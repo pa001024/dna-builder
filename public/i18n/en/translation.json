@@ -1,0 +1,81 @@
+{
+    "main": {
+        "btn_pin_window": "Pin window on top",
+        "btn_unpin_window": "Unpin window",
+        "btn_collapse_menu": "Collapse menu"
+    },
+    "settings": {
+        "title": "Settings"
+    },
+    "setting": {
+        "title": "Setting",
+        "account": "Account",
+        "nickname": "Nickname",
+        "appearance": "Appearance",
+        "theme": "Theme",
+        "darkTheme": "Dark Theme",
+        "lightTheme": "Light Theme",
+        "language": "Language",
+        "window": "Window Settings",
+        "windowTrasnparent": "Window Trasnparent",
+        "autoCount": "Auto count",
+        "minCountInterval": "Min count interval",
+        "counter": "Counter",
+        "uiScale": "UI缩放",
+        "windowTrasnparentTip": "Windows and surfaces show translucency",
+        "minCountIntervalTip": "Unit: Seconds",
+        "login": "Login",
+        "loginTip": "LoginTip",
+        "email": "Email",
+        "password": "Password",
+        "save": "Save",
+        "syncConfig": "Sync config",
+        "change": "Change",
+        "old_password": "Old password",
+        "new_password": "New password",
+        "logout": "Logout",
+        "guest": "Guest",
+        "guestTip": "GuestTip",
+        "winMaterial": "WinMaterial"
+    },
+    "misc": {
+        "all_files": "All files",
+        "exec_files": "Executable files",
+        "selectPath": "Select a path",
+        "select": "Select...",
+        "json_files": "JSON files"
+    },
+    "login": {
+        "login": "Login",
+        "register": "Register",
+        "updatePassword": "Update password",
+        "loginFailed": "Login failed {{err}}",
+        "registerFailed": "Register failed {{err}}",
+        "updatePasswordFailed": "Update password failed",
+        "loginTip": "loginTip",
+        "guestLogin": "Guest login",
+        "guestFailed": "Guest failed",
+        "guestLoginTip": "Guest loginTip"
+    },
+    "common": {
+        "confirm": "Confirm",
+        "dismiss": "Dismiss"
+    },
+    "download": {
+        "subtitle": "Download the latest version of the WeYS client",
+        "github": "Go to GitHub",
+        "title": "Download"
+    },
+    "stat": {
+        "gameToday": "Length of gameplay"
+    },
+    "voice": {
+        "title": "Voice"
+    },
+    "task": {
+        "end": "End",
+        "join": "Join",
+        "copy": "Copy",
+        "unpause": "Unpause"
+    }
+}
