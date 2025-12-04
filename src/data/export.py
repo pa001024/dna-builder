@@ -95,7 +95,10 @@ for item in mod:
             key = f"{item['名称']}_{item['品质']}_{item['类型']}"
         # 如果找到匹配的项，将序号作为id添加
         if key in ct_dict:
-            item['id'] = ct_dict[key]
+            # 重新构建字典，确保id在首位
+            new_item = {'id': ct_dict[key], **item}
+            item.clear()
+            item.update(new_item)
         else:
             # 没有匹配到id，输出警告
             if '属性' in item and item['属性'] is not None:
@@ -118,16 +121,30 @@ for item in ct:
 # 为wp（武器）中的每一项添加id字段（根据名称匹配）
 for item in wp:
     if '名称' in item and item['名称'] in name_id_dict:
-        item['id'] = name_id_dict[item['名称']]
+        # 重新构建字典，确保id在首位
+        new_item = {'id': name_id_dict[item['名称']], **item}
+        item.clear()
+        item.update(new_item)
     else:
         print(f"警告: {item['名称']}  武器未匹配到id")
 
 # 为ch（角色）中的每一项添加id字段（根据名称匹配）
 for item in ch:
     if '名称' in item and item['名称'] in name_id_dict:
-        item['id'] = name_id_dict[item['名称']]
+        # 重新构建字典，确保id在首位
+        new_item = {'id': name_id_dict[item['名称']], **item}
+        item.clear()
+        item.update(new_item)
     else:
         print(f"警告: {item['名称']}  角色未匹配到id")
+
+# 对最终输出的各数组按id升序排序
+ch.sort(key=lambda x: x.get('id', 0))
+mod.sort(key=lambda x: x.get('id', 0))
+wp.sort(key=lambda x: x.get('id', 0))
+
+# 合并mlb、rgb为一个数组base
+base = mlb + rgb + swb
 
 # 将数据导出为JSON文件到src/data目录
 with open('src/data/data.json', 'w', encoding='utf-8') as f:
@@ -135,13 +152,12 @@ with open('src/data/data.json', 'w', encoding='utf-8') as f:
         'char': ch,
         'mod': mod,  # 添加合并后的mod数组
         'weapon': wp,  # 添加武器数组
-        'meleeBase': mlb,  # 添加近战倍率数组
-        'rangedBase': rgb,  # 添加远程倍率数组
-        'skillWeaponBase': swb,  # 添加同律倍率数组
+        'base': base,  # 合并后的倍率数组
         'skill': skl,  # 添加技能数组
         'buff': buff,  # 添加BUFF数组
         'mob': mob  # 添加怪物数组
     }, f, ensure_ascii=False, indent=2)
+
 
 # with open('src/data/code.json', 'w', encoding='utf-8') as f:
 #     json.dump(ct, f, ensure_ascii=False, indent=2)

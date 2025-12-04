@@ -2,9 +2,7 @@ export interface GameDatabase {
     char: Char[]
     mod: Mod[]
     weapon: Weapon[]
-    meleeBase: MeleeBase[]
-    rangedBase: RangedBase[]
-    skillWeaponBase: SkillWeaponBase[]
+    base: WeaponBase[]
     skill: Skill[]
     buff: Buff[]
     mob: Mob[]
@@ -51,7 +49,7 @@ export interface Buff {
 
 export interface Char {
     名称: string
-    属性: Elem
+    属性: string
     近战: string
     远程: string
     同律武器?: string
@@ -119,7 +117,6 @@ export interface Weapon {
     攻击倍率?: number
 }
 
-
 export enum DmgType {
     切割 = "切割",
     贯穿 = "贯穿",
@@ -131,14 +128,13 @@ export enum BulletType {
     非弹道 = "非弹道",
 }
 
-
 export interface Mob {
     名称: string
     阵营: string
     类型: string
     生命: number
-    护盾: number
-    战姿: number
+    护盾?: number
+    战姿?: number
 }
 
 export enum MobType {
@@ -250,31 +246,14 @@ export enum ModSeries {
     黄衣 = "黄衣",
 }
 
-export interface RangedBase {
+export interface WeaponBase {
     武器类型: string
-    武器名称: string
+    武器名称?: string
     名称: string
     倍率: number
-    弹片数: number
-    射速: number
-}
-
-export interface SkillWeaponBase {
-    武器名称: string
-    名称: string
-    等级: number
-    攻击倍率: number
-    攻击段数: number
     弹片数?: number
     射速?: number
-    弹道类型?: string
-}
-
-export interface MeleeBase {
-    武器类型: string
-    名称: string
-    倍率: number
-    段数: number
+    段数?: number
 }
 
 export interface Skill {
@@ -298,4 +277,3 @@ export enum SkillDmgType {
     技能伤害 = "技能伤害",
     武器伤害 = "武器伤害",
 }
-

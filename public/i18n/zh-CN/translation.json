@@ -9,6 +9,9 @@
     "download": "下载 Windows 应用",
     "deps": "运行库下载"
   },
+  "char-build": {
+    "title": "角色构建"
+  },
   "game": {
     "title": "游戏",
     "path": "游戏路径",

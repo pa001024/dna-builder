@@ -24,6 +24,11 @@ export const useUIStore = defineStore("ui", {
                     icon: "la:bookmark",
                 },
                 {
+                    name: "char-build",
+                    path: "/char-build",
+                    icon: "la:edit-solid",
+                },
+                {
                     // -- flex-1
                 },
                 {
