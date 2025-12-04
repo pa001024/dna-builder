@@ -3,6 +3,7 @@ import { RouteRecordRaw, createWebHashHistory, createRouter } from "vue-router"
 import Home from "./views/Home.vue"
 import Setting from "./views/Setting.vue"
 // import User from "./views/User.vue"
+import CharBuildView from "./views/CharBuildView.vue"
 import { env } from "./env"
 import { LogicalSize, getCurrentWindow } from "@tauri-apps/api/window"
 
@@ -24,6 +25,7 @@ const routes: readonly RouteRecordRaw[] = [
     { name: "home", path: "/", component: Home, beforeEnter: () => setMinSize(367, 430) },
     // { name: "user", path: "/user", component: User, beforeEnter: () => setMinSize(367, 430) },
     { name: "setting", path: "/setting", component: Setting, beforeEnter: () => setMinSize(540, 430) },
+    { name: "char-build", path: "/char-build", component: CharBuildView, beforeEnter: () => setMinSize(600, 600) },
 ]
 
 export const router = createRouter({
