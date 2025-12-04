@@ -1,0 +1,43 @@
+{
+  "name": "dna-builder",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "dd": "tauri dev",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-clipboard-manager": "^2.3.2",
+    "@tauri-apps/plugin-opener": "^2",
+    "@tauri-apps/plugin-process": "^2.3.1",
+    "animate.css": "^4.1.1",
+    "gsap": "^3.13.0",
+    "i18next": "^25.7.1",
+    "i18next-http-backend": "^3.0.2",
+    "i18next-vue": "^5.3.1",
+    "pinia": "^3.0.4",
+    "radix-vue": "^1.9.17",
+    "vue": "^3.5.13",
+    "vue-router": "^4.6.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.17",
+    "@tauri-apps/cli": "^2",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vitejs/plugin-vue-jsx": "^5.1.2",
+    "daisyui": "^5.5.5",
+    "tailwindcss": "^4.1.17",
+    "typescript": "~5.6.2",
+    "unplugin-vue-components": "^30.0.0",
+    "vite": "^6.0.3",
+    "vitest": "^4.0.15",
+    "vue-tsc": "^2.1.10"
+  }
+}

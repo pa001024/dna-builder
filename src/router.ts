@@ -1,0 +1,32 @@
+import { RouteRecordRaw, createWebHashHistory, createRouter } from "vue-router"
+
+import Home from "./views/Home.vue"
+import Setting from "./views/Setting.vue"
+// import User from "./views/User.vue"
+import { env } from "./env"
+import { LogicalSize, getCurrentWindow } from "@tauri-apps/api/window"
+
+let setMinSize = async (_w: number, _h: number) => {}
+
+;(async () => {
+    if (!env.isApp) return
+    setMinSize = async (w: number, h: number) => {
+        const win = getCurrentWindow()
+        win.setMinSize(new LogicalSize(w, h))
+        const size = await win.innerSize()
+        const factor = await win.scaleFactor()
+        const logicalSize = size.toLogical(factor)
+        win.setSize(new LogicalSize(Math.max(w, logicalSize.width), Math.max(h, logicalSize.height)))
+    }
+})()
+
+const routes: readonly RouteRecordRaw[] = [
+    { name: "home", path: "/", component: Home, beforeEnter: () => setMinSize(367, 430) },
+    // { name: "user", path: "/user", component: User, beforeEnter: () => setMinSize(367, 430) },
+    { name: "setting", path: "/setting", component: Setting, beforeEnter: () => setMinSize(540, 430) },
+]
+
+export const router = createRouter({
+    history: createWebHashHistory(),
+    routes,
+})
