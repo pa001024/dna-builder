@@ -48,14 +48,25 @@ const skillOptions = data.skill.map((skill) => ({
 
 // 状态变量
 const selectedChar = useLocalStorage("selectedChar", "赛琪")
-const selectedCharLevel = useLocalStorage("selectedLevel", 80)
-const selectedCharSkillLevel = useLocalStorage("selectedCharSkillLevel", 10)
-const selectedMeleeWeapon = useLocalStorage("selectedMeleeWeapon", "辉珀刃")
-const selectedMeleeWeaponLevel = useLocalStorage("selectedMeleeWeaponLevel", 80)
-const selectedMeleeWeaponRefine = useLocalStorage("selectedMeleeWeaponType", 5)
-const selectedRangedWeapon = useLocalStorage("selectedRangedWeapon", "剥离")
-const selectedRangedWeaponLevel = useLocalStorage("selectedRangedWeaponLevel", 80)
-const selectedRangedWeaponRefine = useLocalStorage("selectedRangedWeaponType", 5)
+const charSettingsKey = computed(() => `build.${selectedChar.value}`)
+const charSettings = useLocalStorage(charSettingsKey, {
+    charLevel: 80,
+    charSkillLevel: 10,
+    meleeWeapon: "辉珀刃",
+    meleeWeaponLevel: 80,
+    meleeWeaponRefine: 5,
+    rangedWeapon: "剥离",
+    rangedWeaponLevel: 80,
+    rangedWeaponRefine: 5,
+})
+const selectedCharLevel = computed(() => charSettings.value.charLevel)
+const selectedCharSkillLevel = computed(() => charSettings.value.charSkillLevel)
+const selectedMeleeWeapon = computed(() => charSettings.value.meleeWeapon)
+const selectedMeleeWeaponLevel = computed(() => charSettings.value.meleeWeaponLevel)
+const selectedMeleeWeaponRefine = computed(() => charSettings.value.meleeWeaponRefine)
+const selectedRangedWeapon = computed(() => charSettings.value.rangedWeapon)
+const selectedRangedWeaponLevel = computed(() => charSettings.value.rangedWeaponLevel)
+const selectedRangedWeaponRefine = computed(() => charSettings.value.rangedWeaponRefine)
 const selectedCharMods = ref<(LeveledMod | null)[]>([null, null, null, null, null, null, null, null])
 const selectedMeleeMods = ref<(LeveledMod | null)[]>([null, null, null, null, null, null, null, null])
 const selectedRangedMods = ref<(LeveledMod | null)[]>([null, null, null, null, null, null, null, null])
@@ -489,12 +500,12 @@ const resetConfig = () => {
                 <div class="flex flex-col gap-4 sm:flex-row">
                     <!-- 角色信息 -->
                     <div class="bg-base-200 rounded-lg p-3">
-                        <div class="flex justify-center items-center gap-2">
+                        <div class="flex flex-col justify-center items-center gap-2">
                             <!-- 角色 -->
                             <div class="flex flex-col items-center">
-                                <div class="size-60 bg-gray-700 rounded-lg mb-3 flex items-center justify-center">
+                                <div class="size-72 bg-gray-700 rounded-lg mb-3 flex items-center justify-center">
                                     <span class="text-gray-400">
-                                        <img :src="charBuild.char.url" alt="角色头像" class="w-full h-full object-cover rounded-md" />
+                                        <img :src="charBuild.char.url" alt="角色头像" class="size-72 object-cover rounded-md" />
                                     </span>
                                 </div>
                                 <div class="text-center">
@@ -502,10 +513,10 @@ const resetConfig = () => {
                                     <div class="text-xs text-gray-400">等级: {{ selectedCharLevel }}</div>
                                 </div>
                             </div>
-                            <div class="flex flex-col gap-2">
+                            <div class="flex gap-2 bg-gray-200 rounded-lg p-2 w-full">
                                 <!-- 近战 -->
-                                <div class="flex flex-col items-center">
-                                    <div class="w-24 h-24 bg-gray-700 rounded-lg mb-2 flex items-center justify-center">
+                                <div class="flex items-center gap-2">
+                                    <div class="size-16 rounded-lg mb-2 flex items-center justify-center">
                                         <span class="text-gray-400">
                                             <img
                                                 :src="charBuild.meleeWeapon.url"
@@ -514,16 +525,15 @@ const resetConfig = () => {
                                             />
                                         </span>
                                     </div>
-                                    <div class="text-center">
+                                    <div class="text-left">
                                         <div class="font-medium">{{ selectedMeleeWeapon }}</div>
-                                        <div class="text-xs text-gray-400">
-                                            等级: {{ selectedMeleeWeaponLevel }} 精炼: {{ selectedMeleeWeaponRefine }}
-                                        </div>
+                                        <div class="text-xs text-gray-400">等级: {{ selectedMeleeWeaponLevel }}</div>
+                                        <div class="text-xs text-gray-400">精炼: {{ selectedMeleeWeaponRefine }}</div>
                                     </div>
                                 </div>
                                 <!-- 远程 -->
-                                <div class="flex flex-col items-center">
-                                    <div class="w-24 h-24 bg-gray-700 rounded-lg mb-2 flex items-center justify-center">
+                                <div class="flex items-center gap-2">
+                                    <div class="size-16 rounded-lg mb-2 flex items-center justify-center">
                                         <span class="text-gray-400">
                                             <img
                                                 :src="charBuild.rangedWeapon.url"
@@ -532,11 +542,10 @@ const resetConfig = () => {
                                             />
                                         </span>
                                     </div>
-                                    <div class="text-center">
+                                    <div class="text-left">
                                         <div class="font-medium">{{ selectedRangedWeapon }}</div>
-                                        <div class="text-xs text-gray-400">
-                                            等级: {{ selectedRangedWeaponLevel }} 精炼: {{ selectedRangedWeaponRefine }}
-                                        </div>
+                                        <div class="text-xs text-gray-400">等级: {{ selectedRangedWeaponLevel }}</div>
+                                        <div class="text-xs text-gray-400">精炼: {{ selectedRangedWeaponRefine }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -546,13 +555,13 @@ const resetConfig = () => {
                     <!-- 综合属性 -->
                     <div class="bg-base-200 rounded-lg p-3 flex-1">
                         <h4 class="text-sm font-medium mb-3">综合属性</h4>
-                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                             <div class="flex flex-col items-center">
                                 <div class="text-xs text-gray-400 mb-1">攻击</div>
                                 <div class="text-lg font-semibold text-red-400">{{ attributes.attack }}</div>
                             </div>
                             <div class="flex flex-col items-center">
-                                <div class="text-xs text-gray-400 mb-1">生命值</div>
+                                <div class="text-xs text-gray-400 mb-1">生命</div>
                                 <div class="text-lg font-semibold text-green-400">{{ attributes.health }}</div>
                             </div>
                             <div class="flex flex-col items-center">
@@ -560,8 +569,12 @@ const resetConfig = () => {
                                 <div class="text-lg font-semibold text-blue-400">{{ attributes.shield }}</div>
                             </div>
                             <div class="flex flex-col items-center">
+                                <div class="text-xs text-gray-400 mb-1">防御</div>
+                                <div class="text-lg font-semibold text-yellow-400">{{ attributes.defense }}</div>
+                            </div>
+                            <div class="flex flex-col items-center">
                                 <div class="text-xs text-gray-400 mb-1">威力</div>
-                                <div class="text-lg font-semibold text-yellow-400">{{ (attributes.power * 100).toFixed(0) }}%</div>
+                                <div class="text-lg font-semibold text-sky-400">{{ (attributes.power * 100).toFixed(0) }}%</div>
                             </div>
                             <div class="flex flex-col items-center">
                                 <div class="text-xs text-gray-400 mb-1">耐久</div>
@@ -573,37 +586,39 @@ const resetConfig = () => {
                             </div>
                             <div class="flex flex-col items-center">
                                 <div class="text-xs text-gray-400 mb-1">范围</div>
-                                <div class="text-lg font-semibold text-amber-400">{{ (attributes.range * 100).toFixed(0) }}%</div>
+                                <div class="text-lg font-semibold text-rose-400">{{ (attributes.range * 100).toFixed(0) }}%</div>
                             </div>
-                            <div class="flex flex-col items-center" v-if="attributes.boost > 0">
+                            <div class="flex flex-col items-center" v-if="attributes.boost">
                                 <span class="text-xs text-gray-400 mb-1">昂扬</span>
                                 <span class="text-lg font-semibold text-red-400">{{ (attributes.boost * 100).toFixed(0) }}%</span>
                             </div>
-                            <div class="flex flex-col items-center" v-if="attributes.desperate > 0">
+                            <div class="flex flex-col items-center" v-if="attributes.desperate">
                                 <span class="text-xs text-gray-400 mb-1">背水</span>
                                 <span class="text-lg font-semibold text-green-400">{{ (attributes.desperate * 100).toFixed(0) }}%</span>
                             </div>
-                            <div class="flex flex-col items-center" v-if="attributes.damageIncrease > 0">
+                            <div class="flex flex-col items-center" v-if="attributes.damageIncrease">
                                 <span class="text-xs text-gray-400 mb-1">增伤</span>
                                 <span class="text-lg font-semibold text-cyan-400">{{ (attributes.damageIncrease * 100).toFixed(0) }}%</span>
                             </div>
-                            <div class="flex flex-col items-center" v-if="attributes.weaponDamage > 0">
+                            <div class="flex flex-col items-center" v-if="attributes.weaponDamage">
                                 <span class="text-xs text-gray-400 mb-1">武器伤害</span>
                                 <span class="text-lg font-semibold text-orange-400">{{ (attributes.weaponDamage * 100).toFixed(0) }}%</span>
                             </div>
-                            <div class="flex flex-col items-center" v-if="attributes.skillDamage > 0">
+                            <div class="flex flex-col items-center" v-if="attributes.skillDamage">
                                 <span class="text-xs text-gray-400 mb-1">技能伤害</span>
                                 <span class="text-lg font-semibold text-purple-400">{{ (attributes.skillDamage * 100).toFixed(0) }}%</span>
                             </div>
-                            <div class="flex flex-col items-center" v-if="attributes.independentDamageIncrease > 0">
+                            <div class="flex flex-col items-center" v-if="attributes.independentDamageIncrease">
                                 <span class="text-xs text-gray-400 mb-1">独立增伤</span>
-                                <span class="text-lg font-semibold text-indigo-400">{{ (attributes.independentDamageIncrease * 100).toFixed(0) }}%</span>
+                                <span class="text-lg font-semibold text-indigo-400"
+                                    >{{ (attributes.independentDamageIncrease * 100).toFixed(0) }}%</span
+                                >
                             </div>
-                            <div class="flex flex-col items-center" v-if="attributes.penetration > 0">
+                            <div class="flex flex-col items-center" v-if="attributes.penetration">
                                 <span class="text-xs text-gray-400 mb-1">属性穿透</span>
                                 <span class="text-lg font-semibold text-lime-400">{{ (attributes.penetration * 100).toFixed(0) }}%</span>
                             </div>
-                            <div class="flex flex-col items-center" v-if="attributes.ignoreDefense > 0">
+                            <div class="flex flex-col items-center" v-if="attributes.ignoreDefense">
                                 <span class="text-xs text-gray-400 mb-1">无视防御</span>
                                 <span class="text-lg font-semibold text-pink-400">{{ (attributes.ignoreDefense * 100).toFixed(0) }}%</span>
                             </div>

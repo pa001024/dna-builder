@@ -3,7 +3,6 @@ export interface GameDatabase {
     mod: Mod[]
     weapon: Weapon[]
     base: WeaponBase[]
-    skill: Skill[]
     buff: Buff[]
     mob: Mob[]
 }
@@ -48,6 +47,7 @@ export interface Buff {
 }
 
 export interface Char {
+    id?: number
     名称: string
     属性: string
     近战: string
@@ -67,6 +67,9 @@ export interface Char {
     防御?: number
     效益?: number
     昂扬?: number
+    暴击?: number
+    多重?: number
+    技能: Skill[]
 }
 
 export enum Elem {
@@ -77,44 +80,45 @@ export enum Elem {
     雷 = "雷",
     风 = "风",
 }
-
-export enum MeleeType {
-    单手剑 = "单手剑",
-    双刀 = "双刀",
-    太刀 = "太刀",
-    重剑 = "重剑",
-    长柄 = "长柄",
-    鞭刃 = "鞭刃",
-}
-
 export interface Weapon {
     id?: number
     名称: string
     类别: string
     类型: string
     伤害类型: string
+    弹道类型?: string
     基础攻击: number
     基础暴击: number
     基础暴伤: number
     基础触发: number
+    威力?: number
     耐久?: number
+    效益?: number
+    范围?: number
     生命?: number
     暴击?: number
     攻速?: number
     暴伤?: number
-    范围?: number
     攻击?: number
-    背水?: number
-    威力?: number
     防御?: number
     触发?: number
-    攻击范围?: number
-    弹道类型?: string
-    技能伤害?: number
-    武器伤害?: number
+    背水?: number
+    昂扬?: number
     多重?: number
-    角色?: string
-    攻击倍率?: number
+    武器伤害?: number
+    技能伤害?: number
+    攻击范围?: number
+}
+
+export interface Skill {
+    名称: string
+    类型: string
+    [key: string]: string | SkillProp
+}
+
+export interface SkillProp {
+    属性影响?: string
+    值: number[] | number
 }
 
 export enum DmgType {
@@ -126,6 +130,15 @@ export enum DmgType {
 export enum BulletType {
     弹道 = "弹道",
     非弹道 = "非弹道",
+}
+
+export enum SkillType {
+    伤害 = "伤害",
+    召唤 = "召唤",
+    增益 = "增益",
+    治疗 = "治疗",
+    被动 = "被动",
+    防御 = "防御",
 }
 
 export interface Mob {
@@ -152,51 +165,51 @@ export enum Faction {
 }
 
 export interface Mod {
-    id?: number
+    id: number
     名称: string
     系列?: string
     品质: string
+    极性?: string
     耐受: number
-    攻击?: number
     类型: string
+    威力?: number
+    效益?: number
+    耐久?: number
+    攻击?: number
     生命?: number
     护盾?: number
     神智?: number
     防御?: number
-    属性?: string
-    极性?: string
-    威力?: number
-    耐久?: number
-    属性伤?: number
+    暴击?: number
+    暴伤?: number
+    触发?: number
+    物理?: number
+    攻速?: number
+    属性?: Elem
+    限定?: string
     范围?: number
+    多重?: number
+    属性伤?: number
+    效果?: string
+    弹匣?: number
+    弹药?: number
+    装填?: number
+    弹转?: number
+    增伤?: number
+    失衡易伤?: number
     昂扬?: number
     背水?: number
     技能伤害?: number
     追加伤害?: number
     神智回复?: number
-    效果?: string
-    增伤?: number
-    效益?: number
-    减伤?: number
-    失衡易伤?: number
-    攻速?: number
-    限定?: string
-    物理?: number
-    暴击?: number
-    暴伤?: number
-    触发?: number
-    多重?: number
-    独立增伤?: number
-    弹药?: number
-    装填?: number
-    弹匣?: number
-    滑行伤害?: number
     下落伤害?: number
+    滑行伤害?: number
     下落速度?: number
     蓄力速度?: number
     滑行速度?: number
-    弹转?: number
     触发倍率?: number
+    独立增伤?: number
+    减伤?: number
 }
 
 export enum Quality {
@@ -218,10 +231,9 @@ export enum ModType {
     同率近战 = "同率近战",
     同率远程 = "同率远程",
     角色 = "角色",
-    近战武器 = "近战武器",
-    远程武器 = "远程武器",
+    近战 = "近战",
+    远程 = "远程",
 }
-
 export enum ModSeries {
     不死鸟 = "不死鸟",
     中庭蛇 = "中庭蛇",
@@ -247,33 +259,12 @@ export enum ModSeries {
 }
 
 export interface WeaponBase {
-    武器类型: string
+    武器类型?: string
     武器名称?: string
     名称: string
     倍率: number
     弹片数?: number
     射速?: number
     段数?: number
-}
-
-export interface Skill {
-    名称: string
-    角色: string
-    等级: number
-    伤害类型: string
-    攻击倍率?: number
-    固定范围?: number
-    技能持续?: number
-    神智消耗?: number
-    持续消耗?: number
-    技能范围?: number
-    生命倍率?: number
-    固定伤害?: number
-    固定持续?: number
-    防御倍率?: number
-}
-
-export enum SkillDmgType {
-    技能伤害 = "技能伤害",
-    武器伤害 = "武器伤害",
+    等级?: number
 }

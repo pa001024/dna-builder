@@ -193,6 +193,13 @@ export class LeveledMod implements Mod {
             "弹转",
             "触发倍率",
         ]
+        // 架势MOD属性不受等级变化
+        if (this.id && this.id > 100000) {
+            this.耐受 = (this._originalModData as any).耐受 + this._maxLevel - this._等级
+            return
+        } else {
+            this.耐受 = (this._originalModData as any).耐受 - this._maxLevel + this._等级
+        }
 
         properties.forEach((prop) => {
             const maxValue = (this._originalModData as any)[prop]
