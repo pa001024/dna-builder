@@ -1,5 +1,15 @@
 <script lang="ts" setup>
-import { SelectContent, SelectPortal, SelectRoot, SelectScrollDownButton, SelectScrollUpButton, SelectTrigger, SelectValue, SelectViewport, useForwardPropsEmits } from "radix-vue"
+import {
+    SelectContent,
+    SelectPortal,
+    SelectRoot,
+    SelectScrollDownButton,
+    SelectScrollUpButton,
+    SelectTrigger,
+    SelectValue,
+    SelectViewport,
+    useForwardPropsEmits,
+} from "radix-vue"
 import type { SelectRootEmits, SelectRootProps } from "radix-vue"
 import Icon from "../Icon.vue"
 
@@ -7,7 +17,7 @@ export interface SelectOption {
     type?: "label" | "group" | "separator" | "option"
     label?: string
     tlabel?: string
-    value?: string
+    value?: string | number
     options?: (SelectOption & { value: string })[]
     disabled?: boolean
     selected?: boolean
@@ -27,8 +37,9 @@ export interface SelectOption {
 }
 
 const props = defineProps<
-    SelectRootProps & {
+    Omit<SelectRootProps, "modelValue"> & {
         placeholder?: string
+        modelValue?: string | number
     }
 >()
 const emits = defineEmits<SelectRootEmits>()
@@ -37,14 +48,16 @@ const forward = useForwardPropsEmits(props, emits)
 </script>
 
 <template>
-    <SelectRoot v-bind="forward">
+    <SelectRoot v-bind="forward as any">
         <SelectTrigger v-bind="$attrs">
             <SelectValue :placeholder="placeholder" />
             <Icon icon="radix-icons:chevron-down" class="text-primary ml-2" />
         </SelectTrigger>
 
         <SelectPortal>
-            <SelectContent class="z-50 overflow-hidden bg-base-100 border-base-content/20 border rounded-btn shadow-xl animate-slideDownAndFade">
+            <SelectContent
+                class="z-50 overflow-hidden bg-base-100 border-base-content/20 border rounded-btn shadow-xl animate-slideDownAndFade"
+            >
                 <SelectScrollUpButton class="flex items-center justify-center cursor-default h-4">
                     <Icon icon="radix-icons:chevron-up" />
                 </SelectScrollUpButton>
