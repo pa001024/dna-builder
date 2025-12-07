@@ -1,0 +1,69 @@
+name: Alpha Build
+on:
+    workflow_dispatch:
+    push:
+        branches:
+            - master
+            - dev
+            - "feat/*"
+        paths-ignore:
+            - ".gitattributes"
+            - ".github/**"
+            - ".gitignore"
+            - ".gitmodules"
+            - "**.md"
+            - "LICENSE"
+    pull_request:
+        branches:
+            - dev
+        paths-ignore:
+            - ".gitattributes"
+            - ".github/**"
+            - ".gitignore"
+            - ".gitmodules"
+            - "**.md"
+            - "LICENSE"
+
+jobs:
+    build:
+        runs-on: windows-latest
+
+        # strategy:
+        #   matrix:
+        #     node-version: [18.x]
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Use Node.js LTS
+              uses: actions/setup-node@v3
+              with:
+                  node-version: lts/*
+
+            - name: Build
+              run: |
+                  cd app
+                  npm install
+                  npm run tb
+
+            - name: Upload artifact
+              if: success() && github.event_name != 'pull_request'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: dna-builder-alpha-${{ github.sha }}
+                  path: ${{ github.workspace }}/target/release/dna-builder.exe
+
+            - name: Add summary
+              if: success() && github.event_name != 'pull_request'
+              shell: pwsh
+              run: |
+                  $summary = "
+                  > [!WARNING]
+                  > 该版本是由 CI 程序自动打包生成的 `Alpha` 测试版本，**仅供开发者测试使用**
+
+                  > [!TIP]
+                  > 普通用户请 [点击这里](https://github.com/pa001024/dna-builder/releases/latest/) 下载最新的稳定版本
+                  "
+
+                  echo $summary >> $Env:GITHUB_STEP_SUMMARY

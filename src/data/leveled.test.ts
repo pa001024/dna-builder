@@ -56,11 +56,11 @@ describe("LeveledMod类测试", () => {
     // 测试7：测试不存在的MOD ID
     it("测试不存在的MOD ID会抛出错误", () => {
         expect(() => {
-            const 不存在的MOD = new LeveledMod(99999)
+            new LeveledMod(99999)
         }).toThrow(Error)
 
         expect(() => {
-            const 不存在的MOD = new LeveledMod(99999)
+            new LeveledMod(99999)
         }).toThrow("99999")
     })
 })
@@ -91,8 +91,8 @@ describe("LeveledBuff类测试", () => {
         // 1级时：0.5/1*(1+1/1*(1-1)) = 0.5*1 = 0.5
         // 2级时：0.5/1*(1+1/1*(2-1)) = 0.5*(1+1) = 1.0
 
-        expect(助战50攻1级.攻击).toBe(0.5)
-        expect(助战50攻2级.攻击).toBe(1.0)
+        expect((助战50攻1级 as any).攻击).toBe(0.5)
+        expect((助战50攻2级 as any).攻击).toBe(1.0)
     })
 
     // 测试4：设置超出上限的等级（应该被限制在mx）
@@ -112,11 +112,11 @@ describe("LeveledBuff类测试", () => {
     // 测试6：测试不存在的Buff名称
     it("测试不存在的Buff名称会抛出错误", () => {
         expect(() => {
-            const 不存在的Buff = new LeveledBuff("不存在的Buff")
+            new LeveledBuff("不存在的Buff")
         }).toThrow(Error)
 
         expect(() => {
-            const 不存在的Buff = new LeveledBuff("不存在的Buff")
+            new LeveledBuff("不存在的Buff")
         }).toThrow("不存在的Buff")
     })
 })
@@ -326,11 +326,11 @@ describe("LeveledWeapon类测试", () => {
     // 测试11：测试不存在的武器名称
     it("测试不存在的武器名称会抛出错误", () => {
         expect(() => {
-            const 不存在的武器 = new LeveledWeapon("不存在的武器")
+            new LeveledWeapon("不存在的武器")
         }).toThrow(Error)
 
         expect(() => {
-            const 不存在的武器 = new LeveledWeapon("不存在的武器")
+            new LeveledWeapon("不存在的武器")
         }).toThrow(Error)
     })
 

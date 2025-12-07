@@ -1,12 +1,10 @@
 <script lang="tsx" setup>
 import { FunctionalComponent, ref, onMounted, onUnmounted } from "vue"
-import { useRouter } from "vue-router"
 import StatisticsProgress from "../components/StatisticsProgress.vue"
-import NumberInput from "../components/NumberInput.vue"
 import { env } from "../env"
 
 // const stat = useStatisticsStore()
-const nav = useRouter()
+// const nav = useRouter()
 
 const StatisticsItem: FunctionalComponent<{
     progress?: number

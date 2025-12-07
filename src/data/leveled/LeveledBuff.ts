@@ -93,7 +93,7 @@ export class LeveledBuff implements Buff {
         if (buffData.mx !== undefined) this.mx = buffData.mx
 
         // 设置等级（如果提供），否则使用默认等级dx
-        this.等级 = this.dx || 1
+        this.等级 = 等级 || this.dx || 1
     }
 
     /**

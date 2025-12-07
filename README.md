@@ -1,7 +1,176 @@
-# Tauri + Vue + TypeScript
+# DNA Builder - 角色构建与伤害计算系统
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+<p align="center">
+  <a href="https://riven-im.vercel.app"><img alt="Website" src="https://img.shields.io/website/https/riven-im.vercel.app"></a>
+  <a href="https://circleci.com/gh/pa001024/dna-builder/tree/dev"><img src="https://img.shields.io/circleci/project/github/pa001024/dna-builder/dev.svg" alt="Build Status"></a>
+  <br>
+  <a href="https://github.com/pa001024/dna-builder"><img src="https://img.shields.io/github/license/pa001024/dna-builder" alt="License"></a>
+  <a href="https://discord.gg/m8pGvfP"><img src="https://img.shields.io/badge/chat-on%20discord-7289da.svg" alt="Chat"></a>
+  <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/pa001024/dna-builder">
+  <a href="https://greenkeeper.io/"><img src="https://badges.greenkeeper.io/pa001024/dna-builder.svg" alt="Chat"></a>
+</p>
 
-## Recommended IDE Setup
+DNA Builder 是一个用于游戏角色构建和伤害计算的工具，帮助玩家优化角色配置和计算战斗输出。
 
-- [VS Code](https://code.visualstudio.com/) + [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+## 功能特点
+
+-   🎮 **角色构建系统**：支持角色属性、技能、武器和 MOD 配置
+-   📊 **伤害计算引擎**：精确计算技能伤害和武器伤害期望
+-   ⚙️ **多种计算模式**：支持伤害 (DPA)、每秒伤害 (DPS)、每神智伤害 (DPAPM) 等多种目标函数
+-   🎨 **直观界面**：友好的用户界面，方便快速配置和查看结果
+-   🔄 **实时计算**：配置变化时实时更新计算结果
+
+## 技术栈
+
+-   **前端框架**：Vue 3
+-   **构建工具**：Vite
+-   **编程语言**：TypeScript
+-   **UI 组件库** Tailwind CSS + daisyui + radix-vue
+-   **桌面应用**：Tauri
+
+## 安装和运行
+
+### 开发环境
+
+```bash
+# 安装依赖
+yarn install
+
+# 启动开发服务器
+yarn dev
+
+# 构建生产版本
+yarn build
+```
+
+### 桌面应用
+
+```bash
+# 开发模式运行桌面应用
+yarn tauri dev
+
+# 构建桌面应用
+yarn tauri build
+```
+
+## 项目结构
+
+```
+dna-builder/
+├── src/                  # 源代码
+│   ├── App.vue           # 应用入口组件
+│   ├── main.ts           # 应用入口文件
+│   ├── components/       # 组件目录
+│   ├── data/             # 数据和计算相关
+│   │   ├── AI.md         # 系统文档
+│   │   ├── CharBuild.ts  # 核心计算类
+│   │   ├── data-types.ts # 数据类型定义
+│   │   └── leveled/      # 等级相关类
+│   ├── store/            # 状态管理
+│   └── views/            # 页面组件
+├── public/               # 静态资源
+│   ├── imgs/             # 图片资源
+│   └── i18n/             # 国际化资源
+├── src-tauri/            # Tauri 配置和代码
+└── package.json          # 项目配置
+```
+
+## 核心功能
+
+### 角色构建
+
+-   **角色选择**：选择游戏中的角色
+-   **等级配置**：设置角色等级
+-   **技能选择**：配置角色技能和等级
+-   **武器装备**：选择近战和远程武器
+-   **MOD 配置**：装备和管理 MOD
+-   **BUFF 设置**：添加和配置 BUFF
+
+### 伤害计算
+
+-   **属性计算**：计算角色的基础属性和战斗属性
+-   **技能伤害**：精确计算技能的伤害期望
+-   **武器伤害**：计算武器的单次伤害和触发效果
+-   **多种目标函数**：
+    -   伤害 (DPA)：单次攻击/技能的伤害期望
+    -   每秒伤害 (DPS)：单位时间内的伤害期望
+    -   每神智伤害 (DPAPM)：消耗单位神智的伤害期望
+    -   其他进阶目标函数
+
+### 敌方配置
+
+-   **敌方类型**：小型、大型、首领
+-   **敌方等级**：设置敌方等级
+-   **敌方抗性**：配置敌方抗性
+-   **敌方血量类型**：生命、护盾、战姿
+
+## 使用示例
+
+```typescript
+// 创建角色构建实例
+import { CharBuild } from "./data/CharBuild"
+import { LeveledChar, LeveledWeapon, LeveledMod, LeveledBuff } from "./data/leveled"
+
+const options = {
+    char: new LeveledChar("黎瑟"),
+    hpPercent: 0.5,
+    resonanceGain: 2,
+    mods: [new LeveledMod(41324)],
+    buffs: [new LeveledBuff("助战50攻", 1)],
+    melee: new LeveledWeapon("铸铁者"),
+    ranged: new LeveledWeapon("烈焰孤沙"),
+    skillLevel: 10,
+    baseName: "铸铁者",
+    enemyType: "小型",
+    enemyLevel: 80,
+    enemyResistance: 0.5,
+    enemyHpType: "生命",
+    targetFunction: "伤害",
+}
+
+// 计算伤害
+const cb = new CharBuild(options)
+const damage = cb.calculate() // 获取计算结果
+```
+
+## 属性计算规则
+
+### 基础属性
+
+-   攻击、生命、护盾、防御受等级影响
+-   神智属性为固定值
+-   所有属性都可以通过武器、MOD 和 BUFF 获得加成
+
+### 战斗属性
+
+-   威力、耐久、效益、范围起始值为 1
+-   其他属性起始值为 0
+-   部分属性有上限限制
+
+### 伤害计算
+
+#### 技能伤害
+
+```
+技能伤害期望 = 技能基础伤害 * (1 - 敌方抗性 + 属性穿透) * 昂扬乘区 * 背水乘区 * 防御乘区 * (1 + 增伤 + 技能伤害) * (1 + 独立增伤)
+```
+
+#### 武器伤害
+
+```
+武器伤害期望 = 武器攻击倍率 * (角色攻击 * (1 - 敌方抗性 + 属性穿透) + 武器伤害物理部分 * (1 + 触发伤害倍率 * 武器触发)) * (1 + 暴击率 * (暴击伤害 - 1)) * 昂扬乘区 * 背水乘区 * 防御乘区 * (1 + 增伤 + 武器伤害) * (1 + 独立增伤) * (1 + 追加伤害)
+```
+
+## 贡献指南
+
+欢迎提交 Issue 和 Pull Request！
+
+## 许可证
+
+MIT License
+
+## 联系方式
+
+如有问题或建议，请通过以下方式联系：
+
+-   Issue：在 GitHub 仓库提交 Issue
