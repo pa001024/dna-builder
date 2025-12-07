@@ -96,8 +96,8 @@ onUnmounted(() => {
             </div>
         </ScrollArea>
         <div class="flex-1"></div>
-        <div v-if="!env.isApp" class="flex items-center justify-center p-4">
+        <!-- <div v-if="!env.isApp" class="flex items-center justify-center p-4">
             <a class="link center" href="https://beian.miit.gov.cn" target="_blank" one-link-mark="yes">浙ICP备2024097919号-1</a>
-        </div>
+        </div> -->
     </div>
 </template>
