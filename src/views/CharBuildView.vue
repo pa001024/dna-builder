@@ -49,7 +49,7 @@ const defaultCharSettings = {
     baseName: "",
     hpPercent: 1,
     resonanceGain: 0,
-    enemyType: "小型",
+    enemyType: "small",
     enemyLevel: 80,
     enemyResistance: 0,
     enemyHpType: "生命",
@@ -235,7 +235,7 @@ const resetConfig = () => {
 }
 
 // 导入配置
-const importConfig = () => {
+const loadConfig = () => {
     // 实现导入配置功能
     console.log("导入配置")
     const project = charProject.value.projects.find((project) => project.name === charProject.value.selected)
@@ -251,16 +251,17 @@ const importConfig = () => {
         <div class="container mx-auto p-4">
             <div class="flex justify-end gap-2 mb-4">
                 <Select
+                    v-if="charProject.projects.length > 0"
                     class="w-50 inline-flex items-center justify-between input input-bordered input-md whitespace-nowrap"
                     v-model="charProject.selected"
-                    @change="importConfig"
+                    @change="loadConfig"
                 >
                     <SelectItem v-for="project in charProject.projects" :key="project.name" :value="project.name">
                         {{ project.name }}
                     </SelectItem>
                 </Select>
-                <button class="btn btn-primary" @click="saveConfig">保存配置</button>
-                <button class="btn" @click="resetConfig">重置</button>
+                <button class="btn btn-primary" @click="saveConfig">{{ $t("char-build.save_config") }}</button>
+                <button class="btn" @click="resetConfig">{{ $t("char-build.reset_config") }}</button>
             </div>
 
             <!-- 基本设置 -->
@@ -271,11 +272,11 @@ const importConfig = () => {
                         <SectionMarker reset>
                             <Icon icon="ri:user-line" />
                         </SectionMarker>
-                        <h3 class="text-lg font-semibold">选择角色</h3>
+                        <h3 class="text-lg font-semibold">{{ $t("char-build.select_character") }}</h3>
                     </div>
                     <div class="relative flex items-center gap-2">
                         <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">角色</div>
+                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.character") }}</div>
                             <Select
                                 class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                 v-model="selectedChar"
@@ -294,7 +295,7 @@ const importConfig = () => {
                             </Select>
                         </div>
                         <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">等级</div>
+                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.level") }}</div>
                             <Select
                                 class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                 v-model="charSettings.charLevel"
@@ -306,7 +307,7 @@ const importConfig = () => {
                             </Select>
                         </div>
                         <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">目标函数</div>
+                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.target_function") }}</div>
                             <Select
                                 class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                 v-model="charSettings.targetFunction"
@@ -337,11 +338,11 @@ const importConfig = () => {
                         <SectionMarker>
                             <Icon icon="ri:flashlight-line" />
                         </SectionMarker>
-                        <h3 class="text-lg font-semibold">选择技能/武器</h3>
+                        <h3 class="text-lg font-semibold">{{ $t("char-build.select_skill_weapon") }}</h3>
                     </div>
                     <div class="relative flex items-center gap-2">
                         <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">技能/武器</div>
+                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.skill_weapon") }}</div>
                             <Select
                                 class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                 v-model="charSettings.baseName"
@@ -353,7 +354,7 @@ const importConfig = () => {
                             </Select>
                         </div>
                         <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">技能等级</div>
+                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.skill_level") }}</div>
                             <Select
                                 class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                 v-model="charSettings.charSkillLevel"
@@ -372,11 +373,11 @@ const importConfig = () => {
                         <SectionMarker>
                             <Icon icon="ri:sword-line" />
                         </SectionMarker>
-                        <h3 class="text-lg font-semibold">近战武器</h3>
+                        <h3 class="text-lg font-semibold">{{ $t("char-build.melee_weapon") }}</h3>
                     </div>
                     <div class="relative flex items-center gap-2">
                         <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">武器</div>
+                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.weapon") }}</div>
                             <Select
                                 class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                 v-model="charSettings.meleeWeapon"
@@ -395,7 +396,7 @@ const importConfig = () => {
                             </Select>
                         </div>
                         <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">精炼</div>
+                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.refine") }}</div>
                             <Select
                                 class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                 v-model="charSettings.meleeWeaponRefine"
@@ -407,7 +408,7 @@ const importConfig = () => {
                             </Select>
                         </div>
                         <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">等级</div>
+                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.level") }}</div>
                             <Select
                                 class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                 v-model="charSettings.meleeWeaponLevel"
@@ -426,11 +427,11 @@ const importConfig = () => {
                         <SectionMarker>
                             <Icon icon="ri:crosshair-line" />
                         </SectionMarker>
-                        <h3 class="text-lg font-semibold">远程武器</h3>
+                        <h3 class="text-lg font-semibold">{{ $t("char-build.ranged_weapon") }}</h3>
                     </div>
                     <div class="relative flex items-center gap-2">
                         <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">武器</div>
+                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.weapon") }}</div>
                             <Select
                                 class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                 v-model="charSettings.rangedWeapon"
@@ -449,7 +450,7 @@ const importConfig = () => {
                             </Select>
                         </div>
                         <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">精炼</div>
+                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.refine") }}</div>
                             <Select
                                 class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                 v-model="charSettings.rangedWeaponRefine"
@@ -461,7 +462,7 @@ const importConfig = () => {
                             </Select>
                         </div>
                         <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">等级</div>
+                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.level") }}</div>
                             <Select
                                 class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                 v-model="charSettings.rangedWeaponLevel"
@@ -480,23 +481,23 @@ const importConfig = () => {
                         <SectionMarker>
                             <Icon icon="ri:game-line" />
                         </SectionMarker>
-                        <h3 class="text-lg font-semibold">敌人</h3>
+                        <h3 class="text-lg font-semibold">{{ $t("char-build.enemy") }}</h3>
                     </div>
                     <div class="relative flex items-center gap-2">
                         <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">类型</div>
+                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.enemy_type") }}</div>
                             <Select
                                 class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                 v-model="charSettings.enemyType"
                                 @change="updateCharBuild"
                             >
-                                <SelectItem v-for="enemy in ['小型', '大型', '首领']" :key="enemy" :value="enemy">
-                                    {{ enemy }}
+                                <SelectItem v-for="enemy in ['small', 'large', 'boss']" :key="enemy" :value="enemy">
+                                    {{ $t(`char-build.${enemy}`) }}
                                 </SelectItem>
                             </Select>
                         </div>
                         <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">等级</div>
+                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.level") }}</div>
                             <Select
                                 class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                 v-model="charSettings.enemyLevel"
@@ -508,14 +509,18 @@ const importConfig = () => {
                             </Select>
                         </div>
                         <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">生命值类型</div>
+                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.hp_type") }}</div>
                             <Select
                                 class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                 v-model="charSettings.enemyHpType"
                                 @change="updateCharBuild"
                             >
-                                <SelectItem v-for="hpType in ['生命', '护盾', '战姿']" :key="hpType" :value="hpType">
-                                    {{ hpType }}
+                                <SelectItem
+                                    v-for="(hpType, key) in { 生命: 'hp', 护盾: 'shield', 姿态: 'stance', 其他: 'other' }"
+                                    :key="hpType"
+                                    :value="hpType"
+                                >
+                                    {{ $t(`char-build.${key}`) }}
                                 </SelectItem>
                             </Select>
                         </div>
@@ -527,11 +532,11 @@ const importConfig = () => {
                         <SectionMarker>
                             <Icon icon="ri:more-line" />
                         </SectionMarker>
-                        <h3 class="text-lg font-semibold">其他</h3>
+                        <h3 class="text-lg font-semibold">{{ $t("char-build.other") }}</h3>
                     </div>
                     <div class="relative flex items-center gap-2">
                         <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">生命值比例</div>
+                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.hp_percent") }}</div>
                             <Select
                                 class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                 v-model="charSettings.hpPercent"
@@ -541,7 +546,7 @@ const importConfig = () => {
                             </Select>
                         </div>
                         <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">和鸣增益</div>
+                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.resonance_gain") }}</div>
                             <Select
                                 class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                 v-model="charSettings.resonanceGain"
@@ -551,7 +556,7 @@ const importConfig = () => {
                             </Select>
                         </div>
                         <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">敌人抗性</div>
+                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.enemy_resistance") }}</div>
                             <Select
                                 class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                 v-model="charSettings.enemyResistance"
@@ -566,7 +571,7 @@ const importConfig = () => {
 
             <!-- 角色MOD配置 -->
             <ModEditer
-                title="角色MOD配置"
+                :title="$t('char-build.char_mod_config')"
                 :mods="selectedCharMods"
                 :mod-options="modOptions.filter((m) => m.type === '角色' && (!m.limit || m.limit === charBuild.char.属性))"
                 :char-build="charBuild"
@@ -577,7 +582,7 @@ const importConfig = () => {
             <!-- 近战武器MOD配置 -->
             <ModEditer
                 v-if="charBuild.isMeleeWeapon"
-                title="近战武器MOD配置"
+                :title="$t('char-build.melee_weapon_mod_config')"
                 :mods="selectedMeleeMods"
                 :mod-options="
                     modOptions.filter(
@@ -594,7 +599,7 @@ const importConfig = () => {
             <!-- 远程武器MOD配置 -->
             <ModEditer
                 v-if="charBuild.isRangedWeapon"
-                title="远程武器MOD配置"
+                :title="$t('char-build.ranged_weapon_mod_config')"
                 :mods="selectedRangedMods"
                 :mod-options="
                     modOptions.filter(
@@ -611,7 +616,7 @@ const importConfig = () => {
             <!-- 同律武器MOD配置 -->
             <ModEditer
                 v-if="charBuild.skillWeapon && charBuild.isSkillWeapon"
-                title="同律武器MOD配置"
+                :title="$t('char-build.skill_weapon_mod_config')"
                 :mods="selectedSkillWeaponMods"
                 :mod-options="
                     modOptions.filter(
@@ -630,9 +635,9 @@ const importConfig = () => {
                 <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-2">
                         <SectionMarker />
-                        <h3 class="text-lg font-semibold">BUFF列表</h3>
+                        <h3 class="text-lg font-semibold">{{ $t("char-build.buff_list") }}</h3>
                     </div>
-                    <div class="text-sm text-gray-400">已选 {{ selectedBuffs.length }} 个</div>
+                    <div class="text-sm text-gray-400">{{ $t("char-build.selected_count", { count: selectedBuffs.length }) }}</div>
                 </div>
                 <ScrollArea class="h-80 w-full">
                     <transition-group name="list" tag="div" class="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -699,7 +704,7 @@ const importConfig = () => {
             <div class="bg-base-300 rounded-xl p-4 shadow-lg mb-6">
                 <div class="flex items-center gap-2 mb-4">
                     <SectionMarker />
-                    <h3 class="text-lg font-semibold">装配预览</h3>
+                    <h3 class="text-lg font-semibold">{{ $t("char-build.equipment_preview") }}</h3>
                 </div>
 
                 <div class="flex flex-col gap-4 sm:flex-row">
@@ -764,81 +769,81 @@ const importConfig = () => {
                         <div class="flex flex-col gap-2">
                             <div class="text-sm font-medium p-2 bg-primary/10 rounded-lg flex items-center gap-2">
                                 <div class="w-3 h-3 rounded-full bg-primary"></div>
-                                角色属性
+                                {{ $t("char-build.char_attributes") }}
                             </div>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                                 <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">攻击</div>
+                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.attack") }}</div>
                                     <div class="text-lg font-semibold text-red-400">{{ attributes.attack }}</div>
                                 </div>
                                 <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">生命</div>
+                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.health") }}</div>
                                     <div class="text-lg font-semibold text-green-400">{{ attributes.health }}</div>
                                 </div>
                                 <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">护盾</div>
+                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.shield") }}</div>
                                     <div class="text-lg font-semibold text-blue-400">{{ attributes.shield }}</div>
                                 </div>
                                 <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">防御</div>
+                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.defense") }}</div>
                                     <div class="text-lg font-semibold text-yellow-400">{{ attributes.defense }}</div>
                                 </div>
                                 <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">威力</div>
+                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.power") }}</div>
                                     <div class="text-lg font-semibold text-sky-400">{{ (attributes.power * 100).toFixed(0) }}%</div>
                                 </div>
                                 <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">耐久</div>
+                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.durability") }}</div>
                                     <div class="text-lg font-semibold text-purple-400">{{ (attributes.durability * 100).toFixed(0) }}%</div>
                                 </div>
                                 <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">效益</div>
+                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.efficiency") }}</div>
                                     <div class="text-lg font-semibold text-green-400">{{ (attributes.efficiency * 100).toFixed(0) }}%</div>
                                 </div>
                                 <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">范围</div>
+                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.range") }}</div>
                                     <div class="text-lg font-semibold text-rose-400">{{ (attributes.range * 100).toFixed(0) }}%</div>
                                 </div>
                                 <div class="flex flex-col items-center" v-if="attributes.boost">
-                                    <span class="text-xs text-gray-400 mb-1">昂扬</span>
+                                    <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.boost") }}</span>
                                     <span class="text-lg font-semibold text-red-400">{{ (attributes.boost * 100).toFixed(0) }}%</span>
                                 </div>
                                 <div class="flex flex-col items-center" v-if="attributes.desperate">
-                                    <span class="text-xs text-gray-400 mb-1">背水</span>
+                                    <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.desperate") }}</span>
                                     <span class="text-lg font-semibold text-green-400">{{ (attributes.desperate * 100).toFixed(0) }}%</span>
                                 </div>
                                 <div class="flex flex-col items-center" v-if="attributes.damageIncrease">
-                                    <span class="text-xs text-gray-400 mb-1">增伤</span>
+                                    <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.damage_increase") }}</span>
                                     <span class="text-lg font-semibold text-cyan-400"
                                         >{{ (attributes.damageIncrease * 100).toFixed(0) }}%</span
                                     >
                                 </div>
                                 <div class="flex flex-col items-center" v-if="attributes.weaponDamage">
-                                    <span class="text-xs text-gray-400 mb-1">武器伤害</span>
+                                    <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.weapon_damage") }}</span>
                                     <span class="text-lg font-semibold text-orange-400"
                                         >{{ (attributes.weaponDamage * 100).toFixed(0) }}%</span
                                     >
                                 </div>
                                 <div class="flex flex-col items-center" v-if="attributes.skillDamage">
-                                    <span class="text-xs text-gray-400 mb-1">技能伤害</span>
+                                    <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.skill_damage") }}</span>
                                     <span class="text-lg font-semibold text-purple-400"
                                         >{{ (attributes.skillDamage * 100).toFixed(0) }}%</span
                                     >
                                 </div>
                                 <div class="flex flex-col items-center" v-if="attributes.independentDamageIncrease">
-                                    <span class="text-xs text-gray-400 mb-1">独立增伤</span>
+                                    <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.independent_damage_increase") }}</span>
                                     <span class="text-lg font-semibold text-indigo-400"
                                         >{{ (attributes.independentDamageIncrease * 100).toFixed(0) }}%</span
                                     >
                                 </div>
                                 <div class="flex flex-col items-center" v-if="attributes.penetration">
-                                    <span class="text-xs text-gray-400 mb-1">属性穿透</span>
+                                    <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.attribute_penetration") }}</span>
                                     <span class="text-lg font-semibold text-lime-400"
                                         >{{ (attributes.penetration * 100).toFixed(0) }}%</span
                                     >
                                 </div>
                                 <div class="flex flex-col items-center" v-if="attributes.ignoreDefense">
-                                    <span class="text-xs text-gray-400 mb-1">无视防御</span>
+                                    <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.ignore_defense") }}</span>
                                     <span class="text-lg font-semibold text-pink-400"
                                         >{{ (attributes.ignoreDefense * 100).toFixed(0) }}%</span
                                     >
@@ -848,51 +853,51 @@ const importConfig = () => {
                         <div v-if="weaponAttrs" class="flex flex-col gap-2">
                             <div class="text-sm font-medium p-2 bg-primary/10 rounded-lg flex items-center gap-2">
                                 <div class="w-3 h-3 rounded-full bg-primary"></div>
-                                武器属性
+                                {{ $t("char-build.weapon_attributes") }}
                             </div>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                                 <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">攻击</div>
+                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.attack") }}</div>
                                     <div class="text-lg font-semibold text-red-400">{{ weaponAttrs.attack }}</div>
                                 </div>
                                 <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">暴击率</div>
+                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.crit_rate") }}</div>
                                     <div class="text-lg font-semibold text-yellow-400">{{ (weaponAttrs.critRate * 100).toFixed(1) }}%</div>
                                 </div>
                                 <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">暴击伤害</div>
+                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.crit_damage") }}</div>
                                     <div class="text-lg font-semibold text-yellow-400">
                                         {{ (weaponAttrs.critDamage * 100).toFixed(1) }}%
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">触发率</div>
+                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.trigger_rate") }}</div>
                                     <div class="text-lg font-semibold text-blue-400">{{ (weaponAttrs.triggerRate * 100).toFixed(1) }}%</div>
                                 </div>
                                 <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">攻击速度</div>
+                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.attack_speed") }}</div>
                                     <div class="text-lg font-semibold text-green-400">
                                         {{ weaponAttrs.attackSpeed.toFixed(1) }}
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">多重射击</div>
+                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.multiple_shots") }}</div>
                                     <div class="text-lg font-semibold text-purple-400">{{ weaponAttrs.multiShot.toFixed(1) }}</div>
                                 </div>
                                 <div v-if="weaponAttrs.damageIncrease" class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">伤害增加</div>
+                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.damage_boost") }}</div>
                                     <div class="text-lg font-semibold text-cyan-400">
                                         {{ (weaponAttrs.damageIncrease * 100).toFixed(1) }}%
                                     </div>
                                 </div>
                                 <div v-if="weaponAttrs.independentDamageIncrease" class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">独立增伤</div>
+                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.independent_damage_increase") }}</div>
                                     <div class="text-lg font-semibold text-indigo-400">
                                         {{ (weaponAttrs.independentDamageIncrease * 100).toFixed(1) }}%
                                     </div>
                                 </div>
                                 <div v-if="weaponAttrs.additionalDamage" class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">追加伤害</div>
+                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.additional_damage") }}</div>
                                     <div class="text-lg font-semibold text-orange-400">
                                         {{ (weaponAttrs.additionalDamage * 100).toFixed(1) }}%
                                     </div>
