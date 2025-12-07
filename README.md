@@ -1,11 +1,10 @@
 # DNA Builder - 角色构建与伤害计算系统
 
 <p align="center">
-  <a href="https://riven-im.vercel.app"><img alt="Website" src="https://img.shields.io/website/https/riven-im.vercel.app"></a>
+  <a href="https://dna-builder.vercel.app"><img alt="Website" src="https://img.shields.io/website/https/dna-builder.vercel.app"></a>
   <a href="https://circleci.com/gh/pa001024/dna-builder/tree/dev"><img src="https://img.shields.io/circleci/project/github/pa001024/dna-builder/dev.svg" alt="Build Status"></a>
   <br>
   <a href="https://github.com/pa001024/dna-builder"><img src="https://img.shields.io/github/license/pa001024/dna-builder" alt="License"></a>
-  <a href="https://discord.gg/m8pGvfP"><img src="https://img.shields.io/badge/chat-on%20discord-7289da.svg" alt="Chat"></a>
   <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/pa001024/dna-builder">
   <a href="https://greenkeeper.io/"><img src="https://badges.greenkeeper.io/pa001024/dna-builder.svg" alt="Chat"></a>
 </p>
