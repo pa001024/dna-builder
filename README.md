@@ -1,7 +1,8 @@
 # DNA Builder - 角色构建与伤害计算系统
 
 <p align="center">
-  <a href="https://dna-builder.vercel.app"><img alt="Website" src="https://img.shields.io/website/https/dna-builder.vercel.app"></a>
+  <a href="https://dna-builder.edgeone.dev/"><img alt="Website" src="https://img.shields.io/website/https/dna-builder.edgeone.dev"></a>
+  <!-- <a href="https://dna-builder.vercel.app"><img alt="Website" src="https://img.shields.io/website/https/dna-builder.vercel.app"></a> -->
   <a href="https://circleci.com/gh/pa001024/dna-builder/tree/dev"><img src="https://img.shields.io/circleci/project/github/pa001024/dna-builder/dev.svg" alt="Build Status"></a>
   <br>
   <a href="https://github.com/pa001024/dna-builder"><img src="https://img.shields.io/github/license/pa001024/dna-builder" alt="License"></a>
@@ -10,6 +11,11 @@
 </p>
 
 DNA Builder 是一个用于游戏角色构建和伤害计算的工具，帮助玩家优化角色配置和计算战斗输出。
+
+## 网页版
+
+-   **EdgeOne**：[https://dna-builder.edgeone.dev/](https://dna-builder.edgeone.dev/)
+-   **Vercel(国内访问不了)**：[https://dna-builder.vercel.app/](https://dna-builder.vercel.app/)
 
 ## 功能特点
 
