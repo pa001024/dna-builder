@@ -55,14 +55,20 @@ export class CharBuild {
     // 敌方类型系数表
     private enemyTypeCoefficients: Record<string, number> = {
         小型: 13,
+        small: 13,
         大型: 20,
+        large: 20,
         首领: 30,
+        boss: 30,
     }
     // 血量类型系数表
     private hpTypeCoefficients: Record<string, number> = {
         生命: 0.5,
+        health: 0.5,
         护盾: 1,
+        shield: 1,
         战姿: 1,
+        combatStyle: 1,
     }
 
     constructor(options: {

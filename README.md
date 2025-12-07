@@ -2,12 +2,10 @@
 
 <p align="center">
   <a href="https://dna-builder.edgeone.dev/"><img alt="Website" src="https://img.shields.io/website/https/dna-builder.edgeone.dev"></a>
-  <!-- <a href="https://dna-builder.vercel.app"><img alt="Website" src="https://img.shields.io/website/https/dna-builder.vercel.app"></a> -->
-  <a href="https://circleci.com/gh/pa001024/dna-builder/tree/dev"><img src="https://img.shields.io/circleci/project/github/pa001024/dna-builder/dev.svg" alt="Build Status"></a>
+  <a href="https://github.com/pa001024/dna-builder/actions/workflows/alpha.yml"><img src="https://img.shields.io/github/actions/workflow/status/pa001024/dna-builder/alpha.yml" alt="Build Status"></a>
   <br>
   <a href="https://github.com/pa001024/dna-builder"><img src="https://img.shields.io/github/license/pa001024/dna-builder" alt="License"></a>
   <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/pa001024/dna-builder">
-  <a href="https://greenkeeper.io/"><img src="https://badges.greenkeeper.io/pa001024/dna-builder.svg" alt="Chat"></a>
 </p>
 
 DNA Builder 是一个用于游戏角色构建和伤害计算的工具，帮助玩家优化角色配置和计算战斗输出。
@@ -16,6 +14,11 @@ DNA Builder 是一个用于游戏角色构建和伤害计算的工具，帮助�
 
 -   **EdgeOne**：[https://dna-builder.edgeone.dev/](https://dna-builder.edgeone.dev/)
 -   **Vercel(国内访问不了)**：[https://dna-builder.vercel.app/](https://dna-builder.vercel.app/)
+
+## 桌面应用
+
+-   **Windows**：[https://github.com/pa001024/dna-builder/releases/latest](https://github.com/pa001024/dna-builder/releases/latest)
+-   **无法运行**? 请确保已安装 [Microsoft Edge WebView2](https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/)。
 
 ## 功能特点
 
