@@ -10,40 +10,60 @@ export interface GameDatabase {
 export interface Buff {
     名称: string
     描述: string
+    限定?: string
     a?: number
     b?: number
     dx?: number
     lx?: number
     mx?: number
+
     攻击?: number
-    增伤?: number
-    武器伤害?: number
-    威力?: number
-    范围?: number
-    暴击?: number
-    追加伤害?: number
-    属性穿透?: number
-    异常数量?: number
-    技能伤害?: number
-    背水?: number
-    固定攻击?: number
-    防御?: number
-    效益?: number
-    昂扬?: number
     生命?: number
+    护盾?: number
+    防御?: number
+    神智?: number
+    威力?: number
+    耐久?: number
+    效益?: number
+    范围?: number
+    昂扬?: number
+    背水?: number
+    增伤?: number
+    独立增伤?: number
+    武器伤害?: number
+    技能伤害?: number
+    神智回复?: number
+    暴击?: number
+    暴伤?: number
+    攻速?: number
+    多重?: number
+    追加伤害?: number
     属性伤?: number
     MOD属性?: number
-    多重?: number
-    失衡易伤?: number
-    神智回复?: number
-    独立增伤?: number
-    暴伤?: number
-    护盾?: number
-    神智?: number
-    耐久?: number
-    攻速?: number
-    近战增伤?: number
+    属性穿透?: number
+    异常数量?: number
     无视防御?: number
+    固定攻击?: number
+    技能速度?: number
+    召唤物范围?: number
+    召唤物攻速?: number
+    召唤物攻击?: number
+    召唤物伤害?: number
+    失衡易伤?: number
+    近战攻击?: number
+    近战暴击?: number
+    近战暴伤?: number
+    近战触发?: number
+    近战攻速?: number
+    近战范围?: number
+    近战增伤?: number
+    远程攻击?: number
+    远程攻速?: number
+    远程暴击?: number
+    远程暴伤?: number
+    远程触发?: number
+    远程多重?: number
+    远程增伤?: number
 }
 
 export interface Char {
@@ -113,12 +133,16 @@ export interface Weapon {
 export interface Skill {
     名称: string
     类型: string
-    [key: string]: string | SkillProp
+    字段: SkillField[]
 }
 
-export interface SkillProp {
+export interface SkillField {
+    名称: string
     属性影响?: string
     值: number[] | number
+    格式?: string
+    基础?: string
+    额外?: number[] | number
 }
 
 export enum DmgType {
@@ -172,44 +196,51 @@ export interface Mod {
     极性?: string
     耐受: number
     类型: string
+    属性?: string
+    限定?: string
+    效果?: string
+
     威力?: number
-    效益?: number
     耐久?: number
+    效益?: number
+    范围?: number
     攻击?: number
     生命?: number
     护盾?: number
-    神智?: number
     防御?: number
+    神智?: number
+    属性伤?: number
+    减伤?: number
+    增伤?: number
+    武器伤害?: number
+    技能伤害?: number
+    独立增伤?: number
+    昂扬?: number
+    背水?: number
+    追加伤害?: number
+    固定攻击?: number
+    技能速度?: number
+    召唤物范围?: number
+    召唤物攻速?: number
+    失衡易伤?: number
+    神智回复?: number
     暴击?: number
     暴伤?: number
     触发?: number
     物理?: number
     攻速?: number
-    属性?: Elem
-    限定?: string
-    范围?: number
     多重?: number
-    属性伤?: number
-    效果?: string
-    弹匣?: number
-    弹药?: number
-    装填?: number
-    弹转?: number
-    增伤?: number
-    失衡易伤?: number
-    昂扬?: number
-    背水?: number
-    技能伤害?: number
-    追加伤害?: number
-    神智回复?: number
-    下落伤害?: number
+    攻击范围?: number
     滑行伤害?: number
+    滑行速度?: number
+    下落伤害?: number
     下落速度?: number
     蓄力速度?: number
-    滑行速度?: number
+    弹药?: number
+    弹匣?: number
+    装填?: number
+    弹转?: number
     触发倍率?: number
-    独立增伤?: number
-    减伤?: number
 }
 
 export enum Quality {

@@ -1,4 +1,4 @@
-import { Mod, Buff, Weapon, Skill, WeaponBase, Char } from "../data-types"
+import { Mod, Buff, Weapon, WeaponBase, Char } from "../data-types"
 import gameData from "../data.json"
 
 // 将静态表转换为Map，提高查找效率
@@ -41,47 +41,15 @@ gameData.base.forEach((base: any) => {
     baseMap.get(base.武器类型)!.push(base as WeaponBase)
 })
 
-// 将技能数据转换为Map，按技能名称分组存储1级和10级数据
-const skillMap = new Map<string, { level1: Skill; level10: Skill }>()
-
-// 创建角色到技能的映射关系
-const charToSkillsMap = new Map<string, string[]>()
-
-// 首先将所有技能按名称和等级存储，并建立角色到技能的映射
-gameData.skill.forEach((skill) => {
-    if (skill.名称 && (skill.等级 === 1 || skill.等级 === 10)) {
-        const key = skill.名称
-        if (!skillMap.has(key)) {
-            skillMap.set(key, { level1: {} as Skill, level10: {} as Skill })
-        }
-        if (skill.等级 === 1) {
-            skillMap.get(key)!.level1 = skill as Skill
-        } else {
-            skillMap.get(key)!.level10 = skill as Skill
-        }
-
-        // 建立角色到技能的映射关系
-        if (skill.角色) {
-            const charName = skill.角色
-            if (!charToSkillsMap.has(charName)) {
-                charToSkillsMap.set(charName, [])
-            }
-            // 只添加一次技能名称
-            if (!charToSkillsMap.get(charName)!.includes(key)) {
-                charToSkillsMap.get(charName)!.push(key)
-            }
-        }
-    }
-})
-
 // 导出各种映射表供其他模块使用
-export { charToSkillsMap, charMap, modMap, buffMap, weaponMap, skillMap, baseMap }
+export { charMap, modMap, buffMap, weaponMap, baseMap }
 
 // 导出LeveledChar、LeveledMod、LeveledBuff、LeveledWeapon、LeveledSkill类
 export { LeveledChar } from "./LeveledChar"
 export { LeveledMod } from "./LeveledMod"
 export { LeveledBuff } from "./LeveledBuff"
 export { LeveledWeapon } from "./LeveledWeapon"
+export { LeveledSkillWeapon } from "./LeveledSkillWeapon"
 export { LeveledSkill } from "./LeveledSkill"
 
 /*

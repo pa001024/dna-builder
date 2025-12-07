@@ -12,12 +12,13 @@ import {
 } from "radix-vue"
 import type { SelectRootEmits, SelectRootProps } from "radix-vue"
 import Icon from "../Icon.vue"
+import { watch } from "vue"
 
 export interface SelectOption {
     type?: "label" | "group" | "separator" | "option"
     label?: string
     tlabel?: string
-    value?: string | number
+    value?: any
     options?: (SelectOption & { value: string })[]
     disabled?: boolean
     selected?: boolean
@@ -39,10 +40,16 @@ export interface SelectOption {
 const props = defineProps<
     Omit<SelectRootProps, "modelValue"> & {
         placeholder?: string
-        modelValue?: string | number
+        modelValue?: any
     }
 >()
-const emits = defineEmits<SelectRootEmits>()
+const emits = defineEmits<SelectRootEmits & { change: [value: any] }>()
+watch(
+    () => props.modelValue,
+    (newValue) => {
+        emits("change", newValue)
+    }
+)
 
 const forward = useForwardPropsEmits(props, emits)
 </script>

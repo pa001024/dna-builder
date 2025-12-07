@@ -23,6 +23,7 @@
     "i18next": "^25.7.1",
     "i18next-http-backend": "^3.0.2",
     "i18next-vue": "^5.3.1",
+    "lodash-es": "^4.17.21",
     "pinia": "^3.0.4",
     "radix-vue": "^1.9.17",
     "vue": "^3.5.13",
@@ -31,6 +32,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.17",
     "@tauri-apps/cli": "^2",
+    "@types/lodash-es": "^4.17.12",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vitejs/plugin-vue-jsx": "^5.1.2",
     "daisyui": "^5.5.5",

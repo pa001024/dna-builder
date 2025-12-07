@@ -14,47 +14,57 @@ export class LeveledMod implements Mod {
         [Quality.白]: 3,
     }
     // 基础Mod属性
-    id?: number
+    id: number
     名称: string
     系列?: string
     品质: string
-    耐受: number
-    攻击?: number
-    类型: string
-    生命?: number
-    护盾?: number
-    神智?: number
-    防御?: number
-    属性?: string
     极性?: string
+    耐受: number
+    类型: string
+    属性?: string
+    限定?: string
+    效果?: string
+
+    // 浮动属性
     威力?: number
     耐久?: number
-    属性伤?: number
+    效益?: number
     范围?: number
+    攻击?: number
+    生命?: number
+    护盾?: number
+    防御?: number
+    神智?: number
+    属性伤?: number
+    减伤?: number
+    增伤?: number
+    武器伤害?: number
+    技能伤害?: number
+    独立增伤?: number
     昂扬?: number
     背水?: number
-    技能伤害?: number
     追加伤害?: number
-    神智回复?: number
-    效果?: string
-    增伤?: number
-    效益?: number
-    减伤?: number
+    固定攻击?: number
+    技能速度?: number
+    召唤物范围?: number
+    召唤物攻速?: number
     失衡易伤?: number
-    攻速?: number
+    神智回复?: number
     暴击?: number
     暴伤?: number
     触发?: number
+    物理?: number
+    攻速?: number
     多重?: number
-    独立增伤?: number
-    弹药?: number
-    装填?: number
-    弹匣?: number
+    攻击范围?: number
     滑行伤害?: number
+    滑行速度?: number
     下落伤害?: number
     下落速度?: number
     蓄力速度?: number
-    滑行速度?: number
+    弹药?: number
+    弹匣?: number
+    装填?: number
     弹转?: number
     触发倍率?: number
 
@@ -85,45 +95,12 @@ export class LeveledMod implements Mod {
         this.名称 = modData.名称
         this.系列 = modData.系列
         this.品质 = modData.品质
-        this.耐受 = modData.耐受
-        this.攻击 = modData.攻击
-        this.类型 = modData.类型
-        this.生命 = modData.生命
-        this.护盾 = modData.护盾
-        this.神智 = modData.神智
-        this.防御 = modData.防御
-        this.属性 = modData.属性
         this.极性 = modData.极性
-        this.威力 = modData.威力
-        this.耐久 = modData.耐久
-        this.属性伤 = modData.属性伤
-        this.范围 = modData.范围
-        this.昂扬 = modData.昂扬
-        this.背水 = modData.背水
-        this.技能伤害 = modData.技能伤害
-        this.追加伤害 = modData.追加伤害
-        this.神智回复 = modData.神智回复
+        this.耐受 = modData.耐受
+        this.类型 = modData.类型
+        this.属性 = modData.属性
+        this.限定 = modData.限定
         this.效果 = modData.效果
-        this.增伤 = modData.增伤
-        this.效益 = modData.效益
-        this.减伤 = modData.减伤
-        this.失衡易伤 = modData.失衡易伤
-        this.攻速 = modData.攻速
-        this.暴击 = modData.暴击
-        this.暴伤 = modData.暴伤
-        this.触发 = modData.触发
-        this.多重 = modData.多重
-        this.独立增伤 = modData.独立增伤
-        this.弹药 = modData.弹药
-        this.装填 = modData.装填
-        this.弹匣 = modData.弹匣
-        this.滑行伤害 = modData.滑行伤害
-        this.下落伤害 = modData.下落伤害
-        this.下落速度 = modData.下落速度
-        this.蓄力速度 = modData.蓄力速度
-        this.滑行速度 = modData.滑行速度
-        this.弹转 = modData.弹转
-        this.触发倍率 = modData.触发倍率
 
         // 获取该品质MOD的等级上限
         this._maxLevel = LeveledMod.modQualityMaxLevel[this.品质] || 1
@@ -132,7 +109,7 @@ export class LeveledMod implements Mod {
         this._等级 = 等级 !== undefined ? Math.max(0, Math.min(this._maxLevel, 等级)) : this._maxLevel
 
         // 更新属性
-        if (this._等级 !== this._maxLevel) this.updateProperties()
+        this.updateProperties()
     }
 
     /**
@@ -150,49 +127,54 @@ export class LeveledMod implements Mod {
         this.updateProperties()
     }
 
+    static properties = [
+        "威力",
+        "耐久",
+        "效益",
+        "范围",
+        "攻击",
+        "生命",
+        "护盾",
+        "防御",
+        "神智",
+        "属性伤",
+        "减伤",
+        "增伤",
+        "武器伤害",
+        "技能伤害",
+        "独立增伤",
+        "昂扬",
+        "背水",
+        "追加伤害",
+        "固定攻击",
+        "技能速度",
+        "召唤物范围",
+        "召唤物攻速",
+        "失衡易伤",
+        "神智回复",
+        "暴击",
+        "暴伤",
+        "触发",
+        "物理",
+        "攻速",
+        "多重",
+        "攻击范围",
+        "滑行伤害",
+        "滑行速度",
+        "下落伤害",
+        "下落速度",
+        "蓄力速度",
+        "弹药",
+        "弹匣",
+        "装填",
+        "弹转",
+        "触发倍率",
+    ] as const
     /**
      * 根据等级更新MOD属性
      */
     private updateProperties(): void {
         // 属性值 = 满级属性/(等级上限+1)*(等级+1)
-        const properties = [
-            "攻击",
-            "生命",
-            "护盾",
-            "神智",
-            "防御",
-            "威力",
-            "耐久",
-            "属性伤",
-            "范围",
-            "昂扬",
-            "背水",
-            "技能伤害",
-            "追加伤害",
-            "神智回复",
-            "增伤",
-            "效益",
-            "减伤",
-            "失衡易伤",
-            "攻速",
-            "近战增伤",
-            "无视防御",
-            "暴击",
-            "暴伤",
-            "触发",
-            "多重",
-            "独立增伤",
-            "弹药",
-            "装填",
-            "弹匣",
-            "滑行伤害",
-            "下落伤害",
-            "下落速度",
-            "蓄力速度",
-            "滑行速度",
-            "弹转",
-            "触发倍率",
-        ]
         // 架势MOD属性不受等级变化
         if (this.id && this.id > 100000) {
             this.耐受 = (this._originalModData as any).耐受 + this._maxLevel - this._等级
@@ -201,7 +183,7 @@ export class LeveledMod implements Mod {
             this.耐受 = (this._originalModData as any).耐受 - this._maxLevel + this._等级
         }
 
-        properties.forEach((prop) => {
+        LeveledMod.properties.forEach((prop) => {
             const maxValue = (this._originalModData as any)[prop]
             if (maxValue !== undefined) {
                 const currentValue = (maxValue / (this._maxLevel + 1)) * (this._等级 + 1)
@@ -218,6 +200,16 @@ export class LeveledMod implements Mod {
             ...this,
             等级: this._等级,
         }
+    }
+    /**
+     * 获取MOD的完整属性信息
+     */
+    getProperties(): Partial<Mod> {
+        const properties: Partial<Mod> = {}
+        LeveledMod.properties.forEach((prop) => {
+            if ((this as any)[prop]) properties[prop] = (this as any)[prop]
+        })
+        return properties
     }
 
     get url() {
