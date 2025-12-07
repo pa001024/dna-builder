@@ -1,4 +1,4 @@
-import { charMap } from "."
+import { charMap, LeveledSkill } from "."
 import { Char } from "../data-types"
 
 /**
@@ -25,6 +25,7 @@ export class LeveledChar implements Char {
     防御?: number
     效益?: number
     昂扬?: number
+    技能: LeveledSkill[] = []
 
     // 等级属性
     private _等级: number = 80
@@ -66,6 +67,7 @@ export class LeveledChar implements Char {
         this.防御 = charData.防御
         this.效益 = charData.效益
         this.昂扬 = charData.昂扬
+        this.技能 = charData.技能.map((skill) => new LeveledSkill(skill))
 
         // 保存80级的基准属性值（当前导入的数据是80级的数据）
         this._base80Attack = charData.基础攻击
@@ -77,6 +79,15 @@ export class LeveledChar implements Char {
         if (等级) {
             this.等级 = 等级
         }
+    }
+
+    static getSkillNames(角色名: string) {
+        return charMap.get(角色名)?.技能.map((skill) => skill.名称) || []
+    }
+    static getSkillNamesWithSub(角色名: string) {
+        const skills = charMap.get(角色名)?.技能.map((skill) => new LeveledSkill(skill)) || []
+        // 拼接主技能和子技能
+        return skills.flatMap((skill) => [skill.名称, ...skill.子技能.map((subSkill) => `${skill.名称}[${subSkill}]`)])
     }
 
     /**
@@ -173,10 +184,14 @@ export class LeveledChar implements Char {
             效益: this.效益,
             昂扬: this.昂扬,
             等级: this.等级,
+            技能: this.技能,
         }
     }
 
     get url() {
         return `/imgs/${this.名称}.png`
+    }
+    get urlFull() {
+        return `/imgs/${this.名称}角色立绘.png`
     }
 }

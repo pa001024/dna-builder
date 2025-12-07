@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { watch } from "vue"
-import Select, { SelectGroup, SelectLabel, SelectSeparator, SelectItem } from "../components/select"
 import { MATERIALS } from "../api/app"
 import { useSettingStore } from "../store/setting"
+import { env } from "../env"
 
 const setting = useSettingStore()
 const lightThemes = [
@@ -85,14 +85,14 @@ function capitalize(str: string) {
                             </SelectGroup>
                         </Select>
                     </div>
-                    <div class="flex justify-between items-center p-2">
+                    <div v-if="env.isApp" class="flex justify-between items-center p-2">
                         <span class="label-text">
                             {{ $t("setting.windowTrasnparent") }}
                             <div class="text-xs text-base-content/50">{{ $t("setting.windowTrasnparentTip") }}</div>
                         </span>
                         <input v-model="setting.windowTrasnparent" type="checkbox" class="toggle toggle-secondary" checked />
                     </div>
-                    <div class="flex justify-between items-center p-2">
+                    <div v-if="env.isApp" class="flex justify-between items-center p-2">
                         <span class="label-text">
                             {{ $t("setting.winMaterial") }}
                         </span>
@@ -126,40 +126,6 @@ function capitalize(str: string) {
                                     :key="i"
                                     >{{ (0.7 + i / 10).toFixed(1) }}</span
                                 >
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </article>
-            <article>
-                <h2 class="text-sm font-bold m-2">{{ $t("setting.counter") }}</h2>
-                <div class="bg-base-100 p-2 rounded-lg">
-                    <div class="flex justify-between items-center p-2">
-                        <span class="label-text">{{ $t("setting.autoCount") }}</span>
-                        <input v-model="setting.autoCount" type="checkbox" class="toggle toggle-secondary" checked />
-                    </div>
-                    <div class="flex justify-between items-center p-2">
-                        <span class="label-text"
-                            >{{ $t("setting.minCountInterval") }}
-                            <div class="text-xs text-base-content/50">{{ $t("setting.minCountIntervalTip") }}</div>
-                        </span>
-                        <div class="min-w-56">
-                            <input
-                                :value="setting.minCountInterval"
-                                @input="setting.minCountInterval = Math.max(35, Math.min(60, +($event.target as HTMLInputElement)!.value))"
-                                type="range"
-                                class="range range-secondary"
-                                min="35"
-                                max="60"
-                                step="5"
-                            />
-                            <div class="w-full flex justify-between text-xs px-2">
-                                <span :class="{ 'text-secondary': setting.minCountInterval === 35 }">35</span>
-                                <span :class="{ 'text-secondary': setting.minCountInterval === 40 }">40</span>
-                                <span :class="{ 'text-secondary': setting.minCountInterval === 45 }">45</span>
-                                <span :class="{ 'text-secondary': setting.minCountInterval === 50 }">50</span>
-                                <span :class="{ 'text-secondary': setting.minCountInterval === 55 }">55</span>
-                                <span :class="{ 'text-secondary': setting.minCountInterval === 60 }">60</span>
                             </div>
                         </div>
                     </div>

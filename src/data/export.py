@@ -1,4 +1,5 @@
 # 从data.xlsx中导出JSON数据
+import traceback
 from numpy.f2py.auxfuncs import throw_error
 import pandas as pd
 import json
@@ -6,6 +7,74 @@ from pandas._config.config import is_int
 import requests
 from bs4 import BeautifulSoup
 import re
+
+
+def parse_formated_num_in_str(input_str):
+    """
+    解析包含数字和百分比的字符串，将百分比转换为小数并替换原位置为{}
+
+    Args:
+        input_str: 输入字符串，如"14%*[萨麦尔]强化等级"或"14*[萨麦尔]强化等级"
+
+    Returns:
+        tuple: (替换后的字符串, [数字数组])
+    """
+    # 正则匹配数字和百分比数值，使用捕获组来区分数字和%符号
+    pattern = r"(\d+(?:\.\d+)?)(%?)"
+
+    # 使用finditer来获取所有匹配对象，这样可以获取完整的匹配信息
+    matches = list(re.finditer(pattern, input_str))
+
+    # 转换为数字（百分比转换为小数）
+    decimals = []
+    for match in matches:
+        num_str, percent_sign = match.groups()
+        if percent_sign:
+            # 是百分比，转换为小数
+            decimals.append(round(float(num_str) / 100, 3))
+        else:
+            # 是普通数字
+            decimals.append(round(float(num_str), 3))
+
+    decimals = [
+        int(decimal) if decimal.is_integer() else decimal for decimal in decimals
+    ]
+    # 替换原字符串中的数字为{} 百分比为{%}
+    # 使用完整匹配作为替换目标
+    result_str = input_str
+    for match in reversed(matches):  # 从后往前替换，避免索引偏移问题
+        num_str, percent_sign = match.groups()
+        start, end = match.span()
+        if percent_sign:
+            result_str = result_str[:start] + "{%}" + result_str[end:]
+        else:
+            result_str = result_str[:start] + "{}" + result_str[end:]
+
+    return result_str, decimals
+
+
+def parse_value(s: str):
+    s = s.replace("％", "%").replace("＋", "+").replace("－", "-").replace("×", "*")
+    try:
+        val = round(eval(s.replace("%", "/100")), 3)
+        if val.is_integer():
+            val = int(val)
+        return val, None, 0, None
+    except:
+        pass
+    result_str, decimals = parse_formated_num_in_str(s)
+    if len(decimals) > 2:
+        raise ValueError(f"解析错误：包含多个数字：{s}")
+    val = decimals[0]
+    if result_str == "{}":
+        return val, None, 0, None
+    prop = re.search(r"生命|防御|神智|护盾", s)
+    if prop:
+        prop = prop.group(0)
+    extra = 0
+    if len(decimals) > 1:
+        extra = decimals[-1]
+    return val, prop, extra, result_str
 
 
 def read_excel(sheet_name):
@@ -232,23 +301,6 @@ def getCharSkills(name, url, download=False, retry=3):
                 f".body-full-height.body > div:nth-child(2) > div.tab-content-box:nth-child(9) > div > div.tab-content-body > div > article > div > table > tbody > tr:nth-child({y}) > td:nth-child({x})"
             ).get_text(strip=True)
 
-        def parseValue(s):
-            s = s.replace("％", "%").replace("＋", "+")
-            p = s.split("+")
-            prop = re.search(r"生命|防御|神智|护盾", p[0])
-            # 正确提取百分数：保留百分号并转为小数
-            percent_match = re.search(r"([-+]?\d*\.?\d+)%", s)
-            if percent_match:
-                s = round(float(percent_match.group(1)) / 100, 3)
-            else:
-                # 非百分数则提取普通数字
-                numeric_part = re.search(r"[-+]?\d*\.?\d+", s)
-                if numeric_part:
-                    s = float(numeric_part.group())
-            if type(s) is float and s.is_integer():
-                s = int(s)
-            return s, prop, int(p[1]) if len(p) > 1 else None
-
         # 获取角色攻击(80级)
         info["基础攻击"] = float(getCharStats(3, 2))
         info["基础生命"] = int(getCharStats(3, 4))
@@ -285,13 +337,12 @@ def getCharSkills(name, url, download=False, retry=3):
             )
 
         # 使用 map.call 方式抓取被动技能相关文本
-        passive_cells = soup.select(
+        passive_texts = texts(
             ".tab-content-box:nth-child(6) article > div:nth-child(2) > table > tbody > tr:nth-child(3) > td:nth-child(1),"
             ".tab-content-box:nth-child(6) article > div:nth-child(2) > table > tbody > tr:nth-child(3) > td:nth-child(2),"
             ".tab-content-box:nth-child(7) article > div:nth-child(2) > table > tbody > tr:nth-child(3) > td:nth-child(1),"
             ".tab-content-box:nth-child(7) article > div:nth-child(2) > table > tbody > tr:nth-child(3) > td:nth-child(2)"
         )
-        passive_texts = [cell.get_text(strip=True) for cell in passive_cells]
 
         keyMap = {
             "攻击力": "攻击",
@@ -311,7 +362,7 @@ def getCharSkills(name, url, download=False, retry=3):
                 exit(1)
             key, value = passive_text.split("+")
             mappedKey = keyMap.get(key, key)
-            val, _, _ = parseValue(value)
+            val, _, _, _ = parse_value(value)
             if mappedKey not in info:
                 info[mappedKey] = val
             else:
@@ -330,8 +381,8 @@ def getCharSkills(name, url, download=False, retry=3):
         # print(info, skills)
         for index, skill in enumerate(skills):
             rows = target_elements[index].find_all("tr")
-
             row0 = rows[0].find_all("td")[2:]
+            skills[index]["字段"] = []
             for row_index, row in enumerate(rows[1:]):
                 cells = row.find_all("td")
                 row_name = cells[0].get_text(strip=True)
@@ -340,37 +391,47 @@ def getCharSkills(name, url, download=False, retry=3):
                 属性影响_list = re.findall(
                     r"威力|效益|耐久|范围", cells[1].get_text(strip=True)
                 )
+                skills[index]["字段"].append({"名称": row_name})
                 属性影响_list.sort()
                 属性影响 = ",".join(属性影响_list)
-                skills[index][row_name] = {}
                 if 属性影响:
-                    skills[index][row_name]["属性影响"] = 属性影响
+                    skills[index]["字段"][-1]["属性影响"] = 属性影响
                 if len(cells) >= 2:
                     for cell_index, cell in enumerate(cells[2:]):
                         skill_value = cell.get_text(strip=True)
                         if skill_value == "/":
                             continue
-                        skill_value, prop, extra = parseValue(skill_value)
+                        skill_value, prop, extra, fmt = parse_value(skill_value)
                         title = row0[cell_index].get_text(strip=True)
                         if title.startswith("LV"):
                             if prop:
-                                skills[index][row_name]["参数"] = prop
+                                skills[index]["字段"][-1]["基础"] = prop
                             # level = title[2:]
-                            if "值" not in skills[index][row_name]:
-                                skills[index][row_name]["值"] = []
-                            skills[index][row_name]["值"].append(skill_value)
+                            if "值" not in skills[index]["字段"][-1]:
+                                skills[index]["字段"][-1]["值"] = []
+                            skills[index]["字段"][-1]["值"].append(skill_value)
                             if extra:
-                                if "额外" not in skills[index][row_name]:
-                                    skills[index][row_name]["额外"] = []
-                                skills[index][row_name]["额外"].append(extra)
+                                if "额外" not in skills[index]["字段"][-1]:
+                                    skills[index]["字段"][-1]["额外"] = []
+                                skills[index]["字段"][-1]["额外"].append(extra)
+                            if fmt:
+                                skills[index]["字段"][-1]["格式"] = fmt
                         else:
-                            skills[index][row_name][title] = skill_value
+                            skills[index]["字段"][-1][title] = skill_value
+                            print(title, skill_value)
                         # 检查所有等级下的数值是否相同，如果相同则将数组替换为数字
                 if all(
-                    v == skills[index][row_name]["值"][0]
-                    for v in skills[index][row_name]["值"]
+                    v == skills[index]["字段"][-1]["值"][0]
+                    for v in skills[index]["字段"][-1]["值"]
                 ):
-                    skills[index][row_name]["值"] = skills[index][row_name]["值"][0]
+                    skills[index]["字段"][-1]["值"] = skills[index]["字段"][-1]["值"][0]
+                if "额外" in skills[index]["字段"][-1] and all(
+                    v == skills[index]["字段"][-1]["额外"][0]
+                    for v in skills[index]["字段"][-1]["额外"]
+                ):
+                    skills[index]["字段"][-1]["额外"] = skills[index]["字段"][-1][
+                        "额外"
+                    ][0]
 
         info["技能"] = skills
         # 下载 banner 到 /public/imgs/ 目录，储存为“角色名+full.png”
@@ -388,7 +449,8 @@ def getCharSkills(name, url, download=False, retry=3):
     except requests.RequestException as e:
         print(f"请求{url}时出错: {e}")
     except Exception as e:
-        print(f"处理{url}, {info} 时出错: {e}")
+        print(f"处理{url}, {info} 时出错: ")
+        traceback.print_exc()
         return getCharSkills(name, url, download, retry - 1)
     return info
 

@@ -2,7 +2,7 @@
 import { SelectItem, type SelectItemProps, SelectItemText, SelectItemIndicator } from "radix-vue"
 import Icon from "../Icon.vue"
 
-const props = defineProps<Omit<SelectItemProps, "value"> & { value: string | number }>()
+const props = defineProps<Omit<SelectItemProps, "value"> & { value: any }>()
 </script>
 
 <template>

@@ -5,19 +5,20 @@ import { CharBuild } from "../data/CharBuild"
 import data from "../data/data.json"
 import Select, { SelectItem } from "../components/select"
 import { useLocalStorage } from "@vueuse/core"
+import { groupBy, cloneDeep } from "lodash-es"
 
 // 获取实际数据
-const charOptions = data.char.map((char) => ({ value: char.名称, label: char.名称, icon: `/imgs/${char.名称}.png` }))
+const charOptions = data.char.map((char) => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
 const modOptions = data.mod.map((mod) => ({
     value: mod.id,
     label: mod.名称,
     quality: mod.品质,
     type: mod.类型,
-    elm: mod.属性,
+    limit: mod.属性 || mod.限定,
     icon: mod.系列 && ["狮鹫", "百首", "契约者"].includes(mod.系列) ? `/imgs/${mod.属性}${mod.系列}.png` : `/imgs/${mod.系列}系列.png`,
 }))
 const buffOptions = data.buff.map((buff) => ({
-    value: buff.名称,
+    value: new LeveledBuff(buff.名称),
     label: buff.名称,
     description: buff.描述,
     icon: `/imgs/${buff.名称}.png`, // 可以根据需要添加图标
@@ -40,201 +41,218 @@ const rangedWeaponOptions = data.weapon
         icon: `/imgs/${weapon.名称}.png`,
     }))
 
-const skillOptions = data.skill.map((skill) => ({
-    value: skill.名称,
-    label: skill.名称,
-    // icon: `/imgs/${skill.名称}.png`, // 可以根据需要添加图标
-}))
-
 // 状态变量
 const selectedChar = useLocalStorage("selectedChar", "赛琪")
 const charSettingsKey = computed(() => `build.${selectedChar.value}`)
-const charSettings = useLocalStorage(charSettingsKey, {
+const defaultCharSettings = {
     charLevel: 80,
+    baseName: "",
+    hpPercent: 1,
+    resonanceGain: 0,
+    enemyType: "小型",
+    enemyLevel: 80,
+    enemyResistance: 0,
+    enemyHpType: "生命",
+    targetFunction: "伤害",
     charSkillLevel: 10,
-    meleeWeapon: "辉珀刃",
+    meleeWeapon: "枯朽",
     meleeWeaponLevel: 80,
     meleeWeaponRefine: 5,
     rangedWeapon: "剥离",
     rangedWeaponLevel: 80,
     rangedWeaponRefine: 5,
-})
-const selectedCharLevel = computed(() => charSettings.value.charLevel)
-const selectedCharSkillLevel = computed(() => charSettings.value.charSkillLevel)
-const selectedMeleeWeapon = computed(() => charSettings.value.meleeWeapon)
-const selectedMeleeWeaponLevel = computed(() => charSettings.value.meleeWeaponLevel)
-const selectedMeleeWeaponRefine = computed(() => charSettings.value.meleeWeaponRefine)
-const selectedRangedWeapon = computed(() => charSettings.value.rangedWeapon)
-const selectedRangedWeaponLevel = computed(() => charSettings.value.rangedWeaponLevel)
-const selectedRangedWeaponRefine = computed(() => charSettings.value.rangedWeaponRefine)
-const selectedCharMods = ref<(LeveledMod | null)[]>([null, null, null, null, null, null, null, null])
-const selectedMeleeMods = ref<(LeveledMod | null)[]>([null, null, null, null, null, null, null, null])
-const selectedRangedMods = ref<(LeveledMod | null)[]>([null, null, null, null, null, null, null, null])
-const selectedBuffs = ref<(LeveledBuff | null)[]>([])
-const selectedModSlot = ref<number>(-1)
-const selectedModType = ref("角色")
+    charMods: Array(8).fill(null) as ([number, number] | null)[],
+    meleeMods: Array(8).fill(null) as ([number, number] | null)[],
+    rangedMods: Array(8).fill(null) as ([number, number] | null)[],
+    skillWeaponMods: Array(4).fill(null) as ([number, number] | null)[],
+    buffs: [] as [string, number][],
+}
+const charSettings = useLocalStorage(charSettingsKey, defaultCharSettings, { deep: true })
+const selectedCharMods = computed(() => charSettings.value.charMods.map((v) => (v ? new LeveledMod(v[0], v[1]) : null)))
+const selectedMeleeMods = computed(() => charSettings.value.meleeMods.map((v) => (v ? new LeveledMod(v[0], v[1]) : null)))
+const selectedRangedMods = computed(() => charSettings.value.rangedMods.map((v) => (v ? new LeveledMod(v[0], v[1]) : null)))
+const selectedSkillWeaponMods = computed(() => charSettings.value.skillWeaponMods.map((v) => (v ? new LeveledMod(v[0], v[1]) : null)))
+const selectedBuffs = computed(() => charSettings.value.buffs.map((v) => new LeveledBuff(v[0], v[1])))
 
 // 创建CharBuild实例
 const charBuild = computed(
     () =>
         new CharBuild({
-            char: new LeveledChar(selectedChar.value, selectedCharLevel.value),
-            hpPercent: 1,
-            resonanceGain: 0,
+            char: new LeveledChar(selectedChar.value, charSettings.value.charLevel),
             mods: [
                 ...selectedCharMods.value.filter((mod) => mod !== null),
                 ...selectedMeleeMods.value.filter((mod) => mod !== null),
                 ...selectedRangedMods.value.filter((mod) => mod !== null),
+                ...selectedSkillWeaponMods.value.filter((mod) => mod !== null),
             ] as LeveledMod[],
-            buffs: selectedBuffs.value.filter((buff) => buff !== null) as LeveledBuff[],
-            melee: new LeveledWeapon(selectedMeleeWeapon.value, selectedMeleeWeaponRefine.value, selectedMeleeWeaponLevel.value),
-            ranged: new LeveledWeapon(selectedRangedWeapon.value, selectedRangedWeaponRefine.value, selectedRangedWeaponLevel.value),
-            baseName: selectedChar.value,
-            enemyType: "小型",
-            enemyLevel: 80,
-            enemyResistance: 0,
-            enemyHpType: "生命",
-            targetFunction: "DPS",
+            buffs: selectedBuffs.value,
+            melee: new LeveledWeapon(
+                charSettings.value.meleeWeapon,
+                charSettings.value.meleeWeaponRefine,
+                charSettings.value.meleeWeaponLevel
+            ),
+            ranged: new LeveledWeapon(
+                charSettings.value.rangedWeapon,
+                charSettings.value.rangedWeaponRefine,
+                charSettings.value.rangedWeaponLevel
+            ),
+            baseName: charSettings.value.baseName,
+            hpPercent: charSettings.value.hpPercent,
+            resonanceGain: charSettings.value.resonanceGain,
+            enemyType: charSettings.value.enemyType,
+            enemyLevel: charSettings.value.enemyLevel,
+            enemyResistance: charSettings.value.enemyResistance,
+            enemyHpType: charSettings.value.enemyHpType,
+            targetFunction: charSettings.value.targetFunction,
         })
 )
+
+const baseOptions = computed(() => [
+    ...[
+        ...LeveledWeapon.getBaseNamesWithName(charSettings.value.meleeWeapon),
+        ...LeveledWeapon.getBaseNamesWithName(charSettings.value.rangedWeapon),
+    ].map((base) => ({ value: base, label: base, type: "武器" })),
+    ...(charBuild.value.char.同律武器 ? LeveledWeapon.getBaseNamesWithName(charBuild.value.char.同律武器) : []).map((base) => ({
+        value: base,
+        label: base,
+        type: "同律武器",
+    })),
+    ...LeveledChar.getSkillNamesWithSub(selectedChar.value).map((skill) => ({ value: skill, label: skill, type: "技能" })),
+])
 
 // 计算属性
 const attributes = computed(() => charBuild.value.calculateAttributes())
 
 // 计算武器属性
-const meleeWeaponAttrs = computed(() => charBuild.value.calculateWeaponAttributes(charBuild.value.meleeWeapon))
-const rangedWeaponAttrs = computed(() => charBuild.value.calculateWeaponAttributes(charBuild.value.rangedWeapon))
-
-// 计算技能伤害
-const skills = computed(() => charBuild.value.skills)
-const skillDamages = computed(() => {
-    return skills.value.map((skill) => ({
-        skill,
-        damage: charBuild.value.calculateSkillDamage(skill),
-        dps: charBuild.value.calculateTargetFunction(charBuild.value.calculateSkillDamage(skill), undefined, skill),
-    }))
-})
-
-// 计算武器伤害
-const meleeDamage = computed(() => charBuild.value.calculateWeaponDamage(charBuild.value.meleeWeapon))
-const rangedDamage = computed(() => charBuild.value.calculateWeaponDamage(charBuild.value.rangedWeapon))
-
+const weaponAttrs = computed(() =>
+    charBuild.value.selectedWeapon ? charBuild.value.calculateWeaponAttributes(charBuild.value.selectedWeapon) : null
+)
 // 计算总伤害
 const totalDamage = computed(() => charBuild.value.calculate())
 
 // 更新CharBuild实例
 const updateCharBuild = () => {
     charBuild.value.char = new LeveledChar(selectedChar.value, 80)
-    charBuild.value.meleeWeapon = new LeveledWeapon(selectedMeleeWeapon.value, 5)
-    charBuild.value.rangedWeapon = new LeveledWeapon(selectedRangedWeapon.value, 5)
+    // 确保技能存在
+    if (!charSettings.value.baseName || !baseOptions.value.some((skill) => skill.value === charSettings.value.baseName)) {
+        charSettings.value.baseName = charBuild.value.char.技能[0].名称
+    }
+    charBuild.value.meleeWeapon = new LeveledWeapon(
+        charSettings.value.meleeWeapon,
+        charSettings.value.meleeWeaponRefine,
+        charSettings.value.meleeWeaponLevel
+    )
+    charBuild.value.rangedWeapon = new LeveledWeapon(
+        charSettings.value.rangedWeapon,
+        charSettings.value.rangedWeaponRefine,
+        charSettings.value.rangedWeaponLevel
+    )
     charBuild.value.buffs = selectedBuffs.value.filter((buff) => buff !== null) as LeveledBuff[]
     charBuild.value.mods = [
         ...selectedCharMods.value.filter((mod) => mod !== null),
         ...selectedMeleeMods.value.filter((mod) => mod !== null),
         ...selectedRangedMods.value.filter((mod) => mod !== null),
+        ...selectedSkillWeaponMods.value.filter((mod) => mod !== null),
     ] as LeveledMod[]
 }
+updateCharBuild()
 
-function selectMod(modId: number) {
-    const slotIndex = selectedModSlot.value
-    const type = selectedModType.value
+function selectMod(type: string, slotIndex: number, modId: number) {
+    const mod = new LeveledMod(modId)
+    const lv = mod.等级
     if (type === "角色") {
-        selectedCharMods.value[slotIndex] = new LeveledMod(modId)
+        charSettings.value.charMods[slotIndex] = [modId, lv]
     } else if (type === "近战") {
-        selectedMeleeMods.value[slotIndex] = new LeveledMod(modId)
+        charSettings.value.meleeMods[slotIndex] = [modId, lv]
     } else if (type === "远程") {
-        selectedRangedMods.value[slotIndex] = new LeveledMod(modId)
+        charSettings.value.rangedMods[slotIndex] = [modId, lv]
+    } else if (type === "同律") {
+        charSettings.value.skillWeaponMods[slotIndex] = [modId, lv]
     }
     updateCharBuild()
 }
 
-function removeMod() {
-    const slotIndex = selectedModSlot.value
-    const type = selectedModType.value
+function removeMod(slotIndex: number, type: string) {
     if (type === "角色") {
-        selectedCharMods.value[slotIndex] = null
+        charSettings.value.charMods[slotIndex] = null
     } else if (type === "近战") {
-        selectedMeleeMods.value[slotIndex] = null
+        charSettings.value.meleeMods[slotIndex] = null
     } else if (type === "远程") {
-        selectedRangedMods.value[slotIndex] = null
+        charSettings.value.rangedMods[slotIndex] = null
+    } else if (type === "同律") {
+        charSettings.value.skillWeaponMods[slotIndex] = null
     }
     updateCharBuild()
-}
-
-// 获取品质对应的颜色类名
-function getQualityColor(quality: string) {
-    const colors: Record<string, string> = {
-        金: "border-yellow-500",
-        紫: "border-purple-500",
-        蓝: "border-blue-500",
-        绿: "border-green-500",
-        白: "border-gray-500",
-    }
-    return colors[quality] || "border-gray-500"
-}
-
-// 获取品质对应的hover边框类名
-function getQualityHoverBorder(quality: string) {
-    const colors: Record<string, string> = {
-        金: "hover:border-yellow-400",
-        紫: "hover:border-purple-400",
-        蓝: "hover:border-blue-400",
-        绿: "hover:border-green-400",
-        白: "hover:border-gray-400",
-    }
-    return colors[quality] || "hover:border-gray-400"
-}
-
-// 获取品质对应的文本类名
-function getQualityText(quality: string) {
-    const colors: Record<string, string> = {
-        金: "text-yellow-400",
-        紫: "text-purple-400",
-        蓝: "text-blue-400",
-        绿: "text-green-400",
-        白: "text-gray-400",
-    }
-    return colors[quality] || "text-gray-400"
-}
-// 获取品质对应的等级
-function getQualityLevel(quality: string) {
-    const levels: Record<string, number> = {
-        金: 10,
-        紫: 5,
-        蓝: 5,
-        绿: 3,
-        白: 3,
-    }
-    return levels[quality] || 0
 }
 
 // 切换BUFF选择
-const toggleBuff = (buffName: string) => {
-    const index = selectedBuffs.value.findIndex((buff) => buff?.名称 === buffName)
+const toggleBuff = (buff: LeveledBuff) => {
+    const index = charSettings.value.buffs.findIndex((v) => v[0] === buff.名称)
     if (index > -1) {
-        selectedBuffs.value.splice(index, 1)
+        charSettings.value.buffs.splice(index, 1)
     } else {
-        selectedBuffs.value.push(new LeveledBuff(buffName, 1))
+        charSettings.value.buffs.push([buff.名称, buff.等级])
     }
     updateCharBuild()
 }
 
+function format100(n100: number, di = 2) {
+    return `${+(n100 * 100).toFixed(di)}%`
+}
+
+function formatProp(prop: string, val: any) {
+    if (typeof val !== "number") {
+        return val
+    }
+    if (prop === "攻击范围") {
+        return val
+    }
+    return format100(val)
+}
+
+const charProjectKey = computed(() => `project.${selectedChar.value}`)
+const charProject = useLocalStorage(charProjectKey, {
+    selected: "",
+    projects: [] as { name: string; charSettings: typeof defaultCharSettings }[],
+})
 // 保存配置
 const saveConfig = () => {
     // 实现保存配置功能
     console.log("保存配置")
+    const inputName = prompt("请输入配置名称")
+    if (!inputName) {
+        return
+    }
+    charProject.value.selected = inputName
+    if (charProject.value.projects.some((project) => project.name === inputName)) {
+        const index = charProject.value.projects.findIndex((project) => project.name === inputName)
+        charProject.value.projects[index].charSettings = cloneDeep(charSettings.value)
+    } else {
+        charProject.value.projects.push({
+            name: inputName,
+            charSettings: cloneDeep(charSettings.value),
+        })
+    }
 }
 
-// 重置配置
 const resetConfig = () => {
-    selectedChar.value = "赛琪"
-    selectedMeleeWeapon.value = "辉珀刃"
-    selectedRangedWeapon.value = "剥离"
-    selectedCharMods.value = [null, null, null, null, null, null, null, null]
-    selectedMeleeMods.value = [null, null, null, null, null, null, null, null]
-    selectedRangedMods.value = [null, null, null, null, null, null, null, null]
-    selectedBuffs.value = []
-    updateCharBuild()
+    // 实现重置配置功能
+    console.log("重置配置")
+    charSettings.value.charMods = Array(8).fill(null)
+    charSettings.value.meleeMods = Array(8).fill(null)
+    charSettings.value.rangedMods = Array(8).fill(null)
+    charSettings.value.skillWeaponMods = Array(4).fill(null)
+}
+
+// 导入配置
+const importConfig = () => {
+    // 实现导入配置功能
+    console.log("导入配置")
+    const project = charProject.value.projects.find((project) => project.name === charProject.value.selected)
+    if (project) {
+        charSettings.value = cloneDeep(project.charSettings)
+        updateCharBuild()
+    }
 }
 </script>
 
@@ -242,258 +260,455 @@ const resetConfig = () => {
     <div class="h-full overflow-scroll">
         <div class="container mx-auto p-4">
             <div class="flex justify-end gap-2 mb-4">
-                <button class="btn btn-primary">保存配置</button>
-                <button class="btn">重置</button>
+                <Select
+                    class="w-50 inline-flex items-center justify-between input input-bordered input-md whitespace-nowrap"
+                    v-model="charProject.selected"
+                    @change="importConfig"
+                >
+                    <SelectItem v-for="project in charProject.projects" :key="project.name" :value="project.name">
+                        {{ project.name }}
+                    </SelectItem>
+                </Select>
+                <button class="btn btn-primary" @click="saveConfig">保存配置</button>
+                <button class="btn" @click="resetConfig">重置</button>
             </div>
 
-            <!-- 角色选择 -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+            <!-- 基本设置 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
+                <!-- 角色选择 -->
                 <div class="bg-base-300 rounded-xl p-4 shadow-lg">
                     <div class="flex items-center gap-2 mb-3">
-                        <div class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
-                            <span class="text-xs">1</span>
-                        </div>
+                        <SectionMarker reset>
+                            <Icon icon="ri:user-line" />
+                        </SectionMarker>
                         <h3 class="text-lg font-semibold">选择角色</h3>
                     </div>
                     <div class="relative flex items-center gap-2">
-                        <Select
-                            class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                            v-model="selectedChar"
-                            @change="updateCharBuild"
-                        >
-                            <SelectItem v-for="char in charOptions" :key="char.value" :value="char.value">
-                                {{ char.label }}
-                            </SelectItem>
-                        </Select>
-                        <Select
-                            class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                            v-model="selectedCharLevel"
-                            @change="updateCharBuild"
-                        >
-                            <SelectItem v-for="lv in [1, 10, 20, 30, 40, 50, 60, 70, 80]" :key="lv" :value="lv">
-                                {{ lv }}
-                            </SelectItem>
-                        </Select>
-                        <Select
-                            class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                            v-model="selectedCharSkillLevel"
-                            @change="updateCharBuild"
-                        >
-                            <SelectItem v-for="lv in [1, 10, 20, 30, 40, 50, 60, 70, 80]" :key="lv" :value="lv">
-                                {{ lv }}
-                            </SelectItem>
-                        </Select>
+                        <div class="flex-1">
+                            <div class="px-2 text-xs text-gray-400 mb-1">角色</div>
+                            <Select
+                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                v-model="selectedChar"
+                                @change="updateCharBuild"
+                            >
+                                <template v-for="charWithElm in groupBy(charOptions, 'elm')" :key="charWithElm[0].elm">
+                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
+                                        {{ charWithElm[0].elm }}
+                                    </SelectLabel>
+                                    <SelectGroup>
+                                        <SelectItem v-for="char in charWithElm" :key="char.value" :value="char.value">
+                                            {{ char.label }}
+                                        </SelectItem>
+                                    </SelectGroup>
+                                </template>
+                            </Select>
+                        </div>
+                        <div class="flex-1">
+                            <div class="px-2 text-xs text-gray-400 mb-1">等级</div>
+                            <Select
+                                class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                v-model="charSettings.charLevel"
+                                @change="updateCharBuild"
+                            >
+                                <SelectItem v-for="lv in [1, 10, 20, 30, 40, 50, 60, 70, 80]" :key="lv" :value="lv">
+                                    {{ lv }}
+                                </SelectItem>
+                            </Select>
+                        </div>
+                        <div class="flex-1">
+                            <div class="px-2 text-xs text-gray-400 mb-1">目标函数</div>
+                            <Select
+                                class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                v-model="charSettings.targetFunction"
+                                @change="updateCharBuild"
+                            >
+                                <SelectItem
+                                    v-for="fn in [
+                                        '伤害',
+                                        '弹片伤害',
+                                        '每秒伤害',
+                                        '每神智伤害',
+                                        '每持续神智伤害',
+                                        '每神智每秒伤害',
+                                        '每持续神智每秒伤害',
+                                    ]"
+                                    :key="fn"
+                                    :value="fn"
+                                >
+                                    {{ fn }}
+                                </SelectItem>
+                            </Select>
+                        </div>
                     </div>
                 </div>
-
+                <!-- 技能选择 -->
+                <div class="bg-base-300 rounded-xl p-4 shadow-lg">
+                    <div class="flex items-center gap-2 mb-3">
+                        <SectionMarker>
+                            <Icon icon="ri:flashlight-line" />
+                        </SectionMarker>
+                        <h3 class="text-lg font-semibold">选择技能/武器</h3>
+                    </div>
+                    <div class="relative flex items-center gap-2">
+                        <div class="flex-1">
+                            <div class="px-2 text-xs text-gray-400 mb-1">技能/武器</div>
+                            <Select
+                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                v-model="charSettings.baseName"
+                                @change="updateCharBuild"
+                            >
+                                <SelectItem v-for="skill in baseOptions" :key="skill.label" :value="skill.label">
+                                    {{ skill.label }}
+                                </SelectItem>
+                            </Select>
+                        </div>
+                        <div class="flex-1">
+                            <div class="px-2 text-xs text-gray-400 mb-1">技能等级</div>
+                            <Select
+                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                v-model="charSettings.charSkillLevel"
+                                @change="updateCharBuild"
+                            >
+                                <SelectItem v-for="lv in 12" :key="lv" :value="lv">
+                                    {{ lv }}
+                                </SelectItem>
+                            </Select>
+                        </div>
+                    </div>
+                </div>
                 <!-- 近战武器选择 -->
                 <div class="bg-base-300 rounded-xl p-4 shadow-lg">
                     <div class="flex items-center gap-2 mb-3">
-                        <div class="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center">
-                            <span class="text-xs">2</span>
-                        </div>
+                        <SectionMarker>
+                            <Icon icon="ri:sword-line" />
+                        </SectionMarker>
                         <h3 class="text-lg font-semibold">近战武器</h3>
                     </div>
                     <div class="relative flex items-center gap-2">
-                        <Select
-                            class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                            v-model="selectedMeleeWeapon"
-                            @change="updateCharBuild"
-                        >
-                            <SelectItem v-for="weapon in meleeWeaponOptions" :key="weapon.value" :value="weapon.value">
-                                {{ weapon.label }}
-                            </SelectItem>
-                        </Select>
-                        <Select
-                            class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                            v-model="selectedMeleeWeaponRefine"
-                            @change="updateCharBuild"
-                        >
-                            <SelectItem v-for="lv in [0, 1, 2, 3, 4, 5]" :key="lv" :value="lv">
-                                {{ lv }}
-                            </SelectItem>
-                        </Select>
-                        <Select
-                            class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                            v-model="selectedMeleeWeaponLevel"
-                            @change="updateCharBuild"
-                        >
-                            <SelectItem v-for="lv in [1, 10, 20, 30, 40, 50, 60, 70, 80]" :key="lv" :value="lv">
-                                {{ lv }}
-                            </SelectItem>
-                        </Select>
+                        <div class="flex-1">
+                            <div class="px-2 text-xs text-gray-400 mb-1">武器</div>
+                            <Select
+                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                v-model="charSettings.meleeWeapon"
+                                @change="updateCharBuild"
+                            >
+                                <template v-for="weaponWithType in groupBy(meleeWeaponOptions, 'type')" :key="weaponWithType[0].type">
+                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
+                                        {{ weaponWithType[0].type }}
+                                    </SelectLabel>
+                                    <SelectGroup>
+                                        <SelectItem v-for="weapon in weaponWithType" :key="weapon.value" :value="weapon.value">
+                                            {{ weapon.label }}
+                                        </SelectItem>
+                                    </SelectGroup>
+                                </template>
+                            </Select>
+                        </div>
+                        <div class="flex-1">
+                            <div class="px-2 text-xs text-gray-400 mb-1">精炼</div>
+                            <Select
+                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                v-model="charSettings.meleeWeaponRefine"
+                                @change="updateCharBuild"
+                            >
+                                <SelectItem v-for="lv in [0, 1, 2, 3, 4, 5]" :key="lv" :value="lv">
+                                    {{ lv }}
+                                </SelectItem>
+                            </Select>
+                        </div>
+                        <div class="flex-1">
+                            <div class="px-2 text-xs text-gray-400 mb-1">等级</div>
+                            <Select
+                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                v-model="charSettings.meleeWeaponLevel"
+                                @change="updateCharBuild"
+                            >
+                                <SelectItem v-for="lv in [1, 10, 20, 30, 40, 50, 60, 70, 80]" :key="lv" :value="lv">
+                                    {{ lv }}
+                                </SelectItem>
+                            </Select>
+                        </div>
                     </div>
                 </div>
-
                 <!-- 远程武器选择 -->
                 <div class="bg-base-300 rounded-xl p-4 shadow-lg">
                     <div class="flex items-center gap-2 mb-3">
-                        <div class="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
-                            <span class="text-xs">3</span>
-                        </div>
+                        <SectionMarker>
+                            <Icon icon="ri:crosshair-line" />
+                        </SectionMarker>
                         <h3 class="text-lg font-semibold">远程武器</h3>
                     </div>
                     <div class="relative flex items-center gap-2">
-                        <Select
-                            class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                            v-model="selectedRangedWeapon"
-                            @change="updateCharBuild"
-                        >
-                            <SelectItem v-for="weapon in rangedWeaponOptions" :key="weapon.value" :value="weapon.value">
-                                {{ weapon.label }}
-                            </SelectItem>
-                        </Select>
-                        <Select
-                            class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                            v-model="selectedRangedWeaponRefine"
-                            @change="updateCharBuild"
-                        >
-                            <SelectItem v-for="lv in [0, 1, 2, 3, 4, 5]" :key="lv" :value="lv">
-                                {{ lv }}
-                            </SelectItem>
-                        </Select>
-                        <Select
-                            class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                            v-model="selectedRangedWeaponLevel"
-                            @change="updateCharBuild"
-                        >
-                            <SelectItem v-for="lv in [1, 10, 20, 30, 40, 50, 60, 70, 80]" :key="lv" :value="lv">
-                                {{ lv }}
-                            </SelectItem>
-                        </Select>
+                        <div class="flex-1">
+                            <div class="px-2 text-xs text-gray-400 mb-1">武器</div>
+                            <Select
+                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                v-model="charSettings.rangedWeapon"
+                                @change="updateCharBuild"
+                            >
+                                <template v-for="weaponWithType in groupBy(rangedWeaponOptions, 'type')" :key="weaponWithType[0].type">
+                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
+                                        {{ weaponWithType[0].type }}
+                                    </SelectLabel>
+                                    <SelectGroup>
+                                        <SelectItem v-for="weapon in weaponWithType" :key="weapon.value" :value="weapon.value">
+                                            {{ weapon.label }}
+                                        </SelectItem>
+                                    </SelectGroup>
+                                </template>
+                            </Select>
+                        </div>
+                        <div class="flex-1">
+                            <div class="px-2 text-xs text-gray-400 mb-1">精炼</div>
+                            <Select
+                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                v-model="charSettings.rangedWeaponRefine"
+                                @change="updateCharBuild"
+                            >
+                                <SelectItem v-for="lv in [0, 1, 2, 3, 4, 5]" :key="lv" :value="lv">
+                                    {{ lv }}
+                                </SelectItem>
+                            </Select>
+                        </div>
+                        <div class="flex-1">
+                            <div class="px-2 text-xs text-gray-400 mb-1">等级</div>
+                            <Select
+                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                v-model="charSettings.rangedWeaponLevel"
+                                @change="updateCharBuild"
+                            >
+                                <SelectItem v-for="lv in [1, 10, 20, 30, 40, 50, 60, 70, 80]" :key="lv" :value="lv">
+                                    {{ lv }}
+                                </SelectItem>
+                            </Select>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- MOD配置 -->
-            <div class="bg-base-300 rounded-xl p-4 shadow-lg mb-6">
-                <div class="flex items-center gap-2 mb-3">
-                    <div class="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
-                        <span class="text-xs">4</span>
+                <!-- 敌人选择 -->
+                <div class="bg-base-300 rounded-xl p-4 shadow-lg">
+                    <div class="flex items-center gap-2 mb-3">
+                        <SectionMarker>
+                            <Icon icon="ri:game-line" />
+                        </SectionMarker>
+                        <h3 class="text-lg font-semibold">敌人</h3>
                     </div>
-                    <h3 class="text-lg font-semibold">MOD配置</h3>
+                    <div class="relative flex items-center gap-2">
+                        <div class="flex-1">
+                            <div class="px-2 text-xs text-gray-400 mb-1">类型</div>
+                            <Select
+                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                v-model="charSettings.enemyType"
+                                @change="updateCharBuild"
+                            >
+                                <SelectItem v-for="enemy in ['小型', '大型', '首领']" :key="enemy" :value="enemy">
+                                    {{ enemy }}
+                                </SelectItem>
+                            </Select>
+                        </div>
+                        <div class="flex-1">
+                            <div class="px-2 text-xs text-gray-400 mb-1">等级</div>
+                            <Select
+                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                v-model="charSettings.enemyLevel"
+                                @change="updateCharBuild"
+                            >
+                                <SelectItem v-for="lv in 36" :key="lv" :value="lv * 5">
+                                    {{ lv * 5 }}
+                                </SelectItem>
+                            </Select>
+                        </div>
+                        <div class="flex-1">
+                            <div class="px-2 text-xs text-gray-400 mb-1">生命值类型</div>
+                            <Select
+                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                v-model="charSettings.enemyHpType"
+                                @change="updateCharBuild"
+                            >
+                                <SelectItem v-for="hpType in ['生命', '护盾', '战姿']" :key="hpType" :value="hpType">
+                                    {{ hpType }}
+                                </SelectItem>
+                            </Select>
+                        </div>
+                    </div>
                 </div>
-                <div class="grid grid-cols-4 md:grid-cols-8 gap-4">
-                    <div
-                        @click="selectedModSlot = index"
-                        v-for="(mod, index) in selectedModType === '角色'
-                            ? selectedCharMods
-                            : selectedModType === '近战'
-                            ? selectedMeleeMods
-                            : selectedRangedMods"
-                        :key="index"
-                        class="aspect-square bg-base-200 rounded-lg border-2 flex items-center justify-center hover:border-purple-500 transition-colors cursor-pointer"
-                        :class="mod ? getQualityColor(mod.品质) : 'border-dashed border-gray-600'"
-                    >
-                        <div class="relative w-full h-full flex items-center justify-center">
-                            <div v-if="mod" class="w-full h-full flex items-center justify-center bg-opacity-30 rounded-lg overflow-hidden">
-                                <!-- 背景 -->
-                                <div class="absolute inset-0 flex items-center justify-center">
-                                    <img :src="mod.url" :alt="mod.名称" />
-                                </div>
-                                <!-- MOD名称 -->
-                                <div class="relative mt-auto w-full bg-black/50 z-10 text-left p-2">
-                                    <div class="text-base-100 text-sm font-bold mb-1">{{ mod.名称 }}</div>
-                                    <div class="text-base-300 text-xs">Lv.{{ mod.等级 }}</div>
-                                </div>
-                                <!-- 关闭按钮 -->
-                                <button
-                                    @click.stop="removeMod()"
-                                    class="absolute cursor-pointer -top-2 -right-2 w-5 h-5 bg-red-400 bg-opacity-50 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors"
-                                >
-                                    <span class="text-white text-xs">×</span>
-                                </button>
-                            </div>
-                            <div v-else class="text-gray-500">+</div>
+                <!-- 其他 -->
+                <div class="bg-base-300 rounded-xl p-4 shadow-lg">
+                    <div class="flex items-center gap-2 mb-3">
+                        <SectionMarker>
+                            <Icon icon="ri:more-line" />
+                        </SectionMarker>
+                        <h3 class="text-lg font-semibold">其他</h3>
+                    </div>
+                    <div class="relative flex items-center gap-2">
+                        <div class="flex-1">
+                            <div class="px-2 text-xs text-gray-400 mb-1">生命值比例</div>
+                            <Select
+                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                v-model="charSettings.hpPercent"
+                                @change="updateCharBuild"
+                            >
+                                <SelectItem v-for="hp in [0.01, 0.25, 0.5, 0.75, 1]" :key="hp" :value="hp"> {{ hp * 100 }}% </SelectItem>
+                            </Select>
+                        </div>
+                        <div class="flex-1">
+                            <div class="px-2 text-xs text-gray-400 mb-1">和鸣增益</div>
+                            <Select
+                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                v-model="charSettings.resonanceGain"
+                                @change="updateCharBuild"
+                            >
+                                <SelectItem v-for="rg in [0, 0.5, 1, 1.5, 2, 2.5, 3]" :key="rg" :value="rg"> {{ rg * 100 }}% </SelectItem>
+                            </Select>
+                        </div>
+                        <div class="flex-1">
+                            <div class="px-2 text-xs text-gray-400 mb-1">敌人抗性</div>
+                            <Select
+                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                v-model="charSettings.enemyResistance"
+                                @change="updateCharBuild"
+                            >
+                                <SelectItem v-for="res in [0, 0.5, -4]" :key="res" :value="res"> {{ res * 100 }}% </SelectItem>
+                            </Select>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- MOD选择面板 -->
-            <div v-if="selectedModSlot != -1" class="mt-4 bg-base-200 rounded-lg p-3">
-                <div class="flex">
-                    <h4 class="text-sm font-medium mb-3 p-2">选择MOD - 槽位 {{ selectedModSlot + 1 }}</h4>
 
-                    <!-- 关闭按钮 -->
-                    <button class="ml-auto btn btn-ghost btn-sm btn-square" @click="selectedModSlot = -1">
-                        <Icon bold icon="codicon:chrome-close" />
-                    </button>
-                </div>
-
-                <!-- 品质筛选 -->
-                <div class="tabs tabs-box">
-                    <template v-for="quality in '金紫蓝绿白'" :key="quality">
-                        <input type="radio" name="mod_select" class="tab" :aria-label="`${quality}色`" :checked="quality === '金'" />
-                        <div class="tab-content py-2">
-                            <ScrollArea class="h-80 w-full">
-                                <div class="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-3">
-                                    <div
-                                        v-for="mod in modOptions.filter(
-                                            (m) =>
-                                                m.type === selectedModType &&
-                                                (!m.elm || m.elm === charBuild.char.属性) &&
-                                                m.quality === quality
-                                        )"
-                                        :key="mod.value"
-                                        class="border aspect-square rounded-md cursor-pointer transition-colors relative flex overflow-hidden"
-                                        :class="[getQualityColor(mod.quality), getQualityHoverBorder(mod.quality)]"
-                                        @click="selectMod(mod.value!)"
-                                    >
-                                        <!-- MOD背景图 -->
-                                        <div class="absolute inset-0 opacity-50 rounded-md">
-                                            <img :src="mod.icon" alt="MOD背景" class="w-full h-full object-cover rounded-md" />
-                                        </div>
-
-                                        <!-- MOD内容 -->
-                                        <div class="relative p-3 z-10 mt-auto w-full bg-black/50 text-left text-base-100">
-                                            <div class="text-sm font-medium truncate mb-1">{{ mod.label }}</div>
-                                            <div class="flex items-center justify-between">
-                                                <div class="text-xs">Lv.{{ getQualityLevel(mod.quality) }}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </ScrollArea>
-                        </div>
-                    </template>
-                </div>
-            </div>
-
+            <!-- 角色MOD配置 -->
+            <ModEditer
+                title="角色MOD配置"
+                :mods="selectedCharMods"
+                :mod-options="modOptions.filter((m) => m.type === '角色' && (!m.limit || m.limit === charBuild.char.属性))"
+                :char-build="charBuild"
+                @remove-mod="removeMod($event, '角色')"
+                @select-mod="selectMod('角色', $event[0], $event[1])"
+                @level-change="charSettings.charMods[$event[0]]![1] = $event[1]"
+            />
+            <!-- 近战武器MOD配置 -->
+            <ModEditer
+                v-if="charBuild.isMeleeWeapon"
+                title="近战武器MOD配置"
+                :mods="selectedMeleeMods"
+                :mod-options="
+                    modOptions.filter(
+                        (m) =>
+                            m.type === '近战' &&
+                            (!m.limit || [charBuild.meleeWeapon.类别, charBuild.meleeWeapon.伤害类型].includes(m.limit))
+                    )
+                "
+                :char-build="charBuild"
+                @remove-mod="removeMod($event, '近战')"
+                @select-mod="selectMod('近战', $event[0], $event[1])"
+                @level-change="charSettings.meleeMods[$event[0]]![1] = $event[1]"
+            />
+            <!-- 远程武器MOD配置 -->
+            <ModEditer
+                v-if="charBuild.isRangedWeapon"
+                title="远程武器MOD配置"
+                :mods="selectedRangedMods"
+                :mod-options="
+                    modOptions.filter(
+                        (m) =>
+                            m.type === '远程' &&
+                            (!m.limit || [charBuild.rangedWeapon.类别, charBuild.rangedWeapon.伤害类型].includes(m.limit))
+                    )
+                "
+                :char-build="charBuild"
+                @remove-mod="removeMod($event, '远程')"
+                @select-mod="selectMod('远程', $event[0], $event[1])"
+                @level-change="charSettings.rangedMods[$event[0]]![1] = $event[1]"
+            />
+            <!-- 同律武器MOD配置 -->
+            <ModEditer
+                v-if="charBuild.skillWeapon && charBuild.isSkillWeapon"
+                title="同律武器MOD配置"
+                :mods="selectedSkillWeaponMods"
+                :mod-options="
+                    modOptions.filter(
+                        (m) =>
+                            m.type === charBuild.skillWeapon!.类型 &&
+                            (!m.limit || [charBuild.skillWeapon!.类别, charBuild.skillWeapon!.伤害类型].includes(m.limit))
+                    )
+                "
+                :char-build="charBuild"
+                @remove-mod="removeMod($event, '同律')"
+                @select-mod="selectMod('同律', $event[0], $event[1])"
+                @level-change="charSettings.skillWeaponMods[$event[0]]![1] = $event[1]"
+            />
             <!-- BUFF列表 -->
             <div class="bg-base-300 rounded-xl p-4 shadow-lg mb-6">
                 <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-2">
-                        <div class="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
-                            <span class="text-xs">5</span>
-                        </div>
+                        <SectionMarker />
                         <h3 class="text-lg font-semibold">BUFF列表</h3>
                     </div>
                     <div class="text-sm text-gray-400">已选 {{ selectedBuffs.length }} 个</div>
                 </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <div
-                        v-for="buff in buffOptions.slice(0, 12)"
-                        :key="buff.value"
-                        class="bg-base-200 rounded-lg p-3 cursor-pointer hover:bg-gray-400 transition-colors"
-                        @click="toggleBuff(buff.value)"
-                    >
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="text-sm font-medium">{{ buff.label }}</div>
-                            <div class="text-xs text-gray-400">Lv.1</div>
+                <ScrollArea class="h-80 w-full">
+                    <transition-group name="list" tag="div" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div
+                            v-for="buff in buffOptions.filter((b) => selectedBuffs.some((v) => v.名称 === b.label))"
+                            :key="buff.label"
+                            class="bg-base-200 rounded-lg p-3 cursor-pointer hover:bg-gray-200 transition-colors"
+                            :class="{
+                                'bg-green-100 border border-green-500 hover:bg-green-200': selectedBuffs.some((b) => b.名称 === buff.label),
+                            }"
+                            @click="toggleBuff(buff.value)"
+                        >
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="text-sm font-medium flex items-center gap-1">
+                                    <div class="text-green-500">
+                                        <Icon icon="ri:checkbox-circle-fill" />
+                                    </div>
+                                    {{ buff.label }}
+                                </div>
+                                <div class="text-xs text-gray-400">Lv.{{ buff.value.等级 }}</div>
+                            </div>
+                            <div class="text-xs text-gray-400 mb-2">{{ buff.description }}</div>
+                            <div class="text-xs text-gray-500">
+                                收益:
+                                {{
+                                    format100(
+                                        charBuild.calcIncome(
+                                            buff.value,
+                                            selectedBuffs.some((b) => b.名称 === buff.label)
+                                        )
+                                    )
+                                }}
+                            </div>
                         </div>
-                        <div class="text-xs text-gray-400 mb-2">{{ buff.description }}</div>
-                        <div class="text-xs text-gray-500">收益: {{ Math.floor(Math.random() * 500) }}</div>
-                    </div>
-                </div>
+                        <div
+                            v-for="buff in buffOptions.filter((b) => !selectedBuffs.some((v) => v.名称 === b.label))"
+                            :key="buff.label"
+                            class="bg-base-200 rounded-lg p-3 cursor-pointer hover:bg-gray-200 transition-colors"
+                            :class="{ 'bg-green-300 border border-green-500': selectedBuffs.some((b) => b.名称 === buff.label) }"
+                            @click="toggleBuff(buff.value)"
+                        >
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="text-sm font-medium">{{ buff.label }}</div>
+                                <div class="text-xs text-gray-400">Lv.{{ buff.value.等级 }}</div>
+                            </div>
+                            <div class="text-xs text-gray-400 mb-2">{{ buff.description }}</div>
+                            <div class="text-xs text-gray-500">
+                                收益:
+                                {{
+                                    format100(
+                                        charBuild.calcIncome(
+                                            buff.value,
+                                            selectedBuffs.some((b) => b.名称 === buff.label)
+                                        )
+                                    )
+                                }}
+                            </div>
+                        </div>
+                    </transition-group>
+                </ScrollArea>
             </div>
 
             <!-- 装配预览与保存 -->
             <div class="bg-base-300 rounded-xl p-4 shadow-lg mb-6">
                 <div class="flex items-center gap-2 mb-4">
-                    <div class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
-                        <span class="text-xs">6</span>
-                    </div>
+                    <SectionMarker />
                     <h3 class="text-lg font-semibold">装配预览</h3>
                 </div>
 
@@ -503,14 +718,14 @@ const resetConfig = () => {
                         <div class="flex flex-col justify-center items-center gap-2">
                             <!-- 角色 -->
                             <div class="flex flex-col items-center">
-                                <div class="size-72 bg-gray-700 rounded-lg mb-3 flex items-center justify-center">
+                                <div class="size-72 bg-gray-200 rounded-lg mb-3 flex items-center justify-center">
                                     <span class="text-gray-400">
-                                        <img :src="charBuild.char.url" alt="角色头像" class="size-72 object-cover rounded-md" />
+                                        <img :src="charBuild.char.urlFull" alt="角色头像" class="size-72 object-cover rounded-md" />
                                     </span>
                                 </div>
                                 <div class="text-center">
                                     <div class="font-medium">{{ selectedChar }}</div>
-                                    <div class="text-xs text-gray-400">等级: {{ selectedCharLevel }}</div>
+                                    <div class="text-xs text-gray-400">等级: {{ charSettings.charLevel }}</div>
                                 </div>
                             </div>
                             <div class="flex gap-2 bg-gray-200 rounded-lg p-2 w-full">
@@ -526,9 +741,9 @@ const resetConfig = () => {
                                         </span>
                                     </div>
                                     <div class="text-left">
-                                        <div class="font-medium">{{ selectedMeleeWeapon }}</div>
-                                        <div class="text-xs text-gray-400">等级: {{ selectedMeleeWeaponLevel }}</div>
-                                        <div class="text-xs text-gray-400">精炼: {{ selectedMeleeWeaponRefine }}</div>
+                                        <div class="font-medium">{{ charSettings.meleeWeapon }}</div>
+                                        <div class="text-xs text-gray-400">等级: {{ charSettings.meleeWeaponLevel }}</div>
+                                        <div class="text-xs text-gray-400">精炼: {{ charSettings.meleeWeaponRefine }}</div>
                                     </div>
                                 </div>
                                 <!-- 远程 -->
@@ -543,9 +758,9 @@ const resetConfig = () => {
                                         </span>
                                     </div>
                                     <div class="text-left">
-                                        <div class="font-medium">{{ selectedRangedWeapon }}</div>
-                                        <div class="text-xs text-gray-400">等级: {{ selectedRangedWeaponLevel }}</div>
-                                        <div class="text-xs text-gray-400">精炼: {{ selectedRangedWeaponRefine }}</div>
+                                        <div class="font-medium">{{ charSettings.rangedWeapon }}</div>
+                                        <div class="text-xs text-gray-400">等级: {{ charSettings.rangedWeaponLevel }}</div>
+                                        <div class="text-xs text-gray-400">精炼: {{ charSettings.rangedWeaponRefine }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -553,74 +768,154 @@ const resetConfig = () => {
                     </div>
 
                     <!-- 综合属性 -->
-                    <div class="bg-base-200 rounded-lg p-3 flex-1">
-                        <h4 class="text-sm font-medium mb-3">综合属性</h4>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            <div class="flex flex-col items-center">
-                                <div class="text-xs text-gray-400 mb-1">攻击</div>
-                                <div class="text-lg font-semibold text-red-400">{{ attributes.attack }}</div>
+                    <div class="bg-base-200 rounded-lg p-3 flex-1 flex flex-col gap-2">
+                        <div class="flex flex-col gap-2">
+                            <div class="text-sm font-medium p-2 bg-primary/10 rounded-lg flex items-center gap-2">
+                                <div class="w-3 h-3 rounded-full bg-primary"></div>
+                                角色属性
                             </div>
-                            <div class="flex flex-col items-center">
-                                <div class="text-xs text-gray-400 mb-1">生命</div>
-                                <div class="text-lg font-semibold text-green-400">{{ attributes.health }}</div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <div class="flex flex-col items-center">
+                                    <div class="text-xs text-gray-400 mb-1">攻击</div>
+                                    <div class="text-lg font-semibold text-red-400">{{ attributes.attack }}</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="text-xs text-gray-400 mb-1">生命</div>
+                                    <div class="text-lg font-semibold text-green-400">{{ attributes.health }}</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="text-xs text-gray-400 mb-1">护盾</div>
+                                    <div class="text-lg font-semibold text-blue-400">{{ attributes.shield }}</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="text-xs text-gray-400 mb-1">防御</div>
+                                    <div class="text-lg font-semibold text-yellow-400">{{ attributes.defense }}</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="text-xs text-gray-400 mb-1">威力</div>
+                                    <div class="text-lg font-semibold text-sky-400">{{ (attributes.power * 100).toFixed(0) }}%</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="text-xs text-gray-400 mb-1">耐久</div>
+                                    <div class="text-lg font-semibold text-purple-400">{{ (attributes.durability * 100).toFixed(0) }}%</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="text-xs text-gray-400 mb-1">效益</div>
+                                    <div class="text-lg font-semibold text-green-400">{{ (attributes.efficiency * 100).toFixed(0) }}%</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="text-xs text-gray-400 mb-1">范围</div>
+                                    <div class="text-lg font-semibold text-rose-400">{{ (attributes.range * 100).toFixed(0) }}%</div>
+                                </div>
+                                <div class="flex flex-col items-center" v-if="attributes.boost">
+                                    <span class="text-xs text-gray-400 mb-1">昂扬</span>
+                                    <span class="text-lg font-semibold text-red-400">{{ (attributes.boost * 100).toFixed(0) }}%</span>
+                                </div>
+                                <div class="flex flex-col items-center" v-if="attributes.desperate">
+                                    <span class="text-xs text-gray-400 mb-1">背水</span>
+                                    <span class="text-lg font-semibold text-green-400">{{ (attributes.desperate * 100).toFixed(0) }}%</span>
+                                </div>
+                                <div class="flex flex-col items-center" v-if="attributes.damageIncrease">
+                                    <span class="text-xs text-gray-400 mb-1">增伤</span>
+                                    <span class="text-lg font-semibold text-cyan-400"
+                                        >{{ (attributes.damageIncrease * 100).toFixed(0) }}%</span
+                                    >
+                                </div>
+                                <div class="flex flex-col items-center" v-if="attributes.weaponDamage">
+                                    <span class="text-xs text-gray-400 mb-1">武器伤害</span>
+                                    <span class="text-lg font-semibold text-orange-400"
+                                        >{{ (attributes.weaponDamage * 100).toFixed(0) }}%</span
+                                    >
+                                </div>
+                                <div class="flex flex-col items-center" v-if="attributes.skillDamage">
+                                    <span class="text-xs text-gray-400 mb-1">技能伤害</span>
+                                    <span class="text-lg font-semibold text-purple-400"
+                                        >{{ (attributes.skillDamage * 100).toFixed(0) }}%</span
+                                    >
+                                </div>
+                                <div class="flex flex-col items-center" v-if="attributes.independentDamageIncrease">
+                                    <span class="text-xs text-gray-400 mb-1">独立增伤</span>
+                                    <span class="text-lg font-semibold text-indigo-400"
+                                        >{{ (attributes.independentDamageIncrease * 100).toFixed(0) }}%</span
+                                    >
+                                </div>
+                                <div class="flex flex-col items-center" v-if="attributes.penetration">
+                                    <span class="text-xs text-gray-400 mb-1">属性穿透</span>
+                                    <span class="text-lg font-semibold text-lime-400"
+                                        >{{ (attributes.penetration * 100).toFixed(0) }}%</span
+                                    >
+                                </div>
+                                <div class="flex flex-col items-center" v-if="attributes.ignoreDefense">
+                                    <span class="text-xs text-gray-400 mb-1">无视防御</span>
+                                    <span class="text-lg font-semibold text-pink-400"
+                                        >{{ (attributes.ignoreDefense * 100).toFixed(0) }}%</span
+                                    >
+                                </div>
                             </div>
-                            <div class="flex flex-col items-center">
-                                <div class="text-xs text-gray-400 mb-1">护盾</div>
-                                <div class="text-lg font-semibold text-blue-400">{{ attributes.shield }}</div>
+                        </div>
+                        <div v-if="weaponAttrs" class="flex flex-col gap-2">
+                            <div class="text-sm font-medium p-2 bg-primary/10 rounded-lg flex items-center gap-2">
+                                <div class="w-3 h-3 rounded-full bg-primary"></div>
+                                武器属性
                             </div>
-                            <div class="flex flex-col items-center">
-                                <div class="text-xs text-gray-400 mb-1">防御</div>
-                                <div class="text-lg font-semibold text-yellow-400">{{ attributes.defense }}</div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <div class="flex flex-col items-center">
+                                    <div class="text-xs text-gray-400 mb-1">攻击</div>
+                                    <div class="text-lg font-semibold text-red-400">{{ weaponAttrs.attack }}</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="text-xs text-gray-400 mb-1">暴击率</div>
+                                    <div class="text-lg font-semibold text-yellow-400">{{ (weaponAttrs.critRate * 100).toFixed(1) }}%</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="text-xs text-gray-400 mb-1">暴击伤害</div>
+                                    <div class="text-lg font-semibold text-yellow-400">
+                                        {{ (weaponAttrs.critDamage * 100).toFixed(1) }}%
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="text-xs text-gray-400 mb-1">触发率</div>
+                                    <div class="text-lg font-semibold text-blue-400">{{ (weaponAttrs.triggerRate * 100).toFixed(1) }}%</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="text-xs text-gray-400 mb-1">攻击速度</div>
+                                    <div class="text-lg font-semibold text-green-400">
+                                        {{ weaponAttrs.attackSpeed.toFixed(1) }}
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="text-xs text-gray-400 mb-1">多重射击</div>
+                                    <div class="text-lg font-semibold text-purple-400">{{ weaponAttrs.multiShot.toFixed(1) }}</div>
+                                </div>
+                                <div v-if="weaponAttrs.damageIncrease" class="flex flex-col items-center">
+                                    <div class="text-xs text-gray-400 mb-1">伤害增加</div>
+                                    <div class="text-lg font-semibold text-cyan-400">
+                                        {{ (weaponAttrs.damageIncrease * 100).toFixed(1) }}%
+                                    </div>
+                                </div>
+                                <div v-if="weaponAttrs.independentDamageIncrease" class="flex flex-col items-center">
+                                    <div class="text-xs text-gray-400 mb-1">独立增伤</div>
+                                    <div class="text-lg font-semibold text-indigo-400">
+                                        {{ (weaponAttrs.independentDamageIncrease * 100).toFixed(1) }}%
+                                    </div>
+                                </div>
+                                <div v-if="weaponAttrs.additionalDamage" class="flex flex-col items-center">
+                                    <div class="text-xs text-gray-400 mb-1">追加伤害</div>
+                                    <div class="text-lg font-semibold text-orange-400">
+                                        {{ (weaponAttrs.additionalDamage * 100).toFixed(1) }}%
+                                    </div>
+                                </div>
                             </div>
-                            <div class="flex flex-col items-center">
-                                <div class="text-xs text-gray-400 mb-1">威力</div>
-                                <div class="text-lg font-semibold text-sky-400">{{ (attributes.power * 100).toFixed(0) }}%</div>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <div class="text-sm font-medium p-2 bg-primary/10 rounded-lg flex items-center gap-2">
+                                <div class="w-3 h-3 rounded-full bg-primary"></div>
+                                {{ charSettings.targetFunction }}
                             </div>
-                            <div class="flex flex-col items-center">
-                                <div class="text-xs text-gray-400 mb-1">耐久</div>
-                                <div class="text-lg font-semibold text-purple-400">{{ (attributes.durability * 100).toFixed(0) }}%</div>
-                            </div>
-                            <div class="flex flex-col items-center">
-                                <div class="text-xs text-gray-400 mb-1">效益</div>
-                                <div class="text-lg font-semibold text-green-400">{{ (attributes.efficiency * 100).toFixed(0) }}%</div>
-                            </div>
-                            <div class="flex flex-col items-center">
-                                <div class="text-xs text-gray-400 mb-1">范围</div>
-                                <div class="text-lg font-semibold text-rose-400">{{ (attributes.range * 100).toFixed(0) }}%</div>
-                            </div>
-                            <div class="flex flex-col items-center" v-if="attributes.boost">
-                                <span class="text-xs text-gray-400 mb-1">昂扬</span>
-                                <span class="text-lg font-semibold text-red-400">{{ (attributes.boost * 100).toFixed(0) }}%</span>
-                            </div>
-                            <div class="flex flex-col items-center" v-if="attributes.desperate">
-                                <span class="text-xs text-gray-400 mb-1">背水</span>
-                                <span class="text-lg font-semibold text-green-400">{{ (attributes.desperate * 100).toFixed(0) }}%</span>
-                            </div>
-                            <div class="flex flex-col items-center" v-if="attributes.damageIncrease">
-                                <span class="text-xs text-gray-400 mb-1">增伤</span>
-                                <span class="text-lg font-semibold text-cyan-400">{{ (attributes.damageIncrease * 100).toFixed(0) }}%</span>
-                            </div>
-                            <div class="flex flex-col items-center" v-if="attributes.weaponDamage">
-                                <span class="text-xs text-gray-400 mb-1">武器伤害</span>
-                                <span class="text-lg font-semibold text-orange-400">{{ (attributes.weaponDamage * 100).toFixed(0) }}%</span>
-                            </div>
-                            <div class="flex flex-col items-center" v-if="attributes.skillDamage">
-                                <span class="text-xs text-gray-400 mb-1">技能伤害</span>
-                                <span class="text-lg font-semibold text-purple-400">{{ (attributes.skillDamage * 100).toFixed(0) }}%</span>
-                            </div>
-                            <div class="flex flex-col items-center" v-if="attributes.independentDamageIncrease">
-                                <span class="text-xs text-gray-400 mb-1">独立增伤</span>
-                                <span class="text-lg font-semibold text-indigo-400"
-                                    >{{ (attributes.independentDamageIncrease * 100).toFixed(0) }}%</span
-                                >
-                            </div>
-                            <div class="flex flex-col items-center" v-if="attributes.penetration">
-                                <span class="text-xs text-gray-400 mb-1">属性穿透</span>
-                                <span class="text-lg font-semibold text-lime-400">{{ (attributes.penetration * 100).toFixed(0) }}%</span>
-                            </div>
-                            <div class="flex flex-col items-center" v-if="attributes.ignoreDefense">
-                                <span class="text-xs text-gray-400 mb-1">无视防御</span>
-                                <span class="text-lg font-semibold text-pink-400">{{ (attributes.ignoreDefense * 100).toFixed(0) }}%</span>
+                            <div class="bg-base-200 rounded-lg p-3 flex-1">
+                                <div class="flex flex-col items-center">
+                                    <div class="text-2xl font-semibold text-primary">{{ Math.round(totalDamage) }}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -629,3 +924,22 @@ const resetConfig = () => {
         </div>
     </div>
 </template>
+<style>
+.list-move, /* 对移动中的元素应用的过渡 */
+.list-enter-active,
+.list-leave-active {
+    transition: all 0.5s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+    opacity: 0;
+    transform: translateX(30px);
+}
+
+/* 确保将离开的元素从布局流中删除
+  以便能够正确地计算移动的动画。 */
+.list-leave-active {
+    position: absolute;
+}
+</style>
