@@ -710,7 +710,9 @@ const importConfig = () => {
                             <div class="flex flex-col items-center">
                                 <div class="size-72 bg-gray-200 rounded-lg mb-3 flex items-center justify-center">
                                     <span class="text-gray-400">
-                                        <img :src="charBuild.char.urlFull" alt="角色头像" class="size-72 object-cover rounded-md" />
+                                        <ImageFallback :src="charBuild.char.url" alt="角色头像" class="size-72 object-cover rounded-md">
+                                            <Icon icon="la:user" class="text-[18rem]" />
+                                        </ImageFallback>
                                     </span>
                                 </div>
                                 <div class="text-center">
@@ -900,7 +902,7 @@ const importConfig = () => {
                         <div class="flex flex-col gap-2">
                             <div class="text-sm font-medium p-2 bg-primary/10 rounded-lg flex items-center gap-2">
                                 <div class="w-3 h-3 rounded-full bg-primary"></div>
-                                {{ charSettings.targetFunction }}
+                                {{ charSettings.baseName }} - {{ charSettings.targetFunction }}
                             </div>
                             <div class="bg-base-200 rounded-lg p-3 flex-1">
                                 <div class="flex flex-col items-center">

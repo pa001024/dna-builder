@@ -1,6 +1,8 @@
 import { createApp } from "vue"
 import "./style.css"
 import "animate.css"
+// @ts-ignore
+import { registerSW } from "virtual:pwa-register"
 import i18next from "i18next"
 import I18NextVue from "i18next-vue"
 // prevent rightclicks
@@ -47,3 +49,8 @@ app.use(createPinia())
         el.onpointerdown = onPointerDown
     })
 app.mount("#app")
+
+// Register Service Worker for offline support
+registerSW({
+    immediate: true,
+})
