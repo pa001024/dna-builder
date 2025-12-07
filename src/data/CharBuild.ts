@@ -338,6 +338,10 @@ export class CharBuild {
         const prefix = weapon.类型
         // 计算各种加成
         let attackBonus = this.getTotalBonus(`${prefix}攻击`, prefix) + this.getTotalBonus(`攻击`, prefix)
+        // 角色精通
+        if (weapon.类别 === this.char.近战 || weapon.类别 === this.char.远程) {
+            attackBonus += 0.2
+        }
         let critRateBonus = this.getTotalBonus(`${prefix}暴击`, prefix) + this.getTotalBonus(`暴击`, prefix)
         let critDamageBonus = this.getTotalBonus(`${prefix}暴伤`, prefix) + this.getTotalBonus(`暴伤`, prefix)
         let triggerRateBonus = this.getTotalBonus(`${prefix}触发`, prefix) + this.getTotalBonus(`触发`, prefix)

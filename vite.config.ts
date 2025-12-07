@@ -4,6 +4,7 @@ import vueJsx from "@vitejs/plugin-vue-jsx"
 import Component from "unplugin-vue-components/vite"
 import RadixVueResolver from "radix-vue/resolver"
 import tailwindcss from "@tailwindcss/vite"
+import { VitePWA } from "vite-plugin-pwa"
 
 // @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST
@@ -23,6 +24,60 @@ export default defineConfig(async () => ({
                 //   prefix: '' // use the prefix option to add Prefix to the imported components
                 // })
             ],
+        }),
+        VitePWA({
+            registerType: "autoUpdate",
+            includeAssets: ["favicon.ico", "apple-touch-icon.png", "masked-icon.svg"],
+            manifest: {
+                name: "DNA Builder",
+                short_name: "DNA Builder",
+                description: "A character builder and damage calculator for Duet Night Abyss",
+                theme_color: "#ffffff",
+                icons: [
+                    {
+                        src: "app-icon.png",
+                        sizes: "192x192",
+                        type: "image/png",
+                    },
+                    {
+                        src: "app-icon.png",
+                        sizes: "512x512",
+                        type: "image/png",
+                    },
+                    {
+                        src: "app-icon.png",
+                        sizes: "512x512",
+                        type: "image/png",
+                        purpose: "any maskable",
+                    },
+                ],
+            },
+            workbox: {
+                runtimeCaching: [
+                    {
+                        urlPattern: /^https:\/\/api\.example\.com\//,
+                        handler: "NetworkFirst",
+                        options: {
+                            cacheName: "api-cache",
+                            expiration: {
+                                maxEntries: 50,
+                                maxAgeSeconds: 60 * 60 * 24, // 1 day
+                            },
+                        },
+                    },
+                    {
+                        urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/,
+                        handler: "CacheFirst",
+                        options: {
+                            cacheName: "image-cache",
+                            expiration: {
+                                maxEntries: 60,
+                                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                            },
+                        },
+                    },
+                ],
+            },
         }),
     ],
 
