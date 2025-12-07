@@ -43,7 +43,6 @@ jobs:
 
             - name: Build
               run: |
-                  cd app
                   npm install
                   npm run tb
 
