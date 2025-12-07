@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue"
+import { computed } from "vue"
 import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon } from "../data/leveled"
 import { CharBuild } from "../data/CharBuild"
 import data from "../data/data.json"
@@ -198,16 +198,6 @@ const toggleBuff = (buff: LeveledBuff) => {
 
 function format100(n100: number, di = 2) {
     return `${+(n100 * 100).toFixed(di)}%`
-}
-
-function formatProp(prop: string, val: any) {
-    if (typeof val !== "number") {
-        return val
-    }
-    if (prop === "攻击范围") {
-        return val
-    }
-    return format100(val)
 }
 
 const charProjectKey = computed(() => `project.${selectedChar.value}`)
