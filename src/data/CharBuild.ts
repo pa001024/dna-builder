@@ -1,4 +1,5 @@
 import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon, LeveledSkillWeapon, LeveledSkill, modMap } from "./leveled"
+import { base36Pad } from "../util"
 
 export interface CharAttr {
     // 基础属性
@@ -39,8 +40,10 @@ export class CharBuild {
     public char: LeveledChar
     public hpPercent: number
     public resonanceGain: number
+    public auraMod?: LeveledMod
     public mods: LeveledMod[]
     public buffs: LeveledBuff[]
+    public dynamicBuffs: LeveledBuff[]
     public meleeWeapon: LeveledWeapon
     public rangedWeapon: LeveledWeapon
     public _baseName = ""
@@ -75,6 +78,7 @@ export class CharBuild {
         char: LeveledChar
         hpPercent: number
         resonanceGain: number
+        auraMod?: LeveledMod
         mods?: LeveledMod[]
         buffs?: LeveledBuff[]
         melee: LeveledWeapon
@@ -90,8 +94,10 @@ export class CharBuild {
         this.char = options.char
         this.hpPercent = Math.max(0, Math.min(1, options.hpPercent))
         this.resonanceGain = options.resonanceGain
+        this.auraMod = options.auraMod
         this.mods = options.mods || []
-        this.buffs = options.buffs || []
+        this.buffs = options.buffs?.filter((v) => !v.code) || []
+        this.dynamicBuffs = options.buffs?.filter((v) => v.code) || []
         this.meleeWeapon = options.melee
         this.rangedWeapon = options.ranged
         this.baseName = options.baseName
@@ -137,6 +143,7 @@ export class CharBuild {
 
         // 计算各种加成
         let attackBonus = this.getTotalBonus("攻击")
+        let attackAdd = this.getTotalBonus("固定攻击")
         let healthBonus = this.getTotalBonus("生命")
         let shieldBonus = this.getTotalBonus("护盾")
         let defenseBonus = this.getTotalBonus("防御")
@@ -163,6 +170,7 @@ export class CharBuild {
         if (props) {
             if (minus) {
                 attackBonus -= this.getTotalBonusSingle(props, "攻击")
+                attackAdd -= this.getTotalBonusSingle(props, "固定攻击")
                 healthBonus -= this.getTotalBonusSingle(props, "生命")
                 shieldBonus -= this.getTotalBonusSingle(props, "护盾")
                 defenseBonus -= this.getTotalBonusSingle(props, "防御")
@@ -183,6 +191,7 @@ export class CharBuild {
                 independentDamageIncrease = (1 + independentDamageIncrease) / (1 + this.getTotalBonusSingle(props, "独立增伤")) - 1
             } else {
                 attackBonus += this.getTotalBonusSingle(props, "攻击")
+                attackAdd += this.getTotalBonusSingle(props, "固定攻击")
                 healthBonus += this.getTotalBonusSingle(props, "生命")
                 shieldBonus += this.getTotalBonusSingle(props, "护盾")
                 defenseBonus += this.getTotalBonusSingle(props, "防御")
@@ -205,7 +214,7 @@ export class CharBuild {
         }
 
         // 计算基础属性
-        let attack = char.基础攻击 * (1 + attackBonus + this.resonanceGain)
+        let attack = char.基础攻击 * (1 + attackBonus + this.resonanceGain) + attackAdd
         let health = char.基础生命 * (1 + healthBonus + this.resonanceGain)
         let shield = char.基础护盾 * (1 + shieldBonus + this.resonanceGain)
         let defense = char.基础防御 * (1 + defenseBonus + this.resonanceGain)
@@ -222,10 +231,10 @@ export class CharBuild {
         attack = Math.round(attack * 100) / 100
 
         // 应用属性上限
-        const clampedEfficiency = Math.min(efficiency, 1.75) // 175%
-        const clampedRange = Math.min(range, 2.8) // 280%
+        efficiency = Math.min(efficiency, 1.75) // 175%
+        range = Math.min(range, 2.8) // 280%
 
-        return {
+        let attrs = {
             // 基础属性
             attack,
             health,
@@ -235,8 +244,8 @@ export class CharBuild {
             // 其他属性
             power,
             durability,
-            efficiency: clampedEfficiency,
-            range: clampedRange,
+            efficiency,
+            range,
             boost,
             desperate,
             damageIncrease,
@@ -247,7 +256,276 @@ export class CharBuild {
             ignoreDefense,
             skillSpeed,
         }
+        if (this.dynamicBuffs.length > 0) {
+            for (const b of this.dynamicBuffs) {
+                if (minus && props!.名称 === b.名称) continue
+                attrs = b.applyDynamicAttr(char, attrs)
+            }
+        }
+        if (!minus && (props as LeveledBuff)?.code) {
+            attrs = (props as LeveledBuff).applyDynamicAttr(char, attrs)
+        }
+
+        return attrs
     }
+    // 计算武器属性
+    public calculateWeaponAttributes(props?: LeveledWeapon | LeveledMod | LeveledBuff, minus = false): CharAttr & { weapon?: WeaponAttr } {
+        const char = this.char
+
+        // 计算各种加成
+        let attackBonus = this.getTotalBonus("攻击")
+        let attackAdd = this.getTotalBonus("固定攻击")
+        let healthBonus = this.getTotalBonus("生命")
+        let shieldBonus = this.getTotalBonus("护盾")
+        let defenseBonus = this.getTotalBonus("防御")
+        let sanityBonus = this.getTotalBonus("神智")
+        let elemDamageBonus = this.getTotalBonus("属性伤")
+
+        // 计算基础值为1的属性
+        let power = 1 + this.getTotalBonus("威力")
+        let durability = 1 + this.getTotalBonus("耐久")
+        let efficiency = 1 + this.getTotalBonus("效益")
+        let range = 1 + this.getTotalBonus("范围")
+
+        // 计算基础值为0的属性
+        let boost = this.getTotalBonus("昂扬")
+        let desperate = this.getTotalBonus("背水")
+        let damageIncrease = this.getTotalBonus("增伤")
+        let weaponDamage = this.getTotalBonus("武器伤害")
+        let skillDamage = this.getTotalBonus("技能伤害")
+        let skillSpeed = this.getTotalBonus("技能速度")
+        let penetration = this.getTotalBonus("属性穿透")
+        let ignoreDefense = this.getTotalBonusMul("无视防御")
+        let independentDamageIncrease = this.getTotalBonusMul("独立增伤")
+
+        if (props) {
+            if (minus) {
+                attackBonus -= this.getTotalBonusSingle(props, "攻击")
+                attackAdd -= this.getTotalBonusSingle(props, "固定攻击")
+                healthBonus -= this.getTotalBonusSingle(props, "生命")
+                shieldBonus -= this.getTotalBonusSingle(props, "护盾")
+                defenseBonus -= this.getTotalBonusSingle(props, "防御")
+                sanityBonus -= this.getTotalBonusSingle(props, "神智")
+                elemDamageBonus -= this.getTotalBonusSingle(props, "属性伤")
+                power -= this.getTotalBonusSingle(props, "威力")
+                durability -= this.getTotalBonusSingle(props, "耐久")
+                efficiency -= this.getTotalBonusSingle(props, "效益")
+                range -= this.getTotalBonusSingle(props, "范围")
+                boost -= this.getTotalBonusSingle(props, "昂扬")
+                desperate -= this.getTotalBonusSingle(props, "背水")
+                damageIncrease -= this.getTotalBonusSingle(props, "增伤")
+                weaponDamage -= this.getTotalBonusSingle(props, "武器伤害")
+                skillDamage -= this.getTotalBonusSingle(props, "技能伤害")
+                skillSpeed -= this.getTotalBonusSingle(props, "技能速度")
+                penetration -= this.getTotalBonusSingle(props, "属性穿透")
+                ignoreDefense = (1 + ignoreDefense) / (1 + this.getTotalBonusSingle(props, "无视防御")) - 1
+                independentDamageIncrease = (1 + independentDamageIncrease) / (1 + this.getTotalBonusSingle(props, "独立增伤")) - 1
+            } else {
+                attackBonus += this.getTotalBonusSingle(props, "攻击")
+                attackAdd += this.getTotalBonusSingle(props, "固定攻击")
+                healthBonus += this.getTotalBonusSingle(props, "生命")
+                shieldBonus += this.getTotalBonusSingle(props, "护盾")
+                defenseBonus += this.getTotalBonusSingle(props, "防御")
+                sanityBonus += this.getTotalBonusSingle(props, "神智")
+                elemDamageBonus += this.getTotalBonusSingle(props, "属性伤")
+                power += this.getTotalBonusSingle(props, "威力")
+                durability += this.getTotalBonusSingle(props, "耐久")
+                efficiency += this.getTotalBonusSingle(props, "效益")
+                range += this.getTotalBonusSingle(props, "范围")
+                boost += this.getTotalBonusSingle(props, "昂扬")
+                desperate += this.getTotalBonusSingle(props, "背水")
+                damageIncrease += this.getTotalBonusSingle(props, "增伤")
+                weaponDamage += this.getTotalBonusSingle(props, "武器伤害")
+                skillDamage += this.getTotalBonusSingle(props, "技能伤害")
+                skillSpeed += this.getTotalBonusSingle(props, "技能速度")
+                penetration += this.getTotalBonusSingle(props, "属性穿透")
+                ignoreDefense = (1 + ignoreDefense) * (1 + this.getTotalBonusSingle(props, "无视防御")) - 1
+                independentDamageIncrease = (1 + independentDamageIncrease) * (1 + this.getTotalBonusSingle(props, "独立增伤")) - 1
+            }
+        }
+
+        // 计算基础属性
+        let attack = char.基础攻击 * (1 + attackBonus + this.resonanceGain) + attackAdd
+        let health = char.基础生命 * (1 + healthBonus + this.resonanceGain)
+        let shield = char.基础护盾 * (1 + shieldBonus + this.resonanceGain)
+        let defense = char.基础防御 * (1 + defenseBonus + this.resonanceGain)
+        let sanity = char.基础神智 * (1 + sanityBonus)
+
+        // 应用属性伤加成
+        attack *= 1 + elemDamageBonus
+
+        // 结果处理
+        health = Math.round(health)
+        shield = Math.round(shield)
+        defense = Math.round(defense)
+        sanity = Math.round(sanity)
+        attack = Math.round(attack * 100) / 100
+
+        // 应用属性上限
+        efficiency = Math.min(efficiency, 1.75) // 175%
+        range = Math.min(range, 2.8) // 280%
+
+        let attrs: CharAttr & { weapon?: WeaponAttr } = {
+            // 基础属性
+            attack,
+            health,
+            shield,
+            defense,
+            sanity,
+            // 其他属性
+            power,
+            durability,
+            efficiency,
+            range,
+            boost,
+            desperate,
+            damageIncrease,
+            weaponDamage,
+            skillDamage,
+            independentDamageIncrease,
+            penetration,
+            ignoreDefense,
+            skillSpeed,
+        }
+
+        const weapon = this.selectedWeapon
+        if (weapon) {
+            const prefix = weapon.类型
+            // 计算各种加成
+            let attackBonus = this.getTotalBonus(`${prefix}攻击`, prefix) + this.getTotalBonus(`攻击`, prefix)
+            // 角色精通
+            if (weapon.类别 === this.char.近战 || weapon.类别 === this.char.远程) {
+                attackBonus += 0.2
+            }
+            let critRateBonus = this.getTotalBonus(`${prefix}暴击`, prefix) + this.getTotalBonus(`暴击`, prefix)
+            let critDamageBonus = this.getTotalBonus(`${prefix}暴伤`, prefix) + this.getTotalBonus(`暴伤`, prefix)
+            let triggerRateBonus = this.getTotalBonus(`${prefix}触发`, prefix) + this.getTotalBonus(`触发`, prefix)
+            let attackSpeedBonus = this.getTotalBonus(`${prefix}攻速`, prefix) + this.getTotalBonus(`攻速`, prefix)
+            let multiShotBonus = this.getTotalBonus(`${prefix}多重`, prefix) + this.getTotalBonus(`多重`, prefix)
+            let damageIncrease = this.getTotalBonus(`${prefix}增伤`, prefix) + this.getTotalBonus(`增伤`, prefix)
+            let additionalDamage = this.getTotalBonus("追加伤害")
+            let independentDamageIncrease = this.getTotalBonusMul("独立增伤", prefix)
+
+            if (prefix.startsWith("同律")) {
+                const lowerPrefix = prefix.substring(2)
+                attackBonus += this.getTotalBonus(`${lowerPrefix}攻击`, lowerPrefix)
+                critRateBonus += this.getTotalBonus(`${lowerPrefix}暴击`, lowerPrefix)
+                critDamageBonus += this.getTotalBonus(`${lowerPrefix}暴伤`, lowerPrefix)
+                triggerRateBonus += this.getTotalBonus(`${lowerPrefix}触发`, lowerPrefix)
+                attackSpeedBonus += this.getTotalBonus(`${lowerPrefix}攻速`, lowerPrefix)
+                damageIncrease += this.getTotalBonus(`${lowerPrefix}增伤`, lowerPrefix)
+                multiShotBonus += this.getTotalBonus(`${lowerPrefix}多重`, lowerPrefix)
+            }
+
+            if (props) {
+                if (minus) {
+                    attackBonus -=
+                        this.getTotalBonusSingle(props, `${prefix}攻击`, prefix) + this.getTotalBonusSingle(props, `攻击`, prefix)
+                    critRateBonus -=
+                        this.getTotalBonusSingle(props, `${prefix}暴击`, prefix) + this.getTotalBonusSingle(props, `暴击`, prefix)
+                    critDamageBonus -=
+                        this.getTotalBonusSingle(props, `${prefix}暴伤`, prefix) + this.getTotalBonusSingle(props, `暴伤`, prefix)
+                    triggerRateBonus -=
+                        this.getTotalBonusSingle(props, `${prefix}触发`, prefix) + this.getTotalBonusSingle(props, `触发`, prefix)
+                    attackSpeedBonus -=
+                        this.getTotalBonusSingle(props, `${prefix}攻速`, prefix) + this.getTotalBonusSingle(props, `攻速`, prefix)
+                    multiShotBonus -=
+                        this.getTotalBonusSingle(props, `${prefix}多重`, prefix) + this.getTotalBonusSingle(props, `多重`, prefix)
+                    damageIncrease -=
+                        this.getTotalBonusSingle(props, `${prefix}增伤`, prefix) + this.getTotalBonusSingle(props, `增伤`, prefix)
+                    additionalDamage -= this.getTotalBonusSingle(props, `追加伤害`, prefix)
+                    independentDamageIncrease = (1 + independentDamageIncrease) / (1 + this.getTotalBonusMul("独立增伤", prefix)) - 1
+
+                    if (prefix.startsWith("同律")) {
+                        const lowerPrefix = prefix.substring(2)
+                        attackBonus -= this.getTotalBonusSingle(props, `${lowerPrefix}攻击`, lowerPrefix)
+                        critRateBonus -= this.getTotalBonusSingle(props, `${lowerPrefix}暴击`, lowerPrefix)
+                        critDamageBonus -= this.getTotalBonusSingle(props, `${lowerPrefix}暴伤`, lowerPrefix)
+                        triggerRateBonus -= this.getTotalBonusSingle(props, `${lowerPrefix}触发`, lowerPrefix)
+                        attackSpeedBonus -= this.getTotalBonusSingle(props, `${lowerPrefix}攻速`, lowerPrefix)
+                        multiShotBonus -= this.getTotalBonusSingle(props, `${lowerPrefix}多重`, lowerPrefix)
+                        damageIncrease -= this.getTotalBonusSingle(props, `${lowerPrefix}增伤`, lowerPrefix)
+                    }
+                } else {
+                    attackBonus +=
+                        this.getTotalBonusSingle(props, `${prefix}攻击`, prefix) + this.getTotalBonusSingle(props, `攻击`, prefix)
+                    critRateBonus +=
+                        this.getTotalBonusSingle(props, `${prefix}暴击`, prefix) + this.getTotalBonusSingle(props, `暴击`, prefix)
+                    critDamageBonus +=
+                        this.getTotalBonusSingle(props, `${prefix}暴伤`, prefix) + this.getTotalBonusSingle(props, `暴伤`, prefix)
+                    triggerRateBonus +=
+                        this.getTotalBonusSingle(props, `${prefix}触发`, prefix) + this.getTotalBonusSingle(props, `触发`, prefix)
+                    attackSpeedBonus +=
+                        this.getTotalBonusSingle(props, `${prefix}攻速`, prefix) + this.getTotalBonusSingle(props, `攻速`, prefix)
+                    multiShotBonus +=
+                        this.getTotalBonusSingle(props, `${prefix}多重`, prefix) + this.getTotalBonusSingle(props, `多重`, prefix)
+                    damageIncrease +=
+                        this.getTotalBonusSingle(props, `${prefix}增伤`, prefix) + this.getTotalBonusSingle(props, `增伤`, prefix)
+                    additionalDamage += this.getTotalBonusSingle(props, `追加伤害`, prefix)
+                    independentDamageIncrease = (1 + independentDamageIncrease) * (1 + this.getTotalBonusMul("独立增伤", prefix)) - 1
+
+                    if (prefix.startsWith("同律")) {
+                        const lowerPrefix = prefix.substring(2)
+                        attackBonus += this.getTotalBonusSingle(props, `${lowerPrefix}攻击`, lowerPrefix)
+                        critRateBonus += this.getTotalBonusSingle(props, `${lowerPrefix}暴击`, lowerPrefix)
+                        critDamageBonus += this.getTotalBonusSingle(props, `${lowerPrefix}暴伤`, lowerPrefix)
+                        triggerRateBonus += this.getTotalBonusSingle(props, `${lowerPrefix}触发`, lowerPrefix)
+                        attackSpeedBonus += this.getTotalBonusSingle(props, `${lowerPrefix}攻速`, lowerPrefix)
+                        multiShotBonus += this.getTotalBonusSingle(props, `${lowerPrefix}多重`, lowerPrefix)
+                        damageIncrease += this.getTotalBonusSingle(props, `${lowerPrefix}增伤`, lowerPrefix)
+                    }
+                }
+            }
+
+            // 计算武器属性
+            let attack = weapon.基础攻击 * (1 + attackBonus)
+            let critRate = weapon.基础暴击 * (1 + critRateBonus)
+            let critDamage = weapon.基础暴伤 * (1 + critDamageBonus)
+            let triggerRate = weapon.基础触发 * (1 + triggerRateBonus)
+            let attackSpeed = 1 + attackSpeedBonus
+            let multiShot = 1 + multiShotBonus
+
+            // 应用武器物理加成
+            const physicalBonus = this.getTotalBonus("物理", prefix)
+            attack *= 1 + physicalBonus
+
+            // 应用属性上限
+            triggerRate = Math.min(triggerRate, 1) // 100%
+
+            // 取整
+            attack = Math.round(attack * 100) / 100
+            critRate = Math.round(critRate * 100) / 100
+            critDamage = Math.round(critDamage * 100) / 100
+            triggerRate = Math.round(triggerRate * 100) / 100
+            attackSpeed = Math.round(attackSpeed * 100) / 100
+            multiShot = Math.round(multiShot * 100) / 100
+            independentDamageIncrease = Math.round(independentDamageIncrease * 1000) / 1000
+
+            let weaponAttrs: WeaponAttr = {
+                attack,
+                critRate,
+                critDamage,
+                triggerRate,
+                attackSpeed,
+                multiShot,
+                damageIncrease,
+                independentDamageIncrease,
+                additionalDamage,
+            }
+            attrs.weapon = weaponAttrs
+        }
+        if (this.dynamicBuffs.length > 0) {
+            for (const b of this.dynamicBuffs) {
+                if (minus && props!.名称 === b.名称) continue
+                attrs = b.applyDynamicAttr(char, attrs, weapon, attrs.weapon)
+            }
+        }
+        if (!minus && (props as LeveledBuff)?.code) {
+            attrs = (props as LeveledBuff).applyDynamicAttr(char, attrs, weapon, attrs.weapon)
+        }
+        return attrs
+    }
+
     // 获取单项目总加成
     public getTotalBonusSingle(props: LeveledWeapon | LeveledMod | LeveledBuff, attribute: string, prefix?: string): number {
         let bonus = 0
@@ -335,128 +613,6 @@ export class CharBuild {
         return bonus - 1
     }
 
-    // 计算武器属性
-    public calculateWeaponAttributes(
-        weapon: LeveledWeapon | LeveledSkillWeapon,
-        props?: LeveledWeapon | LeveledMod | LeveledBuff,
-        minus = false
-    ): WeaponAttr {
-        const prefix = weapon.类型
-        // 计算各种加成
-        let attackBonus = this.getTotalBonus(`${prefix}攻击`, prefix) + this.getTotalBonus(`攻击`, prefix)
-        // 角色精通
-        if (weapon.类别 === this.char.近战 || weapon.类别 === this.char.远程) {
-            attackBonus += 0.2
-        }
-        let critRateBonus = this.getTotalBonus(`${prefix}暴击`, prefix) + this.getTotalBonus(`暴击`, prefix)
-        let critDamageBonus = this.getTotalBonus(`${prefix}暴伤`, prefix) + this.getTotalBonus(`暴伤`, prefix)
-        let triggerRateBonus = this.getTotalBonus(`${prefix}触发`, prefix) + this.getTotalBonus(`触发`, prefix)
-        let attackSpeedBonus = this.getTotalBonus(`${prefix}攻速`, prefix) + this.getTotalBonus(`攻速`, prefix)
-        let multiShotBonus = this.getTotalBonus(`${prefix}多重`, prefix) + this.getTotalBonus(`多重`, prefix)
-        let damageIncrease = this.getTotalBonus(`${prefix}增伤`, prefix) + this.getTotalBonus(`增伤`, prefix)
-        let additionalDamage = this.getTotalBonus("追加伤害")
-        let independentDamageIncrease = this.getTotalBonusMul("独立增伤", prefix)
-
-        if (prefix.startsWith("同律")) {
-            const lowerPrefix = prefix.substring(2)
-            attackBonus += this.getTotalBonus(`${lowerPrefix}攻击`, lowerPrefix)
-            critRateBonus += this.getTotalBonus(`${lowerPrefix}暴击`, lowerPrefix)
-            critDamageBonus += this.getTotalBonus(`${lowerPrefix}暴伤`, lowerPrefix)
-            triggerRateBonus += this.getTotalBonus(`${lowerPrefix}触发`, lowerPrefix)
-            attackSpeedBonus += this.getTotalBonus(`${lowerPrefix}攻速`, lowerPrefix)
-            damageIncrease += this.getTotalBonus(`${lowerPrefix}增伤`, lowerPrefix)
-            multiShotBonus += this.getTotalBonus(`${lowerPrefix}多重`, lowerPrefix)
-        }
-
-        if (props) {
-            if (minus) {
-                attackBonus -= this.getTotalBonusSingle(props, `${prefix}攻击`, prefix) + this.getTotalBonusSingle(props, `攻击`, prefix)
-                critRateBonus -= this.getTotalBonusSingle(props, `${prefix}暴击`, prefix) + this.getTotalBonusSingle(props, `暴击`, prefix)
-                critDamageBonus -=
-                    this.getTotalBonusSingle(props, `${prefix}暴伤`, prefix) + this.getTotalBonusSingle(props, `暴伤`, prefix)
-                triggerRateBonus -=
-                    this.getTotalBonusSingle(props, `${prefix}触发`, prefix) + this.getTotalBonusSingle(props, `触发`, prefix)
-                attackSpeedBonus -=
-                    this.getTotalBonusSingle(props, `${prefix}攻速`, prefix) + this.getTotalBonusSingle(props, `攻速`, prefix)
-                multiShotBonus -= this.getTotalBonusSingle(props, `${prefix}多重`, prefix) + this.getTotalBonusSingle(props, `多重`, prefix)
-                damageIncrease -= this.getTotalBonusSingle(props, `${prefix}增伤`, prefix) + this.getTotalBonusSingle(props, `增伤`, prefix)
-                additionalDamage -= this.getTotalBonusSingle(props, `追加伤害`, prefix)
-                independentDamageIncrease = (1 + independentDamageIncrease) / (1 + this.getTotalBonusMul("独立增伤", prefix)) - 1
-
-                if (prefix.startsWith("同律")) {
-                    const lowerPrefix = prefix.substring(2)
-                    attackBonus -= this.getTotalBonusSingle(props, `${lowerPrefix}攻击`, lowerPrefix)
-                    critRateBonus -= this.getTotalBonusSingle(props, `${lowerPrefix}暴击`, lowerPrefix)
-                    critDamageBonus -= this.getTotalBonusSingle(props, `${lowerPrefix}暴伤`, lowerPrefix)
-                    triggerRateBonus -= this.getTotalBonusSingle(props, `${lowerPrefix}触发`, lowerPrefix)
-                    attackSpeedBonus -= this.getTotalBonusSingle(props, `${lowerPrefix}攻速`, lowerPrefix)
-                    multiShotBonus -= this.getTotalBonusSingle(props, `${lowerPrefix}多重`, lowerPrefix)
-                    damageIncrease -= this.getTotalBonusSingle(props, `${lowerPrefix}增伤`, lowerPrefix)
-                }
-            } else {
-                attackBonus += this.getTotalBonusSingle(props, `${prefix}攻击`, prefix) + this.getTotalBonusSingle(props, `攻击`, prefix)
-                critRateBonus += this.getTotalBonusSingle(props, `${prefix}暴击`, prefix) + this.getTotalBonusSingle(props, `暴击`, prefix)
-                critDamageBonus +=
-                    this.getTotalBonusSingle(props, `${prefix}暴伤`, prefix) + this.getTotalBonusSingle(props, `暴伤`, prefix)
-                triggerRateBonus +=
-                    this.getTotalBonusSingle(props, `${prefix}触发`, prefix) + this.getTotalBonusSingle(props, `触发`, prefix)
-                attackSpeedBonus +=
-                    this.getTotalBonusSingle(props, `${prefix}攻速`, prefix) + this.getTotalBonusSingle(props, `攻速`, prefix)
-                multiShotBonus += this.getTotalBonusSingle(props, `${prefix}多重`, prefix) + this.getTotalBonusSingle(props, `多重`, prefix)
-                damageIncrease += this.getTotalBonusSingle(props, `${prefix}增伤`, prefix) + this.getTotalBonusSingle(props, `增伤`, prefix)
-                additionalDamage += this.getTotalBonusSingle(props, `追加伤害`, prefix)
-                independentDamageIncrease = (1 + independentDamageIncrease) * (1 + this.getTotalBonusMul("独立增伤", prefix)) - 1
-
-                if (prefix.startsWith("同律")) {
-                    const lowerPrefix = prefix.substring(2)
-                    attackBonus += this.getTotalBonusSingle(props, `${lowerPrefix}攻击`, lowerPrefix)
-                    critRateBonus += this.getTotalBonusSingle(props, `${lowerPrefix}暴击`, lowerPrefix)
-                    critDamageBonus += this.getTotalBonusSingle(props, `${lowerPrefix}暴伤`, lowerPrefix)
-                    triggerRateBonus += this.getTotalBonusSingle(props, `${lowerPrefix}触发`, lowerPrefix)
-                    attackSpeedBonus += this.getTotalBonusSingle(props, `${lowerPrefix}攻速`, lowerPrefix)
-                    multiShotBonus += this.getTotalBonusSingle(props, `${lowerPrefix}多重`, lowerPrefix)
-                    damageIncrease += this.getTotalBonusSingle(props, `${lowerPrefix}增伤`, lowerPrefix)
-                }
-            }
-        }
-
-        // 计算武器属性
-        let attack = weapon.基础攻击 * (1 + attackBonus)
-        let critRate = weapon.基础暴击 * (1 + critRateBonus)
-        let critDamage = weapon.基础暴伤 * (1 + critDamageBonus)
-        let triggerRate = weapon.基础触发 * (1 + triggerRateBonus)
-        let attackSpeed = 1 + attackSpeedBonus
-        let multiShot = 1 + multiShotBonus
-
-        // 应用武器物理加成
-        const physicalBonus = this.getTotalBonus("物理", prefix)
-        attack *= 1 + physicalBonus
-
-        // 应用属性上限
-        triggerRate = Math.min(triggerRate, 1) // 100%
-
-        // 取整
-        attack = Math.round(attack * 100) / 100
-        critRate = Math.round(critRate * 100) / 100
-        critDamage = Math.round(critDamage * 100) / 100
-        triggerRate = Math.round(triggerRate * 100) / 100
-        attackSpeed = Math.round(attackSpeed * 100) / 100
-        multiShot = Math.round(multiShot * 100) / 100
-        independentDamageIncrease = Math.round(independentDamageIncrease * 1000) / 1000
-
-        return {
-            attack,
-            critRate,
-            critDamage,
-            triggerRate,
-            attackSpeed,
-            multiShot,
-            damageIncrease,
-            independentDamageIncrease,
-            additionalDamage,
-        }
-    }
-
     // 计算昂扬乘区
     public calculateBoostMultiplier(attrs: ReturnType<typeof this.calculateAttributes>): number {
         const boost = attrs.boost
@@ -537,8 +693,7 @@ export class CharBuild {
 
     // 计算武器伤害
     public calculateWeaponDamage(
-        attrs: ReturnType<typeof this.calculateAttributes>,
-        weaponAttrs: ReturnType<typeof this.calculateWeaponAttributes>,
+        attrs: ReturnType<typeof this.calculateWeaponAttributes>,
         weapon: LeveledWeapon | LeveledSkillWeapon
     ): {
         lowerCritNoTrigger: number
@@ -549,6 +704,7 @@ export class CharBuild {
         higherCritTrigger: number
         expectedDamage: number
     } {
+        const weaponAttrs = attrs.weapon!
         // 计算武器基础伤害
         const weaponAttackMultiplier = weapon.倍率 || 1
         const weaponDamagePhysical = weaponAttackMultiplier * weaponAttrs.attack
@@ -615,9 +771,9 @@ export class CharBuild {
         let dps = damage
         let dpb = damage
         if (weapon) {
-            const weaponAttrs = this.calculateWeaponAttributes(weapon)
-            dps = dpa * weaponAttrs.attackSpeed * weaponAttrs.multiShot
-            dpa = dpa * weaponAttrs.multiShot
+            const { weapon: weaponAttrs } = this.calculateWeaponAttributes()
+            dps = dpa * weaponAttrs!.attackSpeed * weaponAttrs!.multiShot
+            dpa = dpa * weaponAttrs!.multiShot
             dpb = dpb / attrs.damageIncrease
         } else if (skill) {
             dps = dpa * (1 + attrs.skillSpeed)
@@ -685,29 +841,24 @@ export class CharBuild {
     }
 
     /**
-     * 计算属性值
+     * 主计算函数
      * @param props 武器、模组或 buff
-     * @returns 属性值
+     * @returns 目标函数结果
      */
     public calculate(props?: LeveledWeapon | LeveledMod | LeveledBuff, minus = false): number {
         // 查找要计算的武器或技能
         let damage = 0
         let weapon = this.selectedWeapon
-        let skill: LeveledSkill | undefined
-        let bt = this.baseNameTitle
         let bs = this.baseNameSub
-        const attrs = this.calculateAttributes(props, minus)
+        const attrs = this.calculateWeaponAttributes(props, minus)
         if (weapon) {
-            if (bs) weapon.倍率名称 = bs || weapon.默认倍率名称
-            const weaponAttrs = this.calculateWeaponAttributes(weapon, props, minus)
-            damage = this.calculateWeaponDamage(attrs, weaponAttrs, weapon).expectedDamage
+            if (bs) weapon.倍率名称 = bs
+            damage = this.calculateWeaponDamage(attrs, weapon).expectedDamage
             if (weapon.类型.startsWith("同律")) {
                 damage *= attrs.power
             }
         }
-        // 检查技能（从私有属性skills中查找指定技能名称）
-
-        skill = this.skills.find((s) => s.名称 === bt)
+        const skill = this.selectedSkill
         if (skill) {
             skill.子技能名 = bs
             damage = this.calculateSkillDamage(attrs, skill)
@@ -752,5 +903,42 @@ export class CharBuild {
             targetFunction: this.targetFunction,
             skillLevel: this.skills[0].等级,
         })
+    }
+
+    getCode(type = "角色") {
+        const mods = this.mods
+            .filter((v) => v.类型 === type)
+            .map((v) => v.id)
+            .map(base36Pad)
+            .join("")
+            .padEnd(8 * 4, "0")
+        const auraMod = base36Pad(this.auraMod?.id || 0).padEnd(4, "0")
+        const flag = type === "角色" ? "C" : "W"
+        return `${flag}${base36Pad(this.char.id || 0)}${mods}${auraMod}`
+    }
+    codeSwap(ids: number[]) {
+        if (ids.length < 8) return ids
+        // 交换顺序
+        return ids.map((_, i) => ids[[1, 4, 2, 3, 5, 8, 6, 7][i] - 1])
+    }
+    importCode(charCode: string, type = "角色") {
+        let modIds =
+            charCode
+                .slice(5)
+                .match(/.{4}/g)
+                ?.map((v) => parseInt(v.toLowerCase(), 36)) || []
+        if (type === "角色") {
+            if (modIds.length !== 9) {
+                console.warn("导入代码格式错误")
+                return
+            }
+            return { mods: this.codeSwap(modIds.slice(0, 8)), auraMod: modIds[8] }
+        } else {
+            if (modIds.length !== 8) {
+                console.warn("导入代码格式错误")
+                return
+            }
+            return { mods: this.codeSwap(modIds.slice(0, 8)) }
+        }
     }
 }

@@ -3,6 +3,7 @@ import { watch } from "vue"
 import { MATERIALS } from "../api/app"
 import { useSettingStore } from "../store/setting"
 import { env } from "../env"
+import { i18nLanguages } from "../i18n"
 
 const setting = useSettingStore()
 const lightThemes = [
@@ -90,7 +91,7 @@ function capitalize(str: string) {
                             {{ $t("setting.windowTrasnparent") }}
                             <div class="text-xs text-base-content/50">{{ $t("setting.windowTrasnparentTip") }}</div>
                         </span>
-                        <input v-model="setting.windowTrasnparent" type="checkbox" class="toggle toggle-secondary" checked />
+                        <input v-model="setting.windowTrasnparent" type="checkbox" class="toggle toggle-secondary" />
                     </div>
                     <div v-if="env.isApp" class="flex justify-between items-center p-2">
                         <span class="label-text">
@@ -104,6 +105,22 @@ function capitalize(str: string) {
                         >
                             <SelectItem v-for="th in MATERIALS" :key="th" :value="th">
                                 {{ th }}
+                            </SelectItem>
+                        </Select>
+                    </div>
+                    <div class="flex justify-between items-center p-2">
+                        <span class="label-text">
+                            {{ $t("setting.lang") }}
+                        </span>
+
+                        <Select
+                            class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
+                            :model-value="$i18next.language"
+                            @update:model-value="$i18next.changeLanguage($event)"
+                            :placeholder="$t('setting.lang')"
+                        >
+                            <SelectItem v-for="lang in i18nLanguages" :key="lang.code" :value="lang.code">
+                                {{ lang.name }}
                             </SelectItem>
                         </Select>
                     </div>

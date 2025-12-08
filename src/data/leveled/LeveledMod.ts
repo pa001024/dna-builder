@@ -175,34 +175,28 @@ export class LeveledMod implements Mod {
      */
     private updateProperties(): void {
         // 属性值 = 满级属性/(等级上限+1)*(等级+1)
-        // 架势MOD属性不受等级变化
-        if (this.id && this.id > 100000) {
+        // 架势MOD属性耐受等级越高越低
+        if (this.id > 100000) {
             this.耐受 = (this._originalModData as any).耐受 + this._maxLevel - this._等级
-            return
         } else {
             this.耐受 = (this._originalModData as any).耐受 - this._maxLevel + this._等级
         }
 
         LeveledMod.properties.forEach((prop) => {
+            let lv = this._等级
+            // 架势MOD属性不受等级变化
+            if (this.id > 100000) lv = this._maxLevel
             const maxValue = (this._originalModData as any)[prop]
             if (maxValue !== undefined) {
-                const currentValue = (maxValue / (this._maxLevel + 1)) * (this._等级 + 1)
+                let currentValue = (maxValue / (this._maxLevel + 1)) * (lv + 1)
+                if (prop === "神智回复") currentValue = Math.round(currentValue)
                 ;(this as any)[prop] = currentValue
             }
         })
     }
 
     /**
-     * 获取MOD的完整属性信息
-     */
-    getFullProperties(): Mod & { 等级: number } {
-        return {
-            ...this,
-            等级: this._等级,
-        }
-    }
-    /**
-     * 获取MOD的完整属性信息
+     * 获取MOD的属性信息
      */
     getProperties(): Partial<Mod> {
         const properties: Partial<Mod> = {}

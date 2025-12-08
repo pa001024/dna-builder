@@ -10,6 +10,21 @@ export const i18nLanguages = [
         code: "zh-CN",
         alias: ["zh", "zh-Hans", "zh-Hans-CN"],
     },
+    {
+        name: "中文（繁體）",
+        code: "zh-TW",
+        alias: ["zh-Hant", "zh-Hant-TW"],
+    },
+    {
+        name: "日本語",
+        code: "jp",
+        alias: ["ja", "ja-JP"],
+    },
+    {
+        name: "한국어",
+        code: "ko",
+        alias: ["ko-KR"],
+    },
 ]
 
 export function changeLanguage(language: string) {

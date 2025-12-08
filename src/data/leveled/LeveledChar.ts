@@ -5,6 +5,7 @@ import { Char } from "../data-types"
  * LeveledChar类 - 继承Char接口，添加等级属性和动态属性计算
  */
 export class LeveledChar implements Char {
+    id?: number
     // 基础Char属性
     名称: string
     属性: string
@@ -48,6 +49,7 @@ export class LeveledChar implements Char {
         }
 
         // 复制基础属性
+        this.id = charData.id
         this.名称 = charData.名称
         this.属性 = charData.属性
         this.近战 = charData.近战

@@ -8,8 +8,6 @@ export const useSettingStore = defineStore("setting", {
             theme: useLocalStorage("setting_theme", "light"),
             uiScale: useLocalStorage("setting_ui_scale", 1),
             winMaterial: useLocalStorage("setting_win_material", "Unset"),
-            autoCount: useLocalStorage("setting_auto_count", false),
-            minCountInterval: useLocalStorage("setting_min_count_interval", 50),
             windowTrasnparent: useLocalStorage("setting_window_trasnparent", true),
         }
     },

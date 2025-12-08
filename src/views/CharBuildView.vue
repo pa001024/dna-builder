@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed, reactive } from "vue"
 import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon } from "../data/leveled"
 import { CharBuild } from "../data/CharBuild"
 import data from "../data/data.json"
@@ -15,14 +15,21 @@ const modOptions = data.mod.map((mod) => ({
     quality: mod.品质,
     type: mod.类型,
     limit: mod.属性 || mod.限定,
+    ser: mod.系列,
     icon: mod.系列 && ["狮鹫", "百首", "契约者"].includes(mod.系列) ? `/imgs/${mod.属性}${mod.系列}.png` : `/imgs/${mod.系列}系列.png`,
 }))
-const buffOptions = data.buff.map((buff) => ({
-    value: new LeveledBuff(buff.名称),
-    label: buff.名称,
-    description: buff.描述,
-    icon: `/imgs/${buff.名称}.png`, // 可以根据需要添加图标
-}))
+const _buffOptions = reactive(
+    data.buff.map((buff) => ({
+        value: new LeveledBuff(buff.名称),
+        label: buff.名称,
+        limit: buff.限定,
+        description: buff.描述,
+        icon: `/imgs/${buff.名称}.png`, // 可以根据需要添加图标
+    }))
+)
+const buffOptions = computed(() =>
+    _buffOptions.filter((buff) => !buff.limit || buff.limit === selectedChar.value || buff.limit === charBuild.value.char.属性)
+)
 // 近战和远程武器选项
 const meleeWeaponOptions = data.weapon
     .filter((weapon) => weapon.类型 === "近战")
@@ -61,6 +68,7 @@ const defaultCharSettings = {
     rangedWeapon: "剥离",
     rangedWeaponLevel: 80,
     rangedWeaponRefine: 5,
+    auraMod: 31524, // 警惕
     charMods: Array(8).fill(null) as ([number, number] | null)[],
     meleeMods: Array(8).fill(null) as ([number, number] | null)[],
     rangedMods: Array(8).fill(null) as ([number, number] | null)[],
@@ -124,15 +132,14 @@ const baseOptions = computed(() => [
 const attributes = computed(() => charBuild.value.calculateAttributes())
 
 // 计算武器属性
-const weaponAttrs = computed(() =>
-    charBuild.value.selectedWeapon ? charBuild.value.calculateWeaponAttributes(charBuild.value.selectedWeapon) : null
-)
+const weaponAttrs = computed(() => (charBuild.value.selectedWeapon ? charBuild.value.calculateWeaponAttributes().weapon : null))
 // 计算总伤害
 const totalDamage = computed(() => charBuild.value.calculate())
 
 // 更新CharBuild实例
 const updateCharBuild = () => {
     charBuild.value.char = new LeveledChar(selectedChar.value, 80)
+    charBuild.value.auraMod = new LeveledMod(charSettings.value.auraMod)
     // 确保技能存在
     if (!charSettings.value.baseName || !baseOptions.value.some((skill) => skill.value === charSettings.value.baseName)) {
         charSettings.value.baseName = charBuild.value.char.技能[0].名称
@@ -195,9 +202,12 @@ const toggleBuff = (buff: LeveledBuff) => {
     }
     updateCharBuild()
 }
-
-function format100(n100: number, di = 2) {
-    return `${+(n100 * 100).toFixed(di)}%`
+function setBuffLv(buff: LeveledBuff, lv: number) {
+    const index = charSettings.value.buffs.findIndex((v) => v[0] === buff.名称)
+    if (index > -1) {
+        charSettings.value.buffs[index][1] = lv
+    }
+    updateCharBuild()
 }
 
 const charProjectKey = computed(() => `project.${selectedChar.value}`)
@@ -242,6 +252,13 @@ const loadConfig = () => {
     if (project) {
         charSettings.value = cloneDeep(project.charSettings)
         updateCharBuild()
+    }
+}
+
+const reloadCustomBuff = () => {
+    const index = _buffOptions.findIndex((buff) => buff.label === "自定义BUFF")
+    if (index > -1) {
+        _buffOptions[index].value = new LeveledBuff("自定义BUFF")
     }
 }
 </script>
@@ -516,8 +533,8 @@ const loadConfig = () => {
                                 @change="updateCharBuild"
                             >
                                 <SelectItem
-                                    v-for="(hpType, key) in { 生命: 'hp', 护盾: 'shield', 姿态: 'stance', 其他: 'other' }"
-                                    :key="hpType"
+                                    v-for="(key, hpType) in { 生命: 'hp', 护盾: 'shield', 战姿: 'stance' }"
+                                    :key="key"
                                     :value="hpType"
                                 >
                                     {{ $t(`char-build.${key}`) }}
@@ -569,69 +586,79 @@ const loadConfig = () => {
                 </div>
             </div>
 
-            <!-- 角色MOD配置 -->
-            <ModEditer
-                :title="$t('char-build.char_mod_config')"
-                :mods="selectedCharMods"
-                :mod-options="modOptions.filter((m) => m.type === '角色' && (!m.limit || m.limit === charBuild.char.属性))"
-                :char-build="charBuild"
-                @remove-mod="removeMod($event, '角色')"
-                @select-mod="selectMod('角色', $event[0], $event[1])"
-                @level-change="charSettings.charMods[$event[0]]![1] = $event[1]"
-            />
-            <!-- 近战武器MOD配置 -->
-            <ModEditer
-                v-if="charBuild.isMeleeWeapon"
-                :title="$t('char-build.melee_weapon_mod_config')"
-                :mods="selectedMeleeMods"
-                :mod-options="
-                    modOptions.filter(
-                        (m) =>
-                            m.type === '近战' &&
-                            (!m.limit || [charBuild.meleeWeapon.类别, charBuild.meleeWeapon.伤害类型].includes(m.limit))
-                    )
-                "
-                :char-build="charBuild"
-                @remove-mod="removeMod($event, '近战')"
-                @select-mod="selectMod('近战', $event[0], $event[1])"
-                @level-change="charSettings.meleeMods[$event[0]]![1] = $event[1]"
-            />
-            <!-- 远程武器MOD配置 -->
-            <ModEditer
-                v-if="charBuild.isRangedWeapon"
-                :title="$t('char-build.ranged_weapon_mod_config')"
-                :mods="selectedRangedMods"
-                :mod-options="
-                    modOptions.filter(
-                        (m) =>
-                            m.type === '远程' &&
-                            (!m.limit || [charBuild.rangedWeapon.类别, charBuild.rangedWeapon.伤害类型].includes(m.limit))
-                    )
-                "
-                :char-build="charBuild"
-                @remove-mod="removeMod($event, '远程')"
-                @select-mod="selectMod('远程', $event[0], $event[1])"
-                @level-change="charSettings.rangedMods[$event[0]]![1] = $event[1]"
-            />
-            <!-- 同律武器MOD配置 -->
-            <ModEditer
-                v-if="charBuild.skillWeapon && charBuild.isSkillWeapon"
-                :title="$t('char-build.skill_weapon_mod_config')"
-                :mods="selectedSkillWeaponMods"
-                :mod-options="
+            <!-- MOD -->
+            <div id="mod-container">
+                <!-- 角色MOD配置 -->
+                <ModEditer
+                    :title="$t('char-build.char_mod_config')"
+                    :mods="selectedCharMods"
+                    :mod-options="modOptions.filter((m) => m.type === '角色' && (!m.limit || m.limit === charBuild.char.属性))"
+                    :char-build="charBuild"
+                    @remove-mod="removeMod($event, '角色')"
+                    @select-mod="selectMod('角色', $event[0], $event[1])"
+                    @level-change="charSettings.charMods[$event[0]]![1] = $event[1]"
+                    :aura-mod="charSettings.auraMod"
+                    @select-aura-mod="charSettings.auraMod = $event"
+                    type="角色"
+                />
+                <!-- 近战武器MOD配置 -->
+                <ModEditer
+                    v-if="charBuild.isMeleeWeapon"
+                    :title="$t('char-build.melee_weapon_mod_config')"
+                    :mods="selectedMeleeMods"
+                    :mod-options="
+                        modOptions.filter(
+                            (m) =>
+                                m.type === '近战' &&
+                                (!m.limit || [charBuild.meleeWeapon.类别, charBuild.meleeWeapon.伤害类型].includes(m.limit))
+                        )
+                    "
+                    :char-build="charBuild"
+                    @remove-mod="removeMod($event, '近战')"
+                    @select-mod="selectMod('近战', $event[0], $event[1])"
+                    @level-change="charSettings.meleeMods[$event[0]]![1] = $event[1]"
+                    type="近战"
+                />
+                <!-- 远程武器MOD配置 -->
+                <ModEditer
+                    v-if="charBuild.isRangedWeapon"
+                    :title="$t('char-build.ranged_weapon_mod_config')"
+                    :mods="selectedRangedMods"
+                    :mod-options="
+                        modOptions.filter(
+                            (m) =>
+                                m.type === '远程' &&
+                                (!m.limit || [charBuild.rangedWeapon.类别, charBuild.rangedWeapon.伤害类型].includes(m.limit))
+                        )
+                    "
+                    :char-build="charBuild"
+                    @remove-mod="removeMod($event, '远程')"
+                    @select-mod="selectMod('远程', $event[0], $event[1])"
+                    @level-change="charSettings.rangedMods[$event[0]]![1] = $event[1]"
+                    type="远程"
+                />
+                <!-- 同律武器MOD配置 -->
+                <ModEditer
+                    v-if="charBuild.skillWeapon && charBuild.isSkillWeapon"
+                    :title="$t('char-build.skill_weapon_mod_config')"
+                    :mods="selectedSkillWeaponMods"
+                    :mod-options="
                     modOptions.filter(
                         (m) =>
                             m.type === charBuild.skillWeapon!.类型 &&
                             (!m.limit || [charBuild.skillWeapon!.类别, charBuild.skillWeapon!.伤害类型].includes(m.limit))
                     )
                 "
-                :char-build="charBuild"
-                @remove-mod="removeMod($event, '同律')"
-                @select-mod="selectMod('同律', $event[0], $event[1])"
-                @level-change="charSettings.skillWeaponMods[$event[0]]![1] = $event[1]"
-            />
+                    :char-build="charBuild"
+                    @remove-mod="removeMod($event, '同律')"
+                    @select-mod="selectMod('同律', $event[0], $event[1])"
+                    @level-change="charSettings.skillWeaponMods[$event[0]]![1] = $event[1]"
+                    :type="charBuild.skillWeapon!.类型"
+                />
+            </div>
+
             <!-- BUFF列表 -->
-            <div class="bg-base-300 rounded-xl p-4 shadow-lg mb-6">
+            <div id="buff-container" class="bg-base-300 rounded-xl p-4 shadow-lg mb-6">
                 <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-2">
                         <SectionMarker />
@@ -639,75 +666,34 @@ const loadConfig = () => {
                     </div>
                     <div class="text-sm text-gray-400">{{ $t("char-build.selected_count", { count: selectedBuffs.length }) }}</div>
                 </div>
-                <ScrollArea class="h-80 w-full">
-                    <transition-group name="list" tag="div" class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div
-                            v-for="buff in buffOptions.filter((b) => selectedBuffs.some((v) => v.名称 === b.label))"
-                            :key="buff.label"
-                            class="bg-base-200 rounded-lg p-3 cursor-pointer hover:bg-gray-200 transition-colors"
-                            :class="{
-                                'bg-green-100 border border-green-500 hover:bg-green-200': selectedBuffs.some((b) => b.名称 === buff.label),
-                            }"
-                            @click="toggleBuff(buff.value)"
-                        >
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="text-sm font-medium flex items-center gap-1">
-                                    <div class="text-green-500">
-                                        <Icon icon="ri:checkbox-circle-fill" />
-                                    </div>
-                                    {{ buff.label }}
-                                </div>
-                                <div class="text-xs text-gray-400">Lv.{{ buff.value.等级 }}</div>
-                            </div>
-                            <div class="text-xs text-gray-400 mb-2">{{ buff.description }}</div>
-                            <div class="text-xs text-gray-500">
-                                收益:
-                                {{
-                                    format100(
-                                        charBuild.calcIncome(
-                                            buff.value,
-                                            selectedBuffs.some((b) => b.名称 === buff.label)
-                                        )
-                                    )
-                                }}
-                            </div>
-                        </div>
-                        <div
-                            v-for="buff in buffOptions.filter((b) => !selectedBuffs.some((v) => v.名称 === b.label))"
-                            :key="buff.label"
-                            class="bg-base-200 rounded-lg p-3 cursor-pointer hover:bg-gray-200 transition-colors"
-                            :class="{ 'bg-green-300 border border-green-500': selectedBuffs.some((b) => b.名称 === buff.label) }"
-                            @click="toggleBuff(buff.value)"
-                        >
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="text-sm font-medium">{{ buff.label }}</div>
-                                <div class="text-xs text-gray-400">Lv.{{ buff.value.等级 }}</div>
-                            </div>
-                            <div class="text-xs text-gray-400 mb-2">{{ buff.description }}</div>
-                            <div class="text-xs text-gray-500">
-                                收益:
-                                {{
-                                    format100(
-                                        charBuild.calcIncome(
-                                            buff.value,
-                                            selectedBuffs.some((b) => b.名称 === buff.label)
-                                        )
-                                    )
-                                }}
-                            </div>
-                        </div>
-                    </transition-group>
-                </ScrollArea>
+                <BuffEditer
+                    :buff-options="buffOptions"
+                    :selected-buffs="selectedBuffs"
+                    :char-settings="charSettings"
+                    :char-build="charBuild"
+                    @toggle-buff="toggleBuff"
+                    @set-buff-lv="setBuffLv"
+                />
+            </div>
+            <!-- 自定义BUFF -->
+            <div id="custom-buff-container" class="bg-base-300 rounded-xl p-4 shadow-lg mb-6">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <SectionMarker />
+                        <h3 class="text-lg font-semibold">{{ $t("char-build.custom_buff") }}</h3>
+                    </div>
+                </div>
+                <CustomBuffEditor v-if="selectedBuffs.some((v) => v.名称 === '自定义BUFF')" @submit="reloadCustomBuff" />
             </div>
 
             <!-- 装配预览与保存 -->
-            <div class="bg-base-300 rounded-xl p-4 shadow-lg mb-6">
+            <div id="preview-container" class="bg-base-300 rounded-xl p-4 shadow-lg mb-6">
                 <div class="flex items-center gap-2 mb-4">
                     <SectionMarker />
                     <h3 class="text-lg font-semibold">{{ $t("char-build.equipment_preview") }}</h3>
                 </div>
 
-                <div class="flex flex-col gap-4 sm:flex-row">
+                <div class="flex flex-col gap-4 md:flex-row">
                     <!-- 角色信息 -->
                     <div class="bg-base-200 rounded-lg p-3">
                         <div class="flex flex-col justify-center items-center gap-2">

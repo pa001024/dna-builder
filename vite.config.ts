@@ -11,6 +11,12 @@ const host = process.env.TAURI_DEV_HOST
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
+    test: {
+        includeSource: ["src/**/*.{js,ts}"],
+    },
+    define: {
+        "import.meta.vitest": "undefined",
+    },
     plugins: [
         vue(),
         vueJsx(),

@@ -13,9 +13,13 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AudioPlayButton: typeof import('./components/AudioPlayButton.vue')['default']
+    BuffCell: typeof import('./components/BuffCell.vue')['default']
+    BuffEditer: typeof import('./components/BuffEditer.vue')['default']
     CheckAnimationButton: typeof import('./components/CheckAnimationButton.vue')['default']
     ContextMenu: typeof import('./components/contextmenu/ContextMenu.vue')['default']
+    CustomBuffEditor: typeof import('./components/CustomBuffEditor.vue')['default']
     Dialog: typeof import('./components/Dialog.vue')['default']
+    FullTooltip: typeof import('./components/FullTooltip.vue')['default']
     Icon: typeof import('./components/Icon.vue')['default']
     ImageFallback: typeof import('./components/ImageFallback.vue')['default']
     ModEditer: typeof import('./components/ModEditer.vue')['default']
@@ -47,9 +51,13 @@ declare module 'vue' {
 // For TSX support
 declare global {
   const AudioPlayButton: typeof import('./components/AudioPlayButton.vue')['default']
+  const BuffCell: typeof import('./components/BuffCell.vue')['default']
+  const BuffEditer: typeof import('./components/BuffEditer.vue')['default']
   const CheckAnimationButton: typeof import('./components/CheckAnimationButton.vue')['default']
   const ContextMenu: typeof import('./components/contextmenu/ContextMenu.vue')['default']
+  const CustomBuffEditor: typeof import('./components/CustomBuffEditor.vue')['default']
   const Dialog: typeof import('./components/Dialog.vue')['default']
+  const FullTooltip: typeof import('./components/FullTooltip.vue')['default']
   const Icon: typeof import('./components/Icon.vue')['default']
   const ImageFallback: typeof import('./components/ImageFallback.vue')['default']
   const ModEditer: typeof import('./components/ModEditer.vue')['default']
