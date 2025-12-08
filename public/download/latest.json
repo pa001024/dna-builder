@@ -1,11 +1,19 @@
 {
-    "version": "",
-    "notes": "",
-    "pub_date": "",
+    "version": "0.2.0",
+    "notes": "See the assets to download this version and install.",
+    "pub_date": "2025-12-08T17:17:47.327Z",
     "platforms": {
         "windows-x86_64": {
-            "signature": "",
-            "url": ""
+            "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSb0VjVEpEL2pIYUdnK2lxZnNMVk9tNVluZFI3N1dFK1R1U2lFdFcyQ0laVHlnRityZExrRUdoZXNwdnd0ZkZkaWJFaDFpOXlJY1FYUXdtaUFTL0MrUXhrUmx4WVYzc1E0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY1MjE0MjYyCWZpbGU6ZG5hLWJ1aWxkZXJfMC4yLjBfeDY0X3poLUNOLm1zaQozTGpadTRtU0FyeGQ3QlhZc3NZbzl6eUM5L2JOSm90amtKeEFqUTBEOHM4ZzVQTlFvb1pUYzJzYU1RaGowenJVVTRSUmc0WUZZaXQ1SW5ydS9DRE5Edz09Cg==",
+            "url": "https://github.com/pa001024/dna-builder/releases/download/v0.2.0/dna-builder_0.2.0_x64_zh-CN.msi"
+        },
+        "windows-x86_64-msi": {
+            "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSb0VjVEpEL2pIYUdnK2lxZnNMVk9tNVluZFI3N1dFK1R1U2lFdFcyQ0laVHlnRityZExrRUdoZXNwdnd0ZkZkaWJFaDFpOXlJY1FYUXdtaUFTL0MrUXhrUmx4WVYzc1E0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY1MjE0MjYyCWZpbGU6ZG5hLWJ1aWxkZXJfMC4yLjBfeDY0X3poLUNOLm1zaQozTGpadTRtU0FyeGQ3QlhZc3NZbzl6eUM5L2JOSm90amtKeEFqUTBEOHM4ZzVQTlFvb1pUYzJzYU1RaGowenJVVTRSUmc0WUZZaXQ1SW5ydS9DRE5Edz09Cg==",
+            "url": "https://github.com/pa001024/dna-builder/releases/download/v0.2.0/dna-builder_0.2.0_x64_zh-CN.msi"
+        },
+        "windows-x86_64-nsis": {
+            "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSb0VjVEpEL2pIYUtQdkZEcXRuZ0Q3R2JNMmd6MlJOVDRqYjFEUUFPdFRmS3RkTlBnY0o1VUJKWVc2NStLWFltNTgyby9mcUZaOTNzZXhzMFlITHVGM2xwVTBEM1hkbndVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY1MjE0MjYyCWZpbGU6ZG5hLWJ1aWxkZXJfMC4yLjBfeDY0LXNldHVwLmV4ZQpjMUVTZU9VQ1laU3BBQVVCS0R2RFpWTHdkcGg0VDFkbG0yTFJmZXk4YUUvRFFHME9hQ3AzZGdFVHRmVk1xNGhHazZPeWZ6MmplM1diUmhNUzQxUzhEdz09Cg==",
+            "url": "https://github.com/pa001024/dna-builder/releases/download/v0.2.0/dna-builder_0.2.0_x64-setup.exe"
         }
     }
 }
