@@ -22,9 +22,7 @@ export function formatProp(prop: string, val: any): string {
 const propRegex = /神智消耗|神智回复$/
 export function formatSkillProp(prop: string, val: LeveledSkillField) {
     const fmt = propRegex.test(prop) ? String : format100
-    return val.格式
-        ? val.格式.replace(/\{%?\}/g, (v, i) => (v.includes("%") ? format100(i ? val.额外! : val.值) : String(i ? val.额外! : val.值)))
-        : fmt(val.值)
+    return val.格式 ? val.格式.replace(/\{%?\}/g, (v, i) => (v.includes("%") ? format100(i ? val.额外! : val.值) : String(i ? val.额外! : val.值))) : fmt(val.值)
 }
 
 export async function copyText(text: string) {

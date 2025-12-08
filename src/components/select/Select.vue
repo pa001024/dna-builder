@@ -1,15 +1,5 @@
 <script lang="ts" setup>
-import {
-    SelectContent,
-    SelectPortal,
-    SelectRoot,
-    SelectScrollDownButton,
-    SelectScrollUpButton,
-    SelectTrigger,
-    SelectValue,
-    SelectViewport,
-    useForwardPropsEmits,
-} from "radix-vue"
+import { SelectContent, SelectPortal, SelectRoot, SelectScrollDownButton, SelectScrollUpButton, SelectTrigger, SelectValue, SelectViewport, useForwardPropsEmits } from "radix-vue"
 import type { SelectRootEmits, SelectRootProps } from "radix-vue"
 import Icon from "../Icon.vue"
 import { watch } from "vue"
@@ -48,7 +38,7 @@ watch(
     () => props.modelValue,
     (newValue) => {
         emits("change", newValue)
-    }
+    },
 )
 
 const forward = useForwardPropsEmits(props, emits)
@@ -62,9 +52,7 @@ const forward = useForwardPropsEmits(props, emits)
         </SelectTrigger>
 
         <SelectPortal>
-            <SelectContent
-                class="z-50 overflow-hidden bg-base-100 border-base-content/20 border rounded-btn shadow-xl animate-slideDownAndFade"
-            >
+            <SelectContent class="z-50 overflow-hidden bg-base-100 border-base-content/20 border rounded-btn shadow-xl animate-slideDownAndFade">
                 <SelectScrollUpButton class="flex items-center justify-center cursor-default h-4">
                     <Icon icon="radix-icons:chevron-up" />
                 </SelectScrollUpButton>

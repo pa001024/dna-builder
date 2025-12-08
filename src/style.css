@@ -25,7 +25,9 @@ body {
 
 @font-face {
     font-family: "Mona Sans";
-    src: url("/fonts/Mona-Sans.woff2") format("woff2 supports variations"), url("/fonts/Mona-Sans.woff2") format("woff2-variations");
+    src:
+        url("/fonts/Mona-Sans.woff2") format("woff2 supports variations"),
+        url("/fonts/Mona-Sans.woff2") format("woff2-variations");
     font-weight: 200 900;
     font-stretch: 75% 125%;
 }
@@ -36,8 +38,19 @@ body {
     -moz-osx-font-smoothing: grayscale;
     font-size: calc(16px * var(--uiscale));
     transition: font-size 0.1s ease-in-out;
-    font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "SourceHanSansCN", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
-        "Fira Sans", "Droid Sans", "Helvetica Neue";
+    font-family:
+        "Mona Sans",
+        -apple-system,
+        BlinkMacSystemFont,
+        "SourceHanSansCN",
+        "Segoe UI",
+        "Roboto",
+        "Oxygen",
+        "Ubuntu",
+        "Cantarell",
+        "Fira Sans",
+        "Droid Sans",
+        "Helvetica Neue";
 }
 #app {
     width: 100%;

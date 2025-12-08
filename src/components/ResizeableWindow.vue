@@ -164,18 +164,10 @@ if (env.isApp) {
                                 <Icon bold icon="ri:pushpin-fill" v-else />
                             </button>
                         </Tooltip>
-                        <button
-                            class="btn btn-ghost btn-sm btn-square disabled:bg-transparent"
-                            :disabled="!minimizable"
-                            @click="handleMinimize"
-                        >
+                        <button class="btn btn-ghost btn-sm btn-square disabled:bg-transparent" :disabled="!minimizable" @click="handleMinimize">
                             <Icon bold icon="codicon:chrome-minimize" />
                         </button>
-                        <button
-                            class="btn btn-ghost btn-sm btn-square disabled:bg-transparent"
-                            :disabled="!maximizable"
-                            @click="handleMaximize"
-                        >
+                        <button class="btn btn-ghost btn-sm btn-square disabled:bg-transparent" :disabled="!maximizable" @click="handleMaximize">
                             <Icon bold icon="codicon:chrome-maximize" v-if="!maximized" />
                             <Icon bold icon="codicon:chrome-restore" v-else />
                         </button>

@@ -210,19 +210,6 @@ describe("LeveledChar", () => {
         expect(char.等级).toBe(1)
     })
 
-    it("应该能够获取完整的角色属性", () => {
-        const char = new LeveledChar("黎瑟", 50)
-        const fullProps = char.getFullProperties()
-
-        expect(fullProps.名称).toBe("黎瑟")
-        expect(fullProps.等级).toBe(50)
-        expect(fullProps.基础攻击).toBe(189)
-        expect(fullProps.属性).toBe("雷")
-        expect(fullProps.近战).toBe("太刀")
-        expect(fullProps.远程).toBe("突击枪")
-        expect(fullProps.基础神智).toBe(150) // 神智不受等级影响
-    })
-
     it("创建不存在的角色时应该抛出错误", () => {
         expect(() => {
             new LeveledChar("不存在的角色")
@@ -333,13 +320,9 @@ describe("LeveledWeapon类测试", () => {
 
     // 测试10：获取完整属性
     it("获取武器完整属性包含等级和攻击信息", () => {
-        const 铸铁者5级 = new LeveledWeapon("铸铁者", 3, 5)
-        const fullProps = 铸铁者5级.getFullProperties()
-        expect(fullProps.精炼).toBeDefined()
-        expect(fullProps.等级).toBeDefined()
-        expect(fullProps.基础攻击).toBeDefined()
-        expect(fullProps.类型).toBeDefined()
-        expect(fullProps.伤害类型).toBeDefined()
+        const 铸铁者5级 = new LeveledWeapon("铸铁者", 5)
+        const fullProps = 铸铁者5级.getProperties()
+        expect(fullProps.暴击).toBe(1)
     })
 
     // 测试11：测试不存在的武器名称

@@ -1,7 +1,7 @@
 {
     "name": "dna-builder",
     "private": true,
-    "version": "0.2.0",
+    "version": "0.2.1",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -12,7 +12,10 @@
         "tb": "tauri build",
         "dd": "tauri dev",
         "test": "vitest run",
-        "coverage": "vitest run --coverage"
+        "coverage": "vitest run --coverage",
+        "prepare": "husky",
+        "format": "prettier --write \"src/**/*.{vue,ts,js,json,css}\"",
+        "ver": "node .husky/update-version.js"
     },
     "dependencies": {
         "@tauri-apps/api": "^2",
@@ -39,6 +42,8 @@
         "@vitejs/plugin-vue": "^5.2.1",
         "@vitejs/plugin-vue-jsx": "^5.1.2",
         "daisyui": "^5.5.5",
+        "husky": "^9.1.7",
+        "prettier": "^3.7.4",
         "tailwindcss": "^4.1.17",
         "typescript": "~5.6.2",
         "unplugin-vue-components": "^30.0.0",

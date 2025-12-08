@@ -76,7 +76,6 @@ onMounted(() => {
         el.innerHTML = model.value
     }
 })
-
 </script>
 
 <template>

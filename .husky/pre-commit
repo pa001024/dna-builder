@@ -1,0 +1,12 @@
+# 更新版本号
+node .husky/update-version.js
+
+# 格式化代码
+npm run format
+
+# 暂存修改的版本文件
+git add package.json
+git add src-tauri/tauri.conf.json
+
+# 运行测试（如果需要可以注释掉）
+# npm run lint

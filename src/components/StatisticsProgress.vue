@@ -19,7 +19,7 @@ onMounted(() => {
                 onUpdate: () => {
                     if (elm.value) elm.value.textContent = ~~gsap.getProperty(elm.value, "--value") + "%"
                 },
-            }
+            },
         )
 })
 </script>
