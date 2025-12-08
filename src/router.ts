@@ -1,4 +1,4 @@
-import { RouteRecordRaw, createWebHashHistory, createRouter } from "vue-router"
+import { RouteRecordRaw, createWebHashHistory, createRouter, createWebHistory } from "vue-router"
 
 import Home from "./views/Home.vue"
 import Setting from "./views/Setting.vue"
@@ -29,6 +29,7 @@ const routes: readonly RouteRecordRaw[] = [
 ]
 
 export const router = createRouter({
-    history: createWebHashHistory(),
+    // edgeone.dev 域名下使用 history 模式，其他域名下使用 hash 模式
+    history: location.host.endsWith("edgeone.dev") ? createWebHistory() : createWebHashHistory(),
     routes,
 })

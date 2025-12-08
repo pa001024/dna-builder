@@ -20,7 +20,7 @@ function incrementPatchVersion(version) {
 }
 
 // 更新版本号
-const newVersion = version || incrementPatchVersion(packageJson.version)
+const newVersion = version || packageJson.version // incrementPatchVersion(packageJson.version)
 packageJson.version = newVersion
 tauriConf.version = newVersion
 
