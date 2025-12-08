@@ -4,6 +4,7 @@ import { MATERIALS } from "../api/app"
 import { useSettingStore } from "../store/setting"
 import { env } from "../env"
 import { i18nLanguages } from "../i18n"
+import { useTranslation } from "i18next-vue"
 
 const setting = useSettingStore()
 const lightThemes = [
@@ -51,6 +52,11 @@ watch(
 // 首字母大写
 function capitalize(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
+const { t } = useTranslation()
+function resetStorage() {
+    if (confirm(t("setting.resetConfirm"))) localStorage.clear()
 }
 </script>
 
@@ -145,6 +151,20 @@ function capitalize(str: string) {
                                 >
                             </div>
                         </div>
+                    </div>
+                </div>
+            </article>
+
+            <article>
+                <h2 class="text-sm font-bold m-2">{{ $t("setting.other") }}</h2>
+                <div class="bg-base-100 p-2 rounded-lg">
+                    <div class="flex justify-between items-center p-2">
+                        <span class="label-text">
+                            {{ $t("setting.reset") }}
+                            <div class="text-xs text-base-content/50">{{ $t("setting.resetTip") }}</div>
+                        </span>
+
+                        <div class="btn btn-secondary w-40" @click="resetStorage">{{ $t("setting.confirm") }}</div>
                     </div>
                 </div>
             </article>

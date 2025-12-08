@@ -19,7 +19,12 @@
     "uiScale": "UI縮放",
     "windowTrasnparentTip": "視窗和表面顯示半透明",
     "winMaterial": "視窗材質",
-    "lang": "語言"
+    "lang": "語言",
+    "confirm": "確認",
+    "other": "其他設置",
+    "reset": "重置所有設置",
+    "resetConfirm": "確認重置所有設置嗎？",
+    "resetTip": "如果頁面出錯可以嘗試重置"
   },
   "char-build": {
     "title": "構築",

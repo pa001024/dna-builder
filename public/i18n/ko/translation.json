@@ -19,7 +19,12 @@
     "uiScale": "UI 크기 조정",
     "windowTrasnparentTip": "창과 표면에 반투명 표시",
     "winMaterial": "창 재질",
-    "lang": "언어"
+    "lang": "언어",
+    "confirm": "확인하다",
+    "other": "기타 설정",
+    "reset": "모든 설정 재설정",
+    "resetConfirm": "모든 설정을 재설정하시겠습니까?",
+    "resetTip": "페이지에 오류가 있으면 재설정해 보세요."
   },
   "char-build": {
     "title": "구축",
