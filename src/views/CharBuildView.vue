@@ -676,14 +676,18 @@ const reloadCustomBuff = () => {
                 />
             </div>
             <!-- 自定义BUFF -->
-            <div id="custom-buff-container" class="bg-base-300 rounded-xl p-4 shadow-lg mb-6">
+            <div
+                id="custom-buff-container"
+                class="bg-base-300 rounded-xl p-4 shadow-lg mb-6"
+                v-if="selectedBuffs.some((v) => v.名称 === '自定义BUFF')"
+            >
                 <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-2">
                         <SectionMarker />
                         <h3 class="text-lg font-semibold">{{ $t("char-build.custom_buff") }}</h3>
                     </div>
                 </div>
-                <CustomBuffEditor v-if="selectedBuffs.some((v) => v.名称 === '自定义BUFF')" @submit="reloadCustomBuff" />
+                <CustomBuffEditor @submit="reloadCustomBuff" />
             </div>
 
             <!-- 装配预览与保存 -->
