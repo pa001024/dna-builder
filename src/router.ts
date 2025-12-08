@@ -30,6 +30,6 @@ const routes: readonly RouteRecordRaw[] = [
 
 export const router = createRouter({
     // edgeone.dev 域名下使用 history 模式，其他域名下使用 hash 模式
-    history: location.host.endsWith("edgeone.dev") ? createWebHistory() : createWebHashHistory(),
+    history: location.host.endsWith("edgeone.dev") || location.host.endsWith("xn--chq26veyq.icu") ? createWebHistory() : createWebHashHistory(),
     routes,
 })
