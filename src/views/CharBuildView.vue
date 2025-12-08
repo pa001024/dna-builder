@@ -237,18 +237,20 @@ const saveConfig = () => {
 }
 
 const resetConfig = () => {
-    // 实现重置配置功能
-    console.log("重置配置")
+    charSettings.value.hpPercent = 1
+    charSettings.value.resonanceGain = 0
+    charSettings.value.enemyType = "small"
+    charSettings.value.enemyLevel = 80
+    charSettings.value.enemyResistance = 0
+    charSettings.value.enemyHpType = "生命"
+    charSettings.value.targetFunction = "伤害"
     charSettings.value.charMods = Array(8).fill(null)
     charSettings.value.meleeMods = Array(8).fill(null)
     charSettings.value.rangedMods = Array(8).fill(null)
     charSettings.value.skillWeaponMods = Array(4).fill(null)
 }
-
 // 导入配置
 const loadConfig = () => {
-    // 实现导入配置功能
-    console.log("导入配置")
     const project = charProject.value.projects.find((project) => project.name === charProject.value.selected)
     if (project) {
         charSettings.value = cloneDeep(project.charSettings)
@@ -355,13 +357,14 @@ const reloadCustomBuff = () => {
                 <!-- 技能选择 -->
                 <FullTooltip side="bottom">
                     <template #tooltip>
-                        <div class="flex flex-col">
+                        <div v-if="charBuild.selectedSkill" class="flex flex-col">
+                            <div class="text-md text-neutral-500 p-2">{{ charBuild.selectedSkill!.类型 }}</div>
                             <div
-                                v-for="(val, prop) in charBuild.selectedSkill?.字段"
+                                v-for="(val, prop) in charBuild.selectedSkill!.字段"
                                 :key="prop"
                                 class="flex flex-col group hover:bg-base-200 rounded-md p-2"
                             >
-                                <div class="flex justify-between items-center gap-2 text-sm">
+                                <div class="flex justify-between items-center gap-4 text-sm">
                                     <div class="text-xs text-neutral-500">{{ val.名称 }}</div>
                                     <div class="font-medium text-primary">
                                         {{ formatSkillProp(val.名称, val) }}
@@ -369,7 +372,7 @@ const reloadCustomBuff = () => {
                                 </div>
                                 <div
                                     v-if="val.属性影响"
-                                    class="justify-between items-center gap-2 text-sm flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
+                                    class="justify-between items-center gap-4 text-sm flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
                                 >
                                     <div class="text-xs text-neutral-500">属性影响</div>
                                     <div class="text-xs ml-auto font-medium text-neutral-500">技能{{ val.属性影响 }}</div>
@@ -685,7 +688,7 @@ const reloadCustomBuff = () => {
                     @remove-mod="removeMod($event, '同律')"
                     @select-mod="selectMod('同律', $event[0], $event[1])"
                     @level-change="charSettings.skillWeaponMods[$event[0]]![1] = $event[1]"
-                    :type="charBuild.skillWeapon!.类型"
+                    type="同律"
                 />
             </div>
 

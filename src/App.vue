@@ -158,7 +158,9 @@ if (env.isApp) {
             <transition name="slide-right">
                 <KeepAlive v-if="route.meta.keepAlive">
                     <Suspense>
-                        <component :is="Component" />
+                        <ErrorBoundary>
+                            <component :is="Component" />
+                        </ErrorBoundary>
                         <template #fallback>
                             <div class="w-full h-full flex justify-center items-center">
                                 <span class="loading loading-spinner loading-md"></span>
