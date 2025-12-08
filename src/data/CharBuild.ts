@@ -906,18 +906,22 @@ export class CharBuild {
     }
 
     getCode(type = "角色") {
-        const mods = this.mods
-            .filter((v) => v.类型 === type)
-            .map((v) => v.id)
+        const slots = type === "同律" ? 4 : 8
+        const ids = this.mods.filter((v) => v.类型 === type).map((v) => v.id)
+        const mods = this.codeSwapR(ids, slots)
             .map(base36Pad)
             .join("")
-            .padEnd(8 * 4, "0")
+            .padEnd(slots * 4, "0")
         const auraMod = base36Pad(this.auraMod?.id || 0).padEnd(4, "0")
         const flag = type === "角色" ? "C" : "W"
         return `${flag}${base36Pad(this.char.id || 0)}${mods}${auraMod}`
     }
+    codeSwapR(ids: number[], len = 8) {
+        const rst = Array(len).fill(0)
+        ids.map((v, i) => (rst[[1, 4, 2, 3, 5, 8, 6, 7][i] - 1] = v))
+        return rst
+    }
     codeSwap(ids: number[]) {
-        if (ids.length < 8) return ids
         // 交换顺序
         return ids.map((_, i) => ids[[1, 4, 2, 3, 5, 8, 6, 7][i] - 1])
     }
@@ -934,7 +938,7 @@ export class CharBuild {
             }
             return { mods: this.codeSwap(modIds.slice(0, 8)), auraMod: modIds[8] }
         } else {
-            if (modIds.length !== 8) {
+            if (modIds.length < 4) {
                 console.warn("导入代码格式错误")
                 return
             }

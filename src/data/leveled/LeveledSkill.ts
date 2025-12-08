@@ -36,7 +36,9 @@ export class LeveledSkill implements Skill {
         // 设置技能等级（如果提供），否则设为10
         this.等级 = 等级 || 10
         this.字段 = []
-        this.子技能 = uniq(this.skillData.字段.map((field) => field.名称.match(/\[(.+?)\]/)?.[1] || "").filter((name) => name !== ""))
+        this.子技能 = uniq(this.skillData.字段.map((field) => field.名称.match(/\[(.+?)\]/)?.[1] || "")).filter(
+            (name) => name !== "" && this.skillData.字段.some((field) => field.名称.includes(name) && field.名称.includes("伤害"))
+        )
 
         // 更新属性
         this.updateProperties()

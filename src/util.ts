@@ -19,8 +19,9 @@ export function formatProp(prop: string, val: any): string {
     if (numKeys.has(prop)) return val > 0 ? `+${val}` : `${val}`
     return format100r(val, 1)
 }
+const propRegex = /神智消耗|神智回复$/
 export function formatSkillProp(prop: string, val: LeveledSkillField) {
-    const fmt = numKeys.has(prop) ? String : format100
+    const fmt = propRegex.test(prop) ? String : format100
     return val.格式
         ? val.格式.replace(/\{%?\}/g, (v, i) => (v.includes("%") ? format100(i ? val.额外! : val.值) : String(i ? val.额外! : val.值)))
         : fmt(val.值)

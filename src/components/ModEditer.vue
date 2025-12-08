@@ -121,14 +121,9 @@ async function handleImportCode() {
     if (charCode) {
         const result = props.charBuild.importCode(charCode, props.type)
         if (result) {
-            emit("selectMod", [0, result.mods[0]])
-            emit("selectMod", [1, result.mods[1]])
-            emit("selectMod", [2, result.mods[2]])
-            emit("selectMod", [3, result.mods[3]])
-            emit("selectMod", [4, result.mods[4]])
-            emit("selectMod", [5, result.mods[5]])
-            emit("selectMod", [6, result.mods[6]])
-            emit("selectMod", [7, result.mods[7]])
+            for (let i = 0; i < result.mods.length; i++) {
+                if (result.mods[i]) emit("selectMod", [i, result.mods[i]])
+            }
             if (result.auraMod) {
                 emit("selectAuraMod", result.auraMod)
             }

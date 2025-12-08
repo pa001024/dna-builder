@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { formatProp } from "../util"
-
 withDefaults(
     defineProps<{
         props: Record<string, any>
