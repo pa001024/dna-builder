@@ -32,6 +32,7 @@ jobs:
               uses: actions/setup-node@v4
               with:
                   node-version: lts/*
+                  cache: "yarn"
 
             - name: install Rust stable
               uses: dtolnay/rust-toolchain@stable
@@ -47,17 +48,35 @@ jobs:
               # webkitgtk 4.0 is for Tauri v1 - webkitgtk 4.1 is for Tauri v2.
               # You can remove the one that doesn't apply to your app to speed up the workflow a bit.
 
+            - name: Rust cache
+              uses: swatinem/rust-cache@v2
+              with:
+                  workspaces: "./src-tauri -> target"
+
             - name: install frontend dependencies
               run: yarn install # change this to npm, pnpm or bun depending on which one you use.
 
-            - uses: tauri-apps/tauri-action@v0
+            - uses: tauri-apps/tauri-action@v1
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
-                  projectPath: .
                   tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
                   releaseName: "App v__VERSION__"
                   releaseBody: "See the assets to download this version and install."
                   releaseDraft: true
                   prerelease: false
                   args: ${{ matrix.args }}
+
+            - name: Add summary
+              if: success() && github.event_name != 'pull_request'
+              shell: pwsh
+              run: |
+                  $summary = "
+                  > [!SUCCESS]
+                  > 发布成功
+
+                  > [!TIP]
+                  > [下载其他版本](https://github.com/pa001024/dna-builder/releases/latest/) 下载最新的稳定版本
+                  "
+
+                  echo $summary >> $Env:GITHUB_STEP_SUMMARY
