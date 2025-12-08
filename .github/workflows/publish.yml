@@ -69,7 +69,13 @@ jobs:
               with:
                   tagName: ${{ github.ref_name }} # the action automatically replaces \_\_VERSION\_\_ with the app version.
                   releaseName: "Duet Night Abyss Builder v__VERSION__"
-                  releaseBody: "See the assets to download this version and install."
+                  releaseBody: "
+                      **Full Changelog**: https://github.com/pa001024/dna-builder/commits/v__VERSION__
+
+                      > [!TIP]
+                      >  Github 请在下方下载
+                      > 夸克网盘链接：https://pan.quark.cn/s/1419bbc8aa2d
+                      "
                   releaseDraft: true
                   prerelease: false
                   args: ${{ matrix.args }}
