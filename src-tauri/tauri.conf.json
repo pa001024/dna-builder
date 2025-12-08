@@ -41,7 +41,10 @@
     "plugins": {
         "updater": {
             "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY4QzdGODBGQzlDNDExNjgKUldSb0VjVEpEL2pIYU1WamtyaWJvaGowZkllVDJtR1dkUjBjNmhzd3hSYk9MdTJUZjQxb2IyMDkK",
-            "endpoints": ["https://dna-builder.edgeone.dev/download/latest.json"],
+            "endpoints": [
+                "https://github.com/pa001024/dna-builder/releases/latest/download/latest.json",
+                "https://dna-builder.edgeone.dev/download/latest.json"
+            ],
             "dialog": false,
             "windows": {
                 "installMode": "passive"
