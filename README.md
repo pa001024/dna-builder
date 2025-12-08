@@ -13,39 +13,39 @@ DNA Builder 是一个用于游戏角色构建和伤害计算的工具，帮助�
 
 支持 PWA( Progressive Web App ), 可以在浏览器中安装为应用, 无需下载安装
 
--   **EdgeOne**：[https://dna-builder.edgeone.dev/](https://dna-builder.edgeone.dev/)
--   **Vercel(国内访问不了)**：[https://dna-builder.vercel.app/](https://dna-builder.vercel.app/)
+- **EdgeOne**：[https://dna-builder.edgeone.dev/](https://dna-builder.edgeone.dev/)
+- **Vercel(国内访问不了)**：[https://dna-builder.vercel.app/](https://dna-builder.vercel.app/)
 
 ## 桌面应用
 
--   **Windows**：[https://github.com/pa001024/dna-builder/releases/latest](https://github.com/pa001024/dna-builder/releases/latest)
--   **无法运行**? 请确保已安装 [Microsoft Edge WebView2](https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/)。
+- **Windows**：[https://github.com/pa001024/dna-builder/releases/latest](https://github.com/pa001024/dna-builder/releases/latest)
+- **无法运行**? 请确保已安装 [Microsoft Edge WebView2](https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/)。
 
 ## 功能特点
 
--   🎮 **角色构建系统**：支持角色属性、技能、武器和 MOD 配置
--   📊 **伤害计算引擎**：精确计算技能伤害和武器伤害期望
--   ⚙️ **多种计算模式**：支持伤害 (DPA)、每秒伤害 (DPS)、每神智伤害 (DPAPM) 等多种目标函数
--   🎨 **直观界面**：友好的用户界面，方便快速配置和查看结果
--   🔄 **实时计算**：配置变化时实时更新计算结果
+- 🎮 **角色构建系统**：支持角色属性、技能、武器和 MOD 配置
+- 📊 **伤害计算引擎**：精确计算技能伤害和武器伤害期望
+- ⚙️ **多种计算模式**：支持伤害 (DPA)、每秒伤害 (DPS)、每神智伤害 (DPAPM) 等多种目标函数
+- 🎨 **直观界面**：友好的用户界面，方便快速配置和查看结果
+- 🔄 **实时计算**：配置变化时实时更新计算结果
 
 ## 技术栈
 
--   **前端框架**：Vue 3
--   **构建工具**：Vite
--   **编程语言**：TypeScript
--   **UI 组件库** Tailwind CSS + daisyui + radix-vue
--   **桌面应用**：Tauri
+- **前端框架**：Vue 3
+- **构建工具**：Vite
+- **编程语言**：TypeScript
+- **UI 组件库** Tailwind CSS + daisyui + radix-vue
+- **桌面应用**：Tauri
 
 ## 多语言支持
 
 目前仅界面支持翻译, MOD 武器等不支持
 
--   **中文(简体/繁体)**：默认语言
--   **英文**
--   **日本語**：(机翻)
--   **한국어**：(机翻)
--   **其他语言**：欢迎贡献翻译
+- **中文(简体/繁体)**：默认语言
+- **英文**
+- **日本語**：(机翻)
+- **한국어**：(机翻)
+- **其他语言**：欢迎贡献翻译
 
 ## 安装和运行
 
@@ -53,23 +53,23 @@ DNA Builder 是一个用于游戏角色构建和伤害计算的工具，帮助�
 
 ```bash
 # 安装依赖
-yarn install
+pnpm install
 
 # 启动开发服务器
-yarn dev
+pnpm dev
 
 # 构建生产版本
-yarn build
+pnpm build
 ```
 
 ### 桌面应用
 
 ```bash
 # 开发模式运行桌面应用
-yarn tauri dev
+pnpm tauri dev
 
 # 构建桌面应用
-yarn tauri build
+pnpm tauri build
 ```
 
 ## 项目结构
@@ -98,30 +98,30 @@ dna-builder/
 
 ### 角色构建
 
--   **角色选择**：选择游戏中的角色
--   **等级配置**：设置角色等级
--   **技能选择**：配置角色技能和等级
--   **武器装备**：选择近战和远程武器
--   **MOD 配置**：装备和管理 MOD
--   **BUFF 设置**：添加和配置 BUFF
+- **角色选择**：选择游戏中的角色
+- **等级配置**：设置角色等级
+- **技能选择**：配置角色技能和等级
+- **武器装备**：选择近战和远程武器
+- **MOD 配置**：装备和管理 MOD
+- **BUFF 设置**：添加和配置 BUFF
 
 ### 伤害计算
 
--   **属性计算**：计算角色的基础属性和战斗属性
--   **技能伤害**：精确计算技能的伤害期望
--   **武器伤害**：计算武器的单次伤害和触发效果
--   **多种目标函数**：
-    -   伤害 (DPA)：单次攻击/技能的伤害期望
-    -   每秒伤害 (DPS)：单位时间内的伤害期望
-    -   每神智伤害 (DPAPM)：消耗单位神智的伤害期望
-    -   其他进阶目标函数
+- **属性计算**：计算角色的基础属性和战斗属性
+- **技能伤害**：精确计算技能的伤害期望
+- **武器伤害**：计算武器的单次伤害和触发效果
+- **多种目标函数**：
+    - 伤害 (DPA)：单次攻击/技能的伤害期望
+    - 每秒伤害 (DPS)：单位时间内的伤害期望
+    - 每神智伤害 (DPAPM)：消耗单位神智的伤害期望
+    - 其他进阶目标函数
 
 ### 敌方配置
 
--   **敌方类型**：小型、大型、首领
--   **敌方等级**：设置敌方等级
--   **敌方抗性**：配置敌方抗性
--   **敌方血量类型**：生命、护盾、战姿
+- **敌方类型**：小型、大型、首领
+- **敌方等级**：设置敌方等级
+- **敌方抗性**：配置敌方抗性
+- **敌方血量类型**：生命、护盾、战姿
 
 ## 使用示例
 
@@ -161,15 +161,15 @@ const damage = cb.calculate() // 获取计算结果
 
 ### 基础属性
 
--   攻击、生命、护盾、防御受等级影响
--   神智属性为固定值
--   所有属性都可以通过武器、MOD 和 BUFF 获得加成
+- 攻击、生命、护盾、防御受等级影响
+- 神智属性为固定值
+- 所有属性都可以通过武器、MOD 和 BUFF 获得加成
 
 ### 战斗属性
 
--   威力、耐久、效益、范围起始值为 1
--   其他属性起始值为 0
--   部分属性有上限限制
+- 威力、耐久、效益、范围起始值为 1
+- 其他属性起始值为 0
+- 部分属性有上限限制
 
 ### 伤害计算
 
@@ -197,4 +197,4 @@ MIT License
 
 如有问题或建议，请通过以下方式联系：
 
--   Issue：在 GitHub 仓库提交 Issue
+- Issue：在 GitHub 仓库提交 Issue
