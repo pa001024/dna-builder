@@ -6,7 +6,7 @@ interface BuffSettings {
     buffs: [string, number][]
 }
 
-const props = defineProps<{
+defineProps<{
     buffOptions: any[]
     selectedBuffs: LeveledBuff[]
     charSettings: BuffSettings
