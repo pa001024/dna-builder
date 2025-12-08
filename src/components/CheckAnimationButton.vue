@@ -10,7 +10,7 @@ async function check_animation(el: any) {
             duration: 0.3,
             ease: "power2.out",
             "--v": "-100%",
-        }
+        },
     )
     gsap.to(el, { delay: 2, duration: 0.3, ease: "power2.in", "--v": "100%" })
 }

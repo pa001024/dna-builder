@@ -7,7 +7,7 @@ withDefaults(
     }>(),
     {
         side: "top",
-    }
+    },
 )
 </script>
 <template>

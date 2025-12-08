@@ -26,11 +26,9 @@ const _buffOptions = reactive(
         limit: buff.限定,
         description: buff.描述,
         icon: `/imgs/${buff.名称}.png`, // 可以根据需要添加图标
-    }))
+    })),
 )
-const buffOptions = computed(() =>
-    _buffOptions.filter((buff) => !buff.limit || buff.limit === selectedChar.value || buff.limit === charBuild.value.char.属性)
-)
+const buffOptions = computed(() => _buffOptions.filter((buff) => !buff.limit || buff.limit === selectedChar.value || buff.limit === charBuild.value.char.属性))
 // 近战和远程武器选项
 const meleeWeaponOptions = data.weapon
     .filter((weapon) => weapon.类型 === "近战")
@@ -95,16 +93,8 @@ const charBuild = computed(
                 ...selectedSkillWeaponMods.value.filter((mod) => mod !== null),
             ] as LeveledMod[],
             buffs: selectedBuffs.value,
-            melee: new LeveledWeapon(
-                charSettings.value.meleeWeapon,
-                charSettings.value.meleeWeaponRefine,
-                charSettings.value.meleeWeaponLevel
-            ),
-            ranged: new LeveledWeapon(
-                charSettings.value.rangedWeapon,
-                charSettings.value.rangedWeaponRefine,
-                charSettings.value.rangedWeaponLevel
-            ),
+            melee: new LeveledWeapon(charSettings.value.meleeWeapon, charSettings.value.meleeWeaponRefine, charSettings.value.meleeWeaponLevel),
+            ranged: new LeveledWeapon(charSettings.value.rangedWeapon, charSettings.value.rangedWeaponRefine, charSettings.value.rangedWeaponLevel),
             baseName: charSettings.value.baseName,
             hpPercent: charSettings.value.hpPercent,
             resonanceGain: charSettings.value.resonanceGain,
@@ -113,14 +103,15 @@ const charBuild = computed(
             enemyResistance: charSettings.value.enemyResistance,
             enemyHpType: charSettings.value.enemyHpType,
             targetFunction: charSettings.value.targetFunction,
-        })
+        }),
 )
 
 const baseOptions = computed(() => [
-    ...[
-        ...LeveledWeapon.getBaseNamesWithName(charSettings.value.meleeWeapon),
-        ...LeveledWeapon.getBaseNamesWithName(charSettings.value.rangedWeapon),
-    ].map((base) => ({ value: base, label: base, type: "武器" })),
+    ...[...LeveledWeapon.getBaseNamesWithName(charSettings.value.meleeWeapon), ...LeveledWeapon.getBaseNamesWithName(charSettings.value.rangedWeapon)].map((base) => ({
+        value: base,
+        label: base,
+        type: "武器",
+    })),
     ...(charBuild.value.char.同律武器 ? LeveledWeapon.getBaseNamesWithName(charBuild.value.char.同律武器) : []).map((base) => ({
         value: base,
         label: base,
@@ -145,16 +136,8 @@ const updateCharBuild = () => {
     if (!charSettings.value.baseName || !baseOptions.value.some((skill) => skill.value === charSettings.value.baseName)) {
         charSettings.value.baseName = charBuild.value.char.技能[0].名称
     }
-    charBuild.value.meleeWeapon = new LeveledWeapon(
-        charSettings.value.meleeWeapon,
-        charSettings.value.meleeWeaponRefine,
-        charSettings.value.meleeWeaponLevel
-    )
-    charBuild.value.rangedWeapon = new LeveledWeapon(
-        charSettings.value.rangedWeapon,
-        charSettings.value.rangedWeaponRefine,
-        charSettings.value.rangedWeaponLevel
-    )
+    charBuild.value.meleeWeapon = new LeveledWeapon(charSettings.value.meleeWeapon, charSettings.value.meleeWeaponRefine, charSettings.value.meleeWeaponLevel)
+    charBuild.value.rangedWeapon = new LeveledWeapon(charSettings.value.rangedWeapon, charSettings.value.rangedWeaponRefine, charSettings.value.rangedWeaponLevel)
     charBuild.value.buffs = selectedBuffs.value.filter((buff) => buff !== null) as LeveledBuff[]
     charBuild.value.mods = [
         ...selectedCharMods.value.filter((mod) => mod !== null),
@@ -298,11 +281,7 @@ const reloadCustomBuff = () => {
                         <div class="relative flex items-center gap-2">
                             <div class="flex-1">
                                 <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.character") }}</div>
-                                <Select
-                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                    v-model="selectedChar"
-                                    @change="updateCharBuild"
-                                >
+                                <Select class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap" v-model="selectedChar" @change="updateCharBuild">
                                     <template v-for="charWithElm in groupBy(charOptions, 'elm')" :key="charWithElm[0].elm">
                                         <SelectLabel class="p-2 text-sm font-semibold text-primary">
                                             {{ charWithElm[0].elm }}
@@ -317,11 +296,7 @@ const reloadCustomBuff = () => {
                             </div>
                             <div class="flex-1">
                                 <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.level") }}</div>
-                                <Select
-                                    class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                    v-model="charSettings.charLevel"
-                                    @change="updateCharBuild"
-                                >
+                                <Select class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap" v-model="charSettings.charLevel" @change="updateCharBuild">
                                     <SelectItem v-for="lv in [1, 10, 20, 30, 40, 50, 60, 70, 80]" :key="lv" :value="lv">
                                         {{ lv }}
                                     </SelectItem>
@@ -334,19 +309,7 @@ const reloadCustomBuff = () => {
                                     v-model="charSettings.targetFunction"
                                     @change="updateCharBuild"
                                 >
-                                    <SelectItem
-                                        v-for="fn in [
-                                            '伤害',
-                                            '弹片伤害',
-                                            '每秒伤害',
-                                            '每神智伤害',
-                                            '每持续神智伤害',
-                                            '每神智每秒伤害',
-                                            '每持续神智每秒伤害',
-                                        ]"
-                                        :key="fn"
-                                        :value="fn"
-                                    >
+                                    <SelectItem v-for="fn in ['伤害', '弹片伤害', '每秒伤害', '每神智伤害', '每持续神智伤害', '每神智每秒伤害', '每持续神智每秒伤害']" :key="fn" :value="fn">
                                         {{ fn }}
                                     </SelectItem>
                                 </Select>
@@ -359,21 +322,14 @@ const reloadCustomBuff = () => {
                     <template #tooltip>
                         <div v-if="charBuild.selectedSkill" class="flex flex-col">
                             <div class="text-md text-neutral-500 p-2">{{ charBuild.selectedSkill!.类型 }}</div>
-                            <div
-                                v-for="(val, prop) in charBuild.selectedSkill!.字段"
-                                :key="prop"
-                                class="flex flex-col group hover:bg-base-200 rounded-md p-2"
-                            >
+                            <div v-for="(val, prop) in charBuild.selectedSkill!.字段" :key="prop" class="flex flex-col group hover:bg-base-200 rounded-md p-2">
                                 <div class="flex justify-between items-center gap-4 text-sm">
                                     <div class="text-xs text-neutral-500">{{ val.名称 }}</div>
                                     <div class="font-medium text-primary">
                                         {{ formatSkillProp(val.名称, val) }}
                                     </div>
                                 </div>
-                                <div
-                                    v-if="val.属性影响"
-                                    class="justify-between items-center gap-4 text-sm flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
-                                >
+                                <div v-if="val.属性影响" class="justify-between items-center gap-4 text-sm flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300">
                                     <div class="text-xs text-neutral-500">属性影响</div>
                                     <div class="text-xs ml-auto font-medium text-neutral-500">技能{{ val.属性影响 }}</div>
                                 </div>
@@ -538,11 +494,7 @@ const reloadCustomBuff = () => {
                     <div class="relative flex items-center gap-2">
                         <div class="flex-1">
                             <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.enemy_type") }}</div>
-                            <Select
-                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.enemyType"
-                                @change="updateCharBuild"
-                            >
+                            <Select class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap" v-model="charSettings.enemyType" @change="updateCharBuild">
                                 <SelectItem v-for="enemy in ['small', 'large', 'boss']" :key="enemy" :value="enemy">
                                     {{ $t(`char-build.${enemy}`) }}
                                 </SelectItem>
@@ -550,11 +502,7 @@ const reloadCustomBuff = () => {
                         </div>
                         <div class="flex-1">
                             <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.level") }}</div>
-                            <Select
-                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.enemyLevel"
-                                @change="updateCharBuild"
-                            >
+                            <Select class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap" v-model="charSettings.enemyLevel" @change="updateCharBuild">
                                 <SelectItem v-for="lv in 36" :key="lv" :value="lv * 5">
                                     {{ lv * 5 }}
                                 </SelectItem>
@@ -567,11 +515,7 @@ const reloadCustomBuff = () => {
                                 v-model="charSettings.enemyHpType"
                                 @change="updateCharBuild"
                             >
-                                <SelectItem
-                                    v-for="(key, hpType) in { 生命: 'hp', 护盾: 'shield', 战姿: 'stance' }"
-                                    :key="key"
-                                    :value="hpType"
-                                >
+                                <SelectItem v-for="(key, hpType) in { 生命: 'hp', 护盾: 'shield', 战姿: 'stance' }" :key="key" :value="hpType">
                                     {{ $t(`char-build.${key}`) }}
                                 </SelectItem>
                             </Select>
@@ -589,11 +533,7 @@ const reloadCustomBuff = () => {
                     <div class="relative flex items-center gap-2">
                         <div class="flex-1">
                             <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.hp_percent") }}</div>
-                            <Select
-                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.hpPercent"
-                                @change="updateCharBuild"
-                            >
+                            <Select class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap" v-model="charSettings.hpPercent" @change="updateCharBuild">
                                 <SelectItem v-for="hp in [0.01, 0.25, 0.5, 0.75, 1]" :key="hp" :value="hp"> {{ hp * 100 }}% </SelectItem>
                             </Select>
                         </div>
@@ -641,13 +581,7 @@ const reloadCustomBuff = () => {
                     v-if="charBuild.isMeleeWeapon"
                     :title="$t('char-build.melee_weapon_mod_config')"
                     :mods="selectedMeleeMods"
-                    :mod-options="
-                        modOptions.filter(
-                            (m) =>
-                                m.type === '近战' &&
-                                (!m.limit || [charBuild.meleeWeapon.类别, charBuild.meleeWeapon.伤害类型].includes(m.limit))
-                        )
-                    "
+                    :mod-options="modOptions.filter((m) => m.type === '近战' && (!m.limit || [charBuild.meleeWeapon.类别, charBuild.meleeWeapon.伤害类型].includes(m.limit)))"
                     :char-build="charBuild"
                     @remove-mod="removeMod($event, '近战')"
                     @select-mod="selectMod('近战', $event[0], $event[1])"
@@ -659,13 +593,7 @@ const reloadCustomBuff = () => {
                     v-if="charBuild.isRangedWeapon"
                     :title="$t('char-build.ranged_weapon_mod_config')"
                     :mods="selectedRangedMods"
-                    :mod-options="
-                        modOptions.filter(
-                            (m) =>
-                                m.type === '远程' &&
-                                (!m.limit || [charBuild.rangedWeapon.类别, charBuild.rangedWeapon.伤害类型].includes(m.limit))
-                        )
-                    "
+                    :mod-options="modOptions.filter((m) => m.type === '远程' && (!m.limit || [charBuild.rangedWeapon.类别, charBuild.rangedWeapon.伤害类型].includes(m.limit)))"
                     :char-build="charBuild"
                     @remove-mod="removeMod($event, '远程')"
                     @select-mod="selectMod('远程', $event[0], $event[1])"
@@ -677,13 +605,7 @@ const reloadCustomBuff = () => {
                     v-if="charBuild.skillWeapon && charBuild.isSkillWeapon"
                     :title="$t('char-build.skill_weapon_mod_config')"
                     :mods="selectedSkillWeaponMods"
-                    :mod-options="
-                    modOptions.filter(
-                        (m) =>
-                            m.type === charBuild.skillWeapon!.类型 &&
-                            (!m.limit || [charBuild.skillWeapon!.类别, charBuild.skillWeapon!.伤害类型].includes(m.limit))
-                    )
-                "
+                    :mod-options="modOptions.filter((m) => m.type === charBuild.skillWeapon!.类型 && (!m.limit || [charBuild.skillWeapon!.类别, charBuild.skillWeapon!.伤害类型].includes(m.limit)))"
                     :char-build="charBuild"
                     @remove-mod="removeMod($event, '同律')"
                     @select-mod="selectMod('同律', $event[0], $event[1])"
@@ -701,21 +623,10 @@ const reloadCustomBuff = () => {
                     </div>
                     <div class="text-sm text-gray-400">{{ $t("char-build.selected_count", { count: selectedBuffs.length }) }}</div>
                 </div>
-                <BuffEditer
-                    :buff-options="buffOptions"
-                    :selected-buffs="selectedBuffs"
-                    :char-settings="charSettings"
-                    :char-build="charBuild"
-                    @toggle-buff="toggleBuff"
-                    @set-buff-lv="setBuffLv"
-                />
+                <BuffEditer :buff-options="buffOptions" :selected-buffs="selectedBuffs" :char-settings="charSettings" :char-build="charBuild" @toggle-buff="toggleBuff" @set-buff-lv="setBuffLv" />
             </div>
             <!-- 自定义BUFF -->
-            <div
-                id="custom-buff-container"
-                class="bg-base-300 rounded-xl p-4 shadow-lg mb-6"
-                v-if="selectedBuffs.some((v) => v.名称 === '自定义BUFF')"
-            >
+            <div id="custom-buff-container" class="bg-base-300 rounded-xl p-4 shadow-lg mb-6" v-if="selectedBuffs.some((v) => v.名称 === '自定义BUFF')">
                 <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-2">
                         <SectionMarker />
@@ -755,11 +666,7 @@ const reloadCustomBuff = () => {
                                 <div class="flex items-center gap-2">
                                     <div class="size-16 rounded-lg mb-2 flex items-center justify-center">
                                         <span class="text-gray-400">
-                                            <img
-                                                :src="charBuild.meleeWeapon.url"
-                                                alt="近战武器"
-                                                class="w-full h-full object-cover rounded-md"
-                                            />
+                                            <img :src="charBuild.meleeWeapon.url" alt="近战武器" class="w-full h-full object-cover rounded-md" />
                                         </span>
                                     </div>
                                     <div class="text-left">
@@ -772,11 +679,7 @@ const reloadCustomBuff = () => {
                                 <div class="flex items-center gap-2">
                                     <div class="size-16 rounded-lg mb-2 flex items-center justify-center">
                                         <span class="text-gray-400">
-                                            <img
-                                                :src="charBuild.rangedWeapon.url"
-                                                alt="远程武器"
-                                                class="w-full h-full object-cover rounded-md"
-                                            />
+                                            <img :src="charBuild.rangedWeapon.url" alt="远程武器" class="w-full h-full object-cover rounded-md" />
                                         </span>
                                     </div>
                                     <div class="text-left">
@@ -839,39 +742,27 @@ const reloadCustomBuff = () => {
                                 </div>
                                 <div class="flex flex-col items-center" v-if="attributes.damageIncrease">
                                     <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.damage_increase") }}</span>
-                                    <span class="text-lg font-semibold text-cyan-400"
-                                        >{{ (attributes.damageIncrease * 100).toFixed(0) }}%</span
-                                    >
+                                    <span class="text-lg font-semibold text-cyan-400">{{ (attributes.damageIncrease * 100).toFixed(0) }}%</span>
                                 </div>
                                 <div class="flex flex-col items-center" v-if="attributes.weaponDamage">
                                     <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.weapon_damage") }}</span>
-                                    <span class="text-lg font-semibold text-orange-400"
-                                        >{{ (attributes.weaponDamage * 100).toFixed(0) }}%</span
-                                    >
+                                    <span class="text-lg font-semibold text-orange-400">{{ (attributes.weaponDamage * 100).toFixed(0) }}%</span>
                                 </div>
                                 <div class="flex flex-col items-center" v-if="attributes.skillDamage">
                                     <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.skill_damage") }}</span>
-                                    <span class="text-lg font-semibold text-purple-400"
-                                        >{{ (attributes.skillDamage * 100).toFixed(0) }}%</span
-                                    >
+                                    <span class="text-lg font-semibold text-purple-400">{{ (attributes.skillDamage * 100).toFixed(0) }}%</span>
                                 </div>
                                 <div class="flex flex-col items-center" v-if="attributes.independentDamageIncrease">
                                     <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.independent_damage_increase") }}</span>
-                                    <span class="text-lg font-semibold text-indigo-400"
-                                        >{{ (attributes.independentDamageIncrease * 100).toFixed(0) }}%</span
-                                    >
+                                    <span class="text-lg font-semibold text-indigo-400">{{ (attributes.independentDamageIncrease * 100).toFixed(0) }}%</span>
                                 </div>
                                 <div class="flex flex-col items-center" v-if="attributes.penetration">
                                     <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.attribute_penetration") }}</span>
-                                    <span class="text-lg font-semibold text-lime-400"
-                                        >{{ (attributes.penetration * 100).toFixed(0) }}%</span
-                                    >
+                                    <span class="text-lg font-semibold text-lime-400">{{ (attributes.penetration * 100).toFixed(0) }}%</span>
                                 </div>
                                 <div class="flex flex-col items-center" v-if="attributes.ignoreDefense">
                                     <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.ignore_defense") }}</span>
-                                    <span class="text-lg font-semibold text-pink-400"
-                                        >{{ (attributes.ignoreDefense * 100).toFixed(0) }}%</span
-                                    >
+                                    <span class="text-lg font-semibold text-pink-400">{{ (attributes.ignoreDefense * 100).toFixed(0) }}%</span>
                                 </div>
                             </div>
                         </div>
@@ -891,9 +782,7 @@ const reloadCustomBuff = () => {
                                 </div>
                                 <div class="flex flex-col items-center">
                                     <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.crit_damage") }}</div>
-                                    <div class="text-lg font-semibold text-yellow-400">
-                                        {{ (weaponAttrs.critDamage * 100).toFixed(1) }}%
-                                    </div>
+                                    <div class="text-lg font-semibold text-yellow-400">{{ (weaponAttrs.critDamage * 100).toFixed(1) }}%</div>
                                 </div>
                                 <div class="flex flex-col items-center">
                                     <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.trigger_rate") }}</div>
@@ -911,21 +800,15 @@ const reloadCustomBuff = () => {
                                 </div>
                                 <div v-if="weaponAttrs.damageIncrease" class="flex flex-col items-center">
                                     <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.damage_boost") }}</div>
-                                    <div class="text-lg font-semibold text-cyan-400">
-                                        {{ (weaponAttrs.damageIncrease * 100).toFixed(1) }}%
-                                    </div>
+                                    <div class="text-lg font-semibold text-cyan-400">{{ (weaponAttrs.damageIncrease * 100).toFixed(1) }}%</div>
                                 </div>
                                 <div v-if="weaponAttrs.independentDamageIncrease" class="flex flex-col items-center">
                                     <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.independent_damage_increase") }}</div>
-                                    <div class="text-lg font-semibold text-indigo-400">
-                                        {{ (weaponAttrs.independentDamageIncrease * 100).toFixed(1) }}%
-                                    </div>
+                                    <div class="text-lg font-semibold text-indigo-400">{{ (weaponAttrs.independentDamageIncrease * 100).toFixed(1) }}%</div>
                                 </div>
                                 <div v-if="weaponAttrs.additionalDamage" class="flex flex-col items-center">
                                     <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.additional_damage") }}</div>
-                                    <div class="text-lg font-semibold text-orange-400">
-                                        {{ (weaponAttrs.additionalDamage * 100).toFixed(1) }}%
-                                    </div>
+                                    <div class="text-lg font-semibold text-orange-400">{{ (weaponAttrs.additionalDamage * 100).toFixed(1) }}%</div>
                                 </div>
                             </div>
                         </div>

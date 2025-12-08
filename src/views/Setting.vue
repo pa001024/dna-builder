@@ -46,7 +46,7 @@ const darkThemes = [
 
 watch(
     () => setting.winMaterial,
-    (v) => setting.setWinMaterial(v)
+    (v) => setting.setWinMaterial(v),
 )
 
 // 首字母大写
@@ -68,11 +68,7 @@ function resetStorage() {
                 <div class="bg-base-100 p-2 rounded-lg">
                     <div class="flex justify-between items-center p-2">
                         <span class="label-text">{{ $t("setting.theme") }}</span>
-                        <Select
-                            class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
-                            v-model="setting.theme"
-                            :placeholder="$t('setting.theme')"
-                        >
+                        <Select class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40" v-model="setting.theme" :placeholder="$t('setting.theme')">
                             <SelectLabel class="p-2 text-sm font-semibold text-primary">
                                 {{ $t("setting.lightTheme") }}
                             </SelectLabel>
@@ -143,12 +139,7 @@ function resetStorage() {
                                 step="0.1"
                             />
                             <div class="w-full flex justify-between text-xs px-1">
-                                <span
-                                    :class="{ 'text-secondary': setting.uiScale.toFixed(1) === (0.7 + i / 10).toFixed(1) }"
-                                    v-for="i in 8"
-                                    :key="i"
-                                    >{{ (0.7 + i / 10).toFixed(1) }}</span
-                                >
+                                <span :class="{ 'text-secondary': setting.uiScale.toFixed(1) === (0.7 + i / 10).toFixed(1) }" v-for="i in 8" :key="i">{{ (0.7 + i / 10).toFixed(1) }}</span>
                             </div>
                         </div>
                     </div>

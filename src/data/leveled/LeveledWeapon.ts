@@ -33,9 +33,7 @@ export class LeveledWeapon implements Weapon {
     // 精炼等级上限（目前武器精炼等级上限固定为5）
     private _maxRefineLevel: number = 5
     // 武器等级对应的基础攻击倍数（1,10,20,30,40,50,60,70,80级）
-    private static _levelAttackMultipliers: number[] = [
-        0.079666848, 0.206300923, 0.302118414, 0.413724425, 0.529132718, 0.682636248, 0.813579576, 1,
-    ]
+    private static _levelAttackMultipliers: number[] = [0.079666848, 0.206300923, 0.302118414, 0.413724425, 0.529132718, 0.682636248, 0.813579576, 1]
 
     /**
      * 构造函数
@@ -64,6 +62,7 @@ export class LeveledWeapon implements Weapon {
         this.基础暴击 = weaponData.基础暴击
         this.基础暴伤 = weaponData.基础暴伤
         this.基础触发 = weaponData.基础触发
+        if (weaponData.弹道类型) this.弹道类型 = weaponData.弹道类型
 
         // 初始化倍率相关属性为undefined
         this.弹片数 = undefined
@@ -209,23 +208,7 @@ export class LeveledWeapon implements Weapon {
             this.段数 = undefined
         }
     }
-    static properties = [
-        "耐久",
-        "生命",
-        "暴击",
-        "攻速",
-        "暴伤",
-        "范围",
-        "攻击",
-        "背水",
-        "威力",
-        "防御",
-        "触发",
-        "攻击范围",
-        "技能伤害",
-        "武器伤害",
-        "多重",
-    ] as const
+    static properties = ["耐久", "生命", "暴击", "攻速", "暴伤", "范围", "攻击", "背水", "威力", "防御", "触发", "攻击范围", "技能伤害", "武器伤害", "多重"] as const
     /**
      * 根据等级和精炼更新武器属性
      * 基础攻击受等级影响，其他属性受精炼影响

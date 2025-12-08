@@ -34,14 +34,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
                     </div>
                     <div class="text-xs text-gray-400" v-if="buff.dx">
                         Lv.
-                        <NumberInput
-                            v-if="selected"
-                            :model-value="lv"
-                            @update:model-value="setBuffLv(buff, $event)"
-                            :min="buff.lx"
-                            :max="buff.mx"
-                            class="w-8 text-center"
-                        />
+                        <NumberInput v-if="selected" :model-value="lv" @update:model-value="setBuffLv(buff, $event)" :min="buff.lx" :max="buff.mx" class="w-8 text-center" />
                         <span v-else>{{ lv }}</span>
                     </div>
                 </div>

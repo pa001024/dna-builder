@@ -28,7 +28,11 @@ export class LeveledSkill implements Skill {
      * @param 技能名称 技能的名称
      * @param 等级 技能等级（可选，默认为10）
      */
-    constructor(public skillData: Skill, 等级?: number, public 子技能名?: string) {
+    constructor(
+        public skillData: Skill,
+        等级?: number,
+        public 子技能名?: string,
+    ) {
         // 设置基础属性
         this.名称 = skillData.名称
         this.类型 = skillData.类型
@@ -37,7 +41,7 @@ export class LeveledSkill implements Skill {
         this.等级 = 等级 || 10
         this.字段 = []
         this.子技能 = uniq(this.skillData.字段.map((field) => field.名称.match(/\[(.+?)\]/)?.[1] || "")).filter(
-            (name) => name !== "" && this.skillData.字段.some((field) => field.名称.includes(name) && field.名称.includes("伤害"))
+            (name) => name !== "" && this.skillData.字段.some((field) => field.名称.includes(name) && field.名称.includes("伤害")),
         )
 
         // 更新属性

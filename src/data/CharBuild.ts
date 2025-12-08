@@ -423,20 +423,13 @@ export class CharBuild {
 
             if (props) {
                 if (minus) {
-                    attackBonus -=
-                        this.getTotalBonusSingle(props, `${prefix}攻击`, prefix) + this.getTotalBonusSingle(props, `攻击`, prefix)
-                    critRateBonus -=
-                        this.getTotalBonusSingle(props, `${prefix}暴击`, prefix) + this.getTotalBonusSingle(props, `暴击`, prefix)
-                    critDamageBonus -=
-                        this.getTotalBonusSingle(props, `${prefix}暴伤`, prefix) + this.getTotalBonusSingle(props, `暴伤`, prefix)
-                    triggerRateBonus -=
-                        this.getTotalBonusSingle(props, `${prefix}触发`, prefix) + this.getTotalBonusSingle(props, `触发`, prefix)
-                    attackSpeedBonus -=
-                        this.getTotalBonusSingle(props, `${prefix}攻速`, prefix) + this.getTotalBonusSingle(props, `攻速`, prefix)
-                    multiShotBonus -=
-                        this.getTotalBonusSingle(props, `${prefix}多重`, prefix) + this.getTotalBonusSingle(props, `多重`, prefix)
-                    damageIncrease -=
-                        this.getTotalBonusSingle(props, `${prefix}增伤`, prefix) + this.getTotalBonusSingle(props, `增伤`, prefix)
+                    attackBonus -= this.getTotalBonusSingle(props, `${prefix}攻击`, prefix) + this.getTotalBonusSingle(props, `攻击`, prefix)
+                    critRateBonus -= this.getTotalBonusSingle(props, `${prefix}暴击`, prefix) + this.getTotalBonusSingle(props, `暴击`, prefix)
+                    critDamageBonus -= this.getTotalBonusSingle(props, `${prefix}暴伤`, prefix) + this.getTotalBonusSingle(props, `暴伤`, prefix)
+                    triggerRateBonus -= this.getTotalBonusSingle(props, `${prefix}触发`, prefix) + this.getTotalBonusSingle(props, `触发`, prefix)
+                    attackSpeedBonus -= this.getTotalBonusSingle(props, `${prefix}攻速`, prefix) + this.getTotalBonusSingle(props, `攻速`, prefix)
+                    multiShotBonus -= this.getTotalBonusSingle(props, `${prefix}多重`, prefix) + this.getTotalBonusSingle(props, `多重`, prefix)
+                    damageIncrease -= this.getTotalBonusSingle(props, `${prefix}增伤`, prefix) + this.getTotalBonusSingle(props, `增伤`, prefix)
                     additionalDamage -= this.getTotalBonusSingle(props, `追加伤害`, prefix)
                     independentDamageIncrease = (1 + independentDamageIncrease) / (1 + this.getTotalBonusMul("独立增伤", prefix)) - 1
 
@@ -451,20 +444,13 @@ export class CharBuild {
                         damageIncrease -= this.getTotalBonusSingle(props, `${lowerPrefix}增伤`, lowerPrefix)
                     }
                 } else {
-                    attackBonus +=
-                        this.getTotalBonusSingle(props, `${prefix}攻击`, prefix) + this.getTotalBonusSingle(props, `攻击`, prefix)
-                    critRateBonus +=
-                        this.getTotalBonusSingle(props, `${prefix}暴击`, prefix) + this.getTotalBonusSingle(props, `暴击`, prefix)
-                    critDamageBonus +=
-                        this.getTotalBonusSingle(props, `${prefix}暴伤`, prefix) + this.getTotalBonusSingle(props, `暴伤`, prefix)
-                    triggerRateBonus +=
-                        this.getTotalBonusSingle(props, `${prefix}触发`, prefix) + this.getTotalBonusSingle(props, `触发`, prefix)
-                    attackSpeedBonus +=
-                        this.getTotalBonusSingle(props, `${prefix}攻速`, prefix) + this.getTotalBonusSingle(props, `攻速`, prefix)
-                    multiShotBonus +=
-                        this.getTotalBonusSingle(props, `${prefix}多重`, prefix) + this.getTotalBonusSingle(props, `多重`, prefix)
-                    damageIncrease +=
-                        this.getTotalBonusSingle(props, `${prefix}增伤`, prefix) + this.getTotalBonusSingle(props, `增伤`, prefix)
+                    attackBonus += this.getTotalBonusSingle(props, `${prefix}攻击`, prefix) + this.getTotalBonusSingle(props, `攻击`, prefix)
+                    critRateBonus += this.getTotalBonusSingle(props, `${prefix}暴击`, prefix) + this.getTotalBonusSingle(props, `暴击`, prefix)
+                    critDamageBonus += this.getTotalBonusSingle(props, `${prefix}暴伤`, prefix) + this.getTotalBonusSingle(props, `暴伤`, prefix)
+                    triggerRateBonus += this.getTotalBonusSingle(props, `${prefix}触发`, prefix) + this.getTotalBonusSingle(props, `触发`, prefix)
+                    attackSpeedBonus += this.getTotalBonusSingle(props, `${prefix}攻速`, prefix) + this.getTotalBonusSingle(props, `攻速`, prefix)
+                    multiShotBonus += this.getTotalBonusSingle(props, `${prefix}多重`, prefix) + this.getTotalBonusSingle(props, `多重`, prefix)
+                    damageIncrease += this.getTotalBonusSingle(props, `${prefix}增伤`, prefix) + this.getTotalBonusSingle(props, `增伤`, prefix)
                     additionalDamage += this.getTotalBonusSingle(props, `追加伤害`, prefix)
                     independentDamageIncrease = (1 + independentDamageIncrease) * (1 + this.getTotalBonusMul("独立增伤", prefix)) - 1
 
@@ -679,14 +665,7 @@ export class CharBuild {
         const independentDamageIncrease = 1 + attrs.independentDamageIncrease
 
         // 计算最终伤害
-        let finalDamage =
-            baseDamage *
-            resistancePenetration *
-            boostMultiplier *
-            desperateMultiplier *
-            defenseMultiplier *
-            damageIncrease *
-            independentDamageIncrease
+        let finalDamage = baseDamage * resistancePenetration * boostMultiplier * desperateMultiplier * defenseMultiplier * damageIncrease * independentDamageIncrease
 
         return finalDamage
     }
@@ -694,7 +673,7 @@ export class CharBuild {
     // 计算武器伤害
     public calculateWeaponDamage(
         attrs: ReturnType<typeof this.calculateWeaponAttributes>,
-        weapon: LeveledWeapon | LeveledSkillWeapon
+        weapon: LeveledWeapon | LeveledSkillWeapon,
     ): {
         lowerCritNoTrigger: number
         higherCritNoTrigger: number
@@ -711,8 +690,7 @@ export class CharBuild {
         const weaponDamageElemental = weaponAttackMultiplier * attrs.attack
 
         // 计算触发伤害期望
-        const triggerDamageMultiplier =
-            weapon.伤害类型 === this.enemyHpType ? this.hpTypeCoefficients[this.enemyHpType] + this.getTotalBonus("触发倍率") : 0
+        const triggerDamageMultiplier = weapon.伤害类型 === this.enemyHpType ? this.hpTypeCoefficients[this.enemyHpType] + this.getTotalBonus("触发倍率") : 0
         const triggerRate = weaponAttrs.triggerRate
         const triggerDamage = 1 + triggerDamageMultiplier
         const triggerExpectedDamage = 1 + triggerDamageMultiplier * triggerRate
@@ -732,30 +710,18 @@ export class CharBuild {
         const damageIncrease = 1 + attrs.damageIncrease + weaponAttrs.damageIncrease + attrs.weaponDamage
         const independentDamageIncrease = (1 + attrs.independentDamageIncrease) * (1 + weaponAttrs.independentDamageIncrease)
         const additionalDamage = 1 + weaponAttrs.additionalDamage
-        const commonMore =
-            boostMultiplier * desperateMultiplier * defenseMultiplier * damageIncrease * independentDamageIncrease * additionalDamage
+        const commonMore = boostMultiplier * desperateMultiplier * defenseMultiplier * damageIncrease * independentDamageIncrease * additionalDamage
 
         // 计算最终伤害
 
         return {
             lowerCritNoTrigger: (weaponDamagePhysical + weaponDamageElemental * resistancePenetration) * lowerCritDamage * commonMore,
             higherCritNoTrigger: (weaponDamagePhysical + weaponDamageElemental * resistancePenetration) * higherCritDamage * commonMore,
-            lowerCritTrigger:
-                (weaponDamagePhysical * triggerDamage + weaponDamageElemental * resistancePenetration) * lowerCritDamage * commonMore,
-            higherCritTrigger:
-                (weaponDamagePhysical * triggerDamage + weaponDamageElemental * resistancePenetration) * higherCritDamage * commonMore,
-            lowerCritExpectedTrigger:
-                (weaponDamagePhysical * triggerExpectedDamage + weaponDamageElemental * resistancePenetration) *
-                lowerCritDamage *
-                commonMore,
-            higherCritExpectedTrigger:
-                (weaponDamagePhysical * triggerExpectedDamage + weaponDamageElemental * resistancePenetration) *
-                higherCritDamage *
-                commonMore,
-            expectedDamage:
-                (weaponDamagePhysical * triggerExpectedDamage + weaponDamageElemental * resistancePenetration) *
-                critExpectedDamage *
-                commonMore,
+            lowerCritTrigger: (weaponDamagePhysical * triggerDamage + weaponDamageElemental * resistancePenetration) * lowerCritDamage * commonMore,
+            higherCritTrigger: (weaponDamagePhysical * triggerDamage + weaponDamageElemental * resistancePenetration) * higherCritDamage * commonMore,
+            lowerCritExpectedTrigger: (weaponDamagePhysical * triggerExpectedDamage + weaponDamageElemental * resistancePenetration) * lowerCritDamage * commonMore,
+            higherCritExpectedTrigger: (weaponDamagePhysical * triggerExpectedDamage + weaponDamageElemental * resistancePenetration) * higherCritDamage * commonMore,
+            expectedDamage: (weaponDamagePhysical * triggerExpectedDamage + weaponDamageElemental * resistancePenetration) * critExpectedDamage * commonMore,
         }
     }
 

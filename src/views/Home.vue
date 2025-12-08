@@ -11,10 +11,7 @@ const StatisticsItem: FunctionalComponent<{
     title: string
 }> = ({ title, progress, ...props }, { slots }) => {
     return (
-        <div
-            {...props}
-            class="flex w-full items-center space-x-4 p-6 bg-base-100/50 hover:bg-base-100 transition-all duration-500 rounded-lg"
-        >
+        <div {...props} class="flex w-full items-center space-x-4 p-6 bg-base-100/50 hover:bg-base-100 transition-all duration-500 rounded-lg">
             {typeof progress === "number" && <StatisticsProgress progress={progress} />}
             <div class="grid justify-center">
                 <div class="text-sm text-neutral-500">{title}</div>
@@ -108,18 +105,11 @@ onUnmounted(() => {
     <div class="h-full flex flex-col">
         <ScrollArea class="h-full overflow-hidden">
             <div class="p-4 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] w-full justify-items-center gap-4">
-                <div
-                    v-if="!env.isApp"
-                    class="flex w-full items-center bg-base-100/50 hover:bg-base-100 transition-all duration-500 rounded-lg p-4"
-                >
-                    <a href="https://github.com/pa001024/dna-builder/releases/latest" target="_blank" class="btn btn-primary flex-1">{{
-                        $t("home.download")
-                    }}</a>
+                <div v-if="!env.isApp" class="flex w-full items-center bg-base-100/50 hover:bg-base-100 transition-all duration-500 rounded-lg p-4">
+                    <a href="https://github.com/pa001024/dna-builder/releases/latest" target="_blank" class="btn btn-primary flex-1">{{ $t("home.download") }}</a>
                 </div>
                 <div class="flex w-full items-center bg-base-100/50 hover:bg-base-100 transition-all duration-500 rounded-lg p-4">
-                    <a href="https://github.com/pa001024/dna-builder" target="_blank" class="btn btn-primary flex-1">{{
-                        $t("home.starme")
-                    }}</a>
+                    <a href="https://github.com/pa001024/dna-builder" target="_blank" class="btn btn-primary flex-1">{{ $t("home.starme") }}</a>
                 </div>
                 <StatisticsItem title="魔灵刷新时间">{{ timeStr(moling) }}</StatisticsItem>
                 <StatisticsItem title="周本刷新时间">{{ timeStr(zhouben) }}</StatisticsItem>

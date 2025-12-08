@@ -30,9 +30,7 @@ export class LeveledSkillWeapon implements Weapon {
     // 精炼等级上限（目前武器精炼等级上限固定为5）
     private _maxSkillLevel: number = 12
     // 武器等级对应的基础攻击倍数（1,10,20,30,40,50,60,70,80级）
-    private static _levelAttackMultipliers: number[] = [
-        0.079666848, 0.206300923, 0.302118414, 0.413724425, 0.529132718, 0.682636248, 0.813579576, 1,
-    ]
+    private static _levelAttackMultipliers: number[] = [0.079666848, 0.206300923, 0.302118414, 0.413724425, 0.529132718, 0.682636248, 0.813579576, 1]
 
     /**
      * 构造函数
