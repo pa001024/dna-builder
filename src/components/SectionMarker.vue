@@ -8,14 +8,14 @@ const props = defineProps<{ reset?: boolean }>()
 
 // 颜色列表
 const colors = [
-    "text-amber-300 bg-amber-500", // 琥珀色
-    "text-blue-300 bg-blue-500", // 蓝色
-    "text-green-300 bg-green-500", // 绿色
-    "text-purple-300 bg-purple-500", // 紫色
-    "text-red-300 bg-red-500", // 红色
-    "text-yellow-300 bg-yellow-500", // 黄色
-    "text-cyan-300 bg-cyan-500", // 青色
-    "text-pink-300 bg-pink-500", // 粉色
+    "bg-amber-500", // 琥珀色
+    "bg-blue-500", // 蓝色
+    "bg-green-500", // 绿色
+    "bg-purple-500", // 紫色
+    "bg-red-500", // 红色
+    "bg-yellow-500", // 黄色
+    "bg-cyan-500", // 青色
+    "bg-pink-500", // 粉色
 ]
 
 // 重置计数器
@@ -31,7 +31,7 @@ const colorClass = computed(() => colors[(counter - 1) % colors.length])
 </script>
 
 <template>
-    <div :class="['w-5 h-5 rounded-sm flex items-center justify-center', colorClass]">
+    <div :class="['w-5 h-5 rounded-sm flex items-center justify-center text-white', colorClass]">
         <!-- <span class="text-xs">{{ counter }}</span> -->
         <slot></slot>
     </div>
