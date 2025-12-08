@@ -23,50 +23,8 @@ export class LeveledMod implements Mod {
     类型: string
     属性?: string
     限定?: string
-    效果?: string
-
-    // 浮动属性
-    威力?: number
-    耐久?: number
-    效益?: number
-    范围?: number
-    攻击?: number
-    生命?: number
-    护盾?: number
-    防御?: number
-    神智?: number
-    属性伤?: number
-    减伤?: number
-    增伤?: number
-    武器伤害?: number
-    技能伤害?: number
-    独立增伤?: number
-    昂扬?: number
-    背水?: number
-    追加伤害?: number
-    固定攻击?: number
-    技能速度?: number
-    召唤物范围?: number
-    召唤物攻速?: number
-    失衡易伤?: number
-    神智回复?: number
-    暴击?: number
-    暴伤?: number
-    触发?: number
-    物理?: number
-    攻速?: number
-    多重?: number
-    攻击范围?: number
-    滑行伤害?: number
-    滑行速度?: number
-    下落伤害?: number
-    下落速度?: number
-    蓄力速度?: number
-    弹药?: number
-    弹匣?: number
-    装填?: number
-    弹转?: number
-    触发倍率?: number
+    效果?: string;
+    [key: string]: any
 
     // 等级属性
     private _等级: number
@@ -187,7 +145,7 @@ export class LeveledMod implements Mod {
             // 架势MOD属性不受等级变化
             if (this.id > 100000) lv = this._maxLevel
             const maxValue = (this._originalModData as any)[prop]
-            if (maxValue !== undefined) {
+            if (maxValue) {
                 let currentValue = (maxValue / (this._maxLevel + 1)) * (lv + 1)
                 if (prop === "神智回复") currentValue = Math.round(currentValue)
                 ;(this as any)[prop] = currentValue

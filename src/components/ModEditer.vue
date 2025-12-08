@@ -165,19 +165,7 @@ async function handleImportCode() {
                 :class="[mod ? getQualityColor(mod.品质) : 'border-dashed border-gray-600', getQualityHoverBorder(mod?.品质!)]"
             >
                 <div class="relative w-full h-full flex items-center justify-center">
-                    <FullTooltip v-if="mod" side="top">
-                        <template #tooltip>
-                            <div class="flex flex-col gap-2">
-                                <div
-                                    v-for="(val, prop) in mods[index]!.getProperties()"
-                                    :key="prop"
-                                    class="flex justify-between items-center gap-2 text-sm"
-                                >
-                                    <div class="text-xs text-neutral-500">{{ prop }}</div>
-                                    <div class="font-medium text-primary">{{ formatProp(prop, val) }}</div>
-                                </div>
-                            </div>
-                        </template>
+                    <ShowProps v-if="mod" :props="mods[index]!.getProperties()">
                         <div class="w-full h-full flex items-center justify-center bg-opacity-30 rounded-lg overflow-hidden">
                             <!-- 背景 -->
                             <div class="absolute inset-0 flex items-center justify-center">
@@ -199,7 +187,7 @@ async function handleImportCode() {
                                 <span class="text-white text-xs">×</span>
                             </button>
                         </div>
-                    </FullTooltip>
+                    </ShowProps>
                     <div v-else class="text-gray-500">+</div>
                 </div>
             </div>
@@ -261,31 +249,35 @@ async function handleImportCode() {
                         <div class="tab-content py-2">
                             <ScrollArea class="h-80 w-full">
                                 <div class="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-3">
-                                    <div
+                                    <ShowProps
                                         v-for="mod in props.modOptions.filter((m) => m.quality === quality)"
                                         :key="mod.value"
-                                        class="border aspect-square rounded-md cursor-pointer transition-colors relative flex overflow-hidden"
-                                        :class="[getQualityColor(mod.quality), getQualityHoverBorder(mod.quality)]"
-                                        @click="handleSelectMod(localSelectedSlot, mod.value)"
+                                        :props="new LeveledMod(mod.value).getProperties()"
                                     >
-                                        <!-- MOD背景图 -->
-                                        <div class="absolute inset-0 opacity-50 rounded-md">
-                                            <img :src="mod.icon" alt="MOD背景" class="w-full h-full object-cover rounded-md" />
-                                        </div>
-
-                                        <!-- MOD内容 -->
-                                        <div class="relative p-3 z-10 mt-auto w-full bg-black/50 text-left text-base-100">
-                                            <div class="text-sm font-medium truncate mb-1">{{ mod.label }}</div>
-                                            <div class="flex items-center justify-between">
-                                                <div class="text-xs">Lv.{{ getQualityLevel(mod.quality) }}</div>
+                                        <div
+                                            class="border aspect-square rounded-md cursor-pointer transition-colors relative flex overflow-hidden"
+                                            :class="[getQualityColor(mod.quality), getQualityHoverBorder(mod.quality)]"
+                                            @click="handleSelectMod(localSelectedSlot, mod.value)"
+                                        >
+                                            <!-- MOD背景图 -->
+                                            <div class="absolute inset-0 opacity-50 rounded-md">
+                                                <img :src="mod.icon" alt="MOD背景" class="w-full h-full object-cover rounded-md" />
                                             </div>
-                                            <div class="flex items-center justify-between">
-                                                <div class="text-xs">
-                                                    收益: {{ format100(charBuild.calcIncome(new LeveledMod(mod.value))) }}
+
+                                            <!-- MOD内容 -->
+                                            <div class="relative p-3 z-10 mt-auto w-full bg-black/50 text-left text-base-100">
+                                                <div class="text-sm font-medium truncate mb-1">{{ mod.label }}</div>
+                                                <div class="flex items-center justify-between">
+                                                    <div class="text-xs">Lv.{{ getQualityLevel(mod.quality) }}</div>
+                                                </div>
+                                                <div class="flex items-center justify-between">
+                                                    <div class="text-xs">
+                                                        收益: {{ format100(charBuild.calcIncome(new LeveledMod(mod.value))) }}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </ShowProps>
                                 </div>
                             </ScrollArea>
                         </div>

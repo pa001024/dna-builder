@@ -32,11 +32,6 @@ export const useUIStore = defineStore("ui", {
                     // -- flex-1
                 },
                 {
-                    name: "user",
-                    path: "/user",
-                    icon: "la:user",
-                },
-                {
                     name: "setting",
                     path: "/setting",
                     icon: "la:cog-solid",

@@ -1,0 +1,24 @@
+<script setup lang="ts">
+import { formatProp } from "../util"
+
+defineProps<{
+    props: Record<string, any>
+}>()
+</script>
+<template>
+    <FullTooltip side="top">
+        <template #tooltip>
+            <div class="flex flex-col gap-2">
+                <div v-for="(val, prop) in props" :key="prop" class="flex justify-between items-center gap-2 text-sm">
+                    <div class="text-xs text-neutral-500">{{ prop }}</div>
+                    <div class="font-medium text-primary">{{ formatProp(prop, val) }}</div>
+                </div>
+                <div v-if="props.code" class="text-xs text-gray-400">
+                    <div class="text-xs text-neutral-500">{{ $t("char-build.dynamic_prop") }}</div>
+                    {{ props.code }}
+                </div>
+            </div>
+        </template>
+        <slot></slot>
+    </FullTooltip>
+</template>

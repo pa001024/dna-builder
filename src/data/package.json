@@ -1,0 +1,37 @@
+{
+    "name": "dna-builder-data",
+    "version": "0.1.0",
+    "description": "DNA Builder game data models and utilities",
+    "type": "module",
+    "main": "./index.ts",
+    "types": "./index.ts",
+    "scripts": {
+        "build": "tsc",
+        "test": "vitest run"
+    },
+    "keywords": [
+        "dna-builder",
+        "game",
+        "data",
+        "models"
+    ],
+    "author": "pa001024",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/pa001024/dna-builder.git",
+        "directory": "src/data"
+    },
+    "dependencies": {
+        "lodash-es": "^4.17.21"
+    },
+    "devDependencies": {
+        "typescript": "~5.6.2",
+        "vitest": "^4.0.15"
+    },
+    "files": [
+        "*.ts",
+        "leveled/*.ts",
+        "data.json"
+    ]
+}
