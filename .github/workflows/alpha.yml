@@ -41,6 +41,12 @@ jobs:
               with:
                   node-version: lts/*
 
+            - uses: pnpm/action-setup@v4
+              name: Install pnpm
+              with:
+                  version: 10
+                  cache: true
+
             - name: Build
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -49,8 +55,8 @@ jobs:
                   TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
                   TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
               run: |
-                  npm install
-                  npm run tb
+                  pnpm install
+                  pnpm run tb
 
             - name: Upload artifact
               if: success() && github.event_name != 'pull_request'

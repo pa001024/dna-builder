@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { LeveledBuff } from "../data/leveled"
-import { format100, formatProp } from "../util"
+import { format100 } from "../util"
 
-const props = defineProps<{
+defineProps<{
     buff: LeveledBuff
     lv: number
     selected?: boolean

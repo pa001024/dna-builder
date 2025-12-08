@@ -6,7 +6,7 @@ import data from "../data/data.json"
 import Select, { SelectItem } from "../components/select"
 import { useLocalStorage } from "@vueuse/core"
 import { groupBy, cloneDeep } from "lodash-es"
-import { format100, formatSkillProp } from "../util"
+import { formatSkillProp } from "../util"
 
 // 获取实际数据
 const charOptions = data.char.map((char) => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
