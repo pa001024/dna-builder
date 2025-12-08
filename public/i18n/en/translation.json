@@ -19,7 +19,12 @@
     "uiScale": "UI Scale",
     "windowTrasnparentTip": "Windows and surfaces show translucency",
     "winMaterial": "Window Material",
-    "lang": "Language"
+    "lang": "Language",
+    "confirm": "confirm",
+    "other": "Other settings",
+    "reset": "Reset all settings",
+    "resetConfirm": "Are you sure to reset all settings?",
+    "resetTip": "If there is an error on the page, try resetting it."
   },
   "char-build": {
     "title": "Build",
