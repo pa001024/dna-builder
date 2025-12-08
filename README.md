@@ -3,7 +3,6 @@
 <p align="center">
   <a href="https://dna-builder.edgeone.dev/"><img alt="Website" src="https://img.shields.io/website/https/dna-builder.edgeone.dev"></a>
   <a href="https://github.com/pa001024/dna-builder/actions/workflows/alpha.yml"><img src="https://img.shields.io/github/actions/workflow/status/pa001024/dna-builder/alpha.yml" alt="Build Status"></a>
-  <br>
   <a href="https://github.com/pa001024/dna-builder"><img src="https://img.shields.io/github/license/pa001024/dna-builder" alt="License"></a>
   <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/pa001024/dna-builder">
 </p>
@@ -35,6 +34,16 @@ DNA Builder 是一个用于游戏角色构建和伤害计算的工具，帮助�
 -   **编程语言**：TypeScript
 -   **UI 组件库** Tailwind CSS + daisyui + radix-vue
 -   **桌面应用**：Tauri
+
+## 多语言支持
+
+目前仅界面支持翻译, MOD 武器等不支持
+
+-   **中文(简体/繁体)**：默认语言
+-   **英文**
+-   **日本語**：(机翻)
+-   **한국어**：(机翻)
+-   **其他语言**：欢迎贡献翻译
 
 ## 安装和运行
 

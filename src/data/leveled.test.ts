@@ -45,14 +45,6 @@ describe("LeveledMod类测试", () => {
         expect(炽灼1级.攻击).toBe(0.075)
     })
 
-    // 测试6：获取完整属性
-    it("获取完整属性包含等级和攻击信息", () => {
-        const 炽灼3级 = new LeveledMod(11001, 3)
-        const fullProps = 炽灼3级.getFullProperties()
-        expect(fullProps.等级).toBeDefined()
-        expect(fullProps.攻击).toBeDefined()
-    })
-
     // 测试7：测试不存在的MOD ID
     it("测试不存在的MOD ID会抛出错误", () => {
         expect(() => {
@@ -64,7 +56,35 @@ describe("LeveledMod类测试", () => {
         }).toThrow("99999")
     })
 })
-
+describe("DynamicBuff", () => {
+    it("applyDynamicAttr", () => {
+        const buff = new LeveledBuff("妮弗尔夫人Q")
+        const char = new LeveledChar("妮弗尔夫人")
+        let attrs = {
+            attack: 1,
+            health: 1,
+            shield: 1,
+            defense: 1,
+            sanity: 1,
+            power: 1,
+            durability: 1,
+            efficiency: 1,
+            range: 2,
+            boost: 1,
+            desperate: 1,
+            damageIncrease: 1,
+            weaponDamage: 1,
+            skillDamage: 1,
+            independentDamageIncrease: 1,
+            penetration: 1,
+            ignoreDefense: 1,
+            skillSpeed: 1,
+        }
+        attrs = buff.applyDynamicAttr(char, attrs)
+        expect(attrs.power).toBe(2)
+        expect(attrs.range).toBe(1)
+    })
+})
 // 测试LeveledBuff类
 describe("LeveledBuff类测试", () => {
     // 测试1：创建带等级的Buff

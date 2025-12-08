@@ -2,6 +2,7 @@
 import { ref } from "vue"
 import { CharBuild } from "../data/CharBuild"
 import { LeveledMod } from "../data/leveled"
+import { copyText, format100, formatProp, pasteText } from "../util"
 
 interface ModOption {
     value: number
@@ -10,6 +11,7 @@ interface ModOption {
     elm?: string
     quality: string
     icon: string
+    ser?: string
 }
 
 interface Props {
@@ -17,16 +19,18 @@ interface Props {
     modOptions: ModOption[]
     charBuild: CharBuild
     title: string
+    type: string
+    auraMod?: number
 }
 
 const props = defineProps<Props>()
 
 // 定义组件事件
 const emit = defineEmits<{
-    (e: "update:mods", value: (LeveledMod | null)[]): void
-    (e: "removeMod", index: number): void
-    (e: "selectMod", indexAndId: [number, number]): void
-    (e: "levelChange", indexAndLevel: [number, number]): void
+    selectAuraMod: [id: number]
+    removeMod: [index: number]
+    selectMod: [indexAndId: [number, number]]
+    levelChange: [indexAndLevel: [number, number]]
 }>()
 
 // 本地状态
@@ -37,6 +41,9 @@ function handleSlotClick(index: number) {
     localSelectedSlot.value = index
 }
 
+function handleSelectAuraMod(id: number) {
+    emit("selectAuraMod", id)
+}
 function handleRemoveMod(index: number) {
     emit("removeMod", index)
 }
@@ -109,11 +116,24 @@ function getQualityLevel(quality: string): number {
     }
 }
 
-function formatProp(prop: string, val: any): string {
-    // 实现属性格式化的逻辑
-    if (typeof val !== "number") return String(val)
-    if (prop === "攻击范围") return String(val)
-    return +(val * 100).toFixed(1) + "%"
+async function handleImportCode() {
+    const charCode = (await pasteText()) || prompt("请输入角色或武器代码")
+    if (charCode) {
+        const result = props.charBuild.importCode(charCode, props.type)
+        if (result) {
+            emit("selectMod", [0, result.mods[0]])
+            emit("selectMod", [1, result.mods[1]])
+            emit("selectMod", [2, result.mods[2]])
+            emit("selectMod", [3, result.mods[3]])
+            emit("selectMod", [4, result.mods[4]])
+            emit("selectMod", [5, result.mods[5]])
+            emit("selectMod", [6, result.mods[6]])
+            emit("selectMod", [7, result.mods[7]])
+            if (result.auraMod) {
+                emit("selectAuraMod", result.auraMod)
+            }
+        }
+    }
 }
 </script>
 <template>
@@ -121,37 +141,65 @@ function formatProp(prop: string, val: any): string {
         <div class="flex items-center gap-2 mb-3">
             <SectionMarker />
             <h3 class="text-lg font-semibold">{{ title }}</h3>
+            <div class="ml-auto flex items-center gap-2">
+                <Select
+                    v-if="type === '角色'"
+                    class="w-30 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                    :model-value="auraMod"
+                    @update:model-value="handleSelectAuraMod($event as any)"
+                >
+                    <SelectItem v-for="m in modOptions.filter((item) => item.ser === '羽蛇')" :key="m.value" :value="m.value">
+                        {{ m.label }}
+                    </SelectItem>
+                </Select>
+                <div class="btn btn-sm btn-primary" @click="handleImportCode">导入代码</div>
+                <div class="btn btn-sm btn-primary" @click="copyText(charBuild.getCode(type))">复制代码</div>
+            </div>
         </div>
-        <div class="grid grid-cols-4 md:grid-cols-8 gap-4">
+        <div class="grid grid-cols-4 lg:grid-cols-8 gap-4">
             <div
-                @click="handleSlotClick(index)"
                 v-for="(mod, index) in mods"
                 :key="index"
+                @click="handleSlotClick(index)"
                 class="aspect-square bg-base-200 rounded-lg border-2 flex items-center justify-center transition-colors cursor-pointer"
                 :class="[mod ? getQualityColor(mod.品质) : 'border-dashed border-gray-600', getQualityHoverBorder(mod?.品质!)]"
             >
                 <div class="relative w-full h-full flex items-center justify-center">
-                    <div v-if="mod" class="w-full h-full flex items-center justify-center bg-opacity-30 rounded-lg overflow-hidden">
-                        <!-- 背景 -->
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <img :src="mod.url" :alt="mod.名称" />
-                        </div>
-                        <!-- MOD名称 -->
-                        <div class="relative mt-auto w-full bg-black/50 z-10 text-left p-2">
-                            <div class="text-base-100 text-sm font-bold mb-1">{{ mod.名称 }}</div>
-                            <div class="flex justify-between">
-                                <div class="text-base-300 text-xs">Lv.{{ mod.等级 }}</div>
-                                <div class="text-base-300 text-xs">+{{ formatProp("", charBuild.calcIncome(mod)) }}</div>
+                    <FullTooltip v-if="mod" side="top">
+                        <template #tooltip>
+                            <div class="flex flex-col gap-2">
+                                <div
+                                    v-for="(val, prop) in mods[index]!.getProperties()"
+                                    :key="prop"
+                                    class="flex justify-between items-center gap-2 text-sm"
+                                >
+                                    <div class="text-xs text-neutral-500">{{ prop }}</div>
+                                    <div class="font-medium text-primary">{{ formatProp(prop, val) }}</div>
+                                </div>
                             </div>
+                        </template>
+                        <div class="w-full h-full flex items-center justify-center bg-opacity-30 rounded-lg overflow-hidden">
+                            <!-- 背景 -->
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <img :src="mod.url" :alt="mod.名称" />
+                            </div>
+                            <!-- MOD名称 -->
+                            <div class="relative mt-auto w-full bg-black/50 z-10 text-left p-2">
+                                <div class="text-base-100 text-sm font-bold mb-1">{{ mod.名称 }}</div>
+                                <div class="flex justify-between">
+                                    <div class="text-base-300 text-xs">Lv.{{ mod.等级 }}</div>
+                                    <div class="text-base-300 text-xs">{{ formatProp("", charBuild.calcIncome(mod)) }}</div>
+                                </div>
+                            </div>
+                            <!-- 关闭按钮 -->
+                            <button
+                                @click.stop="handleRemoveMod(index)"
+                                class="absolute cursor-pointer -top-2 -right-2 w-5 h-5 bg-red-400 bg-opacity-50 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors"
+                            >
+                                <span class="text-white text-xs">×</span>
+                            </button>
                         </div>
-                        <!-- 关闭按钮 -->
-                        <button
-                            @click.stop="handleRemoveMod(index)"
-                            class="absolute cursor-pointer -top-2 -right-2 w-5 h-5 bg-red-400 bg-opacity-50 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors"
-                        >
-                            <span class="text-white text-xs">×</span>
-                        </button>
-                    </div>
+                    </FullTooltip>
                     <div v-else class="text-gray-500">+</div>
                 </div>
             </div>
@@ -233,7 +281,7 @@ function formatProp(prop: string, val: any): string {
                                             </div>
                                             <div class="flex items-center justify-between">
                                                 <div class="text-xs">
-                                                    收益: {{ formatProp("", charBuild.calcIncome(new LeveledMod(mod.value))) }}
+                                                    收益: {{ format100(charBuild.calcIncome(new LeveledMod(mod.value))) }}
                                                 </div>
                                             </div>
                                         </div>

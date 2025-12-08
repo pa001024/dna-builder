@@ -16,6 +16,8 @@ export interface Buff {
     dx?: number
     lx?: number
     mx?: number
+    code?: string
+    [key: string]: any
 
     攻击?: number
     生命?: number
