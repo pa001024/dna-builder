@@ -125,10 +125,15 @@ dna-builder/
 
 ## 使用示例
 
+`dna-builder-data`已发布到 NPM, 可以直接在项目中引入使用
+
+```
+npm install dna-builder-data
+```
+
 ```typescript
 // 创建角色构建实例
-import { CharBuild } from "./data/CharBuild"
-import { LeveledChar, LeveledWeapon, LeveledMod, LeveledBuff } from "./data/leveled"
+import { CharBuild, LeveledChar, LeveledWeapon, LeveledMod, LeveledBuff } from "dna-builder-data"
 
 const options = {
     char: new LeveledChar("黎瑟"),

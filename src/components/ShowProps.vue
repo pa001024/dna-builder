@@ -1,12 +1,18 @@
 <script setup lang="ts">
 import { formatProp } from "../util"
 
-defineProps<{
-    props: Record<string, any>
-}>()
+withDefaults(
+    defineProps<{
+        props: Record<string, any>
+        side?: "top" | "bottom" | "left" | "right"
+    }>(),
+    {
+        side: "top",
+    }
+)
 </script>
 <template>
-    <FullTooltip side="top">
+    <FullTooltip :side="side">
         <template #tooltip>
             <div class="flex flex-col gap-2">
                 <div v-for="(val, prop) in props" :key="prop" class="flex justify-between items-center gap-2 text-sm">
