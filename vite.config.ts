@@ -61,13 +61,24 @@ export default defineConfig(async () => ({
             workbox: {
                 runtimeCaching: [
                     {
-                        urlPattern: /^https:\/\/api\.example\.com\//,
+                        urlPattern: /^https:\/\/xn--chq26veyq\.icu\/api\/.+/,
                         handler: "NetworkFirst",
                         options: {
                             cacheName: "api-cache",
                             expiration: {
                                 maxEntries: 50,
                                 maxAgeSeconds: 60 * 60 * 24, // 1 day
+                            },
+                        },
+                    },
+                    {
+                        urlPattern: /i18n.+\.json$/,
+                        handler: "CacheFirst",
+                        options: {
+                            cacheName: "i18n-cache",
+                            expiration: {
+                                maxEntries: 60,
+                                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
                             },
                         },
                     },
