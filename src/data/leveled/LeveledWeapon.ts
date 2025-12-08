@@ -16,22 +16,8 @@ export class LeveledWeapon implements Weapon {
     基础暴击: number
     基础暴伤: number
     基础触发: number
-    耐久?: number
-    生命?: number
-    暴击?: number
-    攻速?: number
-    暴伤?: number
-    范围?: number
-    攻击?: number
-    背水?: number
-    威力?: number
-    防御?: number
-    触发?: number
-    攻击范围?: number
-    弹道类型?: string
-    技能伤害?: number
-    武器伤害?: number
-    多重?: number
+    弹道类型?: string;
+    [key: string]: any
     // 新增属性
     倍率 = 1
     弹片数?: number
@@ -78,22 +64,6 @@ export class LeveledWeapon implements Weapon {
         this.基础暴击 = weaponData.基础暴击
         this.基础暴伤 = weaponData.基础暴伤
         this.基础触发 = weaponData.基础触发
-        this.耐久 = weaponData.耐久
-        this.生命 = weaponData.生命
-        this.暴击 = weaponData.暴击
-        this.攻速 = weaponData.攻速
-        this.暴伤 = weaponData.暴伤
-        this.范围 = weaponData.范围
-        this.攻击 = weaponData.攻击
-        this.背水 = weaponData.背水
-        this.威力 = weaponData.威力
-        this.防御 = weaponData.防御
-        this.触发 = weaponData.触发
-        this.攻击范围 = weaponData.攻击范围
-        this.弹道类型 = weaponData.弹道类型
-        this.技能伤害 = weaponData.技能伤害
-        this.武器伤害 = weaponData.武器伤害
-        this.多重 = weaponData.多重
 
         // 初始化倍率相关属性为undefined
         this.弹片数 = undefined
@@ -239,7 +209,23 @@ export class LeveledWeapon implements Weapon {
             this.段数 = undefined
         }
     }
-
+    static properties = [
+        "耐久",
+        "生命",
+        "暴击",
+        "攻速",
+        "暴伤",
+        "范围",
+        "攻击",
+        "背水",
+        "威力",
+        "防御",
+        "触发",
+        "攻击范围",
+        "技能伤害",
+        "武器伤害",
+        "多重",
+    ] as const
     /**
      * 根据等级和精炼更新武器属性
      * 基础攻击受等级影响，其他属性受精炼影响
@@ -247,25 +233,6 @@ export class LeveledWeapon implements Weapon {
     private updateProperties(): void {
         // 重置所有属性为原始值
         this.基础攻击 = this._originalWeaponData.基础攻击
-        this.基础暴击 = this._originalWeaponData.基础暴击
-        this.基础暴伤 = this._originalWeaponData.基础暴伤
-        this.基础触发 = this._originalWeaponData.基础触发
-        this.耐久 = this._originalWeaponData.耐久
-        this.生命 = this._originalWeaponData.生命
-        this.暴击 = this._originalWeaponData.暴击
-        this.攻速 = this._originalWeaponData.攻速
-        this.暴伤 = this._originalWeaponData.暴伤
-        this.范围 = this._originalWeaponData.范围
-        this.攻击 = this._originalWeaponData.攻击
-        this.背水 = this._originalWeaponData.背水
-        this.威力 = this._originalWeaponData.威力
-        this.防御 = this._originalWeaponData.防御
-        this.触发 = this._originalWeaponData.触发
-        this.攻击范围 = this._originalWeaponData.攻击范围
-        this.弹道类型 = this._originalWeaponData.弹道类型
-        this.技能伤害 = this._originalWeaponData.技能伤害
-        this.武器伤害 = this._originalWeaponData.武器伤害
-        this.多重 = this._originalWeaponData.多重
 
         // 根据武器等级调整基础攻击
         // 1,10,20,30,40,50,60,70,80级对应的倍数
@@ -274,25 +241,8 @@ export class LeveledWeapon implements Weapon {
         this.基础攻击 *= levelMultiplier
 
         // 根据精炼等级调整属性
-        const refineProperties = [
-            "耐久",
-            "生命",
-            "暴击",
-            "攻速",
-            "暴伤",
-            "范围",
-            "攻击",
-            "背水",
-            "威力",
-            "防御",
-            "触发",
-            "攻击范围",
-            "技能伤害",
-            "武器伤害",
-            "多重",
-        ]
 
-        refineProperties.forEach((prop) => {
+        LeveledWeapon.properties.forEach((prop) => {
             const originalValue = (this._originalWeaponData as any)[prop]
             if (originalValue !== undefined) {
                 const currentValue = (originalValue / (this._maxRefineLevel + 1)) * (this._精炼 + 1)
@@ -301,15 +251,12 @@ export class LeveledWeapon implements Weapon {
         })
     }
 
-    /**
-     * 获取武器的完整属性信息
-     */
-    getFullProperties(): Weapon & { 等级: number; 精炼: number } {
-        return {
-            ...this,
-            等级: this._等级,
-            精炼: this._精炼,
-        }
+    getProperties(): Partial<Weapon> {
+        const properties: Partial<Weapon> = {}
+        LeveledWeapon.properties.forEach((prop) => {
+            if ((this as any)[prop]) properties[prop] = (this as any)[prop]
+        })
+        return properties
     }
 
     get url() {

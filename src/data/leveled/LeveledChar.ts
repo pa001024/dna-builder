@@ -16,16 +16,8 @@ export class LeveledChar implements Char {
     基础生命: number
     基础护盾: number
     基础防御: number
-    基础神智: number
-    范围?: number
-    攻击?: number
-    耐久?: number
-    生命?: number
-    威力?: number
-    背水?: number
-    防御?: number
-    效益?: number
-    昂扬?: number
+    基础神智: number;
+    [key: string]: any
     技能: LeveledSkill[] = []
 
     // 等级属性
@@ -54,21 +46,21 @@ export class LeveledChar implements Char {
         this.属性 = charData.属性
         this.近战 = charData.近战
         this.远程 = charData.远程
-        this.同律武器 = charData.同律武器
         this.基础攻击 = charData.基础攻击
         this.基础生命 = charData.基础生命
         this.基础护盾 = charData.基础护盾
         this.基础防御 = charData.基础防御
         this.基础神智 = charData.基础神智
-        this.范围 = charData.范围
-        this.攻击 = charData.攻击
-        this.耐久 = charData.耐久
-        this.生命 = charData.生命
-        this.威力 = charData.威力
-        this.背水 = charData.背水
-        this.防御 = charData.防御
-        this.效益 = charData.效益
-        this.昂扬 = charData.昂扬
+        if (charData.同律武器) this.同律武器 = charData.同律武器
+        if (charData.范围) this.范围 = charData.范围
+        if (charData.攻击) this.攻击 = charData.攻击
+        if (charData.耐久) this.耐久 = charData.耐久
+        if (charData.生命) this.生命 = charData.生命
+        if (charData.威力) this.威力 = charData.威力
+        if (charData.背水) this.背水 = charData.背水
+        if (charData.防御) this.防御 = charData.防御
+        if (charData.效益) this.效益 = charData.效益
+        if (charData.昂扬) this.昂扬 = charData.昂扬
         this.技能 = charData.技能.map((skill) => new LeveledSkill(skill))
 
         // 保存80级的基准属性值（当前导入的数据是80级的数据）
@@ -161,33 +153,14 @@ export class LeveledChar implements Char {
         this.基础防御 = Math.round(this._base80Defense * multiplier)
     }
 
-    /**
-     * 获取角色的完整属性信息
-     */
-    getFullProperties(): Char & { 等级?: number } {
-        return {
-            名称: this.名称,
-            属性: this.属性,
-            近战: this.近战,
-            远程: this.远程,
-            同律武器: this.同律武器,
-            基础攻击: this.基础攻击,
-            基础生命: this.基础生命,
-            基础护盾: this.基础护盾,
-            基础防御: this.基础防御,
-            基础神智: this.基础神智,
-            范围: this.范围,
-            攻击: this.攻击,
-            耐久: this.耐久,
-            生命: this.生命,
-            威力: this.威力,
-            背水: this.背水,
-            防御: this.防御,
-            效益: this.效益,
-            昂扬: this.昂扬,
-            等级: this.等级,
-            技能: this.技能,
-        }
+    static properties = ["范围", "攻击", "耐久", "生命", "威力", "背水", "防御", "效益", "昂扬"] as const
+
+    getProperties(): Partial<Char> {
+        const properties: Partial<Char> = {}
+        LeveledChar.properties.forEach((prop) => {
+            if ((this as any)[prop]) properties[prop] = (this as any)[prop]
+        })
+        return properties
     }
 
     get url() {

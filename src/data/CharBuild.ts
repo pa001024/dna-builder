@@ -1,5 +1,9 @@
 import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon, LeveledSkillWeapon, LeveledSkill, modMap } from "./leveled"
-import { base36Pad } from "../util"
+// 本地实现base36Pad函数，避免依赖浏览器API
+function base36Pad(num: number): string {
+    const base36 = num.toString(36).toUpperCase()
+    return base36.padStart(4, "0")
+}
 
 export interface CharAttr {
     // 基础属性
@@ -624,10 +628,6 @@ export class CharBuild {
     public calculateDesperateMultiplier(attrs: ReturnType<typeof this.calculateAttributes>): number {
         const desperate = attrs.desperate
         const hpPercent = Math.max(0.25, Math.min(1, this.hpPercent))
-        // 如果desperate为0或hpPercent为1，背水乘区为1
-        if (desperate === 0 || hpPercent === 1) {
-            return 1
-        }
         return 1 + 4 * desperate * (1 - hpPercent) * (1.5 - hpPercent)
     }
 
@@ -865,7 +865,7 @@ export class CharBuild {
         }
 
         // 计算目标函数
-        return this.calculateTargetFunction(damage, weapon, skill)
+        return Math.round(this.calculateTargetFunction(damage, weapon, skill))
     }
 
     /**

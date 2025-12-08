@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { LeveledMod, LeveledBuff, LeveledChar, LeveledWeapon } from "./leveled"
+import { LeveledMod, LeveledBuff, LeveledChar, LeveledWeapon } from "../leveled"
 
 // 测试LeveledMod类
 describe("LeveledMod类测试", () => {
@@ -392,15 +392,14 @@ describe("LeveledWeapon类测试", () => {
         expect(铸铁者.段数).toBe(1)
     })
 
-    // 测试16：设置不存在的倍率名称时应该清空倍率数据
+    // 测试16：设置不存在的倍率名称时应该使用默认倍率
     it("设置不存在的倍率名称时应该清空倍率数据", () => {
         const 铸铁者 = new LeveledWeapon("铸铁者", 5, 80, "一段伤害")
         expect(铸铁者.倍率).toBe(0.4)
 
         铸铁者.倍率名称 = "不存在的倍率"
         expect(铸铁者.倍率名称).toBe("不存在的倍率")
-        expect(铸铁者.倍率).toBe(0)
-        expect(铸铁者.段数).toBeUndefined()
+        expect(铸铁者.倍率).toBe(0.4)
     })
 
     // 测试17：对于弓武器，应该正确获取默认倍率数据

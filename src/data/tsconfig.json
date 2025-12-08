@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "useDefineForClassFields": true,
+        "module": "ESNext",
+        "lib": ["ESNext", "dom"],
+        "skipLibCheck": true,
+        "types": ["vitest/importMeta"],
+        "moduleResolution": "bundler",
+        "esModuleInterop": false,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "outDir": "dist",
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true
+    },
+    "include": ["*.ts", "leveled/*.ts", "tests/CharBuild.test.ts", "tests/leveled.test.ts"],
+    "exclude": ["*.test.ts"]
+}

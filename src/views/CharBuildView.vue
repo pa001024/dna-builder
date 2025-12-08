@@ -284,71 +284,73 @@ const reloadCustomBuff = () => {
             <!-- 基本设置 -->
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
                 <!-- 角色选择 -->
-                <div class="bg-base-300 rounded-xl p-4 shadow-lg">
-                    <div class="flex items-center gap-2 mb-3">
-                        <SectionMarker reset>
-                            <Icon icon="ri:user-line" />
-                        </SectionMarker>
-                        <h3 class="text-lg font-semibold">{{ $t("char-build.select_character") }}</h3>
-                    </div>
-                    <div class="relative flex items-center gap-2">
-                        <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.character") }}</div>
-                            <Select
-                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="selectedChar"
-                                @change="updateCharBuild"
-                            >
-                                <template v-for="charWithElm in groupBy(charOptions, 'elm')" :key="charWithElm[0].elm">
-                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                        {{ charWithElm[0].elm }}
-                                    </SelectLabel>
-                                    <SelectGroup>
-                                        <SelectItem v-for="char in charWithElm" :key="char.value" :value="char.value">
-                                            {{ char.label }}
-                                        </SelectItem>
-                                    </SelectGroup>
-                                </template>
-                            </Select>
+                <ShowProps :props="charBuild.char.getProperties()">
+                    <div class="bg-base-300 rounded-xl p-4 shadow-lg">
+                        <div class="flex items-center gap-2 mb-3">
+                            <SectionMarker reset>
+                                <Icon icon="ri:user-line" />
+                            </SectionMarker>
+                            <h3 class="text-lg font-semibold">{{ $t("char-build.select_character") }}</h3>
                         </div>
-                        <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.level") }}</div>
-                            <Select
-                                class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.charLevel"
-                                @change="updateCharBuild"
-                            >
-                                <SelectItem v-for="lv in [1, 10, 20, 30, 40, 50, 60, 70, 80]" :key="lv" :value="lv">
-                                    {{ lv }}
-                                </SelectItem>
-                            </Select>
-                        </div>
-                        <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.target_function") }}</div>
-                            <Select
-                                class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.targetFunction"
-                                @change="updateCharBuild"
-                            >
-                                <SelectItem
-                                    v-for="fn in [
-                                        '伤害',
-                                        '弹片伤害',
-                                        '每秒伤害',
-                                        '每神智伤害',
-                                        '每持续神智伤害',
-                                        '每神智每秒伤害',
-                                        '每持续神智每秒伤害',
-                                    ]"
-                                    :key="fn"
-                                    :value="fn"
+                        <div class="relative flex items-center gap-2">
+                            <div class="flex-1">
+                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.character") }}</div>
+                                <Select
+                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                    v-model="selectedChar"
+                                    @change="updateCharBuild"
                                 >
-                                    {{ fn }}
-                                </SelectItem>
-                            </Select>
+                                    <template v-for="charWithElm in groupBy(charOptions, 'elm')" :key="charWithElm[0].elm">
+                                        <SelectLabel class="p-2 text-sm font-semibold text-primary">
+                                            {{ charWithElm[0].elm }}
+                                        </SelectLabel>
+                                        <SelectGroup>
+                                            <SelectItem v-for="char in charWithElm" :key="char.value" :value="char.value">
+                                                {{ char.label }}
+                                            </SelectItem>
+                                        </SelectGroup>
+                                    </template>
+                                </Select>
+                            </div>
+                            <div class="flex-1">
+                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.level") }}</div>
+                                <Select
+                                    class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                    v-model="charSettings.charLevel"
+                                    @change="updateCharBuild"
+                                >
+                                    <SelectItem v-for="lv in [1, 10, 20, 30, 40, 50, 60, 70, 80]" :key="lv" :value="lv">
+                                        {{ lv }}
+                                    </SelectItem>
+                                </Select>
+                            </div>
+                            <div class="flex-1">
+                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.target_function") }}</div>
+                                <Select
+                                    class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                    v-model="charSettings.targetFunction"
+                                    @change="updateCharBuild"
+                                >
+                                    <SelectItem
+                                        v-for="fn in [
+                                            '伤害',
+                                            '弹片伤害',
+                                            '每秒伤害',
+                                            '每神智伤害',
+                                            '每持续神智伤害',
+                                            '每神智每秒伤害',
+                                            '每持续神智每秒伤害',
+                                        ]"
+                                        :key="fn"
+                                        :value="fn"
+                                    >
+                                        {{ fn }}
+                                    </SelectItem>
+                                </Select>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </ShowProps>
                 <!-- 技能选择 -->
                 <div class="bg-base-300 rounded-xl p-4 shadow-lg">
                     <div class="flex items-center gap-2 mb-3">
@@ -385,113 +387,117 @@ const reloadCustomBuff = () => {
                     </div>
                 </div>
                 <!-- 近战武器选择 -->
-                <div class="bg-base-300 rounded-xl p-4 shadow-lg">
-                    <div class="flex items-center gap-2 mb-3">
-                        <SectionMarker>
-                            <Icon icon="ri:sword-line" />
-                        </SectionMarker>
-                        <h3 class="text-lg font-semibold">{{ $t("char-build.melee_weapon") }}</h3>
+                <ShowProps :props="charBuild.meleeWeapon.getProperties()">
+                    <div class="bg-base-300 rounded-xl p-4 shadow-lg">
+                        <div class="flex items-center gap-2 mb-3">
+                            <SectionMarker>
+                                <Icon icon="ri:sword-line" />
+                            </SectionMarker>
+                            <h3 class="text-lg font-semibold">{{ $t("char-build.melee_weapon") }}</h3>
+                        </div>
+                        <div class="relative flex items-center gap-2">
+                            <div class="flex-1">
+                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.weapon") }}</div>
+                                <Select
+                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                    v-model="charSettings.meleeWeapon"
+                                    @change="updateCharBuild"
+                                >
+                                    <template v-for="weaponWithType in groupBy(meleeWeaponOptions, 'type')" :key="weaponWithType[0].type">
+                                        <SelectLabel class="p-2 text-sm font-semibold text-primary">
+                                            {{ weaponWithType[0].type }}
+                                        </SelectLabel>
+                                        <SelectGroup>
+                                            <SelectItem v-for="weapon in weaponWithType" :key="weapon.value" :value="weapon.value">
+                                                {{ weapon.label }}
+                                            </SelectItem>
+                                        </SelectGroup>
+                                    </template>
+                                </Select>
+                            </div>
+                            <div class="flex-1">
+                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.refine") }}</div>
+                                <Select
+                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                    v-model="charSettings.meleeWeaponRefine"
+                                    @change="updateCharBuild"
+                                >
+                                    <SelectItem v-for="lv in [0, 1, 2, 3, 4, 5]" :key="lv" :value="lv">
+                                        {{ lv }}
+                                    </SelectItem>
+                                </Select>
+                            </div>
+                            <div class="flex-1">
+                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.level") }}</div>
+                                <Select
+                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                    v-model="charSettings.meleeWeaponLevel"
+                                    @change="updateCharBuild"
+                                >
+                                    <SelectItem v-for="lv in [1, 10, 20, 30, 40, 50, 60, 70, 80]" :key="lv" :value="lv">
+                                        {{ lv }}
+                                    </SelectItem>
+                                </Select>
+                            </div>
+                        </div>
                     </div>
-                    <div class="relative flex items-center gap-2">
-                        <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.weapon") }}</div>
-                            <Select
-                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.meleeWeapon"
-                                @change="updateCharBuild"
-                            >
-                                <template v-for="weaponWithType in groupBy(meleeWeaponOptions, 'type')" :key="weaponWithType[0].type">
-                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                        {{ weaponWithType[0].type }}
-                                    </SelectLabel>
-                                    <SelectGroup>
-                                        <SelectItem v-for="weapon in weaponWithType" :key="weapon.value" :value="weapon.value">
-                                            {{ weapon.label }}
-                                        </SelectItem>
-                                    </SelectGroup>
-                                </template>
-                            </Select>
-                        </div>
-                        <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.refine") }}</div>
-                            <Select
-                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.meleeWeaponRefine"
-                                @change="updateCharBuild"
-                            >
-                                <SelectItem v-for="lv in [0, 1, 2, 3, 4, 5]" :key="lv" :value="lv">
-                                    {{ lv }}
-                                </SelectItem>
-                            </Select>
-                        </div>
-                        <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.level") }}</div>
-                            <Select
-                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.meleeWeaponLevel"
-                                @change="updateCharBuild"
-                            >
-                                <SelectItem v-for="lv in [1, 10, 20, 30, 40, 50, 60, 70, 80]" :key="lv" :value="lv">
-                                    {{ lv }}
-                                </SelectItem>
-                            </Select>
-                        </div>
-                    </div>
-                </div>
+                </ShowProps>
                 <!-- 远程武器选择 -->
-                <div class="bg-base-300 rounded-xl p-4 shadow-lg">
-                    <div class="flex items-center gap-2 mb-3">
-                        <SectionMarker>
-                            <Icon icon="ri:crosshair-line" />
-                        </SectionMarker>
-                        <h3 class="text-lg font-semibold">{{ $t("char-build.ranged_weapon") }}</h3>
+                <ShowProps :props="charBuild.rangedWeapon.getProperties()">
+                    <div class="bg-base-300 rounded-xl p-4 shadow-lg">
+                        <div class="flex items-center gap-2 mb-3">
+                            <SectionMarker>
+                                <Icon icon="ri:crosshair-line" />
+                            </SectionMarker>
+                            <h3 class="text-lg font-semibold">{{ $t("char-build.ranged_weapon") }}</h3>
+                        </div>
+                        <div class="relative flex items-center gap-2">
+                            <div class="flex-1">
+                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.weapon") }}</div>
+                                <Select
+                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                    v-model="charSettings.rangedWeapon"
+                                    @change="updateCharBuild"
+                                >
+                                    <template v-for="weaponWithType in groupBy(rangedWeaponOptions, 'type')" :key="weaponWithType[0].type">
+                                        <SelectLabel class="p-2 text-sm font-semibold text-primary">
+                                            {{ weaponWithType[0].type }}
+                                        </SelectLabel>
+                                        <SelectGroup>
+                                            <SelectItem v-for="weapon in weaponWithType" :key="weapon.value" :value="weapon.value">
+                                                {{ weapon.label }}
+                                            </SelectItem>
+                                        </SelectGroup>
+                                    </template>
+                                </Select>
+                            </div>
+                            <div class="flex-1">
+                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.refine") }}</div>
+                                <Select
+                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                    v-model="charSettings.rangedWeaponRefine"
+                                    @change="updateCharBuild"
+                                >
+                                    <SelectItem v-for="lv in [0, 1, 2, 3, 4, 5]" :key="lv" :value="lv">
+                                        {{ lv }}
+                                    </SelectItem>
+                                </Select>
+                            </div>
+                            <div class="flex-1">
+                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.level") }}</div>
+                                <Select
+                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                    v-model="charSettings.rangedWeaponLevel"
+                                    @change="updateCharBuild"
+                                >
+                                    <SelectItem v-for="lv in [1, 10, 20, 30, 40, 50, 60, 70, 80]" :key="lv" :value="lv">
+                                        {{ lv }}
+                                    </SelectItem>
+                                </Select>
+                            </div>
+                        </div>
                     </div>
-                    <div class="relative flex items-center gap-2">
-                        <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.weapon") }}</div>
-                            <Select
-                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.rangedWeapon"
-                                @change="updateCharBuild"
-                            >
-                                <template v-for="weaponWithType in groupBy(rangedWeaponOptions, 'type')" :key="weaponWithType[0].type">
-                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                        {{ weaponWithType[0].type }}
-                                    </SelectLabel>
-                                    <SelectGroup>
-                                        <SelectItem v-for="weapon in weaponWithType" :key="weapon.value" :value="weapon.value">
-                                            {{ weapon.label }}
-                                        </SelectItem>
-                                    </SelectGroup>
-                                </template>
-                            </Select>
-                        </div>
-                        <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.refine") }}</div>
-                            <Select
-                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.rangedWeaponRefine"
-                                @change="updateCharBuild"
-                            >
-                                <SelectItem v-for="lv in [0, 1, 2, 3, 4, 5]" :key="lv" :value="lv">
-                                    {{ lv }}
-                                </SelectItem>
-                            </Select>
-                        </div>
-                        <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.level") }}</div>
-                            <Select
-                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.rangedWeaponLevel"
-                                @change="updateCharBuild"
-                            >
-                                <SelectItem v-for="lv in [1, 10, 20, 30, 40, 50, 60, 70, 80]" :key="lv" :value="lv">
-                                    {{ lv }}
-                                </SelectItem>
-                            </Select>
-                        </div>
-                    </div>
-                </div>
+                </ShowProps>
                 <!-- 敌人选择 -->
                 <div class="bg-base-300 rounded-xl p-4 shadow-lg">
                     <div class="flex items-center gap-2 mb-3">

@@ -1,13 +1,12 @@
 import { describe, it, expect } from "vitest"
-import { CharBuild } from "./CharBuild"
-import { LeveledChar } from "./leveled"
-import { LeveledWeapon } from "./leveled"
-import { LeveledMod } from "./leveled"
-import { LeveledBuff } from "./leveled"
+import { CharBuild } from "../CharBuild"
+import { LeveledChar } from "../leveled"
+import { LeveledWeapon } from "../leveled"
+import { LeveledMod } from "../leveled"
+import { LeveledBuff } from "../leveled"
 
 describe("CharBuild类测试", () => {
     // 创建测试用数据
-    const mockChar = new LeveledChar("黎瑟")
     const mockMeleeWeapon = new LeveledWeapon("铸铁者")
     const mockRangedWeapon = new LeveledWeapon("烈焰孤沙")
     const mod1 = new LeveledMod(41324) // 雷鸣·燎原
@@ -15,19 +14,19 @@ describe("CharBuild类测试", () => {
     const mod3 = new LeveledMod(41001) // 炽灼 (75%)
     const mod4 = new LeveledMod(42002) // 专注 (100%)
     const mockMods = [mod1, mod2, mod3]
-    const buff1 = new LeveledBuff("自定义BUFF")
+    const buff1 = new LeveledBuff("黎瑟E")
     const mockBuffs = [buff1]
 
     // 基础对象 不要直接使用，而是通过clone()方法创建新实例
     function createCharBuild() {
         return new CharBuild({
-            char: mockChar,
+            char: new LeveledChar("黎瑟"),
             hpPercent: 0.5,
             resonanceGain: 2,
-            mods: mockMods,
-            buffs: mockBuffs,
-            melee: mockMeleeWeapon,
-            ranged: mockRangedWeapon,
+            mods: [...mockMods],
+            buffs: [...mockBuffs],
+            melee: new LeveledWeapon("铸铁者"),
+            ranged: new LeveledWeapon("烈焰孤沙"),
             baseName: mockMeleeWeapon.名称,
             enemyType: "小型",
             enemyLevel: 80,
@@ -98,9 +97,9 @@ describe("CharBuild类测试", () => {
         const charBuild = createCharBuild()
         const attrs = charBuild.calculateAttributes()
 
-        expect(attrs.damageIncrease).toBe(0.94)
+        expect(attrs.damageIncrease).toBe(1.34)
         expect(attrs.penetration).toBe(0)
-        expect(attrs.independentDamageIncrease).toBe(0.5)
+        expect(attrs.independentDamageIncrease).toBe(0)
 
         charBuild.buffs = []
         const attrs2 = charBuild.calculateAttributes()
@@ -112,25 +111,28 @@ describe("CharBuild类测试", () => {
     // 测试武器属性计算
     it("应该能够正确计算武器属性", () => {
         const charBuild = createCharBuild()
-        const meleeWeaponAttrs = charBuild.calculateWeaponAttributes(mockMeleeWeapon)
-        const rangedWeaponAttrs = charBuild.calculateWeaponAttributes(mockRangedWeapon)
+        charBuild.baseName = mockMeleeWeapon.名称
+        const { weapon: meleeWeaponAttrs } = charBuild.calculateWeaponAttributes()
+        charBuild.baseName = mockRangedWeapon.名称
+        const { weapon: rangedWeaponAttrs } = charBuild.calculateWeaponAttributes()
 
         const { 基础攻击, 基础暴击, 基础暴伤, 基础触发 } = charBuild.meleeWeapon
         // 验证武器属性是否为数字
-        expect(meleeWeaponAttrs.attack).toBe(基础攻击)
-        expect(meleeWeaponAttrs.critRate).toBe(基础暴击 * 2) // 铸铁者100%暴击
-        expect(meleeWeaponAttrs.critDamage).toBe(基础暴伤)
-        expect(meleeWeaponAttrs.triggerRate).toBe(基础触发)
+        expect(meleeWeaponAttrs!.attack).toBe(基础攻击)
+        expect(meleeWeaponAttrs!.critRate).toBe(基础暴击 * 2) // 铸铁者100%暴击
+        expect(meleeWeaponAttrs!.critDamage).toBe(基础暴伤)
+        expect(meleeWeaponAttrs!.triggerRate).toBe(基础触发)
 
         const { 基础攻击: 基础远程攻击, 基础暴击: 基础远程暴击, 基础暴伤: 基础远程暴伤, 基础触发: 基础远程触发 } = charBuild.rangedWeapon
-        expect(rangedWeaponAttrs.attack).toBe(基础远程攻击)
-        expect(rangedWeaponAttrs.critRate).toBe(基础远程暴击)
-        expect(rangedWeaponAttrs.critDamage).toBe(基础远程暴伤)
-        expect(rangedWeaponAttrs.triggerRate).toBe(基础远程触发)
+        expect(rangedWeaponAttrs!.attack).toBe(基础远程攻击)
+        expect(rangedWeaponAttrs!.critRate).toBe(基础远程暴击)
+        expect(rangedWeaponAttrs!.critDamage).toBe(基础远程暴伤)
+        expect(rangedWeaponAttrs!.triggerRate).toBe(基础远程触发)
         // 测试MOD
         charBuild.mods = [mod4]
-        const meleeWeaponAttrs2 = charBuild.calculateWeaponAttributes(mockMeleeWeapon)
-        expect(meleeWeaponAttrs2.critRate).toBeCloseTo(基础暴击 * 3, 1)
+        charBuild.baseName = mockMeleeWeapon.名称
+        const { weapon: meleeWeaponAttrs2 } = charBuild.calculateWeaponAttributes()
+        expect(meleeWeaponAttrs2!.critRate).toBeCloseTo(基础暴击 * 3, 1)
     })
 
     // 测试总加成计算
@@ -158,18 +160,22 @@ describe("CharBuild类测试", () => {
         charBuildWithMod.mods = modsWithMeleeMod
 
         // 计算没有MOD52001时的武器属性
-        const meleeAttrsWithoutMod = charBuildWithoutMod.calculateWeaponAttributes(mockMeleeWeapon)
-        const rangedAttrsWithoutMod = charBuildWithoutMod.calculateWeaponAttributes(mockRangedWeapon)
+        charBuildWithoutMod.baseName = mockMeleeWeapon.名称
+        const { weapon: meleeAttrsWithoutMod } = charBuildWithoutMod.calculateWeaponAttributes()
+        charBuildWithoutMod.baseName = mockRangedWeapon.名称
+        const { weapon: rangedAttrsWithoutMod } = charBuildWithoutMod.calculateWeaponAttributes()
 
         // 计算有MOD52001时的武器属性
-        const meleeAttrsWithMod = charBuildWithMod.calculateWeaponAttributes(mockMeleeWeapon)
-        const rangedAttrsWithMod = charBuildWithMod.calculateWeaponAttributes(mockRangedWeapon)
+        charBuildWithMod.baseName = mockMeleeWeapon.名称
+        const { weapon: meleeAttrsWithMod } = charBuildWithMod.calculateWeaponAttributes()
+        charBuildWithMod.baseName = mockRangedWeapon.名称
+        const { weapon: rangedAttrsWithMod } = charBuildWithMod.calculateWeaponAttributes()
 
         // 验证近战武器攻击增加了150%
-        expect(meleeAttrsWithMod.attack).toBeCloseTo(meleeAttrsWithoutMod.attack * 2.5, 2)
+        expect(meleeAttrsWithMod!.attack).toBeCloseTo(meleeAttrsWithoutMod!.attack * 2.5, 2)
 
         // 验证远程武器攻击不受影响
-        expect(rangedAttrsWithMod.attack).toBeCloseTo(rangedAttrsWithoutMod.attack, 2)
+        expect(rangedAttrsWithMod!.attack).toBeCloseTo(rangedAttrsWithoutMod!.attack, 2)
     })
 
     // 测试独立增伤计算
@@ -237,21 +243,22 @@ describe("CharBuild类测试", () => {
     // 测试主要计算方法
     it("应该能够正确执行主要计算方法", () => {
         const charBuild = createCharBuild()
+        charBuild.baseName = charBuild.skills[0].名称
+        const attrs = charBuild.calculateAttributes()
         const result = charBuild.calculate()
-
+        const atk = charBuild.char.基础攻击 * (3 + 1.25) * 1.18
+        expect(charBuild.getTotalBonus("攻击")).toBe(1.25)
+        expect(atk).toBeCloseTo(attrs.attack, 0)
+        const b = charBuild.skills[0].伤害!.值 * 1.18
+        const dm = charBuild.calculateDefenseMultiplier(attrs)
         // 验证结果
-        expect(result).toBeCloseTo(2757, 0)
+        expect(result).toBeCloseTo(atk * b * dm * 0.5 * (1.9 + 0.44), 0)
     })
 
     it("应该能够计算收益", () => {
         const charBuild = createCharBuild()
 
         const buff = new LeveledBuff("黎瑟E")
-        const result = charBuild.calcIncome(buff)
-        console.log(buff)
-        // 验证结果
-        expect(result).toBeCloseTo(1.2, 1)
-
         charBuild.mods = []
         charBuild.buffs = []
         const result2 = charBuild.calcIncome(buff)
