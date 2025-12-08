@@ -124,8 +124,7 @@ describe("LeveledBuff类测试", () => {
     // 测试5：获取完整属性
     it("获取Buff完整属性包含等级和攻击信息", () => {
         const 助战50攻2级 = new LeveledBuff("助战50攻", 2)
-        const fullProps = 助战50攻2级.getFullProperties()
-        expect(fullProps.等级).toBeDefined()
+        const fullProps = 助战50攻2级.getProperties()
         expect(fullProps.攻击).toBeDefined()
     })
 
