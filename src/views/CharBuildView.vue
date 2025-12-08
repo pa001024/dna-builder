@@ -6,6 +6,7 @@ import data from "../data/data.json"
 import Select, { SelectItem } from "../components/select"
 import { useLocalStorage } from "@vueuse/core"
 import { groupBy, cloneDeep } from "lodash-es"
+import { format100, formatSkillProp } from "../util"
 
 // 获取实际数据
 const charOptions = data.char.map((char) => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
@@ -284,7 +285,7 @@ const reloadCustomBuff = () => {
             <!-- 基本设置 -->
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
                 <!-- 角色选择 -->
-                <ShowProps :props="charBuild.char.getProperties()">
+                <ShowProps :props="charBuild.char.getProperties()" side="bottom">
                     <div class="bg-base-300 rounded-xl p-4 shadow-lg">
                         <div class="flex items-center gap-2 mb-3">
                             <SectionMarker reset>
@@ -352,42 +353,67 @@ const reloadCustomBuff = () => {
                     </div>
                 </ShowProps>
                 <!-- 技能选择 -->
-                <div class="bg-base-300 rounded-xl p-4 shadow-lg">
-                    <div class="flex items-center gap-2 mb-3">
-                        <SectionMarker>
-                            <Icon icon="ri:flashlight-line" />
-                        </SectionMarker>
-                        <h3 class="text-lg font-semibold">{{ $t("char-build.select_skill_weapon") }}</h3>
-                    </div>
-                    <div class="relative flex items-center gap-2">
-                        <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.skill_weapon") }}</div>
-                            <Select
-                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.baseName"
-                                @change="updateCharBuild"
+                <FullTooltip side="bottom">
+                    <template #tooltip>
+                        <div class="flex flex-col">
+                            <div
+                                v-for="(val, prop) in charBuild.selectedSkill?.字段"
+                                :key="prop"
+                                class="flex flex-col group hover:bg-base-200 rounded-md p-2"
                             >
-                                <SelectItem v-for="skill in baseOptions" :key="skill.label" :value="skill.label">
-                                    {{ skill.label }}
-                                </SelectItem>
-                            </Select>
+                                <div class="flex justify-between items-center gap-2 text-sm">
+                                    <div class="text-xs text-neutral-500">{{ val.名称 }}</div>
+                                    <div class="font-medium text-primary">
+                                        {{ formatSkillProp(val.名称, val) }}
+                                    </div>
+                                </div>
+                                <div
+                                    v-if="val.属性影响"
+                                    class="justify-between items-center gap-2 text-sm flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
+                                >
+                                    <div class="text-xs text-neutral-500">属性影响</div>
+                                    <div class="text-xs ml-auto font-medium text-neutral-500">技能{{ val.属性影响 }}</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.skill_level") }}</div>
-                            <Select
-                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.charSkillLevel"
-                                @change="updateCharBuild"
-                            >
-                                <SelectItem v-for="lv in 12" :key="lv" :value="lv">
-                                    {{ lv }}
-                                </SelectItem>
-                            </Select>
+                    </template>
+                    <div class="bg-base-300 rounded-xl p-4 shadow-lg">
+                        <div class="flex items-center gap-2 mb-3">
+                            <SectionMarker>
+                                <Icon icon="ri:flashlight-line" />
+                            </SectionMarker>
+                            <h3 class="text-lg font-semibold">{{ $t("char-build.select_skill_weapon") }}</h3>
+                        </div>
+                        <div class="relative flex items-center gap-2">
+                            <div class="flex-1">
+                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.skill_weapon") }}</div>
+                                <Select
+                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                    v-model="charSettings.baseName"
+                                    @change="updateCharBuild"
+                                >
+                                    <SelectItem v-for="skill in baseOptions" :key="skill.label" :value="skill.label">
+                                        {{ skill.label }}
+                                    </SelectItem>
+                                </Select>
+                            </div>
+                            <div class="flex-1">
+                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.skill_level") }}</div>
+                                <Select
+                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                    v-model="charSettings.charSkillLevel"
+                                    @change="updateCharBuild"
+                                >
+                                    <SelectItem v-for="lv in 12" :key="lv" :value="lv">
+                                        {{ lv }}
+                                    </SelectItem>
+                                </Select>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </FullTooltip>
                 <!-- 近战武器选择 -->
-                <ShowProps :props="charBuild.meleeWeapon.getProperties()">
+                <ShowProps :props="charBuild.meleeWeapon.getProperties()" side="bottom">
                     <div class="bg-base-300 rounded-xl p-4 shadow-lg">
                         <div class="flex items-center gap-2 mb-3">
                             <SectionMarker>
@@ -443,7 +469,7 @@ const reloadCustomBuff = () => {
                     </div>
                 </ShowProps>
                 <!-- 远程武器选择 -->
-                <ShowProps :props="charBuild.rangedWeapon.getProperties()">
+                <ShowProps :props="charBuild.rangedWeapon.getProperties()" side="bottom">
                     <div class="bg-base-300 rounded-xl p-4 shadow-lg">
                         <div class="flex items-center gap-2 mb-3">
                             <SectionMarker>

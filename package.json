@@ -1,7 +1,7 @@
 {
     "name": "dna-builder",
     "private": true,
-    "version": "0.1.0",
+    "version": "0.2.0",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -19,6 +19,7 @@
         "@tauri-apps/plugin-clipboard-manager": "^2.3.2",
         "@tauri-apps/plugin-opener": "^2",
         "@tauri-apps/plugin-process": "^2.3.1",
+        "@tauri-apps/plugin-updater": "^2",
         "@vueuse/core": "^14.1.0",
         "animate.css": "^4.1.1",
         "gsap": "^3.13.0",

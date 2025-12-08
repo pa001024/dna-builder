@@ -4,8 +4,8 @@ use tauri::Manager;
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 use window_vibrancy::*;
 
-#[macro_use]
-extern crate lazy_static;
+// #[macro_use]
+// extern crate lazy_static;
 
 // 退出程序
 #[tauri::command]
@@ -19,7 +19,6 @@ async fn app_close(app_handle: tauri::AppHandle) {
     return app_handle.exit(0);
     // }
 }
-
 
 #[tauri::command]
 fn apply_material(window: tauri::WebviewWindow, material: &str) -> String {
@@ -87,10 +86,12 @@ fn get_os_version() -> String {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .plugin(tauri_plugin_clipboard_manager::init())
-        .plugin(tauri_plugin_process::init()).setup(|app| {
+        .plugin(tauri_plugin_process::init())
+        .setup(|app| {
             let handle = app.handle();
             let window = app.get_webview_window("main").unwrap();
             // window.set_shadow(true).expect("Unsupported platform!");
@@ -227,7 +228,11 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![ apply_material, app_close, get_os_version])
+        .invoke_handler(tauri::generate_handler![
+            apply_material,
+            app_close,
+            get_os_version
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

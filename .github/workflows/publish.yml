@@ -1,9 +1,12 @@
 name: "publish"
 
 on:
+    workflow_dispatch:
     push:
-        branches:
-            - release
+        tags:
+            - "v*"
+        # branches:
+        #     - release
 
 # This workflow will trigger on each push to the `release` branch to create or update a GitHub release, build your app, and upload the artifacts to the release.
 
@@ -59,9 +62,11 @@ jobs:
             - uses: tauri-apps/tauri-action@v0
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+                  TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
               with:
-                  tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
-                  releaseName: "App v__VERSION__"
+                  tagName: ${{ github.ref_name }} # the action automatically replaces \_\_VERSION\_\_ with the app version.
+                  releaseName: "Duet Night Abyss Builder v__VERSION__"
                   releaseBody: "See the assets to download this version and install."
                   releaseDraft: true
                   prerelease: false
@@ -72,11 +77,9 @@ jobs:
               shell: pwsh
               run: |
                   $summary = "
-                  > [!SUCCESS]
-                  > 发布成功
-
                   > [!TIP]
-                  > [下载其他版本](https://github.com/pa001024/dna-builder/releases/latest/) 下载最新的稳定版本
+                  > 发布成功
+                  > [下载最新的稳定版本](https://github.com/pa001024/dna-builder/releases/latest/) 
                   "
 
                   echo $summary >> $Env:GITHUB_STEP_SUMMARY
