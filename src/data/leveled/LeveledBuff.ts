@@ -129,7 +129,7 @@ export class LeveledBuff implements Buff {
         if (result) {
             const { char, weapon, weaponAttr, ...attrs } = result
             return { ...attrs, weaponAttr }
-        }
+        } else return attrs
     }
 
     /**
