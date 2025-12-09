@@ -252,8 +252,8 @@ const reloadCustomBuff = () => {
 </script>
 
 <template>
-    <div class="h-full overflow-scroll">
-        <div class="container mx-auto p-4">
+    <div class="h-full overflow-y-auto">
+        <div class="mx-auto p-4">
             <div class="flex justify-end gap-2 mb-4">
                 <Select
                     v-if="charProject.projects.length > 0"
@@ -662,66 +662,71 @@ const reloadCustomBuff = () => {
                     <SectionMarker />
                     <h3 class="text-lg font-semibold">{{ $t("char-build.equipment_preview") }}</h3>
                 </div>
-                <div class="grid md:grid-cols-2 gap-8">
-                    <div class="relative rounded-2xl overflow-hidden border border-secondary/20">
-                        <ImageFallback :src="charBuild.char.url" alt="角色头像" class="w-full h-full object-cover object-top">
-                            <Icon icon="la:user" class="w-full h-full" />
-                        </ImageFallback>
-                        <div class="absolute inset-0 bg-linear-to-t from-gray-900 via-transparent to-transparent"></div>
-                    </div>
-                    <div class="flex flex-col justify-between">
+                <div>
+                    <div class="flex-1 flex flex-col justify-between">
                         <div class="flex flex-col justify-between gap-4">
-                            <div class="flex items-center justify-between">
-                                <h3 class="text-4xl font-bold text-base-content/80 flex items-center gap-2">
-                                    {{ selectedChar }}
-                                    <img :src="`/imgs/${charBuild.char.属性}.png`" :alt="charBuild.char.属性" class="h-12" />
-                                </h3>
-
-                                <span class="px-4 py-2 rounded-full bg-cyan-500/20 text-cyan-400 text-sm border border-cyan-500/30 font-orbitron">LV {{ charBuild.char.等级 }}</span>
-                            </div>
-                            <!-- 武器 -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div
-                                    class="backdrop-blur-sm rounded-xl p-2 bg-linear-to-r from-secondary/1 to-secondary/5 border border-fuchsia-500/20 hover:border-fuchsia-500/40 transition-all duration-300"
-                                >
-                                    <div class="flex gap-4">
-                                        <div class="w-12 h-12 flex items-center justify-center rounded-lg overflow-hidden bg-gray-900/50 border border-fuchsia-500/30">
-                                            <img :alt="charBuild.meleeWeapon.名称" class="w-full h-full object-cover" :src="charBuild.meleeWeapon.url" />
-                                        </div>
-                                        <div class="flex-1">
-                                            <div class="flex items-center justify-between mb-1">
-                                                <h5 class="text-base-content/80 font-bold">{{ charBuild.meleeWeapon.名称 }}</h5>
-                                                <span class="px-2 py-1 rounded-md bg-fuchsia-500/20 text-fuchsia-400 text-xs border border-fuchsia-500/30">近战</span>
-                                            </div>
-                                            <p class="text-gray-400 text-xs">
-                                                {{
-                                                    Object.entries(charBuild.meleeWeapon.getProperties())
-                                                        .map(([k, v]) => `${k} ${formatProp(k, v)}`)
-                                                        .join("，")
-                                                }}
-                                            </p>
-                                        </div>
-                                    </div>
+                            <div class="flex flex-col md:flex-row gap-4">
+                                <div class="relative rounded-2xl overflow-hidden border border-secondary/20 aspect-square self-start">
+                                    <ImageFallback :src="charBuild.char.url" alt="角色头像" class="w-full h-full object-cover object-top">
+                                        <Icon icon="la:user" class="w-full h-full" />
+                                    </ImageFallback>
+                                    <div class="absolute inset-0 bg-linear-to-t from-gray-900 via-transparent to-transparent"></div>
                                 </div>
-                                <div
-                                    class="backdrop-blur-sm rounded-xl p-2 bg-linear-to-r from-secondary/1 to-secondary/5 border border-fuchsia-500/20 hover:border-fuchsia-500/40 transition-all duration-300"
-                                >
-                                    <div class="flex gap-4">
-                                        <div class="w-12 h-12 flex items-center justify-center rounded-lg overflow-hidden bg-gray-900/50 border border-fuchsia-500/30">
-                                            <img :alt="charBuild.rangedWeapon.名称" class="w-full h-full object-cover" :src="charBuild.rangedWeapon.url" />
-                                        </div>
-                                        <div class="flex-1">
-                                            <div class="flex items-center justify-between mb-1">
-                                                <h5 class="text-base-content/80 font-bold">{{ charBuild.rangedWeapon.名称 }}</h5>
-                                                <span class="px-2 py-1 rounded-md bg-fuchsia-500/20 text-fuchsia-400 text-xs border border-fuchsia-500/30">远程</span>
+                                <div class="flex-1 flex flex-col justify-end gap-4">
+                                    <!-- 角色 -->
+                                    <div class="flex items-center justify-between">
+                                        <h3 class="text-4xl font-bold text-base-content/80 flex items-center gap-2">
+                                            <img :src="`/imgs/${charBuild.char.属性}.png`" :alt="charBuild.char.属性" class="h-12" />
+                                            {{ selectedChar }}
+                                        </h3>
+
+                                        <span class="px-4 py-2 rounded-full bg-cyan-500/20 text-cyan-400 text-sm border border-cyan-500/30 font-orbitron">LV {{ charBuild.char.等级 }}</span>
+                                    </div>
+                                    <!-- 武器 -->
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div
+                                            class="backdrop-blur-sm rounded-xl p-2 bg-linear-to-r from-secondary/1 to-secondary/5 border border-fuchsia-500/20 hover:border-fuchsia-500/40 transition-all duration-300"
+                                        >
+                                            <div class="flex gap-4">
+                                                <div class="w-12 h-12 flex items-center justify-center rounded-lg overflow-hidden bg-gray-900/50 border border-fuchsia-500/30">
+                                                    <img :alt="charBuild.meleeWeapon.名称" class="w-full h-full object-cover" :src="charBuild.meleeWeapon.url" />
+                                                </div>
+                                                <div class="flex-1">
+                                                    <div class="flex items-center justify-between mb-1">
+                                                        <h5 class="text-base-content/80 font-bold">{{ charBuild.meleeWeapon.名称 }}</h5>
+                                                        <span class="px-2 py-1 rounded-md bg-fuchsia-500/20 text-fuchsia-400 text-xs border border-fuchsia-500/30">近战</span>
+                                                    </div>
+                                                    <p class="text-gray-400 text-xs">
+                                                        {{
+                                                            Object.entries(charBuild.meleeWeapon.getProperties())
+                                                                .map(([k, v]) => `${k} ${formatProp(k, v)}`)
+                                                                .join("，")
+                                                        }}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <p class="text-gray-400 text-xs">
-                                                {{
-                                                    Object.entries(charBuild.rangedWeapon.getProperties())
-                                                        .map(([k, v]) => `${k} ${formatProp(k, v)}`)
-                                                        .join("，")
-                                                }}
-                                            </p>
+                                        </div>
+                                        <div
+                                            class="backdrop-blur-sm rounded-xl p-2 bg-linear-to-r from-secondary/1 to-secondary/5 border border-fuchsia-500/20 hover:border-fuchsia-500/40 transition-all duration-300"
+                                        >
+                                            <div class="flex gap-4">
+                                                <div class="w-12 h-12 flex items-center justify-center rounded-lg overflow-hidden bg-gray-900/50 border border-fuchsia-500/30">
+                                                    <img :alt="charBuild.rangedWeapon.名称" class="w-full h-full object-cover" :src="charBuild.rangedWeapon.url" />
+                                                </div>
+                                                <div class="flex-1">
+                                                    <div class="flex items-center justify-between mb-1">
+                                                        <h5 class="text-base-content/80 font-bold">{{ charBuild.rangedWeapon.名称 }}</h5>
+                                                        <span class="px-2 py-1 rounded-md bg-fuchsia-500/20 text-fuchsia-400 text-xs border border-fuchsia-500/30">远程</span>
+                                                    </div>
+                                                    <p class="text-gray-400 text-xs">
+                                                        {{
+                                                            Object.entries(charBuild.rangedWeapon.getProperties())
+                                                                .map(([k, v]) => `${k} ${formatProp(k, v)}`)
+                                                                .join("，")
+                                                        }}
+                                                    </p>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -729,7 +734,7 @@ const reloadCustomBuff = () => {
                             <!-- 角色属性 -->
                             <div>
                                 <h4 class="text-xl font-bold mb-4 text-base-content/80">{{ $t("char-build.char_attributes") }}</h4>
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
                                     <div class="col-span-2 bg-base-300/60 bg-linear-to-r from-primary/1 to-primary/5 backdrop-blur-sm rounded-xl p-2 border border-primary/30">
                                         <div class="text-gray-400 text-xs mb-1">{{ charSettings.baseName }} - {{ charSettings.targetFunction }}</div>
                                         <div class="text-primary font-bold text-sm font-orbitron">{{ Math.round(totalDamage) }}</div>
@@ -748,7 +753,7 @@ const reloadCustomBuff = () => {
                             <!-- 武器属性 -->
                             <div v-if="charBuild.selectedWeapon && weaponAttrs">
                                 <h4 class="text-xl font-bold mb-4 text-base-content/80">{{ $t("char-build.weapon_attributes") }}</h4>
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
                                     <div
                                         class="bg-base-300/60 bg-linear-to-r from-secondary/1 to-secondary/5 backdrop-blur-sm rounded-xl p-2 border border-secondary/30"
                                         v-for="[key, val] in Object.entries(weaponAttrs).filter(([_, v]) => v)"
@@ -762,7 +767,7 @@ const reloadCustomBuff = () => {
                             </div>
                             <div class="flex flex-col gap-3" v-if="charBuild.mods.length > 0">
                                 <h4 class="text-xl font-bold text-base-content/80">MOD</h4>
-                                <div class="flex flex-wrap gap-2">
+                                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
                                     <span
                                         class="px-4 py-2 rounded-lg bg-linear-to-r from-secondary/1 to-secondary/5 border border-secondary/30 text-secondary text-xs"
                                         v-for="(count, mod) in charBuild.mods
@@ -783,7 +788,7 @@ const reloadCustomBuff = () => {
                                         {{ count > 1 ? count + " x " : "" }}{{ mod }}
                                     </span>
                                 </div>
-                                <div class="flex flex-wrap gap-2" v-if="charBuild.selectedWeapon">
+                                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2" v-if="charBuild.selectedWeapon">
                                     <span
                                         class="px-4 py-2 rounded-lg bg-linear-to-r from-secondary/1 to-secondary/5 border border-secondary/30 text-secondary text-xs"
                                         v-for="(count, mod) in charBuild.mods
@@ -807,7 +812,7 @@ const reloadCustomBuff = () => {
                             </div>
                             <div v-if="charBuild.buffs.length > 0">
                                 <h4 class="text-xl font-bold mb-3 text-base-content/80">BUFF</h4>
-                                <div class="flex flex-wrap gap-2">
+                                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
                                     <span
                                         class="px-4 py-2 rounded-lg bg-linear-to-r from-secondary/1 to-secondary/5 border border-secondary/30 text-secondary text-xs"
                                         v-for="buff in charBuild.buffs.map((v) => v.名称)"
