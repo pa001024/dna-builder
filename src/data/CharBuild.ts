@@ -763,6 +763,8 @@ export class CharBuild {
             char: new LeveledChar(this.char.名称, this.char.等级),
             hpPercent: this.hpPercent,
             resonanceGain: this.resonanceGain,
+            imbalance: this.imbalance,
+            auraMod: this.auraMod ? new LeveledMod(this.auraMod.id, this.auraMod.等级) : undefined,
             mods: this.mods.map((m) => new LeveledMod(m.id, m.等级)),
             buffs: this.buffs.map((b) => new LeveledBuff(b.名称, b.等级)),
             melee: new LeveledWeapon(this.meleeWeapon.名称, this.meleeWeapon.精炼, this.meleeWeapon.等级),
