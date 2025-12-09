@@ -33,7 +33,7 @@ export default defineConfig(async () => ({
         }),
         VitePWA({
             registerType: "autoUpdate",
-            includeAssets: ["favicon.ico", "apple-touch-icon.png", "masked-icon.svg"],
+            includeAssets: [],
             manifest: {
                 name: "DNA Builder",
                 short_name: "DNA Builder",
@@ -72,10 +72,10 @@ export default defineConfig(async () => ({
                         },
                     },
                     {
-                        urlPattern: /i18n.+\.json$/,
-                        handler: "CacheFirst",
+                        urlPattern: /\.json$/,
+                        handler: "StaleWhileRevalidate",
                         options: {
-                            cacheName: "i18n-cache",
+                            cacheName: "res-cache",
                             expiration: {
                                 maxEntries: 60,
                                 maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
