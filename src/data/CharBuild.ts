@@ -729,15 +729,6 @@ export class CharBuild {
         // 计算目标函数
         return Math.round(this.calculateTargetFunction(damage, attrs))
     }
-
-    /**
-     * 计算单属性收益（减去属性值）
-     * @param props 武器、模组或 buff
-     * @returns 单属性值
-     */
-    public calcIncomeMinus(props?: LeveledWeapon | LeveledMod | LeveledBuff): number {
-        return this.calculate() / this.calculate(props, true) - 1
-    }
     /**
      * 计算单属性收益（加上属性值）
      * @param props 武器、模组或 buff

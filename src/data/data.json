@@ -10001,7 +10001,7 @@
             "名称": "琳恩裂伤特性",
             "限定": "琳恩",
             "描述": "增加一次技能威力独立乘区(上限250%)和同律攻击力",
-            "code": "independentDamageIncrease=(1+independentDamageIncrease)*(1+Math.min(2.5,power))-1,attack+=weaponAttr.attack"
+            "code": "independentDamageIncrease=(1+independentDamageIncrease)*(1+Math.min(2.5,power))-1,attack+=weaponAttr?weaponAttr.attack:0"
         },
         {
             "名称": "幻景4溯",

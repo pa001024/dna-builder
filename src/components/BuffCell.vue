@@ -18,11 +18,11 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
 </script>
 <template>
     <div class="flex">
-        <ShowProps side="top" :props="buff.getProperties()">
+        <ShowProps side="top" :props="buff.getProperties()" :code="buff.code">
             <div
-                class="flex-1 bg-base-200 rounded-lg p-3 cursor-pointer hover:bg-gray-200 transition-colors"
+                class="flex-1 bg-base-200 rounded-lg p-3 cursor-pointer hover:bg-gray-200/20 transition-colors"
                 :class="{
-                    'bg-green-100 border border-green-500 hover:bg-green-200': selected,
+                    'bg-green-100/20 border border-green-500/20 hover:bg-green-200/20': selected,
                 }"
             >
                 <div class="flex items-center justify-between mb-2">
@@ -38,8 +38,8 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
                         <span v-else>{{ lv }}</span>
                     </div>
                 </div>
-                <div class="text-xs text-gray-400 mb-2">{{ buff.描述 }}</div>
-                <div class="text-xs text-gray-500">
+                <div class="text-xs text-base-content/50 mb-2">{{ buff.描述 }}</div>
+                <div class="text-xs text-base-content/30">
                     {{ $t("char-build.income") }}:
                     {{ format100(income) }}
                 </div>
