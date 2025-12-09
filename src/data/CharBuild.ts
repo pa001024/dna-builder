@@ -661,10 +661,17 @@ export class CharBuild {
         }
 
         // 计算效益影响下的神智消耗
-        const baseSanityCost = skill?.神智消耗 || 0 // 从技能中获取或使用默认值
-        const baseSustainedCost = skill?.每秒神智消耗 || 0 // 从技能中获取或使用默认值
+        const baseSanityCost = skill?.神智消耗值 || 100 // 从技能中获取或使用默认值
+        const baseSustainedCost = skill?.每秒神智消耗值 || 100 // 从技能中获取或使用默认值
         const sanityCost = Math.ceil(Math.max(0, baseSanityCost * (2 - attrs.efficiency)))
-        const sustainedCost = Math.ceil(Math.max(0, (baseSustainedCost / attrs.durability) * (2 - attrs.efficiency)))
+        let sustainedCost = baseSustainedCost
+        const sustainedCostField = skill?.每秒神智消耗
+
+        if (sustainedCostField && sustainedCostField.属性影响 && !sustainedCostField.属性影响.includes("耐久")) {
+            sustainedCost = Math.ceil(Math.max(0, baseSustainedCost * (2 - attrs.efficiency)))
+        } else {
+            sustainedCost = Math.ceil(Math.max(0, baseSustainedCost * Math.max(0.25, (2 - attrs.efficiency) / attrs.durability)))
+        }
 
         switch (targetFunction) {
             case "弹片伤害":

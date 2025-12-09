@@ -64,16 +64,34 @@ export class LeveledSkill implements Skill {
         this.updateProperties()
     }
 
-    get 神智消耗(): number {
-        return this.字段.find((field) => field.名称.includes(this.子技能名 || "") && field.名称 === "神智消耗")?.值 || 0
+    get 神智消耗() {
+        return (
+            this.字段.find(
+                (field) => field.名称.includes(this.子技能名 || "") && !field.名称.includes("每秒神智消耗") && field.名称.includes("神智消耗"),
+            ) || this.字段.find((field) => !field.名称.includes("每秒神智消耗") && field.名称.includes("神智消耗"))
+        )
+    }
+    get 神智消耗值(): number {
+        return this.神智消耗?.值 || 0
     }
 
-    get 每秒神智消耗(): number {
-        return this.字段.find((field) => field.名称.includes(this.子技能名 || "") && field.名称 === "每秒神智消耗")?.值 || 0
+    get 每秒神智消耗() {
+        return (
+            this.字段.find((field) => field.名称.includes(this.子技能名 || "") && field.名称.includes("每秒神智消耗")) ||
+            this.字段.find((field) => field.名称.includes("每秒神智消耗"))
+        )
+    }
+
+    get 每秒神智消耗值(): number {
+        return this.每秒神智消耗?.值 || 0
     }
 
     get 伤害() {
         return this.字段.find((field) => field.名称.includes(this.子技能名 || "") && field.名称.includes("伤害"))
+    }
+
+    get 伤害值(): number {
+        return this.伤害?.值 || 0
     }
 
     /**
@@ -108,7 +126,15 @@ export class LeveledSkill implements Skill {
                     }
                 }
                 if (propSet.has("效益")) {
-                    val = field.值 * (2 - tt["效益"])
+                    if (propSet.has("耐久")) {
+                        // 耐久和效益共同影响下仍有175%最大上限
+                        val = field.值 * Math.max(0.25, (2 - tt["效益"]) / tt["耐久"])
+                    } else {
+                        val = field.值 * (2 - tt["效益"])
+                    }
+                }
+                if (field.名称.includes("神智消耗")) {
+                    val = Math.ceil(val)
                 }
                 return {
                     ...field,

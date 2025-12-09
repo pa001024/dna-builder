@@ -464,7 +464,7 @@ function handleAutoFillMaxIncome() {
                                 <div class="text-base-100 text-sm font-bold mb-1">{{ mod.名称 }}</div>
                                 <div class="flex justify-between">
                                     <div class="text-base-300 text-xs">Lv.{{ mod.等级 }}</div>
-                                    <div class="text-base-300 text-xs">{{ formatProp("", charBuild.calcIncome(mod)) }}</div>
+                                    <div class="text-base-300 text-xs">{{ formatProp("", charBuild.calcIncome(mod, true)) }}</div>
                                 </div>
                             </div>
                             <!-- 关闭按钮 -->
