@@ -12,12 +12,18 @@ export function format100(n100: number, di = 2) {
 export function format100r(n100: number, di = 2) {
     return `${n100 >= 0 ? "+" : ""}${+(n100 * 100).toFixed(di)}%`
 }
-const numKeys = new Set(["攻击范围", "固定攻击", "神智回复", "异常数量", "神智消耗"])
+const numKeys = new Set(["攻击范围", "固定攻击", "神智回复", "异常数量", "神智消耗", "基础攻击"])
 export function formatProp(prop: string, val: any): string {
     // 实现属性格式化的逻辑
     if (typeof val !== "number") return String(val)
     if (numKeys.has(prop)) return val > 0 ? `+${val}` : `${val}`
     return format100r(val, 1)
+}
+export function formatWeaponProp(prop: string, val: any): string {
+    // 实现属性格式化的逻辑
+    if (typeof val !== "number") return String(val)
+    if (numKeys.has(prop)) return "" + val.toFixed(2)
+    return format100(val, 1)
 }
 const propRegex = /神智消耗|神智回复$/
 export function formatSkillProp(prop: string, val: LeveledSkillField) {
