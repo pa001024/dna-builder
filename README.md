@@ -13,7 +13,8 @@ DNA Builder 是一个用于游戏角色构建和伤害计算的工具，帮助�
 
 支持 PWA( Progressive Web App ), 可以在浏览器中安装为应用, 无需下载安装
 
-- **EdgeOne**：[https://dna-builder.edgeone.dev/](https://dna-builder.edgeone.dev/)
+- **国内服务器**: [https://xn--chq26veyq.icu/](https://xn--chq26veyq.icu/)
+- **EdgeOne(国内访问不了)**：[https://dna-builder.edgeone.dev/](https://dna-builder.edgeone.dev/)
 - **Vercel(国内访问不了)**：[https://dna-builder.vercel.app/](https://dna-builder.vercel.app/)
 
 ## 桌面应用
