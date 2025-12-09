@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue"
+import { computed, ref } from "vue"
 import { CharBuild } from "../data/CharBuild"
 import { LeveledMod } from "../data/leveled"
 import { copyText, format100, formatProp, pasteText } from "../util"
@@ -24,6 +24,20 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+
+const sortByIncome = ref(false)
+const sortedModOptions = computed(() => {
+    if (!sortByIncome.value) {
+        return props.modOptions
+    }
+    return [...props.modOptions]
+        .map((option) => ({
+            option,
+            income: props.charBuild.calcIncome(new LeveledMod(option.value)),
+        }))
+        .sort((a, b) => b.income - a.income)
+        .map((entry) => entry.option)
+})
 
 // 定义组件事件
 const emit = defineEmits<{
@@ -58,6 +72,10 @@ function handleSelectMod(index: number, value: number) {
 
 function closeSelection() {
     localSelectedSlot.value = -1
+}
+
+function toggleSortByIncome() {
+    sortByIncome.value = !sortByIncome.value
 }
 
 // 这些方法需要从父组件传递或者在组件内部实现
@@ -137,13 +155,16 @@ async function handleImportCode() {
             <SectionMarker />
             <h3 class="text-lg font-semibold">{{ title }}</h3>
             <div class="ml-auto flex items-center gap-2">
+                <button class="btn btn-sm" :class="sortByIncome ? 'btn-secondary' : 'btn-outline'" @click="toggleSortByIncome">
+                    {{ sortByIncome ? "收益排序：高→低" : "默认排序" }}
+                </button>
                 <Select
                     v-if="type === '角色'"
                     class="w-30 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                     :model-value="auraMod"
                     @update:model-value="handleSelectAuraMod($event as any)"
                 >
-                    <SelectItem v-for="m in modOptions.filter((item) => item.ser === '羽蛇')" :key="m.value" :value="m.value">
+                    <SelectItem v-for="m in sortedModOptions.filter((item) => item.ser === '羽蛇')" :key="m.value" :value="m.value">
                         {{ m.label }}
                     </SelectItem>
                 </Select>
@@ -245,7 +266,7 @@ async function handleImportCode() {
                             <ScrollArea class="h-80 w-full">
                                 <div class="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-3">
                                     <ShowProps
-                                        v-for="mod in props.modOptions.filter((m) => m.quality === quality)"
+                                        v-for="mod in sortedModOptions.filter((m) => m.quality === quality)"
                                         :key="mod.value"
                                         :props="new LeveledMod(mod.value).getProperties()"
                                     >
