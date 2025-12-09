@@ -205,11 +205,12 @@ export class LeveledSkillWeapon implements Weapon {
     /**
      * 获取武器的完整属性信息
      */
-    getFullProperties(): Weapon & { 等级: number; 技能等级: number } {
+    getProperties(): Partial<Weapon> {
         return {
-            ...this,
-            等级: this._等级,
-            技能等级: this._技能等级,
+            基础攻击: this.基础攻击,
+            基础暴击: this.基础暴击,
+            基础暴伤: this.基础暴伤,
+            基础触发: this.基础触发,
         }
     }
 

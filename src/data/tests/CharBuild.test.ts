@@ -255,6 +255,17 @@ describe("CharBuild类测试", () => {
         expect(result).toBeCloseTo(atk * b * dm * 0.5 * (1.9 + 0.44), 0)
     })
 
+    // 测试更改目标函数
+    it("应该能够正确执行主要计算方法", () => {
+        const charBuild = createCharBuild()
+        charBuild.baseName = mockMeleeWeapon.名称
+        charBuild.targetFunction = "每秒伤害"
+        charBuild.mods = [] // 迅捷(75%)
+        const income = charBuild.calcIncome(new LeveledMod(52004))
+        // 验证结果
+        expect(income).toBeCloseTo(0.75, 2)
+    })
+
     it("应该能够计算收益", () => {
         const charBuild = createCharBuild()
 

@@ -110,3 +110,11 @@ curl -L https://herobox-img.yingxiong.com/post/1749481913631791252.png -o 火契
 curl -L https://herobox-img.yingxiong.com/post/1749481050642278527.png -o 雷契约者.png
 curl -L https://herobox-img.yingxiong.com/post/1749481195865105251.png -o 风契约者.png
 curl -L https://herobox-img.yingxiong.com/post/1749476867265255464.png -o 光契约者.png
+
+curl -L https://herobox-img.yingxiong.com/config/wiki/shuxing/an.png -o 暗.png
+curl -L https://herobox-img.yingxiong.com/config/wiki/shuxing/shui.png -o 水.png
+curl -L https://herobox-img.yingxiong.com/config/wiki/shuxing/huo.png -o 火.png
+curl -L https://herobox-img.yingxiong.com/config/wiki/shuxing/lei.png -o 雷.png
+curl -L https://herobox-img.yingxiong.com/config/wiki/shuxing/feng.png -o 风.png
+curl -L https://herobox-img.yingxiong.com/config/wiki/shuxing/guang.png -o 光.png
+

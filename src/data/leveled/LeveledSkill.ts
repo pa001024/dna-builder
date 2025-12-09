@@ -1,5 +1,6 @@
 import { uniq } from "lodash-es"
 import { Skill } from "../data-types"
+import { CharAttr } from "../CharBuild"
 
 export interface LeveledSkillField {
     名称: string
@@ -87,13 +88,35 @@ export class LeveledSkill implements Skill {
         }))
     }
 
-    /**
-     * 获取技能的完整属性信息
-     */
-    getFullProperties(): Skill & { 等级: number } {
-        return {
-            ...this,
-            等级: this._level,
-        }
+    getFieldsWithAttr(attrs: CharAttr) {
+        const tt = { 威力: attrs.power, 耐久: attrs.durability, 效益: attrs.efficiency, 范围: attrs.range }
+        return this.字段.map((field) => {
+            if (field.属性影响) {
+                let val = field.值
+                let propSet = new Set(field.属性影响.split(","))
+                if (propSet.has("范围")) {
+                    val = field.值 * tt["范围"]
+                }
+                if (propSet.has("威力")) {
+                    val = field.值 * tt["威力"]
+                }
+                if (propSet.has("耐久")) {
+                    if (field.名称.includes("每秒神智消耗")) {
+                        val = field.值 / tt["耐久"]
+                    } else {
+                        val = field.值 * tt["耐久"]
+                    }
+                }
+                if (propSet.has("效益")) {
+                    val = field.值 * (2 - tt["效益"])
+                }
+                return {
+                    ...field,
+                    值: val,
+                }
+            } else {
+                return field
+            }
+        })
     }
 }

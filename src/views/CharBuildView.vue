@@ -6,7 +6,7 @@ import data from "../data/data.json"
 import Select, { SelectItem } from "../components/select"
 import { useLocalStorage } from "@vueuse/core"
 import { groupBy, cloneDeep } from "lodash-es"
-import { formatSkillProp } from "../util"
+import { formatProp, formatSkillProp, formatWeaponProp } from "../util"
 
 // 获取实际数据
 const charOptions = data.char.map((char) => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
@@ -68,6 +68,7 @@ const defaultCharSettings = {
     rangedWeaponLevel: 80,
     rangedWeaponRefine: 5,
     auraMod: 31524, // 警惕
+    imbalance: true,
     charMods: Array(8).fill(null) as ([number, number] | null)[],
     meleeMods: Array(8).fill(null) as ([number, number] | null)[],
     rangedMods: Array(8).fill(null) as ([number, number] | null)[],
@@ -96,6 +97,7 @@ const charBuild = computed(
             melee: new LeveledWeapon(charSettings.value.meleeWeapon, charSettings.value.meleeWeaponRefine, charSettings.value.meleeWeaponLevel),
             ranged: new LeveledWeapon(charSettings.value.rangedWeapon, charSettings.value.rangedWeaponRefine, charSettings.value.rangedWeaponLevel),
             baseName: charSettings.value.baseName,
+            imbalance: charSettings.value.imbalance,
             hpPercent: charSettings.value.hpPercent,
             resonanceGain: charSettings.value.resonanceGain,
             enemyType: charSettings.value.enemyType,
@@ -322,7 +324,11 @@ const reloadCustomBuff = () => {
                     <template #tooltip>
                         <div v-if="charBuild.selectedSkill" class="flex flex-col">
                             <div class="text-md text-neutral-500 p-2">{{ charBuild.selectedSkill!.类型 }}</div>
-                            <div v-for="(val, prop) in charBuild.selectedSkill!.字段" :key="prop" class="flex flex-col group hover:bg-base-200 rounded-md p-2">
+                            <div
+                                v-for="(val, prop) in charBuild.selectedSkill!.getFieldsWithAttr(charBuild.calculateAttributes())"
+                                :key="prop"
+                                class="flex flex-col group hover:bg-base-200 rounded-md p-2"
+                            >
                                 <div class="flex justify-between items-center gap-4 text-sm">
                                     <div class="text-xs text-neutral-500">{{ val.名称 }}</div>
                                     <div class="font-medium text-primary">
@@ -332,6 +338,17 @@ const reloadCustomBuff = () => {
                                 <div v-if="val.属性影响" class="justify-between items-center gap-4 text-sm flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300">
                                     <div class="text-xs text-neutral-500">属性影响</div>
                                     <div class="text-xs ml-auto font-medium text-neutral-500">技能{{ val.属性影响 }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="charBuild.selectedWeapon" class="flex flex-col">
+                            <div class="text-md text-neutral-500 p-2">{{ charBuild.selectedWeapon!.类型 }}</div>
+                            <div v-for="(val, prop) in charBuild.selectedWeapon!.getProperties()" :key="prop" class="flex flex-col group hover:bg-base-200 rounded-md p-2">
+                                <div class="flex justify-between items-center gap-4 text-sm">
+                                    <div class="text-xs text-neutral-500">{{ prop }}</div>
+                                    <div class="font-medium text-primary">
+                                        {{ formatWeaponProp(prop, val) }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -490,6 +507,9 @@ const reloadCustomBuff = () => {
                             <Icon icon="ri:game-line" />
                         </SectionMarker>
                         <h3 class="text-lg font-semibold">{{ $t("char-build.enemy") }}</h3>
+                        <div class="flex-1"></div>
+                        <div class="label text-xs">失衡</div>
+                        <input v-model="charSettings.imbalance" type="checkbox" class="toggle toggle-secondary" />
                     </div>
                     <div class="relative flex items-center gap-2">
                         <div class="flex-1">
@@ -642,184 +662,158 @@ const reloadCustomBuff = () => {
                     <SectionMarker />
                     <h3 class="text-lg font-semibold">{{ $t("char-build.equipment_preview") }}</h3>
                 </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="relative rounded-2xl overflow-hidden border border-secondary/20">
+                        <ImageFallback :src="charBuild.char.url" alt="角色头像" class="w-full h-full object-cover object-top">
+                            <Icon icon="la:user" class="w-full h-full" />
+                        </ImageFallback>
+                        <div class="absolute inset-0 bg-linear-to-t from-gray-900 via-transparent to-transparent"></div>
+                    </div>
+                    <div class="flex flex-col justify-between">
+                        <div class="flex flex-col justify-between gap-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-4xl font-bold text-base-content/80 flex items-center gap-2">
+                                    {{ selectedChar }}
+                                    <img :src="`/imgs/${charBuild.char.属性}.png`" :alt="charBuild.char.属性" class="h-12" />
+                                </h3>
 
-                <div class="flex flex-col gap-4 md:flex-row">
-                    <!-- 角色信息 -->
-                    <div class="bg-base-200 rounded-lg p-3">
-                        <div class="flex flex-col justify-center items-center gap-2">
-                            <!-- 角色 -->
-                            <div class="flex flex-col items-center">
-                                <div class="size-72 bg-gray-200 rounded-lg mb-3 flex items-center justify-center">
-                                    <span class="text-gray-400">
-                                        <ImageFallback :src="charBuild.char.url" alt="角色头像" class="size-72 object-cover rounded-md">
-                                            <Icon icon="la:user" class="text-[18rem]" />
-                                        </ImageFallback>
+                                <span class="px-4 py-2 rounded-full bg-cyan-500/20 text-cyan-400 text-sm border border-cyan-500/30 font-orbitron">LV {{ charBuild.char.等级 }}</span>
+                            </div>
+                            <!-- 武器 -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div
+                                    class="backdrop-blur-sm rounded-xl p-2 bg-linear-to-r from-secondary/1 to-secondary/5 border border-fuchsia-500/20 hover:border-fuchsia-500/40 transition-all duration-300"
+                                >
+                                    <div class="flex gap-4">
+                                        <div class="w-12 h-12 flex items-center justify-center rounded-lg overflow-hidden bg-gray-900/50 border border-fuchsia-500/30">
+                                            <img :alt="charBuild.meleeWeapon.名称" class="w-full h-full object-cover" :src="charBuild.meleeWeapon.url" />
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="flex items-center justify-between mb-1">
+                                                <h5 class="text-base-content/80 font-bold">{{ charBuild.meleeWeapon.名称 }}</h5>
+                                                <span class="px-2 py-1 rounded-md bg-fuchsia-500/20 text-fuchsia-400 text-xs border border-fuchsia-500/30">近战</span>
+                                            </div>
+                                            <p class="text-gray-400 text-xs">
+                                                {{
+                                                    Object.entries(charBuild.meleeWeapon.getProperties())
+                                                        .map(([k, v]) => `${k} ${formatProp(k, v)}`)
+                                                        .join("，")
+                                                }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div
+                                    class="backdrop-blur-sm rounded-xl p-2 bg-linear-to-r from-secondary/1 to-secondary/5 border border-fuchsia-500/20 hover:border-fuchsia-500/40 transition-all duration-300"
+                                >
+                                    <div class="flex gap-4">
+                                        <div class="w-12 h-12 flex items-center justify-center rounded-lg overflow-hidden bg-gray-900/50 border border-fuchsia-500/30">
+                                            <img :alt="charBuild.rangedWeapon.名称" class="w-full h-full object-cover" :src="charBuild.rangedWeapon.url" />
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="flex items-center justify-between mb-1">
+                                                <h5 class="text-base-content/80 font-bold">{{ charBuild.rangedWeapon.名称 }}</h5>
+                                                <span class="px-2 py-1 rounded-md bg-fuchsia-500/20 text-fuchsia-400 text-xs border border-fuchsia-500/30">远程</span>
+                                            </div>
+                                            <p class="text-gray-400 text-xs">
+                                                {{
+                                                    Object.entries(charBuild.rangedWeapon.getProperties())
+                                                        .map(([k, v]) => `${k} ${formatProp(k, v)}`)
+                                                        .join("，")
+                                                }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 角色属性 -->
+                            <div>
+                                <h4 class="text-xl font-bold mb-4 text-base-content/80">{{ $t("char-build.char_attributes") }}</h4>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    <div class="col-span-2 bg-base-300/60 bg-linear-to-r from-primary/1 to-primary/5 backdrop-blur-sm rounded-xl p-2 border border-primary/30">
+                                        <div class="text-gray-400 text-xs mb-1">{{ charSettings.baseName }} - {{ charSettings.targetFunction }}</div>
+                                        <div class="text-primary font-bold text-sm font-orbitron">{{ Math.round(totalDamage) }}</div>
+                                    </div>
+                                    <div
+                                        class="bg-base-300/60 bg-linear-to-r from-secondary/1 to-secondary/5 backdrop-blur-sm rounded-xl p-2 border border-secondary/30"
+                                        v-for="[key, val] in Object.entries(attributes).filter(([_, v]) => v)"
+                                    >
+                                        <div class="text-gray-400 text-xs mb-1">{{ key === "attack" ? `${charBuild.char.属性}属性` : "" }}{{ $t(`char-build.${key}`) }}</div>
+                                        <div class="text-secondary font-bold text-sm font-orbitron">
+                                            {{ ["attack", "health", "shield", "defense", "sanity"].includes(key) ? val : `${+(val * 100).toFixed(2)}%` }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 武器属性 -->
+                            <div v-if="charBuild.selectedWeapon && weaponAttrs">
+                                <h4 class="text-xl font-bold mb-4 text-base-content/80">{{ $t("char-build.weapon_attributes") }}</h4>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    <div
+                                        class="bg-base-300/60 bg-linear-to-r from-secondary/1 to-secondary/5 backdrop-blur-sm rounded-xl p-2 border border-secondary/30"
+                                        v-for="[key, val] in Object.entries(weaponAttrs).filter(([_, v]) => v)"
+                                    >
+                                        <div class="text-gray-400 text-xs mb-1">{{ key === "attack" ? charBuild.selectedWeapon.伤害类型 : "" }}{{ $t(`char-build.${key}`) }}</div>
+                                        <div class="text-secondary font-bold text-sm font-orbitron">
+                                            {{ ["attack", "attackSpeed", "multiShot"].includes(key) ? val : `${+(val * 100).toFixed(2)}%` }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-3" v-if="charBuild.mods.length > 0">
+                                <h4 class="text-xl font-bold text-base-content/80">MOD</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <span
+                                        class="px-4 py-2 rounded-lg bg-linear-to-r from-secondary/1 to-secondary/5 border border-secondary/30 text-secondary text-xs"
+                                        v-for="(count, mod) in charBuild.mods
+                                            .filter((v) => v.类型 === '角色')
+                                            .map((v) => v.名称)
+                                            .reduce(
+                                                (r, v) => {
+                                                    if (r[v]) {
+                                                        r[v] += 1
+                                                    } else {
+                                                        r[v] = 1
+                                                    }
+                                                    return r
+                                                },
+                                                {} as { [key: string]: number } as any,
+                                            )"
+                                    >
+                                        {{ count > 1 ? count + " x " : "" }}{{ mod }}
                                     </span>
                                 </div>
-                                <div class="text-center">
-                                    <div class="font-medium">{{ selectedChar }}</div>
-                                    <div class="text-xs text-gray-400">等级: {{ charSettings.charLevel }}</div>
+                                <div class="flex flex-wrap gap-2" v-if="charBuild.selectedWeapon">
+                                    <span
+                                        class="px-4 py-2 rounded-lg bg-linear-to-r from-secondary/1 to-secondary/5 border border-secondary/30 text-secondary text-xs"
+                                        v-for="(count, mod) in charBuild.mods
+                                            .filter((v) => v.类型 === charBuild.selectedWeapon!.类型)
+                                            .map((v) => v.名称)
+                                            .reduce(
+                                                (r, v) => {
+                                                    if (r[v]) {
+                                                        r[v] += 1
+                                                    } else {
+                                                        r[v] = 1
+                                                    }
+                                                    return r
+                                                },
+                                                {} as { [key: string]: number } as any,
+                                            )"
+                                    >
+                                        {{ count > 1 ? count + " x " : "" }}{{ mod }}
+                                    </span>
                                 </div>
                             </div>
-                            <div class="flex gap-2 bg-gray-200 rounded-lg p-2 w-full">
-                                <!-- 近战 -->
-                                <div class="flex items-center gap-2">
-                                    <div class="size-16 rounded-lg mb-2 flex items-center justify-center">
-                                        <span class="text-gray-400">
-                                            <img :src="charBuild.meleeWeapon.url" alt="近战武器" class="w-full h-full object-cover rounded-md" />
-                                        </span>
-                                    </div>
-                                    <div class="text-left">
-                                        <div class="font-medium">{{ charSettings.meleeWeapon }}</div>
-                                        <div class="text-xs text-gray-400">等级: {{ charSettings.meleeWeaponLevel }}</div>
-                                        <div class="text-xs text-gray-400">精炼: {{ charSettings.meleeWeaponRefine }}</div>
-                                    </div>
-                                </div>
-                                <!-- 远程 -->
-                                <div class="flex items-center gap-2">
-                                    <div class="size-16 rounded-lg mb-2 flex items-center justify-center">
-                                        <span class="text-gray-400">
-                                            <img :src="charBuild.rangedWeapon.url" alt="远程武器" class="w-full h-full object-cover rounded-md" />
-                                        </span>
-                                    </div>
-                                    <div class="text-left">
-                                        <div class="font-medium">{{ charSettings.rangedWeapon }}</div>
-                                        <div class="text-xs text-gray-400">等级: {{ charSettings.rangedWeaponLevel }}</div>
-                                        <div class="text-xs text-gray-400">精炼: {{ charSettings.rangedWeaponRefine }}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 综合属性 -->
-                    <div class="bg-base-200 rounded-lg p-3 flex-1 flex flex-col gap-2">
-                        <div class="flex flex-col gap-2">
-                            <div class="text-sm font-medium p-2 bg-primary/10 rounded-lg flex items-center gap-2">
-                                <div class="w-3 h-3 rounded-full bg-primary"></div>
-                                {{ $t("char-build.char_attributes") }}
-                            </div>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.attack") }}</div>
-                                    <div class="text-lg font-semibold text-red-400">{{ attributes.attack }}</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.health") }}</div>
-                                    <div class="text-lg font-semibold text-green-400">{{ attributes.health }}</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.shield") }}</div>
-                                    <div class="text-lg font-semibold text-blue-400">{{ attributes.shield }}</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.defense") }}</div>
-                                    <div class="text-lg font-semibold text-yellow-400">{{ attributes.defense }}</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.power") }}</div>
-                                    <div class="text-lg font-semibold text-sky-400">{{ (attributes.power * 100).toFixed(0) }}%</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.durability") }}</div>
-                                    <div class="text-lg font-semibold text-purple-400">{{ (attributes.durability * 100).toFixed(0) }}%</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.efficiency") }}</div>
-                                    <div class="text-lg font-semibold text-green-400">{{ (attributes.efficiency * 100).toFixed(0) }}%</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.range") }}</div>
-                                    <div class="text-lg font-semibold text-rose-400">{{ (attributes.range * 100).toFixed(0) }}%</div>
-                                </div>
-                                <div class="flex flex-col items-center" v-if="attributes.boost">
-                                    <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.boost") }}</span>
-                                    <span class="text-lg font-semibold text-red-400">{{ (attributes.boost * 100).toFixed(0) }}%</span>
-                                </div>
-                                <div class="flex flex-col items-center" v-if="attributes.desperate">
-                                    <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.desperate") }}</span>
-                                    <span class="text-lg font-semibold text-green-400">{{ (attributes.desperate * 100).toFixed(0) }}%</span>
-                                </div>
-                                <div class="flex flex-col items-center" v-if="attributes.damageIncrease">
-                                    <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.damage_increase") }}</span>
-                                    <span class="text-lg font-semibold text-cyan-400">{{ (attributes.damageIncrease * 100).toFixed(0) }}%</span>
-                                </div>
-                                <div class="flex flex-col items-center" v-if="attributes.weaponDamage">
-                                    <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.weapon_damage") }}</span>
-                                    <span class="text-lg font-semibold text-orange-400">{{ (attributes.weaponDamage * 100).toFixed(0) }}%</span>
-                                </div>
-                                <div class="flex flex-col items-center" v-if="attributes.skillDamage">
-                                    <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.skill_damage") }}</span>
-                                    <span class="text-lg font-semibold text-purple-400">{{ (attributes.skillDamage * 100).toFixed(0) }}%</span>
-                                </div>
-                                <div class="flex flex-col items-center" v-if="attributes.independentDamageIncrease">
-                                    <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.independent_damage_increase") }}</span>
-                                    <span class="text-lg font-semibold text-indigo-400">{{ (attributes.independentDamageIncrease * 100).toFixed(0) }}%</span>
-                                </div>
-                                <div class="flex flex-col items-center" v-if="attributes.penetration">
-                                    <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.attribute_penetration") }}</span>
-                                    <span class="text-lg font-semibold text-lime-400">{{ (attributes.penetration * 100).toFixed(0) }}%</span>
-                                </div>
-                                <div class="flex flex-col items-center" v-if="attributes.ignoreDefense">
-                                    <span class="text-xs text-gray-400 mb-1">{{ $t("char-build.ignore_defense") }}</span>
-                                    <span class="text-lg font-semibold text-pink-400">{{ (attributes.ignoreDefense * 100).toFixed(0) }}%</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div v-if="weaponAttrs" class="flex flex-col gap-2">
-                            <div class="text-sm font-medium p-2 bg-primary/10 rounded-lg flex items-center gap-2">
-                                <div class="w-3 h-3 rounded-full bg-primary"></div>
-                                {{ $t("char-build.weapon_attributes") }}
-                            </div>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.attack") }}</div>
-                                    <div class="text-lg font-semibold text-red-400">{{ weaponAttrs.attack }}</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.crit_rate") }}</div>
-                                    <div class="text-lg font-semibold text-yellow-400">{{ (weaponAttrs.critRate * 100).toFixed(1) }}%</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.crit_damage") }}</div>
-                                    <div class="text-lg font-semibold text-yellow-400">{{ (weaponAttrs.critDamage * 100).toFixed(1) }}%</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.trigger_rate") }}</div>
-                                    <div class="text-lg font-semibold text-blue-400">{{ (weaponAttrs.triggerRate * 100).toFixed(1) }}%</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.attack_speed") }}</div>
-                                    <div class="text-lg font-semibold text-green-400">
-                                        {{ weaponAttrs.attackSpeed.toFixed(1) }}
-                                    </div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.multiple_shots") }}</div>
-                                    <div class="text-lg font-semibold text-purple-400">{{ weaponAttrs.multiShot.toFixed(1) }}</div>
-                                </div>
-                                <div v-if="weaponAttrs.damageIncrease" class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.damage_boost") }}</div>
-                                    <div class="text-lg font-semibold text-cyan-400">{{ (weaponAttrs.damageIncrease * 100).toFixed(1) }}%</div>
-                                </div>
-                                <div v-if="weaponAttrs.independentDamageIncrease" class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.independent_damage_increase") }}</div>
-                                    <div class="text-lg font-semibold text-indigo-400">{{ (weaponAttrs.independentDamageIncrease * 100).toFixed(1) }}%</div>
-                                </div>
-                                <div v-if="weaponAttrs.additionalDamage" class="flex flex-col items-center">
-                                    <div class="text-xs text-gray-400 mb-1">{{ $t("char-build.additional_damage") }}</div>
-                                    <div class="text-lg font-semibold text-orange-400">{{ (weaponAttrs.additionalDamage * 100).toFixed(1) }}%</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex flex-col gap-2">
-                            <div class="text-sm font-medium p-2 bg-primary/10 rounded-lg flex items-center gap-2">
-                                <div class="w-3 h-3 rounded-full bg-primary"></div>
-                                {{ charSettings.baseName }} - {{ charSettings.targetFunction }}
-                            </div>
-                            <div class="bg-base-200 rounded-lg p-3 flex-1">
-                                <div class="flex flex-col items-center">
-                                    <div class="text-2xl font-semibold text-primary">{{ Math.round(totalDamage) }}</div>
+                            <div v-if="charBuild.buffs.length > 0">
+                                <h4 class="text-xl font-bold mb-3 text-base-content/80">BUFF</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <span
+                                        class="px-4 py-2 rounded-lg bg-linear-to-r from-secondary/1 to-secondary/5 border border-secondary/30 text-secondary text-xs"
+                                        v-for="buff in charBuild.buffs.map((v) => v.名称)"
+                                    >
+                                        {{ buff }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
