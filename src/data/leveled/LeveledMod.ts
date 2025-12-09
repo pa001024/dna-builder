@@ -16,7 +16,7 @@ export class LeveledMod implements Mod {
     // 基础Mod属性
     id: number
     名称: string
-    系列?: string
+    系列: string
     品质: string
     极性?: string
     耐受: number

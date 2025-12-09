@@ -25,18 +25,62 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const sortByIncome = ref(false)
+const sortByIncome = ref(true)
 const sortedModOptions = computed(() => {
-    if (!sortByIncome.value) {
-        return props.modOptions
+    // 获取已装备的互斥系列名称集合和非契约者MOD名称集合
+    const equippedExclusiveSeries = new Set<string>()
+    const equippedExclusiveNames = new Set<string>()
+
+    if (props.mods && Array.isArray(props.mods)) {
+        props.mods.forEach((mod) => {
+            if (mod) {
+                // 记录互斥系列
+                if (["百首", "狮鹫", "中庭蛇"].includes(mod.系列)) {
+                    equippedExclusiveSeries.add(mod.系列)
+                }
+                // 记录非契约者MOD名称（用于名称互斥）
+                if (mod.系列 !== "契约者") {
+                    equippedExclusiveNames.add(mod.名称!)
+                }
+            }
+        })
     }
-    return [...props.modOptions]
-        .map((option) => ({
-            option,
-            income: props.charBuild.calcIncome(new LeveledMod(option.value)),
-        }))
+
+    // 过滤选项：如果mod属于已装备的互斥系列或同名非契约者MOD，则不显示
+    const filteredOptions = [...props.modOptions].filter((option) => {
+        const mod = new LeveledMod(option.value)
+
+        // 1. 过滤互斥系列的MOD
+        if (equippedExclusiveSeries.has(mod.系列)) {
+            return false
+        }
+
+        // 2. 过滤同名的非契约者MOD（名称互斥）
+        if (mod.系列 !== "契约者" && equippedExclusiveNames.has(mod.名称)) {
+            return false
+        }
+
+        return true
+    })
+
+    if (!sortByIncome.value) {
+        return filteredOptions
+    }
+
+    // 按收益降序排序
+    return filteredOptions
+        .map((option) => {
+            const mod = new LeveledMod(option.value)
+            const income = props.charBuild.calcIncome(mod)
+            return {
+                ...option,
+                income,
+                mod,
+                option,
+            }
+        })
         .sort((a, b) => b.income - a.income)
-        .map((entry) => entry.option)
+        .map((item) => item.option)
 })
 
 // 定义组件事件
@@ -148,6 +192,236 @@ async function handleImportCode() {
         }
     }
 }
+
+function handleAutoFillMaxIncome() {
+    // 第一步：初始填充所有空槽位
+    // 创建一个临时数组模拟当前已装备的MOD状态
+    const tempMods = [...props.mods]
+    // 创建一个集合记录已选择的互斥系列
+    const selectedExclusiveSeries = new Set<string>()
+    // 创建一个集合记录已选择的非契约者MOD名称（用于名称互斥）
+    const selectedExclusiveNames = new Set<string>()
+    // 创建一个集合记录用户初始选择的MOD ID，这些MOD不应该在迭代优化中被替换
+    const userSelectedModSlots = new Set<number>()
+    // 黑名单
+    const blacklist = new Set<string>(["蛮勇", "决断·冥想(没出)", "决断·刹那(没出)", "陷阵", "不息"])
+
+    // 记录用户初始选择的MOD ID
+    props.mods.forEach((mod, i) => {
+        if (mod) {
+            userSelectedModSlots.add(i)
+        }
+    })
+
+    // 首先检查已装备的MOD，记录已选择的互斥系列和非契约者MOD名称
+    tempMods.forEach((mod) => {
+        if (mod) {
+            // 记录互斥系列
+            if (["百首", "狮鹫", "中庭蛇"].includes(mod.系列)) {
+                selectedExclusiveSeries.add(mod.系列!)
+            }
+            // 记录非契约者MOD名称（用于名称互斥）
+            if (mod.系列 !== "契约者") {
+                selectedExclusiveNames.add(mod.名称!)
+            }
+        }
+    })
+
+    // 复制一份所有可选MOD选项
+    const allModOptions = [...props.modOptions]
+    // 为每次添加重新计算收益
+    const localCB = props.charBuild.clone()
+
+    // 遍历所有槽位，为每个空槽位填充收益最高的MOD
+    tempMods.forEach((mod, index) => {
+        // 如果槽位已有MOD，则跳过
+        if (mod !== null) return
+
+        // 计算当前所有可选MOD的收益，并过滤掉已被排除的互斥系列MOD和同名非契约者MOD
+        const availableMods = allModOptions
+            .filter((option) => {
+                const mod = new LeveledMod(option.value)
+
+                // 1. 过滤互斥系列的MOD
+                if (selectedExclusiveSeries.has(mod.系列)) {
+                    return false
+                }
+
+                // 2. 过滤同名的非契约者MOD（名称互斥）
+                if (mod.系列 !== "契约者" && selectedExclusiveNames.has(mod.名称)) {
+                    return false
+                }
+
+                // 3. 过滤黑名单中的MOD
+                if (blacklist.has(mod.名称)) {
+                    return false
+                }
+
+                return true
+            })
+            .map((option) => {
+                const mod = new LeveledMod(option.value)
+                const income = localCB.calcIncome(mod)
+
+                return {
+                    ...option,
+                    income,
+                    mod,
+                    option,
+                }
+            })
+
+        // 如果没有可用的MOD，则跳过
+        if (availableMods.length === 0) return
+
+        // 按收益降序排序
+        availableMods.sort((a, b) => b.income - a.income)
+
+        // 选择收益最高的MOD
+        const selectedMod = availableMods[0]
+
+        // 如果选中的MOD属于互斥系列，则将其系列添加到已选择的互斥系列集合中
+        if (["百首", "狮鹫", "中庭蛇"].includes(selectedMod.mod.系列)) {
+            selectedExclusiveSeries.add(selectedMod.mod.系列)
+        }
+        // 如果是同名非契约者MOD，更新名称互斥集合
+        if (selectedMod.mod.系列 !== "契约者") {
+            selectedExclusiveNames.add(selectedMod.mod.名称)
+        }
+
+        // 更新临时数组和发出选择MOD事件
+        tempMods[index] = selectedMod.mod
+        localCB.mods.push(selectedMod.mod)
+        emit("selectMod", [index, selectedMod.option.value])
+    })
+
+    // 第二步：迭代优化，通过替换MOD来获得更高的总收益
+    let hasImprovement = true
+    let iterations = 0
+    const maxIterations = 100 // 设置最大迭代次数，避免无限循环
+
+    while (hasImprovement && iterations < maxIterations) {
+        hasImprovement = false
+        iterations++
+
+        // 计算当前所有已装备MOD的收益
+        const modIncomes = tempMods
+            .map((mod, index) => {
+                if (!mod) return { index, income: 0, mod: null }
+                // 排除用户初始选择的MOD
+                if (userSelectedModSlots.has(index)) return { index, income: -1, mod: null }
+                // 直接使用props.charBuild计算收益
+                const income = localCB.calcIncome(mod, true)
+                return { index, income, mod }
+            })
+            .filter((item) => item.mod !== null)
+
+        // 如果所有MOD都是用户初始选择的，则无法优化
+        if (modIncomes.length === 0) break
+
+        // 按收益升序排序非用户选择的MOD
+        modIncomes.sort((a, b) => a.income - b.income)
+        const lowestIncomeMod = modIncomes[0]
+        const lowestModIndex = lowestIncomeMod.index
+        const removedMod = lowestIncomeMod.mod
+
+        // 移除这个MOD并更新互斥系列集合和名称互斥集合
+        const tempSelectedExclusiveSeries = new Set(selectedExclusiveSeries)
+        const tempSelectedExclusiveNames = new Set(selectedExclusiveNames)
+
+        if (["百首", "狮鹫", "中庭蛇"].includes(removedMod.系列)) {
+            tempSelectedExclusiveSeries.delete(removedMod.系列)
+        }
+        // 如果是同名非契约者MOD，也从名称互斥集合中移除
+        if (removedMod.系列 !== "契约者") {
+            tempSelectedExclusiveNames.delete(removedMod.名称)
+        }
+
+        // 重新计算当前所有已装备MOD的互斥系列和非契约者MOD名称
+        tempMods.forEach((mod, idx) => {
+            if (idx !== lowestModIndex && mod) {
+                // 重新添加互斥系列
+                if (["百首", "狮鹫", "中庭蛇"].includes(mod.系列)) {
+                    tempSelectedExclusiveSeries.add(mod.系列)
+                }
+                // 如果是非契约者MOD，重新添加到名称互斥集合
+                if (mod.系列 !== "契约者") {
+                    tempSelectedExclusiveNames.add(mod.名称)
+                }
+            }
+        })
+
+        // 计算当前所有可选MOD的收益，并过滤掉已被排除的互斥系列MOD和同名非契约者MOD
+        const availableMods = allModOptions
+            .filter((option) => {
+                const mod = new LeveledMod(option.value)
+                // 1. 过滤互斥系列的MOD
+                if (tempSelectedExclusiveSeries.has(mod.系列)) {
+                    return false
+                }
+                // 2. 过滤同名的非契约者MOD（名称互斥）
+                if (mod.系列 !== "契约者" && tempSelectedExclusiveNames.has(mod.名称)) {
+                    return false
+                }
+                // 3. 过滤黑名单中的MOD
+                if (blacklist.has(mod.名称)) {
+                    return false
+                }
+
+                // 4. 确保不是当前已装备的其他MOD
+                return !tempMods.some((m, idx) => idx !== lowestModIndex && m && m.id === mod.id)
+            })
+            .map((option) => {
+                const mod = new LeveledMod(option.value)
+                const income = localCB.calcIncome(mod)
+
+                return {
+                    ...option,
+                    income,
+                    mod,
+                    option,
+                }
+            })
+
+        // 如果没有可用的MOD，则跳过
+        if (availableMods.length === 0) continue
+
+        // 按收益降序排序
+        availableMods.sort((a, b) => b.income - a.income)
+
+        // 选择收益最高的MOD
+        const selectedMod = availableMods[0]
+
+        // 如果新MOD的收益比移除的MOD高，且不是同一个MOD，则替换
+        if (selectedMod.income > lowestIncomeMod.income && (!removedMod || selectedMod.mod.id !== removedMod.id)) {
+            // 计算替换后的总收益是否提高
+            const currentTotalIncome = modIncomes.reduce((sum, item) => sum + item.income, 0)
+            const newTotalIncome = currentTotalIncome - lowestIncomeMod.income + selectedMod.income
+
+            if (newTotalIncome > currentTotalIncome) {
+                // 替换MOD
+                tempMods[lowestModIndex] = selectedMod.mod
+                localCB.mods[localCB.mods.findIndex((m) => m.id === removedMod.id)] = selectedMod.mod
+                emit("selectMod", [lowestModIndex, selectedMod.option.value])
+
+                // 更新互斥系列集合和名称互斥集合
+                selectedExclusiveSeries.clear()
+                selectedExclusiveNames.clear()
+                tempMods.forEach((mod) => {
+                    if (mod && ["百首", "狮鹫", "中庭蛇"].includes(mod.系列)) {
+                        selectedExclusiveSeries.add(mod.系列)
+                    }
+                    // 如果是非契约者MOD，更新名称互斥集合
+                    if (mod && mod.系列 !== "契约者") {
+                        selectedExclusiveNames.add(mod.名称)
+                    }
+                })
+
+                hasImprovement = true
+            }
+        }
+    }
+}
 </script>
 <template>
     <div class="bg-base-300 rounded-xl p-4 shadow-lg mb-6">
@@ -155,9 +429,6 @@ async function handleImportCode() {
             <SectionMarker />
             <h3 class="text-lg font-semibold">{{ title }}</h3>
             <div class="ml-auto flex items-center gap-2">
-                <button class="btn btn-sm" :class="sortByIncome ? 'btn-secondary' : 'btn-outline'" @click="toggleSortByIncome">
-                    {{ sortByIncome ? "收益排序：高→低" : "默认排序" }}
-                </button>
                 <Select
                     v-if="type === '角色'"
                     class="w-30 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
@@ -168,6 +439,7 @@ async function handleImportCode() {
                         {{ m.label }}
                     </SelectItem>
                 </Select>
+                <div class="btn btn-sm btn-primary" @click="handleAutoFillMaxIncome">自动填充</div>
                 <div class="btn btn-sm btn-primary" @click="handleImportCode">导入代码</div>
                 <div class="btn btn-sm btn-primary" @click="copyText(charBuild.getCode(type))">复制代码</div>
             </div>
@@ -296,6 +568,10 @@ async function handleImportCode() {
                             </ScrollArea>
                         </div>
                     </template>
+
+                    <button class="ml-auto btn btn-sm" :class="sortByIncome ? 'btn-secondary' : 'btn-outline'" @click="toggleSortByIncome">
+                        {{ sortByIncome ? "收益排序：高→低" : "默认排序" }}
+                    </button>
                 </div>
             </div>
         </div>
