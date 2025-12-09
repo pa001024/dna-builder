@@ -150,7 +150,13 @@ if (env.isApp) {
 
 <template>
     <canvas class="fixed w-full h-full z-0 bg-indigo-300" id="background" v-if="!env.isApp"></canvas>
-    <ResizeableWindow :title="route.name === 'schat' ? ui.schatTitle : $t(`${String(route.name)}.title`)" darkable pinable id="main-window" :class="{ 'is-app': env.isApp }">
+    <ResizeableWindow
+        :title="route.name === 'schat' ? ui.schatTitle : $t(`${String(route.name)}.title`)"
+        darkable
+        pinable
+        id="main-window"
+        :class="{ 'is-app': env.isApp }"
+    >
         <RouterView v-slot="{ Component, route }">
             <transition name="slide-right">
                 <KeepAlive v-if="route.meta.keepAlive">

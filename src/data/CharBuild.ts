@@ -559,7 +559,15 @@ export class CharBuild {
         const imbalanceDamageMultiplier = this.imbalance ? attrs.imbalanceDamageBonus + 1.5 : 1
 
         // 计算最终伤害
-        let finalDamage = baseDamage * resistancePenetration * boostMultiplier * desperateMultiplier * defenseMultiplier * damageIncrease * independentDamageIncrease * imbalanceDamageMultiplier
+        let finalDamage =
+            baseDamage *
+            resistancePenetration *
+            boostMultiplier *
+            desperateMultiplier *
+            defenseMultiplier *
+            damageIncrease *
+            independentDamageIncrease *
+            imbalanceDamageMultiplier
 
         return finalDamage
     }
@@ -584,7 +592,8 @@ export class CharBuild {
         const weaponDamageElemental = weaponAttackMultiplier * attrs.attack
 
         // 计算触发伤害期望
-        const triggerDamageMultiplier = weapon.伤害类型 === this.enemyHpType ? this.hpTypeCoefficients[this.enemyHpType] + this.getTotalBonus("触发倍率") : 0
+        const triggerDamageMultiplier =
+            weapon.伤害类型 === this.enemyHpType ? this.hpTypeCoefficients[this.enemyHpType] + this.getTotalBonus("触发倍率") : 0
         const triggerRate = weaponAttrs.triggerRate
         const triggerDamage = 1 + triggerDamageMultiplier
         const triggerExpectedDamage = 1 + triggerDamageMultiplier * triggerRate
@@ -605,7 +614,14 @@ export class CharBuild {
         const independentDamageIncrease = (1 + attrs.independentDamageIncrease) * (1 + weaponAttrs.independentDamageIncrease)
         const additionalDamage = 1 + weaponAttrs.additionalDamage
         const imbalanceDamageMultiplier = this.imbalance ? attrs.imbalanceDamageBonus + 1.5 : 1
-        const commonMore = boostMultiplier * desperateMultiplier * defenseMultiplier * damageIncrease * independentDamageIncrease * additionalDamage * imbalanceDamageMultiplier
+        const commonMore =
+            boostMultiplier *
+            desperateMultiplier *
+            defenseMultiplier *
+            damageIncrease *
+            independentDamageIncrease *
+            additionalDamage *
+            imbalanceDamageMultiplier
 
         // 计算最终伤害
 
@@ -614,9 +630,12 @@ export class CharBuild {
             higherCritNoTrigger: (weaponDamagePhysical + weaponDamageElemental * resistancePenetration) * higherCritDamage * commonMore,
             lowerCritTrigger: (weaponDamagePhysical * triggerDamage + weaponDamageElemental * resistancePenetration) * lowerCritDamage * commonMore,
             higherCritTrigger: (weaponDamagePhysical * triggerDamage + weaponDamageElemental * resistancePenetration) * higherCritDamage * commonMore,
-            lowerCritExpectedTrigger: (weaponDamagePhysical * triggerExpectedDamage + weaponDamageElemental * resistancePenetration) * lowerCritDamage * commonMore,
-            higherCritExpectedTrigger: (weaponDamagePhysical * triggerExpectedDamage + weaponDamageElemental * resistancePenetration) * higherCritDamage * commonMore,
-            expectedDamage: (weaponDamagePhysical * triggerExpectedDamage + weaponDamageElemental * resistancePenetration) * critExpectedDamage * commonMore,
+            lowerCritExpectedTrigger:
+                (weaponDamagePhysical * triggerExpectedDamage + weaponDamageElemental * resistancePenetration) * lowerCritDamage * commonMore,
+            higherCritExpectedTrigger:
+                (weaponDamagePhysical * triggerExpectedDamage + weaponDamageElemental * resistancePenetration) * higherCritDamage * commonMore,
+            expectedDamage:
+                (weaponDamagePhysical * triggerExpectedDamage + weaponDamageElemental * resistancePenetration) * critExpectedDamage * commonMore,
         }
     }
 

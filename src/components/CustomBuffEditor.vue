@@ -109,7 +109,10 @@ const handleValueChange = (event: Event) => {
         <div class="flex gap-3 mb-4">
             <div class="flex-1">
                 <div class="text-xs text-gray-400 mb-1">属性</div>
-                <Select v-model="newBuff.property" class="w-full inline-flex items-center justify-between input input-bordered input-md whitespace-nowrap">
+                <Select
+                    v-model="newBuff.property"
+                    class="w-full inline-flex items-center justify-between input input-bordered input-md whitespace-nowrap"
+                >
                     <SelectItem v-for="prop in properties" :key="prop" :value="prop">
                         {{ prop }}
                     </SelectItem>
@@ -119,7 +122,14 @@ const handleValueChange = (event: Event) => {
 
             <div class="flex-1">
                 <div class="text-xs text-gray-400 mb-1">数值</div>
-                <input type="number" step="0.01" v-model.number="newBuff.value" @input="handleValueChange" class="input input-bordered w-full" placeholder="请输入数值" />
+                <input
+                    type="number"
+                    step="0.01"
+                    v-model.number="newBuff.value"
+                    @input="handleValueChange"
+                    class="input input-bordered w-full"
+                    placeholder="请输入数值"
+                />
                 <div v-if="errors.value" class="text-xs text-error mt-1">{{ errors.value }}</div>
             </div>
 

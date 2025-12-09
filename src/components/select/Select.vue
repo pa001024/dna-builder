@@ -1,5 +1,15 @@
 <script lang="ts" setup>
-import { SelectContent, SelectPortal, SelectRoot, SelectScrollDownButton, SelectScrollUpButton, SelectTrigger, SelectValue, SelectViewport, useForwardPropsEmits } from "radix-vue"
+import {
+    SelectContent,
+    SelectPortal,
+    SelectRoot,
+    SelectScrollDownButton,
+    SelectScrollUpButton,
+    SelectTrigger,
+    SelectValue,
+    SelectViewport,
+    useForwardPropsEmits,
+} from "radix-vue"
 import type { SelectRootEmits, SelectRootProps } from "radix-vue"
 import Icon from "../Icon.vue"
 import { watch } from "vue"

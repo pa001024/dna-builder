@@ -1,4 +1,4 @@
-# DNA Builder - 角色构建与伤害计算系统
+# 二重螺旋构筑模拟器 Duet Night Abyss Builder
 
 <p align="center">
   <a href="https://dna-builder.edgeone.dev/"><img alt="Website" src="https://img.shields.io/website/https/dna-builder.edgeone.dev"></a>

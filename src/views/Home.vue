@@ -106,7 +106,9 @@ onUnmounted(() => {
         <ScrollArea class="h-full overflow-hidden">
             <div class="p-4 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] w-full justify-items-center gap-4">
                 <div v-if="!env.isApp" class="flex w-full items-center bg-base-100/50 hover:bg-base-100 transition-all duration-500 rounded-lg p-4">
-                    <a href="https://github.com/pa001024/dna-builder/releases/latest" target="_blank" class="btn btn-primary flex-1">{{ $t("home.download") }}</a>
+                    <a href="https://github.com/pa001024/dna-builder/releases/latest" target="_blank" class="btn btn-primary flex-1">{{
+                        $t("home.download")
+                    }}</a>
                 </div>
                 <div class="flex w-full items-center bg-base-100/50 hover:bg-base-100 transition-all duration-500 rounded-lg p-4">
                     <a href="https://github.com/pa001024/dna-builder" target="_blank" class="btn btn-primary flex-1">{{ $t("home.starme") }}</a>
