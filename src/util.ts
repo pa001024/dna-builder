@@ -6,6 +6,9 @@ import { LeveledSkillField } from "./data/leveled/LeveledSkill"
 export function useState<T, N extends keyof T>(obj: T, key: N) {
     return [computed(() => obj[key]), (val: T[N]) => (obj[key] = val)] as const
 }
+export function format1(n1: number, di = 2) {
+    return `${+n1.toFixed(di)}`
+}
 export function format100(n100: number, di = 2) {
     return `${+(n100 * 100).toFixed(di)}%`
 }
@@ -27,8 +30,8 @@ export function formatWeaponProp(prop: string, val: any): string {
 }
 const propRegex = /神智消耗|神智回复$/
 export function formatSkillProp(prop: string, val: LeveledSkillField) {
-    const fmt = propRegex.test(prop) ? String : format100
-    return val.格式 ? val.格式.replace(/\{%?\}/g, (v, i) => (v.includes("%") ? format100(i ? val.额外! : val.值) : String(i ? val.额外! : val.值))) : fmt(val.值)
+    const fmt = propRegex.test(prop) ? format1 : format100
+    return val.格式 ? val.格式.replace(/\{%?\}/g, (v, i) => (v.includes("%") ? format100(i ? val.额外! : val.值) : format1(i ? val.额外! : val.值))) : fmt(val.值)
 }
 
 export async function copyText(text: string) {
