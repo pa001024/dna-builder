@@ -6,7 +6,7 @@ import { LeveledSkillField } from "./data/leveled/LeveledSkill"
 export function useState<T, N extends keyof T>(obj: T, key: N) {
     return [computed(() => obj[key]), (val: T[N]) => (obj[key] = val)] as const
 }
-export function format1(n1: number, di = 2) {
+export function format1(n1: number, di = 1) {
     return `${+n1.toFixed(di)}`
 }
 export function format100(n100: number, di = 2) {
