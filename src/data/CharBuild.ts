@@ -292,6 +292,7 @@ export class CharBuild {
             if (weapon.类别 === this.char.近战 || weapon.类别 === this.char.远程) {
                 attackBonus += 0.2
             }
+            let physicalBonus = this.getTotalBonus("物理", prefix)
             let critRateBonus = this.getTotalBonus(`${prefix}暴击`, prefix) + this.getTotalBonus(`暴击`, prefix)
             let critDamageBonus = this.getTotalBonus(`${prefix}暴伤`, prefix) + this.getTotalBonus(`暴伤`, prefix)
             let triggerRateBonus = this.getTotalBonus(`${prefix}触发`, prefix) + this.getTotalBonus(`触发`, prefix)
@@ -315,6 +316,7 @@ export class CharBuild {
             if (props) {
                 if (minus) {
                     attackBonus -= this.getTotalBonusSingle(props, `${prefix}攻击`, prefix) + this.getTotalBonusSingle(props, `攻击`, prefix)
+                    physicalBonus -= this.getTotalBonusSingle(props, `物理`, prefix)
                     critRateBonus -= this.getTotalBonusSingle(props, `${prefix}暴击`, prefix) + this.getTotalBonusSingle(props, `暴击`, prefix)
                     critDamageBonus -= this.getTotalBonusSingle(props, `${prefix}暴伤`, prefix) + this.getTotalBonusSingle(props, `暴伤`, prefix)
                     triggerRateBonus -= this.getTotalBonusSingle(props, `${prefix}触发`, prefix) + this.getTotalBonusSingle(props, `触发`, prefix)
@@ -336,6 +338,7 @@ export class CharBuild {
                     }
                 } else {
                     attackBonus += this.getTotalBonusSingle(props, `${prefix}攻击`, prefix) + this.getTotalBonusSingle(props, `攻击`, prefix)
+                    physicalBonus += this.getTotalBonusSingle(props, `物理`, prefix)
                     critRateBonus += this.getTotalBonusSingle(props, `${prefix}暴击`, prefix) + this.getTotalBonusSingle(props, `暴击`, prefix)
                     critDamageBonus += this.getTotalBonusSingle(props, `${prefix}暴伤`, prefix) + this.getTotalBonusSingle(props, `暴伤`, prefix)
                     triggerRateBonus += this.getTotalBonusSingle(props, `${prefix}触发`, prefix) + this.getTotalBonusSingle(props, `触发`, prefix)
@@ -367,7 +370,6 @@ export class CharBuild {
             let multiShot = 1 + multiShotBonus
 
             // 应用武器物理加成
-            const physicalBonus = this.getTotalBonus("物理", prefix)
             attack *= 1 + physicalBonus
 
             // 应用属性上限
