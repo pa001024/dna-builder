@@ -18,8 +18,14 @@ watchEffect(() => {
 <template>
     <div class="flex h-full">
         <div ref="target" class="flex flex-col space-y-1 py-2 px-2 h-full">
-            <button class="w-full btn btn-ghost border-none justify-start min-h-fit h-auto flex-nowrap whitespace-nowrap px-0 gap-1 overflow-hidden" @click="setExpand(!expand)">
-                <span class="flex-none w-10 h-8 items-center justify-center text-lg text-base-content/50 swap swap-flip" :class="{ 'swap-active': expand }">
+            <button
+                class="w-full btn btn-ghost border-none justify-start min-h-fit h-auto flex-nowrap whitespace-nowrap px-0 gap-1 overflow-hidden"
+                @click="setExpand(!expand)"
+            >
+                <span
+                    class="flex-none w-10 h-8 items-center justify-center text-lg text-base-content/50 swap swap-flip"
+                    :class="{ 'swap-active': expand }"
+                >
                     <Icon icon="tabler:arrow-bar-to-left" class="swap-on" />
                     <Icon icon="tabler:arrow-bar-to-right" class="swap-off" />
                 </span>

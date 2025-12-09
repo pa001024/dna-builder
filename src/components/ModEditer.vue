@@ -207,10 +207,19 @@ async function handleImportCode() {
                     </div>
                     <div class="text-sm font-medium p-2 flex items-center gap-2">
                         <span>等级:</span>
-                        <NumberInput :model-value="mods[localSelectedSlot]!.等级" @update:model-value="handleLevelChange(localSelectedSlot, $event)" :min="1" :max="10" />
+                        <NumberInput
+                            :model-value="mods[localSelectedSlot]!.等级"
+                            @update:model-value="handleLevelChange(localSelectedSlot, $event)"
+                            :min="1"
+                            :max="10"
+                        />
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <div v-for="(val, prop) in mods[localSelectedSlot]!.getProperties()" :key="prop" class="text-sm p-2 bg-base-100/50 border border-base-200 rounded-lg">
+                        <div
+                            v-for="(val, prop) in mods[localSelectedSlot]!.getProperties()"
+                            :key="prop"
+                            class="text-sm p-2 bg-base-100/50 border border-base-200 rounded-lg"
+                        >
                             <div class="text-xs text-neutral-500 mb-1">{{ prop }}</div>
                             <div class="font-medium text-primary">{{ formatProp(prop, val) }}</div>
                         </div>
@@ -235,7 +244,11 @@ async function handleImportCode() {
                         <div class="tab-content py-2">
                             <ScrollArea class="h-80 w-full">
                                 <div class="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-3">
-                                    <ShowProps v-for="mod in props.modOptions.filter((m) => m.quality === quality)" :key="mod.value" :props="new LeveledMod(mod.value).getProperties()">
+                                    <ShowProps
+                                        v-for="mod in props.modOptions.filter((m) => m.quality === quality)"
+                                        :key="mod.value"
+                                        :props="new LeveledMod(mod.value).getProperties()"
+                                    >
                                         <div
                                             class="border aspect-square rounded-md cursor-pointer transition-colors relative flex overflow-hidden"
                                             :class="[getQualityColor(mod.quality), getQualityHoverBorder(mod.quality)]"
