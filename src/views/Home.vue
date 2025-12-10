@@ -79,7 +79,7 @@ function getIntervalHourTime(interval: number = 3, offset: number = 0): number {
 }
 
 // 倒计时剩余毫秒
-const moling = ref(getIntervalDayTime(3, 2))
+const moling = ref(getIntervalDayTime(3, 1))
 const zhouben = ref(getIntervalDayTime(7, 3))
 const mihan = ref(getIntervalHourTime(1))
 
