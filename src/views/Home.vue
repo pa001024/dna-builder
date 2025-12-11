@@ -79,7 +79,7 @@ function getIntervalHourTime(interval: number = 3, offset: number = 0): number {
 }
 
 // 倒计时剩余毫秒
-const moling = ref(getIntervalDayTime(3, 1))
+const moling = ref(getIntervalDayTime(3, 3))
 const zhouben = ref(getIntervalDayTime(7, 3))
 const mihan = ref(getIntervalHourTime(1))
 
@@ -88,7 +88,7 @@ let timer: number | null = null
 onMounted(() => {
     // 每秒更新一次
     timer = window.setInterval(() => {
-        moling.value = getIntervalDayTime(3, 2)
+        moling.value = getIntervalDayTime(3, 3)
         zhouben.value = getIntervalDayTime(7, 3)
         mihan.value = getIntervalHourTime(1)
     }, 1000)
@@ -113,6 +113,8 @@ onUnmounted(() => {
                 <div class="flex w-full items-center bg-base-100/50 hover:bg-base-100 transition-all duration-500 rounded-lg p-4">
                     <a href="https://github.com/pa001024/dna-builder" target="_blank" class="btn btn-primary flex-1">{{ $t("home.starme") }}</a>
                 </div>
+            </div>
+            <div class="p-4 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] w-full justify-items-center gap-4">
                 <StatisticsItem title="魔灵刷新时间">{{ timeStr(moling) }}</StatisticsItem>
                 <StatisticsItem title="周本刷新时间">{{ timeStr(zhouben) }}</StatisticsItem>
                 <StatisticsItem title="密函刷新时间">{{ timeStr(mihan) }}</StatisticsItem>
