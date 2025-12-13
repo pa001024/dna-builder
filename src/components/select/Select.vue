@@ -62,7 +62,9 @@ const forward = useForwardPropsEmits(props, emits)
         </SelectTrigger>
 
         <SelectPortal>
-            <SelectContent class="z-50 overflow-hidden bg-base-100 border-base-content/20 border rounded-btn shadow-xl animate-slideDownAndFade">
+            <SelectContent
+                class="z-50 overflow-hidden bg-base-100 border-base-content/20 border rounded-btn shadow-xl animate-slideDownAndFade"
+            >
                 <SelectScrollUpButton class="flex items-center justify-center cursor-default h-4">
                     <Icon icon="radix-icons:chevron-up" />
                 </SelectScrollUpButton>

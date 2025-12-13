@@ -32,7 +32,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
                         </div>
                         {{ buff.名称 }}
                     </div>
-                    <div class="text-xs text-gray-400" v-if="buff.dx">
+                    <div class="text-xs text-gray-400" v-if="buff.mx">
                         Lv.
                         <NumberInput
                             v-if="selected"

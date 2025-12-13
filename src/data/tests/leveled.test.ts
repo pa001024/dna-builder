@@ -79,6 +79,7 @@ describe("DynamicBuff", () => {
             penetration: 1,
             ignoreDefense: 1,
             skillSpeed: 1,
+            imbalanceDamageBonus: 1,
         }
         attrs = buff.applyDynamicAttr(char, attrs)
         expect(attrs.power).toBe(2)
@@ -360,7 +361,8 @@ describe("LeveledWeapon类测试", () => {
 
     // 测试14：提供倍率名称时应该使用指定的倍率数据
     it("提供倍率名称时应该使用指定的倍率数据", () => {
-        const 铸铁者 = new LeveledWeapon("铸铁者", 5, 80, "三段伤害")
+        const 铸铁者 = new LeveledWeapon("铸铁者", 5, 80)
+        铸铁者.倍率名称 = "三段伤害"
         expect(铸铁者.倍率名称).toBe("三段伤害")
         expect(铸铁者.倍率).toBe(0.5)
         expect(铸铁者.段数).toBe(1)
@@ -377,7 +379,7 @@ describe("LeveledWeapon类测试", () => {
 
     // 测试16：设置不存在的倍率名称时应该使用默认倍率
     it("设置不存在的倍率名称时应该清空倍率数据", () => {
-        const 铸铁者 = new LeveledWeapon("铸铁者", 5, 80, "一段伤害")
+        const 铸铁者 = new LeveledWeapon("铸铁者", 5, 80)
         expect(铸铁者.倍率).toBe(0.4)
 
         铸铁者.倍率名称 = "不存在的倍率"

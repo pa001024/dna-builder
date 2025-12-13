@@ -67,7 +67,8 @@ export class LeveledSkill implements Skill {
     get 神智消耗() {
         return (
             this.字段.find(
-                (field) => field.名称.includes(this.子技能名 || "") && !field.名称.includes("每秒神智消耗") && field.名称.includes("神智消耗"),
+                (field) =>
+                    field.名称.includes(this.子技能名 || "") && !field.名称.includes("每秒神智消耗") && field.名称.includes("神智消耗"),
             ) || this.字段.find((field) => !field.名称.includes("每秒神智消耗") && field.名称.includes("神智消耗"))
         )
     }

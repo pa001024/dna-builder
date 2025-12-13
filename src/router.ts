@@ -2,8 +2,9 @@ import { RouteRecordRaw, createWebHashHistory, createRouter, createWebHistory } 
 
 import Home from "./views/Home.vue"
 import Setting from "./views/Setting.vue"
-// import User from "./views/User.vue"
+import SmallGame from "./views/SmallGame.vue"
 import CharBuildView from "./views/CharBuildView.vue"
+import InventoryEdit from "./views/InventoryEdit.vue"
 import { env } from "./env"
 import { LogicalSize, getCurrentWindow } from "@tauri-apps/api/window"
 
@@ -26,10 +27,13 @@ const routes: readonly RouteRecordRaw[] = [
     // { name: "user", path: "/user", component: User, beforeEnter: () => setMinSize(367, 430) },
     { name: "setting", path: "/setting", component: Setting, beforeEnter: () => setMinSize(540, 430) },
     { name: "char-build", path: "/char-build", component: CharBuildView, beforeEnter: () => setMinSize(600, 600) },
+    { name: "game", path: "/game", component: SmallGame, beforeEnter: () => setMinSize(600, 600) },
+    { name: "inventory", path: "/inventory", component: InventoryEdit, beforeEnter: () => setMinSize(600, 600) },
 ]
 
 export const router = createRouter({
     // edgeone.dev 域名下使用 history 模式，其他域名下使用 hash 模式
-    history: location.host.endsWith("edgeone.dev") || location.host.endsWith("xn--chq26veyq.icu") ? createWebHistory() : createWebHashHistory(),
+    history:
+        location.host.endsWith("edgeone.dev") || location.host.endsWith("xn--chq26veyq.icu") ? createWebHistory() : createWebHashHistory(),
     routes,
 })

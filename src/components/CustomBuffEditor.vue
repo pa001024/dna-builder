@@ -1,12 +1,59 @@
 <script setup lang="ts">
 import { ref, reactive } from "vue"
-import { buffMap, LeveledBuff } from "../data/leveled"
+import { buffMap } from "../data"
 import { formatProp } from "../util"
 import { useLocalStorage } from "@vueuse/core"
 
 // 获取所有可用的属性名
-const properties = LeveledBuff.properties
-
+const properties = [
+    "攻击",
+    "生命",
+    "护盾",
+    "防御",
+    "神智",
+    "威力",
+    "耐久",
+    "效益",
+    "范围",
+    "昂扬",
+    "背水",
+    "增伤",
+    "独立增伤",
+    "武器伤害",
+    "技能伤害",
+    "神智回复",
+    "暴击",
+    "暴伤",
+    "攻速",
+    "多重",
+    "追加伤害",
+    "属性伤",
+    "MOD属性",
+    "属性穿透",
+    "异常数量",
+    "无视防御",
+    "固定攻击",
+    "技能速度",
+    "召唤物范围",
+    "召唤物攻速",
+    "召唤物攻击",
+    "召唤物伤害",
+    "失衡易伤",
+    "近战攻击",
+    "近战暴击",
+    "近战暴伤",
+    "近战触发",
+    "近战攻速",
+    "近战范围",
+    "近战增伤",
+    "远程攻击",
+    "远程攻速",
+    "远程暴击",
+    "远程暴伤",
+    "远程触发",
+    "远程多重",
+    "远程增伤",
+]
 // 自定义BUFF
 const customBuff = useLocalStorage("customBuff", [] as [string, number][])
 function writeCustomBuff() {

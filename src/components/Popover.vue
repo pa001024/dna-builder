@@ -27,7 +27,12 @@ const model = defineModel<boolean>()
                         <p class="text-base-content/70 text-sm font-semibold m-2">{{ title }}</p>
 
                         <div class="controls">
-                            <PopoverClose class="btn btn-ghost btn-square btn-sm" v-if="!noconfirm" aria-label="Close" @click="emit('confirm')">
+                            <PopoverClose
+                                class="btn btn-ghost btn-square btn-sm"
+                                v-if="!noconfirm"
+                                aria-label="Close"
+                                @click="emit('confirm')"
+                            >
                                 <Icon icon="radix-icons:check" />
                             </PopoverClose>
                             <PopoverClose class="btn btn-ghost btn-square btn-sm" aria-label="Close" @click="emit('close')">

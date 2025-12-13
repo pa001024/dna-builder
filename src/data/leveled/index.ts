@@ -21,6 +21,12 @@ gameData.buff.forEach((buff) => {
     buffMap.set(buff.名称, buff as Buff)
 })
 
+// 将effect数据转换为Map
+const effectMap = new Map<string, Buff>()
+gameData.effect.forEach((buff) => {
+    effectMap.set(buff.名称, buff as Buff)
+})
+
 // 将所有武器数据转换为统一的Map
 const weaponMap = new Map<string, Weapon>()
 
@@ -42,11 +48,11 @@ gameData.base.forEach((base: any) => {
 })
 
 // 导出各种映射表供其他模块使用
-export { charMap, modMap, buffMap, weaponMap, baseMap }
+export { charMap, modMap, buffMap, effectMap, weaponMap, baseMap }
 
 // 导出LeveledChar、LeveledMod、LeveledBuff、LeveledWeapon、LeveledSkill类
 export { LeveledChar } from "./LeveledChar"
-export { LeveledMod } from "./LeveledMod"
+export { LeveledMod, LeveledModWithCount } from "./LeveledMod"
 export { LeveledBuff } from "./LeveledBuff"
 export { LeveledWeapon } from "./LeveledWeapon"
 export { LeveledSkillWeapon } from "./LeveledSkillWeapon"

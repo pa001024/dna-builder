@@ -40,11 +40,11 @@ const decrement = () => {
 </script>
 
 <template>
-    <div class="inline-flex items-center overflow-hidden w-fit" v-bind="$attrs">
-        <button class="btn btn-ghost w-8 h-8" @click.stop="decrement">-</button>
+    <div class="inline-flex justify-center items-center overflow-hidden w-fit" v-bind="$attrs">
+        <button class="btn btn-ghost btn-square w-8 h-8" @click.stop="decrement">-</button>
         <div class="w-8 h-8 flex items-center justify-center px-2">
             {{ props.modelValue }}
         </div>
-        <button class="btn btn-ghost w-8 h-8" @click.stop="increment">+</button>
+        <button class="btn btn-ghost btn-square w-8 h-8" @click.stop="increment">+</button>
     </div>
 </template>

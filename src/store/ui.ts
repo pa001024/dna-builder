@@ -29,6 +29,16 @@ export const useUIStore = defineStore("ui", {
                     icon: "la:edit-solid",
                 },
                 {
+                    name: "inventory",
+                    path: "/inventory",
+                    icon: "ri:box-1-line",
+                },
+                {
+                    name: "game",
+                    path: "/game",
+                    icon: "la:gamepad-solid",
+                },
+                {
                     // -- flex-1
                 },
                 {
