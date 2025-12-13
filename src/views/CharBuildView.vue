@@ -128,6 +128,7 @@ const charBuild = computed(
             meleeMods: selectedMeleeMods.value.filter((mod) => mod !== null),
             rangedMods: selectedRangedMods.value.filter((mod) => mod !== null),
             skillWeaponMods: selectedSkillWeaponMods.value.filter((mod) => mod !== null),
+            skillLevel: charSettings.value.charSkillLevel,
             buffs: selectedBuffs.value,
             melee: new LeveledWeapon(
                 charSettings.value.meleeWeapon,

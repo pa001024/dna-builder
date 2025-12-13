@@ -37,7 +37,6 @@ export class LeveledSkill implements Skill {
         // 设置基础属性
         this.名称 = skillData.名称
         this.类型 = skillData.类型
-
         // 设置技能等级（如果提供），否则设为10
         this.等级 = 等级 || 10
         this.字段 = []

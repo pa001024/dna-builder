@@ -253,7 +253,7 @@ export class LeveledWeapon implements Weapon {
         this.baseProperties.forEach((prop) => {
             const originalValue = this._originalWeaponData[prop]
             if (originalValue !== undefined) {
-                const currentValue = (originalValue / (LeveledWeapon._maxRefineLevel + 1)) * (this._精炼 + 1)
+                const currentValue = (originalValue / 10) * (this._精炼 + 5)
                 this[prop] = currentValue
             }
         })
@@ -262,8 +262,8 @@ export class LeveledWeapon implements Weapon {
             const props = this.buff.getProperties()
             Object.keys(props).forEach((prop) => {
                 const maxValue = buff[prop] || 0
-                const currentValue = (maxValue / (LeveledWeapon._maxRefineLevel + 1)) * (this._精炼 + 1)
-                const baseValue = (buff.baseValue / (LeveledWeapon._maxRefineLevel + 1)) * (this._精炼 + 1)
+                const currentValue = (maxValue / 10) * (this._精炼 + 5)
+                const baseValue = (buff.baseValue / 10) * (this._精炼 + 5)
                 this[prop] = currentValue
                 if (buff.描述.includes(`{%}`)) {
                     buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(baseValue * 100).toFixed(1)}%`)

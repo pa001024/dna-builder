@@ -128,7 +128,7 @@ export class CharBuild {
 
         // 从skills表中获取角色技能数组，用参数skillLevel初始化LeveledSkill后储存为私有属性skills数组
         const skillLevel = options.skillLevel || 10
-        this.skills = this.char.技能.map((skill) => new LeveledSkill(skill, skillLevel))
+        this.skills = this.char.技能.map((skill) => new LeveledSkill(skill.skillData, skillLevel))
 
         // 从char中获取同率武器值，如果非空则从武器表中获取同率武器属性，储存为私有字段skillWeapon
         if (this.char.同律武器) {
