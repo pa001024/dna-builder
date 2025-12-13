@@ -70,7 +70,7 @@ const emit = defineEmits<{
                         <img :src="mod.url" :alt="mod.名称" />
                     </div>
                     <!-- MOD名称 -->
-                    <div class="relative mt-auto w-full bg-black/50 z-10 text-left p-2">
+                    <div class="relative mt-auto w-full bg-base-content/30 z-10 text-left p-2">
                         <div class="text-base-100 text-sm font-bold mb-1 flex items-center">
                             <Icon v-if="selected" icon="ri:checkbox-circle-fill" class="inline-block mr-1 text-green-500" />
                             {{ mod.名称 }}
@@ -100,7 +100,7 @@ const emit = defineEmits<{
                                 />
                                 <div class="absolute w-full flex justify-between max-h-20 overflow-hidden group-hover:max-h-0">
                                     <div class="text-base-300 text-xs">Lv.{{ mod.等级 }}</div>
-                                    <div class="text-base-300 text-xs" v-if="income">{{ format100r(income) }}</div>
+                                    <div class="text-base-300 text-xs" v-if="income">{{ format100r(income, 1) }}</div>
                                     <div class="text-base-300 text-xs" v-if="count">x {{ count }}</div>
                                 </div>
                             </div>
@@ -108,7 +108,7 @@ const emit = defineEmits<{
                                 <div class="text-base-300 text-xs">
                                     {{ control && selected !== undefined ? "未拥有" : `Lv.${mod.等级}` }}
                                 </div>
-                                <div class="text-base-300 text-xs" v-if="income">{{ format100r(income) }}</div>
+                                <div class="text-base-300 text-xs" v-if="income">{{ format100r(income, 1) }}</div>
                                 <div class="text-base-300 text-xs" v-if="count">x{{ count }}</div>
                             </div>
                         </div>
