@@ -19,8 +19,8 @@ const numKeys = new Set(["攻击范围", "固定攻击", "神智回复", "异常
 export function formatProp(prop: string, val: any): string {
     // 实现属性格式化的逻辑
     if (typeof val !== "number") return String(val)
-    if (numKeys.has(prop)) return val > 0 ? `+${val}` : `${val}`
-    return format100r(val, 1)
+    if (numKeys.has(prop)) return val > 0 && !prop.startsWith("基础") ? `+${val}` : `${val}`
+    return prop.startsWith("基础") ? format100(val, 1) : format100r(val, 1)
 }
 export function formatWeaponProp(prop: string, val: any): string {
     // 实现属性格式化的逻辑

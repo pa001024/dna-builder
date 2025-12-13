@@ -29,3 +29,22 @@ fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 4) + "\n")
 fs.writeFileSync(tauriConfPath, JSON.stringify(tauriConf, null, 4) + "\n")
 
 // console.log(`Version updated to ${newVersion}`)
+
+// sort JSON
+function sortJson(obj) {
+    if (typeof obj !== "object" || obj === null) return obj
+    if (Array.isArray(obj)) return obj.map(sortJson)
+    return Object.fromEntries(
+        Object.entries(obj)
+            .map(([key, value]) => [key, sortJson(value)])
+            .sort(([a], [b]) => a.localeCompare(b)),
+    )
+}
+
+const langs = ["en", "zh-CN", "zh-TW", "ja", "ko"]
+for (const lang of langs) {
+    const i18nPath = path.join(import.meta.url.replace("file:///", ""), "..", "..", "public", "i18n", lang, `translation.json`)
+    let i18n = JSON.parse(fs.readFileSync(i18nPath, "utf8"))
+    i18n = sortJson(i18n)
+    fs.writeFileSync(i18nPath, JSON.stringify(i18n, null, 4) + "\n")
+}

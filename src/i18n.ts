@@ -17,8 +17,8 @@ export const i18nLanguages = [
     },
     {
         name: "日本語",
-        code: "jp",
-        alias: ["ja", "ja-JP"],
+        code: "ja",
+        alias: ["ja-JP"],
     },
     {
         name: "한국어",

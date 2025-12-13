@@ -23,7 +23,7 @@ describe("CharBuild类测试", () => {
             char: new LeveledChar("黎瑟"),
             hpPercent: 0.5,
             resonanceGain: 2,
-            mods: [...mockMods],
+            charMods: [...mockMods],
             buffs: [...mockBuffs],
             melee: new LeveledWeapon("铸铁者"),
             ranged: new LeveledWeapon("烈焰孤沙"),
@@ -249,7 +249,7 @@ describe("CharBuild类测试", () => {
         const atk = charBuild.char.基础攻击 * (3 + 1.25) * 1.18
         expect(charBuild.getTotalBonus("攻击")).toBe(1.25)
         expect(atk).toBeCloseTo(attrs.attack, 0)
-        const b = charBuild.skills[0].伤害值!.值 * 1.18
+        const b = charBuild.skills[0].伤害值 * 1.18
         const dm = charBuild.calculateDefenseMultiplier(attrs)
         // 验证结果
         expect(result).toBeCloseTo(atk * b * dm * 0.5 * (1.9 + 0.44), 0)

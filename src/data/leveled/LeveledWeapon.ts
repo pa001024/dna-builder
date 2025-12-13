@@ -1,5 +1,5 @@
 import { uniq } from "lodash-es"
-import { baseMap, weaponMap } from "."
+import { baseMap, effectMap, LeveledBuff, weaponMap } from "."
 import { Weapon, WeaponBase } from "../data-types"
 
 /**
@@ -18,6 +18,7 @@ export class LeveledWeapon implements Weapon {
     基础触发: number
     弹道类型?: string;
     [key: string]: any
+    buff?: LeveledBuff
     // 新增属性
     倍率 = 1
     弹片数?: number
@@ -31,20 +32,40 @@ export class LeveledWeapon implements Weapon {
     // 原始武器对象
     private _originalWeaponData: Weapon
     // 精炼等级上限（目前武器精炼等级上限固定为5）
-    private _maxRefineLevel: number = 5
+    private static _maxRefineLevel: number = 5
     // 武器等级对应的基础攻击倍数（1,10,20,30,40,50,60,70,80级）
-    private static _levelAttackMultipliers: number[] = [0.079666848, 0.206300923, 0.302118414, 0.413724425, 0.529132718, 0.682636248, 0.813579576, 1]
+    private static _levelAttackMultipliers: number[] = [
+        0.079666848, 0.206300923, 0.302118414, 0.413724425, 0.529132718, 0.682636248, 0.813579576, 1,
+    ]
+
+    static get emptyWeapon(): LeveledWeapon {
+        return new LeveledWeapon({
+            名称: "空武器",
+            类别: "近战",
+            类型: "长柄",
+            伤害类型: "切割",
+            基础攻击: 0,
+            基础暴击: 0,
+            基础暴伤: 0,
+            基础触发: 0,
+        })
+    }
 
     /**
      * 构造函数
      * @param weaponName 武器的名称
      * @param 精炼 可选的武器精炼等级
      * @param 等级 可选的武器等级
-     * @param 倍率名称 可选的倍率名称
+     * @param effectLv 可选的效果等级
      */
-    constructor(weaponName: string, 精炼?: number, 等级?: number, 倍率名称?: string) {
+    constructor(
+        weaponName: string | Weapon,
+        精炼?: number,
+        等级?: number,
+        public effectLv?: number,
+    ) {
         // 从统一的武器Map中获取武器数据
-        const weaponData = weaponMap.get(weaponName)
+        const weaponData = typeof weaponName === "string" ? weaponMap.get(weaponName) : weaponName
 
         if (!weaponData) {
             throw new Error(`武器名称 "${weaponName}" 未在静态表中找到`)
@@ -64,17 +85,22 @@ export class LeveledWeapon implements Weapon {
         this.基础触发 = weaponData.基础触发
         if (weaponData.弹道类型) this.弹道类型 = weaponData.弹道类型
 
+        if (effectMap.has(this.名称)) {
+            this.buff = new LeveledBuff(effectMap.get(this.名称)!, effectLv)
+            this.buff.pid = this.名称
+        }
+
         // 初始化倍率相关属性为undefined
         this.弹片数 = undefined
         this.射速 = undefined
-        this.段数 = undefined
+        this.段数 = 1
         this._倍率名称 = undefined
 
         // 设置倍率名称，如果未提供则使用默认倍率
-        this.倍率名称 = 倍率名称 || this.默认倍率名称
+        this.倍率名称 = this.默认倍率名称
 
         // 设置精炼等级（如果提供），否则设为5
-        this._精炼 = Math.max(0, Math.min(this._maxRefineLevel, 精炼 !== undefined ? 精炼 : 5))
+        this._精炼 = Math.max(0, Math.min(LeveledWeapon._maxRefineLevel, 精炼 !== undefined ? 精炼 : 5))
 
         // 设置武器等级（如果提供），否则设为80
         this._等级 = Math.max(1, Math.min(80, 等级 !== undefined ? 等级 : 80))
@@ -107,7 +133,7 @@ export class LeveledWeapon implements Weapon {
 
     set 精炼(value: number) {
         // 确保精炼等级在0到精炼等级上限之间
-        this._精炼 = Math.max(0, Math.min(this._maxRefineLevel, value))
+        this._精炼 = Math.max(0, Math.min(LeveledWeapon._maxRefineLevel, value))
 
         // 更新属性
         this.updateProperties()
@@ -131,7 +157,7 @@ export class LeveledWeapon implements Weapon {
         // 获取该武器类型的所有base数据
         const baseDataList = baseMap.get(this.类别)
         if (!baseDataList) {
-            console.warn(`未找到武器类型 "${this.类别}" 的base数据`)
+            // console.warn(`未找到武器类型 "${this.类别}" 的base数据`)
             return undefined
         }
 
@@ -201,30 +227,13 @@ export class LeveledWeapon implements Weapon {
             this.射速 = matchedBase.射速
             this.段数 = matchedBase.段数
         } else {
-            console.warn(`未找到武器 "${this.名称}" 对应类型 "${this.类别}" 下的倍率名称 "${倍率名称}" 的base数据`)
+            // console.warn(`未找到武器 "${this.名称}" 对应类型 "${this.类别}" 下的倍率名称 "${倍率名称}" 的base数据`)
             this.倍率 = 0
             this.弹片数 = undefined
             this.射速 = undefined
             this.段数 = undefined
         }
     }
-    static properties = [
-        "耐久",
-        "生命",
-        "暴击",
-        "攻速",
-        "暴伤",
-        "范围",
-        "攻击",
-        "背水",
-        "威力",
-        "防御",
-        "触发",
-        "攻击范围",
-        "技能伤害",
-        "武器伤害",
-        "多重",
-    ] as const
     /**
      * 根据等级和精炼更新武器属性
      * 基础攻击受等级影响，其他属性受精炼影响
@@ -241,24 +250,116 @@ export class LeveledWeapon implements Weapon {
 
         // 根据精炼等级调整属性
 
-        LeveledWeapon.properties.forEach((prop) => {
-            const originalValue = (this._originalWeaponData as any)[prop]
+        this.baseProperties.forEach((prop) => {
+            const originalValue = this._originalWeaponData[prop]
             if (originalValue !== undefined) {
-                const currentValue = (originalValue / (this._maxRefineLevel + 1)) * (this._精炼 + 1)
-                ;(this as any)[prop] = currentValue
+                const currentValue = (originalValue / (LeveledWeapon._maxRefineLevel + 1)) * (this._精炼 + 1)
+                this[prop] = currentValue
             }
         })
+        if (this.buff) {
+            const buff = this.buff!
+            const props = this.buff.getProperties()
+            Object.keys(props).forEach((prop) => {
+                const maxValue = buff[prop] || 0
+                const currentValue = (maxValue / (LeveledWeapon._maxRefineLevel + 1)) * (this._精炼 + 1)
+                const baseValue = (buff.baseValue / (LeveledWeapon._maxRefineLevel + 1)) * (this._精炼 + 1)
+                this[prop] = currentValue
+                if (buff.描述.includes(`{%}`)) {
+                    buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(baseValue * 100).toFixed(1)}%`)
+                }
+            })
+        }
     }
 
+    /**
+     * 获取武器的属性信息
+     */
     getProperties(): Partial<Weapon> {
         const properties: Partial<Weapon> = {}
-        LeveledWeapon.properties.forEach((prop) => {
-            if ((this as any)[prop]) properties[prop] = (this as any)[prop]
+        this.properties.forEach((prop) => {
+            properties[prop] = this[prop]
         })
         return properties
+    }
+    getSimpleProperties(): Partial<Weapon> {
+        const properties: Partial<Weapon> = {}
+        this.simpleProperties.forEach((prop) => {
+            properties[prop] = this[prop]
+        })
+        return properties
+    }
+    static _exclude_properties = new Set([
+        "id",
+        "名称",
+        "类型",
+        "类别",
+        "倍率",
+        "弹片数",
+        "弹道类型",
+        "射速",
+        "段数",
+        "_倍率名称",
+        "_精炼",
+        "buff",
+        "effectLv",
+        "_等级",
+        "_originalWeaponData",
+    ])
+    static _exclude_simple_properties = new Set([
+        "id",
+        "名称",
+        "类型",
+        "类别",
+        "伤害类型",
+        "基础攻击",
+        "基础暴击",
+        "基础暴伤",
+        "基础触发",
+        "倍率",
+        "弹片数",
+        "弹道类型",
+        "射速",
+        "段数",
+        "_倍率名称",
+        "_精炼",
+        "buff",
+        "effectLv",
+        "_等级",
+        "_originalWeaponData",
+    ])
+    static _exclude_base_properties = new Set([
+        "id",
+        "名称",
+        "类型",
+        "类别",
+        "伤害类型",
+        "基础攻击",
+        "基础暴击",
+        "基础暴伤",
+        "基础触发",
+        "倍率",
+        "弹片数",
+        "弹道类型",
+        "射速",
+        "段数",
+        "buff",
+    ])
+    get properties(): string[] {
+        return Object.keys(this).filter((prop) => !LeveledWeapon._exclude_properties.has(prop))
+    }
+    get simpleProperties(): string[] {
+        return Object.keys(this).filter((prop) => !LeveledWeapon._exclude_simple_properties.has(prop))
+    }
+    get baseProperties(): string[] {
+        return Object.keys(this._originalWeaponData).filter((prop) => !LeveledWeapon._exclude_base_properties.has(prop))
     }
 
     get url() {
         return `/imgs/${this.名称}.png`
+    }
+
+    static getUrl(weaponName: string) {
+        return `/imgs/${weaponName}.png`
     }
 }

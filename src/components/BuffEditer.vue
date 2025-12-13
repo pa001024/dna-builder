@@ -2,14 +2,16 @@
 import { CharBuild } from "../data/CharBuild"
 import { LeveledBuff } from "../data/leveled"
 
-interface BuffSettings {
-    buffs: [string, number][]
+interface BuffOption {
+    label: string
+    value: LeveledBuff
+    lv: number
+    limit?: string
+    description?: string
 }
-
 defineProps<{
-    buffOptions: any[]
+    buffOptions: BuffOption[]
     selectedBuffs: LeveledBuff[]
-    charSettings: BuffSettings
     charBuild: CharBuild
 }>()
 
@@ -34,7 +36,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
                 v-for="buff in buffOptions.filter((b) => selectedBuffs.some((v) => v.名称 === b.label))"
                 :key="buff.label"
                 :buff="buff.value"
-                :lv="charSettings.buffs.find((v) => v[0] === buff.label)![1]"
+                :lv="buff.lv"
                 selected
                 :income="charBuild.calcIncome(buff.value, true)"
                 @setBuffLv="setBuffLv"
@@ -45,7 +47,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
                 v-for="buff in buffOptions.filter((b) => !selectedBuffs.some((v) => v.名称 === b.label))"
                 :key="buff.label"
                 :buff="buff.value"
-                :lv="buff.value.等级"
+                :lv="buff.lv"
                 :income="charBuild.calcIncome(buff.value, false)"
                 @setBuffLv="setBuffLv"
                 @click="toggleBuff(buff.value)"

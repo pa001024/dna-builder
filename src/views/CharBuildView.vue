@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive } from "vue"
+import { computed, reactive, ref } from "vue"
 import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon } from "../data/leveled"
 import { CharBuild } from "../data/CharBuild"
 import data from "../data/data.json"
@@ -7,29 +7,43 @@ import Select, { SelectItem } from "../components/select"
 import { useLocalStorage } from "@vueuse/core"
 import { groupBy, cloneDeep } from "lodash-es"
 import { formatProp, formatSkillProp, formatWeaponProp } from "../util"
+import { useInvStore } from "../store/inv"
 
+const inv = useInvStore()
 // 获取实际数据
 const charOptions = data.char.map((char) => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
-const modOptions = data.mod.map((mod) => ({
-    value: mod.id,
-    label: mod.名称,
-    quality: mod.品质,
-    type: mod.类型,
-    limit: mod.属性 || mod.限定,
-    ser: mod.系列,
-    icon: mod.系列 && ["狮鹫", "百首", "契约者"].includes(mod.系列) ? `/imgs/${mod.属性}${mod.系列}.png` : `/imgs/${mod.系列}系列.png`,
-}))
+const modOptions = data.mod
+    .map((mod) => ({
+        value: mod.id,
+        label: mod.名称,
+        quality: mod.品质,
+        type: mod.类型,
+        limit: mod.属性 || mod.限定,
+        ser: mod.系列,
+        icon: mod.系列 && ["狮鹫", "百首", "契约者"].includes(mod.系列) ? `/imgs/${mod.属性}${mod.系列}.png` : `/imgs/${mod.系列}系列.png`,
+        count: Math.min(inv.getModCount(mod.id, mod.品质), mod.系列 !== "契约者" ? 8 : 1),
+        bufflv: inv.getBuffLv(mod.名称),
+        lv: inv.getModLv(mod.id, mod.品质),
+    }))
+    .filter((mod) => mod.count)
 const _buffOptions = reactive(
     data.buff.map((buff) => ({
         value: new LeveledBuff(buff.名称),
         label: buff.名称,
         limit: buff.限定,
         description: buff.描述,
-        icon: `/imgs/${buff.名称}.png`, // 可以根据需要添加图标
     })),
 )
 const buffOptions = computed(() =>
-    _buffOptions.filter((buff) => !buff.limit || buff.limit === selectedChar.value || buff.limit === charBuild.value.char.属性),
+    _buffOptions
+        .filter((buff) => !buff.limit || buff.limit === selectedChar.value || buff.limit === charBuild.value.char.属性)
+        .map((v) => ({
+            value: new LeveledBuff(v.value._originalBuffData, charSettings.value.buffs.find((b) => b[0] === v.label)?.[1] || v.value.等级),
+            label: v.label,
+            limit: v.limit,
+            description: v.description,
+            lv: charSettings.value.buffs.find((b) => b[0] === v.label)?.[1] || v.value.等级,
+        })),
 )
 // 近战和远程武器选项
 const meleeWeaponOptions = data.weapon
@@ -77,27 +91,56 @@ const defaultCharSettings = {
     skillWeaponMods: Array(4).fill(null) as ([number, number] | null)[],
     buffs: [] as [string, number][],
 }
-const charSettings = useLocalStorage(charSettingsKey, defaultCharSettings, { deep: true })
-const selectedCharMods = computed(() => charSettings.value.charMods.map((v) => (v ? new LeveledMod(v[0], v[1]) : null)))
-const selectedMeleeMods = computed(() => charSettings.value.meleeMods.map((v) => (v ? new LeveledMod(v[0], v[1]) : null)))
-const selectedRangedMods = computed(() => charSettings.value.rangedMods.map((v) => (v ? new LeveledMod(v[0], v[1]) : null)))
-const selectedSkillWeaponMods = computed(() => charSettings.value.skillWeaponMods.map((v) => (v ? new LeveledMod(v[0], v[1]) : null)))
-const selectedBuffs = computed(() => charSettings.value.buffs.map((v) => new LeveledBuff(v[0], v[1])))
+const charSettings = useLocalStorage(charSettingsKey, defaultCharSettings)
+const selectedCharMods = computed(() =>
+    charSettings.value.charMods.map((v) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null)),
+)
+const selectedMeleeMods = computed(() =>
+    charSettings.value.meleeMods.map((v) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null)),
+)
+const selectedRangedMods = computed(() =>
+    charSettings.value.rangedMods.map((v) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null)),
+)
+const selectedSkillWeaponMods = computed(() =>
+    charSettings.value.skillWeaponMods.map((v) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null)),
+)
+const selectedBuffs = computed(() =>
+    charSettings.value.buffs
+        .map((v) => {
+            try {
+                const b = new LeveledBuff(v[0], v[1])
+                return b
+            } catch (error) {
+                console.error(error)
+                charSettings.value.buffs = charSettings.value.buffs.filter((b) => b[0] !== v[0])
+                return null
+            }
+        })
+        .filter((b) => b !== null),
+)
 
 // 创建CharBuild实例
 const charBuild = computed(
     () =>
         new CharBuild({
             char: new LeveledChar(selectedChar.value, charSettings.value.charLevel),
-            mods: [
-                ...selectedCharMods.value.filter((mod) => mod !== null),
-                ...selectedMeleeMods.value.filter((mod) => mod !== null),
-                ...selectedRangedMods.value.filter((mod) => mod !== null),
-                ...selectedSkillWeaponMods.value.filter((mod) => mod !== null),
-            ] as LeveledMod[],
+            charMods: selectedCharMods.value.filter((mod) => mod !== null),
+            meleeMods: selectedMeleeMods.value.filter((mod) => mod !== null),
+            rangedMods: selectedRangedMods.value.filter((mod) => mod !== null),
+            skillWeaponMods: selectedSkillWeaponMods.value.filter((mod) => mod !== null),
             buffs: selectedBuffs.value,
-            melee: new LeveledWeapon(charSettings.value.meleeWeapon, charSettings.value.meleeWeaponRefine, charSettings.value.meleeWeaponLevel),
-            ranged: new LeveledWeapon(charSettings.value.rangedWeapon, charSettings.value.rangedWeaponRefine, charSettings.value.rangedWeaponLevel),
+            melee: new LeveledWeapon(
+                charSettings.value.meleeWeapon,
+                charSettings.value.meleeWeaponRefine,
+                charSettings.value.meleeWeaponLevel,
+                inv.getBuffLv(charSettings.value.meleeWeapon),
+            ),
+            ranged: new LeveledWeapon(
+                charSettings.value.rangedWeapon,
+                charSettings.value.rangedWeaponRefine,
+                charSettings.value.rangedWeaponLevel,
+                inv.getBuffLv(charSettings.value.rangedWeapon),
+            ),
             baseName: charSettings.value.baseName,
             imbalance: charSettings.value.imbalance,
             hpPercent: charSettings.value.hpPercent,
@@ -147,19 +190,19 @@ const updateCharBuild = () => {
         charSettings.value.meleeWeapon,
         charSettings.value.meleeWeaponRefine,
         charSettings.value.meleeWeaponLevel,
+        inv.getBuffLv(charSettings.value.meleeWeapon),
     )
     charBuild.value.rangedWeapon = new LeveledWeapon(
         charSettings.value.rangedWeapon,
         charSettings.value.rangedWeaponRefine,
         charSettings.value.rangedWeaponLevel,
+        inv.getBuffLv(charSettings.value.rangedWeapon),
     )
-    charBuild.value.buffs = selectedBuffs.value.filter((buff) => buff !== null) as LeveledBuff[]
-    charBuild.value.mods = [
-        ...selectedCharMods.value.filter((mod) => mod !== null),
-        ...selectedMeleeMods.value.filter((mod) => mod !== null),
-        ...selectedRangedMods.value.filter((mod) => mod !== null),
-        ...selectedSkillWeaponMods.value.filter((mod) => mod !== null),
-    ] as LeveledMod[]
+    charBuild.value.buffs = selectedBuffs.value.filter((buff) => buff !== null)
+    charBuild.value.charMods = selectedCharMods.value.filter((mod) => mod !== null)
+    charBuild.value.meleeMods = selectedMeleeMods.value.filter((mod) => mod !== null)
+    charBuild.value.rangedMods = selectedRangedMods.value.filter((mod) => mod !== null)
+    charBuild.value.skillWeaponMods = selectedSkillWeaponMods.value.filter((mod) => mod !== null)
 }
 updateCharBuild()
 
@@ -236,12 +279,13 @@ const saveConfig = () => {
 
 const resetConfig = () => {
     charSettings.value.hpPercent = 1
-    charSettings.value.resonanceGain = 0
+    charSettings.value.resonanceGain = 2
     charSettings.value.enemyType = "small"
     charSettings.value.enemyLevel = 80
     charSettings.value.enemyResistance = 0
     charSettings.value.enemyHpType = "生命"
     charSettings.value.targetFunction = "伤害"
+    charSettings.value.imbalance = false
     charSettings.value.charMods = Array(8).fill(null)
     charSettings.value.meleeMods = Array(8).fill(null)
     charSettings.value.rangedMods = Array(8).fill(null)
@@ -262,6 +306,27 @@ const reloadCustomBuff = () => {
         _buffOptions[index].value = new LeveledBuff("自定义BUFF")
     }
 }
+
+const autobuild_model_show = ref(false)
+const openAutoBuild = () => {
+    ;(window as any).autobuild_model.showModal()
+    autobuild_model_show.value = true
+}
+let newBuild!: CharBuild
+
+function applyAutobuild() {
+    if (!newBuild) return
+    charSettings.value.meleeWeapon = newBuild.meleeWeapon.名称
+    charSettings.value.meleeWeaponLevel = newBuild.meleeWeapon.等级
+    charSettings.value.meleeWeaponRefine = newBuild.meleeWeapon.精炼
+    charSettings.value.rangedWeapon = newBuild.rangedWeapon.名称
+    charSettings.value.rangedWeaponLevel = newBuild.rangedWeapon.等级
+    charSettings.value.rangedWeaponRefine = newBuild.rangedWeapon.精炼
+    charSettings.value.charMods = newBuild.charMods.map((v) => [v.id, v.等级])
+    charSettings.value.meleeMods = newBuild.meleeMods.map((v) => [v.id, v.等级])
+    charSettings.value.rangedMods = newBuild.rangedMods.map((v) => [v.id, v.等级])
+    charSettings.value.skillWeaponMods = newBuild.skillWeaponMods.map((v) => [v.id, v.等级])
+}
 </script>
 
 <template>
@@ -278,6 +343,24 @@ const reloadCustomBuff = () => {
                         {{ project.name }}
                     </SelectItem>
                 </Select>
+                <button class="btn btn-secondary" @click="openAutoBuild">自动构筑</button>
+                <dialog id="autobuild_model" class="modal" @close="autobuild_model_show = false">
+                    <div class="modal-box bg-base-300 w-5/6 max-w-5xl">
+                        <div class="mb-6">
+                            <div class="flex items-center gap-2 mb-3">
+                                <SectionMarker />
+                                <h3 class="text-lg font-semibold">自动构筑</h3>
+                            </div>
+                            <AutoBuild :update="autobuild_model_show" :charBuild="charBuild" @change="newBuild = $event" />
+                        </div>
+                        <div class="modal-action">
+                            <form class="flex justify-end gap-2" method="dialog">
+                                <button class="btn btn-primary" @click="applyAutobuild">应用</button>
+                                <button class="btn">取消</button>
+                            </form>
+                        </div>
+                    </div>
+                </dialog>
                 <button class="btn btn-primary" @click="saveConfig">{{ $t("char-build.save_config") }}</button>
                 <button class="btn" @click="resetConfig">{{ $t("char-build.reset_config") }}</button>
             </div>
@@ -336,6 +419,7 @@ const reloadCustomBuff = () => {
                                         v-for="fn in [
                                             '伤害',
                                             '弹片伤害',
+                                            '暴击伤害',
                                             '每秒伤害',
                                             '每神智伤害',
                                             '每持续神智伤害',
@@ -387,7 +471,7 @@ const reloadCustomBuff = () => {
                                 <div class="flex justify-between items-center gap-4 text-sm">
                                     <div class="text-xs text-neutral-500">{{ prop }}</div>
                                     <div class="font-medium text-primary">
-                                        {{ formatWeaponProp(prop, val) }}
+                                        {{ formatWeaponProp(prop as string, val) }}
                                     </div>
                                 </div>
                             </div>
@@ -583,7 +667,11 @@ const reloadCustomBuff = () => {
                                 v-model="charSettings.enemyHpType"
                                 @change="updateCharBuild"
                             >
-                                <SelectItem v-for="(key, hpType) in { 生命: 'hp', 护盾: 'shield', 战姿: 'stance' }" :key="key" :value="hpType">
+                                <SelectItem
+                                    v-for="(key, hpType) in { 生命: 'hp', 护盾: 'shield', 战姿: 'stance' }"
+                                    :key="key"
+                                    :value="hpType"
+                                >
                                     {{ $t(`char-build.${key}`) }}
                                 </SelectItem>
                             </Select>
@@ -655,7 +743,9 @@ const reloadCustomBuff = () => {
                     :mods="selectedMeleeMods"
                     :mod-options="
                         modOptions.filter(
-                            (m) => m.type === '近战' && (!m.limit || [charBuild.meleeWeapon.类别, charBuild.meleeWeapon.伤害类型].includes(m.limit)),
+                            (m) =>
+                                m.type === '近战' &&
+                                (!m.limit || [charBuild.meleeWeapon.类别, charBuild.meleeWeapon.伤害类型].includes(m.limit)),
                         )
                     "
                     :char-build="charBuild"
@@ -672,7 +762,8 @@ const reloadCustomBuff = () => {
                     :mod-options="
                         modOptions.filter(
                             (m) =>
-                                m.type === '远程' && (!m.limit || [charBuild.rangedWeapon.类别, charBuild.rangedWeapon.伤害类型].includes(m.limit)),
+                                m.type === '远程' &&
+                                (!m.limit || [charBuild.rangedWeapon.类别, charBuild.rangedWeapon.伤害类型].includes(m.limit)),
                         )
                     "
                     :char-build="charBuild"
@@ -701,6 +792,13 @@ const reloadCustomBuff = () => {
                 />
             </div>
 
+            <!-- MODBUFF列表 -->
+            <EffectSettings
+                v-if="charBuild.mods.some((v) => v.buff)"
+                id="modbuff-container"
+                :mods="charBuild.modsWithWeapons"
+                :char-build="charBuild"
+            />
             <!-- BUFF列表 -->
             <div id="buff-container" class="bg-base-300 rounded-xl p-4 shadow-lg mb-6">
                 <div class="flex items-center justify-between mb-3">
@@ -713,7 +811,6 @@ const reloadCustomBuff = () => {
                 <BuffEditer
                     :buff-options="buffOptions"
                     :selected-buffs="selectedBuffs"
-                    :char-settings="charSettings"
                     :char-build="charBuild"
                     @toggle-buff="toggleBuff"
                     @set-buff-lv="setBuffLv"
@@ -788,7 +885,7 @@ const reloadCustomBuff = () => {
                                                     </div>
                                                     <p class="text-gray-400 text-xs">
                                                         {{
-                                                            Object.entries(charBuild.meleeWeapon.getProperties())
+                                                            Object.entries(charBuild.meleeWeapon.getSimpleProperties())
                                                                 .map(([k, v]) => `${k} ${formatProp(k, v)}`)
                                                                 .join("，")
                                                         }}
@@ -819,7 +916,7 @@ const reloadCustomBuff = () => {
                                                     </div>
                                                     <p class="text-gray-400 text-xs">
                                                         {{
-                                                            Object.entries(charBuild.rangedWeapon.getProperties())
+                                                            Object.entries(charBuild.rangedWeapon.getSimpleProperties())
                                                                 .map(([k, v]) => `${k} ${formatProp(k, v)}`)
                                                                 .join("，")
                                                         }}
@@ -837,7 +934,9 @@ const reloadCustomBuff = () => {
                                     <div
                                         class="col-span-2 bg-base-300/60 bg-linear-to-r from-primary/1 to-primary/5 backdrop-blur-sm rounded-xl p-2 border border-primary/30"
                                     >
-                                        <div class="text-gray-400 text-xs mb-1">{{ charSettings.baseName }} - {{ charSettings.targetFunction }}</div>
+                                        <div class="text-gray-400 text-xs mb-1">
+                                            {{ charSettings.baseName }} - {{ charSettings.targetFunction }}
+                                        </div>
                                         <div class="text-primary font-bold text-sm font-orbitron">{{ Math.round(totalDamage) }}</div>
                                     </div>
                                     <div
@@ -850,7 +949,7 @@ const reloadCustomBuff = () => {
                                         <div class="text-secondary font-bold text-sm font-orbitron">
                                             {{
                                                 ["attack", "health", "shield", "defense", "sanity"].includes(key)
-                                                    ? val
+                                                    ? `${+val.toFixed(2)}`
                                                     : `${+(val * 100).toFixed(2)}%`
                                             }}
                                         </div>
@@ -882,38 +981,35 @@ const reloadCustomBuff = () => {
                                         v-for="(count, mod) in charBuild.mods
                                             .filter((v) => v.类型 === '角色')
                                             .map((v) => v.名称)
-                                            .reduce(
-                                                (r, v) => {
-                                                    if (r[v]) {
-                                                        r[v] += 1
-                                                    } else {
-                                                        r[v] = 1
-                                                    }
-                                                    return r
-                                                },
-                                                {} as { [key: string]: number } as any,
-                                            )"
+                                            .reduce((r, v) => {
+                                                if (r[v]) {
+                                                    r[v] += 1
+                                                } else {
+                                                    r[v] = 1
+                                                }
+                                                return r
+                                            }, {} as any)"
                                     >
                                         {{ count > 1 ? count + " x " : "" }}{{ mod }}
                                     </span>
                                 </div>
-                                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2" v-if="charBuild.selectedWeapon">
+                                <div
+                                    class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2"
+                                    v-if="charBuild.selectedWeapon"
+                                >
                                     <span
                                         class="px-4 py-2 rounded-lg bg-linear-to-r from-secondary/1 to-secondary/5 border border-secondary/30 text-secondary text-xs"
                                         v-for="(count, mod) in charBuild.mods
                                             .filter((v) => v.类型 === charBuild.selectedWeapon!.类型)
                                             .map((v) => v.名称)
-                                            .reduce(
-                                                (r, v) => {
-                                                    if (r[v]) {
-                                                        r[v] += 1
-                                                    } else {
-                                                        r[v] = 1
-                                                    }
-                                                    return r
-                                                },
-                                                {} as { [key: string]: number } as any,
-                                            )"
+                                            .reduce((r, v) => {
+                                                if (r[v]) {
+                                                    r[v] += 1
+                                                } else {
+                                                    r[v] = 1
+                                                }
+                                                return r
+                                            }, {} as any)"
                                     >
                                         {{ count > 1 ? count + " x " : "" }}{{ mod }}
                                     </span>

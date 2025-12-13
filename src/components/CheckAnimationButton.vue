@@ -28,7 +28,10 @@ const emit = defineEmits(["click"])
         <Icon class="pointer-events-none" style="mask: linear-gradient(to right, #000 var(--v), transparent var(--v))" :icon="icon" />
         <Icon
             class="pointer-events-none absolute text-success"
-            style="opacity: calc(100% - var(--v)); mask: linear-gradient(to left, transparent calc(var(--v) + 100%), #000 calc(var(--v) + 100%))"
+            style="
+                opacity: calc(100% - var(--v));
+                mask: linear-gradient(to left, transparent calc(var(--v) + 100%), #000 calc(var(--v) + 100%));
+            "
             icon="la:check-solid"
         />
     </button>

@@ -130,6 +130,7 @@ export interface Weapon {
     武器伤害?: number
     技能伤害?: number
     攻击范围?: number
+    [key: string]: any
 }
 
 export interface Skill {
@@ -201,6 +202,7 @@ export interface Mod {
     属性?: string
     限定?: string
     效果?: string
+    buff?: Buff
 
     威力?: number
     耐久?: number
@@ -243,6 +245,7 @@ export interface Mod {
     装填?: number
     弹转?: number
     触发倍率?: number
+    [key: string]: any
 }
 
 export enum Quality {

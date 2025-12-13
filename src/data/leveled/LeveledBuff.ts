@@ -1,5 +1,5 @@
 import { buffMap, LeveledChar, LeveledSkillWeapon, LeveledWeapon } from "."
-import { CharAttr, WeaponAttr } from "../CharBuild"
+import { CharAttr, CharBuild, WeaponAttr } from "../CharBuild"
 import { Buff } from "../data-types"
 
 /**
@@ -12,67 +12,18 @@ export class LeveledBuff implements Buff {
     [key: string]: any
 
     // 等级属性
-    private _等级: number = 1
+    _等级: number = 1
     // 原始Buff对象
-    private _originalBuffData: Buff
+    _originalBuffData: Buff
 
-    static properties = [
-        "攻击",
-        "生命",
-        "护盾",
-        "防御",
-        "神智",
-        "威力",
-        "耐久",
-        "效益",
-        "范围",
-        "昂扬",
-        "背水",
-        "增伤",
-        "独立增伤",
-        "武器伤害",
-        "技能伤害",
-        "神智回复",
-        "暴击",
-        "暴伤",
-        "攻速",
-        "多重",
-        "追加伤害",
-        "属性伤",
-        "MOD属性",
-        "属性穿透",
-        "异常数量",
-        "无视防御",
-        "固定攻击",
-        "技能速度",
-        "召唤物范围",
-        "召唤物攻速",
-        "召唤物攻击",
-        "召唤物伤害",
-        "失衡易伤",
-        "近战攻击",
-        "近战暴击",
-        "近战暴伤",
-        "近战触发",
-        "近战攻速",
-        "近战范围",
-        "近战增伤",
-        "远程攻击",
-        "远程攻速",
-        "远程暴击",
-        "远程暴伤",
-        "远程触发",
-        "远程多重",
-        "远程增伤",
-    ]
     /**
      * 构造函数
      * @param 名称 buff的名称
      * @param 等级 可选的buff等级
      */
-    constructor(名称: string, 等级?: number) {
+    constructor(名称: string | Buff, 等级?: number) {
         // 从Map中获取对应的Buff对象
-        const buffData = buffMap.get(名称)
+        const buffData = typeof 名称 === "string" ? buffMap.get(名称) : 名称
         if (!buffData) {
             throw new Error(`Buff "${名称}" 未在静态表中找到`)
         }
@@ -83,14 +34,14 @@ export class LeveledBuff implements Buff {
         // 复制基础属性
         this.名称 = buffData.名称
         this.描述 = buffData.描述
-        if (buffData.a !== undefined) this.a = buffData.a
-        if (buffData.b !== undefined) this.b = buffData.b
-        if (buffData.dx !== undefined) this.dx = buffData.dx
+        if (buffData.a !== undefined && buffData.a != 1) this.a = buffData.a
+        if (buffData.b !== undefined && buffData.b != 1) this.b = buffData.b
         if (buffData.lx !== undefined) this.lx = buffData.lx
         if (buffData.mx !== undefined) this.mx = buffData.mx
+        if (buffData.dx !== undefined) this.dx = buffData.dx
 
         // 设置等级（如果提供），否则使用默认等级dx
-        this.等级 = 等级 || this.dx || 1
+        this.等级 = 等级 !== undefined && 等级 >= 0 ? 等级 : this.dx || this.mx || 1
 
         // 检查动态属性代码
         if (this._originalBuffData.code) {
@@ -105,7 +56,12 @@ export class LeveledBuff implements Buff {
      * @param weapon 武器
      * @param weaponAttrs 武器属性
      */
-    applyDynamicAttr(char: LeveledChar, attrs: CharAttr, weapon?: LeveledWeapon | LeveledSkillWeapon, wAttr?: WeaponAttr) {
+    applyDynamicAttr(
+        char: LeveledChar,
+        attrs: CharAttr,
+        weapon?: LeveledWeapon | LeveledSkillWeapon,
+        wAttr?: WeaponAttr,
+    ): ReturnType<CharBuild["calculateWeaponAttributes"]> {
         const sandbox = {
             ...attrs,
             char: { attack: char.基础攻击, health: char.基础生命, shield: char.基础护盾, defense: char.基础防御, sanity: char.基础神智 },
@@ -128,8 +84,8 @@ export class LeveledBuff implements Buff {
         }
         if (result) {
             const { char, weapon, weaponAttr, ...attrs } = result
-            return { ...attrs, weaponAttr }
-        } else return attrs
+            return { ...attrs, weapon: weaponAttr }
+        } else return { ...attrs, weapon: wAttr }
     }
 
     /**
@@ -155,6 +111,22 @@ export class LeveledBuff implements Buff {
         this.updatePropertiesByLevel()
     }
 
+    get baseValue(): number {
+        const a = this.a || 1
+        const b = this.b || 1
+        const x = 1
+        let val = 0
+        this.properties.forEach((prop) => {
+            const maxValue = (this._originalBuffData as any)[prop]
+            if (maxValue !== undefined) {
+                // 属性值 = 满级属性/a*(1+(x-1)/b)
+                let currentValue = (maxValue / a) * (1 + (x - 1) / b)
+                if (prop === "神智回复") currentValue = Math.round(currentValue)
+                val = currentValue
+            }
+        })
+        return val
+    }
     /**
      * 根据等级更新Buff属性
      * 属性值 = 满级属性/a*(1+1/b*(x-lx))
@@ -162,14 +134,13 @@ export class LeveledBuff implements Buff {
     private updatePropertiesByLevel(): void {
         const a = this.a || 1
         const b = this.b || 1
-        const lx = this.lx !== undefined ? this.lx : 1
         const x = this._等级
 
-        LeveledBuff.properties.forEach((prop) => {
+        this.baseProperties.forEach((prop) => {
             const maxValue = (this._originalBuffData as any)[prop]
             if (maxValue !== undefined) {
-                // 属性值 = 满级属性/a*(1+1/b*(x-lx))
-                let currentValue = (maxValue / a) * (1 + (1 / b) * (x - lx))
+                // 属性值 = 满级属性/a*(1+(x-1)/b)
+                let currentValue = (maxValue / a) * (1 + (x - 1) / b)
                 if (prop === "神智回复") currentValue = Math.round(currentValue)
                 ;(this as any)[prop] = currentValue
             }
@@ -181,9 +152,16 @@ export class LeveledBuff implements Buff {
      */
     getProperties(): Partial<Buff> {
         const properties: Partial<Buff> = {}
-        LeveledBuff.properties.forEach((prop) => {
-            if ((this as any)[prop]) properties[prop] = (this as any)[prop]
+        this.properties.forEach((prop) => {
+            properties[prop] = this[prop]
         })
         return properties
+    }
+    static _exclude_properties = new Set(["名称", "描述", "限定", "_等级", "_originalBuffData", "a", "b", "lx", "mx", "dx", "pid"])
+    get properties(): string[] {
+        return Object.keys(this).filter((prop) => !LeveledBuff._exclude_properties.has(prop))
+    }
+    get baseProperties(): string[] {
+        return Object.keys(this._originalBuffData).filter((prop) => !LeveledBuff._exclude_properties.has(prop))
     }
 }
