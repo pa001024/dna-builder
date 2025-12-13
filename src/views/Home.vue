@@ -82,7 +82,7 @@ function getIntervalHourTime(interval: number = 3, offset: number = 0): number {
 }
 
 // 倒计时剩余毫秒
-const moling = ref(getIntervalDayTime(3, 3))
+const moling = ref(getIntervalDayTime(3, 1))
 const zhouben = ref(getIntervalDayTime(7, 3))
 const mihan = ref(getIntervalHourTime(1))
 
@@ -91,7 +91,7 @@ let timer: number | null = null
 onMounted(() => {
     // 每秒更新一次
     timer = window.setInterval(() => {
-        moling.value = getIntervalDayTime(3, 3)
+        moling.value = getIntervalDayTime(3, 1)
         zhouben.value = getIntervalDayTime(7, 3)
         mihan.value = getIntervalHourTime(1)
     }, 1000)
