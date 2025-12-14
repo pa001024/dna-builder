@@ -331,39 +331,39 @@
         <!-- 战斗控制区 -->
         <div class="flex flex-wrap gap-3 justify-center my-5">
             <button
-                class="bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-2 rounded-md font-bold text-white transition-all duration-200 hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed shadow-lg shadow-blue-900/30"
+                class="btn bg-linear-to-r from-blue-600 to-blue-500 px-6 py-2 rounded-md font-bold text-white transition-all duration-200 hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed shadow-lg shadow-blue-900/30"
                 @click="startBattle"
                 :disabled="inBattle"
             >
                 开始战斗
             </button>
             <button
-                class="bg-gradient-to-r from-yellow-600 to-yellow-500 px-6 py-2 rounded-md font-bold text-white transition-all duration-200 hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed shadow-lg shadow-yellow-900/30"
+                class="btn bg-linear-to-r from-yellow-600 to-yellow-500 px-6 py-2 rounded-md font-bold text-white transition-all duration-200 hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed shadow-lg shadow-yellow-900/30"
                 @click="levelUp"
             >
                 升级 ({{ playerLevel }}金币)
             </button>
             <button
-                class="bg-gradient-to-r from-red-600 to-red-500 px-6 py-2 rounded-md font-bold text-white transition-all duration-200 hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed shadow-lg shadow-red-900/30"
+                class="btn bg-linear-to-r from-red-600 to-red-500 px-6 py-2 rounded-md font-bold text-white transition-all duration-200 hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed shadow-lg shadow-red-900/30"
                 @click="endTurn"
             >
                 结束回合
             </button>
             <button
-                class="bg-gradient-to-r from-purple-600 to-purple-500 px-6 py-2 rounded-md font-bold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-purple-900/30"
+                class="btn bg-linear-to-r from-purple-600 to-purple-500 px-6 py-2 rounded-md font-bold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-purple-900/30"
                 @click="saveGame"
             >
                 保存游戏
             </button>
             <button
-                class="bg-gradient-to-r from-indigo-600 to-indigo-500 px-6 py-2 rounded-md font-bold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-indigo-900/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-600"
+                class="btn bg-linear-to-r from-indigo-600 to-indigo-500 px-6 py-2 rounded-md font-bold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-indigo-900/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-600"
                 :disabled="!hasSavedGame()"
                 @click="loadGame"
             >
                 加载游戏
             </button>
             <button
-                class="bg-gradient-to-r from-green-600 to-green-500 px-6 py-2 rounded-md font-bold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-green-900/30"
+                class="btn bg-linear-to-r from-green-600 to-green-500 px-6 py-2 rounded-md font-bold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-green-900/30"
                 v-if="gameOver"
                 @click="restartGame"
             >
@@ -2932,49 +2932,6 @@ h3 {
     flex-wrap: wrap;
 }
 
-/* 增强按钮交互效果 */
-.btn {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.btn::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.2);
-    transform: translate(-50%, -50%);
-    transition:
-        width 0.6s,
-        height 0.6s;
-    z-index: 0;
-}
-
-.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-}
-
-.btn:active::before {
-    width: 300px;
-    height: 300px;
-}
-
-.btn:disabled {
-    transition: all 0.2s ease;
-    opacity: 0.7;
-}
-
-.btn:not(:disabled) span {
-    position: relative;
-    z-index: 1;
-}
-
 .battle-button,
 .end-turn-button,
 .restart-btn {
@@ -3063,14 +3020,12 @@ h3 {
 }
 
 .log-messages p {
-    margin: 8px 0;
+    margin: 5px 0;
     font-size: 14px;
     color: #ecf0f1;
-    transition: all 0.3s ease;
-    animation: fadeIn 0.5s ease-out;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
+/* 保留使用的动画效果 */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -3080,11 +3035,6 @@ h3 {
         opacity: 1;
         transform: translateX(0) translateY(0);
     }
-}
-
-.log-messages p.damage {
-    color: #ff6b6b;
-    animation: damage-pulse 0.8s ease-out;
 }
 
 @keyframes damage-pulse {
@@ -3102,12 +3052,6 @@ h3 {
     }
 }
 
-.log-messages p.victory {
-    color: #4ecdc4;
-    font-weight: bold;
-    animation: victory-glow 1s ease-out;
-}
-
 @keyframes victory-glow {
     0% {
         text-shadow: 0 0 5px rgba(78, 205, 196, 0.5);
@@ -3120,12 +3064,6 @@ h3 {
     }
 }
 
-.log-messages p.critical {
-    color: #ff9800;
-    font-weight: bold;
-    animation: critical-flash 0.6s ease-out;
-}
-
 @keyframes critical-flash {
     0%,
     100% {
@@ -3135,11 +3073,6 @@ h3 {
         color: #ffeb3b;
         text-shadow: 0 0 15px #ffeb3b;
     }
-}
-
-/* 游戏状态变化动画 */
-.character-container.damaged {
-    animation: damaged-flash 0.3s ease-out;
 }
 
 @keyframes damaged-flash {
@@ -3154,10 +3087,6 @@ h3 {
     }
 }
 
-.character-container.victory {
-    animation: victory-bounce 1s ease-out infinite;
-}
-
 @keyframes victory-bounce {
     0%,
     100% {
@@ -3166,34 +3095,6 @@ h3 {
     50% {
         transform: translateY(-10px);
     }
-}
-
-/* 回合切换动画 */
-.turn-indicator {
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%,
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-    50% {
-        transform: scale(1.05);
-        opacity: 0.8;
-    }
-}
-
-/* 资源变化动画 */
-.gold-change,
-.exp-change {
-    position: absolute;
-    font-size: 16px;
-    font-weight: bold;
-    pointer-events: none;
-    z-index: 100;
-    animation: float-up-fade 1s ease-out;
 }
 
 @keyframes float-up-fade {
@@ -3207,324 +3108,7 @@ h3 {
     }
 }
 
-.gold-change {
-    color: #ffd700;
-    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-}
-
-.exp-change {
-    color: #4ecdc4;
-    text-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
-}
-
-.battle-log h3 {
-    margin-top: 0;
-    border-bottom: 1px solid #333;
-    padding-bottom: 10px;
-}
-
-.log-messages p {
-    margin: 5px 0;
-    font-size: 14px;
-    color: #ecf0f1;
-}
-
-/* 游戏结束遮罩 */
-.game-over-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    animation: fadeIn 0.5s ease-out;
-}
-
-.game-over-dialog {
-    background-color: #1e2129;
-    border-radius: 12px;
-    padding: 30px;
-    text-align: center;
-    border: 2px solid #4a9eff;
-    max-width: 400px;
-    width: 90%;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    animation: slideIn 0.5s ease-out;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateY(-50px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-.game-over-dialog {
-    background-color: #1e2129;
-    border-radius: 12px;
-    padding: 30px;
-    text-align: center;
-    border: 2px solid #4a9eff;
-    max-width: 400px;
-    width: 90%;
-}
-
-.game-over-dialog h2 {
-    color: #4a9eff;
-    margin-top: 0;
-    margin-bottom: 20px;
-    font-size: 28px;
-}
-
-.game-over-dialog p {
-    margin-bottom: 10px;
-    font-size: 16px;
-    color: #e2e8f0;
-}
-
-.game-over-dialog button {
-    margin-top: 20px;
-    padding: 12px 24px;
-    font-size: 16px;
-    background-color: #4a9eff;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.game-over-dialog button:hover {
-    background-color: #3a8eef;
-}
-
-/* 动画效果 */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateY(-20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-@keyframes scaleIn {
-    from {
-        transform: scale(0.9);
-        opacity: 0;
-    }
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-@keyframes bounce {
-    0%,
-    20%,
-    50%,
-    80%,
-    100% {
-        transform: translateY(0);
-    }
-    40% {
-        transform: translateY(-10px);
-    }
-    60% {
-        transform: translateY(-5px);
-    }
-}
-
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-    100% {
-        transform: scale(1);
-    }
-}
-
-@keyframes glow {
-    0% {
-        box-shadow: 0 0 5px rgba(74, 158, 255, 0.5);
-    }
-    50% {
-        box-shadow:
-            0 0 20px rgba(74, 158, 255, 0.8),
-            0 0 30px rgba(74, 158, 255, 0.5);
-    }
-    100% {
-        box-shadow: 0 0 5px rgba(74, 158, 255, 0.5);
-    }
-}
-
-/* 应用动画类 */
-.animate-fadeIn {
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-.animate-slideIn {
-    animation: slideIn 0.3s ease-out;
-}
-
-.animate-scaleIn {
-    animation: scaleIn 0.2s ease-out;
-}
-
-.animate-bounce {
-    animation: bounce 1s ease-in-out;
-}
-
-.animate-pulse {
-    animation: pulse 2s infinite;
-}
-
-.animate-glow {
-    animation: glow 2s infinite;
-}
-
-/* 响应式设计 */
-/* 超大屏幕 */
-@media (max-width: 1200px) {
-    .game-status {
-        padding: 12px;
-    }
-
-    .status-item {
-        margin: 0 5px;
-    }
-}
-
-/* 大屏幕 */
-@media (max-width: 992px) {
-    .game-board {
-        max-width: 600px;
-    }
-
-    .shop-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-
-    .bench-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-
-/* 中等屏幕 */
-@media (max-width: 768px) {
-    .game-board {
-        max-width: 400px;
-    }
-
-    .shop-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    .bench-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    .battle-controls {
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .battle-controls button {
-        width: 200px;
-    }
-
-    .game-status {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .status-item {
-        flex-direction: row;
-        justify-content: space-between;
-        width: 100%;
-    }
-
-    .xp-bar {
-        width: 80px;
-    }
-
-    h1 {
-        font-size: 1.5rem;
-    }
-}
-
-/* 小屏幕 */
-@media (max-width: 576px) {
-    .game-board {
-        max-width: 320px;
-    }
-
-    .shop-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-
-    .bench-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-
-    .character-container {
-        padding: 4px;
-    }
-
-    .character-info h4 {
-        font-size: 12px;
-    }
-
-    .character-attribute,
-    .character-cost,
-    .character-level {
-        font-size: 10px;
-    }
-
-    .battle-controls button {
-        width: 180px;
-        padding: 8px 16px;
-        font-size: 14px;
-    }
-
-    .game-over-dialog,
-    .settings-dialog {
-        margin: 10px;
-        padding: 20px;
-    }
-
-    .game-over-dialog h2,
-    .settings-dialog h2 {
-        font-size: 1.5rem;
-    }
-}
-
-/* 超小屏幕 */
+/* 最小化的响应式设计 */
 @media (max-width: 360px) {
     .game-board {
         max-width: 280px;

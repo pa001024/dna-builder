@@ -202,7 +202,7 @@ export class CharBuild {
         let ignoreDefense = this.getTotalBonusMul("无视防御")
         let independentDamageIncrease = this.getTotalBonusMul("独立增伤")
 
-        if (props) {
+        if (props && ("类别" in props || !props.类型 || props.类型 === "角色")) {
             if (minus) {
                 attackBonus -= this.getTotalBonusSingle(props, "攻击")
                 attackAdd -= this.getTotalBonusSingle(props, "固定攻击")
@@ -468,29 +468,29 @@ export class CharBuild {
     }
 
     // 获取总加成
-    public getTotalBonus(attribute: string, prefix?: string): number {
+    public getTotalBonus(attribute: string, prefix = "角色"): number {
         let bonus = 0
 
         // 添加角色自带加成
-        if (!prefix && typeof this.char[attribute] === "number") {
+        if (prefix === "角色" && typeof this.char[attribute] === "number") {
             bonus += this.char[attribute]
         }
 
         // 添加近战武器加成
-        if ((!prefix || (prefix === "近战" && attribute !== "攻击")) && this.meleeWeapon) {
+        if ((prefix === "角色" || (prefix === "近战" && attribute !== "攻击")) && this.meleeWeapon) {
             if (typeof this.meleeWeapon[attribute] === "number") {
                 bonus += this.meleeWeapon[attribute]
             }
         }
         // 添加远程武器加成
-        if ((!prefix || (prefix === "远程" && attribute !== "攻击")) && this.rangedWeapon) {
+        if ((prefix === "角色" || (prefix === "远程" && attribute !== "攻击")) && this.rangedWeapon) {
             if (typeof this.rangedWeapon[attribute] === "number") {
                 bonus += this.rangedWeapon[attribute]
             }
         }
 
         // 添加MOD加成
-        if (!prefix || !attribute.startsWith(prefix))
+        if (prefix === "角色" || !attribute.startsWith(prefix))
             this.mods.forEach((mod) => {
                 if (prefix && mod.类型 !== prefix) return
                 if (typeof mod[attribute] === "number") {
@@ -500,7 +500,7 @@ export class CharBuild {
 
         // 添加BUFF加成
         this.buffs.forEach((buff) => {
-            if (prefix && ["攻击", "增伤"].includes(attribute)) return
+            if (prefix !== "角色" && ["攻击", "增伤"].includes(attribute)) return
             if (typeof buff[attribute] === "number") {
                 bonus += buff[attribute]
             }
@@ -966,12 +966,8 @@ export class CharBuild {
                         v.类型.startsWith(type) &&
                         (!v.属性 || v.属性 === localBuild.char.属性) &&
                         (!v.限定 ||
-                            [
-                                localBuild.meleeWeapon.伤害类型,
-                                localBuild.meleeWeapon.类别,
-                                localBuild.rangedWeapon.伤害类型,
-                                localBuild.rangedWeapon.类别,
-                            ].includes(v.限定)) &&
+                            (key === "meleeMods" && [localBuild.meleeWeapon.伤害类型, localBuild.meleeWeapon.类别].includes(v.限定)) ||
+                            (key === "rangedMods" && [localBuild.rangedWeapon.伤害类型, localBuild.rangedWeapon.类别].includes(v.限定))) &&
                         !selectedExclusiveNames.has(v.名称) &&
                         !selectedExclusiveSeries.has(v.系列) &&
                         (selectedModCount.get(v.id) || 0) < v.count,

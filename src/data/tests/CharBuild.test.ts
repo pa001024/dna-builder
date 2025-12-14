@@ -161,21 +161,25 @@ describe("CharBuild类测试", () => {
 
         // 计算没有MOD52001时的武器属性
         charBuildWithoutMod.baseName = mockMeleeWeapon.名称
-        const { weapon: meleeAttrsWithoutMod } = charBuildWithoutMod.calculateWeaponAttributes()
+        const { attack: meleeAttackWithoutMod, weapon: meleeAttrsWithoutMod } = charBuildWithoutMod.calculateWeaponAttributes()
         charBuildWithoutMod.baseName = mockRangedWeapon.名称
-        const { weapon: rangedAttrsWithoutMod } = charBuildWithoutMod.calculateWeaponAttributes()
+        const { attack: rangedAttackWithoutMod, weapon: rangedAttrsWithoutMod } = charBuildWithoutMod.calculateWeaponAttributes()
 
         // 计算有MOD52001时的武器属性
         charBuildWithMod.baseName = mockMeleeWeapon.名称
-        const { weapon: meleeAttrsWithMod } = charBuildWithMod.calculateWeaponAttributes()
+        const { attack: meleeAttackWithMod, weapon: meleeAttrsWithMod } = charBuildWithMod.calculateWeaponAttributes()
         charBuildWithMod.baseName = mockRangedWeapon.名称
-        const { weapon: rangedAttrsWithMod } = charBuildWithMod.calculateWeaponAttributes()
+        const { attack: rangedAttackWithMod, weapon: rangedAttrsWithMod } = charBuildWithMod.calculateWeaponAttributes()
 
         // 验证近战武器攻击增加了150%
         expect(meleeAttrsWithMod!.attack).toBeCloseTo(meleeAttrsWithoutMod!.attack * 2.5, 2)
 
         // 验证远程武器攻击不受影响
         expect(rangedAttrsWithMod!.attack).toBeCloseTo(rangedAttrsWithoutMod!.attack, 2)
+
+        // 验证角色攻击无影响
+        expect(meleeAttackWithMod).toBe(meleeAttackWithoutMod)
+        expect(rangedAttackWithMod).toBe(rangedAttackWithoutMod)
     })
 
     // 测试独立增伤计算
