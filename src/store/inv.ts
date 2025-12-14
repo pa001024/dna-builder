@@ -52,13 +52,13 @@ export const useInvStore = defineStore("inv", {
             const all = gameData.mod.filter((mod) => types.has(mod.类型.substring(0, 2)))
             const noInv = useInv ? all.filter((mod) => !this.enableMods[mod.品质 as keyof typeof this.enableMods]) : all
 
-            const invMods = Object.entries(this.mods)
-                .map(([modId, [lv, count]]) => new LeveledModWithCount(Number(modId), lv, this.getBuffLv(Number(modId)), count))
-                .filter((mod) => useInv && this.enableMods[mod.品质 as keyof typeof this.enableMods])
-            return [
-                ...noInv.map((mod) => new LeveledModWithCount(mod, undefined, this.getBuffLv(mod.id), 8)),
-                ...invMods.filter((mod) => types.has(mod.类型)),
-            ]
+            const invMods = useInv
+                ? Object.entries(this.mods)
+                      .map(([modId, [lv, count]]) => new LeveledModWithCount(Number(modId), lv, this.getBuffLv(Number(modId)), count))
+                      .filter((mod) => this.enableMods[mod.品质 as keyof typeof this.enableMods])
+                : []
+
+            return [...noInv.map((mod) => new LeveledModWithCount(mod, undefined, this.getBuffLv(mod.id), 8)), ...invMods]
         },
         getMeleeWeapons(useInv: boolean) {
             return useInv && this.enableWeapons.近战

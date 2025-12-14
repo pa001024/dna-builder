@@ -906,9 +906,19 @@ export class CharBuild {
         includeTypes.forEach((key) => (preserveTypes.includes(key) ? 0 : (initBuild[key] = [])))
         const localBuild = initBuild.clone()
         // 创建一个集合记录已选择的互斥系列
-        const selectedExclusiveSeries = new Set<string>()
+        const selectedExclusiveSeries = {
+            charMods: new Set<string>(),
+            meleeMods: new Set<string>(),
+            rangedMods: new Set<string>(),
+            skillWeaponMods: new Set<string>(),
+        }
         // 创建一个集合记录已选择的非契约者MOD名称（用于名称互斥）
-        const selectedExclusiveNames = new Set<string>()
+        const selectedExclusiveNames = {
+            charMods: new Set<string>(),
+            meleeMods: new Set<string>(),
+            rangedMods: new Set<string>(),
+            skillWeaponMods: new Set<string>(),
+        }
         // 记录已选择的MOD数量
         const selectedModCount = new Map<number, number>()
 
@@ -925,11 +935,11 @@ export class CharBuild {
             localBuild[key].push(mod)
             // 记录互斥系列
             if (CharBuild.exclusiveSeries.includes(mod.系列)) {
-                selectedExclusiveSeries.add(mod.系列)
+                selectedExclusiveSeries[key].add(mod.系列)
             }
             // 记录非契约者MOD名称（用于名称互斥）
             if (mod.系列 !== "契约者") {
-                selectedExclusiveNames.add(mod.名称)
+                selectedExclusiveNames[key].add(mod.名称)
             } else {
                 selectedModCount.set(mod.id, (selectedModCount.get(mod.id) || 0) + 1)
             }
@@ -939,11 +949,11 @@ export class CharBuild {
             localBuild[key].splice(index, 1)
             // 从互斥系列集合中移除
             if (CharBuild.exclusiveSeries.includes(mod.系列)) {
-                selectedExclusiveSeries.delete(mod.系列)
+                selectedExclusiveSeries[key].delete(mod.系列)
             }
             // 从非契约者MOD名称集合中移除
             if (mod.系列 !== "契约者") {
-                selectedExclusiveNames.delete(mod.名称)
+                selectedExclusiveNames[key].delete(mod.名称)
             } else {
                 const count = (selectedModCount.get(mod.id) || 0) - 1
                 if (count > 0) selectedModCount.set(mod.id, count)
@@ -967,9 +977,12 @@ export class CharBuild {
                         (!v.属性 || v.属性 === localBuild.char.属性) &&
                         (!v.限定 ||
                             (key === "meleeMods" && [localBuild.meleeWeapon.伤害类型, localBuild.meleeWeapon.类别].includes(v.限定)) ||
-                            (key === "rangedMods" && [localBuild.rangedWeapon.伤害类型, localBuild.rangedWeapon.类别].includes(v.限定))) &&
-                        !selectedExclusiveNames.has(v.名称) &&
-                        !selectedExclusiveSeries.has(v.系列) &&
+                            (key === "rangedMods" && [localBuild.rangedWeapon.伤害类型, localBuild.rangedWeapon.类别].includes(v.限定)) ||
+                            (key === "skillWeaponMods" &&
+                                localBuild.skillWeapon &&
+                                [localBuild.skillWeapon.伤害类型, localBuild.skillWeapon.类别].includes(v.限定))) &&
+                        !selectedExclusiveNames[key].has(v.名称) &&
+                        !selectedExclusiveSeries[key].has(v.系列) &&
                         (selectedModCount.get(v.id) || 0) < v.count,
                 )
                 .map((v) => ({ mod: v, income: localBuild.calcIncome(v) }))
@@ -1040,7 +1053,7 @@ export class CharBuild {
                     changed = true
                 }
             })
-            log(`无可替换MOD 结束自动构筑`)
+            if (!changed) log(`无可替换MOD 结束自动构筑`)
             return changed
         }
         // 最大迭代次数
