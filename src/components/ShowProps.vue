@@ -16,7 +16,7 @@ withDefaults(
 <template>
     <FullTooltip :side="side">
         <template #tooltip>
-            <div class="flex flex-col gap-2 text-gray-700 max-w-[300px]">
+            <div class="flex flex-col gap-2 max-w-[300px]">
                 <div v-if="title" class="text-sm font-bold">{{ title }}</div>
                 <div v-if="type" class="text-xs text-neutral-500 font-bold">{{ type }}</div>
                 <div v-for="(val, prop) in props" :key="prop" class="flex justify-between items-center gap-2 text-sm">

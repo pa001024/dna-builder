@@ -28,6 +28,7 @@
         "damageBoost": "Increase damage",
         "damageIncrease": "Increase damage",
         "defense": "Defense",
+        "desc": "Character/Weapon/Skill Build",
         "desperate": "Desperation",
         "durability": "Durability",
         "dynamic_prop": "Dynamic Property",
@@ -79,6 +80,7 @@
         "small": "Small",
         "stance": "Posture",
         "target_function": "Target Function",
+        "timeline": "timeline",
         "title": "Build",
         "triggerRate": "Trigger rate",
         "weapon": "Weapon",
@@ -86,6 +88,7 @@
         "weaponDamage": "weapon damage"
     },
     "game": {
+        "desc": "Play Auto Chess with a Double Helix character",
         "end": "end the battle",
         "pause": "pause",
         "restart": "restart",
@@ -99,12 +102,17 @@
         "title": "Home"
     },
     "inventory": {
+        "desc": "Customize your Wedge and weapon loadout",
         "title": "Inventory management"
     },
     "main": {
         "btn_collapse_menu": "Collapse menu",
         "btn_pin_window": "Pin window on top",
         "btn_unpin_window": "Unpin window"
+    },
+    "more": {
+        "desc": "More features",
+        "title": "More"
     },
     "setting": {
         "appearance": "Appearance",
@@ -122,5 +130,9 @@
         "windowTrasnparent": "Window Transparency",
         "windowTrasnparentTip": "Windows and surfaces show translucency",
         "winMaterial": "Window Material"
+    },
+    "timeline": {
+        "desc": "Customize the character’s combat logic (axis fighting)",
+        "title": "timeline"
     }
 }

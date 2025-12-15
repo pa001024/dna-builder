@@ -28,6 +28,7 @@
         "damageBoost": "Increase damage",
         "damageIncrease": "Increase damage",
         "defense": "防御",
+        "desc": "キャラクター/武器/スキルビルド",
         "desperate": "背水",
         "durability": "耐久",
         "dynamic_prop": "動的属性",
@@ -79,6 +80,7 @@
         "small": "小型",
         "stance": "戦姿",
         "target_function": "目標関数",
+        "timeline": "タイムライン",
         "title": "構築",
         "triggerRate": "Trigger rate",
         "weapon": "武器",
@@ -86,6 +88,7 @@
         "weaponDamage": "weapon damage"
     },
     "game": {
+        "desc": "Double Helix キャラクターでオート チェスをプレイする",
         "end": "end the battle",
         "pause": "pause",
         "restart": "restart",
@@ -99,12 +102,17 @@
         "title": "ホーム"
     },
     "inventory": {
+        "desc": "ウェッジと武器の装備をカスタマイズする",
         "title": "Inventory management"
     },
     "main": {
         "btn_collapse_menu": "メニューを折りたたむ",
         "btn_pin_window": "ウィンドウを固定",
         "btn_unpin_window": "固定を解除"
+    },
+    "more": {
+        "desc": "その他の機能",
+        "title": "もっと"
     },
     "setting": {
         "appearance": "外観設定",
@@ -122,5 +130,9 @@
         "windowTrasnparent": "透明効果",
         "windowTrasnparentTip": "ウィンドウと表面に半透明を表示",
         "winMaterial": "ウィンドウ素材"
+    },
+    "timeline": {
+        "desc": "キャラクターの戦闘ロジックをカスタマイズ（軸戦闘）",
+        "title": "タイムライン"
     }
 }

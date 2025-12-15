@@ -59,9 +59,11 @@ export class LeveledBuff implements Buff {
     applyDynamicAttr(
         char: LeveledChar,
         attrs: CharAttr,
-        weapon?: LeveledWeapon | LeveledSkillWeapon,
-        wAttr?: WeaponAttr,
+        weapons: (LeveledWeapon | LeveledSkillWeapon | undefined)[],
+        wAttrs?: (WeaponAttr | undefined)[],
     ): ReturnType<CharBuild["calculateWeaponAttributes"]> {
+        const [weapon, meleeWeapon, rangedWeapon, skillWeapon] = weapons
+        const [weaponAttr, meleeWeaponAttr, rangedWeaponAttr, skillWeaponAttr] = wAttrs || []
         const sandbox = {
             ...attrs,
             char: { attack: char.基础攻击, health: char.基础生命, shield: char.基础护盾, defense: char.基础防御, sanity: char.基础神智 },
@@ -73,7 +75,34 @@ export class LeveledBuff implements Buff {
                       triggerRate: weapon.基础触发,
                   }
                 : undefined,
-            weaponAttr: wAttr,
+            meleeWeapon: meleeWeapon
+                ? {
+                      attack: meleeWeapon.基础攻击,
+                      critRate: meleeWeapon.基础暴击,
+                      critDamage: meleeWeapon.基础暴伤,
+                      triggerRate: meleeWeapon.基础触发,
+                  }
+                : undefined,
+            rangedWeapon: rangedWeapon
+                ? {
+                      attack: rangedWeapon.基础攻击,
+                      critRate: rangedWeapon.基础暴击,
+                      critDamage: rangedWeapon.基础暴伤,
+                      triggerRate: rangedWeapon.基础触发,
+                  }
+                : undefined,
+            skillWeapon: skillWeapon
+                ? {
+                      attack: skillWeapon.基础攻击,
+                      critRate: skillWeapon.基础暴击,
+                      critDamage: skillWeapon.基础暴伤,
+                      triggerRate: skillWeapon.基础触发,
+                  }
+                : undefined,
+            weaponAttr,
+            meleeWeaponAttr,
+            rangedWeaponAttr,
+            skillWeaponAttr,
         } as any
         const func = new Function("attr", `with(attr){${this.code};return attr}`)
         let result = null
@@ -83,9 +112,20 @@ export class LeveledBuff implements Buff {
             console.error("动态属性代码执行错误", error)
         }
         if (result) {
-            const { char, weapon, weaponAttr, ...attrs } = result
+            const {
+                char,
+                weapon,
+                meleeWeapon,
+                rangedWeapon,
+                skillWeapon,
+                weaponAttr,
+                meleeWeaponAttr,
+                rangedWeaponAttr,
+                skillWeaponAttr,
+                ...attrs
+            } = result
             return { ...attrs, weapon: weaponAttr }
-        } else return { ...attrs, weapon: wAttr }
+        } else return { ...attrs, weapon: weaponAttr }
     }
 
     /**

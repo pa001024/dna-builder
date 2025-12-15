@@ -34,9 +34,14 @@ export const useUIStore = defineStore("ui", {
                     icon: "ri:box-1-line",
                 },
                 {
-                    name: "game",
-                    path: "/game",
-                    icon: "la:gamepad-solid",
+                    name: "timeline",
+                    path: "/timeline",
+                    icon: "ri:timeline-view",
+                },
+                {
+                    name: "more",
+                    path: "/more",
+                    icon: "ri:more-line",
                 },
                 {
                     // -- flex-1

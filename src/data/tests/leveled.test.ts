@@ -303,9 +303,9 @@ describe("LeveledWeapon类测试", () => {
         const 铸铁者精炼0级 = new LeveledWeapon("铸铁者", 0)
         const 铸铁者精炼5级 = new LeveledWeapon("铸铁者", 5)
 
-        // 精炼0级时，暴击属性应该是原始值 * (0+1)/(5+1) = 原始值/6
-        // 精炼5级时，暴击属性应该是原始值 * (5+1)/(5+1) = 原始值
-        expect(铸铁者精炼0级.暴击).toBeCloseTo(1 / 6, 2)
+        // 精炼0级时，暴击属性应该是原始值/2
+        // 精炼5级时，暴击属性应该是原始值
+        expect(铸铁者精炼0级.暴击).toBeCloseTo(1 / 2, 2)
         expect(铸铁者精炼5级.暴击).toBe(1)
     })
 

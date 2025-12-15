@@ -15,11 +15,12 @@ watchEffect(() => {
 })
 
 if (env.isApp) {
-    const font = new FontFace("SourceHanSansCN", "url(/fonts/SourceHanSansCN-VF.ttf)")
-    document.fonts.add(font)
-    font.load()
+    // const font = new FontFace("SourceHanSansCN", "url(/fonts/SourceHanSansCN-VF.ttf)")
+    // document.fonts.add(font)
+    // font.load()
 } else {
     onMounted(() => {
+        if (!setting.windowTrasnparent) return
         const app = document.getElementById("main-window")!
         app.style.backdropFilter = "blur(1px)"
         // 获取canvas对象
@@ -149,7 +150,7 @@ if (env.isApp) {
 </script>
 
 <template>
-    <canvas class="fixed w-full h-full z-0 bg-indigo-300" id="background" v-if="!env.isApp"></canvas>
+    <canvas class="fixed w-full h-full z-0 bg-indigo-300" id="background" v-if="setting.windowTrasnparent && !env.isApp"></canvas>
     <ResizeableWindow
         :title="route.name === 'schat' ? ui.schatTitle : $t(`${String(route.name)}.title`)"
         darkable

@@ -92,7 +92,7 @@ function resetStorage() {
                             </SelectGroup>
                         </Select>
                     </div>
-                    <div v-if="env.isApp" class="flex justify-between items-center p-2">
+                    <div class="flex justify-between items-center p-2">
                         <span class="label-text">
                             {{ $t("setting.windowTrasnparent") }}
                             <div class="text-xs text-base-content/50">{{ $t("setting.windowTrasnparentTip") }}</div>

@@ -14,20 +14,36 @@ export interface CharAttr {
     defense: number
     sanity: number
     // 其他属性
+    /** 威力 */
     power: number
+    /** 持续 */
     durability: number
+    /** 效益 */
     efficiency: number
+    /** 范围 */
     range: number
+    /** 昂扬 */
     boost: number
+    /** 背水 */
     desperate: number
+    /** 增伤 */
     damageIncrease: number
+    /** 武器伤害 */
     weaponDamage: number
+    /** 技能伤害 */
     skillDamage: number
+    /** 独立增伤 */
     independentDamageIncrease: number
+    /** 属性穿透 */
     penetration: number
+    /** 无视防御 */
     ignoreDefense: number
+    /** 技能速度 */
     skillSpeed: number
+    /** 失衡易伤 */
     imbalanceDamageBonus: number
+    /** 技能倍率加数 */
+    skillAdd: number
 }
 
 export interface WeaponAttr {
@@ -40,6 +56,64 @@ export interface WeaponAttr {
     damageIncrease: number
     independentDamageIncrease: number
     additionalDamage: number
+}
+
+import type { RawTimelineData } from "../store/timeline"
+export class CharBuildTimeline {
+    totalTime: number = 0
+    constructor(
+        public name: string,
+        public items: CharBuildTimelineItem[],
+    ) {
+        this.items.forEach((item) => {
+            const endTime = item.time + item.duration
+            this.totalTime = Math.max(this.totalTime, endTime)
+        })
+    }
+    static fromRaw(raw: RawTimelineData) {
+        return new CharBuildTimeline(
+            raw.name,
+            raw.items.map((item) => ({
+                track: item.i,
+                name: item.n,
+                time: item.t,
+                duration: item.d,
+                lv: item.l,
+            })),
+        )
+    }
+}
+
+export interface CharBuildTimelineItem {
+    track: number
+    name: string
+    time: number // 单位秒
+    duration: number // 单位秒
+    lv?: number // 如果是BUFF则有此项
+}
+
+export interface CharBuildOptions {
+    char: LeveledChar
+    imbalance?: boolean
+    hpPercent: number
+    resonanceGain: number
+    auraMod?: LeveledMod
+    // mods?: LeveledMod[]
+    charMods?: LeveledMod[]
+    meleeMods?: LeveledMod[]
+    rangedMods?: LeveledMod[]
+    skillWeaponMods?: LeveledMod[]
+    buffs?: LeveledBuff[]
+    melee: LeveledWeapon
+    ranged: LeveledWeapon
+    baseName: string
+    enemyType?: string
+    enemyLevel?: number
+    enemyResistance?: number
+    enemyHpType?: string
+    targetFunction?: string
+    skillLevel?: number
+    timeline?: CharBuildTimeline
 }
 
 export class CharBuild {
@@ -55,7 +129,7 @@ export class CharBuild {
     public dynamicBuffs: LeveledBuff[]
     public meleeWeapon: LeveledWeapon
     public rangedWeapon: LeveledWeapon
-    public _baseName = ""
+    public baseName = ""
     public imbalance = false
     public enemyType: string
     public enemyLevel: number
@@ -64,6 +138,7 @@ export class CharBuild {
     public targetFunction: string
     public skills: LeveledSkill[]
     public skillWeapon?: LeveledSkillWeapon
+    public timeline?: CharBuildTimeline
 
     // 敌方类型系数表
     private enemyTypeCoefficients: Record<string, number> = {
@@ -84,28 +159,7 @@ export class CharBuild {
         combatStyle: 1,
     }
 
-    constructor(options: {
-        char: LeveledChar
-        imbalance?: boolean
-        hpPercent: number
-        resonanceGain: number
-        auraMod?: LeveledMod
-        // mods?: LeveledMod[]
-        charMods?: LeveledMod[]
-        meleeMods?: LeveledMod[]
-        rangedMods?: LeveledMod[]
-        skillWeaponMods?: LeveledMod[]
-        buffs?: LeveledBuff[]
-        melee: LeveledWeapon
-        ranged: LeveledWeapon
-        baseName: string
-        enemyType?: string
-        enemyLevel?: number
-        enemyResistance?: number
-        enemyHpType?: string
-        targetFunction?: string
-        skillLevel?: number
-    }) {
+    constructor(options: CharBuildOptions) {
         this.char = options.char
         this.hpPercent = Math.max(0, Math.min(1, options.hpPercent))
         this.resonanceGain = options.resonanceGain
@@ -125,6 +179,7 @@ export class CharBuild {
         this.enemyResistance = options.enemyResistance || 0
         this.enemyHpType = options.enemyHpType || "生命"
         this.targetFunction = options.targetFunction || "伤害"
+        this.timeline = options.timeline
 
         // 从skills表中获取角色技能数组，用参数skillLevel初始化LeveledSkill后储存为私有属性skills数组
         const skillLevel = options.skillLevel || 10
@@ -155,16 +210,8 @@ export class CharBuild {
         return [...this.mods, this.meleeWeapon, this.rangedWeapon]
     }
 
-    get baseName() {
-        return this._baseName
-    }
-    set baseName(value: string) {
-        this._baseName = value
-        // this.skills?.map((skill) => (skill.子技能名 = this.baseNameSub))
-    }
-
     get baseNameTitle() {
-        return this.baseName.replace(/\[.+?\]/g, "")
+        return this.baseName.replace(/\[.+?\]/, "")
     }
     get baseNameSub() {
         const match = this.baseName.match(/\[(.+?)\]/)
@@ -172,7 +219,7 @@ export class CharBuild {
     }
 
     // 计算角色所有属性（基础属性和其他属性）
-    public calculateAttributes(props?: LeveledWeapon | LeveledMod | LeveledBuff, minus = false): CharAttr {
+    public calculateAttributes(props?: LeveledWeapon | LeveledMod | LeveledBuff, minus = false, nocode = false): CharAttr {
         const char = this.char
 
         // 计算各种加成
@@ -199,6 +246,7 @@ export class CharBuild {
         let skillSpeed = this.getTotalBonus("技能速度")
         let penetration = this.getTotalBonus("属性穿透")
         let imbalanceDamageBonus = this.getTotalBonus("失衡易伤")
+        let skillAdd = this.getTotalBonus("技能倍率加数")
         let ignoreDefense = this.getTotalBonusMul("无视防御")
         let independentDamageIncrease = this.getTotalBonusMul("独立增伤")
 
@@ -222,6 +270,7 @@ export class CharBuild {
                 skillDamage -= this.getTotalBonusSingle(props, "技能伤害")
                 skillSpeed -= this.getTotalBonusSingle(props, "技能速度")
                 penetration -= this.getTotalBonusSingle(props, "属性穿透")
+                skillAdd -= this.getTotalBonusSingle(props, "技能倍率加数")
                 ignoreDefense = (1 + ignoreDefense) / (1 + this.getTotalBonusSingle(props, "无视防御")) - 1
                 independentDamageIncrease = (1 + independentDamageIncrease) / (1 + this.getTotalBonusSingle(props, "独立增伤")) - 1
             } else {
@@ -243,6 +292,7 @@ export class CharBuild {
                 skillDamage += this.getTotalBonusSingle(props, "技能伤害")
                 skillSpeed += this.getTotalBonusSingle(props, "技能速度")
                 penetration += this.getTotalBonusSingle(props, "属性穿透")
+                skillAdd += this.getTotalBonusSingle(props, "技能倍率加数")
                 ignoreDefense = (1 + ignoreDefense) * (1 + this.getTotalBonusSingle(props, "无视防御")) - 1
                 independentDamageIncrease = (1 + independentDamageIncrease) * (1 + this.getTotalBonusSingle(props, "独立增伤")) - 1
             }
@@ -286,30 +336,40 @@ export class CharBuild {
             damageIncrease,
             weaponDamage,
             skillDamage,
-            independentDamageIncrease,
-            penetration,
-            ignoreDefense,
             skillSpeed,
+            penetration,
             imbalanceDamageBonus,
+            skillAdd,
+            ignoreDefense,
+            independentDamageIncrease,
         }
-        if (this.dynamicBuffs.length > 0) {
-            for (const b of this.dynamicBuffs) {
-                if (minus && props!.名称 === b.名称) continue
-                attrs = b.applyDynamicAttr(char, attrs)
+        if (nocode) return attrs
+        if (this.dynamicBuffs.length > 0 || (!minus && props?.code)) {
+            const all = this.getAllWeaponsAttrs(props, minus)
+            if (this.dynamicBuffs.length > 0) {
+                for (const b of this.dynamicBuffs) {
+                    if (minus && props!.名称 === b.名称) continue
+                    attrs = b.applyDynamicAttr(char, attrs, this.allWeapons, all)
+                }
             }
-        }
-        if (!minus && (props as LeveledBuff)?.code) {
-            attrs = (props as LeveledBuff).applyDynamicAttr(char, attrs)
+            if (!minus && props?.code) {
+                attrs = props.applyDynamicAttr(char, attrs, this.allWeapons, all)
+            }
         }
 
         return attrs
     }
     // 计算武器属性
-    public calculateWeaponAttributes(props?: LeveledWeapon | LeveledMod | LeveledBuff, minus = false): CharAttr & { weapon?: WeaponAttr } {
+    public calculateWeaponAttributes(
+        props?: LeveledWeapon | LeveledMod | LeveledBuff,
+        minus = false,
+        weapon = this.selectedWeapon,
+        nocode = false,
+        nochar = false,
+    ): CharAttr & { weapon?: WeaponAttr } {
         const char = this.char
-        let attrs: CharAttr & { weapon?: WeaponAttr } = this.calculateAttributes(props, minus)
+        let attrs: CharAttr & { weapon?: WeaponAttr } = nochar ? ({} as any) : this.calculateAttributes(props, minus, true)
 
-        const weapon = this.selectedWeapon
         if (weapon) {
             const prefix = weapon.类型
             // 计算各种加成
@@ -326,7 +386,8 @@ export class CharBuild {
             let multiShotBonus = this.getTotalBonus(`${prefix}多重`, prefix) + this.getTotalBonus(`多重`, prefix)
             let damageIncrease = this.getTotalBonus(`${prefix}增伤`, prefix) + this.getTotalBonus(`增伤`, prefix)
             let additionalDamage = this.getTotalBonus("追加伤害")
-            let independentDamageIncrease = this.getTotalBonusMul("独立增伤", prefix)
+            let independentDamageIncrease =
+                (1 + this.getTotalBonus(`${prefix}增伤`, prefix)) * (1 + this.getTotalBonusMul("独立增伤", prefix)) - 1
 
             if (prefix.startsWith("同律")) {
                 const lowerPrefix = prefix.substring(2)
@@ -357,7 +418,8 @@ export class CharBuild {
                     damageIncrease -=
                         this.getTotalBonusSingle(props, `${prefix}增伤`, prefix) + this.getTotalBonusSingle(props, `增伤`, prefix)
                     additionalDamage -= this.getTotalBonusSingle(props, `追加伤害`, prefix)
-                    independentDamageIncrease = (1 + independentDamageIncrease) / (1 + this.getTotalBonusMul("独立增伤", prefix)) - 1
+                    independentDamageIncrease =
+                        (1 + independentDamageIncrease) / (1 + this.getTotalBonusSingle(props, "独立增伤", prefix)) - 1
 
                     if (prefix.startsWith("同律")) {
                         const lowerPrefix = prefix.substring(2)
@@ -386,7 +448,8 @@ export class CharBuild {
                     damageIncrease +=
                         this.getTotalBonusSingle(props, `${prefix}增伤`, prefix) + this.getTotalBonusSingle(props, `增伤`, prefix)
                     additionalDamage += this.getTotalBonusSingle(props, `追加伤害`, prefix)
-                    independentDamageIncrease = (1 + independentDamageIncrease) * (1 + this.getTotalBonusMul("独立增伤", prefix)) - 1
+                    independentDamageIncrease =
+                        (1 + independentDamageIncrease) * (1 + this.getTotalBonusSingle(props, "独立增伤", prefix)) - 1
 
                     if (prefix.startsWith("同律")) {
                         const lowerPrefix = prefix.substring(2)
@@ -437,16 +500,51 @@ export class CharBuild {
             }
             attrs.weapon = weaponAttrs
         }
-        if (this.dynamicBuffs.length > 0) {
-            for (const b of this.dynamicBuffs) {
-                if (minus && props!.名称 === b.名称) continue
-                attrs = b.applyDynamicAttr(char, attrs, weapon, attrs.weapon)
+        if (nocode) return attrs
+
+        if (this.dynamicBuffs.length > 0 || (!minus && props?.code)) {
+            // TODO: 没做其他武器属性的code计算, 可能有问题 不过递归太多次也很麻烦
+            const all = this.getAllWeaponsAttrs(props, minus, weapon, attrs.weapon)
+            if (this.dynamicBuffs.length > 0) {
+                for (const b of this.dynamicBuffs) {
+                    if (minus && props!.名称 === b.名称) continue
+                    attrs = b.applyDynamicAttr(char, attrs, this.allWeapons, all)
+                }
+            }
+            if (!minus && props?.code) {
+                attrs = props.applyDynamicAttr(char, attrs, this.allWeapons, all)
             }
         }
-        if (!minus && (props as LeveledBuff)?.code) {
-            attrs = (props as LeveledBuff).applyDynamicAttr(char, attrs, weapon, attrs.weapon)
-        }
         return attrs
+    }
+
+    get allWeapons() {
+        return [this.selectedWeapon, this.meleeWeapon, this.rangedWeapon, this.skillWeapon]
+    }
+
+    /**
+     * 获取所有武器属性
+     * @param props 武器属性
+     * @param minus 是否减去属性
+     * @param weapon 当前武器
+     * @param weaponAttrs 当前武器属性
+     * @returns 所有武器属性
+     */
+    getAllWeaponsAttrs(
+        props?: LeveledWeapon | LeveledMod | LeveledBuff,
+        minus = false,
+        weapon?: LeveledWeapon | LeveledSkillWeapon,
+        weaponAttrs?: WeaponAttr,
+    ) {
+        return this.allWeapons
+            .map((w) =>
+                w
+                    ? w.名称 === weapon?.名称
+                        ? { weapon: weaponAttrs }
+                        : this.calculateWeaponAttributes(props, minus, w, true, true)
+                    : undefined,
+            )
+            .map((a) => a?.weapon)
     }
 
     // 获取单项目总加成
@@ -567,7 +665,7 @@ export class CharBuild {
         const ignoreDefense = attrs.ignoreDefense
 
         // 计算最终防御乘区，并确保其在0到1之间
-        const defenseMultiplier = 1 - (1 - (1 - baseDefenseMultiplier)) * (1 - ignoreDefense)
+        const defenseMultiplier = 1 - baseDefenseMultiplier * (1 - ignoreDefense)
         return Math.max(0, Math.min(1, defenseMultiplier))
     }
 
@@ -689,8 +787,6 @@ export class CharBuild {
 
     // 计算目标函数
     public calculateTargetFunction(damage: DamageResult, attrs: ReturnType<typeof this.calculateWeaponAttributes>): number {
-        const targetFunction = this.targetFunction
-
         // 计算伤害(DPA)
         let dpa = damage.expectedDamage
         let dpac = damage.higherCritNoTrigger || dpa
@@ -700,15 +796,16 @@ export class CharBuild {
         let dpb = damage.expectedDamage
         let weapon = this.selectedWeapon
         let skill = this.selectedSkill
-        if (weapon) {
-            const weaponAttrs = attrs.weapon!
-            dps = dpa * weaponAttrs.attackSpeed * weaponAttrs!.multiShot
-            dpa = dpa * weaponAttrs.multiShot
+        if (weapon && attrs.weapon) {
+            const weaponAttrs = attrs.weapon
+            dps = dpa = dpa * weaponAttrs.multiShot
+            if (!this.timeline) dps = dpa * weaponAttrs.attackSpeed
             dpb = dpb / weaponAttrs.additionalDamage
         } else if (skill) {
-            dps = dpa * (1 + attrs.skillSpeed)
+            if (!this.timeline) dps = dpa * (1 + attrs.skillSpeed)
         }
-
+        // 除以时间线总长度
+        if (this.timeline) dps /= this.timeline.totalTime
         // 计算效益影响下的神智消耗
         const baseSanityCost = skill?.神智消耗值 || 100 // 从技能中获取或使用默认值
         const baseSustainedCost = skill?.每秒神智消耗值 || 100 // 从技能中获取或使用默认值
@@ -722,10 +819,11 @@ export class CharBuild {
             sustainedCost = Math.ceil(Math.max(0, baseSustainedCost * Math.max(0.25, (2 - attrs.efficiency) / attrs.durability)))
         }
 
-        switch (targetFunction) {
+        switch (this.targetFunction) {
             case "弹片伤害":
             case "DPB":
                 return dpb
+            case "总伤":
             case "伤害":
             case "DPA":
                 return dpa
@@ -779,13 +877,12 @@ export class CharBuild {
     get isSkillWeapon() {
         return this.skillWeapon && this.skillWeapon.名称 === this.baseNameTitle
     }
-
     /**
      * 主计算函数
      * @param props 武器、模组或 buff
      * @returns 目标函数结果
      */
-    public calculate(props?: LeveledWeapon | LeveledMod | LeveledBuff, minus = false): number {
+    public calculateOneTime(props?: LeveledWeapon | LeveledMod | LeveledBuff, minus = false): number {
         // 查找要计算的武器或技能
         let damage: DamageResult = {
             expectedDamage: 0,
@@ -809,7 +906,36 @@ export class CharBuild {
         }
 
         // 计算目标函数
-        return Math.round(this.calculateTargetFunction(damage, attrs))
+        return this.calculateTargetFunction(damage, attrs)
+    }
+    /**
+     * 主计算函数(包含时间线)
+     * @param props 武器、模组或 buff
+     * @returns 目标函数结果
+     */
+    public calculate(props?: LeveledWeapon | LeveledMod | LeveledBuff, minus = false): number {
+        if (!this.timeline) return Math.round(this.calculateOneTime(props, minus))
+        let totalDamage = 0
+        const buffItems = this.timeline.items.filter((i) => i.lv).map((i) => ({ ...i, buff: new LeveledBuff(i.name, i.lv) }))
+        const skillItems = this.timeline.items.filter((i) => !i.lv)
+        function getBuffsAtTime(time: number, track: number) {
+            return buffItems.filter((i) => i.time <= time && i.time + i.duration >= time && i.track >= track).map((i) => i.buff)
+        }
+        const initBaseName = this.baseName
+        skillItems.forEach((i) => {
+            const buffs = getBuffsAtTime(i.time, i.track)
+            const build = buffs.length ? this.clone().applyBuffs(buffs) : this
+            build.baseName = i.name
+            const damage = build.calculateOneTime(props, minus)
+            totalDamage += damage
+        })
+        this.baseName = initBaseName
+        return Math.round(totalDamage)
+    }
+
+    public applyBuffs(buffs: LeveledBuff[]) {
+        this.buffs.push(...buffs)
+        return this
     }
     /**
      * 计算单属性收益（加上属性值）

@@ -2,6 +2,138 @@
 @plugin "daisyui" {
     themes: all;
 }
+/* @import "animate.css"; */
+
+@theme {
+    /* Animation variables */
+    --animate-zoomOut: zoomOut 0.3s ease-in-out;
+    --animate-slideDownAndFade: slideDownAndFade 400ms cubic-bezier(0.16, 1, 0.3, 1);
+    --animate-slideLeftAndFade: slideLeftAndFade 400ms cubic-bezier(0.16, 1, 0.3, 1);
+    --animate-slideUpAndFade: slideUpAndFade 400ms cubic-bezier(0.16, 1, 0.3, 1);
+    --animate-slideRightAndFade: slideRightAndFade 400ms cubic-bezier(0.16, 1, 0.3, 1);
+    --animate-slideUp: slideUp 0.3s cubic-bezier(0.87, 0, 0.13, 1);
+    --animate-slideDown: slideDown 0.3s cubic-bezier(0.87, 0, 0.13, 1);
+    --animate-overlayShow: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+    --animate-contentShow: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+    --animate-shake: shake 0.4s;
+    /* Keyframes */
+    @keyframes zoomOut {
+        0% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0;
+            transform: scale3d(0.3, 0.3, 0.3);
+        }
+        100% {
+            opacity: 0;
+        }
+    }
+
+    @keyframes slideDownAndFade {
+        from {
+            opacity: 0;
+            transform: translateY(-2px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideLeftAndFade {
+        from {
+            opacity: 0;
+            transform: translateX(2px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideUpAndFade {
+        from {
+            opacity: 0;
+            transform: translateY(2px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideRightAndFade {
+        from {
+            opacity: 0;
+            transform: translateX(-2px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            height: var(--radix-collapsible-content-height);
+        }
+        to {
+            height: 0;
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            height: 0;
+        }
+        to {
+            height: var(--radix-collapsible-content-height);
+        }
+    }
+
+    @keyframes overlayShow {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes contentShow {
+        from {
+            opacity: 0;
+            transform: translate(-50%, -48%) scale(0.96);
+        }
+        to {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    }
+
+    @keyframes shake {
+        0% {
+            transform: translate(0, 0);
+        }
+        10%,
+        30%,
+        50%,
+        70%,
+        90% {
+            transform: translate(-5px, 0);
+        }
+        20%,
+        40%,
+        60%,
+        80% {
+            transform: translate(5px, 0);
+        }
+        100% {
+            transform: translate(0, 0);
+        }
+    }
+}
 
 /* for apply_acrylic */
 :root,

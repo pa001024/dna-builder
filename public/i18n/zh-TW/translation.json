@@ -28,6 +28,7 @@
         "damageBoost": "增傷",
         "damageIncrease": "增傷",
         "defense": "防禦",
+        "desc": "角色/武器/技能構築",
         "desperate": "背水",
         "durability": "耐久",
         "dynamic_prop": "動態屬性",
@@ -79,6 +80,7 @@
         "small": "小型",
         "stance": "戰姿",
         "target_function": "目標函數",
+        "timeline": "時間線",
         "title": "構築",
         "triggerRate": "觸發率",
         "weapon": "武器",
@@ -86,6 +88,7 @@
         "weaponDamage": "武器傷害"
     },
     "game": {
+        "desc": "用二重螺旋角色玩自走棋",
         "end": "結束戰鬥",
         "pause": "暫停",
         "restart": "重新開始",
@@ -99,12 +102,17 @@
         "title": "主頁"
     },
     "inventory": {
+        "desc": "自定義你的魔之楔和武器配置",
         "title": "庫存管理"
     },
     "main": {
         "btn_collapse_menu": "折疊菜單",
         "btn_pin_window": "視窗置頂",
         "btn_unpin_window": "取消置頂"
+    },
+    "more": {
+        "desc": "更多功能",
+        "title": "更多"
     },
     "setting": {
         "appearance": "外觀設定",
@@ -122,5 +130,9 @@
         "windowTrasnparent": "透明效果",
         "windowTrasnparentTip": "視窗和表面顯示半透明",
         "winMaterial": "視窗材質"
+    },
+    "timeline": {
+        "desc": "自定義角色的戰鬥邏輯(打軸)",
+        "title": "時間線"
     }
 }

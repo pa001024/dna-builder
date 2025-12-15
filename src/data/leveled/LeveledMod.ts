@@ -157,6 +157,7 @@ export class LeveledMod implements Mod {
         "maxLevel",
         "效果",
         "code",
+        "count",
     ])
     get properties(): string[] {
         return Object.keys(this).filter((prop) => !LeveledMod._exclude_properties.has(prop))

@@ -2,14 +2,14 @@ import { RouteRecordRaw, createWebHashHistory, createRouter, createWebHistory } 
 
 import Home from "./views/Home.vue"
 import Setting from "./views/Setting.vue"
-import SmallGame from "./views/SmallGame.vue"
 import CharBuildView from "./views/CharBuildView.vue"
 import InventoryEdit from "./views/InventoryEdit.vue"
+import More from "./views/More.vue"
+import TimelineEditor from "./views/TimelineEditor.vue"
 import { env } from "./env"
 import { LogicalSize, getCurrentWindow } from "@tauri-apps/api/window"
 
 let setMinSize = async (_w: number, _h: number) => {}
-
 ;(async () => {
     if (!env.isApp) return
     setMinSize = async (w: number, h: number) => {
@@ -27,8 +27,11 @@ const routes: readonly RouteRecordRaw[] = [
     // { name: "user", path: "/user", component: User, beforeEnter: () => setMinSize(367, 430) },
     { name: "setting", path: "/setting", component: Setting, beforeEnter: () => setMinSize(540, 430) },
     { name: "char-build", path: "/char-build", component: CharBuildView, beforeEnter: () => setMinSize(600, 600) },
-    { name: "game", path: "/game", component: SmallGame, beforeEnter: () => setMinSize(600, 600) },
     { name: "inventory", path: "/inventory", component: InventoryEdit, beforeEnter: () => setMinSize(600, 600) },
+    { name: "timeline", path: "/timeline", component: TimelineEditor, beforeEnter: () => setMinSize(600, 600) },
+    { name: "more", path: "/more", component: More, beforeEnter: () => setMinSize(600, 600) },
+    // more: lazy load
+    { name: "game", path: "/game", component: () => import("./views/SmallGame.vue"), beforeEnter: () => setMinSize(600, 600) },
 ]
 
 export const router = createRouter({

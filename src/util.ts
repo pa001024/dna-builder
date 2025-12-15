@@ -1,4 +1,4 @@
-import { computed } from "vue"
+import { computed, onMounted, onUnmounted, ref } from "vue"
 import * as clipboard from "@tauri-apps/plugin-clipboard-manager"
 import { env } from "./env"
 import { LeveledSkillField } from "./data/leveled/LeveledSkill"
@@ -67,4 +67,92 @@ export async function pasteText() {
 export function base36Pad(num: number) {
     const base36 = num.toString(36).toUpperCase()
     return base36.padStart(4, "0")
+}
+
+/**
+ * 将毫秒转换为天、时、分、秒格式
+ * @param ms 毫秒数
+ * @returns 格式化后的时间字符串
+ */
+export function timeStr(ms: number) {
+    // 返回3时42分18秒格式
+    const d = ~~(ms / 864e5)
+    const h = ~~(ms / 36e5) % 24
+    const m = ~~((ms % 36e5) / 6e4)
+    const s = ~~((ms % 6e4) / 1e3)
+    function p(n: number) {
+        return n < 10 ? `0${n}` : n
+    }
+    if (d) {
+        return `${d}:${p(h)}:${p(m)}:${p(s)}`
+    }
+    if (h) {
+        return `${p(h)}:${p(m)}:${p(s)}`
+    }
+    if (m) {
+        return `${p(m)}:${p(s)}`
+    }
+    return `00:${p(s)}`
+}
+export function useGameTimer() {
+    /**
+     * 将当前UTC时间以指定时间间隔为单位向上取整，并返回与当前时间的差值（毫秒）
+     * @param interval 时间间隔，单位天
+     * @param offset 偏移量，单位天
+     */
+    function getIntervalDayTime(interval: number = 3, offset: number = 0): number {
+        // 获取当前UTC时间戳
+        const now = new Date().getTime()
+
+        // 3天的毫秒数：3 * 24小时 * 60分钟 * 60秒 * 1000毫秒
+        const oneDay = 24 * 60 * 60 * 1000
+        const oneHour = 60 * 60 * 1000
+        offset = offset * oneDay + 3 * oneHour // 5点
+        // 计算向上取整后的时间戳
+        const next3DayTimestamp = Math.ceil((now + offset) / (interval * oneDay)) * (interval * oneDay) - offset
+
+        // 返回差值
+        return next3DayTimestamp - now
+    }
+
+    function getIntervalHourTime(interval: number = 3, offset: number = 0): number {
+        // 获取当前UTC时间戳
+        const now = new Date().getTime()
+
+        // 3天的毫秒数：3 * 24小时 * 60分钟 * 60秒 * 1000毫秒
+        const oneHour = 60 * 60 * 1000
+        offset = offset * oneHour
+        // 计算向上取整后的时间戳
+        const next3DayTimestamp = Math.ceil((now + offset) / (interval * oneHour)) * (interval * oneHour) - offset
+
+        // 返回差值
+        return next3DayTimestamp - now
+    }
+
+    // 倒计时剩余毫秒
+    const moling = ref(getIntervalDayTime(3, 1))
+    const zhouben = ref(getIntervalDayTime(7, 3))
+    const mihan = ref(getIntervalHourTime(1))
+
+    let timer: number | null = null
+
+    onMounted(() => {
+        // 每秒更新一次
+        timer = window.setInterval(() => {
+            moling.value = getIntervalDayTime(3, 1)
+            zhouben.value = getIntervalDayTime(7, 3)
+            mihan.value = getIntervalHourTime(1)
+        }, 1000)
+    })
+
+    onUnmounted(() => {
+        if (timer) {
+            clearInterval(timer)
+        }
+    })
+    return {
+        moling,
+        zhouben,
+        mihan,
+    }
 }

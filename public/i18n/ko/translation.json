@@ -28,6 +28,7 @@
         "damageBoost": "데미지 증가",
         "damageIncrease": "데미지 증가",
         "defense": "방어",
+        "desc": "캐릭터/무기/스킬 빌드",
         "desperate": "背水",
         "durability": "내구도",
         "dynamic_prop": "동적 속성",
@@ -79,6 +80,7 @@
         "small": "소형",
         "stance": "전투 자세",
         "target_function": "타겟 함수",
+        "timeline": "타임라인",
         "title": "구축",
         "triggerRate": "발동률",
         "weapon": "무기",
@@ -86,6 +88,7 @@
         "weaponDamage": "무기 손상"
     },
     "game": {
+        "desc": "Double Helix 캐릭터로 Auto Chess를 플레이하세요",
         "end": "전투를 끝내다",
         "pause": "정지시키다",
         "restart": "다시 시작하다",
@@ -99,12 +102,17 @@
         "title": "홈"
     },
     "inventory": {
+        "desc": "웨지와 무기 로드아웃을 맞춤화하세요",
         "title": "재고관리"
     },
     "main": {
         "btn_collapse_menu": "메뉴 접기",
         "btn_pin_window": "창 고정",
         "btn_unpin_window": "고정 해제"
+    },
+    "more": {
+        "desc": "더 많은 기능",
+        "title": "더"
     },
     "setting": {
         "appearance": "외관 설정",
@@ -122,5 +130,9 @@
         "windowTrasnparent": "투명 효과",
         "windowTrasnparentTip": "창과 표면에 반투명 표시",
         "winMaterial": "창 재질"
+    },
+    "timeline": {
+        "desc": "캐릭터의 전투 로직을 커스터마이즈하세요(축 싸움)",
+        "title": "타임라인"
     }
 }

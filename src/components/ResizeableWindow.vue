@@ -10,6 +10,7 @@ import { env } from "../env"
 import { useRoute } from "vue-router"
 import { getCurrentWindow } from "@tauri-apps/api/window"
 import { applyMaterial, getOSVersion } from "../api/app"
+import { timeStr, useGameTimer } from "../util"
 
 const props = defineProps({
     title: { type: String },
@@ -96,6 +97,8 @@ if (env.isApp) {
         unlisten?.()
     })
 }
+
+const { mihan, moling, zhouben } = useGameTimer()
 </script>
 <template>
     <!-- Root -->
@@ -108,7 +111,22 @@ if (env.isApp) {
             <div class="relative w-full h-10 pb-1 mt-1 flex items-center space-x-1 sm:space-x-2 pl-2 pr-1">
                 <div :data-tauri-drag-region="draggable" className="w-full h-full font-semibold text-2xl flex items-center space-x-2">
                     <img :src="icon" class="w-6 h-6" />
-                    <span className="max-[370px]:hidden text-sm">{{ route.name !== "sroom" ? title : ui.schatTitle }}</span>
+                    <span className="max-[370px]:hidden text-sm min-w-20">{{ route.name !== "sroom" ? title : ui.schatTitle }}</span>
+                    <!-- 计时器 -->
+                    <div class="flex ml-4 gap-8 items-center text-xs text-base-content/80">
+                        <div class="inline-block text-center w-16">
+                            <div>密函</div>
+                            <div class="font-orbitron">{{ timeStr(mihan) }}</div>
+                        </div>
+                        <div class="inline-block text-center w-16">
+                            <div>魔灵</div>
+                            <div class="font-orbitron">{{ timeStr(moling) }}</div>
+                        </div>
+                        <div class="inline-block text-center w-16">
+                            <div>周本</div>
+                            <div class="font-orbitron">{{ timeStr(zhouben) }}</div>
+                        </div>
+                    </div>
                 </div>
                 <!-- fix resize shadow -->
                 <div class="pointer-events-none flex-none opacity-0 self-start transition-none" v-if="env.isApp">

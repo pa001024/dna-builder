@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue"
-import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon } from "../data/leveled"
-import { CharBuild } from "../data/CharBuild"
-import data from "../data/data.json"
-import Select, { SelectItem } from "../components/select"
+import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon, CharBuild, gameData as data, CharBuildTimeline } from "../data"
 import { useLocalStorage } from "@vueuse/core"
 import { groupBy, cloneDeep } from "lodash-es"
 import { formatProp, formatSkillProp, formatWeaponProp } from "../util"
 import { useInvStore } from "../store/inv"
+import { useCharSettings } from "../store/charSettings"
+import { useTimeline } from "../store/timeline"
 
+//#region 角色
 const inv = useInvStore()
 // 获取实际数据
 const charOptions = data.char.map((char) => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
@@ -65,33 +65,7 @@ const rangedWeaponOptions = data.weapon
 
 // 状态变量
 const selectedChar = useLocalStorage("selectedChar", "赛琪")
-const charSettingsKey = computed(() => `build.${selectedChar.value}`)
-const defaultCharSettings = {
-    charLevel: 80,
-    baseName: "",
-    hpPercent: 1,
-    resonanceGain: 0,
-    enemyType: "small",
-    enemyLevel: 80,
-    enemyResistance: 0,
-    enemyHpType: "生命",
-    targetFunction: "伤害",
-    charSkillLevel: 10,
-    meleeWeapon: "枯朽",
-    meleeWeaponLevel: 80,
-    meleeWeaponRefine: 5,
-    rangedWeapon: "剥离",
-    rangedWeaponLevel: 80,
-    rangedWeaponRefine: 5,
-    auraMod: 31524, // 警惕
-    imbalance: true,
-    charMods: Array(8).fill(null) as ([number, number] | null)[],
-    meleeMods: Array(8).fill(null) as ([number, number] | null)[],
-    rangedMods: Array(8).fill(null) as ([number, number] | null)[],
-    skillWeaponMods: Array(4).fill(null) as ([number, number] | null)[],
-    buffs: [] as [string, number][],
-}
-const charSettings = useLocalStorage(charSettingsKey, defaultCharSettings)
+const charSettings = useCharSettings(selectedChar)
 const selectedCharMods = computed(() =>
     charSettings.value.charMods.map((v) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null)),
 )
@@ -124,6 +98,7 @@ const charBuild = computed(
     () =>
         new CharBuild({
             char: new LeveledChar(selectedChar.value, charSettings.value.charLevel),
+            auraMod: new LeveledMod(charSettings.value.auraMod),
             charMods: selectedCharMods.value.filter((mod) => mod !== null),
             meleeMods: selectedMeleeMods.value.filter((mod) => mod !== null),
             rangedMods: selectedRangedMods.value.filter((mod) => mod !== null),
@@ -151,10 +126,17 @@ const charBuild = computed(
             enemyResistance: charSettings.value.enemyResistance,
             enemyHpType: charSettings.value.enemyHpType,
             targetFunction: charSettings.value.targetFunction,
+            timeline: getTimelineByName(charSettings.value.baseName),
         }),
 )
 
 const baseOptions = computed(() => [
+    ...LeveledChar.getSkillNamesWithSub(selectedChar.value).map((skill) => ({ value: skill, label: skill, type: "技能" })),
+    ...(charBuild.value.char.同律武器 ? LeveledWeapon.getBaseNamesWithName(charBuild.value.char.同律武器) : []).map((base) => ({
+        value: base,
+        label: base,
+        type: "同律武器",
+    })),
     ...[
         ...LeveledWeapon.getBaseNamesWithName(charSettings.value.meleeWeapon),
         ...LeveledWeapon.getBaseNamesWithName(charSettings.value.rangedWeapon),
@@ -163,12 +145,6 @@ const baseOptions = computed(() => [
         label: base,
         type: "武器",
     })),
-    ...(charBuild.value.char.同律武器 ? LeveledWeapon.getBaseNamesWithName(charBuild.value.char.同律武器) : []).map((base) => ({
-        value: base,
-        label: base,
-        type: "同律武器",
-    })),
-    ...LeveledChar.getSkillNamesWithSub(selectedChar.value).map((skill) => ({ value: skill, label: skill, type: "技能" })),
 ])
 
 // 计算属性
@@ -178,34 +154,6 @@ const attributes = computed(() => charBuild.value.calculateAttributes())
 const weaponAttrs = computed(() => (charBuild.value.selectedWeapon ? charBuild.value.calculateWeaponAttributes().weapon : null))
 // 计算总伤害
 const totalDamage = computed(() => charBuild.value.calculate())
-
-// 更新CharBuild实例
-const updateCharBuild = () => {
-    charBuild.value.char = new LeveledChar(selectedChar.value, 80)
-    charBuild.value.auraMod = new LeveledMod(charSettings.value.auraMod)
-    // 确保技能存在
-    if (!charSettings.value.baseName || !baseOptions.value.some((skill) => skill.value === charSettings.value.baseName)) {
-        charSettings.value.baseName = charBuild.value.char.技能[0].名称
-    }
-    charBuild.value.meleeWeapon = new LeveledWeapon(
-        charSettings.value.meleeWeapon,
-        charSettings.value.meleeWeaponRefine,
-        charSettings.value.meleeWeaponLevel,
-        inv.getBuffLv(charSettings.value.meleeWeapon),
-    )
-    charBuild.value.rangedWeapon = new LeveledWeapon(
-        charSettings.value.rangedWeapon,
-        charSettings.value.rangedWeaponRefine,
-        charSettings.value.rangedWeaponLevel,
-        inv.getBuffLv(charSettings.value.rangedWeapon),
-    )
-    charBuild.value.buffs = selectedBuffs.value.filter((buff) => buff !== null)
-    charBuild.value.charMods = selectedCharMods.value.filter((mod) => mod !== null)
-    charBuild.value.meleeMods = selectedMeleeMods.value.filter((mod) => mod !== null)
-    charBuild.value.rangedMods = selectedRangedMods.value.filter((mod) => mod !== null)
-    charBuild.value.skillWeaponMods = selectedSkillWeaponMods.value.filter((mod) => mod !== null)
-}
-updateCharBuild()
 
 function selectMod(type: string, slotIndex: number, modId: number) {
     const mod = new LeveledMod(modId)
@@ -256,7 +204,7 @@ function setBuffLv(buff: LeveledBuff, lv: number) {
 const charProjectKey = computed(() => `project.${selectedChar.value}`)
 const charProject = useLocalStorage(charProjectKey, {
     selected: "",
-    projects: [] as { name: string; charSettings: typeof defaultCharSettings }[],
+    projects: [] as { name: string; charSettings: typeof charSettings.value }[],
 })
 // 保存配置
 const saveConfig = () => {
@@ -307,10 +255,12 @@ const reloadCustomBuff = () => {
         _buffOptions[index].value = new LeveledBuff("自定义BUFF")
     }
 }
+//#endregion
 
+//#region 自动构建
 const autobuild_model_show = ref(false)
 const openAutoBuild = () => {
-    ;(window as any).autobuild_model.showModal()
+    ;(window as any).autobuild_model.show()
     autobuild_model_show.value = true
 }
 let newBuild!: CharBuild
@@ -323,11 +273,69 @@ function applyAutobuild() {
     charSettings.value.rangedWeapon = newBuild.rangedWeapon.名称
     charSettings.value.rangedWeaponLevel = newBuild.rangedWeapon.等级
     charSettings.value.rangedWeaponRefine = newBuild.rangedWeapon.精炼
-    charSettings.value.charMods = newBuild.charMods.map((v) => [v.id, v.等级])
-    charSettings.value.meleeMods = newBuild.meleeMods.map((v) => [v.id, v.等级])
-    charSettings.value.rangedMods = newBuild.rangedMods.map((v) => [v.id, v.等级])
-    charSettings.value.skillWeaponMods = newBuild.skillWeaponMods.map((v) => [v.id, v.等级])
+    charSettings.value.charMods = pad(
+        newBuild.charMods.map((v) => [v.id, v.等级]),
+        8,
+        null,
+    )
+    charSettings.value.meleeMods = pad(
+        newBuild.meleeMods.map((v) => [v.id, v.等级]),
+        8,
+        null,
+    )
+    charSettings.value.rangedMods = pad(
+        newBuild.rangedMods.map((v) => [v.id, v.等级]),
+        8,
+        null,
+    )
+    charSettings.value.skillWeaponMods = pad(
+        newBuild.skillWeaponMods.map((v) => [v.id, v.等级]),
+        4,
+        null,
+    )
+    function pad<T>(arr: T[], length: number, value: T) {
+        while (arr.length < length) {
+            arr.push(value)
+        }
+        return arr
+    }
 }
+//#endregion
+//#region 时间线
+const timelines = useTimeline(selectedChar)
+function getTimelineByName(name: string) {
+    const raw = timelines.value.find((v) => v.name === name)
+    if (!raw) return undefined
+    return CharBuildTimeline.fromRaw(raw)
+}
+const isTimeline = computed(() => timelines.value.some((v) => v.name === charSettings.value.baseName))
+//#endregion
+
+// 更新CharBuild实例
+function updateCharBuild() {
+    // 确保技能存在
+    if (
+        !charSettings.value.baseName ||
+        (!baseOptions.value.some((skill) => skill.value === charSettings.value.baseName) && !isTimeline.value)
+    ) {
+        charSettings.value.baseName = charBuild.value.char.技能[0].名称
+    }
+    pad(charSettings.value.charMods, 8, null)
+    pad(charSettings.value.meleeMods, 8, null)
+    pad(charSettings.value.rangedMods, 8, null)
+    pad(charSettings.value.skillWeaponMods, 4, null)
+    function pad<T>(arr: T[], length: number, value: T) {
+        if (arr.length > length) {
+            arr.length = length
+            return arr
+        }
+        while (arr.length < length) {
+            arr.push(value)
+        }
+        return arr
+    }
+}
+updateCharBuild()
 </script>
 
 <template>
@@ -441,10 +449,10 @@ function applyAutobuild() {
                 <FullTooltip side="bottom">
                     <template #tooltip>
                         <div v-if="charBuild.selectedSkill" class="flex flex-col">
-                            <div class="text-md text-neutral-500 p-2">{{ charBuild.selectedSkill!.类型 }}</div>
+                            <div class="text-md p-2">{{ charBuild.selectedSkill!.类型 }}</div>
                             <div
-                                v-for="(val, prop) in charBuild.selectedSkill!.getFieldsWithAttr(charBuild.calculateAttributes())"
-                                :key="prop"
+                                v-for="(val, index) in charBuild.selectedSkill!.getFieldsWithAttr(charBuild.calculateAttributes())"
+                                :key="index"
                                 class="flex flex-col group hover:bg-base-200 rounded-md p-2"
                             >
                                 <div class="flex justify-between items-center gap-4 text-sm">
@@ -463,7 +471,7 @@ function applyAutobuild() {
                             </div>
                         </div>
                         <div v-if="charBuild.selectedWeapon" class="flex flex-col">
-                            <div class="text-md text-neutral-500 p-2">{{ charBuild.selectedWeapon!.类型 }}</div>
+                            <div class="text-md p-2">{{ charBuild.selectedWeapon!.类型 }}</div>
                             <div
                                 v-for="(val, prop) in charBuild.selectedWeapon!.getProperties()"
                                 :key="prop"
@@ -493,9 +501,24 @@ function applyAutobuild() {
                                     v-model="charSettings.baseName"
                                     @change="updateCharBuild"
                                 >
-                                    <SelectItem v-for="skill in baseOptions" :key="skill.label" :value="skill.label">
-                                        {{ skill.label }}
-                                    </SelectItem>
+                                    <template v-for="baseWithType in groupBy(baseOptions, 'type')" :key="baseWithType[0].type">
+                                        <SelectLabel class="p-2 text-sm font-semibold text-primary">
+                                            {{ baseWithType[0].type }}
+                                        </SelectLabel>
+                                        <SelectGroup>
+                                            <SelectItem v-for="base in baseWithType" :key="base.label" :value="base.label">
+                                                {{ base.label }}
+                                            </SelectItem>
+                                        </SelectGroup>
+                                    </template>
+                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
+                                        {{ $t("char-build.timeline") }}
+                                    </SelectLabel>
+                                    <SelectGroup>
+                                        <SelectItem v-for="timeline in timelines" :key="timeline.name" :value="timeline.name">
+                                            {{ timeline.name }}
+                                        </SelectItem>
+                                    </SelectGroup>
                                 </Select>
                             </div>
                             <div class="flex-1">
@@ -739,7 +762,7 @@ function applyAutobuild() {
                 />
                 <!-- 近战武器MOD配置 -->
                 <ModEditer
-                    v-if="charBuild.isMeleeWeapon"
+                    v-if="charBuild.isMeleeWeapon || isTimeline"
                     :title="$t('char-build.melee_weapon_mod_config')"
                     :mods="selectedMeleeMods"
                     :mod-options="
@@ -757,7 +780,7 @@ function applyAutobuild() {
                 />
                 <!-- 远程武器MOD配置 -->
                 <ModEditer
-                    v-if="charBuild.isRangedWeapon"
+                    v-if="charBuild.isRangedWeapon || isTimeline"
                     :title="$t('char-build.ranged_weapon_mod_config')"
                     :mods="selectedRangedMods"
                     :mod-options="
@@ -775,7 +798,7 @@ function applyAutobuild() {
                 />
                 <!-- 同律武器MOD配置 -->
                 <ModEditer
-                    v-if="charBuild.skillWeapon && charBuild.isSkillWeapon"
+                    v-if="charBuild.skillWeapon && (charBuild.isSkillWeapon || isTimeline)"
                     :title="$t('char-build.skill_weapon_mod_config')"
                     :mods="selectedSkillWeaponMods"
                     :mod-options="

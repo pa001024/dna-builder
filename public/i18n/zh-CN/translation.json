@@ -28,6 +28,7 @@
         "damageBoost": "增伤",
         "damageIncrease": "增伤",
         "defense": "防御",
+        "desc": "角色/武器/技能构筑",
         "desperate": "背水",
         "durability": "技能耐久",
         "dynamic_prop": "动态属性",
@@ -79,6 +80,7 @@
         "small": "小型",
         "stance": "战姿",
         "target_function": "目标函数",
+        "timeline": "时间线",
         "title": "构筑",
         "triggerRate": "触发率",
         "weapon": "武器",
@@ -86,12 +88,13 @@
         "weaponDamage": "武器伤害"
     },
     "game": {
+        "desc": "用二重螺旋角色玩自走棋",
         "end": "结束战斗",
         "pause": "暂停",
         "restart": "重新开始",
         "resume": "继续",
         "start": "开始战斗",
-        "title": "小游戏"
+        "title": "自走棋小游戏"
     },
     "home": {
         "download": "下载 Windows 应用",
@@ -99,12 +102,17 @@
         "title": "主页"
     },
     "inventory": {
+        "desc": "自定义你的魔之楔和武器配置",
         "title": "库存管理"
     },
     "main": {
         "btn_collapse_menu": "折叠菜单",
         "btn_pin_window": "窗口置顶",
         "btn_unpin_window": "取消置顶"
+    },
+    "more": {
+        "desc": "更多功能",
+        "title": "更多"
     },
     "setting": {
         "appearance": "外观设置",
@@ -122,5 +130,9 @@
         "windowTrasnparent": "透明效果",
         "windowTrasnparentTip": "窗口和表面显示半透明",
         "winMaterial": "窗口材质"
+    },
+    "timeline": {
+        "desc": "自定义角色的战斗逻辑(打轴)",
+        "title": "时间线"
     }
 }

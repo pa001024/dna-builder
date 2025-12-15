@@ -13,12 +13,12 @@ defineProps<{
             </TooltipTrigger>
             <TooltipPortal>
                 <TooltipContent
-                    class="z-10000 data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade select-none rounded-[4px] bg-white px-[15px] py-[10px] text-[15px] leading-none shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] will-change-[transform,opacity]"
+                    class="z-10000 bg-base-100 shadow-lg shadow-base-content/20 px-[15px] py-2.5 text-[15px] data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade select-none rounded-sm leading-none will-change-[transform,opacity]"
                     :side-offset="5"
                     :side="side"
                 >
                     <slot name="tooltip" />
-                    <TooltipArrow class="fill-white" :width="8" />
+                    <TooltipArrow class="fill-base-100" :width="8" />
                 </TooltipContent>
             </TooltipPortal>
         </TooltipRoot>
