@@ -39,6 +39,11 @@ export const useUIStore = defineStore("ui", {
                     icon: "ri:timeline-view",
                 },
                 {
+                    name: "achievement",
+                    path: "/achievement",
+                    icon: "ri:trophy-line",
+                },
+                {
                     name: "more",
                     path: "/more",
                     icon: "ri:more-line",

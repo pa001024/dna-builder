@@ -4,3 +4,6 @@ export * from "./CharBuild"
 
 import gameData from "./data.json"
 export { gameData }
+
+import achievementData from "./achievement.json"
+export { achievementData }

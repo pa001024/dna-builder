@@ -6,6 +6,7 @@ import CharBuildView from "./views/CharBuildView.vue"
 import InventoryEdit from "./views/InventoryEdit.vue"
 import More from "./views/More.vue"
 import TimelineEditor from "./views/TimelineEditor.vue"
+import AchievementList from "./views/AchievementList.vue"
 import { env } from "./env"
 import { LogicalSize, getCurrentWindow } from "@tauri-apps/api/window"
 
@@ -29,6 +30,7 @@ const routes: readonly RouteRecordRaw[] = [
     { name: "char-build", path: "/char-build", component: CharBuildView, beforeEnter: () => setMinSize(600, 600) },
     { name: "inventory", path: "/inventory", component: InventoryEdit, beforeEnter: () => setMinSize(600, 600) },
     { name: "timeline", path: "/timeline", component: TimelineEditor, beforeEnter: () => setMinSize(600, 600) },
+    { name: "achievement", path: "/achievement", component: AchievementList, beforeEnter: () => setMinSize(600, 600) },
     { name: "more", path: "/more", component: More, beforeEnter: () => setMinSize(600, 600) },
     // more: lazy load
     { name: "game", path: "/game", component: () => import("./views/SmallGame.vue"), beforeEnter: () => setMinSize(600, 600) },

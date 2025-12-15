@@ -80,8 +80,9 @@ describe("DynamicBuff", () => {
             ignoreDefense: 1,
             skillSpeed: 1,
             imbalanceDamageBonus: 1,
+            skillAdd: 1,
         }
-        attrs = buff.applyDynamicAttr(char, attrs)
+        attrs = buff.applyDynamicAttr(char, attrs, [])
         expect(attrs.power).toBe(2)
         expect(attrs.range).toBe(1)
     })

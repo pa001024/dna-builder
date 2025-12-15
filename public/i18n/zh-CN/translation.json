@@ -1,4 +1,8 @@
 {
+    "achievement": {
+        "desc": "游戏成就解锁统计",
+        "title": "成就"
+    },
     "autobuild": {
         "charMods": "角色MOD",
         "meleeMods": "近战MOD",

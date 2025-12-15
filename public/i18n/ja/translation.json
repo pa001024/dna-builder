@@ -1,4 +1,8 @@
 {
+    "achievement": {
+        "desc": "ゲーム実績アンロック統計",
+        "title": "成果"
+    },
     "autobuild": {
         "charMods": "Character MOD",
         "meleeMods": "Melee MOD",

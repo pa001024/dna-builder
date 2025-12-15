@@ -1,4 +1,8 @@
 {
+    "achievement": {
+        "desc": "게임 성과 잠금 해제 통계",
+        "title": "성취"
+    },
     "autobuild": {
         "charMods": "캐릭터 MOD",
         "meleeMods": "근접 모드",

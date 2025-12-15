@@ -1,4 +1,8 @@
 {
+    "achievement": {
+        "desc": "Game achievement unlock statistics",
+        "title": "Achievement"
+    },
     "autobuild": {
         "charMods": "Character MOD",
         "meleeMods": "Melee MOD",
