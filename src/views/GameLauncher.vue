@@ -9,6 +9,7 @@ import { onMounted } from "vue"
 import { env } from "../env"
 import { Mod } from "../store/db"
 import { watch } from "vue"
+import { computed } from "vue"
 // 状态管理
 const keys = ["path", "beforeGame", "afterGame"] as const
 const tab = ref("mod")
@@ -50,21 +51,12 @@ async function selectPath(key: (typeof keys)[number]) {
 // 打开游戏所在目录
 const openGameDirectory = async () => {
     if (!game.path) {
-        errorMessage.value = "请先选择游戏文件或启动一次游戏"
+        errorMessage.value = "请先选择游戏路径或启动一次游戏"
         return
     }
 
     try {
-        // 简单提取目录路径：找到最后一个斜杠或反斜杠的位置
-        const lastSlash = Math.max(game.path.lastIndexOf("/"), game.path.lastIndexOf("\\"))
-
-        if (lastSlash > 0) {
-            const dir = game.path.substring(0, lastSlash)
-            await openExplorer(dir)
-            // successMessage.value = "已打开游戏目录"
-        } else {
-            errorMessage.value = "无法提取目录路径"
-        }
+        await openExplorer(game.modsDir)
     } catch (error) {
         console.error("打开目录失败:", error)
         errorMessage.value = `打开目录失败: ${error instanceof Error ? error.message : String(error)}`
@@ -109,17 +101,21 @@ watchEffect(async () => {
             game.customEntitys?.map(async (v) => ({ name: v.name, icon: v.icon, count: await game.getModsCountByEntity(v.name) })) || [],
         )
     } else {
-        entitys.value = (
-            await Promise.all(
-                gameData[entityType.value].map(async (v) => ({
-                    name: v.名称,
-                    icon: `/public/imgs/${v.名称}.png`,
-                    count: await game.getModsCountByEntity(v.名称),
-                })),
-            )
-        ).sort((a, b) => (game.likedChars.includes(a.name) ? -1 : game.likedChars.includes(b.name) ? 1 : a.count - b.count))
+        const data = await Promise.all(
+            gameData[entityType.value].map(async (v) => ({
+                name: v.名称,
+                icon: `/public/imgs/${v.名称}.png`,
+                count: await game.getModsCountByEntity(v.名称),
+            })),
+        )
+        entitys.value = data
     }
 })
+
+const sortedEntitys = computed(() =>
+    [...entitys.value].sort((a, b) => (game.likedChars.includes(a.name) ? -1 : game.likedChars.includes(b.name) ? 1 : b.count - a.count)),
+)
+
 async function addCustomEntity() {
     if (!customEntityName.value) {
         errorMessage.value = "请输入自定义类型名称"
@@ -141,18 +137,32 @@ async function addCustomEntity() {
 //#region mod
 const entityMod = ref<Mod | undefined>(undefined)
 const modsInEntity = ref<Mod[]>([])
-watchEffect(async () => {
+async function updateEntityMod() {
     entityMod.value = await game.getEntityMod(game.selectedEntity)
     modsInEntity.value = await game.getModsByEntity(game.selectedEntity)
-})
+    const e = entitys.value.find((v) => v.name === game.selectedEntity)
+    e!.count = modsInEntity.value.length
+}
+watchEffect(updateEntityMod)
 const setEntityMod = async (entity: string, modid: number) => {
     try {
         await game.setEntityMod(entity, modid)
-        entityMod.value = await game.getEntityMod(game.selectedEntity)
-        if (modid) successMessage.value = "MOD已启用"
+        await updateEntityMod()
+        successMessage.value = modid ? "MOD已启用" : "MOD已禁用"
     } catch (error: any) {
         console.error("设置MOD失败:", error)
         errorMessage.value = `设置MOD失败: ${error instanceof Error ? error.message : String(error)}`
+    }
+}
+
+const removeMod = async (mod: Mod) => {
+    try {
+        await game.removeMod(mod)
+        await updateEntityMod()
+        successMessage.value = "MOD已删除"
+    } catch (error: any) {
+        console.error("删除MOD失败:", error)
+        errorMessage.value = `删除MOD失败: ${error instanceof Error ? error.message : String(error)}`
     }
 }
 
@@ -187,6 +197,10 @@ onMounted(async () => {
         const unlistenDragDrop = await listen<TauriDragEvent>(TauriEvent.DRAG_DROP, async (event) => {
             isDragging.value = false
             if (!game.selectedEntity) return
+            if (!game.path) {
+                errorMessage.value = "请先选择游戏路径"
+                return
+            }
 
             const paths = event.payload.paths
             if (paths.some((v) => v.endsWith(".zip") || v.endsWith(".pak"))) {
@@ -197,6 +211,7 @@ onMounted(async () => {
                         return
                     }
                     successMessage.value = `成功导入 1 个MOD`
+                    await updateEntityMod()
                 } catch (error: any) {
                     console.error("导入MOD失败:", error)
                     errorMessage.value = `导入MOD失败: ${error instanceof Error ? error.message : String(error)}`
@@ -256,7 +271,7 @@ onMounted(async () => {
                 <ScrollArea class="overflow-x-hidden overflow-y-auto">
                     <transition-group name="list" tag="ul" class="list">
                         <template v-if="entityType === 'custom'">
-                            <ContextMenu v-for="item in entitys" :key="item.name">
+                            <ContextMenu v-for="item in sortedEntitys" :key="item.name">
                                 <template #menu>
                                     <ContextMenuItem
                                         class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
@@ -325,7 +340,7 @@ onMounted(async () => {
                         </template>
                         <template v-else>
                             <li
-                                v-for="item in entitys"
+                                v-for="item in sortedEntitys"
                                 :key="item.name"
                                 class="list-row cursor-pointer min-w-60 justify-between rounded-none"
                                 @click="game.selectedEntity = item.name"
@@ -390,7 +405,7 @@ onMounted(async () => {
                                     {{ new Date(mod.addTime).toLocaleString() }} | {{ (mod.size / 1024 / 1024).toFixed(2) }} MB
                                 </div>
                             </div>
-                            <button class="btn btn-square btn-ghost" @click.stop="game.removeMod(mod)">
+                            <button class="btn btn-square btn-ghost" @click.stop="removeMod(mod)">
                                 <Icon icon="ri:delete-bin-line" class="size-[1.2em]" />
                             </button>
                         </li>

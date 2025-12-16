@@ -24,7 +24,7 @@ watch(model, (value) => {
         <DialogPortal>
             <DialogOverlay class="bg-blackA5 data-[state=open]:animate-overlayShow fixed inset-0 z-30" />
             <DialogContent
-                class="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-base-100 shadow-lg z-[100]"
+                class="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-base-100 shadow-lg z-100"
             >
                 <form class="p-6" @submit.prevent="$emit('submit')">
                     <div class="flex flex-col p-6 gap-2.5">
@@ -45,7 +45,7 @@ watch(model, (value) => {
                         </slot>
                     </div>
                 </form>
-                <DialogClose class="btn btn-square btn-sm text-lg btn-ghost absolute top-[10px] right-[10px]">
+                <DialogClose class="btn btn-square btn-sm text-lg btn-ghost absolute top-2.5 right-2.5">
                     <Icon icon="radix-icons:cross2" />
                 </DialogClose>
             </DialogContent>

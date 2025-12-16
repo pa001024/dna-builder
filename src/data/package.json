@@ -1,6 +1,6 @@
 {
     "name": "dna-builder-data",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "DNA Builder game data models and utilities",
     "type": "module",
     "main": "./index.ts",
@@ -35,6 +35,7 @@
     "files": [
         "*.ts",
         "leveled/*.ts",
-        "data.json"
+        "data.json",
+        "achievement.json"
     ]
 }
