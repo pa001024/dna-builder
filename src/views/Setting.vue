@@ -4,7 +4,8 @@ import { MATERIALS } from "../api/app"
 import { useSettingStore } from "../store/setting"
 import { env } from "../env"
 import { i18nLanguages } from "../i18n"
-import { useTranslation } from "i18next-vue"
+import { t } from "i18next"
+import { db } from "../store/db"
 
 const setting = useSettingStore()
 const lightThemes = [
@@ -54,9 +55,14 @@ function capitalize(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
-const { t } = useTranslation()
 function resetStorage() {
-    if (confirm(t("setting.resetConfirm"))) localStorage.clear()
+    localStorage.clear()
+    db.delete()
+}
+
+function openResetConfirmDialog() {
+    const dialog = document.getElementById("reset-confirm-dialog")! as HTMLDialogElement
+    dialog.show()
 }
 </script>
 
@@ -164,10 +170,21 @@ function resetStorage() {
                             <div class="text-xs text-base-content/50">{{ $t("setting.resetTip") }}</div>
                         </span>
 
-                        <div class="btn btn-secondary w-40" @click="resetStorage">{{ $t("setting.confirm") }}</div>
+                        <div class="btn btn-secondary w-40" @click="openResetConfirmDialog">{{ $t("setting.confirm") }}</div>
                     </div>
                 </div>
             </article>
         </div>
+        <dialog id="reset-confirm-dialog" class="modal">
+            <div class="modal-box bg-base-300">
+                <p class="text-lg font-bold">{{ $t("setting.resetConfirm") }}</p>
+                <div class="modal-action">
+                    <form class="flex justify-end gap-2" method="dialog">
+                        <button class="min-w-20 btn btn-secondary" @click="resetStorage">{{ $t("setting.confirm") }}</button>
+                        <button class="min-w-20 btn">{{ $t("setting.cancel") }}</button>
+                    </form>
+                </div>
+            </div>
+        </dialog>
     </div>
 </template>

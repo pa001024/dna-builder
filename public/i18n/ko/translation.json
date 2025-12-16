@@ -194,6 +194,7 @@
     },
     "setting": {
         "appearance": "외관 설정",
+        "cancel": "취소",
         "confirm": "확인하다",
         "darkTheme": "다크 테마",
         "lang": "언어",

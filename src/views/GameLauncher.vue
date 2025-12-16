@@ -140,8 +140,10 @@ const modsInEntity = ref<Mod[]>([])
 async function updateEntityMod() {
     entityMod.value = await game.getEntityMod(game.selectedEntity)
     modsInEntity.value = await game.getModsByEntity(game.selectedEntity)
-    const e = entitys.value.find((v) => v.name === game.selectedEntity)
-    e!.count = modsInEntity.value.length
+    if (game.selectedEntity) {
+        const e = entitys.value.find((v) => v.name === game.selectedEntity)
+        if (e) e.count = modsInEntity.value.length
+    }
 }
 watchEffect(updateEntityMod)
 const setEntityMod = async (entity: string, modid: number) => {
@@ -198,7 +200,7 @@ onMounted(async () => {
             isDragging.value = false
             if (!game.selectedEntity) return
             if (!game.path) {
-                errorMessage.value = "请先选择游戏路径"
+                errorMessage.value = "请先选择游戏文件或启动一次游戏"
                 return
             }
 

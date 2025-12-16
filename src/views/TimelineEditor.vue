@@ -133,22 +133,8 @@ const removeTrack = (trackIndex: number) => {
         }
 
         // 删除该轨道上的所有项目
-        const itemsToRemove = items.filter((item) => item.trackIndex === trackIndex)
-
-        if (itemsToRemove.length > 0) {
-            if (
-                !confirm(
-                    `轨道 "${tracks[trackIndex].name}" 上有 ${itemsToRemove.length} 个内容块，删除将同时删除这些内容块。确定要继续吗？`,
-                )
-            ) {
-                return false
-            }
-
-            // 使用filter优化删除方式，避免多次splice操作
-            // 使用数组方法修改内容，而不是重新赋值常量
-            const filteredItems = items.filter((item) => item.trackIndex !== trackIndex)
-            items.splice(0, items.length, ...filteredItems)
-        }
+        const filteredItems = items.filter((item) => item.trackIndex !== trackIndex)
+        items.splice(0, items.length, ...filteredItems)
 
         // 重新排序剩余轨道
         tracks.splice(trackIndex, 1)

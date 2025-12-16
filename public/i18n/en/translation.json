@@ -194,6 +194,7 @@
     },
     "setting": {
         "appearance": "Appearance",
+        "cancel": "Cancel",
         "confirm": "confirm",
         "darkTheme": "Dark Theme",
         "lang": "Language",

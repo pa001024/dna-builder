@@ -194,6 +194,7 @@
     },
     "setting": {
         "appearance": "外观设置",
+        "cancel": "取消",
         "confirm": "确认",
         "darkTheme": "深色主题",
         "lang": "语言",
