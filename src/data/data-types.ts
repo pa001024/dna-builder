@@ -137,6 +137,13 @@ export interface Skill {
     名称: string
     类型: string
     字段: SkillField[]
+    召唤物?: SkillSummon
+}
+
+export interface SkillSummon {
+    名称: string
+    攻击延迟: number
+    攻击间隔: number
 }
 
 export interface SkillField {

@@ -3,16 +3,41 @@ import type { IconTypes } from "../components/Icon.vue"
 
 const items = [
     {
-        name: "game",
-        to: "/game",
-        icon: "la:gamepad-solid",
+        name: "game-launcher",
+        path: "/game-launcher",
+        icon: "ri:rocket-2-line",
+    },
+    {
+        name: "char-build",
+        path: "/char-build",
+        icon: "ri:hammer-line",
+    },
+    {
+        name: "inventory",
+        path: "/inventory",
+        icon: "ri:box-1-line",
+    },
+    {
+        name: "timeline",
+        path: "/timeline",
+        icon: "ri:timeline-view",
     },
     {
         name: "achievement",
-        to: "/achievement",
+        path: "/achievement",
         icon: "ri:trophy-line",
     },
-] satisfies { name: string; to: string; icon: IconTypes }[]
+    {
+        name: "game",
+        path: "/game",
+        icon: "la:gamepad-solid",
+    },
+    {
+        name: "help",
+        path: "/help",
+        icon: "ri:question-line",
+    },
+] satisfies { name: string; path: string; icon: IconTypes }[]
 </script>
 <template>
     <div class="h-full">
@@ -20,7 +45,7 @@ const items = [
             <RouterLink
                 v-for="item in items"
                 :key="item.name"
-                :to="item.to"
+                :to="item.path"
                 class="container flex flex-col justify-center items-center p-8 gap-2 bg-base-100/50 hover:bg-base-100 hover:animate-pulse transition-all duration-500 rounded-lg"
             >
                 <div class="text-primary">

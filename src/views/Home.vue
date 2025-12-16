@@ -1,6 +1,32 @@
 <script lang="tsx" setup>
 import { env } from "../env"
 import pg from "../../package.json"
+import type { IconTypes } from "../components/Icon.vue"
+import { useGameStore } from "../store/game"
+const items = [
+    {
+        name: "char-build",
+        path: "/char-build",
+        icon: "ri:hammer-line",
+    },
+    {
+        name: "inventory",
+        path: "/inventory",
+        icon: "ri:box-1-line",
+    },
+    {
+        name: "achievement",
+        path: "/achievement",
+        icon: "ri:trophy-line",
+    },
+    {
+        name: "more",
+        path: "/more",
+        icon: "ri:more-line",
+    },
+] satisfies { name: string; path: string; icon: IconTypes }[]
+
+const game = useGameStore()
 </script>
 
 <template>
@@ -61,56 +87,30 @@ import pg from "../../package.json"
                     </div>
                 </div>
             </div>
-            <div class="p-4 grid grid-cols-2 lg:grid-cols-4 w-full justify-items-center gap-4">
+            <div class="p-4 grid grid-cols-2 lg:grid-cols-4 w-full justify-items-center gap-4 max-w-6xl mx-auto">
                 <RouterLink
-                    to="/char-build"
-                    class="container flex flex-col justify-center items-center p-8 gap-2 bg-base-100/50 hover:bg-base-100 hover:animate-pulse transition-all duration-500 rounded-lg"
+                    v-for="item in items"
+                    :to="item.path"
+                    class="w-full shadow-xl/5 flex flex-col justify-center items-center p-8 gap-2 bg-base-100/50 hover:bg-base-100 hover:animate-pulse transition-all duration-500 rounded-lg"
                 >
                     <div class="text-primary">
-                        <Icon icon="la:edit-solid" class="w-12 h-12" />
+                        <Icon :icon="item.icon" class="w-12 h-12" />
                     </div>
                     <div class="text-xl font-bold text-primary">
-                        {{ $t("char-build.title") }}
+                        {{ $t(`${item.name}.title`) }}
                     </div>
-                    <div class="text-sm text-gray-500">{{ $t("char-build.desc") }}</div>
-                </RouterLink>
-                <RouterLink
-                    to="/inventory"
-                    class="container flex flex-col justify-center items-center p-8 gap-2 bg-base-100/50 hover:bg-base-100 hover:animate-pulse transition-all duration-500 rounded-lg"
-                >
-                    <div class="text-primary">
-                        <Icon icon="ri:box-1-line" class="w-12 h-12" />
-                    </div>
-                    <div class="text-xl font-bold text-primary">
-                        {{ $t("inventory.title") }}
-                    </div>
-                    <div class="text-sm text-gray-500">{{ $t("inventory.desc") }}</div>
-                </RouterLink>
-                <RouterLink
-                    to="/timeline"
-                    class="container flex flex-col justify-center items-center p-8 gap-2 bg-base-100/50 hover:bg-base-100 hover:animate-pulse transition-all duration-500 rounded-lg"
-                >
-                    <div class="text-primary">
-                        <Icon icon="ri:timeline-view" class="w-12 h-12" />
-                    </div>
-                    <div class="text-xl font-bold text-primary">
-                        {{ $t("timeline.title") }}
-                    </div>
-                    <div class="text-sm text-gray-500">{{ $t("timeline.desc") }}</div>
-                </RouterLink>
-                <RouterLink
-                    to="/more"
-                    class="container flex flex-col justify-center items-center p-8 gap-2 bg-base-100/50 hover:bg-base-100 hover:animate-pulse transition-all duration-500 rounded-lg"
-                >
-                    <div class="text-primary">
-                        <Icon icon="ri:more-line" class="w-12 h-12" />
-                    </div>
-                    <div class="text-xl font-bold text-primary">
-                        {{ $t("more.title") }}
-                    </div>
-                    <div class="text-sm text-gray-500">{{ $t("more.desc") }}</div>
+                    <div class="text-sm text-gray-500">{{ $t(`${item.name}.desc`) }}</div>
                 </RouterLink>
             </div>
+            <RouterLink
+                v-if="env.isApp"
+                to="/game-launcher"
+                class="w-80 btn btn-primary btn-lg fixed right-8 bottom-8"
+                :class="{ 'btn-disabled': game.running }"
+            >
+                <Icon icon="ri:rocket-2-line" class="w-6 h-6" />
+                {{ game.running ? "游戏已启动" : "启动游戏" }}
+            </RouterLink>
         </ScrollArea>
     </div>
 </template>

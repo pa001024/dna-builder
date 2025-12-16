@@ -18,15 +18,12 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [
-    "tray-icon",
-    "image-ico",
-    "unstable"
-] }
+tauri = { version = "2", features = ["tray-icon", "image-ico", "unstable"] }
 tauri-plugin-opener = "2"
 tauri-plugin-clipboard-manager = "2"
 tauri-plugin-process = "2"
 tauri-plugin-window-state = "2"
+tauri-plugin-dialog = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 window-vibrancy = "0.7.1"
@@ -48,9 +45,14 @@ windows-sys = { version = "0.61", features = [
     "Win32_System_Registry",
     "Win32_System_DataExchange",
 ] }
+windows-core = "0.62.2"
+tokio = { version = "1", features = ["full"] }
+thiserror = "2.0.17"
 
 lazy_static = "1"
 widestring = "1"
+zip = { version = "0.6", default-features = false, features = ["deflate"] }
+base64 = "0.22.1"
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.

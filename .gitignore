@@ -25,3 +25,6 @@ dist-ssr
 src/components.d.ts
 *.xlsx
 *.ipynb
+weixin/
+coverage/
+IFLOW.md

@@ -7,7 +7,7 @@
   <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/pa001024/dna-builder">
 </p>
 
-DNA Builder 是一个用于游戏角色构建和伤害计算的工具，帮助玩家优化角色配置和计算战斗输出。
+**DNA Builder**（二重螺旋构筑模拟器）是一个用于游戏《Duet Night Abyss》的角色构建和伤害计算工具，帮助玩家优化角色配置和计算战斗输出。
 
 ## 网页版
 
@@ -32,11 +32,28 @@ DNA Builder 是一个用于游戏角色构建和伤害计算的工具，帮助�
 
 ## 技术栈
 
-- **前端框架**：Vue 3
+### 前端
+
+- **框架**：Vue 3 + TypeScript
 - **构建工具**：Vite
-- **编程语言**：TypeScript
-- **UI 组件库** Tailwind CSS + daisyui + radix-vue
-- **桌面应用**：Tauri
+- **UI 组件库**：Tailwind CSS + daisyui + radix-vue
+- **状态管理**：Pinia
+- **路由**：Vue Router
+- **国际化**：i18next
+- **动画**：GSAP
+- **工具库**：lodash-es, @vueuse/core
+
+### 桌面应用
+
+- **框架**：Tauri (Rust + WebView2)
+- **插件**：clipboard-manager, opener, process, updater
+
+### 服务器端（可选）
+
+- **运行时**：Bun
+- **框架**：Elysia
+- **数据库**：SQLite + Drizzle ORM
+- **GraphQL**：graphql-yoga + graphql-mobius
 
 ## 多语言支持
 

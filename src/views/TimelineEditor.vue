@@ -357,6 +357,11 @@ const addItem = (trackIndex: number, startTime: number, duration = 1, name?: str
         const skill = charBuild.value.skills.find((s) => s.名称 === bt)
         if (skill) {
             newItem.props = skill.getFieldsWithAttr(attr) || []
+            // 处理召唤物
+            if (skill.召唤物持续时间) {
+                const v = Object.entries(newItem.props).find(([name, _]) => /召唤物.*持续时间/.test(name)) as [string, number]
+                newItem.duration = v[1] || 1
+            }
         } else {
             console.warn(`未找到技能 ${bt}`)
         }

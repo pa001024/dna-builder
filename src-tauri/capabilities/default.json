@@ -23,6 +23,7 @@
         "core:window:allow-set-resizable",
         "core:window:allow-set-min-size",
         "clipboard-manager:allow-read-text",
-        "clipboard-manager:allow-write-text"
+        "clipboard-manager:allow-write-text",
+        "dialog:default"
     ]
 }

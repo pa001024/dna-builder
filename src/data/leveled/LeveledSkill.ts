@@ -1,6 +1,6 @@
 import { uniq } from "lodash-es"
 import { Skill } from "../data-types"
-import { CharAttr } from "../CharBuild"
+import { CharAttr, WeaponAttr } from "../CharBuild"
 
 export interface LeveledSkillField {
     名称: string
@@ -41,7 +41,7 @@ export class LeveledSkill implements Skill {
         this.等级 = 等级 || 10
         this.字段 = []
         this.子技能 = uniq(this.skillData.字段.map((field) => field.名称.match(/\[(.+?)\]/)?.[1] || "")).filter(
-            (name) => name !== "" && this.skillData.字段.some((field) => field.名称.includes(name) && field.名称.includes("伤害")),
+            (name) => name !== "" && this.skillData.字段.some((field) => field.名称.includes(name) && field.名称.endsWith("伤害")),
         )
 
         // 更新属性
@@ -94,6 +94,15 @@ export class LeveledSkill implements Skill {
         return this.伤害?.值 || 0
     }
 
+    get 召唤物() {
+        return this.skillData.召唤物
+    }
+
+    get 召唤物持续时间() {
+        const field = this.字段.find((field) => /召唤物.*持续时间/.test(field.名称))
+        return field ? { 值: field.值 || 0, 属性影响: field.属性影响 || "" } : undefined
+    }
+
     /**
      * 根据技能等级更新技能属性
      * 使用公式：最终技能数据 = 10级技能数据 / (1 + (10级技能数据/1级技能数据-1)/9 * (10-技能等级))
@@ -106,9 +115,14 @@ export class LeveledSkill implements Skill {
         }))
     }
 
-    getFieldsWithAttr(attrs: CharAttr) {
-        const tt = { 威力: attrs.power, 耐久: attrs.durability, 效益: attrs.efficiency, 范围: attrs.range }
-        return this.字段.map((field) => {
+    getFieldsWithAttr(attrs: CharAttr & { weapon?: WeaponAttr }) {
+        const tt = {
+            威力: attrs.power,
+            耐久: attrs.durability,
+            效益: attrs.efficiency,
+            范围: attrs.range,
+        }
+        const normalFields = this.字段.map((field) => {
             if (field.属性影响) {
                 let val = field.值
                 let propSet = new Set(field.属性影响.split(","))
@@ -144,5 +158,39 @@ export class LeveledSkill implements Skill {
                 return field
             }
         })
+        if (this.召唤物) {
+            normalFields.push(...this.getSummonAttrs(attrs))
+        }
+        return normalFields
+    }
+
+    getSummonAttrs(attrs: CharAttr & { weapon?: WeaponAttr }) {
+        if (this.召唤物) {
+            const atkspd = ((attrs.weapon?.attackSpeed || 1) - 1) * attrs.summonAttackSpeed
+            return [
+                {
+                    名称: "召唤物名称",
+                    格式: this.召唤物.名称,
+                    值: 0,
+                },
+                {
+                    名称: "召唤物攻击延迟",
+                    值: this.召唤物.攻击延迟,
+                },
+                {
+                    名称: "召唤物攻击间隔",
+                    值: this.召唤物.攻击间隔 / atkspd,
+                },
+                {
+                    名称: "召唤物攻速",
+                    值: atkspd,
+                },
+                {
+                    名称: "召唤物范围",
+                    值: Math.min(2.8, attrs.range * (1 + attrs.summonRange)),
+                },
+            ]
+        }
+        return []
     }
 }

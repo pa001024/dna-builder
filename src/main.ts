@@ -1,6 +1,5 @@
 import { createApp } from "vue"
 import "./style.css"
-import "animate.css"
 // @ts-ignore
 import { registerSW } from "virtual:pwa-register"
 import i18next from "i18next"

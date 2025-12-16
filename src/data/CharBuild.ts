@@ -44,6 +44,10 @@ export interface CharAttr {
     imbalanceDamageBonus: number
     /** 技能倍率加数 */
     skillAdd: number
+    /** 召唤物攻击速度 */
+    summonAttackSpeed: number
+    /** 召唤物范围 */
+    summonRange: number
 }
 
 export interface WeaponAttr {
@@ -247,6 +251,8 @@ export class CharBuild {
         let penetration = this.getTotalBonus("属性穿透")
         let imbalanceDamageBonus = this.getTotalBonus("失衡易伤")
         let skillAdd = this.getTotalBonus("技能倍率加数")
+        let summonAttackSpeed = this.getTotalBonus("召唤物攻击速度")
+        let summonRange = this.getTotalBonus("召唤物范围")
         let ignoreDefense = this.getTotalBonusMul("无视防御")
         let independentDamageIncrease = this.getTotalBonusMul("独立增伤")
 
@@ -270,7 +276,10 @@ export class CharBuild {
                 skillDamage -= this.getTotalBonusSingle(props, "技能伤害")
                 skillSpeed -= this.getTotalBonusSingle(props, "技能速度")
                 penetration -= this.getTotalBonusSingle(props, "属性穿透")
+                imbalanceDamageBonus -= this.getTotalBonusSingle(props, "失衡易伤")
                 skillAdd -= this.getTotalBonusSingle(props, "技能倍率加数")
+                summonAttackSpeed -= this.getTotalBonusSingle(props, "召唤物攻击速度")
+                summonRange -= this.getTotalBonusSingle(props, "召唤物范围")
                 ignoreDefense = (1 + ignoreDefense) / (1 + this.getTotalBonusSingle(props, "无视防御")) - 1
                 independentDamageIncrease = (1 + independentDamageIncrease) / (1 + this.getTotalBonusSingle(props, "独立增伤")) - 1
             } else {
@@ -292,7 +301,10 @@ export class CharBuild {
                 skillDamage += this.getTotalBonusSingle(props, "技能伤害")
                 skillSpeed += this.getTotalBonusSingle(props, "技能速度")
                 penetration += this.getTotalBonusSingle(props, "属性穿透")
+                imbalanceDamageBonus += this.getTotalBonusSingle(props, "失衡易伤")
                 skillAdd += this.getTotalBonusSingle(props, "技能倍率加数")
+                summonAttackSpeed += this.getTotalBonusSingle(props, "召唤物攻击速度")
+                summonRange += this.getTotalBonusSingle(props, "召唤物范围")
                 ignoreDefense = (1 + ignoreDefense) * (1 + this.getTotalBonusSingle(props, "无视防御")) - 1
                 independentDamageIncrease = (1 + independentDamageIncrease) * (1 + this.getTotalBonusSingle(props, "独立增伤")) - 1
             }
@@ -342,6 +354,8 @@ export class CharBuild {
             skillAdd,
             ignoreDefense,
             independentDamageIncrease,
+            summonAttackSpeed,
+            summonRange,
         }
         if (nocode) return attrs
         if (this.dynamicBuffs.length > 0 || (!minus && props?.code)) {
@@ -675,14 +689,15 @@ export class CharBuild {
         let damage = skill.伤害
         let baseDamage = damage?.额外 || 0
         if (damage) {
+            const mul = damage.值 + attrs.skillAdd
             if (!damage.基础) {
-                baseDamage += damage.值 * attrs.attack
+                baseDamage += mul * attrs.attack
             }
             if (damage.基础 === "生命") {
-                baseDamage += damage.值 * attrs.health
+                baseDamage += mul * attrs.health
             }
             if (damage.基础 === "防御") {
-                baseDamage += damage.值 * attrs.defense
+                baseDamage += mul * attrs.defense
             }
         }
         baseDamage *= attrs.power
@@ -785,10 +800,15 @@ export class CharBuild {
         }
     }
 
+    public hasSummon() {
+        return this.selectedSkill?.召唤物 !== undefined
+    }
+
     // 计算目标函数
     public calculateTargetFunction(damage: DamageResult, attrs: ReturnType<typeof this.calculateWeaponAttributes>): number {
         // 计算伤害(DPA)
         let dpa = damage.expectedDamage
+        let tdd = dpa
         let dpac = damage.higherCritNoTrigger || dpa
 
         // 计算每秒伤害(DPS)
@@ -802,7 +822,20 @@ export class CharBuild {
             if (!this.timeline) dps = dpa * weaponAttrs.attackSpeed
             dpb = dpb / weaponAttrs.additionalDamage
         } else if (skill) {
-            if (!this.timeline) dps = dpa * (1 + attrs.skillSpeed)
+            if (!this.timeline) {
+                dps = dpa * (1 + attrs.skillSpeed)
+
+                // 召唤物
+                const summon = this.selectedSkill?.召唤物
+                if (summon) {
+                    const durationField = this.selectedSkill!.召唤物持续时间!
+                    const duration = durationField?.属性影响?.includes("耐久") ? durationField.值 * attrs.durability : durationField.值
+
+                    const attackTimes = Math.floor((duration - summon.攻击延迟) / summon.攻击间隔)
+                    tdd = dpa * attackTimes
+                    dps = tdd / duration
+                }
+            }
         }
         // 除以时间线总长度
         if (this.timeline) dps /= this.timeline.totalTime
@@ -824,6 +857,8 @@ export class CharBuild {
             case "DPB":
                 return dpb
             case "总伤":
+            case "TDD":
+                return tdd
             case "伤害":
             case "DPA":
                 return dpa
@@ -882,14 +917,18 @@ export class CharBuild {
      * @param props 武器、模组或 buff
      * @returns 目标函数结果
      */
-    public calculateOneTime(props?: LeveledWeapon | LeveledMod | LeveledBuff, minus = false): number {
+    public calculateOneTime(
+        props?: LeveledWeapon | LeveledMod | LeveledBuff,
+        minus = false,
+        attrs?: ReturnType<typeof this.calculateWeaponAttributes>,
+    ): number {
         // 查找要计算的武器或技能
         let damage: DamageResult = {
             expectedDamage: 0,
         }
         let weapon = this.selectedWeapon
         let bs = this.baseNameSub
-        const attrs = this.calculateWeaponAttributes(props, minus)
+        if (!attrs) attrs = this.calculateWeaponAttributes(props, minus)
         if (weapon) {
             if (bs) weapon.倍率名称 = bs
             damage = this.calculateWeaponDamage(attrs, weapon)
@@ -914,10 +953,13 @@ export class CharBuild {
      * @returns 目标函数结果
      */
     public calculate(props?: LeveledWeapon | LeveledMod | LeveledBuff, minus = false): number {
-        if (!this.timeline) return Math.round(this.calculateOneTime(props, minus))
+        let timeline = this.timeline
+        if (!timeline) {
+            return Math.round(this.calculateOneTime(props, minus))
+        }
         let totalDamage = 0
-        const buffItems = this.timeline.items.filter((i) => i.lv).map((i) => ({ ...i, buff: new LeveledBuff(i.name, i.lv) }))
-        const skillItems = this.timeline.items.filter((i) => !i.lv)
+        const buffItems = timeline.items.filter((i) => i.lv).map((i) => ({ ...i, buff: new LeveledBuff(i.name, i.lv) }))
+        const skillItems = timeline.items.filter((i) => !i.lv)
         function getBuffsAtTime(time: number, track: number) {
             return buffItems.filter((i) => i.time <= time && i.time + i.duration >= time && i.track >= track).map((i) => i.buff)
         }
@@ -926,8 +968,20 @@ export class CharBuild {
             const buffs = getBuffsAtTime(i.time, i.track)
             const build = buffs.length ? this.clone().applyBuffs(buffs) : this
             build.baseName = i.name
-            const damage = build.calculateOneTime(props, minus)
+            const attrs = build.calculateWeaponAttributes(props, minus)
+            const damage = build.calculateOneTime(props, minus, attrs)
             totalDamage += damage
+            // 召唤物
+            const summon = this.selectedSkill?.召唤物
+            if (summon) {
+                const newAttr = build.calculateWeaponAttributes(props, minus, build.meleeWeapon)
+                const summonAttrs = this.selectedSkill.getFieldsWithAttr(newAttr)
+                const duration = summonAttrs.find((a) => a.名称 === "召唤物持续时间")?.值 || 0
+                const delay = summonAttrs.find((a) => a.名称 === "召唤物攻击延迟")?.值 || 0
+                const interval = summonAttrs.find((a) => a.名称 === "召唤物攻击间隔")?.值 || 0
+                const attackTimes = Math.floor((duration - delay) / interval)
+                totalDamage *= attackTimes
+            }
         })
         this.baseName = initBaseName
         return Math.round(totalDamage)

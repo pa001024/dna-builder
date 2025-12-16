@@ -169,7 +169,10 @@ export class LeveledBuff implements Buff {
     }
     /**
      * 根据等级更新Buff属性
-     * 属性值 = 满级属性/a*(1+1/b*(x-lx))
+     * 属性值 = 满级属性/a*(1+(x-1)/b)
+     * 举例: 对技能来说, 如果满级属性为10级数值
+     * a = 10级数值/1级数值
+     * b = 1级数值/(10级数值-1级数值)*9
      */
     private updatePropertiesByLevel(): void {
         const a = this.a || 1

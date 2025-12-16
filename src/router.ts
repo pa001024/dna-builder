@@ -34,6 +34,13 @@ const routes: readonly RouteRecordRaw[] = [
     { name: "more", path: "/more", component: More, beforeEnter: () => setMinSize(600, 600) },
     // more: lazy load
     { name: "game", path: "/game", component: () => import("./views/SmallGame.vue"), beforeEnter: () => setMinSize(600, 600) },
+    {
+        name: "game-launcher",
+        path: "/game-launcher",
+        component: () => import("./views/GameLauncher.vue"),
+        beforeEnter: () => setMinSize(800, 700),
+    },
+    { name: "help", path: "/help", component: () => import("./views/Help.vue"), beforeEnter: () => setMinSize(800, 700) },
 ]
 
 export const router = createRouter({

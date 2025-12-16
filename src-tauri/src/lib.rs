@@ -1,11 +1,26 @@
+use std::{
+    fs::{self, File},
+    io::{self, Read},
+    path::{Path, PathBuf},
+    time::Duration,
+};
+
 use tauri::menu::*;
 use tauri::tray::*;
 use tauri::Manager;
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 use window_vibrancy::*;
+use winreg::{enums::*, RegKey};
+use zip::ZipArchive;
+
+use crate::util::{get_process_by_name, get_process_exe_path, shell_execute};
+
+mod util;
 
 // #[macro_use]
 // extern crate lazy_static;
+// const GAME_PROCESS: &str = "EM.exe";
+const GAME_PROCESS: &str = "EM-Win64-Shipping.exe";
 
 // 退出程序
 #[tauri::command]
@@ -18,6 +33,188 @@ async fn app_close(app_handle: tauri::AppHandle) {
     // if let Err(_) = window.close() {
     return app_handle.exit(0);
     // }
+}
+
+fn is_zip_file(path: &Path) -> io::Result<bool> {
+    let meta = fs::metadata(path)?;
+    if meta.is_dir() {
+        return Ok(false);
+    }
+    let mut file = File::open(path)?;
+    let mut signature = [0u8; 4];
+    let read = file.read(&mut signature)?;
+    Ok(read >= 2 && signature[0] == b'P' && signature[1] == b'K')
+}
+
+fn extract_zip_into(
+    archive_path: &Path,
+    target_dir: &Path,
+    output: &mut Vec<(String, u64)>,
+) -> io::Result<()> {
+    let file = File::open(archive_path)?;
+    let mut archive = ZipArchive::new(file)
+        .map_err(|err| io::Error::new(io::ErrorKind::Other, err.to_string()))?;
+    for i in 0..archive.len() {
+        let mut entry = archive
+            .by_index(i)
+            .map_err(|err| io::Error::new(io::ErrorKind::Other, err.to_string()))?;
+        if entry.is_dir() {
+            continue;
+        }
+        let relative = entry.mangled_name();
+        let out_path = target_dir.join(relative);
+        if let Some(parent) = out_path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        let mut extracted = File::create(&out_path)?;
+        io::copy(&mut entry, &mut extracted)?;
+        output.push((out_path.to_string_lossy().to_string(), entry.size()));
+    }
+    Ok(())
+}
+
+fn copy_regular_file(
+    file_path: &Path,
+    target_dir: &Path,
+    output: &mut Vec<(String, u64)>,
+) -> io::Result<()> {
+    if !file_path.is_file() {
+        return Ok(());
+    }
+    let Some(file_name) = file_path.file_name() else {
+        return Ok(());
+    };
+    let dest = target_dir.join(file_name);
+    if let Some(parent) = dest.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    fs::copy(file_path, &dest)?;
+    let size = fs::metadata(&dest)?.len();
+    output.push((dest.to_string_lossy().to_string(), size));
+    Ok(())
+}
+
+#[tauri::command]
+fn import_mod(gamebase: String, paths: Vec<String>) -> String {
+    let base_path = PathBuf::from(gamebase);
+    if let Err(err) = fs::create_dir_all(&base_path) {
+        eprintln!("Failed to prepare gamebase dir: {err}");
+        return "[]".to_string();
+    }
+
+    let mut output: Vec<(String, u64)> = Vec::new();
+    for raw in paths {
+        let src = PathBuf::from(&raw);
+        if !src.exists() {
+            eprintln!("Path not found: {raw}");
+            continue;
+        }
+        match is_zip_file(&src) {
+            Ok(true) => {
+                if let Err(err) = extract_zip_into(&src, &base_path, &mut output) {
+                    eprintln!("Failed to extract {:?}: {err}", src);
+                }
+            }
+            Ok(false) => {
+                if let Err(err) = copy_regular_file(&src, &base_path, &mut output) {
+                    eprintln!("Failed to copy {:?}: {err}", src);
+                }
+            }
+            Err(err) => eprintln!("Failed to inspect {:?}: {err}", src),
+        }
+    }
+
+    serde_json::to_string(&output).unwrap_or_else(|_| "[]".to_string())
+}
+
+#[tauri::command]
+fn enable_mod(srcdir: String, dstdir: String, files: Vec<String>) -> String {
+    let base_path = PathBuf::from(dstdir.clone());
+    if let Err(err) = fs::create_dir_all(&base_path) {
+        eprintln!("Failed to prepare moddir: {err}");
+        return "[]".to_string();
+    }
+    // 将srcdir下的files移动到dstdir
+    for file in files {
+        let src = srcdir.clone() + "\\" + file.as_str();
+        let dest = dstdir.clone() + "\\" + file.as_str();
+        if let Err(err) = fs::rename(&src, &dest) {
+            eprintln!("Failed to move {:?} -> {:?}: {err}", src, dest);
+            return format!("Failed to move {:?} -> {:?}: {err}", src, dest);
+        }
+    }
+    "".to_string()
+}
+
+#[tauri::command]
+fn import_pic(path: String) -> String {
+    // 导入图片 转换为dataurl
+    let mut file = File::open(&path).unwrap();
+    let mut buffer = Vec::new();
+    // 截取文件扩展名
+    let ext = path.split(".").last().unwrap();
+    file.read_to_end(&mut buffer).unwrap();
+    let data_url = format!(
+        "data:image/{};base64,{}",
+        ext,
+        base64::Engine::encode(&base64::engine::general_purpose::STANDARD, buffer)
+    );
+    data_url
+}
+
+#[tauri::command]
+fn get_game_install() -> String {
+    // 读取注册表
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    let key = "Software\\Hero Games\\Duet Night Abyss";
+    let sk = hkcu.open_subkey(key);
+    if let Ok(sk) = sk {
+        for file in sk
+            .enum_keys()
+            .map(|x| x.unwrap())
+            .filter(|x| x.ends_with("EMLauncher.exe"))
+        {
+            // 截取文件夹路径
+            let parts: Vec<&str> = file.split("\\").collect();
+            let dir = &parts[..parts.len() - 1].join("\\");
+            let game_dir = dir.to_string() + "\\DNA Game\\EM.exe";
+            return game_dir;
+        }
+    }
+    return "".to_string();
+}
+
+#[tauri::command]
+async fn is_game_running(is_run: bool) -> String {
+    let mut elapsed = Duration::from_secs(0);
+    let timeout = Duration::from_secs(30);
+    let interval = Duration::from_millis(500); // 500ms
+
+    while elapsed <= timeout {
+        let now_is_run = get_process_by_name(GAME_PROCESS).unwrap_or(0) > 0;
+        if now_is_run != is_run {
+            break;
+        }
+        tokio::time::sleep(interval).await;
+        elapsed += interval;
+    }
+
+    if !is_run {
+        if let Ok(Some(path)) = get_process_exe_path(GAME_PROCESS) {
+            return path;
+        }
+    }
+    "".to_string()
+}
+
+#[tauri::command]
+async fn launch_exe(path: String, params: String) -> bool {
+    let pid = shell_execute(path.as_str(), Some(params.as_str()), None);
+    if let Err(err) = pid {
+        println!("Failed to launch game: {:?}", err);
+        return false;
+    }
+    true
 }
 
 #[tauri::command]
@@ -86,6 +283,7 @@ fn get_os_version() -> String {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_window_state::Builder::default().build())
@@ -231,7 +429,13 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             apply_material,
             app_close,
-            get_os_version
+            get_os_version,
+            get_game_install,
+            is_game_running,
+            launch_exe,
+            import_mod,
+            enable_mod,
+            import_pic
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

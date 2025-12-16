@@ -427,6 +427,7 @@ updateCharBuild()
                                     <SelectItem
                                         v-for="fn in [
                                             '伤害',
+                                            '总伤',
                                             '弹片伤害',
                                             '暴击伤害',
                                             '每秒伤害',
@@ -451,7 +452,11 @@ updateCharBuild()
                         <div v-if="charBuild.selectedSkill" class="flex flex-col">
                             <div class="text-md p-2">{{ charBuild.selectedSkill!.类型 }}</div>
                             <div
-                                v-for="(val, index) in charBuild.selectedSkill!.getFieldsWithAttr(charBuild.calculateAttributes())"
+                                v-for="(val, index) in charBuild.selectedSkill!.getFieldsWithAttr(
+                                    charBuild.selectedSkill.召唤物
+                                        ? charBuild.calculateWeaponAttributes(undefined, undefined, charBuild.meleeWeapon)
+                                        : charBuild.calculateAttributes(),
+                                )"
                                 :key="index"
                                 class="flex flex-col group hover:bg-base-200 rounded-md p-2"
                             >
@@ -762,7 +767,7 @@ updateCharBuild()
                 />
                 <!-- 近战武器MOD配置 -->
                 <ModEditer
-                    v-if="charBuild.isMeleeWeapon || isTimeline"
+                    v-if="charBuild.isMeleeWeapon || isTimeline || charBuild.selectedSkill?.召唤物"
                     :title="$t('char-build.melee_weapon_mod_config')"
                     :mods="selectedMeleeMods"
                     :mod-options="
@@ -959,13 +964,17 @@ updateCharBuild()
                                         class="col-span-2 bg-base-300/60 bg-linear-to-r from-primary/1 to-primary/5 backdrop-blur-sm rounded-xl p-2 border border-primary/30"
                                     >
                                         <div class="text-gray-400 text-xs mb-1">
-                                            {{ charSettings.baseName }} - {{ charSettings.targetFunction }}
+                                            {{ charSettings.baseName }} -
+                                            {{ charBuild.selectedSkill?.召唤物?.名称 ? `[${charBuild.selectedSkill?.召唤物?.名称}]` : ""
+                                            }}{{ charSettings.targetFunction }}
                                         </div>
                                         <div class="text-primary font-bold text-sm font-orbitron">{{ Math.round(totalDamage) }}</div>
                                     </div>
                                     <div
                                         class="bg-base-300/60 bg-linear-to-r from-secondary/1 to-secondary/5 backdrop-blur-sm rounded-xl p-2 border border-secondary/30"
-                                        v-for="[key, val] in Object.entries(attributes).filter(([_, v]) => v)"
+                                        v-for="[key, val] in Object.entries(attributes).filter(
+                                            ([k, v]) => !['summonAttackSpeed', 'summonRange'].includes(k) && v,
+                                        )"
                                     >
                                         <div class="text-gray-400 text-xs mb-1">
                                             {{ key === "attack" ? `${charBuild.char.属性}属性` : "" }}{{ $t(`char-build.${key}`) }}

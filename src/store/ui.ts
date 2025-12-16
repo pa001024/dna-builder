@@ -1,5 +1,6 @@
 import { defineStore } from "pinia"
 import { type IconTypes } from "../components/Icon.vue"
+import { env } from "../env"
 
 export interface ITab {
     name?: string
@@ -24,9 +25,15 @@ export const useUIStore = defineStore("ui", {
                     icon: "la:bookmark",
                 },
                 {
+                    name: "game-launcher",
+                    path: "/game-launcher",
+                    icon: "ri:rocket-2-line",
+                    show: env.isApp,
+                },
+                {
                     name: "char-build",
                     path: "/char-build",
-                    icon: "la:edit-solid",
+                    icon: "ri:hammer-line",
                 },
                 {
                     name: "inventory",
@@ -54,7 +61,7 @@ export const useUIStore = defineStore("ui", {
                 {
                     name: "setting",
                     path: "/setting",
-                    icon: "la:cog-solid",
+                    icon: "ri:settings-3-line",
                 },
             ] satisfies ITab[] as ITab[],
         }
