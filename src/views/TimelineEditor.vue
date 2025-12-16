@@ -1167,7 +1167,7 @@ const importTimelineJson = () => {
         if (file) {
             const reader = new FileReader()
             reader.readAsText(file)
-            reader.onload = () => {
+            reader.onload = async () => {
                 try {
                     const json = JSON.parse(reader.result as string)
                     if (json.name) {
@@ -1180,12 +1180,14 @@ const importTimelineJson = () => {
                             items: json.items,
                         }
                         if (index !== -1) {
-                            if (!confirm(`时间线 ${json.name} 已存在，是否覆盖？`)) {
+                            if (!(await confirm(`时间线 ${json.name} 已存在，是否覆盖？`))) {
                                 return
                             }
                             timelineData.value[index] = val
+                            loadTimeline(index)
                         } else {
                             timelineData.value.push(val)
+                            loadTimeline(timelineData.value.length - 1)
                         }
                     }
                 } catch (error) {
@@ -1367,7 +1369,7 @@ const importTimelineJson = () => {
                                 </li>
                             </ul>
                             <div class="btn btn-primary" @click="addTimeline()">新建方案</div>
-                            <div class="w-full join flex">
+                            <div class="w-full join flex gap-2">
                                 <div class="btn flex-1" @click="exportTimelineJson()">导出JSON</div>
                                 <div class="btn flex-1" @click="importTimelineJson()">加载JSON</div>
                             </div>
