@@ -20,7 +20,7 @@ export const useCharSettings = (charNameRef: Ref<string>) => {
         rangedWeaponLevel: 80,
         rangedWeaponRefine: 5,
         auraMod: 31524, // 警惕
-        imbalance: true,
+        imbalance: false,
         charMods: Array(8).fill(null) as ([number, number] | null)[],
         meleeMods: Array(8).fill(null) as ([number, number] | null)[],
         rangedMods: Array(8).fill(null) as ([number, number] | null)[],
