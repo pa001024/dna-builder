@@ -200,7 +200,7 @@ export class LeveledBuff implements Buff {
         })
         return properties
     }
-    static _exclude_properties = new Set(["名称", "描述", "限定", "_等级", "_originalBuffData", "a", "b", "lx", "mx", "dx", "pid"])
+    static _exclude_properties = new Set(["名称", "描述", "限定", "品质", "_等级", "_originalBuffData", "a", "b", "lx", "mx", "dx", "pid"])
     get properties(): string[] {
         return Object.keys(this).filter((prop) => !LeveledBuff._exclude_properties.has(prop))
     }

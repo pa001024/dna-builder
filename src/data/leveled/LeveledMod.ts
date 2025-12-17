@@ -63,8 +63,11 @@ export class LeveledMod implements Mod {
         if (modData.限定) this.限定 = modData.限定
         if (modData.效果) this.效果 = modData.效果
         if (effectMap.has(this.名称)) {
-            this.buff = new LeveledBuff(effectMap.get(this.名称)!, buffLv)
-            this.buff.pid = this.名称
+            const effect = effectMap.get(this.名称)!
+            if (!effect.品质 || effect.品质 === this.品质) {
+                this.buff = new LeveledBuff(effect, buffLv)
+                this.buff.pid = this.名称
+            }
         }
 
         // 获取该品质MOD的等级上限

@@ -63,6 +63,7 @@ export interface WeaponAttr {
 }
 
 import type { RawTimelineData } from "../store/timeline"
+import { groupBy } from "lodash-es"
 export class CharBuildTimeline {
     totalTime: number = 0
     constructor(
@@ -960,8 +961,14 @@ export class CharBuild {
         let totalDamage = 0
         const buffItems = timeline.items.filter((i) => i.lv).map((i) => ({ ...i, buff: new LeveledBuff(i.name, i.lv) }))
         const skillItems = timeline.items.filter((i) => !i.lv)
+        const skillLayers = groupBy(skillItems, (i) => i.track)
+        const skillLayerKeys = Object.keys(skillLayers).map(Number).sort()
         function getBuffsAtTime(time: number, track: number) {
-            return buffItems.filter((i) => i.time <= time && i.time + i.duration >= time && i.track >= track).map((i) => i.buff)
+            // 查找当前轨道及后续轨道的 buff, 但不能超过下一层技能的轨道
+            const maxTrack = skillLayerKeys.find((t) => t > track) || Infinity
+            return buffItems
+                .filter((i) => i.time <= time && i.time + i.duration >= time && i.track >= track && i.track < maxTrack)
+                .map((i) => i.buff)
         }
         const initBaseName = this.baseName
         skillItems.forEach((i) => {
@@ -1022,6 +1029,7 @@ export class CharBuild {
             enemyHpType: this.enemyHpType,
             targetFunction: this.targetFunction,
             skillLevel: this.skills[0].等级,
+            timeline: this.timeline,
         })
     }
 
