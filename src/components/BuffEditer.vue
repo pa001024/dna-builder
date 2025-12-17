@@ -35,6 +35,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
             <BuffCell
                 v-for="buff in buffOptions.filter((b) => selectedBuffs.some((v) => v.名称 === b.label))"
                 :key="buff.label"
+                :title="buff.label"
                 :buff="buff.value"
                 :lv="buff.lv"
                 selected
@@ -46,6 +47,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
             <BuffCell
                 v-for="buff in buffOptions.filter((b) => !selectedBuffs.some((v) => v.名称 === b.label))"
                 :key="buff.label"
+                :title="buff.label"
                 :buff="buff.value"
                 :lv="buff.lv"
                 :income="charBuild.calcIncome(buff.value, false)"

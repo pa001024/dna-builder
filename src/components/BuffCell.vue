@@ -7,6 +7,7 @@ defineProps<{
     lv: number
     selected?: boolean
     income: number
+    title?: string
 }>()
 const emit = defineEmits<{
     setBuffLv: [buff: LeveledBuff, level: number]
@@ -18,7 +19,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
 </script>
 <template>
     <div class="flex">
-        <ShowProps side="top" :props="buff.getProperties()" :code="buff.code">
+        <ShowProps side="top" :props="buff.getProperties()" :code="buff.code" :title="title">
             <div
                 class="flex-1 bg-base-200 rounded-lg p-3 cursor-pointer hover:bg-gray-200/20 transition-colors"
                 :class="{

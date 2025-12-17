@@ -124,7 +124,7 @@ export class LeveledMod implements Mod {
             const maxValue = buff[prop] || 0
             let currentValue = (maxValue / (10 + 1)) * (lv + 1)
             if (prop === "神智回复") currentValue = Math.round(currentValue)
-            this[prop] = currentValue
+            this[prop] = this[prop] ? this[prop] + currentValue : currentValue
             if (buff.描述.includes(`{%}`)) {
                 buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(buff.baseValue * 100).toFixed(1)}%`)
             }
