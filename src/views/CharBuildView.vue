@@ -336,6 +336,15 @@ function updateCharBuild() {
     }
 }
 updateCharBuild()
+
+const summonAttributes = computed(() => {
+    const skill = charBuild.value.selectedSkill
+    if (skill?.召唤物) {
+        const attrs = charBuild.value.calculateWeaponAttributes(undefined, undefined, charBuild.value.meleeWeapon)
+        return skill.getSummonAttrs(attrs)
+    }
+    return undefined
+})
 </script>
 
 <template>
@@ -956,7 +965,6 @@ updateCharBuild()
                                     </div>
                                 </div>
                             </div>
-                            <!-- 角色属性 -->
                             <div>
                                 <h4 class="text-xl font-bold mb-4 text-base-content/80">{{ $t("char-build.char_attributes") }}</h4>
                                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
@@ -985,6 +993,25 @@ updateCharBuild()
                                                     ? `${+val.toFixed(2)}`
                                                     : `${+(val * 100).toFixed(2)}%`
                                             }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 召唤物属性 -->
+                            <div v-if="summonAttributes">
+                                <h4 class="text-xl font-bold mb-4 text-base-content/80">
+                                    {{ summonAttributes.find((p) => p.名称 === "召唤物名称")?.格式 || "召唤物" }}
+                                </h4>
+                                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+                                    <div
+                                        class="bg-base-300/60 bg-linear-to-r from-secondary/1 to-secondary/5 backdrop-blur-sm rounded-xl p-2 border border-secondary/30"
+                                        v-for="prop in summonAttributes.filter((p) => p.值)"
+                                    >
+                                        <div class="text-gray-400 text-xs mb-1">
+                                            {{ prop.名称 }}
+                                        </div>
+                                        <div class="text-secondary font-bold text-sm font-orbitron">
+                                            {{ formatSkillProp(prop.名称, prop) }}
                                         </div>
                                     </div>
                                 </div>

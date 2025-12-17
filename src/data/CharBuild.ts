@@ -122,7 +122,27 @@ export interface CharBuildOptions {
 }
 
 export class CharBuild {
-    public char: LeveledChar
+    public _char!: LeveledChar
+    get char() {
+        return this._char
+    }
+    set char(char: LeveledChar) {
+        this._char = char
+        // 从skills表中获取角色技能数组，用参数skillLevel初始化LeveledSkill后储存为私有属性skills数组
+        this.skills = this.char.技能.map((skill) => new LeveledSkill(skill.skillData, this.skillLevel))
+
+        // 从char中获取同率武器值，如果非空则从武器表中获取同率武器属性，储存为私有字段skillWeapon
+        if (this.char.同律武器) {
+            try {
+                this.skillWeapon = new LeveledSkillWeapon(this.char.同律武器, this.skillLevel)
+            } catch (error) {
+                console.error(`同律武器 ${this.char.同律武器} 初始化失败:`, error)
+            }
+        } else {
+            this.skillWeapon = undefined
+        }
+    }
+    public skillLevel: number = 10
     public hpPercent: number
     public resonanceGain: number
     public auraMod?: LeveledMod
@@ -141,7 +161,7 @@ export class CharBuild {
     public enemyResistance: number
     public enemyHpType: string
     public targetFunction: string
-    public skills: LeveledSkill[]
+    public skills!: LeveledSkill[]
     public skillWeapon?: LeveledSkillWeapon
     public timeline?: CharBuildTimeline
 
@@ -165,6 +185,7 @@ export class CharBuild {
     }
 
     constructor(options: CharBuildOptions) {
+        this.skillLevel = options.skillLevel || 10
         this.char = options.char
         this.hpPercent = Math.max(0, Math.min(1, options.hpPercent))
         this.resonanceGain = options.resonanceGain
@@ -185,19 +206,6 @@ export class CharBuild {
         this.enemyHpType = options.enemyHpType || "生命"
         this.targetFunction = options.targetFunction || "伤害"
         this.timeline = options.timeline
-
-        // 从skills表中获取角色技能数组，用参数skillLevel初始化LeveledSkill后储存为私有属性skills数组
-        const skillLevel = options.skillLevel || 10
-        this.skills = this.char.技能.map((skill) => new LeveledSkill(skill.skillData, skillLevel))
-
-        // 从char中获取同率武器值，如果非空则从武器表中获取同率武器属性，储存为私有字段skillWeapon
-        if (this.char.同律武器) {
-            try {
-                this.skillWeapon = new LeveledSkillWeapon(this.char.同律武器, skillLevel)
-            } catch (error) {
-                console.error(`同律武器 ${this.char.同律武器} 初始化失败:`, error)
-            }
-        }
     }
 
     get mods() {
@@ -374,11 +382,12 @@ export class CharBuild {
 
         return attrs
     }
+
     // 计算武器属性
     public calculateWeaponAttributes(
         props?: LeveledWeapon | LeveledMod | LeveledBuff,
         minus = false,
-        weapon = this.selectedWeapon,
+        weapon = this.selectedWeapon || (this.selectedSkill?.召唤物 && this.meleeWeapon),
         nocode = false,
         nochar = false,
     ): CharAttr & { weapon?: WeaponAttr } {
@@ -825,14 +834,13 @@ export class CharBuild {
         } else if (skill) {
             if (!this.timeline) {
                 dps = dpa * (1 + attrs.skillSpeed)
-
                 // 召唤物
-                const summon = this.selectedSkill?.召唤物
+                const summon = skill.召唤物
                 if (summon) {
-                    const durationField = this.selectedSkill!.召唤物持续时间!
-                    const duration = durationField?.属性影响?.includes("耐久") ? durationField.值 * attrs.durability : durationField.值
+                    const summonAttrs = skill.getSummonAttrsMap(attrs)!
+                    const duration = summonAttrs?.duration || 0
 
-                    const attackTimes = Math.floor((duration - summon.攻击延迟) / summon.攻击间隔)
+                    const attackTimes = Math.floor((duration - summonAttrs?.delay) / summonAttrs?.interval)
                     tdd = dpa * attackTimes
                     dps = tdd / duration
                 }
@@ -938,11 +946,12 @@ export class CharBuild {
                     damage[k as keyof DamageResult] = damage[k as keyof DamageResult]! * attrs.power
                 })
             }
-        }
-        const skill = this.selectedSkill
-        if (skill) {
-            skill.子技能名 = bs
-            damage = this.calculateSkillDamage(attrs, skill)
+        } else {
+            const skill = this.selectedSkill
+            if (skill) {
+                skill.子技能名 = bs
+                damage = this.calculateSkillDamage(attrs, skill)
+            }
         }
 
         // 计算目标函数
@@ -1004,8 +1013,11 @@ export class CharBuild {
      * @returns 单属性值
      */
     public calcIncome(props?: LeveledWeapon | LeveledMod | LeveledBuff, minus = false): number {
-        if (minus) return this.calculate() / this.calculate(props, minus) - 1
-        return this.calculate(props, minus) / this.calculate() - 1
+        if (minus) {
+            return this.calculate() / this.calculate(props, minus) - 1
+        } else {
+            return this.calculate(props, minus) / this.calculate() - 1
+        }
     }
 
     clone() {

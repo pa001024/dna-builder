@@ -115,6 +115,7 @@ function handleSlotClick(index: number) {
 function handleSelectAuraMod(id: number) {
     emit("selectAuraMod", id)
 }
+
 function handleRemoveMod(index: number) {
     emit("removeMod", index)
 }
@@ -202,7 +203,7 @@ async function handleImportCode() {
                     <template v-for="quality in ['全部', '金', '紫', '蓝', '绿', '白']" :key="quality">
                         <input
                             type="radio"
-                            name="mod_select"
+                            :name="`mod_select_${type}`"
                             class="tab"
                             :aria-label="quality === '全部' ? '全部' : `${quality}色`"
                             :checked="quality === '全部'"

@@ -105,7 +105,6 @@ export class LeveledSkill implements Skill {
 
     /**
      * 根据技能等级更新技能属性
-     * 使用公式：最终技能数据 = 10级技能数据 / (1 + (10级技能数据/1级技能数据-1)/9 * (10-技能等级))
      */
     private updateProperties(): void {
         this.字段 = this.skillData.字段.map((field) => ({
@@ -164,32 +163,57 @@ export class LeveledSkill implements Skill {
         return normalFields
     }
 
-    getSummonAttrs(attrs: CharAttr & { weapon?: WeaponAttr }) {
+    getSummonAttrsMap(attrs: CharAttr & { weapon?: WeaponAttr }) {
         if (this.召唤物) {
+            const summon = this.召唤物
             const atkspd = ((attrs.weapon?.attackSpeed || 1) - 1) * attrs.summonAttackSpeed
+            const df = this.召唤物持续时间
+            const duration = df ? (df.属性影响?.includes("耐久") ? df.值 * attrs.durability : df.值) : 0
+            return {
+                name: summon.名称,
+                delay: summon.攻击延迟,
+                interval: summon.攻击间隔 / (1 + atkspd),
+                attackSpeed: atkspd,
+                duration,
+                attackTimes: Math.floor((duration * attrs.durability - summon.攻击延迟) / (summon.攻击间隔 / (1 + atkspd))),
+                range: Math.min(2.8, attrs.range * (1 + attrs.summonRange)),
+            }
+        }
+    }
+
+    getSummonAttrs(attrs: CharAttr & { weapon?: WeaponAttr }) {
+        const sattrs = this.getSummonAttrsMap(attrs)
+        if (sattrs) {
             return [
                 {
                     名称: "召唤物名称",
-                    格式: this.召唤物.名称,
+                    格式: sattrs.name,
                     值: 0,
                 },
                 {
                     名称: "召唤物攻击延迟",
-                    值: this.召唤物.攻击延迟,
+                    值: sattrs.delay,
+                    格式: "{}秒",
                 },
                 {
                     名称: "召唤物攻击间隔",
-                    值: this.召唤物.攻击间隔 / atkspd,
+                    值: sattrs.interval,
+                    格式: "{}秒",
                 },
                 {
                     名称: "召唤物攻速",
-                    值: atkspd,
+                    值: sattrs.attackSpeed,
+                },
+                {
+                    名称: "召唤物攻击次数",
+                    值: sattrs.attackTimes,
+                    格式: "{}",
                 },
                 {
                     名称: "召唤物范围",
-                    值: Math.min(2.8, attrs.range * (1 + attrs.summonRange)),
+                    值: sattrs.range,
                 },
-            ]
+            ] satisfies LeveledSkillField[]
         }
         return []
     }

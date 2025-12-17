@@ -747,6 +747,26 @@ describe("CharBuild类测试", () => {
             expect(income2).toBeTypeOf("number")
             expect(income3).toBeTypeOf("number")
         })
+
+        it("应该能够计算近战攻速MOD对召唤物的影响", () => {
+            const charBuild = createCharBuild()
+            charBuild.char = new LeveledChar("丽蓓卡")
+            charBuild.targetFunction = "总伤"
+            charBuild.baseName = "缠绵之触"
+            const mod1 = new LeveledMod(51921) // 水雾弥散
+            const mod2 = new LeveledMod(52004) // 迅捷
+            charBuild.mods = [mod1, mod2]
+
+            const attrs = charBuild.calculateWeaponAttributes()
+
+            expect(attrs.weapon).toBeDefined()
+
+            const income1 = charBuild.calcIncome(mod1, true)
+            const income2 = charBuild.calcIncome(mod2, true)
+
+            expect(income1).toBeGreaterThan(0)
+            expect(income2).toBeGreaterThan(0)
+        })
     })
 
     // 配置测试
