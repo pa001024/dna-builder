@@ -31,15 +31,15 @@ const routes: readonly RouteRecordRaw[] = [
     { name: "inventory", path: "/inventory", component: InventoryEdit, beforeEnter: () => setMinSize(600, 600) },
     { name: "timeline", path: "/timeline", component: TimelineEditor, beforeEnter: () => setMinSize(600, 600) },
     { name: "achievement", path: "/achievement", component: AchievementList, beforeEnter: () => setMinSize(600, 600) },
-    { name: "more", path: "/more", component: More, beforeEnter: () => setMinSize(600, 600) },
-    // more: lazy load
-    { name: "game", path: "/game", component: () => import("./views/SmallGame.vue"), beforeEnter: () => setMinSize(600, 600) },
     {
         name: "game-launcher",
         path: "/game-launcher",
-        component: () => import("./views/GameLauncher.vue"),
+        component: env.isApp ? import("./views/GameLauncher.vue") : () => undefined,
         beforeEnter: () => setMinSize(800, 700),
     },
+    { name: "more", path: "/more", component: More, beforeEnter: () => setMinSize(600, 600) },
+    // more: lazy load
+    { name: "game", path: "/game", component: () => import("./views/SmallGame.vue"), beforeEnter: () => setMinSize(600, 600) },
     { name: "help", path: "/help", component: () => import("./views/Help.vue"), beforeEnter: () => setMinSize(800, 700) },
 ]
 

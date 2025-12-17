@@ -162,9 +162,7 @@ if (env.isApp) {
             <transition name="slide-right">
                 <KeepAlive v-if="route.meta.keepAlive">
                     <Suspense>
-                        <ErrorBoundary>
-                            <component :is="Component" />
-                        </ErrorBoundary>
+                        <component :is="Component" />
                         <template #fallback>
                             <div class="w-full h-full flex justify-center items-center">
                                 <span class="loading loading-spinner loading-md"></span>
@@ -172,7 +170,11 @@ if (env.isApp) {
                         </template>
                     </Suspense>
                 </KeepAlive>
-                <component :is="Component" :key="route.path" v-else />
+                <div :key="route.path" class="w-full h-full overflow-hidden" v-else>
+                    <ErrorBoundary>
+                        <component :is="Component" />
+                    </ErrorBoundary>
+                </div>
             </transition>
         </RouterView>
         <template #sidebar>

@@ -171,6 +171,9 @@ const removeMod = async (mod: Mod) => {
 // 拖拽相关状态
 const isDragging = ref(false)
 
+let unlistenDragEnter = () => {}
+let unlistenDragLeave = () => {}
+let unlistenDragDrop = () => {}
 onMounted(async () => {
     // Tauri专用拖放逻辑
     if (env.isApp) {
@@ -185,18 +188,19 @@ onMounted(async () => {
             }
         }
         // 监听文件拖入窗口事件
-        const unlistenDragEnter = await listen<TauriDragEvent>(TauriEvent.DRAG_ENTER, () => {
+        unlistenDragEnter = await listen<TauriDragEvent>(TauriEvent.DRAG_ENTER, () => {
             if (!game.selectedEntity) return
             isDragging.value = true
         })
 
         // 监听文件拖离窗口事件
-        const unlistenDragLeave = await listen<TauriDragEvent>(TauriEvent.DRAG_LEAVE, () => {
+        unlistenDragLeave = await listen<TauriDragEvent>(TauriEvent.DRAG_LEAVE, () => {
             isDragging.value = false
         })
 
         // 监听文件放置事件
-        const unlistenDragDrop = await listen<TauriDragEvent>(TauriEvent.DRAG_DROP, async (event) => {
+        unlistenDragDrop = await listen<TauriDragEvent>(TauriEvent.DRAG_DROP, async (event) => {
+            if (!isDragging.value) return
             isDragging.value = false
             if (!game.selectedEntity) return
             if (!game.path) {
@@ -236,14 +240,14 @@ onMounted(async () => {
                 }
             }
         })
-        onUnmounted(() => {
-            unlistenDragEnter()
-            unlistenDragDrop()
-            unlistenDragLeave()
-        })
     }
 })
 
+onUnmounted(() => {
+    unlistenDragEnter()
+    unlistenDragDrop()
+    unlistenDragLeave()
+})
 //#endregion
 </script>
 
