@@ -62,6 +62,8 @@ const emit = defineEmits<{
                 v-if="mod"
                 :props="mod.getProperties()"
                 :title="`${mod.系列}之${mod.名称}`"
+                :polarity="mod.极性"
+                :cost="mod.耐受"
                 :type="`${mod.类型}${mod.属性 ? `,${mod.属性}属性` : ''}${mod.限定 ? `,${mod.限定}` : ''}`"
             >
                 <div class="w-full h-full flex items-center justify-center bg-opacity-30 rounded-lg overflow-hidden">

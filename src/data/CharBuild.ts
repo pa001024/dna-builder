@@ -1231,6 +1231,8 @@ export class CharBuild {
                 let { mod: maxed, income: maxedIncome } = findMaxMod(key)
                 if (maxed === null || initBuild[key].length >= ModTypeMaxSlot[key]) return
                 while (localBuild[key].length < ModTypeMaxSlot[key]) {
+                    // 不添加收益0的MOD
+                    if (maxedIncome <= 0) break
                     addMod(key, maxed)
                     changed = true
                     log(
