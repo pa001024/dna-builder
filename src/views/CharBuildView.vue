@@ -3,7 +3,7 @@ import { computed, reactive, ref } from "vue"
 import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon, CharBuild, gameData as data, CharBuildTimeline } from "../data"
 import { useLocalStorage } from "@vueuse/core"
 import { groupBy, cloneDeep } from "lodash-es"
-import { formatProp, formatSkillProp, formatWeaponProp } from "../util"
+import { format100, formatProp, formatSkillProp, formatWeaponProp } from "../util"
 import { useInvStore } from "../store/inv"
 import { useCharSettings } from "../store/charSettings"
 import { useTimeline } from "../store/timeline"
@@ -484,19 +484,28 @@ const summonAttributes = computed(() => {
                                 </div>
                             </div>
                         </div>
-                        <div v-if="charBuild.selectedWeapon" class="flex flex-col">
-                            <div class="text-md p-2">{{ charBuild.selectedWeapon!.类型 }}</div>
+
+                        <div v-if="charBuild.selectedWeapon" class="flex flex-col gap-2 max-w-[300px]">
+                            <div class="text-sm font-bold">{{ charBuild.selectedWeapon!.类型 }}</div>
+                            <div class="flex justify-between items-center gap-2 text-sm">
+                                <div class="text-xs text-neutral-500">倍率</div>
+                                <div class="font-medium text-primary">
+                                    {{
+                                        format100(
+                                            charBuild.skillWeapon && charBuild.selectedWeapon!.类型 === charBuild.skillWeapon.类型
+                                                ? charBuild.skillWeapon.倍率 * charBuild.calculateAttributes().power
+                                                : charBuild.selectedWeapon.倍率,
+                                        )
+                                    }}
+                                </div>
+                            </div>
                             <div
                                 v-for="(val, prop) in charBuild.selectedWeapon!.getProperties()"
                                 :key="prop"
-                                class="flex flex-col group hover:bg-base-200 rounded-md p-2"
+                                class="flex justify-between items-center gap-2 text-sm"
                             >
-                                <div class="flex justify-between items-center gap-4 text-sm">
-                                    <div class="text-xs text-neutral-500">{{ prop }}</div>
-                                    <div class="font-medium text-primary">
-                                        {{ formatWeaponProp(prop as string, val) }}
-                                    </div>
-                                </div>
+                                <div class="text-xs text-neutral-500">{{ prop }}</div>
+                                <div class="font-medium text-primary">{{ formatWeaponProp(prop as string, val) }}</div>
                             </div>
                         </div>
                     </template>

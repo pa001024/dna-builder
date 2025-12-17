@@ -209,6 +209,7 @@ export class LeveledSkillWeapon implements Weapon {
      */
     getProperties(): Partial<Weapon> {
         return {
+            伤害类型: this.伤害类型,
             基础攻击: this.基础攻击,
             基础暴击: this.基础暴击,
             基础暴伤: this.基础暴伤,
