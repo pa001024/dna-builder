@@ -125,8 +125,12 @@ function handleSelectAllMods() {
                             </svg>
                             <input type="search" class="grow" placeholder="搜索..." v-model="weaponSearchQuery" />
                         </label>
-                        <div class="btn btn-sm btn-secondary" @click="handleSelectAllWeapons">
-                            {{ Object.keys(inv.weapons).length === filteredWeapons.length ? `取消全选` : `全选` }}
+                        <div
+                            class="btn btn-sm btn-secondary"
+                            @click="handleSelectAllWeapons"
+                            :class="{ 'btn-disabled': !filteredWeapons.length }"
+                        >
+                            {{ filteredWeapons.length && Object.keys(inv.weapons).length === filteredWeapons.length ? `取消全选` : `全选` }}
                         </div>
                         <div class="label text-xs">
                             近战 <input v-model="inv.enableWeapons.近战" type="checkbox" class="toggle toggle-secondary" />
@@ -173,8 +177,12 @@ function handleSelectAllMods() {
                             </svg>
                             <input type="search" class="grow" placeholder="搜索..." v-model="modSearchQuery" />
                         </label>
-                        <div class="btn btn-sm btn-secondary" @click="handleSelectAllMods">
-                            {{ filteredSelectedMods.length === filteredMods.length ? `取消全选` : `全选` }}
+                        <div
+                            class="btn btn-sm btn-secondary"
+                            @click="handleSelectAllMods"
+                            :class="{ 'btn-disabled': !filteredMods.length }"
+                        >
+                            {{ filteredMods.length && filteredSelectedMods.length === filteredMods.length ? `取消全选` : `全选` }}
                         </div>
                         <div v-for="color in ['金', '紫', '蓝', '绿', '白'] as const" :key="color" class="label text-xs">
                             {{ color }}
