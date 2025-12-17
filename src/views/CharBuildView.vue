@@ -841,7 +841,7 @@ const summonAttributes = computed(() => {
 
             <!-- MODBUFF列表 -->
             <EffectSettings
-                v-if="charBuild.mods.some((v) => v.buff)"
+                v-if="charBuild.modsWithWeapons.some((v) => v.buff)"
                 id="modbuff-container"
                 :mods="charBuild.modsWithWeapons"
                 :char-build="charBuild"

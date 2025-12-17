@@ -60,9 +60,11 @@ const toggleAchievement = (id: number) => {
 
 // 清空所有完成记录
 const clearAllFinished = () => {
-    if (confirm("确定要清空所有完成记录吗？")) {
-        userFinishedIds.value = []
-    }
+    userFinishedIds.value = []
+}
+const showClearConfirmDialog = () => {
+    const dialog = document.getElementById("reset-confirm-dialog") as HTMLDialogElement
+    dialog?.show()
 }
 
 // 根据选中分类筛选的成就列表
@@ -219,7 +221,7 @@ watch(
 
             <div class="flex items-center gap-2">
                 <!-- 清空按钮 -->
-                <button @click="clearAllFinished" class="btn btn-error btn-sm space-x-1">
+                <button @click="showClearConfirmDialog" class="btn btn-error btn-sm space-x-1">
                     <Icon icon="ri:delete-bin-line" class="w-4 h-4" />
                     清空
                 </button>
@@ -352,5 +354,17 @@ watch(
                 </div>
             </div>
         </div>
+
+        <dialog id="reset-confirm-dialog" class="modal">
+            <div class="modal-box bg-base-300">
+                <p class="text-lg font-bold">确定要清空所有已完成成就吗？</p>
+                <div class="modal-action">
+                    <form class="flex justify-end gap-2" method="dialog">
+                        <button class="min-w-20 btn btn-secondary" @click="clearAllFinished">{{ $t("setting.confirm") }}</button>
+                        <button class="min-w-20 btn">{{ $t("setting.cancel") }}</button>
+                    </form>
+                </div>
+            </div>
+        </dialog>
     </div>
 </template>
