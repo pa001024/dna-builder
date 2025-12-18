@@ -1,7 +1,7 @@
 {
     "name": "dna-builder",
     "private": true,
-    "version": "0.5.6",
+    "version": "0.5.7",
     "type": "module",
     "packageManager": "pnpm@10.25.0+sha512.5e82639027af37cf832061bcc6d639c219634488e0f2baebe785028a793de7b525ffcd3f7ff574f5e9860654e098fe852ba8ac5dd5cefe1767d23a020a92f501",
     "scripts": {
@@ -22,11 +22,13 @@
         "@tauri-apps/api": "^2",
         "@tauri-apps/plugin-clipboard-manager": "^2.3.2",
         "@tauri-apps/plugin-dialog": "~2.4.2",
+        "@tauri-apps/plugin-notification": "~2.3.3",
         "@tauri-apps/plugin-opener": "^2",
         "@tauri-apps/plugin-process": "^2.3.1",
         "@tauri-apps/plugin-updater": "^2",
         "@vueuse/core": "^14.1.0",
         "@vueuse/rxjs": "^14.1.0",
+        "@vueuse/sound": "^2.1.3",
         "dexie": "^4.2.1",
         "gsap": "^3.13.0",
         "i18next": "^25.7.1",

@@ -1,6 +1,6 @@
 [package]
 name = "dna-builder"
-version = "0.5.6"
+version = "0.5.7"
 description = "A DNA Builder"
 authors = ["pa001024"]
 edition = "2024"
@@ -24,6 +24,7 @@ tauri-plugin-clipboard-manager = "2"
 tauri-plugin-process = "2"
 tauri-plugin-window-state = "2"
 tauri-plugin-dialog = "2"
+tauri-plugin-notification = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 window-vibrancy = "0.7.1"

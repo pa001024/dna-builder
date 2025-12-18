@@ -1580,8 +1580,7 @@ const importTimelineJson = () => {
                                 :data-id="item.id"
                                 class="absolute h-8 rounded-md flex items-center cursor-move transition-all duration-200 hover:shadow-lg hover:z-20 transform hover:-translate-y-0.5"
                                 :class="{
-                                    'ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900 shadow-md scale-105 z-30 hover:z-31':
-                                        item.isSelected,
+                                    'ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900 shadow-md z-30 hover:z-31': item.isSelected,
                                     'opacity-80 hover:opacity-100': !item.isSelected,
                                     'scale-110 rotate-1 z-40': isDragging && selectedItems.some((selected) => selected.id === item.id),
                                 }"

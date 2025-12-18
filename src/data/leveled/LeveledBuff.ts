@@ -236,6 +236,7 @@ export class LeveledBuff implements Buff {
     public clone() {
         const buff = new LeveledBuff(this._originalBuffData, this._等级)
         buff.描述 = this.描述
+        if (this.pid) buff.pid = this.pid
         return buff
     }
 

@@ -761,15 +761,15 @@ const summonAttributes = computed(() => {
                             >
                                 <SelectItem
                                     v-for="hp in [
-                                        0.01,
+                                        1,
                                         ...Array(20)
                                             .keys()
-                                            .map((i) => (i + 1) / 20),
+                                            .map((i) => (i + 1) * 5),
                                     ]"
                                     :key="hp"
-                                    :value="hp"
+                                    :value="hp / 100"
                                 >
-                                    {{ hp * 100 }}%
+                                    {{ hp }}%
                                 </SelectItem>
                             </Select>
                         </div>

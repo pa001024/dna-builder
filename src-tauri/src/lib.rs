@@ -5,12 +5,12 @@ use std::{
     time::Duration,
 };
 
+use tauri::Manager;
 use tauri::menu::*;
 use tauri::tray::*;
-use tauri::Manager;
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 use window_vibrancy::*;
-use winreg::{enums::*, RegKey};
+use winreg::{RegKey, enums::*};
 use zip::ZipArchive;
 
 use crate::util::{get_process_by_name, get_process_exe_path, shell_execute};
@@ -283,6 +283,7 @@ fn get_os_version() -> String {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_opener::init())

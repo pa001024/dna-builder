@@ -10,7 +10,11 @@ import { env } from "../env"
 import { useRoute } from "vue-router"
 import { getCurrentWindow } from "@tauri-apps/api/window"
 import { applyMaterial, getOSVersion } from "../api/app"
+import { getInstanceInfo } from "../api/external"
 import { timeStr, useGameTimer } from "../util"
+import { useLocalStorage } from "@vueuse/core"
+import { useSound } from "@vueuse/sound"
+import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification"
 
 const props = defineProps({
     title: { type: String },
@@ -99,6 +103,113 @@ if (env.isApp) {
 }
 
 const { mihan, moling, zhouben } = useGameTimer()
+
+//#region 密函通知模块
+
+const mihanEnableNotify = useLocalStorage("mihanNotify", false)
+const mihanNotifyOnce = useLocalStorage("mihanNotifyOnce", true)
+const mihanNotifyTypes = useLocalStorage("mihanNotifyTypes", [] as number[])
+const mihanNotifyMissions = useLocalStorage("mihanNotifyMissions", [] as string[])
+const mihanData = useLocalStorage<string[][] | undefined>("mihanData", [])
+class MihanNotify {
+    mihanData = mihanData
+    mihanDataLastUpdate = useLocalStorage("mihanDataLastUpdate", 0)
+    mihanEnableNotify = mihanEnableNotify
+    mihanNotifyOnce = mihanNotifyOnce
+    mihanNotifyTypes = mihanNotifyTypes
+    mihanNotifyMissions = mihanNotifyMissions
+    sfx = useSound("/sfx/notice.mp3")
+    watch = false
+    constructor() {
+        this.updateMihanData()
+
+        watchEffect(() => {
+            if (this.mihanEnableNotify.value) {
+                this.startWatch()
+            }
+        })
+    }
+    async updateMihanData() {
+        if (this.mihanData.value && !this.shouldUpdate()) return
+        console.log("update mihan data")
+        this.mihanData.value = await getInstanceInfo()
+        this.mihanDataLastUpdate.value = new Date().getTime()
+    }
+    show() {
+        const dialog = document.getElementById("mihan-dialog") as HTMLDialogElement
+        dialog.show()
+    }
+    async showMihanNotification() {
+        if (this.mihanNotifyOnce.value) {
+            this.mihanEnableNotify.value = false
+        }
+        if (env.isApp) {
+            const matchedTypes = this.mihanData
+                .value!.filter(
+                    (list, type) =>
+                        this.mihanNotifyTypes.value.includes(type) && list.some((v) => this.mihanNotifyMissions.value.includes(v)),
+                )
+                .map(
+                    (list, type) =>
+                        `${MihanNotify.TYPES[type]}-${list.filter((v) => this.mihanNotifyMissions.value.includes(v)).join("、")}`,
+                )
+            let permissionGranted = await isPermissionGranted()
+            if (!permissionGranted) {
+                const permission = await requestPermission()
+                permissionGranted = permission === "granted"
+            }
+            if (permissionGranted) {
+                sendNotification({
+                    title: "委托密函提醒",
+                    body: `你关注的${matchedTypes.join("和")}刷新了`,
+                })
+            }
+        }
+        this.sfx.play()
+        this.show()
+    }
+    getNextUpdateTime(t?: number) {
+        const now = t ?? new Date().getTime()
+        const oneHour = 60 * 60 * 1000
+        return Math.ceil(now / oneHour) * oneHour
+    }
+    shouldUpdate() {
+        return this.getNextUpdateTime(this.mihanDataLastUpdate.value) <= new Date().getTime()
+    }
+    shouldNotify() {
+        if (
+            this.mihanData.value?.some(
+                (list, type) => this.mihanNotifyTypes.value.includes(type) && list.some((v) => this.mihanNotifyMissions.value.includes(v)),
+            )
+        ) {
+            return true
+        }
+        return false
+    }
+    async checkNotify() {
+        if (this.shouldNotify()) {
+            await this.showMihanNotification()
+        }
+    }
+    startWatch() {
+        if (this.watch) return
+        console.log("start watch")
+        this.watch = true
+        const next = this.getNextUpdateTime()
+        const duration = next - new Date().getTime()
+        setTimeout(async () => {
+            this.watch = false
+            await this.updateMihanData()
+            await this.checkNotify()
+            if (this.mihanEnableNotify.value) this.startWatch()
+        }, duration + 3e3)
+    }
+    static TYPES = ["角色", "武器", "魔之楔"]
+    static MISSIONS = ["探险/无尽", "驱离", "拆解", "驱逐", "避险", "扼守/无尽", "护送", "勘探/无尽", "追缉", "调停", "迁移"]
+}
+const mihanNotify = new MihanNotify()
+
+//#endregion
 </script>
 <template>
     <!-- Root -->
@@ -114,7 +225,7 @@ const { mihan, moling, zhouben } = useGameTimer()
                     <span className="max-[370px]:hidden text-sm min-w-20">{{ route.name !== "sroom" ? title : ui.schatTitle }}</span>
                     <!-- 计时器 -->
                     <div class="flex ml-4 gap-8 items-center text-xs text-base-content/80">
-                        <div class="inline-block text-center w-16">
+                        <div class="inline-block text-center w-16 cursor-pointer" @click="mihanNotify.show()">
                             <div>密函</div>
                             <div class="font-orbitron">{{ timeStr(mihan) }}</div>
                         </div>
@@ -127,6 +238,91 @@ const { mihan, moling, zhouben } = useGameTimer()
                             <div class="font-orbitron">{{ timeStr(zhouben) }}</div>
                         </div>
                     </div>
+                    <dialog id="mihan-dialog" class="modal">
+                        <div class="modal-box bg-base-300 text-md">
+                            <div class="text-lg font-bold flex justify-between items-center pb-2">
+                                委托密函
+
+                                <form class="flex justify-end gap-2" method="dialog">
+                                    <button class="btn btn-ghost btn-sm btn-square">
+                                        <Icon bold icon="codicon:chrome-close" />
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="p-4 grid grid-cols-3">
+                                <div
+                                    v-for="(item, missionId) in mihanData"
+                                    :key="missionId"
+                                    class="flex flex-col justify-start items-center"
+                                >
+                                    <div class="flex flex-col justify-center items-center gap-2">
+                                        <img
+                                            class="w-12 h-12"
+                                            :src="`/imgs/${MihanNotify.TYPES[missionId]}密函.png`"
+                                            :alt="`${MihanNotify.TYPES[missionId]}密函`"
+                                        />
+                                        <div
+                                            class="font-bold"
+                                            :style="{
+                                                color: ['#ba9011', '#1171ba', '#ba1111'][missionId],
+                                            }"
+                                        >
+                                            {{ MihanNotify.TYPES[missionId] }}
+                                        </div>
+                                    </div>
+                                    <div class="divider mx-4 my-2"></div>
+                                    <div
+                                        v-for="(mission, index) in item"
+                                        :key="index"
+                                        class="text-sm p-1"
+                                        :class="{ 'text-secondary': mihanNotifyMissions.includes(mission) }"
+                                    >
+                                        {{ mission }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-center bg-base-100 p-3 rounded-md text-sm text-base-content/80">
+                                下次刷新: {{ timeStr(mihan) }}
+                            </div>
+                            <div class="p-4 flex flex-col gap-2">
+                                <div class="text-lg font-bold pb-2">监控设置</div>
+                                <div class="flex gap-2">
+                                    <label class="text-sm p-1 label">
+                                        <input v-model="mihanEnableNotify" type="checkbox" class="toggle toggle-secondary" />
+                                        启用提醒
+                                    </label>
+                                    <label v-if="mihanEnableNotify" class="text-sm p-1 label">
+                                        <input v-model="mihanNotifyOnce" type="checkbox" class="toggle toggle-secondary" />
+                                        仅一次
+                                    </label>
+                                </div>
+                                <div v-if="mihanEnableNotify" class="flex gap-2">
+                                    <label v-for="(type, val) in MihanNotify.TYPES" :key="type" class="text-sm p-1 label">
+                                        <input
+                                            v-model="mihanNotifyTypes"
+                                            :value="val"
+                                            name="mihanTypes"
+                                            type="checkbox"
+                                            class="toggle toggle-secondary"
+                                        />
+                                        {{ type }}
+                                    </label>
+                                </div>
+                                <div v-if="mihanEnableNotify" class="flex gap-2 flex-wrap">
+                                    <label v-for="mission in MihanNotify.MISSIONS" :key="mission" class="text-sm p-1 label">
+                                        <input
+                                            v-model="mihanNotifyMissions"
+                                            :value="mission"
+                                            name="mihanMissions"
+                                            type="checkbox"
+                                            class="toggle toggle-secondary"
+                                        />
+                                        {{ mission }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </dialog>
                 </div>
                 <!-- fix resize shadow -->
                 <div class="pointer-events-none flex-none opacity-0 self-start transition-none" v-if="env.isApp">
