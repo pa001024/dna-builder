@@ -1,12 +1,15 @@
 <script lang="ts" setup>
-import { watch } from "vue"
+import { ref, watch } from "vue"
 import { MATERIALS } from "../api/app"
 import { useSettingStore } from "../store/setting"
 import { env } from "../env"
 import { i18nLanguages } from "../i18n"
 import { db } from "../store/db"
+import { listModels, validateApiKey } from "../api/openai"
 
 const setting = useSettingStore()
+
+//#region UI
 const lightThemes = [
     "light",
     "lofi",
@@ -100,6 +103,64 @@ async function clearServiceWorkers(): Promise<void> {
         console.log("当前浏览器不支持Service Worker")
     }
 }
+
+//#endregion
+
+//#region AI
+// AI大模型设置相关状态
+const isTestingConnection = ref(false)
+const connectionStatus = ref<"success" | "failed" | null>(null)
+const aiModelOptions = ref([] as { label: string; value: string }[])
+
+const loadAiModelOptions = async () => {
+    if (!setting.aiApiKey || !setting.aiBaseUrl) return
+
+    const config = setting.getOpenAIConfig()
+
+    try {
+        const models = await listModels(config)
+        aiModelOptions.value = models.map((model) => ({
+            label: model.id,
+            value: model.id,
+        }))
+    } catch (error) {
+        console.error("Failed to load AI models:", error)
+        aiModelOptions.value = []
+    }
+}
+
+// 测试AI连接
+const testAiConnection = async () => {
+    if (!setting.aiApiKey || !setting.aiBaseUrl) return
+
+    isTestingConnection.value = true
+    connectionStatus.value = null
+
+    try {
+        const config = setting.getOpenAIConfig()
+
+        const isValid = await validateApiKey(config)
+        connectionStatus.value = isValid ? "success" : "failed"
+    } catch (error) {
+        console.error("AI connection test failed:", error)
+        connectionStatus.value = "failed"
+    } finally {
+        isTestingConnection.value = false
+    }
+}
+
+// 打开AI设置重置对话框
+const openResetAiDialog = () => {
+    const dialog = document.getElementById("reset-ai-dialog")! as HTMLDialogElement
+    dialog.show()
+}
+
+// 重置AI设置
+const resetAiSettings = () => {
+    setting.resetAiSettings()
+    connectionStatus.value = null
+}
+//#endregion
 </script>
 
 <template>
@@ -197,6 +258,106 @@ async function clearServiceWorkers(): Promise<void> {
                 </div>
             </article>
 
+            <article v-if="env.isApp">
+                <h2 class="text-sm font-bold m-2">{{ $t("setting.ai") }}</h2>
+                <div class="bg-base-100 p-2 rounded-lg space-y-3">
+                    <div class="flex justify-between items-center p-2">
+                        <span class="label-text">
+                            {{ $t("setting.aiBaseUrl") }}
+                            <div class="text-xs text-base-content/50">{{ $t("setting.aiBaseUrlTip") }}</div>
+                        </span>
+                        <input
+                            v-model="setting.aiBaseUrl"
+                            type="text"
+                            :placeholder="$t('setting.aiBaseUrl')"
+                            class="input input-bordered input-sm w-64"
+                        />
+                    </div>
+
+                    <div class="flex justify-between items-center p-2">
+                        <span class="label-text">
+                            {{ $t("setting.aiApiKey") }}
+                            <div class="text-xs text-base-content/50">{{ $t("setting.aiApiKeyTip") }}</div>
+                        </span>
+                        <input
+                            v-model="setting.aiApiKey"
+                            type="text"
+                            :placeholder="$t('setting.aiApiKey')"
+                            class="input input-bordered input-sm w-64"
+                        />
+                    </div>
+
+                    <div class="flex justify-between items-center p-2">
+                        <span class="label-text">
+                            {{ $t("setting.aiModelName") }}
+                            <div class="text-xs text-base-content/50">{{ $t("setting.aiModelNameTip") }}</div>
+                        </span>
+                        <Combobox
+                            v-model="setting.aiModelName"
+                            type="text"
+                            :placeholder="$t('setting.aiModelName')"
+                            :empty-message="$t('setting.noModelAvailable')"
+                            :options="aiModelOptions"
+                            @open="loadAiModelOptions"
+                            :class="{ disabled: !setting.aiApiKey || !setting.aiBaseUrl }"
+                        />
+                    </div>
+
+                    <div class="flex justify-between items-center p-2">
+                        <span class="label-text">
+                            {{ $t("setting.aiMaxTokens") }}
+                            <div class="text-xs text-base-content/50">{{ $t("setting.aiMaxTokensTip") }}</div>
+                        </span>
+                        <input
+                            v-model.number="setting.aiMaxTokens"
+                            type="number"
+                            min="1"
+                            max="8192"
+                            :placeholder="$t('setting.aiMaxTokens')"
+                            class="input input-bordered input-sm w-32"
+                        />
+                    </div>
+
+                    <div class="flex justify-between items-center p-2">
+                        <span class="label-text">
+                            {{ $t("setting.aiTemperature") }}
+                            <div class="text-xs text-base-content/50">{{ $t("setting.aiTemperatureTip") }}</div>
+                        </span>
+                        <input
+                            v-model.number="setting.aiTemperature"
+                            type="number"
+                            min="0"
+                            max="1"
+                            step="0.1"
+                            :placeholder="$t('setting.aiTemperature')"
+                            class="input input-bordered input-sm w-32"
+                        />
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2 border-t border-base-300">
+                        <div class="flex items-center gap-2 p-2 flex-1">
+                            <button
+                                @click="testAiConnection"
+                                :disabled="isTestingConnection || !setting.aiApiKey || !setting.aiBaseUrl"
+                                class="btn btn-secondary btn-sm"
+                            >
+                                {{ isTestingConnection ? "Loading..." : $t("setting.aiTestConnection") }}
+                            </button>
+
+                            <div v-if="connectionStatus === 'success'" class="text-success text-sm">
+                                {{ $t("setting.aiConnectionSuccess") }}
+                            </div>
+                            <div v-else-if="connectionStatus === 'failed'" class="text-error text-sm">
+                                {{ $t("setting.aiConnectionFailed") }}
+                            </div>
+                            <button @click="openResetAiDialog" class="ml-auto btn btn-outline btn-error btn-sm">
+                                {{ $t("setting.aiReset") }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
             <article>
                 <h2 class="text-sm font-bold m-2">{{ $t("setting.other") }}</h2>
                 <div class="bg-base-100 p-2 rounded-lg">
@@ -219,6 +380,18 @@ async function clearServiceWorkers(): Promise<void> {
                         <button class="min-w-20 btn btn-secondary" @click="resetStorage">{{ $t("setting.confirm") }}</button>
                         <button class="min-w-20 btn">{{ $t("setting.cancel") }}</button>
                     </form>
+                </div>
+            </div>
+        </dialog>
+
+        <!-- AI设置重置确认对话框 -->
+        <dialog id="reset-ai-dialog" class="modal">
+            <div class="modal-box bg-base-300">
+                <p class="text-lg font-bold">{{ $t("setting.aiReset") }}</p>
+                <p class="py-4">{{ $t("setting.resetConfirm") }}</p>
+                <div class="modal-action">
+                    <button class="min-w-20 btn btn-secondary" @click="resetAiSettings">{{ $t("setting.confirm") }}</button>
+                    <button class="min-w-20 btn">{{ $t("setting.cancel") }}</button>
                 </div>
             </div>
         </dialog>

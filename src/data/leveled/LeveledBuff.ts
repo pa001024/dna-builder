@@ -36,9 +36,13 @@ export class LeveledBuff implements Buff {
         this.描述 = buffData.描述
         if (buffData.a !== undefined && buffData.a != 1) this.a = buffData.a
         if (buffData.b !== undefined && buffData.b != 1) this.b = buffData.b
-        if (buffData.lx !== undefined) this.lx = buffData.lx
-        if (buffData.mx !== undefined) this.mx = buffData.mx
-        if (buffData.dx !== undefined) this.dx = buffData.dx
+        if (buffData.lx !== undefined) {
+            this.lx = buffData.lx
+        }
+        if (buffData.mx !== undefined) {
+            this.mx = buffData.mx
+            this.dx = buffData.dx ?? buffData.mx
+        }
 
         // 设置等级（如果提供），否则使用默认等级dx
         this.等级 = 等级 !== undefined && 等级 >= 0 ? 等级 : this.dx || this.mx || 1
@@ -154,13 +158,14 @@ export class LeveledBuff implements Buff {
     get baseValue(): number {
         const a = this.a || 1
         const b = this.b || 1
+        const lx = this.lx ?? 1
         const x = 1
         let val = 0
         this.properties.forEach((prop) => {
-            const maxValue = (this._originalBuffData as any)[prop]
+            const maxValue = this._originalBuffData[prop]
             if (maxValue !== undefined) {
                 // 属性值 = 满级属性/a*(1+(x-1)/b)
-                let currentValue = (maxValue / a) * (1 + (x - 1) / b)
+                let currentValue = (maxValue / a) * (1 + (x - lx) / b)
                 if (prop === "神智回复") currentValue = Math.round(currentValue)
                 val = currentValue
             }
@@ -177,16 +182,17 @@ export class LeveledBuff implements Buff {
     private updatePropertiesByLevel(): void {
         const a = this.a || 1
         const b = this.b || 1
+        const lx = this.lx ?? 1
         const x = this._等级
 
         this.baseProperties.forEach((prop) => {
-            const maxValue = (this._originalBuffData as any)[prop]
+            const maxValue = this._originalBuffData[prop]
             if (maxValue !== undefined) {
                 if (Array.isArray(maxValue)) {
                     this[prop] = maxValue[x - 1]
                 } else {
                     // 属性值 = 满级属性/a*(1+(x-1)/b)
-                    let currentValue = (maxValue / a) * (1 + (x - 1) / b)
+                    let currentValue = (maxValue / a) * (1 + (x - lx) / b)
                     if (prop === "神智回复") currentValue = Math.round(currentValue)
                     this[prop] = currentValue
                 }
@@ -204,7 +210,22 @@ export class LeveledBuff implements Buff {
         })
         return properties
     }
-    static _exclude_properties = new Set(["名称", "描述", "限定", "品质", "_等级", "_originalBuffData", "a", "b", "lx", "mx", "dx", "pid"])
+    static _exclude_properties = new Set([
+        "名称",
+        "描述",
+        "限定",
+        "品质",
+        "_等级",
+        "_originalBuffData",
+        "a",
+        "b",
+        "lx",
+        "bx",
+        "mx",
+        "dx",
+        "pid",
+        "code",
+    ])
     get properties(): string[] {
         return Object.keys(this).filter((prop) => !LeveledBuff._exclude_properties.has(prop))
     }

@@ -27,7 +27,7 @@ const selectedBuffs = computed(() => {
 })
 function toggleBuff(buff: LeveledBuff) {
     const lv = inv.getBuffLv(buff.pid)
-    inv.setBuffLv(buff.pid, lv <= 0 ? buff.mx : 0)
+    inv.setBuffLv(buff.pid, lv <= 0 ? buff.mx || 1 : 0)
 }
 function setBuffLv(buff: LeveledBuff, lv: number) {
     inv.setBuffLv(buff.pid, lv)

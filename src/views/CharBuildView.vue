@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue"
+import { computed, onMounted, reactive, ref } from "vue"
 import { t } from "i18next"
-import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon, CharBuild, gameData as data, CharBuildTimeline } from "../data"
+import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon, CharBuild, gameData as data, CharBuildTimeline, buffMap } from "../data"
 import { useLocalStorage } from "@vueuse/core"
 import { groupBy, cloneDeep } from "lodash-es"
 import { format100, formatProp, formatSkillProp, formatWeaponProp } from "../util"
@@ -27,6 +27,19 @@ const modOptions = data.mod
         lv: inv.getModLv(mod.id, mod.品质),
     }))
     .filter((mod) => mod.count)
+
+// 写入自定义BUFF
+;(function writeCustomBuff() {
+    const customBuff = useLocalStorage("customBuff", [] as [string, number][])
+    const buffObj = {
+        名称: "自定义BUFF",
+        描述: "自行填写",
+    } as any
+    customBuff.value.forEach((prop) => {
+        buffObj[prop[0]] = prop[1]
+    })
+    buffMap.set("自定义BUFF", buffObj)
+})()
 const _buffOptions = reactive(
     data.buff.map((buff) => ({
         value: new LeveledBuff(buff.名称),
@@ -38,13 +51,17 @@ const _buffOptions = reactive(
 const buffOptions = computed(() =>
     _buffOptions
         .filter((buff) => !buff.limit || buff.limit === selectedChar.value || buff.limit === charBuild.value.char.属性)
-        .map((v) => ({
-            value: new LeveledBuff(v.value._originalBuffData, charSettings.value.buffs.find((b) => b[0] === v.label)?.[1] || v.value.等级),
-            label: v.label,
-            limit: v.limit,
-            description: v.description,
-            lv: charSettings.value.buffs.find((b) => b[0] === v.label)?.[1] || v.value.等级,
-        })),
+        .map((v) => {
+            const b = charSettings.value.buffs.find((b) => b[0] === v.label)
+            const lv = b?.[1] ?? v.value.等级
+            return {
+                value: new LeveledBuff(v.value._originalBuffData, lv),
+                label: v.label,
+                limit: v.limit,
+                description: v.description,
+                lv,
+            }
+        }),
 )
 // 近战和远程武器选项
 const meleeWeaponOptions = data.weapon

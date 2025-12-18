@@ -2,10 +2,12 @@
     <!-- 正常渲染子组件 -->
     <slot v-if="!hasError" />
     <!-- 出错时展示备用 UI -->
-    <div v-else class="p-5 bg-red-50 border border-red-200 rounded text-red-600">
-        <h3 class="mb-2 font-semibold">组件渲染出错</h3>
-        <p>{{ errorMessage }}</p>
-        <button @click="resetError" class="mt-3 px-3 py-1 btn btn-primary">重试</button>
+    <div v-else class="flex w-full h-full items-center justify-center">
+        <div class="p-5 bg-red-50 border border-red-200 rounded text-red-600">
+            <h3 class="mb-2 font-semibold">组件渲染出错</h3>
+            <p>{{ errorMessage }}</p>
+            <button @click="resetError" class="mt-3 px-3 py-1 btn btn-primary btn-block">重试</button>
+        </div>
     </div>
 </template>
 
@@ -20,7 +22,7 @@ const errorMessage = ref("")
 const resetError = () => {
     hasError.value = false
     errorMessage.value = ""
-    localStorage.clear()
+    // localStorage.clear()
 }
 
 onErrorCaptured((err, vm, info) => {

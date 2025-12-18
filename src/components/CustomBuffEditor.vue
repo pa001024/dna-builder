@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive } from "vue"
+import { ref, reactive, onMounted } from "vue"
 import { buffMap } from "../data"
 import { formatProp } from "../util"
 import { useLocalStorage } from "@vueuse/core"
@@ -60,12 +60,13 @@ function writeCustomBuff() {
     const buffObj = {
         名称: "自定义BUFF",
         描述: "自行填写",
-    }
+    } as any
     customBuff.value.forEach((prop) => {
-        ;(buffObj as any)[prop[0]] = prop[1]
+        buffObj[prop[0]] = prop[1]
     })
     buffMap.set("自定义BUFF", buffObj)
 }
+
 writeCustomBuff()
 
 // 定义组件事件

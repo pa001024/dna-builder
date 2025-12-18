@@ -39,7 +39,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
                             v-if="selected"
                             :model-value="lv"
                             @update:model-value="setBuffLv(buff, $event)"
-                            :min="buff.lx"
+                            :min="buff.lx || 0"
                             :max="buff.mx"
                             class="w-8 text-center"
                         />
