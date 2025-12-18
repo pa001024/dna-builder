@@ -13,6 +13,10 @@ const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"))
 const tauriConfPath = path.join(import.meta.url.replace("file:///", ""), "..", "..", "src-tauri", "tauri.conf.json")
 const tauriConf = JSON.parse(fs.readFileSync(tauriConfPath, "utf8"))
 
+// 读取Cargo.toml文件
+const cargoTomlPath = path.join(import.meta.url.replace("file:///", ""), "..", "..", "src-tauri", "Cargo.toml")
+const cargoTomlContent = fs.readFileSync(cargoTomlPath, "utf8")
+
 // 递增小版本号
 function incrementPatchVersion(version) {
     const [major, minor, patch] = version.split(".").map(Number)
@@ -23,10 +27,13 @@ function incrementPatchVersion(version) {
 const newVersion = version || packageJson.version // incrementPatchVersion(packageJson.version)
 packageJson.version = newVersion
 tauriConf.version = newVersion
+const updatedCargoTomlContent = cargoTomlContent.replace(/version = "(.*?)"/, `version = "${newVersion}"`)
 
 // 写入更新后的文件
+// 更新Cargo.toml中的版本号
 fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 4) + "\n")
 fs.writeFileSync(tauriConfPath, JSON.stringify(tauriConf, null, 4) + "\n")
+fs.writeFileSync(cargoTomlPath, updatedCargoTomlContent)
 
 // console.log(`Version updated to ${newVersion}`)
 

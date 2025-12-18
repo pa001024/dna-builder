@@ -3,7 +3,7 @@ use windows_sys::Win32::{
     Foundation::*,
     System::{
         Diagnostics::ToolHelp::*,
-        Threading::{OpenProcess, QueryFullProcessImageNameW, PROCESS_QUERY_LIMITED_INFORMATION},
+        Threading::{OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION, QueryFullProcessImageNameW},
     },
     UI::{Shell::*, WindowsAndMessaging::*},
 };
@@ -17,11 +17,13 @@ pub enum Win32Error {
     #[error("custom error:`{0}`")]
     Custom(String),
 }
-unsafe fn cwstr(p_text: *const u16) -> String {
-    let len = (0..).take_while(|&i| *p_text.offset(i) != 0).count();
-    let slice = std::slice::from_raw_parts(p_text, len);
-    let text = String::from_utf16_lossy(slice);
-    text
+fn cwstr(p_text: *const u16) -> String {
+    unsafe {
+        let len = (0..).take_while(|&i| *p_text.offset(i) != 0).count();
+        let slice = std::slice::from_raw_parts(p_text, len);
+        let text = String::from_utf16_lossy(slice);
+        text
+    }
 }
 
 pub fn str_to_pcwstr(s: &str) -> *mut u16 {

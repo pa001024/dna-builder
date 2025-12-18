@@ -846,7 +846,7 @@ dependencies = [
 
 [[package]]
 name = "dna-builder"
-version = "0.1.0"
+version = "0.5.5"
 dependencies = [
  "base64 0.22.1",
  "lazy_static",

@@ -1,9 +1,9 @@
 [package]
 name = "dna-builder"
-version = "0.1.0"
+version = "0.5.5"
 description = "A DNA Builder"
-authors = ["pa"]
-edition = "2021"
+authors = ["pa001024"]
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
