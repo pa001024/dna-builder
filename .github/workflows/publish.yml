@@ -30,6 +30,8 @@ jobs:
         runs-on: ${{ matrix.platform }}
         steps:
             - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
 
             - name: setup node
               uses: actions/setup-node@v4
@@ -63,6 +65,31 @@ jobs:
             - name: install frontend dependencies
               run: pnpm install # change this to npm, pnpm or bun depending on which one you use.
 
+            - name: Get previous tag
+              id: previous_tag
+              shell: pwsh
+              run: |
+                  $tags = git tag --sort=-creatordate | Where-Object { $_ -like "v*" }
+                  if ($tags.Count -gt 1) {
+                      $previousTag = $tags[1]
+                      echo "previous_tag=$previousTag" >> $env:GITHUB_OUTPUT
+                  } else {
+                      echo "previous_tag=" >> $env:GITHUB_OUTPUT
+                  }
+
+            - name: Generate commit diff
+              id: commit_diff
+              shell: pwsh
+              run: |
+                  if (-not [string]::IsNullOrEmpty("${{ steps.previous_tag.outputs.previous_tag }}")) {
+                      $diffLines = git log "${{ steps.previous_tag.outputs.previous_tag }}...${{ github.ref_name }}" --oneline
+                      $diff = $diffLines | ForEach-Object { $_ -replace '\s*\([^)]*\)\s*', ' ' } | ForEach-Object { "- $_" } | Join-String -Separator "`n`n"
+                      $diffBody = "## 本次更新内容 (${{ steps.previous_tag.outputs.previous_tag }} → ${{ github.ref_name }})\n\n$diff\n\n"
+                      echo "commit_diff=$diffBody" >> $env:GITHUB_OUTPUT
+                  } else {
+                      echo "commit_diff=" >> $env:GITHUB_OUTPUT
+                  }
+
             - uses: tauri-apps/tauri-action@v0
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -73,12 +100,13 @@ jobs:
               with:
                   tagName: ${{ github.ref_name }} # the action automatically replaces \_\_VERSION\_\_ with the app version.
                   releaseName: "Duet Night Abyss Builder v__VERSION__"
-                  releaseBody: "
-                      **Full Changelog**: https://github.com/pa001024/dna-builder/commits/v__VERSION__
+                  releaseBody: "${{ steps.commit_diff.outputs.commit_diff }}
+
+                      **Full Changelog**: ${{ steps.previous_tag.outputs.previous_tag && format('https://github.com/pa001024/dna-builder/compare/{0}...{1}', steps.previous_tag.outputs.previous_tag, github.ref_name) || format('https://github.com/pa001024/dna-builder/commits/{0}', github.ref_name) }}
 
                       > [!TIP]
 
-                      >  Github 请在下方下载
+                      > Github 请在下方下载
 
                       > 夸克网盘链接：https://pan.quark.cn/s/1419bbc8aa2d
                       "
