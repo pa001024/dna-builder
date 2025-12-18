@@ -182,10 +182,14 @@ export class LeveledBuff implements Buff {
         this.baseProperties.forEach((prop) => {
             const maxValue = (this._originalBuffData as any)[prop]
             if (maxValue !== undefined) {
-                // 属性值 = 满级属性/a*(1+(x-1)/b)
-                let currentValue = (maxValue / a) * (1 + (x - 1) / b)
-                if (prop === "神智回复") currentValue = Math.round(currentValue)
-                ;(this as any)[prop] = currentValue
+                if (Array.isArray(maxValue)) {
+                    this[prop] = maxValue[x - 1]
+                } else {
+                    // 属性值 = 满级属性/a*(1+(x-1)/b)
+                    let currentValue = (maxValue / a) * (1 + (x - 1) / b)
+                    if (prop === "神智回复") currentValue = Math.round(currentValue)
+                    this[prop] = currentValue
+                }
             }
         })
     }
