@@ -362,4 +362,15 @@ export class LeveledWeapon implements Weapon {
     static getUrl(weaponName: string) {
         return `/imgs/${weaponName}.png`
     }
+
+    public clone(): LeveledWeapon {
+        const weapon = new LeveledWeapon(this._originalWeaponData, this._精炼, this._等级, this.effectLv)
+        return weapon
+    }
+
+    setEffectLv(lv: number) {
+        this.effectLv = lv
+        this.updatePropertiesByLevel()
+        return this
+    }
 }

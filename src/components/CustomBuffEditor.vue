@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue"
+import { ref, reactive } from "vue"
 import { buffMap } from "../data"
 import { formatProp } from "../util"
 import { useLocalStorage } from "@vueuse/core"

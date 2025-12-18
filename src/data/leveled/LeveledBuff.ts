@@ -232,4 +232,16 @@ export class LeveledBuff implements Buff {
     get baseProperties(): string[] {
         return Object.keys(this._originalBuffData).filter((prop) => !LeveledBuff._exclude_properties.has(prop))
     }
+
+    public clone() {
+        const buff = new LeveledBuff(this._originalBuffData, this._等级)
+        buff.描述 = this.描述
+        return buff
+    }
+
+    setLv(lv: number) {
+        this.等级 = lv
+        this.updatePropertiesByLevel()
+        return this
+    }
 }

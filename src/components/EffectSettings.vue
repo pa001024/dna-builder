@@ -16,8 +16,8 @@ const buffOptions = computed(() => {
             const lv = inv.getBuffLv(mod.名称)
             return {
                 label: buff.名称 || "",
-                value: buff,
-                lv: lv < 0 ? buff.等级 : lv,
+                value: lv <= 0 ? buff.clone().setLv(buff.mx || 1) : buff,
+                lv: lv <= 0 ? buff.等级 : lv,
                 description: buff.描述 || "",
             }
         })

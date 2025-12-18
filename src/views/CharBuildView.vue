@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from "vue"
+import { computed, reactive, ref } from "vue"
 import { t } from "i18next"
 import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon, CharBuild, gameData as data, CharBuildTimeline, buffMap } from "../data"
 import { useLocalStorage } from "@vueuse/core"
