@@ -742,7 +742,18 @@ const summonAttributes = computed(() => {
                                 v-model="charSettings.hpPercent"
                                 @change="updateCharBuild"
                             >
-                                <SelectItem v-for="hp in [0.01, 0.25, 0.5, 0.75, 1]" :key="hp" :value="hp"> {{ hp * 100 }}% </SelectItem>
+                                <SelectItem
+                                    v-for="hp in [
+                                        0.01,
+                                        ...Array(20)
+                                            .keys()
+                                            .map((i) => (i + 1) / 20),
+                                    ]"
+                                    :key="hp"
+                                    :value="hp"
+                                >
+                                    {{ hp * 100 }}%
+                                </SelectItem>
                             </Select>
                         </div>
                         <div class="flex-1">

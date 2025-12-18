@@ -153,7 +153,7 @@ function handleSelectAllMods() {
                             :weapon="weapon"
                             :index="index"
                             @click="toggleSelectWeapon(weapon.名称, weapon.类型)"
-                            @refineChange="inv.weapons[weapon.名称] = $event"
+                            @refineChange="inv.setWeaponRefineLv(weapon.名称, $event)"
                             noremove
                             control
                         />

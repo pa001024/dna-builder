@@ -29,6 +29,10 @@ export const useInvStore = defineStore("inv", {
         }),
     },
     actions: {
+        setWeaponRefineLv(weaponName: string, lv: number) {
+            if (weaponName in this.meleeWeapons) this.meleeWeapons[weaponName] = lv
+            else if (weaponName in this.rangedWeapons) this.rangedWeapons[weaponName] = lv
+        },
         getBuffLv(modId: number | string) {
             if (typeof modId === "number") modId = modMap.get(modId)?.名称 || modId
             if (!(modId in this.buffLv)) return 0
