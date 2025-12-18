@@ -1230,6 +1230,10 @@ export class CharBuild {
             includeTypes.forEach((key) => {
                 let { mod: maxed, income: maxedIncome } = findMaxMod(key)
                 if (maxed === null || initBuild[key].length >= ModTypeMaxSlot[key]) return
+                if (!maxedIncome) {
+                    log(`第${iter}次迭代: 当前选项MOD无收益, 直接退出`)
+                    return
+                }
                 while (localBuild[key].length < ModTypeMaxSlot[key]) {
                     // 不添加收益0的MOD
                     if (maxedIncome <= 0) break

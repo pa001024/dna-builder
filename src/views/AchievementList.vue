@@ -2,6 +2,7 @@
 import { computed, ref, watch } from "vue"
 import { achievementData } from "../data"
 import { useLocalStorage } from "@vueuse/core"
+import { t } from "i18next"
 
 // 用户已完成的成就ID列表
 const userFinishedIds = useLocalStorage("achi.finished", [] as number[])
@@ -149,11 +150,11 @@ const importAchievements = () => {
                 }
 
                 // 询问用户是否确认导入
-                if (confirm(`确定要导入 ${importedData.length} 个成就完成记录吗？这将覆盖当前的完成记录。`)) {
+                if (confirm(t("achievement.importConfirm", { count: importedData.length }))) {
                     userFinishedIds.value = importedData
                 }
             } catch (error) {
-                alert("导入失败，请检查文件格式是否正确")
+                alert(t("achievement.importFailed"))
             }
         }
 
@@ -223,17 +224,17 @@ watch(
                 <!-- 清空按钮 -->
                 <button @click="showClearConfirmDialog" class="btn btn-error btn-sm space-x-1">
                     <Icon icon="ri:delete-bin-line" class="w-4 h-4" />
-                    清空
+                    {{ $t("achievement.clear") }}
                 </button>
                 <!-- 导入按钮 -->
                 <button @click="importAchievements" class="btn btn-sm space-x-1">
                     <Icon icon="ri:download-2-line" class="w-4 h-4" />
-                    导入
+                    {{ $t("achievement.import") }}
                 </button>
                 <!-- 导出按钮 -->
                 <button @click="exportAchievements" class="btn btn-sm space-x-1">
                     <Icon icon="ri:upload-2-line" class="w-4 h-4" />
-                    导出
+                    {{ $t("achievement.export") }}
                 </button>
             </div>
         </div>
@@ -282,30 +283,30 @@ watch(
                     <Select
                         class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
                         v-model="selectedVersion"
-                        placeholder="选择版本"
+                        :placeholder="$t('achievement.selectVersion')"
                     >
-                        <SelectItem value="所有版本"> 所有版本 </SelectItem>
+                        <SelectItem value="所有版本">{{ $t("achievement.allVersions") }}</SelectItem>
                         <SelectItem v-for="version in versionOptions" :key="version" :value="version">
                             {{ version }}
                         </SelectItem>
                     </Select>
                     <label class="label text-sm">
                         <input type="checkbox" v-model="prioritizeUnfinished" class="checkbox checkbox-sm" />
-                        未完成优先
+                        {{ $t("achievement.unfinishedFirst") }}
                     </label>
                     <label class="label text-sm">
                         <input type="checkbox" v-model="hideCompleted" class="checkbox checkbox-sm" />
-                        隐藏已完成
+                        {{ $t("achievement.hideCompleted") }}
                     </label>
                     <label class="label text-sm">
                         <input type="checkbox" v-model="selectAllCurrentPage" class="checkbox checkbox-sm" />
-                        全选本页
+                        {{ $t("achievement.selectAllCurrentPage") }}
                     </label>
                     <input
                         type="text"
                         class="ml-auto inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap min-w-40 max-w-80"
                         v-model="searchQuery"
-                        placeholder="搜索成就名字或描述"
+                        :placeholder="$t('achievement.searchAchievements')"
                     />
                 </div>
 
@@ -329,13 +330,13 @@ watch(
                                         class="font-medium text-base"
                                         :class="{ 'line-through opacity-60': userFinishedIds.indexOf(achievement.id) !== -1 }"
                                     >
-                                        {{ achievement.名称 || "未命名成就" }}
+                                        {{ achievement.名称 || $t("achievement.unnamedAchievement") }}
                                     </h3>
                                 </div>
                             </div>
 
                             <div class="text-sm text-base-content/70 mb-3">
-                                {{ achievement.描述 || "暂无描述" }}
+                                {{ achievement.描述 || $t("achievement.noDescription") }}
                             </div>
 
                             <div class="flex flex-wrap items-center gap-2">
@@ -357,7 +358,7 @@ watch(
 
         <dialog id="reset-confirm-dialog" class="modal">
             <div class="modal-box bg-base-300">
-                <p class="text-lg font-bold">确定要清空所有已完成成就吗？</p>
+                <p class="text-lg font-bold">{{ $t("achievement.clearConfirm") }}</p>
                 <div class="modal-action">
                     <form class="flex justify-end gap-2" method="dialog">
                         <button class="min-w-20 btn btn-secondary" @click="clearAllFinished">{{ $t("setting.confirm") }}</button>

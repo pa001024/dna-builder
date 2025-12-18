@@ -8,5 +8,8 @@ npm run format
 git add package.json
 git add src-tauri/tauri.conf.json
 
+# 全添加(别搞错了)
+git add .
+
 # 运行测试（如果需要可以注释掉）
 # npm run lint

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue"
+import { t } from "i18next"
 import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon, CharBuild, gameData as data, CharBuildTimeline } from "../data"
 import { useLocalStorage } from "@vueuse/core"
 import { groupBy, cloneDeep } from "lodash-es"
@@ -210,7 +211,7 @@ const charProject = useLocalStorage(charProjectKey, {
 const saveConfig = () => {
     // 实现保存配置功能
     console.log("保存配置")
-    const inputName = prompt("请输入配置名称")
+    const inputName = prompt(t("char-build.please_enter_config_name"))
     if (!inputName) {
         return
     }

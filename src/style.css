@@ -1,7 +1,10 @@
 @import "tailwindcss";
+
 @plugin "daisyui" {
     themes: all;
+    exclude: properties;
 }
+
 /* @import "animate.css"; */
 
 @theme {
@@ -17,25 +20,30 @@
     --animate-overlayShow: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
     --animate-contentShow: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
     --animate-shake: shake 0.4s;
+
     /* Keyframes */
     @keyframes slideIn {
         from {
             opacity: 0;
             transform: translateY(-10px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
         }
     }
+
     @keyframes zoomOut {
         0% {
             opacity: 1;
         }
+
         50% {
             opacity: 0;
             transform: scale3d(0.3, 0.3, 0.3);
         }
+
         100% {
             opacity: 0;
         }
@@ -46,6 +54,7 @@
             opacity: 0;
             transform: translateY(-2px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
@@ -57,6 +66,7 @@
             opacity: 0;
             transform: translateX(2px);
         }
+
         to {
             opacity: 1;
             transform: translateX(0);
@@ -68,6 +78,7 @@
             opacity: 0;
             transform: translateY(2px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
@@ -79,6 +90,7 @@
             opacity: 0;
             transform: translateX(-2px);
         }
+
         to {
             opacity: 1;
             transform: translateX(0);
@@ -89,6 +101,7 @@
         from {
             height: var(--radix-collapsible-content-height);
         }
+
         to {
             height: 0;
         }
@@ -98,6 +111,7 @@
         from {
             height: 0;
         }
+
         to {
             height: var(--radix-collapsible-content-height);
         }
@@ -107,6 +121,7 @@
         from {
             opacity: 0;
         }
+
         to {
             opacity: 1;
         }
@@ -117,6 +132,7 @@
             opacity: 0;
             transform: translate(-50%, -48%) scale(0.96);
         }
+
         to {
             opacity: 1;
             transform: translate(-50%, -50%) scale(1);
@@ -127,6 +143,7 @@
         0% {
             transform: translate(0, 0);
         }
+
         10%,
         30%,
         50%,
@@ -134,12 +151,14 @@
         90% {
             transform: translate(-5px, 0);
         }
+
         20%,
         40%,
         60%,
         80% {
             transform: translate(5px, 0);
         }
+
         100% {
             transform: translate(0, 0);
         }
@@ -155,6 +174,7 @@ body {
     overflow: hidden;
     background-color: transparent;
 }
+
 * {
     user-select: none;
 }
@@ -162,6 +182,7 @@ body {
 .user-select * {
     user-select: text;
 }
+
 .pointer-events * {
     pointer-events: auto;
 }
@@ -174,6 +195,7 @@ body {
     font-weight: 200 900;
     font-stretch: 75% 125%;
 }
+
 @font-face {
     font-family: "Orbitron";
     font-style: normal;
@@ -184,9 +206,11 @@ body {
         U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191,
         U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
+
 .font-orbitron {
     font-family: "Orbitron", sans-serif;
 }
+
 .font-mona {
     font-family: "Mona Sans", sans-serif;
 }
@@ -212,6 +236,7 @@ body {
         "Droid Sans",
         "Helvetica Neue";
 }
+
 #app {
     width: 100%;
     height: 100%;
@@ -229,19 +254,24 @@ body {
 
 /* For IE, Edge and Firefox */
 .scrollbar-hide {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
 }
+
 ::-webkit-scrollbar {
     width: 0.3rem;
     height: 0.3rem;
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
 }
+
 ::-webkit-scrollbar-thumb {
     background-color: #d7d7d7;
     border-radius: 2rem;
 }
+
 ::-webkit-scrollbar-track {
     background-image: trasparent;
     border-radius: 2rem;

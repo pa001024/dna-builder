@@ -51,7 +51,7 @@ async function selectPath(key: (typeof keys)[number]) {
 // 打开游戏所在目录
 const openGameDirectory = async () => {
     if (!game.path) {
-        errorMessage.value = "请先选择游戏路径或启动一次游戏"
+        errorMessage.value = t("game-launcher.selectGamePathFirst")
         return
     }
 
@@ -59,20 +59,20 @@ const openGameDirectory = async () => {
         await openExplorer(game.modsDir)
     } catch (error) {
         console.error("打开目录失败:", error)
-        errorMessage.value = `打开目录失败: ${error instanceof Error ? error.message : String(error)}`
+        errorMessage.value = t("game-launcher.openDirFailed", { error: error instanceof Error ? error.message : String(error) })
     }
 }
 
 const launchGame = async () => {
     if (!game.path) {
-        errorMessage.value = "请先选择游戏文件或启动一次游戏"
+        errorMessage.value = t("game-launcher.selectGameFileFirst")
         return
     }
     try {
         await game.launchGame()
     } catch (error) {
         console.error("启动游戏失败:", error)
-        errorMessage.value = `启动游戏失败: ${error instanceof Error ? error.message : String(error)}`
+        errorMessage.value = t("game-launcher.launchGameFailed", { error: error instanceof Error ? error.message : String(error) })
     }
 }
 //#endregion
@@ -118,7 +118,7 @@ const sortedEntitys = computed(() =>
 
 async function addCustomEntity() {
     if (!customEntityName.value) {
-        errorMessage.value = "请输入自定义类型名称"
+        errorMessage.value = t("game-launcher.enterCustomTypeName")
         return
     }
     try {
@@ -126,11 +126,11 @@ async function addCustomEntity() {
         customEntityName.value = ""
     } catch (error: any) {
         if (error.name === "ConstraintError") {
-            errorMessage.value = "自定义类型名称已存在"
+            errorMessage.value = t("game-launcher.customTypeNameExists")
             return
         }
         console.error("添加自定义类型失败:", error)
-        errorMessage.value = `添加自定义类型失败: ${error instanceof Error ? error.message : String(error)}`
+        errorMessage.value = t("game-launcher.addCustomTypeFailed", { error: error instanceof Error ? error.message : String(error) })
     }
 }
 //#endregion
@@ -150,10 +150,10 @@ const setEntityMod = async (entity: string, modid: number) => {
     try {
         await game.setEntityMod(entity, modid)
         await updateEntityMod()
-        successMessage.value = modid ? "MOD已启用" : "MOD已禁用"
+        successMessage.value = modid ? t("game-launcher.modEnabled") : t("game-launcher.modDisabled")
     } catch (error: any) {
         console.error("设置MOD失败:", error)
-        errorMessage.value = `设置MOD失败: ${error instanceof Error ? error.message : String(error)}`
+        errorMessage.value = t("game-launcher.setModFailed", { error: error instanceof Error ? error.message : String(error) })
     }
 }
 
@@ -161,10 +161,10 @@ const removeMod = async (mod: Mod) => {
     try {
         await game.removeMod(mod)
         await updateEntityMod()
-        successMessage.value = "MOD已删除"
+        successMessage.value = t("game-launcher.modDeleted")
     } catch (error: any) {
         console.error("删除MOD失败:", error)
-        errorMessage.value = `删除MOD失败: ${error instanceof Error ? error.message : String(error)}`
+        errorMessage.value = t("game-launcher.deleteModFailed", { error: error instanceof Error ? error.message : String(error) })
     }
 }
 
@@ -204,7 +204,7 @@ onMounted(async () => {
             isDragging.value = false
             if (!game.selectedEntity) return
             if (!game.path) {
-                errorMessage.value = "请先选择游戏文件或启动一次游戏"
+                errorMessage.value = t("game-launcher.selectGameFileFirst")
                 return
             }
 
@@ -213,30 +213,34 @@ onMounted(async () => {
                 try {
                     const results = await game.importMod(paths)
                     if (!results) {
-                        errorMessage.value = "导入MOD失败"
+                        errorMessage.value = t("game-launcher.importModFailed")
                         return
                     }
-                    successMessage.value = `成功导入 1 个MOD`
+                    successMessage.value = t("game-launcher.importModSuccess", { count: 1 })
                     await updateEntityMod()
                 } catch (error: any) {
                     console.error("导入MOD失败:", error)
-                    errorMessage.value = `导入MOD失败: ${error instanceof Error ? error.message : String(error)}`
+                    errorMessage.value = t("game-launcher.importModFailed", {
+                        error: error instanceof Error ? error.message : String(error),
+                    })
                 }
             } else if (paths.some((v) => /\.(?:png|jpg|jpeg|gif|webp)$/.test(v))) {
                 if (!entityMod.value) {
-                    errorMessage.value = "请先选择一个MOD"
+                    errorMessage.value = t("game-launcher.selectModFirst")
                     return
                 }
                 try {
                     const results = await game.importPic(entityMod.value.id, paths[0])
                     if (!results) {
-                        errorMessage.value = "导入MOD图片失败"
+                        errorMessage.value = t("game-launcher.importPicFailed")
                         return
                     }
-                    successMessage.value = `成功导入MOD图片`
+                    successMessage.value = t("game-launcher.importPicSuccess")
                 } catch (error: any) {
                     console.error("导入MOD图片失败:", error)
-                    errorMessage.value = `导入MOD图片失败: ${error instanceof Error ? error.message : String(error)}`
+                    errorMessage.value = t("game-launcher.importPicFailed", {
+                        error: error instanceof Error ? error.message : String(error),
+                    })
                 }
             }
         })
@@ -254,14 +258,18 @@ onUnmounted(() => {
 <template>
     <div class="flex flex-col h-full overflow-hidden relative">
         <div class="flex-none tabs tabs-lift tabs-lg items-center">
-            <input type="radio" name="game_mod" class="tab" value="mod" aria-label="MOD管理" v-model="tab" />
-            <input type="radio" name="game_mod" class="tab" value="setting" aria-label="游戏设置" v-model="tab" />
-            <div @click="openGameDirectory()" class="ml-auto btn btn-square tooltip tooltip-bottom" data-tip="打开游戏目录">
+            <input type="radio" name="game_mod" class="tab" value="mod" :aria-label="$t('game-launcher.modManager')" v-model="tab" />
+            <input type="radio" name="game_mod" class="tab" value="setting" :aria-label="$t('game-launcher.gameSetting')" v-model="tab" />
+            <div
+                @click="openGameDirectory()"
+                class="ml-auto btn btn-square tooltip tooltip-bottom"
+                :data-tip="$t('game-launcher.openGameDir')"
+            >
                 <Icon icon="ri:folder-line" class="w-6 h-6" />
             </div>
             <div @click="launchGame()" class="w-40 btn btn-primary mx-2" :class="{ 'btn-disabled': game.running }">
                 <Icon icon="ri:rocket-2-line" class="w-6 h-6" />
-                启动游戏
+                {{ $t("game-launcher.launch") }}
             </div>
         </div>
         <div v-if="tab === 'mod'" class="flex-1 bg-base-100 border-base-300 flex relative h-full overflow-hidden">
@@ -283,7 +291,7 @@ onUnmounted(() => {
                                         class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
                                         @click="game.removeCustomEntity(item as any)"
                                     >
-                                        删除
+                                        {{ $t("game-launcher.delete") }}
                                     </ContextMenuItem>
                                 </template>
                                 <li
@@ -311,15 +319,17 @@ onUnmounted(() => {
                                 </li>
                             </ContextMenu>
                             <li key="--none" class="list-row cursor-pointer min-w-60 justify-between rounded-none flex">
-                                <div class="btn w-full" onclick="add_custom_entity_modal.show()">添加自定义类型</div>
+                                <div class="btn w-full" onclick="add_custom_entity_modal.show()">
+                                    {{ $t("game-launcher.addCustomType") }}
+                                </div>
                                 <dialog id="add_custom_entity_modal" class="modal z-10">
                                     <div class="modal-box">
-                                        <h3 class="text-lg font-bold">添加自定义类型</h3>
+                                        <h3 class="text-lg font-bold">{{ $t("game-launcher.addCustomType") }}</h3>
                                         <p class="py-4">
                                             <input
                                                 v-model="customEntityName"
                                                 type="text"
-                                                placeholder="请输入自定义类型名称"
+                                                :placeholder="$t('game-launcher.enterCustomTypeName')"
                                                 class="input input-bordered input-md w-full"
                                             />
                                         </p>
@@ -336,8 +346,10 @@ onUnmounted(() => {
                                         <div class="modal-action">
                                             <form method="dialog" class="space-x-2">
                                                 <!-- if there is a button in form, it will close the modal -->
-                                                <button class="min-w-20 btn btn-primary" @click="addCustomEntity()">确定</button>
-                                                <button class="min-w-20 btn">取消</button>
+                                                <button class="min-w-20 btn btn-primary" @click="addCustomEntity()">
+                                                    {{ $t("setting.confirm") }}
+                                                </button>
+                                                <button class="min-w-20 btn">{{ $t("setting.cancel") }}</button>
                                             </form>
                                         </div>
                                     </div>
@@ -376,9 +388,11 @@ onUnmounted(() => {
             </div>
             <!-- MOD列表 -->
             <div class="flex-1 p-2 overflow-hidden flex flex-col border-l border-r border-base-300 gap-2">
-                <div class="flex-none font-bold text-primary">MOD列表</div>
+                <div class="flex-none font-bold text-primary">{{ $t("game-launcher.modList") }}</div>
                 <ScrollArea class="flex-2 overflow-x-hidden overflow-y-auto">
-                    <div v-if="!game.selectedEntity" class="h-40 flex justify-center items-center opacity-60">请先选择一个实体</div>
+                    <div v-if="!game.selectedEntity" class="h-40 flex justify-center items-center opacity-60">
+                        {{ $t("game-launcher.selectEntityFirst") }}
+                    </div>
                     <transition-group name="list" tag="ul" class="list">
                         <li
                             v-if="game.selectedEntity"
@@ -391,7 +405,7 @@ onUnmounted(() => {
                                 <Icon icon="ri:puzzle-line" class="size-10 rounded-box opacity-60" />
                             </div>
                             <div class="flex-1">
-                                <div>不使用MOD</div>
+                                <div>{{ $t("game-launcher.noMod") }}</div>
                                 <div class="text-xs font-semibold opacity-60"></div>
                             </div>
                         </li>
@@ -420,11 +434,16 @@ onUnmounted(() => {
             </div>
             <!-- 预览 -->
             <div class="flex-1 p-2 overflow-hidden flex flex-col">
-                <div class="flex-none font-bold text-primary">预览</div>
+                <div class="flex-none font-bold text-primary">{{ $t("game-launcher.preview") }}</div>
                 <div class="flex-1 overflow-hidden flex justify-center items-center">
                     <!-- 图片预览 -->
-                    <img v-if="entityMod?.pic" :src="entityMod.pic" alt="MOD预览" class="max-w-full max-h-full mx-auto my-auto" />
-                    <div v-else class="h-40 flex justify-center items-center opacity-60">暂无预览图片</div>
+                    <img
+                        v-if="entityMod?.pic"
+                        :src="entityMod.pic"
+                        :alt="$t('game-launcher.modPreview')"
+                        class="max-w-full max-h-full mx-auto my-auto"
+                    />
+                    <div v-else class="h-40 flex justify-center items-center opacity-60">{{ $t("game-launcher.noPreviewPic") }}</div>
                 </div>
             </div>
         </div>
@@ -514,7 +533,7 @@ onUnmounted(() => {
 
         <!-- 拖拽提示 -->
         <div v-if="isDragging" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50" @click="isDragging = false">
-            <div class="bg-base-200 p-8 rounded-lg text-2xl font-bold text-primary shadow-xl">松开鼠标导入MOD或图片</div>
+            <div class="bg-base-200 p-8 rounded-lg text-2xl font-bold text-primary shadow-xl">{{ $t("game-launcher.dropToImport") }}</div>
         </div>
     </div>
 </template>

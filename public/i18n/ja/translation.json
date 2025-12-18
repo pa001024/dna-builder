@@ -1,7 +1,21 @@
 {
     "achievement": {
+        "allVersions": "すべてのバージョン",
+        "clear": "クリア",
+        "clearConfirm": "すべての完了済み実績をクリアしてもよろしいですか？",
         "desc": "ゲーム実績アンロック統計",
-        "title": "成果"
+        "export": "エクスポート",
+        "hideCompleted": "完了を非表示",
+        "import": "インポート",
+        "importConfirm": "{{count}}個の実績完了記録をインポートしてもよろしいですか？現在の完了記録が上書きされます。",
+        "importFailed": "インポートに失敗しました。ファイル形式が正しいか確認してください",
+        "noDescription": "説明なし",
+        "searchAchievements": "実績名または説明を検索",
+        "selectAllCurrentPage": "現在のページを全選択",
+        "selectVersion": "バージョンを選択",
+        "title": "成果",
+        "unfinishedFirst": "未完了優先",
+        "unnamedAchievement": "名前のない実績"
     },
     "autobuild": {
         "charMods": "キャラクターMOD",
@@ -98,26 +112,54 @@
         "restart": "再開",
         "resume": "続行",
         "start": "戦闘開始",
-        "title": "ミニゲーム"
+        "title": "オートチェスミニゲーム"
     },
     "game-launcher": {
+        "addCustomType": "カスタムタイプを追加",
         "afterGame": "起動後に実行",
         "all_files": "すべてのファイル",
         "beforeGame": "起動前に実行",
         "char": "キャラクター",
         "custom": "カスタム",
+        "customTypeNameExists": "カスタムタイプ名が既に存在します",
+        "delete": "削除",
+        "deleteModFailed": "MODの削除に失敗しました: {{ error }}",
         "desc": "ゲーム/MODマネージャーを起動",
+        "dropToImport": "ドロップしてMODまたは画像をインポート",
+        "enterCustomTypeName": "カスタムタイプ名を入力してください",
         "exec_files": "実行可能ファイル",
+        "gameSetting": "ゲーム設定",
+        "importModFailed": "MODのインポートに失敗しました",
+        "importModSuccess": "{{ count }}個のMODをインポートしました",
+        "importPicFailed": "MOD画像のインポートに失敗しました: {{ error }}",
+        "importPicSuccess": "MOD画像をインポートしました",
         "json_files": "JSONファイル",
         "launch": "ゲームを起動",
         "launched": "ゲーム起動済み",
+        "launchGameFailed": "ゲームの起動に失敗しました: {{ error }}",
         "legacy": "レガシー",
+        "modDeleted": "MODを削除しました",
+        "modDisabled": "MODを無効化しました",
         "modEnable": "MODを有効化",
+        "modEnabled": "MODを有効化しました",
+        "modList": "MODリスト",
         "modLoader": "ローダー",
+        "modManager": "MOD管理",
+        "modPreview": "MODプレビュー",
+        "noMod": "MODなし",
+        "noPreviewPic": "プレビュー画像なし",
+        "openDirFailed": "ディレクトリのオープンに失敗しました: {{ error }}",
+        "openGameDir": "ゲームディレクトリを開く",
         "params": "パラメータ",
         "path": "ゲームパス",
+        "preview": "プレビュー",
         "select": "参照...",
+        "selectEntityFirst": "まずエンティティを選択してください",
+        "selectGameFileFirst": "まずゲームファイルを選択するか、一度ゲームを起動してください",
+        "selectGamePathFirst": "まずゲームパスを選択するか、一度ゲームを起動してください",
+        "selectModFirst": "まずMODを選択してください",
         "selectPath": "パスを選択",
+        "setModFailed": "MODの設定に失敗しました: {{ error }}",
         "title": "ゲームランチャー",
         "weapon": "武器"
     },
@@ -176,12 +218,12 @@
     },
     "home": {
         "download": "Windows アプリをダウンロード",
-        "starme": "Go to Github and give it a star",
+        "starme": "Githubでスターを付ける",
         "title": "ホーム"
     },
     "inventory": {
         "desc": "ウェッジと武器の装備をカスタマイズする",
-        "title": "Inventory management"
+        "title": "在庫管理"
     },
     "main": {
         "btn_collapse_menu": "メニューを折りたたむ",
