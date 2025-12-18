@@ -1058,31 +1058,36 @@ export class CharBuild {
     }
     codeSwapR(ids: number[], len = 8) {
         const rst = Array(len).fill(0)
-        ids.map((v, i) => (rst[[1, 4, 2, 3, 5, 8, 6, 7][i] - 1] = v))
+        ids.map((v, i) => (rst[[1, 3, 4, 2, 5, 7, 8, 6][i] - 1] = v))
         return rst
     }
     codeSwap(ids: number[]) {
         // 交换顺序
-        return ids.map((_, i) => ids[[1, 4, 2, 3, 5, 8, 6, 7][i] - 1])
+        return ids.map((_, i) => ids[[1, 3, 4, 2, 5, 7, 8, 6][i] - 1])
     }
     importCode(charCode: string, type = "角色") {
-        let modIds =
-            charCode
-                .slice(5)
-                .match(/.{4}/g)
-                ?.map((v) => parseInt(v.toLowerCase(), 36)) || []
-        if (type === "角色") {
-            if (modIds.length !== 9) {
-                console.warn("导入代码格式错误")
-                return
+        try {
+            let modIds =
+                charCode
+                    .slice(5)
+                    .match(/.{4}/g)
+                    ?.map((v) => parseInt(v.toLowerCase(), 36)) || []
+            if (type === "角色") {
+                if (modIds.length !== 9) {
+                    console.warn("导入代码格式错误")
+                    return
+                }
+                return { mods: this.codeSwap(modIds.slice(0, 8)), auraMod: modIds[8] }
+            } else {
+                if (modIds.length < 4) {
+                    console.warn("导入代码格式错误")
+                    return
+                }
+                return { mods: this.codeSwap(modIds.slice(0, 8)) }
             }
-            return { mods: this.codeSwap(modIds.slice(0, 8)), auraMod: modIds[8] }
-        } else {
-            if (modIds.length < 4) {
-                console.warn("导入代码格式错误")
-                return
-            }
-            return { mods: this.codeSwap(modIds.slice(0, 8)) }
+        } catch (error) {
+            console.warn("导入代码格式错误")
+            return
         }
     }
 
