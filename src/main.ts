@@ -23,6 +23,7 @@ import App from "./App.vue"
 import { initI18n } from "./i18n"
 import { createPinia } from "pinia"
 import { router } from "./router"
+import { env } from "./env"
 const app = createApp(App)
 app.use(createPinia())
     .use(I18NextVue, { i18next })
@@ -49,7 +50,10 @@ app.use(createPinia())
     })
 app.mount("#app")
 
-// Register Service Worker for offline support
-registerSW({
-    immediate: true,
-})
+// 仅在非应用环境下注册 Service Worker
+if (!env.isApp) {
+    // Register Service Worker for offline support
+    registerSW({
+        immediate: true,
+    })
+}

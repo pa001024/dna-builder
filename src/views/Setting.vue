@@ -4,7 +4,6 @@ import { MATERIALS } from "../api/app"
 import { useSettingStore } from "../store/setting"
 import { env } from "../env"
 import { i18nLanguages } from "../i18n"
-import { t } from "i18next"
 import { db } from "../store/db"
 
 const setting = useSettingStore()
@@ -58,11 +57,48 @@ function capitalize(str: string) {
 function resetStorage() {
     localStorage.clear()
     db.delete()
+    // 清除所有Service Worker
+    clearServiceWorkers()
 }
 
 function openResetConfirmDialog() {
     const dialog = document.getElementById("reset-confirm-dialog")! as HTMLDialogElement
     dialog.show()
+}
+
+/**
+ * 清除当前注册的所有Service Worker
+ */
+async function clearServiceWorkers(): Promise<void> {
+    // 检查浏览器是否支持Service Worker
+    if ("serviceWorker" in navigator) {
+        try {
+            // 获取所有注册的Service Worker
+            const registrations = await navigator.serviceWorker.getRegistrations()
+
+            // 取消注册所有Service Worker
+            for (const registration of registrations) {
+                await registration.unregister()
+                console.log("Service Worker 已取消注册:", registration.scope)
+            }
+
+            // 清除所有缓存
+            if ("caches" in window) {
+                const cacheNames = await caches.keys()
+                for (const cacheName of cacheNames) {
+                    await caches.delete(cacheName)
+                    console.log("缓存已清除:", cacheName)
+                }
+            }
+
+            console.log("所有Service Worker和缓存已清除")
+        } catch (error) {
+            console.error("清除Service Worker失败:", error)
+            throw error
+        }
+    } else {
+        console.log("当前浏览器不支持Service Worker")
+    }
 }
 </script>
 
