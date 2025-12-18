@@ -34,7 +34,7 @@ const routes: readonly RouteRecordRaw[] = [
     {
         name: "game-launcher",
         path: "/game-launcher",
-        component: env.isApp ? import("./views/GameLauncher.vue") : () => undefined,
+        component: env.isApp ? () => import("./views/GameLauncher.vue") : () => undefined,
         beforeEnter: () => setMinSize(800, 700),
     },
     { name: "more", path: "/more", component: More, beforeEnter: () => setMinSize(600, 600) },
