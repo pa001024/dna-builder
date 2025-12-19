@@ -40,8 +40,6 @@ jobs:
 
             - uses: pnpm/action-setup@v4
               name: Install pnpm
-              with:
-                  cache: true
 
             - name: install Rust stable
               uses: dtolnay/rust-toolchain@stable
@@ -81,11 +79,30 @@ jobs:
               id: commit_diff
               shell: pwsh
               run: |
-                  if (-not [string]::IsNullOrEmpty("${{ steps.previous_tag.outputs.previous_tag }}")) {
-                      $diffLines = git log "${{ steps.previous_tag.outputs.previous_tag }}...${{ github.ref_name }}" --oneline
-                      $diff = $diffLines | ForEach-Object { $_ -replace '\s*\([^)]*\)\s*', ' ' } | ForEach-Object { "- $_" } | Join-String -Separator "`n`n"
-                      $diffBody = "## 本次更新内容 (${{ steps.previous_tag.outputs.previous_tag }} → ${{ github.ref_name }})\n\n$diff\n\n"
-                      echo "commit_diff=$diffBody" >> $env:GITHUB_OUTPUT
+                  $prevVersion = "${{ steps.previous_tag.outputs.previous_tag }}"
+                  $newVersion = "${{ github.ref_name }}"
+                  if (-not [string]::IsNullOrEmpty($prevVersion)) {
+                      $diffLines = git log "$prevVersion...$newVersion" --oneline
+                      $diff = New-Object System.Collections.ArrayList
+                      foreach ($line in $diffLines) {
+                          # 移除开头的提交哈希（支持全小写/混合大小写哈希）
+                          $commitMessage = $line -replace '^[a-fA-F0-9]+\s+', ''
+                          # 过滤空提交信息
+                          if (-not [string]::IsNullOrWhiteSpace($commitMessage)) {
+                              [void]$diff.Add("- $commitMessage")
+                          }
+                      }
+                      # 处理无提交记录的情况
+                      if ($diff.Count -eq 0) {
+                          $diffBody = "## 本次更新内容 ($prevVersion → $newVersion)`n`n- 无提交记录`n`n"
+                      } else {
+                          $diffBody = "## 本次更新内容 ($prevVersion → $newVersion)`n`n$($diff -join "`n`n")`n`n"
+                      }
+                      @"
+                  commit_diff<<EOF
+                  $diffBody
+                  EOF
+                  "@ | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
                   } else {
                       echo "commit_diff=" >> $env:GITHUB_OUTPUT
                   }
