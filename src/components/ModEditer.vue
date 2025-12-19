@@ -137,7 +137,13 @@ function toggleSortByIncome() {
 }
 
 async function handleImportCode() {
-    const charCode = (await pasteText()) || prompt("请输入角色或武器代码")
+    let charCode = ""
+    try {
+        charCode = (await pasteText()) || ""
+    } catch (error) {
+        charCode = prompt("请输入角色或武器代码") || ""
+        console.error("导入代码失败:", error)
+    }
     if (charCode) {
         const result = props.charBuild.importCode(charCode, props.type)
         if (result) {
