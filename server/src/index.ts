@@ -3,6 +3,9 @@ import { staticPlugin } from "@elysiajs/static"
 import { cors } from "@elysiajs/cors"
 import { yogaPlugin } from "./db"
 
+// load env
+import "dotenv/config"
+
 const app = new Elysia()
     .get("/", () => Bun.file("../dist/index.html"))
     .use(staticPlugin({ prefix: "/", assets: "../dist", indexHTML: false, alwaysStatic: true }))

@@ -29,3 +29,4 @@ weixin/
 coverage/
 IFLOW.md
 INTRO.md
+server/.env

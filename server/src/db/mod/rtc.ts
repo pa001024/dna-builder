@@ -1,4 +1,4 @@
-import type { CreateMobius, Resolver } from "graphql-mobius"
+import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
 import { Context } from "../yoga"
 import { id } from "../schema"
 import { getClients, hasUser } from "../kv/room"

@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken"
-import type { CreateMobius, Resolver } from "graphql-mobius"
+import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
 import { eq } from "drizzle-orm"
 import { Context, jwtToken } from "../yoga"
 import { db, schema } from ".."

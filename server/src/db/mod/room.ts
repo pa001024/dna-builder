@@ -1,4 +1,4 @@
-import type { CreateMobius, Resolver } from "graphql-mobius"
+import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
 import { db, schema } from ".."
 import { Context } from "../yoga"
 import { desc, eq, getTableColumns, like, sql } from "drizzle-orm"
@@ -100,7 +100,7 @@ export const resolvers = {
                                     }
                                 })
                                 .as("lastMsg"),
-                    })
+                    }),
                 )
                 .from(schema.rooms)
                 .where(eq(schema.rooms.id, id))
@@ -153,7 +153,7 @@ export const resolvers = {
                                     }
                                 })
                                 .as("lastMsg"),
-                    })
+                    }),
                 )
                 .from(schema.rooms)
                 .orderBy(desc(schema.rooms.updateAt))
@@ -213,7 +213,7 @@ export const resolvers = {
                         ...getTableColumns(schema.rooms),
                         owner: schema.link(schema.users, schema.rooms.ownerId),
                         msgCount: sql<number>`(select count(*) from ${schema.msgs} where ${schema.msgs.roomId} = "rooms"."id")`.as("msgCount"),
-                    })
+                    }),
                 )
                 .from(schema.rooms)
                 .where(eq(schema.rooms.id, id))

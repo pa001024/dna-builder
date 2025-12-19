@@ -1,5 +1,5 @@
 import { createPubSub } from "graphql-yoga"
-import type { msgs, tasks, users } from "../db/schema"
+import type { missionsIngame, msgs, tasks, users } from "../db/schema"
 import type { JWTUser } from "../db/yoga"
 
 export interface RoomUserEvent {
@@ -16,7 +16,7 @@ export interface RtcEvent {
     body: string
 }
 
-type RoomEvent = {
+type KPubSubEvent = {
     newMessage: typeof msgs.$inferSelect
     newReaction: typeof msgs.$inferSelect
     msgEdited: typeof msgs.$inferSelect
@@ -27,6 +27,7 @@ type RoomEvent = {
     watchTask: typeof tasks.$inferSelect & { online?: boolean; paused?: boolean }
     newRtcEvent: RtcEvent
     newRoomUser: RoomUserEvent
+    updateMissionsIngame: typeof missionsIngame.$inferSelect
 }
 
 // type REvents<T extends Record<string, unknown>, L extends string = keyof T extends string ? keyof T : never> = {
@@ -37,6 +38,6 @@ type REvents<T extends Record<string, unknown>, L extends string = keyof T exten
     [K in L]: K extends infer V extends L ? [id: string, { [k in V]: T[V] }] : never
 }
 
-type PubSubEvents = REvents<RoomEvent>
+type PubSubEvents = REvents<KPubSubEvent>
 
 export const pubsub = createPubSub<PubSubEvents>()

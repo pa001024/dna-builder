@@ -7,6 +7,14 @@ CREATE TABLE `logins` (
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE TABLE `missions_ingame` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`server` text NOT NULL,
+	`missions` text NOT NULL,
+	`created_at` text
+);
+--> statement-breakpoint
+CREATE INDEX `missions_ingame_server_idx` ON `missions_ingame` (`server`);--> statement-breakpoint
 CREATE TABLE `msgs` (
 	`id` text PRIMARY KEY NOT NULL,
 	`room_id` text NOT NULL,
@@ -19,6 +27,7 @@ CREATE TABLE `msgs` (
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE INDEX `msg_room_id_idx` ON `msgs` (`room_id`);--> statement-breakpoint
 CREATE TABLE `notifications` (
 	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text NOT NULL,
@@ -45,17 +54,6 @@ CREATE TABLE `reactions` (
 	`content` text NOT NULL,
 	`created_at` text,
 	FOREIGN KEY (`msg_id`) REFERENCES `msgs`(`id`) ON UPDATE no action ON DELETE cascade
-);
---> statement-breakpoint
-CREATE TABLE `room_views` (
-	`id` text PRIMARY KEY NOT NULL,
-	`room_id` text NOT NULL,
-	`user_id` text NOT NULL,
-	`status` text NOT NULL,
-	`created_at` text,
-	`update_at` text,
-	FOREIGN KEY (`room_id`) REFERENCES `rooms`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `rooms` (
@@ -90,6 +88,7 @@ CREATE TABLE `tasks` (
 	`start_time` text,
 	`end_time` text,
 	`max_user` integer NOT NULL,
+	`max_age` integer,
 	`user_list` text NOT NULL,
 	`room_id` text NOT NULL,
 	`user_id` text NOT NULL,
@@ -107,6 +106,7 @@ CREATE TABLE `user_reactions` (
 	FOREIGN KEY (`reaction_id`) REFERENCES `reactions`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `user_reaction_idx` ON `user_reactions` (`user_id`,`reaction_id`);--> statement-breakpoint
 CREATE TABLE `users` (
 	`id` text PRIMARY KEY NOT NULL,
 	`email` text NOT NULL,
@@ -118,9 +118,5 @@ CREATE TABLE `users` (
 	`update_at` text
 );
 --> statement-breakpoint
-CREATE INDEX `msg_room_id_idx` ON `msgs` (`room_id`);--> statement-breakpoint
-CREATE INDEX `roomview_room_id_idx` ON `room_views` (`room_id`);--> statement-breakpoint
-CREATE INDEX `roomview_user_id_idx` ON `room_views` (`user_id`);--> statement-breakpoint
-CREATE UNIQUE INDEX `user_reaction_idx` ON `user_reactions` (`user_id`,`reaction_id`);--> statement-breakpoint
 CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint
 CREATE UNIQUE INDEX `email_idx` ON `users` (`email`);

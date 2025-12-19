@@ -7,7 +7,11 @@
 1. 克隆仓库
 2. 安装 Bun：[Bun 安装指南](https://bun.sh/docs/installation)
 3. 安装依赖：`bun install`
-4. 启动开发服务器：`bun dev`
+4. 配置环境变量：
+    - 创建 `.env` 文件
+    - 添加 `API_TOKEN=your_secret_token`
+5. 启动开发服务器：`bun dev`
+6. 访问 GraphQL Playground：[http://localhost:8887/graphql](http://localhost:8887/graphql)
 
 ## 主要功能
 

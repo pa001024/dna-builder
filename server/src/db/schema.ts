@@ -108,9 +108,7 @@ export const users = sqliteTable(
         createdAt: text("created_at").$default(now),
         updateAt: text("update_at").$onUpdate(now),
     },
-    (users) => ({
-        emailIdx: uniqueIndex("email_idx").on(users.email),
-    })
+    (users) => [uniqueIndex("email_idx").on(users.email)],
 )
 
 export const userRelations = relations(users, ({ one }) => ({
@@ -177,9 +175,7 @@ export const msgs = sqliteTable(
         createdAt: text("created_at").$default(now),
         updateAt: text("update_at").$onUpdate(now),
     },
-    (msgs) => ({
-        roomIdIdx: index("msg_room_id_idx").on(msgs.roomId),
-    })
+    (msgs) => [index("msg_room_id_idx").on(msgs.roomId)],
 )
 
 export const msgsRelations = relations(msgs, ({ one, many }) => ({
@@ -214,9 +210,7 @@ export const userReactions = sqliteTable(
             .references(() => reactions.id, { onDelete: "cascade" }),
         createdAt: text("created_at").$default(now),
     },
-    (userReactions) => ({
-        userReactionIdx: uniqueIndex("user_reaction_idx").on(userReactions.userId, userReactions.reactionId),
-    })
+    (userReactions) => [uniqueIndex("user_reaction_idx").on(userReactions.userId, userReactions.reactionId)],
 )
 
 export const userMsgReactionsRelations = relations(userReactions, ({ one }) => ({
@@ -285,3 +279,14 @@ export const tasksRelations = relations(tasks, ({ one }) => ({
     room: one(rooms, { fields: [tasks.roomId], references: [rooms.id] }),
     user: one(users, { fields: [tasks.userId], references: [users.id] }),
 }))
+
+export const missionsIngame = sqliteTable(
+    "missions_ingame",
+    {
+        id: integer("id").primaryKey({ autoIncrement: true }),
+        server: text("server").notNull(),
+        missions: text("missions", { mode: "json" }).notNull().$type<Array<string[]>>(),
+        createdAt: text("created_at").$default(now),
+    },
+    (missionsIngame) => [index("missions_ingame_server_idx").on(missionsIngame.server)],
+)

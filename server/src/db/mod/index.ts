@@ -3,11 +3,12 @@ import { typeDefs as messageSchema, resolvers as messageResolvers } from "./mess
 import { typeDefs as roomSchema, resolvers as roomResolvers } from "./room"
 import { typeDefs as taskSchema, resolvers as taskResolvers } from "./task"
 import { typeDefs as rtcSchema, resolvers as rtcResolvers } from "./rtc"
+import { typeDefs as missionsIngameSchema, resolvers as missionsIngameResolvers } from "./missionsIngame"
 import { FieldNode, Kind, type GraphQLResolveInfo } from "graphql"
 
 export function schemaWith(ctx: any) {
-    const typeDefs = [userSchema, messageSchema, roomSchema, taskSchema, rtcSchema]
-    const resolvers = mergeResolvers(userResolvers, messageResolvers, roomResolvers, taskResolvers, rtcResolvers)
+    const typeDefs = [userSchema, messageSchema, roomSchema, taskSchema, rtcSchema, missionsIngameSchema]
+    const resolvers = mergeResolvers(userResolvers, messageResolvers, roomResolvers, taskResolvers, rtcResolvers, missionsIngameResolvers)
 
     function mergeResolvers(...items: any[]) {
         const resolvers = {

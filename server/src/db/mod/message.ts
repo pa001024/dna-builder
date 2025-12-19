@@ -1,4 +1,4 @@
-import type { CreateMobius, Resolver } from "graphql-mobius"
+import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
 import { and, count, eq } from "drizzle-orm"
 import { Context } from "../yoga"
 import { db, schema } from ".."
