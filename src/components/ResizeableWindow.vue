@@ -15,6 +15,7 @@ import { timeStr, useGameTimer } from "../util"
 import { useLocalStorage } from "@vueuse/core"
 import { useSound } from "@vueuse/sound"
 import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification"
+import { missionsIngameQuery } from "../api/query"
 
 const props = defineProps({
     title: { type: String },
@@ -132,8 +133,11 @@ class MihanNotify {
     async updateMihanData() {
         if (this.mihanData.value && !this.shouldUpdate()) return
         console.log("update mihan data")
-        this.mihanData.value = await getInstanceInfo()
+        const data = await missionsIngameQuery()
+        if (!data?.missions || JSON.stringify(data.missions) === JSON.stringify(this.mihanData.value)) return false
+        this.mihanData.value = data.missions
         this.mihanDataLastUpdate.value = new Date().getTime()
+        return true
     }
     show() {
         const dialog = document.getElementById("mihan-dialog") as HTMLDialogElement
@@ -191,6 +195,9 @@ class MihanNotify {
             await this.showMihanNotification()
         }
     }
+    sleep(duration: number) {
+        return new Promise((resolve) => setTimeout(resolve, duration))
+    }
     startWatch() {
         if (this.watch) return
         console.log("start watch")
@@ -199,7 +206,12 @@ class MihanNotify {
         const duration = next - new Date().getTime()
         setTimeout(async () => {
             this.watch = false
-            await this.updateMihanData()
+            let ok = await this.updateMihanData()
+            while (!ok) {
+                console.log("update mihan data failed, retry in 3s")
+                ok = await this.updateMihanData()
+                await this.sleep(3e3)
+            }
             await this.checkNotify()
             if (this.mihanEnableNotify.value) this.startWatch()
         }, duration + 3e3)

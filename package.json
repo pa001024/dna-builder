@@ -26,6 +26,7 @@
         "@tauri-apps/plugin-opener": "^2",
         "@tauri-apps/plugin-process": "^2.3.1",
         "@tauri-apps/plugin-updater": "^2",
+        "@urql/vue": "^2.0.0",
         "@vueuse/core": "^14.1.0",
         "@vueuse/rxjs": "^14.1.0",
         "@vueuse/sound": "^2.1.3",

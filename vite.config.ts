@@ -58,6 +58,7 @@ export default defineConfig(async () => ({
                 ],
             },
             workbox: {
+                navigateFallbackDenylist: [/^\/graphql/, /^\/api/],
                 runtimeCaching: [
                     {
                         urlPattern: /^https:\/\/xn--chq26veyq\.icu\/api\/.+/,
