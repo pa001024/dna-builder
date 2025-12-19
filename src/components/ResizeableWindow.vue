@@ -131,7 +131,7 @@ class MihanNotify {
         })
     }
     async updateMihanData() {
-        if (this.mihanData.value && !this.shouldUpdate()) return
+        if (this.mihanData.value && !this.shouldUpdate()) return true
         console.log("update mihan data")
         const data = await missionsIngameQuery()
         if (!data?.missions || JSON.stringify(data.missions) === JSON.stringify(this.mihanData.value)) return false
@@ -207,7 +207,9 @@ class MihanNotify {
         setTimeout(async () => {
             this.watch = false
             let ok = await this.updateMihanData()
-            while (!ok) {
+            let c = 0
+            while (!ok && c < 3) {
+                c++
                 console.log("update mihan data failed, retry in 3s")
                 ok = await this.updateMihanData()
                 await this.sleep(3e3)

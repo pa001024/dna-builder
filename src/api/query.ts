@@ -14,7 +14,7 @@ function namedQuery<R = { id: string }, G extends string = string>(gqlQuery: G) 
     const query = gql(gqlQuery)
     return async (variables?: AnyVariables, context?: Partial<OperationContext> | undefined) => {
         const raw = await gqClient.query(query, variables, context).toPromise()
-        return raw?.data?.[name] as R
+        return raw?.data?.[name] as R | undefined
     }
 }
 
