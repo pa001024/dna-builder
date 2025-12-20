@@ -88,6 +88,7 @@ export class AIClient {
     private client: OpenAI | null = null
     private config: OpenAIConfig
     private messages: ChatCompletionMessageParam[] = []
+    private isStreamInterrupted: boolean = false
 
     /**
      * 创建AI客户端实例
@@ -103,6 +104,13 @@ export class AIClient {
                 content: this.config.system_prompt,
             })
         }
+    }
+
+    /**
+     * 中断流式对话
+     */
+    public interruptStream(): void {
+        this.isStreamInterrupted = true
     }
 
     /**
@@ -362,16 +370,19 @@ export class AIClient {
                 content: m.content,
             }))
 
-            // 添加新的消息（确保只添加user、assistant或system角色的消息）
+            // 添加新的消息（支持文本和图片消息）
             const filteredMessages = messages
                 .filter((msg) => msg.role === "user" || msg.role === "assistant" || msg.role === "system")
                 .map((msg) => ({
                     role: msg.role as "user" | "assistant" | "system",
-                    content: typeof msg.content === "string" ? msg.content : "",
+                    content: msg.content,
                 }))
 
             // 不需要类型断言，因为filteredMessages已经是正确的类型
             allMessages.push(...filteredMessages)
+
+            // 重置中断状态
+            this.isStreamInterrupted = false
 
             const stream = await this.client.chat.completions.create({
                 model,
@@ -383,6 +394,13 @@ export class AIClient {
 
             let fullResponse = ""
             for await (const chunk of stream) {
+                // 检查是否需要中断
+                if (this.isStreamInterrupted) {
+                    // 清除中断状态，以便下次使用
+                    this.isStreamInterrupted = false
+                    break
+                }
+
                 const content = chunk.choices[0]?.delta?.content
                 if (content) {
                     fullResponse += content
@@ -395,9 +413,21 @@ export class AIClient {
                 // 添加用户的最新消息
                 const lastMessage = filteredMessages[filteredMessages.length - 1]
                 if (lastMessage.role === "user") {
+                    // 确保内容类型正确
+                    let messageContent: string | OpenAI.Chat.Completions.ChatCompletionContentPart[] = ""
+                    if (typeof lastMessage.content === "string") {
+                        messageContent = lastMessage.content
+                    } else if (Array.isArray(lastMessage.content)) {
+                        // 过滤掉可能的ChatCompletionContentPartRefusal类型
+                        messageContent = lastMessage.content.filter(
+                            (part): part is OpenAI.Chat.Completions.ChatCompletionContentPart =>
+                                "type" in part && (part.type === "text" || part.type === "image_url" || part.type === "file"),
+                        )
+                    }
+
                     this.messages.push({
                         role: "user",
-                        content: lastMessage.content,
+                        content: messageContent,
                     })
 
                     // 添加助手的响应

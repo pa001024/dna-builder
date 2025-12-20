@@ -38,7 +38,13 @@ export const resolvers = {
     Mutation: {
         addMissionsIngame: async (parent, { token, server, missions }, { user, pubsub }, info) => {
             if (!token || token !== process.env.API_TOKEN) throw new Error("need api token")
-            // TODO: 重复校验
+            // 同server最后一个值重复校验
+            const lastMissionsIngame = await db.query.missionsIngame.findFirst({
+                where: eq(schema.missionsIngame.server, server),
+                orderBy: desc(schema.missionsIngame.id),
+            })
+            if (lastMissionsIngame && JSON.stringify(lastMissionsIngame.missions) === JSON.stringify(missions)) throw new Error("duplicate missions")
+
             const missionsIngame = await db
                 .insert(schema.missionsIngame)
                 .values({

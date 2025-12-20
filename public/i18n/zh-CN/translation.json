@@ -17,6 +17,10 @@
         "unfinishedFirst": "未完成优先",
         "unnamedAchievement": "未命名成就"
     },
+    "ai": {
+        "inputMessage": "输入消息，按 Enter 发送",
+        "title": "AI智能体"
+    },
     "autobuild": {
         "charMods": "角色MOD",
         "meleeMods": "近战MOD",
@@ -98,12 +102,17 @@
         "small": "小型",
         "stance": "战姿",
         "target_function": "目标函数",
+        "team": "协战",
         "timeline": "时间线",
         "title": "构筑",
         "triggerRate": "触发率",
         "weapon": "武器",
         "weapon_attributes": "武器属性",
         "weaponDamage": "武器伤害"
+    },
+    "errorBoundary": {
+        "retry": "重试",
+        "title": "组件渲染出错"
     },
     "game": {
         "desc": "用二重螺旋角色玩自走棋",
@@ -230,9 +239,25 @@
         "btn_pin_window": "窗口置顶",
         "btn_unpin_window": "取消置顶"
     },
+    "modEditor": {
+        "inputCode": "请输入角色或武器代码"
+    },
     "more": {
         "desc": "更多功能",
         "title": "更多"
+    },
+    "resizeableWindow": {
+        "and": "和",
+        "enableNotify": "启用提醒",
+        "mihan": "密函",
+        "mihanNotificationBody": "你关注的{{types}}刷新了",
+        "mihanNotificationTitle": "委托密函提醒",
+        "mihanTitle": "委托密函",
+        "moling": "魔灵",
+        "monitorSettings": "监控设置",
+        "nextRefresh": "下次刷新",
+        "onlyOnce": "仅一次",
+        "zhouben": "周本"
     },
     "setting": {
         "ai": "AI大模型设置",

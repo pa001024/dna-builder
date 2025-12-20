@@ -53,10 +53,33 @@ export interface EntityMod {
 
 export type UEntityMod = Omit<EntityMod, "id">
 
+// AI对话相关接口
+export interface Conversation {
+    id: number
+    name: string
+    createdAt: number
+    updatedAt: number
+}
+
+export type UConversation = Omit<Conversation, "id">
+
+export interface Message {
+    id: number
+    conversationId: number
+    role: "user" | "assistant" | "system"
+    content: string
+    imageUrl?: string
+    createdAt: number
+}
+
+export type UMessage = Omit<Message, "id">
+
 interface DB {
     mods: Mod
     customEntitys: CustomEntity
     entityMods: EntityMod
+    conversations: Conversation
+    messages: Message
 }
 
 // 索引列表
@@ -64,4 +87,6 @@ db.version(1).stores({
     mods: "++id, entity, name",
     customEntitys: "++id, &name",
     entityMods: "++id, entity, modid",
+    conversations: "++id, createdAt, updatedAt",
+    messages: "++id, conversationId, createdAt",
 })

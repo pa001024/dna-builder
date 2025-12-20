@@ -88,7 +88,7 @@ onMounted(() => {
             <div
                 ref="input"
                 contenteditable
-                class="rich-input p-1 px-2 table-cell text-sm focus:outline-none text-wrap break-all overflow-x-hidden"
+                class="rich-input p-2 px-4 text-sm focus:outline-none text-wrap break-all overflow-x-hidden"
                 @paste="onPaste"
                 @input="onInput"
                 dropzone="copy"
@@ -99,7 +99,7 @@ onMounted(() => {
     </div>
 </template>
 
-<style lang="less">
+<style>
 .rich-input img {
     max-width: 200px;
     max-height: 200px;

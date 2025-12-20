@@ -1,3 +1,4 @@
+// 用不了 完全错误的数据
 export async function getInstanceInfo() {
     interface Result {
         code: number

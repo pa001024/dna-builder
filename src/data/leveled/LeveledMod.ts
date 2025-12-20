@@ -80,6 +80,10 @@ export class LeveledMod implements Mod {
         this.updateProperties()
     }
 
+    get fullName(): string {
+        return `${this.系列}之${this.名称}`
+    }
+
     /**
      * 等级属性的getter和setter
      */
@@ -114,7 +118,7 @@ export class LeveledMod implements Mod {
             const maxValue = this._originalModData[prop] || 0
             if (maxValue) {
                 let currentValue = (maxValue / (this.maxLevel + 1)) * (lv + 1)
-                if (prop === "神智回复") currentValue = Math.round(currentValue)
+                if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.round(currentValue)
                 this[prop] = currentValue
             }
         })
@@ -123,7 +127,7 @@ export class LeveledMod implements Mod {
             const buff = this.buff!
             const maxValue = buff[prop] || 0
             let currentValue = (maxValue / (10 + 1)) * (lv + 1)
-            if (prop === "神智回复") currentValue = Math.round(currentValue)
+            if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.round(currentValue)
             this[prop] = this[prop] ? this[prop] + currentValue : currentValue
             if (buff.描述.includes(`{%}`)) {
                 buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(buff.baseValue * 100).toFixed(1)}%`)

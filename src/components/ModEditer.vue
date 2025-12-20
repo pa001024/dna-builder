@@ -4,6 +4,7 @@ import { CharBuild } from "../data/CharBuild"
 import { LeveledMod } from "../data/leveled"
 import { copyText, pasteText } from "../util"
 import { useInvStore } from "../store/inv"
+import { t } from "i18next"
 
 interface ModOption {
     value: number
@@ -31,6 +32,9 @@ const props = defineProps<Props>()
 const inv = useInvStore()
 
 const sortByIncome = ref(true)
+const auraModOptions = computed(() => {
+    return props.modOptions.filter((option) => option.ser === "羽蛇")
+})
 const sortedModOptions = computed(() => {
     // 获取已装备的互斥系列名称集合和非契约者MOD名称集合
     const equippedExclusiveSeries = new Set<string>()
@@ -46,7 +50,7 @@ const sortedModOptions = computed(() => {
                 }
                 // 记录非契约者MOD名称（用于名称互斥）
                 if (mod.系列 !== "契约者") {
-                    equippedExclusiveNames.add(mod.名称!)
+                    equippedExclusiveNames.add(mod.fullName)
                 }
                 // 记录MOD数量
                 idCount.set(mod.id, (idCount.get(mod.id) || 0) + 1)
@@ -58,13 +62,14 @@ const sortedModOptions = computed(() => {
     const filteredOptions = props.modOptions.filter((option) => {
         const mod = new LeveledMod(option.value, option.lv, option.bufflv)
 
+        if (mod.类型 === "羽蛇") return false
         // 1. 过滤互斥系列的MOD
         if (equippedExclusiveSeries.has(mod.系列)) {
             return false
         }
 
         // 2. 过滤同名的非契约者MOD（名称互斥）
-        if (mod.系列 !== "契约者" && equippedExclusiveNames.has(mod.名称)) {
+        if (mod.系列 !== "契约者" && equippedExclusiveNames.has(mod.fullName)) {
             return false
         }
 
@@ -86,7 +91,6 @@ const sortedModOptions = computed(() => {
             const mod = new LeveledMod(option.value, option.lv, option.bufflv)
             const income = props.charBuild.calcIncome(mod)
             return {
-                ...option,
                 income,
                 mod,
                 option,
@@ -141,7 +145,7 @@ async function handleImportCode() {
     try {
         charCode = (await pasteText()) || ""
     } catch (error) {
-        charCode = prompt("请输入角色或武器代码") || ""
+        charCode = prompt(t("modEditor.inputCode")) || ""
         console.error("导入代码失败:", error)
     }
     if (charCode) {
@@ -156,6 +160,10 @@ async function handleImportCode() {
         }
     }
 }
+
+const aMod = computed(() => {
+    return props.auraMod ? new LeveledMod(props.auraMod) : undefined
+})
 </script>
 <template>
     <div class="bg-base-300 rounded-xl p-4 shadow-lg mb-6">
@@ -163,16 +171,24 @@ async function handleImportCode() {
             <SectionMarker />
             <h3 class="text-lg font-semibold">{{ title }}</h3>
             <div class="ml-auto flex items-center gap-2">
-                <Select
-                    v-if="type === '角色'"
-                    class="w-30 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                    :model-value="auraMod"
-                    @update:model-value="handleSelectAuraMod($event as any)"
+                <ShowProps
+                    v-if="aMod"
+                    :props="aMod.getProperties()"
+                    :title="aMod.fullName"
+                    :polarity="aMod.极性"
+                    :cost="aMod.耐受"
+                    :type="`${aMod.类型}${aMod.属性 ? `,${aMod.属性}属性` : ''}${aMod.限定 ? `,${aMod.限定}` : ''}`"
                 >
-                    <SelectItem v-for="m in sortedModOptions.filter((item) => item.ser === '羽蛇')" :key="m.value" :value="m.value">
-                        {{ m.label }}
-                    </SelectItem>
-                </Select>
+                    <Select
+                        class="w-30 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                        :model-value="auraMod"
+                        @update:model-value="handleSelectAuraMod($event)"
+                    >
+                        <SelectItem v-for="m in auraModOptions" :key="m.value" :value="m.value">
+                            {{ m.quality }} - {{ m.label }}
+                        </SelectItem>
+                    </Select>
+                </ShowProps>
                 <div class="btn btn-sm btn-primary" @click="handleImportCode">导入代码</div>
                 <div class="btn btn-sm btn-primary" @click="copyText(charBuild.getCode(type))">复制代码</div>
             </div>

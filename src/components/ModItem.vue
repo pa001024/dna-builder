@@ -61,7 +61,7 @@ const emit = defineEmits<{
             <ShowProps
                 v-if="mod"
                 :props="mod.getProperties()"
-                :title="`${mod.系列}之${mod.名称}`"
+                :title="mod.fullName"
                 :polarity="mod.极性"
                 :cost="mod.耐受"
                 :type="`${mod.类型}${mod.属性 ? `,${mod.属性}属性` : ''}${mod.限定 ? `,${mod.限定}` : ''}`"

@@ -579,7 +579,8 @@ export class CharBuild {
         // 检查属性是否符合前缀
         if (!isMod || !prefix || !attribute.startsWith(prefix)) {
             if (prefix && (props as any).类型 && (props as any).类型 !== prefix) return 0
-            if (["攻击", "增伤"].includes(attribute)) {
+            // 这几种BUFF只对角色生效
+            if (["攻击", "增伤", "独立增伤"].includes(attribute)) {
                 if (!isMod && prefix) return 0
             }
             if (typeof (props as any)[attribute] === "number") {
@@ -1144,7 +1145,7 @@ export class CharBuild {
             }
             // 记录非契约者MOD名称（用于名称互斥）
             if (mod.系列 !== "契约者") {
-                selectedExclusiveNames[key].add(mod.名称)
+                selectedExclusiveNames[key].add(mod.fullName)
             } else {
                 selectedModCount.set(mod.id, (selectedModCount.get(mod.id) || 0) + 1)
             }
@@ -1158,7 +1159,7 @@ export class CharBuild {
             }
             // 从非契约者MOD名称集合中移除
             if (mod.系列 !== "契约者") {
-                selectedExclusiveNames[key].delete(mod.名称)
+                selectedExclusiveNames[key].delete(mod.fullName)
             } else {
                 const count = (selectedModCount.get(mod.id) || 0) - 1
                 if (count > 0) selectedModCount.set(mod.id, count)
@@ -1186,7 +1187,7 @@ export class CharBuild {
                             (key === "skillWeaponMods" &&
                                 localBuild.skillWeapon &&
                                 [localBuild.skillWeapon.伤害类型, localBuild.skillWeapon.类别].includes(v.限定))) &&
-                        !selectedExclusiveNames[key].has(v.名称) &&
+                        !selectedExclusiveNames[key].has(v.fullName) &&
                         !selectedExclusiveSeries[key].has(v.系列) &&
                         (selectedModCount.get(v.id) || 0) < v.count,
                 )

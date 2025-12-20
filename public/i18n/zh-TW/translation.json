@@ -17,6 +17,10 @@
         "unfinishedFirst": "未完成優先",
         "unnamedAchievement": "未命名成就"
     },
+    "ai": {
+        "inputMessage": "輸入訊息，按 Enter 發送",
+        "title": "AI智能體"
+    },
     "autobuild": {
         "charMods": "角色MOD",
         "meleeMods": "近戰MOD",
@@ -98,12 +102,17 @@
         "small": "小型",
         "stance": "戰姿",
         "target_function": "目標函數",
+        "team": "隊伍",
         "timeline": "時間線",
         "title": "構築",
         "triggerRate": "觸發率",
         "weapon": "武器",
         "weapon_attributes": "武器屬性",
         "weaponDamage": "武器傷害"
+    },
+    "errorBoundary": {
+        "retry": "重試",
+        "title": "組件渲染出錯"
     },
     "game": {
         "desc": "用二重螺旋角色玩自走棋",
@@ -230,17 +239,49 @@
         "btn_pin_window": "視窗置頂",
         "btn_unpin_window": "取消置頂"
     },
+    "modEditor": {
+        "inputCode": "請輸入角色或武器代碼"
+    },
     "more": {
         "desc": "更多功能",
         "title": "更多"
     },
+    "resizeableWindow": {
+        "and": "和",
+        "enableNotify": "啟用提醒",
+        "mihan": "密函",
+        "mihanNotificationBody": "你關注的{{types}}刷新了",
+        "mihanNotificationTitle": "委託密函提醒",
+        "mihanTitle": "委託密函",
+        "moling": "魔靈",
+        "monitorSettings": "監控設定",
+        "nextRefresh": "下次刷新",
+        "onlyOnce": "僅一次",
+        "zhouben": "周本"
+    },
     "setting": {
+        "ai": "AI大模型設定",
+        "aiApiKey": "API密鑰",
+        "aiApiKeyTip": "從智譜AI開放平台獲取API密鑰",
+        "aiBaseUrl": "基礎URL",
+        "aiBaseUrlTip": "API伺服器地址，預設為智譜AI",
+        "aiConnectionFailed": "連接失敗",
+        "aiConnectionSuccess": "連接成功",
+        "aiMaxTokens": "最大Token數",
+        "aiMaxTokensTip": "生成文字的最大長度",
+        "aiModelName": "模型名稱",
+        "aiModelNameTip": "選擇要使用的AI模型",
+        "aiReset": "重置AI設定",
+        "aiTemperature": "Temperature",
+        "aiTemperatureTip": "控制生成內容的隨機性(0-1)",
+        "aiTestConnection": "測試連接",
         "appearance": "外觀設定",
         "cancel": "取消",
         "confirm": "確認",
         "darkTheme": "深色主題",
         "lang": "語言",
         "lightTheme": "亮色主題",
+        "noModelAvailable": "暫無可用模型",
         "other": "其他設置",
         "reset": "重置所有設置",
         "resetConfirm": "確認重置所有設置嗎？",
@@ -253,7 +294,7 @@
         "winMaterial": "視窗材質"
     },
     "timeline": {
-        "desc": "自定義角色的戰鬥邏輯(打軸)",
+        "desc": "自訂角色的戰鬥邏輯(打軸)",
         "title": "時間線"
     }
 }

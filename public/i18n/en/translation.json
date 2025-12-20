@@ -17,6 +17,10 @@
         "unfinishedFirst": "Unfinished First",
         "unnamedAchievement": "Unnamed Achievement"
     },
+    "ai": {
+        "inputMessage": "Enter message, press Enter to send",
+        "title": "AI Agent"
+    },
     "autobuild": {
         "charMods": "Character MOD",
         "meleeMods": "Melee MOD",
@@ -98,12 +102,17 @@
         "small": "Small",
         "stance": "Posture",
         "target_function": "Target Function",
+        "team": "Team",
         "timeline": "timeline",
         "title": "Build",
         "triggerRate": "Trigger rate",
         "weapon": "Weapon",
         "weapon_attributes": "Weapon Attributes",
         "weaponDamage": "weapon damage"
+    },
+    "errorBoundary": {
+        "retry": "Retry",
+        "title": "Component Rendering Error"
     },
     "game": {
         "desc": "Play Auto Chess with a Double Helix character",
@@ -230,17 +239,49 @@
         "btn_pin_window": "Pin window on top",
         "btn_unpin_window": "Unpin window"
     },
+    "modEditor": {
+        "inputCode": "Please enter character or weapon code"
+    },
     "more": {
         "desc": "More features",
         "title": "More"
     },
+    "resizeableWindow": {
+        "and": " and ",
+        "enableNotify": "Enable Notification",
+        "mihan": "Secret Letter",
+        "mihanNotificationBody": "Your followed {{types}} have refreshed",
+        "mihanNotificationTitle": "Entrusted Secret Letter Reminder",
+        "mihanTitle": "Entrusted Secret Letter",
+        "moling": "Magic Spirit",
+        "monitorSettings": "Monitor Settings",
+        "nextRefresh": "Next Refresh",
+        "onlyOnce": "Only Once",
+        "zhouben": "Weekly Boss"
+    },
     "setting": {
+        "ai": "AI Model Settings",
+        "aiApiKey": "API Key",
+        "aiApiKeyTip": "Get API key from Zhipu AI platform",
+        "aiBaseUrl": "Base URL",
+        "aiBaseUrlTip": "API server address, default is Zhipu AI",
+        "aiConnectionFailed": "Connection Failed",
+        "aiConnectionSuccess": "Connection Successful",
+        "aiMaxTokens": "Max Tokens",
+        "aiMaxTokensTip": "Maximum length of generated text",
+        "aiModelName": "Model Name",
+        "aiModelNameTip": "Select AI model to use",
+        "aiReset": "Reset AI Settings",
+        "aiTemperature": "Temperature",
+        "aiTemperatureTip": "Control randomness of generated content (0-1)",
+        "aiTestConnection": "Test Connection",
         "appearance": "Appearance",
         "cancel": "Cancel",
         "confirm": "confirm",
         "darkTheme": "Dark Theme",
         "lang": "Language",
         "lightTheme": "Light Theme",
+        "noModelAvailable": "No Model Available",
         "other": "Other settings",
         "reset": "Reset all settings",
         "resetConfirm": "Are you sure to reset all settings?",

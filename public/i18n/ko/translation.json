@@ -17,6 +17,10 @@
         "unfinishedFirst": "미완료 우선",
         "unnamedAchievement": "이름 없는 성과"
     },
+    "ai": {
+        "inputMessage": "메시지를 입력하고 Enter 키를 눌러 보내세요",
+        "title": "AI 에이전트"
+    },
     "autobuild": {
         "charMods": "캐릭터 MOD",
         "meleeMods": "근접 모드",
@@ -98,12 +102,17 @@
         "small": "소형",
         "stance": "전투 자세",
         "target_function": "타겟 함수",
+        "team": "팀",
         "timeline": "타임라인",
         "title": "구축",
         "triggerRate": "발동률",
         "weapon": "무기",
         "weapon_attributes": "무기 속성",
         "weaponDamage": "무기 손상"
+    },
+    "errorBoundary": {
+        "retry": "재시도",
+        "title": "컴포넌트 렌더링 오류"
     },
     "game": {
         "desc": "Double Helix 캐릭터로 Auto Chess를 플레이하세요",
@@ -230,21 +239,53 @@
         "btn_pin_window": "창 고정",
         "btn_unpin_window": "고정 해제"
     },
+    "modEditor": {
+        "inputCode": "캐릭터 또는 무기 코드를 입력하세요"
+    },
     "more": {
         "desc": "더 많은 기능",
         "title": "더"
     },
+    "resizeableWindow": {
+        "and": "와",
+        "enableNotify": "알림 활성화",
+        "mihan": "비밀 편지",
+        "mihanNotificationBody": "당신이 팔로우한 {{types}}가 새로고침되었습니다",
+        "mihanNotificationTitle": "위탁 비밀 편지 알림",
+        "mihanTitle": "위탁 비밀 편지",
+        "moling": "마령",
+        "monitorSettings": "모니터 설정",
+        "nextRefresh": "다음 새로고침",
+        "onlyOnce": "한 번만",
+        "zhouben": "주간 보스"
+    },
     "setting": {
+        "ai": "AI 대모델 설정",
+        "aiApiKey": "API 키",
+        "aiApiKeyTip": "지푸 AI 오픈 플랫폼에서 API 키를 가져옵니다",
+        "aiBaseUrl": "기본 URL",
+        "aiBaseUrlTip": "API 서버 주소, 기본값은 지푸 AI입니다",
+        "aiConnectionFailed": "연결 실패",
+        "aiConnectionSuccess": "연결 성공",
+        "aiMaxTokens": "최대 토큰 수",
+        "aiMaxTokensTip": "생성된 텍스트의 최대 길이",
+        "aiModelName": "모델 이름",
+        "aiModelNameTip": "사용할 AI 모델을 선택하세요",
+        "aiReset": "AI 설정 초기화",
+        "aiTemperature": "Temperature",
+        "aiTemperatureTip": "생성된 내용의 무작위성 제어(0-1)",
+        "aiTestConnection": "연결 테스트",
         "appearance": "외관 설정",
         "cancel": "취소",
-        "confirm": "확인하다",
+        "confirm": "확인",
         "darkTheme": "다크 테마",
         "lang": "언어",
         "lightTheme": "라이트 테마",
+        "noModelAvailable": "사용 가능한 모델이 없습니다",
         "other": "기타 설정",
-        "reset": "모든 설정 재설정",
-        "resetConfirm": "모든 설정을 재설정하시겠습니까?",
-        "resetTip": "페이지에 오류가 있으면 재설정해 보세요.",
+        "reset": "모든 설정 초기화",
+        "resetConfirm": "모든 설정을 초기화하시겠습니까?",
+        "resetTip": "페이지에 오류가 있으면 초기화를 시도하세요.",
         "theme": "테마",
         "title": "설정",
         "uiScale": "UI 크기 조정",

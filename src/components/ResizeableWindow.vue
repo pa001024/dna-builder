@@ -10,12 +10,12 @@ import { env } from "../env"
 import { useRoute } from "vue-router"
 import { getCurrentWindow } from "@tauri-apps/api/window"
 import { applyMaterial, getOSVersion } from "../api/app"
-import { getInstanceInfo } from "../api/external"
 import { timeStr, useGameTimer } from "../util"
 import { useLocalStorage } from "@vueuse/core"
 import { useSound } from "@vueuse/sound"
 import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification"
 import { missionsIngameQuery } from "../api/query"
+import { t } from "i18next"
 
 const props = defineProps({
     title: { type: String },
@@ -164,8 +164,8 @@ class MihanNotify {
             }
             if (permissionGranted) {
                 sendNotification({
-                    title: "委托密函提醒",
-                    body: `你关注的${matchedTypes.join("和")}刷新了`,
+                    title: t("resizeableWindow.mihanNotificationTitle"),
+                    body: t("resizeableWindow.mihanNotificationBody", { types: matchedTypes.join(t("resizeableWindow.and")) }),
                 })
             }
         }
@@ -240,22 +240,22 @@ const mihanNotify = new MihanNotify()
                     <!-- 计时器 -->
                     <div class="flex ml-4 gap-8 items-center text-xs text-base-content/80">
                         <div class="inline-block text-center w-16 cursor-pointer" @click="mihanNotify.show()">
-                            <div>密函</div>
+                            <div>{{ $t("resizeableWindow.mihan") }}</div>
                             <div class="font-orbitron">{{ timeStr(mihan) }}</div>
                         </div>
                         <div class="inline-block text-center w-16">
-                            <div>魔灵</div>
+                            <div>{{ $t("resizeableWindow.moling") }}</div>
                             <div class="font-orbitron">{{ timeStr(moling) }}</div>
                         </div>
                         <div class="inline-block text-center w-16">
-                            <div>周本</div>
+                            <div>{{ $t("resizeableWindow.zhouben") }}</div>
                             <div class="font-orbitron">{{ timeStr(zhouben) }}</div>
                         </div>
                     </div>
                     <dialog id="mihan-dialog" class="modal">
                         <div class="modal-box bg-base-300 text-md">
                             <div class="text-lg font-bold flex justify-between items-center pb-2">
-                                委托密函
+                                {{ $t("resizeableWindow.mihanTitle") }}
 
                                 <form class="flex justify-end gap-2" method="dialog">
                                     <button class="btn btn-ghost btn-sm btn-square">
@@ -296,18 +296,18 @@ const mihanNotify = new MihanNotify()
                                 </div>
                             </div>
                             <div class="flex justify-center bg-base-100 p-3 rounded-md text-sm text-base-content/80">
-                                下次刷新: {{ timeStr(mihan) }}
+                                {{ $t("resizeableWindow.nextRefresh") }}: {{ timeStr(mihan) }}
                             </div>
                             <div class="p-4 flex flex-col gap-2">
-                                <div class="text-lg font-bold pb-2">监控设置</div>
+                                <div class="text-lg font-bold pb-2">{{ $t("resizeableWindow.monitorSettings") }}</div>
                                 <div class="flex gap-2">
                                     <label class="text-sm p-1 label">
                                         <input v-model="mihanEnableNotify" type="checkbox" class="toggle toggle-secondary" />
-                                        启用提醒
+                                        {{ $t("resizeableWindow.enableNotify") }}
                                     </label>
                                     <label v-if="mihanEnableNotify" class="text-sm p-1 label">
                                         <input v-model="mihanNotifyOnce" type="checkbox" class="toggle toggle-secondary" />
-                                        仅一次
+                                        {{ $t("resizeableWindow.onlyOnce") }}
                                     </label>
                                 </div>
                                 <div v-if="mihanEnableNotify" class="flex gap-2">

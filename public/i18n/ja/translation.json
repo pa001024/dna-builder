@@ -17,6 +17,10 @@
         "unfinishedFirst": "未完了優先",
         "unnamedAchievement": "名前のない実績"
     },
+    "ai": {
+        "inputMessage": "メッセージを入力し、Enterキーを押して送信",
+        "title": "AIエージェント"
+    },
     "autobuild": {
         "charMods": "キャラクターMOD",
         "meleeMods": "近接MOD",
@@ -98,12 +102,17 @@
         "small": "小型",
         "stance": "戦姿",
         "target_function": "目標関数",
+        "team": "チーム",
         "timeline": "タイムライン",
         "title": "構築",
         "triggerRate": "発動率",
         "weapon": "武器",
         "weapon_attributes": "武器属性",
         "weaponDamage": "武器ダメージ"
+    },
+    "errorBoundary": {
+        "retry": "再試行",
+        "title": "コンポーネントのレンダリングエラー"
     },
     "game": {
         "desc": "Double Helix キャラクターでオート チェスをプレイする",
@@ -230,17 +239,49 @@
         "btn_pin_window": "ウィンドウを固定",
         "btn_unpin_window": "固定を解除"
     },
+    "modEditor": {
+        "inputCode": "キャラクターまたは武器コードを入力してください"
+    },
     "more": {
         "desc": "その他の機能",
         "title": "もっと"
     },
+    "resizeableWindow": {
+        "and": "と",
+        "enableNotify": "通知を有効にする",
+        "mihan": "秘書",
+        "mihanNotificationBody": "フォローしている{{types}}が更新されました",
+        "mihanNotificationTitle": "委託秘書通知",
+        "mihanTitle": "委託秘書",
+        "moling": "魔霊",
+        "monitorSettings": "モニター設定",
+        "nextRefresh": "次回更新",
+        "onlyOnce": "一回だけ",
+        "zhouben": "週替わりボス"
+    },
     "setting": {
+        "ai": "AI大模型設定",
+        "aiApiKey": "APIキー",
+        "aiApiKeyTip": "智譜AIオープンプラットフォームからAPIキーを取得",
+        "aiBaseUrl": "ベースURL",
+        "aiBaseUrlTip": "APIサーバーアドレス、デフォルトは智譜AI",
+        "aiConnectionFailed": "接続失敗",
+        "aiConnectionSuccess": "接続成功",
+        "aiMaxTokens": "最大Token数",
+        "aiMaxTokensTip": "生成テキストの最大長さ",
+        "aiModelName": "モデル名",
+        "aiModelNameTip": "使用するAIモデルを選択",
+        "aiReset": "AI設定をリセット",
+        "aiTemperature": "Temperature",
+        "aiTemperatureTip": "生成内容のランダム性を制御(0-1)",
+        "aiTestConnection": "接続テスト",
         "appearance": "外観設定",
         "cancel": "キャンセル",
         "confirm": "確認",
         "darkTheme": "ダークテーマ",
         "lang": "言語",
         "lightTheme": "ライトテーマ",
+        "noModelAvailable": "利用可能なモデルはありません",
         "other": "その他の設定",
         "reset": "すべての設定をリセット",
         "resetConfirm": "すべての設定をリセットしてもよろしいですか？",
@@ -253,7 +294,7 @@
         "winMaterial": "ウィンドウ素材"
     },
     "timeline": {
-        "desc": "キャラクターの戦闘ロジックをカスタマイズ（軸戦闘）",
+        "desc": "キャラクターの戦闘ロジックをカスタマイズする",
         "title": "タイムライン"
     }
 }

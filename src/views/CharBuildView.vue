@@ -111,6 +111,21 @@ const selectedBuffs = computed(() =>
         .filter((b) => b !== null),
 )
 
+const team1Options = computed(() =>
+    [{ value: "-", label: "无", elm: "", icon: `/imgs/1.png` }].concat(
+        charOptions.filter((char) => char.label !== selectedChar.value && char.label !== charSettings.value.team2),
+    ),
+)
+const team2Options = computed(() =>
+    [{ value: "-", label: "无", elm: "", icon: `/imgs/1.png` }].concat(
+        charOptions.filter((char) => char.label !== selectedChar.value && char.label !== charSettings.value.team1),
+    ),
+)
+
+const teamWeaponOptions = computed(() =>
+    [{ value: "-", label: "无", type: "", icon: `/imgs/1.png` }].concat(meleeWeaponOptions.concat(rangedWeaponOptions)),
+)
+
 // 创建CharBuild实例
 const charBuild = computed(
     () =>
@@ -206,8 +221,10 @@ const toggleBuff = (buff: LeveledBuff) => {
     const index = charSettings.value.buffs.findIndex((v) => v[0] === buff.名称)
     if (index > -1) {
         charSettings.value.buffs.splice(index, 1)
+        teamBuffLvs.value[buff.名称] = 0
     } else {
         charSettings.value.buffs.push([buff.名称, buff.等级])
+        teamBuffLvs.value[buff.名称] = buff.等级
     }
     updateCharBuild()
 }
@@ -215,6 +232,7 @@ function setBuffLv(buff: LeveledBuff, lv: number) {
     const index = charSettings.value.buffs.findIndex((v) => v[0] === buff.名称)
     if (index > -1) {
         charSettings.value.buffs[index][1] = lv
+        teamBuffLvs.value[buff.名称] = lv
     }
     updateCharBuild()
 }
@@ -257,6 +275,9 @@ const resetConfig = () => {
     charSettings.value.meleeMods = Array(8).fill(null)
     charSettings.value.rangedMods = Array(8).fill(null)
     charSettings.value.skillWeaponMods = Array(4).fill(null)
+    charSettings.value.buffs = []
+    charSettings.value.team1 = "-"
+    charSettings.value.team2 = "-"
 }
 // 导入配置
 const loadConfig = () => {
@@ -363,6 +384,22 @@ const summonAttributes = computed(() => {
     }
     return undefined
 })
+
+const teamBuffLvs = useLocalStorage("teamBuffLvs", {} as Record<string, number>)
+
+function updateTeamBuff(newValue: string, oldValue: string) {
+    // 移除旧的BUFF
+    charSettings.value.buffs = charSettings.value.buffs.filter((v) => !v[0].includes(oldValue))
+    if (newValue === "-") return
+
+    // 添加新的BUFF
+    const teamBuffs = buffOptions.value.filter((v) => v.label.includes(newValue))
+    if (teamBuffs.length > 0) {
+        charSettings.value.buffs.push(
+            ...teamBuffs.map((v) => [v.label, teamBuffLvs.value[v.label] || v.value.等级] as [string, number]).filter((v) => v[1] > 0),
+        )
+    }
+}
 </script>
 
 <template>
@@ -877,12 +914,85 @@ const summonAttributes = computed(() => {
             />
             <!-- BUFF列表 -->
             <div id="buff-container" class="bg-base-300 rounded-xl p-4 shadow-lg mb-6">
-                <div class="flex items-center justify-between mb-3">
+                <div class="flex flex-wrap items-center justify-between mb-3">
                     <div class="flex items-center gap-2">
                         <SectionMarker />
                         <h3 class="text-lg font-semibold">{{ $t("char-build.buff_list") }}</h3>
                     </div>
-                    <div class="text-sm text-gray-400">{{ $t("char-build.selected_count", { count: selectedBuffs.length }) }}</div>
+                    <div class="ml-auto flex gap-4 items-center">
+                        <div class="flex flex-col sm:flex-row gap-4 mx-4 items-center">
+                            <!-- 协战 -->
+                            <span class="text-sm font-semibold text-primary whitespace-nowrap">{{ $t("char-build.team") }}</span>
+                            <Select
+                                class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap min-w-22"
+                                v-model="charSettings.team1"
+                                @change="updateTeamBuff"
+                            >
+                                <template v-for="charWithElm in groupBy(team1Options, 'elm')" :key="charWithElm[0].elm">
+                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
+                                        {{ charWithElm[0].elm }}
+                                    </SelectLabel>
+                                    <SelectGroup>
+                                        <SelectItem v-for="char in charWithElm" :key="char.value" :value="char.value">
+                                            {{ char.label }}
+                                        </SelectItem>
+                                    </SelectGroup>
+                                </template>
+                            </Select>
+
+                            <Select
+                                class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap min-w-22"
+                                v-model="charSettings.team1Weapon"
+                                @change="updateTeamBuff"
+                            >
+                                <template v-for="weaponWithType in groupBy(teamWeaponOptions, 'type')" :key="weaponWithType[0].type">
+                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
+                                        {{ weaponWithType[0].type }}
+                                    </SelectLabel>
+                                    <SelectGroup>
+                                        <SelectItem v-for="char in weaponWithType" :key="char.value" :value="char.value">
+                                            {{ char.label }}
+                                        </SelectItem>
+                                    </SelectGroup>
+                                </template>
+                            </Select>
+
+                            <Select
+                                class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap min-w-22"
+                                v-model="charSettings.team2"
+                                @change="updateTeamBuff"
+                            >
+                                <template v-for="charWithElm in groupBy(team2Options, 'elm')" :key="charWithElm[0].elm">
+                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
+                                        {{ charWithElm[0].elm }}
+                                    </SelectLabel>
+                                    <SelectGroup>
+                                        <SelectItem v-for="char in charWithElm" :key="char.value" :value="char.value">
+                                            {{ char.label }}
+                                        </SelectItem>
+                                    </SelectGroup>
+                                </template>
+                            </Select>
+
+                            <Select
+                                class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap min-w-22"
+                                v-model="charSettings.team2Weapon"
+                                @change="updateTeamBuff"
+                            >
+                                <template v-for="weaponWithType in groupBy(teamWeaponOptions, 'type')" :key="weaponWithType[0].type">
+                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
+                                        {{ weaponWithType[0].type }}
+                                    </SelectLabel>
+                                    <SelectGroup>
+                                        <SelectItem v-for="char in weaponWithType" :key="char.value" :value="char.value">
+                                            {{ char.label }}
+                                        </SelectItem>
+                                    </SelectGroup>
+                                </template>
+                            </Select>
+                        </div>
+                        <div class="text-sm text-gray-400">{{ $t("char-build.selected_count", { count: selectedBuffs.length }) }}</div>
+                    </div>
                 </div>
                 <BuffEditer
                     :buff-options="buffOptions"

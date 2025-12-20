@@ -67,8 +67,6 @@ function writeCustomBuff() {
     buffMap.set("自定义BUFF", buffObj)
 }
 
-writeCustomBuff()
-
 // 定义组件事件
 const emit = defineEmits<{
     // 提交自定义buff列表，格式为[string, number][]
@@ -119,7 +117,7 @@ const addBuff = () => {
         const existingIndex = customBuff.value.findIndex((buff) => buff[0] === newBuff.property)
         if (existingIndex !== -1) {
             // 如果存在，更新数值
-            customBuff.value[existingIndex][1] = newBuff.value
+            customBuff.value[existingIndex][1] += newBuff.value
         } else {
             // 如果不存在，添加新buff
             customBuff.value.push([newBuff.property, newBuff.value])

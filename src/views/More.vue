@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { IconTypes } from "../components/Icon.vue"
+import { env } from "../env"
 
 const items = [
     {
@@ -33,17 +34,23 @@ const items = [
         icon: "la:gamepad-solid",
     },
     {
+        name: "ai",
+        path: "/ai",
+        icon: "ri:robot-2-line",
+        show: env.isApp,
+    },
+    {
         name: "help",
         path: "/help",
         icon: "ri:question-line",
     },
-] satisfies { name: string; path: string; icon: IconTypes }[]
+] satisfies { name: string; path: string; icon: IconTypes; show?: boolean }[]
 </script>
 <template>
     <div class="h-full">
         <div class="p-4 grid grid-cols-2 lg:grid-cols-4 w-full justify-items-center gap-4">
             <RouterLink
-                v-for="item in items"
+                v-for="item in items.filter((item) => item.show !== false)"
                 :key="item.name"
                 :to="item.path"
                 class="container flex flex-col justify-center items-center p-8 gap-2 bg-base-100/50 hover:bg-base-100 hover:animate-pulse transition-all duration-500 rounded-lg"

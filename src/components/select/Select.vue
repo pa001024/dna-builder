@@ -10,7 +10,7 @@ import {
     SelectViewport,
     useForwardPropsEmits,
 } from "radix-vue"
-import type { SelectRootEmits, SelectRootProps } from "radix-vue"
+import type { SelectRootProps } from "radix-vue"
 import Icon from "../Icon.vue"
 import { watch } from "vue"
 
@@ -43,11 +43,19 @@ const props = defineProps<
         modelValue?: any
     }
 >()
-const emits = defineEmits<SelectRootEmits & { change: [value: any] }>()
+const emits = defineEmits<{
+    /** Event handler called when the value changes. */
+    "update:modelValue": [value: any]
+    /** Event handler called when the open state of the context menu changes. */
+    "update:open": [value: boolean]
+    change: [value: any, oldValue: any]
+}>()
 watch(
     () => props.modelValue,
-    (newValue) => {
-        emits("change", newValue)
+    (newValue, oldValue) => {
+        if (newValue !== oldValue) {
+            emits("change", newValue, oldValue)
+        }
     },
 )
 
