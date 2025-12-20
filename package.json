@@ -8,6 +8,8 @@
         "dev": "vite",
         "lint": "vue-tsc --noEmit",
         "build": "vite build",
+        "build:mcp": "cd mcp_server && cargo build --release --bin dna_mcp_server && node build.mjs",
+        "build:all": "pnpm build && pnpm build:mcp",
         "preview": "vite preview",
         "tauri": "tauri",
         "tb": "tauri build",
@@ -19,6 +21,7 @@
         "ver": "node .husky/update-version.js"
     },
     "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.25.1",
         "@tauri-apps/api": "^2",
         "@tauri-apps/plugin-clipboard-manager": "^2.3.2",
         "@tauri-apps/plugin-dialog": "~2.4.2",

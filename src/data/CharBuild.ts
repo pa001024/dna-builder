@@ -1093,6 +1093,7 @@ export class CharBuild {
     }
 
     static indepSeries = ["百首", "狮鹫", "中庭蛇"]
+    static elmSeries = ["狮鹫", "百首", "契约者"]
     static exclusiveSeries = [...CharBuild.indepSeries, "审判者", "巨鲸", "金乌", "焰灵", "黄衣", "夜使"]
     /**
      * 自动构筑

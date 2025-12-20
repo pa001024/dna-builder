@@ -175,7 +175,7 @@ export class LeveledMod implements Mod {
     }
 
     get url() {
-        if (this.系列 && CharBuild.indepSeries.includes(this.系列)) return `/imgs/${this.属性}${this.系列}.png`
+        if (this.系列 && CharBuild.elmSeries.includes(this.系列)) return `/imgs/${this.属性}${this.系列}.png`
         return `/imgs/${this.系列}系列.png`
     }
 

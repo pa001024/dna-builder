@@ -1,5 +1,24 @@
 import OpenAI from "openai"
 import type { ChatCompletionMessageParam } from "openai/resources/index.mjs"
+import { Client as McpClient } from "@modelcontextprotocol/sdk/client"
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js"
+
+// 工具调用类型定义
+export interface ToolCall {
+    id: string
+    type: string
+    function: {
+        name: string
+        arguments: string
+    }
+}
+
+// 工具调用结果定义
+export interface ToolCallResult {
+    tool_call_id: string
+    role: "tool"
+    content: string
+}
 
 // 智谱AI OpenAI兼容API接口
 // 参考: https://docs.bigmodel.cn/cn/guide/develop/openai/introduction
@@ -14,6 +33,10 @@ export interface OpenAIConfig {
     default_temperature: number
     default_max_tokens: number
     system_prompt: string
+    mcp_server_url: string
+    mcp_server_port: number
+    mcp_server_retry_count?: number
+    mcp_server_retry_interval?: number
 }
 
 // 默认配置
@@ -30,7 +53,7 @@ const DEFAULT_CONFIG: OpenAIConfig = {
 你是接入《二重螺旋》游戏的自动化操作 AI Agent，需通过调用指定工具（image_grab 截图分析、run_script 执行脚本实现鼠标键盘的控制），实现游戏核心流程的自动化执行，包括但不限于跑图探索、战斗攻坚、资源收集、角色养成等场景。
 ### 核心目标
 
-优先完成高效资源积累：聚焦委托密函获取、魔之楔刷取、武器材料采集（优先 “无尽” 标签副本），兼顾角色突破与技能升级需求；
+优先完成高效资源积累：聚焦委托密函获取、魔之楔刷取、武器材料采集（优先 "无尽" 标签副本），兼顾角色突破与技能升级需求；
 保障操作流畅性：遵循游戏立体移动与战斗机制，规避无效操作，提升任务完成效率；
 规避养成误区：合理分配转移模块、魔之楔强化资源，避免低效率副本（如素材迁移关卡）。
 
@@ -59,7 +82,7 @@ Q = 角色Q技能
 #### 1. image_grab 截图分析职责
 实时识别场景类型：战斗（敌人位置 / 血量条）、探索（传送点 / 解谜元素 / 交互 NPC）、副本结算（奖励类型识别）；
 关键视觉判断：
-识别 “无尽” 副本标签、委托任务类型（规避迁移关卡）；
+识别 "无尽" 副本标签、委托任务类型（规避迁移关卡）；
 检测敌人攻击预警（红色范围标识）、自身血量 / 神智值（蓝量）状态；
 定位交互图标（NPC 对话气泡、宝箱、传送点高亮标识）。
 
@@ -73,14 +96,108 @@ mover(x: number, y: number, duration: number = 40)：模拟鼠标移动相对坐
 #### 3. 决策逻辑优先级
 场景判断：通过 image_grab 确认当前是战斗 / 探索 / 养成界面，匹配对应操作流程；
 风险规避：战斗中通过 image_grab 识别敌人攻击范围，用 Shift 闪避 + 螺旋飞跃脱离危险区域；
-资源取舍：委托任务优先选择 10 次保底高阶奖励（角色碎片 / 武器设计稿），材料采集优先 “无尽” 副本；
-异常处理：若截图识别到 “兑换失败”“副本超时” 提示，通过 run_script 返回主城，重新规划目标。
+资源取舍：委托任务优先选择 10 次保底高阶奖励（角色碎片 / 武器设计稿），材料采集优先 "无尽" 副本；
+异常处理：若截图识别到 "兑换失败""副本超时" 提示，通过 run_script 返回主城，重新规划目标。
 
 ### 安全限制
 禁止高频重复点击同一位置（避免触发游戏防作弊机制）；
 武器铸造需确认材料齐全（2 个利刃药剂 / 爆弹 + 对应部件）后再执行
 魔之楔强化前需检查同品质素材数量，禁止过度消耗核心资源。
 `,
+    mcp_server_url: "http://127.0.0.1",
+    mcp_server_port: 28080,
+    mcp_server_retry_count: 3,
+    mcp_server_retry_interval: 1000,
+}
+
+/**
+ * 调用MCP服务器工具
+ * @param tool 工具名称
+ * @param params 工具参数
+ * @param config MCP服务器配置
+ * @returns 工具调用结果
+ */
+async function callMcpTool(tool: string, params: Record<string, any>, config: OpenAIConfig): Promise<any> {
+    const url = `${config.mcp_server_url}:${config.mcp_server_port}`
+    const retryCount = config.mcp_server_retry_count || 3
+    const retryInterval = config.mcp_server_retry_interval || 1000
+
+    for (let i = 0; i <= retryCount; i++) {
+        try {
+            // 创建Streamable HTTP传输实例（支持text/event-stream）
+            const transport = new StreamableHTTPClientTransport(new URL(url), {
+                requestInit: {
+                    signal: AbortSignal.timeout(config.timeout),
+                },
+            })
+
+            // 创建MCP客户端
+            const client = new McpClient({
+                version: "1.0.0",
+                name: "dna-builder",
+            })
+
+            // 连接到服务器
+            await client.connect(transport)
+
+            // 调用工具
+            const result = await client.callTool({
+                name: tool,
+                arguments: params,
+            })
+
+            // 关闭连接
+            await client.close()
+
+            // 返回结果数据
+            return result.structuredContent || result.content
+        } catch (error) {
+            // 如果是最后一次重试，则抛出异常
+            if (i === retryCount) {
+                throw new Error(`MCP调用失败(${i + 1}/${retryCount + 1}次尝试): ${error instanceof Error ? error.message : "未知错误"}`)
+            }
+
+            // 记录错误并等待后重试
+            console.warn(
+                `MCP调用失败(${i + 1}/${retryCount + 1}次尝试)，${retryInterval}ms后重试: ${error instanceof Error ? error.message : "未知错误"}`,
+            )
+            await new Promise((resolve) => setTimeout(resolve, retryInterval))
+        }
+    }
+
+    throw new Error("MCP调用失败: 达到最大重试次数")
+}
+
+/**
+ * 截图游戏窗口
+ * @param process_name 游戏进程名称
+ * @param config MCP服务器配置
+ * @returns base64编码的图片数据
+ */
+async function imageGrab(process_name: string, config: OpenAIConfig): Promise<string> {
+    try {
+        const result = await callMcpTool("image_grab", { process_name }, config)
+        return result.image
+    } catch (error) {
+        console.error("截图失败:", error)
+        throw new Error(`截图失败: ${error instanceof Error ? error.message : "未知错误"}`)
+    }
+}
+
+/**
+ * 执行AHKv2脚本
+ * @param script AHKv2脚本内容
+ * @param config MCP服务器配置
+ * @returns 脚本执行结果
+ */
+async function runScript(script: string, config: OpenAIConfig): Promise<{ output: string; error: string }> {
+    try {
+        const result = await callMcpTool("run_script", { script }, config)
+        return result
+    } catch (error) {
+        console.error("脚本执行失败:", error)
+        throw new Error(`脚本执行失败: ${error instanceof Error ? error.message : "未知错误"}`)
+    }
 }
 
 // AI客户端类 - 统一配置管理和对话上下文
@@ -119,6 +236,39 @@ export class AIClient {
     private validateConfig(): void {
         if (!this.config.api_key || this.config.api_key.trim() === "") {
             throw new Error("API密钥不能为空")
+        }
+
+        // 验证MCP服务器配置
+        if (!this.config.mcp_server_url || !this.config.mcp_server_port) {
+            throw new Error("MCP服务器配置不完整")
+        }
+    }
+
+    /**
+     * 处理AI返回的工具调用
+     * @param toolCall AI返回的工具调用请求
+     * @returns 工具调用结果
+     */
+    private async handleToolCall(toolCall: ToolCall): Promise<ToolCallResult> {
+        const functionName = toolCall.function.name
+        const args = JSON.parse(toolCall.function.arguments)
+
+        let result
+        switch (functionName) {
+            case "image_grab":
+                result = await imageGrab(args.process_name, this.config)
+                break
+            case "run_script":
+                result = await runScript(args.script, this.config)
+                break
+            default:
+                throw new Error(`未知工具: ${functionName}`)
+        }
+
+        return {
+            tool_call_id: toolCall.id,
+            role: "tool",
+            content: JSON.stringify(result),
         }
     }
 
@@ -176,7 +326,7 @@ export class AIClient {
     }
 
     /**
-     * 发送聊天消息
+     * 发送聊天消息（支持工具调用）
      * @param message 消息内容
      * @param options 可选参数
      * @returns 聊天响应
@@ -214,16 +364,77 @@ export class AIClient {
                 messages: this.messages,
                 temperature,
                 max_tokens,
+                tools: [
+                    {
+                        type: "function",
+                        function: {
+                            name: "image_grab",
+                            description: "截图游戏窗口",
+                            parameters: {
+                                type: "object",
+                                properties: {
+                                    process_name: {
+                                        type: "string",
+                                        description: "游戏进程名称",
+                                    },
+                                },
+                                required: ["process_name"],
+                            },
+                        },
+                    },
+                    {
+                        type: "function",
+                        function: {
+                            name: "run_script",
+                            description: "执行AHKv2脚本",
+                            parameters: {
+                                type: "object",
+                                properties: {
+                                    script: {
+                                        type: "string",
+                                        description: "AHKv2脚本内容",
+                                    },
+                                },
+                                required: ["script"],
+                            },
+                        },
+                    },
+                ],
             })
 
             if (!completion.choices || completion.choices.length === 0) {
                 throw new Error("API返回数据格式错误")
             }
 
-            const response = completion.choices[0].message.content || ""
+            const choicesMessage = completion.choices[0].message
 
-            // 更新上下文
-            this.addMessage({
+            // 处理工具调用
+            if (choicesMessage.tool_calls) {
+                for (const toolCall of choicesMessage.tool_calls) {
+                    const toolResult = await this.handleToolCall(toolCall as ToolCall)
+                    this.messages.push(toolResult as any)
+                }
+
+                // 继续对话，获取AI对工具调用结果的响应
+                const followupCompletion = await this.client.chat.completions.create({
+                    model,
+                    messages: this.messages,
+                    temperature,
+                    max_tokens,
+                })
+
+                const response = followupCompletion.choices[0].message.content || ""
+                this.messages.push({
+                    role: "assistant",
+                    content: response,
+                })
+
+                return response
+            }
+
+            // 常规文本响应
+            const response = choicesMessage.content || ""
+            this.messages.push({
                 role: "assistant",
                 content: response,
             })
@@ -335,7 +546,7 @@ export class AIClient {
     }
 
     /**
-     * 流式对话
+     * 流式对话（支持工具调用）
      * @param messages 消息数组
      * @param onChunk 数据块回调
      * @param options 可选参数
@@ -390,9 +601,48 @@ export class AIClient {
                 temperature,
                 max_tokens,
                 stream: true,
+                tools: [
+                    {
+                        type: "function",
+                        function: {
+                            name: "image_grab",
+                            description: "截图游戏窗口",
+                            parameters: {
+                                type: "object",
+                                properties: {
+                                    process_name: {
+                                        type: "string",
+                                        description: "游戏进程名称",
+                                    },
+                                },
+                                required: ["process_name"],
+                            },
+                        },
+                    },
+                    {
+                        type: "function",
+                        function: {
+                            name: "run_script",
+                            description: "执行AHKv2脚本",
+                            parameters: {
+                                type: "object",
+                                properties: {
+                                    script: {
+                                        type: "string",
+                                        description: "AHKv2脚本内容",
+                                    },
+                                },
+                                required: ["script"],
+                            },
+                        },
+                    },
+                ],
             })
 
             let fullResponse = ""
+            let toolCalls: any[] = []
+            let currentToolCall: any = null
+
             for await (const chunk of stream) {
                 // 检查是否需要中断
                 if (this.isStreamInterrupted) {
@@ -401,8 +651,41 @@ export class AIClient {
                     break
                 }
 
-                const content = chunk.choices[0]?.delta?.content
-                if (content) {
+                const choice = chunk.choices[0]
+                if (choice?.delta?.tool_calls) {
+                    // 处理工具调用
+                    for (const tool_call of choice.delta.tool_calls) {
+                        if (tool_call.index === 0 && tool_call.id) {
+                            // 新的工具调用开始
+                            currentToolCall = {
+                                id: tool_call.id,
+                                type: "function",
+                                function: {
+                                    name: "",
+                                    arguments: "",
+                                },
+                            }
+                        }
+
+                        if (currentToolCall) {
+                            // 更新工具调用信息
+                            if (tool_call.function?.name) {
+                                currentToolCall.function.name = tool_call.function.name
+                            }
+                            if (tool_call.function?.arguments) {
+                                currentToolCall.function.arguments += tool_call.function.arguments
+                            }
+
+                            // 如果是最后一个片段，添加到工具调用列表
+                            if (choice.finish_reason === "tool_calls") {
+                                toolCalls.push(currentToolCall)
+                                currentToolCall = null
+                            }
+                        }
+                    }
+                } else if (choice?.delta?.content) {
+                    // 常规文本内容
+                    const content = choice.delta.content
                     fullResponse += content
                     onChunk(content)
                 }
@@ -431,10 +714,48 @@ export class AIClient {
                     })
 
                     // 添加助手的响应
-                    this.messages.push({
-                        role: "assistant",
-                        content: fullResponse,
-                    })
+                    if (toolCalls.length > 0) {
+                        // 处理工具调用
+                        for (const toolCall of toolCalls) {
+                            const toolResult = await this.handleToolCall(toolCall as ToolCall)
+                            this.messages.push(toolResult as any)
+                        }
+
+                        // 继续对话，获取AI对工具调用结果的响应
+                        const followupStream = await this.client.chat.completions.create({
+                            model,
+                            messages: this.messages,
+                            temperature,
+                            max_tokens,
+                            stream: true,
+                        })
+
+                        let followupResponse = ""
+                        for await (const chunk of followupStream) {
+                            // 检查是否需要中断
+                            if (this.isStreamInterrupted) {
+                                this.isStreamInterrupted = false
+                                break
+                            }
+
+                            const content = chunk.choices[0]?.delta?.content
+                            if (content) {
+                                followupResponse += content
+                                onChunk(content)
+                            }
+                        }
+
+                        this.messages.push({
+                            role: "assistant",
+                            content: followupResponse,
+                        })
+                    } else {
+                        // 常规文本响应
+                        this.messages.push({
+                            role: "assistant",
+                            content: fullResponse,
+                        })
+                    }
                 }
             }
         } catch (error) {
@@ -505,6 +826,41 @@ export class AIClient {
             return true
         } catch (error) {
             console.error("API密钥验证失败:", error)
+            return false
+        }
+    }
+
+    /**
+     * 验证MCP服务器连接是否有效
+     * @returns 是否有效
+     */
+    public async validateMcpServer(): Promise<boolean> {
+        try {
+            // 创建Streamable HTTP传输实例（支持text/event-stream）
+            const url = `${this.config.mcp_server_url}:${this.config.mcp_server_port}`
+            const transport = new StreamableHTTPClientTransport(new URL(url), {
+                requestInit: {
+                    signal: AbortSignal.timeout(this.config.timeout),
+                },
+            })
+
+            // 创建MCP客户端
+            const client = new McpClient({
+                version: "1.0.0",
+                name: "dna-builder",
+            })
+
+            // 连接到服务器
+            await client.connect(transport)
+
+            // 调用listTools方法测试连接
+            await client.listTools({})
+
+            // 关闭连接
+            await client.close()
+            return true
+        } catch (error) {
+            console.error("MCP服务器连接验证失败:", error)
             return false
         }
     }
