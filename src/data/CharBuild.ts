@@ -1092,7 +1092,8 @@ export class CharBuild {
         }
     }
 
-    static exclusiveSeries = ["百首", "狮鹫", "中庭蛇"]
+    static indepSeries = ["百首", "狮鹫", "中庭蛇"]
+    static exclusiveSeries = [...CharBuild.indepSeries, "审判者", "巨鲸", "金乌", "焰灵", "黄衣", "夜使"]
     /**
      * 自动构筑
      * @param buildOptions 构筑参数
@@ -1140,7 +1141,7 @@ export class CharBuild {
         function addMod(key: ModTypeKey, mod: LeveledMod) {
             localBuild[key].push(mod)
             // 记录互斥系列
-            if (CharBuild.exclusiveSeries.includes(mod.系列)) {
+            if (CharBuild.indepSeries.includes(mod.系列)) {
                 selectedExclusiveSeries[key].add(mod.系列)
             }
             // 记录非契约者MOD名称（用于名称互斥）
@@ -1154,7 +1155,7 @@ export class CharBuild {
             const mod = localBuild[key][index]
             localBuild[key].splice(index, 1)
             // 从互斥系列集合中移除
-            if (CharBuild.exclusiveSeries.includes(mod.系列)) {
+            if (CharBuild.indepSeries.includes(mod.系列)) {
                 selectedExclusiveSeries[key].delete(mod.系列)
             }
             // 从非契约者MOD名称集合中移除

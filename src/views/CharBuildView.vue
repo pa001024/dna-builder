@@ -21,7 +21,7 @@ const modOptions = data.mod
         type: mod.类型,
         limit: mod.属性 || mod.限定,
         ser: mod.系列,
-        icon: mod.系列 && ["狮鹫", "百首", "契约者"].includes(mod.系列) ? `/imgs/${mod.属性}${mod.系列}.png` : `/imgs/${mod.系列}系列.png`,
+        icon: mod.系列 && CharBuild.indepSeries.includes(mod.系列) ? `/imgs/${mod.属性}${mod.系列}.png` : `/imgs/${mod.系列}系列.png`,
         count: Math.min(inv.getModCount(mod.id, mod.品质), mod.系列 !== "契约者" ? 8 : 1),
         bufflv: inv.getBuffLv(mod.名称),
         lv: inv.getModLv(mod.id, mod.品质),

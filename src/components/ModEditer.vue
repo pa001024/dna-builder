@@ -45,7 +45,7 @@ const sortedModOptions = computed(() => {
         props.mods.forEach((mod) => {
             if (mod) {
                 // 记录互斥系列
-                if (["百首", "狮鹫", "中庭蛇"].includes(mod.系列)) {
+                if (CharBuild.exclusiveSeries.includes(mod.系列)) {
                     equippedExclusiveSeries.add(mod.系列)
                 }
                 // 记录非契约者MOD名称（用于名称互斥）
