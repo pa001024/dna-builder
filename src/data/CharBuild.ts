@@ -265,6 +265,35 @@ export class CharBuild {
         let ignoreDefense = this.getTotalBonusMul("无视防御")
         let independentDamageIncrease = this.getTotalBonusMul("独立增伤")
 
+        // 应用MOD属性加成
+        let modAttributeBonus = this.getTotalBonus("MOD属性")
+        if (modAttributeBonus > 0) {
+            // 计算狮鹫百首契约者MOD属性加成
+            const modsBySeries = this.mods.filter((mod) => ["狮鹫", "百首", "契约者"].includes(mod.系列))
+            console.log(modsBySeries, modAttributeBonus)
+            attackBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "攻击")
+            healthBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "生命")
+            shieldBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "护盾")
+            defenseBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "防御")
+            sanityBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "神智")
+            elemDamageBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "属性伤")
+            power += modAttributeBonus * this.getModsBonus(modsBySeries, "威力")
+            durability += modAttributeBonus * this.getModsBonus(modsBySeries, "耐久")
+            efficiency += modAttributeBonus * this.getModsBonus(modsBySeries, "效益")
+            range += modAttributeBonus * this.getModsBonus(modsBySeries, "范围")
+            boost += modAttributeBonus * this.getModsBonus(modsBySeries, "昂扬")
+            desperate += modAttributeBonus * this.getModsBonus(modsBySeries, "背水")
+            damageIncrease += modAttributeBonus * this.getModsBonus(modsBySeries, "增伤")
+            weaponDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "武器伤害")
+            skillDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "技能伤害")
+            skillSpeed += modAttributeBonus * this.getModsBonus(modsBySeries, "技能速度")
+            penetration += modAttributeBonus * this.getModsBonus(modsBySeries, "属性穿透")
+            imbalanceDamageBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "失衡易伤")
+            skillAdd += modAttributeBonus * this.getModsBonus(modsBySeries, "技能倍率加数")
+            summonAttackSpeed += modAttributeBonus * this.getModsBonus(modsBySeries, "召唤物攻击速度")
+            summonRange += modAttributeBonus * this.getModsBonus(modsBySeries, "召唤物范围")
+        }
+
         if (props && ("类别" in props || !props.类型 || props.类型 === "角色")) {
             if (minus) {
                 attackBonus -= this.getTotalBonusSingle(props, "攻击")
@@ -628,6 +657,21 @@ export class CharBuild {
                 bonus += buff[attribute]
             }
         })
+
+        return bonus
+    }
+
+    public getModsBonus(mods: LeveledMod[], attribute: string, prefix = "角色"): number {
+        let bonus = 0
+
+        // 添加MOD加成
+        if (prefix === "角色" || !attribute.startsWith(prefix))
+            mods.forEach((mod) => {
+                if (prefix && mod.类型 !== prefix) return
+                if (typeof mod[attribute] === "number") {
+                    bonus += mod[attribute]
+                }
+            })
 
         return bonus
     }
