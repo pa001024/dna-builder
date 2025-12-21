@@ -4,6 +4,28 @@ import { useSettingStore } from "../store/setting"
 import { ref, onMounted, watch } from "vue"
 import { db, type Conversation, type Message, type UMessage, type UConversation } from "../store/db"
 import type { ChatCompletionMessageParam } from "openai/resources/index.mjs"
+import MarkdownIt from "markdown-it"
+// @ts-ignore - 未类型化模块
+import mdKatex from "markdown-it-katex"
+import mdHighlightjs from "markdown-it-highlightjs"
+import "highlight.js/styles/github.css"
+
+// 创建markdown-it实例，支持latex和代码高亮
+const md = MarkdownIt({
+    html: false,
+    linkify: true,
+    typographer: true,
+    breaks: true,
+})
+    .use(mdKatex, {
+        throwOnError: false,
+    })
+    .use(mdHighlightjs)
+
+// 渲染markdown，支持latex和代码高亮
+function renderMarkdown(text: string): string {
+    return md.render(text)
+}
 
 const setting = useSettingStore()
 
@@ -48,11 +70,34 @@ async function loadConversations() {
     }
 }
 
+// 渲染单条消息
+function renderMessage(message: Message) {
+    if (!message.renderedContent) {
+        try {
+            const rendered = renderMarkdown(message.content)
+            message.renderedContent = rendered
+        } catch (error) {
+            console.error("Markdown rendering failed:", error)
+            // Fallback to plain text
+            message.renderedContent = message.content
+        }
+    }
+}
+
+// 渲染所有消息
+function renderAllMessages() {
+    for (const message of messages.value) {
+        renderMessage(message)
+    }
+}
+
 // 加载消息
 async function loadMessages(conversationId: number) {
     try {
         // 使用Dexie的查询API在数据库层面过滤和排序，提高效率
         messages.value = await db.messages.where("conversationId").equals(conversationId).toArray()
+        // 渲染所有消息
+        renderAllMessages()
         scrollToBottom()
     } catch (error) {
         console.error("加载消息失败:", error)
@@ -175,18 +220,28 @@ async function generateAIResponse() {
                     content: msg.content,
                 }
             })
+        // Helper function for streaming updates
+        function updateStreamingMessage(chunk: string) {
+            const lastIndex = messages.value.length - 1
+            if (lastIndex >= 0) {
+                const msg = messages.value[lastIndex]
+                msg.content += chunk
+                msg.renderedContent = undefined
+            }
+        }
 
+        function finalizeStreamingMessage() {
+            const lastIndex = messages.value.length - 1
+            if (lastIndex >= 0) {
+                renderMessage(messages.value[lastIndex])
+            }
+        }
         // 使用流式对话
         let fullResponse = ""
         await client.streamChat(
             chatHistory,
             (chunk: string) => {
-                fullResponse += chunk
-                // 更新消息内容 - 使用messages数组直接更新，确保响应式生效
-                const lastIndex = messages.value.length - 1
-                if (lastIndex >= 0) {
-                    messages.value[lastIndex].content = fullResponse
-                }
+                updateStreamingMessage(chunk)
                 // 如果用户在底部，自动滚动
                 if (isUserAtBottom.value) {
                     scrollToBottom()
@@ -198,6 +253,13 @@ async function generateAIResponse() {
                 max_tokens: setting.aiMaxTokens,
             },
         )
+        finalizeStreamingMessage()
+
+        // 渲染最终的AI回复
+        const lastIndex = messages.value.length - 1
+        if (lastIndex >= 0) {
+            renderMessage(messages.value[lastIndex])
+        }
 
         // 保存完整的AI回复到数据库
         await db.messages.update(messageId, {
@@ -397,7 +459,10 @@ async function generateAIResponseFromImage() {
                 // 更新消息内容 - 使用messages数组直接更新，确保响应式生效
                 const lastIndex = messages.value.length - 1
                 if (lastIndex >= 0) {
-                    messages.value[lastIndex].content = fullResponse
+                    const msg = messages.value[lastIndex]
+                    msg.content = fullResponse
+                    // 清除旧的渲染内容，在下一次渲染时重新生成
+                    msg.renderedContent = undefined
                 }
                 // 如果用户在底部，自动滚动
                 if (isUserAtBottom.value) {
@@ -410,6 +475,12 @@ async function generateAIResponseFromImage() {
                 max_tokens: setting.aiMaxTokens,
             },
         )
+
+        // 渲染最终的AI回复
+        const lastIndex = messages.value.length - 1
+        if (lastIndex >= 0) {
+            renderMessage(messages.value[lastIndex])
+        }
 
         // 保存完整的AI回复到数据库
         await db.messages.update(messageId, {
@@ -521,7 +592,8 @@ onMounted(() => {
                                 msg.role === 'user' ? 'bg-primary text-white rounded-tr-none' : 'bg-gray-100 text-gray-800 rounded-tl-none',
                             ]"
                         >
-                            <p class="text-wrap break-all">{{ msg.content }}</p>
+                            <!-- 使用计算属性或异步渲染的方式处理markdown -->
+                            <div v-html="msg.renderedContent || msg.content" class="markdown-content"></div>
                             <!-- 图片消息 -->
                             <img
                                 v-if="msg.imageUrl"
@@ -583,25 +655,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* 自定义滚动条样式 */
-:deep(.scroll-area__scrollbar) {
-    background-color: rgba(0, 0, 0, 0.1);
-    width: 6px;
-}
-
-:deep(.scroll-area__scrollbar:hover) {
-    background-color: rgba(0, 0, 0, 0.2);
-}
-
-:deep(.scroll-area__thumb) {
-    background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 3px;
-}
-
-:deep(.scroll-area__thumb:hover) {
-    background-color: rgba(0, 0, 0, 0.4);
-}
-
 /* 输入框样式 */
 [contenteditable]:empty:before {
     content: attr(placeholder);
@@ -612,5 +665,161 @@ onMounted(() => {
 [contenteditable]:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* Markdown内容样式 */
+.markdown-content {
+    /* 基础样式 */
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+
+    /* 标题样式 */
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        margin: 0.5em 0 0.3em 0;
+        font-weight: 600;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+
+    h2 {
+        font-size: 1.3em;
+    }
+
+    h3 {
+        font-size: 1.1em;
+    }
+
+    /* 段落样式 */
+    p {
+        margin: 0.5em 0;
+    }
+
+    /* 列表样式 */
+    ul,
+    ol {
+        margin: 0.5em 0;
+        padding-left: 1.5em;
+    }
+
+    li {
+        margin: 0.2em 0;
+    }
+
+    /* 引用样式 */
+    blockquote {
+        margin: 0.5em 0;
+        padding: 0 0 0 1em;
+        border-left: 3px solid #ccc;
+        opacity: 0.8;
+    }
+
+    /* 代码样式 */
+    pre {
+        margin: 0.5em 0;
+        padding: 1em;
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+        overflow-x: auto;
+    }
+
+    code {
+        padding: 0.2em 0.4em;
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: 3px;
+        font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+        font-size: 0.9em;
+    }
+
+    pre code {
+        background-color: transparent;
+        padding: 0;
+        border-radius: 0;
+    }
+
+    /* 链接样式 */
+    a {
+        color: #3b82f6;
+        text-decoration: underline;
+    }
+
+    /* 图片样式 */
+    img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+        margin: 0.5em 0;
+    }
+
+    /* 表格样式 */
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 0.5em 0;
+    }
+
+    th,
+    td {
+        border: 1px solid #ddd;
+        padding: 0.5em;
+        text-align: left;
+    }
+
+    th {
+        background-color: rgba(0, 0, 0, 0.05);
+        font-weight: 600;
+    }
+
+    /* 水平分隔线样式 */
+    hr {
+        margin: 1em 0;
+        border: none;
+        border-top: 1px solid #ddd;
+    }
+
+    /* 粗体和斜体样式 */
+    strong {
+        font-weight: 600;
+    }
+
+    em {
+        font-style: italic;
+    }
+
+    /* Latex公式样式 */
+    .math,
+    .math-block {
+        margin: 1em 0;
+        text-align: center;
+    }
+
+    .math-inline {
+        font-size: 1.1em;
+        line-height: 1.5;
+    }
+
+    /* 用户消息的markdown样式调整 */
+    :deep(.bg-primary) .markdown-content {
+        /* 用户消息中的链接颜色 */
+        a {
+            color: #93c5fd;
+        }
+
+        /* 用户消息中的代码背景色 */
+        code {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        pre {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    }
 }
 </style>

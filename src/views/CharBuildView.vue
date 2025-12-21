@@ -293,6 +293,8 @@ const reloadCustomBuff = () => {
     if (index > -1) {
         _buffOptions[index].value = new LeveledBuff("自定义BUFF")
     }
+    // 触发重新计算
+    charSettings.value.buffs = [...charSettings.value.buffs]
 }
 //#endregion
 

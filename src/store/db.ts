@@ -68,6 +68,7 @@ export interface Message {
     conversationId: number
     role: "user" | "assistant" | "system"
     content: string
+    renderedContent?: string
     imageUrl?: string
     createdAt: number
 }
