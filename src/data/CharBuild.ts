@@ -269,8 +269,7 @@ export class CharBuild {
         let modAttributeBonus = this.getTotalBonus("MOD属性")
         if (modAttributeBonus > 0) {
             // 计算狮鹫百首契约者MOD属性加成
-            const modsBySeries = this.mods.filter((mod) => ["狮鹫", "百首", "契约者"].includes(mod.系列))
-            console.log(modsBySeries, modAttributeBonus)
+            const modsBySeries = this.mods.filter((mod) => CharBuild.elmSeries.includes(mod.系列))
             attackBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "攻击")
             healthBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "生命")
             shieldBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "护盾")

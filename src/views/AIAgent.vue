@@ -7,13 +7,12 @@ import type { ChatCompletionMessageParam } from "openai/resources/index.mjs"
 import MarkdownIt from "markdown-it"
 // @ts-ignore - 未类型化模块
 import mdKatex from "markdown-it-katex"
-// @ts-ignore - 未类型化模块
 import mdHighlightjs from "markdown-it-highlightjs"
 import "highlight.js/styles/github.css"
 
 // 创建markdown-it实例，支持latex和代码高亮
 const md = MarkdownIt({
-    html: true,
+    html: false,
     linkify: true,
     typographer: true,
     breaks: true,
@@ -74,8 +73,14 @@ async function loadConversations() {
 // 渲染单条消息
 function renderMessage(message: Message) {
     if (!message.renderedContent) {
-        const rendered = renderMarkdown(message.content)
-        message.renderedContent = rendered
+        try {
+            const rendered = renderMarkdown(message.content)
+            message.renderedContent = rendered
+        } catch (error) {
+            console.error("Markdown rendering failed:", error)
+            // Fallback to plain text
+            message.renderedContent = message.content
+        }
     }
 }
 
@@ -215,21 +220,28 @@ async function generateAIResponse() {
                     content: msg.content,
                 }
             })
+        // Helper function for streaming updates
+        function updateStreamingMessage(chunk: string) {
+            const lastIndex = messages.value.length - 1
+            if (lastIndex >= 0) {
+                const msg = messages.value[lastIndex]
+                msg.content += chunk
+                msg.renderedContent = undefined
+            }
+        }
 
+        function finalizeStreamingMessage() {
+            const lastIndex = messages.value.length - 1
+            if (lastIndex >= 0) {
+                renderMessage(messages.value[lastIndex])
+            }
+        }
         // 使用流式对话
         let fullResponse = ""
         await client.streamChat(
             chatHistory,
             (chunk: string) => {
-                fullResponse += chunk
-                // 更新消息内容 - 使用messages数组直接更新，确保响应式生效
-                const lastIndex = messages.value.length - 1
-                if (lastIndex >= 0) {
-                    const msg = messages.value[lastIndex]
-                    msg.content = fullResponse
-                    // 清除旧的渲染内容，在下一次渲染时重新生成
-                    msg.renderedContent = undefined
-                }
+                updateStreamingMessage(chunk)
                 // 如果用户在底部，自动滚动
                 if (isUserAtBottom.value) {
                     scrollToBottom()
@@ -241,6 +253,7 @@ async function generateAIResponse() {
                 max_tokens: setting.aiMaxTokens,
             },
         )
+        finalizeStreamingMessage()
 
         // 渲染最终的AI回复
         const lastIndex = messages.value.length - 1
