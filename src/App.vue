@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted, watchEffect } from "vue"
-import ResizeableWindow from "./components/ResizeableWindow.vue"
 import { useSettingStore } from "./store/setting"
 import { useUIStore } from "./store/ui"
 import { useRoute } from "vue-router"
@@ -108,23 +107,6 @@ if (env.isApp) {
                 if (particle.x < 0 || particle.x > canvas.width || particle.y < 0 || particle.y > canvas.height) {
                     particlesArray.splice(i, 1)
                 }
-
-                // let dx, dy, dist
-                // // 绘制两个点之间的连线
-                // for (var j = i + 1; j < particlesArray.length; j++) {
-                //     dx = particlesArray[j].x - particlesArray[i].x
-                //     dy = particlesArray[j].y - particlesArray[i].y
-                //     dist = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2))
-                //     if (dist < 100) {
-                //         ctx.beginPath()
-                //         ctx.strokeStyle = "rgba(55, 55, 255, " + (1 - dist / 100)
-                //         ctx.moveTo(particlesArray[i].x, particlesArray[i].y)
-                //         ctx.lineTo(particlesArray[j].x, particlesArray[j].y)
-                //         ctx.closePath()
-                //         ctx.lineWidth = 1
-                //         ctx.stroke()
-                //     }
-                // }
             }
         }
 
@@ -147,12 +129,17 @@ if (env.isApp) {
         })
     })
 }
+
+onMounted(() => {
+    ui.setLoginState(setting.dnaUserId !== 0)
+    ui.startTimer()
+})
 </script>
 
 <template>
     <canvas class="fixed w-full h-full z-0 bg-indigo-300" id="background" v-if="setting.windowTrasnparent && !env.isApp"></canvas>
     <ResizeableWindow
-        :title="route.name === 'schat' ? ui.schatTitle : $t(`${String(route.name)}.title`)"
+        :title="ui.title || $t(`${String(route.name)}.title`)"
         darkable
         pinable
         id="main-window"

@@ -110,6 +110,27 @@
         "weapon_attributes": "武器屬性",
         "weaponDamage": "武器傷害"
     },
+    "dna-home": {
+        "title": "皎皎角"
+    },
+    "dna-post-detail": {
+        "title": "帖子詳情"
+    },
+    "dna-posts": {
+        "title": "板塊"
+    },
+    "dna-role-detail": {
+        "title": "角色詳情"
+    },
+    "dna-topic": {
+        "title": "主題"
+    },
+    "dna-user": {
+        "title": "用戶資訊"
+    },
+    "dna-weapon-detail": {
+        "title": "武器詳情"
+    },
     "errorBoundary": {
         "retry": "重試",
         "title": "組件渲染出錯"
@@ -233,6 +254,10 @@
     "inventory": {
         "desc": "自定義你的魔之楔和武器配置",
         "title": "庫存管理"
+    },
+    "login": {
+        "desc": "皎皎角登入/簽到/角色資訊獲取",
+        "title": "皎皎角"
     },
     "main": {
         "btn_collapse_menu": "折疊菜單",

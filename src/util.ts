@@ -69,6 +69,24 @@ export function base36Pad(num: number) {
     return base36.padStart(4, "0")
 }
 
+export function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+import emojiJson from "./assets/emoji.json"
+
+const emojiDict = emojiJson.dict.reduce(
+    (acc, cur) => {
+        acc[cur.desc] = cur.image
+        return acc
+    },
+    {} as Record<string, string>,
+)
+
+export function getEmoji(emoji: string) {
+    return emojiDict[emoji] ? `/emojiimg/${emojiDict[emoji]}` : ""
+}
+
 /**
  * 将毫秒转换为天、时、分、秒格式
  * @param ms 毫秒数

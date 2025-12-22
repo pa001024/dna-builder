@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, reactive, nextTick, computed, onMounted, onUnmounted, watchEffect } from "vue"
 // #region UI
+import { useUIStore } from "../store/ui"
+const ui = useUIStore()
 
 // 工具类型定义
 type ToolType = "select" | "brush" | "delete"
@@ -1180,7 +1182,7 @@ const importTimelineJson = () => {
                             items: json.items,
                         }
                         if (index !== -1) {
-                            if (!(await confirm(`时间线 ${json.name} 已存在，是否覆盖？`))) {
+                            if (!(await ui.showDialog("确认覆盖", `时间线 ${json.name} 已存在，是否覆盖？`))) {
                                 return
                             }
                             timelineData.value[index] = val

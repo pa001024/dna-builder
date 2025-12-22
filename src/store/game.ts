@@ -6,10 +6,7 @@ import { liveQuery } from "dexie"
 import { env } from "../env"
 import { isGameRunning, launchExe, getGameInstall, importMod, enableMod, importPic } from "../api/app"
 import { CustomEntity, db, Mod, UCustomEntity, UMod } from "./db"
-
-function sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms))
-}
+import { sleep } from "../util"
 
 if (env.isApp && getCurrentWindow().label === "main") {
     setTimeout(async () => {
@@ -48,7 +45,6 @@ if (env.isApp && getCurrentWindow().label === "main") {
         }
     }, 1e3)
 }
-// const MOD_PATH = "DNA Game\\EM\\Content\\Paks\\~mods"
 
 export const useGameStore = defineStore("game", {
     state: () => {
@@ -74,12 +70,9 @@ export const useGameStore = defineStore("game", {
             likedChars: useLocalStorage("game.liked_chars", [] as string[]),
             customEntitys: useObservable<CustomEntity[]>(liveQuery(() => db.customEntitys.toArray()) as any),
             selectedEntity: "",
-            // mods: useObservable<Mod[]>(liveQuery(() => db.mods.toArray()) as any),
-            // entityMods: useObservable<EntityMod[]>(liveQuery(() => db.entityMods.toArray()) as any),
         }
     },
     getters: {
-        // selectMods: (state) => state.mods?.filter((mod) => mod.entity === state.selectedEntity) || [],
         modsDir: (state) => state.path.replace(/EM.exe$/, "DNA Game\\EM\\Content\\Paks\\~mods"),
         modsLib: (state) => state.path.replace(/EM.exe$/, "DNA Game\\EM\\Content\\Paks\\lib"),
     },

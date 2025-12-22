@@ -1,0 +1,850 @@
+{
+    "versionName": "9.0",
+    "versionCode": 9,
+    "dict": [
+        {
+            "desc": "[/呲牙]",
+            "image": "001.webp"
+        },
+        {
+            "desc": "[/调皮]",
+            "image": "002.webp"
+        },
+        {
+            "desc": "[/流汗]",
+            "image": "003.webp"
+        },
+        {
+            "desc": "[/偷笑]",
+            "image": "004.webp"
+        },
+        {
+            "desc": "[/再见]",
+            "image": "005.webp"
+        },
+        {
+            "desc": "[/敲打]",
+            "image": "006.webp"
+        },
+        {
+            "desc": "[/擦汗]",
+            "image": "007.webp"
+        },
+        {
+            "desc": "[/猪头]",
+            "image": "008.webp"
+        },
+        {
+            "desc": "[/玫瑰]",
+            "image": "009.webp"
+        },
+        {
+            "desc": "[/流泪]",
+            "image": "010.webp"
+        },
+        {
+            "desc": "[/大哭]",
+            "image": "011.webp"
+        },
+        {
+            "desc": "[/嘘]",
+            "image": "012.webp"
+        },
+        {
+            "desc": "[/酷]",
+            "image": "013.webp"
+        },
+        {
+            "desc": "[/抓狂]",
+            "image": "014.webp"
+        },
+        {
+            "desc": "[/委屈]",
+            "image": "015.webp"
+        },
+        {
+            "desc": "[/便便]",
+            "image": "016.webp"
+        },
+        {
+            "desc": "[/炸弹]",
+            "image": "017.webp"
+        },
+        {
+            "desc": "[/菜刀]",
+            "image": "018.webp"
+        },
+        {
+            "desc": "[/可爱]",
+            "image": "019.webp"
+        },
+        {
+            "desc": "[/色]",
+            "image": "020.webp"
+        },
+        {
+            "desc": "[/害羞]",
+            "image": "021.webp"
+        },
+        {
+            "desc": "[/得意]",
+            "image": "022.webp"
+        },
+        {
+            "desc": "[/吐]",
+            "image": "023.webp"
+        },
+        {
+            "desc": "[/微笑]",
+            "image": "024.webp"
+        },
+        {
+            "desc": "[/发怒]",
+            "image": "025.webp"
+        },
+        {
+            "desc": "[/尴尬]",
+            "image": "026.webp"
+        },
+        {
+            "desc": "[/惊恐]",
+            "image": "027.webp"
+        },
+        {
+            "desc": "[/冷汗]",
+            "image": "028.webp"
+        },
+        {
+            "desc": "[/爱心]",
+            "image": "029.webp"
+        },
+        {
+            "desc": "[/示爱]",
+            "image": "030.webp"
+        },
+        {
+            "desc": "[/白眼]",
+            "image": "031.webp"
+        },
+        {
+            "desc": "[/傲慢]",
+            "image": "032.webp"
+        },
+        {
+            "desc": "[/难过]",
+            "image": "033.webp"
+        },
+        {
+            "desc": "[/惊讶]",
+            "image": "034.webp"
+        },
+        {
+            "desc": "[/疑问]",
+            "image": "035.webp"
+        },
+        {
+            "desc": "[/睡]",
+            "image": "036.webp"
+        },
+        {
+            "desc": "[/亲亲]",
+            "image": "037.webp"
+        },
+        {
+            "desc": "[/憨笑]",
+            "image": "038.webp"
+        },
+        {
+            "desc": "[/爱情]",
+            "image": "039.webp"
+        },
+        {
+            "desc": "[/衰]",
+            "image": "040.webp"
+        },
+        {
+            "desc": "[/撇嘴]",
+            "image": "041.webp"
+        },
+        {
+            "desc": "[/阴险]",
+            "image": "042.webp"
+        },
+        {
+            "desc": "[/奋斗]",
+            "image": "043.webp"
+        },
+        {
+            "desc": "[/发呆]",
+            "image": "044.webp"
+        },
+        {
+            "desc": "[/右哼哼]",
+            "image": "045.webp"
+        },
+        {
+            "desc": "[/拥抱]",
+            "image": "046.webp"
+        },
+        {
+            "desc": "[/坏笑]",
+            "image": "047.webp"
+        },
+        {
+            "desc": "[/飞吻]",
+            "image": "048.webp"
+        },
+        {
+            "desc": "[/鄙视]",
+            "image": "049.webp"
+        },
+        {
+            "desc": "[/晕]",
+            "image": "050.webp"
+        },
+        {
+            "desc": "[/大兵]",
+            "image": "051.webp"
+        },
+        {
+            "desc": "[/可怜]",
+            "image": "052.webp"
+        },
+        {
+            "desc": "[/强]",
+            "image": "053.webp"
+        },
+        {
+            "desc": "[/弱]",
+            "image": "054.webp"
+        },
+        {
+            "desc": "[/握手]",
+            "image": "055.webp"
+        },
+        {
+            "desc": "[/胜利]",
+            "image": "056.webp"
+        },
+        {
+            "desc": "[/抱拳]",
+            "image": "057.webp"
+        },
+        {
+            "desc": "[/凋谢]",
+            "image": "058.png"
+        },
+        {
+            "desc": "[/饭]",
+            "image": "059.webp"
+        },
+        {
+            "desc": "[/蛋糕]",
+            "image": "060.webp"
+        },
+        {
+            "desc": "[/西瓜]",
+            "image": "061.webp"
+        },
+        {
+            "desc": "[/啤酒]",
+            "image": "062.webp"
+        },
+        {
+            "desc": "[/瓢虫]",
+            "image": "063.webp"
+        },
+        {
+            "desc": "[/你过来啊]",
+            "image": "064.webp"
+        },
+        {
+            "desc": "[/OK]",
+            "image": "065.webp"
+        },
+        {
+            "desc": "[/爱你]",
+            "image": "066.webp"
+        },
+        {
+            "desc": "[/咖啡]",
+            "image": "067.webp"
+        },
+        {
+            "desc": "[/月亮]",
+            "image": "068.webp"
+        },
+        {
+            "desc": "[/刀]",
+            "image": "069.webp"
+        },
+        {
+            "desc": "[/发抖]",
+            "image": "070.webp"
+        },
+        {
+            "desc": "[/差劲]",
+            "image": "071.webp"
+        },
+        {
+            "desc": "[/拳头]",
+            "image": "072.webp"
+        },
+        {
+            "desc": "[/心碎]",
+            "image": "073.webp"
+        },
+        {
+            "desc": "[/太阳]",
+            "image": "074.webp"
+        },
+        {
+            "desc": "[/礼物]",
+            "image": "075.webp"
+        },
+        {
+            "desc": "[/足球]",
+            "image": "076.webp"
+        },
+        {
+            "desc": "[/骷髅]",
+            "image": "077.webp"
+        },
+        {
+            "desc": "[/挥手]",
+            "image": "078.webp"
+        },
+        {
+            "desc": "[/闪电]",
+            "image": "079.png"
+        },
+        {
+            "desc": "[/饥饿]",
+            "image": "080.webp"
+        },
+        {
+            "desc": "[/困]",
+            "image": "081.webp"
+        },
+        {
+            "desc": "[/咒骂]",
+            "image": "082.webp"
+        },
+        {
+            "desc": "[/折磨]",
+            "image": "083.webp"
+        },
+        {
+            "desc": "[/抠鼻]",
+            "image": "084.webp"
+        },
+        {
+            "desc": "[/鼓掌]",
+            "image": "085.webp"
+        },
+        {
+            "desc": "[/糗大了]",
+            "image": "086.webp"
+        },
+        {
+            "desc": "[/左哼哼]",
+            "image": "087.webp"
+        },
+        {
+            "desc": "[/哈欠]",
+            "image": "088.webp"
+        },
+        {
+            "desc": "[/快哭了]",
+            "image": "089.webp"
+        },
+        {
+            "desc": "[/吓]",
+            "image": "090.webp"
+        },
+        {
+            "desc": "[/篮球]",
+            "image": "091.webp"
+        },
+        {
+            "desc": "[/乒乓]",
+            "image": "092.webp"
+        },
+        {
+            "desc": "[/NO]",
+            "image": "093.webp"
+        },
+        {
+            "desc": "[/跳跳]",
+            "image": "094.webp"
+        },
+        {
+            "desc": "[/怄火]",
+            "image": "095.webp"
+        },
+        {
+            "desc": "[/转圈]",
+            "image": "096.webp"
+        },
+        {
+            "desc": "[/磕头]",
+            "image": "097.webp"
+        },
+        {
+            "desc": "[/回头]",
+            "image": "098.webp"
+        },
+        {
+            "desc": "[/跳绳]",
+            "image": "099.webp"
+        },
+        {
+            "desc": "[/激动]",
+            "image": "100.webp"
+        },
+        {
+            "desc": "[/街舞]",
+            "image": "101.webp"
+        },
+        {
+            "desc": "[/献吻]",
+            "image": "102.webp"
+        },
+        {
+            "desc": "[/左太极]",
+            "image": "103.webp"
+        },
+        {
+            "desc": "[/右太极]",
+            "image": "104.webp"
+        },
+        {
+            "desc": "[/闭嘴]",
+            "image": "105.webp"
+        },
+        {
+            "desc": "[/开心猫]",
+            "image": "106.webp"
+        },
+        {
+            "desc": "[/双喜]",
+            "image": "107.png"
+        },
+        {
+            "desc": "[/鞭炮]",
+            "image": "108.webp"
+        },
+        {
+            "desc": "[/灯笼]",
+            "image": "109.webp"
+        },
+        {
+            "desc": "[/发财]",
+            "image": "110.webp"
+        },
+        {
+            "desc": "[/K歌]",
+            "image": "111.webp"
+        },
+        {
+            "desc": "[/购物]",
+            "image": "112.webp"
+        },
+        {
+            "desc": "[/邮件]",
+            "image": "113.png"
+        },
+        {
+            "desc": "[/帅]",
+            "image": "114.webp"
+        },
+        {
+            "desc": "[/喝彩]",
+            "image": "115.png"
+        },
+        {
+            "desc": "[/祈祷]",
+            "image": "116.webp"
+        },
+        {
+            "desc": "[/爆筋]",
+            "image": "117.png"
+        },
+        {
+            "desc": "[/棒棒糖]",
+            "image": "118.webp"
+        },
+        {
+            "desc": "[/喝奶]",
+            "image": "119.webp"
+        },
+        {
+            "desc": "[/下面]",
+            "image": "120.webp"
+        },
+        {
+            "desc": "[/香蕉]",
+            "image": "121.png"
+        },
+        {
+            "desc": "[/飞机]",
+            "image": "122.webp"
+        },
+        {
+            "desc": "[/开车]",
+            "image": "123.webp"
+        },
+        {
+            "desc": "[/左车头]",
+            "image": "124.webp"
+        },
+        {
+            "desc": "[/车厢]",
+            "image": "125.webp"
+        },
+        {
+            "desc": "[/右车头]",
+            "image": "126.webp"
+        },
+        {
+            "desc": "[/多云]",
+            "image": "127.webp"
+        },
+        {
+            "desc": "[/下雨]",
+            "image": "128.png"
+        },
+        {
+            "desc": "[/钞票]",
+            "image": "129.png"
+        },
+        {
+            "desc": "[/熊猫]",
+            "image": "130.webp"
+        },
+        {
+            "desc": "[/灯泡]",
+            "image": "131.webp"
+        },
+        {
+            "desc": "[/风车]",
+            "image": "132.png"
+        },
+        {
+            "desc": "[/闹钟]",
+            "image": "133.webp"
+        },
+        {
+            "desc": "[/打伞]",
+            "image": "134.webp"
+        },
+        {
+            "desc": "[/彩球]",
+            "image": "135.webp"
+        },
+        {
+            "desc": "[/钻戒]",
+            "image": "136.png"
+        },
+        {
+            "desc": "[/沙发]",
+            "image": "137.webp"
+        },
+        {
+            "desc": "[/纸巾]",
+            "image": "138.webp"
+        },
+        {
+            "desc": "[/药]",
+            "image": "139.png"
+        },
+        {
+            "desc": "[/手枪]",
+            "image": "140.webp"
+        },
+        {
+            "desc": "[/皎皎-别急嘛]",
+            "image": "141.png"
+        },
+        {
+            "desc": "[/皎皎-差不多得了]",
+            "image": "142.png"
+        },
+        {
+            "desc": "[/皎皎-嘲讽]",
+            "image": "143.png"
+        },
+        {
+            "desc": "[/皎皎-冲鸭]",
+            "image": "144.png"
+        },
+        {
+            "desc": "[/皎皎-大喊]",
+            "image": "145.png"
+        },
+        {
+            "desc": "[/皎皎-得意]",
+            "image": "146.png"
+        },
+        {
+            "desc": "[/皎皎-电影院]",
+            "image": "147.png"
+        },
+        {
+            "desc": "[/皎皎-哈人！]",
+            "image": "148.png"
+        },
+        {
+            "desc": "[/皎皎-好耶]",
+            "image": "149.png"
+        },
+        {
+            "desc": "[/皎皎-寄了下下签]",
+            "image": "150.png"
+        },
+        {
+            "desc": "[/皎皎-开摆]",
+            "image": "151.png"
+        },
+        {
+            "desc": "[/皎皎-看书]",
+            "image": "152.png"
+        },
+        {
+            "desc": "[/皎皎-哭哭]",
+            "image": "153.png"
+        },
+        {
+            "desc": "[/皎皎-老人地铁手机]",
+            "image": "154.png"
+        },
+        {
+            "desc": "[/皎皎-气哭]",
+            "image": "155.png"
+        },
+        {
+            "desc": "[/皎皎-生气嘟嘴巴]",
+            "image": "156.png"
+        },
+        {
+            "desc": "[/皎皎-我的图图呢]",
+            "image": "157.png"
+        },
+        {
+            "desc": "[/皎皎-虚空对线]",
+            "image": "158.png"
+        },
+        {
+            "desc": "[/奥特赛德-酷]",
+            "image": "159.png"
+        },
+        {
+            "desc": "[/奥特赛德-偷笑]",
+            "image": "160.png"
+        },
+        {
+            "desc": "[/奥特赛德-祝贺]",
+            "image": "161.png"
+        },
+        {
+            "desc": "[/白龙-担心]",
+            "image": "162.png"
+        },
+        {
+            "desc": "[/白龙-害怕]",
+            "image": "163.png"
+        },
+        {
+            "desc": "[/白龙-惊讶]",
+            "image": "164.png"
+        },
+        {
+            "desc": "[/菲娜-猫猫嘴]",
+            "image": "165.png"
+        },
+        {
+            "desc": "[/菲娜-摸头]",
+            "image": "166.png"
+        },
+        {
+            "desc": "[/菲娜-我要闹了]",
+            "image": "167.png"
+        },
+        {
+            "desc": "[/芙罗拉-叹气]",
+            "image": "168.png"
+        },
+        {
+            "desc": "[/芙罗拉-推眼镜]",
+            "image": "169.png"
+        },
+        {
+            "desc": "[/芙罗拉-疑惑]",
+            "image": "170.png"
+        },
+        {
+            "desc": "[/海尔法-得意]",
+            "image": "171.png"
+        },
+        {
+            "desc": "[/海尔法-烦躁]",
+            "image": "172.png"
+        },
+        {
+            "desc": "[/海尔法-红温]",
+            "image": "173.png"
+        },
+        {
+            "desc": "[/黑龙-佩服]",
+            "image": "174.png"
+        },
+        {
+            "desc": "[/黑龙-挑眉]",
+            "image": "175.png"
+        },
+        {
+            "desc": "[/黑桃-棒]",
+            "image": "176.png"
+        },
+        {
+            "desc": "[/黑桃-思考]",
+            "image": "177.png"
+        },
+        {
+            "desc": "[/黑桃-战损]",
+            "image": "178.png"
+        },
+        {
+            "desc": "[/兰迪-哈欠]",
+            "image": "179.png"
+        },
+        {
+            "desc": "[/兰迪-好累]",
+            "image": "180.png"
+        },
+        {
+            "desc": "[/兰迪-摸鱼]",
+            "image": "181.png"
+        },
+        {
+            "desc": "[/黎瑟-感谢]",
+            "image": "182.png"
+        },
+        {
+            "desc": "[/黎瑟-痛苦]",
+            "image": "183.png"
+        },
+        {
+            "desc": "[/黎瑟-偷看]",
+            "image": "184.png"
+        },
+        {
+            "desc": "[/琳恩-愤怒]",
+            "image": "185.png"
+        },
+        {
+            "desc": "[/琳恩-？？？]",
+            "image": "186.png"
+        },
+        {
+            "desc": "[/琳恩-敬礼]",
+            "image": "187.png"
+        },
+        {
+            "desc": "[/玛尔洁-大哭]",
+            "image": "188.png"
+        },
+        {
+            "desc": "[/玛尔洁-飞吻]",
+            "image": "189.png"
+        },
+        {
+            "desc": "[/玛尔洁-墨镜流泪]",
+            "image": "190.png"
+        },
+        {
+            "desc": "[/赛琪-可怜]",
+            "image": "191.png"
+        },
+        {
+            "desc": "[/赛琪-失望]",
+            "image": "192.png"
+        },
+        {
+            "desc": "[/赛琪-送花]",
+            "image": "193.png"
+        },
+        {
+            "desc": "[/水母-爱心抱抱]",
+            "image": "194.png"
+        },
+        {
+            "desc": "[/水母-崇拜]",
+            "image": "195.png"
+        },
+        {
+            "desc": "[/水母-没眼看]",
+            "image": "196.png"
+        },
+        {
+            "desc": "[/松露-吐舌]",
+            "image": "197.png"
+        },
+        {
+            "desc": "[/松露-晕]",
+            "image": "198.png"
+        },
+        {
+            "desc": "[/松露-榛子开心]",
+            "image": "199.png"
+        },
+        {
+            "desc": "[/西比尔-坏笑]",
+            "image": "200.png"
+        },
+        {
+            "desc": "[/西比尔-无聊]",
+            "image": "201.png"
+        },
+        {
+            "desc": "[/西比尔-嘘]",
+            "image": "202.png"
+        },
+        {
+            "desc": "[/希尔妲-忍住泪水]",
+            "image": "203.png"
+        },
+        {
+            "desc": "[/希尔妲-微笑]",
+            "image": "204.png"
+        },
+        {
+            "desc": "[/希尔妲-嫌弃]",
+            "image": "205.png"
+        },
+        {
+            "desc": "[/耶尔-害羞]",
+            "image": "206.png"
+        },
+        {
+            "desc": "[/耶尔-裂开]",
+            "image": "207.png"
+        },
+        {
+            "desc": "[/耶尔-无语]",
+            "image": "208.png"
+        },
+        {
+            "desc": "[/章鱼-666]",
+            "image": "209.png"
+        },
+        {
+            "desc": "[/章鱼-吃瓜]",
+            "image": "210.png"
+        },
+        {
+            "desc": "[/章鱼-兴奋]",
+            "image": "211.png"
+        }
+    ]
+}

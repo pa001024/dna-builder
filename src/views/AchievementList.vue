@@ -3,6 +3,9 @@ import { computed, ref, watch } from "vue"
 import { achievementData } from "../data"
 import { useLocalStorage } from "@vueuse/core"
 import { t } from "i18next"
+import { useUIStore } from "../store/ui"
+
+const ui = useUIStore()
 
 // 用户已完成的成就ID列表
 const userFinishedIds = useLocalStorage("achi.finished", [] as number[])
@@ -139,7 +142,7 @@ const importAchievements = () => {
         if (!file) return
 
         const reader = new FileReader()
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
             try {
                 // 解析JSON数据
                 const importedData = JSON.parse(e.target?.result as string)
@@ -150,7 +153,7 @@ const importAchievements = () => {
                 }
 
                 // 询问用户是否确认导入
-                if (confirm(t("achievement.importConfirm", { count: importedData.length }))) {
+                if (await ui.showDialog("确认导入", t("achievement.importConfirm", { count: importedData.length }))) {
                     userFinishedIds.value = importedData
                 }
             } catch (error) {

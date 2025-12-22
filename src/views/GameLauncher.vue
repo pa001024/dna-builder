@@ -1,36 +1,18 @@
 <script setup lang="ts">
-import { onUnmounted, ref, watchEffect } from "vue"
+import { onMounted, onUnmounted, ref, watchEffect, computed } from "vue"
 import * as dialog from "@tauri-apps/plugin-dialog"
-import { useGameStore } from "../store/game"
 import { t } from "i18next"
+import { useGameStore } from "../store/game"
+import { useUIStore } from "../store/ui"
 import { openExplorer } from "../api/app"
 import { gameData } from "../data"
-import { onMounted } from "vue"
 import { env } from "../env"
 import { Mod } from "../store/db"
-import { watch } from "vue"
-import { computed } from "vue"
 // 状态管理
+const ui = useUIStore()
 const keys = ["path", "beforeGame", "afterGame"] as const
 const tab = ref("mod")
-const errorMessage = ref("")
-const successMessage = ref("")
 const game = useGameStore()
-watch(errorMessage, (newValue) => {
-    if (newValue) {
-        setTimeout(() => {
-            errorMessage.value = ""
-        }, 3000)
-    }
-})
-watch(successMessage, (newValue) => {
-    if (newValue) {
-        setTimeout(() => {
-            successMessage.value = ""
-        }, 3000)
-    }
-})
-
 //#region 启动
 async function selectPath(key: (typeof keys)[number]) {
     const result = await dialog.open({
@@ -51,7 +33,7 @@ async function selectPath(key: (typeof keys)[number]) {
 // 打开游戏所在目录
 const openGameDirectory = async () => {
     if (!game.path) {
-        errorMessage.value = t("game-launcher.selectGamePathFirst")
+        ui.showErrorMessage(t("game-launcher.selectGamePathFirst"))
         return
     }
 
@@ -59,20 +41,20 @@ const openGameDirectory = async () => {
         await openExplorer(game.modsDir)
     } catch (error) {
         console.error("打开目录失败:", error)
-        errorMessage.value = t("game-launcher.openDirFailed", { error: error instanceof Error ? error.message : String(error) })
+        ui.showErrorMessage(t("game-launcher.openDirFailed", { error: error instanceof Error ? error.message : String(error) }))
     }
 }
 
 const launchGame = async () => {
     if (!game.path) {
-        errorMessage.value = t("game-launcher.selectGameFileFirst")
+        ui.showErrorMessage(t("game-launcher.selectGameFileFirst"))
         return
     }
     try {
         await game.launchGame()
     } catch (error) {
         console.error("启动游戏失败:", error)
-        errorMessage.value = t("game-launcher.launchGameFailed", { error: error instanceof Error ? error.message : String(error) })
+        ui.showErrorMessage(t("game-launcher.launchGameFailed", { error: error instanceof Error ? error.message : String(error) }))
     }
 }
 //#endregion
@@ -118,7 +100,7 @@ const sortedEntitys = computed(() =>
 
 async function addCustomEntity() {
     if (!customEntityName.value) {
-        errorMessage.value = t("game-launcher.enterCustomTypeName")
+        ui.showErrorMessage(t("game-launcher.enterCustomTypeName"))
         return
     }
     try {
@@ -126,11 +108,11 @@ async function addCustomEntity() {
         customEntityName.value = ""
     } catch (error: any) {
         if (error.name === "ConstraintError") {
-            errorMessage.value = t("game-launcher.customTypeNameExists")
+            ui.showErrorMessage(t("game-launcher.customTypeNameExists"))
             return
         }
         console.error("添加自定义类型失败:", error)
-        errorMessage.value = t("game-launcher.addCustomTypeFailed", { error: error instanceof Error ? error.message : String(error) })
+        ui.showErrorMessage(t("game-launcher.addCustomTypeFailed", { error: error instanceof Error ? error.message : String(error) }))
     }
 }
 //#endregion
@@ -150,10 +132,10 @@ const setEntityMod = async (entity: string, modid: number) => {
     try {
         await game.setEntityMod(entity, modid)
         await updateEntityMod()
-        successMessage.value = modid ? t("game-launcher.modEnabled") : t("game-launcher.modDisabled")
+        ui.showSuccessMessage(modid ? t("game-launcher.modEnabled") : t("game-launcher.modDisabled"))
     } catch (error: any) {
         console.error("设置MOD失败:", error)
-        errorMessage.value = t("game-launcher.setModFailed", { error: error instanceof Error ? error.message : String(error) })
+        ui.showErrorMessage(t("game-launcher.setModFailed", { error: error instanceof Error ? error.message : String(error) }))
     }
 }
 
@@ -161,10 +143,10 @@ const removeMod = async (mod: Mod) => {
     try {
         await game.removeMod(mod)
         await updateEntityMod()
-        successMessage.value = t("game-launcher.modDeleted")
+        ui.showSuccessMessage(t("game-launcher.modDeleted"))
     } catch (error: any) {
         console.error("删除MOD失败:", error)
-        errorMessage.value = t("game-launcher.deleteModFailed", { error: error instanceof Error ? error.message : String(error) })
+        ui.showErrorMessage(t("game-launcher.deleteModFailed", { error: error instanceof Error ? error.message : String(error) }))
     }
 }
 
@@ -204,7 +186,7 @@ onMounted(async () => {
             isDragging.value = false
             if (!game.selectedEntity) return
             if (!game.path) {
-                errorMessage.value = t("game-launcher.selectGameFileFirst")
+                ui.showErrorMessage(t("game-launcher.selectGameFileFirst"))
                 return
             }
 
@@ -213,34 +195,38 @@ onMounted(async () => {
                 try {
                     const results = await game.importMod(paths)
                     if (!results) {
-                        errorMessage.value = t("game-launcher.importModFailed")
+                        ui.showErrorMessage(t("game-launcher.importModFailed"))
                         return
                     }
-                    successMessage.value = t("game-launcher.importModSuccess", { count: 1 })
+                    ui.showSuccessMessage(t("game-launcher.importModSuccess", { count: 1 }))
                     await updateEntityMod()
                 } catch (error: any) {
                     console.error("导入MOD失败:", error)
-                    errorMessage.value = t("game-launcher.importModFailed", {
-                        error: error instanceof Error ? error.message : String(error),
-                    })
+                    ui.showErrorMessage(
+                        t("game-launcher.importModFailed", {
+                            error: error instanceof Error ? error.message : String(error),
+                        }),
+                    )
                 }
             } else if (paths.some((v) => /\.(?:png|jpg|jpeg|gif|webp)$/.test(v))) {
                 if (!entityMod.value) {
-                    errorMessage.value = t("game-launcher.selectModFirst")
+                    ui.showErrorMessage(t("game-launcher.selectModFirst"))
                     return
                 }
                 try {
                     const results = await game.importPic(entityMod.value.id, paths[0])
                     if (!results) {
-                        errorMessage.value = t("game-launcher.importPicFailed")
+                        ui.showErrorMessage(t("game-launcher.importPicFailed"))
                         return
                     }
-                    successMessage.value = t("game-launcher.importPicSuccess")
+                    ui.showSuccessMessage(t("game-launcher.importPicSuccess"))
                 } catch (error: any) {
                     console.error("导入MOD图片失败:", error)
-                    errorMessage.value = t("game-launcher.importPicFailed", {
-                        error: error instanceof Error ? error.message : String(error),
-                    })
+                    ui.showErrorMessage(
+                        t("game-launcher.importPicFailed", {
+                            error: error instanceof Error ? error.message : String(error),
+                        }),
+                    )
                 }
             }
         })
@@ -494,42 +480,6 @@ onUnmounted(() => {
                 </div>
             </div>
         </div>
-        <transition name="slide-right">
-            <div
-                v-if="errorMessage"
-                @click="errorMessage = ''"
-                role="alert"
-                class="alert alert-error absolute bottom-8 right-8 cursor-pointer"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                </svg>
-                <span>{{ errorMessage }}</span>
-            </div>
-        </transition>
-        <transition name="slide-right">
-            <div
-                v-if="successMessage"
-                @click="successMessage = ''"
-                role="alert"
-                class="alert alert-success absolute bottom-8 right-8 cursor-pointer"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                </svg>
-                <span>{{ successMessage }}</span>
-            </div>
-        </transition>
 
         <!-- 拖拽提示 -->
         <div v-if="isDragging" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50" @click="isDragging = false">

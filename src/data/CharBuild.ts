@@ -51,14 +51,23 @@ export interface CharAttr {
 }
 
 export interface WeaponAttr {
+    /** 攻击 基于武器基础值 */
     attack: number
+    /** 暴击率 基于武器基础值 */
     critRate: number
+    /** 暴击伤害 基于武器基础值 */
     critDamage: number
+    /** 触发率 基于武器基础值 */
     triggerRate: number
+    /** 攻击速度 1开始 */
     attackSpeed: number
+    /** 多重射击倍率 1开始 */
     multiShot: number
+    /** 增伤 0开始 */
     damageIncrease: number
+    /** 独立增伤 0开始 */
     independentDamageIncrease: number
+    /** 追加伤害 0开始 */
     additionalDamage: number
 }
 
@@ -716,8 +725,13 @@ export class CharBuild {
         return 1 + 4 * desperate * (1 - hpPercent) * (1.5 - hpPercent)
     }
 
-    // 计算防御乘区
-    public calculateDefenseMultiplier(attrs: ReturnType<typeof this.calculateAttributes>): number {
+    /**
+     * 计算防御乘区
+     * @param attrs 属性
+     * @param finalDef 可选, 最终防御值
+     * @returns 防御乘区
+     */
+    public calculateDefenseMultiplier(attrs: ReturnType<typeof this.calculateAttributes>, finalDef?: number): number {
         // 如果敌方血量类型为护盾，防御乘区固定为1
         if (this.enemyHpType === "护盾") {
             return 1
@@ -729,11 +743,12 @@ export class CharBuild {
         const enemyLevel = typeof this.enemyLevel === "number" ? this.enemyLevel : 80
 
         const levelDiff = Math.max(0, Math.min(20, Math.min(80, enemyLevel) - charLevel))
-        const baseDefenseMultiplier = enemyTypeCoeff / (30 + enemyTypeCoeff - levelDiff)
         const ignoreDefense = attrs.ignoreDefense
+        const def = finalDef ?? enemyTypeCoeff * 10 * (1 - ignoreDefense)
+        const baseDefenseMultiplier = def / (300 + def - levelDiff)
 
         // 计算最终防御乘区，并确保其在0到1之间
-        const defenseMultiplier = 1 - baseDefenseMultiplier * (1 - ignoreDefense)
+        const defenseMultiplier = 1 - baseDefenseMultiplier
         return Math.max(0, Math.min(1, defenseMultiplier))
     }
 
@@ -874,7 +889,11 @@ export class CharBuild {
             const weaponAttrs = attrs.weapon
             dps = dpa = dpa * weaponAttrs.multiShot
             if (!this.timeline) dps = dpa * weaponAttrs.attackSpeed
-            dpb = dpb / weaponAttrs.additionalDamage
+            dpb = dpb / (1 + weaponAttrs.additionalDamage)
+            // 非弹道武器多重直接加伤害
+            if (weapon.弹道类型 === "非弹道") {
+                dpb *= weaponAttrs.multiShot
+            }
         } else if (skill) {
             if (!this.timeline) {
                 dps = dpa * (1 + attrs.skillSpeed)

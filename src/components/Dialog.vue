@@ -22,7 +22,7 @@ watch(model, (value) => {
             <slot></slot>
         </DialogTrigger>
         <DialogPortal>
-            <DialogOverlay class="bg-blackA5 data-[state=open]:animate-overlayShow fixed inset-0 z-30" />
+            <DialogOverlay class="bg-gray-900/50 data-[state=open]:animate-overlayShow fixed inset-0 z-30" />
             <DialogContent
                 class="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-base-100 shadow-lg z-100"
             >
@@ -40,7 +40,7 @@ watch(model, (value) => {
                     <div class="flex justify-end p-6">
                         <slot name="actions">
                             <button class="btn btn-primary w-full" type="submit">
-                                {{ $t("common.confirm") }}
+                                {{ $t("setting.confirm") }}
                             </button>
                         </slot>
                     </div>

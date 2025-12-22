@@ -2,7 +2,8 @@
 import { AIClient } from "../api/openai"
 import { useSettingStore } from "../store/setting"
 import { ref, onMounted, watch } from "vue"
-import { db, type Conversation, type Message, type UMessage, type UConversation } from "../store/db"
+import { db } from "../store/db"
+import type { Conversation, Message, UMessage, UConversation } from "../store/db"
 import type { ChatCompletionMessageParam } from "openai/resources/index.mjs"
 import MarkdownIt from "markdown-it"
 // @ts-ignore - 未类型化模块
@@ -230,14 +231,17 @@ async function generateAIResponse() {
             }
         }
 
-        function finalizeStreamingMessage() {
+        async function finalizeStreamingMessage() {
             const lastIndex = messages.value.length - 1
             if (lastIndex >= 0) {
                 renderMessage(messages.value[lastIndex])
             }
+            // 保存完整的AI回复到数据库
+            await db.messages.update(messageId, {
+                content: messages.value[lastIndex].content,
+            })
         }
         // 使用流式对话
-        let fullResponse = ""
         await client.streamChat(
             chatHistory,
             (chunk: string) => {
@@ -253,18 +257,7 @@ async function generateAIResponse() {
                 max_tokens: setting.aiMaxTokens,
             },
         )
-        finalizeStreamingMessage()
-
-        // 渲染最终的AI回复
-        const lastIndex = messages.value.length - 1
-        if (lastIndex >= 0) {
-            renderMessage(messages.value[lastIndex])
-        }
-
-        // 保存完整的AI回复到数据库
-        await db.messages.update(messageId, {
-            content: fullResponse,
-        })
+        await finalizeStreamingMessage()
 
         // 更新对话时间
         await updateConversationTimestamp(selectedConversationId.value)
@@ -395,115 +388,10 @@ async function handleImageUpload(file: File) {
             scrollToBottom()
 
             // 开始AI回复（处理图片）
-            await generateAIResponseFromImage()
+            await generateAIResponse()
         }
     } catch (error) {
         console.error("图片上传失败:", error)
-    }
-}
-
-// 从图片生成AI回复
-async function generateAIResponseFromImage() {
-    isLoading.value = true
-    isStream.value = true
-
-    try {
-        // 创建AI消息占位符
-        const aiMessage: UMessage = {
-            conversationId: selectedConversationId.value,
-            role: "assistant",
-            content: "",
-            createdAt: Date.now(),
-        }
-        const messageId = await db.messages.add(aiMessage)
-        const newAiMessage: Message = {
-            ...aiMessage,
-            id: messageId,
-        }
-        messages.value.push(newAiMessage)
-
-        // 准备对话历史，包含图片消息
-        const chatHistory = messages.value
-            .filter((msg) => msg.conversationId === selectedConversationId.value)
-            .map((msg) => {
-                if (msg.imageUrl) {
-                    // 构建图片消息格式
-                    return {
-                        role: msg.role,
-                        content: [
-                            {
-                                type: "text",
-                                text: msg.content,
-                            },
-                            {
-                                type: "image_url",
-                                image_url: {
-                                    url: msg.imageUrl,
-                                },
-                            },
-                        ],
-                    } as ChatCompletionMessageParam
-                }
-                return {
-                    role: msg.role,
-                    content: msg.content,
-                }
-            })
-
-        // 使用流式对话
-        let fullResponse = ""
-        await client.streamChat(
-            chatHistory,
-            (chunk: string) => {
-                fullResponse += chunk
-                // 更新消息内容 - 使用messages数组直接更新，确保响应式生效
-                const lastIndex = messages.value.length - 1
-                if (lastIndex >= 0) {
-                    const msg = messages.value[lastIndex]
-                    msg.content = fullResponse
-                    // 清除旧的渲染内容，在下一次渲染时重新生成
-                    msg.renderedContent = undefined
-                }
-                // 如果用户在底部，自动滚动
-                if (isUserAtBottom.value) {
-                    scrollToBottom()
-                }
-            },
-            {
-                model: setting.aiModelName,
-                temperature: setting.aiTemperature,
-                max_tokens: setting.aiMaxTokens,
-            },
-        )
-
-        // 渲染最终的AI回复
-        const lastIndex = messages.value.length - 1
-        if (lastIndex >= 0) {
-            renderMessage(messages.value[lastIndex])
-        }
-
-        // 保存完整的AI回复到数据库
-        await db.messages.update(messageId, {
-            content: fullResponse,
-        })
-
-        // 更新对话时间
-        await updateConversationTimestamp(selectedConversationId.value)
-    } catch (error) {
-        console.error("AI图片回复生成失败:", error)
-        // 添加错误消息
-        const errorMessage: UMessage = {
-            conversationId: selectedConversationId.value,
-            role: "assistant",
-            content: "抱歉，我暂时无法处理图片，请稍后重试。",
-            createdAt: Date.now(),
-        }
-        await db.messages.add(errorMessage)
-        await loadMessages(selectedConversationId.value)
-    } finally {
-        isLoading.value = false
-        isStream.value = false
-        scrollToBottom()
     }
 }
 

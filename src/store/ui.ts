@@ -1,6 +1,7 @@
 import { defineStore } from "pinia"
 import { type IconTypes } from "../components/Icon.vue"
 import { env } from "../env"
+import { until } from "@vueuse/core"
 
 export interface ITab {
     name?: string
@@ -17,7 +18,22 @@ export const useUIStore = defineStore("ui", {
         return {
             sidebarExpand: false,
             loading: false,
-            schatTitle: "",
+            title: "",
+            errorMessage: "",
+            successMessage: "",
+            dialogVisible: false,
+            dialogTitle: "",
+            dialogContent: "",
+            dialogState: -1,
+            loginState: false,
+            timeNow: Date.now(),
+            // 图片预览相关
+            previewVisible: false,
+            previewImageUrl: "",
+            previewImageElm: null as HTMLElement | null,
+            isHoveringPreview: false,
+            // 密函
+            mihanVisible: false,
             tabs: [
                 {
                     name: "home",
@@ -51,24 +67,116 @@ export const useUIStore = defineStore("ui", {
                     icon: "ri:trophy-line",
                 },
                 {
+                    name: "dna-home",
+                    path: "/dna",
+                    icon: "ri:chat-thread-line",
+                },
+                {
                     name: "more",
                     path: "/more",
                     icon: "ri:more-line",
-                },
-                {
-                    // -- flex-1
-                },
-                {
-                    name: "setting",
-                    path: "/setting",
-                    icon: "ri:settings-3-line",
                 },
             ] satisfies ITab[] as ITab[],
         }
     },
     actions: {
+        startTimer() {
+            setInterval(() => {
+                this.timeNow = Date.now()
+            }, 1000)
+        },
+        setLoginState(state: boolean) {
+            this.loginState = state
+            const index = this.tabs.findIndex((tab) => tab.name === "dna-home")
+            if (index === -1) return
+            this.tabs[index].show = this.loginState
+        },
         toggleSidebar() {
             this.sidebarExpand = !this.sidebarExpand
+        },
+        showErrorMessage(message: string) {
+            this.errorMessage = message
+            setTimeout(() => {
+                this.errorMessage = ""
+            }, 3000)
+        },
+        showSuccessMessage(message: string) {
+            this.successMessage = message
+            setTimeout(() => {
+                this.successMessage = ""
+            }, 3000)
+        },
+        // 显示确认对话框
+        async showDialog(title: string, content: string) {
+            this.dialogVisible = true
+            this.dialogTitle = title
+            this.dialogContent = content
+
+            await until(() => this.dialogState !== -1).toBe(true)
+            const dialogState = this.dialogState
+            this.dialogState = -1
+            this.dialogVisible = false
+            return !!dialogState
+        },
+        confirmDialog() {
+            this.dialogState = 1
+        },
+        cancelDialog() {
+            this.dialogState = 0
+        },
+        startImagePreview(url: string, event?: MouseEvent) {
+            this.previewImageUrl = url
+            this.previewVisible = true
+            if (event) {
+                this.handlePreviewMouseMove(event)
+            }
+            document.addEventListener("mousemove", this.handlePreviewMouseMove)
+        },
+        stopImagePreview() {
+            this.previewVisible = false
+            document.removeEventListener("mousemove", this.handlePreviewMouseMove)
+        },
+        handlePreviewMouseMove(event: MouseEvent) {
+            const imagePreview = this.previewImageElm
+            if (!imagePreview) return
+            // 设置初始位置样式，确保元素可见以便获取尺寸
+            imagePreview.style.left = `${event.clientX + 10}px`
+            imagePreview.style.top = `${event.clientY - 10}px`
+            imagePreview.style.position = "fixed"
+
+            // 获取预览元素的实际尺寸
+            const rect = imagePreview.getBoundingClientRect()
+            const windowWidth = window.innerWidth
+            const windowHeight = window.innerHeight
+            const padding = 10 // 窗口边缘内边距
+
+            // 计算调整后的位置
+            let left = event.clientX + 10
+            let top = event.clientY - 10
+
+            // 确保不超出右侧边界
+            if (left + rect.width > windowWidth - padding) {
+                left = windowWidth - rect.width - padding
+            }
+
+            // 确保不超出左侧边界
+            if (left < padding) {
+                left = padding
+            }
+
+            // 确保不超出底部边界
+            if (top + rect.height > windowHeight - padding) {
+                top = windowHeight - rect.height - padding
+            }
+
+            // 确保不超出顶部边界
+            if (top < padding) {
+                top = padding
+            }
+
+            // 更新最终位置
+            imagePreview.style.left = `${left}px`
+            imagePreview.style.top = `${top}px`
         },
     },
 })
