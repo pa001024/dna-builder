@@ -1,0 +1,48 @@
+{
+    "name": "dna-api",
+    "version": "0.2.6",
+    "description": "dna bbs api",
+    "author": {
+        "name": "pa001024",
+        "url": "https://github.com/pa001024",
+        "email": "pa001024@qq.com"
+    },
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        "bun": "./dist/index.js",
+        "node": "./dist/index.js",
+        "require": "./dist/index.js",
+        "import": "./dist/index.js",
+        "default": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+    },
+    "keywords": [
+        "dna",
+        "api"
+    ],
+    "homepage": "https://github.com/pa001024/dna-builder",
+    "repository": {
+        "type": "git",
+        "url": "://github.com/pa001024/dna-builder"
+    },
+    "bugs": "://github.com/pa001024/dna-builder/issues",
+    "license": "MIT",
+    "scripts": {
+        "test": "bun test && npm run test:types",
+        "test:types": "tsc --project tsconfig.test.json",
+        "build": "rimraf dist && bun build.ts && tsc --project tsconfig.build.json",
+        "release": "npm run build && npm publish --access public",
+        "trace": "tsc --generateTrace ./trace --incremental false"
+    },
+    "dependencies": {
+        "node-forge": "^1.3.1"
+    },
+    "devDependencies": {
+        "@types/node": "^25.0.3",
+        "rimraf": "6.1.2",
+        "bun-types": "^1.1.18",
+        "typescript": "^5.1.6"
+    }
+}

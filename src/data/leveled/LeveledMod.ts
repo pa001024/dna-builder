@@ -33,6 +33,26 @@ export class LeveledMod implements Mod {
     maxLevel: number
 
     /**
+     * 判断是否存在指定ID的MOD
+     * @param id MOD的ID
+     * @returns 如果存在则返回true，否则返回false
+     */
+    static fromDNA(dnaMod: import("dna-api").DNARoleMod) {
+        if (modMap.has(dnaMod.id)) {
+            return new LeveledMod(dnaMod.id)
+        }
+        if (dnaMod.id == -1) return null
+        return new LeveledMod({
+            id: dnaMod.id,
+            名称: dnaMod.name || "?",
+            系列: "?",
+            品质: (dnaMod.quality && ["白", "绿", "蓝", "紫", "金"][dnaMod.quality - 1]) || "白",
+            耐受: 1,
+            类型: "?",
+        })
+    }
+
+    /**
      * 构造函数
      * @param modid mod的id|Mod对象
      * @param modLv 可选的mod等级

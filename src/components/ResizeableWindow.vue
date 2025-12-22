@@ -11,11 +11,6 @@ import { useRoute } from "vue-router"
 import { getCurrentWindow } from "@tauri-apps/api/window"
 import { applyMaterial, getOSVersion } from "../api/app"
 import { timeStr, useGameTimer } from "../util"
-import { useLocalStorage } from "@vueuse/core"
-import { useSound } from "@vueuse/sound"
-import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification"
-import { missionsIngameQuery } from "../api/query"
-import { t } from "i18next"
 
 const props = defineProps({
     title: { type: String },
@@ -103,143 +98,27 @@ if (env.isApp) {
     })
 }
 
+onMounted(() => {
+    ui.previewImageElm = document.getElementById("preview-image") as HTMLElement
+})
+
 const { mihan, moling, zhouben } = useGameTimer()
-
-//#region 密函通知模块
-
-const mihanEnableNotify = useLocalStorage("mihanNotify", false)
-const mihanNotifyOnce = useLocalStorage("mihanNotifyOnce", true)
-const mihanNotifyTypes = useLocalStorage("mihanNotifyTypes", [] as number[])
-const mihanNotifyMissions = useLocalStorage("mihanNotifyMissions", [] as string[])
-const mihanData = useLocalStorage<string[][] | undefined>("mihanData", [])
-class MihanNotify {
-    mihanData = mihanData
-    mihanDataLastUpdate = useLocalStorage("mihanDataLastUpdate", 0)
-    mihanEnableNotify = mihanEnableNotify
-    mihanNotifyOnce = mihanNotifyOnce
-    mihanNotifyTypes = mihanNotifyTypes
-    mihanNotifyMissions = mihanNotifyMissions
-    sfx = useSound("/sfx/notice.mp3")
-    watch = false
-    constructor() {
-        this.updateMihanData()
-
-        watchEffect(() => {
-            if (this.mihanEnableNotify.value) {
-                this.startWatch()
-            }
-        })
-    }
-    async updateMihanData() {
-        if (this.mihanData.value && !this.shouldUpdate()) return true
-        console.log("update mihan data")
-        const data = await missionsIngameQuery()
-        if (!data?.missions || JSON.stringify(data.missions) === JSON.stringify(this.mihanData.value)) return false
-        this.mihanData.value = data.missions
-        this.mihanDataLastUpdate.value = new Date().getTime()
-        return true
-    }
-    show() {
-        const dialog = document.getElementById("mihan-dialog") as HTMLDialogElement
-        dialog.show()
-    }
-    async showMihanNotification() {
-        if (this.mihanNotifyOnce.value) {
-            this.mihanEnableNotify.value = false
-        }
-        if (env.isApp) {
-            const matchedTypes = this.mihanData
-                .value!.filter(
-                    (list, type) =>
-                        this.mihanNotifyTypes.value.includes(type) && list.some((v) => this.mihanNotifyMissions.value.includes(v)),
-                )
-                .map(
-                    (list, type) =>
-                        `${MihanNotify.TYPES[type]}-${list.filter((v) => this.mihanNotifyMissions.value.includes(v)).join("、")}`,
-                )
-            let permissionGranted = await isPermissionGranted()
-            if (!permissionGranted) {
-                const permission = await requestPermission()
-                permissionGranted = permission === "granted"
-            }
-            if (permissionGranted) {
-                sendNotification({
-                    title: t("resizeableWindow.mihanNotificationTitle"),
-                    body: t("resizeableWindow.mihanNotificationBody", { types: matchedTypes.join(t("resizeableWindow.and")) }),
-                })
-            }
-        }
-        this.sfx.play()
-        this.show()
-    }
-    getNextUpdateTime(t?: number) {
-        const now = t ?? new Date().getTime()
-        const oneHour = 60 * 60 * 1000
-        return Math.ceil(now / oneHour) * oneHour
-    }
-    shouldUpdate() {
-        return this.getNextUpdateTime(this.mihanDataLastUpdate.value) <= new Date().getTime()
-    }
-    shouldNotify() {
-        if (
-            this.mihanData.value?.some(
-                (list, type) => this.mihanNotifyTypes.value.includes(type) && list.some((v) => this.mihanNotifyMissions.value.includes(v)),
-            )
-        ) {
-            return true
-        }
-        return false
-    }
-    async checkNotify() {
-        if (this.shouldNotify()) {
-            await this.showMihanNotification()
-        }
-    }
-    sleep(duration: number) {
-        return new Promise((resolve) => setTimeout(resolve, duration))
-    }
-    startWatch() {
-        if (this.watch) return
-        console.log("start watch")
-        this.watch = true
-        const next = this.getNextUpdateTime()
-        const duration = next - new Date().getTime()
-        setTimeout(async () => {
-            this.watch = false
-            let ok = await this.updateMihanData()
-            let c = 0
-            while (!ok && c < 3) {
-                c++
-                console.log("update mihan data failed, retry in 3s")
-                ok = await this.updateMihanData()
-                await this.sleep(3e3)
-            }
-            await this.checkNotify()
-            if (this.mihanEnableNotify.value) this.startWatch()
-        }, duration + 3e3)
-    }
-    static TYPES = ["角色", "武器", "魔之楔"]
-    static MISSIONS = ["探险/无尽", "驱离", "拆解", "驱逐", "避险", "扼守/无尽", "护送", "勘探/无尽", "追缉", "调停", "迁移"]
-}
-const mihanNotify = new MihanNotify()
-
-//#endregion
 </script>
 <template>
     <!-- Root -->
     <div class="relative w-full h-full flex overflow-hidden bg-base-100/30 rounded-lg">
         <!-- SideBar -->
-        <slot v-if="route.name !== 'sroom'" name="sidebar"></slot>
+        <slot v-if="route" name="sidebar"></slot>
         <!-- Header -->
         <div className="relative flex flex-col overflow-hidden w-full h-full">
             <!-- ActionBar -->
             <div class="relative w-full h-10 pb-1 mt-1 flex items-center space-x-1 sm:space-x-2 pl-2 pr-1">
                 <div :data-tauri-drag-region="draggable" className="w-full h-full font-semibold text-2xl flex items-center space-x-2">
                     <img :src="icon" class="w-6 h-6" />
-                    <span className="max-[370px]:hidden text-sm min-w-20">{{ route.name !== "sroom" ? title : ui.schatTitle }}</span>
+                    <span className="max-[370px]:hidden text-sm min-w-20">{{ title }}</span>
                     <!-- 计时器 -->
                     <div class="flex ml-4 gap-8 items-center text-xs text-base-content/80">
-                        <div class="inline-block text-center w-16 cursor-pointer" @click="mihanNotify.show()">
+                        <div class="inline-block text-center w-16 cursor-pointer" @click="ui.mihanVisible = true">
                             <div>{{ $t("resizeableWindow.mihan") }}</div>
                             <div class="font-orbitron">{{ timeStr(mihan) }}</div>
                         </div>
@@ -252,90 +131,21 @@ const mihanNotify = new MihanNotify()
                             <div class="font-orbitron">{{ timeStr(zhouben) }}</div>
                         </div>
                     </div>
-                    <dialog id="mihan-dialog" class="modal">
+                    <dialog class="modal" :class="{ 'modal-open': ui.mihanVisible }">
                         <div class="modal-box bg-base-300 text-md">
                             <div class="text-lg font-bold flex justify-between items-center pb-2">
                                 {{ $t("resizeableWindow.mihanTitle") }}
 
                                 <form class="flex justify-end gap-2" method="dialog">
-                                    <button class="btn btn-ghost btn-sm btn-square">
+                                    <button class="btn btn-ghost btn-sm btn-square" @click="ui.mihanVisible = false">
                                         <Icon bold icon="codicon:chrome-close" />
                                     </button>
                                 </form>
                             </div>
-                            <div class="p-4 grid grid-cols-3">
-                                <div
-                                    v-for="(item, missionId) in mihanData"
-                                    :key="missionId"
-                                    class="flex flex-col justify-start items-center"
-                                >
-                                    <div class="flex flex-col justify-center items-center gap-2">
-                                        <img
-                                            class="w-12 h-12"
-                                            :src="`/imgs/${MihanNotify.TYPES[missionId]}密函.png`"
-                                            :alt="`${MihanNotify.TYPES[missionId]}密函`"
-                                        />
-                                        <div
-                                            class="font-bold"
-                                            :style="{
-                                                color: ['#ba9011', '#1171ba', '#ba1111'][missionId],
-                                            }"
-                                        >
-                                            {{ MihanNotify.TYPES[missionId] }}
-                                        </div>
-                                    </div>
-                                    <div class="divider mx-4 my-2"></div>
-                                    <div
-                                        v-for="(mission, index) in item"
-                                        :key="index"
-                                        class="text-sm p-1"
-                                        :class="{ 'text-secondary': mihanNotifyMissions.includes(mission) }"
-                                    >
-                                        {{ mission }}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex justify-center bg-base-100 p-3 rounded-md text-sm text-base-content/80">
-                                {{ $t("resizeableWindow.nextRefresh") }}: {{ timeStr(mihan) }}
-                            </div>
-                            <div class="p-4 flex flex-col gap-2">
-                                <div class="text-lg font-bold pb-2">{{ $t("resizeableWindow.monitorSettings") }}</div>
-                                <div class="flex gap-2">
-                                    <label class="text-sm p-1 label">
-                                        <input v-model="mihanEnableNotify" type="checkbox" class="toggle toggle-secondary" />
-                                        {{ $t("resizeableWindow.enableNotify") }}
-                                    </label>
-                                    <label v-if="mihanEnableNotify" class="text-sm p-1 label">
-                                        <input v-model="mihanNotifyOnce" type="checkbox" class="toggle toggle-secondary" />
-                                        {{ $t("resizeableWindow.onlyOnce") }}
-                                    </label>
-                                </div>
-                                <div v-if="mihanEnableNotify" class="flex gap-2">
-                                    <label v-for="(type, val) in MihanNotify.TYPES" :key="type" class="text-sm p-1 label">
-                                        <input
-                                            v-model="mihanNotifyTypes"
-                                            :value="val"
-                                            name="mihanTypes"
-                                            type="checkbox"
-                                            class="toggle toggle-secondary"
-                                        />
-                                        {{ type }}
-                                    </label>
-                                </div>
-                                <div v-if="mihanEnableNotify" class="flex gap-2 flex-wrap">
-                                    <label v-for="mission in MihanNotify.MISSIONS" :key="mission" class="text-sm p-1 label">
-                                        <input
-                                            v-model="mihanNotifyMissions"
-                                            :value="mission"
-                                            name="mihanMissions"
-                                            type="checkbox"
-                                            class="toggle toggle-secondary"
-                                        />
-                                        {{ mission }}
-                                    </label>
-                                </div>
-                            </div>
+                            <DNAMihan />
                         </div>
+
+                        <div class="modal-backdrop" @click="ui.mihanVisible = false"></div>
                     </dialog>
                 </div>
                 <!-- fix resize shadow -->
@@ -417,6 +227,70 @@ const mihanNotify = new MihanNotify()
             <div :class="{ 'rounded-tl-box': !!$slots.sidebar }" class="w-full relative bg-base-200/50 flex-1 overflow-hidden shadow-inner">
                 <slot></slot>
             </div>
+
+            <!-- 全局悬浮放大层 -->
+            <div
+                v-if="ui.previewVisible || ui.isHoveringPreview"
+                id="preview-image"
+                class="z-50"
+                @mouseenter="ui.isHoveringPreview = true"
+                @mouseleave="ui.isHoveringPreview = false"
+            >
+                <div class="bg-base-100 p-2 rounded-lg shadow-2xl border border-base-200">
+                    <img :src="ui.previewImageUrl" alt="图片预览" class="max-w-full max-h-96 object-contain rounded" />
+                </div>
+            </div>
+            <!-- 全局通用浮层 -->
+            <dialog class="modal" :class="{ 'modal-open': ui.dialogVisible }">
+                <div class="modal-box bg-base-300">
+                    <p class="text-lg font-bold">{{ ui.dialogTitle }}</p>
+                    <p class="py-4 text-base-content/60">{{ ui.dialogContent }}</p>
+                    <div class="modal-action">
+                        <div class="flex justify-end gap-2">
+                            <button class="min-w-20 btn btn-secondary" @click="ui.confirmDialog">{{ $t("setting.confirm") }}</button>
+                            <button class="min-w-20 btn btn-ghost" @click="ui.cancelDialog">{{ $t("setting.cancel") }}</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- 模态框背景 -->
+                <div class="modal-backdrop" @click="ui.cancelDialog"></div>
+            </dialog>
+            <transition name="slide-right">
+                <div
+                    v-if="ui.errorMessage"
+                    @click="ui.errorMessage = ''"
+                    role="alert"
+                    class="alert alert-error absolute bottom-8 right-8 cursor-pointer"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                    <span>{{ ui.errorMessage }}</span>
+                </div>
+            </transition>
+            <transition name="slide-right">
+                <div
+                    v-if="ui.successMessage"
+                    @click="ui.successMessage = ''"
+                    role="alert"
+                    class="alert alert-success absolute bottom-8 right-8 cursor-pointer"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                    <span>{{ ui.successMessage }}</span>
+                </div>
+            </transition>
         </div>
     </div>
 </template>

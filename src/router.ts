@@ -9,6 +9,7 @@ import TimelineEditor from "./views/TimelineEditor.vue"
 import AchievementList from "./views/AchievementList.vue"
 import { env } from "./env"
 import { LogicalSize, getCurrentWindow } from "@tauri-apps/api/window"
+import UserManager from "./views/UserManager.vue"
 
 let setMinSize = async (_w: number, _h: number) => {}
 ;(async () => {
@@ -37,11 +38,51 @@ const routes: readonly RouteRecordRaw[] = [
         component: env.isApp ? () => import("./views/GameLauncher.vue") : () => undefined,
         beforeEnter: () => setMinSize(800, 700),
     },
+    { name: "login", path: "/login", component: UserManager, beforeEnter: () => setMinSize(600, 600) },
     { name: "more", path: "/more", component: More, beforeEnter: () => setMinSize(600, 600) },
     // more: lazy load
     { name: "ai", path: "/ai", component: () => import("./views/AIAgent.vue"), beforeEnter: () => setMinSize(600, 600) },
     { name: "game", path: "/game", component: () => import("./views/SmallGame.vue"), beforeEnter: () => setMinSize(600, 600) },
     { name: "help", path: "/help", component: () => import("./views/Help.vue"), beforeEnter: () => setMinSize(800, 700) },
+
+    // DNA routes
+    { name: "dna-home", path: "/dna", component: () => import("./views/DNAHomeView.vue"), beforeEnter: () => setMinSize(600, 600) },
+    {
+        name: "dna-role-detail",
+        path: "/dna/char/:charId/:charEid",
+        component: () => import("./views/DNARoleDetailView.vue"),
+        beforeEnter: () => setMinSize(600, 600),
+    },
+    {
+        name: "dna-weapon-detail",
+        path: "/dna/weapon/:weaponId/:weaponEid",
+        component: () => import("./views/DNAWeaponDetailView.vue"),
+        beforeEnter: () => setMinSize(600, 600),
+    },
+    {
+        name: "dna-user",
+        path: "/dna/mine/:userId",
+        component: () => import("./views/DNAUserMineView.vue"),
+        beforeEnter: () => setMinSize(600, 600),
+    },
+    {
+        name: "dna-posts",
+        path: "/dna/posts/:forumId",
+        component: () => import("./views/DNAPostListView.vue"),
+        beforeEnter: () => setMinSize(600, 600),
+    },
+    {
+        name: "dna-topic",
+        path: "/dna/topic/:topicId",
+        component: () => import("./views/DNAPostListView.vue"),
+        beforeEnter: () => setMinSize(600, 600),
+    },
+    {
+        name: "dna-post-detail",
+        path: "/dna/posts/:forumId/:postId",
+        component: () => import("./views/DNAPostDetailView.vue"),
+        beforeEnter: () => setMinSize(600, 600),
+    },
 ]
 
 export const router = createRouter({

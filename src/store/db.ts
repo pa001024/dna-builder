@@ -75,12 +75,30 @@ export interface Message {
 
 export type UMessage = Omit<Message, "id">
 
+export interface DNAUser {
+    id: number
+    uid: string // userId
+    name: string // userName
+    dev_code: string
+    token: string
+    refreshToken: string
+    pic: string
+    status: number
+    isComplete: number
+    isOfficial?: number
+    isRegister?: number
+    // userGameList: string[]
+}
+
+export type UDNAUser = Omit<DNAUser, "id">
+
 interface DB {
     mods: Mod
     customEntitys: CustomEntity
     entityMods: EntityMod
     conversations: Conversation
     messages: Message
+    dnaUsers: DNAUser
 }
 
 // 索引列表
@@ -90,4 +108,5 @@ db.version(1).stores({
     entityMods: "++id, entity, modid",
     conversations: "++id, createdAt, updatedAt",
     messages: "++id, conversationId, createdAt",
+    dnaUsers: "++id, uid",
 })

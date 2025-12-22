@@ -25,6 +25,10 @@
         "clipboard-manager:allow-read-text",
         "clipboard-manager:allow-write-text",
         "dialog:default",
-        "notification:default"
+        "notification:default",
+        {
+            "identifier": "http:default",
+            "allow": [{ "url": "https://dnabbs-api.yingxiong.com" }]
+        }
     ]
 }

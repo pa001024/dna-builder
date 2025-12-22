@@ -110,6 +110,27 @@
         "weapon_attributes": "武器属性",
         "weaponDamage": "武器伤害"
     },
+    "dna-home": {
+        "title": "皎皎角"
+    },
+    "dna-post-detail": {
+        "title": "帖子详情"
+    },
+    "dna-posts": {
+        "title": "板块"
+    },
+    "dna-role-detail": {
+        "title": "角色详情"
+    },
+    "dna-topic": {
+        "title": "主题"
+    },
+    "dna-user": {
+        "title": "用户信息"
+    },
+    "dna-weapon-detail": {
+        "title": "武器详情"
+    },
     "errorBoundary": {
         "retry": "重试",
         "title": "组件渲染出错"
@@ -234,6 +255,10 @@
         "desc": "自定义你的魔之楔和武器配置",
         "title": "库存管理"
     },
+    "login": {
+        "desc": "皎皎角登录/签到/角色信息获取",
+        "title": "皎皎角"
+    },
     "main": {
         "btn_collapse_menu": "折叠菜单",
         "btn_pin_window": "窗口置顶",
@@ -254,7 +279,7 @@
         "mihanNotificationTitle": "委托密函提醒",
         "mihanTitle": "委托密函",
         "moling": "魔灵",
-        "monitorSettings": "监控设置",
+        "monitorSettings": "推送设置",
         "nextRefresh": "下次刷新",
         "onlyOnce": "仅一次",
         "zhouben": "周本"

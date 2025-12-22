@@ -8,20 +8,20 @@ defineProps<{
 
 <template>
     <TooltipProvider>
-        <TooltipRoot>
+        <TooltipRoot :delayDuration="100">
             <TooltipTrigger asChild>
                 <slot />
             </TooltipTrigger>
             <TooltipPortal>
                 <TooltipContent
-                    class="z-1000 data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade select-none rounded-sm bg-white px-[15px] py-2.5 text-[15px] leading-none shadow-[hsl(206_22%_7%/35%)_0px_10px_38px_-10px,hsl(206_22%_7%/20%)_0px_10px_20px_-15px] will-change-[transform,opacity]"
+                    class="z-10000 bg-base-100 shadow-lg shadow-base-content/20 px-[15px] py-2.5 text-[15px] data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade select-none rounded-sm leading-none will-change-[transform,opacity]"
                     :side-offset="5"
                     :side="side"
                 >
                     <div class="whitespace-pre-wrap">
                         {{ tooltip }}
                     </div>
-                    <TooltipArrow class="fill-white" :width="8" />
+                    <TooltipArrow class="fill-base-100" :width="8" />
                 </TooltipContent>
             </TooltipPortal>
         </TooltipRoot>

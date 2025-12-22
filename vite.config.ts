@@ -5,6 +5,8 @@ import Component from "unplugin-vue-components/vite"
 import RadixVueResolver from "radix-vue/resolver"
 import tailwindcss from "@tailwindcss/vite"
 import { VitePWA } from "vite-plugin-pwa"
+import { resolve } from "path"
+import { chunkSplitPlugin } from "vite-plugin-chunk-split"
 
 const host = process.env.TAURI_DEV_HOST
 
@@ -29,6 +31,12 @@ export default defineConfig(async () => ({
                 //   prefix: '' // use the prefix option to add Prefix to the imported components
                 // })
             ],
+        }),
+        chunkSplitPlugin({
+            strategy: "default",
+            customSplitting: {
+                dna: [/src\/views\/DNA/],
+            },
         }),
         VitePWA({
             registerType: "autoUpdate",
@@ -97,6 +105,14 @@ export default defineConfig(async () => ({
             },
         }),
     ],
+    build: {
+        rollupOptions: {
+            input: {
+                index: resolve(__dirname, "index.html"),
+                login: resolve(__dirname, "login.html"),
+            },
+        },
+    },
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
     //
@@ -116,7 +132,16 @@ export default defineConfig(async () => ({
             : undefined,
         watch: {
             // 3. tell Vite to ignore watching `src-tauri`
-            ignored: ["**/src-tauri/**", "**/*.d.ts", "**/*.md", "**/*.test.ts"],
+            ignored: [
+                "**/src-tauri/**",
+                "**/*.d.ts",
+                "**/*.md",
+                "**/*.test.ts",
+                "**/mcp_server/**",
+                "**/server/**",
+                "**/externals/**",
+                // ...
+            ],
         },
     },
 }))

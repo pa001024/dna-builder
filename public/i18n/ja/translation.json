@@ -110,6 +110,27 @@
         "weapon_attributes": "武器属性",
         "weaponDamage": "武器ダメージ"
     },
+    "dna-home": {
+        "title": "皎皎角"
+    },
+    "dna-post-detail": {
+        "title": "投稿詳細"
+    },
+    "dna-posts": {
+        "title": "板"
+    },
+    "dna-role-detail": {
+        "title": "キャラクター詳細"
+    },
+    "dna-topic": {
+        "title": "トピック"
+    },
+    "dna-user": {
+        "title": "ユーザー情報"
+    },
+    "dna-weapon-detail": {
+        "title": "武器詳細"
+    },
     "errorBoundary": {
         "retry": "再試行",
         "title": "コンポーネントのレンダリングエラー"
@@ -233,6 +254,10 @@
     "inventory": {
         "desc": "ウェッジと武器の装備をカスタマイズする",
         "title": "在庫管理"
+    },
+    "login": {
+        "desc": "皎皎角ログイン/チェックイン/キャラクター情報取得",
+        "title": "皎皎角"
     },
     "main": {
         "btn_collapse_menu": "メニューを折りたたむ",

@@ -20,6 +20,7 @@ export class LeveledSkillWeapon implements Weapon {
     弹片数?: number
     射速?: number
     段数?: number
+    弹道类型?: string
     private _倍率名称?: string
 
     // 等级和精炼属性
@@ -62,6 +63,7 @@ export class LeveledSkillWeapon implements Weapon {
         this.基础暴击 = weaponData.基础暴击
         this.基础暴伤 = weaponData.基础暴伤
         this.基础触发 = weaponData.基础触发
+        this.弹道类型 = weaponData.弹道类型
 
         // 初始化倍率相关属性为undefined
         this.弹片数 = undefined

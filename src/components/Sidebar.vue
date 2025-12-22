@@ -38,8 +38,14 @@ watchEffect(() => {
                     <Icon v-if="tab.icon" :icon="tab.icon" />
                     <span v-else>{{ t(`${tab.name}.title`) }}</span>
                 </SidebarButton>
-                <div v-else-if="tab.show !== false" class="flex-1" data-tauri-drag-region></div>
             </template>
+            <div class="flex-1" data-tauri-drag-region></div>
+            <SidebarButton to="/login" :tooltip="t(`login.title`)">
+                <Icon icon="la:user" />
+            </SidebarButton>
+            <SidebarButton to="/setting" :tooltip="t(`setting.title`)">
+                <Icon icon="ri:settings-3-line" />
+            </SidebarButton>
         </div>
     </div>
 </template>

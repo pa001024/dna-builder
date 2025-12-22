@@ -110,6 +110,27 @@
         "weapon_attributes": "Weapon Attributes",
         "weaponDamage": "weapon damage"
     },
+    "dna-home": {
+        "title": "Jiaojiaojiao"
+    },
+    "dna-post-detail": {
+        "title": "Post Details"
+    },
+    "dna-posts": {
+        "title": "Sections"
+    },
+    "dna-role-detail": {
+        "title": "Character Details"
+    },
+    "dna-topic": {
+        "title": "Topics"
+    },
+    "dna-user": {
+        "title": "User Information"
+    },
+    "dna-weapon-detail": {
+        "title": "Weapon Details"
+    },
     "errorBoundary": {
         "retry": "Retry",
         "title": "Component Rendering Error"
@@ -233,6 +254,10 @@
     "inventory": {
         "desc": "Customize your Wedge and weapon loadout",
         "title": "Inventory Management"
+    },
+    "login": {
+        "desc": "Jiaojiaojiao Login/Sign-in/Character Info Retrieval",
+        "title": "Jiaojiaojiao"
     },
     "main": {
         "btn_collapse_menu": "Collapse menu",

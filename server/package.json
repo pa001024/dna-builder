@@ -18,6 +18,8 @@
         "@pa001024/graphql-mobius": "^0.1.13",
         "@vitejs/plugin-vue": "^6.0.2",
         "bcrypt": "^6.0.0",
+        "croner": "^9.1.0",
+        "dna-api": "^0.2.6",
         "dotenv": "^17.2.3",
         "drizzle-graphql": "^0.8.4",
         "drizzle-orm": "^0.45.1",
