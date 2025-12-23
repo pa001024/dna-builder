@@ -1308,19 +1308,22 @@ export class CharBuild {
                     addMod(key, maxed)
                     changed = true
                     log(
-                        `第${iter}次迭代: 添加${ModTypeMap[key]}MOD(${localBuild[key].length}/${ModTypeMaxSlot[key]}) ${maxed.名称} 收益: ${+(maxedIncome * 100).toFixed(2)}%`,
+                        `第${iter}次迭代: 添加${ModTypeMap[key]}(${localBuild[key].length}/${ModTypeMaxSlot[key]})>>> ${maxed.名称}(+${+(maxedIncome * 100).toFixed(2)}%)`,
                     )
                     ;({ mod: maxed, income: maxedIncome } = findMaxMod(key))
                     if (maxed === null) return
                 }
                 sortByIcome(key)
                 const lastIncome = localBuild.calcIncome(localBuild[key].at(-1), true)
+                const copyBuild = localBuild.clone()
+                copyBuild[key].pop()
+                const newIncome = copyBuild.calcIncome(maxed)
                 log(
-                    `第${iter}次迭代: 收益最低MOD${localBuild[key].at(-1)?.名称} 收益: ${+(lastIncome * 100).toFixed(2)}% 收益最高的候选MOD${maxed.名称} 收益: ${+(maxedIncome * 100).toFixed(2)}%`,
+                    `第${iter}次迭代: ${ModTypeMap[key]}>>> ${localBuild[key].at(-1)?.名称}(+${+(lastIncome * 100).toFixed(2)}%) vs ${maxed.名称}(+${+(newIncome * 100).toFixed(2)}%)`,
                 )
-                if (maxedIncome > lastIncome) {
+                if (newIncome > lastIncome) {
                     log(
-                        `第${iter}次迭代: 用${ModTypeMap[key]}MOD ${maxed.名称} 替换 ${localBuild[key].at(-1)?.名称} 收益: ${+(lastIncome * 100).toFixed(2)}% -> ${+(maxedIncome * 100).toFixed(2)}%`,
+                        `第${iter}次迭代: ${ModTypeMap[key]}>>> ${maxed.名称} 替换 ${localBuild[key].at(-1)?.名称} (${+(lastIncome * 100).toFixed(2)}% -> ${+(newIncome * 100).toFixed(2)}%)`,
                     )
                     removeMod(key, localBuild[key].length - 1)
                     addMod(key, maxed)

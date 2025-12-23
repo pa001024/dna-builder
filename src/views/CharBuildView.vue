@@ -390,16 +390,22 @@ const summonAttributes = computed(() => {
 const teamBuffLvs = useLocalStorage("teamBuffLvs", {} as Record<string, number>)
 
 function updateTeamBuff(newValue: string, oldValue: string) {
-    // 移除旧的BUFF
-    charSettings.value.buffs = charSettings.value.buffs.filter((v) => !v[0].includes(oldValue))
-    if (newValue === "-") return
+    const newBuffs = [...charSettings.value.buffs.filter((v) => !v[0].includes(oldValue))]
+    console.log(newValue, oldValue, newBuffs)
+    if (newValue === "-") {
+        charSettings.value.buffs = newBuffs
+        return
+    }
 
     // 添加新的BUFF
     const teamBuffs = buffOptions.value.filter((v) => v.label.includes(newValue))
     if (teamBuffs.length > 0) {
-        charSettings.value.buffs.push(
-            ...teamBuffs.map((v) => [v.label, teamBuffLvs.value[v.label] || v.value.等级] as [string, number]).filter((v) => v[1] > 0),
-        )
+        const buffs = teamBuffs
+            .map((v) => [v.label, teamBuffLvs.value[v.label] || v.value.等级] as [string, number])
+            .filter((v) => v[1] > 0)
+        console.log(buffs, newBuffs)
+        newBuffs.push(...buffs)
+        charSettings.value.buffs = newBuffs
     }
 }
 </script>
@@ -550,7 +556,7 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                                     {{
                                         format100(
                                             charBuild.skillWeapon && charBuild.selectedWeapon!.类型 === charBuild.skillWeapon.类型
-                                                ? charBuild.skillWeapon.倍率 * charBuild.calculateAttributes().power
+                                                ? charBuild.skillWeapon.倍率 * charBuild.calculateAttributes().威力
                                                 : charBuild.selectedWeapon.倍率,
                                         )
                                     }}
@@ -1131,15 +1137,15 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                                     <div
                                         class="bg-base-300/60 bg-linear-to-r from-secondary/1 to-secondary/5 backdrop-blur-sm rounded-xl p-2 border border-secondary/30"
                                         v-for="[key, val] in Object.entries(attributes).filter(
-                                            ([k, v]) => !['summonAttackSpeed', 'summonRange'].includes(k) && v,
+                                            ([k, v]) => !['召唤物攻击速度', '召唤物范围'].includes(k) && v,
                                         )"
                                     >
                                         <div class="text-gray-400 text-xs mb-1">
-                                            {{ key === "attack" ? `${charBuild.char.属性}属性` : "" }}{{ $t(`char-build.${key}`) }}
+                                            {{ key === "攻击" ? `${charBuild.char.属性}属性` : "" }}{{ $t(`char-build.${key}`) }}
                                         </div>
                                         <div class="text-secondary font-bold text-sm font-orbitron">
                                             {{
-                                                ["attack", "health", "shield", "defense", "sanity"].includes(key)
+                                                ["攻击", "生命", "护盾", "防御", "神智"].includes(key)
                                                     ? `${+val.toFixed(2)}`
                                                     : `${+(val * 100).toFixed(2)}%`
                                             }}
@@ -1188,19 +1194,19 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
                                     <span
                                         class="px-4 py-2 rounded-lg bg-linear-to-r from-secondary/1 to-secondary/5 border border-secondary/30 text-secondary text-xs"
-                                        v-for="(count, mod) in charBuild.mods
+                                        v-for="mod in charBuild.mods
                                             .filter((v) => v.类型 === '角色')
-                                            .map((v) => v.名称)
                                             .reduce((r, v) => {
-                                                if (r[v]) {
-                                                    r[v] += 1
+                                                if (r[v.名称]) {
+                                                    r[v.名称].count += 1
                                                 } else {
-                                                    r[v] = 1
+                                                    r[v.名称] = { count: 1, mod: v }
                                                 }
                                                 return r
                                             }, {} as any)"
                                     >
-                                        {{ count > 1 ? count + " x " : "" }}{{ mod }}
+                                        <img class="size-8 object-cover inline-block" :src="mod.mod.url" alt="" />
+                                        <span> {{ mod.count > 1 ? mod.count + " x " : "" }}{{ mod.mod.名称 }} </span>
                                     </span>
                                 </div>
                                 <div
@@ -1209,19 +1215,19 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                                 >
                                     <span
                                         class="px-4 py-2 rounded-lg bg-linear-to-r from-secondary/1 to-secondary/5 border border-secondary/30 text-secondary text-xs"
-                                        v-for="(count, mod) in charBuild.mods
+                                        v-for="mod in charBuild.mods
                                             .filter((v) => v.类型 === charBuild.selectedWeapon!.类型)
-                                            .map((v) => v.名称)
                                             .reduce((r, v) => {
-                                                if (r[v]) {
-                                                    r[v] += 1
+                                                if (r[v.名称]) {
+                                                    r[v.名称].count += 1
                                                 } else {
-                                                    r[v] = 1
+                                                    r[v.名称] = { count: 1, mod: v }
                                                 }
                                                 return r
                                             }, {} as any)"
                                     >
-                                        {{ count > 1 ? count + " x " : "" }}{{ mod }}
+                                        <img class="size-8 object-cover inline-block" :src="mod.mod.url" alt="" />
+                                        <span> {{ mod.count > 1 ? mod.count + " x " : "" }}{{ mod.mod.名称 }} </span>
                                     </span>
                                 </div>
                             </div>
