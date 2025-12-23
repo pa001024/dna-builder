@@ -96,6 +96,7 @@
         "select_character": "选择角色",
         "select_skill_weapon": "选择技能/武器",
         "selected_count": "已选 {{count}} 个",
+        "shield": "护盾",
         "shot_damage": "弹片伤害",
         "skill_level": "技能等级",
         "skill_weapon": "技能/武器",

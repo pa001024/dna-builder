@@ -96,6 +96,7 @@
         "select_character": "캐릭터 선택",
         "select_skill_weapon": "스킬/무기 선택",
         "selected_count": "{{count}}개 선택됨",
+        "shield": "실드",
         "shot_damage": "탄환 피해",
         "skill_level": "스킬 레벨",
         "skill_weapon": "스킬/무기",

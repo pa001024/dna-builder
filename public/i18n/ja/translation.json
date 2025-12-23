@@ -96,6 +96,7 @@
         "select_character": "キャラクターを選択",
         "select_skill_weapon": "スキル/武器を選択",
         "selected_count": "{{count}}個選択済み",
+        "shield": "シールド",
         "shot_damage": "弾片ダメージ",
         "skill_level": "スキルレベル",
         "skill_weapon": "スキル/武器",
