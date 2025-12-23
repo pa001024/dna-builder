@@ -445,7 +445,12 @@ function updateTeamBuff(newValue: string, oldValue: string) {
             <!-- 基本设置 -->
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
                 <!-- 角色选择 -->
-                <ShowProps :props="charBuild.char.getProperties()" side="bottom">
+                <ShowProps
+                    :title="charBuild.char.名称"
+                    :props="charBuild.char.getProperties()"
+                    :type="`${charBuild.char.属性},${charBuild.char.近战}/${charBuild.char.远程}`"
+                    side="bottom"
+                >
                     <div class="bg-base-300 rounded-xl p-4 shadow-lg">
                         <div class="flex items-center gap-2 mb-3">
                             <SectionMarker reset>
@@ -518,7 +523,12 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                 <FullTooltip side="bottom">
                     <template #tooltip>
                         <div v-if="charBuild.selectedSkill" class="flex flex-col">
-                            <div class="text-md p-2">{{ charBuild.selectedSkill!.类型 }}</div>
+                            <div class="text-md p-2 flex items-center gap-2">
+                                <span v-if="charBuild.selectedSkillKey" class="badge badge-primary badge-sm">{{
+                                    charBuild.selectedSkillKey
+                                }}</span>
+                                {{ charBuild.selectedSkill!.类型 }}
+                            </div>
                             <div
                                 v-for="(val, index) in charBuild.selectedSkill!.getFieldsWithAttr(
                                     charBuild.selectedSkill.召唤物
@@ -619,7 +629,13 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                     </div>
                 </FullTooltip>
                 <!-- 近战武器选择 -->
-                <ShowProps :props="charBuild.meleeWeapon.getProperties()" side="bottom">
+                <ShowProps
+                    :title="charBuild.meleeWeapon.名称"
+                    :desc="charBuild.meleeWeapon.描述"
+                    :props="charBuild.meleeWeapon.getProperties()"
+                    :type="charBuild.meleeWeapon.类别"
+                    side="bottom"
+                >
                     <div class="bg-base-300 rounded-xl p-4 shadow-lg">
                         <div class="flex items-center gap-2 mb-3">
                             <SectionMarker>
@@ -675,7 +691,12 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                     </div>
                 </ShowProps>
                 <!-- 远程武器选择 -->
-                <ShowProps :props="charBuild.rangedWeapon.getProperties()" side="bottom">
+                <ShowProps
+                    :title="charBuild.rangedWeapon.名称"
+                    :props="charBuild.rangedWeapon.getProperties()"
+                    :type="charBuild.rangedWeapon.类别"
+                    side="bottom"
+                >
                     <div class="bg-base-300 rounded-xl p-4 shadow-lg">
                         <div class="flex items-center gap-2 mb-3">
                             <SectionMarker>

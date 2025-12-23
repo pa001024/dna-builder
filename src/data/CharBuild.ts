@@ -15,7 +15,7 @@ export interface CharAttr {
     神智: number
     // 其他属性
     威力: number
-    持续: number
+    耐久: number
     效益: number
     范围: number
     昂扬: number
@@ -371,7 +371,7 @@ export class CharBuild {
             神智: sanity,
             // 其他属性
             威力: power,
-            持续: durability,
+            耐久: durability,
             效益: efficiency,
             范围: range,
             昂扬: boost,
@@ -390,7 +390,7 @@ export class CharBuild {
             减伤: damageReduce,
         }
         // 应用MOD条件
-        this.applyCondition(
+        attrs = this.applyCondition(
             attrs,
             this.charMods.filter((mod) => mod.生效?.条件),
         )
@@ -916,7 +916,7 @@ export class CharBuild {
         if (sustainedCostField && sustainedCostField.属性影响 && !sustainedCostField.属性影响.includes("耐久")) {
             sustainedCost = Math.ceil(Math.max(0, baseSustainedCost * (2 - attrs.效益)))
         } else {
-            sustainedCost = Math.ceil(Math.max(0, baseSustainedCost * Math.max(0.25, (2 - attrs.效益) / attrs.持续)))
+            sustainedCost = Math.ceil(Math.max(0, baseSustainedCost * Math.max(0.25, (2 - attrs.效益) / attrs.耐久)))
         }
 
         switch (this.targetFunction) {
@@ -963,11 +963,21 @@ export class CharBuild {
     }
 
     get selectedSkill() {
-        let skill: LeveledSkill | undefined
         let bt = this.baseNameTitle
-
-        skill = this.skills.find((s) => s.名称 === bt)
+        const skill = this.skills.find((s) => s.名称 === bt)
         return skill
+    }
+
+    get selectedSkillKey() {
+        let bt = this.baseNameTitle
+        const index = this.skills.findIndex((s) => s.名称 === bt)
+        return index >= 0 ? ["E", "Q", ""][index] : ""
+    }
+
+    public isModEffective(mod: LeveledMod, includeSelf = false) {
+        if (!mod.生效?.条件) return false
+        const attrs = this.calculateAttributes(includeSelf ? undefined : mod)
+        return mod.checkCondition(attrs)
     }
 
     get isMeleeWeapon() {
@@ -1204,7 +1214,7 @@ export class CharBuild {
             }
             // 记录非契约者MOD名称（用于名称互斥）
             if (mod.系列 !== "契约者") {
-                selectedExclusiveNames[key].add(mod.fullName)
+                mod.excludeNames.forEach((name) => selectedExclusiveNames[key].add(name))
             } else {
                 selectedModCount.set(mod.id, (selectedModCount.get(mod.id) || 0) + 1)
             }
@@ -1218,7 +1228,7 @@ export class CharBuild {
             }
             // 从非契约者MOD名称集合中移除
             if (mod.系列 !== "契约者") {
-                selectedExclusiveNames[key].delete(mod.fullName)
+                mod.excludeNames.forEach((name) => selectedExclusiveNames[key].delete(name))
             } else {
                 const count = (selectedModCount.get(mod.id) || 0) - 1
                 if (count > 0) selectedModCount.set(mod.id, count)
@@ -1246,7 +1256,7 @@ export class CharBuild {
                             (key === "skillWeaponMods" &&
                                 localBuild.skillWeapon &&
                                 [localBuild.skillWeapon.伤害类型, localBuild.skillWeapon.类别].includes(v.限定))) &&
-                        !selectedExclusiveNames[key].has(v.fullName) &&
+                        !v.excludeNames.some((name) => selectedExclusiveNames[key].has(name)) &&
                         !selectedExclusiveSeries[key].has(v.系列) &&
                         (selectedModCount.get(v.id) || 0) < v.count,
                 )

@@ -153,7 +153,21 @@ export class LeveledChar implements Char {
         this.基础防御 = Math.round(this._base80Defense * multiplier)
     }
 
-    static properties = ["范围", "攻击", "耐久", "生命", "威力", "背水", "防御", "效益", "昂扬"] as const
+    static properties = [
+        "基础攻击",
+        "基础生命",
+        "基础护盾",
+        "基础防御",
+        "范围",
+        "攻击",
+        "耐久",
+        "生命",
+        "威力",
+        "背水",
+        "防御",
+        "效益",
+        "昂扬",
+    ] as const
 
     getProperties(): Partial<Char> {
         const properties: Partial<Char> = {}

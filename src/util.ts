@@ -15,7 +15,19 @@ export function format100(n100: number, di = 2) {
 export function format100r(n100: number, di = 2) {
     return `${n100 >= 0 ? "+" : ""}${+(n100 * 100).toFixed(di)}%`
 }
-const numKeys = new Set(["攻击范围", "固定攻击", "神智回复", "异常数量", "神智消耗", "基础攻击", "最大耐受", "连击持续时间"])
+const numKeys = new Set([
+    "基础攻击",
+    "基础生命",
+    "基础护盾",
+    "基础防御",
+    "攻击范围",
+    "固定攻击",
+    "神智回复",
+    "异常数量",
+    "神智消耗",
+    "最大耐受",
+    "连击持续时间",
+])
 export function formatProp(prop: string, val: any): string {
     // 实现属性格式化的逻辑
     if (typeof val !== "number") return String(val)

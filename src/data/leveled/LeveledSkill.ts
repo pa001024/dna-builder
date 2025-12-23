@@ -117,7 +117,7 @@ export class LeveledSkill implements Skill {
     getFieldsWithAttr(attrs: CharAttr & { weapon?: WeaponAttr }) {
         const tt = {
             威力: attrs.威力,
-            耐久: attrs.持续,
+            耐久: attrs.耐久,
             效益: attrs.效益,
             范围: attrs.范围,
         }
@@ -168,14 +168,14 @@ export class LeveledSkill implements Skill {
             const summon = this.召唤物
             const atkspd = ((attrs.weapon?.攻速 || 1) - 1) * attrs.召唤物攻击速度
             const df = this.召唤物持续时间
-            const duration = df ? (df.属性影响?.includes("耐久") ? df.值 * attrs.持续 : df.值) : 0
+            const duration = df ? (df.属性影响?.includes("耐久") ? df.值 * attrs.耐久 : df.值) : 0
             return {
                 name: summon.名称,
                 delay: summon.攻击延迟,
                 interval: summon.攻击间隔 / (1 + atkspd),
                 attackSpeed: atkspd,
                 duration,
-                attackTimes: Math.floor((duration * attrs.持续 - summon.攻击延迟) / (summon.攻击间隔 / (1 + atkspd))),
+                attackTimes: Math.floor((duration * attrs.耐久 - summon.攻击延迟) / (summon.攻击间隔 / (1 + atkspd))),
                 range: Math.min(2.8, attrs.范围 * (1 + attrs.召唤物范围)),
             }
         }

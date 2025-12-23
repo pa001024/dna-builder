@@ -10,6 +10,7 @@ withDefaults(
         polarity?: "A" | "D" | "V" | "O"
         cost?: number
         type?: string
+        eff?: boolean
     }>(),
     {
         side: "top",
@@ -21,7 +22,6 @@ withDefaults(
         <template #tooltip>
             <div class="flex flex-col gap-2 max-w-[300px]">
                 <div v-if="title" class="text-sm font-bold">{{ title }}</div>
-                <div v-if="desc" class="text-xs text-neutral-500">{{ desc }}</div>
                 <div v-if="polarity || cost" class="ml-auto badge badge-sm badge-soft gap-1 text-base-content/80">
                     {{ cost }}
                     <Icon v-if="polarity" :icon="`po-${polarity}`" />
@@ -34,6 +34,11 @@ withDefaults(
                     <div class="text-xs text-neutral-500">{{ prop }}</div>
                     <div class="font-medium text-primary">{{ formatProp(prop, val) }}</div>
                 </div>
+                <div v-if="desc" class="text-xs text-neutral-500">
+                    {{ desc }}
+                    <div v-if="eff" class="text-xs text-success">(已生效)</div>
+                </div>
+
                 <div v-if="code" class="text-xs text-gray-400">
                     <div class="text-xs text-neutral-500">{{ $t("char-build.dynamic_prop") }}</div>
                     {{ code }}

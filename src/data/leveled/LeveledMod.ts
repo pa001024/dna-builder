@@ -105,6 +105,26 @@ export class LeveledMod implements Mod {
         return `${this.系列}之${this.名称}`
     }
 
+    get excludeNames() {
+        if (this.系列 === "换生灵") {
+            // 换生灵之决断, 海妖之羽翼·鼓舞·决断
+            return [this.fullName, "海妖之羽翼·鼓舞·" + this.名称]
+        }
+        if (this.系列 === "海妖" && this.名称.split("·").length > 2) {
+            // 海妖之羽翼·鼓舞, 换生灵之决断
+            return [`${this.系列}之${this.名称.split("·").slice(0, -1).join("·")}`, "换生灵之" + this.名称.split("·").at(-1)]
+        }
+        return [this.fullName]
+    }
+
+    get isPrime() {
+        return this.系列 === "换生灵" || (this.系列 === "海妖" && this.名称.split("·").length > 2)
+    }
+
+    get types() {
+        return `${this.类型}${this.属性 ? `,${this.属性}属性` : ""}${this.限定 ? `,${this.限定}` : ""}`
+    }
+
     /**
      * 等级属性的getter和setter
      */
@@ -131,25 +151,31 @@ export class LeveledMod implements Mod {
         } else {
             this.耐受 = this._originalModData.耐受 - this.maxLevel + this._等级
         }
+        let lv = this._等级
 
+        if (this._originalModData.生效) {
+            const maxValue = this._originalModData.生效
+            const keys = Object.keys(maxValue).filter((v) => v !== "条件")
+            const vals: number[] = []
+            this.生效 = keys.reduce(
+                (acc, key) => {
+                    let currentValue = (maxValue[key] / (this.maxLevel + 1)) * (lv + 1)
+                    if (key === "神智回复" || key === "最大耐受") currentValue = Math.round(currentValue)
+                    acc[key] = currentValue
+                    vals.push(currentValue)
+                    return acc
+                },
+                {
+                    条件: maxValue.条件,
+                } as Record<string, any>,
+            )
+            if (this._originalModData.效果) {
+                let i = 0
+                this.效果 = this._originalModData.效果.replace(/{%}/g, () => `${+(vals[i++] * 100).toFixed(1)}%`)
+            }
+        }
         this.baseProperties.forEach((prop) => {
             let lv = this._等级
-            if (prop === "生效") {
-                const maxValue = this._originalModData[prop]
-                const keys = Object.keys(maxValue).filter((v) => v !== "条件")
-                this[prop] = keys.reduce(
-                    (acc, key) => {
-                        let currentValue = (maxValue[key] / (this.maxLevel + 1)) * (lv + 1)
-                        if (key === "神智回复" || key === "最大耐受") currentValue = Math.round(currentValue)
-                        acc[key] = currentValue
-                        return acc
-                    },
-                    {
-                        条件: maxValue.条件,
-                    } as Record<string, any>,
-                )
-                return
-            }
             if ((this.系列 === "换生灵" || this.系列 === "海妖") && prop === "减伤") lv = this.maxLevel
             // 架势MOD属性不受等级变化
             if (this.id > 100000) lv = this.maxLevel
@@ -173,8 +199,8 @@ export class LeveledMod implements Mod {
         })
     }
 
-    applyCondition(attrs: CharAttr): CharAttr {
-        if (!this.生效?.条件?.length) return attrs
+    checkCondition(attrs: CharAttr) {
+        if (!this.生效?.条件?.length) return false
         const isEffective = this.生效.条件.every(([attr, op, value]: [string, string, number]) => {
             const attrValue = attrs[attr as keyof CharAttr]
             if (op === "=") return attrValue === value
@@ -184,7 +210,11 @@ export class LeveledMod implements Mod {
             if (op === "<=") return attrValue <= value
             return false
         })
-        if (!isEffective) return attrs
+        return isEffective
+    }
+
+    applyCondition(attrs: CharAttr): CharAttr {
+        if (!this.checkCondition(attrs)) return attrs
         const keys = Object.keys(this.生效).filter((v) => v !== "条件")
         keys.forEach((key) => {
             attrs[key as keyof CharAttr] += this.生效[key]
@@ -220,6 +250,7 @@ export class LeveledMod implements Mod {
         "buffLv",
         "maxLevel",
         "生效",
+        "效果",
         "code",
         "count",
     ])

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LeveledMod } from "../data"
+import { CharBuild, LeveledMod } from "../data"
 import { format100r } from "../util"
 
 function getQualityColor(quality: string): string {
@@ -44,6 +44,7 @@ defineProps<{
     count?: number
     selected?: boolean
     control?: boolean
+    charBuild?: CharBuild
 }>()
 
 const emit = defineEmits<{
@@ -64,7 +65,9 @@ const emit = defineEmits<{
                 :title="mod.fullName"
                 :polarity="mod.极性"
                 :cost="mod.耐受"
-                :type="`${mod.类型}${mod.属性 ? `,${mod.属性}属性` : ''}${mod.限定 ? `,${mod.限定}` : ''}`"
+                :type="mod.types"
+                :desc="mod.效果"
+                :eff="charBuild?.isModEffective(mod, true)"
             >
                 <div class="w-full h-full flex items-center justify-center bg-opacity-30 rounded-lg overflow-hidden">
                     <!-- 背景 -->

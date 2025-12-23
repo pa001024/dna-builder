@@ -57,9 +57,16 @@ export const useInvStore = defineStore("inv", {
             const noInv = useInv ? all.filter((mod) => !this.enableMods[mod.品质 as keyof typeof this.enableMods]) : all
 
             const invMods = useInv
-                ? Object.entries(this.mods)
-                      .map(([modId, [lv, count]]) => new LeveledModWithCount(Number(modId), lv, this.getBuffLv(Number(modId)), count))
-                      .filter((mod) => this.enableMods[mod.品质 as keyof typeof this.enableMods])
+                ? (Object.entries(this.mods)
+                      .map(([modId, [lv, count]]) => {
+                          try {
+                              const mc = new LeveledModWithCount(Number(modId), lv, this.getBuffLv(Number(modId)), count)
+                              return mc
+                          } catch (error) {
+                              return undefined
+                          }
+                      })
+                      .filter((mod) => mod && this.enableMods[mod.品质 as keyof typeof this.enableMods]) as LeveledModWithCount[])
                 : []
 
             return [...noInv.map((mod) => new LeveledModWithCount(mod, undefined, this.getBuffLv(mod.id), 8)), ...invMods]

@@ -29,6 +29,11 @@ describe("LeveledMod类测试", () => {
         const 炽灼 = new LeveledMod(11001, -1)
         expect(炽灼.等级).toBe(0)
     })
+    // 测试excludeNames
+    it("excludeNames包含正确的名称", () => {
+        const 风决断 = new LeveledMod(56152, -1)
+        expect(风决断.excludeNames).toEqual(["海妖之羽翼·鼓舞", "换生灵之决断"])
+    })
 
     // 测试5：验证属性计算公式
     it("属性计算公式正确", () => {
@@ -70,7 +75,7 @@ describe("DynamicBuff", () => {
             神智: 1,
             // 其他属性
             威力: 1,
-            持续: 1,
+            耐久: 1,
             效益: 1,
             范围: 2,
             昂扬: 1,

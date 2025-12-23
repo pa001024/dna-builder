@@ -448,8 +448,8 @@ describe("CharBuild类测试", () => {
             const charBuild = createCharBuild()
             const attrs = charBuild.calculateAttributes()
 
-            expect(attrs.持续).toBeTypeOf("number")
-            expect(attrs.持续).toBeGreaterThanOrEqual(1)
+            expect(attrs.耐久).toBeTypeOf("number")
+            expect(attrs.耐久).toBeGreaterThanOrEqual(1)
         })
 
         it("应该正确计算效益属性", () => {

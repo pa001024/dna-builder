@@ -50,7 +50,7 @@ const sortedModOptions = computed(() => {
                 }
                 // 记录非契约者MOD名称（用于名称互斥）
                 if (mod.系列 !== "契约者") {
-                    equippedExclusiveNames.add(mod.fullName)
+                    mod.excludeNames.forEach((name) => equippedExclusiveNames.add(name))
                 }
                 // 记录MOD数量
                 idCount.set(mod.id, (idCount.get(mod.id) || 0) + 1)
@@ -69,7 +69,7 @@ const sortedModOptions = computed(() => {
         }
 
         // 2. 过滤同名的非契约者MOD（名称互斥）
-        if (mod.系列 !== "契约者" && equippedExclusiveNames.has(mod.fullName)) {
+        if (mod.系列 !== "契约者" && mod.excludeNames.some((name) => equippedExclusiveNames.has(name))) {
             return false
         }
 
@@ -203,6 +203,7 @@ const aMod = computed(() => {
                 @click="handleSlotClick(index)"
                 @removeMod="handleRemoveMod(index)"
                 control
+                :charBuild="charBuild"
                 :selected="undefined"
                 @lv-change="handleLevelChange(index, $event)"
             />
