@@ -741,12 +741,9 @@ export class CharBuild {
         const enemyLevel = typeof this.enemyLevel === "number" ? this.enemyLevel : 80
 
         const levelDiff = Math.max(0, Math.min(20, Math.min(80, enemyLevel) - charLevel))
-        const ignoreDefense = attrs.无视防御
-        const def = finalDef ?? enemyTypeCoeff * 10 * (1 - ignoreDefense)
-        const baseDefenseMultiplier = def / (300 + def - levelDiff)
-
-        // 计算最终防御乘区，并确保其在0到1之间
-        const defenseMultiplier = 1 - baseDefenseMultiplier
+        const def = finalDef ?? enemyTypeCoeff * 10 * (1 - attrs.无视防御)
+        const dmgReduce = def / (300 + def - levelDiff * 10) // 减伤率
+        const defenseMultiplier = 1 - dmgReduce
         return Math.max(0, Math.min(1, defenseMultiplier))
     }
 
