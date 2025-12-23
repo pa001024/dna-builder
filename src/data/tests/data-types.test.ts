@@ -111,6 +111,11 @@ describe("数据类型测试", () => {
                 expect(mod.名称.length).toBeGreaterThan(0)
             })
         })
+
+        it("MOD ID 不应该重复", () => {
+            const idset = new Set(gameData.mod.map((mod) => mod.id))
+            expect(idset.size).toBe(gameData.mod.length)
+        })
     })
 
     // 武器数据测试
