@@ -391,22 +391,18 @@ const teamBuffLvs = useLocalStorage("teamBuffLvs", {} as Record<string, number>)
 
 function updateTeamBuff(newValue: string, oldValue: string) {
     const newBuffs = [...charSettings.value.buffs.filter((v) => !v[0].includes(oldValue))]
-    console.log(newValue, oldValue, newBuffs)
-    if (newValue === "-") {
-        charSettings.value.buffs = newBuffs
-        return
+    if (newValue !== "-") {
+        // 添加新的BUFF
+        const teamBuffs = buffOptions.value.filter((v) => v.label.includes(newValue))
+        if (teamBuffs.length > 0) {
+            const buffs = teamBuffs
+                .map((v) => [v.label, teamBuffLvs.value[v.label] || v.value.等级] as [string, number])
+                .filter((v) => v[1] > 0)
+            newBuffs.push(...buffs)
+        }
     }
-
-    // 添加新的BUFF
-    const teamBuffs = buffOptions.value.filter((v) => v.label.includes(newValue))
-    if (teamBuffs.length > 0) {
-        const buffs = teamBuffs
-            .map((v) => [v.label, teamBuffLvs.value[v.label] || v.value.等级] as [string, number])
-            .filter((v) => v[1] > 0)
-        console.log(buffs, newBuffs)
-        newBuffs.push(...buffs)
-        charSettings.value.buffs = newBuffs
-    }
+    charSettings.value.buffs = newBuffs
+    localStorage.setItem(`build.${selectedChar.value}`, JSON.stringify(charSettings.value))
 }
 </script>
 
