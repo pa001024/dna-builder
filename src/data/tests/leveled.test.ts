@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { LeveledMod, LeveledBuff, LeveledChar, LeveledWeapon } from "../leveled"
+import { CharAttr } from "../CharBuild"
 
 // 测试LeveledMod类
 describe("LeveledMod类测试", () => {
@@ -60,33 +61,36 @@ describe("DynamicBuff", () => {
     it("applyDynamicAttr", () => {
         const buff = new LeveledBuff("妮弗尔夫人Q")
         const char = new LeveledChar("妮弗尔夫人")
-        let attrs = {
-            attack: 1,
-            health: 1,
-            shield: 1,
-            defense: 1,
-            sanity: 1,
-            power: 1,
-            durability: 1,
-            efficiency: 1,
-            range: 2,
-            boost: 1,
-            desperate: 1,
-            damageIncrease: 1,
-            weaponDamage: 1,
-            skillDamage: 1,
-            independentDamageIncrease: 1,
-            penetration: 1,
-            ignoreDefense: 1,
-            skillSpeed: 1,
-            imbalanceDamageBonus: 1,
-            skillAdd: 1,
-            summonAttackSpeed: 1,
-            summonRange: 1,
+        let attrs: CharAttr = {
+            // 基础属性
+            攻击: 1,
+            生命: 1,
+            护盾: 1,
+            防御: 1,
+            神智: 1,
+            // 其他属性
+            威力: 1,
+            持续: 1,
+            效益: 1,
+            范围: 2,
+            昂扬: 1,
+            背水: 1,
+            增伤: 1,
+            武器伤害: 1,
+            技能伤害: 1,
+            独立增伤: 1,
+            属性穿透: 1,
+            无视防御: 1,
+            技能速度: 1,
+            失衡易伤: 1,
+            技能倍率加数: 1,
+            召唤物攻击速度: 1,
+            召唤物范围: 1,
+            减伤: 1,
         }
         attrs = buff.applyDynamicAttr(char, attrs, [])
-        expect(attrs.power).toBe(2)
-        expect(attrs.range).toBe(1)
+        expect(attrs.威力).toBe(2)
+        expect(attrs.范围).toBe(1)
     })
 })
 // 测试LeveledBuff类

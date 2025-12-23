@@ -10,6 +10,8 @@ import MarkdownIt from "markdown-it"
 import mdKatex from "markdown-it-katex"
 import mdHighlightjs from "markdown-it-highlightjs"
 import "highlight.js/styles/github.css"
+import { env } from "../env"
+import { launchExe } from "../api/app"
 
 // 创建markdown-it实例，支持latex和代码高亮
 const md = MarkdownIt({
@@ -49,6 +51,11 @@ const scrollAreaRef = ref<HTMLElement | null>(null)
 const isUserAtBottom = ref<boolean>(true)
 const messageInputRef = ref<HTMLDivElement | null>(null)
 
+// MCP 服务器状态
+const isMCPRunning = ref<boolean>(false)
+const mcpStatus = ref<string>("未启动")
+const mcpProcess = ref<any>(null)
+
 // 初始化
 async function init() {
     await loadConversations()
@@ -57,6 +64,112 @@ async function init() {
     } else {
         selectedConversationId.value = conversations.value[0].id
         await loadMessages(selectedConversationId.value)
+    }
+
+    // 检查 MCP 服务器状态
+    await checkMCPServerStatus()
+}
+
+// 启动 MCP 服务器
+async function startMCPServer() {
+    if (isMCPRunning.value) {
+        mcpStatus.value = "MCP 服务器已在运行"
+        return
+    }
+
+    try {
+        mcpStatus.value = "正在启动 MCP 服务器..."
+
+        // 检查是否为桌面应用环境
+        if (!env.isTauri) {
+            mcpStatus.value = "MCP 服务器只能在桌面应用环境中启动"
+            return
+        }
+
+        // 使用 launchExe 启动 MCP 服务器
+        // sidecar/dna_mcp_server.exe 已经在 Tauri 配置中定义为外部二进制文件
+        const success = await launchExe("dna_mcp_server.exe", "")
+
+        if (!success) {
+            mcpStatus.value = "启动失败"
+            return
+        }
+
+        // 等待进程启动
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+
+        // 检查服务器是否运行
+        await checkMCPServerStatus()
+
+        if (isMCPRunning.value) {
+            mcpStatus.value = "运行中 (端口: 3000)"
+            console.log("MCP 服务器已启动")
+        } else {
+            mcpStatus.value = "已启动但未响应，请检查端口 3000"
+        }
+    } catch (error: any) {
+        console.error("启动 MCP 服务器失败:", error)
+        mcpStatus.value = `启动失败: ${error.message}`
+        isMCPRunning.value = false
+        mcpProcess.value = null
+    }
+}
+
+// 停止 MCP 服务器
+async function stopMCPServer() {
+    if (!isMCPRunning.value) {
+        return
+    }
+
+    try {
+        mcpStatus.value = "正在停止 MCP 服务器..."
+
+        // 注意：使用 launchExe 启动的进程无法直接停止
+        // 这里我们只是更新状态，实际需要用户手动结束进程
+        isMCPRunning.value = false
+        mcpStatus.value = "已标记为停止（需要手动结束进程）"
+        mcpProcess.value = null
+        console.log("MCP 服务器已标记为停止")
+
+        // 提示用户如何手动停止
+        setTimeout(() => {
+            if (confirm("MCP 服务器需要手动结束进程。\n\n在任务管理器中结束 'dna_mcp_server.exe' 进程。\n\n是否打开任务管理器？")) {
+                if (env.isTauri) {
+                    launchExe("taskmgr.exe", "")
+                }
+            }
+        }, 1000)
+    } catch (error: any) {
+        console.error("停止 MCP 服务器失败:", error)
+        mcpStatus.value = `停止失败: ${error.message}`
+    }
+}
+
+// 检查 MCP 服务器状态
+async function checkMCPServerStatus() {
+    if (!env.isTauri) {
+        return
+    }
+
+    try {
+        // 尝试连接到 MCP 服务器
+        const response = await fetch("http://localhost:3000/health", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+
+        if (response.ok) {
+            isMCPRunning.value = true
+            mcpStatus.value = "运行中 (端口: 3000)"
+        } else {
+            isMCPRunning.value = false
+            mcpStatus.value = "未响应"
+        }
+    } catch (error) {
+        isMCPRunning.value = false
+        mcpStatus.value = "未启动"
     }
 }
 
@@ -432,6 +545,39 @@ onMounted(() => {
             >
                 新对话
             </button>
+
+            <!-- MCP 服务器控制 -->
+            <div class="mt-4 p-3 bg-base-200 rounded-lg">
+                <div class="text-sm font-medium mb-2">MCP 服务器</div>
+                <div class="text-xs opacity-70 mb-2">{{ mcpStatus }}</div>
+                <div class="flex gap-2">
+                    <button
+                        @click="startMCPServer"
+                        :disabled="isMCPRunning || !env.isTauri"
+                        :class="[
+                            'btn btn-sm flex-1',
+                            isMCPRunning ? 'btn-disabled' : 'btn-success',
+                            !env.isTauri ? 'btn-disabled opacity-50' : '',
+                        ]"
+                        title="以管理员权限启动 MCP 服务器"
+                    >
+                        <Icon icon="ri:play-line" class="mr-1" />
+                        启动
+                    </button>
+                    <button
+                        @click="stopMCPServer"
+                        :disabled="!isMCPRunning"
+                        :class="['btn btn-sm flex-1', isMCPRunning ? 'btn-error' : 'btn-disabled']"
+                    >
+                        <Icon icon="ri:stop-line" class="mr-1" />
+                        停止
+                    </button>
+                </div>
+                <div class="text-xs opacity-50 mt-2">
+                    {{ env.isTauri ? "启动MCP服务器" : "仅限桌面应用" }}
+                </div>
+            </div>
+
             <span class="text-sm opacity-50 px-2">最近对话</span>
             <ScrollArea class="flex-1 overflow-hidden">
                 <ul class="flex flex-col gap-2">

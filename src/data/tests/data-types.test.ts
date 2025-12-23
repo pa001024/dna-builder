@@ -227,7 +227,13 @@ describe("数据类型测试", () => {
 
                 numericProperties.forEach((prop) => {
                     if ((buff as any)[prop] !== undefined) {
-                        expect(typeof (buff as any)[prop]).toBe("number")
+                        if (Array.isArray((buff as any)[prop])) {
+                            ;(buff as any)[prop].forEach((item: any) => {
+                                expect(typeof item).toBe("number")
+                            })
+                        } else {
+                            expect(typeof (buff as any)[prop]).toBe("number")
+                        }
                     }
                 })
             })

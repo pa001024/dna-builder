@@ -1,5 +1,5 @@
 import { LeveledBuff, effectMap, modMap } from "."
-import { CharBuild } from "../CharBuild"
+import { CharAttr, CharBuild } from "../CharBuild"
 import { Mod, Quality } from "../data-types"
 
 /**
@@ -134,6 +134,23 @@ export class LeveledMod implements Mod {
 
         this.baseProperties.forEach((prop) => {
             let lv = this._等级
+            if (prop === "生效") {
+                const maxValue = this._originalModData[prop]
+                const keys = Object.keys(maxValue).filter((v) => v !== "条件")
+                this[prop] = keys.reduce(
+                    (acc, key) => {
+                        let currentValue = (maxValue[key] / (this.maxLevel + 1)) * (lv + 1)
+                        if (key === "神智回复" || key === "最大耐受") currentValue = Math.round(currentValue)
+                        acc[key] = currentValue
+                        return acc
+                    },
+                    {
+                        条件: maxValue.条件,
+                    } as Record<string, any>,
+                )
+                return
+            }
+            if ((this.系列 === "换生灵" || this.系列 === "海妖") && prop === "减伤") lv = this.maxLevel
             // 架势MOD属性不受等级变化
             if (this.id > 100000) lv = this.maxLevel
             const maxValue = this._originalModData[prop] || 0
@@ -154,6 +171,25 @@ export class LeveledMod implements Mod {
                 buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(buff.baseValue * 100).toFixed(1)}%`)
             }
         })
+    }
+
+    applyCondition(attrs: CharAttr): CharAttr {
+        if (!this.生效?.条件?.length) return attrs
+        const isEffective = this.生效.条件.every(([attr, op, value]: [string, string, number]) => {
+            const attrValue = attrs[attr as keyof CharAttr]
+            if (op === "=") return attrValue === value
+            if (op === ">") return attrValue > value
+            if (op === ">=") return attrValue >= value
+            if (op === "<") return attrValue < value
+            if (op === "<=") return attrValue <= value
+            return false
+        })
+        if (!isEffective) return attrs
+        const keys = Object.keys(this.生效).filter((v) => v !== "条件")
+        keys.forEach((key) => {
+            attrs[key as keyof CharAttr] += this.生效[key]
+        })
+        return attrs
     }
 
     /**
@@ -183,7 +219,7 @@ export class LeveledMod implements Mod {
         "buff",
         "buffLv",
         "maxLevel",
-        "效果",
+        "生效",
         "code",
         "count",
     ])

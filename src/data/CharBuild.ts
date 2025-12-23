@@ -8,67 +8,51 @@ function base36Pad(num: number): string {
 
 export interface CharAttr {
     // 基础属性
-    attack: number
-    health: number
-    shield: number
-    defense: number
-    sanity: number
+    攻击: number
+    生命: number
+    护盾: number
+    防御: number
+    神智: number
     // 其他属性
-    /** 威力 */
-    power: number
-    /** 持续 */
-    durability: number
-    /** 效益 */
-    efficiency: number
-    /** 范围 */
-    range: number
-    /** 昂扬 */
-    boost: number
-    /** 背水 */
-    desperate: number
-    /** 增伤 */
-    damageIncrease: number
-    /** 武器伤害 */
-    weaponDamage: number
-    /** 技能伤害 */
-    skillDamage: number
-    /** 独立增伤 */
-    independentDamageIncrease: number
-    /** 属性穿透 */
-    penetration: number
-    /** 无视防御 */
-    ignoreDefense: number
-    /** 技能速度 */
-    skillSpeed: number
-    /** 失衡易伤 */
-    imbalanceDamageBonus: number
-    /** 技能倍率加数 */
-    skillAdd: number
-    /** 召唤物攻击速度 */
-    summonAttackSpeed: number
-    /** 召唤物范围 */
-    summonRange: number
+    威力: number
+    持续: number
+    效益: number
+    范围: number
+    昂扬: number
+    背水: number
+    增伤: number
+    武器伤害: number
+    技能伤害: number
+    独立增伤: number
+    属性穿透: number
+    无视防御: number
+    技能速度: number
+    失衡易伤: number
+    技能倍率加数: number
+    召唤物攻击速度: number
+    召唤物范围: number
+    减伤: number
 }
 
 export interface WeaponAttr {
     /** 攻击 基于武器基础值 */
-    attack: number
+    攻击: number
     /** 暴击率 基于武器基础值 */
-    critRate: number
+    暴击: number
     /** 暴击伤害 基于武器基础值 */
-    critDamage: number
+    暴伤: number
     /** 触发率 基于武器基础值 */
-    triggerRate: number
+    触发: number
     /** 攻击速度 1开始 */
-    attackSpeed: number
+    攻速: number
     /** 多重射击倍率 1开始 */
-    multiShot: number
+    多重: number
     /** 增伤 0开始 */
-    damageIncrease: number
+    增伤: number
     /** 独立增伤 0开始 */
-    independentDamageIncrease: number
+    独立增伤: number
     /** 追加伤害 0开始 */
-    additionalDamage: number
+    追加伤害: number
 }
 
 import type { RawTimelineData } from "../store/timeline"
@@ -273,6 +257,7 @@ export class CharBuild {
         let summonRange = this.getTotalBonus("召唤物范围")
         let ignoreDefense = this.getTotalBonusMul("无视防御")
         let independentDamageIncrease = this.getTotalBonusMul("独立增伤")
+        let damageReduce = this.getTotalBonusMul("减伤")
 
         // 应用MOD属性加成
         let modAttributeBonus = this.getTotalBonus("MOD属性")
@@ -377,32 +362,38 @@ export class CharBuild {
         efficiency = Math.min(efficiency, 1.75) // 175%
         range = Math.min(range, 2.8) // 280%
 
-        let attrs = {
+        let attrs: CharAttr = {
             // 基础属性
-            attack,
-            health,
-            shield,
-            defense,
-            sanity,
+            攻击: attack,
+            生命: health,
+            护盾: shield,
+            防御: defense,
+            神智: sanity,
             // 其他属性
-            power,
-            durability,
-            efficiency,
-            range,
-            boost,
-            desperate,
-            damageIncrease,
-            weaponDamage,
-            skillDamage,
-            skillSpeed,
-            penetration,
-            imbalanceDamageBonus,
-            skillAdd,
-            ignoreDefense,
-            independentDamageIncrease,
-            summonAttackSpeed,
-            summonRange,
+            威力: power,
+            持续: durability,
+            效益: efficiency,
+            范围: range,
+            昂扬: boost,
+            背水: desperate,
+            增伤: damageIncrease,
+            武器伤害: weaponDamage,
+            技能伤害: skillDamage,
+            独立增伤: skillSpeed,
+            属性穿透: penetration,
+            无视防御: imbalanceDamageBonus,
+            技能速度: skillAdd,
+            失衡易伤: ignoreDefense,
+            技能倍率加数: independentDamageIncrease,
+            召唤物攻击速度: summonAttackSpeed,
+            召唤物范围: summonRange,
+            减伤: damageReduce,
         }
+        // 应用MOD条件
+        this.applyCondition(
+            attrs,
+            this.charMods.filter((mod) => mod.生效?.条件),
+        )
         if (nocode) return attrs
         if (this.dynamicBuffs.length > 0 || (!minus && props?.code)) {
             const all = this.getAllWeaponsAttrs(props, minus)
@@ -417,6 +408,13 @@ export class CharBuild {
             }
         }
 
+        return attrs
+    }
+
+    public applyCondition(attrs: CharAttr, mods: LeveledMod[]) {
+        mods.forEach((mod) => {
+            attrs = mod.applyCondition(attrs)
+        })
         return attrs
     }
 
@@ -549,15 +547,15 @@ export class CharBuild {
             independentDamageIncrease = Math.round(independentDamageIncrease * 1000) / 1000
 
             let weaponAttrs: WeaponAttr = {
-                attack,
-                critRate,
-                critDamage,
-                triggerRate,
-                attackSpeed,
-                multiShot,
-                damageIncrease,
-                independentDamageIncrease,
-                additionalDamage,
+                攻击: attack,
+                暴击: critRate,
+                暴伤: critDamage,
+                触发: triggerRate,
+                攻速: attackSpeed,
+                多重: multiShot,
+                增伤: damageIncrease,
+                独立增伤: independentDamageIncrease,
+                追加伤害: additionalDamage,
             }
             attrs.weapon = weaponAttrs
         }
@@ -713,14 +711,14 @@ export class CharBuild {
 
     // 计算昂扬乘区
     public calculateBoostMultiplier(attrs: ReturnType<typeof this.calculateAttributes>): number {
-        const boost = attrs.boost
+        const boost = attrs.昂扬
         const hpPercent = Math.max(0, Math.min(1, this.hpPercent || 0))
         return 1 + boost * hpPercent
     }
 
     // 计算背水乘区
     public calculateDesperateMultiplier(attrs: ReturnType<typeof this.calculateAttributes>): number {
-        const desperate = attrs.desperate
+        const desperate = attrs.背水
         const hpPercent = Math.max(0.25, Math.min(1, this.hpPercent))
         return 1 + 4 * desperate * (1 - hpPercent) * (1.5 - hpPercent)
     }
@@ -743,7 +741,7 @@ export class CharBuild {
         const enemyLevel = typeof this.enemyLevel === "number" ? this.enemyLevel : 80
 
         const levelDiff = Math.max(0, Math.min(20, Math.min(80, enemyLevel) - charLevel))
-        const ignoreDefense = attrs.ignoreDefense
+        const ignoreDefense = attrs.无视防御
         const def = finalDef ?? enemyTypeCoeff * 10 * (1 - ignoreDefense)
         const baseDefenseMultiplier = def / (300 + def - levelDiff)
 
@@ -758,27 +756,27 @@ export class CharBuild {
         let damage = skill.伤害
         let baseDamage = damage?.额外 || 0
         if (damage) {
-            const mul = damage.值 + attrs.skillAdd
+            const mul = damage.值 + attrs.技能倍率加数
             if (!damage.基础) {
-                baseDamage += mul * attrs.attack
+                baseDamage += mul * attrs.攻击
             }
             if (damage.基础 === "生命") {
-                baseDamage += mul * attrs.health
+                baseDamage += mul * attrs.生命
             }
             if (damage.基础 === "防御") {
-                baseDamage += mul * attrs.defense
+                baseDamage += mul * attrs.防御
             }
         }
-        baseDamage *= attrs.power
+        baseDamage *= attrs.威力
 
         // 计算各种乘区
-        const resistancePenetration = Math.max(0, 1 - this.enemyResistance + attrs.penetration)
+        const resistancePenetration = Math.max(0, 1 - this.enemyResistance + attrs.属性穿透)
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
         const defenseMultiplier = this.calculateDefenseMultiplier(attrs)
-        const damageIncrease = 1 + attrs.damageIncrease + attrs.skillDamage
-        const independentDamageIncrease = 1 + attrs.independentDamageIncrease
-        const imbalanceDamageMultiplier = this.imbalance ? attrs.imbalanceDamageBonus + 1.5 : 1
+        const damageIncrease = 1 + attrs.增伤 + attrs.技能伤害
+        const independentDamageIncrease = 1 + attrs.独立增伤
+        const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
 
         // 计算最终伤害
         let finalDamage =
@@ -810,32 +808,32 @@ export class CharBuild {
         const weaponAttrs = attrs.weapon!
         // 计算武器基础伤害
         const weaponAttackMultiplier = weapon.倍率 || 1
-        const weaponDamagePhysical = weaponAttackMultiplier * weaponAttrs.attack
-        const weaponDamageElemental = weaponAttackMultiplier * attrs.attack
+        const weaponDamagePhysical = weaponAttackMultiplier * weaponAttrs.攻击
+        const weaponDamageElemental = weaponAttackMultiplier * attrs.攻击
 
         // 计算触发伤害期望
         const triggerDamageMultiplier =
             weapon.伤害类型 === this.enemyHpType ? this.hpTypeCoefficients[this.enemyHpType] + this.getTotalBonus("触发倍率") : 0
-        const triggerRate = weaponAttrs.triggerRate
+        const triggerRate = weaponAttrs.触发
         const triggerDamage = 1 + triggerDamageMultiplier
         const triggerExpectedDamage = 1 + triggerDamageMultiplier * triggerRate
 
         // 计算暴击伤害期望
-        const critRate = weaponAttrs.critRate
-        const critDamage = weaponAttrs.critDamage
-        const lowerCritDamage = (weaponAttrs.critDamage - 1) * Math.floor(weaponAttrs.critRate) + 1
-        const higherCritDamage = (weaponAttrs.critDamage - 1) * Math.ceil(weaponAttrs.critRate) + 1
+        const critRate = weaponAttrs.暴击
+        const critDamage = weaponAttrs.暴伤
+        const lowerCritDamage = (weaponAttrs.暴伤 - 1) * Math.floor(weaponAttrs.暴击) + 1
+        const higherCritDamage = (weaponAttrs.暴伤 - 1) * Math.ceil(weaponAttrs.暴击) + 1
         const critExpectedDamage = 1 + critRate * (critDamage - 1)
 
         // 计算各种乘区
-        const resistancePenetration = 1 - this.enemyResistance + attrs.penetration
+        const resistancePenetration = 1 - this.enemyResistance + attrs.属性穿透
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
         const defenseMultiplier = this.calculateDefenseMultiplier(attrs)
-        const damageIncrease = 1 + attrs.damageIncrease + weaponAttrs.damageIncrease + attrs.weaponDamage
-        const independentDamageIncrease = (1 + attrs.independentDamageIncrease) * (1 + weaponAttrs.independentDamageIncrease)
-        const additionalDamage = 1 + weaponAttrs.additionalDamage
-        const imbalanceDamageMultiplier = this.imbalance ? attrs.imbalanceDamageBonus + 1.5 : 1
+        const damageIncrease = 1 + attrs.增伤 + weaponAttrs.增伤 + attrs.武器伤害
+        const independentDamageIncrease = (1 + attrs.独立增伤) * (1 + weaponAttrs.独立增伤)
+        const additionalDamage = 1 + weaponAttrs.追加伤害
+        const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
         const commonMore =
             boostMultiplier *
             desperateMultiplier *
@@ -887,16 +885,16 @@ export class CharBuild {
         let skill = this.selectedSkill
         if (weapon && attrs.weapon) {
             const weaponAttrs = attrs.weapon
-            dps = dpa = dpa * weaponAttrs.multiShot
-            if (!this.timeline) dps = dpa * weaponAttrs.attackSpeed
-            dpb = dpb / (1 + weaponAttrs.additionalDamage)
+            dps = dpa = dpa * weaponAttrs.多重
+            if (!this.timeline) dps = dpa * weaponAttrs.攻速
+            dpb = dpb / (1 + weaponAttrs.追加伤害)
             // 非弹道武器多重直接加伤害
             if (weapon.弹道类型 === "非弹道") {
-                dpb *= weaponAttrs.multiShot
+                dpb *= weaponAttrs.多重
             }
         } else if (skill) {
             if (!this.timeline) {
-                dps = dpa * (1 + attrs.skillSpeed)
+                dps = dpa * (1 + attrs.技能速度)
                 // 召唤物
                 const summon = skill.召唤物
                 if (summon) {
@@ -914,14 +912,14 @@ export class CharBuild {
         // 计算效益影响下的神智消耗
         const baseSanityCost = skill?.神智消耗值 || 100 // 从技能中获取或使用默认值
         const baseSustainedCost = skill?.每秒神智消耗值 || 100 // 从技能中获取或使用默认值
-        const sanityCost = Math.ceil(Math.max(0, baseSanityCost * (2 - attrs.efficiency)))
+        const sanityCost = Math.ceil(Math.max(0, baseSanityCost * (2 - attrs.效益)))
         let sustainedCost = baseSustainedCost
         const sustainedCostField = skill?.每秒神智消耗
 
         if (sustainedCostField && sustainedCostField.属性影响 && !sustainedCostField.属性影响.includes("耐久")) {
-            sustainedCost = Math.ceil(Math.max(0, baseSustainedCost * (2 - attrs.efficiency)))
+            sustainedCost = Math.ceil(Math.max(0, baseSustainedCost * (2 - attrs.效益)))
         } else {
-            sustainedCost = Math.ceil(Math.max(0, baseSustainedCost * Math.max(0.25, (2 - attrs.efficiency) / attrs.durability)))
+            sustainedCost = Math.ceil(Math.max(0, baseSustainedCost * Math.max(0.25, (2 - attrs.效益) / attrs.持续)))
         }
 
         switch (this.targetFunction) {
@@ -1006,7 +1004,7 @@ export class CharBuild {
             damage = this.calculateWeaponDamage(attrs, weapon)
             if (weapon.类型.startsWith("同律")) {
                 Object.keys(damage).forEach((k) => {
-                    damage[k as keyof DamageResult] = damage[k as keyof DamageResult]! * attrs.power
+                    damage[k as keyof DamageResult] = damage[k as keyof DamageResult]! * attrs.威力
                 })
             }
         } else {
@@ -1155,7 +1153,7 @@ export class CharBuild {
     }
 
     static indepSeries = ["百首", "狮鹫", "中庭蛇"]
-    static elmSeries = ["狮鹫", "百首", "契约者"]
+    static elmSeries = ["狮鹫", "百首", "契约者", "换生灵"]
     static exclusiveSeries = [...CharBuild.indepSeries, "审判者", "巨鲸", "金乌", "焰灵", "黄衣", "夜使"]
     /**
      * 自动构筑

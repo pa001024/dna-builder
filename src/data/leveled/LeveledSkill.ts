@@ -116,10 +116,10 @@ export class LeveledSkill implements Skill {
 
     getFieldsWithAttr(attrs: CharAttr & { weapon?: WeaponAttr }) {
         const tt = {
-            威力: attrs.power,
-            耐久: attrs.durability,
-            效益: attrs.efficiency,
-            范围: attrs.range,
+            威力: attrs.威力,
+            耐久: attrs.持续,
+            效益: attrs.效益,
+            范围: attrs.范围,
         }
         const normalFields = this.字段.map((field) => {
             if (field.属性影响) {
@@ -166,17 +166,17 @@ export class LeveledSkill implements Skill {
     getSummonAttrsMap(attrs: CharAttr & { weapon?: WeaponAttr }) {
         if (this.召唤物) {
             const summon = this.召唤物
-            const atkspd = ((attrs.weapon?.attackSpeed || 1) - 1) * attrs.summonAttackSpeed
+            const atkspd = ((attrs.weapon?.攻速 || 1) - 1) * attrs.召唤物攻击速度
             const df = this.召唤物持续时间
-            const duration = df ? (df.属性影响?.includes("耐久") ? df.值 * attrs.durability : df.值) : 0
+            const duration = df ? (df.属性影响?.includes("耐久") ? df.值 * attrs.持续 : df.值) : 0
             return {
                 name: summon.名称,
                 delay: summon.攻击延迟,
                 interval: summon.攻击间隔 / (1 + atkspd),
                 attackSpeed: atkspd,
                 duration,
-                attackTimes: Math.floor((duration * attrs.durability - summon.攻击延迟) / (summon.攻击间隔 / (1 + atkspd))),
-                range: Math.min(2.8, attrs.range * (1 + attrs.summonRange)),
+                attackTimes: Math.floor((duration * attrs.持续 - summon.攻击延迟) / (summon.攻击间隔 / (1 + atkspd))),
+                range: Math.min(2.8, attrs.范围 * (1 + attrs.召唤物范围)),
             }
         }
     }
