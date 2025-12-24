@@ -32,6 +32,7 @@ const props = defineProps<Props>()
 const inv = useInvStore()
 
 const sortByIncome = ref(true)
+const selectedProperty = ref("无")
 const auraModOptions = computed(() => {
     return props.modOptions.filter((option) => option.ser === "羽蛇")
 })
@@ -78,6 +79,16 @@ const sortedModOptions = computed(() => {
             return false
         }
 
+        // 4. 属性筛选
+        if (selectedProperty.value !== "无") {
+            // 获取mod的所有属性文本，包括描述、属性等
+            const modText = JSON.stringify(mod) + mod.label + (mod.属性 || "")
+            // 判断选择的属性是否在mod文本中
+            if (!modText.includes(selectedProperty.value)) {
+                return false
+            }
+        }
+
         return true
     })
 
@@ -104,7 +115,7 @@ const sortedModOptions = computed(() => {
 const emit = defineEmits<{
     selectAuraMod: [id: number]
     removeMod: [index: number]
-    selectMod: [indexAndId: [number, number]]
+    selectMod: [indexAndId: [number, number, number]]
     levelChange: [indexAndLevel: [number, number]]
 }>()
 
@@ -128,8 +139,8 @@ function handleLevelChange(index: number, level: number) {
     emit("levelChange", [index, level])
 }
 
-function handleSelectMod(index: number, value: number) {
-    emit("selectMod", [index, value])
+function handleSelectMod(index: number, value: number, lv: number) {
+    emit("selectMod", [index, value, lv])
 }
 
 function closeSelection() {
@@ -138,6 +149,36 @@ function closeSelection() {
 
 function toggleSortByIncome() {
     sortByIncome.value = !sortByIncome.value
+}
+
+// 拖拽交换位置
+function handleDrop(index: number, event: DragEvent) {
+    event.preventDefault()
+    const fromIndex = parseInt(event.dataTransfer?.getData("modIndex") || "")
+    if (fromIndex !== index && !isNaN(fromIndex)) {
+        // 使用现有的selectMod和removeMod事件机制来交换MOD位置
+        // 先获取两个位置的MOD ID
+        const fromMod = props.mods[fromIndex]
+        const toMod = props.mods[index]
+
+        // 交换MOD：先将目标位置设为源MOD，再将源位置设为目标MOD
+        if (toMod) {
+            emit("selectMod", [fromIndex, toMod instanceof LeveledMod ? toMod.id : toMod, toMod instanceof LeveledMod ? toMod.等级 : 10])
+        } else {
+            emit("removeMod", fromIndex)
+        }
+
+        if (fromMod) {
+            emit("selectMod", [
+                index,
+                fromMod instanceof LeveledMod ? fromMod.id : fromMod,
+                fromMod instanceof LeveledMod ? fromMod.等级 : 10,
+            ])
+        } else {
+            emit("removeMod", index)
+        }
+        localSelectedSlot.value = -1
+    }
 }
 
 async function handleImportCode() {
@@ -152,7 +193,7 @@ async function handleImportCode() {
         const result = props.charBuild.importCode(charCode, props.type)
         if (result) {
             for (let i = 0; i < result.mods.length; i++) {
-                if (result.mods[i]) emit("selectMod", [i, result.mods[i]])
+                if (result.mods[i]) emit("selectMod", [i, result.mods[i], 10])
             }
             if (result.auraMod) {
                 emit("selectAuraMod", result.auraMod)
@@ -202,6 +243,7 @@ const aMod = computed(() => {
                 :index="index"
                 @click="handleSlotClick(index)"
                 @removeMod="handleRemoveMod(index)"
+                @drop="handleDrop(index, $event)"
                 control
                 :charBuild="charBuild"
                 :selected="undefined"
@@ -239,7 +281,7 @@ const aMod = computed(() => {
                                         :key="mod.value"
                                         :mod="new LeveledMod(mod.value, mod.lv, mod.bufflv)"
                                         :income="charBuild.calcIncome(new LeveledMod(mod.value, mod.lv, mod.bufflv))"
-                                        @click="handleSelectMod(localSelectedSlot, mod.value)"
+                                        @click="handleSelectMod(localSelectedSlot, mod.value, mod.lv ?? 10)"
                                         :noremove="true"
                                     />
                                 </div>
@@ -247,7 +289,19 @@ const aMod = computed(() => {
                         </div>
                     </template>
 
-                    <button class="ml-auto btn btn-sm" :class="sortByIncome ? 'btn-secondary' : 'btn-outline'" @click="toggleSortByIncome">
+                    <!-- 属性筛选下拉框 -->
+                    <Select
+                        class="ml-auto w-30 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap mr-2"
+                        v-model="selectedProperty"
+                    >
+                        <SelectItem
+                            :value="prop"
+                            v-for="prop in ['无', '攻击', '生命', '防御', '护盾', '威力', '耐久', '范围', '效益', '增伤']"
+                            :key="prop"
+                            >{{ prop }}</SelectItem
+                        >
+                    </Select>
+                    <button class="btn btn-sm" :class="sortByIncome ? 'btn-secondary' : 'btn-outline'" @click="toggleSortByIncome">
                         {{ sortByIncome ? "收益排序：高→低" : "默认排序" }}
                     </button>
                 </div>

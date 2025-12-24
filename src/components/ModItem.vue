@@ -57,6 +57,10 @@ const emit = defineEmits<{
     <div
         class="aspect-square bg-base-200 rounded-lg border-2 flex items-center justify-center transition-colors cursor-pointer group"
         :class="[mod ? getQualityColor(mod.品质) : 'border-dashed border-gray-600', getQualityHoverBorder(mod?.品质!)]"
+        draggable="true"
+        @dragstart="$event.dataTransfer?.setData('modIndex', $attrs.index as string)"
+        @dragover.prevent
+        @dragenter.prevent
     >
         <div class="relative w-full h-full flex items-center justify-center">
             <ShowProps
@@ -118,7 +122,7 @@ const emit = defineEmits<{
                             </div>
                         </div>
                     </div>
-                    <!-- 关闭按钮 -->
+                    <!-- 删除按钮 -->
                     <button
                         v-if="!noremove"
                         @click.stop="emit('removeMod')"

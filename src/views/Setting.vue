@@ -6,8 +6,11 @@ import { env } from "../env"
 import { i18nLanguages } from "../i18n"
 import { db } from "../store/db"
 import { listModels, validateApiKey } from "../api/openai"
+import { useUIStore } from "../store/ui"
+import { t } from "i18next"
 
 const setting = useSettingStore()
+const ui = useUIStore()
 
 //#region UI
 const lightThemes = [
@@ -64,9 +67,10 @@ function resetStorage() {
     clearServiceWorkers()
 }
 
-function openResetConfirmDialog() {
-    const dialog = document.getElementById("reset-confirm-dialog")! as HTMLDialogElement
-    dialog.show()
+async function openResetConfirmDialog() {
+    if (await ui.showDialog(t("setting.reset"), t("setting.resetTip"))) {
+        resetStorage()
+    }
 }
 
 /**
@@ -112,7 +116,7 @@ const isTestingConnection = ref(false)
 const connectionStatus = ref<"success" | "failed" | null>(null)
 const aiModelOptions = ref([] as { label: string; value: string }[])
 
-const loadAiModelOptions = async () => {
+async function loadAiModelOptions() {
     if (!setting.aiApiKey || !setting.aiBaseUrl) return
 
     const config = setting.getOpenAIConfig()
@@ -130,7 +134,7 @@ const loadAiModelOptions = async () => {
 }
 
 // 测试AI连接
-const testAiConnection = async () => {
+async function testAiConnection() {
     if (!setting.aiApiKey || !setting.aiBaseUrl) return
 
     isTestingConnection.value = true
@@ -150,13 +154,14 @@ const testAiConnection = async () => {
 }
 
 // 打开AI设置重置对话框
-const openResetAiDialog = () => {
-    const dialog = document.getElementById("reset-ai-dialog")! as HTMLDialogElement
-    dialog.show()
+async function openResetAiDialog() {
+    if (await ui.showDialog(t("setting.aiReset"), t("setting.resetConfirm"))) {
+        resetAiSettings()
+    }
 }
 
 // 重置AI设置
-const resetAiSettings = () => {
+function resetAiSettings() {
     setting.resetAiSettings()
     connectionStatus.value = null
 }
@@ -372,28 +377,5 @@ const resetAiSettings = () => {
                 </div>
             </article>
         </div>
-        <dialog id="reset-confirm-dialog" class="modal">
-            <div class="modal-box bg-base-300">
-                <p class="text-lg font-bold">{{ $t("setting.resetConfirm") }}</p>
-                <div class="modal-action">
-                    <form class="flex justify-end gap-2" method="dialog">
-                        <button class="min-w-20 btn btn-secondary" @click="resetStorage">{{ $t("setting.confirm") }}</button>
-                        <button class="min-w-20 btn">{{ $t("setting.cancel") }}</button>
-                    </form>
-                </div>
-            </div>
-        </dialog>
-
-        <!-- AI设置重置确认对话框 -->
-        <dialog id="reset-ai-dialog" class="modal">
-            <div class="modal-box bg-base-300">
-                <p class="text-lg font-bold">{{ $t("setting.aiReset") }}</p>
-                <p class="py-4">{{ $t("setting.resetConfirm") }}</p>
-                <div class="modal-action">
-                    <button class="min-w-20 btn btn-secondary" @click="resetAiSettings">{{ $t("setting.confirm") }}</button>
-                    <button class="min-w-20 btn">{{ $t("setting.cancel") }}</button>
-                </div>
-            </div>
-        </dialog>
     </div>
 </template>

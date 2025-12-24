@@ -188,9 +188,7 @@ const weaponAttrs = computed(() => (charBuild.value.selectedWeapon ? charBuild.v
 // 计算总伤害
 const totalDamage = computed(() => charBuild.value.calculate())
 
-function selectMod(type: string, slotIndex: number, modId: number) {
-    const mod = new LeveledMod(modId)
-    const lv = mod.等级
+function selectMod(type: string, slotIndex: number, modId: number, lv: number) {
     if (type === "角色") {
         charSettings.value.charMods[slotIndex] = [modId, lv]
     } else if (type === "近战") {
@@ -868,7 +866,7 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                     :mod-options="modOptions.filter((m) => m.type === '角色' && (!m.limit || m.limit === charBuild.char.属性))"
                     :char-build="charBuild"
                     @remove-mod="removeMod($event, '角色')"
-                    @select-mod="selectMod('角色', $event[0], $event[1])"
+                    @select-mod="selectMod('角色', $event[0], $event[1], $event[2])"
                     @level-change="charSettings.charMods[$event[0]]![1] = $event[1]"
                     :aura-mod="charSettings.auraMod"
                     @select-aura-mod="charSettings.auraMod = $event"
@@ -888,7 +886,7 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                     "
                     :char-build="charBuild"
                     @remove-mod="removeMod($event, '近战')"
-                    @select-mod="selectMod('近战', $event[0], $event[1])"
+                    @select-mod="selectMod('近战', $event[0], $event[1], $event[2])"
                     @level-change="charSettings.meleeMods[$event[0]]![1] = $event[1]"
                     type="近战"
                 />
@@ -906,7 +904,7 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                     "
                     :char-build="charBuild"
                     @remove-mod="removeMod($event, '远程')"
-                    @select-mod="selectMod('远程', $event[0], $event[1])"
+                    @select-mod="selectMod('远程', $event[0], $event[1], $event[2])"
                     @level-change="charSettings.rangedMods[$event[0]]![1] = $event[1]"
                     type="远程"
                 />
@@ -924,7 +922,7 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                     "
                     :char-build="charBuild"
                     @remove-mod="removeMod($event, '同律')"
-                    @select-mod="selectMod('同律', $event[0], $event[1])"
+                    @select-mod="selectMod('同律', $event[0], $event[1], $event[2])"
                     @level-change="charSettings.skillWeaponMods[$event[0]]![1] = $event[1]"
                     type="同律"
                 />
