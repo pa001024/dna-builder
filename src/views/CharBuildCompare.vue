@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue"
+import { useLocalStorage } from "@vueuse/core"
+import { groupBy, cloneDeep } from "lodash-es"
+import { useInvStore } from "../store/inv"
+import { useCharSettings } from "../store/charSettings"
+import { useTimeline } from "../store/timeline"
 import {
     LeveledChar,
     LeveledMod,
@@ -12,11 +17,6 @@ import {
     WeaponAttr,
     CharBuildTimeline,
 } from "../data"
-import { useLocalStorage } from "@vueuse/core"
-import { groupBy, cloneDeep } from "lodash-es"
-import { useInvStore } from "../store/inv"
-import { useCharSettings } from "../store/charSettings"
-import { useTimeline } from "../store/timeline"
 
 // Initialize stores and data
 const inv = useInvStore()
@@ -366,26 +366,41 @@ function setBuffLv(configIndex: number, buff: LeveledBuff, lv: number) {
 type ColumnKey = keyof CharAttr | `武器${keyof WeaponAttr}`
 const visibleColumns = ref<ColumnKey[]>(["攻击", "生命", "护盾", "防御", "神智"])
 
-const allColumns = [
-    { key: "攻击" as const, label: "攻击" },
-    { key: "生命" as const, label: "生命" },
-    { key: "护盾" as const, label: "护盾" },
-    { key: "防御" as const, label: "防御" },
-    { key: "神智" as const, label: "神智" },
-    { key: "增伤" as const, label: "伤害加成" },
-    { key: "技能伤害" as const, label: "技能伤害" },
-    { key: "减伤" as const, label: "伤害减免" },
+const allColumns: { key: ColumnKey; label: string }[] = [
+    { key: "攻击", label: "攻击" },
+    { key: "生命", label: "生命" },
+    { key: "护盾", label: "护盾" },
+    { key: "防御", label: "防御" },
+    { key: "神智", label: "神智" },
+    { key: "威力", label: "威力" },
+    { key: "耐久", label: "耐久" },
+    { key: "效益", label: "效益" },
+    { key: "范围", label: "范围" },
+    { key: "昂扬", label: "昂扬" },
+    { key: "背水", label: "背水" },
+    { key: "增伤", label: "增伤" },
+    { key: "武器伤害", label: "武器伤害" },
+    { key: "技能伤害", label: "技能伤害" },
+    { key: "独立增伤", label: "独立增伤" },
+    { key: "属性穿透", label: "属性穿透" },
+    { key: "无视防御", label: "无视防御" },
+    { key: "技能速度", label: "技能速度" },
+    { key: "失衡易伤", label: "失衡易伤" },
+    { key: "技能倍率加数", label: "技能倍率加数" },
+    { key: "召唤物攻击速度", label: "召唤物攻击速度" },
+    { key: "召唤物范围", label: "召唤物范围" },
+    { key: "减伤", label: "减伤" },
     // Weapon attributes
-    { key: "武器攻击" as const, label: "武器攻击" },
-    { key: "武器暴击" as const, label: "武器暴击率" },
-    { key: "武器暴伤" as const, label: "武器暴击伤害" },
-    { key: "武器触发" as const, label: "武器触发率" },
-    { key: "武器攻速" as const, label: "武器攻速" },
-    { key: "武器多重" as const, label: "武器多重" },
-    { key: "武器增伤" as const, label: "武器增伤" },
-    { key: "武器独立增伤" as const, label: "武器独立增伤" },
-    { key: "武器追加伤害" as const, label: "武器追加伤害" },
-] as const
+    { key: "武器攻击", label: "武器攻击" },
+    { key: "武器暴击", label: "武器暴击率" },
+    { key: "武器暴伤", label: "武器暴击伤害" },
+    { key: "武器触发", label: "武器触发率" },
+    { key: "武器攻速", label: "武器攻速" },
+    { key: "武器多重", label: "武器多重" },
+    { key: "武器增伤", label: "武器增伤" },
+    { key: "武器独立增伤", label: "武器独立增伤" },
+    { key: "武器追加伤害", label: "武器追加伤害" },
+]
 
 // Helper methods for table cell formatting
 function formatCharAttribute(configIndex: number, colKey: string): string {
@@ -610,7 +625,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                 <!-- Table Customization -->
                 <div class="mb-4">
                     <h3 class="text-sm font-semibold mb-2 text-primary">{{ $t("build-compare.customize_table") }}</h3>
-                    <div class="flex flex-wrap gap-4">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
                         <label v-for="column in allColumns" :key="column.key" class="inline-flex items-center gap-1 cursor-pointer">
                             <input type="checkbox" v-model="visibleColumns" :value="column.key" class="checkbox checkbox-primary" />
                             <span class="text-sm">{{ column.label }}</span>
