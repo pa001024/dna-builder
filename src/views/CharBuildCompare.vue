@@ -346,7 +346,6 @@ function selectMod(configIndex: number, type: string, slotIndex: number, modId: 
     if (typeIndex === undefined) return
 
     configs.value[configIndex].additionalMods[typeIndex][slotIndex] = [modId, lv]
-    console.log(configs.value[configIndex].additionalMods[typeIndex])
 }
 
 function removeMod(configIndex: number, type: string, slotIndex: number) {
