@@ -3,7 +3,7 @@ import { watch } from "vue"
 
 defineProps<{
     title?: string
-    description?: string
+    description?: string | string[]
     error?: string
 }>()
 
@@ -29,7 +29,14 @@ watch(model, (value) => {
                 <form class="p-6" @submit.prevent="$emit('submit')">
                     <div class="flex flex-col p-6 gap-2.5">
                         <DialogTitle v-if="title" class="text-lg text-base-content font-semibold">{{ title }}</DialogTitle>
-                        <DialogDescription v-if="description" class="text-base-content/60 text-sm">{{ description }}</DialogDescription>
+                        <DialogDescription v-if="description" class="text-base-content/60 text-sm">
+                            <ul v-if="Array.isArray(description)" class="list-disc list-inside">
+                                <template v-for="item in description" :key="item">
+                                    <li>{{ item }}</li>
+                                </template>
+                            </ul>
+                            <p v-else>{{ description }}</p>
+                        </DialogDescription>
                     </div>
 
                     <div class="space-y-4 p-6">
