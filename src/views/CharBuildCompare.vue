@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from "vue"
+import { computed, reactive, ref } from "vue"
 import {
     LeveledChar,
     LeveledMod,
@@ -62,45 +62,62 @@ const _buffOptions = reactive(
     })),
 )
 
-// Component state
-const selectedChar = useLocalStorage("compareSelectedChar", "赛琪")
-const charSettings = useCharSettings(selectedChar)
-const charProjectKey = computed(() => `project.${selectedChar.value}`)
-const _charProject = useLocalStorage(charProjectKey, {
-    selected: "",
-    projects: [] as { name: string; charSettings: typeof charSettings.value }[],
-})
-const charProject = computed(() => ({
-    selected: _charProject.value.selected || "当前配置",
-    projects: [{ name: "当前配置", charSettings: charSettings.value }, ..._charProject.value.projects],
-}))
-
 // Define configuration type
 interface BuildConfiguration {
     additionalMods: (number[] | null)[][] // [charMods, meleeMods, rangedMods, skillWeaponMods]
     additionalBuffs: [string, number][]
     name: string
+    selectedChar: string
+    selectedProject: string
+    charSettings: ReturnType<typeof useCharSettings>["value"]
+    projects: { name: string; charSettings: ReturnType<typeof useCharSettings>["value"] }[]
+}
+
+// Helper function to create a new configuration
+function createConfig(selectedChar: string, name: string): BuildConfiguration {
+    const selectedCharRef = ref(selectedChar)
+    const charSettingsRef = useCharSettings(selectedCharRef)
+
+    // Clone charSettings value
+    const charSettings = cloneDeep(charSettingsRef.value)
+
+    // Get projects from localStorage
+    const savedProjects = useLocalStorage(`project.${selectedChar}`, {
+        selected: "",
+        projects: [] as { name: string; charSettings: typeof charSettings }[],
+    })
+
+    // Create projects array directly
+    const projects = [{ name: "当前配置", charSettings: cloneDeep(charSettings) }, ...cloneDeep(savedProjects.value.projects)]
+
+    // Create and return config object
+    return {
+        additionalMods: [[], [], [], []],
+        additionalBuffs: [],
+        name,
+        selectedChar,
+        selectedProject: "当前配置",
+        charSettings,
+        projects,
+    } as BuildConfiguration
 }
 
 // Multiple configurations state
-const configs = ref<BuildConfiguration[]>([
-    {
-        additionalMods: [[], [], [], []],
-        additionalBuffs: [],
-        name: "配置 1",
-    },
-])
+const configs = ref<BuildConfiguration[]>([])
+// Initialize with one configuration
+configs.value.push(createConfig("赛琪", "配置 1"))
 
 // 针对特定配置的已过滤 BUFF 选项，这些选项排除了项目现有的 BUFF
 const getFilteredBuffOptions = (configIndex: number) => {
-    const project = charProject.value.projects.find((p) => p.name === charProject.value.selected)
-    const projectBuffs = project?.charSettings.buffs.map((b) => b[0]) || []
+    const config = configs.value[configIndex]
+    const project = config.projects.find((p: { name: string; charSettings: any }) => p.name === config.selectedProject)
+    const projectBuffs = project?.charSettings.buffs.map((b: any) => b[0]) || []
 
     return _buffOptions
-        .filter((buff) => !buff.limit || buff.limit === selectedChar.value || buff.limit === charBuilds.value[configIndex]?.char.属性)
+        .filter((buff) => !buff.limit || buff.limit === config.selectedChar || buff.limit === charBuilds.value[configIndex]?.char.属性)
         .filter((buff) => !projectBuffs.includes(buff.label))
         .map((v) => {
-            const b = configs.value[configIndex]?.additionalBuffs.find((b) => b[0] === v.label)
+            const b = config.additionalBuffs.find((b) => b[0] === v.label)
             const lv = b?.[1] ?? v.value.等级
             return {
                 value: new LeveledBuff(v.value._originalBuffData, lv),
@@ -115,11 +132,11 @@ const getFilteredBuffOptions = (configIndex: number) => {
 // Add new configuration by copying the last one
 const addConfiguration = () => {
     const lastConfig = configs.value[configs.value.length - 1]
-    const newConfig: BuildConfiguration = {
-        additionalMods: cloneDeep(lastConfig.additionalMods),
-        additionalBuffs: cloneDeep(lastConfig.additionalBuffs),
+    const newConfig = createConfig(lastConfig.selectedChar, `配置 ${configs.value.length + 1}`)
+    // Copy all properties from last config using deep clone
+    Object.assign(newConfig, cloneDeep(lastConfig), {
         name: `配置 ${configs.value.length + 1}`,
-    }
+    })
     configs.value.push(newConfig)
 }
 
@@ -131,64 +148,96 @@ const removeConfiguration = (index: number) => {
 }
 
 //#region 时间线
-const timelines = useTimeline(selectedChar)
-function getTimelineByName(name: string) {
-    const raw = timelines.value.find((v) => v.name === name)
-    if (!raw) return undefined
-    return CharBuildTimeline.fromRaw(raw)
-}
-const isTimeline = computed(() => timelines.value.some((v) => v.name === charSettings.value.baseName))
+// Timeline functionality is now handled within baseCharBuilds computed property
 //#endregion
-// Base char build from selected project
-const baseCharBuild = computed(() => {
-    const project = charProject.value.projects.find((p) => p.name === charProject.value.selected)
+// Base char builds from selected projects for each configuration
+const baseCharBuilds = computed(() => {
+    return configs.value.map((config) => {
+        const project = config.projects.find((p: { name: string; charSettings: any }) => p.name === config.selectedProject)
+        if (!project) return null
 
-    const settings = project!.charSettings
+        const settings = project.charSettings
+        const timelines = useTimeline(ref(config.selectedChar))
 
-    // Create character build from project settings
-    return new CharBuild({
-        char: new LeveledChar(selectedChar.value, settings.charLevel),
-        auraMod: new LeveledMod(settings.auraMod),
-        charMods: settings.charMods.map((v) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null)).filter((m) => m !== null),
-        meleeMods: settings.meleeMods.map((v) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null)).filter((m) => m !== null),
-        rangedMods: settings.rangedMods.map((v) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null)).filter((m) => m !== null),
-        skillWeaponMods: settings.skillWeaponMods
-            .map((v) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null))
-            .filter((m) => m !== null),
-        skillLevel: settings.charSkillLevel,
-        buffs: settings.buffs.map((v) => new LeveledBuff(v[0], v[1])),
-        melee: new LeveledWeapon(
-            settings.meleeWeapon,
-            settings.meleeWeaponRefine,
-            settings.meleeWeaponLevel,
-            inv.getBuffLv(settings.meleeWeapon),
-        ),
-        ranged: new LeveledWeapon(
-            settings.rangedWeapon,
-            settings.rangedWeaponRefine,
-            settings.rangedWeaponLevel,
-            inv.getBuffLv(settings.rangedWeapon),
-        ),
-        baseName: settings.baseName,
-        imbalance: settings.imbalance,
-        hpPercent: settings.hpPercent,
-        resonanceGain: settings.resonanceGain,
-        enemyType: settings.enemyType,
-        enemyLevel: settings.enemyLevel,
-        enemyResistance: settings.enemyResistance,
-        enemyHpType: settings.enemyHpType,
-        targetFunction: settings.targetFunction,
-        timeline: getTimelineByName(charSettings.value.baseName),
+        function getTimelineByName(name: string) {
+            const raw = timelines.value.find((v: any) => v.name === name)
+            if (!raw) return undefined
+            return CharBuildTimeline.fromRaw(raw)
+        }
+
+        // Create character build from project settings
+        return new CharBuild({
+            char: new LeveledChar(config.selectedChar, settings.charLevel),
+            auraMod: new LeveledMod(settings.auraMod),
+            charMods: settings.charMods
+                .map((v: any) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null))
+                .filter((m: any): m is LeveledMod => m !== null),
+            meleeMods: settings.meleeMods
+                .map((v: any) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null))
+                .filter((m: any): m is LeveledMod => m !== null),
+            rangedMods: settings.rangedMods
+                .map((v: any) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null))
+                .filter((m: any): m is LeveledMod => m !== null),
+            skillWeaponMods: settings.skillWeaponMods
+                .map((v: any) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null))
+                .filter((m: any): m is LeveledMod => m !== null),
+            skillLevel: settings.charSkillLevel,
+            buffs: settings.buffs.map((v: any) => new LeveledBuff(v[0], v[1])),
+            melee: new LeveledWeapon(
+                settings.meleeWeapon,
+                settings.meleeWeaponRefine,
+                settings.meleeWeaponLevel,
+                inv.getBuffLv(settings.meleeWeapon),
+            ),
+            ranged: new LeveledWeapon(
+                settings.rangedWeapon,
+                settings.rangedWeaponRefine,
+                settings.rangedWeaponLevel,
+                inv.getBuffLv(settings.rangedWeapon),
+            ),
+            baseName: settings.baseName,
+            imbalance: settings.imbalance,
+            hpPercent: settings.hpPercent,
+            resonanceGain: settings.resonanceGain,
+            enemyType: settings.enemyType,
+            enemyLevel: settings.enemyLevel,
+            enemyResistance: settings.enemyResistance,
+            enemyHpType: settings.enemyHpType,
+            targetFunction: settings.targetFunction,
+            timeline: getTimelineByName(settings.baseName),
+        })
     })
 })
 
 // Combined char builds with additional MODs and BUFFs for each configuration
 const charBuilds = computed(() => {
-    if (!baseCharBuild.value) return []
+    return configs.value.map((config, index) => {
+        const baseBuild = baseCharBuilds.value[index]
+        if (!baseBuild) {
+            // Create a dummy CharBuild instance if baseBuild is null
+            return new CharBuild({
+                char: new LeveledChar(config.selectedChar, 10),
+                melee: new LeveledWeapon("枯朽", 0, 1, 0),
+                ranged: new LeveledWeapon("剥离", 0, 1, 0),
+                auraMod: new LeveledMod(0),
+                charMods: [],
+                meleeMods: [],
+                rangedMods: [],
+                skillWeaponMods: [],
+                skillLevel: 1,
+                buffs: [],
+                baseName: "",
+                imbalance: false,
+                hpPercent: 1,
+                resonanceGain: 2,
+                enemyType: "small",
+                enemyLevel: 80,
+                enemyResistance: 0,
+                enemyHpType: "生命",
+                targetFunction: "伤害",
+            })
+        }
 
-    const baseBuild = baseCharBuild.value
-
-    return configs.value.map((config) => {
         // Combine MODs from project and additional selections for this configuration
         const combinedCharMods = [...baseBuild.charMods]
         const combinedMeleeMods = [...baseBuild.meleeMods]
@@ -266,33 +315,20 @@ const totalDamageList = computed(() => {
     return charBuilds.value.map((build) => build?.calculate() || 0)
 })
 
-// MOD slot counts based on selected project
-const modSlotCounts = computed(() => {
-    const project = charProject.value.projects.find((p) => p.name === charProject.value.selected)
+// MOD slot counts based on selected project for a specific configuration
+function getModSlotCounts(configIndex: number) {
+    const config = configs.value[configIndex]
+    const project = config.projects.find((p: { name: string; charSettings: any }) => p.name === config.selectedProject)
     if (!project) return [8, 8, 8, 4] // Default max slots
 
     const settings = project.charSettings
     return [
-        Math.max(0, 8 - settings.charMods.filter((m) => m !== null).length),
-        Math.max(0, 8 - settings.meleeMods.filter((m) => m !== null).length),
-        Math.max(0, 8 - settings.rangedMods.filter((m) => m !== null).length),
-        Math.max(0, 4 - settings.skillWeaponMods.filter((m) => m !== null).length),
+        Math.max(0, 8 - settings.charMods.filter((m: any) => m !== null).length),
+        Math.max(0, 8 - settings.meleeMods.filter((m: any) => m !== null).length),
+        Math.max(0, 8 - settings.rangedMods.filter((m: any) => m !== null).length),
+        Math.max(0, 4 - settings.skillWeaponMods.filter((m: any) => m !== null).length),
     ]
-})
-
-// Watch for project changes to reset all configurations
-watch(
-    () => charProject.value.selected,
-    () => {
-        configs.value = [
-            {
-                additionalMods: [[], [], [], []],
-                additionalBuffs: [],
-                name: "配置 1",
-            },
-        ]
-    },
-)
+}
 
 // MOD selection handlers for a specific configuration
 function selectMod(configIndex: number, type: string, slotIndex: number, modId: number, lv: number) {
@@ -324,11 +360,6 @@ function setBuffLv(configIndex: number, buff: LeveledBuff, lv: number) {
     if (index > -1) {
         configs.value[configIndex].additionalBuffs[index][1] = lv
     }
-}
-
-// Update configuration name
-function updateConfigName(configIndex: number, name: string) {
-    configs.value[configIndex].name = name
 }
 
 // Table customization
@@ -386,7 +417,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                 <div class="text-xs text-gray-400 mb-4">{{ $t("build-compare.tip") }}</div>
 
                 <!-- Multiple Configurations -->
-                <div v-if="charProject.projects.length > 0 && charProject.selected" class="space-y-6">
+                <div v-if="configs[0].projects.length > 0" class="space-y-6">
                     <!-- Configuration Cards -->
                     <div
                         v-for="(config, index) in configs"
@@ -406,7 +437,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                         <div class="text-xs text-gray-400">{{ $t("char-build.character") }}</div>
                                         <Select
                                             class="w-40 inline-flex justify-between input input-bordered input-sm"
-                                            v-model="selectedChar"
+                                            v-model="config.selectedChar"
                                         >
                                             <template v-for="charWithElm in groupBy(charOptions, 'elm')" :key="charWithElm[0].elm">
                                                 <SelectLabel class="p-2 text-sm font-semibold text-primary">
@@ -425,11 +456,11 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     <div class="bg-base-200 rounded-lg flex items-center gap-4">
                                         <div class="text-xs text-gray-400">{{ $t("build-compare.project_name") }}</div>
                                         <Select
-                                            v-if="charProject.projects.length > 0"
+                                            v-if="config.projects.length > 0"
                                             class="w-40 inline-flex justify-between input input-bordered input-sm"
-                                            v-model="charProject.selected"
+                                            v-model="config.selectedProject"
                                         >
-                                            <SelectItem v-for="project in charProject.projects" :key="project.name" :value="project.name">
+                                            <SelectItem v-for="project in config.projects" :key="project.name" :value="project.name">
                                                 {{ project.name }}
                                             </SelectItem>
                                         </Select>
@@ -457,10 +488,10 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                         <!-- Additional MOD List for this Configuration -->
                         <div class="mb-6">
                             <!-- Character MODs -->
-                            <div v-if="modSlotCounts[0] > 0" class="mb-4">
+                            <div v-if="getModSlotCounts(index)[0] > 0" class="mb-4">
                                 <ModEditer
                                     :title="$t('char-build.char_mod_config')"
-                                    :mods="Array(modSlotCounts[0]).fill(null)"
+                                    :mods="Array(getModSlotCounts(index)[0]).fill(null)"
                                     :mod-options="
                                         modOptions.filter(
                                             (m) => m.type === '角色' && (!m.limit || m.limit === charBuilds[index]?.char.属性),
@@ -470,21 +501,21 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     @remove-mod="removeMod(index, '角色', $event)"
                                     @select-mod="selectMod(index, '角色', $event[0], $event[1], $event[2])"
                                     type="角色"
-                                    :max-slots="modSlotCounts[0]"
+                                    :max-slots="getModSlotCounts(index)[0]"
                                 />
                             </div>
 
                             <!-- Melee MODs -->
                             <div
                                 v-if="
-                                    modSlotCounts[1] > 0 &&
-                                    (baseCharBuild.isMeleeWeapon || isTimeline || baseCharBuild.selectedSkill?.召唤物)
+                                    getModSlotCounts(index)[1] > 0 &&
+                                    (baseCharBuilds[index]?.isMeleeWeapon || baseCharBuilds[index]?.selectedSkill?.召唤物)
                                 "
                                 class="mb-4"
                             >
                                 <ModEditer
                                     :title="$t('char-build.melee_weapon_mod_config')"
-                                    :mods="Array(modSlotCounts[1]).fill(null)"
+                                    :mods="Array(getModSlotCounts(index)[1]).fill(null)"
                                     :mod-options="
                                         modOptions.filter(
                                             (m) =>
@@ -499,15 +530,15 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     @remove-mod="removeMod(index, '近战', $event)"
                                     @select-mod="selectMod(index, '近战', $event[0], $event[1], $event[2])"
                                     type="近战"
-                                    :max-slots="modSlotCounts[1]"
+                                    :max-slots="getModSlotCounts(index)[1]"
                                 />
                             </div>
 
                             <!-- Ranged MODs -->
-                            <div v-if="modSlotCounts[2] > 0 && (baseCharBuild.isRangedWeapon || isTimeline)" class="mb-4">
+                            <div v-if="getModSlotCounts(index)[2] > 0 && baseCharBuilds[index]?.isRangedWeapon" class="mb-4">
                                 <ModEditer
                                     :title="$t('char-build.ranged_weapon_mod_config')"
-                                    :mods="Array(modSlotCounts[2]).fill(null)"
+                                    :mods="Array(getModSlotCounts(index)[2]).fill(null)"
                                     :mod-options="
                                         modOptions.filter(
                                             (m) =>
@@ -523,15 +554,15 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     @remove-mod="removeMod(index, '远程', $event)"
                                     @select-mod="selectMod(index, '远程', $event[0], $event[1], $event[2])"
                                     type="远程"
-                                    :max-slots="modSlotCounts[2]"
+                                    :max-slots="getModSlotCounts(index)[2]"
                                 />
                             </div>
 
                             <!-- Skill Weapon MODs -->
-                            <div v-if="modSlotCounts[3] > 0 && (baseCharBuild.isSkillWeapon || isTimeline)" class="mb-4">
+                            <div v-if="getModSlotCounts(index)[3] > 0 && baseCharBuilds[index]?.isSkillWeapon" class="mb-4">
                                 <ModEditer
                                     :title="$t('char-build.skill_weapon_mod_config')"
-                                    :mods="Array(modSlotCounts[3]).fill(null)"
+                                    :mods="Array(getModSlotCounts(index)[3]).fill(null)"
                                     :mod-options="
                                         modOptions.filter(
                                             (m) =>
@@ -547,7 +578,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     @remove-mod="removeMod(index, '同律', $event)"
                                     @select-mod="selectMod(index, '同律', $event[0], $event[1], $event[2])"
                                     type="同律"
-                                    :max-slots="modSlotCounts[3]"
+                                    :max-slots="getModSlotCounts(index)[3]"
                                 />
                             </div>
                         </div>
@@ -594,9 +625,12 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                             <tr class="bg-base-200">
                                 <th class="text-left">{{ $t("build-compare.configuration") }}</th>
                                 <th class="text-right">
-                                    {{ charSettings.baseName }} -
-                                    {{ baseCharBuild?.selectedSkill?.召唤物?.名称 ? `[${baseCharBuild?.selectedSkill?.召唤物?.名称}]` : ""
-                                    }}{{ charSettings.targetFunction }}
+                                    {{ configs[0].charSettings.baseName }} -
+                                    {{
+                                        baseCharBuilds[0]?.selectedSkill?.召唤物?.名称
+                                            ? `[${baseCharBuilds[0]?.selectedSkill?.召唤物?.名称}]`
+                                            : ""
+                                    }}{{ configs[0].charSettings.targetFunction }}
                                 </th>
                                 <th v-for="colKey in visibleColumns" :key="colKey" class="text-right">
                                     <!-- Get the display label for the column -->
@@ -628,7 +662,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
             </div>
 
             <!-- No Project Selected Message -->
-            <div v-else-if="charProject.projects.length === 0" class="bg-base-100 rounded-xl p-6 shadow-lg text-center">
+            <div v-else-if="configs[0].projects.length === 0" class="bg-base-100 rounded-xl p-6 shadow-lg text-center">
                 <div class="text-lg font-medium mb-2 text-warning">{{ $t("build-compare.no_projects_available") }}</div>
                 <div class="text-sm text-base-content/70">{{ $t("build-compare.create_project_first") }}</div>
             </div>

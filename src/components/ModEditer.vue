@@ -80,7 +80,7 @@ const sortedModOptions = computed(() => {
         }
 
         // 4. 属性筛选
-        if (selectedProperty.value !== "无") {
+        if (selectedProperty.value) {
             // 获取mod的所有属性文本，包括描述、属性等
             const modText = JSON.stringify(mod)
             // 判断选择的属性是否在mod文本中
