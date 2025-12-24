@@ -64,7 +64,7 @@ const _buffOptions = reactive(
 
 // Define configuration type
 interface BuildConfiguration {
-    additionalMods: (number[] | null)[][] // [charMods, meleeMods, rangedMods, skillWeaponMods]
+    additionalMods: ([number, number] | null)[][] // [charMods, meleeMods, rangedMods, skillWeaponMods]
     additionalBuffs: [string, number][]
     name: string
     selectedChar: string
@@ -81,6 +81,12 @@ function createConfig(selectedChar: string, name: string): BuildConfiguration {
     // Clone charSettings value
     const charSettings = cloneDeep(charSettingsRef.value)
 
+    // Calculate available slots by subtracting existing non-null mods
+    const charModSlots = Math.max(0, 8 - charSettings.charMods.filter((m: any) => m !== null).length)
+    const meleeModSlots = Math.max(0, 8 - charSettings.meleeMods.filter((m: any) => m !== null).length)
+    const rangedModSlots = Math.max(0, 8 - charSettings.rangedMods.filter((m: any) => m !== null).length)
+    const skillWeaponModSlots = Math.max(0, 4 - charSettings.skillWeaponMods.filter((m: any) => m !== null).length)
+
     // Get projects from localStorage
     const savedProjects = useLocalStorage(`project.${selectedChar}`, {
         selected: "",
@@ -92,7 +98,12 @@ function createConfig(selectedChar: string, name: string): BuildConfiguration {
 
     // Create and return config object
     return {
-        additionalMods: [[], [], [], []],
+        additionalMods: [
+            Array(charModSlots).fill(null), // charMods: available slots
+            Array(meleeModSlots).fill(null), // meleeMods: available slots
+            Array(rangedModSlots).fill(null), // rangedMods: available slots
+            Array(skillWeaponModSlots).fill(null), // skillWeaponMods: available slots
+        ],
         additionalBuffs: [],
         name,
         selectedChar,
@@ -103,9 +114,8 @@ function createConfig(selectedChar: string, name: string): BuildConfiguration {
 }
 
 // Multiple configurations state
-const configs = ref<BuildConfiguration[]>([])
+const configs = ref<BuildConfiguration[]>([createConfig("赛琪", "配置 1")])
 // Initialize with one configuration
-configs.value.push(createConfig("赛琪", "配置 1"))
 
 // 针对特定配置的已过滤 BUFF 选项，这些选项排除了项目现有的 BUFF
 const getFilteredBuffOptions = (configIndex: number) => {
@@ -336,13 +346,14 @@ function selectMod(configIndex: number, type: string, slotIndex: number, modId: 
     if (typeIndex === undefined) return
 
     configs.value[configIndex].additionalMods[typeIndex][slotIndex] = [modId, lv]
+    console.log(configs.value[configIndex].additionalMods[typeIndex])
 }
 
 function removeMod(configIndex: number, type: string, slotIndex: number) {
     const typeIndex = { 角色: 0, 近战: 1, 远程: 2, 同律: 3 }[type]
     if (typeIndex === undefined) return
 
-    configs.value[configIndex].additionalMods[typeIndex].splice(slotIndex, 1)
+    configs.value[configIndex].additionalMods[typeIndex][slotIndex] = null
 }
 
 // BUFF selection handlers for a specific configuration
@@ -506,7 +517,8 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                             <div v-if="getModSlotCounts(index)[0] > 0" class="mb-4">
                                 <ModEditer
                                     :title="$t('char-build.char_mod_config')"
-                                    :mods="Array(getModSlotCounts(index)[0]).fill(null)"
+                                    :mods="config.additionalMods[0].map((m) => (m ? new LeveledMod(m[0], m[1]) : null))"
+                                    :otherMods="config.charSettings.charMods.map((m) => (m ? new LeveledMod(m[0], m[1]) : null))"
                                     :mod-options="
                                         modOptions.filter(
                                             (m) => m.type === '角色' && (!m.limit || m.limit === charBuilds[index]?.char.属性),
@@ -516,7 +528,6 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     @remove-mod="removeMod(index, '角色', $event)"
                                     @select-mod="selectMod(index, '角色', $event[0], $event[1], $event[2])"
                                     type="角色"
-                                    :max-slots="getModSlotCounts(index)[0]"
                                 />
                             </div>
 
@@ -530,7 +541,8 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                             >
                                 <ModEditer
                                     :title="$t('char-build.melee_weapon_mod_config')"
-                                    :mods="Array(getModSlotCounts(index)[1]).fill(null)"
+                                    :mods="config.additionalMods[1].map((m) => (m ? new LeveledMod(m[0], m[1]) : null))"
+                                    :otherMods="config.charSettings.meleeMods.map((m) => (m ? new LeveledMod(m[0], m[1]) : null))"
                                     :mod-options="
                                         modOptions.filter(
                                             (m) =>
@@ -545,7 +557,6 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     @remove-mod="removeMod(index, '近战', $event)"
                                     @select-mod="selectMod(index, '近战', $event[0], $event[1], $event[2])"
                                     type="近战"
-                                    :max-slots="getModSlotCounts(index)[1]"
                                 />
                             </div>
 
@@ -553,7 +564,8 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                             <div v-if="getModSlotCounts(index)[2] > 0 && baseCharBuilds[index]?.isRangedWeapon" class="mb-4">
                                 <ModEditer
                                     :title="$t('char-build.ranged_weapon_mod_config')"
-                                    :mods="Array(getModSlotCounts(index)[2]).fill(null)"
+                                    :mods="config.additionalMods[2].map((m) => (m ? new LeveledMod(m[0], m[1]) : null))"
+                                    :otherMods="config.charSettings.rangedMods.map((m) => (m ? new LeveledMod(m[0], m[1]) : null))"
                                     :mod-options="
                                         modOptions.filter(
                                             (m) =>
@@ -569,7 +581,6 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     @remove-mod="removeMod(index, '远程', $event)"
                                     @select-mod="selectMod(index, '远程', $event[0], $event[1], $event[2])"
                                     type="远程"
-                                    :max-slots="getModSlotCounts(index)[2]"
                                 />
                             </div>
 
@@ -577,7 +588,8 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                             <div v-if="getModSlotCounts(index)[3] > 0 && baseCharBuilds[index]?.isSkillWeapon" class="mb-4">
                                 <ModEditer
                                     :title="$t('char-build.skill_weapon_mod_config')"
-                                    :mods="Array(getModSlotCounts(index)[3]).fill(null)"
+                                    :mods="config.additionalMods[3].map((m) => (m ? new LeveledMod(m[0], m[1]) : null))"
+                                    :otherMods="config.charSettings.skillWeaponMods.map((m) => (m ? new LeveledMod(m[0], m[1]) : null))"
                                     :mod-options="
                                         modOptions.filter(
                                             (m) =>
@@ -593,7 +605,6 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     @remove-mod="removeMod(index, '同律', $event)"
                                     @select-mod="selectMod(index, '同律', $event[0], $event[1], $event[2])"
                                     type="同律"
-                                    :max-slots="getModSlotCounts(index)[3]"
                                 />
                             </div>
                         </div>

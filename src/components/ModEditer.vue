@@ -21,6 +21,7 @@ interface ModOption {
 
 interface Props {
     mods: (LeveledMod | null)[]
+    otherMods?: (LeveledMod | null)[]
     modOptions: ModOption[]
     charBuild: CharBuild
     title: string
@@ -44,6 +45,23 @@ const sortedModOptions = computed(() => {
 
     if (props.mods && Array.isArray(props.mods)) {
         props.mods.forEach((mod) => {
+            if (mod) {
+                // 记录互斥系列
+                if (CharBuild.exclusiveSeries.includes(mod.系列)) {
+                    equippedExclusiveSeries.add(mod.系列)
+                }
+                // 记录非契约者MOD名称（用于名称互斥）
+                if (mod.系列 !== "契约者") {
+                    mod.excludeNames.forEach((name) => equippedExclusiveNames.add(name))
+                }
+                // 记录MOD数量
+                idCount.set(mod.id, (idCount.get(mod.id) || 0) + 1)
+            }
+        })
+    }
+
+    if (props.otherMods && Array.isArray(props.otherMods)) {
+        props.otherMods.forEach((mod) => {
             if (mod) {
                 // 记录互斥系列
                 if (CharBuild.exclusiveSeries.includes(mod.系列)) {
