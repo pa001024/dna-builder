@@ -37,12 +37,12 @@
         "desc": "Compare the effects of different construction plans",
         "input_section": "Input Configuration",
         "no_projects_available": "No projects available",
-        "no_projects_message": "No projects available",
         "project_name": "Project Name",
         "remove_config": "Remove Configuration",
         "results": "Results",
         "select_project_message": "Please select a project",
         "select_project_to_compare": "Select a project to start comparing builds",
+        "tip": "Note: The data on this page will not be automatically saved!",
         "title": "Build Compare"
     },
     "char-build": {

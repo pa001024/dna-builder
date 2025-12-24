@@ -37,12 +37,12 @@
         "desc": "对比不同构筑方案的效果",
         "input_section": "输入配置",
         "no_projects_available": "没有可用的项目",
-        "no_projects_message": "没有可用的项目",
         "project_name": "项目名称",
         "remove_config": "移除配置",
         "results": "结果",
         "select_project_message": "请选择一个项目",
         "select_project_to_compare": "选择一个项目开始对比构筑",
+        "tip": "注意: 此页面数据不会自动保存!",
         "title": "构筑对比"
     },
     "char-build": {

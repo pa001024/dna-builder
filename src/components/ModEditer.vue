@@ -116,6 +116,7 @@ const emit = defineEmits<{
     selectAuraMod: [id: number]
     removeMod: [index: number]
     selectMod: [indexAndId: [number, number, number]]
+    swapMods: [index1: number, index2: number]
     levelChange: [indexAndLevel: [number, number]]
 }>()
 
@@ -156,27 +157,8 @@ function handleDrop(index: number, event: DragEvent) {
     event.preventDefault()
     const fromIndex = parseInt(event.dataTransfer?.getData("modIndex") || "")
     if (fromIndex !== index && !isNaN(fromIndex)) {
-        // 使用现有的selectMod和removeMod事件机制来交换MOD位置
-        // 先获取两个位置的MOD ID
-        const fromMod = props.mods[fromIndex]
-        const toMod = props.mods[index]
-
-        // 交换MOD：先将目标位置设为源MOD，再将源位置设为目标MOD
-        if (toMod) {
-            emit("selectMod", [fromIndex, toMod instanceof LeveledMod ? toMod.id : toMod, toMod instanceof LeveledMod ? toMod.等级 : 10])
-        } else {
-            emit("removeMod", fromIndex)
-        }
-
-        if (fromMod) {
-            emit("selectMod", [
-                index,
-                fromMod instanceof LeveledMod ? fromMod.id : fromMod,
-                fromMod instanceof LeveledMod ? fromMod.等级 : 10,
-            ])
-        } else {
-            emit("removeMod", index)
-        }
+        // 直接发送交换事件给父组件处理
+        emit("swapMods", fromIndex, index)
         localSelectedSlot.value = -1
     }
 }

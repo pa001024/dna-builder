@@ -58,7 +58,7 @@ const emit = defineEmits<{
         class="aspect-square bg-base-200 rounded-lg border-2 flex items-center justify-center transition-colors cursor-pointer group"
         :class="[mod ? getQualityColor(mod.品质) : 'border-dashed border-gray-600', getQualityHoverBorder(mod?.品质!)]"
         draggable="true"
-        @dragstart="$event.dataTransfer?.setData('modIndex', $attrs.index as string)"
+        @dragstart="$attrs.index !== undefined && $event.dataTransfer?.setData('modIndex', $attrs.index as string)"
         @dragover.prevent
         @dragenter.prevent
     >

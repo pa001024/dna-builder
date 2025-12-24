@@ -37,12 +37,12 @@
         "desc": "다양한 건설 계획의 효과 비교",
         "input_section": "입력 구성",
         "no_projects_available": "사용 가능한 프로젝트가 없습니다",
-        "no_projects_message": "사용 가능한 프로젝트가 없습니다",
         "project_name": "프로젝트 이름",
         "remove_config": "구성 제거",
         "results": "결과",
         "select_project_message": "프로젝트를 선택하세요",
         "select_project_to_compare": "빌드를 비교하기 위해 프로젝트를 선택하세요",
+        "tip": "참고: 이 페이지의 데이터는 자동으로 저장되지 않습니다!",
         "title": "빌드 비교"
     },
     "char-build": {

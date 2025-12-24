@@ -362,7 +362,8 @@ const allColumns = [
         <div class="mx-auto p-4">
             <!-- Input Section -->
             <div class="mb-6">
-                <h2 class="text-xl font-semibold mb-4 text-base-content">{{ $t("build-compare.input_section") }}</h2>
+                <h2 class="text-xl font-semibold text-base-content">{{ $t("build-compare.input_section") }}</h2>
+                <div class="text-xs text-gray-400 mb-4">{{ $t("build-compare.tip") }}</div>
 
                 <!-- Multiple Configurations -->
                 <div v-if="charProject.projects.length > 0 && charProject.selected" class="space-y-6">
@@ -634,7 +635,7 @@ const allColumns = [
 
             <!-- No Project Selected Message -->
             <div v-else-if="charProject.projects.length === 0" class="bg-base-100 rounded-xl p-6 shadow-lg text-center">
-                <div class="text-lg font-medium mb-2 text-warning">{{ $t("build-compare.no_projects_message") }}</div>
+                <div class="text-lg font-medium mb-2 text-warning">{{ $t("build-compare.no_projects_available") }}</div>
                 <div class="text-sm text-base-content/70">{{ $t("build-compare.create_project_first") }}</div>
             </div>
 

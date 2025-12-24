@@ -37,12 +37,12 @@
         "desc": "さまざまな建設計画の効果を比較する",
         "input_section": "入力設定",
         "no_projects_available": "利用可能なプロジェクトがありません",
-        "no_projects_message": "利用可能なプロジェクトがありません",
         "project_name": "プロジェクト名",
         "remove_config": "設定を削除",
         "results": "結果",
         "select_project_message": "プロジェクトを選択してください",
         "select_project_to_compare": "ビルドを比較するにはプロジェクトを選択してください",
+        "tip": "注: このページのデータは自動的には保存されません。",
         "title": "ビルド比較"
     },
     "char-build": {
