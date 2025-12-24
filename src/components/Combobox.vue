@@ -34,7 +34,7 @@ const emit = defineEmits<{
 
 <template>
     <ComboboxRoot v-model="model" class="relative" @update:open="(open) => open && emit('open')">
-        <ComboboxAnchor v-bind="$attrs" class="input input-bordered input-sm w-64">
+        <ComboboxAnchor v-bind="$attrs" class="input input-bordered input-sm">
             <ComboboxInput asChild class="bg-transparent! outline-none h-full" :placeholder="placeholder">
                 <input v-model="model" type="text" />
             </ComboboxInput>
@@ -44,7 +44,7 @@ const emit = defineEmits<{
         </ComboboxAnchor>
 
         <ComboboxContent
-            class="absolute z-10 w-full mt-2 min-w-40 bg-white overflow-hidden rounded shadow-xl will-change-[opacity,transform] data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade"
+            class="absolute z-100 w-full mt-2 min-w-40 bg-white overflow-hidden rounded shadow-xl will-change-[opacity,transform] data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade"
         >
             <ComboboxViewport class="p-[5px]">
                 <ComboboxEmpty class="text-neutral-500 text-xs font-medium text-center py-2">{{ emptyMessage }}</ComboboxEmpty>

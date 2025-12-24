@@ -304,6 +304,7 @@ function resetAiSettings() {
                             :empty-message="$t('setting.noModelAvailable')"
                             :options="aiModelOptions"
                             @open="loadAiModelOptions"
+                            class="w-64"
                             :class="{ disabled: !setting.aiApiKey || !setting.aiBaseUrl }"
                         />
                     </div>

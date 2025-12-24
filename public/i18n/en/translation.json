@@ -110,7 +110,7 @@
         "refine": "Refine",
         "reset_config": "Reset",
         "resonance_gain": "Harmony Gain",
-        "save_config": "Save Configuration",
+        "save_config": "Save Project",
         "select_character": "Select Character",
         "select_skill_weapon": "Select Skill/Weapon",
         "selected_count": "Selected {{count}}",

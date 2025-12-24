@@ -32,7 +32,7 @@ const props = defineProps<Props>()
 const inv = useInvStore()
 
 const sortByIncome = ref(true)
-const selectedProperty = ref("无")
+const selectedProperty = ref("")
 const auraModOptions = computed(() => {
     return props.modOptions.filter((option) => option.ser === "羽蛇")
 })
@@ -82,7 +82,7 @@ const sortedModOptions = computed(() => {
         // 4. 属性筛选
         if (selectedProperty.value !== "无") {
             // 获取mod的所有属性文本，包括描述、属性等
-            const modText = JSON.stringify(mod) + mod.label + (mod.属性 || "")
+            const modText = JSON.stringify(mod)
             // 判断选择的属性是否在mod文本中
             if (!modText.includes(selectedProperty.value)) {
                 return false
@@ -290,17 +290,17 @@ const aMod = computed(() => {
                     </template>
 
                     <!-- 属性筛选下拉框 -->
-                    <Select
-                        class="ml-auto w-30 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap mr-2"
+                    <Combobox
+                        class="ml-auto w-40 mr-4"
                         v-model="selectedProperty"
-                    >
-                        <SelectItem
-                            :value="prop"
-                            v-for="prop in ['无', '攻击', '生命', '防御', '护盾', '威力', '耐久', '范围', '效益', '增伤']"
-                            :key="prop"
-                            >{{ prop }}</SelectItem
-                        >
-                    </Select>
+                        placeholder="搜索属性/描述"
+                        :options="
+                            ['攻击', '生命', '防御', '护盾', '威力', '耐久', '范围', '效益', '增伤'].map((prop) => ({
+                                label: prop,
+                                value: prop,
+                            }))
+                        "
+                    />
                     <button class="btn btn-sm" :class="sortByIncome ? 'btn-secondary' : 'btn-outline'" @click="toggleSortByIncome">
                         {{ sortByIncome ? "收益排序：高→低" : "默认排序" }}
                     </button>
