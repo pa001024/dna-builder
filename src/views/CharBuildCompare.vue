@@ -355,6 +355,26 @@ const allColumns = [
     { key: "武器独立增伤" as const, label: "武器独立增伤" },
     { key: "武器追加伤害" as const, label: "武器追加伤害" },
 ] as const
+
+// Helper methods for table cell formatting
+function formatCharAttribute(configIndex: number, colKey: string): string {
+    const attr = attributesList.value[configIndex]
+    if (!(colKey in attr)) return "-"
+
+    const value = attr[colKey as keyof CharAttr]
+    const isBaseStat = ["攻击", "生命", "护盾", "防御", "神智"].includes(colKey)
+    return isBaseStat ? `${+value.toFixed(2)}` : `${+(value * 100).toFixed(2)}%`
+}
+
+function formatWeaponAttribute(configIndex: number, colKey: string): string {
+    const weaponAttr = weaponAttrsList.value[configIndex]
+    if (!weaponAttr) return "-"
+
+    const attrKey = colKey.replace("武器", "") as keyof typeof weaponAttr
+    const value = weaponAttr[attrKey]
+    const isBaseStat = ["攻击", "攻速", "多重"].includes(attrKey)
+    return isBaseStat ? `${+value.toFixed(2)}` : `${+(value * 100).toFixed(2)}%`
+}
 </script>
 
 <template>
@@ -379,12 +399,7 @@ const allColumns = [
                                 <!-- Character and Project Selection -->
                                 <div class="flex flex-wrap gap-4">
                                     <h3 class="text-lg font-semibold text-primary">
-                                        <input
-                                            type="text"
-                                            v-model="config.name"
-                                            class="input input-sm input-bordered w-32"
-                                            @input="updateConfigName(index, config.name)"
-                                        />
+                                        <input type="text" v-model="config.name" class="input input-sm input-bordered w-32" />
                                     </h3>
                                     <!-- Character Selection -->
                                     <div class="bg-base-200 rounded-lg flex items-center gap-4">
@@ -600,32 +615,11 @@ const allColumns = [
                                 <!-- Value for each visible column -->
                                 <td v-for="colKey in visibleColumns" :key="colKey" class="text-right">
                                     <!-- Character attributes -->
-                                    <template v-if="!colKey.startsWith('武器')">
-                                        {{
-                                            colKey in attributesList[configIndex]
-                                                ? ["攻击", "生命", "护盾", "防御", "神智"].includes(colKey)
-                                                    ? `${+attributesList[configIndex][colKey as keyof CharAttr].toFixed(2)}`
-                                                    : `${+(attributesList[configIndex][colKey as keyof CharAttr] * 100).toFixed(2)}%`
-                                                : "-"
-                                        }}
-                                    </template>
-
-                                    <!-- Weapon attributes -->
-                                    <template v-else>
-                                        {{
-                                            weaponAttrsList[configIndex]
-                                                ? (() => {
-                                                      const weaponAttr = weaponAttrsList[configIndex]!
-                                                      // Extract the weapon attribute key by removing the "武器" prefix
-                                                      const attrKey = colKey.replace("武器", "") as keyof typeof weaponAttr
-                                                      const value = weaponAttr[attrKey]
-                                                      return ["攻击", "攻速", "多重"].includes(attrKey)
-                                                          ? `${+value.toFixed(2)}`
-                                                          : `${+(value * 100).toFixed(2)}%`
-                                                  })()
-                                                : "-"
-                                        }}
-                                    </template>
+                                    {{
+                                        colKey.startsWith("武器")
+                                            ? formatWeaponAttribute(configIndex, colKey)
+                                            : formatCharAttribute(configIndex, colKey)
+                                    }}
                                 </td>
                             </tr>
                         </tbody>
