@@ -27,6 +27,24 @@
         "rangedMods": "Remote MOD",
         "skillWeaponMods": "Tonglu MOD"
     },
+    "build-compare": {
+        "additional_buff_list": "Additional BUFF List",
+        "additional_mod_list": "Additional MOD List",
+        "configuration": "Configuration",
+        "copy_config": "Copy Configuration",
+        "create_project_first": "Please create a project first in the Character Build page",
+        "customize_table": "select column",
+        "desc": "Compare the effects of different construction plans",
+        "input_section": "Input Configuration",
+        "no_projects_available": "No projects available",
+        "project_name": "Project Name",
+        "remove_config": "Remove Configuration",
+        "results": "Results",
+        "select_project_message": "Please select a project",
+        "select_project_to_compare": "Select a project to start comparing builds",
+        "tip": "Note: The data on this page will not be automatically saved!",
+        "title": "Build Compare"
+    },
     "char-build": {
         "昂扬": "Boost",
         "暴击": "Critical hit rate",
@@ -92,7 +110,7 @@
         "refine": "Refine",
         "reset_config": "Reset",
         "resonance_gain": "Harmony Gain",
-        "save_config": "Save Configuration",
+        "save_config": "Save Project",
         "select_character": "Select Character",
         "select_skill_weapon": "Select Skill/Weapon",
         "selected_count": "Selected {{count}}",

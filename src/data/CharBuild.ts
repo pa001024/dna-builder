@@ -989,6 +989,9 @@ export class CharBuild {
     get isSkillWeapon() {
         return this.skillWeapon && this.skillWeapon.名称 === this.baseNameTitle
     }
+    get isTimeline() {
+        return this.timeline !== undefined
+    }
     /**
      * 主计算函数
      * @param props 武器、模组或 buff

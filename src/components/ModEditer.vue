@@ -21,6 +21,7 @@ interface ModOption {
 
 interface Props {
     mods: (LeveledMod | null)[]
+    otherMods?: (LeveledMod | null)[]
     modOptions: ModOption[]
     charBuild: CharBuild
     title: string
@@ -32,6 +33,7 @@ const props = defineProps<Props>()
 const inv = useInvStore()
 
 const sortByIncome = ref(true)
+const selectedProperty = ref("")
 const auraModOptions = computed(() => {
     return props.modOptions.filter((option) => option.ser === "羽蛇")
 })
@@ -43,6 +45,23 @@ const sortedModOptions = computed(() => {
 
     if (props.mods && Array.isArray(props.mods)) {
         props.mods.forEach((mod) => {
+            if (mod) {
+                // 记录互斥系列
+                if (CharBuild.exclusiveSeries.includes(mod.系列)) {
+                    equippedExclusiveSeries.add(mod.系列)
+                }
+                // 记录非契约者MOD名称（用于名称互斥）
+                if (mod.系列 !== "契约者") {
+                    mod.excludeNames.forEach((name) => equippedExclusiveNames.add(name))
+                }
+                // 记录MOD数量
+                idCount.set(mod.id, (idCount.get(mod.id) || 0) + 1)
+            }
+        })
+    }
+
+    if (props.otherMods && Array.isArray(props.otherMods)) {
+        props.otherMods.forEach((mod) => {
             if (mod) {
                 // 记录互斥系列
                 if (CharBuild.exclusiveSeries.includes(mod.系列)) {
@@ -78,6 +97,16 @@ const sortedModOptions = computed(() => {
             return false
         }
 
+        // 4. 属性筛选
+        if (selectedProperty.value) {
+            // 获取mod的所有属性文本，包括描述、属性等
+            const modText = JSON.stringify(mod)
+            // 判断选择的属性是否在mod文本中
+            if (!modText.includes(selectedProperty.value)) {
+                return false
+            }
+        }
+
         return true
     })
 
@@ -104,7 +133,8 @@ const sortedModOptions = computed(() => {
 const emit = defineEmits<{
     selectAuraMod: [id: number]
     removeMod: [index: number]
-    selectMod: [indexAndId: [number, number]]
+    selectMod: [indexAndId: [number, number, number]]
+    swapMods: [index1: number, index2: number]
     levelChange: [indexAndLevel: [number, number]]
 }>()
 
@@ -128,8 +158,8 @@ function handleLevelChange(index: number, level: number) {
     emit("levelChange", [index, level])
 }
 
-function handleSelectMod(index: number, value: number) {
-    emit("selectMod", [index, value])
+function handleSelectMod(index: number, value: number, lv: number) {
+    emit("selectMod", [index, value, lv])
 }
 
 function closeSelection() {
@@ -138,6 +168,17 @@ function closeSelection() {
 
 function toggleSortByIncome() {
     sortByIncome.value = !sortByIncome.value
+}
+
+// 拖拽交换位置
+function handleDrop(index: number, event: DragEvent) {
+    event.preventDefault()
+    const fromIndex = parseInt(event.dataTransfer?.getData("modIndex") || "")
+    if (fromIndex !== index && !isNaN(fromIndex)) {
+        // 直接发送交换事件给父组件处理
+        emit("swapMods", fromIndex, index)
+        localSelectedSlot.value = -1
+    }
 }
 
 async function handleImportCode() {
@@ -152,7 +193,9 @@ async function handleImportCode() {
         const result = props.charBuild.importCode(charCode, props.type)
         if (result) {
             for (let i = 0; i < result.mods.length; i++) {
-                if (result.mods[i]) emit("selectMod", [i, result.mods[i]])
+                if (result.mods[i]) {
+                    emit("selectMod", [i, result.mods[i], inv.getModLv(result.mods[i], LeveledMod.getQuality(result.mods[i])) ?? 10])
+                }
             }
             if (result.auraMod) {
                 emit("selectAuraMod", result.auraMod)
@@ -202,6 +245,7 @@ const aMod = computed(() => {
                 :index="index"
                 @click="handleSlotClick(index)"
                 @removeMod="handleRemoveMod(index)"
+                @drop="handleDrop(index, $event)"
                 control
                 :charBuild="charBuild"
                 :selected="undefined"
@@ -239,7 +283,7 @@ const aMod = computed(() => {
                                         :key="mod.value"
                                         :mod="new LeveledMod(mod.value, mod.lv, mod.bufflv)"
                                         :income="charBuild.calcIncome(new LeveledMod(mod.value, mod.lv, mod.bufflv))"
-                                        @click="handleSelectMod(localSelectedSlot, mod.value)"
+                                        @click="handleSelectMod(localSelectedSlot, mod.value, mod.lv ?? 10)"
                                         :noremove="true"
                                     />
                                 </div>
@@ -247,7 +291,19 @@ const aMod = computed(() => {
                         </div>
                     </template>
 
-                    <button class="ml-auto btn btn-sm" :class="sortByIncome ? 'btn-secondary' : 'btn-outline'" @click="toggleSortByIncome">
+                    <!-- 属性筛选下拉框 -->
+                    <Combobox
+                        class="ml-auto w-40 mr-4"
+                        v-model="selectedProperty"
+                        placeholder="搜索属性/描述"
+                        :options="
+                            ['攻击', '生命', '防御', '护盾', '威力', '耐久', '范围', '效益', '增伤'].map((prop) => ({
+                                label: prop,
+                                value: prop,
+                            }))
+                        "
+                    />
+                    <button class="btn btn-sm" :class="sortByIncome ? 'btn-secondary' : 'btn-outline'" @click="toggleSortByIncome">
                         {{ sortByIncome ? "收益排序：高→低" : "默认排序" }}
                     </button>
                 </div>

@@ -27,6 +27,24 @@
         "rangedMods": "遠隔MOD",
         "skillWeaponMods": "同律MOD"
     },
+    "build-compare": {
+        "additional_buff_list": "追加BUFFリスト",
+        "additional_mod_list": "追加MODリスト",
+        "configuration": "設定",
+        "copy_config": "設定をコピー",
+        "create_project_first": "まずキャラクタービルドページでプロジェクトを作成してください",
+        "customize_table": "列を選択",
+        "desc": "さまざまな建設計画の効果を比較する",
+        "input_section": "入力設定",
+        "no_projects_available": "利用可能なプロジェクトがありません",
+        "project_name": "プロジェクト名",
+        "remove_config": "設定を削除",
+        "results": "結果",
+        "select_project_message": "プロジェクトを選択してください",
+        "select_project_to_compare": "ビルドを比較するにはプロジェクトを選択してください",
+        "tip": "注: このページのデータは自動的には保存されません。",
+        "title": "ビルド比較"
+    },
     "char-build": {
         "昂扬": "昂揚",
         "暴击": "クリティカルレート",
@@ -92,7 +110,7 @@
         "refine": "精錬",
         "reset_config": "リセット",
         "resonance_gain": "和鳴増益",
-        "save_config": "設定を保存",
+        "save_config": "プロジェクトの保存",
         "select_character": "キャラクターを選択",
         "select_skill_weapon": "スキル/武器を選択",
         "selected_count": "{{count}}個選択済み",

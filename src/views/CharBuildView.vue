@@ -188,9 +188,7 @@ const weaponAttrs = computed(() => (charBuild.value.selectedWeapon ? charBuild.v
 // 计算总伤害
 const totalDamage = computed(() => charBuild.value.calculate())
 
-function selectMod(type: string, slotIndex: number, modId: number) {
-    const mod = new LeveledMod(modId)
-    const lv = mod.等级
+function selectMod(type: string, slotIndex: number, modId: number, lv: number) {
     if (type === "角色") {
         charSettings.value.charMods[slotIndex] = [modId, lv]
     } else if (type === "近战") {
@@ -212,6 +210,28 @@ function removeMod(slotIndex: number, type: string) {
         charSettings.value.rangedMods[slotIndex] = null
     } else if (type === "同律") {
         charSettings.value.skillWeaponMods[slotIndex] = null
+    }
+    updateCharBuild()
+}
+
+// 交换MOD位置
+function swapMods(fromIndex: number, toIndex: number, type: string) {
+    if (type === "角色") {
+        const temp = charSettings.value.charMods[fromIndex]
+        charSettings.value.charMods[fromIndex] = charSettings.value.charMods[toIndex]
+        charSettings.value.charMods[toIndex] = temp
+    } else if (type === "近战") {
+        const temp = charSettings.value.meleeMods[fromIndex]
+        charSettings.value.meleeMods[fromIndex] = charSettings.value.meleeMods[toIndex]
+        charSettings.value.meleeMods[toIndex] = temp
+    } else if (type === "远程") {
+        const temp = charSettings.value.rangedMods[fromIndex]
+        charSettings.value.rangedMods[fromIndex] = charSettings.value.rangedMods[toIndex]
+        charSettings.value.rangedMods[toIndex] = temp
+    } else if (type === "同律") {
+        const temp = charSettings.value.skillWeaponMods[fromIndex]
+        charSettings.value.skillWeaponMods[fromIndex] = charSettings.value.skillWeaponMods[toIndex]
+        charSettings.value.skillWeaponMods[toIndex] = temp
     }
     updateCharBuild()
 }
@@ -438,6 +458,7 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                         </div>
                     </div>
                 </dialog>
+                <button class="btn btn-success" @click="$router.push('/char-build-compare')">{{ $t("build-compare.title") }}</button>
                 <button class="btn btn-primary" @click="saveConfig">{{ $t("char-build.save_config") }}</button>
                 <button class="btn" @click="resetConfig">{{ $t("char-build.reset_config") }}</button>
             </div>
@@ -868,11 +889,12 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                     :mod-options="modOptions.filter((m) => m.type === '角色' && (!m.limit || m.limit === charBuild.char.属性))"
                     :char-build="charBuild"
                     @remove-mod="removeMod($event, '角色')"
-                    @select-mod="selectMod('角色', $event[0], $event[1])"
+                    @select-mod="selectMod('角色', $event[0], $event[1], $event[2])"
                     @level-change="charSettings.charMods[$event[0]]![1] = $event[1]"
                     :aura-mod="charSettings.auraMod"
                     @select-aura-mod="charSettings.auraMod = $event"
                     type="角色"
+                    @swap-mods="(index1, index2) => swapMods(index1, index2, '角色')"
                 />
                 <!-- 近战武器MOD配置 -->
                 <ModEditer
@@ -888,9 +910,10 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                     "
                     :char-build="charBuild"
                     @remove-mod="removeMod($event, '近战')"
-                    @select-mod="selectMod('近战', $event[0], $event[1])"
+                    @select-mod="selectMod('近战', $event[0], $event[1], $event[2])"
                     @level-change="charSettings.meleeMods[$event[0]]![1] = $event[1]"
                     type="近战"
+                    @swap-mods="(index1, index2) => swapMods(index1, index2, '近战')"
                 />
                 <!-- 远程武器MOD配置 -->
                 <ModEditer
@@ -906,9 +929,10 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                     "
                     :char-build="charBuild"
                     @remove-mod="removeMod($event, '远程')"
-                    @select-mod="selectMod('远程', $event[0], $event[1])"
+                    @select-mod="selectMod('远程', $event[0], $event[1], $event[2])"
                     @level-change="charSettings.rangedMods[$event[0]]![1] = $event[1]"
                     type="远程"
+                    @swap-mods="(index1, index2) => swapMods(index1, index2, '远程')"
                 />
                 <!-- 同律武器MOD配置 -->
                 <ModEditer
@@ -924,9 +948,10 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                     "
                     :char-build="charBuild"
                     @remove-mod="removeMod($event, '同律')"
-                    @select-mod="selectMod('同律', $event[0], $event[1])"
+                    @select-mod="selectMod('同律', $event[0], $event[1], $event[2])"
                     @level-change="charSettings.skillWeaponMods[$event[0]]![1] = $event[1]"
                     type="同律"
+                    @swap-mods="(index1, index2) => swapMods(index1, index2, '同律')"
                 />
             </div>
 

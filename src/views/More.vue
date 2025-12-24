@@ -14,6 +14,11 @@ const items = [
         icon: "ri:hammer-line",
     },
     {
+        name: "build-compare",
+        path: "/char-build-compare",
+        icon: "ri:table-view",
+    },
+    {
         name: "inventory",
         path: "/inventory",
         icon: "ri:box-1-line",

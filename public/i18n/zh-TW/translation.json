@@ -27,6 +27,24 @@
         "rangedMods": "遠程MOD",
         "skillWeaponMods": "同律MOD"
     },
+    "build-compare": {
+        "additional_buff_list": "額外BUFF列表",
+        "additional_mod_list": "額外MOD列表",
+        "configuration": "配置",
+        "copy_config": "複製配置",
+        "create_project_first": "請先在角色構築頁面建立專案",
+        "customize_table": "選擇列",
+        "desc": "對比不同構築方案的效果",
+        "input_section": "輸入配置",
+        "no_projects_available": "沒有可用的專案",
+        "project_name": "專案名稱",
+        "remove_config": "移除配置",
+        "results": "結果",
+        "select_project_message": "請選擇一個專案",
+        "select_project_to_compare": "選擇一個專案開始對比構築",
+        "tip": "注意: 此頁面數據不會自動保存!",
+        "title": "構築對比"
+    },
     "char-build": {
         "昂扬": "昂揚",
         "暴击": "暴擊率",
@@ -92,7 +110,7 @@
         "refine": "精煉",
         "reset_config": "重設",
         "resonance_gain": "和鳴增益",
-        "save_config": "儲存配置",
+        "save_config": "保存項目",
         "select_character": "選擇角色",
         "select_skill_weapon": "選擇技能/武器",
         "selected_count": "已選 {{count}} 個",
