@@ -436,6 +436,7 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                         </div>
                     </div>
                 </dialog>
+                <button class="btn btn-success" @click="$router.push('/char-build-compare')">{{ $t("build-compare.title") }}</button>
                 <button class="btn btn-primary" @click="saveConfig">{{ $t("char-build.save_config") }}</button>
                 <button class="btn" @click="resetConfig">{{ $t("char-build.reset_config") }}</button>
             </div>

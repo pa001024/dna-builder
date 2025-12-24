@@ -27,6 +27,24 @@
         "rangedMods": "원거리 MOD",
         "skillWeaponMods": "동률 MOD"
     },
+    "build-compare": {
+        "additional_buff_list": "추가 BUFF 목록",
+        "additional_mod_list": "추가 MOD 목록",
+        "configuration": "구성",
+        "copy_config": "구성 복사",
+        "create_project_first": "먼저 캐릭터 빌드 페이지에서 프로젝트를 생성하세요",
+        "customize_table": "열 선택",
+        "desc": "다양한 건설 계획의 효과 비교",
+        "input_section": "입력 구성",
+        "no_projects_available": "사용 가능한 프로젝트가 없습니다",
+        "no_projects_message": "사용 가능한 프로젝트가 없습니다",
+        "project_name": "프로젝트 이름",
+        "remove_config": "구성 제거",
+        "results": "결과",
+        "select_project_message": "프로젝트를 선택하세요",
+        "select_project_to_compare": "빌드를 비교하기 위해 프로젝트를 선택하세요",
+        "title": "빌드 비교"
+    },
     "char-build": {
         "昂扬": "고양",
         "暴击": "치명타 확률",

@@ -3,6 +3,7 @@ import { RouteRecordRaw, createWebHashHistory, createRouter, createWebHistory } 
 import Home from "./views/Home.vue"
 import Setting from "./views/Setting.vue"
 import CharBuildView from "./views/CharBuildView.vue"
+import CharBuildCompare from "./views/CharBuildCompare.vue"
 import InventoryEdit from "./views/InventoryEdit.vue"
 import More from "./views/More.vue"
 import TimelineEditor from "./views/TimelineEditor.vue"
@@ -29,6 +30,7 @@ const routes: readonly RouteRecordRaw[] = [
     // { name: "user", path: "/user", component: User, beforeEnter: () => setMinSize(367, 430) },
     { name: "setting", path: "/setting", component: Setting, beforeEnter: () => setMinSize(540, 430) },
     { name: "char-build", path: "/char-build", component: CharBuildView, beforeEnter: () => setMinSize(600, 600) },
+    { name: "build-compare", path: "/char-build-compare", component: CharBuildCompare, beforeEnter: () => setMinSize(600, 600) },
     { name: "inventory", path: "/inventory", component: InventoryEdit, beforeEnter: () => setMinSize(600, 600) },
     { name: "timeline", path: "/timeline", component: TimelineEditor, beforeEnter: () => setMinSize(600, 600) },
     { name: "achievement", path: "/achievement", component: AchievementList, beforeEnter: () => setMinSize(600, 600) },
