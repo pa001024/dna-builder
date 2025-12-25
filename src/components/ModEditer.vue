@@ -287,6 +287,7 @@ const aMod = computed(() => {
                                         :income="charBuild.calcIncome(new LeveledMod(mod.value, mod.lv, mod.bufflv))"
                                         @click="handleSelectMod(localSelectedSlot, mod.value, mod.lv ?? 10)"
                                         :noremove="true"
+                                        :charBuild="charBuild"
                                     />
                                 </div>
                             </ScrollArea>

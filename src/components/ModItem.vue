@@ -71,7 +71,7 @@ const emit = defineEmits<{
                 :cost="mod.耐受"
                 :type="mod.types"
                 :desc="mod.效果"
-                :eff="charBuild?.checkModEffective(mod, true)"
+                :eff="charBuild?.checkModEffective(mod) || mod.getCondition()"
             >
                 <div class="w-full h-full flex items-center justify-center bg-opacity-30 rounded-lg overflow-hidden">
                     <!-- 背景 -->

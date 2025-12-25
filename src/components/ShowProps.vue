@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="tsx">
 import { formatProp } from "../util"
 withDefaults(
     defineProps<{
@@ -10,12 +10,21 @@ withDefaults(
         polarity?: "A" | "D" | "V" | "O"
         cost?: number
         type?: string
-        eff?: Record<string, any>
+        eff?: { isEffective: boolean; props?: Record<string, any> }
     }>(),
     {
         side: "top",
     },
 )
+
+const formatDesc = (desc: string) => {
+    const po = desc.match(/([DVOA])趋向/)
+    if (!po) {
+        return desc
+    }
+    const parts = desc.split(po[0])
+    return [parts[0], po[1], parts[1]]
+}
 </script>
 <template>
     <FullTooltip :side="side">
@@ -27,16 +36,31 @@ withDefaults(
                     <Icon v-if="polarity" :icon="`po-${polarity}`" />
                 </div>
                 <div
-                    v-for="[prop, val] in Object.entries({ ...props, ...eff }).filter(([_, v]) => v)"
+                    v-for="[prop, val] in Object.entries(props).filter(([_, v]) => v)"
                     :key="prop"
                     class="flex justify-between items-center gap-2 text-sm"
                 >
                     <div class="text-xs text-neutral-500">{{ prop }}</div>
                     <div class="font-medium text-primary">{{ formatProp(prop, val) }}</div>
                 </div>
+                <div
+                    v-if="eff"
+                    v-for="[prop, val] in Object.entries(eff.props!).filter(([_, v]) => v)"
+                    :key="prop"
+                    class="flex justify-between items-center gap-2 text-sm"
+                    :class="{ 'line-through': !eff.isEffective }"
+                >
+                    <div class="text-xs text-neutral-500">{{ prop }}</div>
+                    <div class="font-medium text-primary">{{ formatProp(prop, val) }}</div>
+                </div>
                 <div v-if="desc" class="text-xs text-neutral-500">
-                    {{ desc }}
-                    <div v-if="eff" class="text-xs text-success">(已生效)</div>
+                    <span v-if="/[DVOA]趋向/.test(desc)">
+                        <template v-for="(part, index) in formatDesc(desc)">
+                            <span v-if="index !== 1">{{ part }}</span>
+                            <span v-else><Icon class="inline-block mx-1" :icon="`po-${part as 'A' | 'D' | 'V' | 'O'}`" />趋向</span>
+                        </template>
+                    </span>
+                    <span v-else>{{ desc }}</span>
                 </div>
 
                 <div v-if="code" class="text-xs text-gray-400">

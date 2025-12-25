@@ -199,8 +199,8 @@ export class LeveledMod implements Mod {
         })
     }
 
-    checkCondition(attrs: CharAttr, charMods: LeveledMod[]) {
-        if (!this.生效?.条件?.length) return false
+    checkCondition(attrs: CharAttr, charMods: LeveledMod[]): { isEffective: boolean; props: Record<string, any> } | undefined {
+        if (!this.生效?.条件?.length) return undefined
         const poTable = charMods.reduce(
             (acc, mod) => {
                 acc[mod.极性] = (acc[mod.极性] || 0) + 1
@@ -208,7 +208,8 @@ export class LeveledMod implements Mod {
             },
             {} as Record<string, number>,
         )
-        const isEffective = this.生效.条件.every(([attr, op, value]: [string, string, number]) => {
+        if (this.极性) poTable[this.极性] = (poTable[this.极性] || 0) + 1
+        const isEffective: boolean = this.生效.条件.every(([attr, op, value]: [string, string, number]) => {
             const attrValue = poTable[attr.slice(0, 1)] || attrs[attr as keyof CharAttr]
             if (op === "=") return attrValue === value
             if (op === ">") return attrValue > value
@@ -217,16 +218,58 @@ export class LeveledMod implements Mod {
             if (op === "<=") return attrValue <= value
             return false
         })
-        if (!isEffective) return undefined
         const { 条件, ...rest } = this.生效
-        return rest
+        return { isEffective, props: rest }
+    }
+
+    getCondition() {
+        if (!this.生效?.条件?.length) return undefined
+        const attrs: CharAttr = {
+            攻击: 0,
+            生命: 0,
+            护盾: 0,
+            防御: 0,
+            神智: 0,
+            威力: 1,
+            耐久: 1,
+            效益: 1,
+            范围: 1,
+            昂扬: 0,
+            背水: 0,
+            增伤: 0,
+            武器伤害: 0,
+            技能伤害: 0,
+            独立增伤: 0,
+            属性穿透: 0,
+            无视防御: 0,
+            技能速度: 0,
+            失衡易伤: 0,
+            技能倍率加数: 0,
+            召唤物攻击速度: 0,
+            召唤物范围: 0,
+            减伤: 0,
+        }
+        Object.keys(this.getProperties()).forEach((prop) => {
+            if (prop in attrs) attrs[prop as keyof CharAttr] += this[prop]
+        })
+        const isEffective: boolean = this.生效.条件.every(([attr, op, value]: [string, string, number]) => {
+            const attrValue = attrs[attr as keyof CharAttr]
+            if (op === "=") return attrValue === value
+            if (op === ">") return attrValue > value
+            if (op === ">=") return attrValue >= value
+            if (op === "<") return attrValue < value
+            if (op === "<=") return attrValue <= value
+            return false
+        })
+        const { 条件, ...rest } = this.生效
+        return { isEffective, props: rest }
     }
 
     applyCondition(attrs: CharAttr, charMods: LeveledMod[]): CharAttr {
         const condition = this.checkCondition(attrs, charMods)
-        if (!condition) return attrs
-        Object.keys(condition).forEach((key) => {
-            attrs[key as keyof CharAttr] += condition[key]
+        if (!condition || !condition.isEffective) return attrs
+        Object.keys(condition.props).forEach((key) => {
+            attrs[key as keyof CharAttr] += condition.props[key]
         })
         return attrs
     }

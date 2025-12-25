@@ -421,7 +421,7 @@ export class CharBuild {
 
     public applyCondition(attrs: CharAttr, mods: LeveledMod[]) {
         mods.forEach((mod) => {
-            attrs = mod.applyCondition(attrs, this.charModsWithAura)
+            attrs = mod.applyCondition(attrs, this.charMods)
         })
         return attrs
     }
@@ -997,9 +997,9 @@ export class CharBuild {
         return index >= 0 ? ["E", "Q", ""][index] : ""
     }
 
-    public checkModEffective(mod: LeveledMod, includeSelf = false) {
+    public checkModEffective(mod: LeveledMod, includeSelf = true) {
         if (!mod.生效?.条件) return undefined
-        const attrs = this.calculateAttributes(includeSelf ? undefined : mod)
+        const attrs = this.calculateAttributes(includeSelf ? mod : undefined)
         return mod.checkCondition(attrs, this.charMods)
     }
 
