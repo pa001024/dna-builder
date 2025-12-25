@@ -49,6 +49,10 @@ export interface WeaponAttr {
     多重: number
     /** 增伤 0开始 */
     增伤: number
+    /** 装填时间 基于武器基础值 */
+    装填: number
+    /** 弹匣容量 基于武器基础值 */
+    弹匣: number
     /** 独立增伤 0开始 */
     独立增伤: number
     /** 追加伤害 0开始 */
@@ -448,6 +452,8 @@ export class CharBuild {
             let attackSpeedBonus = this.getTotalBonus(`${prefix}攻速`, prefix) + this.getTotalBonus(`攻速`, prefix)
             let multiShotBonus = this.getTotalBonus(`${prefix}多重`, prefix) + this.getTotalBonus(`多重`, prefix)
             let damageIncrease = this.getTotalBonus(`${prefix}增伤`, prefix) + this.getTotalBonus(`增伤`, prefix)
+            let reloadTimeBonus = this.getTotalBonus(`${prefix}装填`, prefix) + this.getTotalBonus(`装填`, prefix)
+            let magazineBonus = this.getTotalBonus(`${prefix}弹匣`, prefix) + this.getTotalBonus(`弹匣`, prefix)
             let additionalDamage = this.getTotalBonus("追加伤害")
             let independentDamageIncrease =
                 (1 + this.getTotalBonus(`${prefix}增伤`, prefix)) * (1 + this.getTotalBonusMul("独立增伤", prefix)) - 1
@@ -480,6 +486,10 @@ export class CharBuild {
                         this.getTotalBonusSingle(props, `${prefix}多重`, prefix) + this.getTotalBonusSingle(props, `多重`, prefix)
                     damageIncrease -=
                         this.getTotalBonusSingle(props, `${prefix}增伤`, prefix) + this.getTotalBonusSingle(props, `增伤`, prefix)
+                    reloadTimeBonus -=
+                        this.getTotalBonusSingle(props, `${prefix}装填`, prefix) + this.getTotalBonusSingle(props, `装填`, prefix)
+                    magazineBonus -=
+                        this.getTotalBonusSingle(props, `${prefix}弹匣`, prefix) + this.getTotalBonusSingle(props, `弹匣`, prefix)
                     additionalDamage -= this.getTotalBonusSingle(props, `追加伤害`, prefix)
                     independentDamageIncrease =
                         (1 + independentDamageIncrease) / (1 + this.getTotalBonusSingle(props, "独立增伤", prefix)) - 1
@@ -510,6 +520,10 @@ export class CharBuild {
                         this.getTotalBonusSingle(props, `${prefix}多重`, prefix) + this.getTotalBonusSingle(props, `多重`, prefix)
                     damageIncrease +=
                         this.getTotalBonusSingle(props, `${prefix}增伤`, prefix) + this.getTotalBonusSingle(props, `增伤`, prefix)
+                    reloadTimeBonus +=
+                        this.getTotalBonusSingle(props, `${prefix}装填`, prefix) + this.getTotalBonusSingle(props, `装填`, prefix)
+                    magazineBonus +=
+                        this.getTotalBonusSingle(props, `${prefix}弹匣`, prefix) + this.getTotalBonusSingle(props, `弹匣`, prefix)
                     additionalDamage += this.getTotalBonusSingle(props, `追加伤害`, prefix)
                     independentDamageIncrease =
                         (1 + independentDamageIncrease) * (1 + this.getTotalBonusSingle(props, "独立增伤", prefix)) - 1
@@ -533,6 +547,9 @@ export class CharBuild {
             let critDamage = weapon.基础暴伤 * (1 + critDamageBonus)
             let triggerRate = weapon.基础触发 * (1 + triggerRateBonus)
             let attackSpeed = (weapon.射速 || 1) * (1 + attackSpeedBonus)
+            let reloadTime = (weapon.基础装填 || 0) / (1 + reloadTimeBonus)
+            let magazine = (weapon.基础弹匣 || 0) * (1 + magazineBonus)
+
             let multiShot = 1 + multiShotBonus
 
             // 应用武器物理加成
@@ -560,6 +577,8 @@ export class CharBuild {
                 增伤: damageIncrease,
                 独立增伤: independentDamageIncrease,
                 追加伤害: additionalDamage,
+                装填: reloadTime,
+                弹匣: magazine,
             }
             attrs.weapon = weaponAttrs
         }
@@ -979,7 +998,7 @@ export class CharBuild {
     }
 
     public checkModEffective(mod: LeveledMod, includeSelf = false) {
-        if (!mod.生效?.条件) return false
+        if (!mod.生效?.条件) return undefined
         const attrs = this.calculateAttributes(includeSelf ? undefined : mod)
         return mod.checkCondition(attrs, this.charMods)
     }
@@ -1067,10 +1086,20 @@ export class CharBuild {
             if (summon) {
                 const newAttr = build.calculateWeaponAttributes(props, minus, build.meleeWeapon)
                 const summonAttrs = this.selectedSkill.getFieldsWithAttr(newAttr)
-                const duration = summonAttrs.find((a) => a.名称 === "召唤物持续时间")?.值 || 0
+                const duration = Math.min(summonAttrs.find((a) => a.名称 === "召唤物持续时间")?.值 || 0, i.duration)
                 const delay = summonAttrs.find((a) => a.名称 === "召唤物攻击延迟")?.值 || 0
                 const interval = summonAttrs.find((a) => a.名称 === "召唤物攻击间隔")?.值 || 0
                 const attackTimes = Math.floor((duration - delay) / interval)
+                totalDamage *= attackTimes
+            }
+            if (attrs.weapon && this.selectedWeapon?.射速) {
+                const reloadTime = attrs.weapon.装填 || 0
+                const magazine = attrs.weapon.弹匣 || 1e11
+                const attackSpeed = attrs.weapon.攻速 || 1
+                const attackTime = magazine / attackSpeed
+                // 攻击时间占比 = 攻击时间 / (攻击时间 + 装填时间)
+                const atPercent = attackTime / (attackTime + reloadTime)
+                const attackTimes = Math.floor(i.duration * atPercent * attackSpeed)
                 totalDamage *= attackTimes
             }
         })
@@ -1089,7 +1118,6 @@ export class CharBuild {
      */
     public calcIncome(props?: LeveledWeapon | LeveledMod | LeveledBuff, minus = false): number {
         if (minus) {
-            console.log(this.baseName, this.calculate(), this.calculate(props, minus))
             return this.calculate() / this.calculate(props, minus) - 1
         } else {
             return this.calculate(props, minus) / this.calculate() - 1

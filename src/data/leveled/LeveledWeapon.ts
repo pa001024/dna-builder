@@ -23,6 +23,8 @@ export class LeveledWeapon implements Weapon {
     倍率 = 1
     弹片数?: number
     射速?: number
+    基础装填?: number
+    基础弹匣?: number
     段数?: number
     private _倍率名称?: string
 
@@ -93,6 +95,7 @@ export class LeveledWeapon implements Weapon {
         // 初始化倍率相关属性为undefined
         this.弹片数 = undefined
         this.射速 = undefined
+        this.基础装填 = weaponData.装填 || 0
         this.段数 = 1
         this._倍率名称 = undefined
 
@@ -225,7 +228,7 @@ export class LeveledWeapon implements Weapon {
             this.倍率 = matchedBase.倍率
             this.弹片数 = matchedBase.弹片数
             this.射速 = matchedBase.射速
-            this.段数 = matchedBase.段数
+            this.段数 = matchedBase.段数 || 1
         } else {
             // console.warn(`未找到武器 "${this.名称}" 对应类型 "${this.类别}" 下的倍率名称 "${倍率名称}" 的base数据`)
             this.倍率 = 0

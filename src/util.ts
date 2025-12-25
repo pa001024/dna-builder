@@ -26,6 +26,10 @@ const numKeys = new Set([
     "异常数量",
     "神智消耗",
     "最大耐受",
+    "基础装填",
+    "基础弹匣",
+    "装填",
+    "弹匣",
     "连击持续时间",
 ])
 export function formatProp(prop: string, val: any): string {
