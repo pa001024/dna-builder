@@ -528,7 +528,7 @@ export class CharBuild {
             let critRate = weapon.基础暴击 * (1 + critRateBonus)
             let critDamage = weapon.基础暴伤 * (1 + critDamageBonus)
             let triggerRate = weapon.基础触发 * (1 + triggerRateBonus)
-            let attackSpeed = 1 + attackSpeedBonus
+            let attackSpeed = (weapon.射速 || 1) * (1 + attackSpeedBonus)
             let multiShot = 1 + multiShotBonus
 
             // 应用武器物理加成
@@ -877,17 +877,17 @@ export class CharBuild {
 
         // 计算每秒伤害(DPS)
         let dps = damage.expectedDamage
-        let dpb = damage.expectedDamage
+        let dpb = damage.expectedDamage / (this.selectedWeapon?.弹片数 || 1)
         let weapon = this.selectedWeapon
         let skill = this.selectedSkill
         if (weapon && attrs.weapon) {
             const weaponAttrs = attrs.weapon
-            dps = dpa = dpa * weaponAttrs.多重
+            dps = dpa = dpa * (weaponAttrs.多重 || 1)
             if (!this.timeline) dps = dpa * weaponAttrs.攻速
             dpb = dpb / (1 + weaponAttrs.追加伤害)
             // 非弹道武器多重直接加伤害
             if (weapon.弹道类型 === "非弹道") {
-                dpb *= weaponAttrs.多重
+                dpb *= weaponAttrs.多重 || 1
             }
         } else if (skill) {
             if (!this.timeline) {

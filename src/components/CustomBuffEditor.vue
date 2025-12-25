@@ -80,7 +80,7 @@ const emit = defineEmits<{
 // 本地状态
 const newBuff = reactive({
     property: "",
-    value: 0,
+    value: "",
 })
 const errors = ref({
     property: "",
@@ -100,7 +100,7 @@ const validateForm = (): boolean => {
     }
 
     // 验证数值输入
-    if (isNaN(newBuff.value) || newBuff.value === 0) {
+    if (isNaN(+newBuff.value) || +newBuff.value === 0) {
         errors.value.value = "请输入一个非零数值"
         isValid = false
     } else {
@@ -117,19 +117,19 @@ const addBuff = () => {
         const existingIndex = customBuff.value.findIndex((buff) => buff[0] === newBuff.property)
         if (existingIndex !== -1) {
             // 如果存在，更新数值
-            customBuff.value[existingIndex][1] += newBuff.value
+            customBuff.value[existingIndex][1] += +newBuff.value
         } else {
             // 如果不存在，添加新buff
-            customBuff.value.push([newBuff.property, newBuff.value])
+            customBuff.value.push([newBuff.property, +newBuff.value])
         }
 
         // 重置表单
         newBuff.property = ""
-        newBuff.value = 0
+        newBuff.value = ""
 
         // 触发事件
         writeCustomBuff()
-        emit("add", [newBuff.property, newBuff.value])
+        emit("add", [newBuff.property, +newBuff.value])
         emit("submit", customBuff.value)
     }
 }
@@ -140,12 +140,6 @@ const removeBuff = (index: number) => {
     writeCustomBuff()
     emit("remove", index)
     emit("submit", customBuff.value)
-}
-
-// 处理数值输入变化
-const handleValueChange = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    newBuff.value = parseFloat(target.value) || 0
 }
 </script>
 
@@ -168,14 +162,7 @@ const handleValueChange = (event: Event) => {
 
             <div class="flex-1">
                 <div class="text-xs text-gray-400 mb-1">数值</div>
-                <input
-                    type="number"
-                    step="0.01"
-                    v-model.number="newBuff.value"
-                    @input="handleValueChange"
-                    class="input input-bordered w-full"
-                    placeholder="请输入数值"
-                />
+                <input type="number" step="0.01" v-model="newBuff.value" class="input input-bordered w-full" placeholder="请输入数值" />
                 <div v-if="errors.value" class="text-xs text-error mt-1">{{ errors.value }}</div>
             </div>
 

@@ -1223,10 +1223,15 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                                         v-for="[key, val] in Object.entries(weaponAttrs).filter(([_, v]) => v)"
                                     >
                                         <div class="text-gray-400 text-xs mb-1">
-                                            {{ key === "attack" ? charBuild.selectedWeapon.伤害类型 : "" }}{{ $t(`char-build.${key}`) }}
+                                            {{ key === "攻击" ? charBuild.selectedWeapon.伤害类型 : "" }}{{ $t(`char-build.${key}`) }}
                                         </div>
                                         <div class="text-secondary font-bold text-sm font-orbitron">
-                                            {{ ["attack", "attackSpeed", "multiShot"].includes(key) ? val : `${+(val * 100).toFixed(2)}%` }}
+                                            {{ ["攻击", "攻速", "多重"].includes(key) ? val : `${+(val * 100).toFixed(2)}%` }}
+                                            {{
+                                                key === "多重" && (charBuild.selectedWeapon?.弹片数 || 1) > 1
+                                                    ? ` * ${charBuild.selectedWeapon.弹片数! * val}`
+                                                    : ""
+                                            }}
                                         </div>
                                     </div>
                                 </div>

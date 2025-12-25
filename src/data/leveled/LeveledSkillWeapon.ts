@@ -28,7 +28,7 @@ export class LeveledSkillWeapon implements Weapon {
     private _技能等级: number = 10 // 武器技能等级，默认10级
     // 原始武器对象
     private _originalWeaponData: Weapon
-    // 精炼等级上限（目前武器精炼等级上限固定为5）
+    // 技能等级上限
     private _maxSkillLevel: number = 12
     // 武器等级对应的基础攻击倍数（1,10,20,30,40,50,60,70,80级）
     private static _levelAttackMultipliers: number[] = [
@@ -164,8 +164,8 @@ export class LeveledSkillWeapon implements Weapon {
             const lv1 = matchedBases.find((base) => base.等级 === 1)
             const lv10 = matchedBases.find((base) => base.等级 === 10)
             if (lv1 && lv10) {
-                const ratio = (lv10.倍率 / lv1.倍率 - 1) / 9
-                const finalValue = lv10.倍率 / (1 + ratio * (10 - this._技能等级))
+                const ratio = (lv10.倍率 - lv1.倍率) / 9
+                const finalValue = lv1.倍率 + ratio * (this._技能等级 - 1)
                 matchedBase = {
                     ...lv10,
                     倍率: finalValue,
