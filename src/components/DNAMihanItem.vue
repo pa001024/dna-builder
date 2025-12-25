@@ -11,7 +11,7 @@ defineProps<{
 <template>
     <div class="grid grid-cols-3">
         <div v-for="(item, missionId) in missions" :key="missionId" class="flex flex-col justify-start items-center p-2">
-            <div class="bg-base-100 rounded-xl p-2 py-4 w-full flex flex-col justify-center items-center gap-2">
+            <div class="bg-base-100 rounded-xl p-2 py-4 w-full h-64 flex flex-col justify-start items-center gap-2">
                 <div class="flex flex-col justify-center items-center gap-2">
                     <img
                         class="size-12"
