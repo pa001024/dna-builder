@@ -1,5 +1,5 @@
 import { uniq } from "lodash-es"
-import { baseMap, effectMap, LeveledBuff, weaponMap } from "."
+import { baseMap, CommonLevelUp, effectMap, LeveledBuff, weaponMap } from "."
 import { Weapon, WeaponBase } from "../data-types"
 
 /**
@@ -35,10 +35,6 @@ export class LeveledWeapon implements Weapon {
     private _originalWeaponData: Weapon
     // 精炼等级上限（目前武器精炼等级上限固定为5）
     private static _maxRefineLevel: number = 5
-    // 武器等级对应的基础攻击倍数（1,10,20,30,40,50,60,70,80级）
-    private static _levelAttackMultipliers: number[] = [
-        0.079666848, 0.206300923, 0.302118414, 0.413724425, 0.529132718, 0.682636248, 0.813579576, 1,
-    ]
 
     static get emptyWeapon(): LeveledWeapon {
         return new LeveledWeapon({
@@ -246,10 +242,8 @@ export class LeveledWeapon implements Weapon {
         this.基础攻击 = this._originalWeaponData.基础攻击
 
         // 根据武器等级调整基础攻击
-        // 1,10,20,30,40,50,60,70,80级对应的倍数
-        const levelIndex = Math.min(Math.floor((this._等级 - 1) / 10), 7)
-        const levelMultiplier = LeveledWeapon._levelAttackMultipliers[levelIndex]
-        this.基础攻击 *= levelMultiplier
+        const clampedLevel = Math.max(1, Math.min(80, this._等级))
+        this.基础攻击 *= CommonLevelUp[clampedLevel - 1] / CommonLevelUp.at(-1)!
 
         // 根据精炼等级调整属性
 

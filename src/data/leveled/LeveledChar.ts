@@ -1,4 +1,4 @@
-import { charMap, LeveledSkill } from "."
+import { charMap, CommonLevelUp, LeveledSkill } from "."
 import { Char } from "../data-types"
 
 /**
@@ -102,18 +102,6 @@ export class LeveledChar implements Char {
         }
     }
 
-    // 根据AI.md中的等级公式，不同等级对应的80级属性倍数
-    private static levelMultipliers: Record<number, number> = {
-        1: 0.079666848,
-        10: 0.206300923,
-        20: 0.302118414,
-        30: 0.413724425,
-        40: 0.529132718,
-        50: 0.682636248,
-        60: 0.813579576,
-        70: 0.894757631, // 假设70级是80级的0.894757631倍（根据插值计算）
-        80: 1,
-    }
     /**
      * 根据等级更新角色属性
      * @param level 角色等级
@@ -122,31 +110,10 @@ export class LeveledChar implements Char {
         // 确保等级在1-80之间
         const clampedLevel = Math.max(1, Math.min(80, level))
 
-        // 找到当前等级对应的倍数，如果没有精确匹配则线性插值
-        let multiplier: number
-        if (LeveledChar.levelMultipliers[clampedLevel] !== undefined) {
-            multiplier = LeveledChar.levelMultipliers[clampedLevel]
-        } else {
-            // 找到当前等级的前后两个关键点
-            const sortedLevels = Object.keys(LeveledChar.levelMultipliers)
-                .map(Number)
-                .sort((a, b) => a - b)
-            let lowerLevel = 1
-            let upperLevel = 80
+        // 找到当前等级对应的倍数
+        let multiplier = CommonLevelUp[clampedLevel - 1] / CommonLevelUp.at(-1)!
 
-            for (const l of sortedLevels) {
-                if (l < clampedLevel && l > lowerLevel) lowerLevel = l
-                if (l > clampedLevel && l < upperLevel) upperLevel = l
-            }
-
-            // 线性插值计算倍数
-            const lowerMultiplier = LeveledChar.levelMultipliers[lowerLevel]
-            const upperMultiplier = LeveledChar.levelMultipliers[upperLevel]
-            const ratio = (clampedLevel - lowerLevel) / (upperLevel - lowerLevel)
-            multiplier = lowerMultiplier + (upperMultiplier - lowerMultiplier) * ratio
-        }
-
-        // 更新属性（根据AI.md，基础神智不受等级影响）
+        // 更新属性（基础神智不受等级影响）
         this.基础攻击 = Math.round(this._base80Attack * multiplier)
         this.基础生命 = Math.round(this._base80Life * multiplier)
         this.基础护盾 = Math.round(this._base80Shield * multiplier)
