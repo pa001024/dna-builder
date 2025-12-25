@@ -1270,7 +1270,11 @@ export class CharBuild {
                 )
                 .map((v) => ({ mod: v, income: localBuild.calcIncome(v) }))
             if (mapped.length === 0) return { mod: null, income: 0 }
-            return mapped.reduce((a, b) => (b.income > a.income ? b : a))
+            mapped.sort((a, b) => b.income - a.income)
+            const firstIncome = mapped[0].income
+            const lastSameIncome = mapped.findLastIndex((v) => v.income === firstIncome)
+            // 从相同收益中随机选择一个
+            return mapped[Math.floor(Math.random() * (lastSameIncome + 1))]
         }
         function findMaxMelee() {
             const tempBuild = localBuild.clone()
