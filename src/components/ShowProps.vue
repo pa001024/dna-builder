@@ -10,7 +10,7 @@ withDefaults(
         polarity?: "A" | "D" | "V" | "O"
         cost?: number
         type?: string
-        eff?: boolean
+        eff?: Record<string, any>
     }>(),
     {
         side: "top",
@@ -27,7 +27,7 @@ withDefaults(
                     <Icon v-if="polarity" :icon="`po-${polarity}`" />
                 </div>
                 <div
-                    v-for="[prop, val] in Object.entries(props).filter(([_, v]) => v)"
+                    v-for="[prop, val] in Object.entries({ ...props, ...eff }).filter(([_, v]) => v)"
                     :key="prop"
                     class="flex justify-between items-center gap-2 text-sm"
                 >

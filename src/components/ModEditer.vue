@@ -221,6 +221,8 @@ const aMod = computed(() => {
                     :polarity="aMod.极性"
                     :cost="aMod.耐受"
                     :type="`${aMod.类型}${aMod.属性 ? `,${aMod.属性}属性` : ''}${aMod.限定 ? `,${aMod.限定}` : ''}`"
+                    :desc="aMod.效果"
+                    :eff="charBuild?.checkModEffective(aMod, true)"
                 >
                     <Select
                         class="w-30 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"

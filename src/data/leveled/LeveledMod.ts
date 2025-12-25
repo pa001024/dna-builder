@@ -199,10 +199,17 @@ export class LeveledMod implements Mod {
         })
     }
 
-    checkCondition(attrs: CharAttr) {
+    checkCondition(attrs: CharAttr, charMods: LeveledMod[]) {
         if (!this.生效?.条件?.length) return false
+        const poTable = charMods.reduce(
+            (acc, mod) => {
+                acc[mod.极性] = (acc[mod.极性] || 0) + 1
+                return acc
+            },
+            {} as Record<string, number>,
+        )
         const isEffective = this.生效.条件.every(([attr, op, value]: [string, string, number]) => {
-            const attrValue = attrs[attr as keyof CharAttr]
+            const attrValue = poTable[attr.slice(0, 1)] || attrs[attr as keyof CharAttr]
             if (op === "=") return attrValue === value
             if (op === ">") return attrValue > value
             if (op === ">=") return attrValue >= value
@@ -210,14 +217,16 @@ export class LeveledMod implements Mod {
             if (op === "<=") return attrValue <= value
             return false
         })
-        return isEffective
+        if (!isEffective) return undefined
+        const { 条件, ...rest } = this.生效
+        return rest
     }
 
-    applyCondition(attrs: CharAttr): CharAttr {
-        if (!this.checkCondition(attrs)) return attrs
-        const keys = Object.keys(this.生效).filter((v) => v !== "条件")
-        keys.forEach((key) => {
-            attrs[key as keyof CharAttr] += this.生效[key]
+    applyCondition(attrs: CharAttr, charMods: LeveledMod[]): CharAttr {
+        const condition = this.checkCondition(attrs, charMods)
+        if (!condition) return attrs
+        Object.keys(condition).forEach((key) => {
+            attrs[key as keyof CharAttr] += condition[key]
         })
         return attrs
     }

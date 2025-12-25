@@ -158,6 +158,10 @@ export class CharBuild {
     public skillWeapon?: LeveledSkillWeapon
     public timeline?: CharBuildTimeline
 
+    get charModsWithAura() {
+        return this.auraMod ? [this.auraMod!, ...this.charMods] : this.charMods
+    }
+
     // 敌方类型系数表
     private enemyTypeCoefficients: Record<string, number> = {
         小型: 13,
@@ -392,7 +396,7 @@ export class CharBuild {
         // 应用MOD条件
         attrs = this.applyCondition(
             attrs,
-            this.charMods.filter((mod) => mod.生效?.条件),
+            this.charModsWithAura.filter((mod) => mod.生效?.条件),
         )
         if (nocode) return attrs
         if (this.dynamicBuffs.length > 0 || (!minus && props?.code)) {
@@ -413,7 +417,7 @@ export class CharBuild {
 
     public applyCondition(attrs: CharAttr, mods: LeveledMod[]) {
         mods.forEach((mod) => {
-            attrs = mod.applyCondition(attrs)
+            attrs = mod.applyCondition(attrs, this.charModsWithAura)
         })
         return attrs
     }
@@ -974,10 +978,10 @@ export class CharBuild {
         return index >= 0 ? ["E", "Q", ""][index] : ""
     }
 
-    public isModEffective(mod: LeveledMod, includeSelf = false) {
+    public checkModEffective(mod: LeveledMod, includeSelf = false) {
         if (!mod.生效?.条件) return false
         const attrs = this.calculateAttributes(includeSelf ? undefined : mod)
-        return mod.checkCondition(attrs)
+        return mod.checkCondition(attrs, this.charMods)
     }
 
     get isMeleeWeapon() {
@@ -1085,6 +1089,7 @@ export class CharBuild {
      */
     public calcIncome(props?: LeveledWeapon | LeveledMod | LeveledBuff, minus = false): number {
         if (minus) {
+            console.log(this.baseName, this.calculate(), this.calculate(props, minus))
             return this.calculate() / this.calculate(props, minus) - 1
         } else {
             return this.calculate(props, minus) / this.calculate() - 1
@@ -1280,7 +1285,7 @@ export class CharBuild {
         function next(iter: number) {
             let changed = false
             // 最大化武器
-            if (!fixedMelee) {
+            if (!fixedMelee && !initBuild.isMeleeWeapon) {
                 const maxed = findMaxMelee()
                 if (maxed.名称 !== localBuild.meleeWeapon.名称) {
                     const oldName = localBuild.meleeWeapon.名称
@@ -1292,7 +1297,7 @@ export class CharBuild {
                     changed = true
                 }
             }
-            if (!fixedRanged) {
+            if (!fixedRanged && !initBuild.isRangedWeapon) {
                 const maxed = findMaxRanged()
                 if (maxed.名称 !== localBuild.rangedWeapon.名称) {
                     const oldName = localBuild.rangedWeapon.名称
