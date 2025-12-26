@@ -284,7 +284,7 @@ const saveConfig = () => {
 
 const resetConfig = () => {
     charSettings.value.hpPercent = 1
-    charSettings.value.resonanceGain = 2
+    charSettings.value.resonanceGain = 3
     charSettings.value.enemyType = "small"
     charSettings.value.enemyLevel = 80
     charSettings.value.enemyResistance = 0
@@ -1164,7 +1164,12 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                                 </div>
                             </div>
                             <div>
-                                <h4 class="text-xl font-bold mb-4 text-base-content/80">{{ $t("char-build.char_attributes") }}</h4>
+                                <h4 class="text-xl font-bold mb-4 text-base-content/80">
+                                    {{ $t("char-build.char_attributes") }}
+                                    <span class="text-sm text-gray-400"
+                                        >{{ $t("char-build.resonance_gain") }} {{ charSettings.resonanceGain * 100 }}%</span
+                                    >
+                                </h4>
                                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
                                     <div
                                         class="col-span-2 bg-base-300/60 bg-linear-to-r from-primary/1 to-primary/5 backdrop-blur-sm rounded-xl p-2 border border-primary/30"

@@ -6,7 +6,7 @@ export const useCharSettings = (charNameRef: Ref<string>) => {
         charLevel: 80,
         baseName: "",
         hpPercent: 1,
-        resonanceGain: 0,
+        resonanceGain: 3,
         enemyType: "small",
         enemyLevel: 80,
         enemyResistance: 0,

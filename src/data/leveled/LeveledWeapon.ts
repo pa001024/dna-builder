@@ -313,6 +313,8 @@ export class LeveledWeapon implements Weapon {
         "基础暴击",
         "基础暴伤",
         "基础触发",
+        "基础装填",
+        "基础弹匣",
         "倍率",
         "弹片数",
         "弹道类型",

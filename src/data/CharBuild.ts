@@ -1245,7 +1245,7 @@ export class CharBuild {
         function addMod(key: ModTypeKey, mod: LeveledMod) {
             localBuild[key].push(mod)
             // 记录互斥系列
-            if (CharBuild.indepSeries.includes(mod.系列)) {
+            if (CharBuild.exclusiveSeries.includes(mod.系列)) {
                 selectedExclusiveSeries[key].add(mod.系列)
             }
             // 记录非契约者MOD名称（用于名称互斥）
@@ -1259,7 +1259,7 @@ export class CharBuild {
             const mod = localBuild[key][index]
             localBuild[key].splice(index, 1)
             // 从互斥系列集合中移除
-            if (CharBuild.indepSeries.includes(mod.系列)) {
+            if (CharBuild.exclusiveSeries.includes(mod.系列)) {
                 selectedExclusiveSeries[key].delete(mod.系列)
             }
             // 从非契约者MOD名称集合中移除
