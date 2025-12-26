@@ -77,7 +77,7 @@ onMounted(async () => {
 
 <template>
     <div class="h-full flex flex-col">
-        <ScrollArea class="h-full overflow-hidden">
+        <ScrollArea class="h-full">
             <div class="hero bg-base-200 min-h-72 relative bg-linear-to-br from-purple-500/30 via-gray-500/30 to-blue-500/30">
                 <!-- 网格线 -->
                 <div class="absolute inset-0 opacity-20">

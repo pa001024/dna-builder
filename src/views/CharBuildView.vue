@@ -440,7 +440,7 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                         {{ project.name }}
                     </SelectItem>
                 </Select>
-                <button class="btn btn-secondary" @click="openAutoBuild">自动构筑</button>
+                <button class="btn btn-sm btn-secondary" @click="openAutoBuild">自动构筑</button>
                 <dialog id="autobuild_model" class="modal" @close="autobuild_model_show = false">
                     <div class="modal-box bg-base-300 w-5/6 max-w-5xl">
                         <div class="mb-6">
@@ -458,9 +458,9 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                         </div>
                     </div>
                 </dialog>
-                <button class="btn btn-success" @click="$router.push('/char-build-compare')">{{ $t("build-compare.title") }}</button>
-                <button class="btn btn-primary" @click="saveConfig">{{ $t("char-build.save_config") }}</button>
-                <button class="btn" @click="resetConfig">{{ $t("char-build.reset_config") }}</button>
+                <button class="btn btn-sm btn-success" @click="$router.push('/char-build-compare')">{{ $t("build-compare.title") }}</button>
+                <button class="btn btn-sm btn-primary" @click="saveConfig">{{ $t("char-build.save_config") }}</button>
+                <button class="btn btn-sm" @click="resetConfig">{{ $t("char-build.reset_config") }}</button>
             </div>
 
             <!-- 基本设置 -->

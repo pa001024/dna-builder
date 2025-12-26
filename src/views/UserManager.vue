@@ -128,7 +128,7 @@ onBeforeUnmount(() => {
         <!-- 用户列表卡片 -->
         <div class="flex-1 flex card bg-base-200 shadow-lg rounded-xl overflow-hidden">
             <!-- 卡片内容 -->
-            <ScrollArea class="card-body p-0 h-full flex overflow-y-auto overflow-x-hidden">
+            <ScrollArea class="card-body p-0 h-full flex">
                 <!-- 表格 -->
                 <table class="table w-full">
                     <!-- 表头 -->

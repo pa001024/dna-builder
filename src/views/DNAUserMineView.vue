@@ -75,7 +75,7 @@ async function loadPosts(page = 1) {
         </div>
 
         <!-- 内容区域 -->
-        <ScrollArea @loadref="(r) => (scrollContainer = r)" class="flex-1 overflow-hidden overflow-y-auto p-4">
+        <ScrollArea @loadref="(r) => (scrollContainer = r)" class="flex-1 p-4">
             <div v-if="postList.length > 0" class="space-y-4">
                 <!-- 帖子卡片 -->
                 <DNAPostListView v-for="post in postList" :key="post.postId" />

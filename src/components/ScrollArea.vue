@@ -21,7 +21,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <ScrollAreaRoot v-bind="$attrs" style="--scrollbar-size: 10px">
+    <ScrollAreaRoot class="overflow-hidden" v-bind="$attrs" style="--scrollbar-size: 10px">
         <ScrollAreaViewport class="w-full h-full focus-visible:outline-none" ref="rootRef">
             <slot></slot>
         </ScrollAreaViewport>

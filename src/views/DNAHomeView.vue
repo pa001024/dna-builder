@@ -167,7 +167,7 @@ async function syncInventory() {
             </div>
         </div>
         <!-- 内容区域 -->
-        <ScrollArea v-if="activeTab === '公告'" class="flex-1 overflow-hidden overflow-y-auto p-4">
+        <ScrollArea v-if="activeTab === '公告'" class="flex-1 p-4">
             <div v-if="loading" class="flex justify-center items-center h-full py-8">
                 <span class="loading loading-spinner loading-lg"></span>
             </div>
@@ -180,7 +180,7 @@ async function syncInventory() {
                 </div>
             </div>
         </ScrollArea>
-        <ScrollArea v-if="activeTab === '游戏信息'" class="flex-1 overflow-hidden overflow-y-auto p-4">
+        <ScrollArea v-if="activeTab === '游戏信息'" class="flex-1 p-4">
             <div v-if="loading" class="flex justify-center items-center h-full py-8">
                 <span class="loading loading-spinner loading-lg"></span>
             </div>
@@ -421,7 +421,7 @@ async function syncInventory() {
                 </div>
             </div>
         </ScrollArea>
-        <ScrollArea v-if="activeTab === '论坛'" class="flex-1 overflow-hidden overflow-y-auto p-4">
+        <ScrollArea v-if="activeTab === '论坛'" class="flex-1 p-4">
             <div v-if="loading" class="flex justify-center items-center h-full">
                 <span class="loading loading-spinner loading-lg"></span>
             </div>

@@ -79,7 +79,6 @@ const filteredAchievements = computed(() => {
         const categoryMatch = !selectedCategory.value || achievement.分类 === selectedCategory.value
         // 版本筛选
         const versionMatch = selectedVersion.value === "所有版本" || achievement.版本 === selectedVersion.value
-
         // 搜索筛选
         const searchMatch = achievement.名称.toLowerCase().includes(query) || achievement.描述.toLowerCase().includes(query)
         // 已完成筛选
@@ -248,8 +247,8 @@ watch(
         <!-- 主内容区 -->
         <div class="flex flex-1 overflow-hidden">
             <!-- 左侧分类区 -->
-            <div class="w-64 border-r border-base-200 shrink-0 flex flex-col h-screen bg-base-100">
-                <div class="flex-1 overflow-y-auto p-2">
+            <div class="w-64 border-r border-base-200 shrink-0 flex flex-col h-full bg-base-100">
+                <ScrollArea class="flex-1 p-2">
                     <!-- 全部分类选项 -->
                     <div>
                         <div
@@ -279,13 +278,13 @@ watch(
                             </span>
                         </div>
                     </div>
-                </div>
+                </ScrollArea>
             </div>
 
             <!-- 右侧成就列表 -->
-            <div class="flex-1 overflow-y-auto p-4 bg-base-300">
+            <div class="flex-1 flex flex-col overflow-hidden bg-base-300">
                 <!-- 筛选, 搜索区域 -->
-                <div class="bg-base-100 rounded-lg border border-base-200 p-4 mb-4 shadow-sm flex gap-4">
+                <div class="bg-base-100 rounded-lg border border-base-200 p-4 m-4 shadow-sm flex gap-4">
                     <Select
                         class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
                         v-model="selectedVersion"
@@ -315,50 +314,51 @@ watch(
                         :placeholder="$t('achievement.searchAchievements')"
                     />
                 </div>
-
-                <!-- 成就列表卡片 -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
-                    <div
-                        v-for="achievement in filteredAchievements"
-                        :key="achievement.id"
-                        class="bg-base-100 rounded-lg border border-base-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
-                    >
-                        <div class="p-4">
-                            <div class="flex justify-between items-start mb-3">
-                                <div class="flex items-center gap-2">
-                                    <input
-                                        type="checkbox"
-                                        :checked="userFinishedIds.indexOf(achievement.id) !== -1"
-                                        @change="toggleAchievement(achievement.id)"
-                                        class="checkbox"
-                                    />
-                                    <h3
-                                        class="font-medium text-base"
-                                        :class="{ 'line-through opacity-60': userFinishedIds.indexOf(achievement.id) !== -1 }"
-                                    >
-                                        {{ achievement.名称 || $t("achievement.unnamedAchievement") }}
-                                    </h3>
+                <ScrollArea class="flex-1">
+                    <!-- 成就列表卡片 -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 m-4">
+                        <div
+                            v-for="achievement in filteredAchievements"
+                            :key="achievement.id"
+                            class="bg-base-100 rounded-lg border border-base-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                        >
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            :checked="userFinishedIds.indexOf(achievement.id) !== -1"
+                                            @change="toggleAchievement(achievement.id)"
+                                            class="checkbox"
+                                        />
+                                        <h3
+                                            class="font-medium text-base"
+                                            :class="{ 'line-through opacity-60': userFinishedIds.indexOf(achievement.id) !== -1 }"
+                                        >
+                                            {{ achievement.名称 || $t("achievement.unnamedAchievement") }}
+                                        </h3>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="text-sm text-base-content/70 mb-3">
-                                {{ achievement.描述 || $t("achievement.noDescription") }}
-                            </div>
-
-                            <div class="flex flex-wrap items-center gap-2">
-                                <div class="badge badge-soft badge-primary" v-if="achievement.分类">
-                                    {{ achievement.分类 }}
+                                <div class="text-sm text-base-content/70 mb-3">
+                                    {{ achievement.描述 || $t("achievement.noDescription") }}
                                 </div>
-                                <div class="text-xs ml-auto flex flex-wrap gap-2">
-                                    <div class="inline-flex flex-col items-center" v-for="(value, key) in achievement.奖励" :key="key">
-                                        <span class="text-base-content/60">{{ key }}</span>
-                                        <span class="text-base-content/40">{{ value }}</span>
+
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <div class="badge badge-soft badge-primary" v-if="achievement.分类">
+                                        {{ achievement.分类 }}
+                                    </div>
+                                    <div class="text-xs ml-auto flex flex-wrap gap-2">
+                                        <div class="inline-flex flex-col items-center" v-for="(value, key) in achievement.奖励" :key="key">
+                                            <span class="text-base-content/60">{{ key }}</span>
+                                            <span class="text-base-content/40">{{ value }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </ScrollArea>
             </div>
         </div>
 

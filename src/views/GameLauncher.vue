@@ -268,7 +268,7 @@ onUnmounted(() => {
                         </SelectItem>
                     </Select>
                 </div>
-                <ScrollArea class="overflow-x-hidden overflow-y-auto">
+                <ScrollArea class="flex-1">
                     <transition-group name="list" tag="ul" class="list">
                         <template v-if="entityType === 'custom'">
                             <ContextMenu v-for="item in sortedEntitys" :key="item.name">
