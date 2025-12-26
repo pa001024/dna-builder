@@ -77,12 +77,15 @@ const filteredAchievements = computed(() => {
     let filtered = achievementData.filter((achievement) => {
         // 分类筛选
         const categoryMatch = !selectedCategory.value || achievement.分类 === selectedCategory.value
+        // 版本筛选
+        const versionMatch = selectedVersion.value === "所有版本" || achievement.版本 === selectedVersion.value
+
         // 搜索筛选
         const searchMatch = achievement.名称.toLowerCase().includes(query) || achievement.描述.toLowerCase().includes(query)
         // 已完成筛选
         const completedMatch = !hideCompleted.value || userFinishedIds.value.indexOf(achievement.id) === -1
 
-        return categoryMatch && searchMatch && completedMatch
+        return categoryMatch && versionMatch && searchMatch && completedMatch
     })
 
     // 排序：未完成优先
