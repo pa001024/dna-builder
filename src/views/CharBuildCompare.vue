@@ -74,9 +74,9 @@ interface BuildConfiguration {
 }
 
 // Helper function to create a new configuration
-function createConfig(selectedChar: string, name: string): BuildConfiguration {
-    const selectedCharRef = ref(selectedChar)
-    const charSettingsRef = useCharSettings(selectedCharRef)
+function createConfig(name: string, char?: string): BuildConfiguration {
+    const selectedChar = char ? ref(char) : useLocalStorage("selectedChar", "赛琪")
+    const charSettingsRef = useCharSettings(selectedChar)
 
     // Clone charSettings value
     const charSettings = cloneDeep(charSettingsRef.value)
@@ -106,7 +106,7 @@ function createConfig(selectedChar: string, name: string): BuildConfiguration {
         ],
         additionalBuffs: [],
         name,
-        selectedChar,
+        selectedChar: selectedChar.value,
         selectedProject: "当前配置",
         charSettings,
         projects,
@@ -114,7 +114,7 @@ function createConfig(selectedChar: string, name: string): BuildConfiguration {
 }
 
 // Multiple configurations state
-const configs = ref<BuildConfiguration[]>([createConfig("赛琪", "配置 1")])
+const configs = ref<BuildConfiguration[]>([createConfig("配置 1")])
 // Initialize with one configuration
 
 // 针对特定配置的已过滤 BUFF 选项，这些选项排除了项目现有的 BUFF
@@ -142,7 +142,7 @@ const getFilteredBuffOptions = (configIndex: number) => {
 // Add new configuration by copying the last one
 const addConfiguration = () => {
     const lastConfig = configs.value[configs.value.length - 1]
-    const newConfig = createConfig(lastConfig.selectedChar, `配置 ${configs.value.length + 1}`)
+    const newConfig = createConfig(`配置 ${configs.value.length + 1}`, lastConfig.selectedChar)
     // Copy all properties from last config using deep clone
     Object.assign(newConfig, cloneDeep(lastConfig), {
         name: `配置 ${configs.value.length + 1}`,
