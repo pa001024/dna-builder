@@ -229,8 +229,8 @@ function resetAiSettings() {
 
                         <Select
                             class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
-                            :model-value="$i18next.language"
-                            @update:model-value="$i18next.changeLanguage($event)"
+                            v-model="setting.lang"
+                            @update:model-value="setting.setLang($event)"
                             :placeholder="$t('setting.lang')"
                         >
                             <SelectItem v-for="lang in i18nLanguages" :key="lang.code" :value="lang.code">

@@ -4,7 +4,7 @@ import { t } from "i18next"
 import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon, CharBuild, gameData as data, CharBuildTimeline, buffMap } from "../data"
 import { useLocalStorage } from "@vueuse/core"
 import { groupBy, cloneDeep } from "lodash-es"
-import { format100, formatProp, formatSkillProp, formatWeaponProp } from "../util"
+import { format100, formatSkillProp, formatWeaponProp } from "../util"
 import { useInvStore } from "../store/inv"
 import { useCharSettings } from "../store/charSettings"
 import { useTimeline } from "../store/timeline"
@@ -440,13 +440,13 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                         {{ project.name }}
                     </SelectItem>
                 </Select>
-                <button class="btn btn-sm btn-secondary" @click="openAutoBuild">自动构筑</button>
+                <button class="btn btn-sm btn-secondary" @click="openAutoBuild">{{ $t("char-build.auto_build") }}</button>
                 <dialog id="autobuild_model" class="modal" @close="autobuild_model_show = false">
                     <div class="modal-box bg-base-300 w-5/6 max-w-5xl">
                         <div class="mb-6">
                             <div class="flex items-center gap-2 mb-3">
                                 <SectionMarker />
-                                <h3 class="text-lg font-semibold">自动构筑</h3>
+                                <h3 class="text-lg font-semibold">{{ $t("char-build.auto_build") }}</h3>
                             </div>
                             <AutoBuild :update="autobuild_model_show" :charBuild="charBuild" @change="newBuild = $event" />
                         </div>
@@ -459,7 +459,7 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                     </div>
                 </dialog>
                 <button class="btn btn-sm btn-success" @click="$router.push('/char-build-compare')">{{ $t("build-compare.title") }}</button>
-                <button class="btn btn-sm btn-primary" @click="saveConfig">{{ $t("char-build.save_config") }}</button>
+                <button class="btn btn-sm btn-primary" @click="saveConfig">{{ $t("char-build.save_project") }}</button>
                 <button class="btn btn-sm" @click="resetConfig">{{ $t("char-build.reset_config") }}</button>
             </div>
 
@@ -467,9 +467,9 @@ function updateTeamBuff(newValue: string, oldValue: string) {
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
                 <!-- 角色选择 -->
                 <ShowProps
-                    :title="charBuild.char.名称"
+                    :title="$t(charBuild.char.名称)"
                     :props="charBuild.char.getProperties()"
-                    :type="`${charBuild.char.属性},${charBuild.char.近战}/${charBuild.char.远程}`"
+                    :type="`${$t(charBuild.char.属性 + '属性')},${$t(charBuild.char.近战)}/${$t(charBuild.char.远程)}`"
                     side="bottom"
                 >
                     <div class="bg-base-300 rounded-xl p-4 shadow-lg">
@@ -489,11 +489,11 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                                 >
                                     <template v-for="charWithElm in groupBy(charOptions, 'elm')" :key="charWithElm[0].elm">
                                         <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                            {{ charWithElm[0].elm }}
+                                            {{ $t(charWithElm[0].elm + "属性") }}
                                         </SelectLabel>
                                         <SelectGroup>
                                             <SelectItem v-for="char in charWithElm" :key="char.value" :value="char.value">
-                                                {{ char.label }}
+                                                {{ $t(char.label) }}
                                             </SelectItem>
                                         </SelectGroup>
                                     </template>
@@ -533,7 +533,7 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                                         :key="fn"
                                         :value="fn"
                                     >
-                                        {{ fn }}
+                                        {{ $t(fn) }}
                                     </SelectItem>
                                 </Select>
                             </div>
@@ -651,10 +651,9 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                 </FullTooltip>
                 <!-- 近战武器选择 -->
                 <ShowProps
-                    :title="charBuild.meleeWeapon.名称"
-                    :desc="charBuild.meleeWeapon.描述"
+                    :title="$t(charBuild.meleeWeapon.名称)"
                     :props="charBuild.meleeWeapon.getProperties()"
-                    :type="charBuild.meleeWeapon.类别"
+                    :type="$t(charBuild.meleeWeapon.类别)"
                     side="bottom"
                 >
                     <div class="bg-base-300 rounded-xl p-4 shadow-lg">
@@ -674,11 +673,11 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                                 >
                                     <template v-for="weaponWithType in groupBy(meleeWeaponOptions, 'type')" :key="weaponWithType[0].type">
                                         <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                            {{ weaponWithType[0].type }}
+                                            {{ $t(weaponWithType[0].type) }}
                                         </SelectLabel>
                                         <SelectGroup>
                                             <SelectItem v-for="weapon in weaponWithType" :key="weapon.value" :value="weapon.value">
-                                                {{ weapon.label }}
+                                                {{ $t(weapon.label) }}
                                             </SelectItem>
                                         </SelectGroup>
                                     </template>
@@ -713,9 +712,9 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                 </ShowProps>
                 <!-- 远程武器选择 -->
                 <ShowProps
-                    :title="charBuild.rangedWeapon.名称"
+                    :title="$t(charBuild.rangedWeapon.名称)"
                     :props="charBuild.rangedWeapon.getProperties()"
-                    :type="charBuild.rangedWeapon.类别"
+                    :type="$t(charBuild.rangedWeapon.类别)"
                     side="bottom"
                 >
                     <div class="bg-base-300 rounded-xl p-4 shadow-lg">
@@ -735,11 +734,11 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                                 >
                                     <template v-for="weaponWithType in groupBy(rangedWeaponOptions, 'type')" :key="weaponWithType[0].type">
                                         <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                            {{ weaponWithType[0].type }}
+                                            {{ $t(weaponWithType[0].type) }}
                                         </SelectLabel>
                                         <SelectGroup>
                                             <SelectItem v-for="weapon in weaponWithType" :key="weapon.value" :value="weapon.value">
-                                                {{ weapon.label }}
+                                                {{ $t(weapon.label) }}
                                             </SelectItem>
                                         </SelectGroup>
                                     </template>
@@ -780,7 +779,7 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                         </SectionMarker>
                         <h3 class="text-lg font-semibold">{{ $t("char-build.enemy") }}</h3>
                         <div class="flex-1"></div>
-                        <div class="label text-xs">失衡</div>
+                        <div class="label text-xs">{{ $t("失衡") }}</div>
                         <input v-model="charSettings.imbalance" type="checkbox" class="toggle toggle-secondary" />
                     </div>
                     <div class="relative flex items-center gap-2">
@@ -980,11 +979,11 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                             >
                                 <template v-for="charWithElm in groupBy(team1Options, 'elm')" :key="charWithElm[0].elm">
                                     <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                        {{ charWithElm[0].elm }}
+                                        {{ $t(charWithElm[0].elm + "属性") }}
                                     </SelectLabel>
                                     <SelectGroup>
                                         <SelectItem v-for="char in charWithElm" :key="char.value" :value="char.value">
-                                            {{ char.label }}
+                                            {{ $t(char.label) }}
                                         </SelectItem>
                                     </SelectGroup>
                                 </template>
@@ -997,11 +996,11 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                             >
                                 <template v-for="weaponWithType in groupBy(teamWeaponOptions, 'type')" :key="weaponWithType[0].type">
                                     <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                        {{ weaponWithType[0].type }}
+                                        {{ $t(weaponWithType[0].type) }}
                                     </SelectLabel>
                                     <SelectGroup>
                                         <SelectItem v-for="char in weaponWithType" :key="char.value" :value="char.value">
-                                            {{ char.label }}
+                                            {{ $t(char.label) }}
                                         </SelectItem>
                                     </SelectGroup>
                                 </template>
@@ -1014,11 +1013,11 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                             >
                                 <template v-for="charWithElm in groupBy(team2Options, 'elm')" :key="charWithElm[0].elm">
                                     <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                        {{ charWithElm[0].elm }}
+                                        {{ $t(charWithElm[0].elm + "属性") }}
                                     </SelectLabel>
                                     <SelectGroup>
                                         <SelectItem v-for="char in charWithElm" :key="char.value" :value="char.value">
-                                            {{ char.label }}
+                                            {{ $t(char.label) }}
                                         </SelectItem>
                                     </SelectGroup>
                                 </template>
@@ -1031,11 +1030,11 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                             >
                                 <template v-for="weaponWithType in groupBy(teamWeaponOptions, 'type')" :key="weaponWithType[0].type">
                                     <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                        {{ weaponWithType[0].type }}
+                                        {{ $t(weaponWithType[0].type) }}
                                     </SelectLabel>
                                     <SelectGroup>
                                         <SelectItem v-for="char in weaponWithType" :key="char.value" :value="char.value">
-                                            {{ char.label }}
+                                            {{ $t(char.label) }}
                                         </SelectItem>
                                     </SelectGroup>
                                 </template>
@@ -1088,7 +1087,7 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                                     <div class="flex items-center justify-between">
                                         <h3 class="text-4xl font-bold text-base-content/80 flex items-center gap-2">
                                             <img :src="`/imgs/${charBuild.char.属性}.png`" :alt="charBuild.char.属性" class="h-12" />
-                                            {{ selectedChar }}
+                                            {{ $t(selectedChar) }}
                                         </h3>
 
                                         <span
@@ -1098,68 +1097,8 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                                     </div>
                                     <!-- 武器 -->
                                     <div class="grid grid-cols-2 gap-4">
-                                        <div
-                                            class="backdrop-blur-sm rounded-xl p-2 bg-linear-to-r from-secondary/1 to-secondary/5 border border-fuchsia-500/20 hover:border-fuchsia-500/40 transition-all duration-300"
-                                        >
-                                            <div class="flex gap-4">
-                                                <div
-                                                    class="w-12 h-12 flex items-center justify-center rounded-lg overflow-hidden bg-gray-900/50 border border-fuchsia-500/30"
-                                                >
-                                                    <img
-                                                        :alt="charBuild.meleeWeapon.名称"
-                                                        class="w-full h-full object-cover"
-                                                        :src="charBuild.meleeWeapon.url"
-                                                    />
-                                                </div>
-                                                <div class="flex-1">
-                                                    <div class="flex items-center justify-between mb-1">
-                                                        <h5 class="text-base-content/80 font-bold">{{ charBuild.meleeWeapon.名称 }}</h5>
-                                                        <span
-                                                            class="px-2 py-1 rounded-md bg-fuchsia-500/20 text-fuchsia-400 text-xs border border-fuchsia-500/30"
-                                                            >近战</span
-                                                        >
-                                                    </div>
-                                                    <p class="text-gray-400 text-xs">
-                                                        {{
-                                                            Object.entries(charBuild.meleeWeapon.getSimpleProperties())
-                                                                .map(([k, v]) => `${k} ${formatProp(k, v)}`)
-                                                                .join("，")
-                                                        }}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div
-                                            class="backdrop-blur-sm rounded-xl p-2 bg-linear-to-r from-secondary/1 to-secondary/5 border border-fuchsia-500/20 hover:border-fuchsia-500/40 transition-all duration-300"
-                                        >
-                                            <div class="flex gap-4">
-                                                <div
-                                                    class="w-12 h-12 flex items-center justify-center rounded-lg overflow-hidden bg-gray-900/50 border border-fuchsia-500/30"
-                                                >
-                                                    <img
-                                                        :alt="charBuild.rangedWeapon.名称"
-                                                        class="w-full h-full object-cover"
-                                                        :src="charBuild.rangedWeapon.url"
-                                                    />
-                                                </div>
-                                                <div class="flex-1">
-                                                    <div class="flex items-center justify-between mb-1">
-                                                        <h5 class="text-base-content/80 font-bold">{{ charBuild.rangedWeapon.名称 }}</h5>
-                                                        <span
-                                                            class="px-2 py-1 rounded-md bg-fuchsia-500/20 text-fuchsia-400 text-xs border border-fuchsia-500/30"
-                                                            >远程</span
-                                                        >
-                                                    </div>
-                                                    <p class="text-gray-400 text-xs">
-                                                        {{
-                                                            Object.entries(charBuild.rangedWeapon.getSimpleProperties())
-                                                                .map(([k, v]) => `${k} ${formatProp(k, v)}`)
-                                                                .join("，")
-                                                        }}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <BuildWeaponCard :weapon="charBuild.meleeWeapon" />
+                                        <BuildWeaponCard :weapon="charBuild.rangedWeapon" />
                                     </div>
                                 </div>
                             </div>
@@ -1188,7 +1127,7 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                                         )"
                                     >
                                         <div class="text-gray-400 text-xs mb-1">
-                                            {{ key === "攻击" ? `${charBuild.char.属性}属性` : "" }}{{ $t(`char-build.${key}`) }}
+                                            {{ key === "攻击" ? $t(`${charBuild.char.属性}属性`) : "" }}{{ $t(key) }}
                                         </div>
                                         <div class="text-secondary font-bold text-sm font-orbitron">
                                             {{
@@ -1244,8 +1183,8 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                             <div class="flex flex-col gap-3" v-if="charBuild.mods.length > 0">
                                 <h4 class="text-xl font-bold text-base-content/80">MOD</h4>
                                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
-                                    <span
-                                        class="px-4 py-2 rounded-lg bg-linear-to-r from-secondary/1 to-secondary/5 border border-secondary/30 text-secondary text-xs"
+                                    <div
+                                        class="flex items-center p-2 rounded-lg bg-linear-to-r from-secondary/1 to-secondary/5 border border-secondary/30 text-secondary text-xs"
                                         v-for="mod in charBuild.mods
                                             .filter((v) => v.类型 === '角色')
                                             .reduce((r, v) => {
@@ -1258,15 +1197,15 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                                             }, {} as any)"
                                     >
                                         <img class="size-8 object-cover inline-block" :src="mod.mod.url" alt="" />
-                                        <span> {{ mod.count > 1 ? mod.count + " x " : "" }}{{ mod.mod.名称 }} </span>
-                                    </span>
+                                        <span> {{ mod.count > 1 ? mod.count + " x " : "" }}{{ $t(mod.mod.名称) }} </span>
+                                    </div>
                                 </div>
                                 <div
                                     class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2"
                                     v-if="charBuild.selectedWeapon"
                                 >
-                                    <span
-                                        class="px-4 py-2 rounded-lg bg-linear-to-r from-secondary/1 to-secondary/5 border border-secondary/30 text-secondary text-xs"
+                                    <div
+                                        class="flex items-center p-2 rounded-lg bg-linear-to-r from-secondary/1 to-secondary/5 border border-secondary/30 text-secondary text-xs"
                                         v-for="mod in charBuild.mods
                                             .filter((v) => v.类型 === charBuild.selectedWeapon!.类型)
                                             .reduce((r, v) => {
@@ -1279,8 +1218,8 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                                             }, {} as any)"
                                     >
                                         <img class="size-8 object-cover inline-block" :src="mod.mod.url" alt="" />
-                                        <span> {{ mod.count > 1 ? mod.count + " x " : "" }}{{ mod.mod.名称 }} </span>
-                                    </span>
+                                        <span>{{ mod.count > 1 ? mod.count + " x " : "" }}{{ $t(mod.mod.名称) }} </span>
+                                    </div>
                                 </div>
                             </div>
                             <div v-if="charBuild.buffs.length > 0">

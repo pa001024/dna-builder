@@ -17,7 +17,7 @@ import I18NextVue from "i18next-vue"
 //   false
 // );
 
-initI18n(navigator.language)
+initI18n(localStorage.getItem("setting_lang") || navigator.language)
 
 import App from "./App.vue"
 import { initI18n } from "./i18n"

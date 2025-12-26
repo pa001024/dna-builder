@@ -109,7 +109,7 @@ onMounted(async () => {
                     <div>
                         <h1 class="text-5xl font-bold">DNA Builder</h1>
                         <div class="py-4">
-                            当前版本:
+                            {{ $t("home.cureent_version") }}
                             <a class="link" :href="`https://github.com/pa001024/dna-builder/releases/tag/v${pg.version}`" target="_blank">
                                 {{ pg.version }}
                             </a>

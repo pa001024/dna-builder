@@ -66,10 +66,10 @@ const emit = defineEmits<{
             <ShowProps
                 v-if="mod"
                 :props="mod.getProperties()"
-                :title="mod.fullName"
+                :title="`${$t(mod.系列)}${$t(mod.名称)}`"
                 :polarity="mod.极性"
                 :cost="mod.耐受"
-                :type="mod.types"
+                :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
                 :desc="mod.效果"
                 :eff="charBuild?.checkModEffective(mod) || mod.getCondition()"
             >
@@ -82,7 +82,7 @@ const emit = defineEmits<{
                     <div class="relative mt-auto w-full bg-base-content/30 z-10 text-left p-2">
                         <div class="text-base-100 text-sm font-bold mb-1 flex items-center">
                             <Icon v-if="selected" icon="ri:checkbox-circle-fill" class="inline-block mr-1 text-green-500" />
-                            {{ mod.名称 }}
+                            {{ $t(mod.名称) }}
                         </div>
                         <div class="relative">
                             <div

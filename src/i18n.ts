@@ -39,7 +39,7 @@ export async function initI18n(selectedLanguage: string) {
         },
         preload: [...lngCodes, selectedLanguage],
         supportedLngs: [...lngCodes, "dev"],
-        fallbackLng: lngCodes[0] || "en",
+        fallbackLng: "zh-CN",
         debug: import.meta.env.TAURI_DEBUG,
         lng: selectedLanguage,
 

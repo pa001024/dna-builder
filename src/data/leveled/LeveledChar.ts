@@ -125,6 +125,7 @@ export class LeveledChar implements Char {
         "基础生命",
         "基础护盾",
         "基础防御",
+        "基础神智",
         "范围",
         "攻击",
         "耐久",

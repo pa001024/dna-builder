@@ -4,6 +4,7 @@ import { applyMaterial } from "../api/app"
 import { env } from "../env"
 import { db } from "./db"
 import { DNAAPI } from "dna-api"
+import i18next from "i18next"
 
 export const useSettingStore = defineStore("setting", {
     state: () => {
@@ -20,10 +21,15 @@ export const useSettingStore = defineStore("setting", {
             aiTemperature: env.isApp ? useLocalStorage("ai_temperature", 0.6) : 0,
             // 皎皎角
             dnaUserId: env.isApp ? useLocalStorage("setting_user_id", 0) : 0,
+            lang: useLocalStorage("setting_lang", navigator.language),
         }
     },
     getters: {},
     actions: {
+        setLang(lang: string) {
+            this.lang = lang
+            i18next.changeLanguage(lang)
+        },
         setTheme(theme: string) {
             this.theme = theme
         },

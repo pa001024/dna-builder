@@ -121,10 +121,6 @@ export class LeveledMod implements Mod {
         return this.系列 === "换生灵" || (this.系列 === "海妖" && this.名称.split("·").length > 2)
     }
 
-    get types() {
-        return `${this.类型}${this.属性 ? `,${this.属性}属性` : ""}${this.限定 ? `,${this.限定}` : ""}`
-    }
-
     /**
      * 等级属性的getter和setter
      */
@@ -265,11 +261,14 @@ export class LeveledMod implements Mod {
         return { isEffective, props: rest }
     }
 
-    applyCondition(attrs: CharAttr, charMods: LeveledMod[]): CharAttr {
+    /**
+     * 应用MOD条件
+     */
+    applyCondition(attrs: CharAttr, charMods: LeveledMod[], minus = false): CharAttr {
         const condition = this.checkCondition(attrs, charMods)
         if (!condition || !condition.isEffective) return attrs
         Object.keys(condition.props).forEach((key) => {
-            attrs[key as keyof CharAttr] += condition.props[key]
+            attrs[key as keyof CharAttr] += minus ? -condition.props[key] : condition.props[key]
         })
         return attrs
     }

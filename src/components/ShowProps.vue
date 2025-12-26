@@ -29,7 +29,7 @@ const formatDesc = (desc: string) => {
 <template>
     <FullTooltip :side="side">
         <template #tooltip>
-            <div class="flex flex-col gap-2 max-w-[300px]">
+            <div class="flex flex-col gap-2 max-w-[300px] min-w-28">
                 <div v-if="title" class="text-sm font-bold">{{ title }}</div>
                 <div v-if="polarity || cost" class="ml-auto badge badge-sm badge-soft gap-1 text-base-content/80">
                     {{ cost }}
@@ -40,7 +40,9 @@ const formatDesc = (desc: string) => {
                     :key="prop"
                     class="flex justify-between items-center gap-2 text-sm"
                 >
-                    <div class="text-xs text-neutral-500">{{ prop }}</div>
+                    <div class="text-xs text-neutral-500">
+                        {{ prop.startsWith("基础") ? `${$t("基础")}${$t(prop.slice(2))}` : $t(prop) }}
+                    </div>
                     <div class="font-medium text-primary">{{ formatProp(prop, val) }}</div>
                 </div>
                 <div
@@ -50,7 +52,7 @@ const formatDesc = (desc: string) => {
                     class="flex justify-between items-center gap-2 text-sm"
                     :class="{ 'line-through': !eff.isEffective }"
                 >
-                    <div class="text-xs text-neutral-500">{{ prop }}</div>
+                    <div class="text-xs text-neutral-500">{{ $t(prop) }}</div>
                     <div class="font-medium text-primary">{{ formatProp(prop, val) }}</div>
                 </div>
                 <div v-if="desc" class="text-xs text-neutral-500">

@@ -118,16 +118,16 @@ const { mihan, moling, zhouben } = useGameTimer()
                     <span className="max-[370px]:hidden text-sm min-w-20">{{ title }}</span>
                     <!-- 计时器 -->
                     <div class="flex ml-4 gap-8 items-center text-xs text-base-content/80">
-                        <div class="inline-block text-center w-16 cursor-pointer" @click="ui.mihanVisible = true">
-                            <div>{{ $t("resizeableWindow.mihan") }}</div>
+                        <div class="inline-block text-center min-w-16 cursor-pointer" @click="ui.mihanVisible = true">
+                            <div class="whitespace-nowrap">{{ $t("resizeableWindow.mihan") }}</div>
                             <div class="font-orbitron">{{ timeStr(mihan) }}</div>
                         </div>
-                        <div class="inline-block text-center w-16">
-                            <div>{{ $t("resizeableWindow.moling") }}</div>
+                        <div class="inline-block text-center min-w-16">
+                            <div class="whitespace-nowrap">{{ $t("resizeableWindow.moling") }}</div>
                             <div class="font-orbitron">{{ timeStr(moling) }}</div>
                         </div>
-                        <div class="inline-block text-center w-16">
-                            <div>{{ $t("resizeableWindow.zhouben") }}</div>
+                        <div class="inline-block text-center min-w-16">
+                            <div class="whitespace-nowrap">{{ $t("resizeableWindow.zhouben") }}</div>
                             <div class="font-orbitron">{{ timeStr(zhouben) }}</div>
                         </div>
                     </div>

@@ -221,7 +221,7 @@ watch(
         <!-- 顶部操作栏 -->
         <div class="bg-base-100 border-b border-base-200 p-2 px-4 flex justify-between items-center shadow-sm">
             <div class="flex items-center">
-                <h1 class="text-lg font-bold mr-4">成就</h1>
+                <h1 class="text-lg font-bold mr-4">{{ $t("achievement.title") }}</h1>
                 <span class="text-sm text-base-content/60">{{ userFinishedIds.length }} / {{ achievementData.length }}</span>
             </div>
 
@@ -256,7 +256,7 @@ watch(
                             :class="selectedCategory === null ? 'border-primary text-primary' : 'border-transparent'"
                             @click="selectedCategory = null"
                         >
-                            <span class="text-sm font-medium">全部</span>
+                            <span class="text-sm font-medium">{{ $t("全部") }}</span>
                             <span class="text-xs">
                                 {{ userFinishedIds.length }}/{{ totalAchievements }} ({{
                                     Math.round((userFinishedIds.length / totalAchievements) * 100)
@@ -270,7 +270,7 @@ watch(
                             :class="selectedCategory === category ? 'border-primary text-primary' : 'border-transparent'"
                             @click="selectCategory(category)"
                         >
-                            <span class="text-sm font-medium">{{ category }}</span>
+                            <span class="text-sm font-medium">{{ $t(category) }}</span>
                             <span class="text-xs">
                                 {{ categoryFinishedCounts[category] || 0 }}/{{ achievements.length }} ({{
                                     Math.round(((categoryFinishedCounts[category] || 0) / achievements.length) * 100)
@@ -335,22 +335,22 @@ watch(
                                             class="font-medium text-base"
                                             :class="{ 'line-through opacity-60': userFinishedIds.indexOf(achievement.id) !== -1 }"
                                         >
-                                            {{ achievement.名称 || $t("achievement.unnamedAchievement") }}
+                                            {{ $t(achievement.名称) }}
                                         </h3>
                                     </div>
                                 </div>
 
                                 <div class="text-sm text-base-content/70 mb-3">
-                                    {{ achievement.描述 || $t("achievement.noDescription") }}
+                                    {{ $t(achievement.描述) }}
                                 </div>
 
                                 <div class="flex flex-wrap items-center gap-2">
                                     <div class="badge badge-soft badge-primary" v-if="achievement.分类">
-                                        {{ achievement.分类 }}
+                                        {{ $t(achievement.分类) }}
                                     </div>
                                     <div class="text-xs ml-auto flex flex-wrap gap-2">
                                         <div class="inline-flex flex-col items-center" v-for="(value, key) in achievement.奖励" :key="key">
-                                            <span class="text-base-content/60">{{ key }}</span>
+                                            <span class="text-base-content/60">{{ $t(key) }}</span>
                                             <span class="text-base-content/40">{{ value }}</span>
                                         </div>
                                     </div>

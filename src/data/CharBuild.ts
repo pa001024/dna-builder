@@ -398,10 +398,11 @@ export class CharBuild {
             减伤: damageReduce,
         }
         // 应用MOD条件
-        attrs = this.applyCondition(
-            attrs,
-            this.charModsWithAura.filter((mod) => mod.生效?.条件),
-        )
+        const condMods = this.charModsWithAura.filter((mod) => mod.生效?.条件)
+        if (props?.生效?.条件 && !minus) {
+            condMods.push(props as LeveledMod)
+        }
+        attrs = this.applyCondition(attrs, condMods, minus)
         if (nocode) return attrs
         if (this.dynamicBuffs.length > 0 || (!minus && props?.code)) {
             const all = this.getAllWeaponsAttrs(props, minus)
@@ -419,9 +420,9 @@ export class CharBuild {
         return attrs
     }
 
-    public applyCondition(attrs: CharAttr, mods: LeveledMod[]) {
+    public applyCondition(attrs: CharAttr, mods: LeveledMod[], minus = false) {
         mods.forEach((mod) => {
-            attrs = mod.applyCondition(attrs, this.charMods)
+            attrs = mod.applyCondition(attrs, this.charMods, minus)
         })
         return attrs
     }
@@ -442,7 +443,7 @@ export class CharBuild {
             // 计算各种加成
             let attackBonus = this.getTotalBonus(`${prefix}攻击`, prefix) + this.getTotalBonus(`攻击`, prefix)
             // 角色精通
-            if (weapon.类别 === this.char.近战 || weapon.类别 === this.char.远程) {
+            if (weapon.类别 === this.char.近战 || weapon.类别 === this.char.远程 || this.char.远程 === "全部类型") {
                 attackBonus += 0.2
             }
             let physicalBonus = this.getTotalBonus("物理", prefix)
@@ -885,6 +886,25 @@ export class CharBuild {
                 critExpectedDamage *
                 commonMore,
         }
+    }
+
+    /**
+     * 计算随机伤害
+     */
+    public calculateRandomDamage(baseName: string) {
+        this.baseName = baseName
+        const attrs = this.calculateWeaponAttributes()
+        const damage: DamageResult = this.selectedWeapon
+            ? this.calculateWeaponDamage(attrs, this.selectedWeapon)
+            : this.calculateSkillDamage(attrs, this.selectedSkill!)
+        const cc = (attrs.weapon?.暴击 || 0) % 1
+        const tc = attrs.weapon?.触发 || 0
+        let dmg = damage.expectedDamage
+        if (cc > 0 && tc > 0 && damage.higherCritTrigger && damage.lowerCritTrigger) {
+            const r = Math.random()
+            dmg = r < cc ? damage.higherCritTrigger : damage.lowerCritTrigger
+        }
+        return dmg
     }
 
     public hasSummon() {

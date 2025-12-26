@@ -354,7 +354,7 @@ onUnmounted(() => {
                                     <img class="size-10 rounded-box" :src="item.icon" />
                                 </div>
                                 <div>
-                                    <div>{{ item.name }}</div>
+                                    <div>{{ $t(item.name) }}</div>
                                     <div class="text-xs font-semibold opacity-60">{{ item.count }}</div>
                                 </div>
                                 <button

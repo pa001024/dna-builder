@@ -217,10 +217,10 @@ const aMod = computed(() => {
                 <ShowProps
                     v-if="aMod"
                     :props="aMod.getProperties()"
-                    :title="aMod.fullName"
+                    :title="`${$t(aMod.系列)}${$t(aMod.名称)}`"
                     :polarity="aMod.极性"
                     :cost="aMod.耐受"
-                    :type="`${aMod.类型}${aMod.属性 ? `,${aMod.属性}属性` : ''}${aMod.限定 ? `,${aMod.限定}` : ''}`"
+                    :type="`${$t(aMod.类型)}${aMod.属性 ? `,${$t(aMod.属性 + '属性')}` : ''}${aMod.限定 ? `,${$t(aMod.限定)}` : ''}`"
                     :desc="aMod.效果"
                     :eff="charBuild?.checkModEffective(aMod, true)"
                 >
@@ -230,12 +230,12 @@ const aMod = computed(() => {
                         @update:model-value="handleSelectAuraMod($event)"
                     >
                         <SelectItem v-for="m in auraModOptions" :key="m.value" :value="m.value">
-                            {{ m.quality }} - {{ m.label }}
+                            {{ $t(m.quality + "色") }} - {{ $t(m.label) }}
                         </SelectItem>
                     </Select>
                 </ShowProps>
-                <div class="btn btn-sm btn-primary" @click="handleImportCode">导入代码</div>
-                <div class="btn btn-sm btn-primary" @click="copyText(charBuild.getCode(type))">复制代码</div>
+                <div class="btn btn-sm btn-primary" @click="handleImportCode">{{ $t("char-build.import_code") }}</div>
+                <div class="btn btn-sm btn-primary" @click="copyText(charBuild.getCode(type))">{{ $t("char-build.export_code") }}</div>
             </div>
         </div>
         <div class="grid grid-cols-4 lg:grid-cols-8 gap-4">
@@ -259,7 +259,7 @@ const aMod = computed(() => {
             <!-- 选择新MOD -->
             <div>
                 <div class="flex">
-                    <h4 class="text-sm font-medium mb-3 p-2">选择MOD - 槽位 {{ localSelectedSlot + 1 }}</h4>
+                    <h4 class="text-sm font-medium mb-3 p-2">{{ $t("char-build.select_mod_slot") }} {{ localSelectedSlot + 1 }}</h4>
 
                     <!-- 关闭按钮 -->
                     <button class="ml-auto btn btn-ghost btn-sm btn-square" @click="closeSelection">
@@ -274,7 +274,7 @@ const aMod = computed(() => {
                             type="radio"
                             :name="`mod_select_${type}`"
                             class="tab"
-                            :aria-label="quality === '全部' ? '全部' : `${quality}色`"
+                            :aria-label="quality === '全部' ? $t('全部') : $t(quality + '色')"
                             :checked="quality === '全部'"
                         />
                         <div class="tab-content py-2">

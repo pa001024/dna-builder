@@ -96,6 +96,13 @@ const autoBuild = computed(() => (props.update ? ((lastBuild = buildMods()), emi
                 />
             </div>
         </div>
+        <div class="flex flex-col gap-2 py-4">
+            <span class="text-sm">{{ $t(`char-build.weapon`) }}</span>
+            <div class="grid grid-cols-2 gap-4">
+                <BuildWeaponCard :weapon="autoBuild.newBuild.meleeWeapon" />
+                <BuildWeaponCard :weapon="autoBuild.newBuild.rangedWeapon" />
+            </div>
+        </div>
         <div class="flex flex-col gap-2 py-4" v-for="key in autoBuildSetting.includeTypes" :key="key">
             <span class="text-sm">{{ $t(`autobuild.${key}`) }}</span>
             <div class="grid grid-cols-4 lg:grid-cols-8 gap-4">
