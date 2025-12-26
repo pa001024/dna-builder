@@ -8,6 +8,18 @@ importers:
 
   .:
     dependencies:
+      '@babylonjs/core':
+        specifier: ^8.43.0
+        version: 8.43.0
+      '@babylonjs/gui':
+        specifier: ^8.43.0
+        version: 8.43.0(@babylonjs/core@8.43.0)
+      '@babylonjs/loaders':
+        specifier: ^8.43.0
+        version: 8.43.0(@babylonjs/core@8.43.0)(babylonjs-gltf2interface@8.43.0)
+      '@babylonjs/materials':
+        specifier: ^8.43.0
+        version: 8.43.0(@babylonjs/core@8.43.0)
       '@modelcontextprotocol/sdk':
         specifier: ^1.25.1
         version: 1.25.1(hono@4.11.1)(zod@4.2.1)
@@ -694,6 +706,25 @@ packages:
   '@babel/types@7.28.5':
     resolution: {integrity: sha512-qQ5m48eI/MFLQ5PxQj4PFaprjyCTLI37ElWMmNs0K8Lk3dVeOdNpB3ks8jc7yM5CDmVC73eMVk/trk3fgmrUpA==}
     engines: {node: '>=6.9.0'}
+
+  '@babylonjs/core@8.43.0':
+    resolution: {integrity: sha512-O3HOfNKBNAHNsntK3o1hJHjRyDC9up0mPd4/j9yQWxbxEgJ+zskQyvk5cu2mA5JYHonwvQDtYnH8TIQRGfDcBg==}
+
+  '@babylonjs/gui@8.43.0':
+    resolution: {integrity: sha512-XNXkwrSlML9kgZ9cTbIPK6ohwDdSVdubfqIVloQTf3tQ3YkjcxIEHu5/JpROy+29Q0MXLScKVVTmaHUUVb7oLA==}
+    peerDependencies:
+      '@babylonjs/core': ^8.0.0
+
+  '@babylonjs/loaders@8.43.0':
+    resolution: {integrity: sha512-UaDlekqxohhz0ZPjQXleeUfH+Irur2sfgdQZqXKJjQJzMSfZFzeyMYAPImHwHPsgRcBUzJfKUzamji2v+YMKeA==}
+    peerDependencies:
+      '@babylonjs/core': ^8.0.0
+      babylonjs-gltf2interface: ^8.0.0
+
+  '@babylonjs/materials@8.43.0':
+    resolution: {integrity: sha512-UslKZY6I/8tkPRitz1nytXL7knEGMCogEwslg17xMDTsd5cOE8AjZPA+9xJVGbYKmQexY8CaMPUiuWHm32gjsg==}
+    peerDependencies:
+      '@babylonjs/core': ^8.6.0
 
   '@bcoe/v8-coverage@1.0.2':
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
@@ -1594,6 +1625,9 @@ packages:
     resolution: {integrity: sha512-ISqQ2frbiNU9vIJkzg7dlPpznPZ4jOiUQ1uSmB0fEHeowtN3COYRsXr/xexn64NpU13P06jc/L5TgiJXOgrbEg==}
     peerDependencies:
       '@babel/core': ^7.4.0 || ^8.0.0-0 <8.0.0
+
+  babylonjs-gltf2interface@8.43.0:
+    resolution: {integrity: sha512-xJIFgeSc9yZ4h+/qYxoxYrvwFTZO5lUhpQJjCiJUsBcP9TWBoqct8M02fdJorBzXhaV5CtvsrvlAbS8M+bf0Qw==}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -3951,6 +3985,21 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
+  '@babylonjs/core@8.43.0': {}
+
+  '@babylonjs/gui@8.43.0(@babylonjs/core@8.43.0)':
+    dependencies:
+      '@babylonjs/core': 8.43.0
+
+  '@babylonjs/loaders@8.43.0(@babylonjs/core@8.43.0)(babylonjs-gltf2interface@8.43.0)':
+    dependencies:
+      '@babylonjs/core': 8.43.0
+      babylonjs-gltf2interface: 8.43.0
+
+  '@babylonjs/materials@8.43.0(@babylonjs/core@8.43.0)':
+    dependencies:
+      '@babylonjs/core': 8.43.0
+
   '@bcoe/v8-coverage@1.0.2': {}
 
   '@esbuild/aix-ppc64@0.25.12':
@@ -4802,6 +4851,8 @@ snapshots:
       '@babel/helper-define-polyfill-provider': 0.6.5(@babel/core@7.28.5)
     transitivePeerDependencies:
       - supports-color
+
+  babylonjs-gltf2interface@8.43.0: {}
 
   balanced-match@1.0.2: {}
 

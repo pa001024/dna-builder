@@ -153,6 +153,10 @@
         "retry": "Retry",
         "title": "Component Rendering Error"
     },
+    "fps-game": {
+        "desc": "3D First-Person Shooter Game",
+        "title": "FPS Shooter"
+    },
     "game": {
         "desc": "Play Auto Chess with a Double Helix character",
         "end": "End Battle",

@@ -39,6 +39,11 @@ const items = [
         icon: "la:gamepad-solid",
     },
     {
+        name: "fps-game",
+        path: "/fps-game",
+        icon: "ri:crosshair-line",
+    },
+    {
         name: "ai",
         path: "/ai",
         icon: "ri:robot-2-line",

@@ -45,6 +45,7 @@ const routes: readonly RouteRecordRaw[] = [
     // more: lazy load
     { name: "ai", path: "/ai", component: () => import("./views/AIAgent.vue"), beforeEnter: () => setMinSize(600, 600) },
     { name: "game", path: "/game", component: () => import("./views/SmallGame.vue"), beforeEnter: () => setMinSize(600, 600) },
+    { name: "fps-game", path: "/fps-game", component: () => import("./views/FPSGameView.vue"), beforeEnter: () => setMinSize(1024, 768) },
     { name: "help", path: "/help", component: () => import("./views/Help.vue"), beforeEnter: () => setMinSize(800, 700) },
 
     // DNA routes

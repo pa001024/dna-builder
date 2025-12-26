@@ -5,8 +5,8 @@ node .husky/update-version.js
 npm run format
 
 # 暂存修改的版本文件
-git add package.json
-git add src-tauri/tauri.conf.json
+# git add package.json
+# git add src-tauri/tauri.conf.json
 
 # 全添加(别搞错了)
 git add .

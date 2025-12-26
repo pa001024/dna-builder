@@ -21,6 +21,10 @@
         "ver": "node .husky/update-version.js"
     },
     "dependencies": {
+        "@babylonjs/core": "^8.43.0",
+        "@babylonjs/gui": "^8.43.0",
+        "@babylonjs/loaders": "^8.43.0",
+        "@babylonjs/materials": "^8.43.0",
         "@modelcontextprotocol/sdk": "^1.25.1",
         "@tauri-apps/api": "^2",
         "@tauri-apps/plugin-clipboard-manager": "^2.3.2",
