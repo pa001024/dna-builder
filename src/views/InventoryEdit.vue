@@ -39,11 +39,16 @@ const filteredSelectedMods = computed(() => {
     const selectTypes = new Set(["金", "紫", "蓝", "绿", "白"].filter((v) => inv.enableMods[v as keyof typeof inv.enableMods]))
     const query = modSearchQuery.value.trim()
     return Object.keys(inv.mods).filter((v) => {
-        const mod = new LeveledMod(+v)
-        return (
-            selectTypes.has(LeveledMod.getQuality(Number(v))) &&
-            (mod.名称.includes(query) || mod.属性?.includes(query) || mod.系列.includes(query))
-        )
+        try {
+            const mod = new LeveledMod(+v)
+            return (
+                selectTypes.has(LeveledMod.getQuality(Number(v))) &&
+                (mod.名称.includes(query) || mod.属性?.includes(query) || mod.系列.includes(query))
+            )
+        } catch (error) {
+            delete inv.mods[+v]
+            return false
+        }
     })
 })
 
