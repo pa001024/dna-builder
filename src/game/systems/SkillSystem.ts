@@ -10,6 +10,7 @@ export enum SkillType {
     AREA = "area", // 范围伤害
     PROJECTILE = "projectile", // 投射物
     BUFF = "buff", // 增益
+    PASSIVE = "passive", // 被动
 }
 
 /**
@@ -88,12 +89,21 @@ export class SkillSystem {
     /**
      * 注册并释放技能
      */
-    static castSkill(skillKey: string, behavior: SkillBehavior, state: GameState): boolean {
+    static castSkill(skillKey: "E" | "Q", behavior: SkillBehavior, state: GameState): boolean {
         const now = Date.now()
         const player = state.player
 
+        // 检查是否已经有一个活跃的技能
+        const activeSkill = this.activeSkills.get(skillKey)
+
+        // 如果技能已经在运行且是持续型技能，则关闭它
+        if (activeSkill && activeSkill.isActive && (behavior.type === SkillType.CHANNEL || behavior.duration)) {
+            this.endSkill(skillKey, state)
+            return true
+        }
+
         // 检查冷却
-        const lastUse = player[`lastSkill${skillKey.toUpperCase()}` as keyof typeof player] as number
+        const lastUse = player[`lastSkill${skillKey}`]
         const cooldownMs = behavior.cooldown * 1000
 
         if (now - lastUse < cooldownMs) {
@@ -101,7 +111,7 @@ export class SkillSystem {
         }
 
         // 更新最后使用时间
-        ;(player[`lastSkill${skillKey.toUpperCase()}` as keyof typeof player] as number) = now
+        player[`lastSkill${skillKey}`] = now
 
         // 初始化技能
         behavior.initialize?.(state, player.position)

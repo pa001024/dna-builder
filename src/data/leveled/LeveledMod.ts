@@ -313,6 +313,7 @@ export class LeveledMod implements Mod {
     }
 
     get url() {
+        if (this.系列 === "羽蛇" && this.id > 40000) return `/imgs/${this.属性}${this.系列}.png`
         if (this.系列 === "海妖" && this.名称.split("·").length > 2) return `/imgs/${this.属性}${this.系列}.png`
         if (this.系列 && CharBuild.elmSeries.includes(this.系列)) return `/imgs/${this.属性}${this.系列}.png`
         return `/imgs/${this.系列}系列.png`

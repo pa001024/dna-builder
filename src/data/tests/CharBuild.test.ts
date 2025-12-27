@@ -28,7 +28,7 @@ describe("CharBuild类测试", () => {
             melee: new LeveledWeapon("铸铁者"),
             ranged: new LeveledWeapon("烈焰孤沙"),
             baseName: mockMeleeWeapon.名称,
-            enemyType: "小型",
+            enemyDef: 130,
             enemyLevel: 80,
             enemyResistance: 0.5,
             enemyHpType: "生命",
@@ -580,7 +580,7 @@ describe("CharBuild类测试", () => {
     describe("敌人类型测试", () => {
         it("应该正确处理小型敌人", () => {
             const charBuild = createCharBuild()
-            charBuild.enemyType = "小型"
+            charBuild.enemyDef = 130
 
             const result = charBuild.calculate()
             expect(result).toBeTypeOf("number")
@@ -589,7 +589,7 @@ describe("CharBuild类测试", () => {
 
         it("应该正确处理大型敌人", () => {
             const charBuild = createCharBuild()
-            charBuild.enemyType = "大型"
+            charBuild.enemyDef = 200
 
             const result = charBuild.calculate()
             expect(result).toBeTypeOf("number")
@@ -598,7 +598,7 @@ describe("CharBuild类测试", () => {
 
         it("应该正确处理首领敌人", () => {
             const charBuild = createCharBuild()
-            charBuild.enemyType = "首领"
+            charBuild.enemyDef = 300
 
             const result = charBuild.calculate()
             expect(result).toBeTypeOf("number")
@@ -651,7 +651,7 @@ describe("CharBuild类测试", () => {
                     melee: new LeveledWeapon("铸铁者"),
                     ranged: new LeveledWeapon("烈焰孤沙"),
                     baseName: mockMeleeWeapon.名称,
-                    enemyType: "小型",
+                    enemyDef: 130,
                     enemyLevel: 80,
                     enemyResistance: 0.5,
                     enemyHpType: "生命",
@@ -777,7 +777,7 @@ describe("CharBuild类测试", () => {
             // 验证基本配置
             expect(charBuild.char).toBeDefined()
             expect(charBuild.hpPercent).toBeDefined()
-            expect(charBuild.enemyType).toBeDefined()
+            expect(charBuild.enemyDef).toBeDefined()
             expect(charBuild.targetFunction).toBeDefined()
         })
 
@@ -786,12 +786,12 @@ describe("CharBuild类测试", () => {
 
             // 修改配置
             charBuild.hpPercent = 0.8
-            charBuild.enemyType = "大型"
+            charBuild.enemyDef = 130
             charBuild.targetFunction = "每秒伤害"
 
             // 验证修改
             expect(charBuild.hpPercent).toBe(0.8)
-            expect(charBuild.enemyType).toBe("大型")
+            expect(charBuild.enemyDef).toBe(130)
             expect(charBuild.targetFunction).toBe("每秒伤害")
         })
     })

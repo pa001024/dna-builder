@@ -201,11 +201,11 @@ export class LeveledMonster implements Monster {
     private _baseShield: number
 
     constructor(
-        id: number,
+        id: number | Monster,
         等级 = 180,
         public isRouge = false,
     ) {
-        const mobData = monsterMap.get(id)
+        const mobData = typeof id === "number" ? monsterMap.get(id) : id
         if (!mobData) {
             throw new Error(`怪物 "${id}" 未在静态表中找到`)
         }
@@ -262,5 +262,9 @@ export class LeveledMonster implements Monster {
             if (this[prop] !== undefined) properties[prop] = this[prop] as any
         })
         return properties
+    }
+
+    getHPByLevel(level: number): number {
+        return Math.round(this._baseLife * (this.isRouge ? MOB_LEVEL_UP[level - 1].rhp : MOB_LEVEL_UP[level - 1].hp))
     }
 }

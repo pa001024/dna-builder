@@ -109,7 +109,7 @@ export interface CharBuildOptions {
     melee: LeveledWeapon
     ranged: LeveledWeapon
     baseName: string
-    enemyType?: string
+    enemyDef?: number
     enemyLevel?: number
     enemyResistance?: number
     enemyHpType?: string
@@ -153,7 +153,7 @@ export class CharBuild {
     public rangedWeapon: LeveledWeapon
     public baseName = ""
     public imbalance = false
-    public enemyType: string
+    public enemyDef: number
     public enemyLevel: number
     public enemyResistance: number
     public enemyHpType: string
@@ -166,15 +166,6 @@ export class CharBuild {
         return this.auraMod ? [this.auraMod!, ...this.charMods] : this.charMods
     }
 
-    // 敌方类型系数表
-    private enemyTypeCoefficients: Record<string, number> = {
-        小型: 13,
-        small: 13,
-        大型: 20,
-        large: 20,
-        首领: 30,
-        boss: 30,
-    }
     // 血量类型系数表
     private hpTypeCoefficients: Record<string, number> = {
         生命: 0.5,
@@ -201,12 +192,54 @@ export class CharBuild {
         this.meleeWeapon = options.melee
         this.rangedWeapon = options.ranged
         this.baseName = options.baseName
-        this.enemyType = options.enemyType || "小型"
+        this.enemyDef = options.enemyDef || 130
         this.enemyLevel = options.enemyLevel || 80
         this.enemyResistance = options.enemyResistance || 0
         this.enemyHpType = options.enemyHpType || "生命"
         this.targetFunction = options.targetFunction || "伤害"
         this.timeline = options.timeline
+    }
+
+    static fromCharSetting(
+        selectedChar: string,
+        inv: ReturnType<typeof import("../store/inv").useInvStore>,
+        charSettings: typeof import("../composables/useCharSettings").defaultCharSettings,
+        timeline?: CharBuildTimeline,
+    ) {
+        return new CharBuild({
+            char: new LeveledChar(selectedChar, charSettings.charLevel),
+            auraMod: new LeveledMod(charSettings.auraMod),
+            charMods: charSettings.charMods.filter((mod) => mod !== null).map((v) => new LeveledMod(v[0], v[1], inv.getBuffLv(v[0]))),
+            meleeMods: charSettings.meleeMods.filter((mod) => mod !== null).map((v) => new LeveledMod(v[0], v[1], inv.getBuffLv(v[0]))),
+            rangedMods: charSettings.rangedMods.filter((mod) => mod !== null).map((v) => new LeveledMod(v[0], v[1], inv.getBuffLv(v[0]))),
+            skillWeaponMods: charSettings.skillWeaponMods
+                .filter((mod) => mod !== null)
+                .map((v) => new LeveledMod(v[0], v[1], inv.getBuffLv(v[0]))),
+            skillLevel: charSettings.charSkillLevel,
+            buffs: charSettings.buffs.map((v) => new LeveledBuff(v[0], v[1])),
+            melee: new LeveledWeapon(
+                charSettings.meleeWeapon,
+                charSettings.meleeWeaponRefine,
+                charSettings.meleeWeaponLevel,
+                inv.getBuffLv(charSettings.meleeWeapon),
+            ),
+            ranged: new LeveledWeapon(
+                charSettings.rangedWeapon,
+                charSettings.rangedWeaponRefine,
+                charSettings.rangedWeaponLevel,
+                inv.getBuffLv(charSettings.rangedWeapon),
+            ),
+            baseName: charSettings.baseName,
+            imbalance: charSettings.imbalance,
+            hpPercent: charSettings.hpPercent,
+            resonanceGain: charSettings.resonanceGain,
+            enemyDef: charSettings.enemyDef,
+            enemyLevel: charSettings.enemyLevel,
+            enemyResistance: charSettings.enemyResistance,
+            enemyHpType: charSettings.enemyHpType,
+            targetFunction: charSettings.targetFunction,
+            timeline,
+        })
     }
 
     get mods() {
@@ -759,13 +792,12 @@ export class CharBuild {
             return 1
         }
 
-        const enemyTypeCoeff = this.enemyTypeCoefficients[this.enemyType] || 13
         // 确保等级和敌方等级都是有效的数字
         const charLevel = typeof this.char.等级 === "number" ? this.char.等级 : 80
         const enemyLevel = typeof this.enemyLevel === "number" ? this.enemyLevel : 80
 
         const levelDiff = Math.max(0, Math.min(20, Math.min(80, enemyLevel) - charLevel))
-        const def = finalDef ?? enemyTypeCoeff * 10 * (1 - attrs.无视防御)
+        const def = finalDef ?? this.enemyDef * (1 - attrs.无视防御)
         const dmgReduce = def / (300 + def - levelDiff * 10) // 减伤率
         const defenseMultiplier = 1 - dmgReduce
         return Math.max(0, Math.min(1, defenseMultiplier))
@@ -774,6 +806,7 @@ export class CharBuild {
     // 计算技能伤害
     public calculateSkillDamage(attrs: ReturnType<typeof this.calculateAttributes>, skill: LeveledSkill) {
         // 计算技能基础伤害
+        skill.子技能名 = this.baseNameSub
         let damage = skill.伤害
         let baseDamage = damage?.额外 || 0
         if (damage) {
@@ -826,6 +859,7 @@ export class CharBuild {
         higherCritTrigger: number
         expectedDamage: number
     } {
+        weapon.倍率名称 = this.baseNameSub
         const weaponAttrs = attrs.weapon!
         // 计算武器基础伤害
         const weaponAttackMultiplier = weapon.倍率 || 1
@@ -904,7 +938,8 @@ export class CharBuild {
             const r = Math.random()
             dmg = r < cc ? damage.higherCritTrigger : damage.lowerCritTrigger
         }
-        return dmg
+        const floating = 0.1 * Math.random() - 0.05 // -0.05 ~ 0.05
+        return dmg * (1 + floating)
     }
 
     public hasSummon() {
@@ -1050,10 +1085,8 @@ export class CharBuild {
             expectedDamage: 0,
         }
         let weapon = this.selectedWeapon
-        let bs = this.baseNameSub
         if (!attrs) attrs = this.calculateWeaponAttributes(props, minus)
         if (weapon) {
-            if (bs) weapon.倍率名称 = bs
             damage = this.calculateWeaponDamage(attrs, weapon)
             if (weapon.类型.startsWith("同律")) {
                 Object.keys(damage).forEach((k) => {
@@ -1063,7 +1096,6 @@ export class CharBuild {
         } else {
             const skill = this.selectedSkill
             if (skill) {
-                skill.子技能名 = bs
                 damage = this.calculateSkillDamage(attrs, skill)
             }
         }
@@ -1159,7 +1191,7 @@ export class CharBuild {
             melee: new LeveledWeapon(this.meleeWeapon.名称, this.meleeWeapon.精炼, this.meleeWeapon.等级, this.meleeWeapon.effectLv),
             ranged: new LeveledWeapon(this.rangedWeapon.名称, this.rangedWeapon.精炼, this.rangedWeapon.等级, this.meleeWeapon.effectLv),
             baseName: this.baseNameTitle,
-            enemyType: this.enemyType,
+            enemyDef: this.enemyDef,
             enemyLevel: this.enemyLevel,
             enemyResistance: this.enemyResistance,
             enemyHpType: this.enemyHpType,

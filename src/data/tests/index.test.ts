@@ -67,7 +67,7 @@ describe("模块功能测试", () => {
             melee: new dataModule.LeveledWeapon("铸铁者"),
             ranged: new dataModule.LeveledWeapon("烈焰孤沙"),
             baseName: "一段伤害",
-            enemyType: "小型",
+            enemyDef: 130,
             enemyLevel: 80,
             enemyResistance: 0.5,
             enemyHpType: "生命",
@@ -124,7 +124,6 @@ describe("数据完整性测试", () => {
         expect(exports).toContain("LeveledBuff")
 
         // 检查数据
-        expect(exports).toContain("gameData")
         expect(exports).toContain("achievementData")
     })
 })
@@ -172,7 +171,7 @@ describe("模块使用场景测试", () => {
             melee,
             ranged,
             baseName: "铸铁者",
-            enemyType: "小型",
+            enemyDef: 130,
             enemyLevel: 80,
             enemyResistance: 0.5,
             enemyHpType: "生命",

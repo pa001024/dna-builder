@@ -15,7 +15,7 @@ import { CollisionSystem } from "../game/systems/CollisionSystem"
 import { SkillSystem } from "../game/systems/SkillSystem"
 import { DPSMeter } from "../game/systems/DPSMeter"
 import { getSkillBehaviors } from "../game/skills"
-import { monsterMap } from "../data"
+import { LeveledMonster, monsterMap } from "../data"
 
 /**
  * 游戏逻辑 Composable
@@ -52,12 +52,11 @@ export function useShooterGame(props: { characterName: string }) {
                 return new LeveledMod(mod[0], mod[1])
             }
 
-            const auraMod = charSettings.value.auraMod
-                ? new LeveledMod(charSettings.value.auraMod, charSettings.value.charLevel)
-                : undefined
+            const auraMod = charSettings.value.auraMod ? new LeveledMod(charSettings.value.auraMod) : undefined
             const charMods = charSettings.value.charMods.map(loadMod).filter((m): m is LeveledMod => m !== undefined)
             const meleeMods = charSettings.value.meleeMods.map(loadMod).filter((m): m is LeveledMod => m !== undefined)
             const rangedMods = charSettings.value.rangedMods.map(loadMod).filter((m): m is LeveledMod => m !== undefined)
+            const skillWeaponMods = charSettings.value.skillWeaponMods.map(loadMod).filter((m): m is LeveledMod => m !== undefined)
 
             // 加载 Buff
             const buffs = charSettings.value.buffs.map((b) => new LeveledBuff(b[0], b[1]))
@@ -72,10 +71,10 @@ export function useShooterGame(props: { characterName: string }) {
                 charMods: charMods,
                 meleeMods: meleeMods,
                 rangedMods: rangedMods,
-                skillWeaponMods: [],
+                skillWeaponMods: skillWeaponMods,
                 buffs: buffs,
                 baseName: "",
-                enemyType: charSettings.value.enemyType,
+                enemyDef: charSettings.value.enemyDef,
                 enemyLevel: charSettings.value.enemyLevel,
                 enemyResistance: charSettings.value.enemyResistance,
                 enemyHpType: charSettings.value.enemyHpType,
@@ -90,11 +89,12 @@ export function useShooterGame(props: { characterName: string }) {
         }
     })
 
+    const attrs = charBuild.value?.calculateAttributes() || ({} as any)
     // 初始化游戏状态
     const gameState = ref<GameState>({
         player: createPlayerState(props.characterName, charSettings.value.charLevel),
+        attrs: attrs,
         enemies: [],
-        enemy: null,
         projectiles: [],
         damageNumbers: [],
         input: {
@@ -136,7 +136,6 @@ export function useShooterGame(props: { characterName: string }) {
         const char = new LeveledChar(charName, level)
         const melee = new LeveledWeapon(charSettings.value.meleeWeapon, charSettings.value.meleeWeaponLevel)
         const ranged = new LeveledWeapon(charSettings.value.rangedWeapon, charSettings.value.rangedWeaponLevel)
-        const now = Date.now()
 
         return {
             position: { x: 400, y: 300 },
@@ -151,10 +150,15 @@ export function useShooterGame(props: { characterName: string }) {
                 e: 0.5, // 默认5秒冷却
                 q: 1, // 默认8秒冷却
             },
-            lastMeleeAttack: now,
-            lastRangedAttack: now,
-            lastSkillE: now,
-            lastSkillQ: now,
+            lastMeleeAttack: 0,
+            lastRangedAttack: 0,
+            lastSkillE: 0,
+            lastSkillQ: 0,
+            // 神智系统初始化
+            sanity: attrs.神智,
+            maxSanity: attrs.神智,
+            sanityRegenRate: 7,
+            lastSanityRegenTime: Date.now(),
         }
     }
 
@@ -162,7 +166,7 @@ export function useShooterGame(props: { characterName: string }) {
      * 处理近战攻击
      */
     function handleMeleeAttack() {
-        if (!charBuild.value || !gameState.value.enemy) return
+        if (!charBuild.value) return
 
         const now = Date.now()
         const player = gameState.value.player
@@ -180,11 +184,12 @@ export function useShooterGame(props: { characterName: string }) {
 
         // 检测近战范围内的敌人
         const attackRange = 60
-        if (CollisionSystem.checkMeleeHit(gameState.value, playerEntity.position, attackRange)) {
-            CollisionSystem.applyDamage(gameState.value, damage)
+        const hitEnemies = CollisionSystem.checkMeleeHit(gameState.value, playerEntity.position, attackRange)
 
-            // 创建伤害数字
-            gameState.value.damageNumbers.push(new DamageNumberEntity(gameState.value.enemy!.position, damage, element))
+        // 对命中的敌人造成伤害
+        if (hitEnemies.length > 0) {
+            const damages = hitEnemies.map(() => damage)
+            CollisionSystem.applyDamageToEnemies(gameState.value, hitEnemies, damages, element)
         }
     }
 
@@ -233,25 +238,29 @@ export function useShooterGame(props: { characterName: string }) {
         if (!charBuild.value) return
         if (!skillBehaviors.value) return
         const behavior = skillBehaviors.value.e
-        const success = SkillSystem.castSkill("e", behavior, gameState.value)
+        const success = SkillSystem.castSkill("E", behavior, gameState.value)
 
         if (success && behavior.type === "dash") {
-            // 冲刺技能特殊处理: 移动玩家
+            // 计算冲刺方向
             const dx = gameState.value.input.mousePosition.x - playerEntity.position.x
             const dy = gameState.value.input.mousePosition.y - playerEntity.position.y
             const length = Math.hypot(dx, dy)
             const direction = { x: dx / length, y: dy / length }
 
-            // 冲刺移动
+            // 设置冲刺状态
             const dashDistance = 150
-            playerEntity.position.x += direction.x * dashDistance
-            playerEntity.position.y += direction.y * dashDistance
+            const dashSpeed = 800 // 冲刺速度（像素/秒）
+            const baseDamage = charBuild.value.calculateRandomDamage(behavior.name)
+            const element = gameState.value.player.charData.属性
 
-            // 边界检查
-            playerEntity.position.x = Math.max(20, Math.min(canvasSize.width - 20, playerEntity.position.x))
-            playerEntity.position.y = Math.max(20, Math.min(canvasSize.height - 20, playerEntity.position.y))
-
-            gameState.value.player.position = playerEntity.position
+            gameState.value.player.isDashing = true
+            gameState.value.player.dashDirection = direction
+            gameState.value.player.dashDistance = dashDistance
+            gameState.value.player.dashSpeed = dashSpeed
+            gameState.value.player.dashDistanceTraveled = 0
+            gameState.value.player.dashDamage = baseDamage
+            gameState.value.player.dashElement = element
+            gameState.value.player.dashHitEnemies = new Set() // 初始化已命中敌人记录
         }
     }
 
@@ -262,28 +271,33 @@ export function useShooterGame(props: { characterName: string }) {
         if (!charBuild.value) return
         if (!skillBehaviors.value) return
         const behavior = skillBehaviors.value.q
-        SkillSystem.castSkill("q", behavior, gameState.value)
+        SkillSystem.castSkill("Q", behavior, gameState.value)
     }
 
     /**
      * 选择敌人
      */
-    function handleEnemySelect(enemyId: number) {
+    function handleEnemySelect(enemyId: number, level: number) {
         const mobData = monsterMap.get(enemyId)
         if (!mobData) return
 
-        const enemy = new Enemy(mobData, { x: 600, y: 300 })
+        const enemyCount = 1
+        const positions = [{ x: Math.random() * (canvasSize.width - 200) + 100, y: Math.random() * (canvasSize.height - 200) + 100 }]
 
-        gameState.value.enemy = {
-            position: enemy.position,
-            rotation: enemy.rotation,
-            radius: enemy.radius,
-            data: enemy.data,
-            level: charSettings.value.enemyLevel, // 使用设置中的敌人等级
-            currentHealth: enemy.currentHealth,
-            maxHealth: enemy.maxHealth,
-            currentShield: enemy.currentShield,
-            maxShield: enemy.maxShield,
+        for (let i = 0; i < enemyCount; i++) {
+            const enemy = new Enemy(new LeveledMonster(mobData, level), positions[i])
+
+            gameState.value.enemies.push({
+                position: enemy.position,
+                rotation: enemy.rotation,
+                radius: enemy.radius,
+                data: enemy.data,
+                level: level,
+                currentHealth: enemy.currentHealth,
+                maxHealth: enemy.maxHealth,
+                currentShield: enemy.currentShield,
+                maxShield: enemy.maxShield,
+            })
         }
     }
 
@@ -295,6 +309,52 @@ export function useShooterGame(props: { characterName: string }) {
         playerEntity.update(dt, gameState.value.input)
         gameState.value.player.position = playerEntity.position
         gameState.value.player.rotation = playerEntity.rotation
+
+        // 更新冲刺状态
+        if (gameState.value.player.isDashing) {
+            const player = gameState.value.player
+            const dashDistance = player.dashDistance || 0
+            const dashSpeed = player.dashSpeed || 0
+            const dashDirection = player.dashDirection || { x: 0, y: 0 }
+            const dashDistanceTraveled = player.dashDistanceTraveled || 0
+
+            // 计算本帧移动距离
+            const moveDistance = Math.min(dashSpeed * dt, dashDistance - dashDistanceTraveled)
+
+            // 移动玩家
+            playerEntity.position.x += dashDirection.x * moveDistance
+            playerEntity.position.y += dashDirection.y * moveDistance
+
+            // 边界检查
+            playerEntity.position.x = Math.max(20, Math.min(canvasSize.width - 20, playerEntity.position.x))
+            playerEntity.position.y = Math.max(20, Math.min(canvasSize.height - 20, playerEntity.position.y))
+
+            // 检测碰撞并对敌人造成伤害
+            const hitEnemies = CollisionSystem.checkMeleeHit(gameState.value, playerEntity.position, 30) // 30是碰撞半径
+
+            if (hitEnemies.length > 0 && player.dashDamage && player.dashElement && player.dashHitEnemies) {
+                // 对每个敌人只造成一次伤害
+                for (const enemy of hitEnemies) {
+                    if (!player.dashHitEnemies.has(enemy)) {
+                        player.dashHitEnemies.add(enemy)
+                        const damages = [player.dashDamage]
+                        CollisionSystem.applyDamageToEnemies(gameState.value, [enemy], damages, player.dashElement)
+                    }
+                }
+            }
+
+            // 更新已移动距离
+            player.dashDistanceTraveled = dashDistanceTraveled + moveDistance
+
+            // 检测冲刺是否完成
+            if (player.dashDistanceTraveled >= dashDistance) {
+                player.isDashing = false
+                player.dashHitEnemies = undefined // 清空已命中敌人记录
+            }
+
+            // 更新玩家位置
+            gameState.value.player.position = playerEntity.position
+        }
 
         // 更新冷却时间显示
         const now = Date.now()
@@ -310,6 +370,11 @@ export function useShooterGame(props: { characterName: string }) {
 
         // 更新活跃技能
         SkillSystem.updateActiveSkills(dt, gameState.value)
+
+        // 更新神智回复
+        if (skillBehaviors.value?.e) {
+            skillBehaviors.value.e.regenerateSanity?.(gameState.value, dt)
+        }
 
         // 更新DPS统计
         dpsStats.value = DPSMeter.getStats()
@@ -336,6 +401,15 @@ export function useShooterGame(props: { characterName: string }) {
             dmgNum.age = dmgEntity.age
             dmgNum.position = dmgEntity.position
             return alive
+        })
+
+        // 移除死亡动画已完成的敌人
+        gameState.value.enemies = gameState.value.enemies.filter((enemy) => {
+            if (enemy.isDead && enemy.deathTime && enemy.deathAnimationDuration) {
+                const elapsed = now - enemy.deathTime
+                return elapsed < enemy.deathAnimationDuration
+            }
+            return true
         })
 
         // 更新敌人位置(如果需要移动)
@@ -379,13 +453,13 @@ export function useShooterGame(props: { characterName: string }) {
         // 绘制网格
         drawGrid(context)
 
-        // 绘制敌人
-        if (state.enemy) {
-            const enemy = new Enemy(state.enemy.data, state.enemy.position)
-            enemy.currentHealth = state.enemy.currentHealth
-            enemy.currentShield = state.enemy.currentShield
-            enemy.draw(context)
-        }
+        // 绘制所有敌人
+        state.enemies.forEach((enemyState) => {
+            const enemy = new Enemy(new LeveledMonster(enemyState.data.id, enemyState.level), enemyState.position)
+            enemy.currentHealth = enemyState.currentHealth
+            enemy.currentShield = enemyState.currentShield
+            enemy.draw(context, enemyState.isDead, enemyState.deathTime, enemyState.deathAnimationDuration)
+        })
 
         // 绘制玩家
         playerEntity.draw(context, state.player.charData.属性)
@@ -476,7 +550,7 @@ export function useShooterGame(props: { characterName: string }) {
         start,
         stop,
         handleEnemySelect,
-        mobList: monsterMap.values(),
+        mobList: [...monsterMap.values()].map((mob) => new LeveledMonster(mob.id)),
         dpsStats,
         skillBehaviors,
     }

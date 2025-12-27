@@ -127,7 +127,7 @@ jobs:
 
                       > 夸克网盘链接：https://pan.quark.cn/s/1419bbc8aa2d
                       "
-                  releaseDraft: true
+                  releaseDraft: false
                   prerelease: false
                   args: ${{ matrix.args }}
 

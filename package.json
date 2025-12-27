@@ -1,7 +1,7 @@
 {
     "name": "dna-builder",
     "private": true,
-    "version": "0.6.2",
+    "version": "0.7.0",
     "type": "module",
     "packageManager": "pnpm@10.25.0+sha512.5e82639027af37cf832061bcc6d639c219634488e0f2baebe785028a793de7b525ffcd3f7ff574f5e9860654e098fe852ba8ac5dd5cefe1767d23a020a92f501",
     "scripts": {

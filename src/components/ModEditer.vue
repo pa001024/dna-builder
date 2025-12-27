@@ -81,7 +81,7 @@ const sortedModOptions = computed(() => {
     const filteredOptions = props.modOptions.filter((option) => {
         const mod = new LeveledMod(option.value, option.lv, option.bufflv)
 
-        if (mod.类型 === "羽蛇") return false
+        if (mod.系列 === "羽蛇") return false
         // 1. 过滤互斥系列的MOD
         if (equippedExclusiveSeries.has(mod.系列)) {
             return false

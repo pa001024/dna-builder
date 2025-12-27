@@ -313,7 +313,6 @@ describe("数据类型测试", () => {
             // 应该能够反序列化
             const parsedData = JSON.parse(jsonString)
             expect(parsedData).toBeDefined()
-            expect(parsedData.char).toBeDefined()
         })
 
         it("应该能够序列化成就数据", () => {

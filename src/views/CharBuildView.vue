@@ -166,7 +166,7 @@ const charBuild = computed(
             imbalance: charSettings.value.imbalance,
             hpPercent: charSettings.value.hpPercent,
             resonanceGain: charSettings.value.resonanceGain,
-            enemyType: charSettings.value.enemyType,
+            enemyDef: charSettings.value.enemyDef,
             enemyLevel: charSettings.value.enemyLevel,
             enemyResistance: charSettings.value.enemyResistance,
             enemyHpType: charSettings.value.enemyHpType,
@@ -297,7 +297,7 @@ const saveConfig = () => {
 const resetConfig = () => {
     charSettings.value.hpPercent = 1
     charSettings.value.resonanceGain = 3
-    charSettings.value.enemyType = "small"
+    charSettings.value.enemyDef = 130
     charSettings.value.enemyLevel = 80
     charSettings.value.enemyResistance = 0
     charSettings.value.enemyHpType = "生命"
@@ -450,7 +450,7 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                                 <SectionMarker />
                                 <h3 class="text-lg font-semibold">模拟</h3>
                             </div>
-                            <ShooterGame v-if="simulator_model_show" :characterName="selectedChar" />
+                            <GameSimulator v-if="simulator_model_show" :characterName="selectedChar" />
                         </div>
                     </div>
                     <div class="modal-backdrop" @click="simulator_model_show = false"></div>
@@ -813,11 +813,19 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                             <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.enemy_type") }}</div>
                             <Select
                                 class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.enemyType"
+                                v-model="charSettings.enemyDef"
                                 @change="updateCharBuild"
                             >
-                                <SelectItem v-for="enemy in ['small', 'large', 'boss']" :key="enemy" :value="enemy">
-                                    {{ $t(`char-build.${enemy}`) }}
+                                <SelectItem
+                                    v-for="enemy in [
+                                        { def: 130, type: 'small' },
+                                        { def: 200, type: 'large' },
+                                        { def: 300, type: 'boss' },
+                                    ]"
+                                    :key="enemy.type"
+                                    :value="enemy.def"
+                                >
+                                    {{ $t(`char-build.${enemy.type}`) }}
                                 </SelectItem>
                             </Select>
                         </div>

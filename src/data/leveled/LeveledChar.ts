@@ -136,9 +136,12 @@ export class LeveledChar implements Char {
 
     getProperties(): Partial<Char> {
         const properties: Partial<Char> = {}
-        LeveledChar.properties.forEach((prop) => {
-            if ((this as any)[prop]) properties[prop] = (this as any)[prop]
-        })
+        for (const prop of LeveledChar.properties) {
+            const value = this[prop as keyof this]
+            if (value !== undefined) {
+                properties[prop as keyof Char] = value
+            }
+        }
         return properties
     }
 

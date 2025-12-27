@@ -1,3 +1,4 @@
+import { CharAttr } from "../data"
 import type { Char, Weapon, Skill, Monster } from "../data/data-types"
 
 /**
@@ -46,6 +47,22 @@ export interface PlayerState {
     lastRangedAttack: number
     lastSkillE: number
     lastSkillQ: number
+
+    // 神智系统
+    sanity?: number
+    maxSanity?: number
+    sanityRegenRate?: number // 每秒神智回复量
+    lastSanityRegenTime?: number // 上次神智回复时间
+
+    // 冲刺状态
+    isDashing?: boolean
+    dashDirection?: Vector2D
+    dashDistance?: number
+    dashSpeed?: number
+    dashDistanceTraveled?: number
+    dashDamage?: number
+    dashElement?: string
+    dashHitEnemies?: Set<any> // 本次冲刺已命中的敌人
 }
 
 /**
@@ -61,6 +78,9 @@ export interface EnemyState {
     maxHealth: number
     currentShield: number
     maxShield: number
+    isDead?: boolean // 是否死亡
+    deathTime?: number // 死亡时间
+    deathAnimationDuration?: number // 死亡动画持续时间（毫秒）
 }
 
 /**
@@ -102,12 +122,11 @@ export interface DamageNumber {
  */
 export interface GameState {
     player: PlayerState
+    attrs: CharAttr
     enemies: EnemyState[]
     projectiles: Projectile[]
     damageNumbers: DamageNumber[]
     input: InputState
     isPaused: boolean
     isInitialized: boolean
-    // 为了兼容保留单敌人引用
-    enemy: EnemyState | null
 }

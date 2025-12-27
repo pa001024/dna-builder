@@ -1024,7 +1024,7 @@ const charBuild = computed(
             imbalance: charSettings.value.imbalance,
             hpPercent: charSettings.value.hpPercent,
             resonanceGain: charSettings.value.resonanceGain,
-            enemyType: charSettings.value.enemyType,
+            enemyDef: charSettings.value.enemyDef,
             enemyLevel: charSettings.value.enemyLevel,
             enemyResistance: charSettings.value.enemyResistance,
             enemyHpType: charSettings.value.enemyHpType,

@@ -33,7 +33,9 @@ export class MihanNotify {
             // 用户登录尝试使用DNAAPI获取密函
             const data = await api.getDefaultRoleForTool()
             if (data?.data?.instanceInfo) {
-                this.mihanData.value = data.data.instanceInfo.map((v) => v.instances.map((v) => v.name))
+                const missions = data.data.instanceInfo.map((v) => v.instances.map((v) => v.name))
+                if (!missions || JSON.stringify(missions) === JSON.stringify(this.mihanData.value)) return false
+                this.mihanData.value = missions
                 return true
             }
         }
