@@ -174,17 +174,13 @@ describe("LeveledChar", () => {
         const char = new LeveledChar("黎瑟", 1)
         expect(char.等级).toBe(1)
 
-        // 80级基础攻击 * 0.079666848 = 276.15 * 0.079666848 ≈ 22.00
         expect(char.基础攻击).toBe(22)
 
-        // 80级基础生命 * 0.079666848 = 1180 * 0.079666848 ≈ 94.00
         expect(char.基础生命).toBe(94)
 
-        // 80级基础护盾 * 0.079666848 = 1180 * 0.079666848 ≈ 94.00
         expect(char.基础护盾).toBe(94)
 
-        // 80级基础防御 * 0.079666848 = 276 * 0.079666848 ≈ 22.00
-        expect(char.基础防御).toBe(22)
+        expect(char.基础防御).toBe(276)
     })
 
     it("等级80时的属性计算正确（使用原始值）", () => {
@@ -202,17 +198,13 @@ describe("LeveledChar", () => {
         const char = new LeveledChar("黎瑟", 50)
         expect(char.等级).toBe(50)
 
-        // 80级基础攻击 * 0.682636248 = 276.15 * 0.682636248 ≈ 188.5
-        expect(char.基础攻击).toBe(189)
+        expect(char.基础攻击).toBe(146)
 
-        // 80级基础生命 * 0.682636248 = 1180 * 0.682636248 ≈ 805.5
-        expect(char.基础生命).toBe(806)
+        expect(char.基础生命).toBe(624)
 
-        // 80级基础护盾 * 0.682636248 = 1180 * 0.682636248 ≈ 805.5
-        expect(char.基础护盾).toBe(806)
+        expect(char.基础护盾).toBe(624)
 
-        // 80级基础防御 * 0.682636248 = 276 * 0.682636248 ≈ 188.4
-        expect(char.基础防御).toBe(188)
+        expect(char.基础防御).toBe(276)
     })
 
     it("等级超出范围时应该被限制", () => {

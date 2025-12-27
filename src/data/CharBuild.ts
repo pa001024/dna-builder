@@ -402,7 +402,7 @@ export class CharBuild {
         if (props?.生效?.条件 && !minus) {
             condMods.push(props as LeveledMod)
         }
-        attrs = this.applyCondition(attrs, condMods, minus)
+        if (!minus) attrs = this.applyCondition(attrs, condMods)
         if (nocode) return attrs
         if (this.dynamicBuffs.length > 0 || (!minus && props?.code)) {
             const all = this.getAllWeaponsAttrs(props, minus)
@@ -420,9 +420,9 @@ export class CharBuild {
         return attrs
     }
 
-    public applyCondition(attrs: CharAttr, mods: LeveledMod[], minus = false) {
+    public applyCondition(attrs: CharAttr, mods: LeveledMod[]) {
         mods.forEach((mod) => {
-            attrs = mod.applyCondition(attrs, this.charMods, minus)
+            attrs = mod.applyCondition(attrs, this.charMods)
         })
         return attrs
     }
@@ -1304,6 +1304,7 @@ export class CharBuild {
             const mapped = modOptions
                 .filter(
                     (v) =>
+                        v.系列 !== "羽蛇" &&
                         v.类型.startsWith(type) &&
                         (!v.属性 || v.属性 === localBuild.char.属性) &&
                         (!v.限定 ||

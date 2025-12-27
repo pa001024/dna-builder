@@ -264,11 +264,11 @@ export class LeveledMod implements Mod {
     /**
      * 应用MOD条件
      */
-    applyCondition(attrs: CharAttr, charMods: LeveledMod[], minus = false): CharAttr {
+    applyCondition(attrs: CharAttr, charMods: LeveledMod[]): CharAttr {
         const condition = this.checkCondition(attrs, charMods)
         if (!condition || !condition.isEffective) return attrs
         Object.keys(condition.props).forEach((key) => {
-            attrs[key as keyof CharAttr] += minus ? -condition.props[key] : condition.props[key]
+            attrs[key as keyof CharAttr] += condition.props[key]
         })
         return attrs
     }

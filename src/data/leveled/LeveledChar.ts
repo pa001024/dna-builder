@@ -26,7 +26,6 @@ export class LeveledChar implements Char {
     private _base80Attack: number
     private _base80Life: number
     private _base80Shield: number
-    private _base80Defense: number
 
     /**
      * 构造函数
@@ -67,7 +66,6 @@ export class LeveledChar implements Char {
         this._base80Attack = charData.基础攻击
         this._base80Life = charData.基础生命
         this._base80Shield = charData.基础护盾
-        this._base80Defense = charData.基础防御
 
         // 设置等级（如果提供）
         if (等级) {
@@ -117,7 +115,6 @@ export class LeveledChar implements Char {
         this.基础攻击 = Math.round(this._base80Attack * multiplier)
         this.基础生命 = Math.round(this._base80Life * multiplier)
         this.基础护盾 = Math.round(this._base80Shield * multiplier)
-        this.基础防御 = Math.round(this._base80Defense * multiplier)
     }
 
     static properties = [

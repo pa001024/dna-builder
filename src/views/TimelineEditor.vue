@@ -970,10 +970,9 @@ const resetView = () => {
 // #endregion
 // #region 游戏
 import { useLocalStorage } from "@vueuse/core"
-import { CharBuild, LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../data"
+import { CharBuild, LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon, buffData } from "../data"
 import { useInvStore } from "../store/inv"
-import { useCharSettings } from "../store/charSettings"
-import { gameData } from "../data"
+import { useCharSettings } from "../composables/useCharSettings"
 import { formatProp, formatSkillProp } from "../util"
 import { groupBy } from "lodash-es"
 import { useTimeline } from "../store/timeline"
@@ -1033,7 +1032,7 @@ const charBuild = computed(
         }),
 )
 const buffOptions = computed(() =>
-    gameData.buff
+    buffData
         .filter((buff) => !buff.限定 || buff.限定 === selectedChar.value || buff.限定 === charBuild.value.char.属性)
         .map((v) => ({
             mx: v.mx,

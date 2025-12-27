@@ -2,8 +2,7 @@ import { describe, it, expect } from "vitest"
 import * as dataModule from "../index"
 import { CharBuild } from "../CharBuild"
 import { LeveledChar, LeveledWeapon, LeveledMod, LeveledBuff } from "../leveled"
-import gameData from "../data.json"
-import achievementData from "../achievement.json"
+import achievementData from "../achievement.data"
 
 // 测试模块导出
 describe("模块导出测试", () => {
@@ -30,11 +29,6 @@ describe("模块导出测试", () => {
     it("应该导出LeveledBuff类", () => {
         expect(dataModule.LeveledBuff).toBeDefined()
         expect(dataModule.LeveledBuff).toBe(LeveledBuff)
-    })
-
-    it("应该导出gameData", () => {
-        expect(dataModule.gameData).toBeDefined()
-        expect(dataModule.gameData).toBe(gameData)
     })
 
     it("应该导出achievementData", () => {
@@ -86,17 +80,21 @@ describe("模块功能测试", () => {
     })
 
     it("应该能够访问游戏数据", () => {
-        expect(dataModule.gameData.char).toBeDefined()
-        expect(Array.isArray(dataModule.gameData.char)).toBe(true)
-        expect(dataModule.gameData.char.length).toBeGreaterThan(0)
+        expect(dataModule.charData).toBeDefined()
+        expect(Array.isArray(dataModule.charData)).toBe(true)
+        expect(dataModule.charData.length).toBeGreaterThan(0)
 
-        expect(dataModule.gameData.mod).toBeDefined()
-        expect(Array.isArray(dataModule.gameData.mod)).toBe(true)
-        expect(dataModule.gameData.mod.length).toBeGreaterThan(0)
+        expect(dataModule.modData).toBeDefined()
+        expect(Array.isArray(dataModule.modData)).toBe(true)
+        expect(dataModule.modData.length).toBeGreaterThan(0)
 
-        expect(dataModule.gameData.weapon).toBeDefined()
-        expect(Array.isArray(dataModule.gameData.weapon)).toBe(true)
-        expect(dataModule.gameData.weapon.length).toBeGreaterThan(0)
+        expect(dataModule.weaponData).toBeDefined()
+        expect(Array.isArray(dataModule.weaponData)).toBe(true)
+        expect(dataModule.weaponData.length).toBeGreaterThan(0)
+
+        expect(dataModule.buffData).toBeDefined()
+        expect(Array.isArray(dataModule.buffData)).toBe(true)
+        expect(dataModule.buffData.length).toBeGreaterThan(0)
     })
 
     it("应该能够访问成就数据", () => {
@@ -111,10 +109,6 @@ describe("模块功能测试", () => {
 
 // 测试数据完整性
 describe("数据完整性测试", () => {
-    it("导出的游戏数据应该与原始数据相同", () => {
-        expect(dataModule.gameData).toEqual(gameData)
-    })
-
     it("导出的成就数据应该与原始数据相同", () => {
         expect(dataModule.achievementData).toEqual(achievementData)
     })
@@ -151,7 +145,14 @@ describe("模块使用场景测试", () => {
         const moduleExports = dataModule
 
         expect(moduleExports.CharBuild).toBeDefined()
-        expect(moduleExports.gameData).toBeDefined()
+        expect(moduleExports.charData).toBeDefined()
+        expect(moduleExports.modData).toBeDefined()
+        expect(moduleExports.weaponData).toBeDefined()
+        expect(moduleExports.buffData).toBeDefined()
+        expect(moduleExports.achievementData).toBeDefined()
+        expect(moduleExports.baseData).toBeDefined()
+        expect(moduleExports.monsterData).toBeDefined()
+        expect(moduleExports.effectData).toBeDefined()
     })
 
     it("应该能够与其他模块一起使用", () => {

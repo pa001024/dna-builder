@@ -1,19 +1,31 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue"
 import { t } from "i18next"
-import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon, CharBuild, gameData as data, CharBuildTimeline, buffMap } from "../data"
+import {
+    LeveledChar,
+    LeveledMod,
+    LeveledBuff,
+    LeveledWeapon,
+    CharBuild,
+    CharBuildTimeline,
+    buffMap,
+    charData,
+    modData,
+    buffData,
+    weaponData,
+} from "../data"
 import { useLocalStorage } from "@vueuse/core"
 import { groupBy, cloneDeep } from "lodash-es"
 import { format100, formatSkillProp, formatWeaponProp } from "../util"
 import { useInvStore } from "../store/inv"
-import { useCharSettings } from "../store/charSettings"
+import { useCharSettings } from "../composables/useCharSettings"
 import { useTimeline } from "../store/timeline"
 
 //#region 角色
 const inv = useInvStore()
 // 获取实际数据
-const charOptions = data.char.map((char) => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
-const modOptions = data.mod
+const charOptions = charData.map((char) => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
+const modOptions = modData
     .map((mod) => ({
         value: mod.id,
         label: mod.名称,
@@ -41,7 +53,7 @@ const modOptions = data.mod
     buffMap.set("自定义BUFF", buffObj)
 })()
 const _buffOptions = reactive(
-    data.buff.map((buff) => ({
+    buffData.map((buff) => ({
         value: new LeveledBuff(buff.名称),
         label: buff.名称,
         limit: buff.限定,
@@ -64,7 +76,7 @@ const buffOptions = computed(() =>
         }),
 )
 // 近战和远程武器选项
-const meleeWeaponOptions = data.weapon
+const meleeWeaponOptions = weaponData
     .filter((weapon) => weapon.类型 === "近战")
     .map((weapon) => ({
         value: weapon.名称,
@@ -72,7 +84,7 @@ const meleeWeaponOptions = data.weapon
         type: weapon.类别,
         icon: `/imgs/${weapon.名称}.png`,
     }))
-const rangedWeaponOptions = data.weapon
+const rangedWeaponOptions = weaponData
     .filter((weapon) => weapon.类型 === "远程")
     .map((weapon) => ({
         value: weapon.名称,
@@ -318,15 +330,15 @@ const reloadCustomBuff = () => {
 }
 //#endregion
 
+//#region 模拟
+const simulator_model_show = ref(false)
+//#endregion
 //#region 自动构建
 const autobuild_model_show = ref(false)
-const openAutoBuild = () => {
-    ;(window as any).autobuild_model.show()
-    autobuild_model_show.value = true
-}
 let newBuild!: CharBuild
 
 function applyAutobuild() {
+    autobuild_model_show.value = false
     if (!newBuild) return
     charSettings.value.meleeWeapon = newBuild.meleeWeapon.名称
     charSettings.value.meleeWeaponLevel = newBuild.meleeWeapon.等级
@@ -430,18 +442,21 @@ function updateTeamBuff(newValue: string, oldValue: string) {
     <div class="h-full overflow-y-auto">
         <div class="mx-auto p-4">
             <div class="flex justify-end gap-2 mb-4">
-                <Select
-                    v-if="charProject.projects.length > 0"
-                    class="w-50 inline-flex items-center justify-between input input-bordered input-md whitespace-nowrap"
-                    v-model="charProject.selected"
-                    @change="loadConfig"
-                >
-                    <SelectItem v-for="project in charProject.projects" :key="project.name" :value="project.name">
-                        {{ project.name }}
-                    </SelectItem>
-                </Select>
-                <button class="btn btn-sm btn-secondary" @click="openAutoBuild">{{ $t("char-build.auto_build") }}</button>
-                <dialog id="autobuild_model" class="modal" @close="autobuild_model_show = false">
+                <button class="btn btn-sm btn-circle" @click="simulator_model_show = true">模拟</button>
+                <dialog id="simulator_model" class="modal" :class="{ 'modal-open': simulator_model_show }">
+                    <div class="modal-box bg-base-300 w-5/6 max-w-5xl">
+                        <div class="mb-6">
+                            <div class="flex items-center gap-2 mb-3">
+                                <SectionMarker />
+                                <h3 class="text-lg font-semibold">模拟</h3>
+                            </div>
+                            <ShooterGame v-if="simulator_model_show" :characterName="selectedChar" />
+                        </div>
+                    </div>
+                    <div class="modal-backdrop" @click="simulator_model_show = false"></div>
+                </dialog>
+                <button class="btn btn-sm btn-secondary" @click="autobuild_model_show = true">{{ $t("char-build.auto_build") }}</button>
+                <dialog id="autobuild_model" class="modal" :class="{ 'modal-open': autobuild_model_show }">
                     <div class="modal-box bg-base-300 w-5/6 max-w-5xl">
                         <div class="mb-6">
                             <div class="flex items-center gap-2 mb-3">
@@ -453,12 +468,23 @@ function updateTeamBuff(newValue: string, oldValue: string) {
                         <div class="modal-action">
                             <form class="flex justify-end gap-2" method="dialog">
                                 <button class="btn btn-primary" @click="applyAutobuild">应用</button>
-                                <button class="btn">取消</button>
+                                <button class="btn" @click="autobuild_model_show = false">取消</button>
                             </form>
                         </div>
                     </div>
+                    <div class="modal-backdrop" @click="autobuild_model_show = false"></div>
                 </dialog>
                 <button class="btn btn-sm btn-success" @click="$router.push('/char-build-compare')">{{ $t("build-compare.title") }}</button>
+                <Select
+                    v-if="charProject.projects.length > 0"
+                    class="w-50 inline-flex items-center justify-between input input-bordered input-md whitespace-nowrap"
+                    v-model="charProject.selected"
+                    @change="loadConfig"
+                >
+                    <SelectItem v-for="project in charProject.projects" :key="project.name" :value="project.name">
+                        {{ project.name }}
+                    </SelectItem>
+                </Select>
                 <button class="btn btn-sm btn-primary" @click="saveConfig">{{ $t("char-build.save_project") }}</button>
                 <button class="btn btn-sm" @click="resetConfig">{{ $t("char-build.reset_config") }}</button>
             </div>

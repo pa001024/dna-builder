@@ -71,29 +71,31 @@ const autoBuild = computed(() => (props.update ? ((lastBuild = buildMods()), emi
                     自动更换远程
                 </label>
             </div>
-            <div class="flex items-center gap-2 text-sm">
-                <div class="label">包含MOD类型</div>
-                <CheckBoxGroup
-                    v-model="autoBuildSetting.includeTypes"
-                    :options="[
-                        { label: '角色', value: 'charMods' },
-                        { label: '近战', value: 'meleeMods' },
-                        { label: '远程', value: 'rangedMods' },
-                        { label: '同律', value: 'skillWeaponMods' },
-                    ]"
-                />
-            </div>
-            <div class="flex items-center gap-2 text-sm">
-                <div class="label">保留当前MOD</div>
-                <CheckBoxGroup
-                    v-model="autoBuildSetting.preserveTypes"
-                    :options="[
-                        { label: '角色', value: 'charMods' },
-                        { label: '近战', value: 'meleeMods' },
-                        { label: '远程', value: 'rangedMods' },
-                        { label: '同律', value: 'skillWeaponMods' },
-                    ]"
-                />
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="flex items-center gap-2 text-sm">
+                    <div class="label">包含MOD类型</div>
+                    <CheckBoxGroup
+                        v-model="autoBuildSetting.includeTypes"
+                        :options="[
+                            { label: '角色', value: 'charMods' },
+                            { label: '近战', value: 'meleeMods' },
+                            { label: '远程', value: 'rangedMods' },
+                            { label: '同律', value: 'skillWeaponMods' },
+                        ]"
+                    />
+                </div>
+                <div class="flex items-center gap-2 text-sm">
+                    <div class="label">保留当前MOD</div>
+                    <CheckBoxGroup
+                        v-model="autoBuildSetting.preserveTypes"
+                        :options="[
+                            { label: '角色', value: 'charMods' },
+                            { label: '近战', value: 'meleeMods' },
+                            { label: '远程', value: 'rangedMods' },
+                            { label: '同律', value: 'skillWeaponMods' },
+                        ]"
+                    />
+                </div>
             </div>
         </div>
         <div class="flex flex-col gap-2 py-4">

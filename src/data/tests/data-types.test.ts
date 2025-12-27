@@ -1,52 +1,51 @@
 import { describe, it, expect } from "vitest"
-import gameData from "../data.json"
-import achievementData from "../achievement.json"
+import achievementData from "../achievement.data"
+import { monsterMap } from "../leveled"
+import charData from "../char.data"
+import modData from "../mod.data"
+import weaponData from "../weapon.data"
+import baseData from "../base.data"
+import buffData from "../buff.data"
 
 // 测试数据类型的完整性和有效性
 describe("数据类型测试", () => {
     // 游戏数据测试
     describe("游戏数据完整性测试", () => {
         it("应该包含角色数据", () => {
-            expect(gameData.char).toBeDefined()
-            expect(Array.isArray(gameData.char)).toBe(true)
-            expect(gameData.char.length).toBeGreaterThan(0)
+            expect(charData).toBeDefined()
+            expect(Array.isArray(charData)).toBe(true)
+            expect(charData.length).toBeGreaterThan(0)
         })
 
         it("应该包含MOD数据", () => {
-            expect(gameData.mod).toBeDefined()
-            expect(Array.isArray(gameData.mod)).toBe(true)
-            expect(gameData.mod.length).toBeGreaterThan(0)
+            expect(modData).toBeDefined()
+            expect(Array.isArray(modData)).toBe(true)
+            expect(modData.length).toBeGreaterThan(0)
         })
 
         it("应该包含武器数据", () => {
-            expect(gameData.weapon).toBeDefined()
-            expect(Array.isArray(gameData.weapon)).toBe(true)
-            expect(gameData.weapon.length).toBeGreaterThan(0)
+            expect(weaponData).toBeDefined()
+            expect(Array.isArray(weaponData)).toBe(true)
+            expect(weaponData.length).toBeGreaterThan(0)
         })
 
         it("应该包含武器基础数据", () => {
-            expect(gameData.base).toBeDefined()
-            expect(Array.isArray(gameData.base)).toBe(true)
-            expect(gameData.base.length).toBeGreaterThan(0)
+            expect(baseData).toBeDefined()
+            expect(Array.isArray(baseData)).toBe(true)
+            expect(baseData.length).toBeGreaterThan(0)
         })
 
         it("应该包含BUFF数据", () => {
-            expect(gameData.buff).toBeDefined()
-            expect(Array.isArray(gameData.buff)).toBe(true)
-            expect(gameData.buff.length).toBeGreaterThan(0)
-        })
-
-        it("应该包含敌人数据", () => {
-            expect(gameData.mob).toBeDefined()
-            expect(Array.isArray(gameData.mob)).toBe(true)
-            expect(gameData.mob.length).toBeGreaterThan(0)
+            expect(buffData).toBeDefined()
+            expect(Array.isArray(buffData)).toBe(true)
+            expect(buffData.length).toBeGreaterThan(0)
         })
     })
 
     // 角色数据测试
     describe("角色数据测试", () => {
         it("角色应该包含必要属性", () => {
-            const sampleChar = gameData.char[0]
+            const sampleChar = charData[0]
 
             expect(sampleChar).toBeDefined()
             expect(sampleChar.名称).toBeDefined()
@@ -69,7 +68,7 @@ describe("数据类型测试", () => {
         })
 
         it("角色应该有标识符", () => {
-            gameData.char.forEach((char) => {
+            charData.forEach((char) => {
                 // 角色应该有名称或id作为标识符
                 expect(char.名称).toBeDefined()
                 expect(typeof char.名称).toBe("string")
@@ -78,7 +77,7 @@ describe("数据类型测试", () => {
         })
 
         it("角色属性应该是有效数值", () => {
-            gameData.char.forEach((char) => {
+            charData.forEach((char) => {
                 expect(char.基础攻击).toBeGreaterThan(0)
                 expect(char.基础生命).toBeGreaterThan(0)
                 expect(char.基础护盾).toBeGreaterThanOrEqual(0)
@@ -91,7 +90,7 @@ describe("数据类型测试", () => {
     // MOD数据测试
     describe("MOD数据测试", () => {
         it("MOD应该包含基本属性", () => {
-            const sampleMod = gameData.mod[0]
+            const sampleMod = modData[0]
 
             expect(sampleMod).toBeDefined()
             expect(sampleMod.id).toBeDefined()
@@ -102,7 +101,7 @@ describe("数据类型测试", () => {
         })
 
         it("MOD应该有ID和名称", () => {
-            gameData.mod.forEach((mod) => {
+            modData.forEach((mod) => {
                 expect(mod.id).toBeDefined()
                 expect(typeof mod.id).toBe("number")
 
@@ -113,15 +112,15 @@ describe("数据类型测试", () => {
         })
 
         it("MOD ID 不应该重复", () => {
-            const idset = new Set(gameData.mod.map((mod) => mod.id))
-            expect(idset.size).toBe(gameData.mod.length)
+            const idset = new Set(modData.map((mod) => mod.id))
+            expect(idset.size).toBe(modData.length)
         })
     })
 
     // 武器数据测试
     describe("武器数据测试", () => {
         it("武器应该包含基本属性", () => {
-            const sampleWeapon = gameData.weapon[0]
+            const sampleWeapon = weaponData[0]
 
             expect(sampleWeapon).toBeDefined()
             expect(sampleWeapon.名称).toBeDefined()
@@ -132,7 +131,7 @@ describe("数据类型测试", () => {
         })
 
         it("武器应该有名称和基础类型", () => {
-            gameData.weapon.forEach((weapon) => {
+            weaponData.forEach((weapon) => {
                 expect(weapon.名称).toBeDefined()
                 expect(typeof weapon.名称).toBe("string")
                 expect(weapon.名称.length).toBeGreaterThan(0)
@@ -144,7 +143,7 @@ describe("数据类型测试", () => {
         })
 
         it("武器应该有基础属性", () => {
-            gameData.weapon.forEach((weapon) => {
+            weaponData.forEach((weapon) => {
                 expect(weapon.基础攻击).toBeDefined()
                 expect(typeof weapon.基础攻击).toBe("number")
                 expect(weapon.基础攻击).toBeGreaterThan(0)
@@ -155,7 +154,7 @@ describe("数据类型测试", () => {
     // 武器基础数据测试
     describe("武器基础数据测试", () => {
         it("武器基础应该包含基本属性", () => {
-            const sampleBase = gameData.base[0]
+            const sampleBase = baseData[0]
 
             expect(sampleBase).toBeDefined()
             expect(sampleBase.名称).toBeDefined()
@@ -163,7 +162,7 @@ describe("数据类型测试", () => {
         })
 
         it("武器基础应该有名称", () => {
-            gameData.base.forEach((base) => {
+            baseData.forEach((base) => {
                 expect(base.名称).toBeDefined()
                 expect(typeof base.名称).toBe("string")
                 expect(base.名称.length).toBeGreaterThan(0)
@@ -171,7 +170,7 @@ describe("数据类型测试", () => {
         })
 
         it("武器基础应该有倍率或攻击数据", () => {
-            gameData.base.forEach((base) => {
+            baseData.forEach((base) => {
                 // 检查是否有倍率或攻击相关数据
                 const hasData = base.倍率 !== undefined
                 expect(hasData).toBe(true)
@@ -182,7 +181,7 @@ describe("数据类型测试", () => {
     // BUFF数据测试
     describe("BUFF数据测试", () => {
         it("BUFF应该包含必要属性", () => {
-            const sampleBuff = gameData.buff[0]
+            const sampleBuff = buffData[0]
 
             expect(sampleBuff).toBeDefined()
             expect(sampleBuff.名称).toBeDefined()
@@ -193,7 +192,7 @@ describe("数据类型测试", () => {
         })
 
         it("BUFF应该有名称", () => {
-            gameData.buff.forEach((buff) => {
+            buffData.forEach((buff) => {
                 expect(buff.名称).toBeDefined()
                 expect(typeof buff.名称).toBe("string")
                 expect(buff.名称.length).toBeGreaterThan(0)
@@ -201,7 +200,7 @@ describe("数据类型测试", () => {
         })
 
         it("BUFF属性应该是有效数值", () => {
-            gameData.buff.forEach((buff) => {
+            buffData.forEach((buff) => {
                 // 检查所有可能的数值属性
                 const numericProperties = [
                     "攻击",
@@ -248,22 +247,11 @@ describe("数据类型测试", () => {
     // 敌人数据测试
     describe("敌人数据测试", () => {
         it("敌人应该包含必要属性", () => {
-            const sampleMob = gameData.mob[0]
+            const sampleMob = monsterMap.values().next().value!
 
             expect(sampleMob).toBeDefined()
             expect(sampleMob.名称).toBeDefined()
             expect(typeof sampleMob.名称).toBe("string")
-
-            expect(sampleMob.类型).toBeDefined()
-            expect(typeof sampleMob.类型).toBe("string")
-        })
-
-        it("敌人类型应该是有效值", () => {
-            const validTypes = ["小型", "大型", "首领"]
-
-            gameData.mob.forEach((mob) => {
-                expect(validTypes).toContain(mob.类型)
-            })
         })
     })
 
@@ -292,12 +280,12 @@ describe("数据类型测试", () => {
     // 数据一致性测试
     describe("数据一致性测试", () => {
         it("MOD应该引用有效的角色或武器", () => {
-            const charNames = gameData.char.map((c) => c.名称)
-            const weaponNames = gameData.weapon.map((w) => w.名称)
-            const weaponTypes = [...new Set(gameData.weapon.map((w) => w.类别))]
+            const charNames = charData.map((c) => c.名称)
+            const weaponNames = weaponData.map((w) => w.名称)
+            const weaponTypes = [...new Set(weaponData.map((w) => w.类别))]
             const allNames = [...charNames, ...weaponNames, ...weaponTypes, "切割", "贯穿", "震荡"]
 
-            gameData.mod.forEach((mod) => {
+            modData.forEach((mod) => {
                 if (mod.限定) {
                     expect(allNames).toContain(mod.限定)
                 }
@@ -305,9 +293,9 @@ describe("数据类型测试", () => {
         })
 
         it("BUFF应该引用有效的角色", () => {
-            const charNames = gameData.char.map((c) => c.名称)
+            const charNames = charData.map((c) => c.名称)
 
-            gameData.buff.forEach((buff) => {
+            buffData.forEach((buff) => {
                 if (buff.限定) {
                     expect(charNames).toContain(buff.限定)
                 }
@@ -318,7 +306,7 @@ describe("数据类型测试", () => {
     // 数据导出测试
     describe("数据导出测试", () => {
         it("应该能够序列化游戏数据", () => {
-            const jsonString = JSON.stringify(gameData)
+            const jsonString = JSON.stringify(charData)
             expect(typeof jsonString).toBe("string")
             expect(jsonString.length).toBeGreaterThan(0)
 
@@ -345,11 +333,10 @@ describe("数据类型测试", () => {
             const startTime = performance.now()
 
             // 访问所有数据
-            const charCount = gameData.char.length
-            const modCount = gameData.mod.length
-            const weaponCount = gameData.weapon.length
-            const buffCount = gameData.buff.length
-            const mobCount = gameData.mob.length
+            const charCount = charData.length
+            const modCount = modData.length
+            const weaponCount = weaponData.length
+            const buffCount = buffData.length
 
             const endTime = performance.now()
             const duration = endTime - startTime
@@ -362,16 +349,15 @@ describe("数据类型测试", () => {
             expect(modCount).toBeGreaterThan(0)
             expect(weaponCount).toBeGreaterThan(0)
             expect(buffCount).toBeGreaterThan(0)
-            expect(mobCount).toBeGreaterThan(0)
         })
 
         it("应该能够快速搜索数据", () => {
             const startTime = performance.now()
 
             // 搜索测试
-            const searchChar = gameData.char.find((c) => c.名称 === "黎瑟")
-            const searchMod = gameData.mod.find((m) => m.id === 41001)
-            const searchWeapon = gameData.weapon.find((w) => w.名称 === "铸铁者")
+            const searchChar = charData.find((c) => c.名称 === "黎瑟")
+            const searchMod = modData.find((m) => m.id === 41001)
+            const searchWeapon = weaponData.find((w) => w.名称 === "铸铁者")
 
             const endTime = performance.now()
             const duration = endTime - startTime

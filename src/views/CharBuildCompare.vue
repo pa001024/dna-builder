@@ -3,7 +3,7 @@ import { computed, reactive, ref } from "vue"
 import { useLocalStorage } from "@vueuse/core"
 import { groupBy, cloneDeep } from "lodash-es"
 import { useInvStore } from "../store/inv"
-import { useCharSettings } from "../store/charSettings"
+import { useCharSettings } from "../composables/useCharSettings"
 import { useTimeline } from "../store/timeline"
 import {
     LeveledChar,
@@ -11,21 +11,23 @@ import {
     LeveledBuff,
     LeveledWeapon,
     CharBuild,
-    gameData as data,
     buffMap,
     CharAttr,
     WeaponAttr,
     CharBuildTimeline,
+    charData,
+    modData,
+    buffData,
 } from "../data"
 
 // Initialize stores and data
 const inv = useInvStore()
 
 // Character options (same as CharBuildView)
-const charOptions = data.char.map((char) => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
+const charOptions = charData.map((char) => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
 
 // MOD options (same as CharBuildView)
-const modOptions = data.mod
+const modOptions = modData
     .map((mod) => ({
         value: mod.id,
         label: mod.名称,
@@ -54,7 +56,7 @@ const modOptions = data.mod
 })()
 
 const _buffOptions = reactive(
-    data.buff.map((buff) => ({
+    buffData.map((buff) => ({
         value: new LeveledBuff(buff.名称),
         label: buff.名称,
         limit: buff.限定,

@@ -1,13 +1,12 @@
 <script setup lang="ts">
 // 引入必要的依赖
 import { ref, computed } from "vue"
-import gameData from "../data/data.json"
-import { LeveledMod, LeveledWeapon } from "../data"
+import { LeveledMod, LeveledWeapon, weaponData, modData } from "../data"
 import { useInvStore } from "../store/inv"
 const inv = useInvStore()
 
 // 武器
-const allWeapons = gameData.weapon.filter((v) => !v.类型.startsWith("同律"))
+const allWeapons = weaponData.filter((v) => !v.类型.startsWith("同律"))
 const weaponSearchQuery = ref("")
 const filteredWeapons = computed(() => {
     const mappedWeapons = allWeapons
@@ -23,7 +22,7 @@ const filteredInvWeapons = computed(() => {
     return Object.keys(inv.weapons).filter((v) => v.includes(query))
 })
 // MOD
-const allMods = gameData.mod.map((v) => new LeveledMod(v.id))
+const allMods = modData.map((v) => new LeveledMod(v.id))
 const modSearchQuery = ref("")
 const filteredMods = computed(() => {
     const mappedMods = allMods

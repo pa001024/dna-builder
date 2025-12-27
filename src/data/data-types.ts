@@ -4,7 +4,6 @@ export interface GameDatabase {
     weapon: Weapon[]
     base: WeaponBase[]
     buff: Buff[]
-    mob: Mob[]
 }
 
 export interface Buff {
@@ -17,55 +16,7 @@ export interface Buff {
     lx?: number
     mx?: number
     code?: string
-    [key: string]: any
-
-    攻击?: number
-    生命?: number
-    护盾?: number
-    防御?: number
-    神智?: number
-    威力?: number
-    耐久?: number
-    效益?: number
-    范围?: number
-    昂扬?: number
-    背水?: number
-    增伤?: number
-    独立增伤?: number
-    武器伤害?: number
-    技能伤害?: number
-    神智回复?: number
-    暴击?: number
-    暴伤?: number
-    攻速?: number
-    多重?: number
-    追加伤害?: number
-    属性伤?: number
-    MOD属性?: number
-    属性穿透?: number
-    异常数量?: number
-    无视防御?: number
-    固定攻击?: number
-    技能速度?: number
-    召唤物范围?: number
-    召唤物攻速?: number
-    召唤物攻击?: number
-    召唤物伤害?: number
-    失衡易伤?: number
-    近战攻击?: number
-    近战暴击?: number
-    近战暴伤?: number
-    近战触发?: number
-    近战攻速?: number
-    近战范围?: number
-    近战增伤?: number
-    远程攻击?: number
-    远程攻速?: number
-    远程暴击?: number
-    远程暴伤?: number
-    远程触发?: number
-    远程多重?: number
-    远程增伤?: number
+    [key: string]: string | number | number[] | undefined
 }
 
 export interface Char {
@@ -175,10 +126,12 @@ export enum SkillType {
     防御 = "防御",
 }
 
-export interface Mob {
+export interface Monster {
+    id: number
     名称: string
-    阵营: string
-    类型: string
+    阵营?: Faction
+    攻击: number
+    防御: number
     生命: number
     护盾?: number
     战姿?: number
@@ -191,11 +144,12 @@ export enum MobType {
 }
 
 export enum Faction {
-    其他 = "其他",
-    海伯利亚帝国 = "海伯利亚帝国",
-    神弃者同盟 = "神弃者同盟",
-    秽兽 = "秽兽",
-    艾利西安传颂会 = "艾利西安传颂会",
+    其他 = 0,
+    秽兽 = 1,
+    海伯利亚帝国 = 2,
+    神弃者同盟 = 3,
+    艾利西安传颂会 = 4,
+    华胥 = 5,
 }
 
 export interface Mod {

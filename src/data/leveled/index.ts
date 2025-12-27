@@ -1,15 +1,31 @@
-import { Mod, Buff, Weapon, WeaponBase, Char } from "../data-types"
-import gameData from "../data.json"
+import { Mod, Buff, Weapon, WeaponBase, Char, Monster } from "../data-types"
+import charData from "../char.data"
+import buffData from "../buff.data"
+import effectData from "../effect.data"
+import weaponData from "../weapon.data"
+import modData from "../mod.data"
+import monsterData from "../monster.data"
+import baseData from "../base.data"
+
+export { LeveledMonster } from "./LeveledMonster"
 
 // 将静态表转换为Map，提高查找效率
 const charMap = new Map<string, Char>()
-gameData.char.forEach((char) => {
+charData.forEach((char) => {
     charMap.set(char.名称, char as Char)
 })
 
+// 将mob数据转换为Map
+const monsterMap = new Map<number, Monster>()
+if (monsterData) {
+    monsterData.forEach((mob) => {
+        monsterMap.set(mob.id, mob as Monster)
+    })
+}
+
 // 将mod数据转换为Map
 const modMap = new Map<number, Mod>()
-gameData.mod.forEach((mod) => {
+modData.forEach((mod) => {
     if (mod.id) {
         modMap.set(mod.id, mod as Mod)
     }
@@ -17,13 +33,13 @@ gameData.mod.forEach((mod) => {
 
 // 将buff数据转换为Map
 const buffMap = new Map<string, Buff>()
-gameData.buff.forEach((buff) => {
+buffData.forEach((buff) => {
     buffMap.set(buff.名称, buff as Buff)
 })
 
 // 将effect数据转换为Map
 const effectMap = new Map<string, Buff>()
-gameData.effect.forEach((buff) => {
+effectData.forEach((buff) => {
     effectMap.set(buff.名称, buff as Buff)
 })
 
@@ -31,7 +47,7 @@ gameData.effect.forEach((buff) => {
 const weaponMap = new Map<string, Weapon>()
 
 // 添加近战武器到weaponMap
-gameData.weapon.forEach((weapon: any) => {
+weaponData.forEach((weapon: any) => {
     if (weapon.名称) {
         weaponMap.set(weapon.名称, weapon as Weapon)
     }
@@ -40,7 +56,7 @@ gameData.weapon.forEach((weapon: any) => {
 // 将base数据转换为Map，用于快速查找武器倍率信息
 const baseMap = new Map<string, WeaponBase[]>()
 
-gameData.base.forEach((base: any) => {
+baseData.forEach((base: any) => {
     if (!baseMap.has(base.武器类型)) {
         baseMap.set(base.武器类型, [])
     }
@@ -60,10 +76,11 @@ export const CommonLevelUp = [
 ]
 
 // 导出各种映射表供其他模块使用
-export { charMap, modMap, buffMap, effectMap, weaponMap, baseMap }
+export { charMap, modMap, buffMap, effectMap, weaponMap, baseMap, monsterMap }
 
 // 导出LeveledChar、LeveledMod、LeveledBuff、LeveledWeapon、LeveledSkill类
 export { LeveledChar } from "./LeveledChar"
+export { LeveledMonster as LeveledMob } from "./LeveledMonster"
 export { LeveledMod, LeveledModWithCount } from "./LeveledMod"
 export { LeveledBuff } from "./LeveledBuff"
 export { LeveledWeapon } from "./LeveledWeapon"

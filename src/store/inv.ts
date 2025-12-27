@@ -1,6 +1,6 @@
 import { useLocalStorage } from "@vueuse/core"
 import { defineStore } from "pinia"
-import { gameData, LeveledModWithCount, LeveledWeapon, modMap, ModTypeKey, ModTypeMap } from "../data"
+import { LeveledModWithCount, LeveledWeapon, modData, modMap, ModTypeKey, ModTypeMap, weaponData } from "../data"
 
 export const useInvStore = defineStore("inv", {
     state: () => {
@@ -53,7 +53,7 @@ export const useInvStore = defineStore("inv", {
         },
         getModsWithCount(useInv: boolean, includeTypes: ModTypeKey[]) {
             const types = new Set(includeTypes.map((type) => ModTypeMap[type] as string))
-            const all = gameData.mod.filter((mod) => types.has(mod.类型.substring(0, 2)))
+            const all = modData.filter((mod) => types.has(mod.类型.substring(0, 2)))
             const noInv = useInv ? all.filter((mod) => !this.enableMods[mod.品质 as keyof typeof this.enableMods]) : all
 
             const invMods = useInv
@@ -74,14 +74,14 @@ export const useInvStore = defineStore("inv", {
         getMeleeWeapons(useInv: boolean) {
             return useInv && this.enableWeapons.近战
                 ? Object.entries(this.meleeWeapons).map(([name, level]) => new LeveledWeapon(name, level, undefined, this.getBuffLv(name)))
-                : gameData.weapon
+                : weaponData
                       .filter((weapon) => weapon.类型 === "近战")
                       .map((weapon) => new LeveledWeapon(weapon.名称, undefined, undefined, this.getBuffLv(weapon.名称)))
         },
         getRangedWeapons(useInv: boolean) {
             return useInv && this.enableWeapons.远程
                 ? Object.entries(this.rangedWeapons).map(([name, level]) => new LeveledWeapon(name, level, undefined, this.getBuffLv(name)))
-                : gameData.weapon
+                : weaponData
                       .filter((weapon) => weapon.类型 === "远程")
                       .map((weapon) => new LeveledWeapon(weapon.名称, undefined, undefined, this.getBuffLv(weapon.名称)))
         },
