@@ -31,7 +31,7 @@ const filteredMods = computed(() => {
     if (!modSearchQuery.value) return mappedMods
 
     const query = modSearchQuery.value.trim()
-    return mappedMods.filter((mod) => mod.名称.includes(query) || mod.属性?.includes(query) || mod.系列.includes(query))
+    return mappedMods.filter((mod) => JSON.stringify((mod as any)._originalModData).includes(query))
 })
 
 const filteredSelectedMods = computed(() => {
