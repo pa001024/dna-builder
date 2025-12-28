@@ -794,14 +794,14 @@ export class AIClient {
      * 流式聊天 - 支持自定义工具
      * @param messages 消息数组
      * @param tools 自定义工具定义
-     * @param onChunk 数据块回调
+     * @param onChunk 数据块回调 (可以接收reasoning或content)
      * @param onToolCall 工具调用回调
      * @param options 可选参数
      */
     public async streamChatWithTools(
         messages: ChatCompletionMessageParam[],
         tools: ChatCompletionTool[],
-        onChunk: (chunk: string) => void,
+        onChunk: (chunk: string, type?: "reasoning" | "content") => void,
         onToolCall?: (toolCalls: ChatCompletionMessageFunctionToolCall[]) => Promise<ChatCompletionToolMessageParam[]>,
         options?: {
             model?: string
@@ -875,10 +875,14 @@ export class AIClient {
                     toolCalls.push(currentToolCall)
                     currentToolCall = null
                 }
-                if (delta?.content || delta?.reasoning_content) {
-                    const content = delta.content || delta.reasoning_content || ""
-                    fullResponse += content
-                    onChunk(content)
+                // 分别处理 reasoning_content 和 content
+                if (delta?.reasoning_content) {
+                    onChunk(delta.reasoning_content, "reasoning")
+                    fullResponse += delta.reasoning_content
+                }
+                if (delta?.content) {
+                    onChunk(delta.content, "content")
+                    fullResponse += delta.content
                 }
             }
         } catch (error) {

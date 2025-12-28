@@ -18,11 +18,13 @@ const charSettings = useCharSettings(selectedChar)
 const settingStore = useSettingStore()
 
 const isOpen = ref(false)
-const messages = ref<Array<{ role: "user" | "assistant"; content: string }>>([])
+const messages = ref<Array<{ role: "user" | "assistant"; content: string; reasoning?: string }>>([])
 const inputMessage = ref("")
 const isLoading = ref(false)
 const chatContainer = ref<HTMLElement>()
 let agent: BuildAgent | null = null
+const lastFailedMessage = ref<string>("") // 保存最后一次失败的消息
+const collapsedReasoning = ref<Set<number>>(new Set()) // 跟踪哪些消息的思考过程被折叠
 
 // 初始化AI Agent
 async function initAgent() {
@@ -127,15 +129,21 @@ function closeChat() {
 }
 
 // 发送消息
-async function sendMessage() {
-    if (!inputMessage.value.trim() || isLoading.value) return
+async function sendMessage(retryMessage = "") {
+    if (!inputMessage.value.trim() && !retryMessage) return
+    if (isLoading.value) return
 
-    const userMessage = inputMessage.value.trim()
-    messages.value.push({
-        role: "user",
-        content: userMessage,
-    })
-    inputMessage.value = ""
+    const userMessage = retryMessage || inputMessage.value.trim()
+
+    if (!retryMessage) {
+        messages.value.push({
+            role: "user",
+            content: userMessage,
+        })
+        inputMessage.value = ""
+    }
+
+    lastFailedMessage.value = "" // 清除之前的失败消息
     isLoading.value = true
 
     try {
@@ -149,20 +157,35 @@ async function sendMessage() {
 
         // 流式响应
         let assistantMessage = ""
+        let reasoningMessage = ""
         messages.value.push({
             role: "assistant",
             content: "",
+            reasoning: "",
         })
 
         const messageIndex = messages.value.length - 1
 
-        await agent.streamChat([{ role: "user", content: userMessage }], (chunk) => {
-            assistantMessage += chunk
-            messages.value[messageIndex].content = assistantMessage
+        await agent.streamChat([{ role: "user", content: userMessage }], (chunk, type) => {
+            if (type === "reasoning") {
+                // 思考过程
+                reasoningMessage += chunk
+                messages.value[messageIndex].reasoning = reasoningMessage
+            } else {
+                // 正常回复
+                assistantMessage += chunk
+                messages.value[messageIndex].content = assistantMessage
+            }
             scrollToBottom()
         })
+
+        // 生成完成后，默认折叠思考过程
+        if (reasoningMessage) {
+            collapsedReasoning.value.add(messageIndex)
+        }
     } catch (error) {
         console.error("发送消息失败:", error)
+        lastFailedMessage.value = userMessage // 保存失败的消息
 
         // 生成友好的错误消息
         let errorMessage = "抱歉，处理请求时出错。"
@@ -180,20 +203,23 @@ async function sendMessage() {
                 errorMsg.includes("fetch") ||
                 errorMsg.includes("econnrefused")
             ) {
-                errorMessage = "❌ 网络连接失败\n\n请检查：\n1. 网络连接是否正常\n2. API服务是否可用\n3. 代理设置是否正确\n\n请稍后重试。"
+                errorMessage = "❌ 网络连接失败\n\n请检查：\n1. 网络连接是否正常\n2. API服务是否可用\n3. 代理设置是否正确"
             } else if (errorMsg.includes("timeout") || errorMsg.includes("超时")) {
-                errorMessage = "❌ 请求超时\n\n响应时间过长，请：\n1. 检查网络连接\n2. 稍后重试\n3. 尝试简化你的问题"
+                errorMessage = "❌ 请求超时\n\n响应时间过长，请检查网络连接或尝试简化你的问题"
             } else if (errorMsg.includes("rate limit") || errorMsg.includes("请求过多") || errorMsg.includes("429")) {
-                errorMessage = "❌ 请求过于频繁\n\nAPI调用次数已达限制，请：\n1. 等待一段时间后重试\n2. 检查API配额是否充足"
+                errorMessage = "❌ 请求过于频繁\n\nAPI调用次数已达限制，请等待一段时间后重试"
             } else if (errorMsg.includes("private member")) {
-                errorMessage = "❌ SDK兼容性问题\n\n请刷新页面重试，如果问题持续，请：\n1. 清除浏览器缓存\n2. 重新启动应用"
+                errorMessage = "❌ SDK兼容性问题\n\n请刷新页面重试，如果问题持续，请清除浏览器缓存并重新启动应用"
             } else {
                 // 显示原始错误消息（但简化）
-                errorMessage = `❌ 请求失败\n\n${error.message}\n\n如果问题持续，请检查：\n1. API配置是否正确\n2. 网络连接是否正常\n3. 控制台是否有详细错误信息`
+                errorMessage = `❌ 请求失败\n\n${error.message}`
             }
         } else {
             errorMessage = "❌ 发生未知错误\n\n请查看控制台获取详细信息，或尝试刷新页面。"
         }
+
+        // 添加重试提示
+        errorMessage += "\n\n[点击重试]"
 
         // 更新现有的空消息或添加新错误消息
         const lastMessage = messages.value[messages.value.length - 1]
@@ -218,6 +244,29 @@ function scrollToBottom() {
             chatContainer.value.scrollTop = chatContainer.value.scrollHeight
         }
     })
+}
+
+// 切换思考过程的折叠状态
+function toggleReasoning(index: number) {
+    if (collapsedReasoning.value.has(index)) {
+        collapsedReasoning.value.delete(index)
+    } else {
+        collapsedReasoning.value.add(index)
+    }
+    // 强制更新视图
+    collapsedReasoning.value = new Set(collapsedReasoning.value)
+}
+
+// 重试发送消息
+async function retryMessage() {
+    if (lastFailedMessage.value) {
+        await sendMessage(lastFailedMessage.value)
+    }
+}
+
+// 处理回车键发送消息
+function handleKeyPress() {
+    sendMessage()
 }
 
 // 清空对话
@@ -291,7 +340,59 @@ function clearChat() {
                         "
                     >
                         <div class="whitespace-pre-wrap text-sm wrap-break-word select-text!">
-                            {{ message.content }}
+                            <!-- 显示思考过程 -->
+                            <template v-if="message.reasoning && message.role === 'assistant'">
+                                <div class="mb-2">
+                                    <button
+                                        class="btn btn-xs btn-ghost gap-1 items-center text-base-content/70 hover:text-base-content"
+                                        @click="toggleReasoning(index)"
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class="h-3 w-3 transition-transform"
+                                            :class="{ 'rotate-90': !collapsedReasoning.has(index) }"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                        <span class="text-xs">思考过程</span>
+                                    </button>
+                                    <div
+                                        v-if="!collapsedReasoning.has(index)"
+                                        class="mt-2 p-2 bg-base-300 rounded-lg text-base-content/80 text-xs border-l-2 border-primary"
+                                    >
+                                        {{ message.reasoning }}
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- 显示错误消息和重试按钮 -->
+                            <template v-if="message.content.includes('[点击重试]') && message.role === 'assistant'">
+                                <div>{{ message.content.replace("[点击重试]", "") }}</div>
+                                <button class="btn btn-sm btn-primary mt-2" @click="retryMessage" :disabled="isLoading">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4 mr-1"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                        />
+                                    </svg>
+                                    重试
+                                </button>
+                            </template>
+                            <!-- 普通消息 -->
+                            <template v-else>
+                                {{ message.content }}
+                            </template>
                             <!-- 加载动画 -->
                             <span
                                 v-if="isLoading && index === messages.findLastIndex((msg) => msg.role === 'assistant')"
@@ -308,12 +409,12 @@ function clearChat() {
                     <input
                         type="text"
                         v-model="inputMessage"
-                        @keyup.enter="sendMessage"
+                        @keyup.enter="handleKeyPress"
                         placeholder="问我任何配装问题..."
                         class="input input-bordered input-sm flex-1"
                         :disabled="isLoading"
                     />
-                    <button class="btn btn-primary btn-sm" @click="sendMessage" :disabled="isLoading || !inputMessage.trim()">
+                    <button class="btn btn-primary btn-sm" @click="handleKeyPress" :disabled="isLoading || !inputMessage.trim()">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                         </svg>

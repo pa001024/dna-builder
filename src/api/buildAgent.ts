@@ -624,7 +624,10 @@ ${result.newBuild.mods.map((v) => v.toString()).join("\n")}`
      * 流式对话
      * 使用AIClient的streamChatWithTools方法
      */
-    public async streamChat(userMessages: Array<{ role: string; content: string }>, onChunk: (chunk: string) => void): Promise<void> {
+    public async streamChat(
+        userMessages: Array<{ role: string; content: string }>,
+        onChunk: (chunk: string, type?: "reasoning" | "content") => void,
+    ): Promise<void> {
         // 转换消息格式
         const chatMessages: ChatCompletionMessageParam[] = userMessages.map((m) => ({
             role: m.role as "user" | "assistant" | "system",

@@ -81,7 +81,7 @@ async function startMCPServer() {
         mcpStatus.value = "正在启动 MCP 服务器..."
 
         // 检查是否为桌面应用环境
-        if (!env.isTauri) {
+        if (!env.isApp) {
             mcpStatus.value = "MCP 服务器只能在桌面应用环境中启动"
             return
         }
@@ -134,7 +134,7 @@ async function stopMCPServer() {
         // 提示用户如何手动停止
         setTimeout(() => {
             if (confirm("MCP 服务器需要手动结束进程。\n\n在任务管理器中结束 'dna_mcp_server.exe' 进程。\n\n是否打开任务管理器？")) {
-                if (env.isTauri) {
+                if (env.isApp) {
                     launchExe("taskmgr.exe", "")
                 }
             }
@@ -147,7 +147,7 @@ async function stopMCPServer() {
 
 // 检查 MCP 服务器状态
 async function checkMCPServerStatus() {
-    if (!env.isTauri) {
+    if (!env.isApp) {
         return
     }
 
@@ -553,11 +553,11 @@ onMounted(() => {
                 <div class="flex gap-2">
                     <button
                         @click="startMCPServer"
-                        :disabled="isMCPRunning || !env.isTauri"
+                        :disabled="isMCPRunning || !env.isApp"
                         :class="[
                             'btn btn-sm flex-1',
                             isMCPRunning ? 'btn-disabled' : 'btn-success',
-                            !env.isTauri ? 'btn-disabled opacity-50' : '',
+                            !env.isApp ? 'btn-disabled opacity-50' : '',
                         ]"
                         title="以管理员权限启动 MCP 服务器"
                     >
@@ -574,7 +574,7 @@ onMounted(() => {
                     </button>
                 </div>
                 <div class="text-xs opacity-50 mt-2">
-                    {{ env.isTauri ? "启动MCP服务器" : "仅限桌面应用" }}
+                    {{ env.isApp ? "启动MCP服务器" : "仅限桌面应用" }}
                 </div>
             </div>
 
