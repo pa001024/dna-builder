@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue"
+import { computed, onMounted, reactive, ref } from "vue"
 import { t } from "i18next"
 import {
     LeveledChar,
@@ -20,9 +20,12 @@ import { format100, formatSkillProp, formatWeaponProp } from "../util"
 import { useInvStore } from "../store/inv"
 import { useCharSettings } from "../composables/useCharSettings"
 import { useTimeline } from "../store/timeline"
+import { useSettingStore } from "../store/setting"
 
 //#region 角色
 const inv = useInvStore()
+const settings = useSettingStore()
+
 // 获取实际数据
 const charOptions = charData.map((char) => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
 const modOptions = modData
@@ -33,7 +36,6 @@ const modOptions = modData
         type: mod.类型,
         limit: mod.属性 || mod.限定,
         ser: mod.系列,
-        icon: mod.系列 && CharBuild.elmSeries.includes(mod.系列) ? `/imgs/${mod.属性}${mod.系列}.png` : `/imgs/${mod.系列}系列.png`,
         count: Math.min(inv.getModCount(mod.id, mod.品质), mod.系列 !== "契约者" ? 8 : 1),
         bufflv: inv.getBuffLv(mod.名称),
         lv: inv.getModLv(mod.id, mod.品质),
@@ -97,16 +99,16 @@ const rangedWeaponOptions = weaponData
 const selectedChar = useLocalStorage("selectedChar", "赛琪")
 const charSettings = useCharSettings(selectedChar)
 const selectedCharMods = computed(() =>
-    charSettings.value.charMods.map((v) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null)),
+    charSettings.value.charMods.map((v) => (v ? LeveledMod.from(v[0], v[1], inv.getBuffLv(v[0])) : null)),
 )
 const selectedMeleeMods = computed(() =>
-    charSettings.value.meleeMods.map((v) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null)),
+    charSettings.value.meleeMods.map((v) => (v ? LeveledMod.from(v[0], v[1], inv.getBuffLv(v[0])) : null)),
 )
 const selectedRangedMods = computed(() =>
-    charSettings.value.rangedMods.map((v) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null)),
+    charSettings.value.rangedMods.map((v) => (v ? LeveledMod.from(v[0], v[1], inv.getBuffLv(v[0])) : null)),
 )
 const selectedSkillWeaponMods = computed(() =>
-    charSettings.value.skillWeaponMods.map((v) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null)),
+    charSettings.value.skillWeaponMods.map((v) => (v ? LeveledMod.from(v[0], v[1], inv.getBuffLv(v[0])) : null)),
 )
 const selectedBuffs = computed(() =>
     charSettings.value.buffs
@@ -436,6 +438,54 @@ function updateTeamBuff(newValue: string, oldValue: string) {
     charSettings.value.buffs = newBuffs
     localStorage.setItem(`build.${selectedChar.value}`, JSON.stringify(charSettings.value))
 }
+
+// 外部调用接口
+declare global {
+    interface Window {
+        /**
+         * 设置角色名称
+         * @param name 角色名称
+         */
+        setCharName: (name: string) => void
+        /**
+         * 设置Mod
+         * @param key Mod类型
+         * @param index Mod索引 0-7
+         * @param modId ModID -1表示清除Mod
+         * @param level Mod等级
+         */
+        setMod: (key: "charMods" | "meleeMods" | "rangedMods" | "skillWeaponMods", index: number, modId: number, level: number) => void
+        /**
+         * 设置BUFF
+         * @param buffId BUFFID
+         * @param level BUFF等级 -1表示清除BUFF 为空表示添加默认等级
+         */
+        setBuff: (buffId: string, level?: number) => void
+    }
+}
+
+onMounted(() => {
+    window.setCharName = (name: string) => {
+        selectedChar.value = name
+    }
+    window.setMod = (key: "charMods" | "meleeMods" | "rangedMods" | "skillWeaponMods", index: number, modId: number, level: number) => {
+        if (index < 0 || index >= charSettings.value[key].length) return
+        if (modId < 0) charSettings.value[key][index] = null
+        else charSettings.value[key][index] = [modId, level]
+    }
+    window.setBuff = (buffId: string, level?: number) => {
+        const buff = buffOptions.value.find((v) => v.label === buffId)
+        if (!buff) return
+        if (level === undefined) level = buff.value.等级
+        const index = charSettings.value.buffs.findIndex((v) => v[0] === buffId)
+        if (index === -1) {
+            if (level > 0) charSettings.value.buffs.push([buffId, level])
+        } else {
+            if (level > 0) charSettings.value.buffs[index] = [buffId, level]
+            else charSettings.value.buffs.splice(index, 1)
+        }
+    }
+})
 </script>
 
 <template>
@@ -1273,6 +1323,14 @@ function updateTeamBuff(newValue: string, oldValue: string) {
             </div>
         </div>
     </div>
+
+    <!-- AI对话助手 -->
+    <AIChatDialog
+        v-if="settings.showAIChat"
+        :charBuild="charBuild"
+        @update:charSettings="charSettings = $event"
+        @update:selectedChar="selectedChar = $event"
+    />
 </template>
 <style>
 .list-move, /* 对移动中的元素应用的过渡 */

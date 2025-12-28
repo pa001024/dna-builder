@@ -22,6 +22,7 @@ export const useSettingStore = defineStore("setting", {
             aiTemperature: useLocalStorage("ai_temperature", 0.6),
             // 皎皎角
             dnaUserId: useLocalStorage("setting_user_id", 0),
+            showAIChat: useLocalStorage("setting_show_ai_chat", true),
         }
     },
     getters: {},

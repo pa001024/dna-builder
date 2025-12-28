@@ -1891,6 +1891,7 @@
         "reset": "Reset all settings",
         "resetConfirm": "Are you sure to reset all settings?",
         "resetTip": "If there is an error on the page, try resetting it.",
+        "showAIChat": "Show AI fitting assistant",
         "theme": "Theme",
         "title": "Settings",
         "uiScale": "UI Scale",

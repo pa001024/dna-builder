@@ -32,6 +32,14 @@ export class LeveledMod implements Mod {
     // 等级上限
     maxLevel: number
 
+    static from(id: number, level: number, bufLv?: number) {
+        const modData = modMap.get(id)
+        if (!modData) {
+            return null
+        }
+        return new LeveledMod(modData, level, bufLv)
+    }
+
     /**
      * 判断是否存在指定ID的MOD
      * @param id MOD的ID
@@ -50,6 +58,10 @@ export class LeveledMod implements Mod {
             耐受: 1,
             类型: "?",
         })
+    }
+
+    toString() {
+        return `[${this.id}]${this.系列}之${this.名称}(${this.品质}) Lv.${this.等级}`
     }
 
     /**

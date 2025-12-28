@@ -187,7 +187,7 @@ fn get_game_install() -> String {
 #[tauri::command]
 async fn is_game_running(is_run: bool) -> String {
     let mut elapsed = Duration::from_secs(0);
-    let timeout = Duration::from_secs(30);
+    let timeout = Duration::from_secs(60 * 60); // 1h
     let interval = Duration::from_millis(500); // 500ms
 
     while elapsed <= timeout {

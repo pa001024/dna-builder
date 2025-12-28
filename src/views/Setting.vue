@@ -268,6 +268,12 @@ function resetAiSettings() {
                 <div class="bg-base-100 p-2 rounded-lg space-y-3">
                     <div class="flex justify-between items-center p-2">
                         <span class="label-text">
+                            {{ $t("setting.showAIChat") }}
+                        </span>
+                        <input v-model="setting.showAIChat" type="checkbox" class="toggle toggle-secondary" />
+                    </div>
+                    <div class="flex justify-between items-center p-2">
+                        <span class="label-text">
                             {{ $t("setting.aiBaseUrl") }}
                             <div class="text-xs text-base-content/50">{{ $t("setting.aiBaseUrlTip") }}</div>
                         </span>

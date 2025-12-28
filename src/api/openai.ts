@@ -1,24 +1,12 @@
 import OpenAI from "openai"
-import type { ChatCompletionMessageParam } from "openai/resources/index.mjs"
+import type {
+    ChatCompletionMessageFunctionToolCall,
+    ChatCompletionMessageParam,
+    ChatCompletionTool,
+    ChatCompletionToolMessageParam,
+} from "openai/resources/index.mjs"
 import { Client as McpClient } from "@modelcontextprotocol/sdk/client"
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js"
-
-// 工具调用类型定义
-export interface ToolCall {
-    id: string
-    type: string
-    function: {
-        name: string
-        arguments: string
-    }
-}
-
-// 工具调用结果定义
-export interface ToolCallResult {
-    tool_call_id: string
-    role: "tool"
-    content: string
-}
 
 // 智谱AI OpenAI兼容API接口
 // 参考: https://docs.bigmodel.cn/cn/guide/develop/openai/introduction
@@ -204,8 +192,8 @@ async function runScript(script: string, config: OpenAIConfig): Promise<{ output
 export class AIClient {
     private client: OpenAI | null = null
     private config: OpenAIConfig
-    private messages: ChatCompletionMessageParam[] = []
-    private isStreamInterrupted: boolean = false
+    messages: ChatCompletionMessageParam[] = []
+    isStreamInterrupted: boolean = false
 
     /**
      * 创建AI客户端实例
@@ -239,9 +227,9 @@ export class AIClient {
         }
 
         // 验证MCP服务器配置
-        if (!this.config.mcp_server_url || !this.config.mcp_server_port) {
-            throw new Error("MCP服务器配置不完整")
-        }
+        // if (!this.config.mcp_server_url || !this.config.mcp_server_port) {
+        //     throw new Error("MCP服务器配置不完整")
+        // }
     }
 
     /**
@@ -249,7 +237,7 @@ export class AIClient {
      * @param toolCall AI返回的工具调用请求
      * @returns 工具调用结果
      */
-    private async handleToolCall(toolCall: ToolCall): Promise<ToolCallResult> {
+    private async handleToolCall(toolCall: ChatCompletionMessageFunctionToolCall): Promise<ChatCompletionToolMessageParam> {
         const functionName = toolCall.function.name
         const args = JSON.parse(toolCall.function.arguments)
 
@@ -411,7 +399,7 @@ export class AIClient {
             // 处理工具调用
             if (choicesMessage.tool_calls) {
                 for (const toolCall of choicesMessage.tool_calls) {
-                    const toolResult = await this.handleToolCall(toolCall as ToolCall)
+                    const toolResult = await this.handleToolCall(toolCall as ChatCompletionMessageFunctionToolCall)
                     this.messages.push(toolResult as any)
                 }
 
@@ -717,7 +705,7 @@ export class AIClient {
                     if (toolCalls.length > 0) {
                         // 处理工具调用
                         for (const toolCall of toolCalls) {
-                            const toolResult = await this.handleToolCall(toolCall as ToolCall)
+                            const toolResult = await this.handleToolCall(toolCall as ChatCompletionMessageFunctionToolCall)
                             this.messages.push(toolResult as any)
                         }
 
@@ -800,6 +788,173 @@ export class AIClient {
             throw new Error("客户端未初始化")
         }
         return this.client
+    }
+
+    /**
+     * 流式聊天 - 支持自定义工具
+     * @param messages 消息数组
+     * @param tools 自定义工具定义
+     * @param onChunk 数据块回调
+     * @param onToolCall 工具调用回调
+     * @param options 可选参数
+     */
+    public async streamChatWithTools(
+        messages: ChatCompletionMessageParam[],
+        tools: ChatCompletionTool[],
+        onChunk: (chunk: string) => void,
+        onToolCall?: (toolCalls: ChatCompletionMessageFunctionToolCall[]) => Promise<ChatCompletionToolMessageParam[]>,
+        options?: {
+            model?: string
+            temperature?: number
+            max_tokens?: number
+        },
+    ): Promise<void> {
+        if (!this.client) {
+            throw new Error("客户端未初始化")
+        }
+
+        const model = options?.model || this.config.default_model
+        const temperature = options?.temperature || this.config.default_temperature
+        const max_tokens = options?.max_tokens || this.config.default_max_tokens
+
+        // 添加消息到上下文
+        this.messages.push(...messages)
+
+        let fullResponse = ""
+        let toolCalls: ChatCompletionMessageFunctionToolCall[] = []
+        let currentToolCall: ChatCompletionMessageFunctionToolCall | null = null
+
+        // 第一次请求
+        let stream = null
+        try {
+            stream = await this.client.chat.completions.create({
+                model,
+                messages: this.messages,
+                temperature,
+                max_tokens: max_tokens,
+                stream: true,
+                tools,
+            })
+        } catch (error) {
+            console.error("流式对话失败:", error)
+            if (error instanceof Error) {
+                throw error
+            }
+            throw new Error("流式对话失败，请检查网络连接和API配置")
+        }
+
+        // 处理流式响应
+        try {
+            for await (const chunk of stream) {
+                const delta = chunk.choices[0]?.delta
+
+                if (delta?.tool_calls) {
+                    for (const tool_call of delta.tool_calls) {
+                        if (tool_call.index === 0 && currentToolCall === null) {
+                            currentToolCall = {
+                                id: tool_call.id || `call_${Date.now()}`,
+                                type: "function",
+                                function: {
+                                    name: "",
+                                    arguments: "",
+                                },
+                            }
+                        }
+
+                        if (currentToolCall) {
+                            if (tool_call.function?.name) {
+                                currentToolCall.function.name = tool_call.function.name
+                            }
+                            if (tool_call.function?.arguments) {
+                                currentToolCall.function.arguments += tool_call.function.arguments
+                            }
+                        }
+                    }
+                }
+                if (chunk.choices[0].finish_reason === "tool_calls" && currentToolCall) {
+                    toolCalls.push(currentToolCall)
+                    currentToolCall = null
+                }
+                if (delta?.content || delta?.reasoning_content) {
+                    const content = delta.content || delta.reasoning_content || ""
+                    fullResponse += content
+                    onChunk(content)
+                }
+            }
+        } catch (error) {
+            console.error("处理流式响应失败:", error)
+            // 移除已添加的消息
+            this.messages.splice(this.messages.length - messages.length, messages.length)
+            if (error instanceof Error) {
+                throw error
+            }
+            throw new Error("处理流式响应失败，请检查网络连接和API配置")
+        }
+
+        // 处理工具调用
+        if (toolCalls.length > 0) {
+            // 添加工具调用到上下文
+            this.messages.push({
+                role: "assistant",
+                content: fullResponse.trim(),
+                tool_calls: toolCalls,
+            })
+            console.log("toolCalls", toolCalls)
+            // 调用工具处理回调
+            const toolResults = onToolCall ? await onToolCall(toolCalls) : []
+
+            // 添加工具结果到上下文
+            for (const result of toolResults) {
+                this.messages.push(result)
+            }
+
+            // 获取AI对工具结果的最终响应
+            let finalStream = null
+            try {
+                finalStream = await this.client.chat.completions.create({
+                    model,
+                    messages: this.messages,
+                    temperature,
+                    max_tokens: max_tokens,
+                    stream: true,
+                })
+            } catch (error) {
+                console.error("获取最终响应失败:", error)
+                if (error instanceof Error) {
+                    throw error
+                }
+                throw new Error("获取最终响应失败，请检查网络连接和API配置")
+            }
+
+            let finalContent = ""
+            try {
+                for await (const chunk of finalStream) {
+                    const content = chunk.choices[0]?.delta?.content
+                    if (content) {
+                        finalContent += content
+                        onChunk(content)
+                    }
+                }
+            } catch (error) {
+                console.error("处理最终流式响应失败:", error)
+                if (error instanceof Error) {
+                    throw error
+                }
+                throw new Error("处理最终流式响应失败，请检查网络连接和API配置")
+            }
+
+            // 保存最终响应
+            this.messages.push({
+                role: "assistant",
+                content: finalContent,
+            })
+        } else {
+            // 保存助手响应
+            this.messages.push({
+                role: "assistant",
+                content: fullResponse.trim(),
+            })
+        }
     }
 
     /**
@@ -935,4 +1090,14 @@ const blobToDataURL = (blob: Blob): Promise<string> => {
         reader.onerror = reject
         reader.readAsDataURL(blob)
     })
+}
+
+declare module "openai/resources/index.mjs" {
+    namespace ChatCompletionChunk {
+        namespace Choice {
+            interface Delta {
+                reasoning_content?: string
+            }
+        }
+    }
 }

@@ -1,11 +1,3 @@
-export interface GameDatabase {
-    char: Char[]
-    mod: Mod[]
-    weapon: Weapon[]
-    base: WeaponBase[]
-    buff: Buff[]
-}
-
 export interface Buff {
     名称: string
     描述: string
@@ -53,6 +45,22 @@ export enum Elem {
     雷 = "雷",
     风 = "风",
 }
+
+export enum WeaponCategory {
+    单手剑 = "单手剑",
+    长柄 = "长柄",
+    重剑 = "重剑",
+    双刀 = "双刀",
+    鞭刃 = "鞭刃",
+    太刀 = "太刀",
+    手枪 = "手枪",
+    双枪 = "双枪",
+    榴炮 = "榴炮",
+    霰弹枪 = "霰弹枪",
+    突击枪 = "突击枪",
+    弓 = "弓",
+}
+
 export interface Weapon {
     id?: number
     名称: string

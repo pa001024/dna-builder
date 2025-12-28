@@ -7,7 +7,7 @@ import { computed } from "vue"
 const inv = useInvStore()
 
 const autoBuildSetting = useLocalStorage("autobuild.setting", {
-    useInv: false, // 使用用户库存
+    useInv: true, // 使用用户库存
     includeTypes: [] as ModTypeKey[], // 包含的MOD类型
     preserveTypes: [] as ModTypeKey[], // 保留的MOD类型
     includeMelee: false, // 包含近战武器

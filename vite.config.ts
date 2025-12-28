@@ -68,17 +68,17 @@ export default defineConfig(async () => ({
             workbox: {
                 navigateFallbackDenylist: [/^\/graphql/, /^\/api/],
                 runtimeCaching: [
-                    {
-                        urlPattern: /^https:\/\/xn--chq26veyq\.icu\/api\/.+/,
-                        handler: "NetworkFirst",
-                        options: {
-                            cacheName: "api-cache",
-                            expiration: {
-                                maxEntries: 50,
-                                maxAgeSeconds: 60 * 60 * 24, // 1 day
-                            },
-                        },
-                    },
+                    // {
+                    //     urlPattern: /^https:\/\/xn--chq26veyq\.icu\/api\/.+/,
+                    //     handler: "NetworkFirst",
+                    //     options: {
+                    //         cacheName: "api-cache",
+                    //         expiration: {
+                    //             maxEntries: 50,
+                    //             maxAgeSeconds: 60 * 60 * 24, // 1 day
+                    //         },
+                    //     },
+                    // },
                     {
                         urlPattern: /\.json$/,
                         handler: "StaleWhileRevalidate",
@@ -130,6 +130,14 @@ export default defineConfig(async () => ({
                   port: 1421,
               }
             : undefined,
+        proxy: {
+            // 代理API请求到后端服务器
+            "/api/v1": {
+                target: "http://localhost:8887",
+                changeOrigin: true,
+                secure: false,
+            },
+        },
         watch: {
             // 3. tell Vite to ignore watching `src-tauri`
             ignored: [

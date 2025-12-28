@@ -1,0 +1,326 @@
+<script setup lang="ts">
+import { ref, nextTick, watch } from "vue"
+import { useLocalStorage } from "@vueuse/core"
+import { env } from "../env"
+import { BuildAgent } from "../api/buildAgent"
+import { useSettingStore } from "../store/setting"
+import { useInvStore } from "../store/inv"
+import { useCharSettings } from "../composables/useCharSettings"
+import type { CharBuild } from "../data"
+
+const props = defineProps<{
+    charBuild: CharBuild
+}>()
+
+const inv = useInvStore()
+const selectedChar = useLocalStorage("selectedChar", "赛琪")
+const charSettings = useCharSettings(selectedChar)
+const settingStore = useSettingStore()
+
+const isOpen = ref(false)
+const messages = ref<Array<{ role: "user" | "assistant"; content: string }>>([])
+const inputMessage = ref("")
+const isLoading = ref(false)
+const chatContainer = ref<HTMLElement>()
+let agent: BuildAgent | null = null
+
+// 初始化AI Agent
+async function initAgent() {
+    if (agent) {
+        // 如果角色切换，更新系统提示词
+        agent.updateSystemPrompt(charSettings.value, selectedChar.value)
+        return
+    }
+
+    // 优先使用setting store中的API密钥配置
+    const userApiKey = settingStore.aiApiKey
+    const hasUserConfig = userApiKey && userApiKey.trim() !== ""
+
+    if (hasUserConfig) {
+        try {
+            const config = settingStore.getOpenAIConfig()
+            // 补充缺失的字段
+            const fullConfig = {
+                ...config,
+                timeout: 30000,
+                max_retries: 3,
+                system_prompt: "", // BuildAgent会设置
+                mcp_server_url: "",
+                mcp_server_port: 0,
+            }
+            agent = new BuildAgent(fullConfig, charSettings, selectedChar, inv)
+            console.log("使用用户配置的API密钥初始化AI Agent")
+            return
+        } catch (error) {
+            console.error("使用用户配置初始化AI Agent失败:", error)
+        }
+    }
+
+    // 如果用户没有配置API密钥，尝试使用服务端代理
+    try {
+        const proxyConfig = {
+            base_url: env.endpoint + "/api/v1",
+            api_key: "proxy",
+            default_model: settingStore.aiModelName || "glm-4.6v-flash",
+            default_temperature: settingStore.aiTemperature || 0.6,
+            default_max_tokens: settingStore.aiMaxTokens || 1024,
+            timeout: 30000,
+            max_retries: 3,
+            system_prompt: "", // BuildAgent会设置
+            mcp_server_url: "",
+            mcp_server_port: 0,
+        }
+        agent = new BuildAgent(proxyConfig, charSettings, selectedChar, inv)
+        console.log("使用服务端代理初始化AI Agent")
+        return
+    } catch (error) {
+        console.error("使用代理初始化AI Agent失败:", error)
+    }
+
+    // 都没有配置
+    messages.value.push({
+        role: "assistant",
+        content: `AI服务未配置。
+
+请选择以下方式之一配置AI：
+1. 在设置中配置API密钥（推荐）
+2. 联系管理员配置服务端AI
+
+当前状态：
+- 用户API密钥: ${hasUserConfig ? "✓ 已配置" : "✗ 未配置"}`,
+    })
+}
+
+// 监听角色切换
+watch(selectedChar, () => {
+    if (agent && isOpen.value) {
+        agent.updateSystemPrompt(charSettings.value, selectedChar.value)
+    }
+})
+
+// 打开对话
+async function openChat() {
+    isOpen.value = true
+    if (!agent) {
+        await initAgent()
+    }
+    if (messages.value.length === 0) {
+        const charElm = props.charBuild?.char?.属性 || ""
+        messages.value.push({
+            role: "assistant",
+            content: `你好！我是配装助手，可以帮你优化角色配置。
+
+当前角色: ${selectedChar.value} (${charElm}属性)
+
+你可以问我：
+- ${selectedChar.value}怎么配MOD伤害最高？
+- 带${charElm}属性的MOD有哪些？
+- 如何提升${selectedChar.value}的暴击伤害？
+- ${selectedChar.value}在带扶疏的情况下伤害最大化的MOD要怎么配`,
+        })
+    }
+}
+
+// 关闭对话
+function closeChat() {
+    isOpen.value = false
+}
+
+// 发送消息
+async function sendMessage() {
+    if (!inputMessage.value.trim() || isLoading.value) return
+
+    const userMessage = inputMessage.value.trim()
+    messages.value.push({
+        role: "user",
+        content: userMessage,
+    })
+    inputMessage.value = ""
+    isLoading.value = true
+
+    try {
+        if (!agent) {
+            await initAgent()
+        }
+
+        if (!agent) {
+            throw new Error("AI助手未初始化，请先配置AI设置")
+        }
+
+        // 流式响应
+        let assistantMessage = ""
+        messages.value.push({
+            role: "assistant",
+            content: "",
+        })
+
+        const messageIndex = messages.value.length - 1
+
+        await agent.streamChat([{ role: "user", content: userMessage }], (chunk) => {
+            assistantMessage += chunk
+            messages.value[messageIndex].content = assistantMessage
+            scrollToBottom()
+        })
+    } catch (error) {
+        console.error("发送消息失败:", error)
+
+        // 生成友好的错误消息
+        let errorMessage = "抱歉，处理请求时出错。"
+
+        if (error instanceof Error) {
+            const errorMsg = error.message.toLowerCase()
+
+            // 根据错误类型提供具体的解决方案
+            if (errorMsg.includes("api密钥") || errorMsg.includes("api key") || errorMsg.includes("401")) {
+                errorMessage =
+                    "❌ API密钥无效或未配置\n\n请检查：\n1. 设置中的API密钥是否正确\n2. 是否有足够的API配额\n\n你可以在设置中重新配置API密钥。"
+            } else if (
+                errorMsg.includes("网络") ||
+                errorMsg.includes("network") ||
+                errorMsg.includes("fetch") ||
+                errorMsg.includes("econnrefused")
+            ) {
+                errorMessage = "❌ 网络连接失败\n\n请检查：\n1. 网络连接是否正常\n2. API服务是否可用\n3. 代理设置是否正确\n\n请稍后重试。"
+            } else if (errorMsg.includes("timeout") || errorMsg.includes("超时")) {
+                errorMessage = "❌ 请求超时\n\n响应时间过长，请：\n1. 检查网络连接\n2. 稍后重试\n3. 尝试简化你的问题"
+            } else if (errorMsg.includes("rate limit") || errorMsg.includes("请求过多") || errorMsg.includes("429")) {
+                errorMessage = "❌ 请求过于频繁\n\nAPI调用次数已达限制，请：\n1. 等待一段时间后重试\n2. 检查API配额是否充足"
+            } else if (errorMsg.includes("private member")) {
+                errorMessage = "❌ SDK兼容性问题\n\n请刷新页面重试，如果问题持续，请：\n1. 清除浏览器缓存\n2. 重新启动应用"
+            } else {
+                // 显示原始错误消息（但简化）
+                errorMessage = `❌ 请求失败\n\n${error.message}\n\n如果问题持续，请检查：\n1. API配置是否正确\n2. 网络连接是否正常\n3. 控制台是否有详细错误信息`
+            }
+        } else {
+            errorMessage = "❌ 发生未知错误\n\n请查看控制台获取详细信息，或尝试刷新页面。"
+        }
+
+        // 更新现有的空消息或添加新错误消息
+        const lastMessage = messages.value[messages.value.length - 1]
+        if (lastMessage && lastMessage.role === "assistant" && lastMessage.content === "") {
+            lastMessage.content = errorMessage
+        } else {
+            messages.value.push({
+                role: "assistant",
+                content: errorMessage,
+            })
+        }
+    } finally {
+        isLoading.value = false
+        scrollToBottom()
+    }
+}
+
+// 滚动到底部
+function scrollToBottom() {
+    nextTick(() => {
+        if (chatContainer.value) {
+            chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+        }
+    })
+}
+
+// 清空对话
+function clearChat() {
+    messages.value = []
+    if (agent) {
+        // 重新初始化agent以清除上下文
+        agent = null
+    }
+}
+</script>
+
+<template>
+    <div>
+        <!-- 固定按钮 -->
+        <button class="fixed bottom-8 right-8 btn btn-circle btn-md btn-primary shadow-xl z-50" @click="openChat" v-if="!isOpen">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                />
+            </svg>
+        </button>
+
+        <!-- 对话框 -->
+        <div
+            class="fixed bottom-0 right-0 w-full md:w-96 h-[80vh] bg-base-300 shadow-2xl rounded-t-xl z-50 flex flex-col transition-transform"
+            :class="isOpen ? 'translate-y-0' : 'translate-y-full'"
+            v-if="isOpen"
+        >
+            <!-- 头部 -->
+            <div class="flex items-center justify-between p-4 border-b border-base-content/20 bg-base-200 rounded-t-xl">
+                <div class="flex items-center gap-2">
+                    <span class="font-semibold">配装助手</span>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-ghost btn-sm" @click="clearChat" :disabled="isLoading">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                        </svg>
+                    </button>
+                    <button class="btn btn-ghost btn-sm" @click="closeChat" :disabled="isLoading">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 消息区域 -->
+            <div ref="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-4">
+                <div
+                    v-for="(message, index) in messages"
+                    :key="index"
+                    class="flex"
+                    :class="message.role === 'user' ? 'justify-end' : 'justify-start'"
+                >
+                    <div
+                        class="max-w-[80%] rounded-2xl px-4 py-2"
+                        :class="
+                            message.role === 'user'
+                                ? 'bg-primary text-primary-content rounded-br-sm'
+                                : 'bg-base-200 text-base-content rounded-bl-sm'
+                        "
+                    >
+                        <div class="whitespace-pre-wrap text-sm wrap-break-word select-text!">
+                            {{ message.content }}
+                            <!-- 加载动画 -->
+                            <span
+                                v-if="isLoading && index === messages.findLastIndex((msg) => msg.role === 'assistant')"
+                                class="loading loading-dots loading-sm"
+                            ></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 输入区域 -->
+            <div class="p-4 border-t border-base-content/20 bg-base-200">
+                <div class="flex gap-2">
+                    <input
+                        type="text"
+                        v-model="inputMessage"
+                        @keyup.enter="sendMessage"
+                        placeholder="问我任何配装问题..."
+                        class="input input-bordered input-sm flex-1"
+                        :disabled="isLoading"
+                    />
+                    <button class="btn btn-primary btn-sm" @click="sendMessage" :disabled="isLoading || !inputMessage.trim()">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="text-xs text-base-content/60 mt-2">提示: 可以问"赛琪怎么配MOD"、"带扶疏的配装"等</div>
+            </div>
+        </div>
+    </div>
+</template>

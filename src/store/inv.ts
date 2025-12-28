@@ -43,11 +43,13 @@ export const useInvStore = defineStore("inv", {
             if (lv <= 0) delete this.buffLv[modId]
             else this.buffLv[modId] = lv
         },
-        getModLv(modId: number, quality: string) {
+        getModLv(modId: number, quality?: string) {
+            if (!quality) quality = modMap.get(modId)?.品质 || "白"
             if (!this.enableMods[quality as keyof typeof this.enableMods]) return undefined
             return this.mods[modId]?.[0] || undefined
         },
-        getModCount(modId: number, quality: string) {
+        getModCount(modId: number, quality?: string) {
+            if (!quality) quality = modMap.get(modId)?.品质 || "白"
             if (!this.enableMods[quality as keyof typeof this.enableMods]) return 8
             return this.mods[modId]?.[1] || 0
         },

@@ -30,6 +30,7 @@ export const defaultCharSettings = {
     team2: "-",
     team2Weapon: "-",
 }
+export type CharSettings = typeof defaultCharSettings
 export const useCharSettings = (charNameRef: Ref<string>) => {
     const charSettingsKey = computed(() => `build.${charNameRef.value}`)
     const charSettings = useLocalStorage(charSettingsKey, defaultCharSettings)

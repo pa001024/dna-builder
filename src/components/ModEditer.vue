@@ -12,7 +12,6 @@ interface ModOption {
     type: string
     elm?: string
     quality: string
-    icon: string
     ser?: string
     count?: number
     bufflv?: number
