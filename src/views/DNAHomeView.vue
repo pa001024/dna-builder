@@ -229,7 +229,7 @@ async function syncInventory() {
                 <div class="card bg-base-100 shadow-xl">
                     <div class="card-body">
                         <h3 class="card-title mb-4">角色</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-4">
                             <DNACharItem :char="char" v-for="char in roleInfo.roleInfo.roleShow.roleChars" :key="char.charId" />
                         </div>
                     </div>
@@ -239,7 +239,7 @@ async function syncInventory() {
                 <div class="card bg-base-100 shadow-xl">
                     <div class="card-body">
                         <h3 class="card-title mb-4">远程武器</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-4">
                             <DNAWeaponItem
                                 :weapon="weapon"
                                 v-for="weapon in roleInfo.roleInfo.roleShow.langRangeWeapons"
@@ -253,7 +253,7 @@ async function syncInventory() {
                 <div class="card bg-base-100 shadow-xl">
                     <div class="card-body">
                         <h3 class="card-title mb-4">近战武器</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-4">
                             <DNAWeaponItem
                                 :weapon="weapon"
                                 v-for="weapon in roleInfo.roleInfo.roleShow.closeWeapons"

@@ -135,7 +135,7 @@ async function loadRoleDetail() {
                                 <div class="stat-value text-xl font-bold">{{ charDetail.attribute.maxES }}</div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">最大神志</div>
+                                <div class="stat-title text-xs text-base-content/60">最大神智</div>
                                 <div class="stat-value text-xl font-bold">{{ charDetail.attribute.maxSp }}</div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">

@@ -44,14 +44,15 @@ const addUser = async (data: { dev_code: string; user: import("dna-api").DNALogi
     isAddIframeOpen.value = false
 }
 
-const addUserByToken = async (rawdata: any) => {
+const addUserByToken = async () => {
+    const rawdata = JSON.parse(jsonInput.value)
     const userData = {
-        uid: rawdata.token,
-        name: rawdata.userName,
+        uid: rawdata.uid || rawdata.userId,
+        name: rawdata.name || rawdata.userName,
         dev_code: rawdata.dev_code,
         token: rawdata.token,
         refreshToken: rawdata.refreshToken,
-        pic: rawdata.headUrl,
+        pic: rawdata.pic || rawdata.headUrl,
         status: rawdata.status,
         isComplete: rawdata.isComplete,
     } satisfies UDNAUser as UDNAUser
