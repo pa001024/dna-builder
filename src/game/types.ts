@@ -1,5 +1,5 @@
-import { CharAttr } from "../data"
-import type { Char, Weapon, Skill, Monster } from "../data/data-types"
+import { CharAttr, LeveledChar, LeveledSkill, LeveledWeapon } from "../data"
+import type { Monster } from "../data/data-types"
 
 /**
  * 2D向量类型
@@ -31,10 +31,10 @@ export interface PlayerState {
     radius: number
 
     // 角色数据
-    charData: Char
-    meleeWeapon: Weapon
-    rangedWeapon: Weapon
-    skills: Skill[]
+    charData: LeveledChar
+    meleeWeapon: LeveledWeapon
+    rangedWeapon: LeveledWeapon
+    skills: LeveledSkill[]
 
     // 技能冷却(秒)
     cooldowns: {

@@ -7,8 +7,6 @@ import { LeveledBuff } from "../leveled"
 
 describe("CharBuild类测试", () => {
     // 创建测试用数据
-    const mockMeleeWeapon = new LeveledWeapon("铸铁者")
-    const mockRangedWeapon = new LeveledWeapon("烈焰孤沙")
     const mod1 = new LeveledMod(41324) // 雷鸣·燎原
     const mod2 = new LeveledMod(51313) // 决斗
     const mod3 = new LeveledMod(41001) // 炽灼 (75%)
@@ -21,14 +19,15 @@ describe("CharBuild类测试", () => {
     function createCharBuild() {
         return new CharBuild({
             char: new LeveledChar("黎瑟"),
+            skillLevel: 10,
             hpPercent: 0.5,
             resonanceGain: 2,
             charMods: [...mockMods],
             buffs: [...mockBuffs],
             melee: new LeveledWeapon("铸铁者"),
             ranged: new LeveledWeapon("烈焰孤沙"),
-            baseName: mockMeleeWeapon.名称,
-            enemyDef: 130,
+            baseName: "快速出击",
+            enemyId: 1001001,
             enemyLevel: 80,
             enemyResistance: 0.5,
             enemyHpType: "生命",
@@ -75,7 +74,7 @@ describe("CharBuild类测试", () => {
         const baseDefense = charBuild.char.基础防御
         const baseSanity = charBuild.char.基础神智
 
-        const attackBonus = charBuild.char.攻击 || 0
+        const attackBonus = charBuild.char.加成?.攻击 || 0
         const atk = baseAtk * (3 + attackBonus)
         expect(attrs.攻击).toBeCloseTo(atk, 1)
 
@@ -111,9 +110,9 @@ describe("CharBuild类测试", () => {
     // 测试武器属性计算
     it("应该能够正确计算武器属性", () => {
         const charBuild = createCharBuild()
-        charBuild.baseName = mockMeleeWeapon.名称
+        charBuild.baseName = "普通攻击"
         const { weapon: meleeWeaponAttrs } = charBuild.calculateWeaponAttributes()
-        charBuild.baseName = mockRangedWeapon.名称
+        charBuild.baseName = "射击"
         const { weapon: rangedWeaponAttrs } = charBuild.calculateWeaponAttributes()
 
         const { 基础攻击, 基础暴击, 基础暴伤, 基础触发 } = charBuild.meleeWeapon
@@ -130,7 +129,7 @@ describe("CharBuild类测试", () => {
         expect(rangedWeaponAttrs!.触发).toBe(基础远程触发)
         // 测试MOD
         charBuild.mods = [mod4]
-        charBuild.baseName = mockMeleeWeapon.名称
+        charBuild.baseName = "普通攻击"
         const { weapon: meleeWeaponAttrs2 } = charBuild.calculateWeaponAttributes()
         expect(meleeWeaponAttrs2!.暴击).toBeCloseTo(基础暴击 * 3, 1)
     })
@@ -160,15 +159,15 @@ describe("CharBuild类测试", () => {
         charBuildWithMod.mods = modsWithMeleeMod
 
         // 计算没有MOD52001时的武器属性
-        charBuildWithoutMod.baseName = mockMeleeWeapon.名称
+        charBuildWithoutMod.baseName = "普通攻击"
         const { 攻击: meleeAttackWithoutMod, weapon: meleeAttrsWithoutMod } = charBuildWithoutMod.calculateWeaponAttributes()
-        charBuildWithoutMod.baseName = mockRangedWeapon.名称
+        charBuildWithoutMod.baseName = "射击"
         const { 攻击: rangedAttackWithoutMod, weapon: rangedAttrsWithoutMod } = charBuildWithoutMod.calculateWeaponAttributes()
 
         // 计算有MOD52001时的武器属性
-        charBuildWithMod.baseName = mockMeleeWeapon.名称
+        charBuildWithMod.baseName = "普通攻击"
         const { 攻击: meleeAttackWithMod, weapon: meleeAttrsWithMod } = charBuildWithMod.calculateWeaponAttributes()
-        charBuildWithMod.baseName = mockRangedWeapon.名称
+        charBuildWithMod.baseName = "射击"
         const { 攻击: rangedAttackWithMod, weapon: rangedAttrsWithMod } = charBuildWithMod.calculateWeaponAttributes()
 
         // 验证近战武器攻击增加了150%
@@ -240,8 +239,8 @@ describe("CharBuild类测试", () => {
         expect(defenseMultiplier).toBeGreaterThan(0)
 
         // 测试护盾类型的敌人
-        charBuild.enemyHpType = "护盾"
-        expect(charBuild.calculateDefenseMultiplier(attrs)).toBe(1)
+        charBuild.enemyId = 1001001
+        expect(charBuild.calculateDefenseMultiplier(attrs)).toBeCloseTo(0.69, 1)
     })
 
     // 测试主要计算方法
@@ -253,7 +252,8 @@ describe("CharBuild类测试", () => {
         const atk = charBuild.char.基础攻击 * (3 + 1.25) * 1.18
         expect(charBuild.getTotalBonus("攻击")).toBe(1.25)
         expect(atk).toBeCloseTo(attrs.攻击, 0)
-        const b = charBuild.skills[0].伤害值 * 1.18
+        expect(attrs.技能威力).toBe(1.18)
+        const b = charBuild.skills[0].字段.find((field) => field.名称.includes("伤害"))!.值 * 1.18
         const dm = charBuild.calculateDefenseMultiplier(attrs)
         // 验证结果
         expect(result).toBeCloseTo(atk * b * dm * 0.5 * (1.9 + 0.44), 0)
@@ -262,7 +262,7 @@ describe("CharBuild类测试", () => {
     // 测试更改目标函数
     it("应该能够正确执行主要计算方法", () => {
         const charBuild = createCharBuild()
-        charBuild.baseName = mockMeleeWeapon.名称
+        charBuild.baseName = "普通攻击"
         charBuild.targetFunction = "每秒伤害"
         charBuild.mods = [] // 迅捷(75%)
         const income = charBuild.calcIncome(new LeveledMod(52004))
@@ -440,32 +440,32 @@ describe("CharBuild类测试", () => {
             const charBuild = createCharBuild()
             const attrs = charBuild.calculateAttributes()
 
-            expect(attrs.威力).toBeTypeOf("number")
-            expect(attrs.威力).toBeGreaterThanOrEqual(1)
+            expect(attrs.技能威力).toBeTypeOf("number")
+            expect(attrs.技能威力).toBeGreaterThanOrEqual(1)
         })
 
         it("应该正确计算持续属性", () => {
             const charBuild = createCharBuild()
             const attrs = charBuild.calculateAttributes()
 
-            expect(attrs.耐久).toBeTypeOf("number")
-            expect(attrs.耐久).toBeGreaterThanOrEqual(1)
+            expect(attrs.技能耐久).toBeTypeOf("number")
+            expect(attrs.技能耐久).toBeGreaterThanOrEqual(1)
         })
 
         it("应该正确计算效益属性", () => {
             const charBuild = createCharBuild()
             const attrs = charBuild.calculateAttributes()
 
-            expect(attrs.效益).toBeTypeOf("number")
-            expect(attrs.效益).toBeGreaterThanOrEqual(1)
+            expect(attrs.技能效益).toBeTypeOf("number")
+            expect(attrs.技能效益).toBeGreaterThanOrEqual(1)
         })
 
         it("应该正确计算范围属性", () => {
             const charBuild = createCharBuild()
             const attrs = charBuild.calculateAttributes()
 
-            expect(attrs.范围).toBeTypeOf("number")
-            expect(attrs.范围).toBeGreaterThanOrEqual(1)
+            expect(attrs.技能范围).toBeTypeOf("number")
+            expect(attrs.技能范围).toBeGreaterThanOrEqual(1)
         })
 
         it("应该正确计算技能速度属性", () => {
@@ -503,7 +503,7 @@ describe("CharBuild类测试", () => {
 
         it("应该正确应用暴击MOD", () => {
             const charBuild = createCharBuild()
-            charBuild.baseName = mockMeleeWeapon.名称
+            charBuild.baseName = "普通攻击"
             const { weapon: originalWeaponAttrs } = charBuild.calculateWeaponAttributes()
 
             // 添加暴击MOD
@@ -580,7 +580,7 @@ describe("CharBuild类测试", () => {
     describe("敌人类型测试", () => {
         it("应该正确处理小型敌人", () => {
             const charBuild = createCharBuild()
-            charBuild.enemyDef = 130
+            charBuild.enemyId = 130
 
             const result = charBuild.calculate()
             expect(result).toBeTypeOf("number")
@@ -589,7 +589,7 @@ describe("CharBuild类测试", () => {
 
         it("应该正确处理大型敌人", () => {
             const charBuild = createCharBuild()
-            charBuild.enemyDef = 200
+            charBuild.enemyId = 200
 
             const result = charBuild.calculate()
             expect(result).toBeTypeOf("number")
@@ -598,7 +598,7 @@ describe("CharBuild类测试", () => {
 
         it("应该正确处理首领敌人", () => {
             const charBuild = createCharBuild()
-            charBuild.enemyDef = 300
+            charBuild.enemyId = 300
 
             const result = charBuild.calculate()
             expect(result).toBeTypeOf("number")
@@ -610,25 +610,7 @@ describe("CharBuild类测试", () => {
     describe("敌人血量类型测试", () => {
         it("应该正确处理生命类型敌人", () => {
             const charBuild = createCharBuild()
-            charBuild.enemyHpType = "生命"
-
-            const attrs = charBuild.calculateAttributes()
-            const defenseMultiplier = charBuild.calculateDefenseMultiplier(attrs)
-            expect(defenseMultiplier).toBeLessThan(1)
-        })
-
-        it("应该正确处理护盾类型敌人", () => {
-            const charBuild = createCharBuild()
-            charBuild.enemyHpType = "护盾"
-
-            const attrs = charBuild.calculateAttributes()
-            const defenseMultiplier = charBuild.calculateDefenseMultiplier(attrs)
-            expect(defenseMultiplier).toBe(1)
-        })
-
-        it("应该正确处理战姿类型敌人", () => {
-            const charBuild = createCharBuild()
-            charBuild.enemyHpType = "战姿"
+            charBuild.enemyId = 1001001
 
             const attrs = charBuild.calculateAttributes()
             const defenseMultiplier = charBuild.calculateDefenseMultiplier(attrs)
@@ -650,8 +632,8 @@ describe("CharBuild类测试", () => {
                     buffs: [...mockBuffs],
                     melee: new LeveledWeapon("铸铁者"),
                     ranged: new LeveledWeapon("烈焰孤沙"),
-                    baseName: mockMeleeWeapon.名称,
-                    enemyDef: 130,
+                    baseName: "普通攻击",
+                    enemyId: 1001001,
                     enemyLevel: 80,
                     enemyResistance: 0.5,
                     enemyHpType: "生命",
@@ -777,7 +759,7 @@ describe("CharBuild类测试", () => {
             // 验证基本配置
             expect(charBuild.char).toBeDefined()
             expect(charBuild.hpPercent).toBeDefined()
-            expect(charBuild.enemyDef).toBeDefined()
+            expect(charBuild.enemyId).toBeDefined()
             expect(charBuild.targetFunction).toBeDefined()
         })
 
@@ -786,12 +768,12 @@ describe("CharBuild类测试", () => {
 
             // 修改配置
             charBuild.hpPercent = 0.8
-            charBuild.enemyDef = 130
+            charBuild.enemyId = 130
             charBuild.targetFunction = "每秒伤害"
 
             // 验证修改
             expect(charBuild.hpPercent).toBe(0.8)
-            expect(charBuild.enemyDef).toBe(130)
+            expect(charBuild.enemyId).toBe(130)
             expect(charBuild.targetFunction).toBe("每秒伤害")
         })
     })

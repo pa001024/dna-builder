@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, nextTick, computed, onMounted, onUnmounted, watchEffect } from "vue"
-// #region UI
+//#region UI
 import { useUIStore } from "../store/ui"
 const ui = useUIStore()
 
@@ -321,7 +321,7 @@ const addItem = (trackIndex: number, startTime: number, duration = 1, name?: str
     const validDuration = Math.max(0.1, Math.floor(duration))
 
     if (!name) {
-        name = isBuff.value ? selectedBuff.value : baseName.value
+        name = isBuff.value ? selectedBuff.value : targetFunction.value ? `${baseName.value}::${targetFunction.value}` : baseName.value
     }
     if (!lv && isBuff.value) {
         lv = Math.max(1, Math.min(selectedBuffLv.value, selectedBuffMaxLv.value))
@@ -340,18 +340,19 @@ const addItem = (trackIndex: number, startTime: number, duration = 1, name?: str
         newItem.lv = lv
         newItem.props = new LeveledBuff(name, lv).getProperties()
     } else {
-        const bt = name.replace(/\[.+?\]/g, "")
+        const [base, _target] = name.split("::")
         const attr = charBuild.value.calculateAttributes()
-        const skill = charBuild.value.skills.find((s) => s.名称 === bt)
+        const skill = charBuild.value.allSkills.find((s) => s.名称 === base)
         if (skill) {
-            newItem.props = skill.getFieldsWithAttr(attr) || []
+            const fields = skill.getFieldsWithAttr(attr) || []
+            newItem.props = fields
             // 处理召唤物
             if (skill.召唤物持续时间) {
-                const v = Object.entries(newItem.props).find(([name, _]) => /召唤物.*持续时间/.test(name)) as [string, number]
-                newItem.duration = v[1] || 1
+                const v = fields.find((f) => /召唤物.*持续时间/.test(f.名称))
+                newItem.duration = v?.值 || 1
             }
         } else {
-            console.warn(`未找到技能 ${bt}`)
+            console.warn(`未找到技能 ${base}`)
         }
     }
 
@@ -967,8 +968,8 @@ const resetView = () => {
     timelineStartTime.value = 0
     timelineEndTime.value = 300
 }
-// #endregion
-// #region 游戏
+//#endregion
+//#region 游戏
 import { useLocalStorage } from "@vueuse/core"
 import { CharBuild, LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon, buffData } from "../data"
 import { useInvStore } from "../store/inv"
@@ -980,6 +981,7 @@ const inv = useInvStore()
 const selectedChar = useLocalStorage("selectedChar", "赛琪")
 const charSettings = useCharSettings(selectedChar)
 const baseName = ref(charSettings.value.baseName)
+const targetFunction = ref("")
 const charBuild = computed(
     () =>
         new CharBuild({
@@ -1024,10 +1026,9 @@ const charBuild = computed(
             imbalance: charSettings.value.imbalance,
             hpPercent: charSettings.value.hpPercent,
             resonanceGain: charSettings.value.resonanceGain,
-            enemyDef: charSettings.value.enemyDef,
+            enemyId: charSettings.value.enemyId,
             enemyLevel: charSettings.value.enemyLevel,
             enemyResistance: charSettings.value.enemyResistance,
-            enemyHpType: charSettings.value.enemyHpType,
             targetFunction: charSettings.value.targetFunction,
         }),
 )
@@ -1043,20 +1044,7 @@ const selectedBuff = ref("")
 const selectedBuffLv = ref(1)
 const selectedBuffMaxLv = computed(() => buffOptions.value.find((buff) => buff.label === selectedBuff.value)?.mx || 1)
 const baseOptions = computed(() => [
-    ...LeveledChar.getSkillNamesWithSub(selectedChar.value).map((skill) => ({ value: skill, label: skill, type: "技能" })),
-    ...(charBuild.value.char.同律武器 ? LeveledWeapon.getBaseNamesWithName(charBuild.value.char.同律武器) : []).map((base) => ({
-        value: base,
-        label: base,
-        type: "同律武器",
-    })),
-    ...[
-        ...LeveledWeapon.getBaseNamesWithName(charSettings.value.meleeWeapon),
-        ...LeveledWeapon.getBaseNamesWithName(charSettings.value.rangedWeapon),
-    ].map((base) => ({
-        value: base,
-        label: base,
-        type: "武器",
-    })),
+    ...charBuild.value.allSkills.map((skill) => ({ value: skill.名称, label: `${skill.名称}`, type: skill.类型 })),
 ])
 watchEffect(() => {
     if (baseName.value && !baseOptions.value.some((base) => base.value === baseName.value)) {
@@ -1274,23 +1262,32 @@ const importTimelineJson = () => {
                         </SelectItem>
                     </Select>
                 </div>
-                <div v-else class="p-2 flex w-50 items-center gap-2">
+                <div v-else class="p-2 flex items-center gap-2">
                     <span class="text-sm font-semibold text-secondary whitespace-nowrap">{{ selectedChar }}</span>
-                    <Select
-                        class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                        v-model="baseName"
-                    >
+                    <Select class="w-32 input input-bordered input-sm" v-model="baseName">
                         <template v-for="baseWithType in groupBy(baseOptions, 'type')" :key="baseWithType[0].type">
                             <SelectLabel class="p-2 text-sm font-semibold text-primary">
                                 {{ baseWithType[0].type }}
                             </SelectLabel>
                             <SelectGroup>
-                                <SelectItem v-for="base in baseWithType" :key="base.label" :value="base.label">
+                                <SelectItem v-for="base in baseWithType" :key="base.value" :value="base.value">
                                     {{ base.label }}
                                 </SelectItem>
                             </SelectGroup>
                         </template>
                     </Select>
+                    <Combobox
+                        v-model="targetFunction"
+                        type="text"
+                        :placeholder="$t('伤害')"
+                        :options="
+                            (charBuild.allSkills.find((s) => s.名称 === baseName)?.字段 || []).map((f) => ({
+                                label: f.名称,
+                                value: f.名称,
+                            }))
+                        "
+                        class="w-32"
+                    />
                 </div>
             </div>
             <!-- 右侧操作按钮 -->

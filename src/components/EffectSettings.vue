@@ -34,23 +34,17 @@ function setBuffLv(buff: LeveledBuff, lv: number) {
 }
 </script>
 <template>
-    <div class="bg-base-300 rounded-xl p-4 shadow-lg mb-6">
-        <div class="flex items-center gap-2 mb-3">
-            <SectionMarker />
-            <h3 class="text-lg font-semibold">特殊效果配置</h3>
-            <div class="ml-auto flex items-center gap-2">
-                <div class="btn btn-sm btn-primary" @click="buffOptions.forEach((buff) => setBuffLv(buff.value, buff.value.mx))">
-                    全部最大
-                </div>
-                <div class="btn btn-sm btn-primary" @click="buffOptions.forEach((buff) => setBuffLv(buff.value, 0))">全部关闭</div>
-            </div>
+    <div class="flex items-center gap-2 mb-3">
+        <div class="ml-auto flex items-center gap-2">
+            <div class="btn btn-sm btn-primary" @click="buffOptions.forEach((buff) => setBuffLv(buff.value, buff.value.mx))">全部最大</div>
+            <div class="btn btn-sm btn-primary" @click="buffOptions.forEach((buff) => setBuffLv(buff.value, 0))">全部关闭</div>
         </div>
-        <BuffEditer
-            :buff-options="buffOptions"
-            :selected-buffs="selectedBuffs"
-            :char-build="charBuild"
-            @toggle-buff="toggleBuff"
-            @set-buff-lv="setBuffLv"
-        />
     </div>
+    <BuffEditer
+        :buff-options="buffOptions"
+        :selected-buffs="selectedBuffs"
+        :char-build="charBuild"
+        @toggle-buff="toggleBuff"
+        @set-buff-lv="setBuffLv"
+    />
 </template>

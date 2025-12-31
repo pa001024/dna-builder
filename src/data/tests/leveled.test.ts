@@ -74,10 +74,10 @@ describe("DynamicBuff", () => {
             防御: 1,
             神智: 1,
             // 其他属性
-            威力: 1,
-            耐久: 1,
-            效益: 1,
-            范围: 2,
+            技能威力: 1,
+            技能耐久: 1,
+            技能效益: 1,
+            技能范围: 2,
             昂扬: 1,
             背水: 1,
             增伤: 1,
@@ -92,10 +92,12 @@ describe("DynamicBuff", () => {
             召唤物攻击速度: 1,
             召唤物范围: 1,
             减伤: 1,
+            技能倍率赋值: 0,
+            有效生命: 1,
         }
         attrs = buff.applyDynamicAttr(char, attrs, [])
-        expect(attrs.威力).toBe(2)
-        expect(attrs.范围).toBe(1)
+        expect(attrs.技能威力).toBe(2)
+        expect(attrs.技能范围).toBe(1)
     })
 })
 // 测试LeveledBuff类
@@ -198,7 +200,7 @@ describe("LeveledChar", () => {
         const char = new LeveledChar("黎瑟", 50)
         expect(char.等级).toBe(50)
 
-        expect(char.基础攻击).toBe(146)
+        expect(char.基础攻击).toBe(146.12)
 
         expect(char.基础生命).toBe(624)
 
@@ -351,75 +353,5 @@ describe("LeveledWeapon类测试", () => {
         const 裂魂 = new LeveledWeapon("裂魂")
         expect(裂魂.伤害类型).toBe("震荡")
         expect(裂魂.弹道类型).toBe("弹道")
-    })
-
-    // 倍率相关测试用例
-    // 测试13：未提供倍率名称时应该使用默认倍率数据
-    it("未提供倍率名称时应该使用默认倍率数据", () => {
-        const 铸铁者 = new LeveledWeapon("铸铁者")
-        // 对于重剑武器，默认倍率应该是第一个匹配的base数据
-        expect(铸铁者.倍率名称).toBe("一段伤害")
-        expect(铸铁者.倍率).toBe(0.4)
-        expect(铸铁者.段数).toBe(1)
-    })
-
-    // 测试14：提供倍率名称时应该使用指定的倍率数据
-    it("提供倍率名称时应该使用指定的倍率数据", () => {
-        const 铸铁者 = new LeveledWeapon("铸铁者", 5, 80)
-        铸铁者.倍率名称 = "三段伤害"
-        expect(铸铁者.倍率名称).toBe("三段伤害")
-        expect(铸铁者.倍率).toBe(0.5)
-        expect(铸铁者.段数).toBe(1)
-    })
-
-    // 测试15：通过setter设置倍率名称时应该正确更新倍率数据
-    it("通过setter设置倍率名称时应该正确更新倍率数据", () => {
-        const 铸铁者 = new LeveledWeapon("铸铁者")
-        铸铁者.倍率名称 = "四段伤害"
-        expect(铸铁者.倍率名称).toBe("四段伤害")
-        expect(铸铁者.倍率).toBe(1.2)
-        expect(铸铁者.段数).toBe(1)
-    })
-
-    // 测试16：设置不存在的倍率名称时应该使用默认倍率
-    it("设置不存在的倍率名称时应该清空倍率数据", () => {
-        const 铸铁者 = new LeveledWeapon("铸铁者", 5, 80)
-        expect(铸铁者.倍率).toBe(0.4)
-
-        铸铁者.倍率名称 = "不存在的倍率"
-        expect(铸铁者.倍率名称).toBe("不存在的倍率")
-        expect(铸铁者.倍率).toBe(0.4)
-    })
-
-    // 测试17：对于弓武器，应该正确获取默认倍率数据
-    it("弓武器应该正确获取默认倍率数据", () => {
-        const 烈焰孤沙 = new LeveledWeapon("烈焰孤沙")
-        // 对于烈焰孤沙弓，默认倍率应该是第一个匹配的base数据
-        expect(烈焰孤沙.倍率名称).toBe("子弹伤害")
-        expect(烈焰孤沙.倍率).toBe(0.35)
-        expect(烈焰孤沙.弹片数).toBe(1)
-        expect(烈焰孤沙.射速).toBe(1)
-    })
-
-    // 测试18：对于弓武器，应该能够切换不同阶段的倍率数据
-    it("弓武器应该能够切换不同阶段的倍率数据", () => {
-        const 烈焰孤沙 = new LeveledWeapon("烈焰孤沙")
-        // 切换到二阶子弹伤害
-        烈焰孤沙.倍率名称 = "二阶子弹伤害"
-        expect(烈焰孤沙.倍率名称).toBe("二阶子弹伤害")
-        expect(烈焰孤沙.倍率).toBe(0.6)
-
-        // 切换到三阶子弹伤害
-        烈焰孤沙.倍率名称 = "三阶子弹伤害"
-        expect(烈焰孤沙.倍率名称).toBe("三阶子弹伤害")
-        expect(烈焰孤沙.倍率).toBe(1.43)
-    })
-
-    // 测试19：应该能够获取默认倍率名称
-    it("应该能够获取默认倍率名称", () => {
-        const 铸铁者 = new LeveledWeapon("铸铁者")
-        // @ts-ignore 访问私有方法
-        const defaultBaseName = 铸铁者.默认倍率名称
-        expect(defaultBaseName).toBe("一段伤害")
     })
 })

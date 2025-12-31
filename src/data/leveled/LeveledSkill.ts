@@ -1,27 +1,29 @@
-import { uniq } from "lodash-es"
-import { Skill } from "../data-types"
+import { Skill, SkillField } from "../data-types"
 import { CharAttr, WeaponAttr } from "../CharBuild"
 
 export interface LeveledSkillField {
     名称: string
-    属性影响?: string
+    影响?: string
     值: number
     格式?: string
     基础?: string
-    额外?: number
+    值2?: number
+    段数?: number
 }
 
 /**
  * LeveledSkill类 - 继承Skill接口，添加等级属性和动态属性计算
  */
-export class LeveledSkill implements Skill {
+export class LeveledSkill {
     // 基础Skill属性
     名称: string
+    描述?: string
+    术语解释?: Record<string, string>
     类型: string
     字段: LeveledSkillField[]
 
     // 内部私有属性
-    private _level = 10
+    _level = 10
     子技能: string[] = []
 
     /**
@@ -32,22 +34,23 @@ export class LeveledSkill implements Skill {
     constructor(
         public skillData: Skill,
         等级?: number,
-        public 子技能名?: string,
+        public 武器名?: string,
     ) {
         // 设置基础属性
         this.名称 = skillData.名称
         this.类型 = skillData.类型
+        this.描述 = skillData.描述
+        this.术语解释 = skillData.术语解释
         // 设置技能等级（如果提供），否则设为10
         this.等级 = 等级 || 10
         this.字段 = []
-        this.子技能 = uniq(this.skillData.字段.map((field) => field.名称.match(/\[(.+?)\]/)?.[1] || "")).filter(
-            (name) => name !== "" && this.skillData.字段.some((field) => field.名称.includes(name) && field.名称.endsWith("伤害")),
-        )
 
         // 更新属性
         this.updateProperties()
     }
-
+    clone(level?: number) {
+        return new LeveledSkill(this.skillData, level ?? this._level, this.武器名)
+    }
     /**
      * 等级属性的getter和setter
      */
@@ -63,87 +66,93 @@ export class LeveledSkill implements Skill {
         this.updateProperties()
     }
 
-    get 神智消耗() {
-        return (
-            this.字段.find(
-                (field) =>
-                    field.名称.includes(this.子技能名 || "") && !field.名称.includes("每秒神智消耗") && field.名称.includes("神智消耗"),
-            ) || this.字段.find((field) => !field.名称.includes("每秒神智消耗") && field.名称.includes("神智消耗"))
-        )
-    }
-    get 神智消耗值(): number {
-        return this.神智消耗?.值 || 0
-    }
-
-    get 每秒神智消耗() {
-        return (
-            this.字段.find((field) => field.名称.includes(this.子技能名 || "") && field.名称.includes("每秒神智消耗")) ||
-            this.字段.find((field) => field.名称.includes("每秒神智消耗"))
-        )
-    }
-
-    get 每秒神智消耗值(): number {
-        return this.每秒神智消耗?.值 || 0
-    }
-
-    get 伤害() {
-        return this.字段.find((field) => field.名称.includes(this.子技能名 || "") && field.名称.includes("伤害"))
-    }
-
-    get 伤害值(): number {
-        return this.伤害?.值 || 0
-    }
-
     get 召唤物() {
         return this.skillData.召唤物
     }
 
     get 召唤物持续时间() {
         const field = this.字段.find((field) => /召唤物.*持续时间/.test(field.名称))
-        return field ? { 值: field.值 || 0, 属性影响: field.属性影响 || "" } : undefined
+        return field ? { 值: field.值 || 0, 属性影响: field.影响 || "" } : undefined
     }
 
     /**
      * 根据技能等级更新技能属性
      */
-    private updateProperties(): void {
-        this.字段 = this.skillData.字段.map((field) => ({
-            ...field,
-            值: Array.isArray(field.值) ? field.值[this._level - 1] : field.值,
-            额外: Array.isArray(field.额外) ? field.额外[this._level - 1] : field.额外,
-        }))
-    }
-
-    getFieldsWithAttr(attrs: CharAttr & { weapon?: WeaponAttr }) {
-        const tt = {
-            威力: attrs.威力,
-            耐久: attrs.耐久,
-            效益: attrs.效益,
-            范围: attrs.范围,
-        }
-        const normalFields = this.字段.map((field) => {
-            if (field.属性影响) {
-                let val = field.值
-                let propSet = new Set(field.属性影响.split(","))
-                if (propSet.has("范围")) {
-                    val = field.值 * tt["范围"]
-                }
-                if (propSet.has("威力")) {
-                    val = field.值 * tt["威力"]
-                }
-                if (propSet.has("耐久")) {
-                    if (field.名称.includes("每秒神智消耗")) {
-                        val = field.值 / tt["耐久"]
-                    } else {
-                        val = field.值 * tt["耐久"]
+    updateProperties(): void {
+        if (this.skillData.字段) {
+            const field = this.skillData.字段
+            this.字段 = Object.keys(this.skillData.字段).map((key) => {
+                let fstr = field[key]
+                if (typeof fstr === "string") {
+                    const str = fstr
+                    fstr = {
+                        格式: str.replace(/\d+\.\d+%/g, "{%}").replace(/×\d+/g, "×{}"),
+                        值: str.match(/\d+\.\d+%/g)?.map((match) => parseFloat(match.replace("%", "")) / 100)[0] || 0,
+                    } satisfies SkillField
+                    if (this.类型 === "武器伤害") {
+                        fstr.段数 = str.match(/×\d+/g)?.map((match) => parseFloat(match.replace("×", "")))[0] || 1
                     }
                 }
-                if (propSet.has("效益")) {
-                    if (propSet.has("耐久")) {
-                        // 耐久和效益共同影响下仍有175%最大上限
-                        val = field.值 * Math.max(0.25, (2 - tt["效益"]) / tt["耐久"])
+                const fo = fstr as SkillField
+                const obj = {
+                    名称: key,
+                    ...fo,
+                    值: Array.isArray(fo.值) ? fo.值[this._level - 1] : fo.值,
+                } as LeveledSkillField
+                if (obj.值2) {
+                    obj.值2 = Array.isArray(fo.值2) ? fo.值2[this._level - 1] : fo.值2
+                }
+                if (obj.段数) {
+                    obj.段数 = Array.isArray(fo.段数) ? fo.段数[this._level - 1] : fo.段数
+                }
+                if (obj.格式) {
+                    const m = obj.格式.match(/生命|防御/g)
+                    if (m) obj.基础 = m[0]
+                }
+                return obj
+            })
+        }
+    }
+
+    getFieldsWithAttr(attrs?: CharAttr & { weapon?: WeaponAttr }) {
+        const tt = {
+            技能威力: attrs?.技能威力 || 1,
+            技能耐久: attrs?.技能耐久 || 1,
+            技能效益: attrs?.技能效益 || 1,
+            技能范围: attrs?.技能范围 || 1,
+        }
+        const normalFields = this.字段.map((field) => {
+            if (attrs?.技能倍率赋值 && field.名称.includes("伤害")) {
+                return {
+                    ...field,
+                    值: attrs.技能倍率赋值 + attrs.技能倍率加数,
+                }
+            }
+            if (field.影响) {
+                let val = field.值
+                let propSet = new Set(field.影响.split(","))
+                if (propSet.has("技能范围")) {
+                    val = field.值 * tt["技能范围"]
+                }
+                if (propSet.has("技能威力")) {
+                    val = field.值 * tt["技能威力"]
+                    if (field.名称.includes("伤害")) {
+                        val += attrs?.技能倍率加数 || 0
+                    }
+                }
+                if (propSet.has("技能耐久")) {
+                    if (field.名称.includes("每秒神智消耗")) {
+                        val = field.值 / tt["技能耐久"]
                     } else {
-                        val = field.值 * (2 - tt["效益"])
+                        val = field.值 * tt["技能耐久"]
+                    }
+                }
+                if (propSet.has("技能效益")) {
+                    if (propSet.has("技能耐久")) {
+                        // 耐久和效益共同影响下仍有175%最大上限
+                        val = field.值 * Math.max(0.25, (2 - tt["技能效益"]) / tt["技能耐久"])
+                    } else {
+                        val = field.值 * (2 - tt["技能效益"])
                     }
                 }
                 if (field.名称.includes("神智消耗")) {
@@ -163,25 +172,25 @@ export class LeveledSkill implements Skill {
         return normalFields
     }
 
-    getSummonAttrsMap(attrs: CharAttr & { weapon?: WeaponAttr }) {
+    getSummonAttrsMap(attrs?: CharAttr & { weapon?: WeaponAttr }) {
         if (this.召唤物) {
             const summon = this.召唤物
-            const atkspd = ((attrs.weapon?.攻速 || 1) - 1) * attrs.召唤物攻击速度
+            const atkspd = ((attrs?.weapon?.攻速 || 1) - 1) * (attrs?.召唤物攻击速度 || 1)
             const df = this.召唤物持续时间
-            const duration = df ? (df.属性影响?.includes("耐久") ? df.值 * attrs.耐久 : df.值) : 0
+            const duration = df ? (df.属性影响?.includes("技能耐久") ? df.值 * (attrs?.技能耐久 || 1) : df.值) : 0
             return {
                 name: summon.名称,
                 delay: summon.攻击延迟,
                 interval: summon.攻击间隔 / (1 + atkspd),
                 attackSpeed: atkspd,
                 duration,
-                attackTimes: Math.floor((duration * attrs.耐久 - summon.攻击延迟) / (summon.攻击间隔 / (1 + atkspd))),
-                range: Math.min(2.8, attrs.范围 * (1 + attrs.召唤物范围)),
+                attackTimes: Math.floor((duration * (attrs?.技能耐久 || 1) - summon.攻击延迟) / (summon.攻击间隔 / (1 + atkspd))),
+                range: Math.min(2.8, (attrs?.技能范围 || 1) * (1 + (attrs?.召唤物范围 || 0))),
             }
         }
     }
 
-    getSummonAttrs(attrs: CharAttr & { weapon?: WeaponAttr }) {
+    getSummonAttrs(attrs?: CharAttr & { weapon?: WeaponAttr }) {
         const sattrs = this.getSummonAttrsMap(attrs)
         if (sattrs) {
             return [

@@ -23,7 +23,6 @@ interface Props {
     otherMods?: (LeveledMod | null)[]
     modOptions: ModOption[]
     charBuild: CharBuild
-    title: string
     type: string
     auraMod?: number
 }
@@ -208,10 +207,8 @@ const aMod = computed(() => {
 })
 </script>
 <template>
-    <div class="bg-base-300 rounded-xl p-4 shadow-lg mb-6">
+    <div>
         <div class="flex items-center gap-2 mb-3">
-            <SectionMarker />
-            <h3 class="text-lg font-semibold">{{ title }}</h3>
             <div class="ml-auto flex items-center gap-2">
                 <ShowProps
                     v-if="aMod"
@@ -220,7 +217,7 @@ const aMod = computed(() => {
                     :polarity="aMod.极性"
                     :cost="aMod.耐受"
                     :type="`${$t(aMod.类型)}${aMod.属性 ? `,${$t(aMod.属性 + '属性')}` : ''}${aMod.限定 ? `,${$t(aMod.限定)}` : ''}`"
-                    :desc="aMod.效果"
+                    :effdesc="aMod.效果"
                     :eff="charBuild?.checkModEffective(aMod, true)"
                 >
                     <Select
@@ -237,7 +234,7 @@ const aMod = computed(() => {
                 <div class="btn btn-sm btn-primary" @click="copyText(charBuild.getCode(type))">{{ $t("char-build.export_code") }}</div>
             </div>
         </div>
-        <div class="grid grid-cols-4 lg:grid-cols-8 gap-4">
+        <div class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
             <ModItem
                 v-for="(mod, index) in mods"
                 :key="index"
@@ -278,7 +275,7 @@ const aMod = computed(() => {
                         />
                         <div class="tab-content py-2">
                             <ScrollArea class="h-80 w-full">
-                                <div class="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-3">
+                                <div class="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-3">
                                     <ModItem
                                         v-for="mod in sortedModOptions.filter((m) => quality === '全部' || m.quality === quality)"
                                         :key="mod.value"

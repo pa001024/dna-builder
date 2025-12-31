@@ -70,7 +70,7 @@ const emit = defineEmits<{
                 :polarity="mod.极性"
                 :cost="mod.耐受"
                 :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
-                :desc="mod.效果"
+                :effdesc="mod.效果"
                 :eff="charBuild?.checkModEffective(mod) || mod.getCondition()"
             >
                 <div class="w-full h-full flex items-center justify-center bg-opacity-30 rounded-lg overflow-hidden">
@@ -115,7 +115,7 @@ const emit = defineEmits<{
                             </div>
                             <div v-else class="flex justify-between">
                                 <div class="text-base-300 text-xs">
-                                    {{ control && selected !== undefined ? "未拥有" : `Lv.${mod.等级}` }}
+                                    {{ control && selected !== undefined ? $t("未拥有") : `Lv.${mod.等级}` }}
                                 </div>
                                 <div class="text-base-300 text-xs" v-if="income">{{ format100r(income, 1) }}</div>
                                 <div class="text-base-300 text-xs" v-if="count">x{{ count }}</div>

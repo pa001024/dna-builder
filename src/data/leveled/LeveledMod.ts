@@ -238,10 +238,10 @@ export class LeveledMod implements Mod {
             护盾: 0,
             防御: 0,
             神智: 0,
-            威力: 1,
-            耐久: 1,
-            效益: 1,
-            范围: 1,
+            技能威力: 1,
+            技能耐久: 1,
+            技能效益: 1,
+            技能范围: 1,
             昂扬: 0,
             背水: 0,
             增伤: 0,
@@ -253,9 +253,11 @@ export class LeveledMod implements Mod {
             技能速度: 0,
             失衡易伤: 0,
             技能倍率加数: 0,
+            技能倍率赋值: 0,
             召唤物攻击速度: 0,
             召唤物范围: 0,
             减伤: 0,
+            有效生命: 0,
         }
         Object.keys(this.getProperties()).forEach((prop) => {
             if (prop in attrs) attrs[prop as keyof CharAttr] += this[prop]

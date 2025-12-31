@@ -29,7 +29,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
 }
 </script>
 <template>
-    <ScrollArea class="h-80 w-full">
+    <ScrollArea class="max-h-80 w-full">
         <transition-group name="list" tag="div" class="grid grid-cols-2 md:grid-cols-4 gap-3">
             <!-- 已选择的BUFF -->
             <BuffCell

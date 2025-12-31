@@ -77,14 +77,14 @@ export const useInvStore = defineStore("inv", {
             return useInv && this.enableWeapons.近战
                 ? Object.entries(this.meleeWeapons).map(([name, level]) => new LeveledWeapon(name, level, undefined, this.getBuffLv(name)))
                 : weaponData
-                      .filter((weapon) => weapon.类型 === "近战")
+                      .filter((weapon) => weapon.类型[0] === "近战")
                       .map((weapon) => new LeveledWeapon(weapon.名称, undefined, undefined, this.getBuffLv(weapon.名称)))
         },
         getRangedWeapons(useInv: boolean) {
             return useInv && this.enableWeapons.远程
                 ? Object.entries(this.rangedWeapons).map(([name, level]) => new LeveledWeapon(name, level, undefined, this.getBuffLv(name)))
                 : weaponData
-                      .filter((weapon) => weapon.类型 === "远程")
+                      .filter((weapon) => weapon.类型[0] === "远程")
                       .map((weapon) => new LeveledWeapon(weapon.名称, undefined, undefined, this.getBuffLv(weapon.名称)))
         },
     },

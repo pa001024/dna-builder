@@ -192,40 +192,65 @@ export class LeveledMonster implements Monster {
     防御: number
     生命: number
     护盾?: number
-    战姿?: number;
-    [key: string]: any
+    战姿?: number
 
-    private _等级: number = 1
-    private _baseAttack: number
-    private _baseLife: number
-    private _baseShield: number
+    _等级: number = 1
+    _baseAttack: number
+    _baseLife: number
+    _baseShield: number
+
+    currentHP: number
+    currentShield: number
 
     constructor(
         id: number | Monster,
         等级 = 180,
         public isRouge = false,
     ) {
-        const mobData = typeof id === "number" ? monsterMap.get(id) : id
-        if (!mobData) {
-            throw new Error(`怪物 "${id}" 未在静态表中找到`)
+        let mData = typeof id === "number" ? monsterMap.get(id) : id
+        if (!mData) {
+            console.error(`怪物 "${id}" 未在静态表中找到`)
+            mData = monsterMap.get(1001001)!
         }
 
-        this.id = mobData.id
-        this.名称 = mobData.名称
-        this.阵营 = mobData.阵营 || Faction.其他
-        this.攻击 = mobData.攻击
-        this.防御 = mobData.防御
-        this.生命 = mobData.生命
-        if (mobData.护盾 !== undefined) this.护盾 = mobData.护盾
-        if (mobData.战姿 !== undefined) this.战姿 = mobData.战姿
+        this.id = mData.id
+        this.名称 = mData.名称
+        this.阵营 = mData.阵营 || Faction.其他
+        this.攻击 = mData.攻击
+        this.防御 = mData.防御
+        this.生命 = mData.生命
+        if (mData.护盾 !== undefined) this.护盾 = mData.护盾
+        if (mData.战姿 !== undefined) this.战姿 = mData.战姿
 
-        this._baseAttack = mobData.攻击
-        this._baseLife = mobData.生命
-        this._baseShield = mobData.护盾 || 0
+        this.currentHP = this.生命
+        this.currentShield = this.护盾 || 0
+
+        this._baseAttack = mData.攻击
+        this._baseLife = mData.生命
+        this._baseShield = mData.护盾 || 0
 
         if (等级 > 1) {
             this.等级 = 等级
         }
+    }
+
+    get currentHPType() {
+        if (this.currentShield > 0) {
+            return "护盾"
+        }
+        return "生命"
+    }
+
+    get currentHPValue() {
+        if (this.currentHPType === "护盾") {
+            return this.currentShield
+        }
+        return this.currentHP
+    }
+
+    resetHP() {
+        this.currentHP = this.生命
+        this.currentShield = this.护盾 || 0
     }
 
     get 等级(): number {

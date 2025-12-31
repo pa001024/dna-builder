@@ -25,10 +25,10 @@ const emit = defineEmits<{
                         <img :src="weapon.url" :alt="weapon.名称" />
                     </div>
                     <!-- MOD名称 -->
-                    <div class="relative mt-auto w-full bg-black/50 z-10 text-left p-2">
+                    <div class="relative mt-auto w-full bg-base-content/30 z-10 text-left p-2">
                         <div class="text-base-100 text-sm font-bold mb-1 flex items-center">
                             <Icon v-if="selected" icon="ri:checkbox-circle-fill" class="inline-block mr-1 text-green-500" />
-                            {{ weapon.名称 }}
+                            {{ $t(weapon.名称) }}
                         </div>
                         <div class="relative">
                             <div v-if="control && selected" class="text-base-300 text-xs pb-4 group-hover:pb-8">
@@ -41,10 +41,10 @@ const emit = defineEmits<{
                                     :step="1"
                                 />
                                 <span class="absolute inline-flex text-base-300 text-xs max-h-20 overflow-hidden group-hover:max-h-0">
-                                    精炼{{ weapon.精炼 }}
+                                    {{ $t("精炼") }} {{ weapon.精炼 }}
                                 </span>
                             </div>
-                            <div v-else class="text-base-300 text-xs">{{ control ? "未拥有" : `精炼${weapon.精炼}` }}</div>
+                            <div v-else class="text-base-300 text-xs">{{ control ? $t("未拥有") : `精炼${weapon.精炼}` }}</div>
                             <div class="text-base-300 text-xs" v-if="income">{{ format100r(income) }}</div>
                         </div>
                     </div>

@@ -1,76 +1,71 @@
 import { charMap, CommonLevelUp, LeveledSkill } from "."
-import { Char } from "../data-types"
+import { CommonAttr, SkillWeapon } from "../data-types"
 
 /**
  * LeveledChar类 - 继承Char接口，添加等级属性和动态属性计算
  */
-export class LeveledChar implements Char {
+export class LeveledChar {
     id?: number
     // 基础Char属性
+    icon: string
     名称: string
     属性: string
-    近战: string
-    远程: string
-    同律武器?: string
+    精通: string[]
+    溯源?: string[]
+    同律武器?: SkillWeapon[]
     基础攻击: number
     基础生命: number
     基础护盾: number
     基础防御: number
-    基础神智: number;
-    [key: string]: any
+    基础神智: number
+    加成?: CommonAttr
+    阵营?: string
+    别名?: string
     技能: LeveledSkill[] = []
 
     // 等级属性
-    private _等级: number = 80
+    _等级: number = 1
     // 80级时的基准属性值
-    private _base80Attack: number
-    private _base80Life: number
-    private _base80Shield: number
+    _baseATK: number
+    _baseHP: number
+    _baseShield: number
 
     /**
      * 构造函数
-     * @param 角色名 角色的名称
+     * @param id 角色的名称
      * @param 等级 可选的角色等级
      */
-    constructor(角色名: string, 等级?: number) {
+    constructor(id: string | number, 等级?: number) {
         // 从Map中获取对应的Char对象
-        const charData = charMap.get(角色名)
+        const charData = charMap.get(id)
         if (!charData) {
-            throw new Error(`角色 "${角色名}" 未在静态表中找到`)
+            throw new Error(`角色 "${id}" 未在静态表中找到`)
         }
 
         // 复制基础属性
         this.id = charData.id
+        this.icon = charData.icon || ""
         this.名称 = charData.名称
         this.属性 = charData.属性
-        this.近战 = charData.近战
-        this.远程 = charData.远程
+        this.精通 = charData.精通
+        this.溯源 = charData.溯源
         this.基础攻击 = charData.基础攻击
         this.基础生命 = charData.基础生命
         this.基础护盾 = charData.基础护盾
         this.基础防御 = charData.基础防御
         this.基础神智 = charData.基础神智
+        if (charData.别名) this.别名 = charData.别名
+        if (charData.阵营) this.阵营 = charData.阵营
+        if (charData.加成) this.加成 = charData.加成
         if (charData.同律武器) this.同律武器 = charData.同律武器
-        if (charData.范围) this.范围 = charData.范围
-        if (charData.攻击) this.攻击 = charData.攻击
-        if (charData.耐久) this.耐久 = charData.耐久
-        if (charData.生命) this.生命 = charData.生命
-        if (charData.威力) this.威力 = charData.威力
-        if (charData.背水) this.背水 = charData.背水
-        if (charData.防御) this.防御 = charData.防御
-        if (charData.效益) this.效益 = charData.效益
-        if (charData.昂扬) this.昂扬 = charData.昂扬
         this.技能 = charData.技能.map((skill) => new LeveledSkill(skill))
 
         // 保存80级的基准属性值（当前导入的数据是80级的数据）
-        this._base80Attack = charData.基础攻击
-        this._base80Life = charData.基础生命
-        this._base80Shield = charData.基础护盾
+        this._baseATK = charData.基础攻击
+        this._baseHP = charData.基础生命
+        this._baseShield = charData.基础护盾
 
-        // 设置等级（如果提供）
-        if (等级) {
-            this.等级 = 等级
-        }
+        this.等级 = 等级 ?? 80
     }
 
     static getSkillNames(角色名: string) {
@@ -104,17 +99,17 @@ export class LeveledChar implements Char {
      * 根据等级更新角色属性
      * @param level 角色等级
      */
-    private updatePropertiesByLevel(level: number): void {
+    updatePropertiesByLevel(level: number): void {
         // 确保等级在1-80之间
         const clampedLevel = Math.max(1, Math.min(80, level))
 
         // 找到当前等级对应的倍数
-        let multiplier = CommonLevelUp[clampedLevel - 1] / CommonLevelUp.at(-1)!
+        let multiplier = CommonLevelUp[clampedLevel - 1]
 
         // 更新属性（基础神智不受等级影响）
-        this.基础攻击 = Math.round(this._base80Attack * multiplier)
-        this.基础生命 = Math.round(this._base80Life * multiplier)
-        this.基础护盾 = Math.round(this._base80Shield * multiplier)
+        this.基础攻击 = Math.round(this._baseATK * multiplier * 100) / 100
+        this.基础生命 = Math.round(this._baseHP * multiplier)
+        this.基础护盾 = Math.round(this._baseShield * multiplier)
     }
 
     static properties = [
@@ -123,23 +118,23 @@ export class LeveledChar implements Char {
         "基础护盾",
         "基础防御",
         "基础神智",
-        "范围",
+        "技能范围",
         "攻击",
-        "耐久",
+        "技能耐久",
         "生命",
-        "威力",
+        "技能威力",
         "背水",
         "防御",
-        "效益",
+        "技能效益",
         "昂扬",
     ] as const
 
-    getProperties(): Partial<Char> {
-        const properties: Partial<Char> = {}
+    getProperties(): Record<string, number> {
+        const properties: Record<string, number> = {}
         for (const prop of LeveledChar.properties) {
-            const value = this[prop as keyof this]
+            const value = this.加成?.[prop]
             if (value !== undefined) {
-                properties[prop as keyof Char] = value
+                properties[prop] = value
             }
         }
         return properties
@@ -148,7 +143,31 @@ export class LeveledChar implements Char {
     get url() {
         return `/imgs/${this.名称}.png`
     }
-    get urlFull() {
-        return `/imgs/${this.名称}角色立绘.png`
+
+    get bg() {
+        return `https://herobox-img.yingxiong.com/role/config/character/illustration_1/${bgMap[this.名称]}`
     }
 }
+
+const bgMap = {
+    妮弗尔夫人: "nifuerfuren.png",
+    莉兹贝尔: "lizibeier.png",
+    丽蓓卡: "libeika.png",
+    扶疏: "fushu.png",
+    琳恩: "linen.png",
+    黎瑟: "lise.png",
+    赛琪: "saiqi.png",
+    菲娜: "feina.png",
+    松露与榛子: "songlu.png",
+    贝蕾妮卡: "beileinika.png",
+    幻景: "huanjing.png",
+    "女主-光": "nvzhuguang.png",
+    塔比瑟: "tabise.png",
+    玛尔洁: "maerjie.png",
+    兰迪: "landi.png",
+    西比尔: "xibier.png",
+    奥特赛德: "aotesaide.png",
+    达芙涅: "dafunie.png",
+    耶尔与奥利弗: "yeer.png",
+    海尔法: "haierfa.png",
+} as Record<string, string>

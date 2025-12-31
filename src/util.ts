@@ -16,6 +16,7 @@ export function format100r(n100: number, di = 2) {
     return `${n100 >= 0 ? "+" : ""}${+(n100 * 100).toFixed(di)}%`
 }
 const numKeys = new Set([
+    "有效生命",
     "基础攻击",
     "基础生命",
     "基础护盾",
@@ -48,7 +49,9 @@ const propRegex = /神智消耗|神智回复$/
 export function formatSkillProp(prop: string, val: LeveledSkillField) {
     const fmt = propRegex.test(prop) ? format1 : format100
     return val.格式
-        ? val.格式.replace(/\{%?\}/g, (v, i) => (v.includes("%") ? format100(i ? val.额外! : val.值) : format1(i ? val.额外! : val.值)))
+        ? val.格式.replace(/\{%?\}/g, (v, i) =>
+              v.includes("%") ? format100(i ? (val.值2 || val.段数)! : val.值) : format1(i ? (val.值2 || val.段数)! : val.值),
+          )
         : fmt(val.值)
 }
 

@@ -7,6 +7,7 @@ withDefaults(
         side?: "top" | "bottom" | "left" | "right"
         title?: string
         desc?: string
+        effdesc?: string
         polarity?: "A" | "D" | "V" | "O"
         cost?: number
         type?: string
@@ -31,6 +32,7 @@ const formatDesc = (desc: string) => {
         <template #tooltip>
             <div class="flex flex-col gap-2 max-w-[300px] min-w-28">
                 <div v-if="title" class="text-sm font-bold">{{ title }}</div>
+                <div v-if="desc" class="text-xs text-gray-400">{{ desc }}</div>
                 <div v-if="polarity || cost" class="ml-auto badge badge-sm badge-soft gap-1 text-base-content/80">
                     {{ cost }}
                     <Icon v-if="polarity" :icon="`po-${polarity}`" />
@@ -40,7 +42,7 @@ const formatDesc = (desc: string) => {
                     :key="prop"
                     class="flex justify-between items-center gap-2 text-sm"
                 >
-                    <div class="text-xs text-neutral-500">
+                    <div class="text-xs text-neutral-500 whitespace-nowrap">
                         {{ prop.startsWith("基础") ? `${$t("基础")}${$t(prop.slice(2))}` : $t(prop) }}
                     </div>
                     <div class="font-medium text-primary">{{ formatProp(prop, val) }}</div>
@@ -55,14 +57,14 @@ const formatDesc = (desc: string) => {
                     <div class="text-xs text-neutral-500">{{ $t(prop) }}</div>
                     <div class="font-medium text-primary">{{ formatProp(prop, val) }}</div>
                 </div>
-                <div v-if="desc" class="text-xs text-neutral-500">
-                    <span v-if="/[DVOA]趋向/.test(desc)">
-                        <template v-for="(part, index) in formatDesc(desc)">
+                <div v-if="effdesc" class="text-xs text-neutral-500">
+                    <span v-if="/[DVOA]趋向/.test(effdesc)">
+                        <template v-for="(part, index) in formatDesc(effdesc)">
                             <span v-if="index !== 1">{{ part }}</span>
                             <span v-else><Icon class="inline-block mx-1" :icon="`po-${part as 'A' | 'D' | 'V' | 'O'}`" />趋向</span>
                         </template>
                     </span>
-                    <span v-else>{{ desc }}</span>
+                    <span v-else>{{ effdesc }}</span>
                 </div>
 
                 <div v-if="code" class="text-xs text-gray-400">

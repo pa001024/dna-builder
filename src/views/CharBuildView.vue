@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from "vue"
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch, watchEffect } from "vue"
 import { t } from "i18next"
 import {
     LeveledChar,
@@ -13,21 +13,55 @@ import {
     modData,
     buffData,
     weaponData,
+    monsterData,
+    monsterMap,
+    charMap,
+    LeveledSkill,
+    WeaponAttr,
 } from "../data"
 import { useLocalStorage } from "@vueuse/core"
-import { groupBy, cloneDeep } from "lodash-es"
-import { format100, formatSkillProp, formatWeaponProp } from "../util"
+import { groupBy, cloneDeep, debounce } from "lodash-es"
+import { copyText, format100, format100r, formatSkillProp } from "../util"
 import { useInvStore } from "../store/inv"
-import { useCharSettings } from "../composables/useCharSettings"
+import { defaultCharSettings, deserializeCharSettings, serializeCharSettings, useCharSettings } from "../composables/useCharSettings"
 import { useTimeline } from "../store/timeline"
 import { useSettingStore } from "../store/setting"
+import { useRoute } from "vue-router"
+import { useUIStore } from "../store/ui"
 
 //#region 角色
 const inv = useInvStore()
-const settings = useSettingStore()
+const setting = useSettingStore()
+const ui = useUIStore()
+const route = useRoute()
+
+// 路由
+const selectedChar = computed(() => charMap.get(+route.params.charId)?.名称 || "")
+const code = computed(() => route.params.code || "")
+const charSettings = useCharSettings(selectedChar)
+const charProjectKey = computed(() => `project.${selectedChar.value}`)
+const charProject = useLocalStorage(charProjectKey, {
+    selected: "",
+    projects: [] as { name: string; charSettings: typeof charSettings.value }[],
+})
+if (code.value) {
+    // 代码存在时，判断是否需要添加项目
+    if (JSON.stringify(defaultCharSettings) !== JSON.stringify(charSettings.value)) {
+        charProject.value.projects.push({
+            name: `${selectedChar.value} - ${Math.random().toString(36).substr(2, 9)}`,
+            charSettings: cloneDeep(charSettings.value),
+        })
+    }
+    Object.assign(charSettings.value, deserializeCharSettings(code.value as string))
+}
 
 // 获取实际数据
-const charOptions = charData.map((char) => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
+const charOptions = charData.map((char) => ({
+    value: char.名称,
+    label: char.名称,
+    elm: char.属性,
+    icon: `/imgs/${char.名称}.png`,
+}))
 const modOptions = modData
     .map((mod) => ({
         value: mod.id,
@@ -79,25 +113,23 @@ const buffOptions = computed(() =>
 )
 // 近战和远程武器选项
 const meleeWeaponOptions = weaponData
-    .filter((weapon) => weapon.类型 === "近战")
+    .filter((weapon) => weapon.类型[0] === "近战")
     .map((weapon) => ({
         value: weapon.名称,
         label: weapon.名称,
-        type: weapon.类别,
+        type: weapon.类型[1],
         icon: `/imgs/${weapon.名称}.png`,
     }))
 const rangedWeaponOptions = weaponData
-    .filter((weapon) => weapon.类型 === "远程")
+    .filter((weapon) => weapon.类型[0] === "远程")
     .map((weapon) => ({
         value: weapon.名称,
         label: weapon.名称,
-        type: weapon.类别,
+        type: weapon.类型[0],
         icon: `/imgs/${weapon.名称}.png`,
     }))
 
 // 状态变量
-const selectedChar = useLocalStorage("selectedChar", "赛琪")
-const charSettings = useCharSettings(selectedChar)
 const selectedCharMods = computed(() =>
     charSettings.value.charMods.map((v) => (v ? LeveledMod.from(v[0], v[1], inv.getBuffLv(v[0])) : null)),
 )
@@ -168,37 +200,22 @@ const charBuild = computed(
             imbalance: charSettings.value.imbalance,
             hpPercent: charSettings.value.hpPercent,
             resonanceGain: charSettings.value.resonanceGain,
-            enemyDef: charSettings.value.enemyDef,
+            enemyId: charSettings.value.enemyId,
             enemyLevel: charSettings.value.enemyLevel,
             enemyResistance: charSettings.value.enemyResistance,
-            enemyHpType: charSettings.value.enemyHpType,
             targetFunction: charSettings.value.targetFunction,
             timeline: getTimelineByName(charSettings.value.baseName),
         }),
 )
-
-const baseOptions = computed(() => [
-    ...LeveledChar.getSkillNamesWithSub(selectedChar.value).map((skill) => ({ value: skill, label: skill, type: "技能" })),
-    ...(charBuild.value.char.同律武器 ? LeveledWeapon.getBaseNamesWithName(charBuild.value.char.同律武器) : []).map((base) => ({
-        value: base,
-        label: base,
-        type: "同律武器",
-    })),
-    ...[
-        ...LeveledWeapon.getBaseNamesWithName(charSettings.value.meleeWeapon),
-        ...LeveledWeapon.getBaseNamesWithName(charSettings.value.rangedWeapon),
-    ].map((base) => ({
-        value: base,
-        label: base,
-        type: "武器",
-    })),
-])
 
 // 计算属性
 const attributes = computed(() => charBuild.value.calculateAttributes())
 
 // 计算武器属性
 const weaponAttrs = computed(() => (charBuild.value.selectedWeapon ? charBuild.value.calculateWeaponAttributes().weapon : null))
+const meleeAttrs = computed(() => charBuild.value.meleeAttrs || ({} as WeaponAttr))
+const rangedAttrs = computed(() => charBuild.value.rangedAttrs || ({} as WeaponAttr))
+const skillWeaponAttrs = computed(() => charBuild.value.skillWeaponAttrs || ({} as WeaponAttr))
 // 计算总伤害
 const totalDamage = computed(() => charBuild.value.calculate())
 
@@ -271,14 +288,8 @@ function setBuffLv(buff: LeveledBuff, lv: number) {
     updateCharBuild()
 }
 
-const charProjectKey = computed(() => `project.${selectedChar.value}`)
-const charProject = useLocalStorage(charProjectKey, {
-    selected: "",
-    projects: [] as { name: string; charSettings: typeof charSettings.value }[],
-})
 // 保存配置
 const saveConfig = () => {
-    // 实现保存配置功能
     console.log("保存配置")
     const inputName = prompt(t("char-build.please_enter_config_name"))
     if (!inputName) {
@@ -299,10 +310,9 @@ const saveConfig = () => {
 const resetConfig = () => {
     charSettings.value.hpPercent = 1
     charSettings.value.resonanceGain = 3
-    charSettings.value.enemyDef = 130
+    charSettings.value.enemyId = 130
     charSettings.value.enemyLevel = 80
     charSettings.value.enemyResistance = 0
-    charSettings.value.enemyHpType = "生命"
     charSettings.value.targetFunction = "伤害"
     charSettings.value.imbalance = false
     charSettings.value.charMods = Array(8).fill(null)
@@ -318,6 +328,7 @@ const loadConfig = () => {
     const project = charProject.value.projects.find((project) => project.name === charProject.value.selected)
     if (project) {
         charSettings.value = cloneDeep(project.charSettings)
+        targetFunction.value = charSettings.value.targetFunction
         updateCharBuild()
     }
 }
@@ -327,7 +338,6 @@ const reloadCustomBuff = () => {
     if (index > -1) {
         _buffOptions[index].value = new LeveledBuff("自定义BUFF")
     }
-    // 触发重新计算
     charSettings.value.buffs = [...charSettings.value.buffs]
 }
 //#endregion
@@ -384,17 +394,39 @@ function getTimelineByName(name: string) {
     return CharBuildTimeline.fromRaw(raw)
 }
 const isTimeline = computed(() => timelines.value.some((v) => v.name === charSettings.value.baseName))
+function setTimeline(name?: string) {
+    if (isTimeline.value) {
+        charSettings.value.baseName = charBuild.value.char.技能[0].名称
+        return
+    }
+    if (!name) {
+        if (timelines.value.length > 0) {
+            name = timelines.value[0].name
+        } else {
+            // name = charBuild.value.char.技能[0].名称
+            ui.showErrorMessage("当前角色没有时间线，无法切换")
+            return
+        }
+    }
+    const timeline = getTimelineByName(name)
+    if (!timeline) {
+        return
+    }
+    charSettings.value.baseName = name || ""
+}
 //#endregion
 
 // 更新CharBuild实例
 function updateCharBuild() {
-    // 确保技能存在
-    if (
-        !charSettings.value.baseName ||
-        (!baseOptions.value.some((skill) => skill.value === charSettings.value.baseName) && !isTimeline.value)
-    ) {
-        charSettings.value.baseName = charBuild.value.char.技能[0].名称
+    if (!monsterMap.has(charSettings.value.enemyId)) {
+        charSettings.value.enemyId = 1001001
     }
+    // if (
+    //     !charSettings.value.baseName ||
+    //     (!baseOptions.value.some((skill) => skill.value === charSettings.value.baseName) && !isTimeline.value)
+    // ) {
+    //     charSettings.value.baseName = charBuild.value.char.技能[0].名称
+    // }
     pad(charSettings.value.charMods, 8, null)
     pad(charSettings.value.meleeMods, 8, null)
     pad(charSettings.value.rangedMods, 8, null)
@@ -402,7 +434,7 @@ function updateCharBuild() {
     function pad<T>(arr: T[], length: number, value: T) {
         if (arr.length > length) {
             arr.length = length
-            return arr
+            return
         }
         while (arr.length < length) {
             arr.push(value)
@@ -426,7 +458,6 @@ const teamBuffLvs = useLocalStorage("teamBuffLvs", {} as Record<string, number>)
 function updateTeamBuff(newValue: string, oldValue: string) {
     const newBuffs = [...charSettings.value.buffs.filter((v) => !v[0].includes(oldValue))]
     if (newValue !== "-") {
-        // 添加新的BUFF
         const teamBuffs = buffOptions.value.filter((v) => v.label.includes(newValue))
         if (teamBuffs.length > 0) {
             const buffs = teamBuffs
@@ -442,32 +473,13 @@ function updateTeamBuff(newValue: string, oldValue: string) {
 // 外部调用接口
 declare global {
     interface Window {
-        /**
-         * 设置角色名称
-         * @param name 角色名称
-         */
         setCharName: (name: string) => void
-        /**
-         * 设置Mod
-         * @param key Mod类型
-         * @param index Mod索引 0-7
-         * @param modId ModID -1表示清除Mod
-         * @param level Mod等级
-         */
         setMod: (key: "charMods" | "meleeMods" | "rangedMods" | "skillWeaponMods", index: number, modId: number, level: number) => void
-        /**
-         * 设置BUFF
-         * @param buffId BUFFID
-         * @param level BUFF等级 -1表示清除BUFF 为空表示添加默认等级
-         */
         setBuff: (buffId: string, level?: number) => void
     }
 }
 
 onMounted(() => {
-    window.setCharName = (name: string) => {
-        selectedChar.value = name
-    }
     window.setMod = (key: "charMods" | "meleeMods" | "rangedMods" | "skillWeaponMods", index: number, modId: number, level: number) => {
         if (index < 0 || index >= charSettings.value[key].length) return
         if (modId < 0) charSettings.value[key][index] = null
@@ -485,85 +497,1508 @@ onMounted(() => {
             else charSettings.value.buffs.splice(index, 1)
         }
     }
+    ui.title = t("char-build.title1", { charName: t(selectedChar.value) })
 })
+
+onBeforeUnmount(() => {
+    ui.title = ""
+})
+
+// 折叠状态
+const collapsedSections = useLocalStorage("build-collapsed-sections", {
+    detail: false,
+    basic: false,
+    mods: false,
+    effects: false,
+    buffs: false,
+    preview: false,
+})
+
+function toggleSection(section: keyof typeof collapsedSections.value) {
+    collapsedSections.value[section] = !collapsedSections.value[section]
+}
+
+const detailTab = ref("溯源")
+const selectedSkill = ref<LeveledSkill | null>(null)
+const selectedSkillLevel = ref(12)
+watchEffect(() => {
+    let skill = charBuild.value.char.技能.find((s) => s.名称 === detailTab.value)
+    if (!skill) {
+        detailTab.value = charBuild.value.char.技能[0].名称
+        skill = charBuild.value.char.技能[0]
+    }
+    selectedSkill.value = skill.clone(selectedSkillLevel.value)
+})
+
+const charTab = ref(charBuild.value.selectedSkillType)
+
+function addSkill(skillName: string) {
+    targetFunction.value += skillName
+}
+
+const targetFunction = ref(charSettings.value.targetFunction)
+watch(
+    targetFunction,
+    debounce((newValue) => {
+        const error = charBuild.value.validateAST(newValue)
+        if (error) {
+            return
+        }
+        charSettings.value.targetFunction = newValue
+    }, 500),
+)
+const charDetailExpend = ref(true)
+const weapon_select_model_show = ref(false)
+const newWeaponSelection = ref({ melee: "", ranged: "" })
+function handleWeaponSelection(melee: string, ranged: string) {
+    newWeaponSelection.value = { melee, ranged }
+}
+function applyWeaponSelection() {
+    charSettings.value.meleeWeapon = newWeaponSelection.value.melee
+    charSettings.value.rangedWeapon = newWeaponSelection.value.ranged
+    weapon_select_model_show.value = false
+}
+
+const ast_help_model_show = ref(false)
+
+function shareCharBuild() {
+    const shareUrl = `https://xn--chq26veyq.icu/char/${route.params.charId}/${serializeCharSettings(charSettings.value)}`
+    copyText(shareUrl)
+    ui.showSuccessMessage(t("分享链接已复制"))
+}
 </script>
 
 <template>
-    <div class="h-full overflow-y-auto">
-        <div class="mx-auto p-4">
-            <div class="flex justify-end gap-2 mb-4">
-                <button class="btn btn-sm btn-circle" @click="simulator_model_show = true">模拟</button>
-                <dialog id="simulator_model" class="modal" :class="{ 'modal-open': simulator_model_show }">
-                    <div class="modal-box bg-base-300 w-5/6 max-w-5xl">
-                        <div class="mb-6">
-                            <div class="flex items-center gap-2 mb-3">
-                                <SectionMarker />
-                                <h3 class="text-lg font-semibold">模拟</h3>
-                            </div>
-                            <GameSimulator v-if="simulator_model_show" :characterName="selectedChar" />
-                        </div>
-                    </div>
-                    <div class="modal-backdrop" @click="simulator_model_show = false"></div>
-                </dialog>
-                <button class="btn btn-sm btn-secondary" @click="autobuild_model_show = true">{{ $t("char-build.auto_build") }}</button>
-                <dialog id="autobuild_model" class="modal" :class="{ 'modal-open': autobuild_model_show }">
-                    <div class="modal-box bg-base-300 w-5/6 max-w-5xl">
-                        <div class="mb-6">
-                            <div class="flex items-center gap-2 mb-3">
-                                <SectionMarker />
-                                <h3 class="text-lg font-semibold">{{ $t("char-build.auto_build") }}</h3>
-                            </div>
-                            <AutoBuild :update="autobuild_model_show" :charBuild="charBuild" @change="newBuild = $event" />
-                        </div>
-                        <div class="modal-action">
-                            <form class="flex justify-end gap-2" method="dialog">
-                                <button class="btn btn-primary" @click="applyAutobuild">应用</button>
-                                <button class="btn" @click="autobuild_model_show = false">取消</button>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="modal-backdrop" @click="autobuild_model_show = false"></div>
-                </dialog>
-                <button class="btn btn-sm btn-success" @click="$router.push('/char-build-compare')">{{ $t("build-compare.title") }}</button>
-                <Select
-                    v-if="charProject.projects.length > 0"
-                    class="w-50 inline-flex items-center justify-between input input-bordered input-md whitespace-nowrap"
-                    v-model="charProject.selected"
-                    @change="loadConfig"
-                >
-                    <SelectItem v-for="project in charProject.projects" :key="project.name" :value="project.name">
-                        {{ project.name }}
-                    </SelectItem>
-                </Select>
-                <button class="btn btn-sm btn-primary" @click="saveConfig">{{ $t("char-build.save_project") }}</button>
-                <button class="btn btn-sm" @click="resetConfig">{{ $t("char-build.reset_config") }}</button>
+    <dialog class="modal" :class="{ 'modal-open': simulator_model_show }">
+        <div class="modal-box bg-base-300 w-11/12 max-w-6xl">
+            <GameSimulator v-if="simulator_model_show" :characterName="selectedChar" />
+        </div>
+        <div class="modal-backdrop" @click="simulator_model_show = false"></div>
+    </dialog>
+    <dialog class="modal" :class="{ 'modal-open': autobuild_model_show }">
+        <div class="modal-box bg-base-300 w-11/12 max-w-6xl">
+            <AutoBuild :update="autobuild_model_show" :charBuild="charBuild" @change="newBuild = $event" />
+            <div class="modal-action">
+                <form class="flex justify-end gap-2" method="dialog">
+                    <button class="btn btn-primary" @click="applyAutobuild">{{ $t("应用") }}</button>
+                    <button class="btn" @click="autobuild_model_show = false">{{ $t("取消") }}</button>
+                </form>
             </div>
-
-            <!-- 基本设置 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
-                <!-- 角色选择 -->
-                <ShowProps
-                    :title="$t(charBuild.char.名称)"
-                    :props="charBuild.char.getProperties()"
-                    :type="`${$t(charBuild.char.属性 + '属性')},${$t(charBuild.char.近战)}/${$t(charBuild.char.远程)}`"
-                    side="bottom"
-                >
-                    <div class="bg-base-300 rounded-xl p-4 shadow-lg">
-                        <div class="flex items-center gap-2 mb-3">
-                            <SectionMarker reset>
-                                <Icon icon="ri:user-line" />
-                            </SectionMarker>
-                            <h3 class="text-lg font-semibold">{{ $t("char-build.select_character") }}</h3>
+        </div>
+        <div class="modal-backdrop" @click="autobuild_model_show = false"></div>
+    </dialog>
+    <dialog class="modal" :class="{ 'modal-open': ast_help_model_show }">
+        <div class="modal-box bg-base-300 w-11/12 max-w-6xl">
+            <ASTHelp
+                :char-build="charBuild"
+                v-if="ast_help_model_show"
+                v-model="ast_help_model_show"
+                @select="targetFunction = $event"
+                :skill="charBuild.selectedSkill"
+            />
+        </div>
+        <div class="modal-backdrop" @click="ast_help_model_show = false"></div>
+    </dialog>
+    <dialog class="modal" :class="{ 'modal-open': weapon_select_model_show }">
+        <div class="modal-box bg-base-300 w-11/12 max-w-6xl">
+            <WeaponListView
+                v-if="weapon_select_model_show"
+                :charBuild="charBuild"
+                :melee="charSettings.meleeWeapon"
+                :ranged="charSettings.rangedWeapon"
+                @change="handleWeaponSelection"
+            />
+            <div class="modal-action">
+                <form class="flex justify-end gap-2" method="dialog">
+                    <button class="btn btn-primary" @click="applyWeaponSelection">{{ $t("应用") }}</button>
+                    <button class="btn" @click="weapon_select_model_show = false">{{ $t("取消") }}</button>
+                </form>
+            </div>
+        </div>
+        <div class="modal-backdrop" @click="weapon_select_model_show = false"></div>
+    </dialog>
+    <div class="h-full flex flex-col relative">
+        <!-- 背景图 -->
+        <div
+            class="inset-0 absolute opacity-50"
+            :style="{
+                backgroundImage: `url(${charBuild.char.bg})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+            }"
+        ></div>
+        <!-- 顶部操作栏 -->
+        <div class="sticky top-0 z-1 bg-base-300/50 backdrop-blur-sm rounded-md p-3 m-2 shadow-lg border border-base-200">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                    <button class="btn btn-sm btn-circle btn-ghost" @click="$router.back()">
+                        <Icon icon="ri:arrow-left-line" />
+                    </button>
+                    <h1 class="text-xl font-bold">{{ $t("char-build.title") }}</h1>
+                </div>
+                <div class="flex ml-auto flex-wrap items-center gap-2">
+                    <button class="btn btn-sm btn-ghost" @click="shareCharBuild">
+                        <Icon icon="ri:share-line" class="w-4 h-4" />
+                        <span class="hidden sm:inline">{{ $t("分享") }}</span>
+                    </button>
+                    <button class="btn btn-sm btn-ghost" @click="simulator_model_show = true">
+                        <Icon icon="ri:game-line" class="w-4 h-4" />
+                        <span class="hidden sm:inline">{{ $t("模拟") }}</span>
+                    </button>
+                    <button class="btn btn-sm btn-secondary" @click="autobuild_model_show = true">
+                        <Icon icon="ri:robot-2-line" class="w-4 h-4" />
+                        <span class="hidden sm:inline">{{ $t("char-build.auto_build") }}</span>
+                    </button>
+                    <button class="btn btn-sm btn-success" @click="$router.push('/char-build-compare')">
+                        <Icon icon="ri:bar-chart-line" class="w-4 h-4" />
+                        <span class="hidden sm:inline">{{ $t("build-compare.title") }}</span>
+                    </button>
+                    <Select
+                        v-if="charProject.projects.length > 0"
+                        class="w-40 input input-bordered input-sm"
+                        v-model="charProject.selected"
+                        @change="loadConfig"
+                    >
+                        <SelectItem v-for="project in charProject.projects" :key="project.name" :value="project.name">
+                            {{ project.name }}
+                        </SelectItem>
+                    </Select>
+                    <button class="btn btn-sm btn-primary" @click="saveConfig">
+                        <Icon icon="ri:save-fill" class="w-4 h-4" />
+                        <span class="hidden sm:inline">{{ $t("char-build.save_project") }}</span>
+                    </button>
+                    <button class="btn btn-sm btn-ghost" @click="resetConfig">
+                        <Icon icon="ri:refresh-line" class="w-4 h-4" />
+                        <span class="hidden sm:inline">{{ $t("char-build.reset_config") }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="flex-1 flex flex-col sm:flex-row overflow-y-auto sm:overflow-hidden">
+            <!-- 侧边栏 -->
+            <ScrollArea class="sm:w-92 flex-none flex flex-col gap-2 p-2">
+                <div class="flex flex-col gap-4">
+                    <div class="flex m-auto gap-2">
+                        <div
+                            v-for="tab in [
+                                {
+                                    name: '角色',
+                                    url: charBuild.char.url,
+                                },
+                                {
+                                    name: '近战',
+                                    url: charBuild.meleeWeapon.url,
+                                },
+                                {
+                                    name: '远程',
+                                    url: charBuild.rangedWeapon.url,
+                                },
+                                ...(charBuild.skillWeapon
+                                    ? [
+                                          {
+                                              name: '同律',
+                                              url: charBuild.skillWeapon.url,
+                                          },
+                                      ]
+                                    : []),
+                            ]"
+                            class="flex items-center gap-2"
+                        >
+                            <div
+                                class="flex-none cursor-pointer size-12 relative rounded-full overflow-hidden border-2 border-base-100 aspect-square"
+                                :class="{ 'border-primary! shadow-lg shadow-primary/40': charTab === tab.name }"
+                                @click="charTab = tab.name"
+                            >
+                                <ImageFallback :src="tab.url" alt="角色头像" class="w-full h-full object-cover object-top">
+                                    <Icon icon="ri:question-mark" class="w-full h-full" />
+                                </ImageFallback>
+                                <div class="absolute inset-0 bg-linear-to-t from-yellow-500/20 via-transparent to-transparent"></div>
+                            </div>
                         </div>
-                        <div class="relative flex items-center gap-2">
+                    </div>
+                    <!-- 角色 -->
+                    <div
+                        v-if="charTab === '角色'"
+                        class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-md p-4 space-y-3 border border-base-200"
+                    >
+                        <h3 class="flex items-center gap-4 text-lg font-bold text-base-content/90 mb-2">
+                            <div class="flex flex-col">
+                                <div class="text-lg font-bold">{{ $t(selectedChar) }}</div>
+                                <div class="text-sm opacity-60">{{ $t(charBuild.char.别名 || "") }}</div>
+                            </div>
+                            <div class="ml-auto flex">Lv. {{ charSettings.charLevel }}</div>
+                        </h3>
+                        <div class="flex items-center gap-2 text-sm p-1">
                             <div class="flex-1">
-                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.character") }}</div>
-                                <Select
-                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                    v-model="selectedChar"
-                                    @change="updateCharBuild"
+                                <input
+                                    v-model.number="charSettings.charLevel"
+                                    type="range"
+                                    class="range range-primary range-xs w-full"
+                                    min="1"
+                                    max="80"
+                                    step="1"
+                                />
+                            </div>
+                        </div>
+                        <!-- 词条 -->
+                        <div class="collapse" :class="{ 'collapse-open': charDetailExpend }">
+                            <div class="space-y-1 collapse-content p-0">
+                                <FullTooltip
+                                    side="bottom"
+                                    v-for="[key, val] in Object.entries(attributes).filter(
+                                        ([k, v]) => !['召唤物攻击速度', '召唤物范围'].includes(k) && v,
+                                    )"
+                                    :key="key"
                                 >
-                                    <template v-for="charWithElm in groupBy(charOptions, 'elm')" :key="charWithElm[0].elm">
+                                    <template #tooltip>
+                                        <div class="flex flex-col gap-2">
+                                            <div class="text-base-content/50 text-xs">{{ $t(key) }}</div>
+                                            <div class="text-sm text-primary" v-if="key === '有效生命'">
+                                                (生命 / (1 - 防御 / (300 + 防御)) + 护盾) / (1 - 减伤)
+                                            </div>
+                                            <ul class="space-y-1">
+                                                <li
+                                                    v-if="'基础' + key in charBuild.char"
+                                                    class="flex justify-between gap-8 text-sm text-primary"
+                                                >
+                                                    <div class="text-base-content/80">基础{{ key }}</div>
+                                                    {{ charBuild.char[("基础" + key) as keyof LeveledChar] }}
+                                                </li>
+                                                <li
+                                                    v-if="charBuild.char.加成 && key in charBuild.char.加成"
+                                                    class="flex justify-between gap-8 text-sm text-primary"
+                                                >
+                                                    <div class="text-base-content/80">角色</div>
+                                                    {{ format100r(charBuild.char.加成[key]!) }}
+                                                </li>
+                                                <li
+                                                    v-if="['生命', '护盾', '防御', '攻击'].includes(key)"
+                                                    class="flex justify-between gap-8 text-sm text-primary"
+                                                >
+                                                    <div class="text-base-content/80">和鸣增益</div>
+                                                    {{ format100r(charSettings.resonanceGain) }}
+                                                </li>
+                                                <li
+                                                    v-if="key in (charBuild.meleeWeapon || {})"
+                                                    class="flex justify-between gap-8 text-sm text-primary"
+                                                >
+                                                    <div class="text-base-content/80">{{ $t(charBuild.meleeWeapon.名称) }}</div>
+                                                    {{ format100r(charBuild.meleeWeapon[key]!) }}
+                                                </li>
+                                                <li
+                                                    v-if="key in (charBuild.rangedWeapon || {})"
+                                                    class="flex justify-between gap-8 text-sm text-primary"
+                                                >
+                                                    <div class="text-base-content/80">{{ $t(charBuild.rangedWeapon.名称) }}</div>
+                                                    {{ format100r(charBuild.rangedWeapon[key]!) }}
+                                                </li>
+                                                <li
+                                                    v-for="mod in charBuild.charMods.filter((m) => m[key])"
+                                                    class="flex justify-between gap-8 text-sm text-primary"
+                                                >
+                                                    <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
+                                                    {{ format100r(mod[key]!) }}
+                                                </li>
+                                                <li
+                                                    v-for="buff in charBuild.buffs.filter((b) => b[key])"
+                                                    class="flex justify-between gap-8 text-sm text-primary"
+                                                >
+                                                    <div class="text-base-content/80">{{ buff.名称 }}</div>
+                                                    {{ format100r(buff[key]!) }}
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </template>
+                                    <div
+                                        class="cursor-pointer flex justify-between items-center p-1 px-2 transition-all duration-200 hover:bg-base-100/60 hover:shadow-md"
+                                        @click="addSkill(key)"
+                                        :class="{
+                                            'shadow-md shadow-primary/50 text-shadow-sm outline outline-primary': charBuild
+                                                .getIdentifierNames(charBuild.targetFunction)
+                                                .includes(key),
+                                        }"
+                                    >
+                                        <div class="text-sm text-base-content/80">
+                                            {{ key === "攻击" ? $t(`${charBuild.char.属性}属性`) : "" }}{{ $t(key) }}
+                                        </div>
+                                        <div class="text-primary font-bold text-sm font-orbitron">
+                                            {{
+                                                ["攻击", "生命", "护盾", "防御", "神智", "有效生命"].includes(key)
+                                                    ? `${+val.toFixed(key === "攻击" ? 2 : 0)}`
+                                                    : `${+(val * 100).toFixed(2)}%`
+                                            }}
+                                        </div>
+                                    </div>
+                                </FullTooltip>
+                            </div>
+                        </div>
+                        <div
+                            class="flex justify-center items-center cursor-pointer p-2 hover:bg-base-100/60 transition-all duration-200"
+                            @click="charDetailExpend = !charDetailExpend"
+                        >
+                            <Icon icon="radix-icons:chevron-down" :class="{ 'rotate-180': charDetailExpend }" />
+                        </div>
+                        <!-- 技能选择 -->
+                        <div class="join flex">
+                            <button
+                                v-for="(skill, index) in charBuild.skills.slice(0, 3)"
+                                :key="index"
+                                class="flex-1 btn btn-sm join-item p-0"
+                                :class="{
+                                    'btn-primary': skill.名称 === charBuild.baseName,
+                                    'btn-ghost': skill.名称 !== charBuild.baseName,
+                                }"
+                                @click="charSettings.baseName = skill.名称"
+                            >
+                                {{ skill.名称 }}
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-4 text-sm p-1">
+                            <div class="flex-1">
+                                <input
+                                    v-model.number="charSettings.charSkillLevel"
+                                    type="range"
+                                    class="range range-primary range-xs w-full"
+                                    min="1"
+                                    max="12"
+                                    step="1"
+                                />
+                            </div>
+                            <div class="flex-none">Lv. {{ charSettings.charSkillLevel }}</div>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="text-sm" v-if="charBuild.selectedSkill">
+                                <div
+                                    v-for="(val, index) in charBuild.selectedSkill!.getFieldsWithAttr(
+                                        charBuild.selectedSkill?.召唤物
+                                            ? charBuild.calculateWeaponAttributes(undefined, undefined, charBuild.meleeWeapon)
+                                            : attributes,
+                                    )"
+                                    :key="index"
+                                    class="flex flex-col group hover:bg-base-200/50 p-2 cursor-pointer"
+                                    @click="addSkill(val.名称)"
+                                    :class="{
+                                        'shadow-md shadow-primary/50 outline-2 outline-primary/60': charBuild
+                                            .getIdentifierNames(charBuild.targetFunction)
+                                            .includes(val.名称),
+                                    }"
+                                >
+                                    <div class="flex justify-between items-center gap-4">
+                                        <div>{{ val.名称 }}</div>
+                                        <div class="font-medium text-primary">
+                                            {{ formatSkillProp(val.名称, val) }}
+                                        </div>
+                                    </div>
+                                    <div
+                                        v-if="val.影响"
+                                        class="opacity-0 group-hover:opacity-80 justify-between items-center gap-4 flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
+                                    >
+                                        <div>属性影响</div>
+                                        <div class="ml-auto font-medium">{{ val.影响 }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 近战武器 -->
+                    <div
+                        v-if="charTab === '近战'"
+                        class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-md p-4 space-y-3 border border-base-200"
+                    >
+                        <h3 class="flex items-center gap-4 text-lg font-bold text-base-content/90 mb-2">
+                            <div class="flex flex-1 flex-col">
+                                <div class="text-lg font-bold cursor-pointer" @click="weapon_select_model_show = true">
+                                    {{ $t(charBuild.meleeWeapon.名称) }}
+                                    <Icon icon="ri:exchange-line" class="inline-block w-5 h-5 text-primary" />
+                                </div>
+                                <div class="text-sm opacity-60 flex-1 overflow-hidden whitespace-nowrap text-ellipsis">
+                                    精炼 {{ charSettings.meleeWeaponRefine }}
+                                </div>
+                            </div>
+                            <div class="ml-auto flex flex-none">Lv. {{ charSettings.meleeWeaponLevel }}</div>
+                        </h3>
+                        <div class="flex items-center gap-2 text-sm p-1">
+                            <div class="flex-1">
+                                <input
+                                    v-model.number="charSettings.meleeWeaponLevel"
+                                    type="range"
+                                    class="range range-primary range-xs w-full"
+                                    min="1"
+                                    max="80"
+                                    step="1"
+                                />
+                            </div>
+                        </div>
+                        <!-- 词条 -->
+                        <div class="space-y-1">
+                            <FullTooltip
+                                side="bottom"
+                                v-for="[key, val] in Object.entries(attributes).filter(([k]) => k === '攻击')"
+                                :key="key"
+                            >
+                                <template #tooltip>
+                                    <div class="flex flex-col gap-2">
+                                        <div class="text-base-content/50 text-xs">{{ $t(key) }}</div>
+                                        <ul class="space-y-1">
+                                            <li
+                                                v-if="'基础' + key in charBuild.char"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">基础{{ key }}</div>
+                                                {{ charBuild.char[("基础" + key) as keyof LeveledChar] }}
+                                            </li>
+                                            <li
+                                                v-if="charBuild.char.加成 && key in charBuild.char.加成"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">角色</div>
+                                                {{ format100r(charBuild.char.加成[key]!) }}
+                                            </li>
+                                            <li
+                                                v-if="['生命', '护盾', '防御', '攻击'].includes(key)"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">和鸣增益</div>
+                                                {{ format100r(charSettings.resonanceGain) }}
+                                            </li>
+                                            <li
+                                                v-if="key in (charBuild.meleeWeapon || {})"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ $t(charBuild.meleeWeapon.名称) }}</div>
+                                                {{ format100r(charBuild.meleeWeapon[key]!) }}
+                                            </li>
+                                            <li
+                                                v-if="key in (charBuild.rangedWeapon || {})"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ $t(charBuild.rangedWeapon.名称) }}</div>
+                                                {{ format100r(charBuild.rangedWeapon[key]!) }}
+                                            </li>
+                                            <li
+                                                v-for="mod in charBuild.charMods.filter((m) => m[key])"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
+                                                {{ format100r(mod[key]!) }}
+                                            </li>
+                                            <li
+                                                v-for="buff in charBuild.buffs.filter((b) => b[key])"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ buff.名称 }}</div>
+                                                {{ format100r(buff[key]!) }}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </template>
+                                <div
+                                    class="flex justify-between items-center p-1 px-2 transition-all duration-200 hover:bg-base-100 hover:shadow-md rounded-md"
+                                >
+                                    <div class="text-sm text-base-content/80">
+                                        {{ key === "攻击" ? $t(`${charBuild.char.属性}属性`) : "" }}{{ $t(key) }}
+                                    </div>
+                                    <div class="text-primary font-bold text-sm font-orbitron">
+                                        {{
+                                            ["攻击", "生命", "护盾", "防御", "神智"].includes(key)
+                                                ? `${+val.toFixed(2)}`
+                                                : `${+(val * 100).toFixed(2)}%`
+                                        }}
+                                    </div>
+                                </div>
+                            </FullTooltip>
+                            <FullTooltip
+                                side="bottom"
+                                v-for="[key, val] in Object.entries(meleeAttrs).filter(([k, v]) => v && k !== '多重')"
+                                :key="key"
+                            >
+                                <template #tooltip>
+                                    <div class="flex flex-col gap-2">
+                                        <div class="text-base-content/50 text-xs">{{ $t(key) }}</div>
+                                        <ul class="space-y-1">
+                                            <li
+                                                v-if="'基础' + key in charBuild.meleeWeapon"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">基础{{ key }}</div>
+                                                {{
+                                                    key !== "攻击"
+                                                        ? format100(charBuild.meleeWeapon[("基础" + key) as keyof LeveledWeapon]!)
+                                                        : +charBuild.meleeWeapon[("基础" + key) as keyof LeveledWeapon].toFixed(2)
+                                                }}
+                                            </li>
+                                            <li
+                                                v-if="charBuild.meleeWeapon.加成 && key in charBuild.meleeWeapon.加成"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ charBuild.meleeWeapon.名称 }}</div>
+                                                {{ format100r(charBuild.meleeWeapon.加成[key]!) }}
+                                            </li>
+                                            <li
+                                                v-if="key != '攻击' && key in (charBuild.meleeWeapon || {})"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">近战武器</div>
+                                                {{ format100r(charBuild.meleeWeapon[key]!) }}
+                                            </li>
+                                            <li
+                                                v-if="key != '攻击' && key in (charBuild.rangedWeapon || {})"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">远程武器</div>
+                                                {{ format100r(charBuild.rangedWeapon[key]!) }}
+                                            </li>
+                                            <li
+                                                v-for="mod in charBuild.meleeMods.filter((m) => m[key])"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
+                                                {{ format100r(mod[key]!) }}
+                                            </li>
+                                            <li
+                                                v-for="buff in charBuild.buffs.filter((b) => b[key])"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ buff.名称 }}</div>
+                                                {{ format100r(buff[key]!) }}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </template>
+                                <div
+                                    class="flex justify-between items-center p-1 px-2 transition-all duration-200 hover:bg-base-100 hover:shadow-md rounded-md"
+                                >
+                                    <div class="text-sm text-base-content/80">
+                                        {{ key === "攻击" ? $t(`${charBuild.meleeWeapon.伤害类型}`) : "" }}{{ $t(key) }}
+                                    </div>
+                                    <div class="text-primary font-bold text-sm font-orbitron">
+                                        {{ ["攻击", "攻速", "多重"].includes(key) ? `${+val.toFixed(2)}` : `${+(val * 100).toFixed(2)}%` }}
+                                    </div>
+                                </div>
+                            </FullTooltip>
+                        </div>
+                        <!-- 技能选择 -->
+                        <div class="join flex">
+                            <button
+                                v-for="(skill, index) in charBuild.meleeWeaponSkills.slice(0, 3)"
+                                :key="index"
+                                class="flex-1 btn btn-sm join-item p-0"
+                                :class="{
+                                    'btn-primary': skill.名称 === charBuild.baseName,
+                                    'btn-ghost': skill.名称 !== charBuild.baseName,
+                                }"
+                                @click="charSettings.baseName = skill.名称"
+                            >
+                                {{ skill.名称 }}
+                            </button>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="text-sm" v-if="charBuild.isMeleeWeapon && charBuild.selectedSkill">
+                                <div
+                                    v-for="(val, index) in charBuild.selectedSkill!.getFieldsWithAttr(
+                                        charBuild.selectedSkill?.召唤物
+                                            ? charBuild.calculateWeaponAttributes(undefined, undefined, charBuild.meleeWeapon)
+                                            : attributes,
+                                    )"
+                                    :key="index"
+                                    class="flex flex-col group hover:bg-base-200/50 p-2 cursor-pointer"
+                                    @click="addSkill(val.名称)"
+                                    :class="{
+                                        'shadow-md shadow-primary/50 outline-2 outline-primary/60': charBuild
+                                            .getIdentifierNames(charBuild.targetFunction)
+                                            .includes(val.名称),
+                                    }"
+                                >
+                                    <div class="flex justify-between items-center gap-4">
+                                        <div>{{ val.名称 }}</div>
+                                        <div class="font-medium text-primary">
+                                            {{ formatSkillProp(val.名称, val) }}
+                                        </div>
+                                    </div>
+                                    <div
+                                        v-if="val.影响"
+                                        class="opacity-0 group-hover:opacity-80 justify-between items-center gap-4 flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
+                                    >
+                                        <div>属性影响</div>
+                                        <div class="ml-auto font-medium">{{ val.影响 }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 远程武器 -->
+                    <div
+                        v-if="charTab === '远程'"
+                        class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-md p-4 space-y-3 border border-base-200"
+                    >
+                        <h3 class="flex items-center gap-4 text-lg font-bold text-base-content/90 mb-2">
+                            <div class="flex flex-1 flex-col">
+                                <div class="text-lg font-bold cursor-pointer" @click="weapon_select_model_show = true">
+                                    {{ $t(charBuild.rangedWeapon.名称) }}
+                                    <Icon icon="ri:exchange-line" class="inline-block w-5 h-5 text-primary" />
+                                </div>
+                                <div class="text-sm opacity-60 flex-1 overflow-hidden whitespace-nowrap text-ellipsis">
+                                    精炼 {{ charSettings.rangedWeaponRefine }}
+                                </div>
+                            </div>
+                            <div class="ml-auto flex flex-none">Lv. {{ charSettings.rangedWeaponLevel }}</div>
+                        </h3>
+                        <div class="flex items-center gap-2 text-sm p-1">
+                            <div class="flex-1">
+                                <input
+                                    v-model.number="charSettings.rangedWeaponLevel"
+                                    type="range"
+                                    class="range range-primary range-xs w-full"
+                                    min="1"
+                                    max="80"
+                                    step="1"
+                                />
+                            </div>
+                        </div>
+                        <!-- 词条 -->
+                        <div class="space-y-1">
+                            <FullTooltip
+                                side="bottom"
+                                v-for="[key, val] in Object.entries(attributes).filter(([k]) => k === '攻击')"
+                                :key="key"
+                            >
+                                <template #tooltip>
+                                    <div class="flex flex-col gap-2">
+                                        <div class="text-base-content/50 text-xs">{{ $t(key) }}</div>
+                                        <ul class="space-y-1">
+                                            <li
+                                                v-if="'基础' + key in charBuild.char"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">基础{{ key }}</div>
+                                                {{ charBuild.char[("基础" + key) as keyof LeveledChar] }}
+                                            </li>
+                                            <li
+                                                v-if="charBuild.char.加成 && key in charBuild.char.加成"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">角色</div>
+                                                {{ format100r(charBuild.char.加成[key]!) }}
+                                            </li>
+                                            <li
+                                                v-if="['生命', '护盾', '防御', '攻击'].includes(key)"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">和鸣增益</div>
+                                                {{ format100r(charSettings.resonanceGain) }}
+                                            </li>
+                                            <li
+                                                v-if="key in (charBuild.meleeWeapon || {})"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ $t(charBuild.meleeWeapon.名称) }}</div>
+                                                {{ format100r(charBuild.meleeWeapon[key]!) }}
+                                            </li>
+                                            <li
+                                                v-if="key in (charBuild.rangedWeapon || {})"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ $t(charBuild.rangedWeapon.名称) }}</div>
+                                                {{ format100r(charBuild.rangedWeapon[key]!) }}
+                                            </li>
+                                            <li
+                                                v-for="mod in charBuild.charMods.filter((m) => m[key])"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
+                                                {{ format100r(mod[key]!) }}
+                                            </li>
+                                            <li
+                                                v-for="buff in charBuild.buffs.filter((b) => b[key])"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ buff.名称 }}</div>
+                                                {{ format100r(buff[key]!) }}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </template>
+                                <div
+                                    class="flex justify-between items-center p-1 px-2 transition-all duration-200 hover:bg-base-100 hover:shadow-md rounded-md"
+                                >
+                                    <div class="text-sm text-base-content/80">
+                                        {{ key === "攻击" ? $t(`${charBuild.char.属性}属性`) : "" }}{{ $t(key) }}
+                                    </div>
+                                    <div class="text-primary font-bold text-sm font-orbitron">
+                                        {{
+                                            ["攻击", "生命", "护盾", "防御", "神智"].includes(key)
+                                                ? `${+val.toFixed(2)}`
+                                                : `${+(val * 100).toFixed(2)}%`
+                                        }}
+                                    </div>
+                                </div>
+                            </FullTooltip>
+                            <FullTooltip side="bottom" v-for="[key, val] in Object.entries(rangedAttrs).filter(([_k, v]) => v)" :key="key">
+                                <template #tooltip>
+                                    <div class="flex flex-col gap-2">
+                                        <div class="text-base-content/50 text-xs">{{ $t(key) }}</div>
+                                        <ul class="space-y-1">
+                                            <li
+                                                v-if="'基础' + key in charBuild.rangedWeapon"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">基础{{ key }}</div>
+                                                {{
+                                                    key !== "攻击"
+                                                        ? format100(charBuild.rangedWeapon[("基础" + key) as keyof LeveledWeapon]!)
+                                                        : +charBuild.rangedWeapon[("基础" + key) as keyof LeveledWeapon].toFixed(2)
+                                                }}
+                                            </li>
+                                            <li
+                                                v-if="charBuild.meleeWeapon.加成 && key in charBuild.meleeWeapon.加成"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ charBuild.rangedWeapon.名称 }}</div>
+                                                {{ format100r(charBuild.rangedWeapon.加成[key]!) }}
+                                            </li>
+                                            <li
+                                                v-if="key != '攻击' && key in (charBuild.meleeWeapon || {})"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">近战武器</div>
+                                                {{ format100r(charBuild.meleeWeapon[key]!) }}
+                                            </li>
+                                            <li
+                                                v-if="key != '攻击' && key in (charBuild.rangedWeapon || {})"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">远程武器</div>
+                                                {{ format100r(charBuild.rangedWeapon[key]!) }}
+                                            </li>
+                                            <li
+                                                v-for="mod in charBuild.rangedMods.filter((m) => m[key])"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
+                                                {{ format100r(mod[key]!) }}
+                                            </li>
+                                            <li
+                                                v-for="buff in charBuild.buffs.filter((b) => b[key])"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ buff.名称 }}</div>
+                                                {{ format100r(buff[key]!) }}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </template>
+                                <div
+                                    class="flex justify-between items-center p-1 px-2 transition-all duration-200 hover:bg-base-100 hover:shadow-md rounded-md"
+                                >
+                                    <div class="text-sm text-base-content/80">
+                                        {{ key === "攻击" ? $t(`${charBuild.rangedWeapon.伤害类型}`) : "" }}{{ $t(key) }}
+                                    </div>
+                                    <div class="text-primary font-bold text-sm font-orbitron">
+                                        {{ ["攻击", "攻速", "多重"].includes(key) ? `${+val.toFixed(2)}` : `${+(val * 100).toFixed(2)}%` }}
+                                    </div>
+                                </div>
+                            </FullTooltip>
+                        </div>
+                        <!-- 技能选择 -->
+                        <div class="join flex">
+                            <button
+                                v-for="(skill, index) in charBuild.rangedWeaponSkills.slice(0, 3)"
+                                :key="index"
+                                class="flex-1 btn btn-sm join-item p-0"
+                                :class="{
+                                    'btn-primary': skill.名称 === charBuild.baseName,
+                                    'btn-ghost': skill.名称 !== charBuild.baseName,
+                                }"
+                                @click="charSettings.baseName = skill.名称"
+                            >
+                                {{ skill.名称 }}
+                            </button>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="text-sm" v-if="charBuild.isRangedWeapon && charBuild.selectedSkill">
+                                <div
+                                    v-for="(val, index) in charBuild.selectedSkill!.getFieldsWithAttr(
+                                        charBuild.selectedSkill?.召唤物
+                                            ? charBuild.calculateWeaponAttributes(undefined, undefined, charBuild.meleeWeapon)
+                                            : attributes,
+                                    )"
+                                    :key="index"
+                                    class="flex flex-col group hover:bg-base-200/50 p-2 cursor-pointer"
+                                    @click="addSkill(val.名称)"
+                                    :class="{
+                                        'shadow-md shadow-primary/50 outline-2 outline-primary/60': charBuild
+                                            .getIdentifierNames(charBuild.targetFunction)
+                                            .includes(val.名称),
+                                    }"
+                                >
+                                    <div class="flex justify-between items-center gap-4">
+                                        <div>{{ val.名称 }}</div>
+                                        <div class="font-medium text-primary">
+                                            {{ formatSkillProp(val.名称, val) }}
+                                        </div>
+                                    </div>
+                                    <div
+                                        v-if="val.影响"
+                                        class="opacity-0 group-hover:opacity-80 justify-between items-center gap-4 flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
+                                    >
+                                        <div>属性影响</div>
+                                        <div class="ml-auto font-medium">{{ val.影响 }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 同律武器 -->
+                    <div
+                        v-if="charTab === '同律' && charBuild.skillWeapon"
+                        class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-md p-4 space-y-3 border border-base-200"
+                    >
+                        <h3 class="flex items-center gap-4 text-lg font-bold text-base-content/90 mb-2">
+                            <div class="flex flex-1 flex-col">
+                                <div class="text-lg font-bold cursor-pointer">
+                                    {{ $t(charBuild.skillWeapon.名称) }}
+                                </div>
+                            </div>
+                            <div class="ml-auto flex flex-none">Lv. {{ charSettings.charLevel }}</div>
+                        </h3>
+                        <!-- 词条 -->
+                        <div class="space-y-1">
+                            <FullTooltip
+                                side="bottom"
+                                v-for="[key, val] in Object.entries(attributes).filter(([k]) => k === '攻击')"
+                                :key="key"
+                            >
+                                <template #tooltip>
+                                    <div class="flex flex-col gap-2">
+                                        <div class="text-base-content/50 text-xs">{{ $t(key) }}</div>
+                                        <ul class="space-y-1">
+                                            <li
+                                                v-if="'基础' + key in charBuild.char"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">基础{{ key }}</div>
+                                                {{ charBuild.char[("基础" + key) as keyof LeveledChar] }}
+                                            </li>
+                                            <li
+                                                v-if="charBuild.char.加成 && key in charBuild.char.加成"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">角色</div>
+                                                {{ format100r(charBuild.char.加成[key]!) }}
+                                            </li>
+                                            <li
+                                                v-if="['生命', '护盾', '防御', '攻击'].includes(key)"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">和鸣增益</div>
+                                                {{ format100r(charSettings.resonanceGain) }}
+                                            </li>
+                                            <li
+                                                v-if="key in (charBuild.meleeWeapon || {})"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ $t(charBuild.meleeWeapon.名称) }}</div>
+                                                {{ format100r(charBuild.meleeWeapon[key]!) }}
+                                            </li>
+                                            <li
+                                                v-if="key in (charBuild.rangedWeapon || {})"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ $t(charBuild.rangedWeapon.名称) }}</div>
+                                                {{ format100r(charBuild.rangedWeapon[key]!) }}
+                                            </li>
+                                            <li
+                                                v-for="mod in charBuild.charMods.filter((m) => m[key])"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
+                                                {{ format100r(mod[key]!) }}
+                                            </li>
+                                            <li
+                                                v-for="buff in charBuild.buffs.filter((b) => b[key])"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ buff.名称 }}</div>
+                                                {{ format100r(buff[key]!) }}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </template>
+                                <div
+                                    class="flex justify-between items-center p-1 px-2 transition-all duration-200 hover:bg-base-100 hover:shadow-md rounded-md"
+                                >
+                                    <div class="text-sm text-base-content/80">
+                                        {{ key === "攻击" ? $t(`${charBuild.char.属性}属性`) : "" }}{{ $t(key) }}
+                                    </div>
+                                    <div class="text-primary font-bold text-sm font-orbitron">
+                                        {{
+                                            ["攻击", "生命", "护盾", "防御", "神智"].includes(key)
+                                                ? `${+val.toFixed(2)}`
+                                                : `${+(val * 100).toFixed(2)}%`
+                                        }}
+                                    </div>
+                                </div>
+                            </FullTooltip>
+                            <FullTooltip
+                                side="bottom"
+                                v-for="[key, val] in Object.entries(skillWeaponAttrs).filter(
+                                    ([k, v]) => v && (charBuild.skillWeapon!.类型 !== '近战' || k !== '多重'),
+                                )"
+                                :key="key"
+                            >
+                                <template #tooltip>
+                                    <div class="flex flex-col gap-2">
+                                        <div class="text-base-content/50 text-xs">{{ $t(key) }}</div>
+                                        <ul class="space-y-1">
+                                            <li
+                                                v-if="'基础' + key in charBuild.skillWeapon"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">基础{{ key }}</div>
+                                                {{
+                                                    key !== "攻击"
+                                                        ? format100(
+                                                              charBuild.skillWeapon[
+                                                                  ("基础" + key) as "基础攻击" | "基础暴击" | "基础暴伤" | "基础触发"
+                                                              ]!,
+                                                          )
+                                                        : +charBuild.skillWeapon[
+                                                              ("基础" + key) as "基础攻击" | "基础暴击" | "基础暴伤" | "基础触发"
+                                                          ]!.toFixed(2)
+                                                }}
+                                            </li>
+                                            <li
+                                                v-if="key != '攻击' && key in (charBuild.meleeWeapon || {})"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">近战武器</div>
+                                                {{ format100r(charBuild.meleeWeapon[key]!) }}
+                                            </li>
+                                            <li
+                                                v-if="key != '攻击' && key in (charBuild.rangedWeapon || {})"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">远程武器</div>
+                                                {{ format100r(charBuild.rangedWeapon[key]!) }}
+                                            </li>
+                                            <li
+                                                v-for="mod in charBuild.rangedMods.filter((m) => m[key])"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
+                                                {{ format100r(mod[key]!) }}
+                                            </li>
+                                            <li
+                                                v-for="buff in charBuild.buffs.filter((b) => b[key])"
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">{{ buff.名称 }}</div>
+                                                {{ format100r(buff[key]!) }}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </template>
+                                <div
+                                    class="flex justify-between items-center p-1 px-2 transition-all duration-200 hover:bg-base-100 hover:shadow-md rounded-md"
+                                >
+                                    <div class="text-sm text-base-content/80">
+                                        {{ key === "攻击" ? $t(`${charBuild.rangedWeapon.伤害类型}`) : "" }}{{ $t(key) }}
+                                    </div>
+                                    <div class="text-primary font-bold text-sm font-orbitron">
+                                        {{ ["攻击", "攻速", "多重"].includes(key) ? `${+val.toFixed(2)}` : `${+(val * 100).toFixed(2)}%` }}
+                                    </div>
+                                </div>
+                            </FullTooltip>
+                        </div>
+                        <!-- 技能选择 -->
+                        <div class="join flex">
+                            <button
+                                v-for="(skill, index) in charBuild.skillWeaponSkills.slice(0, 3)"
+                                :key="index"
+                                class="flex-1 btn btn-sm join-item p-0"
+                                :class="{
+                                    'btn-primary': skill.名称 === charBuild.baseName,
+                                    'btn-ghost': skill.名称 !== charBuild.baseName,
+                                }"
+                                @click="charSettings.baseName = skill.名称"
+                            >
+                                {{ skill.名称 }}
+                            </button>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="text-sm" v-if="charBuild.isSkillWeapon && charBuild.selectedSkill">
+                                <div
+                                    v-for="(val, index) in charBuild.selectedSkill!.getFieldsWithAttr(
+                                        charBuild.selectedSkill?.召唤物
+                                            ? charBuild.calculateWeaponAttributes(undefined, undefined, charBuild.meleeWeapon)
+                                            : attributes,
+                                    )"
+                                    :key="index"
+                                    class="flex flex-col group hover:bg-base-200/50 p-2 cursor-pointer"
+                                    @click="addSkill(val.名称)"
+                                    :class="{
+                                        'shadow-md shadow-primary/50 outline-2 outline-primary/60': charBuild
+                                            .getIdentifierNames(charBuild.targetFunction)
+                                            .includes(val.名称),
+                                    }"
+                                >
+                                    <div class="flex justify-between items-center gap-4">
+                                        <div>{{ val.名称 }}</div>
+                                        <div class="font-medium text-primary">
+                                            {{ formatSkillProp(val.名称, val) }}
+                                        </div>
+                                    </div>
+                                    <div
+                                        v-if="val.影响"
+                                        class="opacity-0 group-hover:opacity-80 justify-between items-center gap-4 flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
+                                    >
+                                        <div>属性影响</div>
+                                        <div class="ml-auto font-medium">{{ val.影响 }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 目标函数 -->
+                    <div class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-md p-4 space-y-3 border border-base-200">
+                        <div class="space-y-2 p-1">
+                            <div class="text-sm flex justify-between">
+                                <div class="flex items-center gap-2">
+                                    {{ isTimeline ? "时间线" : "表达式" }}
+                                    <div class="btn btn-xs text-lg btn-ghost btn-circle" @click="ast_help_model_show = true">
+                                        <Icon icon="ri:question-line" />
+                                    </div>
+                                </div>
+                                <input
+                                    v-model="isTimeline"
+                                    @click.prevent="setTimeline()"
+                                    type="checkbox"
+                                    class="toggle toggle-secondary"
+                                />
+                            </div>
+                            <label v-if="!isTimeline" class="input input-sm input-primary text-sm flex justify-between">
+                                <input v-model="targetFunction" type="text" placeholder="伤害" class="grow" />
+                                <div
+                                    v-if="targetFunction"
+                                    class="flex items-center cursor-pointer hover:text-primary"
+                                    @click="targetFunction = ''"
+                                >
+                                    <Icon icon="codicon:chrome-close" />
+                                </div>
+                            </label>
+                            <!-- 时间线 -->
+                            <Select
+                                v-else
+                                :value="charSettings.baseName"
+                                @change="charSettings.baseName = $event"
+                                class="select select-sm select-primary w-full"
+                            >
+                                <SelectItem v-for="timeline in timelines" :key="timeline.name" :value="timeline.name">
+                                    {{ timeline.name }}
+                                </SelectItem>
+                            </Select>
+                            <!-- 错误信息 -->
+                            <div class="flex text-xs items-center text-red-500" v-if="charBuild.validateAST(targetFunction)">
+                                {{ charBuild.validateAST(targetFunction) }}
+                            </div>
+                            <div v-else class="flex justify-between items-center p-1">
+                                <div class="text-sm text-base-content/80">计算结果</div>
+                                <div class="text-primary font-bold text-md font-orbitron">
+                                    {{ totalDamage }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </ScrollArea>
+            <!-- 正文 -->
+            <ScrollArea class="sm:flex-1 flex-none">
+                <div class="p-2 space-y-4">
+                    <!-- 技能 -->
+                    <div
+                        class="collapse bg-base-100/50 backdrop-blur-sm rounded-md shadow-lg border border-base-200"
+                        :class="{ 'collapse-open': !collapsedSections.detail }"
+                    >
+                        <div
+                            class="collapse-title flex items-center justify-between p-4 cursor-pointer bg-linear-to-r from-primary/5 to-transparent hover:from-primary/10 transition-colors"
+                            @click="toggleSection('detail')"
+                        >
+                            <div class="flex items-center gap-2">
+                                <SectionMarker reset />
+                                <h2 class="text-lg font-bold">{{ $t("角色详情") }}</h2>
+                            </div>
+                            <span
+                                class="flex-none size-8 items-center justify-center text-lg text-base-content/50 swap swap-flip -rotate-90"
+                                :class="{ 'swap-active': collapsedSections.detail }"
+                            >
+                                <Icon icon="tabler:arrow-bar-to-left" class="swap-on" />
+                                <Icon icon="tabler:arrow-bar-to-right" class="swap-off" />
+                            </span>
+                        </div>
+                        <div class="collapse-content">
+                            <h2 v-if="charBuild.char.溯源" class="text-lg font-bold p-2 mt-2">溯源</h2>
+                            <div class="flex flex-col gap-2 p-2" v-if="charBuild.char.溯源">
+                                <div
+                                    v-for="(grade, i) in charBuild.char.溯源"
+                                    class="font-medium flex text-sm justify-between items-center gap-8"
+                                >
+                                    <div class="font-medium whitespace-nowrap opacity-70">
+                                        第{{ ["一", "二", "三", "四", "五", "六"][i] }}根源
+                                    </div>
+                                    <div>{{ grade }}</div>
+                                </div>
+                            </div>
+                            <h2 class="text-lg font-bold p-2 flex gap-4 justify-between items-center">
+                                技能
+                                <span class="text-base-content/50 text-sm">Lv. {{ selectedSkillLevel }}</span>
+
+                                <input
+                                    v-model.number="selectedSkillLevel"
+                                    type="range"
+                                    class="range range-primary range-xs ml-auto max-w-64"
+                                    min="1"
+                                    max="12"
+                                    step="1"
+                                />
+                            </h2>
+
+                            <div class="flex gap-2 p-2">
+                                <button
+                                    v-for="skill in charBuild.char.技能"
+                                    :key="skill.名称"
+                                    @click="detailTab = skill.名称"
+                                    class="btn btn-sm rounded-full whitespace-nowrap transition-all duration-200"
+                                    :class="detailTab === skill.名称 ? 'btn-primary shadow-lg scale-105' : 'btn-ghost hover:bg-base-200'"
+                                >
+                                    {{ skill.名称 }}
+                                </button>
+                            </div>
+                            <div class="text-sm" v-if="selectedSkill">
+                                <div class="p-2 text-sm font-medium">
+                                    {{ selectedSkill.类型 }}
+                                </div>
+                                <div class="p-2 text-sm">
+                                    {{ selectedSkill.描述 }}
+                                </div>
+                                <div class="p-2" v-for="(value, key) in selectedSkill.术语解释">
+                                    <div class="text-xs font-medium underline">{{ key }}</div>
+                                    <div class="text-xs">{{ value }}</div>
+                                </div>
+                                <div
+                                    v-for="(val, index) in selectedSkill!.getFieldsWithAttr()"
+                                    :key="index"
+                                    class="flex flex-col group hover:bg-base-200/50 rounded-md p-2"
+                                >
+                                    <div class="flex justify-between items-center gap-4">
+                                        <div>{{ val.名称 }}</div>
+                                        <div class="font-medium text-primary">
+                                            {{ formatSkillProp(val.名称, val) }}
+                                        </div>
+                                    </div>
+                                    <div
+                                        v-if="val.影响"
+                                        class="opacity-0 group-hover:opacity-80 justify-between items-center gap-4 flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
+                                    >
+                                        <div>属性影响</div>
+                                        <div class="ml-auto font-medium">{{ val.影响 }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 基本设置卡片 -->
+                    <div
+                        class="collapse bg-base-100/50 backdrop-blur-sm rounded-md shadow-lg overflow-hidden border border-base-200"
+                        :class="{ 'collapse-open': !collapsedSections.basic }"
+                    >
+                        <div
+                            class="flex items-center justify-between p-4 cursor-pointer bg-linear-to-r from-primary/5 to-transparent hover:from-primary/10 transition-colors"
+                            @click="toggleSection('basic')"
+                        >
+                            <div class="flex items-center gap-2">
+                                <SectionMarker />
+                                <h2 class="text-lg font-bold">{{ $t("char-build.basic_settings") }}</h2>
+                            </div>
+                            <span
+                                class="flex-none size-8 items-center justify-center text-lg text-base-content/50 swap swap-flip -rotate-90"
+                                :class="{ 'swap-active': collapsedSections.basic }"
+                            >
+                                <Icon icon="tabler:arrow-bar-to-left" class="swap-on" />
+                                <Icon icon="tabler:arrow-bar-to-right" class="swap-off" />
+                            </span>
+                        </div>
+                        <div class="collapse-content">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                                <!-- 其他设置 -->
+                                <div class="space-y-3">
+                                    <div class="flex gap-2">
+                                        <div class="flex-1">
+                                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.hp_percent") }}</div>
+                                            <Select
+                                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                                v-model="charSettings.hpPercent"
+                                                @change="updateCharBuild"
+                                            >
+                                                <SelectItem
+                                                    v-for="hp in [
+                                                        1,
+                                                        ...Array(20)
+                                                            .keys()
+                                                            .map((i) => (i + 1) * 5),
+                                                    ]"
+                                                    :key="hp"
+                                                    :value="hp / 100"
+                                                >
+                                                    {{ hp }}%
+                                                </SelectItem>
+                                            </Select>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.resonance_gain") }}</div>
+                                            <Select
+                                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                                v-model="charSettings.resonanceGain"
+                                                @change="updateCharBuild"
+                                            >
+                                                <SelectItem v-for="rg in [0, 0.5, 1, 1.5, 2, 2.5, 3]" :key="rg" :value="rg">
+                                                    {{ rg * 100 }}%
+                                                </SelectItem>
+                                            </Select>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("失衡") }}</div>
+                                            <div class="p-0.5">
+                                                <input v-model="charSettings.imbalance" type="checkbox" class="toggle toggle-secondary" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- 敌人设置 -->
+                                <div class="space-y-3">
+                                    <div class="flex gap-2">
+                                        <div class="flex-1">
+                                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.enemy") }}</div>
+                                            <Select
+                                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                                v-model="charSettings.enemyId"
+                                                @change="updateCharBuild"
+                                            >
+                                                <SelectItem v-for="enemy in monsterData" :key="enemy.id" :value="enemy.id">
+                                                    {{ enemy.名称 }}
+                                                </SelectItem>
+                                            </Select>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.enemy_resistance") }}</div>
+                                            <Select
+                                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                                v-model="charSettings.enemyResistance"
+                                                @change="updateCharBuild"
+                                            >
+                                                <SelectItem v-for="res in [0, 0.5, -4]" :key="res" :value="res">
+                                                    {{ res * 100 }}%
+                                                </SelectItem>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="px-2 text-xs text-gray-400 mb-1">
+                                        {{ $t("char-build.enemy_level") }} (Lv. {{ charSettings.enemyLevel }})
+                                    </div>
+                                    <input
+                                        v-model.number="charSettings.enemyLevel"
+                                        type="range"
+                                        class="range range-primary range-xs w-full"
+                                        min="1"
+                                        max="180"
+                                        step="1"
+                                    />
+                                </div>
+                                <!-- 敌人信息 -->
+                                <div class="space-y-3">
+                                    <div class="flex gap-2">
+                                        <div class="flex-1">
+                                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("生命") }}</div>
+                                            <div class="text-primary font-bold text-right">{{ charBuild.enemy.生命 }}</div>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("防御") }}</div>
+                                            <div class="text-primary font-bold text-right">{{ charBuild.enemy.防御 }}</div>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("护盾") }}</div>
+                                            <div class="text-primary font-bold text-right">{{ charBuild.enemy.护盾 }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MOD配置区域 -->
+                    <div id="mod-container" class="space-y-4">
+                        <!-- 角色MOD -->
+                        <div
+                            class="collapse bg-base-100/50 backdrop-blur-sm rounded-md shadow-lg overflow-hidden border border-base-200"
+                            :class="{ 'collapse-open': !collapsedSections.mods }"
+                        >
+                            <div
+                                class="flex items-center justify-between p-4 cursor-pointer bg-linear-to-r from-primary/5 to-transparent hover:from-primary/10 transition-colors"
+                                @click="toggleSection('mods')"
+                            >
+                                <div class="flex items-center gap-2">
+                                    <SectionMarker />
+                                    <h2 class="text-lg font-bold">{{ $t("魔之楔") }}</h2>
+                                </div>
+                                <span
+                                    class="flex-none size-8 items-center justify-center text-lg text-base-content/50 swap swap-flip -rotate-90"
+                                    :class="{ 'swap-active': collapsedSections.mods }"
+                                >
+                                    <Icon icon="tabler:arrow-bar-to-left" class="swap-on" />
+                                    <Icon icon="tabler:arrow-bar-to-right" class="swap-off" />
+                                </span>
+                            </div>
+                            <div class="collapse-content">
+                                <div class="mt-2">
+                                    <ModEditer
+                                        v-if="charTab === '角色'"
+                                        :mods="selectedCharMods"
+                                        :mod-options="
+                                            modOptions.filter((m) => m.type === '角色' && (!m.limit || m.limit === charBuild.char.属性))
+                                        "
+                                        :char-build="charBuild"
+                                        @remove-mod="removeMod($event, '角色')"
+                                        @select-mod="selectMod('角色', $event[0], $event[1], $event[2])"
+                                        @level-change="charSettings.charMods[$event[0]]![1] = $event[1]"
+                                        :aura-mod="charSettings.auraMod"
+                                        @select-aura-mod="charSettings.auraMod = $event"
+                                        type="角色"
+                                        @swap-mods="(index1, index2) => swapMods(index1, index2, '角色')"
+                                    />
+
+                                    <!-- 近战武器MOD -->
+                                    <ModEditer
+                                        v-if="charTab === '近战'"
+                                        :mods="selectedMeleeMods"
+                                        :mod-options="
+                                            modOptions.filter(
+                                                (m) =>
+                                                    m.type === '近战' &&
+                                                    (!m.limit ||
+                                                        [charBuild.meleeWeapon.类别, charBuild.meleeWeapon.伤害类型].includes(m.limit)),
+                                            )
+                                        "
+                                        :char-build="charBuild"
+                                        @remove-mod="removeMod($event, '近战')"
+                                        @select-mod="selectMod('近战', $event[0], $event[1], $event[2])"
+                                        @level-change="charSettings.meleeMods[$event[0]]![1] = $event[1]"
+                                        type="近战"
+                                        @swap-mods="(index1, index2) => swapMods(index1, index2, '近战')"
+                                    />
+
+                                    <!-- 远程武器MOD -->
+                                    <ModEditer
+                                        v-if="charTab === '远程'"
+                                        :mods="selectedRangedMods"
+                                        :mod-options="
+                                            modOptions.filter(
+                                                (m) =>
+                                                    m.type === '远程' &&
+                                                    (!m.limit ||
+                                                        [charBuild.rangedWeapon.类别, charBuild.rangedWeapon.伤害类型].includes(m.limit)),
+                                            )
+                                        "
+                                        :char-build="charBuild"
+                                        @remove-mod="removeMod($event, '远程')"
+                                        @select-mod="selectMod('远程', $event[0], $event[1], $event[2])"
+                                        @level-change="charSettings.rangedMods[$event[0]]![1] = $event[1]"
+                                        type="远程"
+                                        @swap-mods="(index1, index2) => swapMods(index1, index2, '远程')"
+                                    />
+
+                                    <!-- 同律武器MOD -->
+                                    <ModEditer
+                                        v-if="charTab === '同律'"
+                                        :mods="selectedSkillWeaponMods"
+                                        :mod-options="
+                                            modOptions.filter(
+                                                (m) =>
+                                                    m.type === charBuild.skillWeapon!.类型 &&
+                                                    (!m.limit ||
+                                                        [charBuild.skillWeapon!.类别, charBuild.skillWeapon!.伤害类型].includes(m.limit)),
+                                            )
+                                        "
+                                        :char-build="charBuild"
+                                        @remove-mod="removeMod($event, '同律')"
+                                        @select-mod="selectMod('同律', $event[0], $event[1], $event[2])"
+                                        @level-change="charSettings.skillWeaponMods[$event[0]]![1] = $event[1]"
+                                        type="同律"
+                                        @swap-mods="(index1, index2) => swapMods(index1, index2, '同律')"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MODBUFF列表 -->
+                    <div
+                        v-if="charBuild.modsWithWeapons.some((v) => v.buff)"
+                        class="collapse bg-base-100/50 backdrop-blur-sm rounded-md shadow-lg overflow-hidden border border-base-200"
+                        :class="{ 'collapse-open': !collapsedSections.effects }"
+                    >
+                        <div
+                            class="flex items-center justify-between p-4 cursor-pointer bg-linear-to-r from-primary/5 to-transparent hover:from-primary/10 transition-colors"
+                            @click="toggleSection('effects')"
+                        >
+                            <div class="flex items-center gap-2">
+                                <SectionMarker />
+                                <h2 class="text-lg font-bold">{{ $t("char-build.special_effect_config") }}</h2>
+                                <span class="badge badge-ghost badge-sm">{{ charBuild.modsWithWeapons.filter((v) => v.buff).length }}</span>
+                            </div>
+                            <span
+                                class="flex-none size-8 items-center justify-center text-lg text-base-content/50 swap swap-flip -rotate-90"
+                                :class="{ 'swap-active': collapsedSections.effects }"
+                            >
+                                <Icon icon="tabler:arrow-bar-to-left" class="swap-on" />
+                                <Icon icon="tabler:arrow-bar-to-right" class="swap-off" />
+                            </span>
+                        </div>
+                        <div class="collapse-content">
+                            <div class="mt-2">
+                                <EffectSettings :mods="charBuild.modsWithWeapons" :char-build="charBuild" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BUFF列表 -->
+                    <div
+                        class="collapse bg-base-100/50 backdrop-blur-sm rounded-md shadow-lg overflow-hidden border border-base-200"
+                        :class="{ 'collapse-open': !collapsedSections.buffs }"
+                    >
+                        <div
+                            class="flex items-center justify-between p-4 cursor-pointer bg-linear-to-r from-primary/5 to-transparent hover:from-primary/10 transition-colors"
+                            @click="toggleSection('buffs')"
+                        >
+                            <div class="flex items-center gap-2">
+                                <SectionMarker />
+                                <h2 class="text-lg font-bold">{{ $t("char-build.buff_list") }}</h2>
+                                <span class="badge badge-ghost badge-sm">{{ selectedBuffs.length }}</span>
+                            </div>
+                            <span
+                                class="flex-none size-8 items-center justify-center text-lg text-base-content/50 swap swap-flip -rotate-90"
+                                :class="{ 'swap-active': collapsedSections.buffs }"
+                            >
+                                <Icon icon="tabler:arrow-bar-to-left" class="swap-on" />
+                                <Icon icon="tabler:arrow-bar-to-right" class="swap-off" />
+                            </span>
+                        </div>
+                        <div class="collapse-content">
+                            <!-- 协战选择 -->
+                            <div class="flex flex-wrap items-center gap-4 mt-2 mb-4 p-3 bg-base-200/50 rounded-lg">
+                                <span class="text-sm font-semibold">{{ $t("char-build.team") }}</span>
+                                <Select class="input input-bordered input-sm w-32" v-model="charSettings.team1" @change="updateTeamBuff">
+                                    <template v-for="charWithElm in groupBy(team1Options, 'elm')" :key="charWithElm[0].elm">
                                         <SelectLabel class="p-2 text-sm font-semibold text-primary">
                                             {{ $t(charWithElm[0].elm + "属性") }}
                                         </SelectLabel>
@@ -574,597 +2009,102 @@ onMounted(() => {
                                         </SelectGroup>
                                     </template>
                                 </Select>
-                            </div>
-                            <div class="flex-1">
-                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.level") }}</div>
                                 <Select
-                                    class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                    v-model="charSettings.charLevel"
-                                    @change="updateCharBuild"
+                                    class="input input-bordered input-sm w-32"
+                                    v-model="charSettings.team1Weapon"
+                                    @change="updateTeamBuff"
                                 >
-                                    <SelectItem v-for="lv in [1, 10, 20, 30, 40, 50, 60, 70, 80]" :key="lv" :value="lv">
-                                        {{ lv }}
-                                    </SelectItem>
+                                    <template v-for="weaponWithType in groupBy(teamWeaponOptions, 'type')" :key="weaponWithType[0].type">
+                                        <SelectLabel class="p-2 text-sm font-semibold text-primary">
+                                            {{ $t(weaponWithType[0].type) }}
+                                        </SelectLabel>
+                                        <SelectGroup>
+                                            <SelectItem v-for="char in weaponWithType" :key="char.value" :value="char.value">
+                                                {{ $t(char.label) }}
+                                            </SelectItem>
+                                        </SelectGroup>
+                                    </template>
+                                </Select>
+                                <Select class="input input-bordered input-sm w-32" v-model="charSettings.team2" @change="updateTeamBuff">
+                                    <template v-for="charWithElm in groupBy(team2Options, 'elm')" :key="charWithElm[0].elm">
+                                        <SelectLabel class="p-2 text-sm font-semibold text-primary">
+                                            {{ $t(charWithElm[0].elm + "属性") }}
+                                        </SelectLabel>
+                                        <SelectGroup>
+                                            <SelectItem v-for="char in charWithElm" :key="char.value" :value="char.value">
+                                                {{ $t(char.label) }}
+                                            </SelectItem>
+                                        </SelectGroup>
+                                    </template>
+                                </Select>
+                                <Select
+                                    class="input input-bordered input-sm w-32"
+                                    v-model="charSettings.team2Weapon"
+                                    @change="updateTeamBuff"
+                                >
+                                    <template v-for="weaponWithType in groupBy(teamWeaponOptions, 'type')" :key="weaponWithType[0].type">
+                                        <SelectLabel class="p-2 text-sm font-semibold text-primary">
+                                            {{ $t(weaponWithType[0].type) }}
+                                        </SelectLabel>
+                                        <SelectGroup>
+                                            <SelectItem v-for="char in weaponWithType" :key="char.value" :value="char.value">
+                                                {{ $t(char.label) }}
+                                            </SelectItem>
+                                        </SelectGroup>
+                                    </template>
                                 </Select>
                             </div>
-                            <div class="flex-1">
-                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.target_function") }}</div>
-                                <Select
-                                    class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                    v-model="charSettings.targetFunction"
-                                    @change="updateCharBuild"
-                                >
-                                    <SelectItem
-                                        v-for="fn in [
-                                            '伤害',
-                                            '总伤',
-                                            '弹片伤害',
-                                            '暴击伤害',
-                                            '每秒伤害',
-                                            '每神智伤害',
-                                            '每持续神智伤害',
-                                            '每神智每秒伤害',
-                                            '每持续神智每秒伤害',
-                                        ]"
-                                        :key="fn"
-                                        :value="fn"
-                                    >
-                                        {{ $t(fn) }}
-                                    </SelectItem>
-                                </Select>
-                            </div>
+                            <BuffEditer
+                                :buff-options="buffOptions"
+                                :selected-buffs="selectedBuffs"
+                                :char-build="charBuild"
+                                @toggle-buff="toggleBuff"
+                                @set-buff-lv="setBuffLv"
+                            />
                         </div>
                     </div>
-                </ShowProps>
-                <!-- 技能选择 -->
-                <FullTooltip side="bottom">
-                    <template #tooltip>
-                        <div v-if="charBuild.selectedSkill" class="flex flex-col">
-                            <div class="text-md p-2 flex items-center gap-2">
-                                <span v-if="charBuild.selectedSkillKey" class="badge badge-primary badge-sm">{{
-                                    charBuild.selectedSkillKey
-                                }}</span>
-                                {{ charBuild.selectedSkill!.类型 }}
+
+                    <!-- 自定义BUFF -->
+                    <div
+                        v-if="selectedBuffs.some((v) => v.名称 === '自定义BUFF')"
+                        class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-lg overflow-hidden border border-base-200"
+                    >
+                        <div class="p-4">
+                            <CustomBuffEditor @submit="reloadCustomBuff" />
+                        </div>
+                    </div>
+
+                    <!-- 装配预览 -->
+                    <div
+                        class="collapse bg-base-100/50 backdrop-blur-sm rounded-md shadow-lg overflow-hidden border border-base-200"
+                        :class="{ 'collapse-open': !collapsedSections.preview }"
+                    >
+                        <div
+                            class="flex items-center justify-between p-4 cursor-pointer bg-linear-to-r from-primary/5 to-transparent hover:from-primary/10 transition-colors"
+                            @click="toggleSection('preview')"
+                        >
+                            <div class="flex items-center gap-2">
+                                <SectionMarker />
+                                <h2 class="text-lg font-bold">{{ $t("char-build.equipment_preview") }}</h2>
                             </div>
-                            <div
-                                v-for="(val, index) in charBuild.selectedSkill!.getFieldsWithAttr(
-                                    charBuild.selectedSkill.召唤物
-                                        ? charBuild.calculateWeaponAttributes(undefined, undefined, charBuild.meleeWeapon)
-                                        : charBuild.calculateAttributes(),
-                                )"
-                                :key="index"
-                                class="flex flex-col group hover:bg-base-200 rounded-md p-2"
+                            <span
+                                class="flex-none size-8 items-center justify-center text-lg text-base-content/50 swap swap-flip -rotate-90"
+                                :class="{ 'swap-active': collapsedSections.preview }"
                             >
-                                <div class="flex justify-between items-center gap-4 text-sm">
-                                    <div class="text-xs text-neutral-500">{{ val.名称 }}</div>
-                                    <div class="font-medium text-primary">
-                                        {{ formatSkillProp(val.名称, val) }}
-                                    </div>
-                                </div>
+                                <Icon icon="tabler:arrow-bar-to-left" class="swap-on" />
+                                <Icon icon="tabler:arrow-bar-to-right" class="swap-off" />
+                            </span>
+                        </div>
+                        <div class="collapse-content">
+                            <!-- 角色头部信息 -->
+                            <div class="flex flex-col md:flex-row gap-6 mb-6 mt-2">
                                 <div
-                                    v-if="val.属性影响"
-                                    class="justify-between items-center gap-4 text-sm flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
+                                    class="relative w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden border-2 border-primary/30 shadow-xl self-start"
                                 >
-                                    <div class="text-xs text-neutral-500">属性影响</div>
-                                    <div class="text-xs ml-auto font-medium text-neutral-500">技能{{ val.属性影响 }}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div v-if="charBuild.selectedWeapon" class="flex flex-col gap-2 max-w-[300px]">
-                            <div class="text-sm font-bold">{{ charBuild.selectedWeapon!.类型 }}</div>
-                            <div class="flex justify-between items-center gap-2 text-sm">
-                                <div class="text-xs text-neutral-500">倍率</div>
-                                <div class="font-medium text-primary">
-                                    {{
-                                        format100(
-                                            charBuild.skillWeapon && charBuild.selectedWeapon!.类型 === charBuild.skillWeapon.类型
-                                                ? charBuild.skillWeapon.倍率 * charBuild.calculateAttributes().威力
-                                                : charBuild.selectedWeapon.倍率,
-                                        )
-                                    }}
-                                </div>
-                            </div>
-                            <div
-                                v-for="(val, prop) in charBuild.selectedWeapon!.getProperties()"
-                                :key="prop"
-                                class="flex justify-between items-center gap-2 text-sm"
-                            >
-                                <div class="text-xs text-neutral-500">{{ prop }}</div>
-                                <div class="font-medium text-primary">{{ formatWeaponProp(prop as string, val) }}</div>
-                            </div>
-                        </div>
-                    </template>
-                    <div class="bg-base-300 rounded-xl p-4 shadow-lg">
-                        <div class="flex items-center gap-2 mb-3">
-                            <SectionMarker>
-                                <Icon icon="ri:flashlight-line" />
-                            </SectionMarker>
-                            <h3 class="text-lg font-semibold">{{ $t("char-build.select_skill_weapon") }}</h3>
-                        </div>
-                        <div class="relative flex items-center gap-2">
-                            <div class="flex-1">
-                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.skill_weapon") }}</div>
-                                <Select
-                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                    v-model="charSettings.baseName"
-                                    @change="updateCharBuild"
-                                >
-                                    <template v-for="baseWithType in groupBy(baseOptions, 'type')" :key="baseWithType[0].type">
-                                        <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                            {{ baseWithType[0].type }}
-                                        </SelectLabel>
-                                        <SelectGroup>
-                                            <SelectItem v-for="base in baseWithType" :key="base.label" :value="base.label">
-                                                {{ base.label }}
-                                            </SelectItem>
-                                        </SelectGroup>
-                                    </template>
-                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                        {{ $t("char-build.timeline") }}
-                                    </SelectLabel>
-                                    <SelectGroup>
-                                        <SelectItem v-for="timeline in timelines" :key="timeline.name" :value="timeline.name">
-                                            {{ timeline.name }}
-                                        </SelectItem>
-                                    </SelectGroup>
-                                </Select>
-                            </div>
-                            <div class="flex-1">
-                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.skill_level") }}</div>
-                                <Select
-                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                    v-model="charSettings.charSkillLevel"
-                                    @change="updateCharBuild"
-                                >
-                                    <SelectItem v-for="lv in 12" :key="lv" :value="lv">
-                                        {{ lv }}
-                                    </SelectItem>
-                                </Select>
-                            </div>
-                        </div>
-                    </div>
-                </FullTooltip>
-                <!-- 近战武器选择 -->
-                <ShowProps
-                    :title="$t(charBuild.meleeWeapon.名称)"
-                    :props="charBuild.meleeWeapon.getProperties()"
-                    :type="$t(charBuild.meleeWeapon.类别)"
-                    side="bottom"
-                >
-                    <div class="bg-base-300 rounded-xl p-4 shadow-lg">
-                        <div class="flex items-center gap-2 mb-3">
-                            <SectionMarker>
-                                <Icon icon="ri:sword-line" />
-                            </SectionMarker>
-                            <h3 class="text-lg font-semibold">{{ $t("char-build.melee_weapon") }}</h3>
-                        </div>
-                        <div class="relative flex items-center gap-2">
-                            <div class="flex-1">
-                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.weapon") }}</div>
-                                <Select
-                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                    v-model="charSettings.meleeWeapon"
-                                    @change="updateCharBuild"
-                                >
-                                    <template v-for="weaponWithType in groupBy(meleeWeaponOptions, 'type')" :key="weaponWithType[0].type">
-                                        <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                            {{ $t(weaponWithType[0].type) }}
-                                        </SelectLabel>
-                                        <SelectGroup>
-                                            <SelectItem v-for="weapon in weaponWithType" :key="weapon.value" :value="weapon.value">
-                                                {{ $t(weapon.label) }}
-                                            </SelectItem>
-                                        </SelectGroup>
-                                    </template>
-                                </Select>
-                            </div>
-                            <div class="flex-1">
-                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.refine") }}</div>
-                                <Select
-                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                    v-model="charSettings.meleeWeaponRefine"
-                                    @change="updateCharBuild"
-                                >
-                                    <SelectItem v-for="lv in [0, 1, 2, 3, 4, 5]" :key="lv" :value="lv">
-                                        {{ lv }}
-                                    </SelectItem>
-                                </Select>
-                            </div>
-                            <div class="flex-1">
-                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.level") }}</div>
-                                <Select
-                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                    v-model="charSettings.meleeWeaponLevel"
-                                    @change="updateCharBuild"
-                                >
-                                    <SelectItem v-for="lv in [1, 10, 20, 30, 40, 50, 60, 70, 80]" :key="lv" :value="lv">
-                                        {{ lv }}
-                                    </SelectItem>
-                                </Select>
-                            </div>
-                        </div>
-                    </div>
-                </ShowProps>
-                <!-- 远程武器选择 -->
-                <ShowProps
-                    :title="$t(charBuild.rangedWeapon.名称)"
-                    :props="charBuild.rangedWeapon.getProperties()"
-                    :type="$t(charBuild.rangedWeapon.类别)"
-                    side="bottom"
-                >
-                    <div class="bg-base-300 rounded-xl p-4 shadow-lg">
-                        <div class="flex items-center gap-2 mb-3">
-                            <SectionMarker>
-                                <Icon icon="ri:crosshair-line" />
-                            </SectionMarker>
-                            <h3 class="text-lg font-semibold">{{ $t("char-build.ranged_weapon") }}</h3>
-                        </div>
-                        <div class="relative flex items-center gap-2">
-                            <div class="flex-1">
-                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.weapon") }}</div>
-                                <Select
-                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                    v-model="charSettings.rangedWeapon"
-                                    @change="updateCharBuild"
-                                >
-                                    <template v-for="weaponWithType in groupBy(rangedWeaponOptions, 'type')" :key="weaponWithType[0].type">
-                                        <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                            {{ $t(weaponWithType[0].type) }}
-                                        </SelectLabel>
-                                        <SelectGroup>
-                                            <SelectItem v-for="weapon in weaponWithType" :key="weapon.value" :value="weapon.value">
-                                                {{ $t(weapon.label) }}
-                                            </SelectItem>
-                                        </SelectGroup>
-                                    </template>
-                                </Select>
-                            </div>
-                            <div class="flex-1">
-                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.refine") }}</div>
-                                <Select
-                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                    v-model="charSettings.rangedWeaponRefine"
-                                    @change="updateCharBuild"
-                                >
-                                    <SelectItem v-for="lv in [0, 1, 2, 3, 4, 5]" :key="lv" :value="lv">
-                                        {{ lv }}
-                                    </SelectItem>
-                                </Select>
-                            </div>
-                            <div class="flex-1">
-                                <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.level") }}</div>
-                                <Select
-                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                    v-model="charSettings.rangedWeaponLevel"
-                                    @change="updateCharBuild"
-                                >
-                                    <SelectItem v-for="lv in [1, 10, 20, 30, 40, 50, 60, 70, 80]" :key="lv" :value="lv">
-                                        {{ lv }}
-                                    </SelectItem>
-                                </Select>
-                            </div>
-                        </div>
-                    </div>
-                </ShowProps>
-                <!-- 敌人选择 -->
-                <div class="bg-base-300 rounded-xl p-4 shadow-lg">
-                    <div class="flex items-center gap-2 mb-3">
-                        <SectionMarker>
-                            <Icon icon="ri:game-line" />
-                        </SectionMarker>
-                        <h3 class="text-lg font-semibold">{{ $t("char-build.enemy") }}</h3>
-                        <div class="flex-1"></div>
-                        <div class="label text-xs">{{ $t("失衡") }}</div>
-                        <input v-model="charSettings.imbalance" type="checkbox" class="toggle toggle-secondary" />
-                    </div>
-                    <div class="relative flex items-center gap-2">
-                        <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.enemy_type") }}</div>
-                            <Select
-                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.enemyDef"
-                                @change="updateCharBuild"
-                            >
-                                <SelectItem
-                                    v-for="enemy in [
-                                        { def: 130, type: 'small' },
-                                        { def: 200, type: 'large' },
-                                        { def: 300, type: 'boss' },
-                                    ]"
-                                    :key="enemy.type"
-                                    :value="enemy.def"
-                                >
-                                    {{ $t(`char-build.${enemy.type}`) }}
-                                </SelectItem>
-                            </Select>
-                        </div>
-                        <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.level") }}</div>
-                            <Select
-                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.enemyLevel"
-                                @change="updateCharBuild"
-                            >
-                                <SelectItem v-for="lv in 36" :key="lv" :value="lv * 5">
-                                    {{ lv * 5 }}
-                                </SelectItem>
-                            </Select>
-                        </div>
-                        <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.hp_type") }}</div>
-                            <Select
-                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.enemyHpType"
-                                @change="updateCharBuild"
-                            >
-                                <SelectItem
-                                    v-for="(key, hpType) in { 生命: 'hp', 护盾: 'shield', 战姿: 'stance' }"
-                                    :key="key"
-                                    :value="hpType"
-                                >
-                                    {{ $t(`char-build.${key}`) }}
-                                </SelectItem>
-                            </Select>
-                        </div>
-                    </div>
-                </div>
-                <!-- 其他 -->
-                <div class="bg-base-300 rounded-xl p-4 shadow-lg">
-                    <div class="flex items-center gap-2 mb-3">
-                        <SectionMarker>
-                            <Icon icon="ri:more-line" />
-                        </SectionMarker>
-                        <h3 class="text-lg font-semibold">{{ $t("char-build.other") }}</h3>
-                    </div>
-                    <div class="relative flex items-center gap-2">
-                        <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.hp_percent") }}</div>
-                            <Select
-                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.hpPercent"
-                                @change="updateCharBuild"
-                            >
-                                <SelectItem
-                                    v-for="hp in [
-                                        1,
-                                        ...Array(20)
-                                            .keys()
-                                            .map((i) => (i + 1) * 5),
-                                    ]"
-                                    :key="hp"
-                                    :value="hp / 100"
-                                >
-                                    {{ hp }}%
-                                </SelectItem>
-                            </Select>
-                        </div>
-                        <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.resonance_gain") }}</div>
-                            <Select
-                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.resonanceGain"
-                                @change="updateCharBuild"
-                            >
-                                <SelectItem v-for="rg in [0, 0.5, 1, 1.5, 2, 2.5, 3]" :key="rg" :value="rg"> {{ rg * 100 }}% </SelectItem>
-                            </Select>
-                        </div>
-                        <div class="flex-1">
-                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.enemy_resistance") }}</div>
-                            <Select
-                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                v-model="charSettings.enemyResistance"
-                                @change="updateCharBuild"
-                            >
-                                <SelectItem v-for="res in [0, 0.5, -4]" :key="res" :value="res"> {{ res * 100 }}% </SelectItem>
-                            </Select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- MOD -->
-            <div id="mod-container">
-                <!-- 角色MOD配置 -->
-                <ModEditer
-                    :title="$t('char-build.char_mod_config')"
-                    :mods="selectedCharMods"
-                    :mod-options="modOptions.filter((m) => m.type === '角色' && (!m.limit || m.limit === charBuild.char.属性))"
-                    :char-build="charBuild"
-                    @remove-mod="removeMod($event, '角色')"
-                    @select-mod="selectMod('角色', $event[0], $event[1], $event[2])"
-                    @level-change="charSettings.charMods[$event[0]]![1] = $event[1]"
-                    :aura-mod="charSettings.auraMod"
-                    @select-aura-mod="charSettings.auraMod = $event"
-                    type="角色"
-                    @swap-mods="(index1, index2) => swapMods(index1, index2, '角色')"
-                />
-                <!-- 近战武器MOD配置 -->
-                <ModEditer
-                    v-if="charBuild.isMeleeWeapon || isTimeline || charBuild.selectedSkill?.召唤物"
-                    :title="$t('char-build.melee_weapon_mod_config')"
-                    :mods="selectedMeleeMods"
-                    :mod-options="
-                        modOptions.filter(
-                            (m) =>
-                                m.type === '近战' &&
-                                (!m.limit || [charBuild.meleeWeapon.类别, charBuild.meleeWeapon.伤害类型].includes(m.limit)),
-                        )
-                    "
-                    :char-build="charBuild"
-                    @remove-mod="removeMod($event, '近战')"
-                    @select-mod="selectMod('近战', $event[0], $event[1], $event[2])"
-                    @level-change="charSettings.meleeMods[$event[0]]![1] = $event[1]"
-                    type="近战"
-                    @swap-mods="(index1, index2) => swapMods(index1, index2, '近战')"
-                />
-                <!-- 远程武器MOD配置 -->
-                <ModEditer
-                    v-if="charBuild.isRangedWeapon || isTimeline"
-                    :title="$t('char-build.ranged_weapon_mod_config')"
-                    :mods="selectedRangedMods"
-                    :mod-options="
-                        modOptions.filter(
-                            (m) =>
-                                m.type === '远程' &&
-                                (!m.limit || [charBuild.rangedWeapon.类别, charBuild.rangedWeapon.伤害类型].includes(m.limit)),
-                        )
-                    "
-                    :char-build="charBuild"
-                    @remove-mod="removeMod($event, '远程')"
-                    @select-mod="selectMod('远程', $event[0], $event[1], $event[2])"
-                    @level-change="charSettings.rangedMods[$event[0]]![1] = $event[1]"
-                    type="远程"
-                    @swap-mods="(index1, index2) => swapMods(index1, index2, '远程')"
-                />
-                <!-- 同律武器MOD配置 -->
-                <ModEditer
-                    v-if="charBuild.skillWeapon && (charBuild.isSkillWeapon || isTimeline)"
-                    :title="$t('char-build.skill_weapon_mod_config')"
-                    :mods="selectedSkillWeaponMods"
-                    :mod-options="
-                        modOptions.filter(
-                            (m) =>
-                                m.type === charBuild.skillWeapon!.类型 &&
-                                (!m.limit || [charBuild.skillWeapon!.类别, charBuild.skillWeapon!.伤害类型].includes(m.limit)),
-                        )
-                    "
-                    :char-build="charBuild"
-                    @remove-mod="removeMod($event, '同律')"
-                    @select-mod="selectMod('同律', $event[0], $event[1], $event[2])"
-                    @level-change="charSettings.skillWeaponMods[$event[0]]![1] = $event[1]"
-                    type="同律"
-                    @swap-mods="(index1, index2) => swapMods(index1, index2, '同律')"
-                />
-            </div>
-
-            <!-- MODBUFF列表 -->
-            <EffectSettings
-                v-if="charBuild.modsWithWeapons.some((v) => v.buff)"
-                id="modbuff-container"
-                :mods="charBuild.modsWithWeapons"
-                :char-build="charBuild"
-            />
-            <!-- BUFF列表 -->
-            <div id="buff-container" class="bg-base-300 rounded-xl p-4 shadow-lg mb-6">
-                <div class="flex flex-wrap items-center justify-between mb-3">
-                    <div class="flex items-center gap-2">
-                        <SectionMarker />
-                        <h3 class="text-lg font-semibold">{{ $t("char-build.buff_list") }}</h3>
-                    </div>
-                    <div class="ml-auto flex gap-4 items-center">
-                        <div class="flex flex-col sm:flex-row gap-4 mx-4 items-center">
-                            <!-- 协战 -->
-                            <span class="text-sm font-semibold text-primary whitespace-nowrap">{{ $t("char-build.team") }}</span>
-                            <Select
-                                class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap min-w-22"
-                                v-model="charSettings.team1"
-                                @change="updateTeamBuff"
-                            >
-                                <template v-for="charWithElm in groupBy(team1Options, 'elm')" :key="charWithElm[0].elm">
-                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                        {{ $t(charWithElm[0].elm + "属性") }}
-                                    </SelectLabel>
-                                    <SelectGroup>
-                                        <SelectItem v-for="char in charWithElm" :key="char.value" :value="char.value">
-                                            {{ $t(char.label) }}
-                                        </SelectItem>
-                                    </SelectGroup>
-                                </template>
-                            </Select>
-
-                            <Select
-                                class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap min-w-22"
-                                v-model="charSettings.team1Weapon"
-                                @change="updateTeamBuff"
-                            >
-                                <template v-for="weaponWithType in groupBy(teamWeaponOptions, 'type')" :key="weaponWithType[0].type">
-                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                        {{ $t(weaponWithType[0].type) }}
-                                    </SelectLabel>
-                                    <SelectGroup>
-                                        <SelectItem v-for="char in weaponWithType" :key="char.value" :value="char.value">
-                                            {{ $t(char.label) }}
-                                        </SelectItem>
-                                    </SelectGroup>
-                                </template>
-                            </Select>
-
-                            <Select
-                                class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap min-w-22"
-                                v-model="charSettings.team2"
-                                @change="updateTeamBuff"
-                            >
-                                <template v-for="charWithElm in groupBy(team2Options, 'elm')" :key="charWithElm[0].elm">
-                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                        {{ $t(charWithElm[0].elm + "属性") }}
-                                    </SelectLabel>
-                                    <SelectGroup>
-                                        <SelectItem v-for="char in charWithElm" :key="char.value" :value="char.value">
-                                            {{ $t(char.label) }}
-                                        </SelectItem>
-                                    </SelectGroup>
-                                </template>
-                            </Select>
-
-                            <Select
-                                class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap min-w-22"
-                                v-model="charSettings.team2Weapon"
-                                @change="updateTeamBuff"
-                            >
-                                <template v-for="weaponWithType in groupBy(teamWeaponOptions, 'type')" :key="weaponWithType[0].type">
-                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                        {{ $t(weaponWithType[0].type) }}
-                                    </SelectLabel>
-                                    <SelectGroup>
-                                        <SelectItem v-for="char in weaponWithType" :key="char.value" :value="char.value">
-                                            {{ $t(char.label) }}
-                                        </SelectItem>
-                                    </SelectGroup>
-                                </template>
-                            </Select>
-                        </div>
-                        <div class="text-sm text-gray-400">{{ $t("char-build.selected_count", { count: selectedBuffs.length }) }}</div>
-                    </div>
-                </div>
-                <BuffEditer
-                    :buff-options="buffOptions"
-                    :selected-buffs="selectedBuffs"
-                    :char-build="charBuild"
-                    @toggle-buff="toggleBuff"
-                    @set-buff-lv="setBuffLv"
-                />
-            </div>
-            <!-- 自定义BUFF -->
-            <div
-                id="custom-buff-container"
-                class="bg-base-300 rounded-xl p-4 shadow-lg mb-6"
-                v-if="selectedBuffs.some((v) => v.名称 === '自定义BUFF')"
-            >
-                <div class="flex items-center justify-between mb-3">
-                    <div class="flex items-center gap-2">
-                        <SectionMarker />
-                        <h3 class="text-lg font-semibold">{{ $t("char-build.custom_buff") }}</h3>
-                    </div>
-                </div>
-                <CustomBuffEditor @submit="reloadCustomBuff" />
-            </div>
-
-            <!-- 装配预览与保存 -->
-            <div id="preview-container" class="bg-base-300 rounded-xl p-4 shadow-lg mb-6">
-                <div class="flex items-center gap-2 mb-4">
-                    <SectionMarker />
-                    <h3 class="text-lg font-semibold">{{ $t("char-build.equipment_preview") }}</h3>
-                </div>
-                <div>
-                    <div class="flex-1 flex flex-col justify-between">
-                        <div class="flex flex-col justify-between gap-4">
-                            <div class="flex flex-col md:flex-row gap-4">
-                                <div class="relative rounded-2xl overflow-hidden border border-secondary/20 aspect-square self-start">
                                     <ImageFallback :src="charBuild.char.url" alt="角色头像" class="w-full h-full object-cover object-top">
-                                        <Icon icon="la:user" class="w-full h-full" />
+                                        <Icon icon="ri:question-mark" class="w-full h-full" />
                                     </ImageFallback>
-                                    <div class="absolute inset-0 bg-linear-to-t from-gray-900 via-transparent to-transparent"></div>
+                                    <div class="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent"></div>
                                 </div>
                                 <div class="flex-1 flex flex-col justify-end gap-4">
                                     <!-- 角色 -->
@@ -1179,161 +2119,161 @@ onMounted(() => {
                                             >LV {{ charBuild.char.等级 }}</span
                                         >
                                     </div>
-                                    <!-- 武器 -->
                                     <div class="grid grid-cols-2 gap-4">
                                         <BuildWeaponCard :weapon="charBuild.meleeWeapon" />
                                         <BuildWeaponCard :weapon="charBuild.rangedWeapon" />
                                     </div>
                                 </div>
                             </div>
-                            <div>
-                                <h4 class="text-xl font-bold mb-4 text-base-content/80">
-                                    {{ $t("char-build.char_attributes") }}
-                                    <span class="text-sm text-gray-400"
-                                        >{{ $t("char-build.resonance_gain") }} {{ charSettings.resonanceGain * 100 }}%</span
-                                    >
-                                </h4>
-                                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
-                                    <div
-                                        class="col-span-2 bg-base-300/60 bg-linear-to-r from-primary/1 to-primary/5 backdrop-blur-sm rounded-xl p-2 border border-primary/30"
-                                    >
-                                        <div class="text-gray-400 text-xs mb-1">
-                                            {{ charSettings.baseName }} -
-                                            {{ charBuild.selectedSkill?.召唤物?.名称 ? `[${charBuild.selectedSkill?.召唤物?.名称}]` : ""
-                                            }}{{ charSettings.targetFunction }}
+
+                            <!-- 属性展示 -->
+                            <div class="space-y-6">
+                                <!-- 角色属性 -->
+                                <div>
+                                    <h4 class="text-lg font-bold mb-3 flex items-center gap-2">
+                                        <span>{{ $t("char-build.char_attributes") }}</span>
+                                        <span class="text-sm text-base-content/50"
+                                            >{{ $t("char-build.resonance_gain") }} {{ charSettings.resonanceGain * 100 }}%</span
+                                        >
+                                    </h4>
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                                        <div
+                                            class="col-span-2 bg-linear-to-br from-primary/10 to-primary/5 rounded-lg p-3 border border-primary/20 hover:border-primary/40 transition-colors"
+                                        >
+                                            <div class="text-xs text-base-content/60 mb-1">
+                                                {{ charSettings.baseName }} -
+                                                {{
+                                                    charBuild.selectedSkill?.召唤物?.名称
+                                                        ? `[${charBuild.selectedSkill?.召唤物?.名称}]`
+                                                        : ""
+                                                }}{{ charSettings.targetFunction }}
+                                            </div>
+                                            <div class="text-primary font-bold text-lg font-orbitron">
+                                                {{ Math.round(totalDamage) }}
+                                            </div>
                                         </div>
-                                        <div class="text-primary font-bold text-sm font-orbitron">{{ Math.round(totalDamage) }}</div>
-                                    </div>
-                                    <div
-                                        class="bg-base-300/60 bg-linear-to-r from-secondary/1 to-secondary/5 backdrop-blur-sm rounded-xl p-2 border border-secondary/30"
-                                        v-for="[key, val] in Object.entries(attributes).filter(
-                                            ([k, v]) => !['召唤物攻击速度', '召唤物范围'].includes(k) && v,
-                                        )"
-                                    >
-                                        <div class="text-gray-400 text-xs mb-1">
-                                            {{ key === "攻击" ? $t(`${charBuild.char.属性}属性`) : "" }}{{ $t(key) }}
-                                        </div>
-                                        <div class="text-secondary font-bold text-sm font-orbitron">
-                                            {{
-                                                ["攻击", "生命", "护盾", "防御", "神智"].includes(key)
-                                                    ? `${+val.toFixed(2)}`
-                                                    : `${+(val * 100).toFixed(2)}%`
-                                            }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- 召唤物属性 -->
-                            <div v-if="summonAttributes">
-                                <h4 class="text-xl font-bold mb-4 text-base-content/80">
-                                    {{ summonAttributes.find((p) => p.名称 === "召唤物名称")?.格式 || "召唤物" }}
-                                </h4>
-                                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
-                                    <div
-                                        class="bg-base-300/60 bg-linear-to-r from-secondary/1 to-secondary/5 backdrop-blur-sm rounded-xl p-2 border border-secondary/30"
-                                        v-for="prop in summonAttributes.filter((p) => p.值)"
-                                    >
-                                        <div class="text-gray-400 text-xs mb-1">
-                                            {{ prop.名称 }}
-                                        </div>
-                                        <div class="text-secondary font-bold text-sm font-orbitron">
-                                            {{ formatSkillProp(prop.名称, prop) }}
+                                        <div
+                                            class="bg-linear-to-br from-secondary/10 to-secondary/5 rounded-lg p-3 border border-secondary/20 hover:border-secondary/40 transition-colors"
+                                            v-for="[key, val] in Object.entries(attributes).filter(
+                                                ([k, v]) => !['召唤物攻击速度', '召唤物范围'].includes(k) && v,
+                                            )"
+                                            :key="key"
+                                        >
+                                            <div class="text-xs text-base-content/60 mb-1">
+                                                {{ key === "攻击" ? $t(`${charBuild.char.属性}属性`) : "" }}{{ $t(key) }}
+                                            </div>
+                                            <div class="text-secondary font-bold text-lg font-orbitron">
+                                                {{
+                                                    ["攻击", "生命", "护盾", "防御", "神智", "有效生命"].includes(key)
+                                                        ? `${+val.toFixed(key === "攻击" ? 2 : 0)}`
+                                                        : `${+(val * 100).toFixed(2)}%`
+                                                }}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- 武器属性 -->
-                            <div v-if="charBuild.selectedWeapon && weaponAttrs">
-                                <h4 class="text-xl font-bold mb-4 text-base-content/80">{{ $t("char-build.weapon_attributes") }}</h4>
-                                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
-                                    <div
-                                        class="bg-base-300/60 bg-linear-to-r from-secondary/1 to-secondary/5 backdrop-blur-sm rounded-xl p-2 border border-secondary/30"
-                                        v-for="[key, val] in Object.entries(weaponAttrs).filter(([_, v]) => v)"
-                                    >
-                                        <div class="text-gray-400 text-xs mb-1">
-                                            {{ key === "攻击" ? charBuild.selectedWeapon.伤害类型 : "" }}{{ $t(`char-build.${key}`) }}
-                                        </div>
-                                        <div class="text-secondary font-bold text-sm font-orbitron">
-                                            {{ ["攻击", "攻速", "多重"].includes(key) ? val : `${+(val * 100).toFixed(2)}%` }}
-                                            {{
-                                                key === "多重" && (charBuild.selectedWeapon?.弹片数 || 1) > 1
-                                                    ? ` * ${charBuild.selectedWeapon.弹片数! * val}`
-                                                    : ""
-                                            }}
+
+                                <!-- 召唤物属性 -->
+                                <div v-if="summonAttributes">
+                                    <h4 class="text-lg font-bold mb-3">
+                                        {{ summonAttributes.find((p) => p.名称 === "召唤物名称")?.格式 || "召唤物" }}
+                                    </h4>
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                                        <div
+                                            class="bg-linear-to-br from-secondary/10 to-secondary/5 rounded-lg p-3 border border-secondary/20"
+                                            v-for="prop in summonAttributes.filter((p) => p.值)"
+                                            :key="prop.名称"
+                                        >
+                                            <div class="text-xs text-base-content/60 mb-1">{{ prop.名称 }}</div>
+                                            <div class="text-secondary font-bold text-lg font-orbitron">
+                                                {{ formatSkillProp(prop.名称, prop) }}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="flex flex-col gap-3" v-if="charBuild.mods.length > 0">
-                                <h4 class="text-xl font-bold text-base-content/80">MOD</h4>
-                                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
-                                    <div
-                                        class="flex items-center p-2 rounded-lg bg-linear-to-r from-secondary/1 to-secondary/5 border border-secondary/30 text-secondary text-xs"
-                                        v-for="mod in charBuild.mods
-                                            .filter((v) => v.类型 === '角色')
-                                            .reduce((r, v) => {
-                                                if (r[v.名称]) {
-                                                    r[v.名称].count += 1
-                                                } else {
-                                                    r[v.名称] = { count: 1, mod: v }
-                                                }
-                                                return r
-                                            }, {} as any)"
-                                    >
-                                        <img class="size-8 object-cover inline-block" :src="mod.mod.url" alt="" />
-                                        <span> {{ mod.count > 1 ? mod.count + " x " : "" }}{{ $t(mod.mod.名称) }} </span>
+
+                                <!-- 武器属性 -->
+                                <div v-if="charBuild.selectedWeapon && weaponAttrs">
+                                    <h4 class="text-lg font-bold mb-3">{{ $t("char-build.weapon_attributes") }}</h4>
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                                        <div
+                                            class="bg-linear-to-br from-secondary/10 to-secondary/5 rounded-lg p-3 border border-secondary/20"
+                                            v-for="[key, val] in Object.entries(weaponAttrs).filter(([_, v]) => v)"
+                                            :key="key"
+                                        >
+                                            <div class="text-xs text-base-content/60 mb-1">
+                                                {{ key === "攻击" ? charBuild.selectedWeapon.伤害类型 : "" }}{{ $t(key) }}
+                                            </div>
+                                            <div class="text-secondary font-bold text-lg font-orbitron">
+                                                {{ ["攻击", "攻速", "多重"].includes(key) ? val : `${+(val * 100).toFixed(2)}%` }}
+                                                {{
+                                                    key === "多重" && (charBuild.selectedWeapon?.弹片数 || 1) > 1
+                                                        ? ` * ${charBuild.selectedWeapon.弹片数! * val}`
+                                                        : ""
+                                                }}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div
-                                    class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2"
-                                    v-if="charBuild.selectedWeapon"
-                                >
-                                    <div
-                                        class="flex items-center p-2 rounded-lg bg-linear-to-r from-secondary/1 to-secondary/5 border border-secondary/30 text-secondary text-xs"
-                                        v-for="mod in charBuild.mods
-                                            .filter((v) => v.类型 === charBuild.selectedWeapon!.类型)
-                                            .reduce((r, v) => {
-                                                if (r[v.名称]) {
-                                                    r[v.名称].count += 1
-                                                } else {
-                                                    r[v.名称] = { count: 1, mod: v }
-                                                }
-                                                return r
-                                            }, {} as any)"
-                                    >
-                                        <img class="size-8 object-cover inline-block" :src="mod.mod.url" alt="" />
-                                        <span>{{ mod.count > 1 ? mod.count + " x " : "" }}{{ $t(mod.mod.名称) }} </span>
+
+                                <!-- MOD展示 -->
+                                <div v-if="charBuild.mods.length > 0">
+                                    <h4 class="text-lg font-bold mb-3">MOD</h4>
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                                        <div
+                                            class="flex items-center gap-2 px-3 py-2 rounded-lg bg-linear-to-r from-secondary/10 to-secondary/5 border border-secondary/30 text-sm"
+                                            v-for="mod in charBuild.mods
+                                                .filter((v) => v.类型 === '角色')
+                                                .reduce((r, v) => {
+                                                    if (r[v.名称]) {
+                                                        r[v.名称].count += 1
+                                                    } else {
+                                                        r[v.名称] = { count: 1, mod: v }
+                                                    }
+                                                    return r
+                                                }, {} as any)"
+                                            :key="mod.mod.名称"
+                                        >
+                                            <img class="w-8 h-8 object-cover rounded" :src="mod.mod.url" alt="" />
+                                            <span class="font-medium"
+                                                >{{ mod.count > 1 ? `${mod.count} x ` : "" }}{{ $t(mod.mod.名称) }}</span
+                                            >
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div v-if="charBuild.buffs.length > 0">
-                                <h4 class="text-xl font-bold mb-3 text-base-content/80">BUFF</h4>
-                                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
-                                    <span
-                                        class="px-4 py-2 rounded-lg bg-linear-to-r from-secondary/1 to-secondary/5 border border-secondary/30 text-secondary text-xs"
-                                        v-for="buff in charBuild.buffs.map((v) => v.名称)"
-                                    >
-                                        {{ buff }}
-                                    </span>
+
+                                <!-- BUFF展示 -->
+                                <div v-if="charBuild.buffs.length > 0">
+                                    <h4 class="text-lg font-bold mb-3">BUFF</h4>
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                                        <span
+                                            class="px-4 py-2 rounded-lg bg-linear-to-r from-secondary/10 to-secondary/5 border border-secondary/30 text-sm"
+                                            v-for="buff in charBuild.buffs.map((v) => v.名称)"
+                                            :key="buff"
+                                        >
+                                            {{ buff }}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </ScrollArea>
         </div>
     </div>
 
     <!-- AI对话助手 -->
     <AIChatDialog
-        v-if="settings.showAIChat"
+        v-if="setting.showAIChat"
         :charBuild="charBuild"
         @update:charSettings="charSettings = $event"
         @update:selectedChar="selectedChar = $event"
     />
 </template>
+
 <style>
-.list-move, /* 对移动中的元素应用的过渡 */
+.list-move,
 .list-enter-active,
 .list-leave-active {
     transition: all 0.5s ease;
@@ -1345,8 +2285,6 @@ onMounted(() => {
     transform: translateX(30px);
 }
 
-/* 确保将离开的元素从布局流中删除
-  以便能够正确地计算移动的动画。 */
 .list-leave-active {
     position: absolute;
 }

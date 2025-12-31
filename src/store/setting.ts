@@ -7,9 +7,9 @@ import i18next from "i18next"
 
 export const useSettingStore = defineStore("setting", {
     state: () => {
-        const isDarkMode = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+        // const isDarkMode = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
         return {
-            theme: useLocalStorage("setting_theme", isDarkMode ? "dark" : "light"),
+            theme: useLocalStorage("setting_theme", "dark"),
             uiScale: useLocalStorage("setting_ui_scale", 1),
             winMaterial: useLocalStorage("setting_win_material", "Unset"),
             windowTrasnparent: useLocalStorage("setting_window_trasnparent", true),
@@ -22,7 +22,7 @@ export const useSettingStore = defineStore("setting", {
             aiTemperature: useLocalStorage("ai_temperature", 0.6),
             // 皎皎角
             dnaUserId: useLocalStorage("setting_user_id", 0),
-            showAIChat: useLocalStorage("setting_show_ai_chat", true),
+            showAIChat: useLocalStorage("setting_show_ai_chat", false),
         }
     },
     getters: {},

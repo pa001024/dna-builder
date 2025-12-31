@@ -21,9 +21,9 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
     <div class="flex">
         <ShowProps side="top" :props="buff.getProperties()" :code="buff.code" :title="title">
             <div
-                class="flex-1 bg-base-200 rounded-lg p-3 cursor-pointer hover:bg-gray-200/20 transition-colors"
+                class="flex-1 bg-base-200/50 rounded-lg p-3 cursor-pointer hover:bg-gray-200/20 transition-colors"
                 :class="{
-                    'bg-green-100/20 border border-green-500/20 hover:bg-green-200/20': selected,
+                    ' border border-green-500/20 hover:bg-green-200/20': selected,
                 }"
             >
                 <div class="flex items-center justify-between mb-2">

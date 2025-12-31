@@ -126,8 +126,8 @@ describe("数据类型测试", () => {
             expect(sampleWeapon.名称).toBeDefined()
             expect(typeof sampleWeapon.名称).toBe("string")
 
-            expect(sampleWeapon.基础攻击).toBeDefined()
-            expect(typeof sampleWeapon.基础攻击).toBe("number")
+            expect(sampleWeapon.攻击).toBeDefined()
+            expect(typeof sampleWeapon.攻击).toBe("number")
         })
 
         it("武器应该有名称和基础类型", () => {
@@ -136,17 +136,17 @@ describe("数据类型测试", () => {
                 expect(typeof weapon.名称).toBe("string")
                 expect(weapon.名称.length).toBeGreaterThan(0)
 
-                expect(weapon.基础攻击).toBeDefined()
-                expect(typeof weapon.基础攻击).toBe("number")
-                expect(weapon.基础攻击).toBeGreaterThan(0)
+                expect(weapon.攻击).toBeDefined()
+                expect(typeof weapon.攻击).toBe("number")
+                expect(weapon.攻击).toBeGreaterThan(0)
             })
         })
 
         it("武器应该有基础属性", () => {
             weaponData.forEach((weapon) => {
-                expect(weapon.基础攻击).toBeDefined()
-                expect(typeof weapon.基础攻击).toBe("number")
-                expect(weapon.基础攻击).toBeGreaterThan(0)
+                expect(weapon.攻击).toBeDefined()
+                expect(typeof weapon.攻击).toBe("number")
+                expect(weapon.攻击).toBeGreaterThan(0)
             })
         })
     })
@@ -208,10 +208,10 @@ describe("数据类型测试", () => {
                     "护盾",
                     "防御",
                     "神智",
-                    "威力",
-                    "耐久",
-                    "效益",
-                    "范围",
+                    "技能威力",
+                    "技能耐久",
+                    "技能效益",
+                    "技能范围",
                     "昂扬",
                     "背水",
                     "增伤",
@@ -282,7 +282,7 @@ describe("数据类型测试", () => {
         it("MOD应该引用有效的角色或武器", () => {
             const charNames = charData.map((c) => c.名称)
             const weaponNames = weaponData.map((w) => w.名称)
-            const weaponTypes = [...new Set(weaponData.map((w) => w.类别))]
+            const weaponTypes = [...new Set(weaponData.map((w) => w.类型[1]))]
             const allNames = [...charNames, ...weaponNames, ...weaponTypes, "切割", "贯穿", "震荡"]
 
             modData.forEach((mod) => {

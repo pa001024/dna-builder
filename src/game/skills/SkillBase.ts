@@ -32,34 +32,30 @@ export abstract class SkillBase implements SkillBehavior {
 
     protected getSanityCost(): number {
         const leveledSkill = this.getLeveledSkill()
-        const baseCost = leveledSkill?.神智消耗值 || 20
 
         // 获取属性影响
         const attrs = this.charBuild.calculateAttributes()
-        const 效益 = attrs.效益 || 0
-
+        const baseCost = leveledSkill?.getFieldsWithAttr(attrs)?.find((f) => f.名称.includes("神智消耗"))?.值 || 20
         // 效益影响: 神智消耗 = 基础值 * (2-效益)
-        return Math.ceil(baseCost * (2 - 效益))
+        return baseCost
     }
 
     protected getSanityDrainPerSecond(): number {
         const leveledSkill = this.getLeveledSkill()
-        const baseDrain = leveledSkill?.每秒神智消耗值 || 20
 
         // 获取属性影响
         const attrs = this.charBuild.calculateAttributes()
-        const 效益 = attrs.效益 || 0
-        const 耐久 = attrs.耐久 || 0
+        const baseDrain = leveledSkill?.getFieldsWithAttr(attrs)?.find((f) => f.名称.includes("每秒神智消耗"))?.值 || 20
 
         // 效益影响: 每秒神智消耗值 = 基础值 * Math.max(0.25, (2-效益)/耐久)
-        return Math.ceil(baseDrain * Math.max(0.25, (2 - 效益) / 耐久))
+        return baseDrain
     }
 
     // 计算受耐久影响的持续时间
     protected getAdjustedDuration(baseDuration: number): number {
         // 获取属性影响
         const attrs = this.charBuild.calculateAttributes()
-        const 耐久 = attrs.耐久 || 1
+        const 耐久 = attrs.技能耐久 || 1
 
         // 耐久影响: 对持续时间: 乘法
         return baseDuration * 耐久

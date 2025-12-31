@@ -21,19 +21,19 @@ const field = leveledSkill.字段.find(field => field.名称 === "字段名称")
 // 获取值
 const value = field?.值
 // 获取属性影响
-const attrEffect = field?.属性影响 // maybe "效益,耐久" or "威力" e.t.c.
+const attrEffect = field?.属性影响 // maybe "效益,耐久" or "技能威力" e.t.c.
 - 威力影响: 乘法
 - 耐久影响: 对持续时间: 乘法, 对每秒神智消耗值: 每秒神智消耗值 = 基础值* Math.max(0.25,(2-效益)/耐久)
 - 效益影响: 神智消耗 = 基础值* (2-效益)  每秒神智消耗值 = 基础值* Math.max(0.25,(2-效益)/耐久)
 - 范围影响: 乘法
 // 示例: 范围影响 = 基础值 * 范围
-const rangeField = leveledSkill.字段.find(field => field.名称.includes("范围"))
+const rangeField = leveledSkill.字段.find(field => field.名称.includes("技能范围"))
 const rangeFieldAttrEffect = rangeField?.属性影响
 // 获取范围值
 const rangeValue = rangeField?.值
 // 计算属性影响
 const attrs = this.charBuild.calculateAttributes()
-const rangeValueFinal = rangeValue * (rangeFieldAttrEffect?.includes("范围") ? attrs.范围 : 1)
+const rangeValueFinal = rangeValue * (rangeFieldAttrEffect?.includes("技能范围") ? attrs.范围 : 1)
 
 
 // 常用属性

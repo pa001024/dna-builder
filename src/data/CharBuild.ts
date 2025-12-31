@@ -1,4 +1,4 @@
-import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon, LeveledSkillWeapon, LeveledSkill, modMap } from "./leveled"
+import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon, LeveledSkillWeapon, LeveledSkill, modMap, LeveledMonster } from "./leveled"
 import { LeveledModWithCount } from "./leveled/LeveledMod"
 // 本地实现base36Pad函数，避免依赖浏览器API
 function base36Pad(num: number): string {
@@ -14,10 +14,10 @@ export interface CharAttr {
     防御: number
     神智: number
     // 其他属性
-    威力: number
-    耐久: number
-    效益: number
-    范围: number
+    技能威力: number
+    技能耐久: number
+    技能效益: number
+    技能范围: number
     昂扬: number
     背水: number
     增伤: number
@@ -29,9 +29,11 @@ export interface CharAttr {
     技能速度: number
     失衡易伤: number
     技能倍率加数: number
+    技能倍率赋值: number
     召唤物攻击速度: number
     召唤物范围: number
     减伤: number
+    有效生命: number
 }
 
 export interface WeaponAttr {
@@ -57,10 +59,14 @@ export interface WeaponAttr {
     独立增伤: number
     /** 追加伤害 0开始 */
     追加伤害: number
+    /** 武器倍率 0开始 */
+    武器倍率: number
 }
 
 import type { RawTimelineData } from "../store/timeline"
 import { groupBy } from "lodash-es"
+import { DmgType, HpType, Skill, WeaponSkillType } from "./data-types"
+import { ASTNode, parseAST } from "./ast"
 export class CharBuildTimeline {
     totalTime: number = 0
     constructor(
@@ -109,7 +115,7 @@ export interface CharBuildOptions {
     melee: LeveledWeapon
     ranged: LeveledWeapon
     baseName: string
-    enemyDef?: number
+    enemyId?: number
     enemyLevel?: number
     enemyResistance?: number
     enemyHpType?: string
@@ -125,19 +131,45 @@ export class CharBuild {
     }
     set char(char: LeveledChar) {
         this._char = char
-        // 从skills表中获取角色技能数组，用参数skillLevel初始化LeveledSkill后储存为私有属性skills数组
+        // 从skills表中获取角色技能数组，用参数skillLevel初始化LeveledSkill后储存为属性skills数组
         this.skills = this.char.技能.map((skill) => new LeveledSkill(skill.skillData, this.skillLevel))
 
-        // 从char中获取同率武器值，如果非空则从武器表中获取同率武器属性，储存为私有字段skillWeapon
+        // 从char中获取同率武器值，如果非空则从武器表中获取同率武器属性，储存为字段skillWeapon
         if (this.char.同律武器) {
             try {
-                this.skillWeapon = new LeveledSkillWeapon(this.char.同律武器, this.skillLevel)
+                const uweaponData = this.char.同律武器[0]
+                const uweaponSkillData = {
+                    名称: uweaponData.名称,
+                    类型: "同律武器伤害",
+                    字段: {},
+                } as Skill
+                // 固定获取Q技能的伤害字段
+                this.skills[1].字段.forEach((field) => {
+                    if (field.名称.includes("伤害")) uweaponSkillData.字段![field.名称] = field
+                })
+                uweaponData.技能 = [uweaponSkillData]
+                this.skillWeapon = new LeveledSkillWeapon(uweaponData, this.skillLevel, this.char.等级)
             } catch (error) {
                 console.error(`同律武器 ${this.char.同律武器} 初始化失败:`, error)
             }
         } else {
             this.skillWeapon = undefined
         }
+    }
+    get meleeWeaponSkills() {
+        return this.meleeWeapon.技能 || []
+    }
+    get rangedWeaponSkills() {
+        return this.rangedWeapon.技能 || []
+    }
+    get skillWeaponSkills() {
+        return this.skillWeapon?.技能 || []
+    }
+    get weaponSkills() {
+        return [...this.meleeWeaponSkills, ...this.rangedWeaponSkills, ...this.skillWeaponSkills]
+    }
+    get allSkills() {
+        return [...this.skills, ...this.weaponSkills]
     }
     public skillLevel: number = 10
     public hpPercent: number
@@ -153,27 +185,63 @@ export class CharBuild {
     public rangedWeapon: LeveledWeapon
     public baseName = ""
     public imbalance = false
-    public enemyDef: number
-    public enemyLevel: number
-    public enemyResistance: number
-    public enemyHpType: string
+    _enemyId: number = 1001001
+    get enemyId() {
+        return this._enemyId
+    }
+    set enemyId(value: number) {
+        this._enemyId = value
+        try {
+            this.enemy = new LeveledMonster(value, this.enemyLevel)
+        } catch (error) {
+            console.error(`敌人 ${value} 初始化失败:`, error)
+            this.enemy = new LeveledMonster(1001001, this.enemyLevel)
+        }
+    }
+    public enemy!: LeveledMonster
+    _enemyLevel: number = 180
+    _enemyResistance: number = 0
+    get enemyLevel() {
+        return this._enemyLevel
+    }
+    set enemyLevel(value: number) {
+        this._enemyLevel = value
+        if (this.enemy) this.enemy.等级 = value
+    }
+    get enemyResistance() {
+        return this._enemyResistance
+    }
+    set enemyResistance(value: number) {
+        this._enemyResistance = value
+    }
     public targetFunction: string
     public skills!: LeveledSkill[]
     public skillWeapon?: LeveledSkillWeapon
     public timeline?: CharBuildTimeline
+
+    get baseWithTarget() {
+        return this.baseName + "::" + this.targetFunction
+    }
+    set baseWithTarget(value: string) {
+        const [base, target] = value.split("::")
+        this.baseName = base
+        if (target) this.targetFunction = target
+    }
 
     get charModsWithAura() {
         return this.auraMod ? [this.auraMod!, ...this.charMods] : this.charMods
     }
 
     // 血量类型系数表
-    private hpTypeCoefficients: Record<string, number> = {
+    hpTypeCoefficients: Record<string, number> = {
         生命: 0.5,
-        health: 0.5,
         护盾: 1,
-        shield: 1,
         战姿: 1,
-        combatStyle: 1,
+    }
+    hpTypeDMG: Record<keyof typeof HpType, keyof typeof DmgType> = {
+        生命: "贯穿",
+        护盾: "切割",
+        战姿: "震荡",
     }
 
     constructor(options: CharBuildOptions) {
@@ -192,10 +260,9 @@ export class CharBuild {
         this.meleeWeapon = options.melee
         this.rangedWeapon = options.ranged
         this.baseName = options.baseName
-        this.enemyDef = options.enemyDef || 130
         this.enemyLevel = options.enemyLevel || 80
+        this.enemyId = options.enemyId || 1001001
         this.enemyResistance = options.enemyResistance || 0
-        this.enemyHpType = options.enemyHpType || "生命"
         this.targetFunction = options.targetFunction || "伤害"
         this.timeline = options.timeline
     }
@@ -233,10 +300,9 @@ export class CharBuild {
             imbalance: charSettings.imbalance,
             hpPercent: charSettings.hpPercent,
             resonanceGain: charSettings.resonanceGain,
-            enemyDef: charSettings.enemyDef,
+            enemyId: charSettings.enemyId,
             enemyLevel: charSettings.enemyLevel,
             enemyResistance: charSettings.enemyResistance,
-            enemyHpType: charSettings.enemyHpType,
             targetFunction: charSettings.targetFunction,
             timeline,
         })
@@ -257,12 +323,20 @@ export class CharBuild {
         return [...this.mods, this.meleeWeapon, this.rangedWeapon]
     }
 
-    get baseNameTitle() {
-        return this.baseName.replace(/\[.+?\]/, "")
+    get attrs() {
+        return this.calculateAttributes()
     }
-    get baseNameSub() {
-        const match = this.baseName.match(/\[(.+?)\]/)
-        return match ? match[1] : ""
+
+    get meleeAttrs() {
+        return this.calculateWeaponAttributes(undefined, false, this.meleeWeapon).weapon
+    }
+
+    get rangedAttrs() {
+        return this.calculateWeaponAttributes(undefined, false, this.rangedWeapon).weapon
+    }
+
+    get skillWeaponAttrs() {
+        return this.skillWeapon ? this.calculateWeaponAttributes(undefined, false, this.skillWeapon).weapon : undefined
     }
 
     // 计算角色所有属性（基础属性和其他属性）
@@ -279,10 +353,10 @@ export class CharBuild {
         let elemDamageBonus = this.getTotalBonus("属性伤")
 
         // 计算基础值为1的属性
-        let power = 1 + this.getTotalBonus("威力")
-        let durability = 1 + this.getTotalBonus("耐久")
-        let efficiency = 1 + this.getTotalBonus("效益")
-        let range = 1 + this.getTotalBonus("范围")
+        let power = 1 + this.getTotalBonus("技能威力")
+        let durability = 1 + this.getTotalBonus("技能耐久")
+        let efficiency = 1 + this.getTotalBonus("技能效益")
+        let range = 1 + this.getTotalBonus("技能范围")
 
         // 计算基础值为0的属性
         let boost = this.getTotalBonus("昂扬")
@@ -298,7 +372,8 @@ export class CharBuild {
         let summonRange = this.getTotalBonus("召唤物范围")
         let ignoreDefense = this.getTotalBonusMul("无视防御")
         let independentDamageIncrease = this.getTotalBonusMul("独立增伤")
-        let damageReduce = this.getTotalBonusMul("减伤")
+        let damageReduce = this.getTotalBonusReduce("减伤")
+        let skillMultiplierSet = this.getTotalBonus("技能倍率赋值")
 
         // 应用MOD属性加成
         let modAttributeBonus = this.getTotalBonus("MOD属性")
@@ -311,10 +386,10 @@ export class CharBuild {
             defenseBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "防御")
             sanityBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "神智")
             elemDamageBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "属性伤")
-            power += modAttributeBonus * this.getModsBonus(modsBySeries, "威力")
-            durability += modAttributeBonus * this.getModsBonus(modsBySeries, "耐久")
-            efficiency += modAttributeBonus * this.getModsBonus(modsBySeries, "效益")
-            range += modAttributeBonus * this.getModsBonus(modsBySeries, "范围")
+            power += modAttributeBonus * this.getModsBonus(modsBySeries, "技能威力")
+            durability += modAttributeBonus * this.getModsBonus(modsBySeries, "技能耐久")
+            efficiency += modAttributeBonus * this.getModsBonus(modsBySeries, "技能效益")
+            range += modAttributeBonus * this.getModsBonus(modsBySeries, "技能范围")
             boost += modAttributeBonus * this.getModsBonus(modsBySeries, "昂扬")
             desperate += modAttributeBonus * this.getModsBonus(modsBySeries, "背水")
             damageIncrease += modAttributeBonus * this.getModsBonus(modsBySeries, "增伤")
@@ -337,10 +412,10 @@ export class CharBuild {
                 defenseBonus -= this.getTotalBonusSingle(props, "防御")
                 sanityBonus -= this.getTotalBonusSingle(props, "神智")
                 elemDamageBonus -= this.getTotalBonusSingle(props, "属性伤")
-                power -= this.getTotalBonusSingle(props, "威力")
-                durability -= this.getTotalBonusSingle(props, "耐久")
-                efficiency -= this.getTotalBonusSingle(props, "效益")
-                range -= this.getTotalBonusSingle(props, "范围")
+                power -= this.getTotalBonusSingle(props, "技能威力")
+                durability -= this.getTotalBonusSingle(props, "技能耐久")
+                efficiency -= this.getTotalBonusSingle(props, "技能效益")
+                range -= this.getTotalBonusSingle(props, "技能范围")
                 boost -= this.getTotalBonusSingle(props, "昂扬")
                 desperate -= this.getTotalBonusSingle(props, "背水")
                 damageIncrease -= this.getTotalBonusSingle(props, "增伤")
@@ -354,6 +429,8 @@ export class CharBuild {
                 summonRange -= this.getTotalBonusSingle(props, "召唤物范围")
                 ignoreDefense = (1 + ignoreDefense) / (1 + this.getTotalBonusSingle(props, "无视防御")) - 1
                 independentDamageIncrease = (1 + independentDamageIncrease) / (1 + this.getTotalBonusSingle(props, "独立增伤")) - 1
+                damageReduce = 1 - (1 - damageReduce) / (1 - this.getTotalBonusSingle(props, "减伤"))
+                skillMultiplierSet -= this.getTotalBonusSingle(props, "技能倍率赋值")
             } else {
                 attackBonus += this.getTotalBonusSingle(props, "攻击")
                 attackAdd += this.getTotalBonusSingle(props, "固定攻击")
@@ -362,10 +439,10 @@ export class CharBuild {
                 defenseBonus += this.getTotalBonusSingle(props, "防御")
                 sanityBonus += this.getTotalBonusSingle(props, "神智")
                 elemDamageBonus += this.getTotalBonusSingle(props, "属性伤")
-                power += this.getTotalBonusSingle(props, "威力")
-                durability += this.getTotalBonusSingle(props, "耐久")
-                efficiency += this.getTotalBonusSingle(props, "效益")
-                range += this.getTotalBonusSingle(props, "范围")
+                power += this.getTotalBonusSingle(props, "技能威力")
+                durability += this.getTotalBonusSingle(props, "技能耐久")
+                efficiency += this.getTotalBonusSingle(props, "技能效益")
+                range += this.getTotalBonusSingle(props, "技能范围")
                 boost += this.getTotalBonusSingle(props, "昂扬")
                 desperate += this.getTotalBonusSingle(props, "背水")
                 damageIncrease += this.getTotalBonusSingle(props, "增伤")
@@ -379,6 +456,8 @@ export class CharBuild {
                 summonRange += this.getTotalBonusSingle(props, "召唤物范围")
                 ignoreDefense = (1 + ignoreDefense) * (1 + this.getTotalBonusSingle(props, "无视防御")) - 1
                 independentDamageIncrease = (1 + independentDamageIncrease) * (1 + this.getTotalBonusSingle(props, "独立增伤")) - 1
+                damageReduce = 1 - (1 - damageReduce) * (1 - this.getTotalBonusSingle(props, "减伤"))
+                skillMultiplierSet += this.getTotalBonusSingle(props, "技能倍率赋值")
             }
         }
 
@@ -411,10 +490,10 @@ export class CharBuild {
             防御: defense,
             神智: sanity,
             // 其他属性
-            威力: power,
-            耐久: durability,
-            效益: efficiency,
-            范围: range,
+            技能威力: power,
+            技能耐久: durability,
+            技能效益: efficiency,
+            技能范围: range,
             昂扬: boost,
             背水: desperate,
             增伤: damageIncrease,
@@ -429,13 +508,29 @@ export class CharBuild {
             召唤物攻击速度: summonAttackSpeed,
             召唤物范围: summonRange,
             减伤: damageReduce,
+            技能倍率赋值: skillMultiplierSet,
+            有效生命: (health / (1 - defense / (300 + defense)) + shield) / (1 - damageReduce),
         }
         // 应用MOD条件
         const condMods = this.charModsWithAura.filter((mod) => mod.生效?.条件)
         if (props?.生效?.条件 && !minus) {
             condMods.push(props as LeveledMod)
         }
-        if (!minus) attrs = this.applyCondition(attrs, condMods)
+        if (!minus) {
+            const attrsRst = this.applyCondition({ ...attrs }, condMods)
+            // diff attrsRst and attrs
+            Object.keys(attrsRst).forEach((key) => {
+                if (key === "攻击") {
+                    attrs.攻击 += char.基础攻击 * (attrsRst.攻击 - attrs.攻击) * (1 + elemDamageBonus)
+                } else if (key === "生命" || key === "防御" || key === "护盾" || key === "神智") {
+                    attrs[key as keyof CharAttr] +=
+                        char[("基础" + key) as "基础生命" | "基础护盾" | "基础防御" | "基础神智"] *
+                        (attrsRst[key as keyof CharAttr] - attrs[key as keyof CharAttr])
+                } else {
+                    attrs[key as keyof CharAttr] = attrsRst[key as keyof CharAttr]
+                }
+            })
+        }
         if (nocode) return attrs
         if (this.dynamicBuffs.length > 0 || (!minus && props?.code)) {
             const all = this.getAllWeaponsAttrs(props, minus)
@@ -476,7 +571,7 @@ export class CharBuild {
             // 计算各种加成
             let attackBonus = this.getTotalBonus(`${prefix}攻击`, prefix) + this.getTotalBonus(`攻击`, prefix)
             // 角色精通
-            if (weapon.类别 === this.char.近战 || weapon.类别 === this.char.远程 || this.char.远程 === "全部类型") {
+            if (this.char.精通.includes(weapon.类别) || this.char.精通.includes("全部类型")) {
                 attackBonus += 0.2
             }
             let physicalBonus = this.getTotalBonus("物理", prefix)
@@ -489,6 +584,7 @@ export class CharBuild {
             let reloadTimeBonus = this.getTotalBonus(`${prefix}装填`, prefix) + this.getTotalBonus(`装填`, prefix)
             let magazineBonus = this.getTotalBonus(`${prefix}弹匣`, prefix) + this.getTotalBonus(`弹匣`, prefix)
             let additionalDamage = this.getTotalBonus("追加伤害")
+            let weaponDamageMul = this.getTotalBonus(`${prefix}武器倍率`, prefix) + this.getTotalBonus(`武器倍率`, prefix)
             let independentDamageIncrease =
                 (1 + this.getTotalBonus(`${prefix}增伤`, prefix)) * (1 + this.getTotalBonusMul("独立增伤", prefix)) - 1
 
@@ -524,6 +620,8 @@ export class CharBuild {
                         this.getTotalBonusSingle(props, `${prefix}装填`, prefix) + this.getTotalBonusSingle(props, `装填`, prefix)
                     magazineBonus -=
                         this.getTotalBonusSingle(props, `${prefix}弹匣`, prefix) + this.getTotalBonusSingle(props, `弹匣`, prefix)
+                    weaponDamageMul -=
+                        this.getTotalBonusSingle(props, `${prefix}武器倍率`, prefix) + this.getTotalBonusSingle(props, `武器倍率`, prefix)
                     additionalDamage -= this.getTotalBonusSingle(props, `追加伤害`, prefix)
                     independentDamageIncrease =
                         (1 + independentDamageIncrease) / (1 + this.getTotalBonusSingle(props, "独立增伤", prefix)) - 1
@@ -558,6 +656,8 @@ export class CharBuild {
                         this.getTotalBonusSingle(props, `${prefix}装填`, prefix) + this.getTotalBonusSingle(props, `装填`, prefix)
                     magazineBonus +=
                         this.getTotalBonusSingle(props, `${prefix}弹匣`, prefix) + this.getTotalBonusSingle(props, `弹匣`, prefix)
+                    weaponDamageMul +=
+                        this.getTotalBonusSingle(props, `${prefix}武器倍率`, prefix) + this.getTotalBonusSingle(props, `武器倍率`, prefix)
                     additionalDamage += this.getTotalBonusSingle(props, `追加伤害`, prefix)
                     independentDamageIncrease =
                         (1 + independentDamageIncrease) * (1 + this.getTotalBonusSingle(props, "独立增伤", prefix)) - 1
@@ -613,6 +713,7 @@ export class CharBuild {
                 追加伤害: additionalDamage,
                 装填: reloadTime,
                 弹匣: magazine,
+                武器倍率: weaponDamageMul,
             }
             attrs.weapon = weaponAttrs
         }
@@ -687,8 +788,8 @@ export class CharBuild {
         let bonus = 0
 
         // 添加角色自带加成
-        if (prefix === "角色" && typeof this.char[attribute] === "number") {
-            bonus += this.char[attribute]
+        if (prefix === "角色" && typeof this.char.加成?.[attribute] === "number") {
+            bonus += this.char.加成?.[attribute] || 0
         }
 
         // 添加近战武器加成
@@ -744,26 +845,47 @@ export class CharBuild {
         let bonus = 1
 
         // 添加角色自带加成
-        if (typeof (this.char as any)[attribute] === "number") {
-            bonus *= 1 + (this.char as any)[attribute]
+        if (typeof this.char.加成?.[attribute] === "number") {
+            bonus *= 1 + this.char.加成?.[attribute] || 0
         }
 
         // 添加MOD加成
         this.mods.forEach((mod) => {
             if (prefix && mod.类型 !== prefix) return
-            if (typeof (mod as any)[attribute] === "number") {
-                bonus *= 1 + (mod as any)[attribute]
+            if (typeof mod[attribute] === "number") {
+                bonus *= 1 + mod[attribute]
             }
         })
 
         // 添加BUFF加成
         this.buffs.forEach((buff) => {
-            if (typeof (buff as any)[attribute] === "number") {
-                bonus *= 1 + (buff as any)[attribute]
+            if (typeof buff[attribute] === "number") {
+                bonus *= 1 + buff[attribute]
             }
         })
 
         return bonus - 1
+    }
+    // 获取总加成
+    private getTotalBonusReduce(attribute: string, prefix?: string): number {
+        let bonus = 0
+
+        // 添加MOD加成
+        this.mods.forEach((mod) => {
+            if (prefix && mod.类型 !== prefix) return
+            if (typeof mod[attribute] === "number") {
+                bonus = 1 - (1 - bonus) * (1 - mod[attribute])
+            }
+        })
+
+        // 添加BUFF加成
+        this.buffs.forEach((buff) => {
+            if (typeof buff[attribute] === "number") {
+                bonus = 1 - (1 - bonus) * (1 - buff[attribute])
+            }
+        })
+
+        return bonus
     }
 
     // 计算昂扬乘区
@@ -787,58 +909,32 @@ export class CharBuild {
      * @returns 防御乘区
      */
     public calculateDefenseMultiplier(attrs: ReturnType<typeof this.calculateAttributes>, finalDef?: number): number {
-        // 如果敌方血量类型为护盾，防御乘区固定为1
-        if (this.enemyHpType === "护盾") {
-            return 1
-        }
-
         // 确保等级和敌方等级都是有效的数字
-        const charLevel = typeof this.char.等级 === "number" ? this.char.等级 : 80
-        const enemyLevel = typeof this.enemyLevel === "number" ? this.enemyLevel : 80
+        const charLevel = this.char.等级 || 80
+        const enemyLevel = this.enemy.等级 || 80
 
         const levelDiff = Math.max(0, Math.min(20, Math.min(80, enemyLevel) - charLevel))
-        const def = finalDef ?? this.enemyDef * (1 - attrs.无视防御)
+        const def = finalDef ?? this.enemy.防御 * (1 - attrs.无视防御)
         const dmgReduce = def / (300 + def - levelDiff * 10) // 减伤率
         const defenseMultiplier = 1 - dmgReduce
         return Math.max(0, Math.min(1, defenseMultiplier))
     }
 
     // 计算技能伤害
-    public calculateSkillDamage(attrs: ReturnType<typeof this.calculateAttributes>, skill: LeveledSkill) {
-        // 计算技能基础伤害
-        skill.子技能名 = this.baseNameSub
-        let damage = skill.伤害
-        let baseDamage = damage?.额外 || 0
-        if (damage) {
-            const mul = damage.值 + attrs.技能倍率加数
-            if (!damage.基础) {
-                baseDamage += mul * attrs.攻击
-            }
-            if (damage.基础 === "生命") {
-                baseDamage += mul * attrs.生命
-            }
-            if (damage.基础 === "防御") {
-                baseDamage += mul * attrs.防御
-            }
-        }
-        baseDamage *= attrs.威力
-
+    public calculateSkillDamage(attrs: ReturnType<typeof this.calculateAttributes>) {
         // 计算各种乘区
         const resistancePenetration = Math.max(0, 1 - this.enemyResistance + attrs.属性穿透)
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
-        const defenseMultiplier = this.calculateDefenseMultiplier(attrs)
         const damageIncrease = 1 + attrs.增伤 + attrs.技能伤害
         const independentDamageIncrease = 1 + attrs.独立增伤
         const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
 
         // 计算最终伤害
         let finalDamage =
-            baseDamage *
             resistancePenetration *
             boostMultiplier *
             desperateMultiplier *
-            defenseMultiplier *
             damageIncrease *
             independentDamageIncrease *
             imbalanceDamageMultiplier
@@ -850,25 +946,19 @@ export class CharBuild {
     public calculateWeaponDamage(
         attrs: ReturnType<typeof this.calculateWeaponAttributes>,
         weapon: LeveledWeapon | LeveledSkillWeapon,
-    ): {
-        lowerCritNoTrigger: number
-        higherCritNoTrigger: number
-        lowerCritExpectedTrigger: number
-        higherCritExpectedTrigger: number
-        lowerCritTrigger: number
-        higherCritTrigger: number
-        expectedDamage: number
-    } {
-        weapon.倍率名称 = this.baseNameSub
+    ): DamageResult {
         const weaponAttrs = attrs.weapon!
         // 计算武器基础伤害
-        const weaponAttackMultiplier = weapon.倍率 || 1
-        const weaponDamagePhysical = weaponAttackMultiplier * weaponAttrs.攻击
-        const weaponDamageElemental = weaponAttackMultiplier * attrs.攻击
+        const weaponAttackMultiplier = 1 // 倍率 这里设为1 使用动态计算
+        const totalWeaponDamage = attrs.攻击 + weaponAttrs.攻击
+        const weaponDamagePhysical = (weaponAttackMultiplier * weaponAttrs.攻击) / totalWeaponDamage
+        const weaponDamageElemental = (weaponAttackMultiplier * attrs.攻击) / totalWeaponDamage
 
         // 计算触发伤害期望
         const triggerDamageMultiplier =
-            weapon.伤害类型 === this.enemyHpType ? this.hpTypeCoefficients[this.enemyHpType] + this.getTotalBonus("触发倍率") : 0
+            weapon.伤害类型 === this.hpTypeDMG[this.enemy.currentHPType]
+                ? this.hpTypeCoefficients[this.enemy.currentHPType] + this.getTotalBonus("触发倍率")
+                : 0
         const triggerRate = weaponAttrs.触发
         const triggerDamage = 1 + triggerDamageMultiplier
         const triggerExpectedDamage = 1 + triggerDamageMultiplier * triggerRate
@@ -884,7 +974,6 @@ export class CharBuild {
         const resistancePenetration = 1 - this.enemyResistance + attrs.属性穿透
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
-        const defenseMultiplier = this.calculateDefenseMultiplier(attrs)
         const damageIncrease = 1 + attrs.增伤 + weaponAttrs.增伤 + attrs.武器伤害
         const independentDamageIncrease = (1 + attrs.独立增伤) * (1 + weaponAttrs.独立增伤)
         const additionalDamage = 1 + weaponAttrs.追加伤害
@@ -892,33 +981,23 @@ export class CharBuild {
         const commonMore =
             boostMultiplier *
             desperateMultiplier *
-            defenseMultiplier *
             damageIncrease *
             independentDamageIncrease *
             additionalDamage *
             imbalanceDamageMultiplier
 
         // 计算最终伤害
-
+        const elementalPart = weaponDamageElemental * resistancePenetration
         return {
-            lowerCritNoTrigger: (weaponDamagePhysical + weaponDamageElemental * resistancePenetration) * lowerCritDamage * commonMore,
-            higherCritNoTrigger: (weaponDamagePhysical + weaponDamageElemental * resistancePenetration) * higherCritDamage * commonMore,
-            lowerCritTrigger:
-                (weaponDamagePhysical * triggerDamage + weaponDamageElemental * resistancePenetration) * lowerCritDamage * commonMore,
-            higherCritTrigger:
-                (weaponDamagePhysical * triggerDamage + weaponDamageElemental * resistancePenetration) * higherCritDamage * commonMore,
-            lowerCritExpectedTrigger:
-                (weaponDamagePhysical * triggerExpectedDamage + weaponDamageElemental * resistancePenetration) *
-                lowerCritDamage *
-                commonMore,
-            higherCritExpectedTrigger:
-                (weaponDamagePhysical * triggerExpectedDamage + weaponDamageElemental * resistancePenetration) *
-                higherCritDamage *
-                commonMore,
-            expectedDamage:
-                (weaponDamagePhysical * triggerExpectedDamage + weaponDamageElemental * resistancePenetration) *
-                critExpectedDamage *
-                commonMore,
+            lowerCritNoTrigger: (weaponDamagePhysical + elementalPart) * lowerCritDamage * commonMore,
+            higherCritNoTrigger: (weaponDamagePhysical + elementalPart) * higherCritDamage * commonMore,
+            lowerCritTrigger: (weaponDamagePhysical * triggerDamage + elementalPart) * lowerCritDamage * commonMore,
+            higherCritTrigger: (weaponDamagePhysical * triggerDamage + elementalPart) * higherCritDamage * commonMore,
+            lowerCritExpectedTrigger: (weaponDamagePhysical * triggerExpectedDamage + elementalPart) * lowerCritDamage * commonMore,
+            higherCritExpectedTrigger: (weaponDamagePhysical * triggerExpectedDamage + elementalPart) * higherCritDamage * commonMore,
+            expectedCritTrigger: (weaponDamagePhysical + elementalPart) * critExpectedDamage * commonMore,
+            expectedCritNoTrigger: (weaponDamagePhysical * triggerDamage + elementalPart) * critExpectedDamage * commonMore,
+            expectedDamage: (weaponDamagePhysical * triggerExpectedDamage + elementalPart) * critExpectedDamage * commonMore,
         }
     }
 
@@ -930,7 +1009,7 @@ export class CharBuild {
         const attrs = this.calculateWeaponAttributes()
         const damage: DamageResult = this.selectedWeapon
             ? this.calculateWeaponDamage(attrs, this.selectedWeapon)
-            : this.calculateSkillDamage(attrs, this.selectedSkill!)
+            : this.calculateSkillDamage(attrs)
         const cc = (attrs.weapon?.暴击 || 0) % 1
         const tc = attrs.weapon?.触发 || 0
         let dmg = damage.expectedDamage
@@ -946,108 +1025,328 @@ export class CharBuild {
         return this.selectedSkill?.召唤物 !== undefined
     }
 
-    // 计算目标函数
-    public calculateTargetFunction(damage: DamageResult, attrs: ReturnType<typeof this.calculateWeaponAttributes>): number {
-        // 计算伤害(DPA)
-        let dpa = damage.expectedDamage
-        let tdd = dpa
-        let dpac = damage.higherCritNoTrigger || dpa
-
-        // 计算每秒伤害(DPS)
-        let dps = damage.expectedDamage
-        let dpb = damage.expectedDamage / (this.selectedWeapon?.弹片数 || 1)
-        let weapon = this.selectedWeapon
-        let skill = this.selectedSkill
-        if (weapon && attrs.weapon) {
-            const weaponAttrs = attrs.weapon
-            dps = dpa = dpa * (weaponAttrs.多重 || 1)
-            if (!this.timeline) dps = dpa * weaponAttrs.攻速
-            dpb = dpb / (1 + weaponAttrs.追加伤害)
-            // 非弹道武器多重直接加伤害
-            if (weapon.弹道类型 === "非弹道") {
-                dpb *= weaponAttrs.多重 || 1
-            }
-        } else if (skill) {
-            if (!this.timeline) {
-                dps = dpa * (1 + attrs.技能速度)
-                // 召唤物
-                const summon = skill.召唤物
-                if (summon) {
-                    const summonAttrs = skill.getSummonAttrsMap(attrs)!
-                    const duration = summonAttrs?.duration || 0
-
-                    const attackTimes = Math.floor((duration - summonAttrs?.delay) / summonAttrs?.interval)
-                    tdd = dpa * attackTimes
-                    dps = tdd / duration
-                }
-            }
-        }
-        // 除以时间线总长度
-        if (this.timeline) dps /= this.timeline.totalTime
-        // 计算效益影响下的神智消耗
-        const baseSanityCost = skill?.神智消耗值 || 100 // 从技能中获取或使用默认值
-        const baseSustainedCost = skill?.每秒神智消耗值 || 100 // 从技能中获取或使用默认值
-        const sanityCost = Math.ceil(Math.max(0, baseSanityCost * (2 - attrs.效益)))
-        let sustainedCost = baseSustainedCost
-        const sustainedCostField = skill?.每秒神智消耗
-
-        if (sustainedCostField && sustainedCostField.属性影响 && !sustainedCostField.属性影响.includes("耐久")) {
-            sustainedCost = Math.ceil(Math.max(0, baseSustainedCost * (2 - attrs.效益)))
-        } else {
-            sustainedCost = Math.ceil(Math.max(0, baseSustainedCost * Math.max(0.25, (2 - attrs.效益) / attrs.耐久)))
-        }
-
-        switch (this.targetFunction) {
-            case "弹片伤害":
-            case "DPB":
-                return dpb
+    public translateTargetFunction(targetFunction: string) {
+        let astInput = "伤害"
+        switch (targetFunction) {
+            case "伤害":
+            case "DPH":
+                break
             case "总伤":
             case "TDD":
-                return tdd
-            case "伤害":
-            case "DPA":
-                return dpa
+                astInput = "伤害*max(1,召唤物攻击次数)"
+                break
             case "暴击伤害":
-            case "DPAC":
-                return dpac
+            case "DCD":
+                astInput = "伤害.暴击"
+                break
             case "每秒伤害":
             case "DPS":
-                return dps
+                astInput = "伤害*or(攻速,1+技能速度)*or(多重,1)"
+                break
             case "每神智伤害":
-            case "DPAPM":
-                return sanityCost > 0 ? dpa / sanityCost : dpa
+            case "每神智DPH":
+            case "DPHPSP":
+                astInput = "伤害/神智消耗"
+                break
             case "每持续神智伤害":
-            case "DPAPSM":
-                return sustainedCost > 0 ? dpa / sustainedCost : dpa
+            case "每持续神智DPH":
+            case "DPHPSSP":
+                astInput = "伤害/每秒神智消耗"
+                break
             case "每神智每秒伤害":
-            case "DPSPM":
-                return sanityCost > 0 ? dps / sanityCost : dps
+            case "每神智DPS":
+            case "DPSPSP":
+                astInput = "伤害*or(攻速,1+技能速度)/神智消耗"
+                break
             case "每持续神智每秒伤害":
-            case "DPSPSM":
-                return sustainedCost > 0 ? dps / sustainedCost : dps
+            case "每持续神智DPS":
+            case "DPSPSSP":
+                astInput = "伤害*or(攻速,1+技能速度)/每秒神智消耗"
+                break
             default:
-                return damage.expectedDamage
+                if (targetFunction) astInput = targetFunction
         }
+        return astInput
+    }
+    // 计算目标函数
+    public calculateTargetFunction(damage: DamageResult, attrs: ReturnType<typeof this.calculateWeaponAttributes>): number {
+        let astInput = this.translateTargetFunction(this.targetFunction)
+
+        // 调用ast解析器解析目标函数表达式
+        let result = this.evaluateAST(astInput, damage, attrs)
+        // 除以时间线总长度
+        // if (this.targetFunction === "DPS" && this.timeline) result /= this.timeline.totalTime
+        return result
+    }
+    astCache = new Map<string, ASTNode>()
+    getIdentifierNames(astInput: string) {
+        astInput = this.translateTargetFunction(astInput)
+        try {
+            const ast = parseAST(astInput)
+            const identifiers = new Set<string>()
+            const collectIdentifiers = (node: ASTNode) => {
+                if (node.type === "property") {
+                    identifiers.add(node.name)
+                } else if (node.type === "member_access") {
+                    collectIdentifiers(node.object)
+                } else if (node.type === "function") {
+                    for (const arg of node.args) {
+                        collectIdentifiers(arg)
+                    }
+                } else if (node.type === "binary") {
+                    collectIdentifiers(node.left)
+                    collectIdentifiers(node.right)
+                } else if (node.type === "unary") {
+                    collectIdentifiers(node.argument)
+                }
+            }
+            collectIdentifiers(ast)
+            return [...identifiers]
+        } catch (e) {}
+        return []
+    }
+    /**
+     * 验证AST表达式是否合法
+     */
+    validateAST(astInput: string): string | undefined {
+        astInput = this.translateTargetFunction(astInput)
+        try {
+            const ast = parseAST(astInput)
+
+            // 验证AST中的标识符是否存在
+            const attrs = this.calculateWeaponAttributes()
+            const weaponAttrs = attrs.weapon || ({} as WeaponAttr)
+            const skillAttrs = this.selectedSkill?.getFieldsWithAttr(attrs)
+
+            // 递归验证AST节点
+            const validateNode = (node: ASTNode): string | undefined => {
+                switch (node.type) {
+                    case "property": {
+                        const fieldName = node.name
+                        // 检查是否是技能字段、属性或武器属性
+                        const isSkillField = skillAttrs?.some((v) => v.名称.includes(fieldName))
+                        const isAttr = fieldName in attrs
+                        const isWeaponAttr = fieldName in weaponAttrs || fieldName === "武器攻击"
+
+                        if (!isSkillField && !isAttr && !isWeaponAttr) {
+                            return `找不到标识符: "${fieldName}"`
+                        }
+                        break
+                    }
+                    case "binary":
+                        const leftError = validateNode(node.left)
+                        if (leftError) return leftError
+                        const rightError = validateNode(node.right)
+                        if (rightError) return rightError
+                        break
+                    case "unary":
+                        const unaryError = validateNode(node.argument)
+                        if (unaryError) return unaryError
+                        break
+                    case "function":
+                        for (const arg of node.args) {
+                            const argError = validateNode(arg)
+                            if (argError) return argError
+                        }
+                        break
+                    case "member_access":
+                        const memberError = validateNode(node.object)
+                        if (memberError) return memberError
+                        break
+                }
+                return undefined
+            }
+
+            const error = validateNode(ast)
+            if (error) {
+                return error
+            }
+            return undefined
+        } catch (e: any) {
+            // 重新抛出错误，而不是返回
+            return e.message || (e as string)
+        }
+    }
+    /**
+     * 解释AST表达式并计算结果
+     * @param astInput AST表达式字符串
+     * @param damage 伤害结果对象
+     * @param attrs 武器属性对象
+     * @returns 计算结果
+     */
+    evaluateAST(astInput: string, damage: DamageResult, attrs: ReturnType<typeof this.calculateWeaponAttributes>) {
+        if (!astInput) return 0
+        let ast = this.astCache.get(astInput)
+        if (!ast) {
+            try {
+                ast = parseAST(astInput)
+                this.astCache.set(astInput, ast)
+            } catch (e) {
+                console.error("表达式错误:", e)
+                this.targetFunction = "伤害"
+            }
+        }
+        if (!ast) return 0
+        const weaponAttrs = attrs.weapon || ({} as WeaponAttr)
+        const skillAttrs = this.selectedSkill?.getFieldsWithAttr(attrs)
+
+        function evaluateSkill(fieldName: string) {
+            const field = skillAttrs?.find((v) => v.名称.includes(fieldName))
+            if (!field) return 0
+            // 计算技能基础伤害
+            const mul = field.值
+            if (!field.名称.endsWith("伤害")) return mul
+            let baseDamage = field.值2 || 0
+            let times = field.段数 || 1
+            if (!field.基础) {
+                const patk = weaponAttrs.攻击 || 0
+                baseDamage += mul * (attrs.攻击 + patk)
+            } else if (field.基础 === "生命") {
+                baseDamage += mul * attrs.生命
+            } else if (field.基础 === "防御") {
+                baseDamage += mul * attrs.防御
+            }
+            return baseDamage * times
+        }
+        function evaluateAttr(fieldName: string) {
+            return fieldName in attrs ? attrs[fieldName as keyof CharAttr] : 0
+        }
+        function evaluateWeaponAttr(fieldName: string) {
+            if (fieldName === "武器攻击") fieldName = "攻击"
+            return fieldName in weaponAttrs ? weaponAttrs[fieldName as keyof WeaponAttr] : 0
+        }
+        function evaluateIdentity(fieldName: string) {
+            return evaluateSkill(fieldName) || evaluateAttr(fieldName) || evaluateWeaponAttr(fieldName) || 0
+        }
+        function evaluateMember(memberName?: string) {
+            if (memberName === "暴击") return damage.higherCritExpectedTrigger || damage.expectedDamage
+            if (memberName === "未暴击") return damage.lowerCritExpectedTrigger || damage.expectedDamage
+            if (memberName === "触发") return damage.expectedCritTrigger || damage.expectedDamage
+            if (memberName === "未触发") return damage.expectedCritNoTrigger || damage.expectedDamage
+            if (memberName === "暴击触发" || memberName === "触发暴击") return damage.higherCritTrigger || damage.expectedDamage
+            if (memberName === "未触发暴击" || memberName === "暴击未触发") return damage.higherCritNoTrigger || damage.expectedDamage
+            if (memberName === "触发未暴击" || memberName === "未暴击触发") return damage.lowerCritTrigger || damage.expectedDamage
+            if (memberName === "未暴击未触发" || memberName === "未触发未暴击") return damage.lowerCritNoTrigger || damage.expectedDamage
+            return damage.expectedDamage // 找不到成员默认期望伤害
+        }
+
+        // AST求值函数
+        const evaluate = (node: ASTNode): number => {
+            switch (node.type) {
+                case "number":
+                    return node.value
+
+                case "binary": {
+                    const left = evaluate(node.left)
+                    const right = evaluate(node.right)
+                    switch (node.operator) {
+                        case "+":
+                            return left + right
+                        case "-":
+                            return left - right
+                        case "*":
+                            return left * right
+                        case "/":
+                            return right !== 0 ? left / right : 0
+                        case "%":
+                            return right !== 0 ? left % right : 0
+                        case "//":
+                            return right !== 0 ? Math.floor(left / right) : 0
+                        default:
+                            throw new Error(`未知的二元运算符: ${node.operator}`)
+                    }
+                }
+
+                case "unary": {
+                    const argument = evaluate(node.argument)
+                    switch (node.operator) {
+                        case "+":
+                            return +argument
+                        case "-":
+                            return -argument
+                        default:
+                            throw new Error(`未知的一元运算符: ${node.operator}`)
+                    }
+                }
+
+                case "property": {
+                    const value = evaluateIdentity(node.name)
+                    // 如果是技能字段（evaluateSkill返回值>0），需要乘以默认的伤害系数
+                    const skillValue = evaluateSkill(node.name)
+                    if (skillValue > 0) {
+                        return value * evaluateMember()
+                    }
+                    return value
+                }
+
+                case "function": {
+                    const args = node.args.map((arg) => evaluate(arg))
+                    switch (node.name) {
+                        case "min":
+                            return Math.min(...args)
+                        case "max":
+                            return Math.max(...args)
+                        case "floor":
+                            return Math.floor(args[0])
+                        case "ceil":
+                            return Math.ceil(args[0])
+                        case "or":
+                            return args.find((v) => v !== 0) ?? args[args.length - 1]
+                        default:
+                            throw new Error(`未知的函数: ${node.name}`)
+                    }
+                }
+
+                case "member_access": {
+                    // 对于成员访问，object部分不应该乘以默认伤害系数
+                    // 所以我们需要重新计算object，但跳过默认伤害系数的乘法
+                    const objectNode = node.object
+
+                    // 如果object是property节点，直接调用evaluateIdentity而不乘以evaluateMember()
+                    let objectValue: number
+                    if (objectNode.type === "property") {
+                        objectValue = evaluateIdentity(objectNode.name)
+                    } else {
+                        objectValue = evaluate(objectNode)
+                    }
+
+                    const memberName = node.property
+                    // 成员访问用于修改伤害计算方式
+                    return objectValue * evaluateMember(memberName)
+                }
+
+                default:
+                    throw new Error(`未知的AST节点类型: ${(node as ASTNode).type}`)
+            }
+        }
+
+        return evaluate(ast)
     }
 
     get selectedWeapon() {
         let weapon: LeveledWeapon | LeveledSkillWeapon | undefined
-        let bt = this.baseNameTitle
 
-        if (this.meleeWeapon.名称 === bt) weapon = this.meleeWeapon
-        if (this.rangedWeapon.名称 === bt) weapon = this.rangedWeapon
-        if (this.skillWeapon && this.skillWeapon.名称 === bt) weapon = this.skillWeapon
+        if (this.isMeleeWeapon) weapon = this.meleeWeapon
+        else if (this.isRangedWeapon) weapon = this.rangedWeapon
+        else if (this.isSkillWeapon) weapon = this.skillWeapon
         return weapon
     }
 
+    get selectedSkillType() {
+        if (this.isMeleeWeapon) return "近战"
+        else if (this.isRangedWeapon) return "远程"
+        else if (this.isSkillWeapon) return "同律"
+        return "角色"
+    }
+
     get selectedSkill() {
-        let bt = this.baseNameTitle
-        const skill = this.skills.find((s) => s.名称 === bt)
+        let bt = this.baseName
+        const skill = this.allSkills.find((s) => s.名称 === bt)
         return skill
     }
 
     get selectedSkillKey() {
-        let bt = this.baseNameTitle
+        let bt = this.baseName
         const index = this.skills.findIndex((s) => s.名称 === bt)
         return index >= 0 ? ["E", "Q", ""][index] : ""
     }
@@ -1058,14 +1357,19 @@ export class CharBuild {
         return mod.checkCondition(attrs, this.charMods)
     }
 
+    get isSkill() {
+        return this.selectedSkillType === "角色"
+    }
     get isMeleeWeapon() {
-        return this.meleeWeapon.名称 === this.baseNameTitle
+        return [WeaponSkillType.普通攻击, WeaponSkillType.蓄力攻击, WeaponSkillType.下落攻击, WeaponSkillType.滑行攻击].includes(
+            this.baseName as WeaponSkillType,
+        )
     }
     get isRangedWeapon() {
-        return this.rangedWeapon.名称 === this.baseNameTitle
+        return WeaponSkillType.射击 === (this.baseName as WeaponSkillType)
     }
     get isSkillWeapon() {
-        return this.skillWeapon && this.skillWeapon.名称 === this.baseNameTitle
+        return this.skillWeapon && this.skillWeapon.名称 === this.baseName
     }
     get isTimeline() {
         return this.timeline !== undefined
@@ -1088,20 +1392,34 @@ export class CharBuild {
         if (!attrs) attrs = this.calculateWeaponAttributes(props, minus)
         if (weapon) {
             damage = this.calculateWeaponDamage(attrs, weapon)
-            if (weapon.类型.startsWith("同律")) {
-                Object.keys(damage).forEach((k) => {
-                    damage[k as keyof DamageResult] = damage[k as keyof DamageResult]! * attrs.威力
-                })
-            }
         } else {
             const skill = this.selectedSkill
             if (skill) {
-                damage = this.calculateSkillDamage(attrs, skill)
+                damage = this.calculateSkillDamage(attrs)
             }
         }
-
         // 计算目标函数
-        return this.calculateTargetFunction(damage, attrs)
+        const final = this.calculateTargetFunction(damage, attrs)
+        const defenseMultiplier = this.calculateDefenseMultiplier(attrs)
+        let finalDamage = 0
+        // 计算防御乘区
+        if (final && final > 0) {
+            if (this.enemy.currentShield > 0) {
+                if (final >= this.enemy.currentShield) {
+                    const hpDMG = (final - this.enemy.currentShield) * defenseMultiplier
+                    finalDamage = this.enemy.currentShield + hpDMG
+                    this.enemy.currentShield = 0
+                    this.enemy.currentHP -= hpDMG
+                } else {
+                    finalDamage = final
+                    this.enemy.currentShield -= final
+                }
+            } else {
+                finalDamage = final * defenseMultiplier
+                this.enemy.currentHP -= finalDamage
+            }
+        }
+        return finalDamage
     }
     /**
      * 主计算函数(包含时间线)
@@ -1109,6 +1427,7 @@ export class CharBuild {
      * @returns 目标函数结果
      */
     public calculate(props?: LeveledWeapon | LeveledMod | LeveledBuff, minus = false): number {
+        this.enemy.resetHP()
         let timeline = this.timeline
         if (!timeline) {
             return Math.round(this.calculateOneTime(props, minus))
@@ -1129,7 +1448,7 @@ export class CharBuild {
         skillItems.forEach((i) => {
             const buffs = getBuffsAtTime(i.time, i.track)
             const build = buffs.length ? this.clone().applyBuffs(buffs) : this
-            build.baseName = i.name
+            build.baseWithTarget = i.name
             const attrs = build.calculateWeaponAttributes(props, minus)
             const damage = build.calculateOneTime(props, minus, attrs)
             totalDamage += damage
@@ -1190,11 +1509,10 @@ export class CharBuild {
             buffs: this.buffs.map((b) => new LeveledBuff(b.名称, b.等级)),
             melee: new LeveledWeapon(this.meleeWeapon.名称, this.meleeWeapon.精炼, this.meleeWeapon.等级, this.meleeWeapon.effectLv),
             ranged: new LeveledWeapon(this.rangedWeapon.名称, this.rangedWeapon.精炼, this.rangedWeapon.等级, this.meleeWeapon.effectLv),
-            baseName: this.baseNameTitle,
-            enemyDef: this.enemyDef,
+            baseName: this.baseName,
+            enemyId: this.enemyId,
             enemyLevel: this.enemyLevel,
             enemyResistance: this.enemyResistance,
-            enemyHpType: this.enemyHpType,
             targetFunction: this.targetFunction,
             skillLevel: this.skills[0].等级,
             timeline: this.timeline,
@@ -1480,6 +1798,10 @@ export interface DamageResult {
     lowerCritExpectedTrigger?: number
     /** 期望触发高暴击伤害 */
     higherCritExpectedTrigger?: number
+    /** 触发期望暴击伤害 */
+    expectedCritTrigger?: number
+    /** 未触发期望暴击伤害 */
+    expectedCritNoTrigger?: number
     /** 期望伤害 */
     expectedDamage: number
 }

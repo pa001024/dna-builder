@@ -10,9 +10,10 @@ import baseData from "../base.data"
 export { LeveledMonster } from "./LeveledMonster"
 
 // 将静态表转换为Map，提高查找效率
-const charMap = new Map<string, Char>()
+const charMap = new Map<number | string, Char>()
 charData.forEach((char) => {
     charMap.set(char.名称, char as Char)
+    charMap.set(char.id, char as Char)
 })
 
 // 将mob数据转换为Map

@@ -16,7 +16,7 @@ watchEffect(() => {
 })
 </script>
 <template>
-    <div class="flex h-full">
+    <div class="h-full hidden sm:flex">
         <div ref="target" class="flex flex-col space-y-1 py-2 px-2 h-full">
             <button
                 class="w-full btn btn-ghost border-none justify-start min-h-fit h-auto flex-nowrap whitespace-nowrap px-0 gap-1 overflow-hidden"

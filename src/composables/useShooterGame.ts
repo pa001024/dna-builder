@@ -74,10 +74,9 @@ export function useShooterGame(props: { characterName: string }) {
                 skillWeaponMods: skillWeaponMods,
                 buffs: buffs,
                 baseName: "",
-                enemyDef: charSettings.value.enemyDef,
+                enemyId: charSettings.value.enemyId,
                 enemyLevel: charSettings.value.enemyLevel,
                 enemyResistance: charSettings.value.enemyResistance,
-                enemyHpType: charSettings.value.enemyHpType,
                 targetFunction: charSettings.value.targetFunction,
                 skillLevel: charSettings.value.charSkillLevel,
             })
@@ -170,7 +169,7 @@ export function useShooterGame(props: { characterName: string }) {
 
         const now = Date.now()
         const player = gameState.value.player
-        const attackSpeed = player.meleeWeapon.攻速 || player.meleeWeapon.射速 || 1
+        const attackSpeed = 1
         const cooldown = 1000 / attackSpeed
 
         if (now - player.lastMeleeAttack < cooldown) return
@@ -201,7 +200,7 @@ export function useShooterGame(props: { characterName: string }) {
 
         const now = Date.now()
         const player = gameState.value.player
-        const attackSpeed = player.rangedWeapon.攻速 || player.rangedWeapon.射速 || 1
+        const attackSpeed = 1
         const cooldown = 1000 / attackSpeed
 
         if (now - player.lastRangedAttack < cooldown) return

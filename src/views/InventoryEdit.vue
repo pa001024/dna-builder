@@ -6,11 +6,11 @@ import { useInvStore } from "../store/inv"
 const inv = useInvStore()
 
 // 武器
-const allWeapons = weaponData.filter((v) => !v.类型.startsWith("同律"))
+const allWeapons = weaponData.filter((v) => !v.类型[0].startsWith("同律"))
 const weaponSearchQuery = ref("")
 const filteredWeapons = computed(() => {
     const mappedWeapons = allWeapons
-        .filter((v) => inv.enableWeapons[v.类型 as keyof typeof inv.enableWeapons])
+        .filter((v) => inv.enableWeapons[v.类型[0] as keyof typeof inv.enableWeapons])
         .map((v) => new LeveledWeapon(v.名称, v.名称 in inv.weapons ? inv.weapons[v.名称] : 5))
     if (!weaponSearchQuery.value) return mappedWeapons
 

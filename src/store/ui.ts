@@ -48,7 +48,7 @@ export const useUIStore = defineStore("ui", {
                 },
                 {
                     name: "char-build",
-                    path: "/char-build",
+                    path: "/char",
                     icon: "ri:hammer-line",
                 },
                 {

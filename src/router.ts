@@ -11,6 +11,7 @@ import AchievementList from "./views/AchievementList.vue"
 import { env } from "./env"
 import { LogicalSize, getCurrentWindow } from "@tauri-apps/api/window"
 import UserManager from "./views/UserManager.vue"
+import CharListView from "./views/CharListView.vue"
 
 let setMinSize = async (_w: number, _h: number) => {}
 ;(async () => {
@@ -29,7 +30,9 @@ const routes: readonly RouteRecordRaw[] = [
     { name: "home", path: "/", component: Home, beforeEnter: () => setMinSize(367, 430) },
     // { name: "user", path: "/user", component: User, beforeEnter: () => setMinSize(367, 430) },
     { name: "setting", path: "/setting", component: Setting, beforeEnter: () => setMinSize(540, 430) },
-    { name: "char-build", path: "/char-build", component: CharBuildView, beforeEnter: () => setMinSize(600, 600) },
+    { name: "char-list", path: "/char", component: CharListView, beforeEnter: () => setMinSize(600, 600) },
+    { name: "char-build", path: "/char/:charId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
+    { name: "char-build-code", path: "/char/:charId/:code", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
     { name: "build-compare", path: "/char-build-compare", component: CharBuildCompare, beforeEnter: () => setMinSize(600, 600) },
     { name: "inventory", path: "/inventory", component: InventoryEdit, beforeEnter: () => setMinSize(600, 600) },
     { name: "timeline", path: "/timeline", component: TimelineEditor, beforeEnter: () => setMinSize(600, 600) },

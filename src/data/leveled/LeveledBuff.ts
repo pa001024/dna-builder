@@ -181,7 +181,7 @@ export class LeveledBuff implements Buff {
      * a = 10级数值/1级数值
      * b = 1级数值/(10级数值-1级数值)*9
      */
-    private updatePropertiesByLevel(): void {
+    updatePropertiesByLevel(): void {
         const a = this.a || 1
         const b = this.b || 1
         const lx = this.lx ?? 1

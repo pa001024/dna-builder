@@ -64,7 +64,7 @@ const forward = useForwardPropsEmits(props, emits)
 
 <template>
     <SelectRoot v-bind="forward as any">
-        <SelectTrigger v-bind="$attrs">
+        <SelectTrigger class="inline-flex items-center justify-between" v-bind="$attrs">
             <SelectValue :placeholder="placeholder" />
             <Icon icon="radix-icons:chevron-down" class="text-primary ml-2" />
         </SelectTrigger>

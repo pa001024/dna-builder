@@ -103,6 +103,10 @@ onMounted(() => {
 })
 
 const { mihan, moling, zhouben } = useGameTimer()
+
+watchEffect(() => {
+    document.title = props.title || "Duet Night Abyss Builder"
+})
 </script>
 <template>
     <!-- Root -->
@@ -122,11 +126,11 @@ const { mihan, moling, zhouben } = useGameTimer()
                             <div class="whitespace-nowrap">{{ $t("resizeableWindow.mihan") }}</div>
                             <div class="font-orbitron">{{ timeStr(mihan) }}</div>
                         </div>
-                        <div class="inline-block text-center min-w-16">
+                        <div class="hidden sm:inline-block text-center min-w-16">
                             <div class="whitespace-nowrap">{{ $t("resizeableWindow.moling") }}</div>
                             <div class="font-orbitron">{{ timeStr(moling) }}</div>
                         </div>
-                        <div class="inline-block text-center min-w-16">
+                        <div class="hidden sm:inline-block text-center min-w-16">
                             <div class="whitespace-nowrap">{{ $t("resizeableWindow.zhouben") }}</div>
                             <div class="font-orbitron">{{ timeStr(zhouben) }}</div>
                         </div>

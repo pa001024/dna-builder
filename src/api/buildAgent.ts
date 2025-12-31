@@ -376,8 +376,7 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
         if (char) {
             return `已切换到角色: ${charName}
 属性: ${char.属性}
-近战: ${char.近战}
-远程: ${char.远程}
+精通: ${char.精通}
 同律武器: ${char.同律武器 || "无"}
 当前MOD配置: ${JSON.stringify(this.charSettings.value.charMods)}
 `
@@ -455,8 +454,7 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
                 {
                     名称: char.名称,
                     属性: char.属性,
-                    近战: char.近战,
-                    远程: char.远程,
+                    精通: char.精通,
                     同律武器: char.同律武器,
                     技能: char.技能.map((s) => s.名称),
                 },
@@ -469,8 +467,8 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
             charData.map((c) => ({
                 名称: c.名称,
                 属性: c.属性,
-                近战: c.近战,
-                远程: c.远程,
+                精通: c.精通,
+                同律武器: c.同律武器,
             })),
             null,
             2,
@@ -536,10 +534,10 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
         let weapons = weaponData
 
         if (params.weaponType) {
-            weapons = weapons.filter((w) => w.类型 === params.weaponType)
+            weapons = weapons.filter((w) => w.类型[0] === params.weaponType)
         }
         if (params.category) {
-            weapons = weapons.filter((w) => w.类别 === params.category)
+            weapons = weapons.filter((w) => w.类型[1] === params.category)
         }
 
         return JSON.stringify(

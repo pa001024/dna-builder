@@ -11,30 +11,46 @@ export interface Buff {
     [key: string]: string | number | number[] | undefined
 }
 
+export interface CommonAttr {
+    技能威力?: number
+    技能耐久?: number
+    技能效益?: number
+    技能范围?: number
+    生命?: number
+    暴击?: number
+    攻速?: number
+    暴伤?: number
+    攻击?: number
+    防御?: number
+    触发?: number
+    背水?: number
+    昂扬?: number
+    多重?: number
+    武器伤害?: number
+    技能伤害?: number
+    攻击范围?: number
+    [key: string]: number | undefined
+}
+
 export interface Char {
-    id?: number
+    id: number
+    icon?: string
     名称: string
+    版本?: string
+    别名?: string
+    阵营?: string
     属性: string
-    近战: string
-    远程: string
-    同律武器?: string
+    精通: string[]
+    标签?: string[]
     基础攻击: number
     基础生命: number
     基础护盾: number
     基础防御: number
     基础神智: number
-    范围?: number
-    攻击?: number
-    耐久?: number
-    生命?: number
-    威力?: number
-    背水?: number
-    防御?: number
-    效益?: number
-    昂扬?: number
-    暴击?: number
-    多重?: number
+    加成?: CommonAttr
     技能: Skill[]
+    溯源?: string[]
+    同律武器?: SkillWeapon[]
 }
 
 export enum Elem {
@@ -61,42 +77,57 @@ export enum WeaponCategory {
     弓 = "弓",
 }
 
-export interface Weapon {
-    id?: number
+export interface SkillWeapon {
+    id: number
     名称: string
-    类别: string
-    类型: string
-    伤害类型: string
-    弹道类型?: string
-    基础攻击: number
-    基础暴击: number
-    基础暴伤: number
-    基础触发: number
-    威力?: number
-    耐久?: number
-    效益?: number
-    范围?: number
-    生命?: number
-    暴击?: number
-    攻速?: number
-    暴伤?: number
+    类型: string[]
+    伤害类型?: keyof typeof DmgType
     攻击?: number
-    防御?: number
+    暴击?: number
+    暴伤?: number
     触发?: number
-    背水?: number
-    昂扬?: number
-    多重?: number
-    武器伤害?: number
-    技能伤害?: number
-    攻击范围?: number
-    [key: string]: any
+    技能?: Skill[]
+}
+
+export interface Weapon {
+    id: number
+    icon?: string
+    名称: string
+    版本?: string
+    描述?: string
+    类型: string[]
+    伤害类型: keyof typeof DmgType
+    攻击: number
+    暴击: number
+    暴伤: number
+    触发: number
+    弹匣?: number
+    最大弹药?: number
+    弹药转化率?: number
+    最大射程?: number
+    弹道类型?: keyof typeof BulletType
+    装填?: number
+    加成?: CommonAttr
+    熔炼?: string[]
+    技能?: Skill[]
 }
 
 export interface Skill {
+    id?: number
     名称: string
     类型: string
-    字段: SkillField[]
+    描述?: string
+    字段?: Record<string, SkillField | string>
+    术语解释?: Record<string, string>
     召唤物?: SkillSummon
+}
+
+export enum WeaponSkillType {
+    普通攻击 = "普通攻击",
+    蓄力攻击 = "蓄力攻击",
+    下落攻击 = "下落攻击",
+    滑行攻击 = "滑行攻击",
+    射击 = "射击",
 }
 
 export interface SkillSummon {
@@ -106,12 +137,17 @@ export interface SkillSummon {
 }
 
 export interface SkillField {
-    名称: string
-    属性影响?: string
+    影响?: string
     值: number[] | number
     格式?: string
-    基础?: string
-    额外?: number[] | number
+    值2?: number[] | number
+    段数?: number
+}
+
+export enum HpType {
+    生命 = "生命",
+    护盾 = "护盾",
+    战姿 = "战姿",
 }
 
 export enum DmgType {
@@ -272,4 +308,14 @@ export interface WeaponBase {
     射速?: number
     段数?: number
     等级?: number
+}
+
+export interface Achievement {
+    id: number
+    名称: string
+    分类: string
+    品质: number
+    描述: string
+    版本: string
+    奖励: Record<string, number>
 }
