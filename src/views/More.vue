@@ -10,7 +10,7 @@ const items = [
     },
     {
         name: "char-build",
-        path: "/char-build",
+        path: "/char",
         icon: "ri:hammer-line",
     },
     {

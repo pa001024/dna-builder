@@ -16,6 +16,7 @@ export interface LeveledSkillField {
  */
 export class LeveledSkill {
     // 基础Skill属性
+    id: number
     名称: string
     描述?: string
     术语解释?: Record<string, string>
@@ -37,6 +38,7 @@ export class LeveledSkill {
         public 武器名?: string,
     ) {
         // 设置基础属性
+        this.id = skillData.id || 0
         this.名称 = skillData.名称
         this.类型 = skillData.类型
         this.描述 = skillData.描述

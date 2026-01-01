@@ -5,7 +5,7 @@ import { CommonAttr, SkillWeapon } from "../data-types"
  * LeveledChar类 - 继承Char接口，添加等级属性和动态属性计算
  */
 export class LeveledChar {
-    id?: number
+    id: number
     // 基础Char属性
     icon: string
     名称: string

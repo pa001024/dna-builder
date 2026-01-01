@@ -184,7 +184,13 @@ export const MOB_LEVEL_UP = [
     { atk: 90.8541, hp: 424698.914, es: 424698.914, rhp: 17826.8243, res: 17826.8243 },
 ]
 
-export class LeveledMonster implements Monster {
+export interface DynamicMonster extends Monster {
+    currentHP: number
+    currentShield: number
+    currentWarPose: number
+}
+
+export class LeveledMonster implements DynamicMonster {
     id: number
     名称: string
     阵营: Faction
@@ -201,6 +207,7 @@ export class LeveledMonster implements Monster {
 
     currentHP: number
     currentShield: number
+    currentWarPose: number
 
     constructor(
         id: number | Monster,
@@ -224,6 +231,7 @@ export class LeveledMonster implements Monster {
 
         this.currentHP = this.生命
         this.currentShield = this.护盾 || 0
+        this.currentWarPose = this.战姿 || 0
 
         this._baseAttack = mData.攻击
         this._baseLife = mData.生命

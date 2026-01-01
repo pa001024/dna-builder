@@ -1,132 +1,82 @@
-import { CharAttr, LeveledChar, LeveledSkill, LeveledWeapon } from "../data"
-import type { Monster } from "../data/data-types"
-
 /**
- * 2D向量类型
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
  */
-export interface Vector2D {
+
+import * as THREE from "three"
+
+export interface VoxelData {
     x: number
     y: number
+    z: number
+    color: number
 }
 
-/**
- * 输入状态
- */
-export interface InputState {
-    keys: Record<string, boolean>
-    mousePosition: Vector2D
-    isMouseDown: {
-        left: boolean
-        right: boolean
-    }
+export enum Faction {
+    PLAYER = "PLAYER",
+    MONSTER = "MONSTER",
 }
 
-/**
- * 玩家状态
- */
-export interface PlayerState {
-    position: Vector2D
-    rotation: number
-    speed: number
-    radius: number
-
-    // 角色数据
-    charData: LeveledChar
-    meleeWeapon: LeveledWeapon
-    rangedWeapon: LeveledWeapon
-    skills: LeveledSkill[]
-
-    // 技能冷却(秒)
-    cooldowns: {
-        e: number
-        q: number
-    }
-
-    // 最后使用时间
-    lastMeleeAttack: number
-    lastRangedAttack: number
-    lastSkillE: number
-    lastSkillQ: number
-
-    // 神智系统
-    sanity?: number
-    maxSanity?: number
-    sanityRegenRate?: number // 每秒神智回复量
-    lastSanityRegenTime?: number // 上次神智回复时间
-
-    // 冲刺状态
-    isDashing?: boolean
-    dashDirection?: Vector2D
-    dashDistance?: number
-    dashSpeed?: number
-    dashDistanceTraveled?: number
-    dashDamage?: number
-    dashElement?: string
-    dashHitEnemies?: Set<any> // 本次冲刺已命中的敌人
+export interface BaseEntity {
+    id: string
+    position: THREE.Vector3
+    mesh: THREE.Object3D
+    isDead: boolean
 }
 
-/**
- * 敌人状态
- */
-export interface EnemyState {
-    position: Vector2D
-    rotation: number
-    radius: number
-    data: Monster
+export interface Monster extends BaseEntity {
+    name: string
     level: number
-    currentHealth: number
-    maxHealth: number
-    currentShield: number
+    maxHP: number
+    currentHP: number
     maxShield: number
-    isDead?: boolean // 是否死亡
-    deathTime?: number // 死亡时间
-    deathAnimationDuration?: number // 死亡动画持续时间（毫秒）
+    currentShield: number
+    attack: number
+    defense: number
+    faction: Faction
+    speed: number
+    hpBarRef?: HTMLDivElement
+    screenPosition?: { x: number; y: number } // 屏幕坐标
 }
 
-/**
- * 多敌人配置
- */
-export interface EnemySpawnConfig {
-    mobId: number
-    level: number
-    count: number
+export interface FloatingText {
+    id: string
+    position: THREE.Vector3
+    text: string
+    color: string
+    life: number // 0 to 1
+    opacity: number
+    screenPosition?: { x: number; y: number } // 屏幕坐标
 }
 
-/**
- * 投射物
- */
-export interface Projectile {
-    position: Vector2D
-    velocity: Vector2D
+export interface PlayerStats {
+    maxHP: number
+    currentHP: number
+    maxShield: number
+    currentShield: number
+    maxSanity: number // 神智
+    currentSanity: number
+    electricEnergy: number // 电能
+    attack: number
+    defense: number
+    moveSpeed: number
+    activeBuffs: string[] // 当前激活的BUFF名称列表
+}
+
+export interface GameSettings {
+    monsterCount: number
+    monsterLevel: number
+    spawnType: "random" | "ring"
+    autoLevelUp: boolean
+    autoLevelInterval: number // seconds
+    spawnInterval: number // seconds
+    sanityRegenAmount: number // 神智回复量
+    sanityRegenInterval: number // 神智回复间隔(秒)
+}
+
+export interface DamageEvent {
     damage: number
-    element: string
-    radius: number
-    isPlayerOwned: boolean
-    markedForDeletion: boolean
-}
-
-/**
- * 伤害数字
- */
-export interface DamageNumber {
-    position: Vector2D
-    value: number
-    element: string
-    lifetime: number
-    age: number
-    velocity: Vector2D
-}
-
-/**
- * 游戏状态
- */
-export interface GameState {
-    player: PlayerState
-    attrs: CharAttr
-    enemies: EnemyState[]
-    projectiles: Projectile[]
-    damageNumbers: DamageNumber[]
-    input: InputState
-    isPaused: boolean
-    isInitialized: boolean
+    critLevel: number // 暴击等级，0表示普通伤害，1表示一级暴击，2表示二级暴击等
+    element: "physical" | "lightning" | "fire"
+    targetId: string
 }

@@ -67,6 +67,7 @@ import type { RawTimelineData } from "../store/timeline"
 import { groupBy } from "lodash-es"
 import { DmgType, HpType, Skill, WeaponSkillType } from "./data-types"
 import { ASTNode, parseAST } from "./ast"
+import { DynamicMonster } from "./leveled/LeveledMonster"
 export class CharBuildTimeline {
     totalTime: number = 0
     constructor(
@@ -1004,8 +1005,8 @@ export class CharBuild {
     /**
      * 计算随机伤害
      */
-    public calculateRandomDamage(baseName: string) {
-        this.baseName = baseName
+    public calculateRandomDamage(baseWithTarget: string, enemy?: DynamicMonster) {
+        this.baseWithTarget = baseWithTarget
         const attrs = this.calculateWeaponAttributes()
         const damage: DamageResult = this.selectedWeapon
             ? this.calculateWeaponDamage(attrs, this.selectedWeapon)
@@ -1017,8 +1018,27 @@ export class CharBuild {
             const r = Math.random()
             dmg = r < cc ? damage.higherCritTrigger : damage.lowerCritTrigger
         }
+        const final = this.calculateTargetFunction(damage, attrs, "伤害.未暴击*or(多重,1)")
         const floating = 0.1 * Math.random() - 0.05 // -0.05 ~ 0.05
-        return dmg * (1 + floating)
+        const defenseMultiplier = this.calculateDefenseMultiplier(attrs)
+        dmg = dmg * (1 + floating)
+        let finalDamage = 0
+        if (!enemy) enemy = this.enemy
+        if (enemy.currentShield > 0) {
+            if (final >= enemy.currentShield) {
+                const hpDMG = (final - enemy.currentShield) * defenseMultiplier
+                finalDamage = enemy.currentShield + hpDMG
+                enemy.currentShield = 0
+                enemy.currentHP -= hpDMG
+            } else {
+                finalDamage = final
+                enemy.currentShield -= final
+            }
+        } else {
+            finalDamage = final * defenseMultiplier
+            enemy.currentHP -= finalDamage
+        }
+        return finalDamage
     }
 
     public hasSummon() {
@@ -1028,8 +1048,11 @@ export class CharBuild {
     public translateTargetFunction(targetFunction: string) {
         let astInput = "伤害"
         switch (targetFunction) {
-            case "伤害":
             case "DPH":
+                astInput = "伤害*or(多重,1)"
+                break
+            case "弹片伤害":
+                astInput = "伤害"
                 break
             case "总伤":
             case "TDD":
@@ -1069,8 +1092,12 @@ export class CharBuild {
         return astInput
     }
     // 计算目标函数
-    public calculateTargetFunction(damage: DamageResult, attrs: ReturnType<typeof this.calculateWeaponAttributes>): number {
-        let astInput = this.translateTargetFunction(this.targetFunction)
+    public calculateTargetFunction(
+        damage: DamageResult,
+        attrs: ReturnType<typeof this.calculateWeaponAttributes>,
+        targetFunction?: string,
+    ): number {
+        let astInput = this.translateTargetFunction(targetFunction ?? this.targetFunction)
 
         // 调用ast解析器解析目标函数表达式
         let result = this.evaluateAST(astInput, damage, attrs)
@@ -1403,7 +1430,7 @@ export class CharBuild {
         const defenseMultiplier = this.calculateDefenseMultiplier(attrs)
         let finalDamage = 0
         // 计算防御乘区
-        if (final && final > 0) {
+        if (final > 0) {
             if (this.enemy.currentShield > 0) {
                 if (final >= this.enemy.currentShield) {
                     const hpDMG = (final - this.enemy.currentShield) * defenseMultiplier

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from "vue"
 import { CharBuild } from "../data/CharBuild"
 import { LeveledBuff } from "../data/leveled"
 
@@ -9,7 +10,7 @@ interface BuffOption {
     limit?: string
     description?: string
 }
-defineProps<{
+const props = defineProps<{
     buffOptions: BuffOption[]
     selectedBuffs: LeveledBuff[]
     charBuild: CharBuild
@@ -27,9 +28,15 @@ const toggleBuff = (buff: LeveledBuff) => {
 const setBuffLv = (buff: LeveledBuff, lv: number) => {
     emit("setBuffLv", buff, lv)
 }
+
+const sortedBuffs = computed(() => {
+    return [...props.buffOptions.filter((b) => !props.selectedBuffs.some((v) => v.名称 === b.label))].sort((a, b) => {
+        return a.value.名称.includes(props.charBuild.char.名称) ? -1 : 1
+    })
+})
 </script>
 <template>
-    <ScrollArea class="max-h-80 w-full">
+    <ScrollArea class="h-80">
         <transition-group name="list" tag="div" class="grid grid-cols-2 md:grid-cols-4 gap-3">
             <!-- 已选择的BUFF -->
             <BuffCell
@@ -45,7 +52,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
             />
             <!-- 未选择的BUFF -->
             <BuffCell
-                v-for="buff in buffOptions.filter((b) => !selectedBuffs.some((v) => v.名称 === b.label))"
+                v-for="buff in sortedBuffs"
                 :key="buff.label"
                 :title="buff.label"
                 :buff="buff.value"

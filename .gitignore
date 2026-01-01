@@ -32,3 +32,4 @@ INTRO.md
 server/.env
 src-tauri/sidecar/dna_mcp_server-x86_64-pc-windows-msvc.exe
 .claude/
+src/game/*.md

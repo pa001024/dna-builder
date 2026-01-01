@@ -571,7 +571,7 @@ function shareCharBuild() {
 <template>
     <dialog class="modal" :class="{ 'modal-open': simulator_model_show }">
         <div class="modal-box bg-base-300 w-11/12 max-w-6xl">
-            <GameSimulator v-if="simulator_model_show" :characterName="selectedChar" />
+            <GameSimulator v-if="simulator_model_show" :charBuild="charBuild" />
         </div>
         <div class="modal-backdrop" @click="simulator_model_show = false"></div>
     </dialog>
@@ -1995,7 +1995,7 @@ function shareCharBuild() {
                         </div>
                         <div class="collapse-content">
                             <!-- 协战选择 -->
-                            <div class="flex flex-wrap items-center gap-4 mt-2 mb-4 p-3 bg-base-200/50 rounded-lg">
+                            <div class="flex flex-wrap items-center gap-4 my-2 p-3 bg-base-200/50 rounded-lg">
                                 <span class="text-sm font-semibold">{{ $t("char-build.team") }}</span>
                                 <Select class="input input-bordered input-sm w-32" v-model="charSettings.team1" @change="updateTeamBuff">
                                     <template v-for="charWithElm in groupBy(team1Options, 'elm')" :key="charWithElm[0].elm">
