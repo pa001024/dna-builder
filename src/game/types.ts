@@ -1,9 +1,5 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import * as THREE from "three"
+import type { Faction } from "../data/data-types"
 
 export interface VoxelData {
     x: number
@@ -12,16 +8,19 @@ export interface VoxelData {
     color: number
 }
 
-export enum Faction {
-    PLAYER = "PLAYER",
-    MONSTER = "MONSTER",
-}
-
 export interface BaseEntity {
     id: string
     position: THREE.Vector3
     mesh: THREE.Object3D
     isDead: boolean
+}
+
+export interface StatusEffect {
+    type: string
+    label: string
+    color: string
+    duration: number
+    maxDuration: number
 }
 
 export interface Monster extends BaseEntity {
@@ -37,6 +36,13 @@ export interface Monster extends BaseEntity {
     speed: number
     hpBarRef?: HTMLDivElement
     screenPosition?: { x: number; y: number } // 屏幕坐标
+
+    // AI Behavior State
+    aiState?: "CHASE" | "IDLE" | "WANDER"
+    aiActionTimer?: number // 倒计时，用于决定何时切换状态
+    wanderDirection?: THREE.Vector3 // 游荡时的目标方向
+
+    statusEffects: StatusEffect[]
 }
 
 export interface FloatingText {
@@ -65,6 +71,7 @@ export interface PlayerStats {
 
 export interface GameSettings {
     monsterCount: number
+    monsterId: number
     monsterLevel: number
     spawnType: "random" | "ring"
     autoLevelUp: boolean

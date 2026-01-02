@@ -18,7 +18,8 @@
         "coverage": "vitest run --coverage",
         "prepare": "husky",
         "format": "prettier --write \"src/**/*.{vue,ts,js,json,css}\"",
-        "ver": "node .husky/update-version.js"
+        "ver": "node .husky/update-version.js",
+        "deploy": "bun server/deploy.ts"
     },
     "dependencies": {
         "@modelcontextprotocol/sdk": "^1.25.1",

@@ -10,7 +10,7 @@ export const defaultCharSettings = {
     enemyLevel: 80,
     enemyResistance: 0,
     isRouge: false,
-    targetFunction: "伤害",
+    targetFunction: "",
     charSkillLevel: 10,
     meleeWeapon: "枯朽",
     meleeWeaponLevel: 80,

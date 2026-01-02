@@ -7,8 +7,6 @@ import modData from "../mod.data"
 import monsterData from "../monster.data"
 import baseData from "../base.data"
 
-export { LeveledMonster } from "./LeveledMonster"
-
 // 将静态表转换为Map，提高查找效率
 const charMap = new Map<number | string, Char>()
 charData.forEach((char) => {
@@ -81,12 +79,13 @@ export { charMap, modMap, buffMap, effectMap, weaponMap, baseMap, monsterMap }
 
 // 导出LeveledChar、LeveledMod、LeveledBuff、LeveledWeapon、LeveledSkill类
 export { LeveledChar } from "./LeveledChar"
-export { LeveledMonster as LeveledMob } from "./LeveledMonster"
 export { LeveledMod, LeveledModWithCount } from "./LeveledMod"
 export { LeveledBuff } from "./LeveledBuff"
 export { LeveledWeapon } from "./LeveledWeapon"
 export { LeveledSkillWeapon } from "./LeveledSkillWeapon"
 export { LeveledSkill } from "./LeveledSkill"
+export type { LeveledSkillField } from "./LeveledSkill"
+export { LeveledMonster } from "./LeveledMonster"
 
 /*
 示例用法：

@@ -67,7 +67,7 @@ import type { RawTimelineData } from "../store/timeline"
 import { groupBy } from "lodash-es"
 import { DmgType, HpType, Skill, WeaponSkillType } from "./data-types"
 import { ASTNode, parseAST } from "./ast"
-import { DynamicMonster } from "./leveled/LeveledMonster"
+import { DynamicMonster } from "."
 export class CharBuildTimeline {
     totalTime: number = 0
     constructor(
@@ -119,7 +119,6 @@ export interface CharBuildOptions {
     enemyId?: number
     enemyLevel?: number
     enemyResistance?: number
-    enemyHpType?: string
     targetFunction?: string
     skillLevel?: number
     timeline?: CharBuildTimeline
@@ -226,7 +225,7 @@ export class CharBuild {
     set baseWithTarget(value: string) {
         const [base, target] = value.split("::")
         this.baseName = base
-        if (target) this.targetFunction = target
+        this.targetFunction = target || ""
     }
 
     get charModsWithAura() {
@@ -1007,35 +1006,37 @@ export class CharBuild {
      */
     public calculateRandomDamage(baseWithTarget: string, enemy?: DynamicMonster) {
         this.baseWithTarget = baseWithTarget
+        console.log(baseWithTarget)
         const attrs = this.calculateWeaponAttributes()
         const damage: DamageResult = this.selectedWeapon
             ? this.calculateWeaponDamage(attrs, this.selectedWeapon)
             : this.calculateSkillDamage(attrs)
         const cc = (attrs.weapon?.暴击 || 0) % 1
         const tc = attrs.weapon?.触发 || 0
-        let dmg = damage.expectedDamage
+        let dmg = 1
         if (cc > 0 && tc > 0 && damage.higherCritTrigger && damage.lowerCritTrigger) {
             const r = Math.random()
             dmg = r < cc ? damage.higherCritTrigger : damage.lowerCritTrigger
+            dmg /= damage.expectedDamage
         }
-        const final = this.calculateTargetFunction(damage, attrs, "伤害.未暴击*or(多重,1)")
-        const floating = 0.1 * Math.random() - 0.05 // -0.05 ~ 0.05
+        const final = this.calculateTargetFunction(damage, attrs)
+        const floating = 1 + 0.1 * Math.random() - 0.05 // -0.05 ~ 0.05
         const defenseMultiplier = this.calculateDefenseMultiplier(attrs)
-        dmg = dmg * (1 + floating)
+        dmg = final * dmg * floating
         let finalDamage = 0
         if (!enemy) enemy = this.enemy
         if (enemy.currentShield > 0) {
-            if (final >= enemy.currentShield) {
-                const hpDMG = (final - enemy.currentShield) * defenseMultiplier
+            if (dmg >= enemy.currentShield) {
+                const hpDMG = (dmg - enemy.currentShield) * defenseMultiplier
                 finalDamage = enemy.currentShield + hpDMG
                 enemy.currentShield = 0
                 enemy.currentHP -= hpDMG
             } else {
-                finalDamage = final
-                enemy.currentShield -= final
+                finalDamage = dmg
+                enemy.currentShield -= dmg
             }
         } else {
-            finalDamage = final * defenseMultiplier
+            finalDamage = dmg * defenseMultiplier
             enemy.currentHP -= finalDamage
         }
         return finalDamage
@@ -1218,6 +1219,7 @@ export class CharBuild {
         const skillAttrs = this.selectedSkill?.getFieldsWithAttr(attrs)
 
         function evaluateSkill(fieldName: string) {
+            if (fieldName === "[虚拟]") return 1
             const field = skillAttrs?.find((v) => v.名称.includes(fieldName))
             if (!field) return 0
             // 计算技能基础伤害
@@ -1506,7 +1508,23 @@ export class CharBuild {
     }
 
     public applyBuffs(buffs: LeveledBuff[]) {
-        this.buffs.push(...buffs)
+        // 取交集 然后对已存在的BUFF进行level+1
+        const existingNames = new Set(this.buffs.map((b) => b.名称))
+        const names = new Set(buffs.map((b) => b.名称))
+        this.buffs.push(...buffs.filter((b) => !names.has(b.名称)))
+        // 对已存在的BUFF进行level+1
+        this.buffs.forEach((b) => {
+            if (existingNames.has(b.名称)) {
+                b.等级++
+            }
+        })
+        return this
+    }
+
+    public removeBuffs(buffs: LeveledBuff[] | string[]) {
+        if (!buffs.length) return this
+        const names = new Set(typeof buffs[0] === "string" ? (buffs as string[]) : (buffs as LeveledBuff[]).map((b) => b.名称))
+        this.buffs = this.buffs.filter((b) => !names.has(b.名称))
         return this
     }
     /**

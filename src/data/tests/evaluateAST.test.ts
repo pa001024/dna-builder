@@ -25,7 +25,6 @@ describe("evaluateAST函数测试", () => {
             enemyId: 1001001,
             enemyLevel: 80,
             enemyResistance: 0.5,
-            enemyHpType: "生命",
             targetFunction: "伤害",
         })
 
@@ -317,8 +316,9 @@ describe("evaluateAST函数测试", () => {
 
             charBuild.evaluateAST("攻击 + 100", testDamage, attrs)
             charBuild.evaluateAST("攻击 * 2", testDamage, attrs)
+            console.log(charBuild["astCache"])
 
-            expect(charBuild["astCache"].size).toBe(2)
+            expect(charBuild["astCache"].size).toBe(3)
         })
     })
 

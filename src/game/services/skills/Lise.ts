@@ -1,14 +1,16 @@
 import * as THREE from "three"
 import { BaseSkill, distanceToSegment } from "../BaseSkill"
 import { VoxelEngine } from "../VoxelEngine"
-import { LeveledSkillField } from "../../../data/leveled/LeveledSkill"
+import { LeveledSkillField } from "../../../data"
+import { Monster } from "../../types"
 
 // --- Lise 技能 E: 快速出击 ---
 // 逻辑: 向前冲刺（以米为单位的距离），对路径上的所有敌人造成伤害（以米为单位的宽度）。
 export class LiseSkillE extends BaseSkill {
-    private DASH_DISTANCE_M = 20
+    private DASH_DISTANCE_M = 5
     private DASH_WIDTH_M = 3
     private COST = 20
+    private DASH_DURATION = 0.2 // 0.2 seconds dash
 
     constructor(
         engine: VoxelEngine,
@@ -30,21 +32,20 @@ export class LiseSkillE extends BaseSkill {
 
         // 1. 移动冲量
         // 将米转换为引擎物理单位
-        const dashForceUnits = this.engine.m2u(this.DASH_DISTANCE_M)
+        // Speed = Distance / Time
+        const speedUnitsPerSec = this.engine.m2u(this.DASH_DISTANCE_M) / this.DASH_DURATION
 
-        const playerRot = this.engine.getPlayerRotation()
-        const forward = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), playerRot)
+        // 使用引擎计算的准确面向（朝向鼠标）
+        const forward = this.engine.getForwardVector()
 
-        // 添加速度（冲量）
-        this.engine.addPlayerVelocity(forward.clone().multiplyScalar(dashForceUnits))
+        // 应用冲刺
+        this.engine.applyDash(forward.clone().multiplyScalar(speedUnitsPerSec), this.DASH_DURATION)
 
         // 2. Buff Logic
-        let buffed = false
         if (stats.electricEnergy >= 30) {
             stats.electricEnergy -= 30
-            this.engine.addBuff("过载", 9.0)
-            this.engine.spawnFloatingText("过载!", this.engine.getPlayerPosition(), "#FFFF00")
-            buffed = true
+            this.engine.addBuff("黎瑟E", 9.0)
+            this.engine.spawnFloatingText("伤害增加!", this.engine.getPlayerPosition(), "#FFFF00")
         }
 
         // 3. 范围路径逻辑（基于米）
@@ -74,8 +75,7 @@ export class LiseSkillE extends BaseSkill {
 export class LiseSkillQ extends BaseSkill {
     private isActive: boolean = false
     private timer: number = 0
-    private reactionTimer: number = 0
-    private electricChargeMap = new Map<string, { type: "POS" | "NEG"; timeLeft: number }>()
+    private CHARGE_DURATION = 6
 
     private readonly COST = 10
     private readonly DRAIN_PER_SEC = 20
@@ -87,6 +87,7 @@ export class LiseSkillQ extends BaseSkill {
         public fields: LeveledSkillField[],
     ) {
         super(engine, "涡旋电场")
+        this.CHARGE_DURATION = this.fields.find((f) => f.名称 === "[电荷]持续时间")?.值 || 6
     }
 
     protected onCast(): void {
@@ -104,7 +105,6 @@ export class LiseSkillQ extends BaseSkill {
         stats.currentSanity -= this.COST
         this.isActive = true
         this.timer = 0
-        this.reactionTimer = 0
 
         // 初始范围爆发
         const playerPos = this.engine.getPlayerPosition()
@@ -118,11 +118,19 @@ export class LiseSkillQ extends BaseSkill {
     }
 
     protected onUpdate(dt: number): void {
-        // 清理映射表
-        for (const [id, charge] of this.electricChargeMap.entries()) {
-            charge.timeLeft -= dt
-            if (charge.timeLeft <= 0) this.electricChargeMap.delete(id)
-        }
+        // 更新怪物的电荷状态 (独立于技能激活状态)
+        this.engine.monsters.forEach((m) => {
+            if (!m.statusEffects) return
+            for (let i = m.statusEffects.length - 1; i >= 0; i--) {
+                const effect = m.statusEffects[i]
+                if (effect.type === "POS_CHARGE" || effect.type === "NEG_CHARGE") {
+                    effect.duration -= dt
+                    if (effect.duration <= 0) {
+                        m.statusEffects.splice(i, 1)
+                    }
+                }
+            }
+        })
 
         if (!this.isActive) return
 
@@ -137,7 +145,6 @@ export class LiseSkillQ extends BaseSkill {
         }
 
         this.timer += dt
-        this.reactionTimer += dt
         const playerPos = this.engine.getPlayerPosition()
 
         // 活动区域半径检查
@@ -150,7 +157,7 @@ export class LiseSkillQ extends BaseSkill {
 
             if (targets.length > 0) {
                 // 优先选择无电荷的目标
-                let target = targets.find((m) => !this.electricChargeMap.has(m.id))
+                let target = targets.find((m) => !m.statusEffects.some((e) => e.type.includes("CHARGE")))
                 if (!target) target = targets[Math.floor(Math.random() * targets.length)]
 
                 if (target) {
@@ -158,69 +165,102 @@ export class LiseSkillQ extends BaseSkill {
                     this.applyDamage(target, "选取敌人伤害")
 
                     // 电荷逻辑
-                    const chargeType = Math.random() > 0.5 ? "POS" : "NEG"
-                    const existing = this.electricChargeMap.get(target.id)
+                    const chargeType = Math.random() > 0.5 ? "POS_CHARGE" : "NEG_CHARGE"
+                    const label = chargeType === "POS_CHARGE" ? "+" : "-"
+                    const color = chargeType === "POS_CHARGE" ? "#ef4444" : "#3b82f6" // Red / Blue
 
-                    if (existing && existing.type === chargeType) {
-                        existing.timeLeft = 6
-                        this.engine.spawnFloatingText(
-                            "刷新",
-                            target.position.clone().add(new THREE.Vector3(0, 4, 0)),
-                            chargeType === "POS" ? "#FF4444" : "#4444FF",
-                        )
-                    } else if (!existing) {
-                        this.electricChargeMap.set(target.id, { type: chargeType, timeLeft: 6 })
-                        this.engine.spawnFloatingText(
-                            chargeType === "POS" ? "+" : "-",
-                            target.position.clone().add(new THREE.Vector3(0, 4, 0)),
-                            chargeType === "POS" ? "#FF0000" : "#0000FF",
-                        )
+                    const existing = target.statusEffects.find((e) => e.type.includes("CHARGE"))
+
+                    if (existing) {
+                        if (existing.type === chargeType) {
+                            existing.duration = this.CHARGE_DURATION
+                            this.engine.spawnFloatingText("刷新", target.position.clone().add(new THREE.Vector3(0, 4, 0)), color)
+                        }
+                    } else {
+                        target.statusEffects.push({
+                            type: chargeType,
+                            label: label,
+                            color: color,
+                            duration: this.CHARGE_DURATION,
+                            maxDuration: this.CHARGE_DURATION,
+                        })
+                        this.engine.spawnFloatingText(label, target.position.clone().add(new THREE.Vector3(0, 4, 0)), color)
+
+                        // 立即触发反应（仅针对新获得电荷的单位）
+                        this.triggerReactionFor(target)
                     }
                 }
             }
         }
+    }
 
-        // 2. 每3秒: 反应
-        if (this.reactionTimer >= 3.0) {
-            this.reactionTimer = 0
-            this.triggerReaction()
+    private triggerReactionFor(source: Monster) {
+        const charge = source.statusEffects.find((e) => e.type.includes("CHARGE"))
+        if (!charge) return
+
+        const oppositeType = charge.type === "POS_CHARGE" ? "NEG_CHARGE" : "POS_CHARGE"
+        const attractRangeUnits = this.engine.m2u(this.ATTRACT_RANGE_M)
+
+        // 寻找范围内最近的异性电荷
+        let partner: Monster | undefined
+        let minDist = attractRangeUnits
+
+        for (const m of this.engine.monsters) {
+            if (m === source || m.isDead) continue
+            if (m.statusEffects.some((e) => e.type === oppositeType)) {
+                const dist = source.position.distanceTo(m.position)
+                if (dist < minDist) {
+                    minDist = dist
+                    partner = m
+                }
+            }
+        }
+
+        if (partner) {
+            // 吸引
+            const midpoint = source.position.clone().add(partner.position).multiplyScalar(0.5)
+            midpoint.y = 0
+            source.position.lerp(midpoint, 0.8)
+            partner.position.lerp(midpoint, 0.8)
+
+            // 双方伤害
+            this.applyDamage(source, "[电荷]伤害")
+            this.applyDamage(partner, "[电荷]伤害")
+            this.engine.spawnFloatingText("吸引", midpoint.add(new THREE.Vector3(0, 5, 0)), "#FFFFFF")
+        } else {
+            // 单独过载
+            this.applyDamage(source, "[电荷]伤害")
         }
     }
 
-    private triggerReaction() {
-        // 过滤活着的带电怪物
-        const charged = this.engine.monsters.filter((m) => !m.isDead && this.electricChargeMap.has(m.id))
-        const pos = charged.filter((m) => this.electricChargeMap.get(m.id)?.type === "POS")
-        const neg = charged.filter((m) => this.electricChargeMap.get(m.id)?.type === "NEG")
+    // Called when a monster dies
+    public onMonsterDeath(monster: Monster) {
+        if (!monster.statusEffects) return
+        const charge = monster.statusEffects.find((e) => e.type.includes("CHARGE"))
+        if (!charge) return
 
-        const usedIds = new Set<string>()
-        const attractRangeUnits = this.engine.m2u(this.ATTRACT_RANGE_M)
+        const range = this.engine.m2u(20) // 20m range to transfer
 
-        // 尝试配对
-        pos.forEach((p) => {
-            if (usedIds.has(p.id)) return
-            // 在范围内寻找附近的负电荷
-            const partner = neg.find((n) => !usedIds.has(n.id) && n.position.distanceTo(p.position) < attractRangeUnits)
+        this.engine.monsters.forEach((m) => {
+            // Skip the dead monster itself and other dead monsters
+            if (m.isDead || m.id === monster.id) return
 
-            if (partner) {
-                usedIds.add(p.id)
-                usedIds.add(partner.id)
+            if (m.position.distanceTo(monster.position) <= range) {
+                const existing = m.statusEffects.find((e) => e.type.includes("CHARGE"))
 
-                // 拉到一起
-                const midpoint = p.position.clone().add(partner.position).multiplyScalar(0.5)
-                midpoint.y = 0
-
-                // 瞬间移动（视觉效果）
-                p.position.lerp(midpoint, 0.8)
-                partner.position.lerp(midpoint, 0.8)
-
-                // 伤害
-                this.applyDamage(p, "[电荷]伤害")
-                this.applyDamage(partner, "[电荷]伤害")
-                this.engine.spawnFloatingText("吸引", midpoint.add(new THREE.Vector3(0, 5, 0)), "#FFFFFF")
-            } else {
-                // 单独过载
-                this.applyDamage(p, "[电荷]伤害")
+                if (!existing) {
+                    // Spread charge with remaining duration from dead monster
+                    m.statusEffects.push({ ...charge })
+                    this.engine.spawnFloatingText("传递", m.position.clone().add(new THREE.Vector3(0, 4, 0)), charge.color)
+                    // 传递给没有电荷的单位时立即触发一次
+                    this.triggerReactionFor(m)
+                } else if (existing.type === charge.type) {
+                    // If same charge, extend duration if transmitted one is longer
+                    if (existing.duration < charge.duration) {
+                        existing.duration = charge.duration
+                        this.engine.spawnFloatingText("刷新", m.position.clone().add(new THREE.Vector3(0, 4, 0)), charge.color)
+                    }
+                }
             }
         })
     }

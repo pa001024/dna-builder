@@ -30,8 +30,9 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
 }
 
 const sortedBuffs = computed(() => {
-    return [...props.buffOptions.filter((b) => !props.selectedBuffs.some((v) => v.名称 === b.label))].sort((a, b) => {
-        return a.value.名称.includes(props.charBuild.char.名称) ? -1 : 1
+    return [...props.buffOptions.filter((b) => !props.selectedBuffs.some((v) => v.名称 === b.label))].sort((a, _b) => {
+        // 先排序包含角色名称的BUFF
+        return a.label.includes(props.charBuild.char.名称) ? -1 : 0
     })
 })
 </script>

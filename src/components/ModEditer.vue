@@ -138,10 +138,54 @@ const emit = defineEmits<{
 
 // 本地状态
 const localSelectedSlot = ref(-1)
+const draggedModIndex = ref<number | null>(null)
+const dropTargetIndex = ref<number | null>(null)
 
 // 方法
 function handleSlotClick(index: number) {
     localSelectedSlot.value = index
+}
+
+// 拖动开始
+function handleDragStart(index: number) {
+    draggedModIndex.value = index
+}
+
+// 拖动结束
+function handleDragEnd(_e: MouseEvent, targetElement: Element | null) {
+    if (draggedModIndex.value === null) return
+
+    // 从目标元素向上查找包含 group 类和 data-index 属性的 ModItem
+    let targetModItem = targetElement
+    while (targetModItem && !targetModItem.hasAttribute("data-index")) {
+        targetModItem = targetModItem.parentElement
+    }
+
+    // 如果找到了目标 ModItem，读取它的 data-index
+    if (targetModItem) {
+        const targetIndex = parseInt(targetModItem.getAttribute("data-index") || "-1")
+
+        if (targetIndex !== -1 && draggedModIndex.value !== targetIndex) {
+            const fromIndex = draggedModIndex.value
+            draggedModIndex.value = null
+            dropTargetIndex.value = null
+
+            // 发送交换事件
+            emit("swapMods", fromIndex, targetIndex)
+            localSelectedSlot.value = -1
+            return
+        }
+    }
+
+    // 如果没有有效的放置目标，清除状态
+    draggedModIndex.value = null
+    dropTargetIndex.value = null
+}
+
+// 处理拖动经过某个槽位
+function handleDragOver(index: number) {
+    if (draggedModIndex.value === null) return
+    dropTargetIndex.value = index
 }
 
 function handleSelectAuraMod(id: number) {
@@ -166,17 +210,6 @@ function closeSelection() {
 
 function toggleSortByIncome() {
     sortByIncome.value = !sortByIncome.value
-}
-
-// 拖拽交换位置
-function handleDrop(index: number, event: DragEvent) {
-    event.preventDefault()
-    const fromIndex = parseInt(event.dataTransfer?.getData("modIndex") || "")
-    if (fromIndex !== index && !isNaN(fromIndex)) {
-        // 直接发送交换事件给父组件处理
-        emit("swapMods", fromIndex, index)
-        localSelectedSlot.value = -1
-    }
 }
 
 async function handleImportCode() {
@@ -243,10 +276,16 @@ const aMod = computed(() => {
                 :index="index"
                 @click="handleSlotClick(index)"
                 @removeMod="handleRemoveMod(index)"
-                @drop="handleDrop(index, $event)"
+                @dragStart="handleDragStart(index)"
+                @dragEnd="handleDragEnd"
+                @mouseenter="draggedModIndex !== null && handleDragOver(index)"
                 control
                 :charBuild="charBuild"
                 :selected="undefined"
+                :class="{
+                    'opacity-50': draggedModIndex === index,
+                    'border-2 border-primary': dropTargetIndex === index && draggedModIndex !== index,
+                }"
                 @lv-change="handleLevelChange(index, $event)"
             />
         </div>

@@ -12,12 +12,13 @@ const props = defineProps<{
 
 const canvasRef = ref<HTMLDivElement>()
 const localSettings = useLocalStorage<GameSettings>("gameSettings", {
-    monsterCount: 5,
-    monsterLevel: 1,
+    monsterCount: 15,
+    monsterId: 6001601,
+    monsterLevel: 80,
     spawnType: "random",
     autoLevelUp: false,
     autoLevelInterval: 30,
-    spawnInterval: 5,
+    spawnInterval: 3,
     sanityRegenAmount: 7,
     sanityRegenInterval: 3,
 })
@@ -40,6 +41,7 @@ watchEffect(() => {
         (texts) => (floatingTexts.value = texts),
         (current, total) => (dps.value = { current, total }),
     )
+    engine.setSettings(localSettings.value)
 
     const handleResize = () => engine.resize()
     window.addEventListener("resize", handleResize)
@@ -56,7 +58,7 @@ onUnmounted(() => {
 </script>
 <template>
     <div class="flex justify-center items-center bg-base-300 h-[80vh] overflow-hidden relative">
-        <div ref="canvasRef" class="absolute inset-0 z-0 cursor-crosshair" />
+        <div ref="canvasRef" class="absolute inset-0 z-0 cursor-crosshair" @contextmenu.prevent />
         <GameOverlay
             v-if="playerStats"
             :playerStats="playerStats"
@@ -64,6 +66,7 @@ onUnmounted(() => {
             :floatingTexts="floatingTexts"
             :dps="dps"
             :settings="localSettings"
+            @update:settings="engine.settings = localSettings = $event"
         />
     </div>
 </template>

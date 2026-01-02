@@ -30,7 +30,6 @@ describe("CharBuild类测试", () => {
             enemyId: 1001001,
             enemyLevel: 80,
             enemyResistance: 0.5,
-            enemyHpType: "生命",
             targetFunction: "伤害",
         })
     }
@@ -636,7 +635,6 @@ describe("CharBuild类测试", () => {
                     enemyId: 1001001,
                     enemyLevel: 80,
                     enemyResistance: 0.5,
-                    enemyHpType: "生命",
                     targetFunction: "伤害",
                 })
 

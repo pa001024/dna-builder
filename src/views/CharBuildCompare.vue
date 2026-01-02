@@ -244,7 +244,6 @@ const charBuilds = computed(() => {
                 enemyId: 130,
                 enemyLevel: 80,
                 enemyResistance: 0,
-                enemyHpType: "生命",
                 targetFunction: "伤害",
             })
         }

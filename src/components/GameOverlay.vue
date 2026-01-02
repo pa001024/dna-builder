@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, watch } from "vue"
+import { computed, ref, watch } from "vue"
 import { PlayerStats, Monster, FloatingText, GameSettings } from "../game/types"
+import { LeveledMonster, monsterData } from "../data"
 
 interface Props {
     playerStats: PlayerStats
@@ -49,6 +50,12 @@ const toggleAutoLevelUp = () => {
 const closeSettings = () => {
     isSettingsOpen.value = false
 }
+
+const currentMonster = computed(() => {
+    const data = monsterData.find((monster) => monster.id === localSettings.value.monsterId)
+    if (!data) return
+    return new LeveledMonster(data, localSettings.value.monsterLevel)
+})
 </script>
 <template>
     <div class="absolute inset-0 pointer-events-none select-none font-sans text-white">
@@ -56,14 +63,6 @@ const closeSettings = () => {
         <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 w-[500px]">
             <!-- Buff Icons Area -->
             <div class="flex gap-2 mb-2 flex-wrap justify-center">
-                <!-- Energy Overcharge Indicator -->
-                <div
-                    v-if="playerStats.electricEnergy >= 30"
-                    class="animate-pulse bg-yellow-500/20 border border-yellow-400 text-yellow-300 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1"
-                >
-                    <Icon icon="ri:flashlight-line" /> CHARGED
-                </div>
-
                 <!-- Active Buffs from Engine -->
                 <div
                     v-for="(buff, idx) in playerStats.activeBuffs"
@@ -106,7 +105,9 @@ const closeSettings = () => {
                     class="h-full bg-linear-to-r from-purple-600 to-fuchsia-400 transition-all duration-200"
                     :style="{ width: `${(playerStats.currentSanity / playerStats.maxSanity) * 100}%` }"
                 ></div>
-                <div class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white/80">SANITY</div>
+                <div class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white/80">
+                    {{ Math.floor(playerStats.currentSanity) }} / {{ playerStats.maxSanity }}
+                </div>
             </div>
 
             <!-- Electric Energy (Passive) -->
@@ -117,8 +118,6 @@ const closeSettings = () => {
                         class="h-full bg-yellow-400 transition-all duration-100"
                         :style="{ width: `${Math.min(100, (playerStats.electricEnergy / 100) * 100)}%` }"
                     ></div>
-                    <!-- Threshold Marker at 30 -->
-                    <div class="absolute top-0 bottom-0 w-0.5 bg-white/50" style="left: 30%"></div>
                 </div>
                 <span class="text-xs font-mono text-yellow-400">{{ Math.floor(playerStats.electricEnergy) }}</span>
             </div>
@@ -132,7 +131,7 @@ const closeSettings = () => {
             <div class="text-2xl font-black font-mono text-white">
                 {{ dps.current.toLocaleString() }} <span class="text-sm text-slate-400">DPS</span>
             </div>
-            <div class="text-xs text-slate-400 font-mono">Total: {{ dps.total.toLocaleString() }}</div>
+            <div class="text-xs text-slate-400 font-mono">总计: {{ dps.total.toLocaleString() }}</div>
         </div>
 
         <!-- --- HUD: Top Left Settings --- -->
@@ -157,7 +156,30 @@ const closeSettings = () => {
                     transform: 'translate(-50%, -50%)',
                 }"
             >
-                <div class="text-[10px] font-bold text-white drop-shadow-md mb-1 whitespace-nowrap">{{ m.name }}</div>
+                <!-- 状态效果 -->
+                <div v-if="m.statusEffects && m.statusEffects.length > 0" class="flex gap-1 mt-1">
+                    <div
+                        v-for="(effect, idx) in m.statusEffects"
+                        :key="idx"
+                        class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-sm border border-white/20 relative"
+                        :style="{ backgroundColor: effect.color }"
+                    >
+                        {{ effect.label }}
+                        <!-- 持续时间圆环 -->
+                        <svg class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 36 36">
+                            <path
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                fill="none"
+                                stroke="white"
+                                stroke-width="4"
+                                :stroke-dasharray="`${(effect.duration / effect.maxDuration) * 100}, 100`"
+                                class="opacity-50"
+                            />
+                        </svg>
+                    </div>
+                </div>
+                <div class="text-[10px] font-bold text-white drop-shadow-md whitespace-nowrap">{{ m.name }}</div>
+                <div class="text-[10px] font-bold text-white drop-shadow-md mb-1 whitespace-nowrap">Lv. {{ m.level }}</div>
                 <div class="w-full h-1.5 bg-black/50 rounded-full overflow-hidden mb-0.5">
                     <div class="h-full bg-red-500" :style="{ width: `${(m.currentHP / m.maxHP) * 100}%` }"></div>
                 </div>
@@ -167,7 +189,7 @@ const closeSettings = () => {
             </div>
         </template>
 
-        <!-- --- Floating Damage Text --- -->
+        <!-- 伤害数字 -->
         <div
             v-for="t in floatingTexts.filter((t) => t.screenPosition)"
             :key="t.id"
@@ -183,23 +205,44 @@ const closeSettings = () => {
             {{ t.text }}
         </div>
 
-        <!-- --- Settings Modal --- -->
-        <div
-            v-if="isSettingsOpen"
-            class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center pointer-events-auto"
-        >
+        <!-- 设置 -->
+        <dialog v-if="isSettingsOpen" class="modal modal-open pointer-events-auto">
             <div class="bg-slate-800 border border-slate-700 p-8 rounded-3xl w-full max-w-md shadow-2xl">
                 <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                    <Icon icon="ri:settings-3-line" class="text-indigo-400" /> 游戏设置
+                    <Icon icon="ri:settings-3-line" class="text-indigo-400" /> 设置
                 </h2>
 
                 <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-400 mb-2">怪物名称</label>
+                        <Select
+                            class="input input-bordered input-primary w-full"
+                            v-model="localSettings.monsterId"
+                            @change="updateSettings"
+                        >
+                            <SelectItem v-for="monster in monsterData" :key="monster.id" :value="monster.id">
+                                {{ monster.名称 }}
+                            </SelectItem>
+                        </Select>
+                        <div class="text-right text-xs text-slate-500">
+                            <span>
+                                HP: <span class="text-primary">{{ currentMonster?.生命 }}</span>
+                            </span>
+                            <span v-if="currentMonster?.护盾">
+                                Shld: <span class="text-primary">{{ currentMonster?.护盾 }}</span>
+                            </span>
+                            <span>
+                                Def: <span class="text-primary">{{ currentMonster?.防御 }}</span>
+                            </span>
+                        </div>
+                    </div>
+
                     <div>
                         <label class="block text-sm font-bold text-slate-400 mb-2">怪物数量</label>
                         <input
                             type="range"
                             min="1"
-                            max="20"
+                            max="50"
                             v-model="localSettings.monsterCount"
                             @change="updateSettings"
                             class="w-full accent-indigo-500"
@@ -269,6 +312,7 @@ const closeSettings = () => {
                     应用
                 </button>
             </div>
-        </div>
+            <div class="modal-backdrop" @click="isSettingsOpen = false"></div>
+        </dialog>
     </div>
 </template>

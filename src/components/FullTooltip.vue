@@ -1,14 +1,15 @@
 <script lang="ts" setup>
+import { ref } from "vue"
 import { TooltipArrow, TooltipContent, TooltipPortal, TooltipProvider, TooltipRoot, TooltipTrigger } from "radix-vue"
 defineProps<{
     side: "top" | "right" | "bottom" | "left"
 }>()
+const forceOpen = ref(false)
 </script>
-
 <template>
     <TooltipProvider>
-        <TooltipRoot :delayDuration="100">
-            <TooltipTrigger asChild>
+        <TooltipRoot :delayDuration="100" :open="forceOpen ? true : undefined">
+            <TooltipTrigger asChild @touchstart="forceOpen = true" @touchend="forceOpen = false">
                 <slot />
             </TooltipTrigger>
             <TooltipPortal>

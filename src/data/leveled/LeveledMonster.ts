@@ -1,5 +1,5 @@
 import { monsterMap } from "."
-import { Faction, Monster } from "../data-types"
+import { DynamicMonster, Faction, Monster } from "../data-types"
 
 export const MOB_LEVEL_UP = [
     { atk: 0.1, hp: 0.4, es: 0.4, rhp: 1, res: 1 },
@@ -183,12 +183,6 @@ export const MOB_LEVEL_UP = [
     { atk: 89.4196, hp: 416204.9357, es: 416204.9357, rhp: 16977.9279, res: 16977.9279 },
     { atk: 90.8541, hp: 424698.914, es: 424698.914, rhp: 17826.8243, res: 17826.8243 },
 ]
-
-export interface DynamicMonster extends Monster {
-    currentHP: number
-    currentShield: number
-    currentWarPose: number
-}
 
 export class LeveledMonster implements DynamicMonster {
     id: number

@@ -70,7 +70,6 @@ describe("模块功能测试", () => {
             enemyId: 130,
             enemyLevel: 80,
             enemyResistance: 0.5,
-            enemyHpType: "生命",
             targetFunction: "伤害",
         })
 
@@ -174,7 +173,6 @@ describe("模块使用场景测试", () => {
             enemyId: 130,
             enemyLevel: 80,
             enemyResistance: 0.5,
-            enemyHpType: "生命",
             targetFunction: "伤害",
         })
 

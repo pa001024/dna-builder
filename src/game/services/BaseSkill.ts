@@ -1,8 +1,3 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import * as THREE from "three"
 import { VoxelEngine } from "./VoxelEngine"
 import { Monster } from "../types"
@@ -46,6 +41,9 @@ export abstract class BaseSkill {
     }
 
     protected onUpdate(_dt: number): void {}
+
+    // Called when a monster dies
+    public onMonsterDeath(_monster: Monster): void {}
 
     // 辅助函数：使用引擎的计算器应用伤害
     protected applyDamage(target: Monster, subSkill?: string) {

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, computed } from "vue"
 import { CharBuild, LeveledMod } from "../data"
 import { format100r } from "../util"
 
@@ -37,7 +38,8 @@ function getQualityHoverBorder(quality: string): string {
             return "hover:border-gray-400"
     }
 }
-defineProps<{
+
+const props = defineProps<{
     mod: LeveledMod | null
     income?: number
     noremove?: boolean
@@ -45,22 +47,127 @@ defineProps<{
     selected?: boolean
     control?: boolean
     charBuild?: CharBuild
+    index?: number
 }>()
 
 const emit = defineEmits<{
     removeMod: []
     lvChange: [number]
     countChange: [number]
+    dragStart: [event: MouseEvent, index: number]
+    dragEnd: [event: MouseEvent, targetElement: Element | null]
 }>()
+
+// 拖动状态
+const isDragging = ref(false)
+const dragPosition = ref({ x: 0, y: 0 })
+const dragOffset = ref({ x: 0, y: 0 })
+const dragStartRect = ref({ left: 0, top: 0 })
+const dragStartElement = ref<HTMLElement | null>(null)
+
+// 计算拖动时的样式
+const dragStyle = computed(() => {
+    if (!isDragging.value) return {}
+    return {
+        transform: `translate(${dragPosition.value.x}px, ${dragPosition.value.y}px)`,
+        zIndex: 1000,
+        opacity: 0.8,
+        cursor: "grabbing",
+    }
+})
+
+// 鼠标按下开始拖动
+function handleMouseDown(event: MouseEvent) {
+    // 如果没有 mod 或者没有 index,不开始拖动
+    if (!props.mod || props.index === undefined) return
+
+    // 检查点击的目标是否是交互元素
+    const target = event.target as HTMLElement
+    if (target.tagName === "BUTTON" || target.tagName === "INPUT" || target.closest("button") || target.closest("input")) {
+        return
+    }
+
+    event.preventDefault()
+    isDragging.value = true
+
+    // 保存拖动开始的元素引用
+    dragStartElement.value = event.currentTarget as HTMLElement
+
+    // 记录元素的初始位置
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
+    dragStartRect.value = {
+        left: rect.left,
+        top: rect.top,
+    }
+
+    // 记录鼠标在元素内的偏移
+    dragOffset.value = {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top,
+    }
+
+    // 初始位置为0
+    dragPosition.value = { x: 0, y: 0 }
+
+    // 触发拖动开始事件
+    emit("dragStart", event, props.index)
+
+    // 添加全局鼠标事件监听
+    document.addEventListener("mousemove", handleMouseMove)
+    document.addEventListener("mouseup", handleMouseUp)
+}
+
+// 鼠标移动
+function handleMouseMove(event: MouseEvent) {
+    if (!isDragging.value) return
+
+    // 计算新位置 - 使用拖动开始时记录的初始位置
+    dragPosition.value = {
+        x: event.clientX - dragOffset.value.x - dragStartRect.value.left,
+        y: event.clientY - dragOffset.value.y - dragStartRect.value.top,
+    }
+}
+
+// 鼠标松开
+function handleMouseUp(event: MouseEvent) {
+    if (!isDragging.value) return
+
+    isDragging.value = false
+
+    // 临时隐藏拖动元素，以便检测下方的元素
+    if (dragStartElement.value) {
+        dragStartElement.value.style.pointerEvents = "none"
+    }
+
+    // 使用 elementFromPoint 检测鼠标位置下方的元素
+    const element = document.elementFromPoint(event.clientX, event.clientY)
+
+    // 恢复拖动元素的可见性
+    if (dragStartElement.value) {
+        dragStartElement.value.style.pointerEvents = ""
+    }
+
+    // 重置拖动状态
+    dragPosition.value = { x: 0, y: 0 }
+
+    // 触发拖动结束事件，传递目标元素
+    emit("dragEnd", event, element)
+
+    // 清除拖动开始元素引用
+    dragStartElement.value = null
+
+    // 移除全局事件监听
+    document.removeEventListener("mousemove", handleMouseMove)
+    document.removeEventListener("mouseup", handleMouseUp)
+}
 </script>
 <template>
     <div
         class="aspect-square bg-base-200 rounded-lg border-2 flex items-center justify-center transition-colors cursor-pointer group"
         :class="[mod ? getQualityColor(mod.品质) : 'border-dashed border-gray-600', getQualityHoverBorder(mod?.品质!)]"
-        draggable="true"
-        @dragstart="$attrs.index !== undefined && $event.dataTransfer?.setData('modIndex', $attrs.index as string)"
-        @dragover.prevent
-        @dragenter.prevent
+        :style="dragStyle"
+        :data-index="index"
+        @mousedown="handleMouseDown"
     >
         <div class="relative w-full h-full flex items-center justify-center">
             <ShowProps
@@ -75,7 +182,7 @@ const emit = defineEmits<{
             >
                 <div class="w-full h-full flex items-center justify-center bg-opacity-30 rounded-lg overflow-hidden">
                     <!-- 背景 -->
-                    <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <img :src="mod.url" :alt="mod.名称" />
                     </div>
                     <!-- MOD名称 -->

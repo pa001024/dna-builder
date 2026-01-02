@@ -181,6 +181,12 @@ export interface Monster {
     战姿?: number
 }
 
+export interface DynamicMonster extends Monster {
+    currentHP: number
+    currentShield: number
+    currentWarPose: number
+}
+
 export enum MobType {
     小型 = "小型",
     大型 = "大型",

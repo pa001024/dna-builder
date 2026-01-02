@@ -28,6 +28,7 @@ import { useTimeline } from "../store/timeline"
 import { useSettingStore } from "../store/setting"
 import { useRoute } from "vue-router"
 import { useUIStore } from "../store/ui"
+import { waitForInitialLoad } from "../i18n"
 
 //#region 角色
 const inv = useInvStore()
@@ -421,12 +422,9 @@ function updateCharBuild() {
     if (!monsterMap.has(charSettings.value.enemyId)) {
         charSettings.value.enemyId = 1001001
     }
-    // if (
-    //     !charSettings.value.baseName ||
-    //     (!baseOptions.value.some((skill) => skill.value === charSettings.value.baseName) && !isTimeline.value)
-    // ) {
-    //     charSettings.value.baseName = charBuild.value.char.技能[0].名称
-    // }
+    if (!charSettings.value.baseName) {
+        charSettings.value.baseName = charBuild.value.char.技能[0].名称
+    }
     pad(charSettings.value.charMods, 8, null)
     pad(charSettings.value.meleeMods, 8, null)
     pad(charSettings.value.rangedMods, 8, null)
@@ -479,7 +477,7 @@ declare global {
     }
 }
 
-onMounted(() => {
+onMounted(async () => {
     window.setMod = (key: "charMods" | "meleeMods" | "rangedMods" | "skillWeaponMods", index: number, modId: number, level: number) => {
         if (index < 0 || index >= charSettings.value[key].length) return
         if (modId < 0) charSettings.value[key][index] = null
@@ -497,6 +495,7 @@ onMounted(() => {
             else charSettings.value.buffs.splice(index, 1)
         }
     }
+    await waitForInitialLoad()
     ui.title = t("char-build.title1", { charName: t(selectedChar.value) })
 })
 

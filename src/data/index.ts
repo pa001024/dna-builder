@@ -18,3 +18,5 @@ import effectData from "./effect.data"
 export { effectData }
 import achievementData from "./achievement.data"
 export { achievementData }
+
+export * from "./data-types"
