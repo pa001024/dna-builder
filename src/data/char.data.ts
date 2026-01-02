@@ -1,4 +1,4 @@
-import type { Char } from "./data-types"
+import type { Char, SkillWeapon } from "./data-types"
 
 const t = [
     {
@@ -4061,6 +4061,19 @@ function patch(id: number, skillName: string, cb: (skill: Char["技能"][number]
     }
     cb(skill)
 }
+
+function patchUW(id: number, cb: (uw: SkillWeapon[]) => void) {
+    const char = t.find((item) => item.id === id)
+    if (!char) {
+        return
+    }
+    if (!char.同律武器) return
+    cb(char.同律武器)
+}
+
+patchUW(5301, (uw) => {
+    uw[0].攻速 = 4
+})
 
 patch(2101, "缠绵之触", (skill) => {
     skill.召唤物 = {

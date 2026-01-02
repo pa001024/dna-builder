@@ -4,7 +4,7 @@ import { LeveledChar } from "../leveled"
 import { LeveledWeapon } from "../leveled"
 import { LeveledMod } from "../leveled"
 import { LeveledBuff } from "../leveled"
-import { parseAST } from "../ast"
+import { parseAST, ASTProperty, ASTFunction, ASTBinary, ASTUnary, ASTMemberAccess } from "../ast"
 
 describe("evaluateAST函数测试", () => {
     let charBuild: CharBuild
@@ -393,6 +393,226 @@ describe("evaluateAST函数测试", () => {
                     4.1, // 暴伤盛怒
                 0,
             )
+        })
+    })
+
+    describe("命名空间解析测试", () => {
+        describe("基础命名空间解析", () => {
+            it("应该正确解析命名空间属性", () => {
+                const ast = parseAST("Math::PI")
+                expect(ast.type).toBe("property")
+
+                const propNode = ast as ASTProperty
+                expect(propNode.name).toBe("PI")
+                expect(propNode.namespace).toBe("Math")
+            })
+
+            it("应该正确解析命名空间函数调用", () => {
+                const ast = parseAST("Math::max(10, 20)")
+                expect(ast.type).toBe("function")
+
+                const funcNode = ast as ASTFunction
+                expect(funcNode.name).toBe("max")
+                expect(funcNode.namespace).toBe("Math")
+                expect(funcNode.args).toHaveLength(2)
+            })
+
+            it("应该正确解析多个参数的命名空间函数", () => {
+                const ast = parseAST("Util::calc(a, b, c)")
+                expect(ast.type).toBe("function")
+
+                const funcNode = ast as ASTFunction
+                expect(funcNode.name).toBe("calc")
+                expect(funcNode.namespace).toBe("Util")
+                expect(funcNode.args).toHaveLength(3)
+            })
+        })
+
+        describe("命名空间与表达式组合", () => {
+            it("应该正确处理命名空间属性与运算符的组合", () => {
+                const ast = parseAST("Math::PI * 2")
+                expect(ast.type).toBe("binary")
+
+                const binaryNode = ast as ASTBinary
+                expect(binaryNode.operator).toBe("*")
+                expect(binaryNode.left.type).toBe("property")
+
+                const propNode = binaryNode.left as ASTProperty
+                expect(propNode.namespace).toBe("Math")
+                expect(propNode.name).toBe("PI")
+            })
+
+            it("应该正确处理命名空间函数调用与运算符的组合", () => {
+                const ast = parseAST("Math::max(10, 20) + 5")
+                expect(ast.type).toBe("binary")
+
+                const binaryNode = ast as ASTBinary
+                expect(binaryNode.operator).toBe("+")
+                expect(binaryNode.left.type).toBe("function")
+
+                const funcNode = binaryNode.left as ASTFunction
+                expect(funcNode.namespace).toBe("Math")
+            })
+
+            it("应该正确处理嵌套命名空间函数调用", () => {
+                const ast = parseAST("Math::floor(Util::calc(10, 20))")
+                expect(ast.type).toBe("function")
+
+                const outerFunc = ast as ASTFunction
+                expect(outerFunc.name).toBe("floor")
+                expect(outerFunc.namespace).toBe("Math")
+                expect(outerFunc.args).toHaveLength(1)
+                expect(outerFunc.args[0].type).toBe("function")
+
+                const innerFunc = outerFunc.args[0] as ASTFunction
+                expect(innerFunc.namespace).toBe("Util")
+            })
+        })
+
+        describe("命名空间与成员访问组合", () => {
+            it("应该正确处理命名空间属性后的成员访问", () => {
+                const ast = parseAST("Config::Settings.value")
+                expect(ast.type).toBe("member_access")
+
+                const memberNode = ast as ASTMemberAccess
+                expect(memberNode.property).toBe("value")
+                expect(memberNode.object.type).toBe("property")
+
+                const propNode = memberNode.object as ASTProperty
+                expect(propNode.namespace).toBe("Config")
+                expect(propNode.name).toBe("Settings")
+            })
+
+            it("应该正确处理命名空间函数返回值的成员访问", () => {
+                const ast = parseAST("Data::get(id).property")
+                expect(ast.type).toBe("member_access")
+
+                const memberNode = ast as ASTMemberAccess
+                expect(memberNode.property).toBe("property")
+                expect(memberNode.object.type).toBe("function")
+
+                const funcNode = memberNode.object as ASTFunction
+                expect(funcNode.namespace).toBe("Data")
+                expect(funcNode.name).toBe("get")
+            })
+
+            it("应该正确处理多级成员访问", () => {
+                const ast = parseAST("Config::Settings.data.value")
+                expect(ast.type).toBe("member_access")
+
+                const memberNode = ast as ASTMemberAccess
+                expect(memberNode.property).toBe("value")
+                expect(memberNode.object.type).toBe("member_access")
+            })
+        })
+
+        describe("命名空间错误处理", () => {
+            it("应该拒绝单个冒号语法", () => {
+                expect(() => {
+                    parseAST("Math:PI")
+                }).toThrow("单个冒号")
+            })
+
+            it("应该在命名空间后缺少标识符时报错", () => {
+                expect(() => {
+                    parseAST("Math::")
+                }).toThrow("命名空间")
+            })
+
+            it("应该在命名空间后不能直接使用数字", () => {
+                expect(() => {
+                    parseAST("Math::123")
+                }).toThrow()
+            })
+
+            it("应该处理命名空间与括号组合", () => {
+                const ast = parseAST("(Math::max(10, 20))")
+                expect(ast.type).toBe("function")
+
+                const funcNode = ast as ASTFunction
+                expect(funcNode.namespace).toBe("Math")
+                expect(funcNode.name).toBe("max")
+            })
+        })
+
+        describe("复杂命名空间表达式", () => {
+            it("应该正确处理命名空间与括号表达式的组合", () => {
+                const ast = parseAST("Math::max(10, 20) * (2 + 3)")
+                expect(ast.type).toBe("binary")
+
+                const binaryNode = ast as ASTBinary
+                expect(binaryNode.operator).toBe("*")
+                expect(binaryNode.left.type).toBe("function")
+
+                const funcNode = binaryNode.left as ASTFunction
+                expect(funcNode.namespace).toBe("Math")
+            })
+
+            it("应该正确处理多个命名空间在表达式中", () => {
+                const ast = parseAST("Math::max(10, 20) + Util::min(5, 15)")
+                expect(ast.type).toBe("binary")
+
+                const binaryNode = ast as ASTBinary
+                expect(binaryNode.operator).toBe("+")
+                expect(binaryNode.left.type).toBe("function")
+                expect(binaryNode.right.type).toBe("function")
+
+                const leftFunc = binaryNode.left as ASTFunction
+                expect(leftFunc.namespace).toBe("Math")
+
+                const rightFunc = binaryNode.right as ASTFunction
+                expect(rightFunc.namespace).toBe("Util")
+            })
+
+            it("应该正确处理命名空间在一元运算符中", () => {
+                const ast = parseAST("-Math::value")
+                expect(ast.type).toBe("unary")
+
+                const unaryNode = ast as ASTUnary
+                expect(unaryNode.operator).toBe("-")
+                expect(unaryNode.argument.type).toBe("property")
+
+                const propNode = unaryNode.argument as ASTProperty
+                expect(propNode.namespace).toBe("Math")
+            })
+        })
+
+        describe("命名空间属性验证", () => {
+            it("没有命名空间的属性应该namespace为undefined", () => {
+                const ast = parseAST("攻击")
+                expect(ast.type).toBe("property")
+
+                const propNode = ast as ASTProperty
+                expect(propNode.name).toBe("攻击")
+                expect(propNode.namespace).toBeUndefined()
+            })
+
+            it("没有命名空间的函数应该namespace为undefined", () => {
+                const ast = parseAST("max(10, 20)")
+                expect(ast.type).toBe("function")
+
+                const funcNode = ast as ASTFunction
+                expect(funcNode.name).toBe("max")
+                expect(funcNode.namespace).toBeUndefined()
+            })
+
+            it("命名空间应该支持中文标识符", () => {
+                const ast = parseAST("数学::圆周率")
+                expect(ast.type).toBe("property")
+
+                const propNode = ast as ASTProperty
+                expect(propNode.namespace).toBe("数学")
+                expect(propNode.name).toBe("圆周率")
+            })
+
+            it("命名空间应该支持带标签的标识符", () => {
+                const ast = parseAST("[配置]::值")
+                expect(ast.type).toBe("property")
+
+                const propNode = ast as ASTProperty
+                expect(propNode.namespace).toBe("[配置]")
+                expect(propNode.name).toBe("值")
+            })
         })
     })
 })

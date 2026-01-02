@@ -20,11 +20,13 @@ export interface ASTUnary extends ASTNodeBase {
 export interface ASTProperty extends ASTNodeBase {
     type: "property"
     name: string
+    namespace?: string // 命名空间 (从 xxx::yyy 中提取的 xxx)
 }
 
 export interface ASTFunction extends ASTNodeBase {
     type: "function"
     name: string
+    namespace?: string // 命名空间 (从 xxx::yyy 中提取的 xxx)
     args: ASTNode[]
 }
 
@@ -46,6 +48,7 @@ export enum TokenType {
     IDENTIFIER, // [幻象]伤害, max 等
     OPERATOR, // +, -, *, /, %, //
     DOT, // . (成员访问)
+    DOUBLE_COLON, // :: (命名空间访问)
     LPAREN, // (
     RPAREN, // )
     COMMA, // ,
@@ -61,9 +64,11 @@ export interface Token {
 class Tokenizer {
     private input: string
     private position: number = 0
+    private macros: Map<string, string>
 
-    constructor(input: string) {
+    constructor(input: string, macros: Map<string, string>) {
         this.input = input
+        this.macros = macros
     }
 
     getNextToken(): Token {
@@ -99,6 +104,17 @@ class Tokenizer {
                     break
                 }
             }
+
+            // 检查是否是宏定义,进行精准匹配替换
+            if (this.macros.has(value)) {
+                const replacement = this.macros.get(value)!
+                // 将替换的文本插入到输入流中
+                this.input = this.input.slice(0, this.position - value.length) + replacement + this.input.slice(this.position)
+                this.position -= value.length
+                // 递归获取替换后的token
+                return this.getNextToken()
+            }
+
             return { type: TokenType.IDENTIFIER, value, position: this.position - value.length }
         }
 
@@ -129,6 +145,15 @@ class Tokenizer {
             this.position++
             return { type: TokenType.DOT, value: ".", position: this.position - 1 }
         }
+
+        // 处理双冒号 ::
+        if (char === ":") {
+            if (this.position + 1 < this.input.length && this.input[this.position + 1] === ":") {
+                this.position += 2
+                return { type: TokenType.DOUBLE_COLON, value: "::", position: this.position - 2 }
+            }
+            throw new Error(`单个冒号 ':' 不支持,请使用 '::' 进行命名空间访问`)
+        }
         if (char === "(") {
             this.position++
             return { type: TokenType.LPAREN, value: "(", position: this.position - 1 }
@@ -156,8 +181,8 @@ class Parser {
     private tokens: Token[] = []
     private current: number = 0
 
-    constructor(input: string) {
-        const tokenizer = new Tokenizer(input)
+    constructor(input: string, macros: Map<string, string>) {
+        const tokenizer = new Tokenizer(input, macros)
         let token = tokenizer.getNextToken()
         while (token.type !== TokenType.EOF) {
             this.tokens.push(token)
@@ -243,7 +268,7 @@ class Parser {
         return this.parseFactor()
     }
 
-    // 因子: (Expression) | Number | Identifier(Call/Prop) -> (.Identifier)*
+    // 因子: (Expression) | Number | Identifier(Call/Prop) -> (::Identifier| .Identifier)*
     private parseFactor(): ASTNode {
         let node: ASTNode
 
@@ -254,26 +279,58 @@ class Parser {
             }
         } else if (this.match(TokenType.IDENTIFIER)) {
             const name = this.previous().value
+            let namespace: string | undefined
 
-            // 检查是否为函数调用
-            if (this.match(TokenType.LPAREN)) {
-                const args: ASTNode[] = []
-                if (!this.check(TokenType.RPAREN)) {
-                    do {
-                        args.push(this.parseExpression())
-                    } while (this.match(TokenType.COMMA))
-                }
-                this.consume(TokenType.RPAREN, "函数参数后缺少 ')'")
-                node = {
-                    type: "function",
-                    name,
-                    args,
+            // 检查是否有命名空间前缀 (xxx::yyy)
+            if (this.match(TokenType.DOUBLE_COLON)) {
+                namespace = name
+                const nextToken = this.consume(TokenType.IDENTIFIER, "命名空间 '::' 后缺少标识符")
+                const actualName = nextToken.value
+
+                // 检查是否为函数调用
+                if (this.match(TokenType.LPAREN)) {
+                    const args: ASTNode[] = []
+                    if (!this.check(TokenType.RPAREN)) {
+                        do {
+                            args.push(this.parseExpression())
+                        } while (this.match(TokenType.COMMA))
+                    }
+                    this.consume(TokenType.RPAREN, "函数参数后缺少 ')'")
+                    node = {
+                        type: "function",
+                        name: actualName,
+                        namespace,
+                        args,
+                    }
+                } else {
+                    // 属性
+                    node = {
+                        type: "property",
+                        name: actualName,
+                        namespace,
+                    }
                 }
             } else {
-                // 属性
-                node = {
-                    type: "property",
-                    name,
+                // 检查是否为函数调用
+                if (this.match(TokenType.LPAREN)) {
+                    const args: ASTNode[] = []
+                    if (!this.check(TokenType.RPAREN)) {
+                        do {
+                            args.push(this.parseExpression())
+                        } while (this.match(TokenType.COMMA))
+                    }
+                    this.consume(TokenType.RPAREN, "函数参数后缺少 ')'")
+                    node = {
+                        type: "function",
+                        name,
+                        args,
+                    }
+                } else {
+                    // 属性
+                    node = {
+                        type: "property",
+                        name,
+                    }
                 }
             }
         } else if (this.match(TokenType.LPAREN)) {
@@ -337,7 +394,23 @@ class Parser {
     }
 }
 
-export function parseAST(input: string): ASTNode {
-    const parser = new Parser(input)
+export type MacroReplacement = (input: string) => string
+export type MacroMap = Map<string, string>
+
+export function parseAST(input: string, macros?: Record<string, string> | MacroMap | MacroReplacement): ASTNode {
+    let macrosMap: MacroMap = new Map()
+
+    // 如果传入的是函数,先应用于整个输入(向后兼容)
+    if (typeof macros === "function") {
+        input = macros(input)
+    } else if (macros instanceof Map) {
+        // 如果传入的是 Map,用于词法分析阶段的精准替换
+        macrosMap = macros
+    } else if (macros) {
+        // 如果传入的是 Record,转换为 Map
+        macrosMap = new Map(Object.entries(macros))
+    }
+
+    const parser = new Parser(input, macrosMap)
     return parser.parse()
 }

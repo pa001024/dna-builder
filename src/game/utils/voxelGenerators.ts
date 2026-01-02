@@ -206,8 +206,172 @@ export const Generators = {
         return Array.from(map.values())
     },
 
-    // 武器模型 - 辉珀刃 (参考图片)
-    LiseWeapon: (): VoxelData[] => {
+    // 角色Saiqi - 银白黑黄配色，短裙不对称设计
+    Saiqi: (): VoxelData[] => {
+        const map = new Map<string, VoxelData>()
+        const HY = 12
+
+        const C = {
+            SKIN: 0xfff0e0, // Pale skin
+            HAIR: 0xeaeaea, // Silver White
+            BLACK: 0x1a1a1a, // Dark
+            YELLOW: 0xd4dc28, // Acid Yellow/Greenish Yellow
+            WHITE: 0xffffff,
+            EYE: 0xbfff00, // Lime Yellow
+            ARMOR_DARK: 0x111111,
+            METAL: 0x555555,
+        }
+
+        // --- Head (y=12..16) ---
+        // Face
+        for (let x = -2; x <= 2; x++) for (let y = 0; y < 4; y++) for (let z = -2; z <= 2; z++) setBlock(map, x, HY + y, z, C.SKIN)
+
+        // Eyes
+        setBlock(map, -1, HY + 1, 2, C.EYE)
+        setBlock(map, 1, HY + 1, 2, C.EYE)
+
+        // Hair (Wild Silver)
+        // Top
+        for (let x = -3; x <= 3; x++) for (let z = -3; z <= 3; z++) setBlock(map, x, HY + 4, z, C.HAIR)
+
+        // Back/Sides
+        for (let x = -3; x <= 3; x++) for (let y = -2; y < 4; y++) setBlock(map, x, HY + y, -3, C.HAIR) // Back
+
+        // Side bangs / messy strands
+        setBlock(map, -4, HY + 3, 0, C.HAIR)
+        setBlock(map, 4, HY + 3, 0, C.HAIR)
+        setBlock(map, -4, HY + 1, -1, C.HAIR)
+        setBlock(map, 4, HY + 1, -1, C.HAIR)
+        setBlock(map, -3, HY + 5, -2, C.HAIR) // Stray hair on top
+
+        // Headpiece (Black Horns/Wings with Yellow Eyes)
+        // Left
+        setBlock(map, -3, HY + 4, 1, C.BLACK)
+        setBlock(map, -4, HY + 5, 1, C.BLACK)
+        setBlock(map, -4, HY + 6, 0, C.BLACK)
+        setBlock(map, -4, HY + 7, 1, C.BLACK) // Sharp tip
+        setBlock(map, -4, HY + 5, 2, C.YELLOW) // Eye motif
+
+        // Right
+        setBlock(map, 3, HY + 4, 1, C.BLACK)
+        setBlock(map, 4, HY + 5, 1, C.BLACK)
+        setBlock(map, 4, HY + 6, 0, C.BLACK)
+        setBlock(map, 4, HY + 7, 1, C.BLACK) // Sharp tip
+        setBlock(map, 4, HY + 5, 2, C.YELLOW) // Eye motif
+
+        // --- Upper Body (y=7..11) ---
+        // Neck/Choker
+        setBlock(map, 0, 11, 0, C.BLACK)
+
+        // Torso - White Strapless Top
+        for (let y = 8; y < 11; y++) {
+            for (let x = -1; x <= 1; x++) setBlock(map, x, y, 0, C.WHITE)
+        }
+        // Black detailing under bust
+        setBlock(map, 0, 8, 1, C.BLACK)
+        // Exposed back
+        setBlock(map, 0, 9, -1, C.SKIN)
+
+        // Shoulders (Exposed)
+        setBlock(map, -2, 10, 0, C.SKIN)
+        setBlock(map, 2, 10, 0, C.SKIN)
+
+        // --- Arms (Asymmetric) ---
+        // Right Arm (Bare Skin)
+        for (let y = 7; y < 10; y++) setBlock(map, -3, y, 0, C.SKIN)
+        setBlock(map, -3, 6, 0, C.SKIN) // Hand
+
+        // Left Arm (Black Gauntlet/Armor)
+        for (let y = 7; y < 10; y++) setBlock(map, 3, y, 0, C.ARMOR_DARK)
+        setBlock(map, 3, 6, 0, C.BLACK) // Hand
+        setBlock(map, 3, 9, 1, C.BLACK) // Elbow/Armor detail
+
+        // --- Lower Body (y=0..7) ---
+        // Waist
+        for (let x = -1; x <= 1; x++) setBlock(map, x, 7, 0, C.YELLOW)
+
+        // Skirt (Yellow, Short, Flared)
+        for (let x = -2; x <= 2; x++) {
+            for (let z = -1; z <= 1; z++) {
+                // Main skirt body
+                setBlock(map, x, 6, z, C.YELLOW)
+                // Flare out
+                if (Math.abs(x) === 2 || Math.abs(z) === 1) setBlock(map, x, 5, z, C.YELLOW)
+            }
+        }
+
+        // Black Armor side pieces on hips
+        setBlock(map, 3, 6, 0, C.BLACK)
+        setBlock(map, -3, 6, 0, C.BLACK)
+        setBlock(map, 3, 5, 1, C.BLACK) // Spiky armor bit
+        setBlock(map, -3, 5, 1, C.BLACK)
+
+        // Legs (Black Stockings/Boots)
+        // Thighs
+        setBlock(map, -1, 4, 0, C.SKIN)
+        setBlock(map, 1, 4, 0, C.SKIN)
+        // Boots/Stockings start high
+        for (let y = 0; y < 4; y++) {
+            setBlock(map, -1, y, 0, C.BLACK)
+            setBlock(map, 1, y, 0, C.BLACK)
+        }
+        // Yellow accents on boots
+        setBlock(map, -1, 3, 1, C.YELLOW)
+        setBlock(map, 1, 1, 1, C.YELLOW)
+
+        return Array.from(map.values())
+    },
+
+    // 赛琪武器 - 扭曲的黑色法杖/长枪 (Organic Twisted Staff)
+    SaiqiWeapon: (): VoxelData[] => {
+        const map = new Map<string, VoxelData>()
+        const cx = 0,
+            cz = 0
+        const BLACK = 0x151515
+        const DARK_GREY = 0x2a2a2a
+        const GLOW = 0xd4dc28 // Matches skirt yellow
+
+        // Shaft - Twisted organic look
+        for (let y = -4; y < 18; y++) {
+            setBlock(map, cx, y, cz, BLACK)
+            // Spiral / uneven texture
+            if (y % 5 === 0) setBlock(map, cx + 1, y, cz, DARK_GREY)
+            if (y % 5 === 2) setBlock(map, cx - 1, y, cz, DARK_GREY)
+            if (y % 5 === 3) setBlock(map, cx, y, cz + 1, DARK_GREY)
+        }
+
+        // Head - Forked/Branched structure
+        // Base of head
+        setBlock(map, cx, 18, cz, BLACK)
+        setBlock(map, cx + 1, 18, cz, BLACK)
+        setBlock(map, cx - 1, 18, cz, BLACK)
+
+        // Left Prong (Curved in)
+        setBlock(map, cx - 2, 19, cz, BLACK)
+        setBlock(map, cx - 2, 20, cz, BLACK)
+        setBlock(map, cx - 1, 21, cz, BLACK)
+
+        // Right Prong (Straight/Jagged)
+        setBlock(map, cx + 2, 19, cz, BLACK)
+        setBlock(map, cx + 2, 20, cz + 1, BLACK) // 3D twist
+        setBlock(map, cx + 2, 21, cz, BLACK)
+        setBlock(map, cx + 1, 22, cz, BLACK) // Tip
+
+        // Center Spike
+        setBlock(map, cx, 19, cz, BLACK)
+        setBlock(map, cx, 20, cz, BLACK)
+        setBlock(map, cx, 21, cz, BLACK)
+        setBlock(map, cx, 22, cz, BLACK)
+        setBlock(map, cx, 23, cz, BLACK)
+
+        // Glowing core suspended in branches
+        setBlock(map, cx, 20, cz + 1, GLOW)
+
+        return Array.from(map.values())
+    },
+
+    // 武器模型 - 泽世
+    DefaultWeapon: (): VoxelData[] => {
         const map = new Map<string, VoxelData>()
         const cx = 0,
             cz = 0

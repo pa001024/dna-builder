@@ -86,7 +86,7 @@ export class LeveledWeapon {
         this.基础暴伤 = weaponData.暴伤
         this.基础触发 = weaponData.触发
         if (weaponData.技能) {
-            this.技能 = weaponData.技能.map((skill) => new LeveledSkill(skill, undefined, weaponData.名称))
+            this.技能 = weaponData.技能.map((skill) => new LeveledSkill({ ...skill, 武器: this.类型 }, undefined, weaponData.名称))
             this.弹道类型 = weaponData.技能.some((v) => "射线伤害" in v.字段!) ? "非弹道" : "弹道"
         }
 

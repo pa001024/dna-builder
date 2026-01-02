@@ -48,11 +48,10 @@ const formatDesc = (desc: string) => {
                     <div class="font-medium text-primary">{{ formatProp(prop, val) }}</div>
                 </div>
                 <div
-                    v-if="eff"
+                    v-if="eff && !eff.isEffective"
                     v-for="[prop, val] in Object.entries(eff.props!).filter(([_, v]) => v)"
                     :key="prop"
-                    class="flex justify-between items-center gap-2 text-sm"
-                    :class="{ 'line-through': !eff.isEffective }"
+                    class="flex justify-between items-center gap-2 text-sm line-through"
                 >
                     <div class="text-xs text-neutral-500">{{ $t(prop) }}</div>
                     <div class="font-medium text-primary">{{ formatProp(prop, val) }}</div>

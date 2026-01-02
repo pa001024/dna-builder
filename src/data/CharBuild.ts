@@ -108,10 +108,10 @@ export interface CharBuildOptions {
     resonanceGain: number
     auraMod?: LeveledMod
     // mods?: LeveledMod[]
-    charMods?: LeveledMod[]
-    meleeMods?: LeveledMod[]
-    rangedMods?: LeveledMod[]
-    skillWeaponMods?: LeveledMod[]
+    charMods?: (LeveledMod | null)[]
+    meleeMods?: (LeveledMod | null)[]
+    rangedMods?: (LeveledMod | null)[]
+    skillWeaponMods?: (LeveledMod | null)[]
     buffs?: LeveledBuff[]
     melee: LeveledWeapon
     ranged: LeveledWeapon
@@ -125,6 +125,26 @@ export interface CharBuildOptions {
 }
 
 export class CharBuild {
+    // 静态宏定义: 用于AST表达式的宏替换
+    static macros: Record<string, string> = {
+        ATK: "攻击",
+        DEF: "防御",
+        HP: "生命",
+        SP: "神智",
+        DPH: "伤害*or(多重,1)",
+        总伤: "伤害*max(1,召唤物攻击次数)",
+        暴击伤害: "伤害.暴击",
+        DCD: "伤害.暴击",
+        DPS: "伤害*or(攻速,1+技能速度)*or(多重,1)",
+        范围收益: "伤害*技能范围",
+        耐久收益: "伤害*技能耐久",
+        效益收益: "伤害*技能效益",
+        每神智DPH: "伤害/神智消耗",
+        每持续神智DPH: "伤害/每秒神智消耗",
+        每神智DPS: "伤害*or(攻速,1+技能速度)/神智消耗",
+        每持续神智DPS: "伤害*or(攻速,1+技能速度)/每秒神智消耗",
+    }
+
     public _char!: LeveledChar
     get char() {
         return this._char
@@ -175,10 +195,10 @@ export class CharBuild {
     public hpPercent: number
     public resonanceGain: number
     public auraMod?: LeveledMod
-    public charMods: LeveledMod[]
-    public meleeMods: LeveledMod[]
-    public rangedMods: LeveledMod[]
-    public skillWeaponMods: LeveledMod[]
+    public charMods: (LeveledMod | null)[]
+    public meleeMods: (LeveledMod | null)[]
+    public rangedMods: (LeveledMod | null)[]
+    public skillWeaponMods: (LeveledMod | null)[]
     public buffs: LeveledBuff[]
     public dynamicBuffs: LeveledBuff[]
     public meleeWeapon: LeveledWeapon
@@ -229,7 +249,7 @@ export class CharBuild {
     }
 
     get charModsWithAura() {
-        return this.auraMod ? [this.auraMod!, ...this.charMods] : this.charMods
+        return (this.auraMod ? [this.auraMod!, ...this.charMods] : this.charMods).filter((v) => v !== null)
     }
 
     // 血量类型系数表
@@ -309,7 +329,7 @@ export class CharBuild {
     }
 
     get mods() {
-        return [...this.charMods, ...this.meleeMods, ...this.rangedMods, ...this.skillWeaponMods]
+        return [...this.charMods, ...this.meleeMods, ...this.rangedMods, ...this.skillWeaponMods].filter((v) => v !== null)
     }
 
     set mods(mods: LeveledMod[]) {
@@ -379,7 +399,7 @@ export class CharBuild {
         let modAttributeBonus = this.getTotalBonus("MOD属性")
         if (modAttributeBonus > 0) {
             // 计算狮鹫百首契约者MOD属性加成
-            const modsBySeries = this.mods.filter((mod) => CharBuild.elmSeries.includes(mod.系列))
+            const modsBySeries = this.charMods.filter((mod): mod is LeveledMod => mod !== null && CharBuild.elmSeries.includes(mod.系列))
             attackBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "攻击")
             healthBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "生命")
             shieldBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "护盾")
@@ -512,24 +532,9 @@ export class CharBuild {
             有效生命: (health / (1 - defense / (300 + defense)) + shield) / (1 - damageReduce),
         }
         // 应用MOD条件
-        const condMods = this.charModsWithAura.filter((mod) => mod.生效?.条件)
+        const condMods = this.charModsWithAura.filter((mod) => mod.生效?.条件 && (!minus || mod.id !== props?.id))
         if (props?.生效?.条件 && !minus) {
             condMods.push(props as LeveledMod)
-        }
-        if (!minus) {
-            const attrsRst = this.applyCondition({ ...attrs }, condMods)
-            // diff attrsRst and attrs
-            Object.keys(attrsRst).forEach((key) => {
-                if (key === "攻击") {
-                    attrs.攻击 += char.基础攻击 * (attrsRst.攻击 - attrs.攻击) * (1 + elemDamageBonus)
-                } else if (key === "生命" || key === "防御" || key === "护盾" || key === "神智") {
-                    attrs[key as keyof CharAttr] +=
-                        char[("基础" + key) as "基础生命" | "基础护盾" | "基础防御" | "基础神智"] *
-                        (attrsRst[key as keyof CharAttr] - attrs[key as keyof CharAttr])
-                } else {
-                    attrs[key as keyof CharAttr] = attrsRst[key as keyof CharAttr]
-                }
-            })
         }
         if (nocode) return attrs
         if (this.dynamicBuffs.length > 0 || (!minus && props?.code)) {
@@ -544,15 +549,22 @@ export class CharBuild {
                 attrs = props.applyDynamicAttr(char, attrs, this.allWeapons, all)
             }
         }
-
+        // 应用MOD条件 如果有变化就再计算一次
+        if (this.applyCondition(attrs, condMods)) {
+            return this.calculateAttributes(props, minus, nocode)
+        }
         return attrs
     }
 
     public applyCondition(attrs: CharAttr, mods: LeveledMod[]) {
+        let changed = false
         mods.forEach((mod) => {
-            attrs = mod.applyCondition(attrs, this.charMods)
+            changed ||= mod.applyCondition(
+                attrs,
+                this.charMods.filter((v) => v !== null),
+            )
         })
-        return attrs
+        return changed
     }
 
     // 计算武器属性
@@ -762,6 +774,22 @@ export class CharBuild {
                     : undefined,
             )
             .map((a) => a?.weapon)
+    }
+
+    getAllWeaponSkillsAttrs() {
+        const map = new Map([
+            ["远程", this.calculateWeaponAttributes(undefined, false, this.rangedWeapon, true, true).weapon],
+            ["近战", this.calculateWeaponAttributes(undefined, false, this.meleeWeapon, true, true).weapon],
+        ])
+        if (this.skillWeapon) {
+            map.set("同律", this.calculateWeaponAttributes(undefined, false, this.skillWeapon, true, true).weapon)
+        }
+        this.weaponSkills.forEach((ws) => {
+            if (ws.武器 && map.has(ws.武器.slice(0, 2))) {
+                map.set(ws.名称, map.get(ws.武器.slice(0, 2)))
+            }
+        })
+        return map
     }
 
     // 获取单项目总加成
@@ -1002,24 +1030,45 @@ export class CharBuild {
     }
 
     /**
-     * 计算随机伤害
+     * 计算基础属性和伤害 (immutable)
+     */
+    public calculateByBasename(baseName: string): [attrs: ReturnType<typeof this.calculateWeaponAttributes>, damage: DamageResult] {
+        let weapon: LeveledWeapon | LeveledSkillWeapon | undefined
+        switch (baseName) {
+            case WeaponSkillType.普通攻击:
+            case WeaponSkillType.蓄力攻击:
+            case WeaponSkillType.下落攻击:
+            case WeaponSkillType.滑行攻击:
+                weapon = this.meleeWeapon
+                break
+            case WeaponSkillType.射击:
+                weapon = this.rangedWeapon
+                break
+            default:
+                if (this.skillWeapon && this.skillWeapon.名称 === baseName) weapon = this.skillWeapon
+                break
+        }
+        const attrs = this.calculateWeaponAttributes(undefined, false, weapon)
+        const damage: DamageResult = weapon ? this.calculateWeaponDamage(attrs, weapon) : this.calculateSkillDamage(attrs)
+        return [attrs, damage]
+    }
+
+    /**
+     * 计算随机伤害 (immutable)
      */
     public calculateRandomDamage(baseWithTarget: string, enemy?: DynamicMonster) {
-        this.baseWithTarget = baseWithTarget
-        console.log(baseWithTarget)
-        const attrs = this.calculateWeaponAttributes()
-        const damage: DamageResult = this.selectedWeapon
-            ? this.calculateWeaponDamage(attrs, this.selectedWeapon)
-            : this.calculateSkillDamage(attrs)
-        const cc = (attrs.weapon?.暴击 || 0) % 1
-        const tc = attrs.weapon?.触发 || 0
+        const [baseName, target] = baseWithTarget.split("::")
+        const targetFunction = target || "伤害"
+        const [attrs, damage] = this.calculateByBasename(baseName)
+        // 计算随机暴击率影响
         let dmg = 1
-        if (cc > 0 && tc > 0 && damage.higherCritTrigger && damage.lowerCritTrigger) {
+        const cc = (attrs.weapon?.暴击 || 0) % 1
+        if (cc > 0 && damage.higherCritExpectedTrigger && damage.lowerCritExpectedTrigger) {
             const r = Math.random()
-            dmg = r < cc ? damage.higherCritTrigger : damage.lowerCritTrigger
+            dmg = r < cc ? damage.higherCritExpectedTrigger : damage.lowerCritExpectedTrigger
             dmg /= damage.expectedDamage
         }
-        const final = this.calculateTargetFunction(damage, attrs)
+        const final = this.calculateTargetFunction(damage, attrs, targetFunction)
         const floating = 1 + 0.1 * Math.random() - 0.05 // -0.05 ~ 0.05
         const defenseMultiplier = this.calculateDefenseMultiplier(attrs)
         dmg = final * dmg * floating
@@ -1046,59 +1095,13 @@ export class CharBuild {
         return this.selectedSkill?.召唤物 !== undefined
     }
 
-    public translateTargetFunction(targetFunction: string) {
-        let astInput = "伤害"
-        switch (targetFunction) {
-            case "DPH":
-                astInput = "伤害*or(多重,1)"
-                break
-            case "弹片伤害":
-                astInput = "伤害"
-                break
-            case "总伤":
-            case "TDD":
-                astInput = "伤害*max(1,召唤物攻击次数)"
-                break
-            case "暴击伤害":
-            case "DCD":
-                astInput = "伤害.暴击"
-                break
-            case "每秒伤害":
-            case "DPS":
-                astInput = "伤害*or(攻速,1+技能速度)*or(多重,1)"
-                break
-            case "每神智伤害":
-            case "每神智DPH":
-            case "DPHPSP":
-                astInput = "伤害/神智消耗"
-                break
-            case "每持续神智伤害":
-            case "每持续神智DPH":
-            case "DPHPSSP":
-                astInput = "伤害/每秒神智消耗"
-                break
-            case "每神智每秒伤害":
-            case "每神智DPS":
-            case "DPSPSP":
-                astInput = "伤害*or(攻速,1+技能速度)/神智消耗"
-                break
-            case "每持续神智每秒伤害":
-            case "每持续神智DPS":
-            case "DPSPSSP":
-                astInput = "伤害*or(攻速,1+技能速度)/每秒神智消耗"
-                break
-            default:
-                if (targetFunction) astInput = targetFunction
-        }
-        return astInput
-    }
     // 计算目标函数
     public calculateTargetFunction(
         damage: DamageResult,
         attrs: ReturnType<typeof this.calculateWeaponAttributes>,
         targetFunction?: string,
     ): number {
-        let astInput = this.translateTargetFunction(targetFunction ?? this.targetFunction)
+        let astInput = targetFunction || this.targetFunction || "伤害"
 
         // 调用ast解析器解析目标函数表达式
         let result = this.evaluateAST(astInput, damage, attrs)
@@ -1108,9 +1111,8 @@ export class CharBuild {
     }
     astCache = new Map<string, ASTNode>()
     getIdentifierNames(astInput: string) {
-        astInput = this.translateTargetFunction(astInput)
         try {
-            const ast = parseAST(astInput)
+            const ast = parseAST(astInput, CharBuild.macros)
             const identifiers = new Set<string>()
             const collectIdentifiers = (node: ASTNode) => {
                 if (node.type === "property") {
@@ -1137,14 +1139,21 @@ export class CharBuild {
      * 验证AST表达式是否合法
      */
     validateAST(astInput: string): string | undefined {
-        astInput = this.translateTargetFunction(astInput)
+        if (!astInput) return ""
         try {
-            const ast = parseAST(astInput)
+            const ast = parseAST(astInput, CharBuild.macros)
 
             // 验证AST中的标识符是否存在
             const attrs = this.calculateWeaponAttributes()
-            const weaponAttrs = attrs.weapon || ({} as WeaponAttr)
-            const skillAttrs = this.selectedSkill?.getFieldsWithAttr(attrs)
+
+            const weaponAttrs = this.getAllWeaponSkillsAttrs()
+            const skillAttrs = new Map(this.allSkills.map((v) => [v.名称, v.getFieldsWithAttr(attrs)]))
+            skillAttrs.set("E", skillAttrs.get(this.skills[0].名称)!)
+            skillAttrs.set("Q", skillAttrs.get(this.skills[1].名称)!)
+            const getWeaponAttr = (fieldName: string, base?: string) =>
+                weaponAttrs?.get(base || this.baseName)?.[fieldName as keyof WeaponAttr] || 0
+            const getSkillAttr = (fieldName: string, base?: string) =>
+                skillAttrs?.get(base || this.baseName)?.find((v) => v.名称.includes(fieldName))
 
             // 递归验证AST节点
             const validateNode = (node: ASTNode): string | undefined => {
@@ -1152,12 +1161,13 @@ export class CharBuild {
                     case "property": {
                         const fieldName = node.name
                         // 检查是否是技能字段、属性或武器属性
-                        const isSkillField = skillAttrs?.some((v) => v.名称.includes(fieldName))
+                        const isSkillField = getSkillAttr(fieldName, node.namespace)
                         const isAttr = fieldName in attrs
-                        const isWeaponAttr = fieldName in weaponAttrs || fieldName === "武器攻击"
+                        const isWeaponAttr = getWeaponAttr(fieldName, node.namespace)
 
                         if (!isSkillField && !isAttr && !isWeaponAttr) {
-                            return `找不到标识符: "${fieldName}"`
+                            const ns = node.namespace ? `${node.namespace}::` : ""
+                            return `找不到标识符: "${ns}${fieldName}"`
                         }
                         break
                     }
@@ -1207,7 +1217,7 @@ export class CharBuild {
         let ast = this.astCache.get(astInput)
         if (!ast) {
             try {
-                ast = parseAST(astInput)
+                ast = parseAST(astInput, CharBuild.macros)
                 this.astCache.set(astInput, ast)
             } catch (e) {
                 console.error("表达式错误:", e)
@@ -1215,12 +1225,18 @@ export class CharBuild {
             }
         }
         if (!ast) return 0
-        const weaponAttrs = attrs.weapon || ({} as WeaponAttr)
-        const skillAttrs = this.selectedSkill?.getFieldsWithAttr(attrs)
+        const weaponAttrs = this.getAllWeaponSkillsAttrs()
+        const skillAttrs = new Map(this.allSkills.map((v) => [v.名称, v.getFieldsWithAttr(attrs)]))
+        const getWeaponAttr = (fieldName: string, base?: string) =>
+            weaponAttrs?.get(base || this.baseName)?.[fieldName as keyof WeaponAttr] || 0
+        const getSkillAttr = (fieldName: string, base?: string) =>
+            skillAttrs?.get(base || this.baseName)?.find((v) => v.名称.includes(fieldName))
 
-        function evaluateSkill(fieldName: string) {
-            if (fieldName === "[虚拟]") return 1
-            const field = skillAttrs?.find((v) => v.名称.includes(fieldName))
+        function evaluateSkill(fieldName: string, ns?: string) {
+            if (fieldName === "[攻击]") return attrs.攻击 + getWeaponAttr("攻击", ns)
+            else if (fieldName === "[防御]") return attrs.防御
+            else if (fieldName === "[生命]") return attrs.生命
+            const field = getSkillAttr(fieldName, ns)
             if (!field) return 0
             // 计算技能基础伤害
             const mul = field.值
@@ -1228,7 +1244,7 @@ export class CharBuild {
             let baseDamage = field.值2 || 0
             let times = field.段数 || 1
             if (!field.基础) {
-                const patk = weaponAttrs.攻击 || 0
+                const patk = getWeaponAttr("攻击", ns) || 0
                 baseDamage += mul * (attrs.攻击 + patk)
             } else if (field.基础 === "生命") {
                 baseDamage += mul * attrs.生命
@@ -1240,12 +1256,13 @@ export class CharBuild {
         function evaluateAttr(fieldName: string) {
             return fieldName in attrs ? attrs[fieldName as keyof CharAttr] : 0
         }
-        function evaluateWeaponAttr(fieldName: string) {
+        function evaluateWeaponAttr(fieldName: string, ns?: string) {
             if (fieldName === "武器攻击") fieldName = "攻击"
-            return fieldName in weaponAttrs ? weaponAttrs[fieldName as keyof WeaponAttr] : 0
+            return getWeaponAttr(fieldName, ns)
         }
-        function evaluateIdentity(fieldName: string) {
-            return evaluateSkill(fieldName) || evaluateAttr(fieldName) || evaluateWeaponAttr(fieldName) || 0
+        const evaluateIdentity = (fieldName: string, ns?: string) => {
+            if (ns) return evaluateSkill(fieldName, ns) || evaluateWeaponAttr(fieldName, ns) || evaluateAttr(fieldName) || 0
+            else return evaluateSkill(fieldName, ns) || evaluateAttr(fieldName) || evaluateWeaponAttr(fieldName, ns) || 0
         }
         function evaluateMember(memberName?: string) {
             if (memberName === "暴击") return damage.higherCritExpectedTrigger || damage.expectedDamage
@@ -1258,7 +1275,6 @@ export class CharBuild {
             if (memberName === "未暴击未触发" || memberName === "未触发未暴击") return damage.lowerCritNoTrigger || damage.expectedDamage
             return damage.expectedDamage // 找不到成员默认期望伤害
         }
-
         // AST求值函数
         const evaluate = (node: ASTNode): number => {
             switch (node.type) {
@@ -1299,10 +1315,10 @@ export class CharBuild {
                 }
 
                 case "property": {
-                    const value = evaluateIdentity(node.name)
+                    const value = evaluateIdentity(node.name, node.namespace)
                     // 如果是技能字段（evaluateSkill返回值>0），需要乘以默认的伤害系数
-                    const skillValue = evaluateSkill(node.name)
-                    if (skillValue > 0) {
+                    const skillValue = evaluateSkill(node.name, node.namespace)
+                    if (skillValue) {
                         return value * evaluateMember()
                     }
                     return value
@@ -1321,6 +1337,10 @@ export class CharBuild {
                             return Math.ceil(args[0])
                         case "or":
                             return args.find((v) => v !== 0) ?? args[args.length - 1]
+                        case "log":
+                            return Math.log(args[0])
+                        case "power":
+                            return Math.pow(args[0], args[1])
                         default:
                             throw new Error(`未知的函数: ${node.name}`)
                     }
@@ -1334,7 +1354,7 @@ export class CharBuild {
                     // 如果object是property节点，直接调用evaluateIdentity而不乘以evaluateMember()
                     let objectValue: number
                     if (objectNode.type === "property") {
-                        objectValue = evaluateIdentity(objectNode.name)
+                        objectValue = evaluateIdentity(objectNode.name, objectNode.namespace)
                     } else {
                         objectValue = evaluate(objectNode)
                     }
@@ -1383,7 +1403,10 @@ export class CharBuild {
     public checkModEffective(mod: LeveledMod, includeSelf = true) {
         if (!mod.生效?.条件) return undefined
         const attrs = this.calculateAttributes(includeSelf ? mod : undefined)
-        return mod.checkCondition(attrs, this.charMods)
+        return mod.checkCondition(
+            attrs,
+            this.charMods.filter((v) => v !== null),
+        )
     }
 
     get isSkill() {
@@ -1547,10 +1570,10 @@ export class CharBuild {
             resonanceGain: this.resonanceGain,
             imbalance: this.imbalance,
             auraMod: this.auraMod ? new LeveledMod(this.auraMod.id, this.auraMod.等级) : undefined,
-            charMods: this.charMods.map((m) => new LeveledMod(m.id, m.等级, m.buffLv)),
-            meleeMods: this.meleeMods.map((m) => new LeveledMod(m.id, m.等级, m.buffLv)),
-            rangedMods: this.rangedMods.map((m) => new LeveledMod(m.id, m.等级, m.buffLv)),
-            skillWeaponMods: this.skillWeaponMods.map((m) => new LeveledMod(m.id, m.等级, m.buffLv)),
+            charMods: this.charMods.map((m) => (m ? new LeveledMod(m.id, m.等级, m.buffLv) : null)),
+            meleeMods: this.meleeMods.map((m) => (m ? new LeveledMod(m.id, m.等级, m.buffLv) : null)),
+            rangedMods: this.rangedMods.map((m) => (m ? new LeveledMod(m.id, m.等级, m.buffLv) : null)),
+            skillWeaponMods: this.skillWeaponMods.map((m) => (m ? new LeveledMod(m.id, m.等级, m.buffLv) : null)),
             buffs: this.buffs.map((b) => new LeveledBuff(b.名称, b.等级)),
             melee: new LeveledWeapon(this.meleeWeapon.名称, this.meleeWeapon.精炼, this.meleeWeapon.等级, this.meleeWeapon.effectLv),
             ranged: new LeveledWeapon(this.rangedWeapon.名称, this.rangedWeapon.精炼, this.rangedWeapon.等级, this.meleeWeapon.effectLv),
@@ -1562,6 +1585,62 @@ export class CharBuild {
             skillLevel: this.skills[0].等级,
             timeline: this.timeline,
         })
+    }
+    getMods(charTab: string) {
+        if (charTab === "角色") {
+            return this.charMods
+        } else if (charTab === "近战") {
+            return this.meleeMods
+        } else if (charTab === "远程") {
+            return this.rangedMods
+        } else if (charTab === "同律") {
+            return this.skillWeaponMods
+        }
+        return []
+    }
+    getModCost(charTab: string) {
+        return this.getMods(charTab).reduce((acc, cur) => acc + (cur?.耐受 || 0), 0)
+    }
+    getModCostMax(charTab: string) {
+        const max = this.getModCap(charTab)
+        let now = this.getModCost(charTab)
+        const costs = this.getMods(charTab)
+            .map((m, i) => ({ m, i }))
+            .sort((a, b) => (b.m?.耐受 || 0) - (a.m?.耐受 || 0))
+        for (const cost of costs) {
+            if (now > max) {
+                now -= (cost.m?.耐受 || 0) - Math.ceil((cost.m?.耐受 || 0) / 2)
+            } else {
+                break
+            }
+        }
+        return now
+    }
+    getModCap(charTab: string) {
+        let charOrWeapon: { 等级: number } = this.char
+        if (charTab === "近战") {
+            charOrWeapon = this.meleeWeapon
+        } else if (charTab === "远程") {
+            charOrWeapon = this.rangedWeapon
+        }
+        return 20 + ((charTab === "角色" && this.auraMod?.["最大耐受"]) || 0) + charOrWeapon.等级
+    }
+    getModCostTransfer(charTab: string) {
+        const max = this.getModCap(charTab)
+        let now = this.getModCost(charTab)
+        const costs = this.getMods(charTab)
+            .map((m, i) => ({ m, i }))
+            .sort((a, b) => (b.m?.耐受 || 0) - (a.m?.耐受 || 0))
+        let need: number[] = []
+        for (const cost of costs) {
+            if (now > max) {
+                now -= (cost.m?.耐受 || 0) - Math.ceil((cost.m?.耐受 || 0) / 2)
+                need.push(cost.i)
+            } else {
+                break
+            }
+        }
+        return need
     }
 
     getCode(type = "角色") {
@@ -1630,7 +1709,9 @@ export class CharBuild {
         enableLog = true,
     }: BuildOption) {
         const initBuild = this.clone()
-        includeTypes.forEach((key) => (preserveTypes.includes(key) ? 0 : (initBuild[key] = [])))
+        includeTypes.forEach((key) =>
+            preserveTypes.includes(key) ? (initBuild[key] = initBuild[key].filter((v) => v !== null)) : (initBuild[key] = []),
+        )
         const localBuild = initBuild.clone()
         // 创建一个集合记录已选择的互斥系列
         const selectedExclusiveSeries = {
@@ -1651,7 +1732,7 @@ export class CharBuild {
 
         includeTypes.forEach((key) => {
             localBuild[key] = []
-            initBuild[key].forEach((mod) => addMod(key, mod))
+            initBuild[key].forEach((mod) => addMod(key, mod!))
         })
         let logString = ""
         function log(msg: string) {
@@ -1672,7 +1753,7 @@ export class CharBuild {
             }
         }
         function removeMod(key: ModTypeKey, index: number) {
-            const mod = localBuild[key][index]
+            const mod = localBuild[key][index]!
             localBuild[key].splice(index, 1)
             // 从互斥系列集合中移除
             if (CharBuild.exclusiveSeries.includes(mod.系列)) {
@@ -1690,7 +1771,7 @@ export class CharBuild {
         function sortByIcome(key: ModTypeKey) {
             const initMods = initBuild[key]
             const rst = localBuild[key].slice(initMods.length).sort((a, b) => {
-                return localBuild.calcIncome(b, true) - localBuild.calcIncome(a, true)
+                return localBuild.calcIncome(b!, true) - localBuild.calcIncome(a!, true)
             })
             localBuild[key] = [...initMods, ...rst]
             return rst[0]
@@ -1778,7 +1859,7 @@ export class CharBuild {
                     if (maxed === null) return
                 }
                 sortByIcome(key)
-                const lastIncome = localBuild.calcIncome(localBuild[key].at(-1), true)
+                const lastIncome = localBuild.calcIncome(localBuild[key].at(-1)!, true)
                 const copyBuild = localBuild.clone()
                 copyBuild[key].pop()
                 const newIncome = copyBuild.calcIncome(maxed)

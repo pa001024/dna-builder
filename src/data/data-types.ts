@@ -86,6 +86,7 @@ export interface SkillWeapon {
     暴击?: number
     暴伤?: number
     触发?: number
+    攻速?: number
     技能?: Skill[]
 }
 
@@ -116,6 +117,7 @@ export interface Skill {
     id?: number
     名称: string
     类型: string
+    武器?: string
     描述?: string
     字段?: Record<string, SkillField | string>
     术语解释?: Record<string, string>

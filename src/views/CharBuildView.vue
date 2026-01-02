@@ -179,10 +179,10 @@ const charBuild = computed(
         new CharBuild({
             char: new LeveledChar(selectedChar.value, charSettings.value.charLevel),
             auraMod: new LeveledMod(charSettings.value.auraMod),
-            charMods: selectedCharMods.value.filter((mod) => mod !== null),
-            meleeMods: selectedMeleeMods.value.filter((mod) => mod !== null),
-            rangedMods: selectedRangedMods.value.filter((mod) => mod !== null),
-            skillWeaponMods: selectedSkillWeaponMods.value.filter((mod) => mod !== null),
+            charMods: selectedCharMods.value,
+            meleeMods: selectedMeleeMods.value,
+            rangedMods: selectedRangedMods.value,
+            skillWeaponMods: selectedSkillWeaponMods.value,
             skillLevel: charSettings.value.charSkillLevel,
             buffs: selectedBuffs.value,
             melee: new LeveledWeapon(
@@ -360,22 +360,22 @@ function applyAutobuild() {
     charSettings.value.rangedWeaponLevel = newBuild.rangedWeapon.等级
     charSettings.value.rangedWeaponRefine = newBuild.rangedWeapon.精炼
     charSettings.value.charMods = pad(
-        newBuild.charMods.map((v) => [v.id, v.等级]),
+        newBuild.charMods.map((v) => [v!.id, v!.等级]),
         8,
         null,
     )
     charSettings.value.meleeMods = pad(
-        newBuild.meleeMods.map((v) => [v.id, v.等级]),
+        newBuild.meleeMods.map((v) => [v!.id, v!.等级]),
         8,
         null,
     )
     charSettings.value.rangedMods = pad(
-        newBuild.rangedMods.map((v) => [v.id, v.等级]),
+        newBuild.rangedMods.map((v) => [v!.id, v!.等级]),
         8,
         null,
     )
     charSettings.value.skillWeaponMods = pad(
-        newBuild.skillWeaponMods.map((v) => [v.id, v.等级]),
+        newBuild.skillWeaponMods.map((v) => [v!.id, v!.等级]),
         4,
         null,
     )
@@ -792,7 +792,7 @@ function shareCharBuild() {
                                                     {{ format100r(charBuild.rangedWeapon[key]!) }}
                                                 </li>
                                                 <li
-                                                    v-for="mod in charBuild.charMods.filter((m) => m[key])"
+                                                    v-for="mod in charBuild.charMods.filter((m): m is LeveledMod => m && m[key])"
                                                     class="flex justify-between gap-8 text-sm text-primary"
                                                 >
                                                     <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
@@ -975,7 +975,7 @@ function shareCharBuild() {
                                                 {{ format100r(charBuild.rangedWeapon[key]!) }}
                                             </li>
                                             <li
-                                                v-for="mod in charBuild.charMods.filter((m) => m[key])"
+                                                v-for="mod in charBuild.charMods.filter((m): m is LeveledMod => m && m[key])"
                                                 class="flex justify-between gap-8 text-sm text-primary"
                                             >
                                                 <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
@@ -1048,7 +1048,7 @@ function shareCharBuild() {
                                                 {{ format100r(charBuild.rangedWeapon[key]!) }}
                                             </li>
                                             <li
-                                                v-for="mod in charBuild.meleeMods.filter((m) => m[key])"
+                                                v-for="mod in charBuild.meleeMods.filter((m): m is LeveledMod => m && m[key])"
                                                 class="flex justify-between gap-8 text-sm text-primary"
                                             >
                                                 <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
@@ -1201,7 +1201,7 @@ function shareCharBuild() {
                                                 {{ format100r(charBuild.rangedWeapon[key]!) }}
                                             </li>
                                             <li
-                                                v-for="mod in charBuild.charMods.filter((m) => m[key])"
+                                                v-for="mod in charBuild.charMods.filter((m): m is LeveledMod => m && m[key])"
                                                 class="flex justify-between gap-8 text-sm text-primary"
                                             >
                                                 <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
@@ -1270,7 +1270,7 @@ function shareCharBuild() {
                                                 {{ format100r(charBuild.rangedWeapon[key]!) }}
                                             </li>
                                             <li
-                                                v-for="mod in charBuild.rangedMods.filter((m) => m[key])"
+                                                v-for="mod in charBuild.rangedMods.filter((m): m is LeveledMod => m && m[key])"
                                                 class="flex justify-between gap-8 text-sm text-primary"
                                             >
                                                 <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
@@ -1364,7 +1364,7 @@ function shareCharBuild() {
                         <div class="space-y-1">
                             <FullTooltip
                                 side="bottom"
-                                v-for="[key, val] in Object.entries(attributes).filter(([k]) => k === '攻击')"
+                                v-for="[key, val] in Object.entries(attributes).filter(([k]) => k === '攻击' || k === '技能威力')"
                                 :key="key"
                             >
                                 <template #tooltip>
@@ -1407,7 +1407,7 @@ function shareCharBuild() {
                                                 {{ format100r(charBuild.rangedWeapon[key]!) }}
                                             </li>
                                             <li
-                                                v-for="mod in charBuild.charMods.filter((m) => m[key])"
+                                                v-for="mod in charBuild.charMods.filter((m): m is LeveledMod => m && m[key])"
                                                 class="flex justify-between gap-8 text-sm text-primary"
                                             >
                                                 <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
@@ -1481,7 +1481,7 @@ function shareCharBuild() {
                                                 {{ format100r(charBuild.rangedWeapon[key]!) }}
                                             </li>
                                             <li
-                                                v-for="mod in charBuild.rangedMods.filter((m) => m[key])"
+                                                v-for="mod in charBuild.rangedMods.filter((m): m is LeveledMod => m && m[key])"
                                                 class="flex justify-between gap-8 text-sm text-primary"
                                             >
                                                 <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
@@ -1601,7 +1601,7 @@ function shareCharBuild() {
                                 {{ charBuild.validateAST(targetFunction) }}
                             </div>
                             <div v-else class="flex justify-between items-center p-1">
-                                <div class="text-sm text-base-content/80">计算结果</div>
+                                <div class="text-sm text-base-content/80">{{ charSettings.baseName }}</div>
                                 <div class="text-primary font-bold text-md font-orbitron">
                                     {{ totalDamage }}
                                 </div>
@@ -1848,7 +1848,15 @@ function shareCharBuild() {
                             >
                                 <div class="flex items-center gap-2">
                                     <SectionMarker />
-                                    <h2 class="text-lg font-bold">{{ $t("魔之楔") }}</h2>
+                                    <h2 class="text-lg font-bold">
+                                        {{ $t("魔之楔") }}
+                                        <span class="text-sm text-gray-400">
+                                            ({{ charBuild.getModCostMax(charTab) }}/{{ charBuild.getModCap(charTab) }})
+                                        </span>
+                                        <span class="badge badge-ghost badge-sm"
+                                            >{{ charBuild.getModCostTransfer(charTab).length }}转移模块</span
+                                        >
+                                    </h2>
                                 </div>
                                 <span
                                     class="flex-none size-8 items-center justify-center text-lg text-base-content/50 swap swap-flip -rotate-90"
@@ -1874,6 +1882,7 @@ function shareCharBuild() {
                                         @select-aura-mod="charSettings.auraMod = $event"
                                         type="角色"
                                         @swap-mods="(index1, index2) => swapMods(index1, index2, '角色')"
+                                        :polset="charBuild.getModCostTransfer(charTab)"
                                     />
 
                                     <!-- 近战武器MOD -->
@@ -1894,6 +1903,7 @@ function shareCharBuild() {
                                         @level-change="charSettings.meleeMods[$event[0]]![1] = $event[1]"
                                         type="近战"
                                         @swap-mods="(index1, index2) => swapMods(index1, index2, '近战')"
+                                        :polset="charBuild.getModCostTransfer(charTab)"
                                     />
 
                                     <!-- 远程武器MOD -->
@@ -1914,6 +1924,7 @@ function shareCharBuild() {
                                         @level-change="charSettings.rangedMods[$event[0]]![1] = $event[1]"
                                         type="远程"
                                         @swap-mods="(index1, index2) => swapMods(index1, index2, '远程')"
+                                        :polset="charBuild.getModCostTransfer(charTab)"
                                     />
 
                                     <!-- 同律武器MOD -->
@@ -1934,6 +1945,7 @@ function shareCharBuild() {
                                         @level-change="charSettings.skillWeaponMods[$event[0]]![1] = $event[1]"
                                         type="同律"
                                         @swap-mods="(index1, index2) => swapMods(index1, index2, '同律')"
+                                        :polset="charBuild.getModCostTransfer(charTab)"
                                     />
                                 </div>
                             </div>
@@ -2145,7 +2157,7 @@ function shareCharBuild() {
                                                     charBuild.selectedSkill?.召唤物?.名称
                                                         ? `[${charBuild.selectedSkill?.召唤物?.名称}]`
                                                         : ""
-                                                }}{{ charSettings.targetFunction }}
+                                                }}{{ charSettings.targetFunction || $t("伤害") }}
                                             </div>
                                             <div class="text-primary font-bold text-lg font-orbitron">
                                                 {{ Math.round(totalDamage) }}

@@ -47,8 +47,8 @@ export class LeveledSkillWeapon {
         // 复制基础属性
         this.id = weaponData.id
         this.名称 = weaponData.名称
-        this.类型 = weaponData.类型[0]
-        this.类别 = weaponData.类型[1]
+        this.类型 = weaponData.类型[0] + weaponData.类型[1]
+        this.类别 = weaponData.类型[2]
         this.伤害类型 = weaponData.伤害类型 || "切割"
         this.基础攻击 = weaponData.攻击 || 0
         this.基础暴击 = weaponData.暴击 || 0
@@ -58,11 +58,12 @@ export class LeveledSkillWeapon {
         // 设置技能等级等级（如果提供），否则设为10
         this._技能等级 = Math.max(1, Math.min(this._maxSkillLevel, 技能等级 ?? 10))
 
-        if (weaponData.技能) this.技能 = weaponData.技能.map((skill) => new LeveledSkill(skill, this._技能等级, weaponData.名称))
+        if (weaponData.技能)
+            this.技能 = weaponData.技能.map((skill) => new LeveledSkill({ ...skill, 武器: this.类型 }, this._技能等级, weaponData.名称))
 
         // 初始化倍率相关属性为undefined
         this.弹片数 = undefined
-        this.射速 = undefined
+        this.射速 = weaponData.攻速 || 1
         this.段数 = undefined
 
         // 设置武器等级（如果提供），否则设为80

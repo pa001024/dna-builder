@@ -19,6 +19,7 @@ export class LeveledSkill {
     id: number
     名称: string
     描述?: string
+    武器?: string
     术语解释?: Record<string, string>
     类型: string
     字段: LeveledSkillField[]
@@ -42,6 +43,7 @@ export class LeveledSkill {
         this.名称 = skillData.名称
         this.类型 = skillData.类型
         this.描述 = skillData.描述
+        if (skillData.武器) this.武器 = skillData.武器
         this.术语解释 = skillData.术语解释
         // 设置技能等级（如果提供），否则设为10
         this.等级 = 等级 || 10

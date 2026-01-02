@@ -48,6 +48,7 @@ const props = defineProps<{
     control?: boolean
     charBuild?: CharBuild
     index?: number
+    polset?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -184,6 +185,10 @@ function handleMouseUp(event: MouseEvent) {
                     <!-- 背景 -->
                     <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <img :src="mod.url" :alt="mod.名称" />
+                    </div>
+                    <div class="absolute top-2 left-2 text-xs pointer-events-none flex items-center" :class="{ 'text-green-500': polset }">
+                        <Icon v-if="mod.极性" class="inline-block" :icon="`po-${mod.极性 as 'A' | 'D' | 'V' | 'O'}`" />
+                        {{ polset ? Math.ceil(mod.耐受 / 2) : mod.耐受 }}
                     </div>
                     <!-- MOD名称 -->
                     <div class="relative mt-auto w-full bg-base-content/30 z-10 text-left p-2">

@@ -25,6 +25,7 @@ interface Props {
     charBuild: CharBuild
     type: string
     auraMod?: number
+    polset?: number[]
 }
 
 const props = defineProps<Props>()
@@ -274,6 +275,7 @@ const aMod = computed(() => {
                 :mod="mod"
                 :income="mod ? charBuild.calcIncome(mod, true) : 0"
                 :index="index"
+                :polset="polset?.includes(index)"
                 @click="handleSlotClick(index)"
                 @removeMod="handleRemoveMod(index)"
                 @dragStart="handleDragStart(index)"

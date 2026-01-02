@@ -1,6 +1,7 @@
-import { LeveledSkillField } from "../../data/leveled/LeveledSkill"
+import { LeveledSkillField } from "../../data"
 import { BaseSkill } from "./BaseSkill"
 import { LiseSkillE, LiseSkillQ } from "./skills/Lise"
+import { SaiqiSkillE, SaiqiSkillQ } from "./skills/Saiqi"
 import { VoxelEngine } from "./VoxelEngine"
 
 /**
@@ -18,7 +19,9 @@ export const SkillRegistry = {
             throw new Error("技能名称与实例不能为空")
         }
         if (this._skills.has(id)) {
-            throw new Error(`技能 "${id}" 已存在`)
+            // throw new Error(`技能 "${id}" 已存在`)
+            // Allow overwrite for hot reload or re-initialization
+            console.warn(`Skill ${id} re-registered`)
         }
         this._skills.set(id, skill)
     },
@@ -48,3 +51,5 @@ export const SkillRegistry = {
 
 SkillRegistry.register(410101, LiseSkillE)
 SkillRegistry.register(410102, LiseSkillQ)
+SkillRegistry.register(530101, SaiqiSkillE)
+SkillRegistry.register(530102, SaiqiSkillQ)

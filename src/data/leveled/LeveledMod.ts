@@ -168,7 +168,7 @@ export class LeveledMod implements Mod {
             this.生效 = keys.reduce(
                 (acc, key) => {
                     let currentValue = (maxValue[key] / (this.maxLevel + 1)) * (lv + 1)
-                    if (key === "神智回复" || key === "最大耐受") currentValue = Math.round(currentValue)
+                    if (key === "神智回复" || key === "最大耐受") currentValue = Math.floor(currentValue)
                     acc[key] = currentValue
                     vals.push(currentValue)
                     return acc
@@ -190,7 +190,7 @@ export class LeveledMod implements Mod {
             const maxValue = this._originalModData[prop] || 0
             if (maxValue) {
                 let currentValue = (maxValue / (this.maxLevel + 1)) * (lv + 1)
-                if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.round(currentValue)
+                if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.floor(currentValue)
                 this[prop] = currentValue
             }
         })
@@ -199,7 +199,7 @@ export class LeveledMod implements Mod {
             const buff = this.buff!
             const maxValue = buff[prop] || 0
             let currentValue = (maxValue / (10 + 1)) * (lv + 1)
-            if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.round(currentValue)
+            if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.floor(currentValue)
             this[prop] = this[prop] ? this[prop] + currentValue : currentValue
             if (buff.描述.includes(`{%}`)) {
                 buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(buff.baseValue * 100).toFixed(1)}%`)
@@ -230,6 +230,7 @@ export class LeveledMod implements Mod {
         return { isEffective, props: rest }
     }
 
+    /** 检查单卡是否生效 */
     getCondition() {
         if (!this.生效?.条件?.length) return undefined
         const attrs: CharAttr = {
@@ -276,15 +277,24 @@ export class LeveledMod implements Mod {
     }
 
     /**
-     * 应用MOD条件
+     * 应用MOD条件 (mutable)
      */
-    applyCondition(attrs: CharAttr, charMods: LeveledMod[]): CharAttr {
+    applyCondition(attrs: CharAttr, charMods: LeveledMod[]) {
         const condition = this.checkCondition(attrs, charMods)
-        if (!condition || !condition.isEffective) return attrs
+        if (!condition) return false
+        let changed = false
         Object.keys(condition.props).forEach((key) => {
-            attrs[key as keyof CharAttr] += condition.props[key]
+            if (condition.isEffective) {
+                if (this[key] !== condition.props[key]) {
+                    this[key] = condition.props[key]
+                    changed = true
+                }
+            } else if (this[key]) {
+                delete this[key]
+                changed = true
+            }
         })
-        return attrs
+        return changed
     }
 
     /**
