@@ -51,7 +51,7 @@ const sortedModOptions = computed(() => {
                 }
                 // 记录非契约者MOD名称（用于名称互斥）
                 if (mod.系列 !== "契约者") {
-                    mod.excludeNames.forEach((name) => equippedExclusiveNames.add(name))
+                    equippedExclusiveNames.add(mod.名称)
                 }
                 // 记录MOD数量
                 idCount.set(mod.id, (idCount.get(mod.id) || 0) + 1)
@@ -68,7 +68,7 @@ const sortedModOptions = computed(() => {
                 }
                 // 记录非契约者MOD名称（用于名称互斥）
                 if (mod.系列 !== "契约者") {
-                    mod.excludeNames.forEach((name) => equippedExclusiveNames.add(name))
+                    equippedExclusiveNames.add(mod.名称)
                 }
                 // 记录MOD数量
                 idCount.set(mod.id, (idCount.get(mod.id) || 0) + 1)
@@ -87,7 +87,7 @@ const sortedModOptions = computed(() => {
         }
 
         // 2. 过滤同名的非契约者MOD（名称互斥）
-        if (mod.系列 !== "契约者" && mod.excludeNames.some((name) => equippedExclusiveNames.has(name))) {
+        if (mod.系列 !== "契约者" && equippedExclusiveNames.has(mod.名称)) {
             return false
         }
 
@@ -145,6 +145,7 @@ const dropTargetIndex = ref<number | null>(null)
 // 方法
 function handleSlotClick(index: number) {
     localSelectedSlot.value = index
+    mod_model_show.value = true
 }
 
 // 拖动开始
@@ -205,10 +206,6 @@ function handleSelectMod(index: number, value: number, lv: number) {
     emit("selectMod", [index, value, lv])
 }
 
-function closeSelection() {
-    localSelectedSlot.value = -1
-}
-
 function toggleSortByIncome() {
     sortByIncome.value = !sortByIncome.value
 }
@@ -239,9 +236,70 @@ async function handleImportCode() {
 const aMod = computed(() => {
     return props.auraMod ? new LeveledMod(props.auraMod) : undefined
 })
+const mod_model_show = ref(false)
 </script>
 <template>
     <div>
+        <Teleport v-if="mod_model_show" to="body">
+            <dialog class="modal" :class="{ 'modal-open': mod_model_show }">
+                <div class="modal-box max-w-11/12 h-11/12 relative">
+                    <!-- 选择新MOD -->
+                    <div class="flex">
+                        <h4 class="text-sm font-medium mb-3 p-2">{{ $t("char-build.select_mod_slot") }} {{ localSelectedSlot + 1 }}</h4>
+
+                        <!-- 关闭按钮 -->
+                        <button class="ml-auto btn btn-ghost btn-sm btn-square" @click="mod_model_show = false">
+                            <Icon bold icon="codicon:chrome-close" />
+                        </button>
+                    </div>
+
+                    <!-- 品质筛选 -->
+                    <div class="tabs tabs-box bg-transparent">
+                        <template v-for="quality in ['全部', '金', '紫', '蓝', '绿', '白']" :key="quality">
+                            <input
+                                type="radio"
+                                :name="`mod_select_${type}`"
+                                class="tab"
+                                :aria-label="quality === '全部' ? $t('全部') : $t(quality + '色')"
+                                :checked="quality === '全部'"
+                            />
+                            <div class="tab-content py-2">
+                                <ScrollArea class="h-[calc(110vh/1.2-10.5rem)] w-full">
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-3">
+                                        <ModItem
+                                            v-for="mod in sortedModOptions.filter((m) => quality === '全部' || m.quality === quality)"
+                                            :key="mod.value"
+                                            :mod="new LeveledMod(mod.value, mod.lv, mod.bufflv)"
+                                            :income="charBuild.calcIncome(new LeveledMod(mod.value, mod.lv, mod.bufflv))"
+                                            @click="handleSelectMod(localSelectedSlot, mod.value, mod.lv ?? 10)"
+                                            :noremove="true"
+                                            :charBuild="charBuild"
+                                        />
+                                    </div>
+                                </ScrollArea>
+                            </div>
+                        </template>
+
+                        <!-- 属性筛选下拉框 -->
+                        <Combobox
+                            class="ml-auto w-40 mr-4"
+                            v-model="selectedProperty"
+                            placeholder="搜索属性/描述"
+                            :options="
+                                ['攻击', '生命', '防御', '护盾', '威力', '耐久', '范围', '效益', '增伤'].map((prop) => ({
+                                    label: prop,
+                                    value: prop,
+                                }))
+                            "
+                        />
+                        <button class="btn btn-sm" :class="sortByIncome ? 'btn-secondary' : 'btn-outline'" @click="toggleSortByIncome">
+                            {{ sortByIncome ? "收益排序：高→低" : "默认排序" }}
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-backdrop" @click="mod_model_show = false"></div>
+            </dialog>
+        </Teleport>
         <div class="flex items-center gap-2 mb-3">
             <div class="ml-auto flex items-center gap-2">
                 <ShowProps
@@ -268,7 +326,7 @@ const aMod = computed(() => {
                 <div class="btn btn-sm btn-primary" @click="copyText(charBuild.getCode(type))">{{ $t("char-build.export_code") }}</div>
             </div>
         </div>
-        <div class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
+        <div class="grid grid-cols-2 lg:grid-cols-4 2xl:grid-cols-8 gap-4">
             <ModItem
                 v-for="(mod, index) in mods"
                 :key="index"
@@ -276,7 +334,7 @@ const aMod = computed(() => {
                 :income="mod ? charBuild.calcIncome(mod, true) : 0"
                 :index="index"
                 :polset="polset?.includes(index)"
-                @click="handleSlotClick(index)"
+                @click="!mod && handleSlotClick(index)"
                 @removeMod="handleRemoveMod(index)"
                 @dragStart="handleDragStart(index)"
                 @dragEnd="handleDragEnd"
@@ -290,64 +348,6 @@ const aMod = computed(() => {
                 }"
                 @lv-change="handleLevelChange(index, $event)"
             />
-        </div>
-        <!-- MOD选择面板 -->
-        <div v-if="localSelectedSlot != -1 && !mods[localSelectedSlot]" class="mt-4 bg-base-200 rounded-lg p-3">
-            <!-- 选择新MOD -->
-            <div>
-                <div class="flex">
-                    <h4 class="text-sm font-medium mb-3 p-2">{{ $t("char-build.select_mod_slot") }} {{ localSelectedSlot + 1 }}</h4>
-
-                    <!-- 关闭按钮 -->
-                    <button class="ml-auto btn btn-ghost btn-sm btn-square" @click="closeSelection">
-                        <Icon bold icon="codicon:chrome-close" />
-                    </button>
-                </div>
-
-                <!-- 品质筛选 -->
-                <div class="tabs tabs-box">
-                    <template v-for="quality in ['全部', '金', '紫', '蓝', '绿', '白']" :key="quality">
-                        <input
-                            type="radio"
-                            :name="`mod_select_${type}`"
-                            class="tab"
-                            :aria-label="quality === '全部' ? $t('全部') : $t(quality + '色')"
-                            :checked="quality === '全部'"
-                        />
-                        <div class="tab-content py-2">
-                            <ScrollArea class="h-80 w-full">
-                                <div class="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-3">
-                                    <ModItem
-                                        v-for="mod in sortedModOptions.filter((m) => quality === '全部' || m.quality === quality)"
-                                        :key="mod.value"
-                                        :mod="new LeveledMod(mod.value, mod.lv, mod.bufflv)"
-                                        :income="charBuild.calcIncome(new LeveledMod(mod.value, mod.lv, mod.bufflv))"
-                                        @click="handleSelectMod(localSelectedSlot, mod.value, mod.lv ?? 10)"
-                                        :noremove="true"
-                                        :charBuild="charBuild"
-                                    />
-                                </div>
-                            </ScrollArea>
-                        </div>
-                    </template>
-
-                    <!-- 属性筛选下拉框 -->
-                    <Combobox
-                        class="ml-auto w-40 mr-4"
-                        v-model="selectedProperty"
-                        placeholder="搜索属性/描述"
-                        :options="
-                            ['攻击', '生命', '防御', '护盾', '威力', '耐久', '范围', '效益', '增伤'].map((prop) => ({
-                                label: prop,
-                                value: prop,
-                            }))
-                        "
-                    />
-                    <button class="btn btn-sm" :class="sortByIncome ? 'btn-secondary' : 'btn-outline'" @click="toggleSortByIncome">
-                        {{ sortByIncome ? "收益排序：高→低" : "默认排序" }}
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 </template>

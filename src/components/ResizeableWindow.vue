@@ -4,8 +4,6 @@ import { exit } from "@tauri-apps/plugin-process"
 import { onMounted, onUnmounted, ref, watch, watchEffect } from "vue"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
-import Tooltip from "./Tooltip.vue"
-import Icon from "./Icon.vue"
 import { env } from "../env"
 import { useRoute } from "vue-router"
 import { getCurrentWindow } from "@tauri-apps/api/window"
@@ -118,7 +116,9 @@ watchEffect(() => {
             <!-- ActionBar -->
             <div class="relative w-full h-10 pb-1 mt-1 flex items-center space-x-1 sm:space-x-2 pl-2 pr-1">
                 <div :data-tauri-drag-region="draggable" className="w-full h-full font-semibold text-2xl flex items-center space-x-2">
-                    <img :src="icon" class="w-6 h-6" />
+                    <button class="btn btn-sm btn-circle btn-ghost" @click="$router.back()">
+                        <Icon icon="ri:arrow-left-line" />
+                    </button>
                     <span className="max-[370px]:hidden text-sm min-w-20">{{ title }}</span>
                     <!-- 计时器 -->
                     <div class="flex ml-4 gap-8 items-center text-xs text-base-content/80">

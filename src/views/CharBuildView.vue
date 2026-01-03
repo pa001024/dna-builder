@@ -445,7 +445,7 @@ updateCharBuild()
 const summonAttributes = computed(() => {
     const skill = charBuild.value.selectedSkill
     if (skill?.召唤物) {
-        const attrs = charBuild.value.calculateWeaponAttributes(undefined, undefined, charBuild.value.meleeWeapon)
+        const attrs = charBuild.value.calculateWeaponAttributes(charBuild.value.meleeWeapon)
         return skill.getSummonAttrs(attrs)
     }
     return undefined
@@ -629,12 +629,6 @@ function shareCharBuild() {
         <!-- 顶部操作栏 -->
         <div class="sticky top-0 z-1 bg-base-300/50 backdrop-blur-sm rounded-md p-3 m-2 shadow-lg border border-base-200">
             <div class="flex flex-wrap items-center justify-between gap-2">
-                <div class="flex items-center gap-2">
-                    <button class="btn btn-sm btn-circle btn-ghost" @click="$router.back()">
-                        <Icon icon="ri:arrow-left-line" />
-                    </button>
-                    <h1 class="text-xl font-bold">{{ $t("char-build.title") }}</h1>
-                </div>
                 <div class="flex ml-auto flex-wrap items-center gap-2">
                     <button class="btn btn-sm btn-ghost" @click="shareCharBuild">
                         <Icon icon="ri:share-line" class="w-4 h-4" />
@@ -870,7 +864,7 @@ function shareCharBuild() {
                                 <div
                                     v-for="(val, index) in charBuild.selectedSkill!.getFieldsWithAttr(
                                         charBuild.selectedSkill?.召唤物
-                                            ? charBuild.calculateWeaponAttributes(undefined, undefined, charBuild.meleeWeapon)
+                                            ? charBuild.calculateWeaponAttributes(charBuild.meleeWeapon)
                                             : attributes,
                                     )"
                                     :key="index"
@@ -1096,7 +1090,7 @@ function shareCharBuild() {
                                 <div
                                     v-for="(val, index) in charBuild.selectedSkill!.getFieldsWithAttr(
                                         charBuild.selectedSkill?.召唤物
-                                            ? charBuild.calculateWeaponAttributes(undefined, undefined, charBuild.meleeWeapon)
+                                            ? charBuild.calculateWeaponAttributes(charBuild.meleeWeapon)
                                             : attributes,
                                     )"
                                     :key="index"
@@ -1318,7 +1312,7 @@ function shareCharBuild() {
                                 <div
                                     v-for="(val, index) in charBuild.selectedSkill!.getFieldsWithAttr(
                                         charBuild.selectedSkill?.召唤物
-                                            ? charBuild.calculateWeaponAttributes(undefined, undefined, charBuild.meleeWeapon)
+                                            ? charBuild.calculateWeaponAttributes(charBuild.meleeWeapon)
                                             : attributes,
                                     )"
                                     :key="index"
@@ -1529,7 +1523,7 @@ function shareCharBuild() {
                                 <div
                                     v-for="(val, index) in charBuild.selectedSkill!.getFieldsWithAttr(
                                         charBuild.selectedSkill?.召唤物
-                                            ? charBuild.calculateWeaponAttributes(undefined, undefined, charBuild.meleeWeapon)
+                                            ? charBuild.calculateWeaponAttributes(charBuild.meleeWeapon)
                                             : attributes,
                                     )"
                                     :key="index"

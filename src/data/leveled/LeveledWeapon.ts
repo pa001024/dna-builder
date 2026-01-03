@@ -281,4 +281,23 @@ export class LeveledWeapon {
         this.updatePropertiesByLevel()
         return this
     }
+
+    get attrType() {
+        return "角色" as const
+    }
+    get addAttr(): Record<string, number> {
+        const r: Record<string, number> = {}
+        this.baseProperties.forEach((prop) => {
+            r[prop] = this[prop]
+        })
+        return r
+    }
+    get minusAttr() {
+        const r: Record<string, any> = this.clone()
+        this.baseProperties.forEach((prop) => {
+            r[prop] = -this[prop]
+        })
+        r.isMinus = true
+        return r as LeveledWeapon
+    }
 }

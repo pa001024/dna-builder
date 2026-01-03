@@ -263,7 +263,7 @@ function resetAiSettings() {
                 </div>
             </article>
 
-            <article v-if="env.isApp">
+            <article>
                 <h2 class="text-sm font-bold m-2">{{ $t("setting.ai") }}</h2>
                 <div class="bg-base-100 p-2 rounded-lg space-y-3">
                     <div class="flex justify-between items-center p-2">

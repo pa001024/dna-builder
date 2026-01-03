@@ -117,16 +117,11 @@ export class LeveledMod implements Mod {
         return `${this.系列}之${this.名称}`
     }
 
-    get excludeNames() {
-        if (this.系列 === "换生灵") {
-            // 换生灵之决断, 海妖之羽翼·鼓舞·决断
-            return [this.fullName, "海妖之羽翼·鼓舞·" + this.名称]
+    get excludeSeries() {
+        if (this.系列 === "换生灵" || this.系列 === "海妖") {
+            return ["换生灵", "海妖"]
         }
-        if (this.系列 === "海妖" && this.名称.split("·").length > 2) {
-            // 海妖之羽翼·鼓舞, 换生灵之决断
-            return [`${this.系列}之${this.名称.split("·").slice(0, -1).join("·")}`, "换生灵之" + this.名称.split("·").at(-1)]
-        }
-        return [this.fullName]
+        return [this.系列]
     }
 
     get isPrime() {
@@ -356,8 +351,34 @@ export class LeveledMod implements Mod {
         return LeveledMod.modQualityMaxLevel[quality] || 1
     }
 
+    public clone(): LeveledMod {
+        const mod = new LeveledMod(this._originalModData, this._等级, this.buffLv)
+        this.properties.forEach((prop) => {
+            mod[prop] = this[prop]
+        })
+        return mod
+    }
     equals(mod: LeveledMod) {
         return this.id === mod.id && this.等级 === mod.等级
+    }
+
+    get attrType() {
+        return this.类型.slice(0, 2) as "角色" | "近战" | "远程" | "同律"
+    }
+    get addAttr(): Record<string, number> {
+        const r: Record<string, number> = {}
+        this.properties.forEach((prop) => {
+            r[prop] = this[prop]
+        })
+        return r
+    }
+    get minusAttr() {
+        const r: Record<string, any> = this.clone()
+        this.properties.forEach((prop) => {
+            r[prop] = -this[prop]
+        })
+        r.isMinus = true
+        return r as LeveledMod
     }
 }
 

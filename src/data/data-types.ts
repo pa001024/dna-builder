@@ -11,6 +11,13 @@ export interface Buff {
     [key: string]: string | number | number[] | undefined
 }
 
+export interface AbstractMod {
+    readonly attrType: "角色" | "近战" | "远程" | "同律"
+    readonly addAttr: Record<string, number>
+    readonly minusAttr: AbstractMod
+    isMinus?: boolean
+}
+
 export interface CommonAttr {
     技能威力?: number
     技能耐久?: number

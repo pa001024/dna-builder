@@ -247,4 +247,13 @@ export class LeveledBuff implements Buff {
         this.updatePropertiesByLevel()
         return this
     }
+
+    get minusAttr() {
+        const r: Record<string, any> = this.clone()
+        this.properties.forEach((prop) => {
+            r[prop] = -this[prop]
+        })
+        r.isMinus = true
+        return r as LeveledBuff
+    }
 }
