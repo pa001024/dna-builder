@@ -162,10 +162,20 @@ export class LeveledMod implements Mod {
             const vals: number[] = []
             this.生效 = keys.reduce(
                 (acc, key) => {
-                    let currentValue = (maxValue[key] / (this.maxLevel + 1)) * (lv + 1)
-                    if (key === "神智回复" || key === "最大耐受") currentValue = Math.floor(currentValue)
-                    acc[key] = currentValue
-                    vals.push(currentValue)
+                    const mv = maxValue[key] as number | number[]
+                    if (Array.isArray(mv)) {
+                        const mv1 = mv[0]
+                        const mv2 = mv[1]
+                        let currentValue1 = (mv1 / (this.maxLevel + 1)) * (lv + 1)
+                        let currentValue2 = (mv2 / (this.maxLevel + 1)) * (lv + 1)
+                        acc[key] = [currentValue1, currentValue2]
+                        vals.push(...acc[key])
+                    } else {
+                        let currentValue = (mv / (this.maxLevel + 1)) * (lv + 1)
+                        if (key === "神智回复" || key === "最大耐受") currentValue = Math.floor(currentValue)
+                        acc[key] = currentValue
+                        vals.push(currentValue)
+                    }
                     return acc
                 },
                 {
@@ -214,6 +224,7 @@ export class LeveledMod implements Mod {
         if (this.极性) poTable[this.极性] = (poTable[this.极性] || 0) + 1
         const isEffective: boolean = this.生效.条件.every(([attr, op, value]: [string, string, number]) => {
             const attrValue = poTable[attr.slice(0, 1)] || attrs[attr as keyof CharAttr]
+            if (op === "*") return true
             if (op === "=") return attrValue === value
             if (op === ">") return attrValue > value
             if (op === ">=") return attrValue >= value
@@ -260,6 +271,7 @@ export class LeveledMod implements Mod {
         })
         const isEffective: boolean = this.生效.条件.every(([attr, op, value]: [string, string, number]) => {
             const attrValue = attrs[attr as keyof CharAttr]
+            if (op === "*") return true
             if (op === "=") return attrValue === value
             if (op === ">") return attrValue > value
             if (op === ">=") return attrValue >= value
@@ -280,7 +292,15 @@ export class LeveledMod implements Mod {
         let changed = false
         Object.keys(condition.props).forEach((key) => {
             if (condition.isEffective) {
-                if (this[key] !== condition.props[key]) {
+                if (Array.isArray(condition.props[key])) {
+                    const [v1, v2] = condition.props[key]
+                    const cond = this.生效!.条件![0][0] as keyof CharAttr
+                    const finalValue = Math.min(attrs[cond] * v1, v2)
+                    if (this[key] !== finalValue) {
+                        this[key] = finalValue
+                        changed = true
+                    }
+                } else if (this[key] !== condition.props[key]) {
                     this[key] = condition.props[key]
                     changed = true
                 }

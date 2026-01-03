@@ -329,7 +329,9 @@ export class CharBuild {
     }
 
     get mods() {
-        return [...this.charMods, ...this.meleeMods, ...this.rangedMods, ...this.skillWeaponMods, this.tempMod].filter((v) => v !== null)
+        return [...this.charMods, ...this.meleeMods, ...this.rangedMods, ...this.skillWeaponMods, this.auraMod, this.tempMod].filter(
+            (v): v is LeveledMod => !!v,
+        )
     }
 
     set mods(mods: LeveledMod[]) {
@@ -471,7 +473,6 @@ export class CharBuild {
             有效生命: (health / (1 - defense / (300 + defense)) + shield) / (1 - damageReduce),
         }
         // 应用MOD条件
-        const condMods = this.charModsWithAura.filter((mod) => mod.生效?.条件)
         if (nocode) return attrs
         if (this.dynamicBuffs.length > 0) {
             const all = this.getAllWeaponsAttrs()
@@ -482,6 +483,7 @@ export class CharBuild {
             }
         }
         // 应用MOD条件 如果有变化就再计算一次
+        const condMods = this.charModsWithAura.filter((mod) => mod.生效?.条件)
         if (this.applyCondition(attrs, condMods)) {
             return this.calculateAttributes(nocode)
         }
@@ -491,10 +493,7 @@ export class CharBuild {
     public applyCondition(attrs: CharAttr, mods: LeveledMod[]) {
         let changed = false
         mods.forEach((mod) => {
-            changed ||= mod.applyCondition(
-                attrs,
-                this.charMods.filter((v) => v !== null),
-            )
+            changed ||= mod.applyCondition(attrs, this.charModsWithAura)
         })
         return changed
     }
@@ -1249,7 +1248,7 @@ export class CharBuild {
 
     public checkModEffective(mod: LeveledMod, includeSelf = true): { isEffective: boolean; props: Record<string, any> } | undefined {
         if (!mod.生效?.条件) return undefined
-        if (includeSelf) {
+        if (includeSelf && !this.mods.includes(mod) && mod.id !== this.auraMod?.id) {
             const clone = this.clone()
             clone.applyMods([mod])
             return clone.checkModEffective(mod, false)
@@ -1475,9 +1474,18 @@ export class CharBuild {
         if (minus) {
             let mval = 0
             if (props instanceof LeveledBuff) {
-                this.buffs.push(props.minusAttr)
-                mval = this.calculate()
-                this.buffs.pop()
+                if (props.code) {
+                    const index = this.dynamicBuffs.findIndex((b) => b.名称 === props.名称)
+                    if (index !== -1) {
+                        this.dynamicBuffs.splice(index, 1)
+                    }
+                    mval = this.calculate()
+                    this.dynamicBuffs.push(props)
+                } else {
+                    this.buffs.push(props.minusAttr)
+                    mval = this.calculate()
+                    this.buffs.pop()
+                }
             } else {
                 this.tempMod = props.minusAttr as LeveledMod
                 mval = this.calculate()
@@ -1487,9 +1495,15 @@ export class CharBuild {
         } else {
             let mval = 0
             if (props instanceof LeveledBuff) {
-                this.buffs.push(props)
-                mval = this.calculate()
-                this.buffs.pop()
+                if (props.code) {
+                    this.dynamicBuffs.push(props)
+                    mval = this.calculate()
+                    this.dynamicBuffs.pop()
+                } else {
+                    this.buffs.push(props)
+                    mval = this.calculate()
+                    this.buffs.pop()
+                }
             } else {
                 this.tempMod = props as LeveledMod
                 mval = this.calculate()

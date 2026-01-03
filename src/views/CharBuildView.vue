@@ -712,9 +712,9 @@ function shareCharBuild() {
                     <!-- 角色 -->
                     <div
                         v-if="charTab === '角色'"
-                        class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-md p-4 space-y-3 border border-base-200"
+                        class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-md p-3 space-y-3 border border-base-200"
                     >
-                        <h3 class="flex items-center gap-4 text-lg font-bold text-base-content/90 mb-2">
+                        <h3 class="flex items-center gap-4 text-lg font-bold text-base-content/90 mb-2 p-1">
                             <div class="flex flex-col">
                                 <div class="text-lg font-bold">{{ $t(selectedChar) }}</div>
                                 <div class="text-sm opacity-60">{{ $t(charBuild.char.别名 || "") }}</div>
@@ -734,7 +734,7 @@ function shareCharBuild() {
                             </div>
                         </div>
                         <!-- 词条 -->
-                        <div class="collapse" :class="{ 'collapse-open': charDetailExpend }">
+                        <div class="collapse p-1" :class="{ 'collapse-open': charDetailExpend }">
                             <div class="space-y-1 collapse-content p-0">
                                 <FullTooltip
                                     side="bottom"
@@ -784,6 +784,13 @@ function shareCharBuild() {
                                                 >
                                                     <div class="text-base-content/80">{{ $t(charBuild.rangedWeapon.名称) }}</div>
                                                     {{ format100r(charBuild.rangedWeapon[key]!) }}
+                                                </li>
+                                                <li
+                                                    v-for="mod in [charBuild.auraMod].filter((m): m is LeveledMod => m && m[key])"
+                                                    class="flex justify-between gap-8 text-sm text-primary"
+                                                >
+                                                    <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
+                                                    {{ format100r(mod[key]!) }}
                                                 </li>
                                                 <li
                                                     v-for="mod in charBuild.charMods.filter((m): m is LeveledMod => m && m[key])"

@@ -4062,17 +4062,21 @@ function patch(id: number, skillName: string, cb: (skill: Char["技能"][number]
     cb(skill)
 }
 
-function patchUW(id: number, cb: (uw: SkillWeapon[]) => void) {
+function patchUW(id: number, cb: (uw: Char) => void) {
     const char = t.find((item) => item.id === id)
     if (!char) {
         return
     }
-    if (!char.同律武器) return
-    cb(char.同律武器)
+    if (!char) return
+    cb(char)
 }
 
 patchUW(5301, (uw) => {
-    uw[0].攻速 = 4
+    uw.同律武器![0].攻速 = 4
+})
+
+patchUW(1503, (uw) => {
+    delete uw.同律武器
 })
 
 patch(2101, "缠绵之触", (skill) => {
