@@ -110,7 +110,7 @@ export class SaiqiSkillE extends BaseSkill {
         }
     }
 
-    private spawnProjectile(start: THREE.Vector3, dir: THREE.Vector3, target: Monster | null) {
+    private spawnProjectile(_start: THREE.Vector3, _dir: THREE.Vector3, target: Monster | null) {
         if (target) {
             this.applyDamage(target, "逐光")
         } else {

@@ -7,7 +7,7 @@
   <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/pa001024/dna-builder">
 </p>
 
-**DNA Builder**（二重螺旋构筑模拟器）是一个用于游戏《Duet Night Abyss》的角色构建和伤害计算工具，帮助玩家优化角色配置和计算战斗输出。
+**DNA Builder** （二重螺旋构筑模拟器）简称DOB，是一个用于游戏《Duet Night Abyss》的角色构建和伤害计算工具，帮助玩家优化角色配置和计算战斗输出。
 
 ## 网页版
 

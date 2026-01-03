@@ -1783,7 +1783,7 @@ function shareCharBuild() {
                                                 @change="updateCharBuild"
                                             >
                                                 <SelectItem v-for="enemy in monsterData" :key="enemy.id" :value="enemy.id">
-                                                    {{ enemy.名称 }}
+                                                    {{ $t(enemy.名称) }}
                                                 </SelectItem>
                                             </Select>
                                         </div>
@@ -1854,7 +1854,7 @@ function shareCharBuild() {
                                             ({{ charBuild.getModCostMax(charTab) }}/{{ charBuild.getModCap(charTab) }})
                                         </span>
                                         <span class="badge badge-ghost badge-sm"
-                                            >{{ charBuild.getModCostTransfer(charTab).length }}转移模块</span
+                                            >{{ charBuild.getModCostTransfer(charTab).length }}模块</span
                                         >
                                     </h2>
                                 </div>

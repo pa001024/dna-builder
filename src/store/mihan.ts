@@ -17,7 +17,12 @@ export class MihanNotify {
     sfx = useSound("/sfx/notice.mp3")
     watch = false
     constructor() {
-        this.updateMihanData()
+        watchEffect(() => {
+            const ui = useUIStore()
+            if (ui.mihanVisible) {
+                this.updateMihanData()
+            }
+        })
 
         watchEffect(() => {
             if (this.mihanEnableNotify.value) {

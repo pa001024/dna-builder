@@ -112,7 +112,7 @@ const autoBuild = computed(() => (props.update ? ((lastBuild = buildMods()), emi
                     v-for="(mod, index) in autoBuild.newBuild[key]"
                     :key="index"
                     :mod="mod"
-                    :income="autoBuild.newBuild.calcIncome(mod, true)"
+                    :income="autoBuild.newBuild.calcIncome(mod!, true)"
                     noremove
                 />
             </div>

@@ -105,7 +105,7 @@ onMounted(() => {
 const { mihan, moling, zhouben } = useGameTimer()
 
 watchEffect(() => {
-    document.title = props.title || "Duet Night Abyss Builder"
+    document.title = props.title ? props.title + " - DOB" : "Duet Night Abyss Builder"
 })
 </script>
 <template>
@@ -126,7 +126,7 @@ watchEffect(() => {
                             <div class="whitespace-nowrap">{{ $t("resizeableWindow.mihan") }}</div>
                             <div class="font-orbitron">{{ timeStr(mihan) }}</div>
                         </div>
-                        <div class="hidden sm:inline-block text-center min-w-16">
+                        <div class="text-center min-w-16" :class="[env.isApp ? 'hidden sm:inline-block' : 'inline-block']">
                             <div class="whitespace-nowrap">{{ $t("resizeableWindow.moling") }}</div>
                             <div class="font-orbitron">{{ timeStr(moling) }}</div>
                         </div>

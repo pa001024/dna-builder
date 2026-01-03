@@ -221,7 +221,7 @@ const currentMonster = computed(() => {
                             @change="updateSettings"
                         >
                             <SelectItem v-for="monster in monsterData" :key="monster.id" :value="monster.id">
-                                {{ monster.名称 }}
+                                {{ $t(monster.名称) }}
                             </SelectItem>
                         </Select>
                         <div class="text-right text-xs text-slate-500">

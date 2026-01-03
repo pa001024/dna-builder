@@ -150,6 +150,7 @@ async function syncInventory() {
                 <div @click="activeTab = '公告'" class="tab" :class="{ 'tab-active': activeTab === '公告' }">公告</div>
                 <div @click="activeTab = '游戏信息'" class="tab" :class="{ 'tab-active': activeTab === '游戏信息' }">游戏信息</div>
                 <div @click="activeTab = '论坛'" class="tab" :class="{ 'tab-active': activeTab === '论坛' }">论坛</div>
+                <div @click="activeTab = '签到'" class="tab" :class="{ 'tab-active': activeTab === '签到' }">签到</div>
             </div>
             <RouterLink to="/dna/mine" class="flex items-center">
                 <img :src="mine?.headUrl" alt="User Head" class="w-8 h-8 rounded-full mr-2" />
@@ -476,6 +477,9 @@ async function syncInventory() {
                     <button class="btn btn-secondary" @click="loadGameConfig(true)">重试</button>
                 </div>
             </div>
+        </ScrollArea>
+        <ScrollArea v-if="activeTab === '签到'" class="flex-1 p-4">
+            <DNASignCalendar />
         </ScrollArea>
     </div>
 </template>
