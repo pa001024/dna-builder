@@ -102,6 +102,7 @@
         "unnamedAchievement": "未命名成就"
     },
     "ai": {
+        "desc": "使用AI智能体与游戏互动",
         "inputMessage": "输入消息，按 Enter 发送",
         "title": "AI智能体"
     },
@@ -392,6 +393,7 @@
         "cancel": "取消",
         "confirm": "确认",
         "darkTheme": "深色主题",
+        "desc": "自定义应用程序设置",
         "lang": "语言",
         "lightTheme": "亮色主题",
         "noModelAvailable": "暂无可用模型",

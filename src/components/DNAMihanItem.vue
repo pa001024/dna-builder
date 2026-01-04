@@ -31,7 +31,7 @@ defineProps<{
                 <div
                     v-for="(mission, index) in item"
                     :key="index"
-                    class="text-xs sm:text-sm p-1 whitespace-nowrap"
+                    class="text-sm p-1 whitespace-nowrap"
                     :class="{ 'text-secondary': mihanNotifyMissions?.includes(mission) }"
                 >
                     {{ mission }}
@@ -39,7 +39,7 @@ defineProps<{
             </div>
         </div>
     </div>
-    <div class="flex justify-center bg-base-300 p-3 rounded-md text-xs sm:text-sm text-base-content/80">
+    <div class="flex justify-center bg-base-300 p-3 rounded-md text-sm text-base-content/80">
         {{ $t("resizeableWindow.nextRefresh") }}: {{ timeStr(mihan) }}
     </div>
 </template>

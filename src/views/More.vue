@@ -49,10 +49,20 @@ const items = [
         path: "/help",
         icon: "ri:question-line",
     },
+    {
+        name: "login",
+        path: "/login",
+        icon: "la:user",
+    },
+    {
+        name: "setting",
+        path: "/setting",
+        icon: "ri:settings-3-line",
+    },
 ] satisfies { name: string; path: string; icon: IconTypes; show?: boolean }[]
 </script>
 <template>
-    <div class="h-full">
+    <ScrollArea class="h-full">
         <div class="p-4 grid grid-cols-2 lg:grid-cols-4 w-full justify-items-center gap-4">
             <RouterLink
                 v-for="item in items.filter((item) => item.show !== false)"
@@ -69,5 +79,5 @@ const items = [
                 <div class="text-sm text-gray-500">{{ $t(`${item.name}.desc`) }}</div>
             </RouterLink>
         </div>
-    </div>
+    </ScrollArea>
 </template>

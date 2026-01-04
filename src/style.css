@@ -236,6 +236,11 @@ body {
         "Fira Sans",
         "Droid Sans",
         "Helvetica Neue";
+    @media (width <40rem
+
+ /* 640px */) {
+        font-size: calc(13px * var(--uiscale));
+    }
 }
 
 #app {

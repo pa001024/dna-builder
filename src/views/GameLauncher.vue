@@ -351,7 +351,9 @@ onUnmounted(() => {
                                 :class="{ 'bg-base-300': item.name === game.selectedEntity }"
                             >
                                 <div>
-                                    <img class="size-10 rounded-box" :src="item.icon" />
+                                    <ImageFallback class="size-10 rounded-box" :src="item.icon">
+                                        <Icon icon="ri:question-mark" class="w-full h-full" />
+                                    </ImageFallback>
                                 </div>
                                 <div>
                                     <div>{{ $t(item.name) }}</div>
