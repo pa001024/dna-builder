@@ -3,8 +3,27 @@
 import { $ } from "bun"
 import fs from "fs"
 import path from "path"
+import { parse } from "dotenv"
+import OSS from "ali-oss"
 
-// 配置信息
+const args = process.argv.slice(2)
+const isAppMode = args.includes("app")
+
+const envPath = path.resolve("server/.env")
+const envConfig = fs.existsSync(envPath) ? parse(fs.readFileSync(envPath)) : {}
+
+const packageJsonPath = path.resolve("./package.json")
+const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"))
+const version = packageJson.version
+
+const OSS_CONFIG = {
+    region: envConfig.OSS_REGION || envConfig.OSS_ENDPOINT?.replace(".aliyuncs.com", "") || "oss-cn-hongkong",
+    endpoint: envConfig.OSS_ENDPOINT || "",
+    bucket: envConfig.OSS_BUCKET || "",
+    accessKeyId: envConfig.OSS_ACCESS_KEY_ID || "",
+    accessKeySecret: envConfig.OSS_ACCESS_KEY_SECRET || "",
+}
+
 const CONFIG = {
     ssh: {
         host: "dev",
@@ -18,13 +37,60 @@ const CONFIG = {
     server: {
         commands: ["rm -rf /var/www/dna-builder", "unzip -o /var/www/dist.zip -d /var/www/dna-builder"],
     },
+    app: {
+        msiPath: `./src-tauri/target/release/bundle/msi/dna-builder_${version}_x64_zh-CN.msi`,
+        sigPath: `./src-tauri/target/release/bundle/msi/dna-builder_${version}_x64_zh-CN.msi.sig`,
+    },
 }
 
-async function main() {
-    try {
-        console.log("=== 开始部署流程 ===")
+/**
+ * 阿里云OSS上传函数
+ * @param filePath 本地文件路径
+ * @param ossKey OSS存储路径
+ */
+async function uploadToOss(filePath: string, ossKey: string): Promise<void> {
+    console.log(`📤 上传文件到OSS: ${ossKey}`)
 
-        // 1. 执行本地构建命令
+    const client = new OSS({
+        region: OSS_CONFIG.region,
+        accessKeyId: OSS_CONFIG.accessKeyId,
+        accessKeySecret: OSS_CONFIG.accessKeySecret,
+        bucket: OSS_CONFIG.bucket,
+    })
+
+    await client.put(ossKey, filePath)
+
+    console.log(`✅ 上传成功: ${ossKey}`)
+}
+
+/**
+ * 生成tauri updater格式的latest.json
+ * @param version 版本号
+ * @param signature 签名
+ * @param msiUrl MSI文件下载链接
+ */
+function generateLatestJson(version: string, signature: string, msiUrl: string): object {
+    return {
+        version: version,
+        notes: `## 本次更新内容 (v${version})\n\n- 更新版本至 v${version}\n\n> [!TIP]\n> 请在下方下载`,
+        pub_date: new Date().toISOString(),
+        platforms: {
+            "windows-x86_64": {
+                signature: signature,
+                url: msiUrl,
+            },
+            "windows-x86_64-msi": {
+                signature: signature,
+                url: msiUrl,
+            },
+        },
+    }
+}
+
+async function deployWeb() {
+    try {
+        console.log("=== 开始Web部署流程 ===")
+
         console.log("1. 执行本地构建命令...")
         const buildCmdParts = CONFIG.local.buildCommand.split(" ")
         await $`${buildCmdParts[0]} ${buildCmdParts.slice(1).join(" ")}`
@@ -63,11 +129,66 @@ async function main() {
         // 6. 清理本地zip文件
         console.log("5. 清理本地zip文件...")
         fs.unlinkSync(zipPath)
-
-        console.log("=== 部署流程完成 ===")
+        console.log("=== Web部署流程完成 ===")
     } catch (error) {
         console.error("部署失败:", error)
         process.exit(1)
+    }
+}
+
+async function deployApp() {
+    try {
+        console.log("=== 开始App部署流程 ===")
+
+        if (!OSS_CONFIG.endpoint || !OSS_CONFIG.bucket || !OSS_CONFIG.accessKeyId || !OSS_CONFIG.accessKeySecret) {
+            throw new Error("OSS配置不完整，请检查.env中的OSS配置")
+        }
+
+        console.log("1. 执行pnpm tb命令构建Tauri应用...")
+        await $`pnpm tb`
+
+        const msiAbsPath = path.resolve(CONFIG.app.msiPath)
+        const sigAbsPath = path.resolve(CONFIG.app.sigPath)
+
+        if (!fs.existsSync(msiAbsPath)) {
+            throw new Error(`MSI文件不存在: ${msiAbsPath}`)
+        }
+
+        console.log("2. 上传MSI文件到OSS...")
+        const msiOssKey = `msi/${path.basename(msiAbsPath)}`
+        await uploadToOss(msiAbsPath, msiOssKey)
+
+        console.log("3. 读取签名文件...")
+        if (!fs.existsSync(sigAbsPath)) {
+            throw new Error(`签名文件不存在: ${sigAbsPath}`)
+        }
+        const signature = fs.readFileSync(sigAbsPath, "utf-8").trim()
+        const msiUrl = `http://${OSS_CONFIG.bucket}.${OSS_CONFIG.endpoint}/${msiOssKey}`
+
+        console.log("4. 生成latest.json...")
+        const latestJson = generateLatestJson(version, signature, msiUrl)
+
+        const newLatestJsonPath = path.resolve("./latest.json")
+        fs.writeFileSync(newLatestJsonPath, JSON.stringify(latestJson, null, 2))
+
+        console.log("5. 上传latest.json到OSS根目录...")
+        await uploadToOss(newLatestJsonPath, "latest.json")
+
+        fs.unlinkSync(newLatestJsonPath)
+
+        console.log("=== App部署流程完成 ===")
+        console.log(`MSI下载链接: ${msiUrl}`)
+    } catch (error) {
+        console.error("部署失败:", error)
+        process.exit(1)
+    }
+}
+
+async function main() {
+    if (isAppMode) {
+        await deployApp()
+    } else {
+        await deployWeb()
     }
 }
 

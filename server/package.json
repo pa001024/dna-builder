@@ -17,6 +17,7 @@
         "@graphql-yoga/node": "^3.9.1",
         "@pa001024/graphql-mobius": "^0.1.13",
         "@vitejs/plugin-vue": "^6.0.2",
+        "ali-oss": "^6.23.0",
         "bcrypt": "^6.0.0",
         "croner": "^9.1.0",
         "dna-api": "^0.2.6",
@@ -36,6 +37,7 @@
         "vue": "^3.4.32"
     },
     "devDependencies": {
+        "@types/ali-oss": "^6.16.13",
         "@types/bcrypt": "^6.0.0",
         "@types/jsonwebtoken": "^9.0.6",
         "bun-types": "latest",
