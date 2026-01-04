@@ -5949,4 +5949,4 @@ export default [
             委托密函线索: 2,
         },
     },
-] satisfies import("./data-types").Achievement[]
+] satisfies import("../data-types").Achievement[]

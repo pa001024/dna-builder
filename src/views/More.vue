@@ -19,6 +19,11 @@ const items = [
         icon: "ri:table-view",
     },
     {
+        name: "database",
+        path: "/db",
+        icon: "ri:book-line",
+    },
+    {
         name: "inventory",
         path: "/inventory",
         icon: "ri:box-1-line",

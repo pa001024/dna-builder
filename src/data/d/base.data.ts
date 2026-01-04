@@ -1,4 +1,4 @@
-import type { WeaponBase } from "./data-types"
+import type { WeaponBase } from "../data-types"
 
 export default [
     { 武器类型: "长柄", 名称: "一段伤害", 倍率: 0.35 },

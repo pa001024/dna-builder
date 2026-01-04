@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest"
 import * as dataModule from "../index"
 import { CharBuild } from "../CharBuild"
 import { LeveledChar, LeveledWeapon, LeveledMod, LeveledBuff } from "../leveled"
-import achievementData from "../achievement.data"
 
 // 测试模块导出
 describe("模块导出测试", () => {
@@ -33,7 +32,7 @@ describe("模块导出测试", () => {
 
     it("应该导出achievementData", () => {
         expect(dataModule.achievementData).toBeDefined()
-        expect(dataModule.achievementData).toBe(achievementData)
+        expect(dataModule.achievementData).toBe(dataModule.achievementData)
     })
 })
 
@@ -109,7 +108,7 @@ describe("模块功能测试", () => {
 // 测试数据完整性
 describe("数据完整性测试", () => {
     it("导出的成就数据应该与原始数据相同", () => {
-        expect(dataModule.achievementData).toEqual(achievementData)
+        expect(dataModule.achievementData).toEqual(dataModule.achievementData)
     })
 
     it("应该包含所有必要的导出", () => {

@@ -1,4 +1,4 @@
-import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon, LeveledSkillWeapon, LeveledSkill, modMap, LeveledMonster } from "./leveled"
+import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon, LeveledSkillWeapon, LeveledSkill, LeveledMonster } from "./leveled"
 import { LeveledModWithCount } from "./leveled/LeveledMod"
 // 本地实现base36Pad函数，避免依赖浏览器API
 function base36Pad(num: number): string {
@@ -161,11 +161,11 @@ export class CharBuild {
                 const uweaponSkillData = {
                     名称: uweaponData.名称,
                     类型: "同律武器伤害",
-                    字段: {},
+                    字段: [],
                 } as Skill
                 // 固定获取Q技能的伤害字段
                 this.skills[1].字段.forEach((field) => {
-                    if (field.名称.includes("伤害")) uweaponSkillData.字段![field.名称] = field
+                    if (field.名称.includes("伤害")) uweaponSkillData.字段!.push(field)
                 })
                 uweaponData.技能 = [uweaponSkillData]
                 this.skillWeapon = new LeveledSkillWeapon(uweaponData, this.skillLevel, this.char.等级)
@@ -635,25 +635,6 @@ export class CharBuild {
             }
         })
         return map
-    }
-
-    // 获取单项目总加成
-    public getTotalBonusSingle(props: LeveledWeapon | LeveledMod | LeveledBuff, attribute: string, prefix?: string): number {
-        let bonus = 0
-
-        const isMod = "id" in props && props.id && modMap.has(props.id)
-        // 检查属性是否符合前缀
-        if (!isMod || !prefix || !attribute.startsWith(prefix)) {
-            if (prefix && (props as any).类型 && (props as any).类型 !== prefix) return 0
-            // 这几种BUFF只对角色生效
-            if (["攻击", "增伤", "独立增伤"].includes(attribute)) {
-                if (!isMod && prefix) return 0
-            }
-            if (typeof (props as any)[attribute] === "number") {
-                bonus += (props as any)[attribute]
-            }
-        }
-        return bonus
     }
 
     // 获取总加成

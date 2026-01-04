@@ -179,8 +179,10 @@
         "select_mod_slot": "选择MOD - 槽位",
         "select_skill_weapon": "选择技能/武器",
         "selected_count": "已选 {{count}} 个",
+        "share": "分享",
         "shield": "护盾",
         "shot_damage": "弹片伤害",
+        "simulator": "模拟",
         "skill_level": "技能等级",
         "skill_weapon": "技能/武器",
         "skill_weapon_mod_config": "同律武器MOD配置",
@@ -197,6 +199,10 @@
     },
     "char-list": {
         "title": "角色列表"
+    },
+    "database": {
+        "desc": "查询游戏中的数据",
+        "title": "资料库"
     },
     "dna-home": {
         "title": "皎皎角"
@@ -218,6 +224,12 @@
     },
     "dna-weapon-detail": {
         "title": "武器详情"
+    },
+    "dungeon-detail": {
+        "title": "副本详情"
+    },
+    "dungeon-list": {
+        "title": "副本列表"
     },
     "errorBoundary": {
         "retry": "重试",
@@ -355,6 +367,12 @@
     },
     "modEditor": {
         "inputCode": "请输入角色或武器代码"
+    },
+    "monster-detail": {
+        "title": "怪物详情"
+    },
+    "monster-list": {
+        "title": "怪物列表"
     },
     "more": {
         "desc": "更多功能",

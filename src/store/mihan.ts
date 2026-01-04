@@ -38,7 +38,7 @@ export class MihanNotify {
             // 用户登录尝试使用DNAAPI获取密函
             const data = await api.getDefaultRoleForTool()
             if (data?.data?.instanceInfo) {
-                const missions = data.data.instanceInfo.map((v) => v.instances.map((v) => v.name))
+                const missions = data.data.instanceInfo.map((v) => v.instances.map((v) => v.name.replace("勘探/无尽", "勘察/无尽")))
                 if (!missions || JSON.stringify(missions) === JSON.stringify(this.mihanData.value)) return false
                 this.mihanData.value = missions
                 return true
@@ -46,7 +46,7 @@ export class MihanNotify {
         }
         const data = await missionsIngameQuery()
         if (!data?.missions || JSON.stringify(data.missions) === JSON.stringify(this.mihanData.value)) return false
-        this.mihanData.value = data.missions
+        this.mihanData.value = data.missions.map((v) => v.map((v) => v.replace("勘探/无尽", "勘察/无尽")))
         return true
     }
     show() {
@@ -65,7 +65,10 @@ export class MihanNotify {
                 )
                 .map(
                     (list, type) =>
-                        `${MihanNotify.TYPES[type]}-${list.filter((v) => this.mihanNotifyMissions.value.includes(v)).join("、")}`,
+                        `${t(MihanNotify.TYPES[type])}-${list
+                            .filter((v) => this.mihanNotifyMissions.value.includes(v))
+                            .map((v) => t(v))
+                            .join("、")}`,
                 )
             let permissionGranted = await isPermissionGranted()
             if (!permissionGranted) {
@@ -129,5 +132,5 @@ export class MihanNotify {
         }, duration + 3e3)
     }
     static TYPES = ["角色", "武器", "魔之楔"]
-    static MISSIONS = ["探险/无尽", "驱离", "拆解", "驱逐", "避险", "扼守/无尽", "护送", "勘探/无尽", "追缉", "调停", "迁移"]
+    static MISSIONS = ["探险/无尽", "驱离", "拆解", "驱逐", "避险", "扼守/无尽", "护送", "勘察/无尽", "追缉", "调停", "迁移"]
 }

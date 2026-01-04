@@ -1,4 +1,4 @@
-import type { Buff } from "./data-types"
+import type { Buff } from "../data-types"
 
 export default [
     { 名称: "自定义BUFF", 描述: "自行填写" },

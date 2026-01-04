@@ -1,4 +1,4 @@
-import { monsterMap } from "."
+import { monsterMap } from "../d"
 import { DynamicMonster, Faction, Monster } from "../data-types"
 
 export const MOB_LEVEL_UP = [
@@ -275,9 +275,9 @@ export class LeveledMonster implements DynamicMonster {
         let multiplier = MOB_LEVEL_UP[clampedLevel - 1]
 
         this.攻击 = Math.round(this._baseAttack * multiplier.atk)
-        this.生命 = Math.round(this._baseLife * (this.isRouge ? multiplier.hp : multiplier.rhp))
+        this.生命 = Math.round(this._baseLife * (this.isRouge ? multiplier.rhp : multiplier.hp))
         if (this.护盾 !== undefined) {
-            this.护盾 = Math.round(this._baseShield * (this.isRouge ? multiplier.es : multiplier.res))
+            this.护盾 = Math.round(this._baseShield * (this.isRouge ? multiplier.res : multiplier.es))
         }
     }
 

@@ -1,4 +1,5 @@
-import { charMap, CommonLevelUp, LeveledSkill } from "."
+import { CommonLevelUp, LeveledSkill } from "."
+import { charMap } from "../d"
 import { CommonAttr, SkillWeapon } from "../data-types"
 
 /**

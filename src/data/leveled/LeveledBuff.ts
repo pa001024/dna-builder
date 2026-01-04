@@ -1,5 +1,6 @@
-import { buffMap, LeveledChar, LeveledSkillWeapon, LeveledWeapon } from "."
+import { LeveledChar, LeveledSkillWeapon, LeveledWeapon } from "."
 import { CharAttr, CharBuild, WeaponAttr } from "../CharBuild"
+import { buffMap } from "../d"
 import { Buff } from "../data-types"
 
 /**

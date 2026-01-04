@@ -19,12 +19,12 @@ defineProps<{
                         :alt="`${MihanNotify.TYPES[missionId]}密函`"
                     />
                     <div
-                        class="font-bold text-sm sm:text-lg"
+                        class="font-bold text-sm sm:text-lg whitespace-nowrap"
                         :style="{
                             color: ['#ba9011', '#1171ba', '#ba1111'][missionId],
                         }"
                     >
-                        {{ MihanNotify.TYPES[missionId] }}
+                        {{ $t(MihanNotify.TYPES[missionId]) }}
                     </div>
                 </div>
                 <div class="divider mx-2 my-1"></div>
@@ -34,7 +34,7 @@ defineProps<{
                     class="text-sm p-1 whitespace-nowrap"
                     :class="{ 'text-secondary': mihanNotifyMissions?.includes(mission) }"
                 >
-                    {{ mission }}
+                    {{ $t(mission) }}
                 </div>
             </div>
         </div>

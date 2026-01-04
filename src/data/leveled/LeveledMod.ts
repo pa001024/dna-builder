@@ -1,5 +1,6 @@
-import { LeveledBuff, effectMap, modMap } from "."
+import { LeveledBuff } from "."
 import { CharAttr, CharBuild } from "../CharBuild"
+import { effectMap, modMap } from "../d"
 import { Mod, Quality } from "../data-types"
 
 /**

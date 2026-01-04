@@ -1,5 +1,6 @@
-import { CommonLevelUp, effectMap, LeveledBuff, LeveledSkill, weaponMap } from "."
-import { DmgType, Weapon } from "../data-types"
+import { CommonLevelUp, LeveledBuff, LeveledSkill } from "."
+import { effectMap, weaponMap } from "../d"
+import { DmgType, Skill, SkillField, Weapon } from "../data-types"
 
 /**
  * LeveledWeapon类 - 继承Weapon接口，添加等级和精炼属性和动态属性计算
@@ -86,7 +87,32 @@ export class LeveledWeapon {
         this.基础暴伤 = weaponData.暴伤
         this.基础触发 = weaponData.触发
         if (weaponData.技能) {
-            this.技能 = weaponData.技能.map((skill) => new LeveledSkill({ ...skill, 武器: this.类型 }, undefined, weaponData.名称))
+            const skills = weaponData.技能.map((v) => {
+                const skill: Skill = {
+                    名称: v.名称,
+                    武器: this.类型,
+                    类型: v.类型,
+                }
+                if (v.字段) {
+                    skill.字段 = Object.keys(v.字段).map((key) => {
+                        let fstr = v.字段![key] as string | SkillField
+                        if (typeof fstr === "string") {
+                            const str = fstr
+                            fstr = {
+                                名称: key,
+                                格式: str.replace(/\d+\.\d+%/g, "{%}").replace(/×\d+/g, "×{}"),
+                                值: str.match(/\d+\.\d+%/g)?.map((match) => parseFloat(match.replace("%", "")) / 100)[0] || 0,
+                            } satisfies SkillField
+                            if (this.类型 === "武器伤害") {
+                                fstr.段数 = str.match(/×\d+/g)?.map((match) => parseFloat(match.replace("×", "")))[0] || 1
+                            }
+                        }
+                        return fstr as SkillField
+                    })
+                }
+                return skill
+            })
+            this.技能 = skills.map((skill) => new LeveledSkill(skill, undefined, weaponData.名称))
             this.弹道类型 = weaponData.技能.some((v) => "射线伤害" in v.字段!) ? "非弹道" : "弹道"
         }
 

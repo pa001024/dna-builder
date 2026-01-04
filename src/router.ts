@@ -44,6 +44,38 @@ const routes: readonly RouteRecordRaw[] = [
     { name: "ai", path: "/ai", component: () => import("./views/AIAgent.vue"), beforeEnter: () => setMinSize(600, 600) },
     { name: "help", path: "/help", component: () => import("./views/Help.vue"), beforeEnter: () => setMinSize(800, 700) },
 
+    // 数据库路由
+    {
+        name: "database",
+        path: "/db",
+        component: () => import("./views/DatabaseView.vue"),
+        beforeEnter: () => setMinSize(800, 600),
+    },
+    {
+        name: "monster-list",
+        path: "/db/monster",
+        component: () => import("./views/MonsterList.vue"),
+        beforeEnter: () => setMinSize(800, 600),
+    },
+    {
+        name: "monster-detail",
+        path: "/db/monster/:monsterId",
+        component: () => import("./views/MonsterDetailPage.vue"),
+        beforeEnter: () => setMinSize(800, 600),
+    },
+    {
+        name: "dungeon-list",
+        path: "/db/dungeon",
+        component: () => import("./views/DungeonList.vue"),
+        beforeEnter: () => setMinSize(800, 600),
+    },
+    {
+        name: "dungeon-detail",
+        path: "/db/dungeon/:dungeonId",
+        component: () => import("./views/DungeonDetailPage.vue"),
+        beforeEnter: () => setMinSize(800, 600),
+    },
+
     // DNA routes
     { name: "dna-home", path: "/dna", component: () => import("./views/DNAHomeView.vue"), beforeEnter: () => setMinSize(600, 600) },
     {

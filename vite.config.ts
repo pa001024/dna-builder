@@ -36,6 +36,7 @@ export default defineConfig(async () => ({
             strategy: "default",
             customSplitting: {
                 dna: [/src\/views\/DNA/],
+                db: [/src\/views\/Database/, /src\/views\/Monster/, /src\/views\/Dungeon/],
             },
         }),
         VitePWA({

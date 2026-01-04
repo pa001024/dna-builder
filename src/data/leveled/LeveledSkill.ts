@@ -85,21 +85,12 @@ export class LeveledSkill {
     updateProperties(): void {
         if (this.skillData.字段) {
             const field = this.skillData.字段
-            this.字段 = Object.keys(this.skillData.字段).map((key) => {
-                let fstr = field[key]
-                if (typeof fstr === "string") {
-                    const str = fstr
-                    fstr = {
-                        格式: str.replace(/\d+\.\d+%/g, "{%}").replace(/×\d+/g, "×{}"),
-                        值: str.match(/\d+\.\d+%/g)?.map((match) => parseFloat(match.replace("%", "")) / 100)[0] || 0,
-                    } satisfies SkillField
-                    if (this.类型 === "武器伤害") {
-                        fstr.段数 = str.match(/×\d+/g)?.map((match) => parseFloat(match.replace("×", "")))[0] || 1
-                    }
-                }
+            const fieldObj = Array.isArray(field) ? Object.fromEntries(field.map((f) => [f.名称, f])) : field
+            this.字段 = Object.keys(fieldObj).map((key) => {
+                let fstr = fieldObj[key]
+
                 const fo = fstr as SkillField
                 const obj = {
-                    名称: key,
                     ...fo,
                     值: Array.isArray(fo.值) ? fo.值[this._level - 1] : fo.值,
                 } as LeveledSkillField

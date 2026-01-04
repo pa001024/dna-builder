@@ -476,7 +476,7 @@ export class VoxelEngine {
                 if (this.fireTimer <= 0) {
                     this.performRangedAttack(0)
                     // 重置计时器。如果武器有攻速属性，使用武器攻速。否则默认0.5秒间隔。
-                    const attrs = this.charBuild.calculateWeaponAttributes(undefined, false, activeWeapon)
+                    const attrs = this.charBuild.calculateWeaponAttributes(activeWeapon)
                     // 攻速属性是一个乘数（例如，1.2 意味着快 20%）。大多数远程武器的基础速度大约是 2-5 发 / 秒？
                     // 我们假设基础速度是每秒 2 发（间隔 0.5 秒），再乘以攻击速度。
                     const attackSpeed = Math.max(0.1, attrs.weapon?.攻速 || 1)
@@ -893,7 +893,7 @@ export class VoxelEngine {
                 // 再检查一下它是否仍然处于范围内（例如状态变化）
                 if (this.isRangedWeapon(activeWeapon)) {
                     this.performRangedAttack(0)
-                    const attrs = this.charBuild.calculateWeaponAttributes(undefined, false, activeWeapon)
+                    const attrs = this.charBuild.calculateWeaponAttributes(activeWeapon)
                     // 假设基础攻击率大约是每2秒发射1次（0.5间隔），根据攻速进行修改
                     const attackSpeed = Math.max(0.1, attrs.weapon?.攻速 || 1)
                     this.fireTimer = 0.5 / attackSpeed

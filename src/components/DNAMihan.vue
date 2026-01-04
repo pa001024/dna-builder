@@ -43,7 +43,7 @@ onUnmounted(() => {
         <div v-if="mihanEnableNotify" class="flex gap-2">
             <label v-for="(type, val) in MihanNotify.TYPES" :key="type" class="text-sm p-1 label">
                 <input v-model="mihanNotifyTypes" :value="val" name="mihanTypes" type="checkbox" class="toggle toggle-secondary" />
-                {{ type }}
+                {{ $t(type) }}
             </label>
         </div>
         <div v-if="mihanEnableNotify" class="flex gap-2 flex-wrap">
@@ -55,7 +55,7 @@ onUnmounted(() => {
                     type="checkbox"
                     class="toggle toggle-secondary"
                 />
-                {{ mission }}
+                {{ $t(mission) }}
             </label>
         </div>
     </div>

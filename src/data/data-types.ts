@@ -117,7 +117,7 @@ export interface Weapon {
     装填?: number
     加成?: CommonAttr
     熔炼?: string[]
-    技能?: Skill[]
+    技能?: WeaponSkill[]
 }
 
 export interface Skill {
@@ -126,7 +126,18 @@ export interface Skill {
     类型: string
     武器?: string
     描述?: string
-    字段?: Record<string, SkillField | string>
+    字段?: SkillField[]
+    术语解释?: Record<string, string>
+    召唤物?: SkillSummon
+}
+
+export interface WeaponSkill {
+    id?: number
+    名称: string
+    类型: string
+    武器?: string
+    描述?: string
+    字段?: Record<string, string>
     术语解释?: Record<string, string>
     召唤物?: SkillSummon
 }
@@ -146,6 +157,7 @@ export interface SkillSummon {
 }
 
 export interface SkillField {
+    名称: string
     影响?: string
     值: number[] | number
     格式?: string
@@ -190,6 +202,15 @@ export interface Monster {
     战姿?: number
 }
 
+export enum Faction {
+    其他 = 0,
+    秽兽 = 1,
+    海伯利亚帝国 = 2,
+    神弃者同盟 = 3,
+    艾利西安传颂会 = 4,
+    华胥 = 5,
+}
+
 export interface DynamicMonster extends Monster {
     currentHP: number
     currentShield: number
@@ -200,15 +221,6 @@ export enum MobType {
     小型 = "小型",
     大型 = "大型",
     首领 = "首领",
-}
-
-export enum Faction {
-    其他 = 0,
-    秽兽 = 1,
-    海伯利亚帝国 = 2,
-    神弃者同盟 = 3,
-    艾利西安传颂会 = 4,
-    华胥 = 5,
 }
 
 export interface Mod {
@@ -333,4 +345,34 @@ export interface Achievement {
     描述: string
     版本: string
     奖励: Record<string, number>
+}
+
+export interface Reward {
+    id: number
+    m: string
+    child: RewardChild[]
+}
+
+export interface RewardChild {
+    id: number
+    t: string
+    c: number
+    d?: 1 // 是否是图纸
+    p?: number
+    n?: string
+}
+
+export interface Dungeon {
+    id: number
+    n: string
+    t: string
+    ts?: string
+    lv: number
+    rd: number
+    desc?: string
+    m: number[]
+    r?: number[]
+    win: number
+    sm?: number[]
+    sr?: number[]
 }

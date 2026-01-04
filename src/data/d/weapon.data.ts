@@ -1,4 +1,4 @@
-import type { Weapon } from "./data-types"
+import type { Weapon } from "../data-types"
 
 export default [
     {

@@ -1,4 +1,4 @@
-import type { Buff } from "./data-types"
+import type { Buff } from "../data-types"
 
 export default [
     { 名称: "暴虐", mx: 2, 描述: "击败敌人后，获得1层攻击速度提高30.0%，持续10.0秒，最多叠加2层。", 近战攻速: 0.3 },

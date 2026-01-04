@@ -632,11 +632,11 @@ function shareCharBuild() {
                 <div class="flex ml-auto flex-wrap items-center gap-2">
                     <button class="btn btn-sm btn-ghost" @click="shareCharBuild">
                         <Icon icon="ri:share-line" class="w-4 h-4" />
-                        <span class="hidden sm:inline">{{ $t("分享") }}</span>
+                        <span class="hidden sm:inline">{{ $t("char-build.share") }}</span>
                     </button>
                     <button class="btn btn-sm btn-ghost" @click="simulator_model_show = true">
                         <Icon icon="ri:game-line" class="w-4 h-4" />
-                        <span class="hidden sm:inline">{{ $t("模拟") }}</span>
+                        <span class="hidden sm:inline">{{ $t("char-build.simulator") }}</span>
                     </button>
                     <button class="btn btn-sm btn-secondary" @click="autobuild_model_show = true">
                         <Icon icon="ri:robot-2-line" class="w-4 h-4" />
@@ -850,7 +850,7 @@ function shareCharBuild() {
                                 }"
                                 @click="charSettings.baseName = skill.名称"
                             >
-                                {{ skill.名称 }}
+                                {{ $t(skill.名称) }}
                             </button>
                         </div>
                         <div class="flex items-center gap-4 text-sm p-1">
@@ -884,7 +884,7 @@ function shareCharBuild() {
                                     }"
                                 >
                                     <div class="flex justify-between items-center gap-4">
-                                        <div>{{ val.名称 }}</div>
+                                        <div>{{ $t(val.名称) }}</div>
                                         <div class="font-medium text-primary">
                                             {{ formatSkillProp(val.名称, val) }}
                                         </div>
@@ -893,8 +893,15 @@ function shareCharBuild() {
                                         v-if="val.影响"
                                         class="opacity-0 group-hover:opacity-80 justify-between items-center gap-4 flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
                                     >
-                                        <div>属性影响</div>
-                                        <div class="ml-auto font-medium">{{ val.影响 }}</div>
+                                        <div>{{ $t("属性影响") }}</div>
+                                        <div class="ml-auto font-medium">
+                                            {{
+                                                val.影响
+                                                    .split(",")
+                                                    .map((item) => $t(item))
+                                                    .join(",")
+                                            }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1089,7 +1096,7 @@ function shareCharBuild() {
                                 }"
                                 @click="charSettings.baseName = skill.名称"
                             >
-                                {{ skill.名称 }}
+                                {{ $t(skill.名称) }}
                             </button>
                         </div>
                         <div class="space-y-1">
@@ -1110,7 +1117,7 @@ function shareCharBuild() {
                                     }"
                                 >
                                     <div class="flex justify-between items-center gap-4">
-                                        <div>{{ val.名称 }}</div>
+                                        <div>{{ $t(val.名称) }}</div>
                                         <div class="font-medium text-primary">
                                             {{ formatSkillProp(val.名称, val) }}
                                         </div>
@@ -1119,8 +1126,15 @@ function shareCharBuild() {
                                         v-if="val.影响"
                                         class="opacity-0 group-hover:opacity-80 justify-between items-center gap-4 flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
                                     >
-                                        <div>属性影响</div>
-                                        <div class="ml-auto font-medium">{{ val.影响 }}</div>
+                                        <div>{{ $t("属性影响") }}</div>
+                                        <div class="ml-auto font-medium">
+                                            {{
+                                                val.影响
+                                                    .split(",")
+                                                    .map((item) => $t(item))
+                                                    .join(",")
+                                            }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1311,7 +1325,7 @@ function shareCharBuild() {
                                 }"
                                 @click="charSettings.baseName = skill.名称"
                             >
-                                {{ skill.名称 }}
+                                {{ $t(skill.名称) }}
                             </button>
                         </div>
                         <div class="space-y-1">
@@ -1332,7 +1346,7 @@ function shareCharBuild() {
                                     }"
                                 >
                                     <div class="flex justify-between items-center gap-4">
-                                        <div>{{ val.名称 }}</div>
+                                        <div>{{ $t(val.名称) }}</div>
                                         <div class="font-medium text-primary">
                                             {{ formatSkillProp(val.名称, val) }}
                                         </div>
@@ -1341,8 +1355,15 @@ function shareCharBuild() {
                                         v-if="val.影响"
                                         class="opacity-0 group-hover:opacity-80 justify-between items-center gap-4 flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
                                     >
-                                        <div>属性影响</div>
-                                        <div class="ml-auto font-medium">{{ val.影响 }}</div>
+                                        <div>{{ $t("属性影响") }}</div>
+                                        <div class="ml-auto font-medium">
+                                            {{
+                                                val.影响
+                                                    .split(",")
+                                                    .map((item) => $t(item))
+                                                    .join(",")
+                                            }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1522,7 +1543,7 @@ function shareCharBuild() {
                                 }"
                                 @click="charSettings.baseName = skill.名称"
                             >
-                                {{ skill.名称 }}
+                                {{ $t(skill.名称) }}
                             </button>
                         </div>
                         <div class="space-y-1">
@@ -1543,7 +1564,7 @@ function shareCharBuild() {
                                     }"
                                 >
                                     <div class="flex justify-between items-center gap-4">
-                                        <div>{{ val.名称 }}</div>
+                                        <div>{{ $t(val.名称) }}</div>
                                         <div class="font-medium text-primary">
                                             {{ formatSkillProp(val.名称, val) }}
                                         </div>
@@ -1552,8 +1573,15 @@ function shareCharBuild() {
                                         v-if="val.影响"
                                         class="opacity-0 group-hover:opacity-80 justify-between items-center gap-4 flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
                                     >
-                                        <div>属性影响</div>
-                                        <div class="ml-auto font-medium">{{ val.影响 }}</div>
+                                        <div>{{ $t("属性影响") }}</div>
+                                        <div class="ml-auto font-medium">
+                                            {{
+                                                val.影响
+                                                    .split(",")
+                                                    .map((item) => $t(item))
+                                                    .join(",")
+                                            }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1636,20 +1664,20 @@ function shareCharBuild() {
                             </span>
                         </div>
                         <div class="collapse-content">
-                            <h2 v-if="charBuild.char.溯源" class="text-lg font-bold p-2 mt-2">溯源</h2>
+                            <h2 v-if="charBuild.char.溯源" class="text-lg font-bold p-2 mt-2">{{ $t("溯源") }}</h2>
                             <div class="flex flex-col gap-2 p-2" v-if="charBuild.char.溯源">
                                 <div
                                     v-for="(grade, i) in charBuild.char.溯源"
                                     class="font-medium flex text-sm justify-between items-center gap-8"
                                 >
                                     <div class="font-medium whitespace-nowrap opacity-70">
-                                        第{{ ["一", "二", "三", "四", "五", "六"][i] }}根源
+                                        {{ $t("第" + ["一", "二", "三", "四", "五", "六"][i] + "根源") }}
                                     </div>
-                                    <div>{{ grade }}</div>
+                                    <div>{{ $t(grade) }}</div>
                                 </div>
                             </div>
                             <h2 class="text-lg font-bold p-2 flex gap-4 justify-between items-center">
-                                技能
+                                {{ $t("技能") }}
                                 <span class="text-base-content/50 text-sm">Lv. {{ selectedSkillLevel }}</span>
 
                                 <input
@@ -1670,19 +1698,19 @@ function shareCharBuild() {
                                     class="btn btn-sm rounded-full whitespace-nowrap transition-all duration-200"
                                     :class="detailTab === skill.名称 ? 'btn-primary shadow-lg scale-105' : 'btn-ghost hover:bg-base-200'"
                                 >
-                                    {{ skill.名称 }}
+                                    {{ $t(skill.名称) }}
                                 </button>
                             </div>
                             <div class="text-sm" v-if="selectedSkill">
                                 <div class="p-2 text-sm font-medium">
-                                    {{ selectedSkill.类型 }}
+                                    {{ $t(selectedSkill.类型) }}
                                 </div>
                                 <div class="p-2 text-sm">
-                                    {{ selectedSkill.描述 }}
+                                    {{ $t(selectedSkill.描述 || "") }}
                                 </div>
                                 <div class="p-2" v-for="(value, key) in selectedSkill.术语解释">
-                                    <div class="text-xs font-medium underline">{{ key }}</div>
-                                    <div class="text-xs">{{ value }}</div>
+                                    <div class="text-xs font-medium underline">{{ $t(key) }}</div>
+                                    <div class="text-xs">{{ $t(value) }}</div>
                                 </div>
                                 <div
                                     v-for="(val, index) in selectedSkill!.getFieldsWithAttr()"
@@ -1690,7 +1718,7 @@ function shareCharBuild() {
                                     class="flex flex-col group hover:bg-base-200/50 rounded-md p-2"
                                 >
                                     <div class="flex justify-between items-center gap-4">
-                                        <div>{{ val.名称 }}</div>
+                                        <div>{{ $t(val.名称) }}</div>
                                         <div class="font-medium text-primary">
                                             {{ formatSkillProp(val.名称, val) }}
                                         </div>
@@ -1699,8 +1727,15 @@ function shareCharBuild() {
                                         v-if="val.影响"
                                         class="opacity-0 group-hover:opacity-80 justify-between items-center gap-4 flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
                                     >
-                                        <div>属性影响</div>
-                                        <div class="ml-auto font-medium">{{ val.影响 }}</div>
+                                        <div>{{ $t("属性影响") }}</div>
+                                        <div class="ml-auto font-medium">
+                                            {{
+                                                val.影响
+                                                    .split(",")
+                                                    .map((item) => $t(item))
+                                                    .join(",")
+                                            }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

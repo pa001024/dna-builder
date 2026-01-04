@@ -1,4 +1,4 @@
-import type { Mod } from "./data-types"
+import type { Mod } from "../data-types"
 
 export default [
     { id: 11001, 名称: "炽灼", 系列: "不死鸟", 品质: "白", 耐受: 5, 攻击: 0.15, 类型: "角色" },

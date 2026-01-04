@@ -1,11 +1,5 @@
 import { describe, it, expect } from "vitest"
-import achievementData from "../achievement.data"
-import { monsterMap } from "../leveled"
-import charData from "../char.data"
-import modData from "../mod.data"
-import weaponData from "../weapon.data"
-import baseData from "../base.data"
-import buffData from "../buff.data"
+import { achievementData, baseData, buffData, charData, modData, monsterMap, weaponData } from ".."
 
 // 测试数据类型的完整性和有效性
 describe("数据类型测试", () => {
