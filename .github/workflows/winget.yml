@@ -1,0 +1,14 @@
+name: Publish to WinGet
+on:
+    release:
+        types: [released]
+jobs:
+    publish:
+        runs-on: windows-latest
+        steps:
+            - uses: vedantmgoyal9/winget-releaser@main
+              with:
+                  identifier: pa001024.dob
+                  installers-regex: ".*\\.msi"
+                  max-versions-to-keep: 5 # keep only latest 5 versions
+                  token: ${{ secrets.WINGET_TOKEN }}
