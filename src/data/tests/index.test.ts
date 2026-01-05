@@ -43,7 +43,7 @@ describe("模块功能测试", () => {
         expect(char).toBeInstanceOf(LeveledChar)
         expect(char.名称).toBe("黎瑟")
 
-        const weapon = new dataModule.LeveledWeapon("铸铁者")
+        const weapon = new dataModule.LeveledWeapon(10302)
         expect(weapon).toBeInstanceOf(LeveledWeapon)
         expect(weapon.名称).toBe("铸铁者")
 
@@ -63,8 +63,8 @@ describe("模块功能测试", () => {
             resonanceGain: 2,
             charMods: [new dataModule.LeveledMod(41001)],
             buffs: [new dataModule.LeveledBuff("助战50攻")],
-            melee: new dataModule.LeveledWeapon("铸铁者"),
-            ranged: new dataModule.LeveledWeapon("烈焰孤沙"),
+            melee: new dataModule.LeveledWeapon(10302), //"铸铁者"),
+            ranged: new dataModule.LeveledWeapon(20601), //"烈焰孤沙"),
             baseName: "一段伤害",
             enemyId: 130,
             enemyLevel: 80,
@@ -155,8 +155,8 @@ describe("模块使用场景测试", () => {
     it("应该能够与其他模块一起使用", () => {
         // 创建完整的构建流程
         const char = new dataModule.LeveledChar("黎瑟")
-        const melee = new dataModule.LeveledWeapon("铸铁者")
-        const ranged = new dataModule.LeveledWeapon("烈焰孤沙")
+        const melee = new dataModule.LeveledWeapon(10302) //"铸铁者")
+        const ranged = new dataModule.LeveledWeapon(20601) //"烈焰孤沙")
         const mod = new dataModule.LeveledMod(41001)
         const buff = new dataModule.LeveledBuff("助战50攻")
 
@@ -199,7 +199,7 @@ describe("错误处理测试", () => {
     it("应该处理无效的武器名称", () => {
         // 尝试创建无效武器，可能返回默认武器或抛出错误
         try {
-            const weapon = new dataModule.LeveledWeapon("不存在的武器")
+            const weapon = new dataModule.LeveledWeapon(99999)
             // 如果创建成功，验证它是LeveledWeapon实例
             expect(weapon).toBeInstanceOf(LeveledWeapon)
         } catch (error) {

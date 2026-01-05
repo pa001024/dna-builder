@@ -24,8 +24,8 @@ describe("CharBuild类测试", () => {
             resonanceGain: 2,
             charMods: [...mockMods],
             buffs: [...mockBuffs],
-            melee: new LeveledWeapon("铸铁者"),
-            ranged: new LeveledWeapon("烈焰孤沙"),
+            melee: new LeveledWeapon(10302), //"铸铁者"),
+            ranged: new LeveledWeapon(20601), //"烈焰孤沙"),
             baseName: "快速出击",
             enemyId: 1001001,
             enemyLevel: 80,
@@ -262,7 +262,7 @@ describe("CharBuild类测试", () => {
     it("应该能够正确执行主要计算方法", () => {
         const charBuild = createCharBuild()
         charBuild.baseName = "普通攻击"
-        charBuild.targetFunction = "每秒伤害"
+        charBuild.targetFunction = "DPS"
         charBuild.mods = [] // 迅捷(75%)
         const income = charBuild.calcIncome(new LeveledMod(52004))
         // 验证结果
@@ -294,7 +294,7 @@ describe("CharBuild类测试", () => {
 
         it("应该能够正确计算DPS（每秒伤害）目标函数", () => {
             const charBuild = createCharBuild()
-            charBuild.targetFunction = "每秒伤害"
+            charBuild.targetFunction = "DPS"
 
             const result = charBuild.calculate()
 
@@ -629,8 +629,8 @@ describe("CharBuild类测试", () => {
                     resonanceGain: 2,
                     charMods: [...mockMods],
                     buffs: [...mockBuffs],
-                    melee: new LeveledWeapon("铸铁者"),
-                    ranged: new LeveledWeapon("烈焰孤沙"),
+                    melee: new LeveledWeapon(10302), //"铸铁者"),
+                    ranged: new LeveledWeapon(20601), //"烈焰孤沙"),
                     baseName: "普通攻击",
                     enemyId: 1001001,
                     enemyLevel: 80,
@@ -648,12 +648,11 @@ describe("CharBuild类测试", () => {
     // 武器测试
     describe("武器测试", () => {
         it("应该能够处理不同近战武器", () => {
-            const weapons = ["铸铁者", "春玦戟", "辉珀刃"]
+            const weapons = [10302, 10303, 10304]
 
-            weapons.forEach((weaponName) => {
+            weapons.forEach((weaponId) => {
                 const charBuild = createCharBuild()
-                charBuild.meleeWeapon = new LeveledWeapon(weaponName)
-                charBuild.baseName = weaponName
+                charBuild.meleeWeapon = new LeveledWeapon(weaponId)
 
                 const result = charBuild.calculateWeaponAttributes()
                 // result可能包含weapon属性，也可能不包含
@@ -666,12 +665,11 @@ describe("CharBuild类测试", () => {
         })
 
         it("应该能够处理不同远程武器", () => {
-            const weapons = ["烈焰孤沙", "弧光百劫", "苍瑚凝碧"]
+            const weapons = [20601, 20602, 20603]
 
-            weapons.forEach((weaponName) => {
+            weapons.forEach((weaponId) => {
                 const charBuild = createCharBuild()
-                charBuild.rangedWeapon = new LeveledWeapon(weaponName)
-                charBuild.baseName = weaponName
+                charBuild.rangedWeapon = new LeveledWeapon(weaponId)
 
                 const result = charBuild.calculateWeaponAttributes()
                 // result可能包含weapon属性，也可能不包含

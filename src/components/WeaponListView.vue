@@ -6,15 +6,15 @@ import type { Weapon } from "../data/data-types"
 
 const props = defineProps<{
     charBuild?: CharBuild
-    melee?: string
-    ranged?: string
+    melee?: number
+    ranged?: number
 }>()
 
 const tabs = ["全部", "单手剑", "长柄", "重剑", "双刀", "鞭刃", "太刀", "手枪", "双枪", "榴炮", "霰弹枪", "突击枪", "弓"]
 const activeTab = ref(tabs[1])
 const searchQuery = ref("")
-const selectedMelee = ref(props.melee || "")
-const selectedRanged = ref(props.ranged || "")
+const selectedMelee = ref(props.melee || 0)
+const selectedRanged = ref(props.ranged || 0)
 
 // 元素颜色映射
 const elementColors: Record<string, string> = {
@@ -52,14 +52,14 @@ const getAnimationDelay = (index: number) => {
 }
 
 const emits = defineEmits<{
-    change: [melee: string, ranged: string]
+    change: [melee: number, ranged: number]
 }>()
 
 function selectWeapon(weapon: Weapon) {
     if (weapon.类型[0] === "近战") {
-        selectedMelee.value = weapon.名称
+        selectedMelee.value = weapon.id
     } else if (weapon.类型[0] === "远程") {
-        selectedRanged.value = weapon.名称
+        selectedRanged.value = weapon.id
     }
     emits("change", selectedMelee.value, selectedRanged.value)
 }
@@ -112,7 +112,7 @@ function selectWeapon(weapon: Weapon) {
                     class="group relative bg-base-100 rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer border-2"
                     :class="[
                         elementBorderColors[weapon.类型[0]] || 'border-base-300',
-                        (weapon.类型[0] === '近战' ? selectedMelee == weapon.名称 : selectedRanged == weapon.名称)
+                        (weapon.类型[0] === '近战' ? selectedMelee == weapon.id : selectedRanged == weapon.id)
                             ? '-translate-y-1 border-green-500!'
                             : '',
                     ]"
@@ -162,7 +162,7 @@ function selectWeapon(weapon: Weapon) {
                             {{ $t(weapon.伤害类型) }}
                         </p>
 
-                        <p class="text-xs text-base-content/60 truncate">
+                        <p v-if="weapon.熔炼" class="text-xs text-base-content/60 truncate">
                             {{ $t(weapon.熔炼[5]) }}
                         </p>
 

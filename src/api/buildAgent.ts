@@ -599,9 +599,9 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
             this.charSettings.value.meleeMods = result.newBuild.meleeMods.map((m) => (m !== null ? [m.modId, m.level] : null))
             this.charSettings.value.rangedMods = result.newBuild.rangedMods.map((m) => (m !== null ? [m.modId, m.level] : null))
             this.charSettings.value.skillWeaponMods = result.newBuild.skillWeaponMods.map((m) => (m !== null ? [m.modId, m.level] : null))
-            this.charSettings.value.meleeWeapon = result.newBuild.meleeWeapon.名称
+            this.charSettings.value.meleeWeapon = result.newBuild.meleeWeapon.id
             this.charSettings.value.meleeWeaponRefine = result.newBuild.meleeWeapon.精炼
-            this.charSettings.value.rangedWeapon = result.newBuild.rangedWeapon.名称
+            this.charSettings.value.rangedWeapon = result.newBuild.rangedWeapon.id
             this.charSettings.value.rangedWeaponRefine = result.newBuild.rangedWeapon.精炼
         }
         return `自动构建参数: ${JSON.stringify(params, null, 2)}

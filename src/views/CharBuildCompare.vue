@@ -228,8 +228,8 @@ const charBuilds = computed(() => {
             // Create a dummy CharBuild instance if baseBuild is null
             return new CharBuild({
                 char: new LeveledChar(config.selectedChar, 10),
-                melee: new LeveledWeapon("枯朽", 0, 1, 0),
-                ranged: new LeveledWeapon("剥离", 0, 1, 0),
+                melee: new LeveledWeapon(10302, 0, 1, 0),
+                ranged: new LeveledWeapon(20601, 0, 1, 0),
                 auraMod: new LeveledMod(0),
                 charMods: [],
                 meleeMods: [],

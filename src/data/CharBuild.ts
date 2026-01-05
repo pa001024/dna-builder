@@ -335,6 +335,19 @@ export class CharBuild {
     }
 
     set mods(mods: LeveledMod[]) {
+        this.charMods = []
+        this.meleeMods = []
+        this.rangedMods = []
+        this.skillWeaponMods = []
+        this.tempMod = null
+        this.charModsExclusiveSeries.clear()
+        this.meleeModsExclusiveSeries.clear()
+        this.rangedModsExclusiveSeries.clear()
+        this.skillWeaponModsExclusiveSeries.clear()
+        this.charModsExclusiveNames.clear()
+        this.meleeModsExclusiveNames.clear()
+        this.rangedModsExclusiveNames.clear()
+        this.skillWeaponModsExclusiveNames.clear()
         this.applyMods(mods)
     }
 
@@ -370,7 +383,6 @@ export class CharBuild {
         let defenseBonus = this.getTotalBonus("防御")
         let sanityBonus = this.getTotalBonus("神智")
         let elemDamageBonus = this.getTotalBonus("属性伤")
-
         // 计算基础值为1的属性
         let power = 1 + this.getTotalBonus("技能威力")
         let durability = 1 + this.getTotalBonus("技能耐久")
@@ -505,7 +517,7 @@ export class CharBuild {
         nochar = false,
     ): CharAttr & { weapon?: WeaponAttr } {
         const char = this.char
-        let attrs: CharAttr & { weapon?: WeaponAttr } = nochar ? ({} as any) : this.calculateAttributes(true)
+        let attrs: CharAttr & { weapon?: WeaponAttr } = nochar ? ({} as any) : this.calculateAttributes()
 
         if (weapon) {
             const prefix = weapon.类型
@@ -1377,19 +1389,14 @@ export class CharBuild {
         // 处理互斥逻辑
         keys.forEach((key) => {
             for (const mod of toAddMods[key]) {
-                if (mod.isMinus) {
-                    this[key].push(mod)
-                    continue
-                }
                 // 记录互斥系列
                 if (CharBuild.exclusiveSeries.includes(mod.系列)) {
                     if (!this[`${key}ExclusiveSeries`].has(mod.系列)) {
                         mod.excludeSeries.forEach((series) => this[`${key}ExclusiveSeries`].add(series))
-                        this[key].push(mod)
                     }
                 }
-                // 记录非契约者MOD名称（用于名称互斥）
                 if (mod.系列 !== "契约者") {
+                    // 记录非契约者MOD名称（用于名称互斥）
                     if (!this[`${key}ExclusiveNames`].has(mod.名称)) {
                         this[`${key}ExclusiveNames`].add(mod.名称)
                         this[key].push(mod)

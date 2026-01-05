@@ -38,7 +38,7 @@ const sortedBuffs = computed(() => {
 </script>
 <template>
     <ScrollArea class="h-80">
-        <transition-group name="list" tag="div" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <transition-group name="list" tag="div" class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
             <!-- 已选择的BUFF -->
             <BuffCell
                 v-for="buff in buffOptions.filter((b) => selectedBuffs.some((v) => v.名称 === b.label))"

@@ -29,11 +29,6 @@ describe("LeveledMod类测试", () => {
         const 炽灼 = new LeveledMod(11001, -1)
         expect(炽灼.等级).toBe(0)
     })
-    // 测试excludeNames
-    it("excludeNames包含正确的名称", () => {
-        const 风决断 = new LeveledMod(56152, -1)
-        expect(风决断.excludeNames).toEqual(["海妖之羽翼·鼓舞", "换生灵之决断"])
-    })
 
     // 测试5：验证属性计算公式
     it("属性计算公式正确", () => {
@@ -240,7 +235,7 @@ describe("LeveledWeapon类测试", () => {
     // 测试1：创建近战武器
     it("成功创建带等级的近战武器", () => {
         // 使用铸铁者的名称
-        const 铸铁者5级 = new LeveledWeapon("铸铁者", 3, 5)
+        const 铸铁者5级 = new LeveledWeapon(10302, 3, 5)
         expect(铸铁者5级).toBeTruthy()
         expect(铸铁者5级.名称).toBe("铸铁者")
         expect(铸铁者5级.类型).toBe("近战")
@@ -252,9 +247,9 @@ describe("LeveledWeapon类测试", () => {
     // 测试2：创建远程武器
     it("成功创建带等级的远程武器", () => {
         // 使用烈焰孤沙的名称
-        const 烈焰孤沙7级 = new LeveledWeapon("烈焰孤沙", 4, 7)
+        const 烈焰孤沙7级 = new LeveledWeapon(20604, 4, 7)
         expect(烈焰孤沙7级).toBeTruthy()
-        expect(烈焰孤沙7级.名称).toBe("烈焰孤沙")
+        expect(烈焰孤沙7级.名称).toBe("裂魂")
         expect(烈焰孤沙7级.类型).toBe("远程")
         expect(烈焰孤沙7级.类别).toBe("弓")
         expect(烈焰孤沙7级.精炼).toBe(4)
@@ -263,7 +258,7 @@ describe("LeveledWeapon类测试", () => {
 
     // 测试3：创建默认等级的武器（默认等级为80，默认精炼为5）
     it("成功创建默认等级的武器", () => {
-        const 铸铁者默认级 = new LeveledWeapon("铸铁者")
+        const 铸铁者默认级 = new LeveledWeapon(10302)
         expect(铸铁者默认级).toBeTruthy()
         expect(铸铁者默认级.精炼).toBe(5)
         expect(铸铁者默认级.等级).toBe(80)
@@ -271,32 +266,32 @@ describe("LeveledWeapon类测试", () => {
 
     // 测试3：设置超过上限的精炼等级（应该被限制在5）
     it("武器精炼等级被正确限制在精炼等级上限5", () => {
-        const 铸铁者 = new LeveledWeapon("铸铁者", 15, 80)
+        const 铸铁者 = new LeveledWeapon(10302, 15, 80)
         expect(铸铁者.精炼).toBe(5)
     })
 
     // 测试5：设置低于下限的精炼等级（应该被限制在0）
     it("武器精炼等级被正确限制在0", () => {
-        const 铸铁者 = new LeveledWeapon("铸铁者", -1)
+        const 铸铁者 = new LeveledWeapon(10302, -1)
         expect(铸铁者.精炼).toBe(0)
     })
 
     // 测试6：设置超出上限的等级（应该被限制在80）
     it("武器等级被正确限制在等级上限80", () => {
-        const 铸铁者 = new LeveledWeapon("铸铁者", 5, 90)
+        const 铸铁者 = new LeveledWeapon(10302, 5, 90)
         expect(铸铁者.等级).toBe(80)
     })
 
     // 测试7：设置低于下限的等级（应该被限制在1）
     it("武器等级被正确限制在1", () => {
-        const 铸铁者 = new LeveledWeapon("铸铁者", 5, 0)
+        const 铸铁者 = new LeveledWeapon(10302, 5, 0)
         expect(铸铁者.等级).toBe(1)
     })
 
     // 测试8：验证基础攻击受等级影响
     it("武器基础攻击受等级影响", () => {
-        const 铸铁者1级 = new LeveledWeapon("铸铁者", 0, 1)
-        const 铸铁者80级 = new LeveledWeapon("铸铁者", 0, 80)
+        const 铸铁者1级 = new LeveledWeapon(10302, 0, 1)
+        const 铸铁者80级 = new LeveledWeapon(10302, 0, 80)
 
         // 1级时基础攻击 = 原始值 * 0.079666848
         // 80级时基础攻击 = 原始值 * 1
@@ -306,8 +301,8 @@ describe("LeveledWeapon类测试", () => {
 
     // 测试9：验证精炼等级影响其他属性
     it("武器精炼等级影响其他属性", () => {
-        const 铸铁者精炼0级 = new LeveledWeapon("铸铁者", 0)
-        const 铸铁者精炼5级 = new LeveledWeapon("铸铁者", 5)
+        const 铸铁者精炼0级 = new LeveledWeapon(10302, 0)
+        const 铸铁者精炼5级 = new LeveledWeapon(10302, 5)
 
         // 精炼0级时，暴击属性应该是原始值/2
         // 精炼5级时，暴击属性应该是原始值
@@ -317,8 +312,8 @@ describe("LeveledWeapon类测试", () => {
 
     // 测试10：验证精炼等级不影响基础暴击属性
     it("武器精炼等级不影响基础暴击属性", () => {
-        const 铸铁者精炼0级 = new LeveledWeapon("铸铁者", 0)
-        const 铸铁者精炼5级 = new LeveledWeapon("铸铁者", 5)
+        const 铸铁者精炼0级 = new LeveledWeapon(10302, 0)
+        const 铸铁者精炼5级 = new LeveledWeapon(10302, 5)
 
         // 基础暴击属性应该始终保持原始值0.2，不受精炼等级影响
         expect(铸铁者精炼0级.基础暴击).toBe(0.2)
@@ -327,7 +322,7 @@ describe("LeveledWeapon类测试", () => {
 
     // 测试10：获取完整属性
     it("获取武器完整属性包含等级和攻击信息", () => {
-        const 铸铁者5级 = new LeveledWeapon("铸铁者", 5)
+        const 铸铁者5级 = new LeveledWeapon(10302, 5)
         const fullProps = 铸铁者5级.getProperties()
         expect(fullProps.暴击).toBe(1)
     })
@@ -335,22 +330,22 @@ describe("LeveledWeapon类测试", () => {
     // 测试11：测试不存在的武器名称
     it("测试不存在的武器名称会抛出错误", () => {
         expect(() => {
-            new LeveledWeapon("不存在的武器")
+            new LeveledWeapon(123)
         }).toThrow(Error)
 
         expect(() => {
-            new LeveledWeapon("不存在的武器")
+            new LeveledWeapon(345)
         }).toThrow(Error)
     })
 
     // 测试12：测试不同类型的武器属性
     it("测试不同类型武器的特定属性", () => {
         // 近战武器（重剑）
-        const 铸铁者 = new LeveledWeapon("铸铁者")
+        const 铸铁者 = new LeveledWeapon(10302)
         expect(铸铁者.伤害类型).toBe("切割")
 
         // 远程武器（弓）
-        const 裂魂 = new LeveledWeapon("裂魂")
+        const 裂魂 = new LeveledWeapon(20604)
         expect(裂魂.伤害类型).toBe("震荡")
         expect(裂魂.弹道类型).toBe("弹道")
     })

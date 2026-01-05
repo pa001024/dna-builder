@@ -174,40 +174,40 @@ const teamWeaponOptions = computed(() =>
 )
 
 // 创建CharBuild实例
-const charBuild = computed(
-    () =>
-        new CharBuild({
-            char: new LeveledChar(selectedChar.value, charSettings.value.charLevel),
-            auraMod: new LeveledMod(charSettings.value.auraMod),
-            charMods: selectedCharMods.value,
-            meleeMods: selectedMeleeMods.value,
-            rangedMods: selectedRangedMods.value,
-            skillWeaponMods: selectedSkillWeaponMods.value,
-            skillLevel: charSettings.value.charSkillLevel,
-            buffs: selectedBuffs.value,
-            melee: new LeveledWeapon(
-                charSettings.value.meleeWeapon,
-                charSettings.value.meleeWeaponRefine,
-                charSettings.value.meleeWeaponLevel,
-                inv.getBuffLv(charSettings.value.meleeWeapon),
-            ),
-            ranged: new LeveledWeapon(
-                charSettings.value.rangedWeapon,
-                charSettings.value.rangedWeaponRefine,
-                charSettings.value.rangedWeaponLevel,
-                inv.getBuffLv(charSettings.value.rangedWeapon),
-            ),
-            baseName: charSettings.value.baseName,
-            imbalance: charSettings.value.imbalance,
-            hpPercent: charSettings.value.hpPercent,
-            resonanceGain: charSettings.value.resonanceGain,
-            enemyId: charSettings.value.enemyId,
-            enemyLevel: charSettings.value.enemyLevel,
-            enemyResistance: charSettings.value.enemyResistance,
-            targetFunction: charSettings.value.targetFunction,
-            timeline: getTimelineByName(charSettings.value.baseName),
-        }),
-)
+const charBuild = computed(() => {
+    const b = new CharBuild({
+        char: new LeveledChar(selectedChar.value, charSettings.value.charLevel),
+        auraMod: new LeveledMod(charSettings.value.auraMod),
+        charMods: selectedCharMods.value,
+        meleeMods: selectedMeleeMods.value,
+        rangedMods: selectedRangedMods.value,
+        skillWeaponMods: selectedSkillWeaponMods.value,
+        skillLevel: charSettings.value.charSkillLevel,
+        buffs: selectedBuffs.value,
+        melee: new LeveledWeapon(
+            charSettings.value.meleeWeapon,
+            charSettings.value.meleeWeaponRefine,
+            charSettings.value.meleeWeaponLevel,
+            inv.getBuffLv(charSettings.value.meleeWeapon),
+        ),
+        ranged: new LeveledWeapon(
+            charSettings.value.rangedWeapon,
+            charSettings.value.rangedWeaponRefine,
+            charSettings.value.rangedWeaponLevel,
+            inv.getBuffLv(charSettings.value.rangedWeapon),
+        ),
+        baseName: charSettings.value.baseName,
+        imbalance: charSettings.value.imbalance,
+        hpPercent: charSettings.value.hpPercent,
+        resonanceGain: charSettings.value.resonanceGain,
+        enemyId: charSettings.value.enemyId,
+        enemyLevel: charSettings.value.enemyLevel,
+        enemyResistance: charSettings.value.enemyResistance,
+        targetFunction: charSettings.value.targetFunction,
+        timeline: getTimelineByName(charSettings.value.baseName),
+    })
+    return b
+})
 
 // 计算属性
 const attributes = computed(() => charBuild.value.calculateAttributes())
@@ -353,10 +353,10 @@ let newBuild!: CharBuild
 function applyAutobuild() {
     autobuild_model_show.value = false
     if (!newBuild) return
-    charSettings.value.meleeWeapon = newBuild.meleeWeapon.名称
+    charSettings.value.meleeWeapon = newBuild.meleeWeapon.id
     charSettings.value.meleeWeaponLevel = newBuild.meleeWeapon.等级
     charSettings.value.meleeWeaponRefine = newBuild.meleeWeapon.精炼
-    charSettings.value.rangedWeapon = newBuild.rangedWeapon.名称
+    charSettings.value.rangedWeapon = newBuild.rangedWeapon.id
     charSettings.value.rangedWeaponLevel = newBuild.rangedWeapon.等级
     charSettings.value.rangedWeaponRefine = newBuild.rangedWeapon.精炼
     charSettings.value.charMods = pad(
@@ -548,8 +548,8 @@ watch(
 )
 const charDetailExpend = ref(true)
 const weapon_select_model_show = ref(false)
-const newWeaponSelection = ref({ melee: "", ranged: "" })
-function handleWeaponSelection(melee: string, ranged: string) {
+const newWeaponSelection = ref({ melee: 0, ranged: 0 })
+function handleWeaponSelection(melee: number, ranged: number) {
     newWeaponSelection.value = { melee, ranged }
 }
 function applyWeaponSelection() {

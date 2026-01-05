@@ -11,7 +11,7 @@ const weaponSearchQuery = ref("")
 const filteredWeapons = computed(() => {
     const mappedWeapons = allWeapons
         .filter((v) => inv.enableWeapons[v.类型[0] as keyof typeof inv.enableWeapons])
-        .map((v) => new LeveledWeapon(v.名称, v.名称 in inv.weapons ? inv.weapons[v.名称] : 5))
+        .map((v) => new LeveledWeapon(v.id, v.名称 in inv.weapons ? inv.weapons[v.id] : 5))
     if (!weaponSearchQuery.value) return mappedWeapons
 
     const query = weaponSearchQuery.value.trim()
@@ -51,18 +51,18 @@ const filteredSelectedMods = computed(() => {
     })
 })
 
-function toggleSelectWeapon(weaponName: string, weaponType: string) {
+function toggleSelectWeapon(weaponId: number, weaponType: string) {
     if (weaponType === "近战") {
-        if (weaponName in inv.meleeWeapons) {
-            delete inv.meleeWeapons[weaponName]
+        if (weaponId in inv.meleeWeapons) {
+            delete inv.meleeWeapons[weaponId]
         } else {
-            inv.meleeWeapons[weaponName] = 5
+            inv.meleeWeapons[weaponId] = 5
         }
     } else if (weaponType === "远程") {
-        if (weaponName in inv.rangedWeapons) {
-            delete inv.rangedWeapons[weaponName]
+        if (weaponId in inv.rangedWeapons) {
+            delete inv.rangedWeapons[weaponId]
         } else {
-            inv.rangedWeapons[weaponName] = 5
+            inv.rangedWeapons[weaponId] = 5
         }
     }
 }
@@ -80,17 +80,17 @@ function handleSelectAllWeapons() {
     if (filteredInvWeapons.value.length === filteredWeapons.value.length) {
         filteredWeapons.value.forEach((weapon) => {
             if (weapon.类型 === "近战") {
-                delete inv.meleeWeapons[weapon.名称]
+                delete inv.meleeWeapons[weapon.id]
             } else if (weapon.类型 === "远程") {
-                delete inv.rangedWeapons[weapon.名称]
+                delete inv.rangedWeapons[weapon.id]
             }
         })
     } else {
         filteredWeapons.value.forEach((weapon) => {
             if (weapon.类型 === "近战") {
-                inv.meleeWeapons[weapon.名称] = weapon.精炼
+                inv.meleeWeapons[weapon.id] = weapon.精炼
             } else if (weapon.类型 === "远程") {
-                inv.rangedWeapons[weapon.名称] = weapon.精炼
+                inv.rangedWeapons[weapon.id] = weapon.精炼
             }
         })
     }
@@ -156,8 +156,8 @@ function handleSelectAllMods() {
                             :key="index"
                             :weapon="weapon"
                             :index="index"
-                            @click="toggleSelectWeapon(weapon.名称, weapon.类型)"
-                            @refineChange="inv.setWeaponRefineLv(weapon.名称, $event)"
+                            @click="toggleSelectWeapon(weapon.id, weapon.类型)"
+                            @refineChange="inv.setWeaponRefineLv(weapon.id, $event)"
                             noremove
                             control
                         />

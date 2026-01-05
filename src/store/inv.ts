@@ -1,12 +1,12 @@
 import { useLocalStorage } from "@vueuse/core"
 import { defineStore } from "pinia"
-import { LeveledModWithCount, LeveledWeapon, modData, modMap, ModTypeKey, ModTypeMap, weaponData } from "../data"
+import { LeveledModWithCount, LeveledWeapon, modData, modMap, ModTypeKey, ModTypeMap, weaponData, weaponMap } from "../data"
 
 export const useInvStore = defineStore("inv", {
     state: () => {
         return {
-            meleeWeapons: useLocalStorage("inv.meleeWeapons", {} as Record<string, number>),
-            rangedWeapons: useLocalStorage("inv.rangedWeapons", {} as Record<string, number>),
+            meleeWeapons: useLocalStorage("inv.meleeWeapons", {} as Record<number, number>),
+            rangedWeapons: useLocalStorage("inv.rangedWeapons", {} as Record<number, number>),
             enableWeapons: useLocalStorage("inv.enableWeapon", {
                 近战: false,
                 远程: false,
@@ -29,9 +29,9 @@ export const useInvStore = defineStore("inv", {
         }),
     },
     actions: {
-        setWeaponRefineLv(weaponName: string, lv: number) {
-            if (weaponName in this.meleeWeapons) this.meleeWeapons[weaponName] = lv
-            else if (weaponName in this.rangedWeapons) this.rangedWeapons[weaponName] = lv
+        setWeaponRefineLv(weaponId: number, lv: number) {
+            if (weaponId in this.meleeWeapons) this.meleeWeapons[weaponId] = lv
+            else if (weaponId in this.rangedWeapons) this.rangedWeapons[weaponId] = lv
         },
         getBuffLv(modId: number | string) {
             if (typeof modId === "number") modId = modMap.get(modId)?.名称 || modId
@@ -75,17 +75,21 @@ export const useInvStore = defineStore("inv", {
         },
         getMeleeWeapons(useInv: boolean) {
             return useInv && this.enableWeapons.近战
-                ? Object.entries(this.meleeWeapons).map(([name, level]) => new LeveledWeapon(name, level, undefined, this.getBuffLv(name)))
+                ? Object.entries(this.meleeWeapons).map(
+                      ([id, level]) => new LeveledWeapon(+id, level, undefined, this.getBuffLv(weaponMap.get(+id)!.名称)),
+                  )
                 : weaponData
                       .filter((weapon) => weapon.类型[0] === "近战")
-                      .map((weapon) => new LeveledWeapon(weapon.名称, undefined, undefined, this.getBuffLv(weapon.名称)))
+                      .map((weapon) => new LeveledWeapon(weapon.id, undefined, undefined, this.getBuffLv(weapon.名称)))
         },
         getRangedWeapons(useInv: boolean) {
             return useInv && this.enableWeapons.远程
-                ? Object.entries(this.rangedWeapons).map(([name, level]) => new LeveledWeapon(name, level, undefined, this.getBuffLv(name)))
+                ? Object.entries(this.rangedWeapons).map(
+                      ([id, level]) => new LeveledWeapon(+id, level, undefined, this.getBuffLv(weaponMap.get(+id)!.名称)),
+                  )
                 : weaponData
                       .filter((weapon) => weapon.类型[0] === "远程")
-                      .map((weapon) => new LeveledWeapon(weapon.名称, undefined, undefined, this.getBuffLv(weapon.名称)))
+                      .map((weapon) => new LeveledWeapon(weapon.id, undefined, undefined, this.getBuffLv(weapon.名称)))
         },
     },
 })

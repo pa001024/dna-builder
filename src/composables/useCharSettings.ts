@@ -12,10 +12,10 @@ export const defaultCharSettings = {
     isRouge: false,
     targetFunction: "",
     charSkillLevel: 10,
-    meleeWeapon: "枯朽",
+    meleeWeapon: 10206, //"枯朽",
     meleeWeaponLevel: 80,
     meleeWeaponRefine: 5,
-    rangedWeapon: "剥离",
+    rangedWeapon: 20102, //"剥离",
     rangedWeaponLevel: 80,
     rangedWeaponRefine: 5,
     auraMod: 31524, // 警惕
@@ -204,7 +204,7 @@ export function deserializeCharSettings(str: string): Partial<CharSettings> {
                 settings.charSkillLevel = decodeBase62(val)
                 break
             case 10: // meleeWeapon
-                settings.meleeWeapon = val === "" ? "" : decodeURIComponent(val)
+                settings.meleeWeapon = decodeBase62(val)
                 break
             case 11: // meleeWeaponLevel
                 settings.meleeWeaponLevel = decodeBase62(val)
@@ -213,7 +213,7 @@ export function deserializeCharSettings(str: string): Partial<CharSettings> {
                 settings.meleeWeaponRefine = decodeBase62(val)
                 break
             case 13: // rangedWeapon
-                settings.rangedWeapon = val === "" ? "" : decodeURIComponent(val)
+                settings.rangedWeapon = decodeBase62(val)
                 break
             case 14: // rangedWeaponLevel
                 settings.rangedWeaponLevel = decodeBase62(val)

@@ -2820,6 +2820,9 @@
     "DNA动了Ⅰ": "My DNA Is Responding Ⅰ",
     "DNA动了Ⅱ": "My DNA Is Responding Ⅱ",
     "DNA动了Ⅲ": "My DNA Is Responding Ⅲ",
+    "draft-list": {
+        "title": "Drawing list"
+    },
     "dungeon-detail": {
         "title": "Copy details"
     },
@@ -2962,6 +2965,12 @@
         "btn_pin_window": "Pin window on top",
         "btn_unpin_window": "Unpin window"
     },
+    "mod-detail": {
+        "title": "Devil's Wedge details"
+    },
+    "mod-list": {
+        "title": "Demonic Wedge List"
+    },
     "modEditor": {
         "inputCode": "Please enter character or weapon code"
     },
@@ -2974,6 +2983,9 @@
     "more": {
         "desc": "More features",
         "title": "More"
+    },
+    "raid-rank": {
+        "title": "Ranking rewards"
     },
     "resizeableWindow": {
         "and": " and ",
@@ -3030,5 +3042,11 @@
         "title": "Timeline"
     },
     "UI_CHAR_SUBTITLE_2102": "UI_CHAR_SUBTITLE_2102",
-    "UI_CHAR_SUBTITLE_3202": "UI_CHAR_SUBTITLE_3202"
+    "UI_CHAR_SUBTITLE_3202": "UI_CHAR_SUBTITLE_3202",
+    "weapon-detail": {
+        "title": "Weapon details"
+    },
+    "weapon-list": {
+        "title": "Weapons list"
+    }
 }

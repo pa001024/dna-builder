@@ -31,7 +31,7 @@ const product = computed(() => {
     if (props.draft.t === "Mod") {
         return modMap.get(props.draft.p)
     } else if (props.draft.t === "Weapon") {
-        return weaponMap.get(props.draft.p.toString())
+        return weaponMap.get(props.draft.p)
     }
     return null
 })

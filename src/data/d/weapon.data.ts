@@ -2407,4 +2407,4 @@ export default [
             },
         ],
     },
-] satisfies Weapon[]
+] satisfies Weapon[] as Weapon[]

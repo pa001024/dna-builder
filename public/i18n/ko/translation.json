@@ -2820,6 +2820,9 @@
     "DNA动了Ⅰ": "추억의 감동 Ⅰ",
     "DNA动了Ⅱ": "추억의 감동 Ⅱ",
     "DNA动了Ⅲ": "추억의 감동 Ⅲ",
+    "draft-list": {
+        "title": "도면 목록"
+    },
     "dungeon-detail": {
         "title": "세부정보 복사"
     },
@@ -2962,6 +2965,12 @@
         "btn_pin_window": "창 고정",
         "btn_unpin_window": "고정 해제"
     },
+    "mod-detail": {
+        "title": "악마의 웨지 세부정보"
+    },
+    "mod-list": {
+        "title": "악마의 쐐기 목록"
+    },
     "modEditor": {
         "inputCode": "캐릭터 또는 무기 코드를 입력하세요"
     },
@@ -2974,6 +2983,9 @@
     "more": {
         "desc": "기타 기능",
         "title": "더보기"
+    },
+    "raid-rank": {
+        "title": "순위 보상"
     },
     "resizeableWindow": {
         "and": "및",
@@ -3030,5 +3042,11 @@
         "title": "타임라인"
     },
     "UI_CHAR_SUBTITLE_2102": "UI_CHAR_SUBTITLE_2102",
-    "UI_CHAR_SUBTITLE_3202": "UI_CHAR_SUBTITLE_3202"
+    "UI_CHAR_SUBTITLE_3202": "UI_CHAR_SUBTITLE_3202",
+    "weapon-detail": {
+        "title": "무기 세부정보"
+    },
+    "weapon-list": {
+        "title": "무기 목록"
+    }
 }

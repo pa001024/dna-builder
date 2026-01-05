@@ -1,5 +1,5 @@
 import { CommonLevelUp, LeveledBuff, LeveledSkill } from "."
-import { effectMap, weaponMap } from "../d"
+import { effectMap, weaponMap, weaponNameMap } from "../d"
 import { DmgType, Skill, SkillField, Weapon } from "../data-types"
 
 /**
@@ -7,7 +7,7 @@ import { DmgType, Skill, SkillField, Weapon } from "../data-types"
  */
 export class LeveledWeapon {
     // 基础Weapon属性
-    id?: number
+    id: number
     名称: string
     类型: string
     类别: string
@@ -55,22 +55,23 @@ export class LeveledWeapon {
 
     /**
      * 构造函数
-     * @param weaponName 武器的名称
+     * @param weaponId 武器的名称
      * @param 精炼 可选的武器精炼等级
      * @param 等级 可选的武器等级
      * @param effectLv 可选的效果等级
      */
     constructor(
-        weaponName: string | Weapon,
+        weaponId: number | string | Weapon,
         精炼?: number,
         等级?: number,
         public effectLv?: number,
     ) {
         // 从统一的武器Map中获取武器数据
-        const weaponData = typeof weaponName === "string" ? weaponMap.get(weaponName) : weaponName
+        const weaponData =
+            typeof weaponId === "number" ? weaponMap.get(weaponId) : typeof weaponId === "string" ? weaponNameMap.get(weaponId) : weaponId
 
         if (!weaponData) {
-            throw new Error(`武器名称 "${weaponName}" 未在静态表中找到`)
+            throw new Error(`武器名称 "${weaponId}" 未在静态表中找到`)
         }
         // 保存原始武器对象和类型
         this._originalWeaponData = weaponData
@@ -103,9 +104,7 @@ export class LeveledWeapon {
                                 格式: str.replace(/\d+\.\d+%/g, "{%}").replace(/×\d+/g, "×{}"),
                                 值: str.match(/\d+\.\d+%/g)?.map((match) => parseFloat(match.replace("%", "")) / 100)[0] || 0,
                             } satisfies SkillField
-                            if (this.类型 === "武器伤害") {
-                                fstr.段数 = str.match(/×\d+/g)?.map((match) => parseFloat(match.replace("×", "")))[0] || 1
-                            }
+                            fstr.段数 = str.match(/×\d+/g)?.map((match) => parseFloat(match.replace("×", "")))[0] || 1
                         }
                         return fstr as SkillField
                     })

@@ -19,8 +19,8 @@ describe("evaluateAST函数测试", () => {
             resonanceGain: 2,
             charMods: [new LeveledMod(41324), new LeveledMod(51313)],
             buffs: [new LeveledBuff("黎瑟E")],
-            melee: new LeveledWeapon("铸铁者"),
-            ranged: new LeveledWeapon("烈焰孤沙"),
+            melee: new LeveledWeapon(10302), //"铸铁者"),
+            ranged: new LeveledWeapon(20601), //"烈焰孤沙"),
             baseName: "快速出击", // 设置为技能而不是武器，这样selectedSkill才会有值
             enemyId: 1001001,
             enemyLevel: 80,

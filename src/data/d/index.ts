@@ -41,13 +41,13 @@ effectData.forEach((buff) => {
 })
 
 // 将所有武器数据转换为统一的Map
-export const weaponMap = new Map<string, Weapon>()
+export const weaponMap = new Map<number, Weapon>()
+export const weaponNameMap = new Map<string, Weapon>()
 
 // 添加近战武器到weaponMap
-weaponData.forEach((weapon: any) => {
-    if (weapon.名称) {
-        weaponMap.set(weapon.名称, weapon as Weapon)
-    }
+weaponData.forEach((weapon) => {
+    weaponMap.set(weapon.id, weapon as Weapon)
+    weaponNameMap.set(weapon.名称, weapon as Weapon)
 })
 
 // 将base数据转换为Map，用于快速查找武器倍率信息

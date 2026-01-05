@@ -2801,6 +2801,9 @@
     "DNA动了Ⅰ": "骨に刻まれた記憶 Ⅰ",
     "DNA动了Ⅱ": "骨に刻まれた記憶 Ⅱ",
     "DNA动了Ⅲ": "骨に刻まれた記憶 Ⅲ",
+    "draft-list": {
+        "title": "図面リスト"
+    },
     "dungeon-detail": {
         "title": "詳細をコピーする"
     },
@@ -2943,6 +2946,12 @@
         "btn_pin_window": "ウィンドウを固定",
         "btn_unpin_window": "固定を解除"
     },
+    "mod-detail": {
+        "title": "悪魔の楔の詳細"
+    },
+    "mod-list": {
+        "title": "悪魔の楔一覧"
+    },
     "modEditor": {
         "inputCode": "キャラクターまたは武器コードを入力してください"
     },
@@ -2955,6 +2964,9 @@
     "more": {
         "desc": "その他の機能",
         "title": "もっと"
+    },
+    "raid-rank": {
+        "title": "ランキング報酬"
     },
     "resizeableWindow": {
         "and": "と",
@@ -3011,5 +3023,11 @@
         "title": "タイムライン"
     },
     "UI_CHAR_SUBTITLE_2102": "UI_CHAR_SUBTITLE_2102",
-    "UI_CHAR_SUBTITLE_3202": "UI_CHAR_SUBTITLE_3202"
+    "UI_CHAR_SUBTITLE_3202": "UI_CHAR_SUBTITLE_3202",
+    "weapon-detail": {
+        "title": "武器の詳細"
+    },
+    "weapon-list": {
+        "title": "武器リスト"
+    }
 }

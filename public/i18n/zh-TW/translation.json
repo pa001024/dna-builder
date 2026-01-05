@@ -2745,6 +2745,9 @@
     "DNA动了Ⅰ": "DNA動了Ⅰ",
     "DNA动了Ⅱ": "DNA動了Ⅱ",
     "DNA动了Ⅲ": "DNA動了Ⅲ",
+    "draft-list": {
+        "title": "圖紙列表"
+    },
     "dungeon-detail": {
         "title": "副本詳情"
     },
@@ -2887,6 +2890,12 @@
         "btn_pin_window": "視窗置頂",
         "btn_unpin_window": "取消置頂"
     },
+    "mod-detail": {
+        "title": "魔之楔詳情"
+    },
+    "mod-list": {
+        "title": "魔之楔列表"
+    },
     "modEditor": {
         "inputCode": "請輸入角色或武器代碼"
     },
@@ -2899,6 +2908,9 @@
     "more": {
         "desc": "更多功能",
         "title": "更多"
+    },
+    "raid-rank": {
+        "title": "排名獎勵"
     },
     "resizeableWindow": {
         "and": "和",
@@ -2955,5 +2967,11 @@
         "title": "時間線"
     },
     "UI_CHAR_SUBTITLE_2102": "UI_CHAR_SUBTITLE_2102",
-    "UI_CHAR_SUBTITLE_3202": "UI_CHAR_SUBTITLE_3202"
+    "UI_CHAR_SUBTITLE_3202": "UI_CHAR_SUBTITLE_3202",
+    "weapon-detail": {
+        "title": "武器詳情"
+    },
+    "weapon-list": {
+        "title": "武器列表"
+    }
 }
