@@ -186,13 +186,14 @@ export const MOB_LEVEL_UP = [
 
 export class LeveledMonster implements DynamicMonster {
     id: number
-    名称: string
-    阵营: Faction
-    攻击: number
-    防御: number
-    生命: number
-    护盾?: number
-    战姿?: number
+    n: string
+    t?: "Rescue_Elite_Monster" | "Elite_Monster" | "Boss"
+    f: Faction
+    atk: number
+    def: number
+    hp: number
+    es?: number
+    tn?: number
 
     _等级: number = 1
     _baseAttack: number
@@ -215,21 +216,22 @@ export class LeveledMonster implements DynamicMonster {
         }
 
         this.id = mData.id
-        this.名称 = mData.名称
-        this.阵营 = mData.阵营 || Faction.其他
-        this.攻击 = mData.攻击
-        this.防御 = mData.防御
-        this.生命 = mData.生命
-        if (mData.护盾 !== undefined) this.护盾 = mData.护盾
-        if (mData.战姿 !== undefined) this.战姿 = mData.战姿
+        this.n = mData.n
+        this.f = mData.f || Faction.其他
+        this.atk = mData.atk
+        this.def = mData.def
+        this.hp = mData.hp
+        if (mData.t !== undefined) this.t = mData.t
+        if (mData.es !== undefined) this.es = mData.es
+        if (mData.tn !== undefined) this.tn = mData.tn
 
-        this.currentHP = this.生命
-        this.currentShield = this.护盾 || 0
-        this.currentWarPose = this.战姿 || 0
+        this.currentHP = this.hp
+        this.currentShield = this.es || 0
+        this.currentWarPose = this.tn || 0
 
-        this._baseAttack = mData.攻击
-        this._baseLife = mData.生命
-        this._baseShield = mData.护盾 || 0
+        this._baseAttack = mData.atk
+        this._baseLife = mData.hp
+        this._baseShield = mData.es || 0
 
         if (等级 > 1) {
             this.等级 = 等级
@@ -251,8 +253,8 @@ export class LeveledMonster implements DynamicMonster {
     }
 
     resetHP() {
-        this.currentHP = this.生命
-        this.currentShield = this.护盾 || 0
+        this.currentHP = this.hp
+        this.currentShield = this.es || 0
     }
 
     get 等级(): number {
@@ -274,14 +276,14 @@ export class LeveledMonster implements DynamicMonster {
 
         let multiplier = MOB_LEVEL_UP[clampedLevel - 1]
 
-        this.攻击 = Math.round(this._baseAttack * multiplier.atk)
-        this.生命 = Math.round(this._baseLife * (this.isRouge ? multiplier.rhp : multiplier.hp))
-        if (this.护盾 !== undefined) {
-            this.护盾 = Math.round(this._baseShield * (this.isRouge ? multiplier.res : multiplier.es))
+        this.atk = Math.round(this._baseAttack * multiplier.atk)
+        this.hp = Math.round(this._baseLife * (this.isRouge ? multiplier.rhp : multiplier.hp))
+        if (this.es !== undefined) {
+            this.es = Math.round(this._baseShield * (this.isRouge ? multiplier.res : multiplier.es))
         }
     }
 
-    static properties = ["名称", "阵营", "攻击", "防御", "生命", "护盾", "战姿"] as const
+    static properties = ["n", "t", "f", "atk", "def", "hp", "es", "tn"] as const
 
     getProperties(): Partial<Monster> {
         const properties: Partial<Monster> = {}

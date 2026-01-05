@@ -229,6 +229,7 @@ export class LeveledWeapon {
         "射速",
         "段数",
         "描述",
+        "技能",
         "效果",
         "_精炼",
         "buff",

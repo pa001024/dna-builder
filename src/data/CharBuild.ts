@@ -754,6 +754,7 @@ export class CharBuild {
     public calculateDesperateMultiplier(attrs: ReturnType<typeof this.calculateAttributes>): number {
         const desperate = attrs.背水
         const hpPercent = Math.max(0.25, Math.min(1, this.hpPercent))
+        // 4(x-1.25)^2-0.25
         return 1 + 4 * desperate * (1 - hpPercent) * (1.5 - hpPercent)
     }
 
@@ -769,7 +770,7 @@ export class CharBuild {
         const enemyLevel = this.enemy.等级 || 80
 
         const levelDiff = Math.max(0, Math.min(20, Math.min(80, enemyLevel) - charLevel))
-        const def = finalDef ?? this.enemy.防御 * (1 - attrs.无视防御)
+        const def = finalDef ?? this.enemy.def * (1 - attrs.无视防御)
         const dmgReduce = def / (300 + def - levelDiff * 10) // 减伤率
         const defenseMultiplier = 1 - dmgReduce
         return Math.max(0, Math.min(1, defenseMultiplier))

@@ -28,8 +28,8 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-100 text-base-content">
-        <div class="flex-1 flex min-h-0">
+    <div class="h-full flex flex-col bg-base-100">
+        <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <!-- 左侧列表面板 -->
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedDungeon }">
                 <!-- 搜索栏 -->
@@ -53,17 +53,15 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
                             全部
                         </button>
                         <button
-                            v-for="type in allTypes"
-                            :key="type"
+                            v-for="type in allTypes.map((t) => getDungeonType(t))"
+                            :key="type.t"
                             class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all cursor-pointer"
                             :class="
-                                selectedType === type
-                                    ? getDungeonType(type).color + ' text-white'
-                                    : 'bg-base-200 text-base-content hover:bg-base-300'
+                                selectedType === type.t ? type.color + ' text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
                             "
-                            @click="selectedType = type"
+                            @click="selectedType = type.t"
                         >
-                            {{ getDungeonType(type).label }}
+                            {{ type.label }}
                         </button>
                     </div>
                 </div>
@@ -80,7 +78,10 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
                         >
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <div class="font-medium">{{ dungeon.n }}</div>
+                                    <div class="font-medium flex gap-2 items-center">
+                                        <img v-if="dungeon.e" :src="`/imgs/${dungeon.e}.png`" class="h-8 inline-block rounded" />
+                                        {{ dungeon.n }}
+                                    </div>
                                     <div class="text-xs opacity-70 mt-1">{{ dungeon.desc }}</div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">
@@ -91,8 +92,10 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 mt-2 text-xs opacity-70">
-                                <span>怪物: {{ (dungeon.m || []).length + (dungeon.sm || []).length }}个</span>
+                                <span>怪物: {{ (dungeon.m || []).length }}个</span>
+                                <span v-if="(dungeon.sm || []).length">特殊: {{ (dungeon.sm || []).length }}个</span>
                                 <span v-if="dungeon.r?.length">奖励: {{ dungeon.r.length }}组</span>
+                                <span class="ml-auto">ID: {{ dungeon.id }}</span>
                             </div>
                         </div>
                     </div>
@@ -105,15 +108,15 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
             </div>
             <div
                 v-if="selectedDungeon"
-                class="flex-none flex justify-center items-center w-4 overflow-hidden cursor-pointer hover:bg-base-300"
+                class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
                 @click="selectDungeon(null)"
             >
-                <Icon icon="tabler:arrow-bar-to-right" />
+                <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 
             <!-- 右侧详情面板 -->
             <div v-if="selectedDungeon" class="flex-1 overflow-hidden">
-                <DungeonDetailItem :dungeon="selectedDungeon" />
+                <DBDungeonDetailItem :dungeon="selectedDungeon" />
             </div>
         </div>
     </div>

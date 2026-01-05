@@ -1,0 +1,233 @@
+<script lang="ts" setup>
+import { ref, computed, watch } from "vue"
+import type { Mod, Draft } from "../data/data-types"
+import { LeveledMod } from "../data/leveled/LeveledMod"
+import { formatProp } from "../util"
+import { modDraftMap } from "../data/d/index"
+
+const props = defineProps<{
+    mod: Mod
+}>()
+
+// 当前等级
+const currentLevel = ref(1)
+const buffLv = ref(0)
+
+// 创建LeveledMod实例
+const leveledMod = computed(() => {
+    return new LeveledMod(props.mod, currentLevel.value, buffLv.value)
+})
+
+// 监听mod变化，重置等级为新mod的等级上限
+watch(
+    () => props.mod,
+    (newMod) => {
+        currentLevel.value = LeveledMod.modQualityMaxLevel[newMod.品质] || 1
+    },
+)
+
+// 根据品质获取颜色
+function getQualityColor(quality: string): string {
+    const colorMap: Record<string, string> = {
+        白: "bg-gray-200 text-gray-800",
+        绿: "bg-green-200 text-green-800",
+        蓝: "bg-blue-200 text-blue-800",
+        紫: "bg-purple-200 text-purple-800",
+        金: "bg-yellow-200 text-yellow-800",
+    }
+    return colorMap[quality] || "bg-base-200 text-base-content"
+}
+
+// 处理效果描述中的极性
+const formatEffDesc = (desc: string) => {
+    const po = desc.match(/([DVOA])趋向/)
+    if (!po) {
+        return desc
+    }
+    const parts = desc.split(po[0])
+    return [parts[0], po[1], parts[1]]
+}
+
+// 获取当前mod的图纸信息
+const modDraft = computed<Draft | undefined>(() => {
+    return modDraftMap.get(props.mod.id)
+})
+
+// 将分钟数转换为00:00格式
+function formatDuration(minutes: number): string {
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`
+}
+</script>
+
+<template>
+    <ScrollArea class="h-full">
+        <div class="p-3 space-y-4">
+            <div class="p-3">
+                <div class="flex items-center gap-3 mb-3">
+                    <RouterLink :to="`/db/mod/${mod.id}`" class="text-lg font-bold link link-primary">
+                        {{ $t(mod.系列) }}{{ $t(mod.名称) }}
+                    </RouterLink>
+                    <span class="text-xs text-base-content/70">ID: {{ mod.id }}</span>
+                    <div class="text-sm text-base-content/70 flex items-center gap-2">
+                        <span class="px-1.5 py-0.5 rounded" :class="getQualityColor(leveledMod.品质)">
+                            {{ $t(leveledMod.品质) }}
+                        </span>
+                        <div v-if="mod.极性 || mod.耐受" class="ml-auto badge badge-sm badge-soft gap-1 text-base-content/80">
+                            {{ leveledMod.耐受 }}
+                            <Icon v-if="mod.极性" :icon="`po-${mod.极性}`" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-center items-center">
+                    <img :src="leveledMod.url" class="w-24 object-cover rounded" />
+                </div>
+
+                <div class="flex flex-wrap gap-2 text-sm opacity-70 mb-3">
+                    <span>{{ $t(leveledMod.类型) }}</span>
+                    <span v-if="leveledMod.属性">{{ $t(`${leveledMod.属性}属性`) }}</span>
+                    <span v-if="leveledMod.限定">{{ $t(leveledMod.限定) }}</span>
+                </div>
+
+                <!-- 等级调整 -->
+                <div class="mb-3">
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm min-w-12"
+                            >Lv. <input type="text" v-model.number="currentLevel" class="w-12 text-center" />
+                        </span>
+                        <input
+                            v-model.number="currentLevel"
+                            type="range"
+                            class="range range-primary range-xs grow"
+                            :min="1"
+                            :max="leveledMod.maxLevel"
+                            step="1"
+                            :key="leveledMod.id"
+                        />
+                    </div>
+                </div>
+
+                <div v-if="leveledMod.效果" class="p-3 bg-base-200 rounded mb-3">
+                    <div class="text-xs text-base-content/70 mb-1">效果</div>
+                    <div class="text-sm">
+                        <span v-if="/(?:[DVOA])趋向/.test(leveledMod.效果)">
+                            <template v-for="(part, index) in formatEffDesc(leveledMod.效果)">
+                                <span v-if="index !== 1">{{ part }}</span>
+                                <span v-else>
+                                    <Icon class="inline-block mx-1" :icon="`po-${part as 'A' | 'D' | 'V' | 'O'}`" />
+                                    趋向
+                                </span>
+                            </template>
+                        </span>
+                        <span v-else>{{ leveledMod.效果 }}</span>
+                    </div>
+                </div>
+
+                <div v-if="leveledMod.buff" class="p-3 bg-base-200 rounded mb-3">
+                    <div class="text-xs text-base-content/70 mb-1">Buff</div>
+                    <div class="space-y-2">
+                        <!-- 等级调整 -->
+                        <div class="flex items-center gap-4" v-if="leveledMod.buff.mx">
+                            <span class="text-sm min-w-12">Lv. {{ buffLv }}</span>
+                            <input
+                                v-model.number="buffLv"
+                                type="range"
+                                class="range range-primary range-xs grow"
+                                :min="leveledMod.buff.lx ?? 1"
+                                :max="leveledMod.buff.mx ?? 1"
+                                step="1"
+                            />
+                        </div>
+                        <label v-else class="text-sm min-w-12">
+                            <input v-model="buffLv" type="checkbox" class="toggle toggle-primary toggle-sm" />
+                            启用
+                        </label>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-base-200 rounded">
+                    <div class="text-xs text-base-content/70 mb-2">属性</div>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        <div
+                            v-for="[key, attr] in Object.entries(leveledMod.getProperties()).filter(([_, v]) => v)"
+                            :key="key"
+                            class="flex justify-between items-center p-2 bg-base-300 rounded text-sm"
+                        >
+                            <span class="text-base-content/70">{{ key }}</span>
+                            <span class="font-medium text-primary">{{ formatProp(key, attr) }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 图纸信息 -->
+                <div v-if="modDraft" class="p-3 bg-base-200 rounded mt-2">
+                    <div class="text-xs text-base-content/70 mb-2">图纸 (ID: {{ modDraft.id }})</div>
+                    <div class="space-y-2 text-sm">
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="col-span-1 opacity-70">名称</div>
+                            <div class="col-span-2 font-medium">{{ modDraft.n }}</div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="col-span-1 opacity-70">稀有度</div>
+                            <div class="col-span-2 font-medium">
+                                <Icon v-for="i in modDraft.r" :key="i" class="inline-block mr-1" icon="ri:star-fill" />
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="col-span-1 opacity-70">版本</div>
+                            <div class="col-span-2 font-medium">{{ modDraft.v }}</div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="col-span-1 opacity-70">铸造时间</div>
+                            <div class="col-span-2 font-medium">{{ formatDuration(modDraft.d) }}</div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="col-span-1 opacity-70">批量制造</div>
+                            <div class="col-span-2 font-medium">{{ modDraft.b ? "支持" : "不支持" }}</div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="col-span-1 opacity-70">无限制造</div>
+                            <div class="col-span-2 font-medium">{{ modDraft.i ? "支持" : "不支持" }}</div>
+                        </div>
+                        <div v-if="modDraft.x.length > 0" class="mt-3">
+                            <div class="text-xs text-base-content/70 mb-1">消耗资源</div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                                    <span class="text-base-content/70">{{ $t("铜币") }}</span>
+                                    <span class="font-medium text-primary">{{ modDraft.m }}</span>
+                                </div>
+                                <template v-for="item in modDraft.x" :key="item.id">
+                                    <ShowProps
+                                        v-for="mod in [new LeveledMod(item.id)]"
+                                        :props="mod.getProperties()"
+                                        :title="`${$t(mod.系列)}${$t(mod.名称)}`"
+                                        :rarity="mod.品质"
+                                        :polarity="mod.极性"
+                                        :cost="mod.耐受"
+                                        :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
+                                        :effdesc="mod.效果"
+                                        v-if="item.t === 'Mod'"
+                                    >
+                                        <RouterLink
+                                            :to="`/db/mod/${item.id}`"
+                                            class="flex justify-between items-center p-2 bg-base-300 rounded text-sm"
+                                        >
+                                            <span class="text-base-content/70">{{ item.n }}</span>
+                                            <span class="font-medium text-primary">{{ item.c }}</span>
+                                        </RouterLink>
+                                    </ShowProps>
+                                    <div v-else class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                                        <span class="text-base-content/70">{{ item.n }}</span>
+                                        <span class="font-medium text-primary">{{ item.c }}</span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ScrollArea>
+</template>

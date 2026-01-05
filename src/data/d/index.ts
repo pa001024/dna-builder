@@ -1,4 +1,4 @@
-import { Mod, Buff, Weapon, WeaponBase, Char, Monster, Reward } from "../data-types"
+import { Mod, Buff, Weapon, WeaponBase, Char, Monster, Reward, Draft } from "../data-types"
 import charData from "./char.data"
 import monsterData from "./monster.data"
 import modData from "./mod.data"
@@ -7,6 +7,7 @@ import effectData from "./effect.data"
 import weaponData from "./weapon.data"
 import baseData from "./base.data"
 import rewardData from "./reward.data"
+import draftData from "./draft.data"
 
 // 将静态表转换为Map，提高查找效率
 export const charMap = new Map<number | string, Char>()
@@ -60,7 +61,22 @@ baseData.forEach((base: any) => {
 })
 
 export const rewardMap = new Map<number, Reward>()
+export const modRewardMap = new Map<number, Reward>()
 
 rewardData.forEach((v) => {
     rewardMap.set(v.id, v)
+    if (v.child) {
+        const mods = v.child.filter((c) => c.t === "Mod")
+        mods.forEach((mod) => modRewardMap.set(mod.id, v))
+    }
+})
+
+export const modDraftMap = new Map<number, Draft>()
+export const weaponDraftMap = new Map<number, Draft>()
+export const draftMap = new Map<number, Draft>()
+
+draftData.forEach((v) => {
+    if (v.t === "Mod") modDraftMap.set(v.p, v)
+    if (v.t === "Weapon") weaponDraftMap.set(v.p, v)
+    draftMap.set(v.id, v)
 })

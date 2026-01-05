@@ -137,8 +137,7 @@ export class LeveledMod implements Mod {
     }
 
     set 等级(value: number) {
-        // 确保等级在1到80之间
-        this._等级 = Math.max(1, Math.min(80, value))
+        this._等级 = Math.max(0, Math.min(this.maxLevel, value))
 
         // 更新属性
         this.updateProperties()
@@ -344,6 +343,8 @@ export class LeveledMod implements Mod {
         "效果",
         "code",
         "count",
+        "icon",
+        "版本",
     ])
     get properties(): string[] {
         return Object.keys(this).filter((prop) => !LeveledMod._exclude_properties.has(prop))

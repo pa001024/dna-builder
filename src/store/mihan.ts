@@ -45,8 +45,9 @@ export class MihanNotify {
             }
         }
         const data = await missionsIngameQuery()
-        if (!data?.missions || JSON.stringify(data.missions) === JSON.stringify(this.mihanData.value)) return false
-        this.mihanData.value = data.missions.map((v) => v.map((v) => v.replace("勘探/无尽", "勘察/无尽")))
+        const missions = data?.missions.map((v) => v.map((v) => v.replace("勘探/无尽", "勘察/无尽")))
+        if (!missions || JSON.stringify(missions) === JSON.stringify(this.mihanData.value)) return false
+        this.mihanData.value = missions
         return true
     }
     show() {

@@ -1,6 +1,12 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { getRewardDetails } from "../utils/reward-utils"
+import { LeveledMod } from "../data"
+
+// 递归
+defineOptions({
+    name: "RewardItem",
+})
 
 // 定义组件接收的Props
 interface Props {
@@ -66,13 +72,36 @@ function getRewardTypeText(type: string): string {
                 <div class="flex-1">
                     <div class="flex items-center gap-2">
                         <span>
-                            {{ item.d ? "图纸:" : ""
-                            }}{{ (item.n && $t(item.n)) || (item.t === "Reward" ? `奖励组 ${item.id}` : `ID: ${item.id}`) }}
+                            {{ item.d ? "图纸: " : "" }}
+                            <ShowProps
+                                v-for="mod in [new LeveledMod(item.id)]"
+                                :props="mod.getProperties()"
+                                :title="`${$t(mod.系列)}${$t(mod.名称)}`"
+                                :rarity="mod.品质"
+                                :polarity="mod.极性"
+                                :cost="mod.耐受"
+                                :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
+                                :effdesc="mod.效果"
+                                v-if="item.t === 'Mod'"
+                            >
+                                <RouterLink :to="`/db/mod/${item.id}`" class="text-xs hover:text-primary hover:underline">{{
+                                    (item.n && $t(item.n)) || `ID: ${item.id}`
+                                }}</RouterLink>
+                            </ShowProps>
+                            <span v-else>{{
+                                (item.n && $t(item.n)) || (item.t === "Reward" ? `奖励组 ${item.id}` : `ID: ${item.id}`)
+                            }}</span>
                             <span class="text-xs text-base-content/50">({{ $t(getRewardTypeText(item.t)) }})</span>
                         </span>
                         <span v-if="item.c" class="text-base-content/70">x{{ item.c }}</span>
                         <span v-if="item.p" class="text-base-content/70">
-                            ({{ item.p < 1 ? `概率:${(item.p * 100).toFixed(2)}%` : `权重:${item.p}` }})
+                            ({{
+                                item.p < 1
+                                    ? `概率:${(item.p * 100).toFixed(2)}%`
+                                    : rewardRoot!.m === "Sequence"
+                                      ? `次数:${item.p}`
+                                      : `权重:${item.p}`
+                            }})
                         </span>
                         <!-- 显示掉落模式 -->
                         <span
@@ -89,102 +118,7 @@ function getRewardTypeText(type: string): string {
                     </div>
                     <!-- 递归显示子奖励 -->
                     <div v-if="item.child && item.child.length" class="pl-4 mt-1 space-y-1">
-                        <template v-for="childItem in item.child" :key="`${childItem.id}-${childItem.t}`">
-                            <div class="flex items-start gap-2 text-xs">
-                                <span
-                                    class="w-2 h-2 rounded-full shrink-0 mt-1"
-                                    :class="childItem.t === 'Drop' ? 'bg-warning' : childItem.t === 'Reward' ? 'bg-error' : 'bg-info'"
-                                ></span>
-                                <div class="flex-1">
-                                    <div class="flex items-center gap-2">
-                                        <span>
-                                            {{ $t(childItem.d ? "图纸:" : "") }}
-                                            {{
-                                                (childItem.n && $t(childItem.n)) ||
-                                                (childItem.t === "Reward" ? `奖励组 ${childItem.id}` : `ID: ${childItem.id}`)
-                                            }}
-                                            <span class="text-xs text-base-content/50">({{ getRewardTypeText(childItem.t) }})</span>
-                                        </span>
-                                        <span v-if="childItem.c" class="text-base-content/70">x{{ childItem.c }}</span>
-                                        <span v-if="childItem.p" class="text-base-content/70"
-                                            >({{
-                                                childItem.p < 1 ? `概率:${(childItem.p * 100).toFixed(2)}%` : `权重:${childItem.p}`
-                                            }})</span
-                                        >
-                                        <!-- 显示掉落模式 -->
-                                        <span
-                                            v-if="childItem.t === 'Reward'"
-                                            class="text-xs px-1.5 py-0.5 rounded"
-                                            :class="
-                                                getDropModeText(childItem.m || '') === '独立'
-                                                    ? 'bg-success text-success-content'
-                                                    : 'bg-warning text-warning-content'
-                                            "
-                                        >
-                                            {{ getDropModeText(childItem.m || "") }}
-                                        </span>
-                                    </div>
-                                    <!-- 再次递归显示子奖励（最多支持两层嵌套，如需更多可继续添加） -->
-                                    <div v-if="childItem.child && childItem.child.length" class="pl-4 mt-1 space-y-1">
-                                        <template
-                                            v-for="grandChildItem in childItem.child"
-                                            :key="`${grandChildItem.id}-${grandChildItem.t}`"
-                                        >
-                                            <div class="flex items-start gap-2 text-xs">
-                                                <span
-                                                    class="w-2 h-2 rounded-full shrink-0 mt-1"
-                                                    :class="
-                                                        grandChildItem.t === 'Drop'
-                                                            ? 'bg-warning'
-                                                            : grandChildItem.t === 'Reward'
-                                                              ? 'bg-error'
-                                                              : 'bg-info'
-                                                    "
-                                                ></span>
-                                                <div class="flex-1">
-                                                    <div class="flex items-center gap-2">
-                                                        <span
-                                                            >{{ grandChildItem.d ? "图纸:" : ""
-                                                            }}{{
-                                                                (grandChildItem.n && $t(grandChildItem.n)) ||
-                                                                (grandChildItem.t === "Reward"
-                                                                    ? `奖励组 ${grandChildItem.id}`
-                                                                    : `ID: ${grandChildItem.id}`)
-                                                            }}
-                                                            <span class="text-xs text-base-content/50"
-                                                                >({{ getRewardTypeText(grandChildItem.t) }})</span
-                                                            ></span
-                                                        >
-                                                        <span v-if="grandChildItem.c" class="text-base-content/70"
-                                                            >x{{ grandChildItem.c }}</span
-                                                        >
-                                                        <span v-if="grandChildItem.p" class="text-base-content/70"
-                                                            >({{
-                                                                grandChildItem.p < 1
-                                                                    ? `概率:${(grandChildItem.p * 100).toFixed(2)}%`
-                                                                    : `权重:${grandChildItem.p}`
-                                                            }})</span
-                                                        >
-                                                        <!-- 显示掉落模式 -->
-                                                        <span
-                                                            v-if="grandChildItem.t === 'Reward'"
-                                                            class="text-xs px-1.5 py-0.5 rounded"
-                                                            :class="
-                                                                getDropModeText(grandChildItem.m || '') === '独立'
-                                                                    ? 'bg-success text-success-content'
-                                                                    : 'bg-warning text-warning-content'
-                                                            "
-                                                        >
-                                                            {{ getDropModeText(grandChildItem.m || "") }}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
+                        <RewardItem :rewardId="item.id" />
                     </div>
                 </div>
             </div>

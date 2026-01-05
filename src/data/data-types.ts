@@ -1,3 +1,31 @@
+export interface Draft {
+    id: number
+    /** 名称 */
+    n: string
+    /** 稀有度 1-5 */
+    r: number
+    /** 版本 */
+    v: string
+    /** 产物类型 */
+    t: "Mod" | "Resource" | "CharAccessory" | "Weapon"
+    /** 产物数量 */
+    c: number
+    /** 产物ID */
+    p: number
+    /** 铸造时间 */
+    d: number
+    /** 批量制造 */
+    b?: 1
+    /** 无限制造 */
+    i?: 1
+    /** 是否可见 */
+    s?: 1
+    /** 消耗资源 {id,数量,类型,名称}[] */
+    x: { id: number; c: number; t: "Resource" | "Mod" | "CharAccessory" | "Weapon"; n: string }[]
+    /** 消耗铜币 */
+    m: number
+}
+
 export interface Buff {
     名称: string
     描述: string
@@ -193,13 +221,14 @@ export enum SkillType {
 
 export interface Monster {
     id: number
-    名称: string
-    阵营?: Faction
-    攻击: number
-    防御: number
-    生命: number
-    护盾?: number
-    战姿?: number
+    n: string
+    t?: "Rescue_Elite_Monster" | "Elite_Monster" | "Boss"
+    f?: Faction
+    atk: number
+    def: number
+    hp: number
+    es?: number
+    tn?: number
 }
 
 export enum Faction {
@@ -225,10 +254,12 @@ export enum MobType {
 
 export interface Mod {
     id: number
+    icon?: string
+    版本?: string
     名称: string
     系列: string
     品质: string
-    极性?: string
+    极性?: "D" | "O" | "V" | "A"
     耐受: number
     类型: string
     属性?: string
@@ -236,47 +267,6 @@ export interface Mod {
     效果?: string
     buff?: Buff
 
-    威力?: number
-    耐久?: number
-    效益?: number
-    范围?: number
-    攻击?: number
-    生命?: number
-    护盾?: number
-    防御?: number
-    神智?: number
-    属性伤?: number
-    减伤?: number
-    增伤?: number
-    武器伤害?: number
-    技能伤害?: number
-    独立增伤?: number
-    昂扬?: number
-    背水?: number
-    追加伤害?: number
-    固定攻击?: number
-    技能速度?: number
-    召唤物范围?: number
-    召唤物攻速?: number
-    失衡易伤?: number
-    神智回复?: number
-    暴击?: number
-    暴伤?: number
-    触发?: number
-    物理?: number
-    攻速?: number
-    多重?: number
-    攻击范围?: number
-    滑行伤害?: number
-    滑行速度?: number
-    下落伤害?: number
-    下落速度?: number
-    蓄力速度?: number
-    弹药?: number
-    弹匣?: number
-    装填?: number
-    弹转?: number
-    触发倍率?: number
     [key: string]: any
 }
 
@@ -366,6 +356,7 @@ export interface Dungeon {
     id: number
     n: string
     t: string
+    e?: string
     ts?: string
     lv: number
     rd: number

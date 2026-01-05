@@ -6,6 +6,7 @@ withDefaults(
         code?: string
         side?: "top" | "bottom" | "left" | "right"
         title?: string
+        rarity?: string
         desc?: string
         effdesc?: string
         polarity?: "A" | "D" | "V" | "O"
@@ -26,12 +27,25 @@ const formatDesc = (desc: string) => {
     const parts = desc.split(po[0])
     return [parts[0], po[1], parts[1]]
 }
+function getQualityColor(quality: string): string {
+    const colorMap: Record<string, string> = {
+        白: "bg-gray-200 text-gray-800",
+        绿: "bg-green-200 text-green-800",
+        蓝: "bg-blue-200 text-blue-800",
+        紫: "bg-purple-200 text-purple-800",
+        金: "bg-yellow-200 text-yellow-800",
+    }
+    return colorMap[quality] || "bg-base-200 text-base-content"
+}
 </script>
 <template>
     <FullTooltip :side="side">
         <template #tooltip>
             <div class="flex flex-col gap-2 max-w-[300px] min-w-28">
-                <div v-if="title" class="text-sm font-bold">{{ title }}</div>
+                <div v-if="title" class="text-sm font-bold">
+                    {{ title }}
+                    <span v-if="rarity" class="text-xs p-1 rounded-sm" :class="getQualityColor(rarity)">{{ rarity }}</span>
+                </div>
                 <div v-if="desc" class="text-xs text-gray-400">{{ desc }}</div>
                 <div v-if="polarity || cost" class="ml-auto badge badge-sm badge-soft gap-1 text-base-content/80">
                     {{ cost }}

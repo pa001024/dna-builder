@@ -244,8 +244,8 @@ describe("数据类型测试", () => {
             const sampleMob = monsterMap.values().next().value!
 
             expect(sampleMob).toBeDefined()
-            expect(sampleMob.名称).toBeDefined()
-            expect(typeof sampleMob.名称).toBe("string")
+            expect(sampleMob.n).toBeDefined()
+            expect(typeof sampleMob.n).toBe("string")
         })
     })
 

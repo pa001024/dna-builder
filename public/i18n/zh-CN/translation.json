@@ -225,6 +225,9 @@
     "dna-weapon-detail": {
         "title": "武器详情"
     },
+    "draft-list": {
+        "title": "图纸列表"
+    },
     "dungeon-detail": {
         "title": "副本详情"
     },
@@ -365,6 +368,12 @@
         "btn_pin_window": "窗口置顶",
         "btn_unpin_window": "取消置顶"
     },
+    "mod-detail": {
+        "title": "魔之楔详情"
+    },
+    "mod-list": {
+        "title": "魔之楔列表"
+    },
     "modEditor": {
         "inputCode": "请输入角色或武器代码"
     },
@@ -377,6 +386,9 @@
     "more": {
         "desc": "更多功能",
         "title": "更多"
+    },
+    "raid-rank": {
+        "title": "排名奖励"
     },
     "resizeableWindow": {
         "and": "和",

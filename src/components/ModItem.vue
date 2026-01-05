@@ -175,6 +175,7 @@ function handleMouseUp(event: MouseEvent) {
                 v-if="mod"
                 :props="mod.getProperties()"
                 :title="`${$t(mod.系列)}${$t(mod.名称)}`"
+                :rarity="mod.品质"
                 :polarity="mod.极性"
                 :cost="mod.耐受"
                 :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"

@@ -1819,7 +1819,7 @@ function shareCharBuild() {
                                                 @change="updateCharBuild"
                                             >
                                                 <SelectItem v-for="enemy in monsterData" :key="enemy.id" :value="enemy.id">
-                                                    {{ $t(enemy.名称) }}
+                                                    {{ $t(enemy.n) }}
                                                 </SelectItem>
                                             </Select>
                                         </div>
@@ -1855,15 +1855,15 @@ function shareCharBuild() {
                                     <div class="flex gap-2">
                                         <div class="flex-1">
                                             <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("生命") }}</div>
-                                            <div class="text-primary font-bold text-right">{{ charBuild.enemy.生命 }}</div>
+                                            <div class="text-primary font-bold text-right">{{ charBuild.enemy.hp }}</div>
                                         </div>
                                         <div class="flex-1">
                                             <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("防御") }}</div>
-                                            <div class="text-primary font-bold text-right">{{ charBuild.enemy.防御 }}</div>
+                                            <div class="text-primary font-bold text-right">{{ charBuild.enemy.def }}</div>
                                         </div>
                                         <div class="flex-1">
                                             <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("护盾") }}</div>
-                                            <div class="text-primary font-bold text-right">{{ charBuild.enemy.护盾 }}</div>
+                                            <div class="text-primary font-bold text-right">{{ charBuild.enemy.es }}</div>
                                         </div>
                                     </div>
                                 </div>

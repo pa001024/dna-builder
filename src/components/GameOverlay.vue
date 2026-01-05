@@ -221,18 +221,18 @@ const currentMonster = computed(() => {
                             @change="updateSettings"
                         >
                             <SelectItem v-for="monster in monsterData" :key="monster.id" :value="monster.id">
-                                {{ $t(monster.名称) }}
+                                {{ $t(monster.n) }}
                             </SelectItem>
                         </Select>
                         <div class="text-right text-xs text-slate-500">
                             <span>
-                                HP: <span class="text-primary">{{ currentMonster?.生命 }}</span>
+                                HP: <span class="text-primary">{{ currentMonster?.hp }}</span>
                             </span>
-                            <span v-if="currentMonster?.护盾">
-                                Shld: <span class="text-primary">{{ currentMonster?.护盾 }}</span>
+                            <span v-if="currentMonster?.es">
+                                Shld: <span class="text-primary">{{ currentMonster?.es }}</span>
                             </span>
                             <span>
-                                Def: <span class="text-primary">{{ currentMonster?.防御 }}</span>
+                                Def: <span class="text-primary">{{ currentMonster?.def }}</span>
                             </span>
                         </div>
                     </div>

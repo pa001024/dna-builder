@@ -18,6 +18,20 @@ export interface RewardItem {
  */
 export type DropMode = "Fixed" | "Gender" | "Independent" | "Level" | "Once" | "Sequence" | "Weight"
 
+// 获取掉落模式文本
+export function getDropModeText(mode: string): string {
+    const modeMap: Record<string, string> = {
+        Independent: "独立",
+        Weight: "权重",
+        Fixed: "固定",
+        Gender: "性别",
+        Level: "等级",
+        Once: "一次",
+        Sequence: "序列",
+    }
+
+    return modeMap[mode] || mode
+}
 /**
  * 递归获取奖励详情
  * @param rewardId 奖励ID
@@ -45,7 +59,7 @@ export function getRewardDetails(rewardId: number, visited: Set<number> = new Se
             const childReward = getRewardDetails(item.id, visited, (item.p ?? 1) * parentProbability)
             if (childReward) {
                 // 判断子奖励的掉落模式是否与父奖励相同
-                if (childReward.m === currentDropMode) {
+                if (childReward.m === currentDropMode && childReward.m !== "Sequence") {
                     // 如果掉落模式相同，合并子奖励的子元素到当前列表
                     if (childReward.child) {
                         // 将子奖励的子元素的概率乘以子奖励的概率
@@ -66,7 +80,7 @@ export function getRewardDetails(rewardId: number, visited: Set<number> = new Se
                 id: item.id,
                 t: item.t,
                 c: item.c,
-                p: (item.p ?? 0) * parentProbability,
+                p: currentDropMode === "Sequence" ? item.p! : (item.p ?? 0) * parentProbability,
                 m: currentDropMode,
                 n: item.n,
             }
@@ -77,7 +91,7 @@ export function getRewardDetails(rewardId: number, visited: Set<number> = new Se
 
     // 检查是否需要归一化权重
     const isFlatList = childRewards.every((item) => !item.child || item.child.length === 0)
-    if (isFlatList) {
+    if (isFlatList && currentDropMode !== "Sequence") {
         // 计算总权重
         const totalWeight = childRewards.reduce((sum, item) => sum + item.p, 0)
         // 归一化权重，确保总和为1
