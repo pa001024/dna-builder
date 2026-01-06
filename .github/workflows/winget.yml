@@ -9,7 +9,7 @@ jobs:
         steps:
             - uses: vedantmgoyal9/winget-releaser@main
               with:
-                  identifier: pa001024.dob
+                  identifier: pa001024.dna-builder
                   installers-regex: ".*\\.msi"
                   max-versions-to-keep: 5 # keep only latest 5 versions
                   token: ${{ secrets.WINGET_TOKEN }}

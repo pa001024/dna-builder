@@ -19,7 +19,7 @@
 
 ## 桌面应用
 
-- **winget**: `winget install pa001024.dob`
+- **winget**: `winget install pa001024.dna-builder`
 - **Windows**：[https://github.com/pa001024/dna-builder/releases/latest](https://github.com/pa001024/dna-builder/releases/latest)
 - **无法运行**? 请确保已安装 [Microsoft Edge WebView2](https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/)。
 
