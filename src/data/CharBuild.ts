@@ -791,7 +791,7 @@ export class CharBuild {
     // 计算技能伤害
     public calculateSkillDamage(attrs: ReturnType<typeof this.calculateAttributes>) {
         // 计算各种乘区
-        const resistancePenetration = Math.max(0, 1 - this.enemyResistance + attrs.属性穿透)
+        const resistancePenetration = Math.max(0, (1 - this.enemyResistance) * (1 + attrs.属性穿透))
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
         const damageIncrease = 1 + attrs.增伤 + attrs.技能伤害
@@ -839,7 +839,7 @@ export class CharBuild {
         const critExpectedDamage = 1 + critRate * (critDamage - 1)
 
         // 计算各种乘区
-        const resistancePenetration = 1 - this.enemyResistance + attrs.属性穿透
+        const resistancePenetration = Math.max(0, (1 - this.enemyResistance) * (1 + attrs.属性穿透))
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
         const damageIncrease = 1 + attrs.增伤 + weaponAttrs.增伤 + attrs.武器伤害
