@@ -134,6 +134,12 @@ const routes: readonly RouteRecordRaw[] = [
     },
     {
         name: "dna-user",
+        path: "/dna/mine",
+        component: () => import("./views/DNAUserMineView.vue"),
+        beforeEnter: () => setMinSize(600, 600),
+    },
+    {
+        name: "dna-user",
         path: "/dna/mine/:userId",
         component: () => import("./views/DNAUserMineView.vue"),
         beforeEnter: () => setMinSize(600, 600),

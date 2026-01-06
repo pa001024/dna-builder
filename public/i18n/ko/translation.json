@@ -2834,15 +2834,6 @@
         "title": "컴포넌트 렌더링 오류"
     },
     "Fire Keeper Ⅰ": "불의 수호자 Ⅰ",
-    "game": {
-        "desc": "Double Helix 캐릭터로 오토 체스 플레이",
-        "end": "전투 종료",
-        "pause": "일시 정지",
-        "restart": "다시 시작",
-        "resume": "계속",
-        "start": "전투 시작",
-        "title": "오토 체스 미니게임"
-    },
     "game-launcher": {
         "addCustomType": "사용자 지정 유형 추가",
         "afterGame": "시작 후 실행",

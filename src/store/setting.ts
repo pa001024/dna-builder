@@ -1,11 +1,10 @@
 import { useLocalStorage } from "@vueuse/core"
 import { defineStore } from "pinia"
-import { applyMaterial } from "../api/app"
+import { applyMaterial, tauriFetch } from "../api/app"
 import { db } from "./db"
 import { DNAAPI } from "dna-api"
 import i18next from "i18next"
 import { env } from "../env"
-import { fetch } from "@tauri-apps/plugin-http"
 
 export const useSettingStore = defineStore("setting", {
     state: () => {
@@ -82,7 +81,7 @@ export const useSettingStore = defineStore("setting", {
         async getDNAAPI() {
             const user = await this.getCurrentUser()
             if (!user) return undefined
-            const api = new DNAAPI(user.dev_code, user.token, { fetchFn: env.isApp ? fetch : undefined })
+            const api = new DNAAPI(user.dev_code, user.token, { fetchFn: tauriFetch })
             return api
         },
     },

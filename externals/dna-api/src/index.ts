@@ -75,6 +75,11 @@ export class DNAAPI {
         return res
     }
 
+    async getSmsCode(mobile: string, vJson: string) {
+        const data = { mobile, isCaptcha: 1, vJson }
+        return await this._dna_request<DNASmsCodeRes>("user/getSmsCode", data, { sign: true, refer: true })
+    }
+
     /**
      * 获取登录日志
      */

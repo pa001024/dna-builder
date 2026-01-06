@@ -2759,15 +2759,6 @@
         "title": "組件渲染出錯"
     },
     "Fire Keeper Ⅰ": "Fire Keeper Ⅰ",
-    "game": {
-        "desc": "用二重螺旋角色玩自走棋",
-        "end": "結束戰鬥",
-        "pause": "暫停",
-        "restart": "重新開始",
-        "resume": "繼續",
-        "start": "開始戰鬥",
-        "title": "自走棋小遊戲"
-    },
     "game-launcher": {
         "addCustomType": "添加自定義類型",
         "afterGame": "啟動後執行",

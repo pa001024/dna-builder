@@ -147,19 +147,25 @@ fn enable_mod(srcdir: String, dstdir: String, files: Vec<String>) -> String {
 }
 
 #[tauri::command]
-fn import_pic(path: String) -> String {
+fn import_pic(path: String) -> Result<String, String> {
     // 导入图片 转换为dataurl
-    let mut file = File::open(&path).unwrap();
+    let mut file = File::open(&path)
+        .map_err(|e| format!("无法打开文件: {}", e))?;
     let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer)
+        .map_err(|e| format!("读取文件失败: {}", e))?;
+
     // 截取文件扩展名
-    let ext = path.split(".").last().unwrap();
-    file.read_to_end(&mut buffer).unwrap();
+    let ext = path.split(".")
+        .last()
+        .ok_or_else(|| "无效的文件路径".to_string())?;
+
     let data_url = format!(
         "data:image/{};base64,{}",
         ext,
         base64::Engine::encode(&base64::engine::general_purpose::STANDARD, buffer)
     );
-    data_url
+    Ok(data_url)
 }
 
 #[tauri::command]
@@ -266,6 +272,42 @@ fn apply_material(window: tauri::WebviewWindow, material: &str) -> String {
         _ => return "Unsupported material!".to_string(),
     }
     "Success".to_string()
+}
+
+#[tauri::command]
+async fn fetch(url: String, method: String, body: Option<String>, headers: Option<Vec<(String, String)>>) -> Result<String, String> {
+    let client = reqwest::Client::new();
+    let mut request_builder = match method.to_uppercase().as_str() {
+        "GET" => client.get(&url),
+        "POST" => client.post(&url),
+        "PUT" => client.put(&url),
+        "DELETE" => client.delete(&url),
+        _ => return Err(format!("Unsupported method: {}", method)),
+    };
+
+    if let Some(ref b) = body {
+        request_builder = request_builder.body(b.clone());
+    }
+
+    if let Some(h) = headers {
+        for (key, value) in h {
+            request_builder = request_builder.header(&key, &value);
+        }
+    }
+
+    let response = request_builder.send().await;
+
+    match response {
+        Ok(resp) => {
+            let status = resp.status();
+            let text = match resp.text().await {
+                Ok(t) => t,
+                Err(e) => return Err(format!("Failed to read response: {}", e)),
+            };
+            Ok(format!("{{\"status\":{},\"body\":\"{}\"}}", status.as_u16(), text.replace("\"", "\\\"")))
+        }
+        Err(e) => Err(format!("Request failed: {}", e)),
+    }
 }
 
 #[tauri::command]
@@ -437,7 +479,8 @@ pub fn run() {
             launch_exe,
             import_mod,
             enable_mod,
-            import_pic
+            import_pic,
+            fetch
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

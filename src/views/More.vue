@@ -39,11 +39,6 @@ const items = [
         icon: "ri:trophy-line",
     },
     {
-        name: "game",
-        path: "/game",
-        icon: "la:gamepad-solid",
-    },
-    {
         name: "ai",
         path: "/ai",
         icon: "ri:robot-2-line",

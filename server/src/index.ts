@@ -7,11 +7,13 @@ import { cronPlugin } from "./cron"
 
 // load env
 import "dotenv/config"
+import { apiPlugin } from "./api"
 
 const app = new Elysia()
     .get("/", () => Bun.file("../dist/index.html"))
     .use(staticPlugin({ prefix: "/", assets: "../dist", indexHTML: false, alwaysStatic: true }))
     .use(cronPlugin())
+    .use(apiPlugin())
     .use(aiPlugin())
     .use(
         cors({

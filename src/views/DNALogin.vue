@@ -2,6 +2,7 @@
 import { computed, onMounted } from "vue"
 import { ref } from "vue"
 import { DNAAPI } from "dna-api"
+import { tauriFetch } from "../api/app"
 
 const errorMessage = ref("")
 const successMessage = ref("")
@@ -36,7 +37,7 @@ async function getSMSCode(validate: any) {
     formData.append("mobile", phone.value)
     formData.append("vJson", JSON.stringify(validate))
     formData.append("timestamp", Date.now().toString())
-    const response = await fetch("https://dnabbs-api.yingxiong.com/user/getSmsCode", {
+    const response = await tauriFetch("https://dnabbs-api.yingxiong.com/user/getSmsCode", {
         method: "POST",
         body: formData,
         headers: {

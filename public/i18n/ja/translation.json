@@ -2815,15 +2815,6 @@
         "title": "コンポーネントのレンダリングエラー"
     },
     "Fire Keeper Ⅰ": "ファイアキーパー Ⅰ",
-    "game": {
-        "desc": "Double Helix キャラクターでオート チェスをプレイする",
-        "end": "戦闘を終了",
-        "pause": "一時停止",
-        "restart": "再開",
-        "resume": "続行",
-        "start": "戦闘開始",
-        "title": "オートチェスミニゲーム"
-    },
     "game-launcher": {
         "addCustomType": "カスタムタイプを追加",
         "afterGame": "起動後に実行",

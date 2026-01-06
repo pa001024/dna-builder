@@ -238,15 +238,6 @@
         "retry": "重试",
         "title": "组件渲染出错"
     },
-    "game": {
-        "desc": "用二重螺旋角色玩自走棋",
-        "end": "结束战斗",
-        "pause": "暂停",
-        "restart": "重新开始",
-        "resume": "继续",
-        "start": "开始战斗",
-        "title": "自走棋小游戏"
-    },
     "game-launcher": {
         "addCustomType": "添加自定义类型",
         "afterGame": "启动后执行",

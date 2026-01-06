@@ -50,8 +50,12 @@ export const cronPlugin = () => {
                     await updateServerMH(server, missions)
                     is_success = true
                 }
-            } catch (e) {
-                // console.debug(`${new Date().toLocaleString()} 同步失败: ${e} retry: ${i}`)
+            } catch (e: any) {
+                if (e.message === "duplicate missions") {
+                    console.error(`${new Date().toLocaleString()} 重复值 - server: ${server}`)
+                } else {
+                    // console.debug(`${new Date().toLocaleString()} 同步失败: ${e} retry: ${i}`)
+                }
             }
             if (is_success) {
                 console.log(`${new Date().toLocaleString()} 同步成功 - server: ${server}`)

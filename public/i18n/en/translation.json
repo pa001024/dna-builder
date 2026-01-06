@@ -2834,15 +2834,6 @@
         "title": "Component Rendering Error"
     },
     "Fire Keeper Ⅰ": "Fire Keeper Ⅰ",
-    "game": {
-        "desc": "Play Auto Chess with a Double Helix character",
-        "end": "End Battle",
-        "pause": "Pause",
-        "restart": "Restart",
-        "resume": "Continue",
-        "start": "Start Battle",
-        "title": "Auto Chess Mini Game"
-    },
     "game-launcher": {
         "addCustomType": "Add Custom Type",
         "afterGame": "Execute After Launch",
