@@ -146,9 +146,7 @@ export class LeveledBuff implements Buff {
         if (this.lx !== undefined) {
             level = Math.max(this.lx, level)
         }
-        if (this.mx !== undefined) {
-            level = Math.min(this.mx, level)
-        }
+        level = Math.min(this.mx ?? 1, level)
 
         this._等级 = level
 
