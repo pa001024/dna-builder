@@ -1,8 +1,15 @@
 name: Publish to WinGet
 on:
     workflow_dispatch:
-    release:
-        types: [published]
+        inputs:
+            tag_name:
+                description: "Tag名称（对应已发布的Release）"
+                required: true
+                type: string
+            version:
+                description: "版本号（不带v前缀）"
+                required: true
+                type: string
 jobs:
     publish:
         runs-on: windows-latest
@@ -10,6 +17,8 @@ jobs:
             - uses: vedantmgoyal9/winget-releaser@main
               with:
                   identifier: pa001024.dna-builder
+                  release-tag: ${{ inputs.tag_name }}
+                  version: ${{ inputs.version }}
                   installers-regex: ".*\\.msi"
                   max-versions-to-keep: 5 # keep only latest 5 versions
                   token: ${{ secrets.WINGET_TOKEN }}
