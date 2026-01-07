@@ -1,6 +1,6 @@
 import { useLocalStorage } from "@vueuse/core"
 import { defineStore } from "pinia"
-import { LeveledModWithCount, LeveledWeapon, modData, modMap, ModTypeKey, ModTypeMap, weaponData, weaponMap } from "../data"
+import { LeveledModWithCount, LeveledWeapon, modData, modMap, ModTypeKey, ModTypeMap, weaponData } from "../data"
 
 export const useInvStore = defineStore("inv", {
     state: () => {
@@ -19,7 +19,8 @@ export const useInvStore = defineStore("inv", {
                 绿: false,
                 白: false,
             }),
-            buffLv: useLocalStorage("inv.buffLv", {} as Record<number | string, number>),
+            buffLv: useLocalStorage("inv.buffLv", {} as Record<number, number>),
+            wLv: useLocalStorage("inv.wLv", {} as Record<number, number>),
         }
     },
     getters: {
@@ -33,15 +34,21 @@ export const useInvStore = defineStore("inv", {
             if (weaponId in this.meleeWeapons) this.meleeWeapons[weaponId] = lv
             else if (weaponId in this.rangedWeapons) this.rangedWeapons[weaponId] = lv
         },
-        getBuffLv(modId: number | string) {
-            if (typeof modId === "number") modId = modMap.get(modId)?.名称 || modId
+        getBuffLv(modId: number) {
             if (!(modId in this.buffLv)) return 0
             return this.buffLv[modId] || 0
         },
-        setBuffLv(modId: number | string, lv: number) {
-            if (typeof modId === "number") modId = modMap.get(modId)?.名称 || modId
+        setBuffLv(modId: number, lv: number) {
             if (lv <= 0) delete this.buffLv[modId]
             else this.buffLv[modId] = lv
+        },
+        getWBuffLv(weaponId: number) {
+            if (!(weaponId in this.wLv)) return 0
+            return this.wLv[weaponId] || 0
+        },
+        setWBuffLv(weaponId: number, lv: number) {
+            if (lv <= 0) delete this.wLv[weaponId]
+            else this.wLv[weaponId] = lv
         },
         getModLv(modId: number, quality?: string) {
             if (!quality) quality = modMap.get(modId)?.品质 || "白"
@@ -75,21 +82,21 @@ export const useInvStore = defineStore("inv", {
         },
         getMeleeWeapons(useInv: boolean) {
             return useInv && this.enableWeapons.近战
-                ? Object.entries(this.meleeWeapons).map(
-                      ([id, level]) => new LeveledWeapon(+id, level, undefined, this.getBuffLv(weaponMap.get(+id)!.名称)),
-                  )
+                ? Object.entries(this.meleeWeapons)
+                      .filter(([id]) => !isNaN(+id))
+                      .map(([id, level]) => new LeveledWeapon(+id, level, undefined, this.getBuffLv(+id)))
                 : weaponData
                       .filter((weapon) => weapon.类型[0] === "近战")
-                      .map((weapon) => new LeveledWeapon(weapon.id, undefined, undefined, this.getBuffLv(weapon.名称)))
+                      .map((weapon) => new LeveledWeapon(weapon.id, undefined, undefined, this.getBuffLv(weapon.id)))
         },
         getRangedWeapons(useInv: boolean) {
             return useInv && this.enableWeapons.远程
-                ? Object.entries(this.rangedWeapons).map(
-                      ([id, level]) => new LeveledWeapon(+id, level, undefined, this.getBuffLv(weaponMap.get(+id)!.名称)),
-                  )
+                ? Object.entries(this.rangedWeapons)
+                      .filter(([id]) => !isNaN(+id))
+                      .map(([id, level]) => new LeveledWeapon(+id, level, undefined, this.getBuffLv(+id)))
                 : weaponData
                       .filter((weapon) => weapon.类型[0] === "远程")
-                      .map((weapon) => new LeveledWeapon(weapon.id, undefined, undefined, this.getBuffLv(weapon.名称)))
+                      .map((weapon) => new LeveledWeapon(weapon.id, undefined, undefined, this.getBuffLv(weapon.id)))
         },
     },
 })

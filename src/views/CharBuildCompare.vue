@@ -37,7 +37,7 @@ const modOptions = modData
         ser: mod.系列,
         icon: mod.系列 && CharBuild.elmSeries.includes(mod.系列) ? `/imgs/${mod.属性}${mod.系列}.png` : `/imgs/${mod.系列}系列.png`,
         count: Math.min(inv.getModCount(mod.id, mod.品质), mod.系列 !== "契约者" ? 8 : 1),
-        bufflv: inv.getBuffLv(mod.名称),
+        bufflv: inv.getBuffLv(mod.id),
         lv: inv.getModLv(mod.id, mod.品质),
     }))
     .filter((mod) => mod.count)
@@ -199,13 +199,13 @@ const baseCharBuilds = computed(() => {
                 settings.meleeWeapon,
                 settings.meleeWeaponRefine,
                 settings.meleeWeaponLevel,
-                inv.getBuffLv(settings.meleeWeapon),
+                inv.getWBuffLv(settings.meleeWeapon),
             ),
             ranged: new LeveledWeapon(
                 settings.rangedWeapon,
                 settings.rangedWeaponRefine,
                 settings.rangedWeaponLevel,
-                inv.getBuffLv(settings.rangedWeapon),
+                inv.getWBuffLv(settings.rangedWeapon),
             ),
             baseName: settings.baseName,
             imbalance: settings.imbalance,

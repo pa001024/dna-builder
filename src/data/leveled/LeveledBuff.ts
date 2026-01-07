@@ -146,7 +146,7 @@ export class LeveledBuff implements Buff {
         if (this.lx !== undefined) {
             level = Math.max(this.lx, level)
         }
-        level = Math.min(this.mx ?? 1, level)
+        level = Math.min(this.mx || 1, level)
 
         this._等级 = level
 
@@ -225,6 +225,7 @@ export class LeveledBuff implements Buff {
         "mx",
         "dx",
         "pid",
+        "pt",
         "code",
     ])
     get properties(): string[] {
@@ -238,6 +239,7 @@ export class LeveledBuff implements Buff {
         const buff = new LeveledBuff(this._originalBuffData, this._等级)
         buff.描述 = this.描述
         if (this.pid) buff.pid = this.pid
+        if (this.pt) buff.pt = this.pt
         return buff
     }
 

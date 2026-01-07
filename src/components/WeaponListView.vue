@@ -97,7 +97,7 @@ function selectWeapon(weapon: Weapon) {
         </div>
 
         <!-- 武器列表 -->
-        <ScrollArea class="flex-1">
+        <ScrollArea class="h-[60vh]">
             <div v-if="filteredWeapons.length === 0" class="flex flex-col items-center justify-center h-full text-base-content/50 py-20">
                 <Icon icon="ri:emotion-sad-line" class="w-16 h-16 mb-4" />
                 <p class="text-lg">{{ $t("没有找到匹配的武器") }}</p>
@@ -134,11 +134,11 @@ function selectWeapon(weapon: Weapon) {
                     </div>
 
                     <!-- 武器头像 -->
-                    <div class="relative aspect-square overflow-hidden bg-base-200">
+                    <div class="relative h-24 overflow-hidden bg-base-200">
                         <ImageFallback
                             :src="getWeaponIcon(weapon.名称)"
                             :alt="weapon.名称"
-                            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
                             loading="lazy"
                         >
                             <Icon icon="ri:question-line" class="w-full h-full opacity-50" />
@@ -158,16 +158,17 @@ function selectWeapon(weapon: Weapon) {
                             {{ $t(weapon.名称) }}
                         </h3>
 
-                        <p class="text-xs text-base-content/60 truncate">
-                            {{ $t(weapon.伤害类型) }}
-                        </p>
-
                         <p v-if="weapon.熔炼" class="text-xs text-base-content/60 truncate">
                             {{ $t(weapon.熔炼[5]) }}
                         </p>
 
-                        <p v-if="charBuild" class="text-xs truncate text-primary">
-                            收益: {{ format100r(charBuild.calcIncome(weapon.加成 as any)) }}
+                        <p class="text-xs truncate space-x-2">
+                            <span>
+                                {{ $t(weapon.伤害类型) }}
+                            </span>
+                            <span class="text-primary" v-if="charBuild">
+                                收益: {{ format100r(charBuild.calcIncome(weapon.加成 as any)) }}
+                            </span>
                         </p>
 
                         <!-- 底部属性条 -->
@@ -230,17 +231,6 @@ function selectWeapon(weapon: Weapon) {
                 </div>
             </div>
         </ScrollArea>
-
-        <!-- 底部统计信息 -->
-        <div
-            class="flex-none bg-base-100 border-t border-base-200 px-4 py-2 text-sm text-base-content/60 flex items-center justify-between"
-        >
-            <span>{{ $t("已选择") }}</span>
-            <div class="flex items-center gap-1">
-                <span class="badge badge-primary badge-sm">{{ selectedMelee }}</span>
-                <span class="badge badge-primary badge-sm">{{ selectedRanged }}</span>
-            </div>
-        </div>
     </div>
 </template>
 <style>

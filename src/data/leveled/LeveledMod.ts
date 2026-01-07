@@ -100,7 +100,8 @@ export class LeveledMod implements Mod {
             const effect = effectMap.get(this.名称)!
             if (!effect.品质 || effect.品质 === this.品质) {
                 this.buff = new LeveledBuff(effect, buffLv)
-                this.buff.pid = this.名称
+                this.buff.pid = this.id
+                this.buff.pt = "Mod"
             }
         }
 

@@ -72,7 +72,7 @@ const modOptions = modData
         limit: mod.属性 || mod.限定,
         ser: mod.系列,
         count: Math.min(inv.getModCount(mod.id, mod.品质), mod.系列 !== "契约者" ? 8 : 1),
-        bufflv: inv.getBuffLv(mod.名称),
+        bufflv: inv.getBuffLv(mod.id),
         lv: inv.getModLv(mod.id, mod.品质),
     }))
     .filter((mod) => mod.count)
@@ -175,6 +175,18 @@ const teamWeaponOptions = computed(() =>
 
 // 创建CharBuild实例
 const charBuild = computed(() => {
+    const melee = new LeveledWeapon(
+        charSettings.value.meleeWeapon,
+        charSettings.value.meleeWeaponRefine,
+        charSettings.value.meleeWeaponLevel,
+        inv.getWBuffLv(charSettings.value.meleeWeapon),
+    )
+    const ranged = new LeveledWeapon(
+        charSettings.value.rangedWeapon,
+        charSettings.value.rangedWeaponRefine,
+        charSettings.value.rangedWeaponLevel,
+        inv.getWBuffLv(charSettings.value.rangedWeapon),
+    )
     const b = new CharBuild({
         char: new LeveledChar(selectedChar.value, charSettings.value.charLevel),
         auraMod: new LeveledMod(charSettings.value.auraMod),
@@ -184,18 +196,8 @@ const charBuild = computed(() => {
         skillWeaponMods: selectedSkillWeaponMods.value,
         skillLevel: charSettings.value.charSkillLevel,
         buffs: selectedBuffs.value,
-        melee: new LeveledWeapon(
-            charSettings.value.meleeWeapon,
-            charSettings.value.meleeWeaponRefine,
-            charSettings.value.meleeWeaponLevel,
-            inv.getBuffLv(charSettings.value.meleeWeapon),
-        ),
-        ranged: new LeveledWeapon(
-            charSettings.value.rangedWeapon,
-            charSettings.value.rangedWeaponRefine,
-            charSettings.value.rangedWeaponLevel,
-            inv.getBuffLv(charSettings.value.rangedWeapon),
-        ),
+        melee,
+        ranged,
         baseName: charSettings.value.baseName,
         imbalance: charSettings.value.imbalance,
         hpPercent: charSettings.value.hpPercent,
@@ -551,6 +553,7 @@ const weapon_select_model_show = ref(false)
 const newWeaponSelection = ref({ melee: 0, ranged: 0 })
 function handleWeaponSelection(melee: number, ranged: number) {
     newWeaponSelection.value = { melee, ranged }
+    weapon_select_model_show.value = false
 }
 function applyWeaponSelection() {
     charSettings.value.meleeWeapon = newWeaponSelection.value.melee
@@ -918,9 +921,9 @@ function shareCharBuild() {
                                     {{ $t(charBuild.meleeWeapon.名称) }}
                                     <Icon icon="ri:exchange-line" class="inline-block w-5 h-5 text-primary" />
                                 </div>
-                                <div class="text-sm opacity-60 flex-1 overflow-hidden whitespace-nowrap text-ellipsis">
-                                    精炼 {{ charSettings.meleeWeaponRefine }}
-                                </div>
+                                <Select hidebtn v-model="charSettings.meleeWeaponRefine" class="text-sm text-primary">
+                                    <SelectItem v-for="i in [0, 1, 2, 3, 4, 5]" :key="i" :value="i">{{ $t("精炼") + i }}</SelectItem>
+                                </Select>
                             </div>
                             <div class="ml-auto flex flex-none">Lv. {{ charSettings.meleeWeaponLevel }}</div>
                         </h3>
@@ -1151,9 +1154,9 @@ function shareCharBuild() {
                                     {{ $t(charBuild.rangedWeapon.名称) }}
                                     <Icon icon="ri:exchange-line" class="inline-block w-5 h-5 text-primary" />
                                 </div>
-                                <div class="text-sm opacity-60 flex-1 overflow-hidden whitespace-nowrap text-ellipsis">
-                                    精炼 {{ charSettings.rangedWeaponRefine }}
-                                </div>
+                                <Select hidebtn v-model="charSettings.rangedWeaponRefine" class="text-sm text-primary">
+                                    <SelectItem v-for="i in [0, 1, 2, 3, 4, 5]" :key="i" :value="i">{{ $t("精炼") + i }}</SelectItem>
+                                </Select>
                             </div>
                             <div class="ml-auto flex flex-none">Lv. {{ charSettings.rangedWeaponLevel }}</div>
                         </h3>

@@ -308,13 +308,13 @@ export class CharBuild {
                 charSettings.meleeWeapon,
                 charSettings.meleeWeaponRefine,
                 charSettings.meleeWeaponLevel,
-                inv.getBuffLv(charSettings.meleeWeapon),
+                inv.getWBuffLv(charSettings.meleeWeapon),
             ),
             ranged: new LeveledWeapon(
                 charSettings.rangedWeapon,
                 charSettings.rangedWeaponRefine,
                 charSettings.rangedWeaponLevel,
-                inv.getBuffLv(charSettings.rangedWeapon),
+                inv.getWBuffLv(charSettings.rangedWeapon),
             ),
             baseName: charSettings.baseName,
             imbalance: charSettings.imbalance,
@@ -435,14 +435,14 @@ export class CharBuild {
         }
 
         // 计算基础属性
-        let attack = char.基础攻击 * (1 + attackBonus + this.resonanceGain) + attackAdd
+        let attack = char.基础攻击 * (1 + attackBonus + this.resonanceGain)
         let health = char.基础生命 * (1 + healthBonus + this.resonanceGain)
         let shield = char.基础护盾 * (1 + shieldBonus + this.resonanceGain)
         let defense = char.基础防御 * (1 + defenseBonus + this.resonanceGain)
         let sanity = char.基础神智 * (1 + sanityBonus)
 
         // 应用属性伤加成
-        attack *= 1 + elemDamageBonus
+        attack = attack * (1 + elemDamageBonus) + attackAdd
 
         // 结果处理
         health = Math.round(health)
@@ -756,16 +756,16 @@ export class CharBuild {
     }
 
     // 计算昂扬乘区
-    public calculateBoostMultiplier(attrs: ReturnType<typeof this.calculateAttributes>): number {
+    public calculateBoostMultiplier(attrs: ReturnType<typeof this.calculateAttributes>, hpPercent = this.hpPercent): number {
         const boost = attrs.昂扬
-        const hpPercent = Math.max(0, Math.min(1, this.hpPercent || 0))
+        hpPercent = Math.max(0, Math.min(1, hpPercent))
         return 1 + boost * hpPercent
     }
 
     // 计算背水乘区
-    public calculateDesperateMultiplier(attrs: ReturnType<typeof this.calculateAttributes>): number {
+    public calculateDesperateMultiplier(attrs: ReturnType<typeof this.calculateAttributes>, hpPercent = this.hpPercent): number {
         const desperate = attrs.背水
-        const hpPercent = Math.max(0.25, Math.min(1, this.hpPercent))
+        hpPercent = Math.max(0.25, Math.min(1, hpPercent))
         // 4(x-1.25)^2-0.25
         return 1 + 4 * desperate * (1 - hpPercent) * (1.5 - hpPercent)
     }
@@ -798,16 +798,14 @@ export class CharBuild {
         const independentDamageIncrease = 1 + attrs.独立增伤
         const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
 
+        const hpMore = boostMultiplier * desperateMultiplier
         // 计算最终伤害
-        let finalDamage =
-            resistancePenetration *
-            boostMultiplier *
-            desperateMultiplier *
-            damageIncrease *
-            independentDamageIncrease *
-            imbalanceDamageMultiplier
+        let finalDamage = resistancePenetration * damageIncrease * independentDamageIncrease * imbalanceDamageMultiplier
 
-        return { expectedDamage: finalDamage }
+        return {
+            expectedDamage: finalDamage * hpMore,
+            noHpDamage: finalDamage,
+        }
     }
 
     // 计算武器伤害
@@ -846,13 +844,9 @@ export class CharBuild {
         const independentDamageIncrease = (1 + attrs.独立增伤) * (1 + weaponAttrs.独立增伤)
         const additionalDamage = 1 + weaponAttrs.追加伤害
         const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
-        const commonMore =
-            boostMultiplier *
-            desperateMultiplier *
-            damageIncrease *
-            independentDamageIncrease *
-            additionalDamage *
-            imbalanceDamageMultiplier
+        const hpMore = boostMultiplier * desperateMultiplier
+        const otherMore = damageIncrease * independentDamageIncrease * additionalDamage * imbalanceDamageMultiplier
+        const commonMore = hpMore * otherMore
 
         // 计算最终伤害
         const elementalPart = weaponDamageElemental * resistancePenetration
@@ -866,6 +860,7 @@ export class CharBuild {
             expectedCritTrigger: (weaponDamagePhysical + elementalPart) * critExpectedDamage * commonMore,
             expectedCritNoTrigger: (weaponDamagePhysical * triggerDamage + elementalPart) * critExpectedDamage * commonMore,
             expectedDamage: (weaponDamagePhysical * triggerExpectedDamage + elementalPart) * critExpectedDamage * commonMore,
+            noHpDamage: (weaponDamagePhysical * triggerExpectedDamage + elementalPart) * critExpectedDamage * otherMore,
         }
     }
 
@@ -1105,6 +1100,7 @@ export class CharBuild {
             else return evaluateSkill(fieldName, ns) || evaluateAttr(fieldName) || evaluateWeaponAttr(fieldName, ns) || 0
         }
         function evaluateMember(memberName?: string) {
+            if (memberName === "N") return damage.noHpDamage
             if (memberName === "暴击") return damage.higherCritExpectedTrigger || damage.expectedDamage
             if (memberName === "未暴击") return damage.lowerCritExpectedTrigger || damage.expectedDamage
             if (memberName === "触发") return damage.expectedCritTrigger || damage.expectedDamage
@@ -1181,6 +1177,8 @@ export class CharBuild {
                             return Math.log(args[0])
                         case "power":
                             return Math.pow(args[0], args[1])
+                        case "hp":
+                            return this.calculateDesperateMultiplier(attrs, args[0]) * this.calculateBoostMultiplier(attrs, args[0])
                         default:
                             throw new Error(`未知的函数: ${node.name}`)
                     }
@@ -1280,6 +1278,7 @@ export class CharBuild {
         // 查找要计算的武器或技能
         let damage: DamageResult = {
             expectedDamage: 0,
+            noHpDamage: 0,
         }
         let weapon = this.selectedWeapon
         if (!attrs) attrs = this.calculateWeaponAttributes()
@@ -1630,7 +1629,7 @@ export class CharBuild {
 
     static indepSeries = ["百首", "狮鹫", "中庭蛇"]
     static elmSeries = ["狮鹫", "百首", "契约者", "换生灵"]
-    static exclusiveSeries = [...CharBuild.indepSeries, "囚狼", "换生灵", "海妖", "审判者", "巨鲸", "金乌", "焰灵", "黄衣", "夜使"]
+    static exclusiveSeries = [...CharBuild.indepSeries, "换生灵", "海妖", "审判者", "巨鲸", "金乌", "焰灵", "黄衣", "夜使"]
 
     /**
      * 自动构筑
@@ -1681,7 +1680,7 @@ export class CharBuild {
         function addMod(key: ModTypeKey, mod: LeveledMod) {
             localBuild[key].push(mod)
             // 记录互斥系列
-            if (CharBuild.exclusiveSeries.includes(mod.系列)) {
+            if (CharBuild.exclusiveSeries.includes(mod.系列) || (mod.系列 === "囚狼" && mod.id > 100000)) {
                 mod.excludeSeries.forEach((series) => selectedExclusiveSeries[key].add(series))
             }
             // 记录非契约者MOD名称（用于名称互斥）
@@ -1730,7 +1729,7 @@ export class CharBuild {
                                 localBuild.skillWeapon &&
                                 [localBuild.skillWeapon.伤害类型, localBuild.skillWeapon.类别].includes(v.限定))) &&
                         !selectedExclusiveNames[key].has(v.名称) &&
-                        !selectedExclusiveSeries[key].has(v.系列) &&
+                        !(v.系列 == "囚狼" && v.id > 100000 && selectedExclusiveSeries[key].has(v.系列)) &&
                         (selectedModCount.get(v.id) || 0) < v.count,
                 )
                 .map((v) => ({ mod: v, income: localBuild.calcIncome(v) }))
@@ -1754,7 +1753,7 @@ export class CharBuild {
         function next(iter: number) {
             let changed = false
             // 最大化武器
-            if (!fixedMelee && !initBuild.isMeleeWeapon) {
+            if (!fixedMelee && !initBuild.isMeleeWeapon && meleeOptions.length) {
                 const maxed = findMaxMelee()
                 if (maxed.名称 !== localBuild.meleeWeapon.名称) {
                     const oldName = localBuild.meleeWeapon.名称
@@ -1766,7 +1765,7 @@ export class CharBuild {
                     changed = true
                 }
             }
-            if (!fixedRanged && !initBuild.isRangedWeapon) {
+            if (!fixedRanged && !initBuild.isRangedWeapon && rangedOptions.length) {
                 const maxed = findMaxRanged()
                 if (maxed.名称 !== localBuild.rangedWeapon.名称) {
                     const oldName = localBuild.rangedWeapon.名称
@@ -1869,6 +1868,8 @@ export interface DamageResult {
     expectedCritNoTrigger?: number
     /** 期望伤害 */
     expectedDamage: number
+    /** 无血量因数伤害 */
+    noHpDamage: number
 }
 
 export interface BuildOption {

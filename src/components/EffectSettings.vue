@@ -13,7 +13,7 @@ const buffOptions = computed(() => {
         .filter((mod) => mod.buff)
         .map((mod) => {
             const buff = mod.buff!
-            const lv = inv.getBuffLv(mod.名称)
+            const lv = buff.pt === "Weapon" ? inv.getWBuffLv(mod.id) : inv.getBuffLv(mod.id)
             return {
                 label: buff.名称 || "",
                 value: lv <= 0 ? buff.clone().setLv(buff.mx || 1) : buff,
@@ -23,14 +23,25 @@ const buffOptions = computed(() => {
         })
 })
 const selectedBuffs = computed(() => {
-    return props.mods.filter((mod) => mod.buff && inv.getBuffLv(mod.名称) > 0).map((mod) => mod.buff!)
+    return props.mods
+        .filter((mod) => mod.buff && (mod.buff.pt === "Weapon" ? inv.getWBuffLv(mod.id) : inv.getBuffLv(mod.id)) > 0)
+        .map((mod) => mod.buff!)
 })
 function toggleBuff(buff: LeveledBuff) {
-    const lv = inv.getBuffLv(buff.pid)
-    inv.setBuffLv(buff.pid, lv <= 0 ? buff.mx || 1 : 0)
+    if (buff.pt === "Weapon") {
+        const lv = inv.getWBuffLv(buff.pid)
+        inv.setWBuffLv(buff.pid, lv <= 0 ? buff.mx || 1 : 0)
+    } else {
+        const lv = inv.getBuffLv(buff.pid)
+        inv.setBuffLv(buff.pid, lv <= 0 ? buff.mx || 1 : 0)
+    }
 }
 function setBuffLv(buff: LeveledBuff, lv: number) {
-    inv.setBuffLv(buff.pid, lv)
+    if (buff.pt === "Weapon") {
+        inv.setWBuffLv(buff.pid, lv)
+    } else {
+        inv.setBuffLv(buff.pid, lv)
+    }
 }
 </script>
 <template>

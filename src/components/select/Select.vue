@@ -41,6 +41,7 @@ const props = defineProps<
     Omit<SelectRootProps, "modelValue"> & {
         placeholder?: string
         modelValue?: any
+        hidebtn?: boolean
     }
 >()
 const emits = defineEmits<{
@@ -66,7 +67,7 @@ const forward = useForwardPropsEmits(props, emits)
     <SelectRoot v-bind="forward as any">
         <SelectTrigger class="inline-flex items-center justify-between" v-bind="$attrs">
             <SelectValue :placeholder="placeholder" />
-            <Icon icon="radix-icons:chevron-down" class="text-primary ml-2" />
+            <Icon v-if="!hidebtn" icon="radix-icons:chevron-down" class="text-primary ml-2" />
         </SelectTrigger>
 
         <SelectPortal>

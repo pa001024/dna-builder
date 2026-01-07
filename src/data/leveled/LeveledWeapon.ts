@@ -117,7 +117,8 @@ export class LeveledWeapon {
 
         if (effectMap.has(this.名称)) {
             this.buff = new LeveledBuff(effectMap.get(this.名称)!, effectLv)
-            this.buff.pid = this.名称
+            this.buff.pid = this.id
+            this.buff.pt = "Weapon"
         }
 
         // 初始化倍率相关属性为undefined
@@ -188,6 +189,7 @@ export class LeveledWeapon {
         if (this.buff) {
             const buff = this.buff
             const props = this.buff.getProperties()
+            console.log(props, this.buff._等级, this.effectLv)
             Object.keys(props).forEach((prop) => {
                 const maxValue = buff[prop] || 0
                 const currentValue = (maxValue / 10) * (this._精炼 + 5)
