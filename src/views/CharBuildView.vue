@@ -1867,15 +1867,15 @@ function shareCharBuild() {
                                 <div class="space-y-3">
                                     <div class="flex gap-2">
                                         <div class="flex-1">
-                                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("生命") }}</div>
+                                            <div class="px-2 text-xs text-gray-400 mb-1 whitespace-nowrap">{{ $t("生命") }}</div>
                                             <div class="text-primary font-bold text-right">{{ charBuild.enemy.hp }}</div>
                                         </div>
                                         <div class="flex-1">
-                                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("防御") }}</div>
+                                            <div class="px-2 text-xs text-gray-400 mb-1 whitespace-nowrap">{{ $t("防御") }}</div>
                                             <div class="text-primary font-bold text-right">{{ charBuild.enemy.def }}</div>
                                         </div>
                                         <div class="flex-1">
-                                            <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("护盾") }}</div>
+                                            <div class="px-2 text-xs text-gray-400 mb-1 whitespace-nowrap">{{ $t("护盾") }}</div>
                                             <div class="text-primary font-bold text-right">{{ charBuild.enemy.es }}</div>
                                         </div>
                                     </div>

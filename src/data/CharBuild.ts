@@ -281,7 +281,7 @@ export class CharBuild {
         this.rangedWeapon = options.ranged
         this.baseName = options.baseName
         this.enemyLevel = options.enemyLevel || 80
-        this.enemyId = options.enemyId || 130
+        this.enemyId = options.enemyId ?? 130
         this.enemyResistance = options.enemyResistance || 0
         this.targetFunction = options.targetFunction || "伤害"
         this.timeline = options.timeline
@@ -517,7 +517,7 @@ export class CharBuild {
         nochar = false,
     ): CharAttr & { weapon?: WeaponAttr } {
         const char = this.char
-        let attrs: CharAttr & { weapon?: WeaponAttr } = nochar ? ({} as any) : this.calculateAttributes()
+        let attrs: CharAttr & { weapon?: WeaponAttr } = nochar ? ({} as any) : this.calculateAttributes(true) // code因为底下会算 所以角色属性不需要计算了
 
         if (weapon) {
             const prefix = weapon.类型

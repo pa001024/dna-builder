@@ -189,7 +189,6 @@ export class LeveledWeapon {
         if (this.buff) {
             const buff = this.buff
             const props = this.buff.getProperties()
-            console.log(props, this.buff._等级, this.effectLv)
             Object.keys(props).forEach((prop) => {
                 const maxValue = buff[prop] || 0
                 const currentValue = (maxValue / 10) * (this._精炼 + 5)

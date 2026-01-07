@@ -773,6 +773,19 @@ describe("CharBuild类测试", () => {
             expect(charBuild.targetFunction).toBe("每秒伤害")
         })
     })
+    describe("表达式测试", () => {
+        it("应该能够计算常数", () => {
+            const charBuild = createCharBuild()
+
+            // 修改配置
+            charBuild.enemyId = 0
+            charBuild.targetFunction = "1+1"
+            const result = charBuild.calculate()
+
+            // 验证修改
+            expect(result).toBe(2)
+        })
+    })
 
     // 性能测试
     describe("性能测试", () => {
