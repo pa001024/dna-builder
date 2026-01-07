@@ -130,16 +130,16 @@ export class LeveledSkill {
                 }
                 let propSet = new Set(field.影响.split(","))
                 if (propSet.has("技能范围")) {
-                    val = field.值 * tt["技能范围"]
+                    val = val * tt["技能范围"]
                 }
                 if (propSet.has("技能威力")) {
-                    val = field.值 * tt["技能威力"]
+                    val = val * tt["技能威力"]
                 }
                 if (propSet.has("技能耐久")) {
                     if (field.名称.includes("每秒神智消耗")) {
-                        val = field.值 / tt["技能耐久"]
+                        val = val / tt["技能耐久"]
                     } else {
-                        val = field.值 * tt["技能耐久"]
+                        val = val * tt["技能耐久"]
                     }
                 }
                 if (propSet.has("技能效益")) {
