@@ -86,7 +86,7 @@ watchEffect(async () => {
         const data = await Promise.all(
             (entityType.value === "char" ? charData : weaponData).map(async (v) => ({
                 name: v.名称,
-                icon: `/public/imgs/${v.名称}.png`,
+                icon: `/imgs/${v.名称}.png`,
                 count: await game.getModsCountByEntity(v.名称),
             })),
         )
