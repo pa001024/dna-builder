@@ -1769,24 +1769,32 @@ function shareCharBuild() {
                                     <div class="flex gap-2">
                                         <div class="flex-1">
                                             <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.hp_percent") }}</div>
-                                            <Select
-                                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                                v-model="charSettings.hpPercent"
-                                                @change="updateCharBuild"
-                                            >
-                                                <SelectItem
-                                                    v-for="hp in [
-                                                        1,
-                                                        ...Array(20)
-                                                            .keys()
-                                                            .map((i) => (i + 1) * 5),
-                                                    ]"
-                                                    :key="hp"
-                                                    :value="hp / 100"
+                                            <FullTooltip side="bottom">
+                                                <template #tooltip>
+                                                    <div class="flex flex-col">
+                                                        <h1 class="text-lg font-bold">血量收益曲线</h1>
+                                                        <CharHPCurve :desperate="attributes.背水" :boost="attributes.昂扬" />
+                                                    </div>
+                                                </template>
+                                                <Select
+                                                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                                    v-model="charSettings.hpPercent"
+                                                    @change="updateCharBuild"
                                                 >
-                                                    {{ hp }}%
-                                                </SelectItem>
-                                            </Select>
+                                                    <SelectItem
+                                                        v-for="hp in [
+                                                            1,
+                                                            ...Array(20)
+                                                                .keys()
+                                                                .map((i) => (i + 1) * 5),
+                                                        ]"
+                                                        :key="hp"
+                                                        :value="hp / 100"
+                                                    >
+                                                        {{ hp }}%
+                                                    </SelectItem>
+                                                </Select>
+                                            </FullTooltip>
                                         </div>
                                         <div class="flex-1">
                                             <div class="px-2 text-xs text-gray-400 mb-1">{{ $t("char-build.resonance_gain") }}</div>
