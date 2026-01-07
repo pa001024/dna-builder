@@ -125,15 +125,15 @@ export class LeveledSkill {
             }
             if (field.影响) {
                 let val = field.值
+                if (field.名称.includes("伤害")) {
+                    val += attrs?.技能倍率加数 || 0
+                }
                 let propSet = new Set(field.影响.split(","))
                 if (propSet.has("技能范围")) {
                     val = field.值 * tt["技能范围"]
                 }
                 if (propSet.has("技能威力")) {
                     val = field.值 * tt["技能威力"]
-                    if (field.名称.includes("伤害")) {
-                        val += attrs?.技能倍率加数 || 0
-                    }
                 }
                 if (propSet.has("技能耐久")) {
                     if (field.名称.includes("每秒神智消耗")) {
