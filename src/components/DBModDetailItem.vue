@@ -161,6 +161,20 @@ function formatDuration(minutes: number): string {
                     </div>
                 </div>
 
+                <div class="p-3 bg-base-200 rounded" v-if="leveledMod.生效">
+                    <div class="text-xs text-base-content/70 mb-2">条件属性</div>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        <div
+                            v-for="[key, attr] in Object.entries(leveledMod.生效).filter(([k, v]) => k !== '条件' && v)"
+                            :key="key"
+                            class="flex justify-between items-center p-2 bg-base-300 rounded text-sm"
+                        >
+                            <span class="text-base-content/70">{{ key }}</span>
+                            <span class="font-medium text-primary">{{ formatProp(key, attr) }}</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 图纸信息 -->
                 <div v-if="modDraft" class="p-3 bg-base-200 rounded mt-2">
                     <div class="text-xs text-base-content/70 mb-2">图纸 (ID: {{ modDraft.id }})</div>

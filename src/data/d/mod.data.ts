@@ -7647,6 +7647,13 @@ export default t.map((item: Mod) => {
     const id = item.id
     const pi = idmap.get(id)
     if (pi) {
+        if (pi.生效) {
+            Object.keys(pi.生效)
+                .filter((key) => key !== "条件")
+                .forEach((key) => {
+                    delete item[key]
+                })
+        }
         return {
             ...item,
             ...pi,

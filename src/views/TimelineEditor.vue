@@ -971,13 +971,14 @@ const resetView = () => {
 //#endregion
 //#region 游戏
 import { useLocalStorage } from "@vueuse/core"
-import { CharBuild, LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon, buffData } from "../data"
+import { CharBuild, LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon, buffData, charData } from "../data"
 import { useInvStore } from "../store/inv"
 import { useCharSettings } from "../composables/useCharSettings"
 import { formatProp, formatSkillProp } from "../util"
 import { groupBy } from "lodash-es"
 import { useTimeline } from "../store/timeline"
 const inv = useInvStore()
+const charOptions = charData.map((char) => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
 const selectedChar = useLocalStorage("selectedChar", "赛琪")
 const charSettings = useCharSettings(selectedChar)
 const baseName = ref(charSettings.value.baseName)
@@ -1237,12 +1238,23 @@ const importTimelineJson = () => {
                 </div>
             </div>
             <!-- 游戏数据关联 -->
-            <div class="flex items-center px-4">
+            <div class="flex items-center px-4 gap-2">
+                <Select class="inline-flex justify-between input input-bordered input-sm" v-model="selectedChar">
+                    <template v-for="charWithElm in groupBy(charOptions, 'elm')" :key="charWithElm[0].elm">
+                        <SelectLabel class="p-2 text-sm font-semibold text-primary">
+                            {{ charWithElm[0].elm }}
+                        </SelectLabel>
+                        <SelectGroup>
+                            <SelectItem v-for="char in charWithElm" :key="char.value" :value="char.value">
+                                {{ char.label }}
+                            </SelectItem>
+                        </SelectGroup>
+                    </template>
+                </Select>
                 <label class="label">
                     <span class="label-text text-sm font-semibold text-secondary whitespace-nowrap">BUFF</span>
                     <input v-model="isBuff" type="checkbox" class="toggle toggle-secondary" />
                 </label>
-
                 <div v-if="isBuff" class="p-2 flex w-50 items-center gap-2">
                     <Select
                         class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
@@ -1263,8 +1275,7 @@ const importTimelineJson = () => {
                     </Select>
                 </div>
                 <div v-else class="p-2 flex items-center gap-2">
-                    <span class="text-sm font-semibold text-secondary whitespace-nowrap">{{ selectedChar }}</span>
-                    <Select class="w-32 input input-bordered input-sm" v-model="baseName">
+                    <Select class="input input-bordered input-sm" v-model="baseName">
                         <template v-for="baseWithType in groupBy(baseOptions, 'type')" :key="baseWithType[0].type">
                             <SelectLabel class="p-2 text-sm font-semibold text-primary">
                                 {{ baseWithType[0].type }}
@@ -1279,7 +1290,7 @@ const importTimelineJson = () => {
                     <Combobox
                         v-model="targetFunction"
                         type="text"
-                        :placeholder="$t('伤害')"
+                        placeholder="伤害"
                         :options="
                             (charBuild.allSkills.find((s) => s.名称 === baseName)?.字段 || []).map((f) => ({
                                 label: f.名称,
@@ -1321,7 +1332,7 @@ const importTimelineJson = () => {
                 </div>
 
                 <div class="dropdown dropdown-end">
-                    <div tabindex="0" role="button" class="btn btn-primary">
+                    <div tabindex="0" role="button" class="btn btn-primary btn-sm">
                         <span class="font-medium text-sm">加载/保存</span>
                     </div>
                     <div tabindex="0" class="card card-sm dropdown-content bg-base-100 rounded-box z-1 w-80 shadow-sm">
@@ -1520,7 +1531,7 @@ const importTimelineJson = () => {
                 <!-- 轨道内容 -->
                 <div
                     id="track-content"
-                    class="flex-1 min-h-[500px] relative"
+                    class="flex-1 min-h-125 relative"
                     :style="{ width: `${300 * timelineScale}px` }"
                     @mousedown="startSelection"
                 >

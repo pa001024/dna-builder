@@ -149,7 +149,7 @@ function getQualityColor(quality: string): string {
                                 "
                                 @click="selectedQuality = quality"
                             >
-                                {{ quality }}
+                                {{ $t(quality) }}
                             </button>
                         </div>
                     </div>
@@ -176,6 +176,8 @@ function getQualityColor(quality: string): string {
                                     </div>
                                     <div class="text-xs opacity-70 mt-1 flex gap-2">
                                         <span>{{ $t(mod.类型) }}</span>
+                                        <span v-if="mod.属性">{{ $t(`${mod.属性}属性`) }}</span>
+                                        <span v-if="mod.限定">{{ $t(mod.限定) }}</span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">
@@ -195,7 +197,15 @@ function getQualityColor(quality: string): string {
                                     class="flex justify-between items-center gap-2"
                                 >
                                     <span>{{ $t(key) }}</span>
-                                    <span class="font-medium">{{ formatProp(key, attr) }}</span>
+                                    <span class="font-medium text-primary">{{ formatProp(key, attr) }}</span>
+                                </div>
+                                <div
+                                    v-if="mod.生效"
+                                    v-for="key in Object.keys(mod.生效).filter((key) => key !== '条件')"
+                                    class="flex justify-between items-center gap-2"
+                                >
+                                    <span>{{ $t(key) }}</span>
+                                    <span class="font-medium text-primary">{{ formatProp(key, mod.生效[key]) }}</span>
                                 </div>
                             </div>
                         </div>

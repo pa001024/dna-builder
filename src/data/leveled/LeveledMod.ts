@@ -162,6 +162,7 @@ export class LeveledMod implements Mod {
             const vals: number[] = []
             this.生效 = keys.reduce(
                 (acc, key) => {
+                    delete this[key]
                     const mv = maxValue[key] as number | number[]
                     if (Array.isArray(mv)) {
                         const mv1 = mv[0]
