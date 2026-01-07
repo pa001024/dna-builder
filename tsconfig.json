@@ -16,7 +16,10 @@
         "jsx": "preserve",
         "jsxImportSource": "vue",
         "experimentalDecorators": true,
-
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"]
+        },
         /* Linting */
         "strict": true,
         "forceConsistentCasingInFileNames": true,

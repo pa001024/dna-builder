@@ -18,6 +18,11 @@ export default defineConfig(async () => ({
     define: {
         "import.meta.vitest": "undefined",
     },
+    resolve: {
+        alias: {
+            "@": resolve(__dirname, "src"),
+        },
+    },
     plugins: [
         vue(),
         vueJsx(),

@@ -3105,6 +3105,14 @@
     },
     "UI_CHAR_SUBTITLE_2102": "UI_CHAR_SUBTITLE_2102",
     "UI_CHAR_SUBTITLE_3202": "UI_CHAR_SUBTITLE_3202",
+    "updater": {
+        "newVersionFound": "新しいバージョン v{{version}}が見つかりました",
+        "newVersionMessage": "\n\n{{body}}\n\n更新を自動的にダウンロードしてインストールしますか？",
+        "newVersionTitle": "新しいバージョン",
+        "updateErrorMessage": "更新のダウンロードまたはインストール中にエラーが発生しました。後でもう一度お試しください",
+        "updateFailed": "更新に失敗しました",
+        "updating": "更新中..."
+    },
     "weapon-detail": {
         "title": "武器の詳細"
     },

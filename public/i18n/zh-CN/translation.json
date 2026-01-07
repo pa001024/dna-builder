@@ -501,6 +501,14 @@
         "desc": "自定义角色的战斗逻辑(打轴)",
         "title": "时间线"
     },
+    "updater": {
+        "newVersionFound": "发现新版本 v{{version}}",
+        "newVersionMessage": "\n\n{{body}}\n\n是否自动下载并安装更新？",
+        "newVersionTitle": "有新版本",
+        "updateErrorMessage": "下载或安装更新时出错，请稍后重试",
+        "updateFailed": "更新失败",
+        "updating": "更新中..."
+    },
     "weapon-detail": {
         "title": "武器详情"
     },

@@ -3105,6 +3105,14 @@
     },
     "UI_CHAR_SUBTITLE_2102": "UI_CHAR_SUBTITLE_2102",
     "UI_CHAR_SUBTITLE_3202": "UI_CHAR_SUBTITLE_3202",
+    "updater": {
+        "newVersionFound": "New version v{{version}} found",
+        "newVersionMessage": "\n\n{{body}}\n\nDo you want to automatically download and install the update?",
+        "newVersionTitle": "New Version Available",
+        "updateErrorMessage": "An error occurred while downloading or installing the update, please try again later",
+        "updateFailed": "Update Failed",
+        "updating": "Updating..."
+    },
     "weapon-detail": {
         "title": "Weapon details"
     },

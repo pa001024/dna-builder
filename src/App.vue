@@ -4,6 +4,7 @@ import { useSettingStore } from "./store/setting"
 import { useUIStore } from "./store/ui"
 import { useRoute } from "vue-router"
 import { env } from "./env"
+import Updater from "./components/Updater.vue"
 const setting = useSettingStore()
 const ui = useUIStore()
 const route = useRoute()
@@ -14,9 +15,7 @@ watchEffect(() => {
 })
 
 if (env.isApp) {
-    // const font = new FontFace("SourceHanSansCN", "url(/fonts/SourceHanSansCN-VF.ttf)")
-    // document.fonts.add(font)
-    // font.load()
+    //
 } else {
     onMounted(() => {
         if (!setting.windowTrasnparent) return
@@ -138,6 +137,7 @@ onMounted(() => {
 
 <template>
     <canvas class="fixed w-full h-full z-0 bg-indigo-300" id="background" v-if="setting.windowTrasnparent && !env.isApp"></canvas>
+    <Updater />
     <ResizeableWindow
         :title="ui.title || $t(`${String(route.name)}.title`)"
         darkable

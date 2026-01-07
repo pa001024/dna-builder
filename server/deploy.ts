@@ -8,6 +8,7 @@ import OSS from "ali-oss"
 
 const args = process.argv.slice(2)
 const isAppMode = args.includes("app")
+const skipBuild = args.includes("skip-build")
 
 const envPath = path.resolve("server/.env")
 const envConfig = fs.existsSync(envPath) ? parse(fs.readFileSync(envPath)) : {}
@@ -58,6 +59,15 @@ async function uploadToOss(filePath: string, ossKey: string): Promise<void> {
         bucket: OSS_CONFIG.bucket,
     })
 
+    // 强制覆盖：先删除旧文件，再上传新文件
+    try {
+        await client.delete(ossKey)
+        console.log(`🗑️  已删除旧文件: ${ossKey}`)
+    } catch (error) {
+        // 文件不存在时忽略错误
+        console.log(`ℹ️  文件不存在，跳过删除: ${ossKey}`)
+    }
+
     await client.put(ossKey, filePath)
 
     console.log(`✅ 上传成功: ${ossKey}`)
@@ -70,9 +80,14 @@ async function uploadToOss(filePath: string, ossKey: string): Promise<void> {
  * @param msiUrl MSI文件下载链接
  */
 function generateLatestJson(version: string, signature: string, msiUrl: string): object {
+    const versionsPath = path.resolve("./public/versions.json")
+    const versionsData = JSON.parse(fs.readFileSync(versionsPath, "utf-8"))
+    const versionInfo = versionsData.find((v: { version: string }) => v.version === `v${version}`)
+    const notes = versionInfo ? `更新内容: ${versionInfo.msg}` : ""
+
     return {
         version: version,
-        notes: `## 本次更新内容 (v${version})\n\n- 更新版本至 v${version}\n\n> [!TIP]\n> 请在下方下载`,
+        notes,
         pub_date: new Date().toISOString(),
         platforms: {
             "windows-x86_64": {
@@ -144,8 +159,12 @@ async function deployApp() {
             throw new Error("OSS配置不完整，请检查.env中的OSS配置")
         }
 
-        console.log("1. 执行pnpm tb命令构建Tauri应用...")
-        await $`pnpm tb`
+        if (!skipBuild) {
+            console.log("1. 执行pnpm tb命令构建Tauri应用...")
+            await $`pnpm tb`
+        } else {
+            console.log("1. 跳过构建，使用现有文件")
+        }
 
         const msiAbsPath = path.resolve(CONFIG.app.msiPath)
         const sigAbsPath = path.resolve(CONFIG.app.sigPath)

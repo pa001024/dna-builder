@@ -35,3 +35,4 @@ src-tauri/sidecar/dna_mcp_server-x86_64-pc-windows-msvc.exe
 src/game/*.md
 .moonagent/
 .trae/
+tools/i18n_diff.json

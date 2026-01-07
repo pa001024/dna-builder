@@ -3105,6 +3105,14 @@
     },
     "UI_CHAR_SUBTITLE_2102": "UI_CHAR_SUBTITLE_2102",
     "UI_CHAR_SUBTITLE_3202": "UI_CHAR_SUBTITLE_3202",
+    "updater": {
+        "newVersionFound": "새 버전 v{{version}}이(가) 발견되었습니다",
+        "newVersionMessage": "\n\n{{body}}\n\n업데이트를 자동으로 다운로드하여 설치하시겠습니까?",
+        "newVersionTitle": "새 버전",
+        "updateErrorMessage": "업데이트 다운로드 또는 설치 중 오류가 발생했습니다. 나중에 다시 시도해 주세요",
+        "updateFailed": "업데이트 실패",
+        "updating": "업데이트 중..."
+    },
     "weapon-detail": {
         "title": "무기 세부정보"
     },

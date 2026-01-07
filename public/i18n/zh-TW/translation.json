@@ -3105,6 +3105,14 @@
     },
     "UI_CHAR_SUBTITLE_2102": "UI_CHAR_SUBTITLE_2102",
     "UI_CHAR_SUBTITLE_3202": "UI_CHAR_SUBTITLE_3202",
+    "updater": {
+        "newVersionFound": "發現新版本 v{{version}}",
+        "newVersionMessage": "\n\n{{body}}\n\n是否自動下載並安裝更新？",
+        "newVersionTitle": "有新版本",
+        "updateErrorMessage": "下載或安裝更新時出錯，請稍後重試",
+        "updateFailed": "更新失敗",
+        "updating": "更新中..."
+    },
     "weapon-detail": {
         "title": "武器詳情"
     },
