@@ -8,6 +8,7 @@ import weaponData from "./weapon.data"
 import baseData from "./base.data"
 import rewardData from "./reward.data"
 import draftData from "./draft.data"
+import { AbyssBuff, abyssBuffs, AbyssDungeon, abyssDungeons } from "./abyss.data"
 
 // 将静态表转换为Map，提高查找效率
 export const charMap = new Map<number | string, Char>()
@@ -80,3 +81,19 @@ draftData.forEach((v) => {
     if (v.t === "Weapon") weaponDraftMap.set(v.p, v)
     draftMap.set(v.id, v)
 })
+
+export const abyssBuffMap = new Map<number, AbyssBuff>()
+abyssBuffs.forEach((v) => abyssBuffMap.set(v.id, v))
+export const abyssDungeonMap = new Map<number, AbyssDungeon>()
+abyssDungeons.forEach((v) => {
+    // 转换buffID为AbyssBuff对象
+    v.buff = v.b.map((id) => abyssBuffMap.get(id)!)
+    // 转换角色ID为角色名称
+    const cname = v.cid ? charMap.get(v.cid)?.名称 : undefined
+    if (cname) v.cname = cname
+    abyssDungeonMap.set(v.id, v)
+})
+
+import petData, { type Pet } from "./pet.data"
+export const petMap = new Map<number, Pet>()
+petData.forEach((v) => petMap.set(v.id, v))

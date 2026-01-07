@@ -155,7 +155,7 @@ onMounted(async () => {
                 :class="{ 'btn-disabled': game.running }"
             >
                 <Icon icon="ri:rocket-2-line" class="w-6 h-6" />
-                {{ game.running ? "游戏已启动" : "启动游戏" }}
+                {{ game.running ? $t("game-launcher.launched") : $t("game-launcher.launch") }}
             </RouterLink>
         </ScrollArea>
 
@@ -163,8 +163,8 @@ onMounted(async () => {
         <dialog class="modal" :class="{ 'modal-open': showModal }" @click="closeModal" ref="dialogRef">
             <div class="modal-box bg-base-100 w-[80%] min-w-72 max-w-160" @click.stop>
                 <div class="text-center">
-                    <h3 class="text-xl font-bold">欢迎使用 DNA Builder {{ currentVersion }}</h3>
-                    <p class="text-sm text-gray-500">版本更新日志</p>
+                    <h3 class="text-xl font-bold">{{ $t("home.welcome") }} {{ currentVersion }}</h3>
+                    <p class="text-sm text-gray-500">{{ $t("home.update_log") }}</p>
                 </div>
                 <div class="max-h-96 overflow-y-auto py-4">
                     <div v-if="versions.length > 0" class="space-y-4">
@@ -183,10 +183,10 @@ onMounted(async () => {
                             </div>
                         </div>
                     </div>
-                    <div v-else class="text-center text-gray-500">当前版本无更新内容</div>
+                    <div v-else class="text-center text-gray-500">{{ $t("home.noupdate") }}</div>
                 </div>
                 <div class="modal-action justify-center">
-                    <button class="btn btn-primary" @click="closeModal">了解了</button>
+                    <button class="btn btn-primary" @click="closeModal">{{ $t("home.understand") }}</button>
                 </div>
             </div>
             <div class="modal-backdrop" @click="closeModal"></div>

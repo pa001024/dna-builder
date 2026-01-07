@@ -50,7 +50,7 @@ function getRewardTypeText(type: string): string {
         Skin: "角色皮肤",
         Title: "称号",
         TitleFrame: "称号框",
-        Walnut: "胡桃",
+        Walnut: "密函",
         Weapon: "武器",
         WeaponAccessory: "武器饰品",
         WeaponSkin: "武器皮肤",

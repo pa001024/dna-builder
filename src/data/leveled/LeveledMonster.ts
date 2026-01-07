@@ -212,7 +212,7 @@ export class LeveledMonster implements DynamicMonster {
         let mData = typeof id === "number" ? monsterMap.get(id) : id
         if (!mData) {
             console.error(`怪物 "${id}" 未在静态表中找到`)
-            mData = monsterMap.get(1001001)!
+            mData = monsterMap.get(130)!
         }
 
         this.id = mData.id

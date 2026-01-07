@@ -2,6 +2,7 @@ import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
 import { Context } from "../yoga"
 import { id } from "../schema"
 import { getClients, hasUser } from "../kv/room"
+import { createGraphQLError } from "graphql-yoga"
 
 export const typeDefs = /* GraphQL */ `
     type Mutation {
@@ -45,7 +46,7 @@ export const typeDefs = /* GraphQL */ `
 // 内存RTC信令服务器
 export const resolvers = {
     Query: {
-        rtcClients: async (parent, { roomId }, context, info: any) => {
+        rtcClients: async (parent, { roomId }, context, info) => {
             if (!context.user) return []
             return getClients(roomId)
         },
@@ -76,7 +77,7 @@ export const resolvers = {
     },
     Subscription: {
         newRtcEvent: (parent, { roomId }, { user, pubsub }, info) => {
-            if (!user) throw new Error("need login")
+            if (!user) throw createGraphQLError("need login")
             return pubsub.subscribe("newRtcEvent", roomId)
         },
     },

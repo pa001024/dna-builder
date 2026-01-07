@@ -5,6 +5,7 @@ import { db, schema } from ".."
 import { getSubSelection } from "."
 import { sanitizeHTML } from "../../util/html"
 import { hasUser } from "../kv/room"
+import { createGraphQLError } from "graphql-yoga"
 
 export const typeDefs = /* GraphQL */ `
     type Query {
@@ -60,15 +61,15 @@ export const typeDefs = /* GraphQL */ `
 export const resolvers = {
     Query: {
         msgCount: async (parent, { roomId }, { user }, info) => {
-            if (!user) throw new Error("need login")
-            if (!hasUser(roomId, user.id)) throw new Error("need room join")
+            if (!user) throw createGraphQLError("need login")
+            if (!hasUser(roomId, user.id)) throw createGraphQLError("need room join")
 
             const rst = await db.select({ value: count() }).from(schema.msgs).where(eq(schema.msgs.roomId, roomId))
             return rst[0].value
         },
         msgs: async (parent, { roomId, limit, offset }, context, info) => {
-            if (!context.user) throw new Error("need login")
-            if (!hasUser(roomId, context.user.id)) throw new Error("need room join")
+            if (!context.user) throw createGraphQLError("need login")
+            if (!hasUser(roomId, context.user.id)) throw createGraphQLError("need room join")
 
             const user = getSubSelection(info, "user")
             const reactions = getSubSelection(info, "reactions")
@@ -84,8 +85,8 @@ export const resolvers = {
             return msgs
         },
         lastMsgs: async (parent, { roomId, limit, offset }, context, info) => {
-            if (!context.user) throw new Error("need login")
-            if (!hasUser(roomId, context.user.id)) throw new Error("need room join")
+            if (!context.user) throw createGraphQLError("need login")
+            if (!hasUser(roomId, context.user.id)) throw createGraphQLError("need room join")
 
             const user = getSubSelection(info, "user")
             const reactions = getSubSelection(info, "reactions")
@@ -104,7 +105,7 @@ export const resolvers = {
     },
     Mutation: {
         sendMessage: async (parent, { roomId, content }, { user, pubsub }) => {
-            if (!user) throw new Error("need login")
+            if (!user) throw createGraphQLError("need login")
             // TODO: check if user is in the room
             const userId = user.id
             const rst = (
@@ -195,23 +196,23 @@ export const resolvers = {
     },
     Subscription: {
         newMessage: async (parent, { roomId }, { user, pubsub }, info) => {
-            if (!user) throw new Error("need login")
+            if (!user) throw createGraphQLError("need login")
             return pubsub.subscribe("newMessage", roomId)
         },
         newReaction: async (parent, { roomId }, { user, pubsub }, info) => {
-            if (!user) throw new Error("need login")
+            if (!user) throw createGraphQLError("need login")
             return pubsub.subscribe("newReaction", roomId)
         },
         msgEdited: async (parent, { roomId }, { user, pubsub }, info) => {
-            if (!user) throw new Error("need login")
+            if (!user) throw createGraphQLError("need login")
             return pubsub.subscribe("msgEdited", roomId)
         },
         userJoined: async (parent, { roomId }, { user, pubsub }, info) => {
-            if (!user) throw new Error("need login")
+            if (!user) throw createGraphQLError("need login")
             return pubsub.subscribe("userJoined", roomId)
         },
         userLeaved: async (parent, { roomId }, { user, pubsub }, info) => {
-            if (!user) throw new Error("need login")
+            if (!user) throw createGraphQLError("need login")
             return pubsub.subscribe("userLeaved", roomId)
         },
     },

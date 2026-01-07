@@ -12,6 +12,9 @@ import { env } from "./env"
 import { LogicalSize, getCurrentWindow } from "@tauri-apps/api/window"
 import UserManager from "./views/UserManager.vue"
 import CharListView from "./views/CharListView.vue"
+import GuideListView from "./views/GuideListView.vue"
+import GuideDetailView from "./views/GuideDetailView.vue"
+import GuideEditView from "./views/GuideEditView.vue"
 
 let setMinSize = async (_w: number, _h: number) => {}
 ;(async () => {
@@ -117,6 +120,30 @@ const routes: readonly RouteRecordRaw[] = [
         component: () => import("./views/DBDungeonDetailView.vue"),
         beforeEnter: () => setMinSize(320, 360),
     },
+    {
+        name: "abyss-dungeon-list",
+        path: "/db/abyss",
+        component: () => import("./views/DBAbyssDungeonListView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+    },
+    {
+        name: "abyss-dungeon-detail",
+        path: "/db/abyss/:dungeonId",
+        component: () => import("./views/DBAbyssDungeonDetailView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+    },
+    {
+        name: "pet-list",
+        path: "/db/pet",
+        component: () => import("./views/DBPetListView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+    },
+    {
+        name: "pet-detail",
+        path: "/db/pet/:id",
+        component: () => import("./views/DBPetDetailView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+    },
 
     // DNA routes
     { name: "dna-home", path: "/dna", component: () => import("./views/DNAHomeView.vue"), beforeEnter: () => setMinSize(600, 600) },
@@ -162,6 +189,12 @@ const routes: readonly RouteRecordRaw[] = [
         component: () => import("./views/DNAPostDetailView.vue"),
         beforeEnter: () => setMinSize(600, 600),
     },
+
+    // 攻略 routes
+    { name: "guide-list", path: "/guides", component: GuideListView, beforeEnter: () => setMinSize(800, 600) },
+    { name: "guide-detail", path: "/guides/:id", component: GuideDetailView, beforeEnter: () => setMinSize(800, 600) },
+    { name: "guide-create", path: "/guides/create", component: GuideEditView, beforeEnter: () => setMinSize(800, 800) },
+    { name: "guide-edit", path: "/guides/:id/edit", component: GuideEditView, beforeEnter: () => setMinSize(800, 800) },
 ]
 
 export const router = createRouter({

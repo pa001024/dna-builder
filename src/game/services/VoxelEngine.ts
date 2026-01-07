@@ -369,7 +369,7 @@ export class VoxelEngine {
 
         // 为CharBuild构建兼容的DynamicMonster对象
         const adapter = {
-            id: parseInt(target.id) || 1001001,
+            id: parseInt(target.id) || 130,
             n: target.name,
             f: target.faction,
             atk: target.attack,
@@ -589,7 +589,7 @@ export class VoxelEngine {
         const level = this.settings.monsterLevel
 
         // 使用LeveledMonster根据等级计算新怪物的属性
-        const newMonster = new LeveledMonster(this.settings.monsterId, level) // 1001001 is "生命木桩" ID, used as base
+        const newMonster = new LeveledMonster(this.settings.monsterId, level) // 130 is "生命木桩" ID, used as base
 
         this.monsters.push({
             id: Math.random().toString(),

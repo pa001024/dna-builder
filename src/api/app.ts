@@ -96,24 +96,69 @@ class TauriResponse {
 export async function tauriFetch(url: RequestInfo | URL, options?: RequestInit): Promise<Response> {
     if (!env.isApp) return await serverFetch(url, options)
     const method = options?.method ?? "GET"
-    const body = typeof options?.body === "string" ? options.body : options?.body?.toString()
+
+    let body: string | undefined
+    let multipart: [string, string | { filename: string; data: number[]; mime?: string }][] | undefined
+
+    if (options?.body instanceof FormData) {
+        multipart = []
+        for (const [key, value] of options.body.entries()) {
+            if (value instanceof File) {
+                const arrayBuffer = await value.arrayBuffer()
+                const data = Array.from(new Uint8Array(arrayBuffer))
+                multipart.push([
+                    key,
+                    {
+                        filename: value.name,
+                        data,
+                        mime: value.type || undefined,
+                    },
+                ])
+            } else {
+                multipart.push([key, value as string])
+            }
+        }
+    } else {
+        body = typeof options?.body === "string" ? options.body : options?.body?.toString()
+    }
+
     const headers = options?.headers ? Object.entries(options.headers as Record<string, string>) : undefined
-    const result = await invoke<string>("fetch", { url: url.toString(), method, body, headers })
+    const result = await invoke<string>("fetch", { url: url.toString(), method, body, headers, multipart })
     const parsed = JSON.parse(result) as { status: number; body: string }
     return new TauriResponse(parsed.status, parsed.body)
 }
 
 export async function serverFetch(url: RequestInfo | URL, options?: RequestInit): Promise<Response> {
-    const body = JSON.stringify({
-        url: url.toString(),
-        ...options,
-        body: typeof options?.body === "string" ? options.body : options?.body?.toString(),
-    })
-    return await fetch(env.endpoint + "/api/fetch", {
-        method: "POST",
-        body,
-        headers: {
-            "Content-Type": "application/json",
-        },
-    })
+    if (options?.body instanceof FormData) {
+        const formData = new FormData()
+        formData.append("url", url.toString())
+        if (options.method) formData.append("method", options.method)
+
+        if (options.headers) {
+            const headersData = JSON.stringify(Object.entries(options.headers as Record<string, string>))
+            formData.append("headers", headersData)
+        }
+
+        for (const [key, value] of options.body.entries()) {
+            formData.append(`body_${key}`, value)
+        }
+
+        return await fetch(env.endpoint + "/api/fetch", {
+            method: "POST",
+            body: formData,
+        })
+    } else {
+        const body = JSON.stringify({
+            url: url.toString(),
+            ...options,
+            body: typeof options?.body === "string" ? options.body : options?.body?.toString(),
+        })
+        return await fetch(env.endpoint + "/api/fetch", {
+            method: "POST",
+            body,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+    }
 }

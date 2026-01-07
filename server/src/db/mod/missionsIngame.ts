@@ -2,6 +2,7 @@ import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
 import { desc, eq } from "drizzle-orm"
 import { Context } from "../yoga"
 import { db, schema } from ".."
+import { createGraphQLError } from "graphql-yoga"
 
 export const typeDefs = /* GraphQL */ `
     type Query {
@@ -37,13 +38,13 @@ export const resolvers = {
     },
     Mutation: {
         addMissionsIngame: async (parent, { token, server, missions }, { user, pubsub }, info) => {
-            if (!token || token !== process.env.API_TOKEN) throw new Error("need api token")
+            if (!token || token !== process.env.API_TOKEN) throw createGraphQLError("need api token")
             // 同server最后一个值重复校验
             const lastMissionsIngame = await db.query.missionsIngame.findFirst({
                 where: eq(schema.missionsIngame.server, server),
                 orderBy: desc(schema.missionsIngame.id),
             })
-            if (lastMissionsIngame && JSON.stringify(lastMissionsIngame.missions) === JSON.stringify(missions)) throw new Error("duplicate missions")
+            if (lastMissionsIngame && JSON.stringify(lastMissionsIngame.missions) === JSON.stringify(missions)) throw createGraphQLError("duplicate missions")
 
             const missionsIngame = await db
                 .insert(schema.missionsIngame)
@@ -57,7 +58,7 @@ export const resolvers = {
     },
     Subscription: {
         updateMissionsIngame: async (parent, { server }, { user, pubsub, extra }, info) => {
-            if (!user) throw new Error("need login")
+            if (!user) throw createGraphQLError("need login")
             return pubsub.subscribe("updateMissionsIngame", server)
         },
     },

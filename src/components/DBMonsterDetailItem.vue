@@ -3,6 +3,8 @@ import { ref, computed } from "vue"
 import { LeveledMonster } from "../data/leveled/LeveledMonster"
 import dungeonData from "../data/d/dungeon.data"
 import { Faction, Monster } from "../data/data-types"
+import { abyssDungeonMap } from "../data"
+import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
 
 const props = defineProps<{
     monster: Monster
@@ -25,6 +27,13 @@ const dungeons = computed(() => {
     })
 })
 
+const abyssDungeonsFiltered = computed(() => {
+    if (!props.monster) return []
+    return [...abyssDungeonMap.values()].filter((d) => {
+        const normalMonsters = d.m || []
+        return normalMonsters.includes(props.monster.id)
+    })
+})
 // 按照副本名称分组
 const dungeonGroups = computed(() => {
     const groups: Record<string, typeof dungeons.value> = {}
@@ -182,6 +191,29 @@ function formatNumber(num: number): string {
                             </div>
                         </div>
                         <div class="text-xs text-base-content/70 mt-1">{{ dungeon.desc }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="abyssDungeonsFiltered.length > 0" class="p-3">
+                <h3 class="font-bold mb-2">出现深渊</h3>
+
+                <!-- 深渊列表 -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    <div
+                        v-for="dungeon in abyssDungeonsFiltered"
+                        :key="dungeon.id"
+                        class="p-2 bg-base-200 rounded cursor-pointer hover:bg-base-300 transition-colors"
+                        @click="$router.push(`/db/abyss/${dungeon.id}`)"
+                    >
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium">
+                                {{ dungeon.cname }} {{ $t(getAbyssDungeonGroup(dungeon)) }} #{{ getAbyssDungeonLevel(dungeon) }}</span
+                            >
+                            <div class="flex flex-col items-end">
+                                <span class="text-xs text-base-content/70">ID: {{ dungeon.id }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

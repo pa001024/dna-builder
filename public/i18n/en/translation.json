@@ -583,6 +583,7 @@
     "不屈": "Unyielding",
     "不死鸟": "Phoenix's ",
     "不息": "Relentless",
+    "不朽剧目": "Immortal Repertoire",
     "不渝的梦海": "Undying Oneiros",
     "不止是数字": "Beyond Numbers",
     "步入雨幕": "Into the Downpour",
@@ -1133,6 +1134,7 @@
     "进入[送葬]状态，进入时，如果自身技能范围大于100%，将技能范围超过100%的部分按一定比例转化为技能威力，并将技能范围降低至100%，持续到[送葬]状态结束。\n[送葬]状态中，远程武器的触发概率提高，释放[月猎]时不消耗神智、并将伤害目标拉向范围中心，释放[日食]时不消耗神智、伤害倍率增加。\n持续一段时间或释放6次[月猎]和[日食]后退出[送葬]状态。": "Enters [Funeral Rite] status. Upon entry, if the user's Skill Range exceeds 100%, the excess is converted into Skill Damage at a fixed ratio, and Skill Range is reduced to 100% for the duration.\nWhile under [Funeral Rite], gains Trigger Probability Increase for ranged weapons; [Lunar Hunt] and [Solar Eclipse] cost no Sanity; [Lunar Hunt] pulls enemies toward its centre; [Solar Eclipse] deals increased damage.\n[Funeral Rite] ends after a set duration or after casting a total of 6 [Lunar Hunt] and/or [Solar Eclipse].",
     "进入[巡航]状态，获得高速飞行能力，并对沿途敌人造成光属性伤害，期间持续消耗[天工能源]，[天工能源]下降为0或再次使用此技能时停止[巡航]。": "Enters [Cruise], gaining high-speed flight and dealing Lumino DMG to enemies along the path. This state continuously drains [Artificer Energy] and ends when Energy reaches 0 or when the skill is recast.",
     "进入战斗时，获得6层[预装填]。同时获得昂扬提高35%，持续60秒。": "Grants 6 stacks of [Preload] when battle starts, and increases Morale by 35% for 60s.",
+    "经典剧目": "Classic Repertoire",
     "经典流传": "Timeless Masterpiece",
     "惊世智慧·海伯利亚": "Astonishing Wisdom - Hyperborea",
     "惊喜×惊吓": "Krackle × Kaboom",
@@ -1636,6 +1638,7 @@
     "冥焰": "Netherflames",
     "命令[榛子]向前冲刺，对路径上的敌人造成风属性伤害，在撞到障碍物后造成风属性范围伤害。释放技能时，为自身和队友提供治疗，并附加造成伤害提高效果。\n骑乘[榛子]时，此技能被替换为[蹄蹄大冲撞]。": "Commands [Filbert] to charge forwards, dealing Anemo Damage to enemies in the path. Upon hitting any obstacles, triggers Anemo AoE Damage at the endpoint. While this skill is active, heals Truffle and allies, and increases their damage.\nWhen Truffle rides on [Filbert], this skill is replaced with [Trotters Charge-Charge].",
     "命令所有[清扫机]在自身周围持续旋转并发射[高温祛污焰束]，期间所有[轻型清扫机]持续时间暂停。[高温祛污焰束]对扫射到的敌人造成火属性伤害。[高温祛污焰束]持续期间，击败敌人时，自身有概率回复神智。": "Commands all [Dirtexpellers] to continuously revolve around Hilda and fire [Hyperthermal Purgejets], during which the duration timer for all [Light Dirtexpellers] pauses.\n[Hyperthermal Purgejets] deal Pyro Damage to enemies, and defeating an enemy has a chance to restore Sanity for Hilda during the [Hyperthermal Purgejets] firing.",
+    "魔灵": "Geniemons",
     "魔灵俱乐部Ⅰ": "Geniemon Club Ⅰ",
     "魔灵俱乐部Ⅱ": "Geniemon Club Ⅱ",
     "魔灵俱乐部Ⅲ": "Geniemon Club Ⅲ",
@@ -1797,6 +1800,7 @@
     "热心调查员·无双Ⅲ": "Warm-Hearted Investigator - Peerless Ⅲ",
     "热心调查员Ⅰ": "Warm-Hearted Investigator Ⅰ",
     "热心调查员Ⅱ": "Warm-Hearted Investigator Ⅱ",
+    "热映剧目": "Featured Repertoire",
     "人才管理": "Talent Management",
     "人面狮": "Sphinx's ",
     "人气悲剧《红叶反讨秘话》中出现的刀具，形制少见。刀柄的一点红色据说是最初的主人刺死自己的王上时所留下的血污。": "A uniquely shaped blade featured in the acclaimed tragedy Momiji: A Chronicle of Rebellion. Its crimson-stained hilt is said to bear the blood of a king — struck down by the very hand sworn to protect him.",
@@ -2674,6 +2678,12 @@
     "罪名宣告": "Guilty Verdict",
     "罪愆的逆鳞": "Venial Sinscales",
     "坐上那把充满“力量”的椅子": "Take a seat in \"The Chair Full Of Power\"",
+    "abyss-dungeon-detail": {
+        "title": "Abyss Dungeon Detail"
+    },
+    "abyss-dungeon-list": {
+        "title": "Abyss list"
+    },
     "achievement": {
         "allVersions": "All Versions",
         "clear": "Clear",
@@ -2792,8 +2802,24 @@
         "title": "role list"
     },
     "database": {
+        "abyss_dungeon": "Abyss Dungeon",
+        "abyss_dungeon_desc": "View abyss dungeon information and buffs",
         "desc": "Query game data",
-        "title": "Database"
+        "draft": "Blueprint",
+        "draft_desc": "View blueprint information and required materials",
+        "dungeon": "Dungeon",
+        "dungeon_desc": "View dungeon information and reward drops",
+        "mod": "Mod",
+        "mod_desc": "View mod information and attributes",
+        "monster": "Monster",
+        "monster_desc": "View monster information and attributes",
+        "pet": "Geniemon",
+        "pet_desc": "View Geniemon info and skills",
+        "rank": "Rank Rewards",
+        "rank_desc": "View ranking tournament rewards",
+        "title": "Database",
+        "weapon": "Weapon",
+        "weapon_desc": "View weapon information and attributes"
     },
     "dna-home": {
         "title": "Jiaojiaojiao"
@@ -2883,6 +2909,44 @@
         "title": "Game Launcher",
         "weapon": "Weapon"
     },
+    "guide-create": {
+        "title": "Create Guide"
+    },
+    "guide-detail": {
+        "title": "Strategy details"
+    },
+    "guide-list": {
+        "title": "Guide List"
+    },
+    "guides": {
+        "all": "all",
+        "all_characters": "All roles",
+        "associated_character": "associated role",
+        "build_info": "Build infor",
+        "build_info_tip": "This guide contains equipment information, click the button below to view the complete equipment",
+        "desc": "View character guides",
+        "edit": "edit",
+        "guide_content": "Strategy content",
+        "guide_title": "Guide title",
+        "guide_type": "Strategy type",
+        "image_guide": "Yitu Flow Guide",
+        "include_build_info": "Contains current outfit information",
+        "include_build_tip": "After checking, the current character outfit will be released together with the guide",
+        "likes": "Like",
+        "load_more": "Load More",
+        "no_character": "No Character",
+        "no_guides": "No guides available",
+        "please_enter_guide_content": "Please enter guide content or upload images",
+        "please_enter_guide_title": "Please enter guide title",
+        "publish": "Publish Guide",
+        "publish_guide": "Publish Guide",
+        "search_placeholder": "Search guide titles...",
+        "text_guide": "Text Guide",
+        "title": "Guides",
+        "upload_images": "Upload Images",
+        "view_build": "View Build",
+        "views": "Views"
+    },
     "help": {
         "achievementFeature1": "View game achievement unlock progress",
         "achievementFeature2": "Statistics on character usage frequency and win rate",
@@ -2939,8 +3003,12 @@
     "home": {
         "cureent_version": "Current version:",
         "download": "Download Windows App",
+        "noupdate": "No updates available",
         "starme": "Go to Github and give it a star",
-        "title": "Home"
+        "title": "Home",
+        "understand": "Understood",
+        "update_log": "Update Log",
+        "welcome": "Welcome to DNA Builder"
     },
     "Home, Sweet Home": "Home, Sweet Home",
     "inventory": {
@@ -2974,6 +3042,9 @@
     "more": {
         "desc": "More features",
         "title": "More"
+    },
+    "pet-list": {
+        "title": "Geniemon List"
     },
     "raid-rank": {
         "title": "Ranking rewards"

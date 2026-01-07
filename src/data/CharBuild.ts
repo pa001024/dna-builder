@@ -205,7 +205,7 @@ export class CharBuild {
     public rangedWeapon: LeveledWeapon
     public baseName = ""
     public imbalance = false
-    _enemyId: number = 1001001
+    _enemyId: number = 130
     get enemyId() {
         return this._enemyId
     }
@@ -215,7 +215,7 @@ export class CharBuild {
             this.enemy = new LeveledMonster(value, this.enemyLevel)
         } catch (error) {
             console.error(`敌人 ${value} 初始化失败:`, error)
-            this.enemy = new LeveledMonster(1001001, this.enemyLevel)
+            this.enemy = new LeveledMonster(130, this.enemyLevel)
         }
     }
     public enemy!: LeveledMonster
@@ -281,7 +281,7 @@ export class CharBuild {
         this.rangedWeapon = options.ranged
         this.baseName = options.baseName
         this.enemyLevel = options.enemyLevel || 80
-        this.enemyId = options.enemyId || 1001001
+        this.enemyId = options.enemyId || 130
         this.enemyResistance = options.enemyResistance || 0
         this.targetFunction = options.targetFunction || "伤害"
         this.timeline = options.timeline

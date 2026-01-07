@@ -81,7 +81,8 @@ jobs:
               run: |
                   $prevVersion = "${{ steps.previous_tag.outputs.previous_tag }}"
                   $newVersion = "${{ github.ref_name }}"
-                  echo "version=${newVersion:1}`n" >> $env:GITHUB_OUTPUT
+                  $vernov = $newVersion.Substring(1)
+                  echo "version=$vernov" >> $env:GITHUB_OUTPUT
                   if (-not [string]::IsNullOrEmpty($prevVersion)) {
                       $diffLines = git log "$prevVersion...$newVersion" --oneline
                       $diff = New-Object System.Collections.ArrayList
@@ -127,6 +128,7 @@ jobs:
                       > Github 请在下方下载
 
                       > 夸克网盘链接：https://pan.quark.cn/s/1419bbc8aa2d
+
                       > 直接下载: [${{ github.ref_name }}](http://rm-build.oss-cn-hongkong.aliyuncs.com/msi/dna-builder_${{ steps.commit_diff.outputs.version }}_x64_zh-CN.msi)
                       "
                   releaseDraft: false

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue"
-import Icon, { IconTypes } from "../components/Icon.vue"
+import type { IconTypes } from "../components/Icon.vue"
 
 const activeTab = ref("char-build")
 

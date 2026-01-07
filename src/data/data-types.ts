@@ -1,30 +1,11 @@
-export interface Draft {
-    id: number
-    /** 名称 */
-    n: string
-    /** 稀有度 1-5 */
-    r: number
-    /** 版本 */
-    v: string
-    /** 产物类型 */
-    t: "Mod" | "Resource" | "CharAccessory" | "Weapon"
-    /** 产物数量 */
-    c: number
-    /** 产物ID */
-    p: number
-    /** 铸造时间 */
-    d: number
-    /** 批量制造 */
-    b?: 1
-    /** 无限制造 */
-    i?: 1
-    /** 是否可见 */
-    s?: 1
-    /** 消耗资源 {id,数量,类型,名称}[] */
-    x: { id: number; c: number; t: "Resource" | "Mod" | "CharAccessory" | "Weapon"; n: string }[]
-    /** 消耗铜币 */
-    m: number
-}
+import type { AbyssDungeon, MonsterBuff, AbyssBuff } from "./d/abyss.data"
+export { AbyssDungeon, MonsterBuff, AbyssBuff }
+
+import type { Pet } from "./d/pet.data"
+export { Pet }
+
+import type { Draft } from "./d/draft.data"
+export { Draft }
 
 export interface Buff {
     名称: string

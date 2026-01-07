@@ -1,9 +1,8 @@
 import { Elysia } from "elysia"
-import { DNAAPI } from "dna-api"
 import { Cron } from "croner"
 import { desc, eq } from "drizzle-orm"
-import { fetch } from "bun"
 import { db, schema } from "./db"
+import { getDNAAPI } from "./api/dna"
 
 export const cronPlugin = () => {
     const app = new Elysia({
@@ -43,7 +42,7 @@ export const cronPlugin = () => {
         for (let i = 0; i < t; i++) {
             await sleep(3000)
             try {
-                const dnaAPI = new DNAAPI(process.env.DEV_CODE!, process.env.USER_TOKEN, { fetchFn: fetch })
+                const dnaAPI = getDNAAPI()
                 const res = await dnaAPI.getDefaultRoleForTool()
                 if (res.is_success && res.data?.instanceInfo) {
                     const missions = res.data.instanceInfo.map((item) => item.instances.map((v) => v.name))
@@ -68,11 +67,31 @@ export const cronPlugin = () => {
         }
         console.log(`${new Date().toLocaleString()} 同步完成 - next run: ${syncMHJob.nextRun()}`)
     }
+
+    const initMH = async (server: string = "cn") => {
+        // 同server最后一个值重复校验
+        const lastMissionsIngame = await db.query.missionsIngame.findFirst({
+            where: eq(schema.missionsIngame.server, server),
+            orderBy: desc(schema.missionsIngame.id),
+        })
+        const last = lastMissionsIngame?.createdAt ? Date.parse(lastMissionsIngame.createdAt) : 0
+        const getNextUpdateTime = (t?: number) => {
+            const now = t ?? new Date().getTime()
+            const oneHour = 60 * 60 * 1000
+            return Math.ceil(now / oneHour) * oneHour
+        }
+        const next = getNextUpdateTime(last)
+        if (next <= new Date().getTime()) {
+            await updateMH(1)
+        } else {
+            console.log(`${new Date().toLocaleString()} 下一次同步密函信息 - server: ${server} - next: ${new Date(next).toLocaleString()}`)
+        }
+    }
     // every 1h
     const syncMHJob = new Cron("@hourly", { timezone: "Asia/Shanghai" }, () => updateMH())
     app.onStart(() => {
         console.log("Elysia 服务启动，cron 任务已注册：", syncMHJob.isRunning())
-        updateMH(1)
+        initMH()
     })
     app.onStop(() => {
         syncMHJob.stop()

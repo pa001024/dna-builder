@@ -14,6 +14,11 @@ const items = [
         icon: "ri:hammer-line",
     },
     {
+        name: "guides",
+        path: "/guides",
+        icon: "ri:book-line",
+    },
+    {
         name: "build-compare",
         path: "/char-build-compare",
         icon: "ri:table-view",

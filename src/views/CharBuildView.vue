@@ -420,7 +420,7 @@ function setTimeline(name?: string) {
 // 更新CharBuild实例
 function updateCharBuild() {
     if (!monsterMap.has(charSettings.value.enemyId)) {
-        charSettings.value.enemyId = 1001001
+        charSettings.value.enemyId = 130
     }
     if (!charSettings.value.baseName) {
         charSettings.value.baseName = charBuild.value.char.技能[0].名称

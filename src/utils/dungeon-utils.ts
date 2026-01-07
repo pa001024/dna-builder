@@ -1,3 +1,5 @@
+import { AbyssDungeon, abyssDungeonMap } from "../data"
+
 // 获取副本类型信息
 export function getDungeonType(type: string): { t: string; label: string; color: string } {
     const typeMap: Record<string, { t: string; label: string; color: string }> = {
@@ -20,4 +22,23 @@ export function getDungeonType(type: string): { t: string; label: string; color:
         Synthesis: { t: "Synthesis", label: "竞逐", color: "bg-violet-500" },
     }
     return typeMap[type] || { t: type, label: type, color: "bg-gray-500" }
+}
+
+export function getAbyssDungeonGroup(dungeon: AbyssDungeon) {
+    const typeMap: Record<string, string> = {
+        "奖励进度·经典剧目": "经典剧目",
+        "奖励进度·热映剧目": "热映剧目",
+        "奖励进度·不朽剧目": "不朽剧目",
+    }
+    return typeMap[dungeon.art || ""] || "经典剧目"
+}
+
+export function getAbyssDungeonLevel(dungeon: AbyssDungeon) {
+    const isTwoSide = abyssDungeonMap.has(dungeon.id - (dungeon.id % 10) + 2)
+    const isRight = dungeon.id % 10 === 2
+    return ~~((dungeon.id / 10) % 10) + (isTwoSide ? (isRight ? " 右" : " 左") : "")
+}
+
+export function getAbyssDungeonName(dungeon: AbyssDungeon) {
+    return getAbyssDungeonGroup(dungeon) + " " + getAbyssDungeonLevel(dungeon)
 }

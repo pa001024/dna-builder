@@ -23,6 +23,7 @@ export const typeDefs = /* GraphQL */ `
         id: String!
         name: String
         qq: String
+        pic: String
         uid: String
         roles: String
         createdAt: String

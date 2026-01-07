@@ -1,5 +1,6 @@
 import { Client, fetchExchange } from "@urql/vue"
 import { env } from "../env"
+import { useSettingStore } from "../store/setting"
 // import schema from "../../schema.json"
 
 export const gqClient = (function () {
@@ -9,11 +10,10 @@ export const gqClient = (function () {
         url,
         exchanges: [fetchExchange],
         fetchOptions: () => {
-            // const token = useUserStore().token
-            // return {
-            //     headers: { token },
-            // }
-            return {}
+            const token = useSettingStore().jwtToken
+            return {
+                headers: { token },
+            }
         },
     })
 })()

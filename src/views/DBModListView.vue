@@ -172,6 +172,7 @@ function getQualityColor(quality: string): string {
                                         <span class="text-xs px-2 py-0.5 rounded" :class="getQualityColor(mod.品质)">
                                             {{ $t(mod.品质) }}
                                         </span>
+                                        <span class="text-xs opacity-70">ID: {{ mod.id }}</span>
                                     </div>
                                     <div class="text-xs opacity-70 mt-1 flex gap-2">
                                         <span>{{ $t(mod.类型) }}</span>
@@ -193,7 +194,7 @@ function getQualityColor(quality: string): string {
                                     :key="key"
                                     class="flex justify-between items-center gap-2"
                                 >
-                                    <span>{{ key }}</span>
+                                    <span>{{ $t(key) }}</span>
                                     <span class="font-medium">{{ formatProp(key, attr) }}</span>
                                 </div>
                             </div>

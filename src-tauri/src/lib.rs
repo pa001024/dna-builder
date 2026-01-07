@@ -5,6 +5,8 @@ use std::{
     time::Duration,
 };
 
+use reqwest::multipart;
+use serde::{Deserialize, Serialize};
 use tauri::Manager;
 use tauri::menu::*;
 use tauri::tray::*;
@@ -16,6 +18,17 @@ use zip::ZipArchive;
 use crate::util::{get_process_by_name, get_process_exe_path, shell_execute};
 
 mod util;
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+enum FormDataValue {
+    Text(String),
+    File {
+        filename: String,
+        data: Vec<u8>,
+        mime: Option<String>,
+    },
+}
 
 // #[macro_use]
 // extern crate lazy_static;
@@ -275,7 +288,13 @@ fn apply_material(window: tauri::WebviewWindow, material: &str) -> String {
 }
 
 #[tauri::command]
-async fn fetch(url: String, method: String, body: Option<String>, headers: Option<Vec<(String, String)>>) -> Result<String, String> {
+async fn fetch(
+    url: String,
+    method: String,
+    body: Option<String>,
+    headers: Option<Vec<(String, String)>>,
+    multipart: Option<Vec<(String, FormDataValue)>>,
+) -> Result<String, String> {
     let client = reqwest::Client::new();
     let mut request_builder = match method.to_uppercase().as_str() {
         "GET" => client.get(&url),
@@ -285,7 +304,32 @@ async fn fetch(url: String, method: String, body: Option<String>, headers: Optio
         _ => return Err(format!("Unsupported method: {}", method)),
     };
 
-    if let Some(ref b) = body {
+    if let Some(form_data) = multipart {
+        let mut form = multipart::Form::new();
+        for (key, value) in form_data {
+            match value {
+                FormDataValue::Text(text) => {
+                    form = form.text(key, text);
+                }
+                FormDataValue::File { filename, data, mime } => {
+                    let part = match mime {
+                        Some(mime_type) => {
+                            match multipart::Part::bytes(data.clone())
+                                .file_name(filename.clone())
+                                .mime_str(&mime_type)
+                            {
+                                Ok(p) => p,
+                                Err(_) => multipart::Part::bytes(data).file_name(filename),
+                            }
+                        }
+                        None => multipart::Part::bytes(data).file_name(filename),
+                    };
+                    form = form.part(key, part);
+                }
+            }
+        }
+        request_builder = request_builder.multipart(form);
+    } else if let Some(ref b) = body {
         request_builder = request_builder.body(b.clone());
     }
 

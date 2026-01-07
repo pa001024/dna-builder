@@ -1,4 +1,32 @@
-export default [
+export interface Draft {
+    id: number
+    /** 名称 */
+    n: string
+    /** 稀有度 1-5 */
+    r: number
+    /** 版本 */
+    v: string
+    /** 产物类型 */
+    t: "Mod" | "Resource" | "CharAccessory" | "Weapon"
+    /** 产物数量 */
+    c: number
+    /** 产物ID */
+    p: number
+    /** 铸造时间 */
+    d: number
+    /** 批量制造 */
+    b?: 1
+    /** 无限制造 */
+    i?: 1
+    /** 是否可见 */
+    s?: 1
+    /** 消耗资源 {id,数量,类型,名称}[] */
+    x: { id: number; c: number; t: "Resource" | "Mod" | "CharAccessory" | "Weapon"; n: string }[]
+    /** 消耗铜币 */
+    m: number
+}
+
+const t: Draft[] = [
     {
         id: 1001,
         n: "利刃药剂",
@@ -8663,4 +8691,6 @@ export default [
         ],
         m: 280000,
     },
-] satisfies import("../data-types").Draft[] as import("../data-types").Draft[]
+]
+
+export default t

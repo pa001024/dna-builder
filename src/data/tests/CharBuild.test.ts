@@ -27,7 +27,7 @@ describe("CharBuild类测试", () => {
             melee: new LeveledWeapon(10302), //"铸铁者"),
             ranged: new LeveledWeapon(20601), //"烈焰孤沙"),
             baseName: "快速出击",
-            enemyId: 1001001,
+            enemyId: 130,
             enemyLevel: 80,
             enemyResistance: 0.5,
             targetFunction: "伤害",
@@ -238,7 +238,7 @@ describe("CharBuild类测试", () => {
         expect(defenseMultiplier).toBeGreaterThan(0)
 
         // 测试护盾类型的敌人
-        charBuild.enemyId = 1001001
+        charBuild.enemyId = 130
         expect(charBuild.calculateDefenseMultiplier(attrs)).toBeCloseTo(0.69, 1)
     })
 
@@ -609,7 +609,7 @@ describe("CharBuild类测试", () => {
     describe("敌人血量类型测试", () => {
         it("应该正确处理生命类型敌人", () => {
             const charBuild = createCharBuild()
-            charBuild.enemyId = 1001001
+            charBuild.enemyId = 130
 
             const attrs = charBuild.calculateAttributes()
             const defenseMultiplier = charBuild.calculateDefenseMultiplier(attrs)
@@ -632,7 +632,7 @@ describe("CharBuild类测试", () => {
                     melee: new LeveledWeapon(10302), //"铸铁者"),
                     ranged: new LeveledWeapon(20601), //"烈焰孤沙"),
                     baseName: "普通攻击",
-                    enemyId: 1001001,
+                    enemyId: 130,
                     enemyLevel: 80,
                     enemyResistance: 0.5,
                     targetFunction: "伤害",

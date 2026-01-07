@@ -22,7 +22,7 @@ describe("evaluateAST函数测试", () => {
             melee: new LeveledWeapon(10302), //"铸铁者"),
             ranged: new LeveledWeapon(20601), //"烈焰孤沙"),
             baseName: "快速出击", // 设置为技能而不是武器，这样selectedSkill才会有值
-            enemyId: 1001001,
+            enemyId: 130,
             enemyLevel: 80,
             enemyResistance: 0.5,
             targetFunction: "伤害",
@@ -316,7 +316,7 @@ describe("evaluateAST函数测试", () => {
 
             charBuild.evaluateAST("攻击 + 100", testDamage, attrs)
             charBuild.evaluateAST("攻击 * 2", testDamage, attrs)
-            console.log(charBuild["astCache"])
+            // console.log(charBuild["astCache"])
 
             expect(charBuild["astCache"].size).toBe(3)
         })

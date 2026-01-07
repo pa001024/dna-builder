@@ -4,6 +4,7 @@ import { Context } from "../yoga"
 import { desc, eq, getTableColumns, like, sql } from "drizzle-orm"
 import { getSubSelection } from "."
 import { addClient, hasUser, removeClient, getUsers, getClientRoom } from "../kv/room"
+import { createGraphQLError } from "graphql-yoga"
 
 export const typeDefs = /* GraphQL */ `
     type Mutation {
@@ -116,7 +117,7 @@ export const resolvers = {
             }
             return rst[0]
         },
-        rooms: async (parent, args, context, info: any) => {
+        rooms: async (parent, args, context, info) => {
             if (!context.user) return []
             const lastMsgSel = getSubSelection(info, "lastMsg")
             const onlineUsersSel = getSubSelection(info, "onlineUsers")
@@ -181,7 +182,7 @@ export const resolvers = {
         },
     },
     Mutation: {
-        createRoom: async (parent, { data: { name, type, maxUsers } }, context, info: any) => {
+        createRoom: async (parent, { data: { name, type, maxUsers } }, context, info) => {
             const user = context.user
             if (!user) return null
             const rst = (
@@ -204,7 +205,7 @@ export const resolvers = {
             }
             return null
         },
-        joinRoom: async (parent, { id }, context, info: any) => {
+        joinRoom: async (parent, { id }, context, info) => {
             const user = context.user
             if (!user) return null
             let query = db
@@ -243,11 +244,11 @@ export const resolvers = {
     },
     Subscription: {
         newRoomUser: async (parent, { roomId }, { user, pubsub, extra }, info) => {
-            if (!user) throw new Error("need login")
+            if (!user) throw createGraphQLError("need login")
             const socket = extra?.socket
             const room = await db.query.rooms.findFirst({ where: eq(schema.rooms.id, roomId) })
-            if (!room) throw new Error("room not found")
-            if (room.ownerId !== user.id && !hasUser(room.id, user.id) && room.maxUsers && room.maxUsers <= getUsers(room.id).length) throw new Error("room full")
+            if (!room) throw createGraphQLError("room not found")
+            if (room.ownerId !== user.id && !hasUser(room.id, user.id) && room.maxUsers && room.maxUsers <= getUsers(room.id).length) throw createGraphQLError("room full")
             if (socket) {
                 const id = socket.data.id
                 if (!hasUser(roomId, user.id)) {

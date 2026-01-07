@@ -1,26 +1,54 @@
-// 定义允许的标签
-const allowedTags = new Set(["br", "b", "i", "s", "u", "em", "a", "img"])
+const allowedTags = new Set(["p", "br", "b", "i", "s", "u", "em", "strong", "a", "img", "div", "span"])
 
-// 定义允许的属性
 const allowedAttributes = new Set(["href", "src"])
+
+function isSafeURL(value: string): boolean {
+    if (!value || typeof value !== "string") return false
+
+    const valueLower = value.toLowerCase().trim()
+
+    if (valueLower.startsWith("javascript:")) return false
+    if (valueLower.startsWith("vbscript:")) return false
+    if (valueLower.startsWith("data:")) return false
+    if (valueLower.startsWith("file:")) return false
+    if (valueLower.startsWith("about:")) return false
+
+    return true
+}
 
 export const sanitizeHTML = (inputHTML: string) => {
     if (inputHTML.length > 80000) return "[消息过长]"
-    // bun
+
     const rewriter = new HTMLRewriter()
     rewriter.on("*", {
         element(element) {
             const tagName = element.tagName.toLowerCase()
             if (!allowedTags.has(tagName)) {
                 element.remove()
-            } else {
-                for (const [name] of element.attributes) {
-                    if (!allowedAttributes.has(name.toLowerCase())) {
-                        element.removeAttribute(name)
-                    }
+                return
+            }
+
+            const attributes = element.attributes
+            const attributesToRemove: string[] = []
+
+            for (const [name, value] of attributes) {
+                const attrLower = name.toLowerCase()
+
+                if (!allowedAttributes.has(attrLower)) {
+                    attributesToRemove.push(name)
+                    continue
                 }
+
+                if ((attrLower === "href" || attrLower === "src") && !isSafeURL(value)) {
+                    attributesToRemove.push(name)
+                }
+            }
+
+            for (const attr of attributesToRemove) {
+                element.removeAttribute(attr)
             }
         },
     })
+
     return rewriter.transform(inputHTML)
 }

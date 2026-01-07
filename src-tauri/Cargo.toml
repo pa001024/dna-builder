@@ -1,6 +1,6 @@
 [package]
 name = "dna-builder"
-version = "0.8.5"
+version = "0.8.6"
 description = "A DNA Builder"
 authors = ["pa001024"]
 edition = "2024"
@@ -55,7 +55,7 @@ widestring = "1"
 zip = { version = "0.6", default-features = false, features = ["deflate"] }
 base64 = "0.22.1"
 tauri-plugin-http = "2"
-reqwest = { version = "0.12", features = ["json"] }
+reqwest = { version = "0.12", features = ["json", "multipart"] }
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.

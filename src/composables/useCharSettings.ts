@@ -6,7 +6,7 @@ export const defaultCharSettings = {
     baseName: "",
     hpPercent: 1,
     resonanceGain: 3,
-    enemyId: 1001001,
+    enemyId: 130,
     enemyLevel: 80,
     enemyResistance: 0,
     isRouge: false,

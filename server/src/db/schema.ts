@@ -103,6 +103,7 @@ export const users = sqliteTable(
         email: text("email").notNull().unique(),
         name: text("name"),
         qq: text("qq"),
+        pic: text("pic"),
         uid: text("uid"),
         roles: text("roles"),
         createdAt: text("created_at").$default(now),
@@ -110,10 +111,6 @@ export const users = sqliteTable(
     },
     (users) => [uniqueIndex("email_idx").on(users.email)],
 )
-
-export const userRelations = relations(users, ({ one }) => ({
-    password: one(passwords, { fields: [users.id], references: [passwords.userId] }),
-}))
 
 /** 登录 */
 export const logins = sqliteTable("logins", {
@@ -290,3 +287,86 @@ export const missionsIngame = sqliteTable(
     },
     (missionsIngame) => [index("missions_ingame_server_idx").on(missionsIngame.server)],
 )
+
+/** 攻略 */
+export const guides = sqliteTable(
+    "guides",
+    {
+        id: text("id").$default(id).primaryKey(),
+        title: text("title").notNull(),
+        type: text("type").notNull(),
+        content: text("content").notNull(),
+        images: text("images", { mode: "json" }).$type<string[]>(),
+        charId: integer("char_id"),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        charSettings: text("char_settings", { mode: "json" }).$type<Record<string, any>>(),
+        views: integer("views").$default(() => 0),
+        likes: integer("likes").$default(() => 0),
+        createdAt: text("created_at").$default(now),
+        updateAt: text("update_at").$onUpdate(now),
+    },
+    (guides) => [index("guides_type_idx").on(guides.type), index("guides_char_id_idx").on(guides.charId), index("guides_user_id_idx").on(guides.userId)],
+)
+
+export const guideRelations = relations(guides, ({ one }) => ({
+    user: one(users, { fields: [guides.userId], references: [users.id] }),
+}))
+
+/** 攻略点赞 */
+export const guideLikes = sqliteTable(
+    "guide_likes",
+    {
+        id: text("id").$default(id).primaryKey(),
+        guideId: text("guide_id")
+            .notNull()
+            .references(() => guides.id, { onDelete: "cascade" }),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        createdAt: text("created_at").$default(now),
+    },
+    (guideLikes) => [uniqueIndex("guide_like_idx").on(guideLikes.userId, guideLikes.guideId), index("guide_like_guide_idx").on(guideLikes.guideId)],
+)
+
+export const guideLikesRelations = relations(guideLikes, ({ one }) => ({
+    guide: one(guides, { fields: [guideLikes.guideId], references: [guides.id] }),
+    user: one(users, { fields: [guideLikes.userId], references: [users.id] }),
+}))
+
+/** DNA OAuth 会话 */
+export const dnaAuthSessions = sqliteTable("dna_auth_sessions", {
+    id: text("id").$default(id).primaryKey(),
+    code: text("code").notNull().unique(),
+    imageUrl: text("image_url").notNull(),
+    dnaUid: text("dna_uid").notNull(),
+    expiresAt: text("expires_at").notNull(),
+    createdAt: text("created_at").$default(now),
+})
+
+/** DNA 用户绑定 */
+export const dnaUserBindings = sqliteTable(
+    "dna_user_bindings",
+    {
+        id: text("id").$default(id).primaryKey(),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        dnaUid: text("dna_uid").notNull().unique(),
+        createdAt: text("created_at").$default(now),
+        updateAt: text("update_at").$onUpdate(now),
+    },
+    (dnaUserBindings) => [uniqueIndex("dna_user_binding_idx").on(dnaUserBindings.userId, dnaUserBindings.dnaUid)],
+)
+
+export const userRelations = relations(users, ({ one, many }) => ({
+    password: one(passwords, { fields: [users.id], references: [passwords.userId] }),
+    guides: many(guides),
+    guideLikes: many(guideLikes),
+    dnaBinding: one(dnaUserBindings, { fields: [users.id], references: [dnaUserBindings.userId] }),
+}))
+
+export const dnaUserBindingsRelations = relations(dnaUserBindings, ({ one }) => ({
+    user: one(users, { fields: [dnaUserBindings.userId], references: [users.id] }),
+}))

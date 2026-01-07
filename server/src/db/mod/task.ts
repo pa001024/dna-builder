@@ -4,6 +4,7 @@ import { Context } from "../yoga"
 import { db, schema } from ".."
 import { now } from "../schema"
 import { clearTaskOnline, getTaskOnlineStatus, isTaskOnline, setTaskOnline, toggleTaskPaused } from "../kv/task"
+import { createGraphQLError } from "graphql-yoga"
 
 export const typeDefs = /* GraphQL */ `
     type Query {
@@ -223,20 +224,20 @@ export const resolvers = {
     },
     Subscription: {
         newTask: async (parent, { roomId }, { user, pubsub }, info) => {
-            if (!user) throw new Error("need login")
+            if (!user) throw createGraphQLError("need login")
             return pubsub.subscribe("newTask", roomId)
         },
         updateTask: async (parent, { roomId }, { user, pubsub, extra }, info) => {
-            if (!user) throw new Error("need login")
+            if (!user) throw createGraphQLError("need login")
             return pubsub.subscribe("updateTask", roomId)
         },
         watchTask: async (parent, { taskId }, { user, pubsub, extra }, info) => {
-            if (!user) throw new Error("need login")
+            if (!user) throw createGraphQLError("need login")
             const task = await db.query.tasks.findFirst({
                 with: { user: true },
                 where: eq(schema.tasks.id, taskId),
             })
-            if (!task) throw new Error("task not exist")
+            if (!task) throw createGraphQLError("task not exist")
             const socket = extra?.socket
             if (socket) {
                 setTaskOnline(taskId)

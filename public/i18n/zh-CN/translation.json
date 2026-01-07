@@ -83,6 +83,12 @@
     "子弹爆炸范围": "子弹爆炸范围",
     "总伤": "总计伤害",
     "最大弹药": "最大弹药",
+    "abyss-dungeon-detail": {
+        "title": "深渊详情"
+    },
+    "abyss-dungeon-list": {
+        "title": "深渊列表"
+    },
     "achievement": {
         "allVersions": "所有版本",
         "clear": "清空",
@@ -201,8 +207,24 @@
         "title": "角色列表"
     },
     "database": {
+        "abyss_dungeon": "深渊副本",
+        "abyss_dungeon_desc": "查看深渊副本信息和BUFF",
         "desc": "查询游戏中的数据",
-        "title": "资料库"
+        "draft": "图纸",
+        "draft_desc": "查看图纸信息和需求材料",
+        "dungeon": "副本",
+        "dungeon_desc": "查看副本信息和奖励掉落",
+        "mod": "魔之楔",
+        "mod_desc": "查看魔之楔信息和属性",
+        "monster": "怪物",
+        "monster_desc": "查看怪物信息和属性",
+        "pet": "魔灵",
+        "pet_desc": "查看魔灵信息和技能",
+        "rank": "排名奖励",
+        "rank_desc": "查看排名赛奖励",
+        "title": "资料库",
+        "weapon": "武器",
+        "weapon_desc": "查看武器信息和属性"
     },
     "dna-home": {
         "title": "皎皎角"
@@ -287,6 +309,44 @@
         "title": "游戏启动器",
         "weapon": "武器"
     },
+    "guide-create": {
+        "title": "创建攻略"
+    },
+    "guide-detail": {
+        "title": "攻略详情"
+    },
+    "guide-list": {
+        "title": "攻略列表"
+    },
+    "guides": {
+        "all": "全部",
+        "all_characters": "全部角色",
+        "associated_character": "关联角色",
+        "build_info": "配装信息",
+        "build_info_tip": "此攻略包含配装信息，点击下方按钮可查看完整配装",
+        "desc": "查看角色攻略",
+        "edit": "编辑",
+        "guide_content": "攻略内容",
+        "guide_title": "攻略标题",
+        "guide_type": "攻略类型",
+        "image_guide": "一图流攻略",
+        "include_build_info": "包含当前配装信息",
+        "include_build_tip": "勾选后，当前的角色配装将随攻略一同发布",
+        "likes": "点赞",
+        "load_more": "加载更多",
+        "no_character": "不关联角色",
+        "no_guides": "暂无攻略",
+        "please_enter_guide_content": "请输入攻略内容或上传图片",
+        "please_enter_guide_title": "请输入攻略标题",
+        "publish": "发布攻略",
+        "publish_guide": "发布攻略",
+        "search_placeholder": "搜索攻略标题...",
+        "text_guide": "图文攻略",
+        "title": "攻略",
+        "upload_images": "上传图片",
+        "view_build": "查看配装",
+        "views": "浏览"
+    },
     "help": {
         "achievementFeature1": "查看游戏成就解锁进度",
         "achievementFeature2": "统计角色使用频率和胜率",
@@ -343,8 +403,12 @@
     "home": {
         "cureent_version": "当前版本:",
         "download": "下载 Windows 应用",
+        "noupdate": "当前版本无更新内容",
         "starme": "去Github点个星",
-        "title": "主页"
+        "title": "主页",
+        "understand": "了解了",
+        "update_log": "版本更新日志",
+        "welcome": "欢迎使用 DNA Builder"
     },
     "inventory": {
         "desc": "自定义你的魔之楔和武器配置",
@@ -377,6 +441,9 @@
     "more": {
         "desc": "更多功能",
         "title": "更多"
+    },
+    "pet-list": {
+        "title": "魔灵列表"
     },
     "raid-rank": {
         "title": "排名奖励"

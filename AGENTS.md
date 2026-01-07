@@ -37,6 +37,48 @@ bun run migrate    # Run migrations
 cd mcp_server && cargo build --release
 ```
 
+## i18n Workflow
+
+**Tool**: `tools/i18n_tool.ts` - Manage i18n translations
+
+### Export Missing Translations
+
+When zh-CN has translations that are missing in other languages:
+
+```bash
+bun tools/i18n_tool.ts export
+```
+
+This creates `tools/i18n_diff.json` with structure:
+
+```json
+{
+    "key.path": {
+        "zh-CN": "原文",
+        "en": "",
+        "ja": "",
+        "ko": "",
+        "zh-TW": ""
+    }
+}
+```
+
+### Import Completed Translations
+
+Fill in the missing translations in the diff file, then:
+
+```bash
+bun tools/i18n_tool.ts import
+```
+
+This merges translations back to language files and deletes the diff file.
+
+**Important**:
+
+- Only export translations where zh-CN has the value and other languages are missing
+- The tool handles nested JSON structures automatically
+- Always verify translations before importing
+
 ## Code Style Guidelines
 
 ### Formatting
@@ -167,10 +209,11 @@ mcp_server/
 
 ## Important Notes
 
-- **NO COMMENTS** unless explicitly requested (per project convention)
+- **CHINESE COMMENTS** needs for every function or complex logic, no need for simple code lines
 - Chinese is acceptable in comments and strings (Chinese project)
 - Use `@ts-ignore` sparingly and with justification
 - Always run `pnpm lint` after changes to ensure type safety
 - Always run `pnpm test` to ensure tests pass
 - Prefer native APIs over libraries when possible
 - Follow existing patterns in the codebase
+- Use `unplugin-vue-components/vite` for automatic component imports

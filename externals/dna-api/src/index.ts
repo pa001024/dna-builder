@@ -20,6 +20,7 @@ export class DNAAPI {
     public RSA_PUBLIC_KEY =
         "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDGpdbezK+eknQZQzPOjp8mr/dP+QHwk8CRkQh6C6qFnfLH3tiyl0pnt3dePuFDnM1PUXGhCkQ157ePJCQgkDU2+mimDmXh0oLFn9zuWSp+U8uLSLX3t3PpJ8TmNCROfUDWvzdbnShqg7JfDmnrOJz49qd234W84nrfTHbzdqeigQIDAQAB"
     public BASE_URL = "https://dnabbs-api.yingxiong.com/"
+    private uploadKey: string = ""
 
     /**
      * 构造函数
@@ -64,8 +65,8 @@ export class DNAAPI {
      * 登录
      */
     async login(mobile: string, code: string) {
-        const data = { mobile, code, gameList: DNA_GAME_ID }
-        const res = await this._dna_request<DNALoginRes>("user/sdkLogin", data, { sign: true, refer: true })
+        const data = { code: code, devCode: this.dev_code, gameList: DNA_GAME_ID, loginType: 1, mobile: mobile }
+        const res = await this._dna_request<DNALoginRes>("user/sdkLogin", data, { sign: true })
         if (res.is_success && res.data) {
             const data = res.data
             if (typeof data.token === "string") {
@@ -75,9 +76,39 @@ export class DNAAPI {
         return res
     }
 
+    /**
+     * 获取短信验证码
+     */
     async getSmsCode(mobile: string, vJson: string) {
         const data = { mobile, isCaptcha: 1, vJson }
-        return await this._dna_request<DNASmsCodeRes>("user/getSmsCode", data, { sign: true, refer: true })
+        return await this._dna_request("user/getSmsCode", data)
+    }
+
+    /**
+     * 上传头像
+     */
+    async uploadHead(file: File) {
+        const data = new FormData()
+        data.append("parts", file)
+        const res = await this._dna_request<string[]>("user/img/uploadHead", data, { sign: true })
+        if (res.is_success && res.data) {
+            res.data = res.data.map((url) => aesDecryptImageUrl(url, this.uploadKey))
+        }
+        return res
+    }
+
+    /**
+     * 图片上传
+     */
+    async uploadImage(file: File) {
+        const data = new FormData()
+        data.append("files", file)
+        data.append("type", "post")
+        const res = await this._dna_request<string[]>("config/img/upload", data, { sign: true })
+        if (res.is_success && res.data) {
+            res.data = res.data.map((url) => aesDecryptImageUrl(url, this.uploadKey))
+        }
+        return res
     }
 
     /**
@@ -506,9 +537,9 @@ export class DNAAPI {
             {
                 content,
                 contentType: "1",
-                imgHeight: 0,
-                imgWidth: 0,
-                url: "",
+                // imgHeight: 0,
+                // imgWidth: 0,
+                // url: "",
             },
         ])
         const data = {
@@ -518,7 +549,10 @@ export class DNAAPI {
             content: content_json,
         }
 
-        return await this._dna_request("forum/comment/createComment", data, { sign: true, refer: true, params: { toUserId: post.userId } })
+        return await this._dna_request("forum/comment/createComment", data, {
+            sign: true,
+            params: { toUserId: post.userId },
+        })
     }
 
     /** 回复评论 */
@@ -602,7 +636,7 @@ export class DNAAPI {
     }
 
     async getHeaders(options?: {
-        payload?: Record<string, any> | string
+        payload?: Record<string, any> | string | FormData
         exparams?: Record<string, any>
         dev_code?: string
         refer?: boolean
@@ -637,7 +671,20 @@ export class DNAAPI {
         if (token) {
             headers.token = token
         }
-        if (typeof payload === "object") {
+        if (payload instanceof FormData) {
+            const pk = await this.getRsaPublicKey()
+            const { signature, key } = build_upload_signature(pk)
+            headers.t = signature
+            this.uploadKey = key
+
+            if (exparams) {
+                for (const [key, value] of Object.entries(exparams)) {
+                    payload.append(key, String(value))
+                }
+            }
+
+            delete headers["Content-Type"]
+        } else if (typeof payload === "object") {
             const si = build_signature(payload, tokenSig ? token : "")
             Object.assign(payload, { sign: si.s, timestamp: si.t })
             if (exparams) {
@@ -669,6 +716,7 @@ export class DNAAPI {
         options?: {
             method?: "GET" | "POST"
             sign?: boolean
+            file?: File
             tokenSig?: boolean
             token?: boolean
             refer?: boolean
@@ -697,8 +745,8 @@ export class DNAAPI {
 
         for (let attempt = 0; attempt < max_retries; attempt++) {
             try {
-                let body: string = data
-                if (data && typeof data === "object") {
+                let body: string | FormData | undefined = data
+                if (data && typeof data === "object" && !(data instanceof FormData)) {
                     const p = new URLSearchParams()
                     Object.entries(data).forEach(([key, value]) => {
                         if (value !== undefined) p.append(key, String(value))
@@ -760,19 +808,6 @@ export class DNAAPI {
 
         return DNAApiResponse.err("请求服务器失败，已达最大重试次数")
     }
-}
-
-enum DNAInstanceMHType {
-    "角色" = "role",
-    "武器" = "weapon",
-    "魔之楔" = "mzx",
-    "role" = "角色",
-    "weapon" = "武器",
-    "mzx" = "魔之楔",
-}
-
-export function getDNAInstanceMHType(key: keyof typeof DNAInstanceMHType) {
-    return DNAInstanceMHType[key]
 }
 
 //#region 接口定义
@@ -1637,7 +1672,46 @@ function xor_encode(text: string, key: string): string {
     return out.join("")
 }
 
-// 构建签名
+// 上传图片签名 - 字符交换
+function swapForUploadImgApp(text: string): string {
+    const chars = text.split("")
+    const swaps = [
+        [3, 23],
+        [11, 32],
+        [22, 42],
+        [25, 48],
+    ]
+    for (const [p1, p2] of swaps) {
+        if (p1 < chars.length && p2 < chars.length) {
+            ;[chars[p1], chars[p2]] = [chars[p2], chars[p1]]
+        }
+    }
+    return chars.join("")
+}
+
+// AES 解密图片 URL
+function aesDecryptImageUrl(encryptedUrl: string, key: string): string {
+    const swapped = swapForUploadImgApp(encryptedUrl)
+
+    const encryptedData = forge.util.decode64(swapped)
+
+    const decipher = forge.cipher.createDecipher("AES-CBC", key)
+    decipher.start({ iv: "A-16-Byte-String" })
+    decipher.update(forge.util.createBuffer(encryptedData))
+    decipher.finish()
+
+    return decipher.output.getBytes()
+}
+
+// 构建上传图片签名（返回签名和密钥）
+function build_upload_signature(public_key: string): { signature: string; key: string } {
+    const key = rand_str(16)
+    const encrypted = rsa_encrypt(key, public_key)
+    const signature = swapForUploadImgApp(encrypted)
+    return { signature, key }
+}
+
+// 构建普通签名
 function build_signature(data: Record<string, any>, token?: string): Record<string, any> {
     const ts = Date.now()
     const sign_data = { ...data, timestamp: ts, token }
