@@ -553,6 +553,8 @@ const weapon_select_model_show = ref(false)
 const newWeaponSelection = ref({ melee: 0, ranged: 0 })
 function handleWeaponSelection(melee: number, ranged: number) {
     newWeaponSelection.value = { melee, ranged }
+    charSettings.value.meleeWeapon = newWeaponSelection.value.melee
+    charSettings.value.rangedWeapon = newWeaponSelection.value.ranged
     weapon_select_model_show.value = false
 }
 function applyWeaponSelection() {
