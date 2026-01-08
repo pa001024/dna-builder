@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core"
 import { env } from "../env"
+import { DNAAPI } from "dna-api"
 
 export const MATERIALS = ["None", "Blur", "Acrylic", "Mica", "Mica_Dark", "Mica_Tabbed", "Mica_Tabbed_Dark"] as const
 export async function applyMaterial(material: (typeof MATERIALS)[number]) {
@@ -161,4 +162,8 @@ export async function serverFetch(url: RequestInfo | URL, options?: RequestInit)
             },
         })
     }
+}
+
+export const getMapAPI = () => {
+    return new DNAAPI("", "", { fetchFn: tauriFetch, is_h5: true })
 }

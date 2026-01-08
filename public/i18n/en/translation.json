@@ -2809,6 +2809,8 @@
         "draft_desc": "View blueprint information and required materials",
         "dungeon": "Dungeon",
         "dungeon_desc": "View dungeon information and reward drops",
+        "map": "Map",
+        "map_desc": "View Map Markers",
         "mod": "Mod",
         "mod_desc": "View mod information and attributes",
         "monster": "Monster",
@@ -3023,6 +3025,12 @@
         "btn_collapse_menu": "Collapse menu",
         "btn_pin_window": "Pin window on top",
         "btn_unpin_window": "Unpin window"
+    },
+    "map-detail": {
+        "title": "Map"
+    },
+    "map-list": {
+        "title": "Map List"
     },
     "mod-detail": {
         "title": "Devil's Wedge details"

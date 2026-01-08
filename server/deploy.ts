@@ -8,6 +8,7 @@ import OSS from "ali-oss"
 
 const args = process.argv.slice(2)
 const isAppMode = args.includes("app")
+const isAllMode = args.includes("all")
 const skipBuild = args.includes("skip-build")
 
 const envPath = path.resolve("server/.env")
@@ -204,11 +205,8 @@ async function deployApp() {
 }
 
 async function main() {
-    if (isAppMode) {
-        await deployApp()
-    } else {
-        await deployWeb()
-    }
+    if (isAllMode || !isAppMode) await deployWeb()
+    if (isAllMode || isAppMode) await deployApp()
 }
 
 main()

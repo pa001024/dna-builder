@@ -1,6 +1,6 @@
 {
     "name": "dna-api",
-    "version": "0.2.7",
+    "version": "0.2.9",
     "description": "dna bbs api",
     "author": {
         "name": "pa001024",
@@ -41,8 +41,8 @@
     },
     "devDependencies": {
         "@types/node": "^25.0.3",
+        "bun-types": "^1.3.5",
         "rimraf": "6.1.2",
-        "bun-types": "^1.1.18",
         "typescript": "^5.1.6"
     }
 }

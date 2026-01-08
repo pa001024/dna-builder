@@ -37,22 +37,6 @@ export function getDropModeText(mode: string): string {
     return modeMap[mode] || mode
 }
 /**
- * 计算奖励项的递归乘积和（用于序列模式）
- */
-function calculateRecursiveProductSum(item: RewardItem): number {
-    if (!item.child || item.child.length === 0) {
-        return item.p
-    }
-
-    if (item.m === "Sequence") {
-        const childSum = item.child.reduce((sum, child) => sum + calculateRecursiveProductSum(child), 0)
-        return childSum
-    }
-
-    return item.p
-}
-
-/**
  * 递归获取奖励详情
  * @param rewardId 奖励ID
  * @param visited 已访问的奖励ID，防止循环引用
@@ -80,8 +64,9 @@ export function getRewardDetails(
 
     for (const item of rewardGroup.child) {
         if (item.t === "Reward") {
-            // 递归获取子奖励
-            const childReward = getRewardDetails(item.id, visited, (item.p ?? 1) * parentProbability, currentDropMode !== "Sequence")
+            // 递归获取子奖励，Sequence模式下不缩放parentProbability
+            const newParentProbability = currentDropMode === "Sequence" ? (item.p ?? 1) : (item.p ?? 1) * parentProbability
+            const childReward = getRewardDetails(item.id, visited, newParentProbability, currentDropMode !== "Sequence")
             if (childReward) {
                 // 判断子奖励的掉落模式是否与父奖励相同
                 if (childReward.m === currentDropMode && currentDropMode !== "Sequence") {
@@ -147,19 +132,23 @@ export function getRewardDetails(
     }
 
     if (currentDropMode === "Sequence" && isRoot) {
-        result.totalP = calculateRecursiveProductSum(result)
-        const calculatePP = (item: RewardItem, totalRPS: number): void => {
-            const selfP = item.p
-            const childP = item.child ? item.child.reduce((sum, child) => sum + calculateRecursiveProductSum(child), 0) : 0
-            item.pp = childP > 0 ? childP / totalRPS : selfP / totalRPS
-            if (item.child) {
-                item.child.forEach((child) => calculatePP(child, totalRPS))
+        result.totalP = result.child?.reduce((sum, child) => sum + child.p, 0) || 0
+        const calculatePP = (item: RewardItem, parentPP: number): void => {
+            if (item.child && item.child.length > 0) {
+                const childTotalP = item.child.reduce((sum, child) => sum + child.p, 0)
+                item.child.forEach((child) => {
+                    child.pp = parentPP * (child.p / childTotalP)
+                    calculatePP(child, child.pp!)
+                })
             } else {
-                item.times = 1 / item.pp
+                item.times = 1 / parentPP
             }
         }
         if (result.child) {
-            result.child.forEach((child) => calculatePP(child, result.totalP!))
+            result.child.forEach((child) => {
+                child.pp = child.p / result.totalP!
+                calculatePP(child, child.pp!)
+            })
         }
     }
 

@@ -64,11 +64,13 @@ const forward = useForwardPropsEmits(props, emits)
 </script>
 
 <template>
-    <SelectRoot v-bind="forward as any">
-        <SelectTrigger class="inline-flex items-center justify-between" v-bind="$attrs">
-            <SelectValue :placeholder="placeholder" />
-            <Icon v-if="!hidebtn" icon="radix-icons:chevron-down" class="text-primary ml-2" />
-        </SelectTrigger>
+    <SelectRoot v-bind="forward">
+        <slot name="trigger">
+            <SelectTrigger class="inline-flex items-center justify-between" v-bind="$attrs">
+                <SelectValue :placeholder="placeholder" />
+                <Icon v-if="!hidebtn" icon="radix-icons:chevron-down" class="text-primary ml-auto" />
+            </SelectTrigger>
+        </slot>
 
         <SelectPortal>
             <SelectContent

@@ -21,6 +21,7 @@ export default defineConfig(async () => ({
     resolve: {
         alias: {
             "@": resolve(__dirname, "src"),
+            // "dna-api": resolve(__dirname, "externals/dna-api/src/index.ts"),
         },
     },
     plugins: [

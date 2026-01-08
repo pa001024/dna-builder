@@ -62,9 +62,9 @@ const launchGame = async () => {
 const entityType = ref<(typeof entityTypes)[number]>("char")
 const entityTypes = ["char", "weapon", "custom"] as const
 const customEntityName = ref("")
-const customEntityIcon = ref("la:gamepad-solid")
+const customEntityIcon = ref("ri:gamepad-line")
 const customEntityIconsOptions = [
-    "la:gamepad-solid",
+    "ri:gamepad-line",
     "ri:rocket-2-line",
     "ri:heart-line",
     "ri:sword-line",

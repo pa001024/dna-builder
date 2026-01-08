@@ -1050,15 +1050,8 @@ function shareCharBuild() {
                                                 v-if="key != '攻击' && key in (charBuild.meleeWeapon || {})"
                                                 class="flex justify-between gap-8 text-sm text-primary"
                                             >
-                                                <div class="text-base-content/80">近战武器</div>
+                                                <div class="text-base-content/80">{{ $t(charBuild.meleeWeapon.名称) }}</div>
                                                 {{ format100r(charBuild.meleeWeapon[key]!) }}
-                                            </li>
-                                            <li
-                                                v-if="key != '攻击' && key in (charBuild.rangedWeapon || {})"
-                                                class="flex justify-between gap-8 text-sm text-primary"
-                                            >
-                                                <div class="text-base-content/80">远程武器</div>
-                                                {{ format100r(charBuild.rangedWeapon[key]!) }}
                                             </li>
                                             <li
                                                 v-for="mod in charBuild.meleeMods.filter((m): m is LeveledMod => m && m[key])"
@@ -1068,11 +1061,22 @@ function shareCharBuild() {
                                                 {{ format100r(mod[key]!) }}
                                             </li>
                                             <li
-                                                v-for="buff in charBuild.buffs.filter((b) => b[key])"
+                                                v-for="buff in charBuild.buffs.filter((b) => !['攻击', '增伤'].includes(key) && b[key])"
                                                 class="flex justify-between gap-8 text-sm text-primary"
                                             >
                                                 <div class="text-base-content/80">{{ buff.名称 }}</div>
                                                 {{ format100r(buff[key]!) }}
+                                            </li>
+                                            <li
+                                                v-if="
+                                                    key === '攻击' &&
+                                                    (charBuild.char.精通.includes(charBuild.meleeWeapon.类别) ||
+                                                        charBuild.char.精通.includes('全部类型'))
+                                                "
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">武器精通</div>
+                                                {{ format100r(0.2) }}
                                             </li>
                                         </ul>
                                     </div>
@@ -1276,17 +1280,10 @@ function shareCharBuild() {
                                                 {{ format100r(charBuild.rangedWeapon.加成[key]!) }}
                                             </li>
                                             <li
-                                                v-if="key != '攻击' && key in (charBuild.meleeWeapon || {})"
-                                                class="flex justify-between gap-8 text-sm text-primary"
-                                            >
-                                                <div class="text-base-content/80">近战武器</div>
-                                                {{ format100r(charBuild.meleeWeapon[key]!) }}
-                                            </li>
-                                            <li
                                                 v-if="key != '攻击' && key in (charBuild.rangedWeapon || {})"
                                                 class="flex justify-between gap-8 text-sm text-primary"
                                             >
-                                                <div class="text-base-content/80">远程武器</div>
+                                                <div class="text-base-content/80">{{ $t(charBuild.rangedWeapon.名称) }}</div>
                                                 {{ format100r(charBuild.rangedWeapon[key]!) }}
                                             </li>
                                             <li
@@ -1297,11 +1294,22 @@ function shareCharBuild() {
                                                 {{ format100r(mod[key]!) }}
                                             </li>
                                             <li
-                                                v-for="buff in charBuild.buffs.filter((b) => b[key])"
+                                                v-for="buff in charBuild.buffs.filter((b) => !['攻击', '增伤'].includes(key) && b[key])"
                                                 class="flex justify-between gap-8 text-sm text-primary"
                                             >
                                                 <div class="text-base-content/80">{{ buff.名称 }}</div>
                                                 {{ format100r(buff[key]!) }}
+                                            </li>
+                                            <li
+                                                v-if="
+                                                    key === '攻击' &&
+                                                    (charBuild.char.精通.includes(charBuild.rangedWeapon.类别) ||
+                                                        charBuild.char.精通.includes('全部类型'))
+                                                "
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">武器精通</div>
+                                                {{ format100r(0.2) }}
                                             </li>
                                         </ul>
                                     </div>
@@ -1494,32 +1502,29 @@ function shareCharBuild() {
                                                 }}
                                             </li>
                                             <li
-                                                v-if="key != '攻击' && key in (charBuild.meleeWeapon || {})"
-                                                class="flex justify-between gap-8 text-sm text-primary"
-                                            >
-                                                <div class="text-base-content/80">近战武器</div>
-                                                {{ format100r(charBuild.meleeWeapon[key]!) }}
-                                            </li>
-                                            <li
-                                                v-if="key != '攻击' && key in (charBuild.rangedWeapon || {})"
-                                                class="flex justify-between gap-8 text-sm text-primary"
-                                            >
-                                                <div class="text-base-content/80">远程武器</div>
-                                                {{ format100r(charBuild.rangedWeapon[key]!) }}
-                                            </li>
-                                            <li
-                                                v-for="mod in charBuild.rangedMods.filter((m): m is LeveledMod => m && m[key])"
+                                                v-for="mod in charBuild.skillWeaponMods.filter((m): m is LeveledMod => m && m[key])"
                                                 class="flex justify-between gap-8 text-sm text-primary"
                                             >
                                                 <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
                                                 {{ format100r(mod[key]!) }}
                                             </li>
                                             <li
-                                                v-for="buff in charBuild.buffs.filter((b) => b[key])"
+                                                v-for="buff in charBuild.buffs.filter((b) => !['攻击', '增伤'].includes(key) && b[key])"
                                                 class="flex justify-between gap-8 text-sm text-primary"
                                             >
                                                 <div class="text-base-content/80">{{ buff.名称 }}</div>
                                                 {{ format100r(buff[key]!) }}
+                                            </li>
+                                            <li
+                                                v-if="
+                                                    key === '攻击' &&
+                                                    (charBuild.char.精通.includes(charBuild.skillWeapon.类别) ||
+                                                        charBuild.char.精通.includes('全部类型'))
+                                                "
+                                                class="flex justify-between gap-8 text-sm text-primary"
+                                            >
+                                                <div class="text-base-content/80">武器精通</div>
+                                                {{ format100r(0.2) }}
                                             </li>
                                         </ul>
                                     </div>
@@ -1528,7 +1533,7 @@ function shareCharBuild() {
                                     class="flex justify-between items-center p-1 px-2 transition-all duration-200 hover:bg-base-100 hover:shadow-md rounded-md"
                                 >
                                     <div class="text-sm text-base-content/80">
-                                        {{ key === "攻击" ? $t(`${charBuild.rangedWeapon.伤害类型}`) : "" }}{{ $t(key) }}
+                                        {{ key === "攻击" ? $t(`${charBuild.skillWeapon.伤害类型}`) : "" }}{{ $t(key) }}
                                     </div>
                                     <div class="text-primary font-bold text-sm font-orbitron">
                                         {{ ["攻击", "攻速", "多重"].includes(key) ? `${+val.toFixed(2)}` : `${+(val * 100).toFixed(2)}%` }}

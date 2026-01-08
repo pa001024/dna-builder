@@ -92,6 +92,21 @@ export interface DNAUser {
 
 export type UDNAUser = Omit<DNAUser, "id">
 
+export interface UserMapMarker {
+    id: number
+    mapId: number
+    x: number
+    y: number
+    name: string
+    desc?: string
+    icon?: string
+    categoryId?: number
+    createdAt: number
+    updatedAt: number
+}
+
+export type UUserMapMarker = Omit<UserMapMarker, "id">
+
 interface DB {
     mods: Mod
     customEntitys: CustomEntity
@@ -99,9 +114,9 @@ interface DB {
     conversations: Conversation
     messages: Message
     dnaUsers: DNAUser
+    userMapMarkers: UserMapMarker
 }
 
-// 索引列表
 db.version(1).stores({
     mods: "++id, entity, name",
     customEntitys: "++id, &name",
@@ -109,4 +124,5 @@ db.version(1).stores({
     conversations: "++id, createdAt, updatedAt",
     messages: "++id, conversationId, createdAt",
     dnaUsers: "++id, uid",
+    userMapMarkers: "++id, mapId, createdAt",
 })

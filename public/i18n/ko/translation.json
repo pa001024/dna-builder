@@ -2809,6 +2809,8 @@
         "draft_desc": "도면 정보와 필요 재료 확인",
         "dungeon": "던전",
         "dungeon_desc": "던전 정보와 보상 드롭 확인",
+        "map": "지도",
+        "map_desc": "지도 마커 보기",
         "mod": "모드",
         "mod_desc": "모드 정보와 속성 확인",
         "monster": "몬스터",
@@ -3023,6 +3025,12 @@
         "btn_collapse_menu": "메뉴 접기",
         "btn_pin_window": "창 고정",
         "btn_unpin_window": "고정 해제"
+    },
+    "map-detail": {
+        "title": "지도"
+    },
+    "map-list": {
+        "title": "지도 목록"
     },
     "mod-detail": {
         "title": "악마의 웨지 세부정보"

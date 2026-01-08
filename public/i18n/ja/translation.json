@@ -2809,6 +2809,8 @@
         "draft_desc": "設計図情報と必要材料を確認",
         "dungeon": "ダンジョン",
         "dungeon_desc": "ダンジョン情報と報酬ドロップを確認",
+        "map": "マップ",
+        "map_desc": "マップのマーカーを表示",
         "mod": "モッド",
         "mod_desc": "モッド情報と属性を確認",
         "monster": "モンスター",
@@ -3023,6 +3025,12 @@
         "btn_collapse_menu": "メニューを折りたたむ",
         "btn_pin_window": "ウィンドウを固定",
         "btn_unpin_window": "固定を解除"
+    },
+    "map-detail": {
+        "title": "マップ"
+    },
+    "map-list": {
+        "title": "マップ一覧"
     },
     "mod-detail": {
         "title": "悪魔の楔の詳細"

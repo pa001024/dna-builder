@@ -532,6 +532,7 @@ export class CharBuild {
             let critDamageBonus = this.getTotalBonus(`${prefix}暴伤`, prefix) + this.getTotalBonus(`暴伤`, prefix)
             let triggerRateBonus = this.getTotalBonus(`${prefix}触发`, prefix) + this.getTotalBonus(`触发`, prefix)
             let attackSpeedBonus = this.getTotalBonus(`${prefix}攻速`, prefix) + this.getTotalBonus(`攻速`, prefix)
+            if (weapon.名称 === "伊卡洛斯") console.log(this.meleeWeapon.buffProps, attackSpeedBonus)
             let multiShotBonus = this.getTotalBonus(`${prefix}多重`, prefix) + this.getTotalBonus(`多重`, prefix)
             let damageIncrease = this.getTotalBonus(`${prefix}增伤`, prefix) + this.getTotalBonus(`增伤`, prefix)
             let reloadTimeBonus = this.getTotalBonus(`${prefix}装填`, prefix) + this.getTotalBonus(`装填`, prefix)
@@ -688,6 +689,20 @@ export class CharBuild {
             }
         })
 
+        Object.entries(this.rangedWeapon.buffProps).forEach(([key, value]) => {
+            if (prefix !== "角色" && ["攻击", "增伤"].includes(key)) return
+            if (attribute === key && typeof value === "number") {
+                bonus += value
+            }
+        })
+
+        Object.entries(this.meleeWeapon.buffProps).forEach(([key, value]) => {
+            if (prefix !== "角色" && ["攻击", "增伤"].includes(key)) return
+            if (attribute === key && typeof value === "number") {
+                bonus += value
+            }
+        })
+
         return bonus
     }
 
@@ -837,7 +852,8 @@ export class CharBuild {
         const critExpectedDamage = 1 + critRate * (critDamage - 1)
 
         // 计算各种乘区
-        const resistancePenetration = Math.max(0, (1 - this.enemyResistance) * (1 + attrs.属性穿透))
+        const resistance = Math.max(0, 1 - this.enemyResistance)
+        const resistancePenetration = Math.max(0, 1 + attrs.属性穿透)
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
         const damageIncrease = 1 + attrs.增伤 + weaponAttrs.增伤 + attrs.武器伤害
@@ -845,11 +861,11 @@ export class CharBuild {
         const additionalDamage = 1 + weaponAttrs.追加伤害
         const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
         const hpMore = boostMultiplier * desperateMultiplier
-        const otherMore = damageIncrease * independentDamageIncrease * additionalDamage * imbalanceDamageMultiplier
+        const otherMore = damageIncrease * independentDamageIncrease * additionalDamage * imbalanceDamageMultiplier * resistancePenetration
         const commonMore = hpMore * otherMore
 
         // 计算最终伤害
-        const elementalPart = weaponDamageElemental * resistancePenetration
+        const elementalPart = weaponDamageElemental * resistance
         return {
             lowerCritNoTrigger: (weaponDamagePhysical + elementalPart) * lowerCritDamage * commonMore,
             higherCritNoTrigger: (weaponDamagePhysical + elementalPart) * higherCritDamage * commonMore,

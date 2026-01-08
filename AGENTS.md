@@ -79,6 +79,37 @@ This merges translations back to language files and deletes the diff file.
 - The tool handles nested JSON structures automatically
 - Always verify translations before importing
 
+## Icon Management Workflow
+
+**Tool**: `tools/icon_tool.ts` - 管理图标
+
+```bash
+bun tools/icon_tool.ts add <icon-name>     # 从 remixicon 添加图标
+bun tools/icon_tool.ts check               # 检查使用情况
+bun tools/icon_tool.ts clean               # 删除未使用的图标
+bun tools/icon_tool.ts ignore <icon>       # 忽略特定图标
+bun tools/icon_tool.ts unignore <icon>     # 取消忽略
+bun tools/icon_tool.ts ignored              # 列出已忽略的图标
+bun tools/icon_tool.ts list [pattern]       # 搜索可用图标
+```
+
+**示例**:
+
+```bash
+bun tools/icon_tool.ts add subtract-line    # 添加 ri:subtract-line
+bun tools/icon_tool.ts list heart         # 搜索包含 heart 的图标
+bun tools/icon_tool.ts ignore po-A         # 忽略 po-A 图标
+```
+
+**说明**:
+
+- 图标存储在 `src/components/Icon.vue` 的 `data` 对象中
+- Remixicon 图标使用 `ri:` 前缀
+- 自动扫描 `.vue`, `.ts`, `.tsx` 文件中的图标使用
+- 支持多种绑定模式（静态/动态/模板字符串/条件/类型注解）
+- 扫描时自动排除 `Icon.vue` 本身
+- clean 前建议先运行 check 确认
+
 ## Code Style Guidelines
 
 ### Formatting
@@ -87,7 +118,6 @@ This merges translations back to language files and deletes the diff file.
 - **Semicolons**: Omitted
 - **Print width**: 140 characters
 - **Quotes**: Double quotes preferred
-- **Always run `pnpm format`** before committing
 
 ### Vue / TypeScript
 

@@ -62,6 +62,46 @@ export class DNAAPI {
     }
 
     /**
+     * 获取通用配置
+     */
+    async getCommonConfig() {
+        return await this._dna_request<DNACommonConfigRes>("config/getCommonConfig")
+    }
+
+    /**
+     * 获取地图标点分类
+     */
+    async getMapMatterCategorizeOptions() {
+        return await this._dna_request<DNAMapMatterCategorizeOption[]>("map/matter/categorize/getOptions", undefined, {
+            refer: true,
+            h5: true,
+        })
+    }
+
+    /**
+     * 获取地图列表
+     */
+    async getMapCategorizeList() {
+        return await this._dna_request<DNAMapCategorizeListRes>("map/categorize/list", undefined, { refer: true, h5: true })
+    }
+
+    /**
+     * 获取地图详情
+     * @param id 地图ID (getMapCategorizeList().list[].maps[].id)
+     */
+    async getMapDetail(id: number) {
+        return await this._dna_request<DNAMapDetailRes>("map/detail", { id }, { refer: true, h5: true })
+    }
+
+    /**
+     * 获取地图标点详情
+     * @param id 标点ID (getMapDetail().matterCategorizes[].matters[].sites[].id)
+     */
+    async getMapSiteDetail(id: number) {
+        return await this._dna_request<DNAMapSiteDetailRes>("map/site/detail", { id }, { refer: true, h5: true })
+    }
+
+    /**
      * 登录
      */
     async login(mobile: string, code: string) {
@@ -109,6 +149,13 @@ export class DNAAPI {
             res.data = res.data.map((url) => aesDecryptImageUrl(url, this.uploadKey))
         }
         return res
+    }
+
+    /**
+     * 获取Emoji列表
+     */
+    async getEmojiList() {
+        return await this._dna_request<DNAEmoji[]>("config/getEmoji")
     }
 
     /**
@@ -642,8 +689,9 @@ export class DNAAPI {
         refer?: boolean
         token?: string
         tokenSig?: boolean
+        h5?: boolean
     }) {
-        let { payload, exparams, dev_code = this.dev_code, refer, token = this.token, tokenSig } = options || {}
+        let { payload, exparams, dev_code = this.dev_code, refer, token = this.token, tokenSig, h5 } = options || {}
 
         const CONTENT_TYPE = "application/x-www-form-urlencoded; charset=utf-8"
         const iosBaseHeader = {
@@ -660,7 +708,7 @@ export class DNAAPI {
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
         }
         // 默认获取ios头
-        const headers = { ...(this.is_h5 ? h5BaseHeader : iosBaseHeader) } as Record<string, any>
+        const headers = { ...(this.is_h5 || h5 ? h5BaseHeader : iosBaseHeader) } as Record<string, any>
         if (dev_code) {
             headers.devCode = dev_code
         }
@@ -718,6 +766,7 @@ export class DNAAPI {
             sign?: boolean
             file?: File
             tokenSig?: boolean
+            h5?: boolean
             token?: boolean
             refer?: boolean
             params?: Record<string, any>
@@ -726,7 +775,7 @@ export class DNAAPI {
             timeout?: number
         },
     ): Promise<DNAApiResponse<T>> {
-        let { method = "POST", sign, refer, params, max_retries = 3, retry_delay = 1, timeout = 10000, token, tokenSig } = options || {}
+        let { method = "POST", sign, h5, refer, params, max_retries = 3, retry_delay = 1, timeout = 10000, token, tokenSig } = options || {}
         let headers: Record<string, any>
         if (sign) {
             const { payload: p, headers: h } = await this.getHeaders({
@@ -735,11 +784,12 @@ export class DNAAPI {
                 exparams: params,
                 token: token ? this.token : undefined,
                 tokenSig,
+                h5,
             })
             data = p
             headers = h
         } else {
-            const { headers: h } = await this.getHeaders({ token: token ? this.token : undefined })
+            const { headers: h } = await this.getHeaders({ token: token ? this.token : undefined, refer, h5 })
             headers = h
         }
 
@@ -938,6 +988,143 @@ export interface UserGame {
     gameId: number // gameId
     gameName: string // gameName
 }
+
+export interface DNAEmoji {
+    content: string[]
+    gameId: number
+    icon: string
+    size: number
+    title: string
+    url: string
+}
+
+export interface DNACommonConfigRes {
+    logBehaviorConfigVo: DNALogBehaviorConfigVo
+    signApiConfigVo: DNASignApiConfigVo
+    vodOssConfig: DNAVodOssConfig
+}
+
+export interface DNAVodOssConfig {
+    endPoint: string
+    uploadSizeLimit: string
+}
+
+export interface DNASignApiConfigVo {
+    /**
+     * 签名API列表
+     * e.g. [
+        "/user/sdkLogin",
+        "/forum/postPublish",
+        "/forum/comment/createComment",
+        "/forum/comment/createReply",
+        "/user/getSmsCode",
+        "/role/defaultRoleForTool",
+        "/media/av/cfg/getVideos",
+        "/media/av/cfg/getAudios",
+        "/media/av/cfg/getImages"
+    ]
+     */
+    signApiList: string[]
+}
+
+//#region 地图相关
+export interface DNAMapMatterCategorizeOption {
+    icon: string
+    id: number
+    matters: DNAMapMatter[]
+    name: string
+    sort?: number
+}
+export interface DNAMatterCategorizeDetail {
+    icon: string
+    id: number
+    matters: DNAMapMatterDetail[]
+    name: string
+    sort?: number
+}
+
+export interface DNAMapMatter {
+    icon: string
+    id: number
+    mapMatterCategorizeId: number
+    name: string
+    sort: number
+}
+
+export interface DNAMapCategorizeListRes {
+    list: DNAMatterCategorizeList[]
+}
+
+export interface DNAMatterCategorizeList {
+    id: number
+    maps: DNAMap[]
+    name: string
+}
+
+export interface DNALogBehaviorConfigVo {
+    freq: number
+    onAndOff: number
+}
+
+export interface DNAMapDetailRes {
+    floors: DNAMapFloor[]
+    matterCategorizes: DNAMatterCategorizeDetail[]
+    map: DNAMap
+    userSites: DNAMapSite[]
+}
+
+export interface DNAMap {
+    id: number
+    name: string
+    pid?: number
+}
+
+export interface DNAMapMatterDetail extends DNAMapMatter {
+    sites: DNAMapSite[]
+}
+
+export interface DNAMapSite {
+    id: number
+    isHide: number
+    mapFloorId: number
+    mapId: number
+    mapMatterId: number
+    x: number
+    y: number
+}
+
+export interface DNAMapFloor {
+    floor: number
+    id: number
+    name: string
+    pic: string
+}
+
+export interface DNAMapSiteDetailRes {
+    contributes: Contribute[]
+    description: string
+    id: number
+    isDel: number
+    isHide: number
+    mapFloorId: number
+    mapId: number
+    mapMatterCategorizeId: number
+    mapMatterId: number
+    pic: string
+    script: string
+    url: string
+    urlDesc: string
+    urlIcon: string
+    x: number
+    y: number
+}
+
+interface Contribute {
+    userHeadUrl: string
+    userId: string
+    userName: string
+}
+//#endregion
 
 export interface DNALoginRes {
     applyCancel?: number // applyCancel

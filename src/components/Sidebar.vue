@@ -47,7 +47,7 @@ function closeMobileDrawer() {
             </template>
             <div class="flex-1" data-tauri-drag-region></div>
             <SidebarButton to="/login" :tooltip="t(`login.title`)">
-                <Icon icon="la:user" />
+                <Icon icon="ri:user-line" />
             </SidebarButton>
             <SidebarButton to="/setting" :tooltip="t(`setting.title`)">
                 <Icon icon="ri:settings-3-line" />
@@ -88,7 +88,7 @@ function closeMobileDrawer() {
                         @click="closeMobileDrawer"
                         class="flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors"
                     >
-                        <Icon icon="la:user" class="w-6 h-6" />
+                        <Icon icon="ri:user-line" class="w-6 h-6" />
                         <span class="font-medium">{{ t(`login.title`) }}</span>
                     </RouterLink>
                 </li>

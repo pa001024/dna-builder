@@ -38,7 +38,7 @@ export const useUIStore = defineStore("ui", {
                 {
                     name: "home",
                     path: "/",
-                    icon: "la:bookmark",
+                    icon: "ri:bookmark-line",
                 },
                 {
                     name: "game-launcher",

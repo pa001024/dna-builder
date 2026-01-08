@@ -162,14 +162,14 @@ fn enable_mod(srcdir: String, dstdir: String, files: Vec<String>) -> String {
 #[tauri::command]
 fn import_pic(path: String) -> Result<String, String> {
     // 导入图片 转换为dataurl
-    let mut file = File::open(&path)
-        .map_err(|e| format!("无法打开文件: {}", e))?;
+    let mut file = File::open(&path).map_err(|e| format!("无法打开文件: {}", e))?;
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer)
         .map_err(|e| format!("读取文件失败: {}", e))?;
 
     // 截取文件扩展名
-    let ext = path.split(".")
+    let ext = path
+        .split(".")
         .last()
         .ok_or_else(|| "无效的文件路径".to_string())?;
 
@@ -311,7 +311,11 @@ async fn fetch(
                 FormDataValue::Text(text) => {
                     form = form.text(key, text);
                 }
-                FormDataValue::File { filename, data, mime } => {
+                FormDataValue::File {
+                    filename,
+                    data,
+                    mime,
+                } => {
                     let part = match mime {
                         Some(mime_type) => {
                             match multipart::Part::bytes(data.clone())
@@ -348,7 +352,14 @@ async fn fetch(
                 Ok(t) => t,
                 Err(e) => return Err(format!("Failed to read response: {}", e)),
             };
-            Ok(format!("{{\"status\":{},\"body\":\"{}\"}}", status.as_u16(), text.replace("\"", "\\\"")))
+            // 使用serde_json正确转义JSON字符串中的特殊字符
+            let body_json = serde_json::to_string(&text)
+                .map_err(|e| format!("Failed to serialize response body: {}", e))?;
+            Ok(format!(
+                "{{\"status\":{},\"body\":{}}}",
+                status.as_u16(),
+                body_json
+            ))
         }
         Err(e) => Err(format!("Request failed: {}", e)),
     }

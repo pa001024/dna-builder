@@ -57,23 +57,23 @@ describe("getRewardDetails", () => {
         const result = getRewardDetails(300167)
         expect(result).not.toBeNull()
         expect(result?.m).toBe("Sequence")
-        expect(result?.p).toBe(125)
+        expect(result?.totalP).toBe(12)
 
         if (result?.child) {
-            expect(result.child[0].pp).toBeCloseTo(10 / 125, 6)
-            expect(result.child[1].pp).toBeCloseTo(10 / 125, 6)
-            expect(result.child[2].pp).toBeCloseTo(10 / 125, 6)
-            expect(result.child[3].pp).toBeCloseTo(10 / 125, 6)
-            expect(result.child[4].pp).toBeCloseTo(10 / 125, 6)
-            expect(result.child[5].pp).toBeCloseTo(10 / 125, 6)
-            expect(result.child[6].pp).toBeCloseTo(25 / 125, 6)
-            expect(result.child[7].pp).toBeCloseTo(20 / 125, 6)
-            expect(result.child[8].pp).toBeCloseTo(20 / 125, 6)
+            expect(result.child[0].pp).toBeCloseTo(1 / 12, 6)
+            expect(result.child[1].pp).toBeCloseTo(1 / 12, 6)
+            expect(result.child[2].pp).toBeCloseTo(1 / 12, 6)
+            expect(result.child[3].pp).toBeCloseTo(1 / 12, 6)
+            expect(result.child[4].pp).toBeCloseTo(1 / 12, 6)
+            expect(result.child[5].pp).toBeCloseTo(1 / 12, 6)
+            expect(result.child[6].pp).toBeCloseTo(2 / 12, 6)
+            expect(result.child[7].pp).toBeCloseTo(2 / 12, 6)
+            expect(result.child[8].pp).toBeCloseTo(2 / 12, 6)
 
             if (result.child[0].child) {
-                // 子奖励0的pp值应该是5/125
-                expect(result.child[0].child[0].pp).toBeCloseTo(5 / 125, 6)
-                expect(result.child[0].child[1].pp).toBeCloseTo(5 / 125, 6)
+                // 子奖励0的pp值应该是 (1/12) * (5/10)
+                expect(result.child[0].child[0].pp).toBeCloseTo((1 / 12) * (5 / 10), 6)
+                expect(result.child[0].child[1].pp).toBeCloseTo((1 / 12) * (5 / 10), 6)
             }
         }
     })
@@ -156,7 +156,7 @@ describe("getRewardDetails", () => {
 
         if (result?.child && result.child.length > 0) {
             const expectedTotal = result.child.reduce((sum: number, child: RewardItem) => sum + child.p, 0)
-            expect(result.p).toBeCloseTo(expectedTotal, 6)
+            expect(result.totalP).toBeCloseTo(expectedTotal, 6)
         }
     })
 })

@@ -2809,6 +2809,8 @@
         "draft_desc": "查看圖紙信息和需求材料",
         "dungeon": "副本",
         "dungeon_desc": "查看副本信息和獎勵掉落",
+        "map": "地圖",
+        "map_desc": "查看地圖標點",
         "mod": "魔之楔",
         "mod_desc": "查看魔之楔信息和屬性",
         "monster": "怪物",
@@ -3023,6 +3025,12 @@
         "btn_collapse_menu": "折疊菜單",
         "btn_pin_window": "視窗置頂",
         "btn_unpin_window": "取消置頂"
+    },
+    "map-detail": {
+        "title": "地圖"
+    },
+    "map-list": {
+        "title": "地圖列表"
     },
     "mod-detail": {
         "title": "魔之楔詳情"

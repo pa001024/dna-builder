@@ -5,7 +5,7 @@
         "module": "ESNext",
         "lib": ["ESNext", "DOM", "DOM.Iterable"],
         "skipLibCheck": true,
-        "types": ["vitest/importMeta"],
+        "types": ["vitest/importMeta", "bun-types"],
         /* Bundler mode */
         "moduleResolution": "bundler",
         "allowImportingTsExtensions": true,

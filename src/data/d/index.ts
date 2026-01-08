@@ -121,8 +121,9 @@ function findModRewards(child: any[], modIds: Set<number>, visited: Set<number> 
 dungeonData.forEach((dungeon) => {
     dungeonMap.set(dungeon.id, dungeon as Dungeon)
     // 获取副本的所有奖励ID
-    if (dungeon.r) {
-        dungeon.r.forEach((rewardId) => {
+    const rewardIds = [...dungeon.r, ...(dungeon.sr || [])]
+    if (rewardIds.length > 0) {
+        rewardIds.forEach((rewardId) => {
             const reward = rewardMap.get(rewardId)
             if (reward && reward.child) {
                 // 递归查找Mod类型的奖励
@@ -144,3 +145,5 @@ dungeonData.forEach((dungeon) => {
 import petData, { type Pet } from "./pet.data"
 export const petMap = new Map<number, Pet>()
 petData.forEach((v) => petMap.set(v.id, v))
+
+export { type DBMap, type DBMapMarker } from "./map.data"

@@ -115,7 +115,7 @@ const getAnimationDelay = (index: number) => {
                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                             loading="lazy"
                         >
-                            <Icon icon="la:user" class="w-full h-full opacity-50" />
+                            <Icon icon="ri:user-line" class="w-full h-full opacity-50" />
                         </ImageFallback>
 
                         <!-- 悬停时的遮罩 -->

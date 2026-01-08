@@ -144,6 +144,18 @@ const routes: readonly RouteRecordRaw[] = [
         component: () => import("./views/DBPetDetailView.vue"),
         beforeEnter: () => setMinSize(320, 360),
     },
+    {
+        name: "map-list",
+        path: "/db/map",
+        component: () => import("./views/DBMapListView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+    },
+    {
+        name: "map-detail",
+        path: "/db/map/:mapId",
+        component: () => import("./views/DBMapDetailView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+    },
 
     // DNA routes
     { name: "dna-home", path: "/dna", component: () => import("./views/DNAHomeView.vue"), beforeEnter: () => setMinSize(600, 600) },

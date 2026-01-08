@@ -19,6 +19,7 @@ export class LeveledWeapon {
     弹道类型?: string;
     [key: string]: any
     buff?: LeveledBuff
+    buffProps: Record<string, number> = {}
     // 新增属性
     倍率 = 1
     弹片数?: number
@@ -194,6 +195,7 @@ export class LeveledWeapon {
                 const currentValue = (maxValue / 10) * (this._精炼 + 5)
                 const baseValue = (buff.baseValue / 10) * (this._精炼 + 5)
                 this[prop] = currentValue
+                this.buffProps[prop] = currentValue
                 if (buff.描述.includes(`{%}`)) {
                     buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(baseValue * 100).toFixed(1)}%`)
                 }

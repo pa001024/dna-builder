@@ -57,7 +57,7 @@ const items = [
     {
         name: "login",
         path: "/login",
-        icon: "la:user",
+        icon: "ri:user-line",
     },
     {
         name: "setting",
