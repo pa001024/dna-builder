@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import { computed } from "vue"
-import { getRewardDetails } from "../utils/reward-utils"
+import { RewardItem as RewardItemType } from "../utils/reward-utils"
 import { LeveledMod } from "../data"
 
 // 递归
@@ -10,15 +9,10 @@ defineOptions({
 
 // 定义组件接收的Props
 interface Props {
-    rewardId: number
+    reward: RewardItemType
 }
 
 const props = defineProps<Props>()
-
-// 使用computed获取奖励根节点
-const rewardRoot = computed(() => {
-    return getRewardDetails(props.rewardId)
-})
 
 // 获取掉落模式文本
 function getDropModeText(mode: string): string {
@@ -63,15 +57,16 @@ function getRewardTypeText(type: string): string {
 <template>
     <div class="space-y-1">
         <!-- 递归奖励显示 -->
-        <template v-for="item in rewardRoot?.child || []" :key="`${item.id}-${item.t}`">
+        <template v-for="item in reward?.child || []" :key="`${item.id}-${item.t}`">
             <div class="flex items-start gap-2 text-xs">
                 <span
                     class="w-2 h-2 rounded-full shrink-0 mt-1"
-                    :class="item.t === 'Drop' ? 'bg-warning' : item.t === 'Reward' ? 'bg-error' : 'bg-info'"
+                    :class="item.dp ? 'bg-warning' : item.t === 'Reward' ? 'bg-error' : 'bg-info'"
                 ></span>
                 <div class="flex-1">
                     <div class="flex items-center gap-2">
                         <span>
+                            {{ item.dp ? "掉落物: " : "" }}
                             {{ item.d ? "图纸: " : "" }}
                             <ShowProps
                                 v-for="mod in [new LeveledMod(item.id)]"
@@ -95,13 +90,10 @@ function getRewardTypeText(type: string): string {
                         </span>
                         <span v-if="item.c" class="text-base-content/70">x{{ item.c }}</span>
                         <span v-if="item.p" class="text-base-content/70">
-                            ({{
-                                item.p < 1
-                                    ? `概率:${(item.p * 100).toFixed(2)}%`
-                                    : rewardRoot!.m === "Sequence"
-                                      ? `次数:${item.p}`
-                                      : `权重:${item.p}`
-                            }})
+                            ({{ `权重:${item.p}` }}
+                            {{ item.pp ? `比例:${+(item.pp * 100).toFixed(2)}%` : "" }}
+                            {{ item.times ? `每个期望:${+item.times.toFixed(2)}次` : "" }}
+                            )
                         </span>
                         <!-- 显示掉落模式 -->
                         <span
@@ -114,11 +106,12 @@ function getRewardTypeText(type: string): string {
                             "
                         >
                             {{ getDropModeText(item.m || "") }}
+                            <span v-if="item.totalP"> 总容量 {{ item.totalP }}</span>
                         </span>
                     </div>
                     <!-- 递归显示子奖励 -->
                     <div v-if="item.child && item.child.length" class="pl-4 mt-1 space-y-1">
-                        <RewardItem :rewardId="item.id" />
+                        <RewardItem :reward="item" />
                     </div>
                 </div>
             </div>

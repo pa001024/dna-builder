@@ -17,7 +17,12 @@ const allTypes = computed(() => {
 const filteredDungeons = computed(() => {
     return dungeonData.filter((d) => {
         const matchesType = selectedType.value === "" || d.t === selectedType.value
-        const matchesKeyword = searchKeyword.value === "" || d.n.includes(searchKeyword.value) || d.desc?.includes(searchKeyword.value)
+        const matchesKeyword =
+            searchKeyword.value === "" ||
+            `${d.id}`.includes(searchKeyword.value) ||
+            d.n.includes(searchKeyword.value) ||
+            d.desc?.includes(searchKeyword.value) ||
+            `${d.lv}`.includes(searchKeyword.value)
         return matchesType && matchesKeyword
     })
 })
@@ -37,7 +42,7 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
                     <input
                         v-model="searchKeyword"
                         type="text"
-                        placeholder="搜索副本名称..."
+                        placeholder="搜索副本ID/名称/描述/等级..."
                         class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
                     />
                 </div>

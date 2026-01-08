@@ -329,6 +329,7 @@ export interface RewardChild {
     t: string
     c: number
     d?: 1 // 是否是图纸
+    dp?: 1 //是否是Drop类型
     p?: number
     n?: string
 }

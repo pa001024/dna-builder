@@ -1,4 +1,4 @@
-import { Mod, Buff, Weapon, WeaponBase, Char, Monster, Reward, Draft } from "../data-types"
+import { Mod, Buff, Weapon, WeaponBase, Char, Monster, Reward, Draft, Dungeon } from "../data-types"
 import charData from "./char.data"
 import monsterData from "./monster.data"
 import modData from "./mod.data"
@@ -8,6 +8,7 @@ import weaponData from "./weapon.data"
 import baseData from "./base.data"
 import rewardData from "./reward.data"
 import draftData from "./draft.data"
+import dungeonData from "./dungeon.data"
 import { AbyssBuff, abyssBuffs, AbyssDungeon, abyssDungeons } from "./abyss.data"
 
 // 将静态表转换为Map，提高查找效率
@@ -62,14 +63,9 @@ baseData.forEach((base: any) => {
 })
 
 export const rewardMap = new Map<number, Reward>()
-export const modRewardMap = new Map<number, Reward>()
 
 rewardData.forEach((v) => {
     rewardMap.set(v.id, v)
-    if (v.child) {
-        const mods = v.child.filter((c) => c.t === "Mod")
-        mods.forEach((mod) => modRewardMap.set(mod.id, v))
-    }
 })
 
 export const modDraftMap = new Map<number, Draft>()
@@ -92,6 +88,57 @@ abyssDungeons.forEach((v) => {
     const cname = v.cid ? charMap.get(v.cid)?.名称 : undefined
     if (cname) v.cname = cname
     abyssDungeonMap.set(v.id, v)
+})
+
+// 将副本数据转换为Map，并建立Mod到副本的反向映射
+export const dungeonMap = new Map<number, Dungeon>()
+export const modDungeonMap = new Map<number, Dungeon[]>()
+
+/**
+ * 递归查找奖励树中的所有Mod类型的奖励
+ */
+function findModRewards(child: any[], modIds: Set<number>, visited: Set<number> = new Set()): void {
+    if (!child || child.length === 0) return
+
+    for (const item of child) {
+        if (item.t === "Reward") {
+            // 防止循环引用
+            if (visited.has(item.id)) continue
+            visited.add(item.id)
+
+            const reward = rewardMap.get(item.id)
+            if (reward && reward.child) {
+                // 递归查找子奖励
+                findModRewards(reward.child, modIds, visited)
+            }
+        } else if (item.t === "Mod") {
+            // 找到Mod类型的奖励
+            modIds.add(item.id)
+        }
+    }
+}
+
+dungeonData.forEach((dungeon) => {
+    dungeonMap.set(dungeon.id, dungeon as Dungeon)
+    // 获取副本的所有奖励ID
+    if (dungeon.r) {
+        dungeon.r.forEach((rewardId) => {
+            const reward = rewardMap.get(rewardId)
+            if (reward && reward.child) {
+                // 递归查找Mod类型的奖励
+                const modIds = new Set<number>()
+                findModRewards(reward.child, modIds)
+
+                // 建立Mod ID到Dungeon的映射
+                modIds.forEach((modId) => {
+                    if (!modDungeonMap.has(modId)) {
+                        modDungeonMap.set(modId, [])
+                    }
+                    modDungeonMap.get(modId)!.push(dungeon as Dungeon)
+                })
+            }
+        })
+    }
 })
 
 import petData, { type Pet } from "./pet.data"

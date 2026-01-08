@@ -1629,7 +1629,7 @@ export class CharBuild {
 
     static indepSeries = ["百首", "狮鹫", "中庭蛇"]
     static elmSeries = ["狮鹫", "百首", "契约者", "换生灵"]
-    static exclusiveSeries = [...CharBuild.indepSeries, "换生灵", "海妖", "审判者", "巨鲸", "金乌", "焰灵", "黄衣", "夜使"]
+    static exclusiveSeries = [...CharBuild.indepSeries, "囚狼1", "换生灵", "海妖", "审判者", "巨鲸", "金乌", "焰灵", "黄衣", "夜使"]
 
     /**
      * 自动构筑
@@ -1729,7 +1729,7 @@ export class CharBuild {
                                 localBuild.skillWeapon &&
                                 [localBuild.skillWeapon.伤害类型, localBuild.skillWeapon.类别].includes(v.限定))) &&
                         !selectedExclusiveNames[key].has(v.名称) &&
-                        !(v.系列 == "囚狼" && v.id > 100000 && selectedExclusiveSeries[key].has(v.系列)) &&
+                        !selectedExclusiveSeries[key].has(v.系列 == "囚狼" && v.id > 100000 ? "囚狼1" : v.系列) &&
                         (selectedModCount.get(v.id) || 0) < v.count,
                 )
                 .map((v) => ({ mod: v, income: localBuild.calcIncome(v) }))

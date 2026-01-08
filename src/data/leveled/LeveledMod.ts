@@ -120,6 +120,7 @@ export class LeveledMod implements Mod {
     }
 
     get excludeSeries() {
+        if (this.系列 === "囚狼" && this.id > 100000) return ["囚狼1"]
         if (this.系列 === "换生灵" || this.系列 === "海妖") {
             return ["换生灵", "海妖"]
         }

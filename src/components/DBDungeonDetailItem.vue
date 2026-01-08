@@ -93,6 +93,7 @@ function getMonsterName(monsterId: number): string {
                     <div v-for="rewardId in dungeon.r" :key="rewardId" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors">
                         <div class="flex items-center justify-between mb-1">
                             <span class="text-sm font-medium">奖励组 {{ rewardId }}</span>
+
                             <span
                                 class="text-xs px-1.5 py-0.5 rounded"
                                 :class="
@@ -102,10 +103,11 @@ function getMonsterName(monsterId: number): string {
                                 "
                             >
                                 {{ getDropModeText(getRewardDetails(rewardId)?.m || "") }}
+                                <span v-if="getRewardDetails(rewardId)?.totalP">总容量 {{ getRewardDetails(rewardId)!.totalP }}</span>
                             </span>
                         </div>
                         <!-- 使用 RewardItem 组件显示奖励 -->
-                        <RewardItem :rewardId="rewardId" />
+                        <RewardItem :reward="getRewardDetails(rewardId)!" />
                     </div>
                 </div>
             </div>
@@ -126,10 +128,11 @@ function getMonsterName(monsterId: number): string {
                                 "
                             >
                                 {{ getDropModeText(getRewardDetails(rewardId)?.m || "") }}
+                                <span v-if="getRewardDetails(rewardId)?.totalP">总容量 {{ getRewardDetails(rewardId)!.totalP }}</span>
                             </span>
                         </div>
                         <!-- 使用 RewardItem 组件显示奖励 -->
-                        <RewardItem :rewardId="rewardId" />
+                        <RewardItem :reward="getRewardDetails(rewardId)!" />
                     </div>
                 </div>
             </div>

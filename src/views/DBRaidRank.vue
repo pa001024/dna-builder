@@ -37,7 +37,7 @@ const rankData = rawRankData[0].RankName.map((item, index) => ({
                         </span>
                     </div>
                     <!-- 使用 RewardItem 组件显示奖励 -->
-                    <RewardItem :rewardId="rewardId" />
+                    <RewardItem :reward="getRewardDetails(rewardId)!" />
                 </div>
             </div>
         </div>

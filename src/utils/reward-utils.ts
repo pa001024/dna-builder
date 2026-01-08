@@ -7,7 +7,11 @@ export interface RewardItem {
     t: string
     c?: number
     d?: 1 // 是否是图纸
+    dp?: 1 //是否是Drop类型
     p: number
+    totalP?: number // 总和权重
+    pp?: number // 总和概率
+    times?: number // 期望次数
     m?: string
     n?: string
     child?: RewardItem[]
@@ -33,13 +37,34 @@ export function getDropModeText(mode: string): string {
     return modeMap[mode] || mode
 }
 /**
+ * 计算奖励项的递归乘积和（用于序列模式）
+ */
+function calculateRecursiveProductSum(item: RewardItem): number {
+    if (!item.child || item.child.length === 0) {
+        return item.p
+    }
+
+    if (item.m === "Sequence") {
+        const childSum = item.child.reduce((sum, child) => sum + calculateRecursiveProductSum(child), 0)
+        return childSum
+    }
+
+    return item.p
+}
+
+/**
  * 递归获取奖励详情
  * @param rewardId 奖励ID
  * @param visited 已访问的奖励ID，防止循环引用
  * @param parentProbability 父奖励的概率，用于计算子奖励的实际概率
  * @returns 奖励详情根节点，包含所有子奖励和掉落模式
  */
-export function getRewardDetails(rewardId: number, visited: Set<number> = new Set(), parentProbability: number = 1): RewardItem | null {
+export function getRewardDetails(
+    rewardId: number,
+    visited: Set<number> = new Set(),
+    parentProbability: number = 1,
+    isRoot: boolean = true,
+): RewardItem | null {
     if (visited.has(rewardId)) {
         return null
     }
@@ -56,10 +81,10 @@ export function getRewardDetails(rewardId: number, visited: Set<number> = new Se
     for (const item of rewardGroup.child) {
         if (item.t === "Reward") {
             // 递归获取子奖励
-            const childReward = getRewardDetails(item.id, visited, (item.p ?? 1) * parentProbability)
+            const childReward = getRewardDetails(item.id, visited, (item.p ?? 1) * parentProbability, currentDropMode !== "Sequence")
             if (childReward) {
                 // 判断子奖励的掉落模式是否与父奖励相同
-                if (childReward.m === currentDropMode && childReward.m !== "Sequence") {
+                if (childReward.m === currentDropMode && currentDropMode !== "Sequence") {
                     // 如果掉落模式相同，合并子奖励的子元素到当前列表
                     if (childReward.child) {
                         // 将子奖励的子元素的概率乘以子奖励的概率
@@ -80,11 +105,12 @@ export function getRewardDetails(rewardId: number, visited: Set<number> = new Se
                 id: item.id,
                 t: item.t,
                 c: item.c,
-                p: currentDropMode === "Sequence" ? item.p! : (item.p ?? 0) * parentProbability,
+                p: item.p ?? 0,
                 m: currentDropMode,
                 n: item.n,
             }
             if (item.d) rewardItem.d = item.d
+            if (item.dp) rewardItem.dp = item.dp
             childRewards.push(rewardItem)
         }
     }
@@ -98,8 +124,10 @@ export function getRewardDetails(rewardId: number, visited: Set<number> = new Se
         if (totalWeight > 0) {
             const normalizedChildRewards = childRewards.map((item) => ({
                 ...item,
-                p: item.p / totalWeight,
+                pp: item.p / totalWeight,
+                times: 1 / (item.p / totalWeight),
             }))
+
             return {
                 id: rewardId,
                 t: "Reward",
@@ -110,12 +138,30 @@ export function getRewardDetails(rewardId: number, visited: Set<number> = new Se
         }
     }
 
-    // 返回根奖励节点
-    return {
+    const result: RewardItem = {
         id: rewardId,
         t: "Reward",
         p: parentProbability,
         m: currentDropMode,
         child: childRewards,
     }
+
+    if (currentDropMode === "Sequence" && isRoot) {
+        result.totalP = calculateRecursiveProductSum(result)
+        const calculatePP = (item: RewardItem, totalRPS: number): void => {
+            const selfP = item.p
+            const childP = item.child ? item.child.reduce((sum, child) => sum + calculateRecursiveProductSum(child), 0) : 0
+            item.pp = childP > 0 ? childP / totalRPS : selfP / totalRPS
+            if (item.child) {
+                item.child.forEach((child) => calculatePP(child, totalRPS))
+            } else {
+                item.times = 1 / item.pp
+            }
+        }
+        if (result.child) {
+            result.child.forEach((child) => calculatePP(child, result.totalP!))
+        }
+    }
+
+    return result
 }

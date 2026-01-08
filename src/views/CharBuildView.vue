@@ -632,28 +632,28 @@ function shareCharBuild() {
             }"
         ></div>
         <!-- 顶部操作栏 -->
-        <div class="sticky top-0 z-1 bg-base-300/50 backdrop-blur-sm rounded-md p-3 m-2 shadow-lg border border-base-200">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-                <div class="flex ml-auto flex-wrap items-center gap-2">
-                    <button class="btn btn-sm btn-ghost" @click="shareCharBuild">
+        <div class="sticky top-0 z-1 bg-base-300/50 backdrop-blur-sm rounded-md p-2 sm:p-3 m-1 sm:m-2 shadow-lg border border-base-200">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-2">
+                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto sm:ml-auto">
+                    <button class="btn btn-sm btn-ghost flex-1 sm:flex-none" @click="shareCharBuild">
                         <Icon icon="ri:share-line" class="w-4 h-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.share") }}</span>
                     </button>
-                    <button class="btn btn-sm btn-ghost" @click="simulator_model_show = true">
+                    <button class="btn btn-sm btn-ghost flex-1 sm:flex-none" @click="simulator_model_show = true">
                         <Icon icon="ri:game-line" class="w-4 h-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.simulator") }}</span>
                     </button>
-                    <button class="btn btn-sm btn-secondary" @click="autobuild_model_show = true">
+                    <button class="btn btn-sm btn-secondary flex-1 sm:flex-none" @click="autobuild_model_show = true">
                         <Icon icon="ri:robot-2-line" class="w-4 h-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.auto_build") }}</span>
                     </button>
-                    <button class="btn btn-sm btn-success" @click="$router.push('/char-build-compare')">
+                    <button class="btn btn-sm btn-success flex-1 sm:flex-none" @click="$router.push('/char-build-compare')">
                         <Icon icon="ri:bar-chart-line" class="w-4 h-4" />
                         <span class="hidden sm:inline">{{ $t("build-compare.title") }}</span>
                     </button>
                     <Select
                         v-if="charProject.projects.length > 0"
-                        class="w-40 input input-bordered input-sm"
+                        class="w-full sm:w-40 input input-bordered input-sm"
                         v-model="charProject.selected"
                         @change="loadConfig"
                     >
@@ -661,11 +661,11 @@ function shareCharBuild() {
                             {{ project.name }}
                         </SelectItem>
                     </Select>
-                    <button class="btn btn-sm btn-primary" @click="saveConfig">
+                    <button class="btn btn-sm btn-primary flex-1 sm:flex-none" @click="saveConfig">
                         <Icon icon="ri:save-fill" class="w-4 h-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.save_project") }}</span>
                     </button>
-                    <button class="btn btn-sm btn-ghost" @click="resetConfig">
+                    <button class="btn btn-sm btn-ghost flex-1 sm:flex-none" @click="resetConfig">
                         <Icon icon="ri:refresh-line" class="w-4 h-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.reset_config") }}</span>
                     </button>
@@ -676,7 +676,7 @@ function shareCharBuild() {
             <!-- 侧边栏 -->
             <ScrollArea class="sm:w-92 flex-none flex flex-col gap-2 p-2">
                 <div class="flex flex-col gap-4">
-                    <div class="flex m-auto gap-2">
+                    <div class="flex m-auto gap-2 overflow-x-auto pb-2">
                         <div
                             v-for="tab in [
                                 {
@@ -700,10 +700,10 @@ function shareCharBuild() {
                                       ]
                                     : []),
                             ]"
-                            class="flex items-center gap-2"
+                            class="flex items-center gap-2 shrink-0"
                         >
                             <div
-                                class="flex-none cursor-pointer size-12 relative rounded-full overflow-hidden border-2 border-base-100 aspect-square"
+                                class="flex-none cursor-pointer size-10 sm:size-12 relative rounded-full overflow-hidden border-2 border-base-100 aspect-square"
                                 :class="{ 'border-primary! shadow-lg shadow-primary/40': charTab === tab.name }"
                                 @click="charTab = tab.name"
                             >
@@ -1768,7 +1768,7 @@ function shareCharBuild() {
                             </span>
                         </div>
                         <div class="collapse-content">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-2">
                                 <!-- 其他设置 -->
                                 <div class="space-y-3">
                                     <div class="flex gap-2">

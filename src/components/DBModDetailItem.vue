@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { ref, computed, watch } from "vue"
-import type { Mod, Draft } from "../data/data-types"
+import type { Mod, Draft, Dungeon } from "../data/data-types"
 import { LeveledMod } from "../data/leveled/LeveledMod"
 import { formatProp } from "../util"
-import { modDraftMap } from "../data/d/index"
+import { modDraftMap, modDungeonMap } from "../data/d/index"
 
 const props = defineProps<{
     mod: Mod
@@ -51,6 +51,11 @@ const formatEffDesc = (desc: string) => {
 // 获取当前mod的图纸信息
 const modDraft = computed<Draft | undefined>(() => {
     return modDraftMap.get(props.mod.id)
+})
+
+// 获取当前mod的掉落来源
+const modDungeons = computed<Dungeon[]>(() => {
+    return modDungeonMap.get(props.mod.id) || []
 })
 
 // 将分钟数转换为00:00格式
@@ -239,6 +244,30 @@ function formatDuration(minutes: number): string {
                                 </template>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- 掉落来源 -->
+                <div v-if="modDungeons.length > 0" class="p-3 bg-base-200 rounded mt-2">
+                    <div class="text-xs text-base-content/70 mb-2">掉落来源</div>
+                    <div class="space-y-2 text-sm">
+                        <RouterLink
+                            v-for="dungeon in modDungeons"
+                            :key="dungeon.id"
+                            :to="`/db/dungeon/${dungeon.id}`"
+                            class="flex justify-between items-center p-2 bg-base-300 rounded hover:bg-base-content/10 transition-colors"
+                        >
+                            <div class="flex items-center gap-2">
+                                <span class="font-medium">{{ dungeon.n }}</span>
+                                <span v-if="dungeon.e" class="text-xs px-1.5 py-0.5 rounded bg-primary/20 text-primary">{{
+                                    $t(dungeon.e)
+                                }}</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-base-content/70">
+                                <span v-if="dungeon.lv" class="text-xs">Lv.{{ dungeon.lv }}</span>
+                                <span class="text-xs">{{ dungeon.t }}</span>
+                            </div>
+                        </RouterLink>
                     </div>
                 </div>
             </div>

@@ -41,6 +41,7 @@ describe("evaluateAST函数测试", () => {
             higherCritExpectedTrigger: damageValue * 1.15,
             expectedCritTrigger: damageValue * 1.1,
             expectedCritNoTrigger: damageValue * 0.95,
+            noHpDamage: damageValue,
         }
     })
 

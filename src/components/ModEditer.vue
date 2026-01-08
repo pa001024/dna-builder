@@ -46,8 +46,8 @@ const sortedModOptions = computed(() => {
         props.mods.forEach((mod) => {
             if (mod) {
                 // 记录互斥系列
-                if (CharBuild.exclusiveSeries.includes(mod.系列)) {
-                    equippedExclusiveSeries.add(mod.系列)
+                if (CharBuild.exclusiveSeries.includes(mod.系列) || (mod.系列 === "囚狼" && mod.id > 100000)) {
+                    mod.excludeSeries.forEach((series) => equippedExclusiveSeries.add(series))
                 }
                 // 记录非契约者MOD名称（用于名称互斥）
                 if (mod.系列 !== "契约者") {
@@ -63,8 +63,8 @@ const sortedModOptions = computed(() => {
         props.otherMods.forEach((mod) => {
             if (mod) {
                 // 记录互斥系列
-                if (CharBuild.exclusiveSeries.includes(mod.系列)) {
-                    equippedExclusiveSeries.add(mod.系列)
+                if (CharBuild.exclusiveSeries.includes(mod.系列) || (mod.系列 === "囚狼" && mod.id > 100000)) {
+                    mod.excludeSeries.forEach((series) => equippedExclusiveSeries.add(series))
                 }
                 // 记录非契约者MOD名称（用于名称互斥）
                 if (mod.系列 !== "契约者") {
@@ -82,7 +82,7 @@ const sortedModOptions = computed(() => {
 
         if (mod.系列 === "羽蛇") return false
         // 1. 过滤互斥系列的MOD
-        if (equippedExclusiveSeries.has(mod.系列)) {
+        if (equippedExclusiveSeries.has(mod.系列 == "囚狼" && mod.id > 100000 ? "囚狼1" : mod.系列)) {
             return false
         }
 
@@ -204,6 +204,7 @@ function handleLevelChange(index: number, level: number) {
 
 function handleSelectMod(index: number, value: number, lv: number) {
     emit("selectMod", [index, value, lv])
+    mod_model_show.value = false
 }
 
 function toggleSortByIncome() {

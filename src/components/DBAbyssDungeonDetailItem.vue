@@ -120,8 +120,8 @@ function getChar(charId: number): Char | undefined {
                                 </span>
                             </div>
                         </div>
-                        <RewardItem :rewardId="item.r" />
-                        <RewardItem v-if="item.a" :rewardId="item.a" />
+                        <RewardItem :reward="getRewardDetails(item.r)!" />
+                        <RewardItem v-if="item.a" :reward="getRewardDetails(item.a)!" />
                     </div>
                 </div>
             </div>
