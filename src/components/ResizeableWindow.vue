@@ -234,7 +234,7 @@ watchEffect(() => {
 
             <!-- 全局悬浮放大层 -->
             <div
-                v-if="ui.previewVisible || ui.isHoveringPreview"
+                v-show="ui.previewVisible || ui.isHoveringPreview"
                 id="preview-image"
                 class="z-50"
                 @mouseenter="ui.isHoveringPreview = true"

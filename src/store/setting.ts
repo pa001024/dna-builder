@@ -83,7 +83,11 @@ export const useSettingStore = defineStore("setting", {
         async getDNAAPI() {
             const user = await this.getCurrentUser()
             if (!user) return undefined
-            const api = new DNAAPI(user.dev_code, user.token, { fetchFn: tauriFetch })
+            const api = new DNAAPI({
+                dev_code: user.dev_code,
+                token: user.token,
+                fetchFn: tauriFetch,
+            })
             return api
         },
         async autoLoginDNA() {

@@ -1,15 +1,6 @@
-<template>
-    <component :is="props.tag" v-bind="$attrs">
-        <template v-for="(segment, index) in contentSegments" :key="index">
-            <img v-if="segment.type === 'emoji'" :src="segment.content" :alt="segment.alt" class="inline-block w-6 h-6 align-middle" />
-            <span v-else>{{ segment.content }}</span>
-        </template>
-    </component>
-</template>
-
 <script setup lang="ts">
 import { ref, watchEffect } from "vue"
-import { getEmoji } from "../util"
+import { getEmoji, type EmojiStyle } from "../util"
 
 const props = withDefaults(
     defineProps<{
@@ -27,6 +18,7 @@ interface ContentSegment {
     type: "text" | "emoji"
     content: string
     alt?: string
+    emojiStyle?: EmojiStyle
 }
 
 const contentSegments = ref<ContentSegment[]>([])
@@ -37,11 +29,9 @@ watchEffect(() => {
     let lastIndex = 0
     let match
 
-    // 重置正则表达式的lastIndex，避免多次调用时出现问题
     emojiPattren.lastIndex = 0
 
     while ((match = emojiPattren.exec(text)) !== null) {
-        // 添加匹配前的文本
         if (match.index > lastIndex) {
             segments.push({
                 type: "text",
@@ -49,17 +39,16 @@ watchEffect(() => {
             })
         }
 
-        // 处理表情符号
         const emojiKey = match[0].slice(1)
-        const emojiUrl = getEmoji(emojiKey)
-        if (emojiUrl) {
+        const emojiStyle = getEmoji(emojiKey)
+        if (emojiStyle) {
             segments.push({
                 type: "emoji",
-                content: emojiUrl,
+                content: emojiStyle.src,
                 alt: match[0],
+                emojiStyle,
             })
         } else {
-            // 如果没有找到对应的表情，作为普通文本处理
             segments.push({
                 type: "text",
                 content: match[0],
@@ -69,7 +58,6 @@ watchEffect(() => {
         lastIndex = match.index + match[0].length
     }
 
-    // 添加剩余的文本
     if (lastIndex < text.length) {
         segments.push({
             type: "text",
@@ -80,3 +68,33 @@ watchEffect(() => {
     contentSegments.value = segments
 })
 </script>
+<template>
+    <component :is="props.tag" v-bind="$attrs">
+        <template v-for="(segment, index) in contentSegments" :key="index">
+            <img
+                v-if="segment.type === 'emoji' && segment.emojiStyle?.type === 'local'"
+                :src="segment.emojiStyle.src"
+                :alt="segment.alt"
+                class="inline-block w-12 h-12 align-middle"
+            />
+            <span
+                v-else-if="segment.type === 'emoji' && segment.emojiStyle?.type === 'remote'"
+                class="inline-block w-12 h-12 align-middle emoji-sprite"
+                :style="{
+                    'background-image': `url(${segment.emojiStyle.src})`,
+                    'background-size': `${segment.emojiStyle.size}px`,
+                    'background-position': segment.emojiStyle.position,
+                }"
+            />
+            <span v-else>{{ segment.content }}</span>
+        </template>
+    </component>
+</template>
+<style>
+.emoji-sprite {
+    display: inline-block;
+    background-repeat: no-repeat;
+    background-origin: padding-box;
+    background-clip: border-box;
+}
+</style>

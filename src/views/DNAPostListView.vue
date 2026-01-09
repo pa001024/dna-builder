@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue"
-import { DNAAPI, DNAPost } from "dna-api"
+import { DNAAPI, DNAPostListBean } from "dna-api"
 import { useSettingStore } from "../store/setting"
 import { useRoute, useRouter } from "vue-router"
 import { useUIStore } from "../store/ui"
 import { useInfiniteScroll } from "@vueuse/core"
+import { initEmojiDict } from "@/util"
 
 const setting = useSettingStore()
 const ui = useUIStore()
@@ -12,7 +13,7 @@ let api: DNAAPI
 const router = useRouter()
 const route = useRoute()
 
-const postList = ref<DNAPost[]>([])
+const postList = ref<DNAPostListBean[]>([])
 const loading = ref(true)
 const forumId = computed(() => route.params.forumId as string)
 const topicId = computed(() => route.params.topicId as string)
@@ -31,14 +32,14 @@ useInfiniteScroll(scrollContainer, async () => {
 })
 
 onMounted(async () => {
-    const user = await setting.getCurrentUser()
-    if (!user) {
+    const p = await setting.getDNAAPI()
+    if (!p) {
         ui.showErrorMessage("请先登录")
         router.push("/login")
         return
     }
-
-    api = new DNAAPI(user.dev_code, user.token)
+    api = p
+    await initEmojiDict()
     await loadPosts()
 })
 
@@ -46,7 +47,7 @@ async function loadPosts(page = 1) {
     try {
         loading.value = true
         const res = topicId.value
-            ? await api.getPostsByTopic(+topicId.value, page, limit)
+            ? await api.getPostByTopic(+topicId.value, page, limit)
             : await api.getPostList(+forumId.value, page, limit)
         if (res.is_success && res.data) {
             postList.value = page === 1 ? res.data.postList : [...postList.value, ...res.data.postList]

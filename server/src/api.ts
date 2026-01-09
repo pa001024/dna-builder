@@ -6,43 +6,43 @@ export const apiPlugin = () => {
     const app = new Elysia({
         prefix: "/api",
     })
-    app.post("/fetch", async ({ body, request }) => {
-        const contentType = request.headers.get("content-type") || ""
+    // app.post("/fetch", async ({ body, request }) => {
+    //     const contentType = request.headers.get("content-type") || ""
 
-        if (contentType.includes("multipart/form-data")) {
-            const formData = body as FormData
-            const url = formData.get("url") as string
-            const method = (formData.get("method") as string) || "GET"
+    //     if (contentType.includes("multipart/form-data")) {
+    //         const formData = body as FormData
+    //         const url = formData.get("url") as string
+    //         const method = (formData.get("method") as string) || "GET"
 
-            const options: RequestInit = { method }
+    //         const options: RequestInit = { method }
 
-            const headersStr = formData.get("headers") as string
-            if (headersStr) {
-                const headersArray = JSON.parse(headersStr) as [string, string][]
-                const headers = new Headers()
-                for (const [key, value] of headersArray) {
-                    headers.append(key, value)
-                }
-                options.headers = headers
-            }
+    //         const headersStr = formData.get("headers") as string
+    //         if (headersStr) {
+    //             const headersArray = JSON.parse(headersStr) as [string, string][]
+    //             const headers = new Headers()
+    //             for (const [key, value] of headersArray) {
+    //                 headers.append(key, value)
+    //             }
+    //             options.headers = headers
+    //         }
 
-            const targetFormData = new FormData()
-            for (const [key, value] of formData.entries()) {
-                if (key.startsWith("body_")) {
-                    const targetKey = key.replace("body_", "")
-                    targetFormData.append(targetKey, value as any)
-                }
-            }
-            options.body = targetFormData
+    //         const targetFormData = new FormData()
+    //         for (const [key, value] of formData.entries()) {
+    //             if (key.startsWith("body_")) {
+    //                 const targetKey = key.replace("body_", "")
+    //                 targetFormData.append(targetKey, value as any)
+    //             }
+    //         }
+    //         options.body = targetFormData
 
-            const res = await fetch(url, options)
-            return await res.json()
-        } else {
-            const { url, ...options } = body as { url: string } & RequestInit
-            const res = await fetch(url, options)
-            return await res.json()
-        }
-    })
+    //         const res = await fetch(url, options)
+    //         return await res.json()
+    //     } else {
+    //         const { url, ...options } = body as { url: string } & RequestInit
+    //         const res = await fetch(url, options)
+    //         return await res.json()
+    //     }
+    // })
     app.post(
         "/upload/image",
         async ({ body: { file } }) => {

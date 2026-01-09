@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue"
-import { DNAAPI, DNAMine, DNAPost } from "dna-api"
+import { DNAAPI, DNAMineBean, DNAPostListBean } from "dna-api"
 import { useSettingStore } from "../store/setting"
 import { useRoute, useRouter } from "vue-router"
 import { useUIStore } from "../store/ui"
 import { useInfiniteScroll } from "@vueuse/core"
+import { initEmojiDict } from "@/util"
 
 const setting = useSettingStore()
 const ui = useUIStore()
@@ -12,8 +13,8 @@ let api: DNAAPI
 const router = useRouter()
 const route = useRoute()
 
-const mineData = ref<DNAMine | null>(null)
-const postList = ref<DNAPost[]>([])
+const mineData = ref<DNAMineBean | null>(null)
+const postList = ref<DNAPostListBean[]>([])
 const loading = ref(true)
 const userId = computed(() => route.params.userId as string)
 const limit = 20
@@ -31,14 +32,14 @@ useInfiniteScroll(scrollContainer, async () => {
 })
 
 onMounted(async () => {
-    const user = await setting.getCurrentUser()
-    if (!user) {
+    const p = await setting.getDNAAPI()
+    if (!p) {
         ui.showErrorMessage("请先登录")
         router.push("/login")
         return
     }
-
-    api = new DNAAPI(user.dev_code, user.token)
+    api = p
+    await initEmojiDict()
     await loadMine()
 })
 
@@ -132,7 +133,7 @@ async function loadPosts(page = 1) {
                             </div>
                             <div>
                                 <p class="text-base-content/70">文章</p>
-                                <p>{{ mineData.articleCount }}</p>
+                                <p>{{ mineData.postCount }}</p>
                             </div>
                             <div>
                                 <p class="text-base-content/70">精华</p>

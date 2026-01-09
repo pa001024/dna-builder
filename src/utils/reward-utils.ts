@@ -65,24 +65,10 @@ export function getRewardDetails(
     for (const item of rewardGroup.child) {
         if (item.t === "Reward") {
             // 递归获取子奖励，Sequence模式下不缩放parentProbability
-            const newParentProbability = currentDropMode === "Sequence" ? (item.p ?? 1) : (item.p ?? 1) * parentProbability
-            const childReward = getRewardDetails(item.id, visited, newParentProbability, currentDropMode !== "Sequence")
+            const newParentProbability = item.p ?? 1
+            const childReward = getRewardDetails(item.id, visited, newParentProbability, false)
             if (childReward) {
-                // 判断子奖励的掉落模式是否与父奖励相同
-                if (childReward.m === currentDropMode && currentDropMode !== "Sequence") {
-                    // 如果掉落模式相同，合并子奖励的子元素到当前列表
-                    if (childReward.child) {
-                        // 将子奖励的子元素的概率乘以子奖励的概率
-                        const mergedChild = childReward.child.map((child) => ({
-                            ...child,
-                            p: child.p * childReward.p,
-                        }))
-                        childRewards.push(...mergedChild)
-                    }
-                } else {
-                    // 如果掉落模式不同，嵌套显示
-                    childRewards.push(childReward)
-                }
+                childRewards.push(childReward)
             }
         } else {
             // 普通奖励项，概率乘以父概率
@@ -100,29 +86,6 @@ export function getRewardDetails(
         }
     }
 
-    // 检查是否需要归一化权重
-    const isFlatList = childRewards.every((item) => !item.child || item.child.length === 0)
-    if (isFlatList && currentDropMode !== "Sequence") {
-        // 计算总权重
-        const totalWeight = childRewards.reduce((sum, item) => sum + item.p, 0)
-        // 归一化权重，确保总和为1
-        if (totalWeight > 0) {
-            const normalizedChildRewards = childRewards.map((item) => ({
-                ...item,
-                pp: item.p / totalWeight,
-                times: 1 / (item.p / totalWeight),
-            }))
-
-            return {
-                id: rewardId,
-                t: "Reward",
-                p: parentProbability,
-                m: currentDropMode,
-                child: normalizedChildRewards,
-            }
-        }
-    }
-
     const result: RewardItem = {
         id: rewardId,
         t: "Reward",
@@ -131,8 +94,9 @@ export function getRewardDetails(
         child: childRewards,
     }
 
-    if (currentDropMode === "Sequence" && isRoot) {
-        result.totalP = result.child?.reduce((sum, child) => sum + child.p, 0) || 0
+    if (isRoot) {
+        const totalP = result.child?.reduce((sum, child) => sum + child.p, 0) || 0
+        if (currentDropMode === "Sequence") result.totalP = totalP
         const calculatePP = (item: RewardItem, parentPP: number): void => {
             if (item.child && item.child.length > 0) {
                 const childTotalP = item.child.reduce((sum, child) => sum + child.p, 0)
@@ -146,7 +110,7 @@ export function getRewardDetails(
         }
         if (result.child) {
             result.child.forEach((child) => {
-                child.pp = child.p / result.totalP!
+                child.pp = child.p / totalP
                 calculatePP(child, child.pp!)
             })
         }

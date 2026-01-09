@@ -111,6 +111,44 @@ export const useUIStore = defineStore("ui", {
                 this.successMessage = ""
             }, 3000)
         },
+        timeDistancePassed(time: number) {
+            const now = this.timeNow
+            const diff = now - time
+            const diffDay = Math.floor(diff / (1000 * 60 * 60 * 24))
+            if (diffDay > 0) {
+                return `${diffDay}天前`
+            }
+            const diffHour = Math.floor(diff / (1000 * 60 * 60))
+            if (diffHour > 0) {
+                return `${diffHour}小时前`
+            }
+            const diffMinute = Math.floor(diff / (1000 * 60))
+            if (diffMinute > 0) {
+                return `${diffMinute}分钟前`
+            }
+            const diffSecond = Math.floor(diff / 1000)
+            if (diffSecond > 0) {
+                return `${diffSecond}秒前`
+            }
+            return "刚刚"
+        },
+        timeDistanceFuture(time: number) {
+            const now = this.timeNow
+            const diff = time - now
+            const diffDay = Math.floor(diff / (1000 * 60 * 60 * 24))
+            if (diffDay > 0) {
+                return `${diffDay}天后`
+            }
+            const diffHour = Math.floor(diff / (1000 * 60 * 60))
+            if (diffHour > 0) {
+                return `${diffHour}小时后`
+            }
+            const diffMinute = Math.floor(diff / (1000 * 60))
+            if (diffMinute > 0) {
+                return `${diffMinute}分钟后`
+            }
+            return "已过期"
+        },
         // 显示确认对话框
         async showDialog(title: string, content: string) {
             this.dialogVisible = true

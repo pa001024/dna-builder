@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from "vue"
-import { DNAAPI, DNAWeaponDetail } from "dna-api"
+import { DNAAPI, DNAWeaponDetailBean } from "dna-api"
 import { useSettingStore } from "../store/setting"
 import { useRouter, useRoute } from "vue-router"
 import { useUIStore } from "../store/ui"
@@ -12,21 +12,20 @@ let api: DNAAPI
 const router = useRouter()
 const route = useRoute()
 
-const weaponDetail = ref<DNAWeaponDetail | null>(null)
+const weaponDetail = ref<DNAWeaponDetailBean | null>(null)
 const loading = ref(true)
 
 const weaponId = computed(() => route.params.weaponId as string)
 const weaponEid = computed(() => route.params.weaponEid as string)
 
 onMounted(async () => {
-    const user = await setting.getCurrentUser()
-    if (!user) {
+    const p = await setting.getDNAAPI()
+    if (!p) {
         ui.showErrorMessage("请先登录")
         router.push("/login")
         return
     }
-
-    api = new DNAAPI(user.dev_code, user.token)
+    api = p
     await loadWeaponDetail()
 })
 

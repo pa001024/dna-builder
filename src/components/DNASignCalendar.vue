@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue"
-import { DNAAPI, DNACalendarSignRes, DNATaskProcessRes, DNADayAward } from "dna-api"
+import { DNAAPI, DNAGameSignInDayAward, DNAGameSignInShowDataBean, DNAUserTaskProcessEntity } from "dna-api"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
-
+import { useLocalStorage } from "@vueuse/core"
+defineProps<{
+    nobtn?: boolean
+}>()
 const setting = useSettingStore()
 const ui = useUIStore()
 
@@ -13,8 +16,9 @@ const loading = ref(true)
 const signing = ref(false)
 const bbsSigning = ref(false)
 
-const calendarData = ref<DNACalendarSignRes | null>(null)
-const taskProcess = ref<DNATaskProcessRes | null>(null)
+const calendarData = useLocalStorage<DNAGameSignInShowDataBean>("dna.sign.calendarData", {} as any)
+const taskProcess = useLocalStorage<DNAUserTaskProcessEntity>("dna.sign.taskProcess", {} as any)
+const lastUpdateTime = useLocalStorage("dna.sign.lastUpdateTime", 0)
 
 const errorMessage = ref("")
 
@@ -29,12 +33,17 @@ onMounted(async () => {
     await loadData()
 })
 
-async function loadData() {
+async function loadData(force = false) {
     try {
+        if (lastUpdateTime.value > 0 && ui.timeNow - lastUpdateTime.value < 1000 * 60 * 5 && !force) {
+            loading.value = false
+            return
+        }
         loading.value = true
         errorMessage.value = ""
 
         await Promise.all([loadCalendarData(), loadTaskProcess()])
+        lastUpdateTime.value = ui.timeNow
     } catch (e) {
         errorMessage.value = "加载数据失败"
         ui.showErrorMessage("加载数据失败")
@@ -69,7 +78,7 @@ async function loadTaskProcess() {
     }
 }
 
-async function handleGameSign(dayAward: DNADayAward) {
+async function handleGameSign(dayAward: DNAGameSignInDayAward) {
     if (!calendarData.value) return
 
     try {
@@ -115,7 +124,7 @@ const calendarDays = computed(() => {
 
     const totalDays = calendarData.value.period.overDays
     const today = new Date().getDate()
-    const awardMap = new Map<number, DNADayAward>()
+    const awardMap = new Map<number, DNAGameSignInDayAward>()
     const signedCount = calendarData.value.signinTime || 0
     const todaySignin = calendarData.value.todaySignin || false
     const maybeSignedDays = signedCount + (todaySignin ? 0 : 1)
@@ -161,31 +170,36 @@ const firstUnsignedDay = computed(() => {
     }
     return null
 })
+
+defineExpose({
+    loadData,
+    lastUpdateTime,
+})
 </script>
 <template>
     <div class="space-y-6">
+        <div class="flex justify-between items-center" v-if="!nobtn">
+            <span class="text-xs text-gray-500">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
+            <Tooltip tooltip="刷新" side="bottom">
+                <button class="btn btn-primary btn-square btn-sm" @click="loadData(true)">
+                    <Icon icon="ri:refresh-line" />
+                </button>
+            </Tooltip>
+        </div>
         <div v-if="loading" class="flex justify-center items-center h-64">
             <span class="loading loading-spinner loading-lg"></span>
         </div>
 
         <div v-else-if="errorMessage" class="flex flex-col items-center justify-center h-64">
             <p class="text-lg mb-4 text-error">{{ errorMessage }}</p>
-            <button class="btn btn-primary" @click="loadData">重试</button>
+            <button class="btn btn-primary" @click="loadData(true)">重试</button>
         </div>
 
         <div v-else class="space-y-6">
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body">
-                    <h3 class="card-title mb-4">
-                        签到日历
-
-                        <Tooltip tooltip="刷新" side="bottom">
-                            <button class="ml-auto btn btn-primary btn-square btn-sm" @click="loadData">
-                                <Icon icon="ri:refresh-line" />
-                            </button>
-                        </Tooltip>
-                    </h3>
-                    <div v-if="calendarData" class="flex items-center justify-between">
+                    <h3 class="card-title mb-4">签到日历</h3>
+                    <div v-if="calendarData?.period" class="flex items-center justify-between">
                         <div class="text-sm">
                             <span class="text-base-content/70">周期:</span>
                             <span class="font-bold ml-2">{{ calendarData.period.name }}</span>
@@ -207,7 +221,7 @@ const firstUnsignedDay = computed(() => {
                         <div v-else-if="calendarData.todaySignin" class="badge badge-success">今日已签到</div>
                     </div>
 
-                    <div v-if="calendarData" class="space-y-4">
+                    <div v-if="calendarData?.period" class="space-y-4">
                         <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
                             <div class="flex items-center gap-4">
                                 <img :src="calendarData.roleInfo.headUrl" alt="角色头像" class="w-12 h-12 rounded-full" />

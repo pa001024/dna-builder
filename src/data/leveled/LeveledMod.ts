@@ -46,13 +46,13 @@ export class LeveledMod implements Mod {
      * @param id MOD的ID
      * @returns 如果存在则返回true，否则返回false
      */
-    static fromDNA(dnaMod: import("dna-api").DNARoleMod) {
-        if (modMap.has(dnaMod.id)) {
-            return new LeveledMod(dnaMod.id)
+    static fromDNA(dnaMod: import("dna-api").DNAModesBean) {
+        if (modMap.has(+dnaMod.id)) {
+            return new LeveledMod(+dnaMod.id)
         }
-        if (dnaMod.id == -1) return null
+        if (+dnaMod.id == -1) return null
         return new LeveledMod({
-            id: dnaMod.id,
+            id: +dnaMod.id,
             名称: dnaMod.name || "?",
             系列: "?",
             品质: (dnaMod.quality && ["白", "绿", "蓝", "紫", "金"][dnaMod.quality - 1]) || "白",
@@ -175,7 +175,7 @@ export class LeveledMod implements Mod {
                         vals.push(...acc[key])
                     } else {
                         let currentValue = (mv / (this.maxLevel + 1)) * (lv + 1)
-                        if (key === "神智回复" || key === "最大耐受") currentValue = Math.floor(currentValue)
+                        if (key === "神智回复" || key === "最大耐受") currentValue = Math.ceil(currentValue)
                         acc[key] = currentValue
                         vals.push(currentValue)
                     }
@@ -198,7 +198,7 @@ export class LeveledMod implements Mod {
             const maxValue = this._originalModData[prop] || 0
             if (maxValue) {
                 let currentValue = (maxValue / (this.maxLevel + 1)) * (lv + 1)
-                if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.floor(currentValue)
+                if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.ceil(currentValue)
                 this[prop] = currentValue
             }
         })
@@ -207,7 +207,7 @@ export class LeveledMod implements Mod {
             const buff = this.buff!
             const maxValue = buff[prop] || 0
             let currentValue = (maxValue / (10 + 1)) * (lv + 1)
-            if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.floor(currentValue)
+            if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.ceil(currentValue)
             this[prop] = this[prop] ? this[prop] + currentValue : currentValue
             if (buff.描述.includes(`{%}`)) {
                 buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(buff.baseValue * 100).toFixed(1)}%`)

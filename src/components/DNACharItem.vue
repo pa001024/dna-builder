@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { DNARoleChar } from "dna-api"
+import { DNARoleCharsBean } from "dna-api"
 import { useUIStore } from "../store/ui"
 
 defineProps<{
-    char: DNARoleChar
+    char: DNARoleCharsBean
 }>()
 
 const ui = useUIStore()

@@ -135,6 +135,7 @@ const getAnimationDelay = (index: number) => {
                         <!-- 阵营 -->
                         <p v-if="char.阵营" class="text-xs text-base-content/60 truncate">
                             {{ $t(char.阵营) }}
+                            {{ char.版本 }}
                         </p>
 
                         <!-- 标签 -->
@@ -179,7 +180,12 @@ const getAnimationDelay = (index: number) => {
         <div
             class="flex-none bg-base-100 border-t border-base-200 px-4 py-2 text-sm text-base-content/60 flex items-center justify-between"
         >
-            <span>{{ $t("共") }} {{ filteredChars.length }} {{ $t("个角色") }}</span>
+            <span
+                >{{ $t("共") }} {{ filteredChars.length }}
+
+                {{ $t("个角色") }}</span
+            >
+            <div class="text-xs text-base-content/60">未上线内容可能会发生改变</div>
             <span v-if="activeTab !== '全部'" class="badge badge-primary badge-sm">{{ activeTab }}</span>
         </div>
     </div>

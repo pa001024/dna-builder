@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { DNAPost } from "dna-api"
+import { DNAPostListBean } from "dna-api"
 import { useUIStore } from "../store/ui"
 const ui = useUIStore()
 
 defineProps<{
-    post: DNAPost
+    post: DNAPostListBean
 }>()
 </script>
 

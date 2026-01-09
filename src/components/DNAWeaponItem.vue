@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { DNARoleWeapon } from "dna-api"
+import type { DNAWeaponBean } from "dna-api"
 import { useUIStore } from "../store/ui"
 
 defineProps<{
-    weapon: DNARoleWeapon
+    weapon: DNAWeaponBean
 }>()
 
 const ui = useUIStore()

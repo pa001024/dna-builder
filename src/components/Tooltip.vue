@@ -1,10 +1,15 @@
 <script lang="ts" setup>
 import { ref } from "vue"
 import { TooltipArrow, TooltipContent, TooltipPortal, TooltipProvider, TooltipRoot, TooltipTrigger } from "radix-vue"
-defineProps<{
-    tooltip: string
-    side: "top" | "right" | "bottom" | "left"
-}>()
+withDefaults(
+    defineProps<{
+        tooltip: string
+        side?: "top" | "right" | "bottom" | "left"
+    }>(),
+    {
+        side: "top",
+    },
+)
 const forceOpen = ref(false)
 </script>
 
@@ -16,7 +21,7 @@ const forceOpen = ref(false)
             </TooltipTrigger>
             <TooltipPortal>
                 <TooltipContent
-                    class="z-10000 bg-base-100 shadow-lg shadow-base-content/20 px-[15px] py-2.5 text-[15px] data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade select-none rounded-sm leading-none will-change-[transform,opacity]"
+                    class="z-10000 bg-base-100 shadow-lg shadow-base-content/20 px-3.75 py-2.5 text-[15px] data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade select-none rounded-sm leading-none will-change-[transform,opacity]"
                     :side-offset="5"
                     :side="side"
                 >

@@ -78,6 +78,19 @@ describe("getRewardDetails", () => {
         }
     })
 
+    it("应该正确计算复合模式的pp值（reward id 51537）", () => {
+        const result = getRewardDetails(51537)
+        expect(result).not.toBeNull()
+        expect(result?.m).toBe("Independent")
+
+        if (result?.child) {
+            expect(result.child[0].pp).toBeCloseTo(2 / 3, 6)
+            expect(result.child[0].child?.[0].pp).toBeCloseTo(0, 6)
+            expect(result.child[0].child?.[1].pp).toBeCloseTo(1 / 3, 6)
+            expect(result.child[0].child?.[2].pp).toBeCloseTo(1 / 3, 6)
+        }
+    })
+
     it("应该正确计算多层嵌套结构的pp值", () => {
         const result = getRewardDetails(51)
         expect(result).not.toBeNull()

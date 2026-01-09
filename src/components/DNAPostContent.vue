@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { DNAPostContent, PostContentType } from "dna-api"
+import { DNACommentContentBean, DNAPostContentBean, PostContentType } from "dna-api"
 
 defineProps<{
-    contents: DNAPostContent[]
+    contents: (DNAPostContentBean | DNACommentContentBean)[]
 }>()
 </script>
 <template>
@@ -23,16 +23,16 @@ defineProps<{
         <!-- 视频内容 -->
         <div v-else-if="content.contentType === PostContentType.VIDEO" class="flex justify-center">
             <video
-                v-if="content.contentVideo?.videoUrl"
-                :src="content.contentVideo.videoUrl"
+                v-if="(content as DNAPostContentBean).contentVideo?.videoUrl"
+                :src="(content as DNAPostContentBean).contentVideo.videoUrl"
                 controls
                 class="max-w-full rounded-lg object-cover shadow-md"
             >
                 您的浏览器不支持视频播放
             </video>
             <img
-                v-else-if="content.contentVideo?.coverUrl"
-                :src="content.contentVideo.coverUrl"
+                v-else-if="(content as DNAPostContentBean).contentVideo?.coverUrl"
+                :src="(content as DNAPostContentBean).contentVideo.coverUrl"
                 :alt="`视频封面 ${index + 1}`"
                 class="max-w-full rounded-lg shadow-md"
             />

@@ -36,3 +36,4 @@ src/game/*.md
 .moonagent/
 .trae/
 tools/i18n_diff.json
+externals/dna-api/java/

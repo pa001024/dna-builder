@@ -43,17 +43,19 @@ export const cronPlugin = () => {
             await sleep(3000)
             try {
                 const dnaAPI = getDNAAPI()
-                const res = await dnaAPI.getDefaultRoleForTool()
+                const res = await dnaAPI.defaultRoleForTool()
                 if (res.is_success && res.data?.instanceInfo) {
                     const missions = res.data.instanceInfo.map((item) => item.instances.map((v) => v.name))
                     await updateServerMH(server, missions)
                     is_success = true
+                } else {
+                    console.error(`${new Date().toLocaleString()} 同步失败: ${res.msg} retry: ${i}`)
                 }
             } catch (e: any) {
                 if (e.message === "duplicate missions") {
                     console.error(`${new Date().toLocaleString()} 重复值 - server: ${server}`)
                 } else {
-                    // console.debug(`${new Date().toLocaleString()} 同步失败: ${e} retry: ${i}`)
+                    // console.log(`${new Date().toLocaleString()} 同步失败: ${e} retry: ${i}`)
                 }
             }
             if (is_success) {

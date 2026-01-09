@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from "vue"
-import { DNAAPI, type DNAPostDetailRes } from "dna-api"
+import { DNAAPI, DNAPostDetailResponse } from "dna-api"
 import { useSettingStore } from "../store/setting"
 import { useRouter, useRoute } from "vue-router"
 import { useUIStore } from "../store/ui"
@@ -11,7 +11,7 @@ let api: DNAAPI
 const router = useRouter()
 const route = useRoute()
 
-const postRes = ref<DNAPostDetailRes | null>(null)
+const postRes = ref<DNAPostDetailResponse | null>(null)
 const loading = ref(true)
 const commentLoading = ref(false)
 const commentContent = ref("")
@@ -47,7 +47,7 @@ async function loadPostDetail() {
 }
 
 async function follow(userId: string, unfollow?: boolean) {
-    const res = await api.doFollow(userId, unfollow)
+    const res = await api.followUser(userId, unfollow)
     if (res.is_success) {
         await api.getFollowState(userId)
     }
@@ -148,7 +148,6 @@ async function submitComment() {
 
                         <!-- 帖子标签 -->
                         <div class="flex flex-wrap gap-2">
-                            <span v-if="postRes.postDetail.isTop === 1" class="badge badge-primary text-xs">置顶</span>
                             <span v-if="postRes.postDetail.isElite === 1" class="badge badge-secondary text-xs">精华</span>
                             <span v-if="postRes.postDetail.isOfficial === 1" class="badge badge-info text-xs">官方</span>
                             <span class="badge badge-outline text-xs" v-for="topic in postRes.postDetail.topics">

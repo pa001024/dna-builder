@@ -247,3 +247,5 @@ mcp_server/
 - Prefer native APIs over libraries when possible
 - Follow existing patterns in the codebase
 - Use `unplugin-vue-components/vite` for automatic component imports
+- Use `bun -e "code"` for inline code execution
+- When you start a complex task, first use git add to add it to the staging area. Then you can use checkout to revert incorrect changes; otherwise, using git checkout or rm to delete unstaged files is not allowed.

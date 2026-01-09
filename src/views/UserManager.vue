@@ -26,7 +26,7 @@ const loadUsers = async () => {
 }
 
 // 添加用户
-const addUser = async (data: { dev_code: string; user: import("dna-api").DNALoginRes }) => {
+const addUser = async (data: { dev_code: string; user: import("dna-api").DNAUserDataBean }) => {
     const userData = {
         uid: data.user.userId,
         name: data.user.userName,

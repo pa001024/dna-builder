@@ -175,40 +175,46 @@ const teamWeaponOptions = computed(() =>
 
 // 创建CharBuild实例
 const charBuild = computed(() => {
-    const melee = new LeveledWeapon(
-        charSettings.value.meleeWeapon,
-        charSettings.value.meleeWeaponRefine,
-        charSettings.value.meleeWeaponLevel,
-        inv.getWBuffLv(charSettings.value.meleeWeapon),
-    )
-    const ranged = new LeveledWeapon(
-        charSettings.value.rangedWeapon,
-        charSettings.value.rangedWeaponRefine,
-        charSettings.value.rangedWeaponLevel,
-        inv.getWBuffLv(charSettings.value.rangedWeapon),
-    )
-    const b = new CharBuild({
-        char: new LeveledChar(selectedChar.value, charSettings.value.charLevel),
-        auraMod: new LeveledMod(charSettings.value.auraMod),
-        charMods: selectedCharMods.value,
-        meleeMods: selectedMeleeMods.value,
-        rangedMods: selectedRangedMods.value,
-        skillWeaponMods: selectedSkillWeaponMods.value,
-        skillLevel: charSettings.value.charSkillLevel,
-        buffs: selectedBuffs.value,
-        melee,
-        ranged,
-        baseName: charSettings.value.baseName,
-        imbalance: charSettings.value.imbalance,
-        hpPercent: charSettings.value.hpPercent,
-        resonanceGain: charSettings.value.resonanceGain,
-        enemyId: charSettings.value.enemyId,
-        enemyLevel: charSettings.value.enemyLevel,
-        enemyResistance: charSettings.value.enemyResistance,
-        targetFunction: charSettings.value.targetFunction,
-        timeline: getTimelineByName(charSettings.value.baseName),
-    })
-    return b
+    try {
+        const melee = new LeveledWeapon(
+            charSettings.value.meleeWeapon,
+            charSettings.value.meleeWeaponRefine,
+            charSettings.value.meleeWeaponLevel,
+            inv.getWBuffLv(charSettings.value.meleeWeapon),
+        )
+        const ranged = new LeveledWeapon(
+            charSettings.value.rangedWeapon,
+            charSettings.value.rangedWeaponRefine,
+            charSettings.value.rangedWeaponLevel,
+            inv.getWBuffLv(charSettings.value.rangedWeapon),
+        )
+        const b = new CharBuild({
+            char: new LeveledChar(selectedChar.value, charSettings.value.charLevel),
+            auraMod: new LeveledMod(charSettings.value.auraMod),
+            charMods: selectedCharMods.value,
+            meleeMods: selectedMeleeMods.value,
+            rangedMods: selectedRangedMods.value,
+            skillWeaponMods: selectedSkillWeaponMods.value,
+            skillLevel: charSettings.value.charSkillLevel,
+            buffs: selectedBuffs.value,
+            melee,
+            ranged,
+            baseName: charSettings.value.baseName,
+            imbalance: charSettings.value.imbalance,
+            hpPercent: charSettings.value.hpPercent,
+            resonanceGain: charSettings.value.resonanceGain,
+            enemyId: charSettings.value.enemyId,
+            enemyLevel: charSettings.value.enemyLevel,
+            enemyResistance: charSettings.value.enemyResistance,
+            targetFunction: charSettings.value.targetFunction,
+            timeline: getTimelineByName(charSettings.value.baseName),
+        })
+        return b
+    } catch (error) {
+        localStorage.removeItem(`build.${selectedChar.value}`)
+        location.reload()
+        return {} as CharBuild
+    }
 })
 
 // 计算属性

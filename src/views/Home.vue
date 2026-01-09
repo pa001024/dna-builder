@@ -1,8 +1,10 @@
 <script lang="tsx" setup>
+import { onMounted, ref } from "vue"
 import { env } from "../env"
 import pg from "../../package.json"
 import type { IconTypes } from "../components/Icon.vue"
 import { useGameStore } from "../store/game"
+const downloadlink = ref("https://github.com/pa001024/dna-builder/releases/latest")
 
 const items = [
     {
@@ -28,6 +30,17 @@ const items = [
 ] satisfies { name: string; path: string; icon: IconTypes }[]
 
 const game = useGameStore()
+
+onMounted(() => {
+    if (env.isApp) {
+        return
+    }
+    fetch("https://rm-build.oss-cn-hongkong.aliyuncs.com/latest.json")
+        .then((res) => res.json())
+        .then((data) => {
+            downloadlink.value = data.platforms["windows-x86_64"].url
+        })
+})
 </script>
 
 <template>
@@ -71,12 +84,7 @@ const game = useGameStore()
                         </div>
 
                         <div class="inline-flex flex-wrap gap-3 sm:gap-4 justify-center">
-                            <a
-                                v-if="!env.isApp"
-                                href="https://github.com/pa001024/dna-builder/releases/latest"
-                                target="_blank"
-                                class="btn btn-primary btn-sm sm:btn-md"
-                            >
+                            <a v-if="!env.isApp" :href="downloadlink" target="_blank" class="btn btn-primary btn-sm sm:btn-md">
                                 <Icon icon="ri:windows-fill" class="w-5 h-5 sm:w-6 sm:h-6" />
                                 <span class="hidden sm:inline">{{ $t("home.download") }}</span>
                             </a>

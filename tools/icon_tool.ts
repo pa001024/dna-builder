@@ -213,7 +213,7 @@ async function findUsedIcons(): Promise<Set<string>> {
                 })
             }
 
-            const stringLiteralIcon = trimmedLine.match(/["']([^"']+)["']/)
+            const stringLiteralIcon = trimmedLine.match(/["']([^"']+?)["']/)
             if (stringLiteralIcon) {
                 const value = stringLiteralIcon[1]
                 if (
@@ -238,16 +238,18 @@ async function findUsedIcons(): Promise<Set<string>> {
             }
         }
 
-        const templateConditionals = content.matchAll(/:icon\s*=\s*[^"']+\?\s*["']([^"']+)["']\s*:/g)
-        for (const match of templateConditionals) {
-            const icon = match[1]
-            usedIcons.add(icon)
-        }
-
-        const ternaryElse = content.matchAll(/:icon\s*=\s*[^"']+\?\s*[^:]+:\s*["']([^"']+)["']/g)
-        for (const match of ternaryElse) {
-            const icon = match[1]
-            usedIcons.add(icon)
+        // 匹配模板中的三元表达式，如 :icon="guide.isLiked ? 'ri:heart-fill' : 'ri:heart-line'"
+        // 处理嵌套引号：外层是双引号，内层是单引号
+        const ternaryMatches = content.matchAll(/:icon\s*=\s*"[^"]*?\?[^"]*?['"]([^'"]+)['"][^"]*?:[^"]*?['"]([^'"]+)['"][^"]*?"/g)
+        for (const match of ternaryMatches) {
+            // match[1] 是第一个分支（? 后面的值）
+            // match[2] 是第二个分支（: 后面的值）
+            if (match[1] && match[1].includes(":")) {
+                usedIcons.add(match[1])
+            }
+            if (match[2] && match[2].includes(":")) {
+                usedIcons.add(match[2])
+            }
         }
     }
 

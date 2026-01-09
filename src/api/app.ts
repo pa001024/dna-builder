@@ -95,7 +95,9 @@ class TauriResponse {
 }
 
 export async function tauriFetch(url: RequestInfo | URL, options?: RequestInit): Promise<Response> {
-    if (!env.isApp) return await serverFetch(url, options)
+    if (!env.isApp) {
+        throw new Error("网页不给用了, 请下载APP")
+    }
     const method = options?.method ?? "GET"
 
     let body: string | undefined
@@ -165,5 +167,5 @@ export async function serverFetch(url: RequestInfo | URL, options?: RequestInit)
 }
 
 export const getMapAPI = () => {
-    return new DNAAPI("", "", { fetchFn: tauriFetch, is_h5: true })
+    return new DNAAPI({ fetchFn: tauriFetch })
 }

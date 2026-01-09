@@ -36,7 +36,7 @@ export class MihanNotify {
         const api = await setting.getDNAAPI()
         if (api) {
             // 用户登录尝试使用DNAAPI获取密函
-            const data = await api.getDefaultRoleForTool()
+            const data = await api.defaultRoleForTool()
             if (data?.data?.instanceInfo) {
                 const missions = data.data.instanceInfo.map((v) => v.instances.map((v) => v.name.replace("勘探/无尽", "勘察/无尽")))
                 if (!missions || JSON.stringify(missions) === JSON.stringify(this.mihanData.value)) return false

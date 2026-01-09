@@ -67,7 +67,10 @@ const login = async () => {
     try {
         // 向父窗口发送登录成功消息
         if (window.parent) {
-            const api = new DNAAPI(dev_code.value, undefined, { fetchFn: tauriFetch })
+            const api = new DNAAPI({
+                dev_code: dev_code.value,
+                fetchFn: tauriFetch,
+            })
             const data = await api.login(phone.value, code.value)
             if (data.code === 200 && data.data) {
                 window.parent.postMessage(

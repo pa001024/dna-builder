@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from "vue"
-import { DNAAPI, DNACharDetail } from "dna-api"
+import { DNAAPI, DNACharDetailBean } from "dna-api"
 import { useSettingStore } from "../store/setting"
 import { useRouter, useRoute } from "vue-router"
 import { useUIStore } from "../store/ui"
 import { LeveledMod } from "../data"
+import { initEmojiDict } from "@/util"
 
 const setting = useSettingStore()
 const ui = useUIStore()
@@ -12,28 +13,28 @@ let api: DNAAPI
 const router = useRouter()
 const route = useRoute()
 
-const charDetail = ref<DNACharDetail | null>(null)
+const charDetail = ref<DNACharDetailBean | null>(null)
 const loading = ref(true)
 
 const charId = computed(() => route.params.charId as string)
 const charEid = computed(() => route.params.charEid as string)
 
 onMounted(async () => {
-    const user = await setting.getCurrentUser()
-    if (!user) {
+    const p = await setting.getDNAAPI()
+    if (!p) {
         ui.showErrorMessage("请先登录")
         router.push("/login")
         return
     }
-
-    api = new DNAAPI(user.dev_code, user.token)
+    api = p
+    await initEmojiDict()
     await loadRoleDetail()
 })
 
 async function loadRoleDetail() {
     try {
         loading.value = true
-        const res = await api.getCharDetail(charId.value, charEid.value)
+        const res = await api.getRoleDetail(charId.value, charEid.value)
         if (res.is_success && res.data?.charDetail?.attribute) {
             charDetail.value = res.data.charDetail
         } else {
