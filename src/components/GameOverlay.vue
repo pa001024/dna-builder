@@ -22,10 +22,10 @@ const localSettings = ref<GameSettings>({ ...props.settings })
 // 监听外部设置变化
 watch(
     () => props.settings,
-    (newSettings) => {
+    newSettings => {
         localSettings.value = { ...newSettings }
     },
-    { deep: true },
+    { deep: true }
 )
 
 const isOnScreen = (position: { x: number; y: number }) => {
@@ -52,7 +52,7 @@ const closeSettings = () => {
 }
 
 const currentMonster = computed(() => {
-    const data = monsterData.find((monster) => monster.id === localSettings.value.monsterId)
+    const data = monsterData.find(monster => monster.id === localSettings.value.monsterId)
     if (!data) return
     return new LeveledMonster(data, localSettings.value.monsterLevel)
 })
@@ -86,12 +86,12 @@ const currentMonster = computed(() => {
                 <div
                     class="h-full bg-linear-to-r from-green-600 to-emerald-400 transition-all duration-200"
                     :style="{ width: `${(playerStats.currentHP / playerStats.maxHP) * 100}%` }"
-                ></div>
+                />
                 <!-- Shield Overlay -->
                 <div
                     class="absolute top-0 left-0 h-full bg-blue-500/30 border-r border-blue-400 transition-all duration-200"
                     :style="{ width: `${(playerStats.currentShield / playerStats.maxShield) * 100}%` }"
-                ></div>
+                />
                 <div class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white drop-shadow-md gap-2">
                     <Icon icon="ri:heart-line" class="text-red-500" />
                     {{ Math.floor(playerStats.currentHP) }} / {{ playerStats.maxHP }}
@@ -104,7 +104,7 @@ const currentMonster = computed(() => {
                 <div
                     class="h-full bg-linear-to-r from-purple-600 to-fuchsia-400 transition-all duration-200"
                     :style="{ width: `${(playerStats.currentSanity / playerStats.maxSanity) * 100}%` }"
-                ></div>
+                />
                 <div class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white/80">
                     {{ Math.floor(playerStats.currentSanity) }} / {{ playerStats.maxSanity }}
                 </div>
@@ -117,7 +117,7 @@ const currentMonster = computed(() => {
                     <div
                         class="h-full bg-yellow-400 transition-all duration-100"
                         :style="{ width: `${Math.min(100, (playerStats.electricEnergy / 100) * 100)}%` }"
-                    ></div>
+                    />
                 </div>
                 <span class="text-xs font-mono text-yellow-400">{{ Math.floor(playerStats.electricEnergy) }}</span>
             </div>
@@ -137,8 +137,8 @@ const currentMonster = computed(() => {
         <!-- --- HUD: Top Left Settings --- -->
         <div class="absolute top-4 left-4 pointer-events-auto">
             <button
-                @click="isSettingsOpen = true"
                 class="p-3 bg-slate-800/80 hover:bg-slate-700 border border-slate-600 rounded-xl text-white transition-colors"
+                @click="isSettingsOpen = true"
             >
                 <Icon icon="ri:settings-3-line" />
             </button>
@@ -178,20 +178,22 @@ const currentMonster = computed(() => {
                         </svg>
                     </div>
                 </div>
-                <div class="text-[10px] font-bold text-white drop-shadow-md whitespace-nowrap">{{ m.name }}</div>
+                <div class="text-[10px] font-bold text-white drop-shadow-md whitespace-nowrap">
+                    {{ m.name }}
+                </div>
                 <div class="text-[10px] font-bold text-white drop-shadow-md mb-1 whitespace-nowrap">Lv. {{ m.level }}</div>
                 <div class="w-full h-1.5 bg-black/50 rounded-full overflow-hidden mb-0.5">
-                    <div class="h-full bg-red-500" :style="{ width: `${(m.currentHP / m.maxHP) * 100}%` }"></div>
+                    <div class="h-full bg-red-500" :style="{ width: `${(m.currentHP / m.maxHP) * 100}%` }" />
                 </div>
                 <div v-if="m.currentShield > 0" class="w-full h-1 bg-black/50 rounded-full overflow-hidden">
-                    <div class="h-full bg-blue-400" :style="{ width: `${(m.currentShield / m.maxShield) * 100}%` }"></div>
+                    <div class="h-full bg-blue-400" :style="{ width: `${(m.currentShield / m.maxShield) * 100}%` }" />
                 </div>
             </div>
         </template>
 
         <!-- 伤害数字 -->
         <div
-            v-for="t in floatingTexts.filter((t) => t.screenPosition)"
+            v-for="t in floatingTexts.filter(t => t.screenPosition)"
             :key="t.id"
             class="absolute font-black text-xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]"
             :style="{
@@ -216,8 +218,8 @@ const currentMonster = computed(() => {
                     <div>
                         <label class="block text-sm font-bold text-slate-400 mb-2">怪物名称</label>
                         <Select
-                            class="input input-bordered input-primary w-full"
                             v-model="localSettings.monsterId"
+                            class="input input-bordered input-primary w-full"
                             @change="updateSettings"
                         >
                             <SelectItem v-for="monster in monsterData" :key="monster.id" :value="monster.id">
@@ -240,12 +242,12 @@ const currentMonster = computed(() => {
                     <div>
                         <label class="block text-sm font-bold text-slate-400 mb-2">怪物数量</label>
                         <input
+                            v-model="localSettings.monsterCount"
                             type="range"
                             min="1"
                             max="50"
-                            v-model="localSettings.monsterCount"
-                            @change="updateSettings"
                             class="w-full accent-indigo-500"
+                            @change="updateSettings"
                         />
                         <div class="text-right text-xs text-slate-500">{{ localSettings.monsterCount }} 实体</div>
                     </div>
@@ -253,18 +255,18 @@ const currentMonster = computed(() => {
                     <div>
                         <label class="block text-sm font-bold text-slate-400 mb-2">初始等级</label>
                         <input
-                            type="number"
                             v-model.number="localSettings.monsterLevel"
-                            @change="updateSettings"
+                            type="number"
                             class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-indigo-500"
+                            @change="updateSettings"
                         />
                     </div>
 
                     <div class="flex items-center justify-between">
                         <label class="text-sm font-bold text-slate-400">生成模式</label>
                         <button
-                            @click="toggleSpawnType"
                             class="px-4 py-2 bg-slate-700 rounded-lg text-xs font-bold uppercase hover:bg-slate-600"
+                            @click="toggleSpawnType"
                         >
                             {{ localSettings.spawnType }}
                         </button>
@@ -273,12 +275,12 @@ const currentMonster = computed(() => {
                     <div class="flex items-center justify-between">
                         <label class="text-sm font-bold text-slate-400">自动升级 (+5 / {{ localSettings.autoLevelInterval }}s)</label>
                         <button
-                            @click="toggleAutoLevelUp"
                             :class="`w-12 h-6 rounded-full transition-colors relative ${localSettings.autoLevelUp ? 'bg-green-500' : 'bg-slate-600'}`"
+                            @click="toggleAutoLevelUp"
                         >
                             <div
                                 :class="`absolute top-1 bottom-1 left-1 w-4 bg-white rounded-full transition-transform ${localSettings.autoLevelUp ? 'translate-x-6' : ''}`"
-                            ></div>
+                            />
                         </button>
                     </div>
 
@@ -288,31 +290,31 @@ const currentMonster = computed(() => {
                         </label>
                         <div class="flex gap-2">
                             <input
-                                type="number"
                                 v-model.number="localSettings.sanityRegenAmount"
-                                @change="updateSettings"
+                                type="number"
                                 class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-indigo-500"
                                 placeholder="Amount"
+                                @change="updateSettings"
                             />
                             <input
-                                type="number"
                                 v-model.number="localSettings.sanityRegenInterval"
-                                @change="updateSettings"
+                                type="number"
                                 class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-indigo-500"
                                 placeholder="Interval (s)"
+                                @change="updateSettings"
                             />
                         </div>
                     </div>
                 </div>
 
                 <button
-                    @click="closeSettings"
                     class="w-full mt-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-colors"
+                    @click="closeSettings"
                 >
                     应用
                 </button>
             </div>
-            <div class="modal-backdrop" @click="isSettingsOpen = false"></div>
+            <div class="modal-backdrop" @click="isSettingsOpen = false" />
         </dialog>
     </div>
 </template>

@@ -7,7 +7,7 @@ const route = useRoute()
 
 const draft = computed(() => {
     const id = Number(route.params.id)
-    const foundDraft = draftData.find((d) => d.id === id)
+    const foundDraft = draftData.find(d => d.id === id)
     if (!foundDraft) {
         throw new Error(`Draft with id ${id} not found`)
     }

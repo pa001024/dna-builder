@@ -22,7 +22,7 @@ export class BuildAgent {
         private config: OpenAIConfig,
         public charSettings: ReturnType<typeof useCharSettings>,
         public selectedChar: Ref<string>,
-        public inv: ReturnType<typeof useInvStore>,
+        public inv: ReturnType<typeof useInvStore>
     ) {
         this.client = new AIClient({
             ...config,
@@ -128,7 +128,7 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
                             charName: {
                                 type: "string",
                                 description: "角色名称（中文名）",
-                                enum: charData.map((c) => c.名称),
+                                enum: charData.map(c => c.名称),
                             },
                         },
                         required: ["charName"],
@@ -151,7 +151,7 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
                             buffName: {
                                 type: "string",
                                 description: "BUFF名称",
-                                enum: buffData.map((c) => c.名称),
+                                enum: buffData.map(c => c.名称),
                             },
                             level: {
                                 type: "number",
@@ -372,7 +372,7 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
     private setCharacter(charName: string): string {
         this.selectedChar.value = charName
 
-        const char = charData.find((c) => c.名称 === charName)
+        const char = charData.find(c => c.名称 === charName)
         if (char) {
             return `已切换到角色: ${charName}
 属性: ${char.属性}
@@ -394,7 +394,7 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
             if (index > -1) {
                 return `BUFF ${buffName} 已存在`
             }
-            const buff = buffData.find((b) => b.名称 === buffName)
+            const buff = buffData.find(b => b.名称 === buffName)
             if (!buff) {
                 return `未找到BUFF: ${buffName}`
             }
@@ -416,7 +416,7 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
         let mod: LeveledMod
         try {
             mod = new LeveledMod(modId, level ?? 10)
-        } catch (error) {
+        } catch {
             return `MOD ${modId} 无效`
         }
 
@@ -446,7 +446,7 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
      */
     private queryCharData(charName?: string): string {
         if (charName) {
-            const char = charData.find((c) => c.名称 === charName)
+            const char = charData.find(c => c.名称 === charName)
             if (!char) {
                 return `未找到角色: ${charName}`
             }
@@ -456,22 +456,22 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
                     属性: char.属性,
                     精通: char.精通,
                     同律武器: char.同律武器,
-                    技能: char.技能.map((s) => s.名称),
+                    技能: char.技能.map(s => s.名称),
                 },
                 null,
-                2,
+                2
             )
         }
 
         return JSON.stringify(
-            charData.map((c) => ({
+            charData.map(c => ({
                 名称: c.名称,
                 属性: c.属性,
                 精通: c.精通,
                 同律武器: c.同律武器,
             })),
             null,
-            2,
+            2
         )
     }
 
@@ -482,17 +482,17 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
         let mods = modData
 
         if (params.element) {
-            mods = mods.filter((m) => m.属性 === params.element)
+            mods = mods.filter(m => m.属性 === params.element)
         }
         if (params.modType) {
-            mods = mods.filter((m) => m.类型 === params.modType)
+            mods = mods.filter(m => m.类型 === params.modType)
         }
         if (params.series) {
-            mods = mods.filter((m) => m.系列 === params.series)
+            mods = mods.filter(m => m.系列 === params.series)
         }
         if (params.keywords) {
             const keyword = params.keywords.toLowerCase()
-            mods = mods.filter((m) => m.名称.toLowerCase().includes(keyword) || (m.效果 && m.效果.toLowerCase().includes(keyword)))
+            mods = mods.filter(m => m.名称.toLowerCase().includes(keyword) || (m.效果 && m.效果.toLowerCase().includes(keyword)))
         }
 
         // 限制返回数量
@@ -504,7 +504,7 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
                 results,
             },
             null,
-            2,
+            2
         )
     }
 
@@ -513,17 +513,17 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
      */
     private queryBuffData(buffName?: string): string {
         if (buffName) {
-            const buffs = buffData.filter((b) => b.名称.includes(buffName))
+            const buffs = buffData.filter(b => b.名称.includes(buffName))
             return JSON.stringify(buffs, null, 2)
         }
         return JSON.stringify(
-            buffData.map((b) => ({
+            buffData.map(b => ({
                 名称: b.名称,
                 描述: b.描述,
                 限定: b.限定,
             })),
             null,
-            2,
+            2
         )
     }
 
@@ -534,10 +534,10 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
         let weapons = weaponData
 
         if (params.weaponType) {
-            weapons = weapons.filter((w) => w.类型[0] === params.weaponType)
+            weapons = weapons.filter(w => w.类型[0] === params.weaponType)
         }
         if (params.category) {
-            weapons = weapons.filter((w) => w.类型[1] === params.category)
+            weapons = weapons.filter(w => w.类型[1] === params.category)
         }
 
         return JSON.stringify(
@@ -546,7 +546,7 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
                 results: weapons.slice(0, 20),
             },
             null,
-            2,
+            2
         )
     }
 
@@ -558,11 +558,11 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
             角色: this.selectedChar,
             等级: this.charSettings.value.charLevel,
             目标函数: this.charSettings.value.targetFunction,
-            角色MOD: this.charSettings.value.charMods.filter((m) => m !== null).map((m) => new LeveledMod(m[0], m[1]).toString()),
-            近战MOD: this.charSettings.value.meleeMods.filter((m) => m !== null).map((m) => new LeveledMod(m[0], m[1]).toString()),
-            远程MOD: this.charSettings.value.rangedMods.filter((m) => m !== null).map((m) => new LeveledMod(m[0], m[1]).toString()),
-            同律MOD: this.charSettings.value.skillWeaponMods.filter((m) => m !== null).map((m) => new LeveledMod(m[0], m[1]).toString()),
-            BUFF列表: this.charSettings.value.buffs.map((b) => b[0]),
+            角色MOD: this.charSettings.value.charMods.filter(m => m !== null).map(m => new LeveledMod(m[0], m[1]).toString()),
+            近战MOD: this.charSettings.value.meleeMods.filter(m => m !== null).map(m => new LeveledMod(m[0], m[1]).toString()),
+            远程MOD: this.charSettings.value.rangedMods.filter(m => m !== null).map(m => new LeveledMod(m[0], m[1]).toString()),
+            同律MOD: this.charSettings.value.skillWeaponMods.filter(m => m !== null).map(m => new LeveledMod(m[0], m[1]).toString()),
+            BUFF列表: this.charSettings.value.buffs.map(b => b[0]),
         }
         return JSON.stringify(rst, null, 2)
     }
@@ -595,10 +595,10 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
         }
         const result = build.autoBuild(final)
         if (params.apply) {
-            this.charSettings.value.charMods = result.newBuild.charMods.map((m) => (m !== null ? [m.modId, m.level] : null))
-            this.charSettings.value.meleeMods = result.newBuild.meleeMods.map((m) => (m !== null ? [m.modId, m.level] : null))
-            this.charSettings.value.rangedMods = result.newBuild.rangedMods.map((m) => (m !== null ? [m.modId, m.level] : null))
-            this.charSettings.value.skillWeaponMods = result.newBuild.skillWeaponMods.map((m) => (m !== null ? [m.modId, m.level] : null))
+            this.charSettings.value.charMods = result.newBuild.charMods.map(m => (m !== null ? [m.modId, m.level] : null))
+            this.charSettings.value.meleeMods = result.newBuild.meleeMods.map(m => (m !== null ? [m.modId, m.level] : null))
+            this.charSettings.value.rangedMods = result.newBuild.rangedMods.map(m => (m !== null ? [m.modId, m.level] : null))
+            this.charSettings.value.skillWeaponMods = result.newBuild.skillMods.map(m => (m !== null ? [m.modId, m.level] : null))
             this.charSettings.value.meleeWeapon = result.newBuild.meleeWeapon.id
             this.charSettings.value.meleeWeaponRefine = result.newBuild.meleeWeapon.精炼
             this.charSettings.value.rangedWeapon = result.newBuild.rangedWeapon.id
@@ -606,7 +606,7 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
         }
         return `自动构建参数: ${JSON.stringify(params, null, 2)}
 目标函数结果: ${result.newBuild.calculate()}
-${result.newBuild.mods.map((v) => v.toString()).join("\n")}`
+${result.newBuild.mods.map(v => v.toString()).join("\n")}`
     }
     /**
      * 获取更新后的配置
@@ -624,10 +624,10 @@ ${result.newBuild.mods.map((v) => v.toString()).join("\n")}`
      */
     public async streamChat(
         userMessages: Array<{ role: string; content: string }>,
-        onChunk: (chunk: string, type?: "reasoning" | "content") => void,
+        onChunk: (chunk: string, type?: "reasoning" | "content") => void
     ): Promise<void> {
         // 转换消息格式
-        const chatMessages: ChatCompletionMessageParam[] = userMessages.map((m) => ({
+        const chatMessages: ChatCompletionMessageParam[] = userMessages.map(m => ({
             role: m.role as "user" | "assistant" | "system",
             content: m.content,
         }))
@@ -639,7 +639,7 @@ ${result.newBuild.mods.map((v) => v.toString()).join("\n")}`
             chatMessages,
             tools,
             onChunk,
-            async (toolCalls) => {
+            async toolCalls => {
                 // 处理工具调用
                 const results: ChatCompletionToolMessageParam[] = []
                 for (const toolCall of toolCalls) {
@@ -657,7 +657,7 @@ ${result.newBuild.mods.map((v) => v.toString()).join("\n")}`
                 model: this.config.default_model,
                 temperature: this.config.default_temperature,
                 max_tokens: this.config.default_max_tokens,
-            },
+            }
         )
     }
 

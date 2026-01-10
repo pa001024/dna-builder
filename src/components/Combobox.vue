@@ -22,7 +22,7 @@ withDefaults(
     }>(),
     {
         placeholder: "...",
-    },
+    }
 )
 
 const model = defineModel<any>()
@@ -33,9 +33,9 @@ const emit = defineEmits<{
 </script>
 
 <template>
-    <ComboboxRoot v-model="model" class="relative" @update:open="(open) => open && emit('open')">
+    <ComboboxRoot v-model="model" class="relative" @update:open="open => open && emit('open')">
         <ComboboxAnchor v-bind="$attrs" class="input input-bordered input-sm">
-            <ComboboxInput asChild class="bg-transparent! outline-none h-full" :placeholder="placeholder">
+            <ComboboxInput as-child class="bg-transparent! outline-none h-full" :placeholder="placeholder">
                 <input v-model="model" type="text" />
             </ComboboxInput>
             <ComboboxTrigger>
@@ -46,15 +46,17 @@ const emit = defineEmits<{
         <ComboboxContent
             class="absolute z-100 w-full mt-2 min-w-40 bg-white overflow-hidden rounded shadow-xl will-change-[opacity,transform] data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade"
         >
-            <ComboboxViewport class="p-[5px]">
-                <ComboboxEmpty class="text-neutral-500 text-xs font-medium text-center py-2">{{ emptyMessage }}</ComboboxEmpty>
+            <ComboboxViewport class="p-1.25">
+                <ComboboxEmpty class="text-neutral-500 text-xs font-medium text-center py-2">
+                    {{ emptyMessage }}
+                </ComboboxEmpty>
                 <ComboboxItem
                     v-for="(option, index) in options"
                     :key="index"
-                    class="p-2 pl-[30px] text-sm leading-none text-secondary rounded-sm flex items-center relative select-none data-disabled:text-neutral-400 data-disabled:pointer-events-none data-highlighted:outline-none data-highlighted:bg-secondary data-highlighted:text-base-100"
+                    class="p-2 pl-7.5 text-sm leading-none text-secondary rounded-sm flex items-center relative select-none data-disabled:text-neutral-400 data-disabled:pointer-events-none data-highlighted:outline-none data-highlighted:bg-secondary data-highlighted:text-base-100"
                     :value="option.value"
                 >
-                    <ComboboxItemIndicator class="absolute left-0 w-[25px] inline-flex items-center justify-center">
+                    <ComboboxItemIndicator class="absolute left-0 w-6.25 inline-flex items-center justify-center">
                         <Icon icon="radix-icons:check" />
                     </ComboboxItemIndicator>
                     <span>

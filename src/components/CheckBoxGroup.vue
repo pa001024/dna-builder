@@ -14,7 +14,7 @@ withDefaults(defineProps<Props>(), {
     disabled: false,
     checked: false,
 })
-const model = defineModel()
+const model = defineModel<any[]>()
 </script>
 <template>
     <div class="flex gap-2 flex-wrap">

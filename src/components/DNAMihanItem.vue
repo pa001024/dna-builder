@@ -27,7 +27,7 @@ defineProps<{
                         {{ $t(MihanNotify.TYPES[missionId]) }}
                     </div>
                 </div>
-                <div class="divider mx-2 my-1"></div>
+                <div class="divider mx-2 my-1" />
                 <div
                     v-for="(mission, index) in item"
                     :key="index"

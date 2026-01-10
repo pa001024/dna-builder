@@ -20,7 +20,7 @@ const hideCompleted = ref(false)
 // 获取所有类别并构建分类树
 const categorizedAchievements = computed(() => {
     const categories: Record<string, any[]> = {}
-    achievementData.forEach((achievement) => {
+    achievementData.forEach(achievement => {
         if (achievement.分类) {
             if (!categories[achievement.分类]) {
                 categories[achievement.分类] = []
@@ -33,7 +33,7 @@ const categorizedAchievements = computed(() => {
 
 const versionOptions = computed(() => {
     const versions = new Set<string>()
-    achievementData.forEach((achievement) => {
+    achievementData.forEach(achievement => {
         if (achievement.版本) {
             versions.add(achievement.版本)
         }
@@ -46,7 +46,7 @@ const categoryFinishedCounts = computed(() => {
     const counts: Record<string, number> = {}
 
     Object.entries(categorizedAchievements.value).forEach(([category, achievements]) => {
-        counts[category] = achievements.filter((a) => userFinishedIds.value.indexOf(a.id) !== -1).length
+        counts[category] = achievements.filter(a => userFinishedIds.value.indexOf(a.id) !== -1).length
     })
 
     return counts
@@ -74,7 +74,7 @@ const showClearConfirmDialog = () => {
 // 根据选中分类筛选的成就列表
 const filteredAchievements = computed(() => {
     const query = searchQuery.value.toLowerCase()
-    let filtered = achievementData.filter((achievement) => {
+    let filtered = achievementData.filter(achievement => {
         // 分类筛选
         const categoryMatch = !selectedCategory.value || achievement.分类 === selectedCategory.value
         // 版本筛选
@@ -139,12 +139,12 @@ const importAchievements = () => {
     input.accept = ".json"
 
     // 监听文件选择事件
-    input.onchange = (event) => {
+    input.onchange = event => {
         const file = (event.target as HTMLInputElement).files?.[0]
         if (!file) return
 
         const reader = new FileReader()
-        reader.onload = async (e) => {
+        reader.onload = async e => {
             try {
                 // 解析JSON数据
                 const importedData = JSON.parse(e.target?.result as string)
@@ -158,8 +158,8 @@ const importAchievements = () => {
                 if (await ui.showDialog("确认导入", t("achievement.importConfirm", { count: importedData.length }))) {
                     userFinishedIds.value = importedData
                 }
-            } catch (error) {
-                alert(t("achievement.importFailed"))
+            } catch (e) {
+                ui.showErrorMessage(t("achievement.importFailed"), e)
             }
         }
 
@@ -173,12 +173,12 @@ const importAchievements = () => {
 //#region 全选当前分类
 const selectAllCurrentPage = ref(false)
 // 监听全选复选框变化
-watch(selectAllCurrentPage, (newValue) => {
+watch(selectAllCurrentPage, newValue => {
     // 创建一个新的数组，避免直接修改userFinishedIds
     const updatedFinishedIds = [...userFinishedIds.value]
 
     // 遍历当前页面的所有成就
-    filteredAchievements.value.forEach((achievement) => {
+    filteredAchievements.value.forEach(achievement => {
         const id = achievement.id
         const index = updatedFinishedIds.indexOf(id)
 
@@ -202,7 +202,7 @@ watch(
         // 检查当前页面是否所有成就都已完成
         const allCompleted =
             filteredAchievements.value.length > 0 &&
-            filteredAchievements.value.every((achievement) => userFinishedIds.value.includes(achievement.id))
+            filteredAchievements.value.every(achievement => userFinishedIds.value.includes(achievement.id))
 
         // 只有当筛选结果不为空时，才更新全选状态
         if (filteredAchievements.value.length > 0) {
@@ -211,7 +211,7 @@ watch(
             selectAllCurrentPage.value = false
         }
     },
-    { immediate: true },
+    { immediate: true }
 )
 //#endregion
 </script>
@@ -221,23 +221,25 @@ watch(
         <!-- 顶部操作栏 -->
         <div class="bg-base-100 border-b border-base-200 p-2 px-4 flex justify-between items-center shadow-sm">
             <div class="flex items-center">
-                <h1 class="text-lg font-bold mr-4">{{ $t("achievement.title") }}</h1>
+                <h1 class="text-lg font-bold mr-4">
+                    {{ $t("achievement.title") }}
+                </h1>
                 <span class="text-sm text-base-content/60">{{ userFinishedIds.length }} / {{ achievementData.length }}</span>
             </div>
 
             <div class="flex items-center gap-2">
                 <!-- 清空按钮 -->
-                <button @click="showClearConfirmDialog" class="btn btn-error btn-sm space-x-1">
+                <button class="btn btn-error btn-sm space-x-1" @click="showClearConfirmDialog">
                     <Icon icon="ri:delete-bin-line" class="w-4 h-4" />
                     {{ $t("achievement.clear") }}
                 </button>
                 <!-- 导入按钮 -->
-                <button @click="importAchievements" class="btn btn-sm space-x-1">
+                <button class="btn btn-sm space-x-1" @click="importAchievements">
                     <Icon icon="ri:download-2-line" class="w-4 h-4" />
                     {{ $t("achievement.import") }}
                 </button>
                 <!-- 导出按钮 -->
-                <button @click="exportAchievements" class="btn btn-sm space-x-1">
+                <button class="btn btn-sm space-x-1" @click="exportAchievements">
                     <Icon icon="ri:upload-2-line" class="w-4 h-4" />
                     {{ $t("achievement.export") }}
                 </button>
@@ -286,31 +288,33 @@ watch(
                 <!-- 筛选, 搜索区域 -->
                 <div class="bg-base-100 rounded-lg border border-base-200 p-4 m-4 shadow-sm flex gap-4">
                     <Select
-                        class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
                         v-model="selectedVersion"
+                        class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
                         :placeholder="$t('achievement.selectVersion')"
                     >
-                        <SelectItem value="所有版本">{{ $t("achievement.allVersions") }}</SelectItem>
+                        <SelectItem value="所有版本">
+                            {{ $t("achievement.allVersions") }}
+                        </SelectItem>
                         <SelectItem v-for="version in versionOptions" :key="version" :value="version">
                             {{ version }}
                         </SelectItem>
                     </Select>
                     <label class="label text-sm">
-                        <input type="checkbox" v-model="prioritizeUnfinished" class="checkbox checkbox-sm" />
+                        <input v-model="prioritizeUnfinished" type="checkbox" class="checkbox checkbox-sm" />
                         {{ $t("achievement.unfinishedFirst") }}
                     </label>
                     <label class="label text-sm">
-                        <input type="checkbox" v-model="hideCompleted" class="checkbox checkbox-sm" />
+                        <input v-model="hideCompleted" type="checkbox" class="checkbox checkbox-sm" />
                         {{ $t("achievement.hideCompleted") }}
                     </label>
                     <label class="label text-sm">
-                        <input type="checkbox" v-model="selectAllCurrentPage" class="checkbox checkbox-sm" />
+                        <input v-model="selectAllCurrentPage" type="checkbox" class="checkbox checkbox-sm" />
                         {{ $t("achievement.selectAllCurrentPage") }}
                     </label>
                     <input
+                        v-model="searchQuery"
                         type="text"
                         class="ml-auto inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap min-w-40 max-w-80"
-                        v-model="searchQuery"
                         :placeholder="$t('achievement.searchAchievements')"
                     />
                 </div>
@@ -328,8 +332,8 @@ watch(
                                         <input
                                             type="checkbox"
                                             :checked="userFinishedIds.indexOf(achievement.id) !== -1"
-                                            @change="toggleAchievement(achievement.id)"
                                             class="checkbox"
+                                            @change="toggleAchievement(achievement.id)"
                                         />
                                         <h3
                                             class="font-medium text-base"
@@ -345,11 +349,11 @@ watch(
                                 </div>
 
                                 <div class="flex flex-wrap items-center gap-2">
-                                    <div class="badge badge-soft badge-primary" v-if="achievement.分类">
+                                    <div v-if="achievement.分类" class="badge badge-soft badge-primary">
                                         {{ $t(achievement.分类) }}
                                     </div>
                                     <div class="text-xs ml-auto flex flex-wrap gap-2">
-                                        <div class="inline-flex flex-col items-center" v-for="(value, key) in achievement.奖励" :key="key">
+                                        <div v-for="(value, key) in achievement.奖励" :key="key" class="inline-flex flex-col items-center">
                                             <span class="text-base-content/60">{{ $t(key) }}</span>
                                             <span class="text-base-content/40">{{ value }}</span>
                                         </div>
@@ -364,11 +368,17 @@ watch(
 
         <dialog id="reset-confirm-dialog" class="modal">
             <div class="modal-box bg-base-300">
-                <p class="text-lg font-bold">{{ $t("achievement.clearConfirm") }}</p>
+                <p class="text-lg font-bold">
+                    {{ $t("achievement.clearConfirm") }}
+                </p>
                 <div class="modal-action">
                     <form class="flex justify-end gap-2" method="dialog">
-                        <button class="min-w-20 btn btn-secondary" @click="clearAllFinished">{{ $t("setting.confirm") }}</button>
-                        <button class="min-w-20 btn">{{ $t("setting.cancel") }}</button>
+                        <button class="min-w-20 btn btn-secondary" @click="clearAllFinished">
+                            {{ $t("setting.confirm") }}
+                        </button>
+                        <button class="min-w-20 btn">
+                            {{ $t("setting.cancel") }}
+                        </button>
                     </form>
                 </div>
             </div>

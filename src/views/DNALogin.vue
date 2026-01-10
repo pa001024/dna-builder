@@ -79,7 +79,7 @@ const login = async () => {
                         dev_code: dev_code.value,
                         user: { ...data.data },
                     },
-                    "*",
+                    "*"
                 )
             } else {
                 showErrorMessage(`登录失败: ${data.msg}`)
@@ -132,15 +132,15 @@ onMounted(() => {
                     validate.captcha_id = captchaId
                     getSMSCode(validate)
                 })
-                .onFail((e) => {
+                .onFail(e => {
                     console.log(e)
                     showErrorMessage(`验证码校验失败: ${e}`)
                 })
-                .onError((e) => {
+                .onError(e => {
                     console.log(e)
                     showErrorMessage(`验证码校验失败: ${e}`)
                 })
-        },
+        }
     )
 })
 
@@ -204,9 +204,9 @@ interface Captcha4Instance {
                 <fieldset class="fieldset">
                     <legend class="fieldset-legend">手机号</legend>
                     <input
+                        id="phone"
                         v-model="phone"
                         type="tel"
-                        id="phone"
                         name="phone"
                         required
                         pattern="[0-9]{11}"
@@ -219,13 +219,13 @@ interface Captcha4Instance {
                 <fieldset class="fieldset">
                     <legend class="fieldset-legend">验证码</legend>
                     <div class="flex gap-4">
-                        <input v-model="code" type="text" id="code" required placeholder="请输入验证码" class="input w-full" />
-                        <button @click="showCaptcha" class="btn btn-primary" :disabled="phone.length !== 11">获取验证码</button>
+                        <input id="code" v-model="code" type="text" required placeholder="请输入验证码" class="input w-full" />
+                        <button class="btn btn-primary" :disabled="phone.length !== 11" @click="showCaptcha">获取验证码</button>
                     </div>
                 </fieldset>
 
                 <!-- 登录按钮 -->
-                <button class="btn btn-primary btn-block" @click="login" :disabled="!canLogin">登录</button>
+                <button class="btn btn-primary btn-block" :disabled="!canLogin" @click="login">登录</button>
 
                 <!-- 辅助信息 -->
                 <div class="text-center text-sm text-base-content/70">
@@ -238,7 +238,7 @@ interface Captcha4Instance {
         <div class="fixed bottom-6 right-6 space-y-4">
             <!-- 错误消息 -->
             <transition name="slide-right">
-                <div v-if="errorMessage" @click="errorMessage = ''" role="alert" class="alert alert-error cursor-pointer">
+                <div v-if="errorMessage" role="alert" class="alert alert-error cursor-pointer" @click="errorMessage = ''">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
@@ -253,7 +253,7 @@ interface Captcha4Instance {
 
             <!-- 成功消息 -->
             <transition name="slide-right">
-                <div v-if="successMessage" @click="successMessage = ''" role="alert" class="alert alert-success cursor-pointer">
+                <div v-if="successMessage" role="alert" class="alert alert-success cursor-pointer" @click="successMessage = ''">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"

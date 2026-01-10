@@ -60,7 +60,9 @@ const product = computed(() => {
                     <div class="space-y-2 text-sm">
                         <div class="grid grid-cols-3 gap-2">
                             <div class="col-span-1 opacity-70">名称</div>
-                            <div class="col-span-2 font-medium">{{ draft.n }}</div>
+                            <div class="col-span-2 font-medium">
+                                {{ draft.n }}
+                            </div>
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <div class="col-span-1 opacity-70">稀有度</div>
@@ -70,27 +72,39 @@ const product = computed(() => {
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <div class="col-span-1 opacity-70">版本</div>
-                            <div class="col-span-2 font-medium">{{ draft.v }}</div>
+                            <div class="col-span-2 font-medium">
+                                {{ draft.v }}
+                            </div>
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <div class="col-span-1 opacity-70">类型</div>
-                            <div class="col-span-2 font-medium">{{ getTypeName(draft.t) }}</div>
+                            <div class="col-span-2 font-medium">
+                                {{ getTypeName(draft.t) }}
+                            </div>
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <div class="col-span-1 opacity-70">铸造时间</div>
-                            <div class="col-span-2 font-medium">{{ formatDuration(draft.d) }}</div>
+                            <div class="col-span-2 font-medium">
+                                {{ formatDuration(draft.d) }}
+                            </div>
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <div class="col-span-1 opacity-70">产物数量</div>
-                            <div class="col-span-2 font-medium">{{ draft.c }}</div>
+                            <div class="col-span-2 font-medium">
+                                {{ draft.c }}
+                            </div>
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <div class="col-span-1 opacity-70">批量制造</div>
-                            <div class="col-span-2 font-medium">{{ draft.b ? "支持" : "不支持" }}</div>
+                            <div class="col-span-2 font-medium">
+                                {{ draft.b ? "支持" : "不支持" }}
+                            </div>
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <div class="col-span-1 opacity-70">无限制造</div>
-                            <div class="col-span-2 font-medium">{{ draft.i ? "支持" : "不支持" }}</div>
+                            <div class="col-span-2 font-medium">
+                                {{ draft.i ? "支持" : "不支持" }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -101,19 +115,27 @@ const product = computed(() => {
                     <div class="space-y-2 text-sm">
                         <div class="grid grid-cols-3 gap-2">
                             <div class="col-span-1 opacity-70">名称</div>
-                            <div class="col-span-2 font-medium">{{ product.名称 }}</div>
+                            <div class="col-span-2 font-medium">
+                                {{ product.名称 }}
+                            </div>
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <div class="col-span-1 opacity-70">ID</div>
-                            <div class="col-span-2 font-medium">{{ draft.p }}</div>
+                            <div class="col-span-2 font-medium">
+                                {{ draft.p }}
+                            </div>
                         </div>
                         <div v-if="'品质' in product" class="grid grid-cols-3 gap-2">
                             <div class="col-span-1 opacity-70">品质</div>
-                            <div class="col-span-2 font-medium">{{ (product as any).品质 }}</div>
+                            <div class="col-span-2 font-medium">
+                                {{ (product as any).品质 }}
+                            </div>
                         </div>
                         <div v-if="'类型' in product" class="grid grid-cols-3 gap-2">
                             <div class="col-span-1 opacity-70">类型</div>
-                            <div class="col-span-2 font-medium">{{ (product as any).类型 }}</div>
+                            <div class="col-span-2 font-medium">
+                                {{ (product as any).类型 }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -129,6 +151,8 @@ const product = computed(() => {
                         <template v-for="item in draft.x" :key="item.id">
                             <ShowProps
                                 v-for="mod in [new LeveledMod(item.id)]"
+                                v-if="item.t === 'Mod'"
+                                :key="mod.id"
                                 :props="mod.getProperties()"
                                 :title="`${$t(mod.系列)}${$t(mod.名称)}`"
                                 :rarity="mod.品质"
@@ -136,7 +160,6 @@ const product = computed(() => {
                                 :cost="mod.耐受"
                                 :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
                                 :effdesc="mod.效果"
-                                v-if="item.t === 'Mod'"
                             >
                                 <RouterLink
                                     :to="`/db/mod/${item.id}`"

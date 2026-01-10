@@ -6,6 +6,9 @@ import { DNAAPI } from "dna-api"
 import i18next from "i18next"
 import { env } from "../env"
 
+let apiCache: DNAAPI | null = null
+let apiCacheKey = ""
+
 export const useSettingStore = defineStore("setting", {
     state: () => {
         // const isDarkMode = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -83,11 +86,14 @@ export const useSettingStore = defineStore("setting", {
         async getDNAAPI() {
             const user = await this.getCurrentUser()
             if (!user) return undefined
+            if (apiCache && apiCacheKey === user.uid) return apiCache
             const api = new DNAAPI({
                 dev_code: user.dev_code,
                 token: user.token,
                 fetchFn: tauriFetch,
             })
+            apiCache = api
+            apiCacheKey = user.uid
             return api
         },
         async autoLoginDNA() {

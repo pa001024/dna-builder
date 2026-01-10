@@ -16,7 +16,9 @@ defineProps<{
             </div>
             <div class="flex-1">
                 <div class="flex items-center justify-between mb-1">
-                    <h5 class="text-base-content/80 font-bold">{{ $t(weapon.名称) }}</h5>
+                    <h5 class="text-base-content/80 font-bold">
+                        {{ $t(weapon.名称) }}
+                    </h5>
                     <span class="px-2 py-1 rounded-md bg-fuchsia-500/20 text-fuchsia-400 text-xs border border-fuchsia-500/30">
                         {{ $t(weapon.类型) }}
                     </span>

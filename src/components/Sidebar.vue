@@ -45,7 +45,7 @@ function closeMobileDrawer() {
                     <span v-else>{{ t(`${tab.name}.title`) }}</span>
                 </SidebarButton>
             </template>
-            <div class="flex-1" data-tauri-drag-region></div>
+            <div class="flex-1" data-tauri-drag-region />
             <SidebarButton to="/login" :tooltip="t(`login.title`)">
                 <Icon icon="ri:user-line" />
             </SidebarButton>
@@ -58,35 +58,35 @@ function closeMobileDrawer() {
     <!-- 移动端抽屉式导航 - 使用daisyUI drawer -->
     <div class="sm:hidden">
         <!-- daisyUI drawer -->
-        <input id="my-drawer-1" type="checkbox" class="drawer-toggle" v-model="mobileDrawerOpen" />
+        <input id="my-drawer-1" v-model="mobileDrawerOpen" type="checkbox" class="drawer-toggle" />
         <div class="drawer-side z-50">
             <!-- 抽屉头部 -->
-            <label for="my-drawer-1" aria-label="close sidebar" class="drawer-overlay"></label>
+            <label for="my-drawer-1" aria-label="close sidebar" class="drawer-overlay" />
             <ul class="menu bg-base-100 min-h-full w-72 p-4">
                 <li>
                     <h2 class="menu-title text-lg font-bold pb-2">DNA Builder</h2>
                 </li>
-                <li><div class="divider my-2"></div></li>
+                <li><div class="divider my-2" /></li>
                 <!-- 导航菜单 -->
                 <template v-for="tab in UI.tabs" :key="tab.name">
                     <li v-if="tab.name && tab.show !== false && tab.path">
                         <RouterLink
                             :to="tab.path"
-                            @click="closeMobileDrawer"
                             class="flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors"
+                            @click="closeMobileDrawer"
                         >
                             <Icon v-if="tab.icon" :icon="tab.icon" class="w-6 h-6" />
                             <span class="font-medium">{{ t(`${tab.name}.title`) }}</span>
                         </RouterLink>
                     </li>
                 </template>
-                <li><div class="divider my-2"></div></li>
+                <li><div class="divider my-2" /></li>
                 <!-- 底部操作 -->
                 <li>
                     <RouterLink
                         to="/login"
-                        @click="closeMobileDrawer"
                         class="flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors"
+                        @click="closeMobileDrawer"
                     >
                         <Icon icon="ri:user-line" class="w-6 h-6" />
                         <span class="font-medium">{{ t(`login.title`) }}</span>
@@ -95,8 +95,8 @@ function closeMobileDrawer() {
                 <li>
                     <RouterLink
                         to="/setting"
-                        @click="closeMobileDrawer"
                         class="flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors"
+                        @click="closeMobileDrawer"
                     >
                         <Icon icon="ri:settings-3-line" class="w-6 h-6" />
                         <span class="font-medium">{{ t(`setting.title`) }}</span>

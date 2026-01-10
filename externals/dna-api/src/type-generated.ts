@@ -682,7 +682,7 @@ export interface DNABlockListBean {
 
 export interface DNACharDetailBean {
     attribute: DNAAttributeBean
-    charId: string
+    charId: number
     charName: string
     currentVolume: string
     elementIcon: string
@@ -1785,7 +1785,7 @@ export interface DNAWeaponBean {
     skillLevel: number
     unLocked: boolean
     weaponEid: string
-    weaponId: string
+    weaponId: number
 }
 
 export interface DNARoleParamBean {

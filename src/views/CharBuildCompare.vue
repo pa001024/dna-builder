@@ -24,11 +24,11 @@ import {
 const inv = useInvStore()
 
 // Character options (same as CharBuildView)
-const charOptions = charData.map((char) => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
+const charOptions = charData.map(char => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
 
 // MOD options (same as CharBuildView)
 const modOptions = modData
-    .map((mod) => ({
+    .map(mod => ({
         value: mod.id,
         label: mod.名称,
         quality: mod.品质,
@@ -40,7 +40,7 @@ const modOptions = modData
         bufflv: inv.getBuffLv(mod.id),
         lv: inv.getModLv(mod.id, mod.品质),
     }))
-    .filter((mod) => mod.count)
+    .filter(mod => mod.count)
 
 // BUFF options with custom buff support (same as CharBuildView)
 ;(function writeCustomBuff() {
@@ -49,19 +49,19 @@ const modOptions = modData
         名称: "自定义BUFF",
         描述: "自行填写",
     } as any
-    customBuff.value.forEach((prop) => {
+    customBuff.value.forEach(prop => {
         buffObj[prop[0]] = prop[1]
     })
     buffMap.set("自定义BUFF", buffObj)
 })()
 
 const _buffOptions = reactive(
-    buffData.map((buff) => ({
+    buffData.map(buff => ({
         value: new LeveledBuff(buff.名称),
         label: buff.名称,
         limit: buff.限定,
         description: buff.描述,
-    })),
+    }))
 )
 
 // Define configuration type
@@ -126,10 +126,10 @@ const getFilteredBuffOptions = (configIndex: number) => {
     const projectBuffs = project?.charSettings.buffs.map((b: any) => b[0]) || []
 
     return _buffOptions
-        .filter((buff) => !buff.limit || buff.limit === config.selectedChar || buff.limit === charBuilds.value[configIndex]?.char.属性)
-        .filter((buff) => !projectBuffs.includes(buff.label))
-        .map((v) => {
-            const b = config.additionalBuffs.find((b) => b[0] === v.label)
+        .filter(buff => !buff.limit || buff.limit === config.selectedChar || buff.limit === charBuilds.value[configIndex]?.char.属性)
+        .filter(buff => !projectBuffs.includes(buff.label))
+        .map(v => {
+            const b = config.additionalBuffs.find(b => b[0] === v.label)
             const lv = b?.[1] ?? v.value.等级
             return {
                 value: new LeveledBuff(v.value._originalBuffData, lv),
@@ -164,7 +164,7 @@ const removeConfiguration = (index: number) => {
 //#endregion
 // Base char builds from selected projects for each configuration
 const baseCharBuilds = computed(() => {
-    return configs.value.map((config) => {
+    return configs.value.map(config => {
         const project = config.projects.find((p: { name: string; charSettings: any }) => p.name === config.selectedProject)
         if (!project) return null
 
@@ -190,7 +190,7 @@ const baseCharBuilds = computed(() => {
             rangedMods: settings.rangedMods
                 .map((v: any) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null))
                 .filter((m: any): m is LeveledMod => m !== null),
-            skillWeaponMods: settings.skillWeaponMods
+            skillMods: settings.skillWeaponMods
                 .map((v: any) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null))
                 .filter((m: any): m is LeveledMod => m !== null),
             skillLevel: settings.charSkillLevel,
@@ -199,13 +199,13 @@ const baseCharBuilds = computed(() => {
                 settings.meleeWeapon,
                 settings.meleeWeaponRefine,
                 settings.meleeWeaponLevel,
-                inv.getWBuffLv(settings.meleeWeapon),
+                inv.getWBuffLv(settings.meleeWeapon)
             ),
             ranged: new LeveledWeapon(
                 settings.rangedWeapon,
                 settings.rangedWeaponRefine,
                 settings.rangedWeaponLevel,
-                inv.getWBuffLv(settings.rangedWeapon),
+                inv.getWBuffLv(settings.rangedWeapon)
             ),
             baseName: settings.baseName,
             imbalance: settings.imbalance,
@@ -234,7 +234,7 @@ const charBuilds = computed(() => {
                 charMods: [],
                 meleeMods: [],
                 rangedMods: [],
-                skillWeaponMods: [],
+                skillMods: [],
                 skillLevel: 1,
                 buffs: [],
                 baseName: "",
@@ -252,35 +252,35 @@ const charBuilds = computed(() => {
         const combinedCharMods = [...baseBuild.charMods]
         const combinedMeleeMods = [...baseBuild.meleeMods]
         const combinedRangedMods = [...baseBuild.rangedMods]
-        const combinedSkillWeaponMods = [...baseBuild.skillWeaponMods]
+        const combinedSkillWeaponMods = [...baseBuild.skillMods]
 
         // Add additional MODs for this configuration, ensuring we don't exceed 8 slots for each type
-        config.additionalMods[0].forEach((mod) => {
+        config.additionalMods[0].forEach(mod => {
             if (mod && combinedCharMods.length < 8) {
                 combinedCharMods.push(new LeveledMod(mod[0], mod[1], inv.getBuffLv(mod[0])))
             }
         })
 
-        config.additionalMods[1].forEach((mod) => {
+        config.additionalMods[1].forEach(mod => {
             if (mod && combinedMeleeMods.length < 8) {
                 combinedMeleeMods.push(new LeveledMod(mod[0], mod[1], inv.getBuffLv(mod[0])))
             }
         })
 
-        config.additionalMods[2].forEach((mod) => {
+        config.additionalMods[2].forEach(mod => {
             if (mod && combinedRangedMods.length < 8) {
                 combinedRangedMods.push(new LeveledMod(mod[0], mod[1], inv.getBuffLv(mod[0])))
             }
         })
 
-        config.additionalMods[3].forEach((mod) => {
+        config.additionalMods[3].forEach(mod => {
             if (mod && combinedSkillWeaponMods.length < 4) {
                 combinedSkillWeaponMods.push(new LeveledMod(mod[0], mod[1], inv.getBuffLv(mod[0])))
             }
         })
 
         // Combine BUFFs from project and additional selections for this configuration
-        const combinedBuffs = [...baseBuild.buffs, ...config.additionalBuffs.map((v) => new LeveledBuff(v[0], v[1]))]
+        const combinedBuffs = [...baseBuild.buffs, ...config.additionalBuffs.map(v => new LeveledBuff(v[0], v[1]))]
 
         // Create new CharBuild instance with combined settings for this configuration
         return new CharBuild({
@@ -291,7 +291,7 @@ const charBuilds = computed(() => {
             charMods: combinedCharMods,
             meleeMods: combinedMeleeMods,
             rangedMods: combinedRangedMods,
-            skillWeaponMods: combinedSkillWeaponMods,
+            skillMods: combinedSkillWeaponMods,
             skillLevel: baseBuild.skillLevel,
             buffs: combinedBuffs,
             baseName: baseBuild.baseName,
@@ -309,11 +309,11 @@ const charBuilds = computed(() => {
 
 // Calculate statistics for all configurations
 const attributesList = computed(() => {
-    return charBuilds.value.map((build) => build?.calculateAttributes() || {})
+    return charBuilds.value.map(build => build?.calculateAttributes() || {})
 })
 
 const weaponAttrsList = computed(() => {
-    return charBuilds.value.map((build) => {
+    return charBuilds.value.map(build => {
         if (!build?.selectedWeapon) return null
         const result = build.calculateWeaponAttributes()
         return result.weapon
@@ -321,7 +321,7 @@ const weaponAttrsList = computed(() => {
 })
 
 const totalDamageList = computed(() => {
-    return charBuilds.value.map((build) => build?.calculate() || 0)
+    return charBuilds.value.map(build => build?.calculate() || 0)
 })
 
 // MOD slot counts based on selected project for a specific configuration
@@ -356,7 +356,7 @@ function removeMod(configIndex: number, type: string, slotIndex: number) {
 
 // BUFF selection handlers for a specific configuration
 function toggleBuff(configIndex: number, buff: LeveledBuff) {
-    const index = configs.value[configIndex].additionalBuffs.findIndex((v) => v[0] === buff.名称)
+    const index = configs.value[configIndex].additionalBuffs.findIndex(v => v[0] === buff.名称)
     if (index > -1) {
         configs.value[configIndex].additionalBuffs.splice(index, 1)
     } else {
@@ -365,7 +365,7 @@ function toggleBuff(configIndex: number, buff: LeveledBuff) {
 }
 
 function setBuffLv(configIndex: number, buff: LeveledBuff, lv: number) {
-    const index = configs.value[configIndex].additionalBuffs.findIndex((v) => v[0] === buff.名称)
+    const index = configs.value[configIndex].additionalBuffs.findIndex(v => v[0] === buff.名称)
     if (index > -1) {
         configs.value[configIndex].additionalBuffs[index][1] = lv
     }
@@ -437,8 +437,12 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
         <div class="mx-auto p-4">
             <!-- Input Section -->
             <div class="mb-6">
-                <h2 class="text-xl font-semibold text-base-content">{{ $t("build-compare.input_section") }}</h2>
-                <div class="text-xs text-gray-400 mb-4">{{ $t("build-compare.tip") }}</div>
+                <h2 class="text-xl font-semibold text-base-content">
+                    {{ $t("build-compare.input_section") }}
+                </h2>
+                <div class="text-xs text-gray-400 mb-4">
+                    {{ $t("build-compare.tip") }}
+                </div>
 
                 <!-- Multiple Configurations -->
                 <div v-if="configs[0].projects.length > 0" class="space-y-6">
@@ -454,14 +458,16 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                 <!-- Character and Project Selection -->
                                 <div class="flex flex-wrap gap-4">
                                     <h3 class="text-lg font-semibold text-primary">
-                                        <input type="text" v-model="config.name" class="input input-sm input-bordered w-32" />
+                                        <input v-model="config.name" type="text" class="input input-sm input-bordered w-32" />
                                     </h3>
                                     <!-- Character Selection -->
                                     <div class="bg-base-200 rounded-lg flex items-center gap-4">
-                                        <div class="text-xs text-gray-400">{{ $t("char-build.character") }}</div>
+                                        <div class="text-xs text-gray-400">
+                                            {{ $t("char-build.character") }}
+                                        </div>
                                         <Select
-                                            class="w-40 inline-flex justify-between input input-bordered input-sm"
                                             v-model="config.selectedChar"
+                                            class="w-40 inline-flex justify-between input input-bordered input-sm"
                                         >
                                             <template v-for="charWithElm in groupBy(charOptions, 'elm')" :key="charWithElm[0].elm">
                                                 <SelectLabel class="p-2 text-sm font-semibold text-primary">
@@ -478,11 +484,13 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
 
                                     <!-- Project Selection -->
                                     <div class="bg-base-200 rounded-lg flex items-center gap-4">
-                                        <div class="text-xs text-gray-400">{{ $t("build-compare.project_name") }}</div>
+                                        <div class="text-xs text-gray-400">
+                                            {{ $t("build-compare.project_name") }}
+                                        </div>
                                         <Select
                                             v-if="config.projects.length > 0"
-                                            class="w-40 inline-flex justify-between input input-bordered input-sm"
                                             v-model="config.selectedProject"
+                                            class="w-40 inline-flex justify-between input input-bordered input-sm"
                                         >
                                             <SelectItem v-for="project in config.projects" :key="project.name" :value="project.name">
                                                 {{ project.name }}
@@ -495,14 +503,14 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                 </div>
                             </div>
                             <div class="flex gap-2">
-                                <button class="btn btn-primary btn-sm" @click="addConfiguration" :title="$t('build-compare.copy_config')">
+                                <button class="btn btn-primary btn-sm" :title="$t('build-compare.copy_config')" @click="addConfiguration">
                                     <Icon icon="ri:add-line" />
                                 </button>
                                 <button
                                     v-if="configs.length > 1"
                                     class="btn btn-error btn-sm"
-                                    @click="removeConfiguration(index)"
                                     :title="$t('build-compare.remove_config')"
+                                    @click="removeConfiguration(index)"
                                 >
                                     <Icon icon="ri:delete-bin-line" />
                                 </button>
@@ -515,17 +523,15 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                             <div v-if="getModSlotCounts(index)[0] > 0" class="mb-4">
                                 <ModEditer
                                     :title="$t('char-build.char_mod_config')"
-                                    :mods="config.additionalMods[0].map((m) => (m ? new LeveledMod(m[0], m[1]) : null))"
-                                    :otherMods="config.charSettings.charMods.map((m) => (m ? new LeveledMod(m[0], m[1]) : null))"
+                                    :mods="config.additionalMods[0].map(m => (m ? new LeveledMod(m[0], m[1]) : null))"
+                                    :other-mods="config.charSettings.charMods.map(m => (m ? new LeveledMod(m[0], m[1]) : null))"
                                     :mod-options="
-                                        modOptions.filter(
-                                            (m) => m.type === '角色' && (!m.limit || m.limit === charBuilds[index]?.char.属性),
-                                        )
+                                        modOptions.filter(m => m.type === '角色' && (!m.limit || m.limit === charBuilds[index]?.char.属性))
                                     "
                                     :char-build="charBuilds[index]"
+                                    type="角色"
                                     @remove-mod="removeMod(index, '角色', $event)"
                                     @select-mod="selectMod(index, '角色', $event[0], $event[1], $event[2])"
-                                    type="角色"
                                 />
                             </div>
 
@@ -539,22 +545,22 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                             >
                                 <ModEditer
                                     :title="$t('char-build.melee_weapon_mod_config')"
-                                    :mods="config.additionalMods[1].map((m) => (m ? new LeveledMod(m[0], m[1]) : null))"
-                                    :otherMods="config.charSettings.meleeMods.map((m) => (m ? new LeveledMod(m[0], m[1]) : null))"
+                                    :mods="config.additionalMods[1].map(m => (m ? new LeveledMod(m[0], m[1]) : null))"
+                                    :other-mods="config.charSettings.meleeMods.map(m => (m ? new LeveledMod(m[0], m[1]) : null))"
                                     :mod-options="
                                         modOptions.filter(
-                                            (m) =>
+                                            m =>
                                                 m.type === '近战' &&
                                                 (!m.limit ||
                                                     [charBuilds[index]?.meleeWeapon.类别, charBuilds[index]?.meleeWeapon.伤害类型].includes(
-                                                        m.limit,
-                                                    )),
+                                                        m.limit
+                                                    ))
                                         )
                                     "
                                     :char-build="charBuilds[index]"
+                                    type="近战"
                                     @remove-mod="removeMod(index, '近战', $event)"
                                     @select-mod="selectMod(index, '近战', $event[0], $event[1], $event[2])"
-                                    type="近战"
                                 />
                             </div>
 
@@ -562,23 +568,23 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                             <div v-if="getModSlotCounts(index)[2] > 0 && baseCharBuilds[index]?.isRangedWeapon" class="mb-4">
                                 <ModEditer
                                     :title="$t('char-build.ranged_weapon_mod_config')"
-                                    :mods="config.additionalMods[2].map((m) => (m ? new LeveledMod(m[0], m[1]) : null))"
-                                    :otherMods="config.charSettings.rangedMods.map((m) => (m ? new LeveledMod(m[0], m[1]) : null))"
+                                    :mods="config.additionalMods[2].map(m => (m ? new LeveledMod(m[0], m[1]) : null))"
+                                    :other-mods="config.charSettings.rangedMods.map(m => (m ? new LeveledMod(m[0], m[1]) : null))"
                                     :mod-options="
                                         modOptions.filter(
-                                            (m) =>
+                                            m =>
                                                 m.type === '远程' &&
                                                 (!m.limit ||
                                                     [
                                                         charBuilds[index]?.rangedWeapon.类别,
                                                         charBuilds[index]?.rangedWeapon.伤害类型,
-                                                    ].includes(m.limit)),
+                                                    ].includes(m.limit))
                                         )
                                     "
                                     :char-build="charBuilds[index]"
+                                    type="远程"
                                     @remove-mod="removeMod(index, '远程', $event)"
                                     @select-mod="selectMod(index, '远程', $event[0], $event[1], $event[2])"
-                                    type="远程"
                                 />
                             </div>
 
@@ -586,23 +592,23 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                             <div v-if="getModSlotCounts(index)[3] > 0 && baseCharBuilds[index]?.isSkillWeapon" class="mb-4">
                                 <ModEditer
                                     :title="$t('char-build.skill_weapon_mod_config')"
-                                    :mods="config.additionalMods[3].map((m) => (m ? new LeveledMod(m[0], m[1]) : null))"
-                                    :otherMods="config.charSettings.skillWeaponMods.map((m) => (m ? new LeveledMod(m[0], m[1]) : null))"
+                                    :mods="config.additionalMods[3].map(m => (m ? new LeveledMod(m[0], m[1]) : null))"
+                                    :other-mods="config.charSettings.skillWeaponMods.map(m => (m ? new LeveledMod(m[0], m[1]) : null))"
                                     :mod-options="
                                         modOptions.filter(
-                                            (m) =>
+                                            m =>
                                                 m.type === charBuilds[index]?.skillWeapon?.类型 &&
                                                 (!m.limit ||
                                                     [
                                                         charBuilds[index]?.skillWeapon?.类别,
                                                         charBuilds[index]?.skillWeapon?.伤害类型,
-                                                    ].includes(m.limit)),
+                                                    ].includes(m.limit))
                                         )
                                     "
                                     :char-build="charBuilds[index]"
+                                    type="同律"
                                     @remove-mod="removeMod(index, '同律', $event)"
                                     @select-mod="selectMod(index, '同律', $event[0], $event[1], $event[2])"
-                                    type="同律"
                                 />
                             </div>
                         </div>
@@ -612,7 +618,9 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                             <div class="flex flex-wrap items-center justify-between mb-3">
                                 <div class="flex items-center gap-2">
                                     <SectionMarker />
-                                    <h3 class="text-lg font-semibold">{{ $t("char-build.buff_list") }}</h3>
+                                    <h3 class="text-lg font-semibold">
+                                        {{ $t("char-build.buff_list") }}
+                                    </h3>
                                 </div>
                             </div>
                             <BuffEditer
@@ -629,14 +637,18 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
 
             <!-- Results Section -->
             <div v-if="charBuilds.length > 0 && charBuilds[0]" class="bg-base-100 rounded-xl p-6 shadow-lg">
-                <h2 class="text-xl font-semibold mb-4 text-base-content">{{ $t("build-compare.results") }}</h2>
+                <h2 class="text-xl font-semibold mb-4 text-base-content">
+                    {{ $t("build-compare.results") }}
+                </h2>
 
                 <!-- Table Customization -->
                 <div class="mb-4">
-                    <h3 class="text-sm font-semibold mb-2 text-primary">{{ $t("build-compare.customize_table") }}</h3>
+                    <h3 class="text-sm font-semibold mb-2 text-primary">
+                        {{ $t("build-compare.customize_table") }}
+                    </h3>
                     <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
                         <label v-for="column in allColumns" :key="column.key" class="inline-flex items-center gap-1 cursor-pointer">
-                            <input type="checkbox" v-model="visibleColumns" :value="column.key" class="checkbox checkbox-primary" />
+                            <input v-model="visibleColumns" type="checkbox" :value="column.key" class="checkbox checkbox-primary" />
                             <span class="text-sm">{{ column.label }}</span>
                         </label>
                     </div>
@@ -647,7 +659,9 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                     <table class="table table-zebra w-full">
                         <thead>
                             <tr class="bg-base-200">
-                                <th class="text-left">{{ $t("build-compare.configuration") }}</th>
+                                <th class="text-left">
+                                    {{ $t("build-compare.configuration") }}
+                                </th>
                                 <th class="text-right">
                                     {{ configs[0].charSettings.baseName }} -
                                     {{
@@ -658,7 +672,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                 </th>
                                 <th v-for="colKey in visibleColumns" :key="colKey" class="text-right">
                                     <!-- Get the display label for the column -->
-                                    {{ allColumns.find((col) => col.key === colKey)?.label || colKey }}
+                                    {{ allColumns.find(col => col.key === colKey)?.label || colKey }}
                                 </th>
                             </tr>
                         </thead>
@@ -666,10 +680,14 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                             <!-- One row per configuration -->
                             <tr v-for="(config, configIndex) in configs" :key="configIndex">
                                 <!-- Configuration name -->
-                                <td class="font-medium">{{ config.name }}</td>
+                                <td class="font-medium">
+                                    {{ config.name }}
+                                </td>
 
                                 <!-- Target function result -->
-                                <td class="text-right">{{ Math.round(totalDamageList[configIndex]) }}</td>
+                                <td class="text-right">
+                                    {{ Math.round(totalDamageList[configIndex]) }}
+                                </td>
                                 <!-- Value for each visible column -->
                                 <td v-for="colKey in visibleColumns" :key="colKey" class="text-right">
                                     <!-- Character attributes -->
@@ -687,14 +705,22 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
 
             <!-- No Project Selected Message -->
             <div v-else-if="configs[0].projects.length === 0" class="bg-base-100 rounded-xl p-6 shadow-lg text-center">
-                <div class="text-lg font-medium mb-2 text-warning">{{ $t("build-compare.no_projects_available") }}</div>
-                <div class="text-sm text-base-content/70">{{ $t("build-compare.create_project_first") }}</div>
+                <div class="text-lg font-medium mb-2 text-warning">
+                    {{ $t("build-compare.no_projects_available") }}
+                </div>
+                <div class="text-sm text-base-content/70">
+                    {{ $t("build-compare.create_project_first") }}
+                </div>
             </div>
 
             <!-- No Project Selected Message -->
             <div v-else class="bg-base-100 rounded-xl p-6 shadow-lg text-center">
-                <div class="text-lg font-medium mb-2 text-primary">{{ $t("build-compare.select_project_message") }}</div>
-                <div class="text-sm text-base-content/70">{{ $t("build-compare.select_project_to_compare") }}</div>
+                <div class="text-lg font-medium mb-2 text-primary">
+                    {{ $t("build-compare.select_project_message") }}
+                </div>
+                <div class="text-sm text-base-content/70">
+                    {{ $t("build-compare.select_project_to_compare") }}
+                </div>
             </div>
         </div>
     </div>

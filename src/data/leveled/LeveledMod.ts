@@ -74,7 +74,7 @@ export class LeveledMod implements Mod {
     constructor(
         modid: number | Mod,
         modLv?: number,
-        public buffLv?: number,
+        public buffLv?: number
     ) {
         // 从Map中获取对应的Mod对象
         const modData = typeof modid === "number" ? modMap.get(modid) : modid
@@ -156,11 +156,11 @@ export class LeveledMod implements Mod {
         } else {
             this.耐受 = this._originalModData.耐受 - this.maxLevel + this._等级
         }
-        let lv = this._等级
+        const lv = this._等级
 
         if (this._originalModData.生效) {
             const maxValue = this._originalModData.生效
-            const keys = Object.keys(maxValue).filter((v) => v !== "条件")
+            const keys = Object.keys(maxValue).filter(v => v !== "条件")
             const vals: number[] = []
             this.生效 = keys.reduce(
                 (acc, key) => {
@@ -169,8 +169,8 @@ export class LeveledMod implements Mod {
                     if (Array.isArray(mv)) {
                         const mv1 = mv[0]
                         const mv2 = mv[1]
-                        let currentValue1 = (mv1 / (this.maxLevel + 1)) * (lv + 1)
-                        let currentValue2 = (mv2 / (this.maxLevel + 1)) * (lv + 1)
+                        const currentValue1 = (mv1 / (this.maxLevel + 1)) * (lv + 1)
+                        const currentValue2 = (mv2 / (this.maxLevel + 1)) * (lv + 1)
                         acc[key] = [currentValue1, currentValue2]
                         vals.push(...acc[key])
                     } else {
@@ -183,14 +183,14 @@ export class LeveledMod implements Mod {
                 },
                 {
                     条件: maxValue.条件,
-                } as Record<string, any>,
+                } as Record<string, any>
             )
             if (this._originalModData.效果) {
                 let i = 0
                 this.效果 = this._originalModData.效果.replace(/{%}/g, () => `${+(vals[i++] * 100).toFixed(1)}%`)
             }
         }
-        this.baseProperties.forEach((prop) => {
+        this.baseProperties.forEach(prop => {
             let lv = this._等级
             if ((this.系列 === "换生灵" || this.系列 === "海妖") && prop === "减伤") lv = this.maxLevel
             // 架势MOD属性不受等级变化
@@ -202,8 +202,8 @@ export class LeveledMod implements Mod {
                 this[prop] = currentValue
             }
         })
-        this.buff?.properties.forEach((prop) => {
-            let lv = this._等级
+        this.buff?.properties.forEach(prop => {
+            const lv = this._等级
             const buff = this.buff!
             const maxValue = buff[prop] || 0
             let currentValue = (maxValue / (10 + 1)) * (lv + 1)
@@ -222,7 +222,7 @@ export class LeveledMod implements Mod {
                 acc[mod.极性] = (acc[mod.极性] || 0) + 1
                 return acc
             },
-            {} as Record<string, number>,
+            {} as Record<string, number>
         )
         if (this.极性) poTable[this.极性] = (poTable[this.极性] || 0) + 1
         const isEffective: boolean = this.生效.条件.every(([attr, op, value]: [string, string, number]) => {
@@ -235,7 +235,7 @@ export class LeveledMod implements Mod {
             if (op === "<=") return attrValue <= value
             return false
         })
-        const { 条件, ...rest } = this.生效
+        const { 条件: _, ...rest } = this.生效
         return { isEffective, props: rest }
     }
 
@@ -269,7 +269,7 @@ export class LeveledMod implements Mod {
             减伤: 0,
             有效生命: 0,
         }
-        Object.keys(this.getProperties()).forEach((prop) => {
+        Object.keys(this.getProperties()).forEach(prop => {
             if (prop in attrs) attrs[prop as keyof CharAttr] += this[prop]
         })
         const isEffective: boolean = this.生效.条件.every(([attr, op, value]: [string, string, number]) => {
@@ -293,7 +293,7 @@ export class LeveledMod implements Mod {
         const condition = this.checkCondition(attrs, charMods)
         if (!condition) return false
         let changed = false
-        Object.keys(condition.props).forEach((key) => {
+        Object.keys(condition.props).forEach(key => {
             if (condition.isEffective) {
                 if (Array.isArray(condition.props[key])) {
                     const [v1, v2] = condition.props[key]
@@ -321,7 +321,7 @@ export class LeveledMod implements Mod {
 
     getProperties(): Partial<Mod> {
         const properties: Partial<Mod> = {}
-        this.properties.forEach((prop) => {
+        this.properties.forEach(prop => {
             properties[prop] = this[prop]
         })
         return properties
@@ -350,10 +350,10 @@ export class LeveledMod implements Mod {
         "版本",
     ])
     get properties(): string[] {
-        return Object.keys(this).filter((prop) => !LeveledMod._exclude_properties.has(prop))
+        return Object.keys(this).filter(prop => !LeveledMod._exclude_properties.has(prop))
     }
     get baseProperties(): string[] {
-        return Object.keys(this._originalModData).filter((prop) => !LeveledMod._exclude_properties.has(prop))
+        return Object.keys(this._originalModData).filter(prop => !LeveledMod._exclude_properties.has(prop))
     }
 
     get url() {
@@ -378,7 +378,7 @@ export class LeveledMod implements Mod {
 
     public clone(): LeveledMod {
         const mod = new LeveledMod(this._originalModData, this._等级, this.buffLv)
-        this.properties.forEach((prop) => {
+        this.properties.forEach(prop => {
             mod[prop] = this[prop]
         })
         return mod
@@ -392,14 +392,14 @@ export class LeveledMod implements Mod {
     }
     get addAttr(): Record<string, number> {
         const r: Record<string, number> = {}
-        this.properties.forEach((prop) => {
+        this.properties.forEach(prop => {
             r[prop] = this[prop]
         })
         return r
     }
     get minusAttr() {
         const r: Record<string, any> = this.clone()
-        this.properties.forEach((prop) => {
+        this.properties.forEach(prop => {
             r[prop] = -this[prop]
         })
         r.isMinus = true

@@ -39,7 +39,7 @@ async function loadWeaponDetail() {
             ui.showErrorMessage(!res.is_success ? res.msg : "获取武器详情失败")
         }
     } catch (e) {
-        ui.showErrorMessage("获取武器详情失败")
+        ui.showErrorMessage("获取武器详情失败", e)
     } finally {
         loading.value = false
     }
@@ -54,15 +54,17 @@ async function loadWeaponDetail() {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
             </button>
-            <h1 class="text-xl font-bold">{{ weaponDetail?.name || "武器详情" }}</h1>
-            <div class="w-12"></div>
+            <h1 class="text-xl font-bold">
+                {{ weaponDetail?.name || "武器详情" }}
+            </h1>
+            <div class="w-12" />
             <!-- Spacer -->
         </div>
 
         <!-- 内容区域 -->
         <div class="flex-1 overflow-auto p-4 bg-base-100">
             <div v-if="loading" class="flex justify-center items-center h-full">
-                <span class="loading loading-spinner loading-lg"></span>
+                <span class="loading loading-spinner loading-lg" />
             </div>
 
             <div v-else-if="weaponDetail" class="space-y-6">
@@ -89,7 +91,9 @@ async function loadWeaponDetail() {
                             <!-- 武器名称与等级 -->
                             <div class="flex-1">
                                 <div class="flex items-center gap-3">
-                                    <h2 class="text-2xl font-bold">{{ weaponDetail.name }}</h2>
+                                    <h2 class="text-2xl font-bold">
+                                        {{ weaponDetail.name }}
+                                    </h2>
                                     <div class="badge badge-secondary">Lv.{{ weaponDetail.level }}</div>
                                 </div>
 
@@ -126,7 +130,9 @@ async function loadWeaponDetail() {
                         <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
                                 <div class="stat-title text-xs text-base-content/60">攻击力</div>
-                                <div class="stat-value text-xl font-bold">{{ weaponDetail.attribute.atk }}</div>
+                                <div class="stat-value text-xl font-bold">
+                                    {{ weaponDetail.attribute.atk }}
+                                </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
                                 <div class="stat-title text-xs text-base-content/60">暴击率</div>
@@ -138,7 +144,9 @@ async function loadWeaponDetail() {
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
                                 <div class="stat-title text-xs text-base-content/60">攻速</div>
-                                <div class="stat-value text-xl font-bold">{{ weaponDetail.attribute.speed }}</div>
+                                <div class="stat-value text-xl font-bold">
+                                    {{ weaponDetail.attribute.speed }}
+                                </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
                                 <div class="stat-title text-xs text-base-content/60">触发</div>
@@ -160,8 +168,8 @@ async function loadWeaponDetail() {
 
                 <!-- 模式 -->
                 <div
-                    class="card bg-base-100 border border-base-200 rounded-lg shadow-sm"
                     v-if="weaponDetail.modes && weaponDetail.modes.length > 0"
+                    class="card bg-base-100 border border-base-200 rounded-lg shadow-sm"
                 >
                     <div class="card-body p-6">
                         <h3 class="text-lg font-semibold mb-4">模式</h3>

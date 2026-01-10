@@ -57,7 +57,7 @@ watch(
         if (newValue !== oldValue) {
             emits("change", newValue, oldValue)
         }
-    },
+    }
 )
 
 const forward = useForwardPropsEmits(props, emits)

@@ -25,7 +25,7 @@ function onPaste(e: ClipboardEvent) {
             const clt = setTimeout(() => {
                 imgLoading.value = false
             }, 3e3)
-            reader.onload = (e) => {
+            reader.onload = e => {
                 const url = e.target?.result
                 const img = new Image()
                 img.src = url as string
@@ -48,7 +48,7 @@ function onPaste(e: ClipboardEvent) {
     const range = sel.getRangeAt(0)
     const node = document.createElement("div")
     node.innerText = text
-    node.innerHTML = node.innerHTML.replace(/ (?: +|$)/g, (s) => "&nbsp;".repeat(s.length))
+    node.innerHTML = node.innerHTML.replace(/ (?: +|$)/g, s => "&nbsp;".repeat(s.length))
     range.deleteContents()
     range.insertNode(nodeChildFrag(node))
     range.collapse(false)
@@ -82,19 +82,19 @@ onMounted(() => {
     <div class="flex-1 overflow-hidden pointer-events-auto">
         <!-- loading遮罩 -->
         <div v-if="imgLoading" class="absolute top-0 left-0 bottom-0 right-0 cursor-progress z-100 flex justify-center items-center">
-            <span class="loading loading-spinner loading-md"></span>
+            <span class="loading loading-spinner loading-md" />
         </div>
         <ScrollArea class="w-full h-full">
             <div
                 ref="input"
                 contenteditable
                 class="rich-input p-2 px-4 text-sm focus:outline-none text-wrap break-all overflow-x-hidden"
-                @paste="onPaste"
-                @input="onInput"
                 dropzone="copy"
                 :placeholder="placeholder"
+                @paste="onPaste"
+                @input="onInput"
                 @keydown.enter="emit('enter', $event)"
-            ></div>
+            />
         </ScrollArea>
     </div>
 </template>

@@ -10,8 +10,8 @@ const props = defineProps<{
 }>()
 const buffOptions = computed(() => {
     return props.mods
-        .filter((mod) => mod.buff)
-        .map((mod) => {
+        .filter(mod => mod.buff)
+        .map(mod => {
             const buff = mod.buff!
             const lv = buff.pt === "Weapon" ? inv.getWBuffLv(mod.id) : inv.getBuffLv(mod.id)
             return {
@@ -24,8 +24,8 @@ const buffOptions = computed(() => {
 })
 const selectedBuffs = computed(() => {
     return props.mods
-        .filter((mod) => mod.buff && (mod.buff.pt === "Weapon" ? inv.getWBuffLv(mod.id) : inv.getBuffLv(mod.id)) > 0)
-        .map((mod) => mod.buff!)
+        .filter(mod => mod.buff && (mod.buff.pt === "Weapon" ? inv.getWBuffLv(mod.id) : inv.getBuffLv(mod.id)) > 0)
+        .map(mod => mod.buff!)
 })
 function toggleBuff(buff: LeveledBuff) {
     if (buff.pt === "Weapon") {
@@ -47,8 +47,8 @@ function setBuffLv(buff: LeveledBuff, lv: number) {
 <template>
     <div class="flex items-center gap-2 mb-3">
         <div class="ml-auto flex items-center gap-2">
-            <div class="btn btn-sm btn-primary" @click="buffOptions.forEach((buff) => setBuffLv(buff.value, buff.value.mx))">全部最大</div>
-            <div class="btn btn-sm btn-primary" @click="buffOptions.forEach((buff) => setBuffLv(buff.value, 0))">全部关闭</div>
+            <div class="btn btn-sm btn-primary" @click="buffOptions.forEach(buff => setBuffLv(buff.value, buff.value.mx))">全部最大</div>
+            <div class="btn btn-sm btn-primary" @click="buffOptions.forEach(buff => setBuffLv(buff.value, 0))">全部关闭</div>
         </div>
     </div>
     <BuffEditer

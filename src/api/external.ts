@@ -27,7 +27,7 @@ export async function getInstanceInfo() {
             },
         })
         const data = (await res.json()) as Result
-        return data.data.map((d) => d.instances.map((v) => v.name))
+        return data.data.map(d => d.instances.map(v => v.name))
     } catch (error) {
         console.error(error)
     }
@@ -81,10 +81,10 @@ export async function getActivityInfo() {
                 headers: {
                     "game-alias": "dna",
                 },
-            },
+            }
         )
         const data = (await res.json()) as Result
-        return data.data.map((v) => ({
+        return data.data.map(v => ({
             title: v.title,
             description: v.description,
             begin_at: v.begin_at,

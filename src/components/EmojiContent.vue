@@ -9,7 +9,7 @@ const props = withDefaults(
     }>(),
     {
         tag: "div",
-    },
+    }
 )
 
 const emojiPattren = /_\[\/[\u4e00-\u9fa5-a-zA-Z0-9？！@#%&?!+=~…]*]/g

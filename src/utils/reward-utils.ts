@@ -47,7 +47,7 @@ export function getRewardDetails(
     rewardId: number,
     visited: Set<number> = new Set(),
     parentProbability: number = 1,
-    isRoot: boolean = true,
+    isRoot: boolean = true
 ): RewardItem | null {
     if (visited.has(rewardId)) {
         return null
@@ -100,7 +100,7 @@ export function getRewardDetails(
         const calculatePP = (item: RewardItem, parentPP: number): void => {
             if (item.child && item.child.length > 0) {
                 const childTotalP = item.child.reduce((sum, child) => sum + child.p, 0)
-                item.child.forEach((child) => {
+                item.child.forEach(child => {
                     child.pp = parentPP * (child.p / childTotalP)
                     calculatePP(child, child.pp!)
                 })
@@ -109,7 +109,7 @@ export function getRewardDetails(
             }
         }
         if (result.child) {
-            result.child.forEach((child) => {
+            result.child.forEach(child => {
                 child.pp = child.p / totalP
                 calculatePP(child, child.pp!)
             })

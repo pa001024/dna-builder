@@ -206,40 +206,44 @@ function handleMouseUp(event: MouseEvent) {
                                 <NumberInput
                                     class="absolute w-full max-h-0 group-hover:max-h-20"
                                     :model-value="mod.等级"
-                                    @update:modelValue="emit('lvChange', $event)"
                                     :min="0"
                                     :max="mod.maxLevel"
                                     :step="1"
+                                    @update:model-value="emit('lvChange', $event)"
                                 />
                                 <NumberInput
                                     v-if="count"
                                     class="absolute mt-8 w-full max-h-0 group-hover:max-h-20"
                                     :model-value="count"
-                                    @update:modelValue="emit('countChange', $event)"
                                     :min="1"
                                     :max="8"
                                     :step="1"
+                                    @update:model-value="emit('countChange', $event)"
                                 />
                                 <div class="absolute w-full flex justify-between max-h-20 overflow-hidden group-hover:max-h-0">
                                     <div class="text-base-300 text-xs">Lv.{{ mod.等级 }}</div>
-                                    <div class="text-base-300 text-xs" v-if="income">{{ format100r(income, 1) }}</div>
-                                    <div class="text-base-300 text-xs" v-if="count">x {{ count }}</div>
+                                    <div v-if="income" class="text-base-300 text-xs">
+                                        {{ format100r(income, 1) }}
+                                    </div>
+                                    <div v-if="count" class="text-base-300 text-xs">x {{ count }}</div>
                                 </div>
                             </div>
                             <div v-else class="flex justify-between">
                                 <div class="text-base-300 text-xs">
                                     {{ control && selected !== undefined ? $t("未拥有") : `Lv.${mod.等级}` }}
                                 </div>
-                                <div class="text-base-300 text-xs" v-if="income">{{ format100r(income, 1) }}</div>
-                                <div class="text-base-300 text-xs" v-if="count">x{{ count }}</div>
+                                <div v-if="income" class="text-base-300 text-xs">
+                                    {{ format100r(income, 1) }}
+                                </div>
+                                <div v-if="count" class="text-base-300 text-xs">x{{ count }}</div>
                             </div>
                         </div>
                     </div>
                     <!-- 删除按钮 -->
                     <button
                         v-if="!noremove"
-                        @click.stop="emit('removeMod')"
                         class="absolute cursor-pointer -top-2 -right-2 w-5 h-5 bg-red-400 bg-opacity-50 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors"
+                        @click.stop="emit('removeMod')"
                     >
                         <span class="text-white text-xs">×</span>
                     </button>

@@ -62,7 +62,7 @@ describe("数据类型测试", () => {
         })
 
         it("角色应该有标识符", () => {
-            charData.forEach((char) => {
+            charData.forEach(char => {
                 // 角色应该有名称或id作为标识符
                 expect(char.名称).toBeDefined()
                 expect(typeof char.名称).toBe("string")
@@ -71,7 +71,7 @@ describe("数据类型测试", () => {
         })
 
         it("角色属性应该是有效数值", () => {
-            charData.forEach((char) => {
+            charData.forEach(char => {
                 expect(char.基础攻击).toBeGreaterThan(0)
                 expect(char.基础生命).toBeGreaterThan(0)
                 expect(char.基础护盾).toBeGreaterThanOrEqual(0)
@@ -95,7 +95,7 @@ describe("数据类型测试", () => {
         })
 
         it("MOD应该有ID和名称", () => {
-            modData.forEach((mod) => {
+            modData.forEach(mod => {
                 expect(mod.id).toBeDefined()
                 expect(typeof mod.id).toBe("number")
 
@@ -106,7 +106,7 @@ describe("数据类型测试", () => {
         })
 
         it("MOD ID 不应该重复", () => {
-            const idset = new Set(modData.map((mod) => mod.id))
+            const idset = new Set(modData.map(mod => mod.id))
             expect(idset.size).toBe(modData.length)
         })
     })
@@ -125,7 +125,7 @@ describe("数据类型测试", () => {
         })
 
         it("武器应该有名称和基础类型", () => {
-            weaponData.forEach((weapon) => {
+            weaponData.forEach(weapon => {
                 expect(weapon.名称).toBeDefined()
                 expect(typeof weapon.名称).toBe("string")
                 expect(weapon.名称.length).toBeGreaterThan(0)
@@ -137,7 +137,7 @@ describe("数据类型测试", () => {
         })
 
         it("武器应该有基础属性", () => {
-            weaponData.forEach((weapon) => {
+            weaponData.forEach(weapon => {
                 expect(weapon.攻击).toBeDefined()
                 expect(typeof weapon.攻击).toBe("number")
                 expect(weapon.攻击).toBeGreaterThan(0)
@@ -156,7 +156,7 @@ describe("数据类型测试", () => {
         })
 
         it("武器基础应该有名称", () => {
-            baseData.forEach((base) => {
+            baseData.forEach(base => {
                 expect(base.名称).toBeDefined()
                 expect(typeof base.名称).toBe("string")
                 expect(base.名称.length).toBeGreaterThan(0)
@@ -164,7 +164,7 @@ describe("数据类型测试", () => {
         })
 
         it("武器基础应该有倍率或攻击数据", () => {
-            baseData.forEach((base) => {
+            baseData.forEach(base => {
                 // 检查是否有倍率或攻击相关数据
                 const hasData = base.倍率 !== undefined
                 expect(hasData).toBe(true)
@@ -186,7 +186,7 @@ describe("数据类型测试", () => {
         })
 
         it("BUFF应该有名称", () => {
-            buffData.forEach((buff) => {
+            buffData.forEach(buff => {
                 expect(buff.名称).toBeDefined()
                 expect(typeof buff.名称).toBe("string")
                 expect(buff.名称.length).toBeGreaterThan(0)
@@ -194,7 +194,7 @@ describe("数据类型测试", () => {
         })
 
         it("BUFF属性应该是有效数值", () => {
-            buffData.forEach((buff) => {
+            buffData.forEach(buff => {
                 // 检查所有可能的数值属性
                 const numericProperties = [
                     "攻击",
@@ -223,7 +223,7 @@ describe("数据类型测试", () => {
                     "技能速度",
                 ]
 
-                numericProperties.forEach((prop) => {
+                numericProperties.forEach(prop => {
                     if ((buff as any)[prop] !== undefined) {
                         if (Array.isArray((buff as any)[prop])) {
                             ;(buff as any)[prop].forEach((item: any) => {
@@ -274,12 +274,12 @@ describe("数据类型测试", () => {
     // 数据一致性测试
     describe("数据一致性测试", () => {
         it("MOD应该引用有效的角色或武器", () => {
-            const charNames = charData.map((c) => c.名称)
-            const weaponNames = weaponData.map((w) => w.名称)
-            const weaponTypes = [...new Set(weaponData.map((w) => w.类型[1]))]
+            const charNames = charData.map(c => c.名称)
+            const weaponNames = weaponData.map(w => w.名称)
+            const weaponTypes = [...new Set(weaponData.map(w => w.类型[1]))]
             const allNames = [...charNames, ...weaponNames, ...weaponTypes, "切割", "贯穿", "震荡"]
 
-            modData.forEach((mod) => {
+            modData.forEach(mod => {
                 if (mod.限定) {
                     expect(allNames).toContain(mod.限定)
                 }
@@ -287,9 +287,9 @@ describe("数据类型测试", () => {
         })
 
         it("BUFF应该引用有效的角色", () => {
-            const charNames = charData.map((c) => c.名称)
+            const charNames = charData.map(c => c.名称)
 
-            buffData.forEach((buff) => {
+            buffData.forEach(buff => {
                 if (buff.限定) {
                     expect(charNames).toContain(buff.限定)
                 }
@@ -348,9 +348,9 @@ describe("数据类型测试", () => {
             const startTime = performance.now()
 
             // 搜索测试
-            const searchChar = charData.find((c) => c.名称 === "黎瑟")
-            const searchMod = modData.find((m) => m.id === 41001)
-            const searchWeapon = weaponData.find((w) => w.名称 === "铸铁者")
+            const searchChar = charData.find(c => c.名称 === "黎瑟")
+            const searchMod = modData.find(m => m.id === 41001)
+            const searchWeapon = weaponData.find(w => w.名称 === "铸铁者")
 
             const endTime = performance.now()
             const duration = endTime - startTime

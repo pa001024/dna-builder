@@ -20,7 +20,7 @@ const leveledMonster = computed(() => {
 
 const dungeons = computed(() => {
     if (!props.monster) return []
-    return dungeonData.filter((d) => {
+    return dungeonData.filter(d => {
         const normalMonsters = d.m || []
         const specialMonsters = d.sm || []
         return normalMonsters.includes(props.monster.id) || specialMonsters.includes(props.monster.id)
@@ -29,7 +29,7 @@ const dungeons = computed(() => {
 
 const abyssDungeonsFiltered = computed(() => {
     if (!props.monster) return []
-    return [...abyssDungeonMap.values()].filter((d) => {
+    return [...abyssDungeonMap.values()].filter(d => {
         const normalMonsters = d.m || []
         return normalMonsters.includes(props.monster.id)
     })
@@ -37,7 +37,7 @@ const abyssDungeonsFiltered = computed(() => {
 // 按照副本名称分组
 const dungeonGroups = computed(() => {
     const groups: Record<string, typeof dungeons.value> = {}
-    dungeons.value.forEach((dungeon) => {
+    dungeons.value.forEach(dungeon => {
         const dn = dungeon.n.replace(/·.+/, "")
         if (!groups[dn]) {
             groups[dn] = []
@@ -46,7 +46,7 @@ const dungeonGroups = computed(() => {
     })
 
     // 对每个组内的副本按等级升序排列
-    Object.keys(groups).forEach((groupName) => {
+    Object.keys(groups).forEach(groupName => {
         groups[groupName].sort((a, b) => a.lv - b.lv)
     })
 
@@ -82,16 +82,16 @@ function formatNumber(num: number): string {
         <div class="p-3 space-y-4">
             <div class="p-3">
                 <div class="flex items-center gap-3 mb-3">
-                    <RouterLink :to="`/db/monster/${monster.id}`" class="text-lg font-bold link link-primary">{{
-                        $t(monster.n)
-                    }}</RouterLink>
+                    <RouterLink :to="`/db/monster/${monster.id}`" class="text-lg font-bold link link-primary">
+                        {{ $t(monster.n) }}
+                    </RouterLink>
                     <div class="text-sm text-base-content/70 flex items-center gap-2">
                         <span class="px-1.5 py-0.5 rounded bg-base-200 text-xs">
                             {{ $t(getFactionName(monster.f)) }}
                         </span>
                     </div>
                     <label class="ml-auto flex items-center gap-1 text-xs">
-                        <input type="checkbox" v-model="showRougeStats" class="toggle toggle-sm toggle-primary" />
+                        <input v-model="showRougeStats" type="checkbox" class="toggle toggle-sm toggle-primary" />
                         <span>迷津</span>
                     </label>
                 </div>
@@ -111,23 +111,33 @@ function formatNumber(num: number): string {
                 <div v-if="leveledMonster" class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
                     <div class="bg-base-200 rounded p-2 text-center">
                         <div class="text-xs text-base-content/70 mb-1">攻击</div>
-                        <div class="font-bold text-primary">{{ formatNumber(leveledMonster.atk) }}</div>
+                        <div class="font-bold text-primary">
+                            {{ formatNumber(leveledMonster.atk) }}
+                        </div>
                     </div>
                     <div class="bg-base-200 rounded p-2 text-center">
                         <div class="text-xs text-base-content/70 mb-1">防御</div>
-                        <div class="font-bold text-success">{{ formatNumber(leveledMonster.def) }}</div>
+                        <div class="font-bold text-success">
+                            {{ formatNumber(leveledMonster.def) }}
+                        </div>
                     </div>
                     <div class="bg-base-200 rounded p-2 text-center">
                         <div class="text-xs text-base-content/70 mb-1">生命</div>
-                        <div class="font-bold text-error">{{ formatNumber(leveledMonster.hp) }}</div>
+                        <div class="font-bold text-error">
+                            {{ formatNumber(leveledMonster.hp) }}
+                        </div>
                     </div>
                     <div v-if="leveledMonster.es !== undefined" class="bg-base-200 rounded p-2 text-center">
                         <div class="text-xs text-base-content/70 mb-1">护盾</div>
-                        <div class="font-bold text-info">{{ formatNumber(leveledMonster.es) }}</div>
+                        <div class="font-bold text-info">
+                            {{ formatNumber(leveledMonster.es) }}
+                        </div>
                     </div>
                     <div v-if="leveledMonster.tn !== undefined" class="bg-base-200 rounded p-2 text-center">
                         <div class="text-xs text-base-content/70 mb-1">战姿</div>
-                        <div class="font-bold text-secondary">{{ formatNumber(leveledMonster.tn) }}</div>
+                        <div class="font-bold text-secondary">
+                            {{ formatNumber(leveledMonster.tn) }}
+                        </div>
                     </div>
                 </div>
 
@@ -145,7 +155,7 @@ function formatNumber(num: number): string {
                                     :style="{
                                         height: `${(leveledMonster.getHPByLevel(level) / leveledMonster.getHPByLevel(180)) * 100}%`,
                                     }"
-                                ></div>
+                                />
                             </div>
                             <span class="text-[10px] mt-1">Lv{{ level }}</span>
                         </div>
@@ -190,7 +200,9 @@ function formatNumber(num: number): string {
                                 <span class="text-xs text-base-content/70">ID: {{ dungeon.id }}</span>
                             </div>
                         </div>
-                        <div class="text-xs text-base-content/70 mt-1">{{ dungeon.desc }}</div>
+                        <div class="text-xs text-base-content/70 mt-1">
+                            {{ dungeon.desc }}
+                        </div>
                     </div>
                 </div>
             </div>

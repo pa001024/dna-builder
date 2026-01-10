@@ -55,7 +55,7 @@ async function loadPosts(page = 1) {
             ui.showErrorMessage(res.msg || "获取帖子列表失败")
         }
     } catch (e) {
-        ui.showErrorMessage("获取帖子列表失败")
+        ui.showErrorMessage("获取帖子列表失败", e)
     } finally {
         loading.value = false
     }
@@ -71,15 +71,15 @@ async function loadPosts(page = 1) {
                 </svg>
             </button>
             <h1 class="text-xl font-bold">社区帖子</h1>
-            <div class="w-12"></div>
+            <div class="w-12" />
             <!-- Spacer -->
         </div>
 
         <!-- 内容区域 -->
-        <ScrollArea @loadref="(r) => (scrollContainer = r)" class="flex-1 p-4">
+        <ScrollArea class="flex-1 p-4" @loadref="r => (scrollContainer = r)">
             <div v-if="postList.length > 0" class="space-y-4">
                 <!-- 帖子卡片 -->
-                <DNAPostListItem :post="post" v-for="post in postList" :key="post.postId" />
+                <DNAPostListItem v-for="post in postList" :key="post.postId" :post="post" />
             </div>
 
             <div v-else class="flex justify-center items-center h-full">
@@ -90,7 +90,7 @@ async function loadPosts(page = 1) {
             </div>
 
             <div v-if="loading" class="flex justify-center items-center h-full">
-                <span class="loading loading-spinner loading-lg"></span>
+                <span class="loading loading-spinner loading-lg" />
             </div>
         </ScrollArea>
     </div>

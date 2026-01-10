@@ -41,7 +41,7 @@ async function loadRoleDetail() {
             ui.showErrorMessage(!res.is_success ? res.msg : "获取角色详情失败")
         }
     } catch (e) {
-        ui.showErrorMessage("获取角色详情失败")
+        ui.showErrorMessage("获取角色详情失败", e)
     } finally {
         loading.value = false
     }
@@ -56,15 +56,17 @@ async function loadRoleDetail() {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
             </button>
-            <h1 class="text-xl font-bold">{{ charDetail?.charName || "角色详情" }}</h1>
-            <div class="w-12"></div>
+            <h1 class="text-xl font-bold">
+                {{ charDetail?.charName || "角色详情" }}
+            </h1>
+            <div class="w-12" />
             <!-- Spacer -->
         </div>
 
         <!-- 内容区域 -->
         <div class="flex-1 overflow-auto p-4 bg-base-100">
             <div v-if="loading" class="flex justify-center items-center h-full">
-                <span class="loading loading-spinner loading-lg"></span>
+                <span class="loading loading-spinner loading-lg" />
             </div>
 
             <div v-else-if="charDetail" class="space-y-6">
@@ -121,43 +123,63 @@ async function loadRoleDetail() {
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
                                 <div class="stat-title text-xs text-base-content/60">{{ charDetail.elementName }}属性攻击</div>
-                                <div class="stat-value text-xl font-bold">{{ charDetail.attribute.atk }}</div>
+                                <div class="stat-value text-xl font-bold">
+                                    {{ charDetail.attribute.atk }}
+                                </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
                                 <div class="stat-title text-xs text-base-content/60">生命值</div>
-                                <div class="stat-value text-xl font-bold">{{ charDetail.attribute.maxHp }}</div>
+                                <div class="stat-value text-xl font-bold">
+                                    {{ charDetail.attribute.maxHp }}
+                                </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
                                 <div class="stat-title text-xs text-base-content/60">防御</div>
-                                <div class="stat-value text-xl font-bold">{{ charDetail.attribute.def }}</div>
+                                <div class="stat-value text-xl font-bold">
+                                    {{ charDetail.attribute.def }}
+                                </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
                                 <div class="stat-title text-xs text-base-content/60">护盾</div>
-                                <div class="stat-value text-xl font-bold">{{ charDetail.attribute.maxES }}</div>
+                                <div class="stat-value text-xl font-bold">
+                                    {{ charDetail.attribute.maxES }}
+                                </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
                                 <div class="stat-title text-xs text-base-content/60">最大神智</div>
-                                <div class="stat-value text-xl font-bold">{{ charDetail.attribute.maxSp }}</div>
+                                <div class="stat-value text-xl font-bold">
+                                    {{ charDetail.attribute.maxSp }}
+                                </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
                                 <div class="stat-title text-xs text-base-content/60">技能威力</div>
-                                <div class="stat-value text-xl font-bold">{{ charDetail.attribute.skillIntensity }}</div>
+                                <div class="stat-value text-xl font-bold">
+                                    {{ charDetail.attribute.skillIntensity }}
+                                </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
                                 <div class="stat-title text-xs text-base-content/60">技能耐久</div>
-                                <div class="stat-value text-xl font-bold">{{ charDetail.attribute.skillSustain }}</div>
+                                <div class="stat-value text-xl font-bold">
+                                    {{ charDetail.attribute.skillSustain }}
+                                </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
                                 <div class="stat-title text-xs text-base-content/60">技能效益</div>
-                                <div class="stat-value text-xl font-bold">{{ charDetail.attribute.skillEfficiency }}</div>
+                                <div class="stat-value text-xl font-bold">
+                                    {{ charDetail.attribute.skillEfficiency }}
+                                </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
                                 <div class="stat-title text-xs text-base-content/60">技能范围</div>
-                                <div class="stat-value text-xl font-bold">{{ charDetail.attribute.skillRange }}</div>
+                                <div class="stat-value text-xl font-bold">
+                                    {{ charDetail.attribute.skillRange }}
+                                </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
                                 <div class="stat-title text-xs text-base-content/60">武器精通</div>
-                                <div class="stat-value text-xl font-bold">{{ charDetail.attribute.weaponTags.join("/") }}</div>
+                                <div class="stat-value text-xl font-bold">
+                                    {{ charDetail.attribute.weaponTags.join("/") }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -178,8 +200,10 @@ async function loadRoleDetail() {
                                         alt="技能图标"
                                         class="size-12 rounded-full bg-base-content"
                                         :style="{ mask: `url(${skill.icon}) no-repeat center/contain` }"
-                                    ></div>
-                                    <div class="text-sm font-medium">{{ skill.skillName }}</div>
+                                    />
+                                    <div class="text-sm font-medium">
+                                        {{ skill.skillName }}
+                                    </div>
                                     <div class="ml-auto">Lv. {{ skill.level }}</div>
                                 </div>
                             </div>
@@ -212,7 +236,9 @@ async function loadRoleDetail() {
                                                 >{{ charDetail.gradeLevel > index ? "已解锁" : "未解锁" }}</span
                                             >
                                         </div>
-                                        <p class="text-xs opacity-60">{{ trace.description }}</p>
+                                        <p class="text-xs opacity-60">
+                                            {{ trace.description }}
+                                        </p>
                                     </div>
                                 </div>
                             </div>

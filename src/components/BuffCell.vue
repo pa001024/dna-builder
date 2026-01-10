@@ -33,20 +33,22 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
                         </div>
                         {{ buff.名称 }}
                     </div>
-                    <div class="text-xs text-gray-400" v-if="buff.mx">
+                    <div v-if="buff.mx" class="text-xs text-gray-400">
                         Lv.
                         <NumberInput
                             v-if="selected"
                             :model-value="lv"
-                            @update:model-value="setBuffLv(buff, $event)"
                             :min="buff.lx || 0"
                             :max="buff.mx"
                             class="w-8 text-center"
+                            @update:model-value="setBuffLv(buff, $event)"
                         />
                         <span v-else>{{ lv }}</span>
                     </div>
                 </div>
-                <div class="text-xs text-base-content/50 mb-2">{{ buff.描述 }}</div>
+                <div class="text-xs text-base-content/50 mb-2">
+                    {{ buff.描述 }}
+                </div>
                 <div class="text-xs text-base-content/30">
                     {{ $t("char-build.income") }}:
                     {{ format100(income) }}

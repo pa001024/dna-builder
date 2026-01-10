@@ -40,7 +40,7 @@ async function loadPostDetail() {
             ui.showErrorMessage(res.msg || "获取帖子详情失败")
         }
     } catch (e) {
-        ui.showErrorMessage("获取帖子详情失败")
+        ui.showErrorMessage("获取帖子详情失败", e)
     } finally {
         loading.value = false
     }
@@ -84,7 +84,7 @@ async function submitComment() {
             ui.showErrorMessage(res.msg || "评论发布失败")
         }
     } catch (e) {
-        ui.showErrorMessage("评论发布失败")
+        ui.showErrorMessage("评论发布失败", e)
     } finally {
         commentLoading.value = false
     }
@@ -103,14 +103,14 @@ async function submitComment() {
                 <img :src="postRes?.postDetail?.gameForumVo.iconUrl" class="size-8" />
                 {{ postRes?.postDetail?.gameForumVo.name || "帖子详情" }}
             </h1>
-            <div class="w-12"></div>
+            <div class="w-12" />
             <!-- Spacer -->
         </div>
 
         <!-- 内容区域 -->
         <div class="flex-1 overflow-auto p-4">
             <div v-if="loading" class="flex justify-center items-center h-full">
-                <span class="loading loading-spinner loading-lg"></span>
+                <span class="loading loading-spinner loading-lg" />
             </div>
 
             <div v-else-if="postRes?.postDetail" class="space-y-6">
@@ -127,14 +127,18 @@ async function submitComment() {
                                 <div class="flex items-center gap-2">
                                     <span class="font-medium text-base-content">{{ postRes.postDetail.userName }}</span>
                                 </div>
-                                <div class="text-xs text-base-content/60">{{ postRes.postDetail.postTime }}</div>
+                                <div class="text-xs text-base-content/60">
+                                    {{ postRes.postDetail.postTime }}
+                                </div>
                             </div>
                             <div class="btn" @click="follow(postRes.postDetail.postUserId, !!postRes.isFollow)">
                                 {{ postRes.isFollow ? "取消关注" : "关注" }}
                             </div>
                         </div>
                         <!-- 帖子标题 -->
-                        <h2 class="text-2xl font-bold mb-2">{{ postRes.postDetail.postTitle }}</h2>
+                        <h2 class="text-2xl font-bold mb-2">
+                            {{ postRes.postDetail.postTitle }}
+                        </h2>
 
                         <!-- 帖子元信息 -->
                         <div class="flex flex-wrap gap-2 mb-4 text-sm text-base-content/70">
@@ -150,7 +154,7 @@ async function submitComment() {
                         <div class="flex flex-wrap gap-2">
                             <span v-if="postRes.postDetail.isElite === 1" class="badge badge-secondary text-xs">精华</span>
                             <span v-if="postRes.postDetail.isOfficial === 1" class="badge badge-info text-xs">官方</span>
-                            <span class="badge badge-outline text-xs" v-for="topic in postRes.postDetail.topics">
+                            <span v-for="(topic, index) in postRes.postDetail.topics" :key="index" class="badge badge-outline text-xs">
                                 <Icon icon="ri:hashtag" />
                                 {{ topic.topicName }}</span
                             >
@@ -188,7 +192,9 @@ async function submitComment() {
                                             <span v-if="comment.isOfficial === 1" class="badge badge-primary text-xs">官方</span>
                                             <span v-if="comment.isCreator === 1" class="badge badge-secondary text-xs">作者</span>
                                         </div>
-                                        <div class="text-xs text-base-content/60">{{ comment.commentTime }}</div>
+                                        <div class="text-xs text-base-content/60">
+                                            {{ comment.commentTime }}
+                                        </div>
                                     </div>
                                     <span class="text-xs text-base-content/50">#{{ comment.floor }}</span>
                                 </div>
@@ -254,16 +260,16 @@ async function submitComment() {
                                 <textarea
                                     v-model="commentContent"
                                     placeholder="写下你的评论..."
-                                    class="textarea textarea-bordered w-full min-h-[120px] bg-base-100 border-base-300 text-base-content"
+                                    class="textarea textarea-bordered w-full min-h-30 bg-base-100 border-base-300 text-base-content"
                                     :disabled="commentLoading"
-                                ></textarea>
+                                />
                                 <div class="flex justify-end">
                                     <button
                                         class="btn btn-primary"
-                                        @click="submitComment"
                                         :disabled="commentLoading || !commentContent.trim()"
+                                        @click="submitComment"
                                     >
-                                        <span v-if="commentLoading" class="loading loading-spinner loading-sm mr-2"></span>
+                                        <span v-if="commentLoading" class="loading loading-spinner loading-sm mr-2" />
                                         {{ commentLoading ? "发布中..." : "发布评论" }}
                                     </button>
                                 </div>

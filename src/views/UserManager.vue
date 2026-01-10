@@ -5,6 +5,7 @@ import { db } from "../store/db"
 import type { DNAUser, UDNAUser } from "../store/db"
 import { useUIStore } from "../store/ui"
 import { useSettingStore } from "../store/setting"
+import { env } from "@/env"
 
 const ui = useUIStore()
 const setting = useSettingStore()
@@ -81,7 +82,7 @@ const switchUser = (id: number) => {
 
 // 复制用户JSON
 const copyUser = (id: number) => {
-    const user = users.value.find((u) => u.id === id)
+    const user = users.value.find(u => u.id === id)
     if (user) {
         const text = JSON.stringify(user, null, 2)
         copyText(text)
@@ -109,17 +110,27 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div class="w-full h-full bg-base-100 p-4 flex flex-col">
+    <div class="w-full h-full bg-base-100 p-4 flex flex-col relative">
+        <div v-if="!env.isApp" class="flex flex-col gap-8 absolute inset-0 items-center justify-center bg-base-200/50 z-10">
+            <div class="flex items-center">
+                <Icon icon="ri:error-warning-line" class="size-12 text-warning mr-2" />
+                网页端不可用
+            </div>
+            <RouterLink to="/" class="btn btn-primary px-8">
+                <Icon icon="ri:download-2-line" />
+                下载APP</RouterLink
+            >
+        </div>
         <!-- 顶部操作栏 -->
         <div class="flex justify-between items-center mb-4">
             <h1 class="text-xl font-semibold text-base-content">账号管理</h1>
             <div class="join">
-                <button @click="isAddIframeOpen = true" class="join-item btn btn-primary">
+                <button class="join-item btn btn-primary" @click="isAddIframeOpen = true">
                     <Icon icon="ri:add-line" class="size-5 mr-1" />
                     <span> 添加账号 </span>
                 </button>
                 <Tooltip tooltip="通过JSON添加账号" side="bottom">
-                    <button @click="((isAddByTokenOpen = true), (jsonInput = ''))" class="join-item btn btn-primary btn-square">
+                    <button class="join-item btn btn-primary btn-square" @click="((isAddByTokenOpen = true), (jsonInput = ''))">
                         <Icon icon="ri:more-line" class="size-5" />
                     </button>
                 </Tooltip>
@@ -163,13 +174,13 @@ onBeforeUnmount(() => {
 
                             <!-- 用户ID -->
                             <td class="py-3 px-4">
-                                <span class="text-base-content/80 truncate max-w-[150px]">{{ user.uid }}</span>
+                                <span class="text-base-content/80 truncate max-w-37.5">{{ user.uid }}</span>
                             </td>
 
                             <!-- 状态 -->
                             <td class="py-3 px-4">
                                 <span class="badge badge-primary badge-sm">{{ user.isComplete ? "已绑定" : "未绑定" }}</span>
-                                <span class="badge badge-primary badge-sm" v-if="user.isOfficial">官方</span>
+                                <span v-if="user.isOfficial" class="badge badge-primary badge-sm">官方</span>
                             </td>
 
                             <!-- 操作按钮 -->
@@ -177,20 +188,20 @@ onBeforeUnmount(() => {
                                 <div class="flex justify-end gap-2">
                                     <!-- 使用按钮 -->
                                     <button
-                                        @click="switchUser(user.id)"
                                         class="btn btn-sm btn-primary"
                                         :disabled="user.id === setting.dnaUserId"
+                                        @click="switchUser(user.id)"
                                     >
                                         {{ user.id === setting.dnaUserId ? "当前" : "使用" }}
                                     </button>
                                     <!-- 复制按钮 -->
                                     <Tooltip tooltip="复制账号JSON" side="bottom">
-                                        <button @click="copyUser(user.id)" class="btn btn-sm btn-square">
+                                        <button class="btn btn-sm btn-square" @click="copyUser(user.id)">
                                             <Icon icon="ri:clipboard-line" class="size-4" />
                                         </button>
                                     </Tooltip>
                                     <!-- 删除按钮 -->
-                                    <button @click="deleteUser(user.id)" class="btn btn-sm btn-square btn-error">
+                                    <button class="btn btn-sm btn-square btn-error" @click="deleteUser(user.id)">
                                         <Icon icon="ri:delete-bin-line" class="size-4" />
                                     </button>
                                 </div>
@@ -233,11 +244,11 @@ onBeforeUnmount(() => {
         <!-- 添加用户iframe模态框 -->
         <div class="modal" :class="{ 'modal-open': isAddIframeOpen }">
             <div class="modal-box bg-base-200 shadow-2xl rounded-xl p-0 w-114 h-116">
-                <iframe ref="iframeRef" src="/login.html" class="w-full h-full border-0 rounded-lg"></iframe>
+                <iframe ref="iframeRef" src="/login.html" class="w-full h-full border-0 rounded-lg" />
             </div>
 
             <!-- 模态框背景 -->
-            <div class="modal-backdrop" @click="isAddIframeOpen = false"></div>
+            <div class="modal-backdrop" @click="isAddIframeOpen = false" />
         </div>
         <!-- 添加用户iframe模态框 -->
         <div class="modal" :class="{ 'modal-open': isAddByTokenOpen }">
@@ -250,7 +261,7 @@ onBeforeUnmount(() => {
                             <textarea v-model="jsonInput" required placeholder="请输入JSON字符串" class="input w-full p-2 h-68 text-md" />
                         </fieldset>
                         <!-- 登录按钮 -->
-                        <button class="btn btn-primary btn-block" @click="addUserByToken" :disabled="!jsonInput.length">添加用户</button>
+                        <button class="btn btn-primary btn-block" :disabled="!jsonInput.length" @click="addUserByToken">添加用户</button>
 
                         <!-- 辅助信息 -->
                         <div class="text-center text-sm text-base-content/70">
@@ -261,7 +272,7 @@ onBeforeUnmount(() => {
             </div>
 
             <!-- 模态框背景 -->
-            <div class="modal-backdrop" @click="isAddByTokenOpen = false"></div>
+            <div class="modal-backdrop" @click="isAddByTokenOpen = false" />
         </div>
     </div>
 </template>

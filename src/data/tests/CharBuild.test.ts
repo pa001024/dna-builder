@@ -252,7 +252,7 @@ describe("CharBuild类测试", () => {
         expect(charBuild.getTotalBonus("攻击")).toBe(1.25)
         expect(atk).toBeCloseTo(attrs.攻击, 0)
         expect(attrs.技能威力).toBe(1.18)
-        const b = charBuild.skills[0].字段.find((field) => field.名称.includes("伤害"))!.值 * 1.18
+        const b = charBuild.skills[0].字段.find(field => field.名称.includes("伤害"))!.值 * 1.18
         const dm = charBuild.calculateDefenseMultiplier(attrs)
         // 验证结果
         expect(result).toBeCloseTo(atk * b * dm * 0.5 * (1.9 + 0.44), 0)
@@ -622,7 +622,7 @@ describe("CharBuild类测试", () => {
         it("应该能够处理不同角色", () => {
             const chars = ["黎瑟", "菲娜", "希尔妲", "莉兹贝尔"]
 
-            chars.forEach((charName) => {
+            chars.forEach(charName => {
                 const charBuild = new CharBuild({
                     char: new LeveledChar(charName),
                     hpPercent: 0.5,
@@ -650,7 +650,7 @@ describe("CharBuild类测试", () => {
         it("应该能够处理不同近战武器", () => {
             const weapons = [10302, 10303, 10304]
 
-            weapons.forEach((weaponId) => {
+            weapons.forEach(weaponId => {
                 const charBuild = createCharBuild()
                 charBuild.meleeWeapon = new LeveledWeapon(weaponId)
 
@@ -667,7 +667,7 @@ describe("CharBuild类测试", () => {
         it("应该能够处理不同远程武器", () => {
             const weapons = [20601, 20602, 20603]
 
-            weapons.forEach((weaponId) => {
+            weapons.forEach(weaponId => {
                 const charBuild = createCharBuild()
                 charBuild.rangedWeapon = new LeveledWeapon(weaponId)
 

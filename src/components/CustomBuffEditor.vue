@@ -61,7 +61,7 @@ function writeCustomBuff() {
         名称: "自定义BUFF",
         描述: "自行填写",
     } as any
-    customBuff.value.forEach((prop) => {
+    customBuff.value.forEach(prop => {
         buffObj[prop[0]] = prop[1]
     })
     buffMap.set("自定义BUFF", buffObj)
@@ -114,7 +114,7 @@ const validateForm = (): boolean => {
 const addBuff = () => {
     if (validateForm()) {
         // 检查是否已经存在相同属性的buff
-        const existingIndex = customBuff.value.findIndex((buff) => buff[0] === newBuff.property)
+        const existingIndex = customBuff.value.findIndex(buff => buff[0] === newBuff.property)
         if (existingIndex !== -1) {
             // 如果存在，更新数值
             customBuff.value[existingIndex][1] += +newBuff.value
@@ -157,13 +157,17 @@ const removeBuff = (index: number) => {
                         {{ prop }}
                     </SelectItem>
                 </Select>
-                <div v-if="errors.property" class="text-xs text-error mt-1">{{ errors.property }}</div>
+                <div v-if="errors.property" class="text-xs text-error mt-1">
+                    {{ errors.property }}
+                </div>
             </div>
 
             <div class="flex-1">
                 <div class="text-xs text-gray-400 mb-1">数值</div>
-                <input type="number" step="0.01" v-model="newBuff.value" class="input input-bordered w-full" placeholder="请输入数值" />
-                <div v-if="errors.value" class="text-xs text-error mt-1">{{ errors.value }}</div>
+                <input v-model="newBuff.value" type="number" step="0.01" class="input input-bordered w-full" placeholder="请输入数值" />
+                <div v-if="errors.value" class="text-xs text-error mt-1">
+                    {{ errors.value }}
+                </div>
             </div>
 
             <div class="flex items-end">

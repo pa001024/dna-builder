@@ -80,22 +80,22 @@ const entitys = ref<{ name: string; icon: string; count: number }[]>([])
 watchEffect(async () => {
     if (entityType.value === "custom") {
         entitys.value = await Promise.all(
-            game.customEntitys?.map(async (v) => ({ name: v.name, icon: v.icon, count: await game.getModsCountByEntity(v.name) })) || [],
+            game.customEntitys?.map(async v => ({ name: v.name, icon: v.icon, count: await game.getModsCountByEntity(v.name) })) || []
         )
     } else {
         const data = await Promise.all(
-            (entityType.value === "char" ? charData : weaponData).map(async (v) => ({
+            (entityType.value === "char" ? charData : weaponData).map(async v => ({
                 name: v.名称,
                 icon: `/imgs/${v.名称}.png`,
                 count: await game.getModsCountByEntity(v.名称),
-            })),
+            }))
         )
         entitys.value = data
     }
 })
 
 const sortedEntitys = computed(() =>
-    [...entitys.value].sort((a, b) => (game.likedChars.includes(a.name) ? -1 : game.likedChars.includes(b.name) ? 1 : b.count - a.count)),
+    [...entitys.value].sort((a, b) => (game.likedChars.includes(a.name) ? -1 : game.likedChars.includes(b.name) ? 1 : b.count - a.count))
 )
 
 async function addCustomEntity() {
@@ -123,7 +123,7 @@ async function updateEntityMod() {
     entityMod.value = await game.getEntityMod(game.selectedEntity)
     modsInEntity.value = await game.getModsByEntity(game.selectedEntity)
     if (game.selectedEntity) {
-        const e = entitys.value.find((v) => v.name === game.selectedEntity)
+        const e = entitys.value.find(v => v.name === game.selectedEntity)
         if (e) e.count = modsInEntity.value.length
     }
 }
@@ -181,7 +181,7 @@ onMounted(async () => {
         })
 
         // 监听文件放置事件
-        unlistenDragDrop = await listen<TauriDragEvent>(TauriEvent.DRAG_DROP, async (event) => {
+        unlistenDragDrop = await listen<TauriDragEvent>(TauriEvent.DRAG_DROP, async event => {
             if (!isDragging.value) return
             isDragging.value = false
             if (!game.selectedEntity) return
@@ -191,7 +191,7 @@ onMounted(async () => {
             }
 
             const paths = event.payload.paths
-            if (paths.some((v) => v.endsWith(".zip") || v.endsWith(".pak"))) {
+            if (paths.some(v => v.endsWith(".zip") || v.endsWith(".pak"))) {
                 try {
                     const results = await game.importMod(paths)
                     if (!results) {
@@ -205,10 +205,10 @@ onMounted(async () => {
                     ui.showErrorMessage(
                         t("game-launcher.importModFailed", {
                             error: error instanceof Error ? error.message : String(error),
-                        }),
+                        })
                     )
                 }
-            } else if (paths.some((v) => /\.(?:png|jpg|jpeg|gif|webp)$/.test(v))) {
+            } else if (paths.some(v => /\.(?:png|jpg|jpeg|gif|webp)$/.test(v))) {
                 if (!entityMod.value) {
                     ui.showErrorMessage(t("game-launcher.selectModFirst"))
                     return
@@ -225,7 +225,7 @@ onMounted(async () => {
                     ui.showErrorMessage(
                         t("game-launcher.importPicFailed", {
                             error: error instanceof Error ? error.message : String(error),
-                        }),
+                        })
                     )
                 }
             }
@@ -244,16 +244,16 @@ onUnmounted(() => {
 <template>
     <div class="flex flex-col h-full overflow-hidden relative">
         <div class="flex-none tabs tabs-lift tabs-lg items-center">
-            <input type="radio" name="game_mod" class="tab" value="mod" :aria-label="$t('game-launcher.modManager')" v-model="tab" />
-            <input type="radio" name="game_mod" class="tab" value="setting" :aria-label="$t('game-launcher.gameSetting')" v-model="tab" />
+            <input v-model="tab" type="radio" name="game_mod" class="tab" value="mod" :aria-label="$t('game-launcher.modManager')" />
+            <input v-model="tab" type="radio" name="game_mod" class="tab" value="setting" :aria-label="$t('game-launcher.gameSetting')" />
             <div
-                @click="openGameDirectory()"
                 class="ml-auto btn btn-square tooltip tooltip-bottom"
                 :data-tip="$t('game-launcher.openGameDir')"
+                @click="openGameDirectory()"
             >
                 <Icon icon="ri:folder-line" class="w-6 h-6" />
             </div>
-            <div @click="launchGame()" class="w-40 btn btn-primary mx-2" :class="{ 'btn-disabled': game.running }">
+            <div class="w-40 btn btn-primary mx-2" :class="{ 'btn-disabled': game.running }" @click="launchGame()">
                 <Icon icon="ri:rocket-2-line" class="w-6 h-6" />
                 {{ $t("game-launcher.launch") }}
             </div>
@@ -262,7 +262,7 @@ onUnmounted(() => {
             <!-- 角色列表 -->
             <div class="flex-none overflow-hidden flex flex-col">
                 <div class="flex-none p-1">
-                    <Select class="w-full inline-flex items-center justify-between input input-sm whitespace-nowrap" v-model="entityType">
+                    <Select v-model="entityType" class="w-full inline-flex items-center justify-between input input-sm whitespace-nowrap">
                         <SelectItem v-for="type in entityTypes" :key="type" :value="type">
                             {{ $t(`game-launcher.${type}`) }}
                         </SelectItem>
@@ -282,20 +282,22 @@ onUnmounted(() => {
                                 </template>
                                 <li
                                     class="list-row cursor-pointer min-w-60 justify-between rounded-none"
-                                    @click="game.selectedEntity = item.name"
                                     :class="{ 'bg-base-300': item.name === game.selectedEntity }"
+                                    @click="game.selectedEntity = item.name"
                                 >
                                     <div>
                                         <Icon :icon="item.icon as any" class="size-10 rounded-box" />
                                     </div>
                                     <div>
                                         <div>{{ item.name }}</div>
-                                        <div class="text-xs font-semibold opacity-60">{{ item.count }}</div>
+                                        <div class="text-xs font-semibold opacity-60">
+                                            {{ item.count }}
+                                        </div>
                                     </div>
                                     <button
                                         class="btn btn-square btn-ghost"
-                                        @click="game.likeChar(item.name)"
                                         :class="{ 'text-primary': game.likedChars.includes(item.name) }"
+                                        @click="game.likeChar(item.name)"
                                     >
                                         <Icon
                                             :icon="game.likedChars.includes(item.name) ? 'ri:heart-fill' : 'ri:heart-line'"
@@ -310,7 +312,9 @@ onUnmounted(() => {
                                 </div>
                                 <dialog id="add_custom_entity_modal" class="modal z-10">
                                     <div class="modal-box">
-                                        <h3 class="text-lg font-bold">{{ $t("game-launcher.addCustomType") }}</h3>
+                                        <h3 class="text-lg font-bold">
+                                            {{ $t("game-launcher.addCustomType") }}
+                                        </h3>
                                         <p class="py-4">
                                             <input
                                                 v-model="customEntityName"
@@ -321,8 +325,8 @@ onUnmounted(() => {
                                         </p>
                                         <p class="py-4">
                                             <Select
-                                                class="w-full inline-flex items-center justify-between input input-md whitespace-nowrap"
                                                 v-model="customEntityIcon"
+                                                class="w-full inline-flex items-center justify-between input input-md whitespace-nowrap"
                                             >
                                                 <SelectItem v-for="icon in customEntityIconsOptions" :key="icon" :value="icon">
                                                     <Icon :icon="icon" class="size-8 rounded-box" />
@@ -335,7 +339,9 @@ onUnmounted(() => {
                                                 <button class="min-w-20 btn btn-primary" @click="addCustomEntity()">
                                                     {{ $t("setting.confirm") }}
                                                 </button>
-                                                <button class="min-w-20 btn">{{ $t("setting.cancel") }}</button>
+                                                <button class="min-w-20 btn">
+                                                    {{ $t("setting.cancel") }}
+                                                </button>
                                             </form>
                                         </div>
                                     </div>
@@ -347,8 +353,8 @@ onUnmounted(() => {
                                 v-for="item in sortedEntitys"
                                 :key="item.name"
                                 class="list-row cursor-pointer min-w-60 justify-between rounded-none"
-                                @click="game.selectedEntity = item.name"
                                 :class="{ 'bg-base-300': item.name === game.selectedEntity }"
+                                @click="game.selectedEntity = item.name"
                             >
                                 <div>
                                     <ImageFallback class="size-10 rounded-box" :src="item.icon">
@@ -357,12 +363,14 @@ onUnmounted(() => {
                                 </div>
                                 <div>
                                     <div>{{ $t(item.name) }}</div>
-                                    <div class="text-xs font-semibold opacity-60">{{ item.count }}</div>
+                                    <div class="text-xs font-semibold opacity-60">
+                                        {{ item.count }}
+                                    </div>
                                 </div>
                                 <button
                                     class="btn btn-square btn-ghost"
-                                    @click="game.likeChar(item.name)"
                                     :class="{ 'text-primary': game.likedChars.includes(item.name) }"
+                                    @click="game.likeChar(item.name)"
                                 >
                                     <Icon
                                         :icon="game.likedChars.includes(item.name) ? 'ri:heart-fill' : 'ri:heart-line'"
@@ -376,7 +384,9 @@ onUnmounted(() => {
             </div>
             <!-- MOD列表 -->
             <div class="flex-1 p-2 overflow-hidden flex flex-col border-l border-r border-base-300 gap-2">
-                <div class="flex-none font-bold text-primary">{{ $t("game-launcher.modList") }}</div>
+                <div class="flex-none font-bold text-primary">
+                    {{ $t("game-launcher.modList") }}
+                </div>
                 <ScrollArea class="flex-2 overflow-x-hidden overflow-y-auto">
                     <div v-if="!game.selectedEntity" class="h-40 flex justify-center items-center opacity-60">
                         {{ $t("game-launcher.selectEntityFirst") }}
@@ -394,7 +404,7 @@ onUnmounted(() => {
                             </div>
                             <div class="flex-1">
                                 <div>{{ $t("game-launcher.noMod") }}</div>
-                                <div class="text-xs font-semibold opacity-60"></div>
+                                <div class="text-xs font-semibold opacity-60" />
                             </div>
                         </li>
                         <li
@@ -422,7 +432,9 @@ onUnmounted(() => {
             </div>
             <!-- 预览 -->
             <div class="flex-1 p-2 overflow-hidden flex flex-col">
-                <div class="flex-none font-bold text-primary">{{ $t("game-launcher.preview") }}</div>
+                <div class="flex-none font-bold text-primary">
+                    {{ $t("game-launcher.preview") }}
+                </div>
                 <div class="flex-1 overflow-hidden flex justify-center items-center">
                     <!-- 图片预览 -->
                     <img
@@ -431,7 +443,9 @@ onUnmounted(() => {
                         :alt="$t('game-launcher.modPreview')"
                         class="max-w-full max-h-full mx-auto my-auto"
                     />
-                    <div v-else class="h-40 flex justify-center items-center opacity-60">{{ $t("game-launcher.noPreviewPic") }}</div>
+                    <div v-else class="h-40 flex justify-center items-center opacity-60">
+                        {{ $t("game-launcher.noPreviewPic") }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -439,10 +453,10 @@ onUnmounted(() => {
             <div v-for="key in keys" :key="key">
                 <div class="p-2 flex flex-row justify-between items-center flex-wrap">
                     <label class="label cursor-pointer space-x-2 min-w-32 justify-start">
-                        <input type="checkbox" v-model="game[`${key}Enable`]" class="checkbox checkbox-primary" />
+                        <input v-model="game[`${key}Enable`]" type="checkbox" class="checkbox checkbox-primary" />
                         <span class="label-text">{{ $t("game-launcher." + key) }}</span>
                     </label>
-                    <div class="flex flex-1 space-x-2" v-show="game[`${key}Enable`]">
+                    <div v-show="game[`${key}Enable`]" class="flex flex-1 space-x-2">
                         <input
                             type="text"
                             disabled
@@ -450,32 +464,34 @@ onUnmounted(() => {
                             :placeholder="$t('game-launcher.selectPath')"
                             class="input input-bordered input-sm w-full min-w-32"
                         />
-                        <div class="btn btn-primary btn-sm" @click="selectPath(key)">{{ $t("game-launcher.select") }}</div>
+                        <div class="btn btn-primary btn-sm" @click="selectPath(key)">
+                            {{ $t("game-launcher.select") }}
+                        </div>
                     </div>
                 </div>
-                <div class="p-2 flex flex-row justify-between items-center flex-wrap" v-if="key === 'path' && game[`${key}Enable`]">
+                <div v-if="key === 'path' && game[`${key}Enable`]" class="p-2 flex flex-row justify-between items-center flex-wrap">
                     <label class="label cursor-pointer min-w-32 justify-start">
                         <span class="label-text ml-12">{{ $t("game-launcher.params") }}</span>
                     </label>
-                    <div class="flex flex-1 space-x-2" v-show="game.pathEnable">
-                        <input type="text" v-model="game.pathParams" class="input input-bordered input-sm w-full min-w-32" />
+                    <div v-show="game.pathEnable" class="flex flex-1 space-x-2">
+                        <input v-model="game.pathParams" type="text" class="input input-bordered input-sm w-full min-w-32" />
                     </div>
                 </div>
             </div>
             <div>
                 <div class="p-2 flex flex-row justify-between items-center flex-wrap">
                     <label class="label cursor-pointer space-x-2 min-w-32 justify-start">
-                        <input type="checkbox" v-model="game.modEnable" class="checkbox checkbox-primary" />
+                        <input v-model="game.modEnable" type="checkbox" class="checkbox checkbox-primary" />
                         <span class="label-text">{{ $t("game-launcher.modEnable") }}</span>
                     </label>
                 </div>
-                <div class="p-2 flex flex-row justify-between items-center flex-wrap" v-if="game.modEnable">
+                <div v-if="game.modEnable" class="p-2 flex flex-row justify-between items-center flex-wrap">
                     <label class="label cursor-pointer min-w-32 justify-start">
                         <span class="label-text ml-12">{{ $t("game-launcher.modLoader") }}</span>
                     </label>
-                    <div class="flex flex-1 space-x-2" v-show="game.pathEnable">
+                    <div v-show="game.pathEnable" class="flex flex-1 space-x-2">
                         <label class="label tooltip" data-tip="启动命令行添加-fileopenlog, 可能导致游戏卡顿">
-                            <input type="radio" v-model="game.modLoader" value="legacy" class="radio radio-primary" />
+                            <input v-model="game.modLoader" type="radio" value="legacy" class="radio radio-primary" />
                             <span class="label-text">{{ $t("game-launcher.legacy") }}</span>
                         </label>
                     </div>
@@ -485,7 +501,9 @@ onUnmounted(() => {
 
         <!-- 拖拽提示 -->
         <div v-if="isDragging" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50" @click="isDragging = false">
-            <div class="bg-base-200 p-8 rounded-lg text-2xl font-bold text-primary shadow-xl">{{ $t("game-launcher.dropToImport") }}</div>
+            <div class="bg-base-200 p-8 rounded-lg text-2xl font-bold text-primary shadow-xl">
+                {{ $t("game-launcher.dropToImport") }}
+            </div>
         </div>
     </div>
 </template>

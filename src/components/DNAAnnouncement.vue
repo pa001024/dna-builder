@@ -56,7 +56,7 @@ defineExpose({
 </script>
 <template>
     <div class="space-y-4">
-        <div class="flex justify-between items-center" v-if="!nobtn">
+        <div v-if="!nobtn" class="flex justify-between items-center">
             <span class="text-xs text-gray-500">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
             <Tooltip tooltip="刷新" side="bottom">
                 <button class="btn btn-primary btn-square btn-sm" @click="loadData(true)">
@@ -65,10 +65,10 @@ defineExpose({
             </Tooltip>
         </div>
         <div v-if="loading" class="flex justify-center items-center h-full py-8">
-            <span class="loading loading-spinner loading-lg"></span>
+            <span class="loading loading-spinner loading-lg" />
         </div>
         <div v-if="annPosts.length > 0" class="space-y-4">
-            <DNAPostListItem v-for="post in annPosts" :post="post" :key="post.postId" />
+            <DNAPostListItem v-for="post in annPosts" :key="post.postId" :post="post" />
         </div>
         <div v-else-if="!loading" class="flex justify-center items-center h-full">
             <div class="text-center">

@@ -13,32 +13,32 @@ import { AbyssBuff, abyssBuffs, AbyssDungeon, abyssDungeons } from "./abyss.data
 
 // 将静态表转换为Map，提高查找效率
 export const charMap = new Map<number | string, Char>()
-charData.forEach((char) => {
+charData.forEach(char => {
     charMap.set(char.名称, char as Char)
     charMap.set(char.id, char as Char)
 })
 
 // 将mob数据转换为Map
 export const monsterMap = new Map<number, Monster>()
-monsterData.forEach((mob) => {
+monsterData.forEach(mob => {
     monsterMap.set(mob.id, mob as Monster)
 })
 
 // 将mod数据转换为Map
 export const modMap = new Map<number, Mod>()
-modData.forEach((mod) => {
+modData.forEach(mod => {
     modMap.set(mod.id, mod as Mod)
 })
 
 // 将buff数据转换为Map
 export const buffMap = new Map<string, Buff>()
-buffData.forEach((buff) => {
+buffData.forEach(buff => {
     buffMap.set(buff.名称, buff as Buff)
 })
 
 // 将effect数据转换为Map
 export const effectMap = new Map<string, Buff>()
-effectData.forEach((buff) => {
+effectData.forEach(buff => {
     effectMap.set(buff.名称, buff as Buff)
 })
 
@@ -47,7 +47,7 @@ export const weaponMap = new Map<number, Weapon>()
 export const weaponNameMap = new Map<string, Weapon>()
 
 // 添加近战武器到weaponMap
-weaponData.forEach((weapon) => {
+weaponData.forEach(weapon => {
     weaponMap.set(weapon.id, weapon as Weapon)
     weaponNameMap.set(weapon.名称, weapon as Weapon)
 })
@@ -64,7 +64,7 @@ baseData.forEach((base: any) => {
 
 export const rewardMap = new Map<number, Reward>()
 
-rewardData.forEach((v) => {
+rewardData.forEach(v => {
     rewardMap.set(v.id, v)
 })
 
@@ -72,18 +72,18 @@ export const modDraftMap = new Map<number, Draft>()
 export const weaponDraftMap = new Map<number, Draft>()
 export const draftMap = new Map<number, Draft>()
 
-draftData.forEach((v) => {
+draftData.forEach(v => {
     if (v.t === "Mod") modDraftMap.set(v.p, v)
     if (v.t === "Weapon") weaponDraftMap.set(v.p, v)
     draftMap.set(v.id, v)
 })
 
 export const abyssBuffMap = new Map<number, AbyssBuff>()
-abyssBuffs.forEach((v) => abyssBuffMap.set(v.id, v))
+abyssBuffs.forEach(v => abyssBuffMap.set(v.id, v))
 export const abyssDungeonMap = new Map<number, AbyssDungeon>()
-abyssDungeons.forEach((v) => {
+abyssDungeons.forEach(v => {
     // 转换buffID为AbyssBuff对象
-    v.buff = v.b.map((id) => abyssBuffMap.get(id)!)
+    v.buff = v.b.map(id => abyssBuffMap.get(id)!)
     // 转换角色ID为角色名称
     const cname = v.cid ? charMap.get(v.cid)?.名称 : undefined
     if (cname) v.cname = cname
@@ -118,12 +118,12 @@ function findModRewards(child: any[], modIds: Set<number>, visited: Set<number> 
     }
 }
 
-dungeonData.forEach((dungeon) => {
+dungeonData.forEach(dungeon => {
     dungeonMap.set(dungeon.id, dungeon as Dungeon)
     // 获取副本的所有奖励ID
     const rewardIds = [...dungeon.r, ...(dungeon.sr || [])]
     if (rewardIds.length > 0) {
-        rewardIds.forEach((rewardId) => {
+        rewardIds.forEach(rewardId => {
             const reward = rewardMap.get(rewardId)
             if (reward && reward.child) {
                 // 递归查找Mod类型的奖励
@@ -131,7 +131,7 @@ dungeonData.forEach((dungeon) => {
                 findModRewards(reward.child, modIds)
 
                 // 建立Mod ID到Dungeon的映射
-                modIds.forEach((modId) => {
+                modIds.forEach(modId => {
                     if (!modDungeonMap.has(modId)) {
                         modDungeonMap.set(modId, [])
                     }
@@ -144,6 +144,6 @@ dungeonData.forEach((dungeon) => {
 
 import petData, { type Pet } from "./pet.data"
 export const petMap = new Map<number, Pet>()
-petData.forEach((v) => petMap.set(v.id, v))
+petData.forEach(v => petMap.set(v.id, v))
 
 export { type DBMap, type DBMapMarker } from "./map.data"

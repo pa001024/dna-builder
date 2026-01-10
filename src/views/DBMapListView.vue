@@ -48,7 +48,7 @@ async function loadMapList() {
 }
 
 const filteredMaps = computed(() => {
-    return maps.value.filter((m) => {
+    return maps.value.filter(m => {
         const matchesKeyword =
             searchKeyword.value === "" ||
             `${m.id}`.includes(searchKeyword.value) ||
@@ -85,8 +85,8 @@ async function loadMapData() {
             }
 
             markers.value = []
-            matterCategorizes.forEach((category) => {
-                category.matters.forEach((matter) => {
+            matterCategorizes.forEach(category => {
+                category.matters.forEach(matter => {
                     matter.sites.forEach((site: any) => {
                         if (site.mapId === selectedMap.value!.id) {
                             markers.value.push({
@@ -128,7 +128,7 @@ function handleMarkerAdd(marker: DBMapMarker) {
 }
 
 function handleMarkerDelete(id: number) {
-    const index = markers.value.findIndex((m) => m.id === id)
+    const index = markers.value.findIndex(m => m.id === id)
     if (index !== -1) {
         markers.value.splice(index, 1)
     }
@@ -163,8 +163,12 @@ onMounted(() => {
                         >
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <div class="font-medium">{{ map.n }}</div>
-                                    <div class="text-xs opacity-70 mt-1">{{ map.desc }}</div>
+                                    <div class="font-medium">
+                                        {{ map.n }}
+                                    </div>
+                                    <div class="text-xs opacity-70 mt-1">
+                                        {{ map.desc }}
+                                    </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">
                                     <span class="text-xs opacity-70">ID: {{ map.id }}</span>
@@ -180,9 +184,9 @@ onMounted(() => {
             <div v-show="selectedMap" class="relative flex-1 overflow-hidden">
                 <button
                     v-if="!showLeftPanel"
-                    @click="showLeftPanel = true"
                     class="absolute left-4 top-4 z-30 btn btn-circle btn-sm"
                     title="显示地图列表"
+                    @click="showLeftPanel = true"
                 >
                     <Icon icon="tabler:arrow-bar-to-right" />
                 </button>
@@ -192,7 +196,7 @@ onMounted(() => {
                         :key="selectedMap.mapUrl + selectedMap.currentFloorIndex"
                         :map-id="selectedMap.id"
                         :map-url="selectedMap.mapUrl"
-                        :markers="markers.filter((m) => m.mapId === selectedMap!.id)"
+                        :markers="markers.filter(m => m.mapId === selectedMap!.id)"
                         :categories="categories"
                         :floors="selectedMap.floors"
                         :current-floor-index="selectedMap.currentFloorIndex"

@@ -28,12 +28,12 @@ const elementBorderColors: Record<string, string> = {
 
 // 过滤后的角色列表
 const filteredChars = computed(() => {
-    let filtered = charData.filter((c) => activeTab.value === "全部" || c.标签?.includes(activeTab.value))
+    let filtered = charData.filter(c => activeTab.value === "全部" || c.标签?.includes(activeTab.value))
 
     if (searchQuery.value) {
         const query = searchQuery.value.toLowerCase()
         filtered = filtered.filter(
-            (c) => c.名称.toLowerCase().includes(query) || c.别名?.toLowerCase().includes(query) || c.阵营?.toLowerCase().includes(query),
+            c => c.名称.toLowerCase().includes(query) || c.别名?.toLowerCase().includes(query) || c.阵营?.toLowerCase().includes(query)
         )
     }
 
@@ -73,9 +73,9 @@ const getAnimationDelay = (index: number) => {
                     <button
                         v-for="tab in tabs"
                         :key="tab"
-                        @click="activeTab = tab"
                         class="btn btn-sm whitespace-nowrap transition-all duration-200"
                         :class="activeTab === tab ? 'btn-primary shadow-lg scale-105' : 'btn-ghost hover:bg-base-200'"
+                        @click="activeTab = tab"
                     >
                         {{ $t(tab) }}
                     </button>
@@ -87,25 +87,27 @@ const getAnimationDelay = (index: number) => {
         <ScrollArea class="flex-1">
             <div v-if="filteredChars.length === 0" class="flex flex-col items-center justify-center h-full text-base-content/50 py-20">
                 <Icon icon="ri:emotion-sad-line" class="w-16 h-16 mb-4" />
-                <p class="text-lg">{{ $t("没有找到匹配的角色") }}</p>
+                <p class="text-lg">
+                    {{ $t("没有找到匹配的角色") }}
+                </p>
             </div>
 
             <div
                 class="grid gap-4 p-4 grid-cols-[repeat(auto-fill,minmax(min(100%,160px),1fr))] sm:grid-cols-[repeat(auto-fill,minmax(min(100%,180px),1fr))] md:grid-cols-[repeat(auto-fill,minmax(min(100%,200px),1fr))]"
             >
                 <div
-                    @click="$router.push(`/char/${char.id}`)"
                     v-for="(char, index) in filteredChars"
                     :key="char.id"
                     class="group relative bg-base-100 rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer border-2"
                     :class="[elementBorderColors[char.属性] || 'border-base-300']"
                     :style="{ animation: `fade-in-up 0.5s ease-out ${getAnimationDelay(index)}ms both` }"
+                    @click="$router.push(`/char/${char.id}`)"
                 >
                     <!-- 属性背景渐变 -->
                     <div
                         class="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 bg-linear-to-br"
                         :class="elementColors[char.属性] || 'from-gray-400 to-gray-600'"
-                    ></div>
+                    />
 
                     <!-- 角色头像 -->
                     <div class="relative aspect-square overflow-hidden bg-base-200">
@@ -152,7 +154,7 @@ const getAnimationDelay = (index: number) => {
                         <!-- 精通武器 -->
                         <div class="flex items-center gap-1 text-xs text-base-content/50">
                             <span>⚔️</span>
-                            <span class="truncate">{{ char.精通?.map((item) => $t(item)).join(" / ") }}</span>
+                            <span class="truncate">{{ char.精通?.map(item => $t(item)).join(" / ") }}</span>
                         </div>
 
                         <!-- 底部属性条 -->
@@ -171,7 +173,7 @@ const getAnimationDelay = (index: number) => {
                     <!-- 悬停时的发光效果 -->
                     <div
                         class="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300 ring-2 ring-primary/50"
-                    ></div>
+                    />
                 </div>
             </div>
         </ScrollArea>

@@ -87,7 +87,7 @@ const databaseItems = [
                     <div
                         class="absolute inset-0 bg-linear-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                         :class="[item.color]"
-                    ></div>
+                    />
                     <div class="relative flex items-center gap-4">
                         <div class="w-16 h-16 rounded-xl flex items-center justify-center shrink-0">
                             <svg
@@ -112,7 +112,7 @@ const databaseItems = [
                             class="w-8 h-8 rounded-full bg-base-content/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0"
                         >
                             <svg class="w-4 h-4 text-base-content/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
                         </div>
                     </div>

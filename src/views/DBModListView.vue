@@ -14,7 +14,7 @@ const selectedQuality = ref<string | "">("")
 // 获取所有可用类型
 const types = computed(() => {
     const typeSet = new Set<string>()
-    modData.forEach((m) => {
+    modData.forEach(m => {
         typeSet.add(m.类型)
     })
     return Array.from(typeSet).sort()
@@ -23,7 +23,7 @@ const types = computed(() => {
 // 获取所有可用系列
 const series = computed(() => {
     const seriesSet = new Set<string>()
-    modData.forEach((m) => {
+    modData.forEach(m => {
         seriesSet.add(m.系列)
     })
     return Array.from(seriesSet).sort()
@@ -32,7 +32,7 @@ const series = computed(() => {
 // 获取所有可用品质
 const qualities = computed(() => {
     const qualitySet = new Set<string>()
-    modData.forEach((m) => {
+    modData.forEach(m => {
         qualitySet.add(m.品质)
     })
     return Array.from(qualitySet).sort()
@@ -40,7 +40,7 @@ const qualities = computed(() => {
 
 // 过滤魔之楔列表
 const filteredMods = computed(() => {
-    return modData.filter((m) => {
+    return modData.filter(m => {
         const matchKeyword = searchKeyword.value === "" || m.名称.includes(searchKeyword.value)
         const matchType = selectedType.value === "" || m.类型 === selectedType.value
         const matchSeries = selectedSeries.value === "" || m.系列 === selectedSeries.value
@@ -200,8 +200,9 @@ function getQualityColor(quality: string): string {
                                     <span class="font-medium text-primary">{{ formatProp(key, attr) }}</span>
                                 </div>
                                 <div
+                                    v-for="key in Object.keys(mod.生效).filter(key => key !== '条件')"
                                     v-if="mod.生效"
-                                    v-for="key in Object.keys(mod.生效).filter((key) => key !== '条件')"
+                                    :key="key"
                                     class="flex justify-between items-center gap-2"
                                 >
                                     <span>{{ $t(key) }}</span>

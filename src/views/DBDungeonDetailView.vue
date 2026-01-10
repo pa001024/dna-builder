@@ -6,7 +6,7 @@ import dungeonData from "../data/d/dungeon.data"
 const route = useRoute()
 
 const dungeonId = computed(() => Number(route.params.dungeonId))
-const dungeon = computed(() => dungeonData.find((d) => d.id === dungeonId.value))
+const dungeon = computed(() => dungeonData.find(d => d.id === dungeonId.value))
 </script>
 
 <template>

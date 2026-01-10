@@ -12,7 +12,7 @@ const selectedFaction = ref<number | "">("")
 // 获取所有可用阵营
 const factions = computed(() => {
     const factionSet = new Set<number>()
-    monsterData.forEach((m) => {
+    monsterData.forEach(m => {
         if (m.f !== undefined) {
             factionSet.add(m.f)
         }
@@ -22,7 +22,7 @@ const factions = computed(() => {
 
 // 过滤怪物列表
 const filteredMonsters = computed(() => {
-    return monsterData.filter((m) => {
+    return monsterData.filter(m => {
         if (m.id < 2000000) return false
         const matchKeyword = searchKeyword.value === "" || m.n.includes(searchKeyword.value)
         const matchFaction = selectedFaction.value === "" || m.f === selectedFaction.value
@@ -91,9 +91,11 @@ function getFactionName(faction: number | undefined): string {
                                     <div class="font-medium flex gap-2 items-center">
                                         {{ monster.n }}
                                     </div>
-                                    <div class="text-xs opacity-70 mt-1">{{ $t(getFactionName(monster.f)) }}</div>
+                                    <div class="text-xs opacity-70 mt-1">
+                                        {{ $t(getFactionName(monster.f)) }}
+                                    </div>
                                 </div>
-                                <div class="flex flex-col items-end gap-1" v-if="monster.t">
+                                <div v-if="monster.t" class="flex flex-col items-end gap-1">
                                     <span class="text-xs px-2 py-0.5 rounded" :class="getMonsterType(monster.t).color + ' text-white'">
                                         {{ getMonsterType(monster.t).label }}
                                     </span>

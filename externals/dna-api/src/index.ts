@@ -80,11 +80,11 @@ export class DNAAPI extends DNABaseAPI {
         return await this.game.defaultRoleForTool(type, otherUserId)
     }
 
-    async getRoleDetail(char_id: string, char_eid: string, otherUserId?: string) {
+    async getRoleDetail(char_id: string | number, char_eid: string, otherUserId?: string) {
         return await this.game.getRoleDetail(char_id, char_eid, otherUserId)
     }
 
-    async getWeaponDetail(weapon_id: string, weapon_eid: string, otherUserId?: string) {
+    async getWeaponDetail(weapon_id: string | number, weapon_eid: string, otherUserId?: string) {
         return await this.game.getWeaponDetail(weapon_id, weapon_eid, otherUserId)
     }
 
@@ -97,7 +97,7 @@ export class DNAAPI extends DNABaseAPI {
         return await this.home.getPostList(forumId, pageIndex, pageSize, searchType, timeType)
     }
 
-    async getPostDetail(postId: string) {
+    async getPostDetail(postId: string | number) {
         return await this.home.getPostDetail(postId)
     }
 
@@ -106,7 +106,7 @@ export class DNAAPI extends DNABaseAPI {
         pageIndex: number = 1,
         pageSize: number = 20,
         searchType: number = 1,
-        timeType: number = 0,
+        timeType: number = 0
     ) {
         return await this.home.getPostByTopic(topicId, pageIndex, pageSize, searchType, timeType)
     }
@@ -147,7 +147,7 @@ export class DNAAPI extends DNABaseAPI {
         post: { postId: number; gameId?: number; gameForumId: number },
         newGameId: number,
         newForumId: number,
-        newTopicIdStr: string,
+        newTopicIdStr: string
     ) {
         return await this.home.adminMovePost(post, newGameId, newForumId, newTopicIdStr)
     }
@@ -172,7 +172,7 @@ export class DNAAPI extends DNABaseAPI {
         comment: { id: number; gameId: number; gameForumId: number },
         entityType: number,
         content: string,
-        reasonCode: number,
+        reasonCode: number
     ) {
         return await this.home.commentDelete(comment, entityType, content, reasonCode)
     }
@@ -187,7 +187,7 @@ export class DNAAPI extends DNABaseAPI {
 
     async createReplyList(
         post: { userId: string; postId: string; postCommentId: string; postCommentReplyId: string; gameForumId: number },
-        content: string,
+        content: string
     ) {
         return await this.home.createReplyList(post, content)
     }
@@ -287,7 +287,7 @@ export class DNAAPI extends DNABaseAPI {
     async report(
         { commentId = 0, postId = 0, replyId = 0 }: { commentId?: number; postId?: number; replyId?: number },
         reportReason = 1,
-        reportType = 1,
+        reportType = 1
     ) {
         return await this.home.report({ commentId, postId, replyId }, reportReason, reportType)
     }
@@ -649,7 +649,7 @@ export class DNAAPI extends DNABaseAPI {
         postTitle: string,
         postType: number,
         gameId: number,
-        videoReUpload: number,
+        videoReUpload: number
     ) {
         return await this.trend.draftSave(content, draftId, h5Content, postTitle, postType, gameId, videoReUpload)
     }
@@ -687,7 +687,7 @@ export class DNAAPI extends DNABaseAPI {
         topics: string,
         postType: number,
         gameId: number,
-        videoReUpload: number,
+        videoReUpload: number
     ) {
         return await this.trend.posAdminEdit(content, gameForumId, h5Content, postId, postTitle, topics, postType, gameId, videoReUpload)
     }
@@ -700,7 +700,7 @@ export class DNAAPI extends DNABaseAPI {
         postTitle: string,
         topics: string,
         postType: number,
-        videoReUpload: number,
+        videoReUpload: number
     ) {
         return await this.trend.postEdit(content, gameForumId, h5Content, postId, postTitle, topics, postType, videoReUpload)
     }
@@ -713,7 +713,7 @@ export class DNAAPI extends DNABaseAPI {
         h5Content: string,
         postTitle: string,
         postType: number,
-        topics: string,
+        topics: string
     ) {
         return await this.trend.postPublish(content, draftId, gameForumId, gameId, h5Content, postTitle, postType, topics)
     }
@@ -734,7 +734,7 @@ export class DNAAPI extends DNABaseAPI {
         h5Content: string,
         postTitle: string,
         postType: number,
-        topics: string,
+        topics: string
     ) {
         return await this.trend.videoPostPublish(content, draftId, gameForumId, gameId, h5Content, postTitle, postType, topics)
     }
@@ -749,7 +749,7 @@ export class DNAAPI extends DNABaseAPI {
         otherPlatformUrl: string,
         otherPlatformFans: string,
         materialUrl: string,
-        gameId: number | null,
+        gameId: number | null
     ) {
         return await this.userGrowing.apply(type, id, concatWay, otherPlatform, otherPlatformUrl, otherPlatformFans, materialUrl, gameId)
     }

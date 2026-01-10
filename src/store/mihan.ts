@@ -38,14 +38,14 @@ export class MihanNotify {
             // 用户登录尝试使用DNAAPI获取密函
             const data = await api.defaultRoleForTool()
             if (data?.data?.instanceInfo) {
-                const missions = data.data.instanceInfo.map((v) => v.instances.map((v) => v.name.replace("勘探/无尽", "勘察/无尽")))
+                const missions = data.data.instanceInfo.map(v => v.instances.map(v => v.name.replace("勘探/无尽", "勘察/无尽")))
                 if (!missions || JSON.stringify(missions) === JSON.stringify(this.mihanData.value)) return false
                 this.mihanData.value = missions
                 return true
             }
         }
         const data = await missionsIngameQuery()
-        const missions = data?.missions.map((v) => v.map((v) => v.replace("勘探/无尽", "勘察/无尽")))
+        const missions = data?.missions.map(v => v.map(v => v.replace("勘探/无尽", "勘察/无尽")))
         if (!missions || JSON.stringify(missions) === JSON.stringify(this.mihanData.value)) return false
         this.mihanData.value = missions
         return true
@@ -61,15 +61,14 @@ export class MihanNotify {
         if (env.isApp) {
             const matchedTypes = this.mihanData
                 .value!.filter(
-                    (list, type) =>
-                        this.mihanNotifyTypes.value.includes(type) && list.some((v) => this.mihanNotifyMissions.value.includes(v)),
+                    (list, type) => this.mihanNotifyTypes.value.includes(type) && list.some(v => this.mihanNotifyMissions.value.includes(v))
                 )
                 .map(
                     (list, type) =>
                         `${t(MihanNotify.TYPES[type])}-${list
-                            .filter((v) => this.mihanNotifyMissions.value.includes(v))
-                            .map((v) => t(v))
-                            .join("、")}`,
+                            .filter(v => this.mihanNotifyMissions.value.includes(v))
+                            .map(v => t(v))
+                            .join("、")}`
                 )
             let permissionGranted = await isPermissionGranted()
             if (!permissionGranted) {
@@ -97,7 +96,7 @@ export class MihanNotify {
     shouldNotify() {
         if (
             this.mihanData.value?.some(
-                (list, type) => this.mihanNotifyTypes.value.includes(type) && list.some((v) => this.mihanNotifyMissions.value.includes(v)),
+                (list, type) => this.mihanNotifyTypes.value.includes(type) && list.some(v => this.mihanNotifyMissions.value.includes(v))
             )
         ) {
             return true
@@ -110,7 +109,7 @@ export class MihanNotify {
         }
     }
     sleep(duration: number) {
-        return new Promise((resolve) => setTimeout(resolve, duration))
+        return new Promise(resolve => setTimeout(resolve, duration))
     }
     startWatch() {
         if (this.watch) return

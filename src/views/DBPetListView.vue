@@ -11,7 +11,7 @@ const selectedQuality = ref<number | 0>(0)
 
 const types = computed(() => {
     const typeSet = new Set<number>()
-    petData.forEach((p) => {
+    petData.forEach(p => {
         typeSet.add(p.类型)
     })
     return Array.from(typeSet).sort()
@@ -19,14 +19,14 @@ const types = computed(() => {
 
 const qualities = computed(() => {
     const qualitySet = new Set<number>()
-    petData.forEach((p) => {
+    petData.forEach(p => {
         qualitySet.add(p.品质)
     })
     return Array.from(qualitySet).sort()
 })
 
 const filteredPets = computed(() => {
-    return petData.filter((p) => {
+    return petData.filter(p => {
         const matchKeyword = searchKeyword.value === "" || p.名称.includes(searchKeyword.value)
         const matchType = selectedType.value === 0 || p.类型 === selectedType.value
         const matchQuality = selectedQuality.value === 0 || p.品质 === selectedQuality.value

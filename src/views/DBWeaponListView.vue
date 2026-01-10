@@ -11,8 +11,8 @@ const selectedDamageType = ref<string | "">("")
 
 const categories = computed(() => {
     const categorySet = new Set<string>()
-    weaponData.forEach((w) => {
-        w.类型.forEach((t) => {
+    weaponData.forEach(w => {
+        w.类型.forEach(t => {
             if (t !== "近战" && t !== "远程") {
                 categorySet.add(t)
             }
@@ -23,14 +23,14 @@ const categories = computed(() => {
 
 const damageTypes = computed(() => {
     const typeSet = new Set<string>()
-    weaponData.forEach((w) => {
+    weaponData.forEach(w => {
         typeSet.add(w.伤害类型)
     })
     return Array.from(typeSet).sort()
 })
 
 const filteredWeapons = computed(() => {
-    return weaponData.filter((w) => {
+    return weaponData.filter(w => {
         const matchKeyword = searchKeyword.value === "" || w.名称.includes(searchKeyword.value)
         const matchCategory = selectedCategory.value === "" || w.类型.includes(selectedCategory.value)
         const matchDamageType = selectedDamageType.value === "" || w.伤害类型 === selectedDamageType.value
@@ -123,7 +123,7 @@ const filteredWeapons = computed(() => {
                                         {{ $t(weapon.名称) }}
                                     </div>
                                     <div class="text-xs opacity-70 mt-1 flex gap-2">
-                                        <span>{{ weapon.类型.map((t) => $t(t)).join(", ") }}</span>
+                                        <span>{{ weapon.类型.map(t => $t(t)).join(", ") }}</span>
                                         <span>{{ $t(weapon.伤害类型) }}</span>
                                     </div>
                                 </div>

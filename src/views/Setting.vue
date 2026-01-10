@@ -52,7 +52,7 @@ const darkThemes = [
 
 watch(
     () => setting.winMaterial,
-    (v) => setting.setWinMaterial(v),
+    v => setting.setWinMaterial(v)
 )
 
 // 首字母大写
@@ -123,7 +123,7 @@ async function loadAiModelOptions() {
 
     try {
         const models = await listModels(config)
-        aiModelOptions.value = models.map((model) => ({
+        aiModelOptions.value = models.map(model => ({
             label: model.id,
             value: model.id,
         }))
@@ -172,13 +172,15 @@ function resetAiSettings() {
     <div class="w-full h-full overflow-y-auto">
         <div class="p-4 flex flex-col gap-4 max-w-xl m-auto">
             <article>
-                <h2 class="text-sm font-bold m-2">{{ $t("setting.appearance") }}</h2>
+                <h2 class="text-sm font-bold m-2">
+                    {{ $t("setting.appearance") }}
+                </h2>
                 <div class="bg-base-100 p-2 rounded-lg">
                     <div class="flex justify-between items-center p-2">
                         <span class="label-text">{{ $t("setting.theme") }}</span>
                         <Select
-                            class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
                             v-model="setting.theme"
+                            class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
                             :placeholder="$t('setting.theme')"
                         >
                             <SelectLabel class="p-2 text-sm font-semibold text-primary">
@@ -213,8 +215,8 @@ function resetAiSettings() {
                         </span>
 
                         <Select
-                            class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
                             v-model="setting.winMaterial"
+                            class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
                             :placeholder="$t('setting.winMaterial')"
                         >
                             <SelectItem v-for="th in MATERIALS" :key="th" :value="th">
@@ -228,10 +230,10 @@ function resetAiSettings() {
                         </span>
 
                         <Select
-                            class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
                             v-model="setting.lang"
-                            @update:model-value="setting.setLang($event)"
+                            class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
                             :placeholder="$t('setting.lang')"
+                            @update:model-value="setting.setLang($event)"
                         >
                             <SelectItem v-for="lang in i18nLanguages" :key="lang.code" :value="lang.code">
                                 {{ lang.name }}
@@ -243,18 +245,18 @@ function resetAiSettings() {
                         <div class="min-w-56">
                             <input
                                 :value="setting.uiScale"
-                                @input="setting.uiScale = +($event.target as HTMLInputElement)!.value"
                                 type="range"
                                 class="range range-secondary"
                                 min="0.8"
                                 max="1.5"
                                 step="0.1"
+                                @input="setting.uiScale = +($event.target as HTMLInputElement)!.value"
                             />
                             <div class="w-full flex justify-between text-xs px-1">
                                 <span
-                                    :class="{ 'text-secondary': setting.uiScale.toFixed(1) === (0.7 + i / 10).toFixed(1) }"
                                     v-for="i in 8"
                                     :key="i"
+                                    :class="{ 'text-secondary': setting.uiScale.toFixed(1) === (0.7 + i / 10).toFixed(1) }"
                                     >{{ (0.7 + i / 10).toFixed(1) }}</span
                                 >
                             </div>
@@ -264,7 +266,9 @@ function resetAiSettings() {
             </article>
 
             <article>
-                <h2 class="text-sm font-bold m-2">{{ $t("setting.ai") }}</h2>
+                <h2 class="text-sm font-bold m-2">
+                    {{ $t("setting.ai") }}
+                </h2>
                 <div class="bg-base-100 p-2 rounded-lg space-y-3">
                     <div class="flex justify-between items-center p-2">
                         <span class="label-text">
@@ -309,9 +313,9 @@ function resetAiSettings() {
                             :placeholder="$t('setting.aiModelName')"
                             :empty-message="$t('setting.noModelAvailable')"
                             :options="aiModelOptions"
-                            @open="loadAiModelOptions"
                             class="w-64"
                             :class="{ disabled: !setting.aiApiKey || !setting.aiBaseUrl }"
+                            @open="loadAiModelOptions"
                         />
                     </div>
 
@@ -349,9 +353,9 @@ function resetAiSettings() {
                     <div class="flex justify-between items-center pt-2 border-t border-base-300">
                         <div class="flex items-center gap-2 p-2 flex-1">
                             <button
-                                @click="testAiConnection"
                                 :disabled="isTestingConnection || !setting.aiApiKey || !setting.aiBaseUrl"
                                 class="btn btn-secondary btn-sm"
+                                @click="testAiConnection"
                             >
                                 {{ isTestingConnection ? "Loading..." : $t("setting.aiTestConnection") }}
                             </button>
@@ -362,7 +366,7 @@ function resetAiSettings() {
                             <div v-else-if="connectionStatus === 'failed'" class="text-error text-sm">
                                 {{ $t("setting.aiConnectionFailed") }}
                             </div>
-                            <button @click="openResetAiDialog" class="ml-auto btn btn-outline btn-error btn-sm">
+                            <button class="ml-auto btn btn-outline btn-error btn-sm" @click="openResetAiDialog">
                                 {{ $t("setting.aiReset") }}
                             </button>
                         </div>
@@ -371,7 +375,9 @@ function resetAiSettings() {
             </article>
 
             <article>
-                <h2 class="text-sm font-bold m-2">{{ $t("setting.other") }}</h2>
+                <h2 class="text-sm font-bold m-2">
+                    {{ $t("setting.other") }}
+                </h2>
                 <div class="bg-base-100 p-2 rounded-lg">
                     <div class="flex justify-between items-center p-2">
                         <span class="label-text">
@@ -379,7 +385,9 @@ function resetAiSettings() {
                             <div class="text-xs text-base-content/50">{{ $t("setting.resetTip") }}</div>
                         </span>
 
-                        <div class="btn btn-secondary w-40" @click="openResetConfirmDialog">{{ $t("setting.confirm") }}</div>
+                        <div class="btn btn-secondary w-40" @click="openResetConfirmDialog">
+                            {{ $t("setting.confirm") }}
+                        </div>
                     </div>
                 </div>
             </article>

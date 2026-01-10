@@ -92,21 +92,21 @@ export const useUIStore = defineStore("ui", {
         },
         setLoginState(state: boolean) {
             this.loginState = state
-            const index = this.tabs.findIndex((tab) => tab.name === "dna-home")
+            const index = this.tabs.findIndex(tab => tab.name === "dna-home")
             if (index === -1) return
             this.tabs[index].show = this.loginState
         },
         toggleSidebar() {
             this.sidebarExpand = !this.sidebarExpand
         },
-        showErrorMessage(message: string) {
-            this.errorMessage = message
+        showErrorMessage(...messages: any[]) {
+            this.errorMessage = messages.join(" ")
             setTimeout(() => {
                 this.errorMessage = ""
             }, 3000)
         },
-        showSuccessMessage(message: string) {
-            this.successMessage = message
+        showSuccessMessage(...messages: any[]) {
+            this.successMessage = messages.join(" ")
             setTimeout(() => {
                 this.successMessage = ""
             }, 3000)

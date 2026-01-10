@@ -59,15 +59,15 @@ const autoBuild = computed(() => (props.update ? ((lastBuild = buildMods()), emi
         <div class="flex flex-col gap-4 py-4">
             <div class="flex items-center gap-2 text-sm">
                 <label class="cursor-pointer flex gap-2 items-center">
-                    <input type="checkbox" class="toggle toggle-secondary" v-model="autoBuildSetting.useInv" />
+                    <input v-model="autoBuildSetting.useInv" type="checkbox" class="toggle toggle-secondary" />
                     使用用户库存
                 </label>
                 <label class="cursor-pointer flex gap-2 items-center">
-                    <input type="checkbox" class="toggle toggle-secondary" v-model="autoBuildSetting.includeMelee" />
+                    <input v-model="autoBuildSetting.includeMelee" type="checkbox" class="toggle toggle-secondary" />
                     自动更换近战
                 </label>
                 <label class="cursor-pointer flex gap-2 items-center">
-                    <input type="checkbox" class="toggle toggle-secondary" v-model="autoBuildSetting.includeRanged" />
+                    <input v-model="autoBuildSetting.includeRanged" type="checkbox" class="toggle toggle-secondary" />
                     自动更换远程
                 </label>
             </div>
@@ -105,7 +105,7 @@ const autoBuild = computed(() => (props.update ? ((lastBuild = buildMods()), emi
                 <BuildWeaponCard :weapon="autoBuild.newBuild.rangedWeapon" />
             </div>
         </div>
-        <div class="flex flex-col gap-2 py-4" v-for="key in autoBuildSetting.includeTypes" :key="key">
+        <div v-for="key in autoBuildSetting.includeTypes" :key="key" class="flex flex-col gap-2 py-4">
             <span class="text-sm">{{ $t(`autobuild.${key}`) }}</span>
             <div class="grid grid-cols-4 lg:grid-cols-8 gap-4">
                 <ModItem

@@ -1,6 +1,5 @@
 <script setup>
 import { useImage } from "@vueuse/core"
-import { computed } from "vue"
 
 const props = defineProps({
     src: {
@@ -17,7 +16,9 @@ const { isLoading, error } = useImage({ src: props.src })
 </script>
 
 <template>
-    <div v-if="isLoading" class="w-12 h-12 animate-spin rounded-full border-b-2 border-gray-900"></div>
-    <img v-bind="$attrs" v-if="!error" :src="src" :alt="alt" />
-    <slot v-else></slot>
+    <div class="inline-flex justify-center items-center relative">
+        <div v-if="isLoading" class="absolute w-12 h-12 m-auto animate-spin rounded-full border-b-2 border-base-content" />
+        <img v-if="!error" v-bind="$attrs" :src="src" :alt="alt" />
+        <slot v-else />
+    </div>
 </template>

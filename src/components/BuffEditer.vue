@@ -30,9 +30,20 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
 }
 
 const sortedBuffs = computed(() => {
-    return [...props.buffOptions.filter((b) => !props.selectedBuffs.some((v) => v.名称 === b.label))].sort((a, _b) => {
-        // 先排序包含角色名称的BUFF
-        return a.label.includes(props.charBuild.char.名称) ? -1 : 0
+    // 获取角色名称
+    const charName = props.charBuild.char.名称 || ""
+
+    return [...props.buffOptions.filter(b => !props.selectedBuffs.some(v => v.名称 === b.label))].sort((a, b) => {
+        // 最先是包含角色名称的BUFF; 然后按默认顺序排序
+        const aHasCharName = a.label.includes(charName) || a.value.名称.includes(charName)
+        const bHasCharName = b.label.includes(charName) || b.value.名称.includes(charName)
+
+        // 如果一个包含角色名称，另一个不包含，则包含角色名称的排在前面
+        if (aHasCharName && !bHasCharName) return -1
+        if (!aHasCharName && bHasCharName) return 1
+
+        // 否则保持默认顺序
+        return 0
     })
 })
 </script>
@@ -41,14 +52,14 @@ const sortedBuffs = computed(() => {
         <transition-group name="list" tag="div" class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
             <!-- 已选择的BUFF -->
             <BuffCell
-                v-for="buff in buffOptions.filter((b) => selectedBuffs.some((v) => v.名称 === b.label))"
+                v-for="buff in buffOptions.filter(b => selectedBuffs.some(v => v.名称 === b.label))"
                 :key="buff.label"
                 :title="buff.label"
                 :buff="buff.value"
                 :lv="buff.lv"
                 selected
                 :income="charBuild.calcIncome(buff.value, true)"
-                @setBuffLv="setBuffLv"
+                @set-buff-lv="setBuffLv"
                 @click="toggleBuff(buff.value)"
             />
             <!-- 未选择的BUFF -->
@@ -59,7 +70,7 @@ const sortedBuffs = computed(() => {
                 :buff="buff.value"
                 :lv="buff.lv"
                 :income="charBuild.calcIncome(buff.value, false)"
-                @setBuffLv="setBuffLv"
+                @set-buff-lv="setBuffLv"
                 @click="toggleBuff(buff.value)"
             />
         </transition-group>

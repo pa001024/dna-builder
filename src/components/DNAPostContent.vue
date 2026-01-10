@@ -8,7 +8,7 @@ defineProps<{
 <template>
     <template v-for="(content, index) in contents" :key="index">
         <!-- 文本内容 -->
-        <EmojiContent :content="content.content!" v-if="content.contentType === PostContentType.TEXT" class="prose prose-base max-w-none" />
+        <EmojiContent v-if="content.contentType === PostContentType.TEXT" :content="content.content!" class="prose prose-base max-w-none" />
 
         <!-- 图片内容 -->
         <div v-else-if="content.contentType === PostContentType.IMAGE" class="flex justify-center">

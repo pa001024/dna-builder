@@ -35,7 +35,7 @@ const typeOptions = [
 
 const charOptions = computed(() => [
     { value: -1, label: "不关联角色" },
-    ...charData.map((char) => ({
+    ...charData.map(char => ({
         value: char.id,
         label: char.名称,
     })),
@@ -231,7 +231,7 @@ async function handleSubmit() {
                             type
                         }
                     }`,
-                    { id: id as string, input },
+                    { id: id as string, input }
                 )
                 .toPromise()
             if (result.error?.graphQLErrors?.[0]) {
@@ -259,7 +259,7 @@ async function handleSubmit() {
                             type
                         }
                     }`,
-                    { input },
+                    { input }
                 )
                 .toPromise()
             if (result.error?.graphQLErrors?.[0]) {
@@ -291,12 +291,12 @@ onMounted(async () => {
             isDragging.value = false
         })
 
-        unlistenDragDrop = await listen<{ paths: string[] }>(TauriEvent.DRAG_DROP, async (event) => {
+        unlistenDragDrop = await listen<{ paths: string[] }>(TauriEvent.DRAG_DROP, async event => {
             if (!isDragging.value) return
             await handleTauriDrop(event.payload.paths)
         })
     }
-    ui.title = isEdit ? "编辑攻略" : "发布攻略"
+    ui.title = isEdit.value ? "编辑攻略" : "发布攻略"
 })
 
 onUnmounted(() => {
@@ -367,25 +367,25 @@ onUnmounted(() => {
                         <div class="space-y-2">
                             <label class="block text-sm font-medium mb-2">攻略内容</label>
                             <div
+                                :class="['relative', isDragging ? 'ring-2 ring-primary ring-offset-2' : '']"
                                 @dragover="handleWebDragOver"
                                 @dragleave="handleWebDragLeave"
                                 @drop="handleWebDrop"
-                                :class="['relative', isDragging ? 'ring-2 ring-primary ring-offset-2' : '']"
                             >
                                 <textarea
                                     v-model="content"
                                     placeholder="详细描述你的攻略内容，支持 Markdown 格式..."
                                     class="w-full px-3 py-2 rounded-md border border-base-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all h-64 leading-relaxed resize-none"
-                                ></textarea>
+                                />
                                 <div
-                                    @click="triggerFileInput"
                                     class="absolute bottom-3 right-3 btn btn-ghost btn-sm bg-base-200 hover:bg-base-300"
                                     title="插入图片"
+                                    @click="triggerFileInput"
                                 >
                                     <Icon icon="ri:image-add-line" class="w-4 h-4" />
                                 </div>
                             </div>
-                            <input ref="fileInputRef" type="file" accept="image/*" @change="handleImageUpload" class="hidden" />
+                            <input ref="fileInputRef" type="file" accept="image/*" class="hidden" @change="handleImageUpload" />
                         </div>
 
                         <div v-if="type === 'image'" class="space-y-6">
@@ -395,16 +395,16 @@ onUnmounted(() => {
                                     <span class="text-xs text-base-content/60">支持拖拽上传或点击选择</span>
                                 </div>
                                 <div
-                                    @click="triggerFileInput"
-                                    @dragover="handleWebDragOver"
-                                    @dragleave="handleWebDragLeave"
-                                    @drop="handleWebDrop"
                                     :class="[
                                         'border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200',
                                         isDragging ? 'border-primary bg-primary/5' : 'border-base-content/30 hover:border-primary/50',
                                     ]"
+                                    @click="triggerFileInput"
+                                    @dragover="handleWebDragOver"
+                                    @dragleave="handleWebDragLeave"
+                                    @drop="handleWebDrop"
                                 >
-                                    <input ref="fileInputRef" type="file" accept="image/*" @change="handleImageUpload" class="hidden" />
+                                    <input ref="fileInputRef" type="file" accept="image/*" class="hidden" @change="handleImageUpload" />
                                     <div class="flex flex-col items-center gap-3">
                                         <div
                                             :class="[
@@ -460,8 +460,8 @@ onUnmounted(() => {
                 </div>
 
                 <div class="flex items-center gap-4 justify-center">
-                    <button class="btn btn-primary btn-wide" @click="handleSubmit" :disabled="isLoading">
-                        <span v-if="isLoading" class="loading loading-spinner loading-sm"></span>
+                    <button class="btn btn-primary btn-wide" :disabled="isLoading" @click="handleSubmit">
+                        <span v-if="isLoading" class="loading loading-spinner loading-sm" />
                         <Icon v-else icon="ri:send-plane-line" class="w-4 h-4" />
                         {{ isEdit ? "保存" : "发布" }}
                     </button>

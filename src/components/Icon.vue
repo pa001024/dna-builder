@@ -228,6 +228,9 @@ const data = {
     "ri:arrow-down-s-line": [
         "M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z",
     ],
+    "ri:error-warning-line": [
+        "M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 15H13V17H11V15ZM11 7H13V13H11V7Z",
+    ],
 } satisfies { [key: string]: [string, number?, Partial<SVGAttributes>?] }
 
 defineProps<{
@@ -252,7 +255,7 @@ export type IconTypes = keyof typeof data
         fill="currentColor"
         :viewBox="`0 0 ${data[icon][1] || 24} ${data[icon][1] || 24}`"
     >
-        <path fillRule="evenodd" clipRule="evenodd" :d="data[icon][0]" v-bind="data[icon][2]"></path>
+        <path fillRule="evenodd" clipRule="evenodd" :d="data[icon][0]" v-bind="data[icon][2]" />
     </svg>
-    <i class="icon" v-else>{{ icon }}</i>
+    <i v-else class="icon">{{ icon }}</i>
 </template>

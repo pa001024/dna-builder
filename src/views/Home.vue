@@ -36,8 +36,8 @@ onMounted(() => {
         return
     }
     fetch("https://rm-build.oss-cn-hongkong.aliyuncs.com/latest.json")
-        .then((res) => res.json())
-        .then((data) => {
+        .then(res => res.json())
+        .then(data => {
             downloadlink.value = data.platforms["windows-x86_64"].url
         })
 })
@@ -57,13 +57,14 @@ onMounted(() => {
                                 linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px);
                             background-size: 50px 50px;
                         "
-                    ></div>
+                    />
                 </div>
                 <!-- 闪烁星星 -->
                 <div class="absolute inset-0 overflow-hidden">
                     <div
+                        v-for="index in 20"
+                        :key="index"
                         class="absolute aspect-square bg-cyan-400/50 rounded-full animate-ping"
-                        v-for="_ in 20"
                         :style="{
                             width: `${0.1 + Math.random() * 0.2}em`,
                             left: `${Math.random() * 100}%`,
@@ -71,7 +72,7 @@ onMounted(() => {
                             animationDelay: `${Math.random() * 3}s`,
                             animationDuration: `${1 + Math.random() * 2}s`,
                         }"
-                    ></div>
+                    />
                 </div>
                 <div class="hero-content text-center container pb-8">
                     <div>
@@ -98,7 +99,8 @@ onMounted(() => {
             </div>
             <div class="p-2 sm:p-4 grid grid-cols-2 lg:grid-cols-4 w-full justify-items-center gap-3 sm:gap-4 max-w-6xl mx-auto">
                 <RouterLink
-                    v-for="item in items"
+                    v-for="(item, index) in items"
+                    :key="index"
                     :to="item.path"
                     class="w-full shadow-xl/5 flex flex-col justify-center items-center p-4 sm:p-6 lg:p-8 gap-2 bg-base-100/50 hover:bg-base-100 hover:animate-pulse transition-all duration-500 rounded-lg mobile-card"
                 >
@@ -108,7 +110,9 @@ onMounted(() => {
                     <div class="text-lg sm:text-xl font-bold text-primary text-center">
                         {{ $t(`${item.name}.title`) }}
                     </div>
-                    <div class="text-xs sm:text-sm text-gray-500 text-center">{{ $t(`${item.name}.desc`) }}</div>
+                    <div class="text-xs sm:text-sm text-gray-500 text-center">
+                        {{ $t(`${item.name}.desc`) }}
+                    </div>
                 </RouterLink>
             </div>
             <RouterLink

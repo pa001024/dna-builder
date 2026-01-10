@@ -5,7 +5,7 @@ import type { Char } from "../data/data-types"
 import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
 import { getRewardDetails, getDropModeText } from "../utils/reward-utils"
 
-const props = defineProps<{
+defineProps<{
     dungeon: AbyssDungeon
 }>()
 
@@ -72,7 +72,9 @@ function getChar(charId: number): Char | undefined {
                     </div>
                     <div v-if="dungeon.cid" class="flex justify-between">
                         <span class="text-base-content/70">关联角色</span>
-                        <RouterLink :to="`/char/${dungeon.cid}`" class="link link-primary">{{ getCharName(dungeon.cid) }}</RouterLink>
+                        <RouterLink :to="`/char/${dungeon.cid}`" class="link link-primary">
+                            {{ getCharName(dungeon.cid) }}
+                        </RouterLink>
                     </div>
                 </div>
             </div>
@@ -93,14 +95,16 @@ function getChar(charId: number): Char | undefined {
 
             <div v-if="dungeon.art || dungeon.arl?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
                 <h3 class="font-bold mb-2">奖励信息</h3>
-                <div class="space-y-2 text-sm" v-if="dungeon.art && !dungeon.arl?.length">
+                <div v-if="dungeon.art && !dungeon.arl?.length" class="space-y-2 text-sm">
                     <div class="flex justify-between">
                         <span class="text-base-content/70">奖励标题</span>
                         <span>{{ dungeon.art }}</span>
                     </div>
                 </div>
                 <div v-if="dungeon.arl?.length" class="space-y-3">
-                    <div v-if="dungeon.art" class="text-sm font-medium mb-2">{{ dungeon.art }}</div>
+                    <div v-if="dungeon.art" class="text-sm font-medium mb-2">
+                        {{ dungeon.art }}
+                    </div>
                     <div v-for="item in dungeon.arl" :key="item.lv" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors">
                         <div class="flex items-center justify-between mb-1">
                             <span class="text-sm font-medium">等级 {{ item.lv }}</span>
@@ -152,7 +156,7 @@ function getChar(charId: number): Char | undefined {
             <div v-if="dungeon.mb" class="card bg-base-100 border border-base-200 rounded-lg p-3">
                 <h3 class="font-bold mb-2">怪物属性加成</h3>
                 <div class="grid grid-cols-3 gap-2 text-sm">
-                    <div v-for="key in ['暗', '水', '火', '雷', '风', '光']" class="flex justify-between">
+                    <div v-for="key in ['暗', '水', '火', '雷', '风', '光']" :key="key" class="flex justify-between">
                         <span class="text-base-content/70">{{ $t(`${key}属性`) }}</span>
                         <span>{{ (dungeon.mb[key] * 100).toFixed(0) }}%</span>
                     </div>
@@ -171,7 +175,9 @@ function getChar(charId: number): Char | undefined {
 
                                     <span class="text-xs text-base-content/70">ID: {{ buff.id }}</span>
                                 </div>
-                                <div class="text-xs text-base-content/70 mt-1">{{ buff.d }}</div>
+                                <div class="text-xs text-base-content/70 mt-1">
+                                    {{ buff.d }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -182,9 +188,9 @@ function getChar(charId: number): Char | undefined {
                 <h3 class="font-bold mb-2">怪物列表 ({{ dungeon.m.length }}种)</h3>
                 <div class="flex flex-wrap gap-1">
                     <RouterLink
-                        :to="`/db/monster/${monsterId}`"
                         v-for="monsterId in dungeon.m"
                         :key="monsterId"
+                        :to="`/db/monster/${monsterId}`"
                         class="px-2 py-1 bg-base-200 rounded text-xs hover:bg-base-300 transition-colors cursor-pointer"
                     >
                         {{ $t(getMonsterName(monsterId)) }}

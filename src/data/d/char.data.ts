@@ -4504,11 +4504,11 @@ const t: Char[] = [
 ]
 
 function patch(id: number, skillName: string, cb: (skill: Char["技能"][number]) => void) {
-    const char = t.find((item) => item.id === id)
+    const char = t.find(item => item.id === id)
     if (!char) {
         return
     }
-    const skill = char.技能.find((item) => item.名称 === skillName)
+    const skill = char.技能.find(item => item.名称 === skillName)
     if (!skill) {
         return
     }
@@ -4516,7 +4516,7 @@ function patch(id: number, skillName: string, cb: (skill: Char["技能"][number]
 }
 
 function patchUW(id: number, cb: (uw: Char) => void) {
-    const char = t.find((item) => item.id === id)
+    const char = t.find(item => item.id === id)
     if (!char) {
         return
     }
@@ -4524,36 +4524,44 @@ function patchUW(id: number, cb: (uw: Char) => void) {
     cb(char)
 }
 
-patchUW(5301, (uw) => {
+patchUW(5301, uw => {
     uw.同律武器![0].攻速 = 4
 })
 
-patchUW(1503, (uw) => {
-    delete uw.同律武器
+patchUW(1503, uw => {
+    uw.同律武器 = [
+        {
+            id: uw.同律武器![0].id,
+            名称: "剑非剑",
+            类型: ["同律", "近战", "单手剑"],
+            filter: "[霜剑拂流星]",
+            inherit: "melee",
+        },
+    ]
 })
 
-patch(2101, "缠绵之触", (skill) => {
+patch(2101, "缠绵之触", skill => {
     skill.召唤物 = {
         名称: "召唤物·海月水母",
         攻击延迟: 2,
         攻击间隔: 1.8,
     }
 })
-patch(2401, "提挈浮沉", (skill) => {
+patch(2401, "提挈浮沉", skill => {
     skill.召唤物 = {
         名称: "召唤物·云输",
         攻击延迟: 0,
         攻击间隔: 1,
     }
 })
-patch(2301, "正义群殴！", (skill) => {
+patch(2301, "正义群殴！", skill => {
     skill.召唤物 = {
         名称: "召唤物·触手",
         攻击延迟: 0,
         攻击间隔: 1.66667,
     }
 })
-patch(4301, "指尖风暴", (skill) => {
+patch(4301, "指尖风暴", skill => {
     skill.召唤物 = {
         名称: "召唤物·紊乱雷球",
         攻击延迟: 2,

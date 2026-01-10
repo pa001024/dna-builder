@@ -6,7 +6,7 @@ import { db } from "../store/db"
 import type { Conversation, Message, UMessage, UConversation } from "../store/db"
 import type { ChatCompletionMessageParam } from "openai/resources/index.mjs"
 import MarkdownIt from "markdown-it"
-// @ts-ignore - 未类型化模块
+// @ts-expect-error 模块无ts定义 也不需要类型检查
 import mdKatex from "markdown-it-katex"
 import mdHighlightjs from "markdown-it-highlightjs"
 import "highlight.js/styles/github.css"
@@ -96,7 +96,7 @@ async function startMCPServer() {
         }
 
         // 等待进程启动
-        await new Promise((resolve) => setTimeout(resolve, 2000))
+        await new Promise(resolve => setTimeout(resolve, 2000))
 
         // 检查服务器是否运行
         await checkMCPServerStatus()
@@ -167,7 +167,7 @@ async function checkMCPServerStatus() {
             isMCPRunning.value = false
             mcpStatus.value = "未响应"
         }
-    } catch (error) {
+    } catch {
         isMCPRunning.value = false
         mcpStatus.value = "未启动"
     }
@@ -309,8 +309,8 @@ async function generateAIResponse() {
 
         // 准备对话历史，包含图片消息
         const chatHistory = messages.value
-            .filter((msg) => msg.conversationId === selectedConversationId.value)
-            .map((msg) => {
+            .filter(msg => msg.conversationId === selectedConversationId.value)
+            .map(msg => {
                 if (msg.imageUrl) {
                     // 构建图片消息格式
                     return {
@@ -368,7 +368,7 @@ async function generateAIResponse() {
                 model: setting.aiModelName,
                 temperature: setting.aiTemperature,
                 max_tokens: setting.aiMaxTokens,
-            },
+            }
         )
         await finalizeStreamingMessage()
 
@@ -423,7 +423,7 @@ function handleInput(e: Event) {
 }
 
 // 监听inputText变化，同步到DOM
-watch(inputText, (newValue) => {
+watch(inputText, newValue => {
     if (messageInputRef.value && messageInputRef.value.innerText !== newValue) {
         messageInputRef.value.innerText = newValue
     }
@@ -474,7 +474,7 @@ async function handleImageUpload(file: File) {
         const reader = new FileReader()
         reader.readAsDataURL(file)
 
-        reader.onload = async (event) => {
+        reader.onload = async event => {
             const imageUrl = event.target?.result as string
 
             // 创建包含图片的用户消息
@@ -527,7 +527,7 @@ watch(
             default_model: setting.aiModelName,
         })
     },
-    { deep: true },
+    { deep: true }
 )
 
 // 初始化
@@ -540,8 +540,8 @@ onMounted(() => {
         <!-- 对话列表 -->
         <div class="flex-none w-60 flex flex-col items-stretch overflow-hidden p-4 bg-base-100 gap-4 border-r border-gray-200">
             <button
-                @click="createNewConversation"
                 class="p-2 px-4 text-md cursor-pointer btn btn-primary btn-block rounded-lg hover:bg-primary/90 transition-colors"
+                @click="createNewConversation"
             >
                 新对话
             </button>
@@ -549,10 +549,11 @@ onMounted(() => {
             <!-- MCP 服务器控制 -->
             <div class="mt-4 p-3 bg-base-200 rounded-lg">
                 <div class="text-sm font-medium mb-2">MCP 服务器</div>
-                <div class="text-xs opacity-70 mb-2">{{ mcpStatus }}</div>
+                <div class="text-xs opacity-70 mb-2">
+                    {{ mcpStatus }}
+                </div>
                 <div class="flex gap-2">
                     <button
-                        @click="startMCPServer"
                         :disabled="isMCPRunning || !env.isApp"
                         :class="[
                             'btn btn-sm flex-1',
@@ -560,14 +561,15 @@ onMounted(() => {
                             !env.isApp ? 'btn-disabled opacity-50' : '',
                         ]"
                         title="以管理员权限启动 MCP 服务器"
+                        @click="startMCPServer"
                     >
                         <Icon icon="ri:play-line" class="mr-1" />
                         启动
                     </button>
                     <button
-                        @click="stopMCPServer"
                         :disabled="!isMCPRunning"
                         :class="['btn btn-sm flex-1', isMCPRunning ? 'btn-error' : 'btn-disabled']"
+                        @click="stopMCPServer"
                     >
                         <Icon icon="ri:stop-line" class="mr-1" />
                         停止
@@ -602,7 +604,7 @@ onMounted(() => {
         <!-- 对话内容 -->
         <div class="flex-1 flex flex-col items-center justify-center overflow-hidden">
             <!-- 消息列表 -->
-            <ScrollArea class="flex-1 w-full overflow-hidden p-4" @scroll="handleScroll" ref="scrollAreaRef">
+            <ScrollArea ref="scrollAreaRef" class="flex-1 w-full overflow-hidden p-4" @scroll="handleScroll">
                 <div class="flex flex-col gap-4 max-w-3xl mx-auto w-full">
                     <!-- 消息项 -->
                     <div
@@ -627,7 +629,7 @@ onMounted(() => {
                             ]"
                         >
                             <!-- 使用计算属性或异步渲染的方式处理markdown -->
-                            <div v-html="msg.renderedContent || msg.content" class="markdown-content"></div>
+                            <div class="markdown-content" v-html="msg.renderedContent || msg.content" />
                             <!-- 图片消息 -->
                             <img
                                 v-if="msg.imageUrl"
@@ -662,27 +664,29 @@ onMounted(() => {
                     <div
                         ref="messageInputRef"
                         contenteditable
+                        class="flex-1 p-3 bg-gray-100 rounded-lg focus:outline-none min-h-20 max-h-50 overflow-y-auto"
+                        placeholder="发消息或输入/选择指令，支持粘贴或拖拽图片"
                         @input="handleInput"
                         @keydown.enter="handleEnter"
                         @paste="handlePaste"
                         @dragover="handleDragOver"
                         @drop="handleDrop"
-                        class="flex-1 p-3 bg-gray-100 rounded-lg focus:outline-none min-h-20 max-h-[200px] overflow-y-auto"
-                        placeholder="发消息或输入/选择指令，支持粘贴或拖拽图片"
-                    ></div>
+                    />
                     <button
-                        @click="isStream ? interruptStream() : sendMessage()"
                         :class="[
                             'btn ml-2',
                             isStream ? 'btn-warning' : 'btn-primary',
                             isLoading && !isStream ? 'btn-disabled opacity-70 cursor-not-allowed' : '',
                         ]"
+                        @click="isStream ? interruptStream() : sendMessage()"
                     >
                         <Icon v-if="isStream" icon="ri:stop-circle-line" />
                         <Icon v-else icon="ri:send-plane-line" />
                     </button>
                 </div>
-                <div class="text-xs text-gray-500 w-full max-w-3xl">{{ $t("ai.inputMessage") }}</div>
+                <div class="text-xs text-gray-500 w-full max-w-3xl">
+                    {{ $t("ai.inputMessage") }}
+                </div>
             </div>
         </div>
     </div>

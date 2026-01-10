@@ -37,7 +37,7 @@ if (env.isApp) {
     if (setting.winMaterial !== "Unset") {
         applyMaterial(setting.winMaterial as any)
     } else {
-        getOSVersion().then((ver) => {
+        getOSVersion().then(ver => {
             if (ver.startsWith("11")) {
                 setting.setWinMaterial("Acrylic")
             } else {
@@ -49,12 +49,12 @@ if (env.isApp) {
     watchEffect(() => {
         appWindow.setResizable(props.resizable)
     })
-    watch(alwaysOnTop, (newValue) => {
+    watch(alwaysOnTop, newValue => {
         appWindow.setAlwaysOnTop(newValue)
     })
 }
 
-watch(isDark, async (newValue) => {
+watch(isDark, async newValue => {
     setting.theme = newValue ? "dark" : "light"
     setting.windowTrasnparent = !newValue
 })
@@ -65,7 +65,11 @@ function handleMinimize() {
 
 async function handleMaximize() {
     const state = await appWindow.isMaximized()
-    state ? appWindow.unmaximize() : appWindow.maximize()
+    if (state) {
+        appWindow.unmaximize()
+    } else {
+        appWindow.maximize()
+    }
 }
 
 async function handleClose() {
@@ -78,11 +82,11 @@ async function handleClose() {
     }
 }
 
-watch(alwaysOnTop, async (newValue) => {
+watch(alwaysOnTop, async newValue => {
     await appWindow.setAlwaysOnTop(newValue)
 })
 
-let unlisten: Function
+let unlisten: () => void
 
 if (env.isApp) {
     onMounted(async () => {
@@ -110,7 +114,7 @@ watchEffect(() => {
     <!-- Root -->
     <div class="relative w-full h-full flex overflow-hidden bg-base-100/30 rounded-lg">
         <!-- SideBar -->
-        <slot v-if="route" name="sidebar"></slot>
+        <slot v-if="route" name="sidebar" />
         <!-- Header -->
         <div className="relative flex flex-col overflow-hidden w-full h-full">
             <!-- ActionBar -->
@@ -123,16 +127,28 @@ watchEffect(() => {
                     <!-- 计时器 -->
                     <div class="flex ml-4 gap-8 items-center text-xs text-base-content/80">
                         <div class="inline-block text-center min-w-16 cursor-pointer" @click="ui.mihanVisible = true">
-                            <div class="whitespace-nowrap">{{ $t("resizeableWindow.mihan") }}</div>
-                            <div class="font-orbitron">{{ timeStr(mihan) }}</div>
+                            <div class="whitespace-nowrap">
+                                {{ $t("resizeableWindow.mihan") }}
+                            </div>
+                            <div class="font-orbitron">
+                                {{ timeStr(mihan) }}
+                            </div>
                         </div>
                         <div class="text-center min-w-16" :class="[env.isApp ? 'hidden sm:inline-block' : 'inline-block']">
-                            <div class="whitespace-nowrap">{{ $t("resizeableWindow.moling") }}</div>
-                            <div class="font-orbitron">{{ timeStr(moling) }}</div>
+                            <div class="whitespace-nowrap">
+                                {{ $t("resizeableWindow.moling") }}
+                            </div>
+                            <div class="font-orbitron">
+                                {{ timeStr(moling) }}
+                            </div>
                         </div>
                         <div class="hidden sm:inline-block text-center min-w-16">
-                            <div class="whitespace-nowrap">{{ $t("resizeableWindow.zhouben") }}</div>
-                            <div class="font-orbitron">{{ timeStr(zhouben) }}</div>
+                            <div class="whitespace-nowrap">
+                                {{ $t("resizeableWindow.zhouben") }}
+                            </div>
+                            <div class="font-orbitron">
+                                {{ timeStr(zhouben) }}
+                            </div>
                         </div>
                     </div>
                     <dialog class="modal" :class="{ 'modal-open': ui.mihanVisible }">
@@ -149,15 +165,15 @@ watchEffect(() => {
                             <DNAMihan />
                         </div>
 
-                        <div class="modal-backdrop" @click="ui.mihanVisible = false"></div>
+                        <div class="modal-backdrop" @click="ui.mihanVisible = false" />
                     </dialog>
                 </div>
                 <!-- fix resize shadow -->
-                <div class="pointer-events-none flex-none opacity-0 self-start transition-none" v-if="env.isApp">
+                <div v-if="env.isApp" class="pointer-events-none flex-none opacity-0 self-start transition-none">
                     <div class="flex items-center space-x-2">
-                        <label class="btn btn-ghost btn-sm btn-square swap swap-rotate" v-if="darkable">
+                        <label v-if="darkable" class="btn btn-ghost btn-sm btn-square swap swap-rotate">
                             <!-- this hidden checkbox controls the state -->
-                            <input type="checkbox" class="theme-controller" value="dark" v-model="isDark" />
+                            <input v-model="isDark" type="checkbox" class="theme-controller" value="dark" />
 
                             <!-- sun icon -->
                             <svg class="swap-off fill-current w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -173,18 +189,18 @@ watchEffect(() => {
                                 />
                             </svg>
                         </label>
-                        <button class="btn btn-ghost btn-sm btn-square"></button>
-                        <button class="btn btn-ghost btn-sm btn-square disabled:bg-transparent" :disabled="!minimizable"></button>
-                        <button class="btn btn-ghost btn-sm btn-square disabled:bg-transparent" :disabled="!maximizable"></button>
-                        <button class="btn btn-ghost btn-sm btn-square"></button>
+                        <button class="btn btn-ghost btn-sm btn-square" />
+                        <button class="btn btn-ghost btn-sm btn-square disabled:bg-transparent" :disabled="!minimizable" />
+                        <button class="btn btn-ghost btn-sm btn-square disabled:bg-transparent" :disabled="!maximizable" />
+                        <button class="btn btn-ghost btn-sm btn-square" />
                     </div>
                 </div>
                 <!-- fix resize -->
-                <div class="pointer-events-none fixed right-1 top-1" v-if="env.isApp">
+                <div v-if="env.isApp" class="pointer-events-none fixed right-1 top-1">
                     <div class="flex pointer-events-auto items-center space-x-2">
-                        <label class="btn btn-ghost btn-sm btn-square swap swap-rotate" v-if="darkable">
+                        <label v-if="darkable" class="btn btn-ghost btn-sm btn-square swap swap-rotate">
                             <!-- this hidden checkbox controls the state -->
-                            <input type="checkbox" class="theme-controller" value="dark" v-model="isDark" />
+                            <input v-model="isDark" type="checkbox" class="theme-controller" value="dark" />
 
                             <!-- sun icon -->
                             <svg class="swap-off fill-current w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -202,8 +218,8 @@ watchEffect(() => {
                         </label>
                         <Tooltip side="bottom" :tooltip="alwaysOnTop ? $t('main.btn_unpin_window') : $t('main.btn_pin_window')">
                             <button class="btn btn-ghost btn-sm btn-square" @click="alwaysOnTop = !alwaysOnTop">
-                                <Icon bold icon="ri:pushpin-2-fill" v-if="alwaysOnTop" />
-                                <Icon bold icon="ri:pushpin-fill" v-else />
+                                <Icon v-if="alwaysOnTop" bold icon="ri:pushpin-2-fill" />
+                                <Icon v-else bold icon="ri:pushpin-fill" />
                             </button>
                         </Tooltip>
                         <button
@@ -218,8 +234,8 @@ watchEffect(() => {
                             :disabled="!maximizable"
                             @click="handleMaximize"
                         >
-                            <Icon bold icon="codicon:chrome-maximize" v-if="!maximized" />
-                            <Icon bold icon="codicon:chrome-restore" v-else />
+                            <Icon v-if="!maximized" bold icon="codicon:chrome-maximize" />
+                            <Icon v-else bold icon="codicon:chrome-restore" />
                         </button>
                         <button class="btn btn-ghost btn-sm btn-square" @click="handleClose">
                             <Icon bold icon="codicon:chrome-close" />
@@ -229,7 +245,7 @@ watchEffect(() => {
             </div>
             <!-- Body -->
             <div :class="{ 'rounded-tl-box': !!$slots.sidebar }" class="w-full relative bg-base-200/50 flex-1 overflow-hidden shadow-inner">
-                <slot></slot>
+                <slot />
             </div>
 
             <!-- 全局悬浮放大层 -->
@@ -247,24 +263,32 @@ watchEffect(() => {
             <!-- 全局通用浮层 -->
             <dialog class="modal" :class="{ 'modal-open': ui.dialogVisible }">
                 <div class="modal-box bg-base-300">
-                    <p class="text-lg font-bold">{{ ui.dialogTitle }}</p>
-                    <p class="py-4 text-base-content/60">{{ ui.dialogContent }}</p>
+                    <p class="text-lg font-bold">
+                        {{ ui.dialogTitle }}
+                    </p>
+                    <p class="py-4 text-base-content/60">
+                        {{ ui.dialogContent }}
+                    </p>
                     <div class="modal-action">
                         <div class="flex justify-end gap-2">
-                            <button class="min-w-20 btn btn-secondary" @click="ui.confirmDialog">{{ $t("setting.confirm") }}</button>
-                            <button class="min-w-20 btn btn-ghost" @click="ui.cancelDialog">{{ $t("setting.cancel") }}</button>
+                            <button class="min-w-20 btn btn-secondary" @click="ui.confirmDialog">
+                                {{ $t("setting.confirm") }}
+                            </button>
+                            <button class="min-w-20 btn btn-ghost" @click="ui.cancelDialog">
+                                {{ $t("setting.cancel") }}
+                            </button>
                         </div>
                     </div>
                 </div>
                 <!-- 模态框背景 -->
-                <div class="modal-backdrop" @click="ui.cancelDialog"></div>
+                <div class="modal-backdrop" @click="ui.cancelDialog" />
             </dialog>
             <transition name="slide-right">
                 <div
                     v-if="ui.errorMessage"
-                    @click="ui.errorMessage = ''"
                     role="alert"
                     class="alert alert-error absolute bottom-8 right-8 cursor-pointer"
+                    @click="ui.errorMessage = ''"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
                         <path
@@ -280,9 +304,9 @@ watchEffect(() => {
             <transition name="slide-right">
                 <div
                     v-if="ui.successMessage"
-                    @click="ui.successMessage = ''"
                     role="alert"
                     class="alert alert-success absolute bottom-8 right-8 cursor-pointer"
+                    @click="ui.successMessage = ''"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
                         <path

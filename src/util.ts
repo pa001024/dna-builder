@@ -51,7 +51,7 @@ export function formatSkillProp(prop: string, val: LeveledSkillField) {
     const fmt = propRegex.test(prop) ? format1 : format100
     return val.格式
         ? val.格式.replace(/\{%?\}/g, (v, i) =>
-              v.includes("%") ? format100(i ? (val.值2 || val.段数)! : val.值) : format1(i ? (val.值2 || val.段数)! : val.值),
+              v.includes("%") ? format100(i ? (val.值2 || val.段数)! : val.值) : format1(i ? (val.值2 || val.段数)! : val.值)
           )
         : fmt(val.值)
 }
@@ -90,7 +90,7 @@ export function base36Pad(num: number) {
 }
 
 export function sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms))
+    return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 import emojiJson from "./assets/emoji.json"
@@ -107,7 +107,7 @@ const emojiDict = emojiJson.dict.reduce(
         acc[cur.desc] = { type: "local", src: cur.image }
         return acc
     },
-    {} as Record<string, EmojiStyle>,
+    {} as Record<string, EmojiStyle>
 )
 let emojiDictLoaded = false
 

@@ -9,13 +9,13 @@ const selectedType = ref<string>("")
 
 // 所有副本类型
 const allTypes = computed(() => {
-    const types = new Set(dungeonData.map((d) => d.t))
+    const types = new Set(dungeonData.map(d => d.t))
     return Array.from(types).sort()
 })
 
 // 按类型和关键词筛选副本
 const filteredDungeons = computed(() => {
-    return dungeonData.filter((d) => {
+    return dungeonData.filter(d => {
         const matchesType = selectedType.value === "" || d.t === selectedType.value
         const matchesKeyword =
             searchKeyword.value === "" ||
@@ -58,7 +58,7 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
                             全部
                         </button>
                         <button
-                            v-for="type in allTypes.map((t) => getDungeonType(t))"
+                            v-for="type in allTypes.map(t => getDungeonType(t))"
                             :key="type.t"
                             class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all cursor-pointer"
                             :class="
@@ -87,7 +87,9 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
                                         <img v-if="dungeon.e" :src="`/imgs/${dungeon.e}.png`" class="h-8 inline-block rounded" />
                                         {{ dungeon.n }}
                                     </div>
-                                    <div class="text-xs opacity-70 mt-1">{{ dungeon.desc }}</div>
+                                    <div class="text-xs opacity-70 mt-1">
+                                        {{ dungeon.desc }}
+                                    </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">
                                     <span class="text-xs px-2 py-0.5 rounded" :class="getDungeonType(dungeon.t).color + ' text-white'">

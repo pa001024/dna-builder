@@ -67,8 +67,8 @@ const editTrackName = ref<string>("")
 const selectTool = (tool: ToolType) => {
     currentTool.value = tool
     // 清除选择状态
-    selectedItems.forEach((item) => {
-        const found = items.find((i) => i.id === item.id)
+    selectedItems.forEach(item => {
+        const found = items.find(i => i.id === item.id)
         if (found) found.isSelected = false
     })
     selectedItems.length = 0
@@ -95,7 +95,7 @@ const addTrack = (name?: string) => {
 
         // 验证名称唯一性
         const trackName = name?.trim() || `轨道 ${trackNumber}`
-        const nameExists = tracks.some((track) => track.name === trackName)
+        const nameExists = tracks.some(track => track.name === trackName)
 
         if (nameExists) {
             alert(`轨道名称 "${trackName}" 已存在，请使用其他名称！`)
@@ -135,7 +135,7 @@ const removeTrack = (trackIndex: number) => {
         }
 
         // 删除该轨道上的所有项目
-        const filteredItems = items.filter((item) => item.trackIndex !== trackIndex)
+        const filteredItems = items.filter(item => item.trackIndex !== trackIndex)
         items.splice(0, items.length, ...filteredItems)
 
         // 重新排序剩余轨道
@@ -145,7 +145,7 @@ const removeTrack = (trackIndex: number) => {
         })
 
         // 更新所有轨道索引大于被删除轨道的项目
-        items.forEach((item) => {
+        items.forEach(item => {
             if (item.trackIndex > trackIndex) {
                 item.trackIndex--
             }
@@ -251,7 +251,7 @@ const moveTrackUp = (trackIndex: number) => {
     tracks[trackIndex - 1].index = trackIndex - 1
 
     // 更新轨道上的项目索引
-    items.forEach((item) => {
+    items.forEach(item => {
         if (item.trackIndex === trackIndex) {
             item.trackIndex = trackIndex - 1
         } else if (item.trackIndex === trackIndex - 1) {
@@ -279,7 +279,7 @@ const moveTrackDown = (trackIndex: number) => {
     tracks[trackIndex + 1].index = trackIndex + 1
 
     // 更新轨道上的项目索引
-    items.forEach((item) => {
+    items.forEach(item => {
         if (item.trackIndex === trackIndex) {
             item.trackIndex = trackIndex + 1
         } else if (item.trackIndex === trackIndex + 1) {
@@ -340,15 +340,15 @@ const addItem = (trackIndex: number, startTime: number, duration = 1, name?: str
         newItem.lv = lv
         newItem.props = new LeveledBuff(name, lv).getProperties()
     } else {
-        const [base, _target] = name.split("::")
+        const [base] = name.split("::")
         const attr = charBuild.value.calculateAttributes()
-        const skill = charBuild.value.allSkills.find((s) => s.名称 === base)
+        const skill = charBuild.value.allSkills.find(s => s.名称 === base)
         if (skill) {
             const fields = skill.getFieldsWithAttr(attr) || []
             newItem.props = fields
             // 处理召唤物
             if (skill.召唤物持续时间) {
-                const v = fields.find((f) => /召唤物.*持续时间/.test(f.名称))
+                const v = fields.find(f => /召唤物.*持续时间/.test(f.名称))
                 newItem.duration = v?.值 || 1
             }
         } else {
@@ -357,8 +357,8 @@ const addItem = (trackIndex: number, startTime: number, duration = 1, name?: str
     }
 
     // 清除之前的选择
-    selectedItems.forEach((item) => {
-        const found = items.find((i) => i.id === item.id)
+    selectedItems.forEach(item => {
+        const found = items.find(i => i.id === item.id)
         if (found) found.isSelected = false
     })
     selectedItems.length = 0
@@ -389,16 +389,16 @@ const prepareDeleteItem = (item: TimelineItem) => {
             }
 
             const itemId = item.id
-            const index = items.findIndex((i) => i.id === itemId)
+            const index = items.findIndex(i => i.id === itemId)
 
             if (index !== -1) {
                 // 从选中列表中移除
-                const selectedIndex = selectedItems.findIndex((i) => i.id === itemId)
+                const selectedIndex = selectedItems.findIndex(i => i.id === itemId)
                 if (selectedIndex !== -1) {
                     selectedItems.splice(selectedIndex, 1)
                 }
 
-                const currentIndex = items.findIndex((i) => i.id === itemId)
+                const currentIndex = items.findIndex(i => i.id === itemId)
                 if (currentIndex !== -1) {
                     items.splice(currentIndex, 1)
                 }
@@ -412,9 +412,9 @@ const prepareDeleteItem = (item: TimelineItem) => {
 // 清除选择
 const clearSelection = () => {
     try {
-        selectedItems.forEach((item) => {
+        selectedItems.forEach(item => {
             try {
-                const found = items.find((i) => i.id === item.id)
+                const found = items.find(i => i.id === item.id)
                 if (found) found.isSelected = false
             } catch (itemErr) {
                 console.warn("清除单个项目选中状态时出错:", itemErr)
@@ -483,10 +483,10 @@ const deleteSelectedItems = () => {
         }
 
         // 获取所有选中项目的ID
-        const selectedIds = selectedItems.map((item) => item.id)
+        const selectedIds = selectedItems.map(item => item.id)
 
         // 从items数组中过滤掉选中的项目
-        const newItems = items.filter((item) => !selectedIds.includes(item.id))
+        const newItems = items.filter(item => !selectedIds.includes(item.id))
 
         // 清空原数组并添加剩余项目
         items.splice(0, items.length, ...newItems)
@@ -579,8 +579,8 @@ const startSelection = (event: MouseEvent) => {
 
     // 清除之前的选择
     if (!event.shiftKey) {
-        selectedItems.forEach((item) => {
-            const found = items.find((i) => i.id === item.id)
+        selectedItems.forEach(item => {
+            const found = items.find(i => i.id === item.id)
             if (found) found.isSelected = false
         })
         selectedItems.length = 0
@@ -617,13 +617,13 @@ const startSelection = (event: MouseEvent) => {
 
         if (!event.shiftKey) {
             // 如果不是按住Shift多选，先清除其他选择
-            selectedItems.forEach((i) => {
+            selectedItems.forEach(i => {
                 i.isSelected = false
             })
             selectedItems.length = 0
         }
         // 检查每个项目是否在选择框内
-        items.forEach((item) => {
+        items.forEach(item => {
             const itemTop = item.trackIndex * trackHeight.value // 20px 轨道名称区域
             const itemLeft = (item.startTime - timelineStartTime.value) * timelineScale.value
             const itemBottom = itemTop + trackHeight.value // 项目高度
@@ -684,7 +684,7 @@ const startResize = (event: MouseEvent, item: TimelineItem, side: "left" | "righ
         const timeDiff = pixelDiff / timelineScale.value
 
         // 查找项目在原始数组中的引用
-        const itemRef = items.find((i) => i.id === resizingItem.id)
+        const itemRef = items.find(i => i.id === resizingItem.id)
         if (!itemRef) return
 
         if (resizeSide === "left") {
@@ -736,8 +736,8 @@ const startDrag = (event: MouseEvent, item: TimelineItem) => {
             }
         } else if (!item.isSelected) {
             // 如果不是多选模式，确保只有当前项被选中
-            selectedItems.forEach((selected) => {
-                const found = items.find((i) => i.id === selected.id)
+            selectedItems.forEach(selected => {
+                const found = items.find(i => i.id === selected.id)
                 if (found) found.isSelected = false
             })
             selectedItems.length = 0
@@ -820,18 +820,18 @@ const startDrag = (event: MouseEvent, item: TimelineItem) => {
                 const timelineElement = selectionBaseElement
                 if (timelineElement) {
                     // 更新每个选中的项目
-                    selectedItems.forEach((item) => {
+                    selectedItems.forEach(item => {
                         // 计算新的轨道索引
                         const newTrackIndex = Math.max(
                             0,
-                            Math.min(tracks.length - 1, item.trackIndex + Math.floor((endY - startY) / trackHeight.value)),
+                            Math.min(tracks.length - 1, item.trackIndex + Math.floor((endY - startY) / trackHeight.value))
                         )
 
                         // 计算新的开始时间
                         const newStartTime = item.startTime + (endX - startX) / timelineScale.value
 
                         // 查找项目在原始数组中的引用
-                        const itemRef = items.find((i) => i.id === item.id)
+                        const itemRef = items.find(i => i.id === item.id)
                         if (itemRef) {
                             itemRef.trackIndex = newTrackIndex
 
@@ -880,7 +880,7 @@ const zoomLevels = [
 
 // 放大
 const zoomIn = () => {
-    const currentIndex = zoomLevels.findIndex((level) => level.level === zoomLevel.value)
+    const currentIndex = zoomLevels.findIndex(level => level.level === zoomLevel.value)
     if (currentIndex < zoomLevels.length - 1) {
         const nextLevel = zoomLevels[currentIndex + 1]
         zoomLevel.value = nextLevel.level
@@ -890,7 +890,7 @@ const zoomIn = () => {
 
 // 缩小
 const zoomOut = () => {
-    const currentIndex = zoomLevels.findIndex((level) => level.level === zoomLevel.value)
+    const currentIndex = zoomLevels.findIndex(level => level.level === zoomLevel.value)
     if (currentIndex > 0) {
         const prevLevel = zoomLevels[currentIndex - 1]
         zoomLevel.value = prevLevel.level
@@ -978,7 +978,7 @@ import { formatProp, formatSkillProp } from "../util"
 import { groupBy } from "lodash-es"
 import { useTimeline } from "../store/timeline"
 const inv = useInvStore()
-const charOptions = charData.map((char) => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
+const charOptions = charData.map(char => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
 const selectedChar = useLocalStorage("selectedChar", "赛琪")
 const charSettings = useCharSettings(selectedChar)
 const baseName = ref(charSettings.value.baseName)
@@ -988,40 +988,36 @@ const charBuild = computed(
         new CharBuild({
             char: new LeveledChar(selectedChar.value, charSettings.value.charLevel),
             auraMod: new LeveledMod(charSettings.value.auraMod),
-            charMods: charSettings.value.charMods.filter((mod) => mod !== null).map((m) => new LeveledMod(m[0], m[1], inv.getBuffLv(m[0]))),
-            meleeMods: charSettings.value.meleeMods
-                .filter((mod) => mod !== null)
-                .map((m) => new LeveledMod(m[0], m[1], inv.getBuffLv(m[0]))),
-            rangedMods: charSettings.value.rangedMods
-                .filter((mod) => mod !== null)
-                .map((m) => new LeveledMod(m[0], m[1], inv.getBuffLv(m[0]))),
-            skillWeaponMods: charSettings.value.skillWeaponMods
-                .filter((mod) => mod !== null)
-                .map((m) => new LeveledMod(m[0], m[1], inv.getBuffLv(m[0]))),
+            charMods: charSettings.value.charMods.filter(mod => mod !== null).map(m => new LeveledMod(m[0], m[1], inv.getBuffLv(m[0]))),
+            meleeMods: charSettings.value.meleeMods.filter(mod => mod !== null).map(m => new LeveledMod(m[0], m[1], inv.getBuffLv(m[0]))),
+            rangedMods: charSettings.value.rangedMods.filter(mod => mod !== null).map(m => new LeveledMod(m[0], m[1], inv.getBuffLv(m[0]))),
+            skillMods: charSettings.value.skillWeaponMods
+                .filter(mod => mod !== null)
+                .map(m => new LeveledMod(m[0], m[1], inv.getBuffLv(m[0]))),
             skillLevel: charSettings.value.charSkillLevel,
             buffs: charSettings.value.buffs
-                .map((v) => {
+                .map(v => {
                     try {
                         const b = new LeveledBuff(v[0], v[1])
                         return b
                     } catch (error) {
                         console.error(error)
-                        charSettings.value.buffs = charSettings.value.buffs.filter((b) => b[0] !== v[0])
+                        charSettings.value.buffs = charSettings.value.buffs.filter(b => b[0] !== v[0])
                         return null
                     }
                 })
-                .filter((b) => b !== null),
+                .filter(b => b !== null),
             melee: new LeveledWeapon(
                 charSettings.value.meleeWeapon,
                 charSettings.value.meleeWeaponRefine,
                 charSettings.value.meleeWeaponLevel,
-                inv.getWBuffLv(charSettings.value.meleeWeapon),
+                inv.getWBuffLv(charSettings.value.meleeWeapon)
             ),
             ranged: new LeveledWeapon(
                 charSettings.value.rangedWeapon,
                 charSettings.value.rangedWeaponRefine,
                 charSettings.value.rangedWeaponLevel,
-                inv.getWBuffLv(charSettings.value.rangedWeapon),
+                inv.getWBuffLv(charSettings.value.rangedWeapon)
             ),
             baseName: charSettings.value.baseName,
             imbalance: charSettings.value.imbalance,
@@ -1031,24 +1027,24 @@ const charBuild = computed(
             enemyLevel: charSettings.value.enemyLevel,
             enemyResistance: charSettings.value.enemyResistance,
             targetFunction: charSettings.value.targetFunction,
-        }),
+        })
 )
 const buffOptions = computed(() =>
     buffData
-        .filter((buff) => !buff.限定 || buff.限定 === selectedChar.value || buff.限定 === charBuild.value.char.属性)
-        .map((v) => ({
+        .filter(buff => !buff.限定 || buff.限定 === selectedChar.value || buff.限定 === charBuild.value.char.属性)
+        .map(v => ({
             mx: v.mx,
             label: v.名称,
-        })),
+        }))
 )
 const selectedBuff = ref("")
 const selectedBuffLv = ref(1)
-const selectedBuffMaxLv = computed(() => buffOptions.value.find((buff) => buff.label === selectedBuff.value)?.mx || 1)
+const selectedBuffMaxLv = computed(() => buffOptions.value.find(buff => buff.label === selectedBuff.value)?.mx || 1)
 const baseOptions = computed(() => [
-    ...charBuild.value.allSkills.map((skill) => ({ value: skill.名称, label: `${skill.名称}`, type: skill.类型 })),
+    ...charBuild.value.allSkills.map(skill => ({ value: skill.名称, label: `${skill.名称}`, type: skill.类型 })),
 ])
 watchEffect(() => {
-    if (baseName.value && !baseOptions.value.some((base) => base.value === baseName.value)) {
+    if (baseName.value && !baseOptions.value.some(base => base.value === baseName.value)) {
         // 切换角色自动选择第一个基础属性
         baseName.value = baseOptions.value[0].value
     }
@@ -1056,7 +1052,7 @@ watchEffect(() => {
 const timelineData = useTimeline(selectedChar)
 const currentTimelineName = ref("")
 const getTimelineItems = () => {
-    const raw = items.map((item) =>
+    const raw = items.map(item =>
         item.lv
             ? {
                   i: item.trackIndex,
@@ -1070,7 +1066,7 @@ const getTimelineItems = () => {
                   n: item.label,
                   t: item.startTime,
                   d: item.duration,
-              },
+              }
     )
     raw.sort((a, b) => a.i - b.i || a.t - b.t)
     return raw
@@ -1086,9 +1082,9 @@ const loadTimeline = (index: number) => {
             id: `track-${index}`,
             index,
             name,
-        })),
+        }))
     )
-    raw.forEach((item) => {
+    raw.forEach(item => {
         addItem(item.i, item.t, item.d, item.n, item.l)
     })
 }
@@ -1097,7 +1093,7 @@ const addTimeline = () => {
     currentTimelineName.value = newName
     timelineData.value.push({
         name: newName,
-        tracks: tracks.map((track) => track.name),
+        tracks: tracks.map(track => track.name),
         items: getTimelineItems(),
     })
 }
@@ -1105,7 +1101,7 @@ const editingTimelineIndex = ref(-1)
 const editTimelineName = ref("")
 const saveTimeline = (index: number) => {
     timelineData.value[index].items = getTimelineItems()
-    timelineData.value[index].tracks = tracks.map((track) => track.name)
+    timelineData.value[index].tracks = tracks.map(track => track.name)
 }
 const renameTimeline = (index: number) => {
     editTimelineName.value = timelineData.value[index].name
@@ -1124,7 +1120,7 @@ const finishEditTimelineName = () => {
             return
         }
         // 检查重名
-        if (baseOptions.value.some((base) => base.value === editTimelineName.value)) {
+        if (baseOptions.value.some(base => base.value === editTimelineName.value)) {
             alert(`时间线名称不能与技能名称相同`)
             return
         }
@@ -1136,7 +1132,7 @@ const exportTimelineJson = () => {
     const newName = currentTimelineName.value || `${selectedChar.value}${(~~(Math.random() * 1e6)).toString(36)}`
     const json = JSON.stringify({
         name: newName,
-        tracks: tracks.map((track) => track.name),
+        tracks: tracks.map(track => track.name),
         items: getTimelineItems(),
     })
     const blob = new Blob([json], { type: "application/json" })
@@ -1152,7 +1148,7 @@ const importTimelineJson = () => {
     input.type = "file"
     input.accept = ".json"
     input.click()
-    input.addEventListener("change", (e) => {
+    input.addEventListener("change", e => {
         const file = (e.target as HTMLInputElement).files?.[0]
         if (file) {
             const reader = new FileReader()
@@ -1163,7 +1159,7 @@ const importTimelineJson = () => {
                     if (json.name) {
                         currentTimelineName.value = json.name
                         // 检查重名
-                        const index = timelineData.value.findIndex((item) => item.name === json.name)
+                        const index = timelineData.value.findIndex(item => item.name === json.name)
                         const val = {
                             name: json.name,
                             tracks: json.tracks,
@@ -1197,7 +1193,6 @@ const importTimelineJson = () => {
                 <!-- 工具选择按钮组 -->
                 <div class="flex bg-base-300/50 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg shrink-0 cursor-pointer">
                     <div
-                        @click="selectTool('select')"
                         class="px-3 sm:px-4 py-2 flex items-center justify-center transition-all duration-200 relative"
                         :class="
                             currentTool === 'select'
@@ -1205,12 +1200,12 @@ const importTimelineJson = () => {
                                 : 'bg-base-300 hover:bg-base-content/50 text-base-content/80 hover:text-white'
                         "
                         title="选择模式"
+                        @click="selectTool('select')"
                     >
                         <Icon icon="ri:drag-move-line" class="h-5 w-5" />
-                        <div v-if="currentTool === 'select'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-400"></div>
+                        <div v-if="currentTool === 'select'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-400" />
                     </div>
                     <div
-                        @click="selectTool('brush')"
                         class="px-3 sm:px-4 py-2 flex items-center justify-center transition-all duration-200 relative"
                         :class="
                             currentTool === 'brush'
@@ -1218,12 +1213,12 @@ const importTimelineJson = () => {
                                 : 'bg-base-300 hover:bg-base-content/50 text-base-content/80 hover:text-base-100'
                         "
                         title="画笔模式"
+                        @click="selectTool('brush')"
                     >
                         <Icon icon="ri:edit-line" class="h-5 w-5" />
-                        <div v-if="currentTool === 'brush'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-green-400"></div>
+                        <div v-if="currentTool === 'brush'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-green-400" />
                     </div>
                     <div
-                        @click="selectTool('delete')"
                         class="px-3 sm:px-4 py-2 flex items-center justify-center transition-all duration-200 relative"
                         :class="
                             currentTool === 'delete'
@@ -1231,15 +1226,16 @@ const importTimelineJson = () => {
                                 : 'bg-base-300 hover:bg-base-content/50 text-base-content/80 hover:text-base-100'
                         "
                         title="删除模式"
+                        @click="selectTool('delete')"
                     >
                         <Icon icon="ri:delete-bin-line" class="h-5 w-5" />
-                        <div v-if="currentTool === 'delete'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-red-400"></div>
+                        <div v-if="currentTool === 'delete'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-red-400" />
                     </div>
                 </div>
             </div>
             <!-- 游戏数据关联 -->
             <div class="flex items-center px-4 gap-2">
-                <Select class="inline-flex justify-between input input-bordered input-sm" v-model="selectedChar">
+                <Select v-model="selectedChar" class="inline-flex justify-between input input-bordered input-sm">
                     <template v-for="charWithElm in groupBy(charOptions, 'elm')" :key="charWithElm[0].elm">
                         <SelectLabel class="p-2 text-sm font-semibold text-primary">
                             {{ charWithElm[0].elm }}
@@ -1257,8 +1253,8 @@ const importTimelineJson = () => {
                 </label>
                 <div v-if="isBuff" class="p-2 flex w-50 items-center gap-2">
                     <Select
-                        class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                         v-model="selectedBuff"
+                        class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                     >
                         <SelectItem v-for="buff in buffOptions" :key="buff.label" :value="buff.label">
                             {{ buff.label }}
@@ -1266,8 +1262,8 @@ const importTimelineJson = () => {
                     </Select>
                     <Select
                         v-if="selectedBuffMaxLv > 1"
-                        class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                         v-model="selectedBuffLv"
+                        class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                     >
                         <SelectItem v-for="lv in selectedBuffMaxLv" :key="lv" :value="lv">
                             {{ lv }}
@@ -1275,7 +1271,7 @@ const importTimelineJson = () => {
                     </Select>
                 </div>
                 <div v-else class="p-2 flex items-center gap-2">
-                    <Select class="input input-bordered input-sm" v-model="baseName">
+                    <Select v-model="baseName" class="input input-bordered input-sm">
                         <template v-for="baseWithType in groupBy(baseOptions, 'type')" :key="baseWithType[0].type">
                             <SelectLabel class="p-2 text-sm font-semibold text-primary">
                                 {{ baseWithType[0].type }}
@@ -1292,7 +1288,7 @@ const importTimelineJson = () => {
                         type="text"
                         placeholder="伤害"
                         :options="
-                            (charBuild.allSkills.find((s) => s.名称 === baseName)?.字段 || []).map((f) => ({
+                            (charBuild.allSkills.find(s => s.名称 === baseName)?.字段 || []).map(f => ({
                                 label: f.名称,
                                 value: f.名称,
                             }))
@@ -1307,12 +1303,12 @@ const importTimelineJson = () => {
                     <button class="btn btn-sm btn-square btn-circle">?</button>
                 </div>
                 <div class="p-2 font-orbitron">{{ zoomLevel }}x</div>
-                <div @click="zoomOut" class="btn btn-ghost btn-square border-0" title="缩小">
+                <div class="btn btn-ghost btn-square border-0" title="缩小" @click="zoomOut">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
                     </svg>
                 </div>
-                <div @click="zoomIn" class="btn btn-ghost btn-square border-0" title="放大">
+                <div class="btn btn-ghost btn-square border-0" title="放大" @click="zoomIn">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path
                             fill-rule="evenodd"
@@ -1321,7 +1317,7 @@ const importTimelineJson = () => {
                         />
                     </svg>
                 </div>
-                <div @click="resetView" class="btn btn-ghost btn-square border-0" title="重置视图">
+                <div class="btn btn-ghost btn-square border-0" title="重置视图" @click="resetView">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path
                             fill-rule="evenodd"
@@ -1346,13 +1342,13 @@ const importTimelineJson = () => {
                                     :class="{ 'bg-base-300': item.name === currentTimelineName }"
                                 >
                                     <input
-                                        :id="`timeline-name-input-${index}`"
                                         v-if="editingTimelineIndex === index"
+                                        :id="`timeline-name-input-${index}`"
                                         v-model="editTimelineName"
+                                        class="bg-base-200 px-2 py-0.5 text-sm w-24 sm:w-36"
                                         @blur="finishEditTimelineName"
                                         @keyup.enter="finishEditTimelineName"
                                         @keyup.escape="editingTimelineIndex = -1"
-                                        class="bg-base-200 px-2 py-0.5 text-sm w-24 sm:w-36"
                                     />
                                     <span
                                         v-else
@@ -1363,16 +1359,16 @@ const importTimelineJson = () => {
                                         {{ item.name }}
                                     </span>
                                     <div
-                                        @click="renameTimeline(index)"
                                         class="ml-auto btn btn-xs btn-ghost btn-square border-0"
                                         title="重命名"
+                                        @click="renameTimeline(index)"
                                     >
                                         <Icon icon="ri:pencil-fill" class="h-4 w-4" />
                                     </div>
-                                    <div @click="saveTimeline(index)" class="btn btn-xs btn-ghost btn-square border-0" title="保存">
+                                    <div class="btn btn-xs btn-ghost btn-square border-0" title="保存" @click="saveTimeline(index)">
                                         <Icon icon="ri:save-fill" class="h-4 w-4" />
                                     </div>
-                                    <div @click="deleteTimeline(index)" class="btn btn-xs btn-ghost btn-square border-0" title="删除">
+                                    <div class="btn btn-xs btn-ghost btn-square border-0" title="删除" @click="deleteTimeline(index)">
                                         <Icon icon="ri:delete-bin-2-fill" class="h-4 w-4" />
                                     </div>
                                 </li>
@@ -1393,8 +1389,8 @@ const importTimelineJson = () => {
             <!-- 轨道 -->
             <div class="flex-none flex flex-col w-64 sm:w-80 mt-16 relative" :style="{ minHeight: `${tracks.length * trackHeight}px` }">
                 <div
-                    @click="addTrack()"
                     class="absolute -top-14 left-4 px-6 py-3 hover:bg-base-200 rounded-lg transition-all duration-200 flex items-center space-x-1 transform hover:scale-[1.03] hover:shadow-lg shrink-0 cursor-pointer"
+                    @click="addTrack()"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                         <path
@@ -1424,7 +1420,7 @@ const importTimelineJson = () => {
                                 ? 'border-r border-blue-600 bg-blue-900/30'
                                 : 'border-r border-gray-700 bg-base-300'
                         "
-                        @click="(e) => handleTrackClick(track.index, e)"
+                        @click="e => handleTrackClick(track.index, e)"
                     >
                         <div class="flex items-center justify-between w-full">
                             <div class="flex flex-col">
@@ -1433,32 +1429,32 @@ const importTimelineJson = () => {
                                     <input
                                         :id="`track-name-input-${track.index}`"
                                         v-model="editTrackName"
+                                        class="bg-base-200 px-2 py-0.5 text-sm w-24 sm:w-36"
                                         @blur="finishEditTrackName"
                                         @keyup.enter="finishEditTrackName"
                                         @keyup.escape="editingTrackIndex = -1"
-                                        class="bg-base-200 px-2 py-0.5 text-sm w-24 sm:w-36"
                                     />
                                 </template>
                                 <template v-else>
                                     <span
                                         :class="selectedTrackIndex === track.index ? 'text-blue-400' : 'text-base-content/80'"
-                                        @dblclick="(e) => startEditTrackName(track.index, e)"
                                         class="cursor-pointer hover:underline truncate max-w-24 sm:max-w-36"
+                                        @dblclick="e => startEditTrackName(track.index, e)"
                                     >
                                         {{ track.name }}
                                     </span>
                                 </template>
                                 <span class="text-xs text-gray-500 mt-1 hidden sm:inline">
-                                    {{ items.filter((item) => item.trackIndex === track.index).length }} 项
+                                    {{ items.filter(item => item.trackIndex === track.index).length }} 项
                                 </span>
                             </div>
                             <div class="flex items-center space-x-1">
                                 <!-- 移动轨道按钮 -->
                                 <button
-                                    @click.stop="moveTrackUp(track.index)"
                                     class="text-gray-500 hover:text-white p-1 rounded-full hover:bg-gray-700 transition-all duration-200 transform hover:scale-110"
                                     :disabled="track.index === 0"
                                     :class="{ 'opacity-30 cursor-not-allowed': track.index === 0 }"
+                                    @click.stop="moveTrackUp(track.index)"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                         <path
@@ -1469,10 +1465,10 @@ const importTimelineJson = () => {
                                     </svg>
                                 </button>
                                 <button
-                                    @click.stop="moveTrackDown(track.index)"
                                     class="text-gray-500 hover:text-white p-1 rounded-full hover:bg-gray-700 transition-all duration-200 transform hover:scale-110"
                                     :disabled="track.index === tracks.length - 1"
                                     :class="{ 'opacity-30 cursor-not-allowed': track.index === tracks.length - 1 }"
+                                    @click.stop="moveTrackDown(track.index)"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                         <path
@@ -1485,8 +1481,8 @@ const importTimelineJson = () => {
                                 <!-- 删除轨道按钮 -->
                                 <button
                                     v-if="tracks.length > 1"
-                                    @click.stop="removeTrack(track.index)"
                                     class="text-gray-500 hover:text-red-500 p-1 rounded-full hover:bg-red-700/30 transition-all duration-200 transform hover:scale-110"
+                                    @click.stop="removeTrack(track.index)"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                         <path
@@ -1502,8 +1498,8 @@ const importTimelineJson = () => {
                 </div>
             </div>
             <div
-                class="flex-1 flex flex-col overflow-x-auto"
                 id="timeline-container"
+                class="flex-1 flex flex-col overflow-x-auto"
                 :style="{ minHeight: `${80 + tracks.length * trackHeight}px` }"
             >
                 <!-- 时间刻度 -->
@@ -1515,11 +1511,11 @@ const importTimelineJson = () => {
                         :style="{ left: `${mark.position}px` }"
                         class="absolute top-0 w-0.5"
                         :class="mark.isMajor ? 'h-full border-r border-gray-700' : 'h-1/2 border-r border-gray-600'"
-                    ></div>
+                    />
 
                     <!-- 时间标签 -->
                     <div
-                        v-for="mark in visibleTimeMarks.filter((m) => m.isMajor)"
+                        v-for="mark in visibleTimeMarks.filter(m => m.isMajor)"
                         :key="`time-label-${mark.time}`"
                         :style="{ left: `${mark.position + 10}px` }"
                         class="absolute bottom-1 text-xs text-gray-400 whitespace-nowrap"
@@ -1548,14 +1544,18 @@ const importTimelineJson = () => {
                         <FullTooltip side="bottom">
                             <template #tooltip>
                                 <div v-if="item.props && !item.lv" class="flex flex-col">
-                                    <div class="text-md text-neutral-500 p-2">{{ item.label }}</div>
+                                    <div class="text-md text-neutral-500 p-2">
+                                        {{ item.label }}
+                                    </div>
                                     <div
                                         v-for="(val, index) in item.props"
                                         :key="index"
                                         class="flex flex-col group hover:bg-base-200 rounded-md p-2"
                                     >
                                         <div class="flex justify-between items-center gap-4 text-sm">
-                                            <div class="text-xs text-neutral-500">{{ val.名称 }}</div>
+                                            <div class="text-xs text-neutral-500">
+                                                {{ val.名称 }}
+                                            </div>
                                             <div class="font-medium text-primary">
                                                 {{ formatSkillProp(val.名称, val) }}
                                             </div>
@@ -1570,14 +1570,18 @@ const importTimelineJson = () => {
                                     </div>
                                 </div>
                                 <div v-if="item.props && item.lv" class="flex flex-col">
-                                    <div class="text-md text-neutral-500 p-2">{{ item.label }}</div>
+                                    <div class="text-md text-neutral-500 p-2">
+                                        {{ item.label }}
+                                    </div>
                                     <div
                                         v-for="(val, prop) in item.props"
                                         :key="prop"
                                         class="flex flex-col group hover:bg-base-200 rounded-md p-2"
                                     >
                                         <div class="flex justify-between items-center gap-4 text-sm">
-                                            <div class="text-xs text-neutral-500">{{ prop }}</div>
+                                            <div class="text-xs text-neutral-500">
+                                                {{ prop }}
+                                            </div>
                                             <div class="font-medium text-primary">
                                                 {{ formatProp(prop as any, val) }}
                                             </div>
@@ -1591,7 +1595,7 @@ const importTimelineJson = () => {
                                 :class="{
                                     'ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900 shadow-md z-30 hover:z-31': item.isSelected,
                                     'opacity-80 hover:opacity-100': !item.isSelected,
-                                    'scale-110 rotate-1 z-40': isDragging && selectedItems.some((selected) => selected.id === item.id),
+                                    'scale-110 rotate-1 z-40': isDragging && selectedItems.some(selected => selected.id === item.id),
                                 }"
                                 :style="{
                                     top: `${item.trackIndex * trackHeight + 5}px`,
@@ -1604,7 +1608,7 @@ const importTimelineJson = () => {
                                     userSelect: 'none',
                                     transformOrigin: 'center',
                                 }"
-                                @mousedown.stop="(e) => startDrag(e, item)"
+                                @mousedown.stop="e => startDrag(e, item)"
                                 @click.stop="currentTool === 'delete' && prepareDeleteItem(item)"
                                 @mouseenter="hoveredItemId = item.id"
                                 @mouseleave="hoveredItemId = null"
@@ -1612,8 +1616,8 @@ const importTimelineJson = () => {
                                 <!-- 左侧拖拽区域 -->
                                 <div
                                     class="group absolute left-0 top-0 h-full w-3 cursor-col-resize z-50 flex items-center justify-center hover:bg-white/10 rounded-l-md transition-colors duration-150"
-                                    @mousedown.stop="(e) => startResize(e, item, 'left')"
                                     :title="'拖拽调整开始时间'"
+                                    @mousedown.stop="e => startResize(e, item, 'left')"
                                 >
                                     <span class="text-white opacity-0 group-hover:opacity-100 text-sm transition-opacity duration-150">
                                         <Icon icon="ri:expand-left-line" />
@@ -1623,8 +1627,8 @@ const importTimelineJson = () => {
                                 <!-- 右侧拖拽区域 -->
                                 <div
                                     class="group absolute right-0 top-0 h-full w-3 cursor-col-resize z-50 flex items-center justify-center hover:bg-white/10 rounded-r-md transition-colors duration-150"
-                                    @mousedown.stop="(e) => startResize(e, item, 'right')"
                                     :title="'拖拽调整持续时间'"
+                                    @mousedown.stop="e => startResize(e, item, 'right')"
                                 >
                                     <span class="text-white opacity-0 group-hover:opacity-100 text-sm transition-opacity duration-150">
                                         <Icon icon="ri:expand-right-line" />
@@ -1656,7 +1660,7 @@ const importTimelineJson = () => {
                             backdropFilter: 'blur(1px)',
                         }"
                         class="absolute border-2 border-blue-400 bg-blue-400/20 pointer-events-none z-20"
-                    ></div>
+                    />
                 </div>
             </div>
         </div>

@@ -12,7 +12,7 @@ interface Props {
     reward: RewardItemType
 }
 
-const props = defineProps<Props>()
+defineProps<Props>()
 
 // 获取掉落模式文本
 function getDropModeText(mode: string): string {
@@ -62,7 +62,7 @@ function getRewardTypeText(type: string): string {
                 <span
                     class="w-2 h-2 rounded-full shrink-0 mt-1"
                     :class="item.dp ? 'bg-warning' : item.t === 'Reward' ? 'bg-error' : 'bg-info'"
-                ></span>
+                />
                 <div class="flex-1">
                     <div class="flex items-center gap-2">
                         <span>
@@ -70,6 +70,8 @@ function getRewardTypeText(type: string): string {
                             {{ item.d ? "图纸: " : "" }}
                             <ShowProps
                                 v-for="mod in [new LeveledMod(item.id)]"
+                                v-if="item.t === 'Mod'"
+                                :key="mod.id"
                                 :props="mod.getProperties()"
                                 :title="`${$t(mod.系列)}${$t(mod.名称)}`"
                                 :rarity="mod.品质"
@@ -77,7 +79,6 @@ function getRewardTypeText(type: string): string {
                                 :cost="mod.耐受"
                                 :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
                                 :effdesc="mod.效果"
-                                v-if="item.t === 'Mod'"
                             >
                                 <RouterLink :to="`/db/mod/${item.id}`" class="text-xs hover:text-primary hover:underline">{{
                                     (item.n && $t(item.n)) || `ID: ${item.id}`

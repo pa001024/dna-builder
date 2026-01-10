@@ -56,7 +56,7 @@ defineExpose({
 </script>
 <template>
     <div class="space-y-6">
-        <div class="flex justify-between items-center" v-if="!nobtn">
+        <div v-if="!nobtn" class="flex justify-between items-center">
             <span class="text-xs text-gray-500">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
             <Tooltip tooltip="刷新" side="bottom">
                 <button class="btn btn-primary btn-square btn-sm" @click="loadData(true)">
@@ -65,7 +65,7 @@ defineExpose({
             </Tooltip>
         </div>
         <div v-if="loading" class="flex justify-center items-center h-full">
-            <span class="loading loading-spinner loading-lg"></span>
+            <span class="loading loading-spinner loading-lg" />
         </div>
         <div v-if="gameConfig" class="space-y-6">
             <div class="card bg-base-100 shadow-xl">

@@ -33,7 +33,7 @@ function checkNewVersions() {
     if (!versions.value.length) return
 
     // Get versions newer than lastPopupVersion
-    const newVersions = versions.value.filter((version) => {
+    const newVersions = versions.value.filter(version => {
         return version.version > lastPopupVersion.value
     })
 
@@ -57,7 +57,7 @@ onMounted(async () => {
             if (await ui.showDialog(t("updater.newVersionTitle"), message)) {
                 try {
                     isUpdating.value = true
-                    await downloadAndInstallUpdate((progress) => {
+                    await downloadAndInstallUpdate(progress => {
                         updateProgress.value = progress
                         // console.log(`下载进度: ${progress}%`)
                     })
@@ -77,27 +77,31 @@ onMounted(async () => {
 </script>
 <template>
     <div
-        class="fixed h-screen w-screen bg-base-100/50 backdrop-blur-lg flex flex-col gap-4 p-8 justify-center items-center rounded-md shadow-md z-100"
         v-if="isUpdating"
+        class="fixed h-screen w-screen bg-base-100/50 backdrop-blur-lg flex flex-col gap-4 p-8 justify-center items-center rounded-md shadow-md z-100"
     >
         {{ $t("updater.updating") }}
-        <progress class="progress progress-primary w-1/2" :value="updateProgress" max="100"></progress>
+        <progress class="progress progress-primary w-1/2" :value="updateProgress" max="100" />
     </div>
     <!-- Welcome Popup Modal using daisyUI dialog -->
-    <dialog class="modal" :class="{ 'modal-open': showModal }" @click="closeModal" ref="dialogRef">
+    <dialog ref="dialogRef" class="modal" :class="{ 'modal-open': showModal }" @click="closeModal">
         <div class="modal-box bg-base-100 w-[80%] min-w-72 max-w-160" @click.stop>
             <div class="text-center">
                 <h3 class="text-xl font-bold">{{ $t("home.welcome") }} {{ currentVersion }}</h3>
-                <p class="text-sm text-gray-500">{{ $t("home.update_log") }}</p>
+                <p class="text-sm text-gray-500">
+                    {{ $t("home.update_log") }}
+                </p>
             </div>
             <div class="max-h-96 overflow-y-auto py-4">
                 <div v-if="versions.length > 0" class="space-y-4">
                     <div
-                        v-for="version in versions.filter((v) => v.version > lastPopupVersion)"
+                        v-for="version in versions.filter(v => v.version > lastPopupVersion)"
                         :key="version.version"
                         class="bg-base-200 p-4 rounded-lg"
                     >
-                        <div class="font-bold text-primary">{{ version.version }}</div>
+                        <div class="font-bold text-primary">
+                            {{ version.version }}
+                        </div>
                         <div class="text-sm text-base-content/80 mt-1">
                             <ul class="list-disc list-inside">
                                 <template v-for="item in version.msg.split(', ')" :key="item">
@@ -107,12 +111,16 @@ onMounted(async () => {
                         </div>
                     </div>
                 </div>
-                <div v-else class="text-center text-gray-500">{{ $t("home.noupdate") }}</div>
+                <div v-else class="text-center text-gray-500">
+                    {{ $t("home.noupdate") }}
+                </div>
             </div>
             <div class="modal-action justify-center">
-                <button class="btn btn-primary" @click="closeModal">{{ $t("home.understand") }}</button>
+                <button class="btn btn-primary" @click="closeModal">
+                    {{ $t("home.understand") }}
+                </button>
             </div>
         </div>
-        <div class="modal-backdrop" @click="closeModal"></div>
+        <div class="modal-backdrop" @click="closeModal" />
     </dialog>
 </template>

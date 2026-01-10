@@ -282,7 +282,7 @@ function clearChat() {
 <template>
     <div>
         <!-- 固定按钮 -->
-        <button class="fixed bottom-8 right-8 btn btn-circle btn-md btn-primary shadow-xl z-50" @click="openChat" v-if="!isOpen">
+        <button v-if="!isOpen" class="fixed bottom-8 right-8 btn btn-circle btn-md btn-primary shadow-xl z-50" @click="openChat">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                     stroke-linecap="round"
@@ -295,9 +295,9 @@ function clearChat() {
 
         <!-- 对话框 -->
         <div
+            v-if="isOpen"
             class="fixed bottom-0 right-0 w-full md:w-96 h-[80vh] bg-base-300 shadow-2xl rounded-t-xl z-50 flex flex-col transition-transform"
             :class="isOpen ? 'translate-y-0' : 'translate-y-full'"
-            v-if="isOpen"
         >
             <!-- 头部 -->
             <div class="flex items-center justify-between p-4 border-b border-base-content/20 bg-base-200 rounded-t-xl">
@@ -305,7 +305,7 @@ function clearChat() {
                     <span class="font-semibold">配装助手</span>
                 </div>
                 <div class="flex gap-2">
-                    <button class="btn btn-ghost btn-sm" @click="clearChat" :disabled="isLoading">
+                    <button class="btn btn-ghost btn-sm" :disabled="isLoading" @click="clearChat">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path
                                 stroke-linecap="round"
@@ -315,7 +315,7 @@ function clearChat() {
                             />
                         </svg>
                     </button>
-                    <button class="btn btn-ghost btn-sm" @click="closeChat" :disabled="isLoading">
+                    <button class="btn btn-ghost btn-sm" :disabled="isLoading" @click="closeChat">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -371,7 +371,7 @@ function clearChat() {
                             <!-- 显示错误消息和重试按钮 -->
                             <template v-if="message.content.includes('[点击重试]') && message.role === 'assistant'">
                                 <div>{{ message.content.replace("[点击重试]", "") }}</div>
-                                <button class="btn btn-sm btn-primary mt-2" @click="retryMessage" :disabled="isLoading">
+                                <button class="btn btn-sm btn-primary mt-2" :disabled="isLoading" @click="retryMessage">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         class="h-4 w-4 mr-1"
@@ -395,9 +395,9 @@ function clearChat() {
                             </template>
                             <!-- 加载动画 -->
                             <span
-                                v-if="isLoading && index === messages.findLastIndex((msg) => msg.role === 'assistant')"
+                                v-if="isLoading && index === messages.findLastIndex(msg => msg.role === 'assistant')"
                                 class="loading loading-dots loading-sm"
-                            ></span>
+                            />
                         </div>
                     </div>
                 </div>
@@ -407,14 +407,14 @@ function clearChat() {
             <div class="p-4 border-t border-base-content/20 bg-base-200">
                 <div class="flex gap-2">
                     <input
-                        type="text"
                         v-model="inputMessage"
-                        @keyup.enter="handleKeyPress"
+                        type="text"
                         placeholder="问我任何配装问题..."
                         class="input input-bordered input-sm flex-1"
                         :disabled="isLoading"
+                        @keyup.enter="handleKeyPress"
                     />
-                    <button class="btn btn-primary btn-sm" @click="handleKeyPress" :disabled="isLoading || !inputMessage.trim()">
+                    <button class="btn btn-primary btn-sm" :disabled="isLoading || !inputMessage.trim()" @click="handleKeyPress">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                         </svg>

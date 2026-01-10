@@ -63,7 +63,7 @@ const members = {
     未暴击未触发: "未暴击且未触发",
 }
 
-const namespaces = computed(() => ["E", "Q", "近战", "远程", "同律", ...(props.charBuild?.allSkills.map((v) => v.名称) || [])])
+const namespaces = computed(() => ["E", "Q", "近战", "远程", "同律", ...(props.charBuild?.allSkills.map(v => v.名称) || [])])
 
 function parseExpression() {
     if (!inputExpression.value.trim()) {
@@ -107,7 +107,7 @@ watch(
     inputExpression,
     debounce(() => {
         parseExpression()
-    }, 300),
+    }, 300)
 )
 
 function renderNode(node: ASTNode, depth = 0): string {
@@ -124,7 +124,7 @@ function renderNode(node: ASTNode, depth = 0): string {
             return `${indent}一元运算 (${node.operator})\n${renderNode(node.argument, depth + 1)}`
         case "function":
             const funcNamespace = (node as any).namespace ? `${(node as any).namespace}::` : ""
-            return `${indent}函数: ${funcNamespace}${functions[node.name as keyof typeof functions] || node.name}\n${node.args.map((arg) => renderNode(arg, depth + 1)).join("\n")}`
+            return `${indent}函数: ${funcNamespace}${functions[node.name as keyof typeof functions] || node.name}\n${node.args.map(arg => renderNode(arg, depth + 1)).join("\n")}`
         case "member_access":
             return `${indent}成员访问: ${members[node.property as keyof typeof members] || node.property}\n${renderNode(node.object, depth + 1)}`
         default:
@@ -236,8 +236,10 @@ const astTreeText = computed(() => {
                     v-model="inputExpression"
                     class="textarea grow font-mono text-sm w-full"
                     placeholder="输入表达式，如: 攻击 + 防御"
-                ></textarea>
-                <div v-if="parseError" class="text-error text-sm">{{ parseError }}</div>
+                />
+                <div v-if="parseError" class="text-error text-sm">
+                    {{ parseError }}
+                </div>
             </div>
 
             <div class="flex-1 flex flex-col gap-2 overflow-hidden">

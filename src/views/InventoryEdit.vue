@@ -6,45 +6,45 @@ import { useInvStore } from "../store/inv"
 const inv = useInvStore()
 
 // 武器
-const allWeapons = weaponData.filter((v) => !v.类型[0].startsWith("同律"))
+const allWeapons = weaponData.filter(v => !v.类型[0].startsWith("同律"))
 const weaponSearchQuery = ref("")
 const filteredWeapons = computed(() => {
     const mappedWeapons = allWeapons
-        .filter((v) => inv.enableWeapons[v.类型[0] as keyof typeof inv.enableWeapons])
-        .map((v) => new LeveledWeapon(v.id, v.名称 in inv.weapons ? inv.weapons[v.id] : 5))
+        .filter(v => inv.enableWeapons[v.类型[0] as keyof typeof inv.enableWeapons])
+        .map(v => new LeveledWeapon(v.id, v.名称 in inv.weapons ? inv.weapons[v.id] : 5))
     if (!weaponSearchQuery.value) return mappedWeapons
 
     const query = weaponSearchQuery.value.trim()
-    return mappedWeapons.filter((weapon) => weapon.名称.includes(query) || weapon.类别.includes(query))
+    return mappedWeapons.filter(weapon => weapon.名称.includes(query) || weapon.类别.includes(query))
 })
 const filteredInvWeapons = computed(() => {
     const query = weaponSearchQuery.value.trim()
-    return Object.keys(inv.weapons).filter((v) => v.includes(query))
+    return Object.keys(inv.weapons).filter(v => v.includes(query))
 })
 // MOD
-const allMods = modData.map((v) => new LeveledMod(v.id))
+const allMods = modData.map(v => new LeveledMod(v.id))
 const modSearchQuery = ref("")
 const filteredMods = computed(() => {
     const mappedMods = allMods
-        .filter((v) => inv.enableMods[v.品质 as keyof typeof inv.enableMods])
-        .map((v) => new LeveledMod(v.id, v.id in inv.mods ? inv.mods[v.id][0] : undefined))
+        .filter(v => inv.enableMods[v.品质 as keyof typeof inv.enableMods])
+        .map(v => new LeveledMod(v.id, v.id in inv.mods ? inv.mods[v.id][0] : undefined))
     if (!modSearchQuery.value) return mappedMods
 
     const query = modSearchQuery.value.trim()
-    return mappedMods.filter((mod) => JSON.stringify((mod as any)._originalModData).includes(query))
+    return mappedMods.filter(mod => JSON.stringify((mod as any)._originalModData).includes(query))
 })
 
 const filteredSelectedMods = computed(() => {
-    const selectTypes = new Set(["金", "紫", "蓝", "绿", "白"].filter((v) => inv.enableMods[v as keyof typeof inv.enableMods]))
+    const selectTypes = new Set(["金", "紫", "蓝", "绿", "白"].filter(v => inv.enableMods[v as keyof typeof inv.enableMods]))
     const query = modSearchQuery.value.trim()
-    return Object.keys(inv.mods).filter((v) => {
+    return Object.keys(inv.mods).filter(v => {
         try {
             const mod = new LeveledMod(+v)
             return (
                 selectTypes.has(LeveledMod.getQuality(Number(v))) &&
                 (mod.名称.includes(query) || mod.属性?.includes(query) || mod.系列.includes(query))
             )
-        } catch (error) {
+        } catch {
             delete inv.mods[+v]
             return false
         }
@@ -78,7 +78,7 @@ function toggleSelectMod(modId: number, quality: string) {
 
 function handleSelectAllWeapons() {
     if (filteredInvWeapons.value.length === filteredWeapons.value.length) {
-        filteredWeapons.value.forEach((weapon) => {
+        filteredWeapons.value.forEach(weapon => {
             if (weapon.类型 === "近战") {
                 delete inv.meleeWeapons[weapon.id]
             } else if (weapon.类型 === "远程") {
@@ -86,7 +86,7 @@ function handleSelectAllWeapons() {
             }
         })
     } else {
-        filteredWeapons.value.forEach((weapon) => {
+        filteredWeapons.value.forEach(weapon => {
             if (weapon.类型 === "近战") {
                 inv.meleeWeapons[weapon.id] = weapon.精炼
             } else if (weapon.类型 === "远程") {
@@ -98,11 +98,11 @@ function handleSelectAllWeapons() {
 
 function handleSelectAllMods() {
     if (filteredSelectedMods.value.length === filteredMods.value.length) {
-        filteredMods.value.forEach((mod) => {
+        filteredMods.value.forEach(mod => {
             delete inv.mods[mod.id]
         })
     } else {
-        filteredMods.value.forEach((mod) => {
+        filteredMods.value.forEach(mod => {
             inv.mods[mod.id] = [mod.等级, mod.系列 === "契约者" ? 8 : 1]
         })
     }
@@ -123,16 +123,16 @@ function handleSelectAllMods() {
                         <label class="w-40 input input-sm">
                             <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                                 <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
-                                    <circle cx="11" cy="11" r="8"></circle>
-                                    <path d="m21 21-4.3-4.3"></path>
+                                    <circle cx="11" cy="11" r="8" />
+                                    <path d="m21 21-4.3-4.3" />
                                 </g>
                             </svg>
-                            <input type="search" class="grow" placeholder="搜索..." v-model="weaponSearchQuery" />
+                            <input v-model="weaponSearchQuery" type="search" class="grow" placeholder="搜索..." />
                         </label>
                         <div
                             class="btn btn-sm btn-secondary"
-                            @click="handleSelectAllWeapons"
                             :class="{ 'btn-disabled': !filteredWeapons.length }"
+                            @click="handleSelectAllWeapons"
                         >
                             {{ filteredWeapons.length && Object.keys(inv.weapons).length === filteredWeapons.length ? `取消全选` : `全选` }}
                         </div>
@@ -152,14 +152,14 @@ function handleSelectAllMods() {
                     >
                         <WeaponItem
                             v-for="(weapon, index) in filteredWeapons"
-                            :selected="weapon.名称 in inv.weapons"
                             :key="index"
+                            :selected="weapon.名称 in inv.weapons"
                             :weapon="weapon"
                             :index="index"
-                            @click="toggleSelectWeapon(weapon.id, weapon.类型)"
-                            @refineChange="inv.setWeaponRefineLv(weapon.id, $event)"
                             noremove
                             control
+                            @click="toggleSelectWeapon(weapon.id, weapon.类型)"
+                            @refine-change="inv.setWeaponRefineLv(weapon.id, $event)"
                         />
                     </div>
                     <div v-else class="p-4 flex w-full h-72 justify-center items-center text-gray-500">
@@ -175,16 +175,16 @@ function handleSelectAllMods() {
                         <label class="w-40 input input-sm">
                             <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                                 <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
-                                    <circle cx="11" cy="11" r="8"></circle>
-                                    <path d="m21 21-4.3-4.3"></path>
+                                    <circle cx="11" cy="11" r="8" />
+                                    <path d="m21 21-4.3-4.3" />
                                 </g>
                             </svg>
-                            <input type="search" class="grow" placeholder="搜索..." v-model="modSearchQuery" />
+                            <input v-model="modSearchQuery" type="search" class="grow" placeholder="搜索..." />
                         </label>
                         <div
                             class="btn btn-sm btn-secondary"
-                            @click="handleSelectAllMods"
                             :class="{ 'btn-disabled': !filteredMods.length }"
+                            @click="handleSelectAllMods"
                         >
                             {{ filteredMods.length && filteredSelectedMods.length === filteredMods.length ? `取消全选` : `全选` }}
                         </div>
@@ -192,16 +192,16 @@ function handleSelectAllMods() {
                             {{ color }}
                             <input
                                 :checked="inv.enableMods[color]"
-                                @change="inv.enableMods[color] = ($event.target! as any).checked"
                                 type="checkbox"
                                 class="toggle toggle-secondary"
+                                @change="inv.enableMods[color] = ($event.target! as any).checked"
                             />
                         </div>
                     </div>
                 </div>
                 <div class="min-h-80 w-full pb-4">
                     <div
-                        v-if="(['金', '紫', '蓝', '绿', '白'] as const).some((color) => inv.enableMods[color])"
+                        v-if="(['金', '紫', '蓝', '绿', '白'] as const).some(color => inv.enableMods[color])"
                         class="p-4 grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-4"
                     >
                         <ModItem
@@ -211,11 +211,11 @@ function handleSelectAllMods() {
                             :selected="mod.id in inv.mods"
                             :count="mod.系列 === '契约者' ? inv.mods[mod.id]?.[1] : 0"
                             :index="index"
-                            @click="toggleSelectMod(mod.id, mod.品质)"
-                            @lvChange="inv.mods[mod.id] = [$event, inv.mods[mod.id][1]]"
-                            @countChange="inv.mods[mod.id] = [inv.mods[mod.id][0], $event]"
                             control
                             noremove
+                            @click="toggleSelectMod(mod.id, mod.品质)"
+                            @lv-change="inv.mods[mod.id] = [$event, inv.mods[mod.id][1]]"
+                            @count-change="inv.mods[mod.id] = [inv.mods[mod.id][0], $event]"
                         />
                     </div>
                     <div v-else class="p-4 flex w-full h-72 justify-center items-center text-gray-500">

@@ -59,7 +59,7 @@ export class LeveledChar {
         if (charData.阵营) this.阵营 = charData.阵营
         if (charData.加成) this.加成 = charData.加成
         if (charData.同律武器) this.同律武器 = charData.同律武器
-        this.技能 = charData.技能.map((skill) => new LeveledSkill(skill))
+        this.技能 = charData.技能.map(skill => new LeveledSkill(skill))
 
         // 保存80级的基准属性值（当前导入的数据是80级的数据）
         this._baseATK = charData.基础攻击
@@ -70,12 +70,12 @@ export class LeveledChar {
     }
 
     static getSkillNames(角色名: string) {
-        return charMap.get(角色名)?.技能.map((skill) => skill.名称) || []
+        return charMap.get(角色名)?.技能.map(skill => skill.名称) || []
     }
     static getSkillNamesWithSub(角色名: string) {
-        const skills = charMap.get(角色名)?.技能.map((skill) => new LeveledSkill(skill)) || []
+        const skills = charMap.get(角色名)?.技能.map(skill => new LeveledSkill(skill)) || []
         // 拼接主技能和子技能
-        return skills.flatMap((skill) => [skill.名称, ...skill.子技能.map((subSkill) => `${skill.名称}[${subSkill}]`)])
+        return skills.flatMap(skill => [skill.名称, ...skill.子技能.map(subSkill => `${skill.名称}[${subSkill}]`)])
     }
 
     /**
@@ -105,7 +105,7 @@ export class LeveledChar {
         const clampedLevel = Math.max(1, Math.min(80, level))
 
         // 找到当前等级对应的倍数
-        let multiplier = CommonLevelUp[clampedLevel - 1]
+        const multiplier = CommonLevelUp[clampedLevel - 1]
 
         // 更新属性（基础神智不受等级影响）
         this.基础攻击 = Math.round(this._baseATK * multiplier * 100) / 100

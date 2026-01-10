@@ -2,12 +2,10 @@
 import { onMounted, watchEffect } from "vue"
 import { useSettingStore } from "./store/setting"
 import { useUIStore } from "./store/ui"
-import { useRoute } from "vue-router"
 import { env } from "./env"
 import Updater from "./components/Updater.vue"
 const setting = useSettingStore()
 const ui = useUIStore()
-const route = useRoute()
 watchEffect(() => {
     document.body.setAttribute("data-theme", setting.theme)
     document.body.style.background = setting.windowTrasnparent ? "transparent" : "var(--color-base-300)"
@@ -44,7 +42,7 @@ if (env.isApp) {
             size: number
             constructor(
                 public x: number,
-                public y: number,
+                public y: number
             ) {
                 const speed = 0.5 + Math.random() * 1.5
                 this.directionX = Math.cos(angle) * speed
@@ -136,13 +134,13 @@ onMounted(() => {
 </script>
 
 <template>
-    <canvas class="fixed w-full h-full z-0 bg-indigo-300" id="background" v-if="setting.windowTrasnparent && !env.isApp"></canvas>
+    <canvas v-if="setting.windowTrasnparent && !env.isApp" id="background" class="fixed w-full h-full z-0 bg-indigo-300" />
     <Updater />
     <ResizeableWindow
-        :title="ui.title || $t(`${String(route.name)}.title`)"
+        id="main-window"
+        :title="ui.title || $t(`${String($route.name)}.title`)"
         darkable
         pinable
-        id="main-window"
         :class="{ 'is-app': env.isApp }"
     >
         <RouterView v-slot="{ Component, route }">
@@ -152,12 +150,12 @@ onMounted(() => {
                         <component :is="Component" />
                         <template #fallback>
                             <div class="w-full h-full flex justify-center items-center">
-                                <span class="loading loading-spinner loading-md"></span>
+                                <span class="loading loading-spinner loading-md" />
                             </div>
                         </template>
                     </Suspense>
                 </KeepAlive>
-                <div :key="route.path" class="w-full h-full overflow-hidden" v-else>
+                <div v-else :key="$route.path" class="w-full h-full overflow-hidden">
                     <ErrorBoundary>
                         <component :is="Component" />
                     </ErrorBoundary>

@@ -73,8 +73,8 @@ export const useGameStore = defineStore("game", {
         }
     },
     getters: {
-        modsDir: (state) => state.path.replace(/EM.exe$/, "DNA Game\\EM\\Content\\Paks\\~mods"),
-        modsLib: (state) => state.path.replace(/EM.exe$/, "DNA Game\\EM\\Content\\Paks\\lib"),
+        modsDir: state => state.path.replace(/EM.exe$/, "DNA Game\\EM\\Content\\Paks\\~mods"),
+        modsLib: state => state.path.replace(/EM.exe$/, "DNA Game\\EM\\Content\\Paks\\lib"),
     },
     actions: {
         async launchGame() {
@@ -103,7 +103,7 @@ export const useGameStore = defineStore("game", {
         },
         likeChar(charName: string) {
             if (this.likedChars.includes(charName)) {
-                this.likedChars = this.likedChars.filter((name) => name !== charName)
+                this.likedChars = this.likedChars.filter(name => name !== charName)
             } else {
                 this.likedChars.push(charName)
             }

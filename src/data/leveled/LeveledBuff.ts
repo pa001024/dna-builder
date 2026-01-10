@@ -65,7 +65,7 @@ export class LeveledBuff implements Buff {
         char: LeveledChar,
         attrs: CharAttr,
         weapons: (LeveledWeapon | LeveledSkillWeapon | undefined)[],
-        wAttrs?: (WeaponAttr | undefined)[],
+        wAttrs?: (WeaponAttr | undefined)[]
     ): ReturnType<CharBuild["calculateWeaponAttributes"]> {
         const [weapon, meleeWeapon, rangedWeapon, skillWeapon] = weapons
         const [weaponAttr, meleeWeaponAttr, rangedWeaponAttr, skillWeaponAttr] = wAttrs || []
@@ -160,7 +160,7 @@ export class LeveledBuff implements Buff {
         const lx = this.lx ?? 1
         const x = 1
         let val = 0
-        this.properties.forEach((prop) => {
+        this.properties.forEach(prop => {
             const maxValue = this._originalBuffData[prop]
             if (maxValue !== undefined && typeof maxValue === "number") {
                 // 属性值 = 满级属性/a*(1+(x-1)/b)
@@ -186,7 +186,7 @@ export class LeveledBuff implements Buff {
         const lx = this.lx ?? 1
         const x = this._等级
 
-        this.baseProperties.forEach((prop) => {
+        this.baseProperties.forEach(prop => {
             const maxValue = this._originalBuffData[prop]
             if (maxValue !== undefined) {
                 if (Array.isArray(maxValue)) {
@@ -206,7 +206,7 @@ export class LeveledBuff implements Buff {
      */
     getProperties(): Partial<Buff> {
         const properties: Partial<Buff> = {}
-        this.properties.forEach((prop) => {
+        this.properties.forEach(prop => {
             properties[prop] = this[prop]
         })
         return properties
@@ -229,10 +229,10 @@ export class LeveledBuff implements Buff {
         "code",
     ])
     get properties(): string[] {
-        return Object.keys(this).filter((prop) => !LeveledBuff._exclude_properties.has(prop))
+        return Object.keys(this).filter(prop => !LeveledBuff._exclude_properties.has(prop))
     }
     get baseProperties(): string[] {
-        return Object.keys(this._originalBuffData).filter((prop) => !LeveledBuff._exclude_properties.has(prop))
+        return Object.keys(this._originalBuffData).filter(prop => !LeveledBuff._exclude_properties.has(prop))
     }
 
     public clone() {
@@ -251,7 +251,7 @@ export class LeveledBuff implements Buff {
 
     get minusAttr() {
         const r: Record<string, any> = this.clone()
-        this.properties.forEach((prop) => {
+        this.properties.forEach(prop => {
             r[prop] = -this[prop]
         })
         r.isMinus = true

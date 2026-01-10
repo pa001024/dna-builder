@@ -11,8 +11,8 @@ defineProps<{
 <template>
     <div
         class="card bg-base-100 shadow-md cursor-pointer hover:shadow-lg transition-shadow"
-        @click="$router.push(`/dna/posts/${post.gameForumId}/${post.postId}`)"
         v-bind="$attrs"
+        @click="$router.push(`/dna/posts/${post.gameForumId}/${post.postId}`)"
     >
         <div class="card-body p-4">
             <!-- 帖子头部：用户信息 -->
@@ -23,7 +23,7 @@ defineProps<{
                     alt="用户头像"
                     class="w-10 h-10 rounded-full object-cover border border-base-200"
                 />
-                <div class="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center" v-else>
+                <div v-else class="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center">
                     <span class="text-base-content/60">{{ post.userName?.[0] || "?" }}</span>
                 </div>
                 <div class="flex-1">

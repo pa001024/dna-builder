@@ -55,7 +55,7 @@ async function loadMine() {
             ui.showErrorMessage(res.msg || "获取用户信息失败")
         }
     } catch (e) {
-        ui.showErrorMessage("获取用户信息失败")
+        ui.showErrorMessage("获取用户信息失败", e)
     } finally {
         loading.value = false
     }
@@ -73,7 +73,7 @@ async function loadPosts(page = 1) {
             ui.showErrorMessage(res.msg || "获取帖子列表失败")
         }
     } catch (e) {
-        ui.showErrorMessage("获取帖子列表失败")
+        ui.showErrorMessage("获取帖子列表失败", e)
     } finally {
         loading.value = false
     }
@@ -88,40 +88,50 @@ async function loadPosts(page = 1) {
                 </svg>
             </button>
             <h1 class="text-xl font-bold">用户主页</h1>
-            <div class="w-12"></div>
+            <div class="w-12" />
         </div>
 
-        <ScrollArea @loadref="(r) => (scrollContainer = r)" class="flex-1 p-4">
+        <ScrollArea class="flex-1 p-4" @loadref="r => (scrollContainer = r)">
             <div v-if="mineData" class="space-y-4">
                 <div class="card bg-base-200">
                     <div class="card-body">
                         <div class="flex items-start gap-4">
                             <img :src="mineData.headUrl" alt="avatar" class="w-20 h-20 rounded-full object-cover" />
                             <div class="flex-1">
-                                <h2 class="text-xl font-bold">{{ mineData.userName }}</h2>
+                                <h2 class="text-xl font-bold">
+                                    {{ mineData.userName }}
+                                </h2>
                                 <p class="text-sm text-base-content/70">ID: {{ mineData.userId }}</p>
                                 <p class="text-sm text-base-content/70 mt-1">等级: {{ mineData.levelTotal }}</p>
                             </div>
                         </div>
                         <div class="grid grid-cols-4 gap-4 mt-4 text-center">
                             <div>
-                                <p class="text-lg font-bold">{{ mineData.postCount }}</p>
+                                <p class="text-lg font-bold">
+                                    {{ mineData.postCount }}
+                                </p>
                                 <p class="text-sm text-base-content/70">帖子</p>
                             </div>
                             <div>
-                                <p class="text-lg font-bold">{{ mineData.followCount }}</p>
+                                <p class="text-lg font-bold">
+                                    {{ mineData.followCount }}
+                                </p>
                                 <p class="text-sm text-base-content/70">关注</p>
                             </div>
                             <div>
-                                <p class="text-lg font-bold">{{ mineData.fansCount }}</p>
+                                <p class="text-lg font-bold">
+                                    {{ mineData.fansCount }}
+                                </p>
                                 <p class="text-sm text-base-content/70">粉丝</p>
                             </div>
                             <div>
-                                <p class="text-lg font-bold">{{ mineData.likeCount }}</p>
+                                <p class="text-lg font-bold">
+                                    {{ mineData.likeCount }}
+                                </p>
                                 <p class="text-sm text-base-content/70">点赞</p>
                             </div>
                         </div>
-                        <div class="divider"></div>
+                        <div class="divider" />
                         <div class="grid grid-cols-4 gap-4 text-center text-sm">
                             <div>
                                 <p class="text-base-content/70">收藏</p>
@@ -144,7 +154,7 @@ async function loadPosts(page = 1) {
                 </div>
 
                 <div v-if="postList.length > 0" class="space-y-4">
-                    <DNAPostListItem :post="post" v-for="post in postList" :key="post.postId" />
+                    <DNAPostListItem v-for="post in postList" :key="post.postId" :post="post" />
                 </div>
 
                 <div v-else class="flex justify-center items-center py-8">
@@ -156,11 +166,11 @@ async function loadPosts(page = 1) {
             </div>
 
             <div v-else-if="loading" class="flex justify-center items-center h-full">
-                <span class="loading loading-spinner loading-lg"></span>
+                <span class="loading loading-spinner loading-lg" />
             </div>
 
             <div v-if="loading" class="flex justify-center items-center py-4">
-                <span class="loading loading-spinner"></span>
+                <span class="loading loading-spinner" />
             </div>
         </ScrollArea>
     </div>

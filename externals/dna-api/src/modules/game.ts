@@ -24,7 +24,7 @@ export class GameAPI extends DNASubModule {
         return await this._dna_request<DNAPushStringBean>("user/push/getMhSwitchStatus")
     }
 
-    async getRoleDetail(char_id: string, char_eid: string, otherUserId?: string) {
+    async getRoleDetail(char_id: number | string, char_eid: string, otherUserId?: string) {
         const data = { charId: char_id, charEid: char_eid, type: 1, otherUserId }
         return await this._dna_request<DNACharDetailEntity>("role/getCharDetail", data)
     }
@@ -33,7 +33,7 @@ export class GameAPI extends DNASubModule {
         return await this._dna_request<DNAShortNoteEntity>("role/getShortNoteInfo")
     }
 
-    async getWeaponDetail(weapon_id: string, weapon_eid: string, otherUserId?: string) {
+    async getWeaponDetail(weapon_id: number | string, weapon_eid: string, otherUserId?: string) {
         const data = { weaponId: weapon_id, weaponEid: weapon_eid, type: 1, otherUserId }
         return await this._dna_request<DNAWeaponDetailEntity>("role/getWeaponDetail", data)
     }

@@ -11,7 +11,7 @@ const selectedRarity = ref<number | "">("")
 // 获取所有可用类型
 const types = computed(() => {
     const typeSet = new Set<string>()
-    draftData.forEach((d) => {
+    draftData.forEach(d => {
         typeSet.add(d.t)
     })
     return Array.from(typeSet).sort()
@@ -20,7 +20,7 @@ const types = computed(() => {
 // 获取所有可用稀有度
 const rarities = computed(() => {
     const raritySet = new Set<number>()
-    draftData.forEach((d) => {
+    draftData.forEach(d => {
         raritySet.add(d.r)
     })
     return Array.from(raritySet).sort((a, b) => b - a)
@@ -28,7 +28,7 @@ const rarities = computed(() => {
 
 // 过滤图纸列表
 const filteredDrafts = computed(() => {
-    return draftData.filter((d) => {
+    return draftData.filter(d => {
         const matchKeyword = searchKeyword.value === "" || d.n.includes(searchKeyword.value)
         const matchType = selectedType.value === "" || d.t === selectedType.value
         const matchRarity = selectedRarity.value === "" || d.r === selectedRarity.value

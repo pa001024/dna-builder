@@ -46,7 +46,7 @@ async function loadData(force = false) {
         lastUpdateTime.value = ui.timeNow
     } catch (e) {
         errorMessage.value = "加载数据失败"
-        ui.showErrorMessage("加载数据失败")
+        ui.showErrorMessage("加载数据失败:", e)
     } finally {
         loading.value = false
     }
@@ -61,7 +61,7 @@ async function loadCalendarData() {
             ui.showErrorMessage(res.msg || "获取签到日历失败")
         }
     } catch (e) {
-        ui.showErrorMessage("获取签到日历失败")
+        ui.showErrorMessage("获取签到日历失败:", e)
     }
 }
 
@@ -74,7 +74,7 @@ async function loadTaskProcess() {
             ui.showErrorMessage(res.msg || "获取任务进度失败")
         }
     } catch (e) {
-        ui.showErrorMessage("获取任务进度失败")
+        ui.showErrorMessage("获取任务进度失败:", e)
     }
 }
 
@@ -91,7 +91,7 @@ async function handleGameSign(dayAward: DNAGameSignInDayAward) {
             ui.showErrorMessage(res.msg || "游戏签到失败")
         }
     } catch (e) {
-        ui.showErrorMessage("游戏签到失败")
+        ui.showErrorMessage("游戏签到失败:", e)
     } finally {
         signing.value = false
     }
@@ -108,7 +108,7 @@ async function handleBbsSign() {
             ui.showErrorMessage(res.msg || "论坛签到失败")
         }
     } catch (e) {
-        ui.showErrorMessage("论坛签到失败")
+        ui.showErrorMessage("论坛签到失败:", e)
     } finally {
         bbsSigning.value = false
     }
@@ -130,7 +130,7 @@ const calendarDays = computed(() => {
     const maybeSignedDays = signedCount + (todaySignin ? 0 : 1)
     const missedCount = today - maybeSignedDays
 
-    calendarData.value.dayAward.forEach((award) => {
+    calendarData.value.dayAward.forEach(award => {
         awardMap.set(award.dayInPeriod, award)
     })
 
@@ -166,7 +166,7 @@ const firstUnsignedDay = computed(() => {
     const signedCount = calendarData.value.signinTime || 0
 
     if (signedCount < today) {
-        return calendarData.value.dayAward.find((a) => a.dayInPeriod === signedCount + 1) || null
+        return calendarData.value.dayAward.find(a => a.dayInPeriod === signedCount + 1) || null
     }
     return null
 })
@@ -178,7 +178,7 @@ defineExpose({
 </script>
 <template>
     <div class="space-y-6">
-        <div class="flex justify-between items-center" v-if="!nobtn">
+        <div v-if="!nobtn" class="flex justify-between items-center">
             <span class="text-xs text-gray-500">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
             <Tooltip tooltip="刷新" side="bottom">
                 <button class="btn btn-primary btn-square btn-sm" @click="loadData(true)">
@@ -187,11 +187,13 @@ defineExpose({
             </Tooltip>
         </div>
         <div v-if="loading" class="flex justify-center items-center h-64">
-            <span class="loading loading-spinner loading-lg"></span>
+            <span class="loading loading-spinner loading-lg" />
         </div>
 
         <div v-else-if="errorMessage" class="flex flex-col items-center justify-center h-64">
-            <p class="text-lg mb-4 text-error">{{ errorMessage }}</p>
+            <p class="text-lg mb-4 text-error">
+                {{ errorMessage }}
+            </p>
             <button class="btn btn-primary" @click="loadData(true)">重试</button>
         </div>
 
@@ -226,17 +228,21 @@ defineExpose({
                             <div class="flex items-center gap-4">
                                 <img :src="calendarData.roleInfo.headUrl" alt="角色头像" class="w-12 h-12 rounded-full" />
                                 <div>
-                                    <div class="font-bold">{{ calendarData.roleInfo.roleName }}</div>
+                                    <div class="font-bold">
+                                        {{ calendarData.roleInfo.roleName }}
+                                    </div>
                                     <div class="text-sm text-base-content/70">Lv. {{ calendarData.roleInfo.level }}</div>
                                 </div>
                             </div>
                             <div class="text-right">
                                 <div class="text-sm text-base-content/70">金币</div>
-                                <div class="font-bold text-xl">{{ calendarData.userGoldNum }}</div>
+                                <div class="font-bold text-xl">
+                                    {{ calendarData.userGoldNum }}
+                                </div>
                             </div>
                         </div>
 
-                        <div class="divider mx-2"></div>
+                        <div class="divider mx-2" />
 
                         <div class="grid grid-cols-7 gap-2">
                             <div
@@ -250,7 +256,9 @@ defineExpose({
                                     'bg-base-200': !dayInfo.isSigned,
                                 }"
                             >
-                                <div class="text-sm font-bold">{{ dayInfo.day }}</div>
+                                <div class="text-sm font-bold">
+                                    {{ dayInfo.day }}
+                                </div>
                                 <div class="flex flex-col items-center gap-1">
                                     <img
                                         v-if="dayInfo.iconUrl"
@@ -258,7 +266,9 @@ defineExpose({
                                         :alt="dayInfo.awardName"
                                         class="w-6 h-6 object-contain"
                                     />
-                                    <div class="text-xs">{{ dayInfo.awardNum }}</div>
+                                    <div class="text-xs">
+                                        {{ dayInfo.awardNum }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -273,14 +283,16 @@ defineExpose({
                     <div v-if="taskProcess && taskProcess.dailyTask.length > 0" class="space-y-4">
                         <div v-for="(task, index) in taskProcess.dailyTask" :key="index" class="bg-base-200 p-4 rounded-lg">
                             <div class="flex items-center justify-between mb-2">
-                                <div class="font-medium">{{ task.remark }}</div>
+                                <div class="font-medium">
+                                    {{ task.remark }}
+                                </div>
                                 <div class="text-sm">
                                     <span class="text-base-content/70">进度:</span>
                                     <span class="font-bold ml-1">{{ task.completeTimes }}/{{ task.times }}</span>
                                 </div>
                             </div>
 
-                            <progress class="progress progress-primary w-full" :value="task.completeTimes" :max="task.times"></progress>
+                            <progress class="progress progress-primary w-full" :value="task.completeTimes" :max="task.times" />
 
                             <div class="flex items-center justify-between mt-2 text-sm">
                                 <div class="text-base-content/70">

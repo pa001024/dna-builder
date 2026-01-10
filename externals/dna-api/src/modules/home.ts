@@ -54,7 +54,7 @@ export class HomeAPI extends DNASubModule {
         post: { postId: number; gameId?: number; gameForumId: number },
         newGameId: number,
         newForumId: number,
-        newTopicIdStr: string,
+        newTopicIdStr: string
     ) {
         const data = {
             postId: post.postId,
@@ -94,7 +94,7 @@ export class HomeAPI extends DNASubModule {
         comment: { id: number; gameId: number; gameForumId: number },
         entityType: number,
         content: string,
-        reasonCode: number,
+        reasonCode: number
     ) {
         const data = { id: comment.id, gameId: comment.gameId, gameForumId: comment.gameForumId, entityType, content, reasonCode }
         return await this._dna_request("forum/commentReplyDelete", data)
@@ -140,7 +140,7 @@ export class HomeAPI extends DNASubModule {
 
     async createReplyList(
         post: { userId: string; postId: string; postCommentId: string; postCommentReplyId: string; gameForumId: number },
-        content: string,
+        content: string
     ) {
         const content_json = JSON.stringify([
             {
@@ -202,7 +202,7 @@ export class HomeAPI extends DNASubModule {
         pageIndex: number = 1,
         pageSize: number = 20,
         searchType: number = 1,
-        timeType: number = 0,
+        timeType: number = 0
     ) {
         const data = {
             topicId,
@@ -224,7 +224,7 @@ export class HomeAPI extends DNASubModule {
         })
     }
 
-    async getPostDetail(postId: string) {
+    async getPostDetail(postId: string | number) {
         return await this._dna_request<DNAPostDetailResponse>("forum/getPostDetail", { postId })
     }
 
@@ -335,7 +335,7 @@ export class HomeAPI extends DNASubModule {
     async report(
         { commentId = 0, postId = 0, replyId = 0 }: { commentId?: number; postId?: number; replyId?: number },
         reportReason = 1,
-        reportType = 1,
+        reportType = 1
     ) {
         const data = { commentId, postId, replyId, reportReason, reportType }
         return await this._dna_request("forum/more/report", data)

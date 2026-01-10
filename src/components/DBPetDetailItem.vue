@@ -17,7 +17,7 @@ watch(
     () => props.pet,
     () => {
         currentLevel.value = 0
-    },
+    }
 )
 
 function getQualityColor(quality: number): string {
@@ -82,13 +82,13 @@ function getTypeName(type: number): string {
                     <div class="flex items-center gap-4">
                         <span class="text-sm min-w-12">Lv. {{ currentLevel }}</span>
                         <input
+                            :key="pet.id"
                             v-model.number="currentLevel"
                             type="range"
                             class="range range-primary range-xs grow"
                             :min="0"
                             :max="3"
                             step="1"
-                            :key="pet.id"
                         />
                     </div>
                     <div class="text-xs text-base-content/50 mt-1">突破等级 (0-3)</div>
@@ -96,12 +96,16 @@ function getTypeName(type: number): string {
 
                 <div v-if="leveledPet.主动" class="p-3 bg-base-200 rounded mb-3">
                     <div class="text-xs text-base-content/70 mb-1">主动技能</div>
-                    <div class="text-sm whitespace-pre-wrap">{{ leveledPet.主动.描述 }}</div>
+                    <div class="text-sm whitespace-pre-wrap">
+                        {{ leveledPet.主动.描述 }}
+                    </div>
                 </div>
 
                 <div v-if="leveledPet.被动" class="p-3 bg-base-200 rounded mb-3">
                     <div class="text-xs text-base-content/70 mb-1">被动技能</div>
-                    <div class="text-sm whitespace-pre-wrap">{{ leveledPet.被动.描述 }}</div>
+                    <div class="text-sm whitespace-pre-wrap">
+                        {{ leveledPet.被动.描述 }}
+                    </div>
                 </div>
             </div>
         </div>

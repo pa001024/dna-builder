@@ -33,6 +33,6 @@ const colorClass = computed(() => colors[(counter - 1) % colors.length])
 <template>
     <div :class="['w-5 h-5 rounded-sm flex items-center justify-center text-white', colorClass]">
         <!-- <span class="text-xs">{{ counter }}</span> -->
-        <slot></slot>
+        <slot />
     </div>
 </template>

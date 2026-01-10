@@ -9,6 +9,7 @@ export interface LeveledSkillField {
     基础?: string
     值2?: number
     段数?: number
+    safeName: string
 }
 
 /**
@@ -28,6 +29,10 @@ export class LeveledSkill {
     _level = 10
     子技能: string[] = []
 
+    get safeName() {
+        return this.名称.replace(/\//g, "_")
+    }
+
     /**
      * 构造函数
      * @param 技能名称 技能的名称
@@ -36,7 +41,7 @@ export class LeveledSkill {
     constructor(
         public skillData: Skill,
         等级?: number,
-        public 武器名?: string,
+        public 武器名?: string
     ) {
         // 设置基础属性
         this.id = skillData.id || 0
@@ -75,7 +80,7 @@ export class LeveledSkill {
     }
 
     get 召唤物持续时间() {
-        const field = this.字段.find((field) => /召唤物.*持续时间/.test(field.名称))
+        const field = this.字段.find(field => /召唤物.*持续时间/.test(field.名称))
         return field ? { 值: field.值 || 0, 属性影响: field.影响 || "" } : undefined
     }
 
@@ -85,13 +90,14 @@ export class LeveledSkill {
     updateProperties(): void {
         if (this.skillData.字段) {
             const field = this.skillData.字段
-            const fieldObj = Array.isArray(field) ? Object.fromEntries(field.map((f) => [f.名称, f])) : field
-            this.字段 = Object.keys(fieldObj).map((key) => {
-                let fstr = fieldObj[key]
+            const fieldObj = Array.isArray(field) ? Object.fromEntries(field.map(f => [f.名称, f])) : field
+            this.字段 = Object.keys(fieldObj).map(key => {
+                const fstr = fieldObj[key]
 
                 const fo = fstr as SkillField
                 const obj = {
                     ...fo,
+                    safeName: key.replace(/\//g, "_"),
                     值: Array.isArray(fo.值) ? fo.值[this._level - 1] : fo.值,
                 } as LeveledSkillField
                 if (obj.值2) {
@@ -116,7 +122,7 @@ export class LeveledSkill {
             技能效益: attrs?.技能效益 || 1,
             技能范围: attrs?.技能范围 || 1,
         }
-        const normalFields = this.字段.map((field) => {
+        const normalFields = this.字段.map(field => {
             if (attrs?.技能倍率赋值 && field.名称.includes("伤害")) {
                 return {
                     ...field,
@@ -128,7 +134,7 @@ export class LeveledSkill {
                 if (field.名称.includes("伤害")) {
                     val += attrs?.技能倍率加数 || 0
                 }
-                let propSet = new Set(field.影响.split(","))
+                const propSet = new Set(field.影响.split(","))
                 if (propSet.has("技能范围")) {
                     val = val * tt["技能范围"]
                 }
@@ -217,7 +223,7 @@ export class LeveledSkill {
                     名称: "召唤物范围",
                     值: sattrs.range,
                 },
-            ] satisfies LeveledSkillField[]
+            ].map(v => ({ ...v, safeName: v.名称.replace(/\//g, "_") })) satisfies LeveledSkillField[]
         }
         return []
     }

@@ -43,7 +43,7 @@ export async function downloadAndInstallUpdate(onProgress?: (progress: number) =
         let downloaded = 0
         let total = 0
 
-        await update.downloadAndInstall((event) => {
+        await update.downloadAndInstall(event => {
             switch (event.event) {
                 case "Started":
                     downloaded = 0

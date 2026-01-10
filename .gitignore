@@ -37,3 +37,4 @@ src/game/*.md
 .trae/
 tools/i18n_diff.json
 externals/dna-api/java/
+.env

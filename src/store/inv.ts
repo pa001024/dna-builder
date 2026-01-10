@@ -24,7 +24,7 @@ export const useInvStore = defineStore("inv", {
         }
     },
     getters: {
-        weapons: (state) => ({
+        weapons: state => ({
             ...state.meleeWeapons,
             ...state.rangedWeapons,
         }),
@@ -61,9 +61,9 @@ export const useInvStore = defineStore("inv", {
             return this.mods[modId]?.[1] || 0
         },
         getModsWithCount(useInv: boolean, includeTypes: ModTypeKey[]) {
-            const types = new Set(includeTypes.map((type) => ModTypeMap[type] as string))
-            const all = modData.filter((mod) => types.has(mod.类型.substring(0, 2)))
-            const noInv = useInv ? all.filter((mod) => !this.enableMods[mod.品质 as keyof typeof this.enableMods]) : all
+            const types = new Set(includeTypes.map(type => ModTypeMap[type] as string))
+            const all = modData.filter(mod => types.has(mod.类型.substring(0, 2)))
+            const noInv = useInv ? all.filter(mod => !this.enableMods[mod.品质 as keyof typeof this.enableMods]) : all
 
             const invMods = useInv
                 ? (Object.entries(this.mods)
@@ -71,14 +71,14 @@ export const useInvStore = defineStore("inv", {
                           try {
                               const mc = new LeveledModWithCount(Number(modId), lv, this.getBuffLv(Number(modId)), count)
                               return mc
-                          } catch (error) {
+                          } catch {
                               return undefined
                           }
                       })
-                      .filter((mod) => mod && this.enableMods[mod.品质 as keyof typeof this.enableMods]) as LeveledModWithCount[])
+                      .filter(mod => mod && this.enableMods[mod.品质 as keyof typeof this.enableMods]) as LeveledModWithCount[])
                 : []
 
-            return [...noInv.map((mod) => new LeveledModWithCount(mod, undefined, this.getBuffLv(mod.id), 8)), ...invMods]
+            return [...noInv.map(mod => new LeveledModWithCount(mod, undefined, this.getBuffLv(mod.id), 8)), ...invMods]
         },
         getMeleeWeapons(useInv: boolean) {
             return useInv && this.enableWeapons.近战
@@ -86,8 +86,8 @@ export const useInvStore = defineStore("inv", {
                       .filter(([id]) => !isNaN(+id))
                       .map(([id, level]) => new LeveledWeapon(+id, level, undefined, this.getBuffLv(+id)))
                 : weaponData
-                      .filter((weapon) => weapon.类型[0] === "近战")
-                      .map((weapon) => new LeveledWeapon(weapon.id, undefined, undefined, this.getBuffLv(weapon.id)))
+                      .filter(weapon => weapon.类型[0] === "近战")
+                      .map(weapon => new LeveledWeapon(weapon.id, undefined, undefined, this.getBuffLv(weapon.id)))
         },
         getRangedWeapons(useInv: boolean) {
             return useInv && this.enableWeapons.远程
@@ -95,8 +95,8 @@ export const useInvStore = defineStore("inv", {
                       .filter(([id]) => !isNaN(+id))
                       .map(([id, level]) => new LeveledWeapon(+id, level, undefined, this.getBuffLv(+id)))
                 : weaponData
-                      .filter((weapon) => weapon.类型[0] === "远程")
-                      .map((weapon) => new LeveledWeapon(weapon.id, undefined, undefined, this.getBuffLv(weapon.id)))
+                      .filter(weapon => weapon.类型[0] === "远程")
+                      .map(weapon => new LeveledWeapon(weapon.id, undefined, undefined, this.getBuffLv(weapon.id)))
         },
     },
 })

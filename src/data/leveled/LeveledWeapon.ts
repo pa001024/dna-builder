@@ -65,7 +65,7 @@ export class LeveledWeapon {
         weaponId: number | string | Weapon,
         精炼?: number,
         等级?: number,
-        public effectLv?: number,
+        public effectLv?: number
     ) {
         // 从统一的武器Map中获取武器数据
         const weaponData =
@@ -89,31 +89,31 @@ export class LeveledWeapon {
         this.基础暴伤 = weaponData.暴伤
         this.基础触发 = weaponData.触发
         if (weaponData.技能) {
-            const skills = weaponData.技能.map((v) => {
+            const skills = weaponData.技能.map(v => {
                 const skill: Skill = {
                     名称: v.名称,
                     武器: this.类型,
                     类型: v.类型,
                 }
                 if (v.字段) {
-                    skill.字段 = Object.keys(v.字段).map((key) => {
+                    skill.字段 = Object.keys(v.字段).map(key => {
                         let fstr = v.字段![key] as string | SkillField
                         if (typeof fstr === "string") {
                             const str = fstr
                             fstr = {
                                 名称: key,
                                 格式: str.replace(/\d+\.\d+%/g, "{%}").replace(/×\d+/g, "×{}"),
-                                值: str.match(/\d+\.\d+%/g)?.map((match) => parseFloat(match.replace("%", "")) / 100)[0] || 0,
+                                值: str.match(/\d+\.\d+%/g)?.map(match => parseFloat(match.replace("%", "")) / 100)[0] || 0,
                             } satisfies SkillField
-                            fstr.段数 = str.match(/×\d+/g)?.map((match) => parseFloat(match.replace("×", "")))[0] || 1
+                            fstr.段数 = str.match(/×\d+/g)?.map(match => parseFloat(match.replace("×", "")))[0] || 1
                         }
                         return fstr as SkillField
                     })
                 }
                 return skill
             })
-            this.技能 = skills.map((skill) => new LeveledSkill(skill, undefined, weaponData.名称))
-            this.弹道类型 = weaponData.技能.some((v) => "射线伤害" in v.字段!) ? "非弹道" : "弹道"
+            this.技能 = skills.map(skill => new LeveledSkill(skill, undefined, weaponData.名称))
+            this.弹道类型 = weaponData.技能.some(v => "射线伤害" in v.字段!) ? "非弹道" : "弹道"
         }
 
         if (effectMap.has(this.名称)) {
@@ -178,7 +178,7 @@ export class LeveledWeapon {
         this.基础攻击 = +(this._originalWeaponData.攻击 * CommonLevelUp[clampedLevel - 1]).toFixed(2)
 
         // 根据精炼等级调整属性
-        this.baseProperties.forEach((prop) => {
+        this.baseProperties.forEach(prop => {
             const originalValue = this._originalWeaponData.加成?.[prop]
             if (originalValue !== undefined) {
                 const currentValue = (originalValue / 5) * (this._精炼 + 5)
@@ -190,7 +190,7 @@ export class LeveledWeapon {
         if (this.buff) {
             const buff = this.buff
             const props = this.buff.getProperties()
-            Object.keys(props).forEach((prop) => {
+            Object.keys(props).forEach(prop => {
                 const maxValue = buff[prop] || 0
                 const currentValue = (maxValue / 10) * (this._精炼 + 5)
                 const baseValue = (buff.baseValue / 10) * (this._精炼 + 5)
@@ -208,14 +208,14 @@ export class LeveledWeapon {
      */
     getProperties(): Record<string, number> {
         const properties: Record<string, number> = {}
-        this.properties.forEach((prop) => {
+        this.properties.forEach(prop => {
             properties[prop] = this[prop]
         })
         return properties
     }
     getSimpleProperties(): Record<string, number> {
         const properties: Record<string, number> = {}
-        this.simpleProperties.forEach((prop) => {
+        this.simpleProperties.forEach(prop => {
             properties[prop] = this[prop]
         })
         return properties
@@ -238,6 +238,7 @@ export class LeveledWeapon {
         "effectLv",
         "_等级",
         "_originalWeaponData",
+        "buffProps",
     ])
     static _exclude_simple_properties = new Set([
         "id",
@@ -264,6 +265,7 @@ export class LeveledWeapon {
         "effectLv",
         "_等级",
         "_originalWeaponData",
+        "buffProps",
     ])
     static _exclude_base_properties = new Set([
         "id",
@@ -283,10 +285,10 @@ export class LeveledWeapon {
         "buff",
     ])
     get properties(): string[] {
-        return Object.keys(this).filter((prop) => !LeveledWeapon._exclude_properties.has(prop))
+        return Object.keys(this).filter(prop => !LeveledWeapon._exclude_properties.has(prop))
     }
     get simpleProperties(): string[] {
-        return Object.keys(this).filter((prop) => !LeveledWeapon._exclude_simple_properties.has(prop))
+        return Object.keys(this).filter(prop => !LeveledWeapon._exclude_simple_properties.has(prop))
     }
     get baseProperties(): string[] {
         return Object.keys(this._originalWeaponData.加成 || {})
@@ -316,14 +318,14 @@ export class LeveledWeapon {
     }
     get addAttr(): Record<string, number> {
         const r: Record<string, number> = {}
-        this.baseProperties.forEach((prop) => {
+        this.baseProperties.forEach(prop => {
             r[prop] = this[prop]
         })
         return r
     }
     get minusAttr() {
         const r: Record<string, any> = this.clone()
-        this.baseProperties.forEach((prop) => {
+        this.baseProperties.forEach(prop => {
             r[prop] = -this[prop]
         })
         r.isMinus = true

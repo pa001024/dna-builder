@@ -12,18 +12,22 @@
                             stroke-linejoin="round"
                             stroke-width="2"
                             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        ></path>
+                        />
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-center mb-2">{{ $t("errorBoundary.title") || "组件渲染出错" }}</h3>
+                <h3 class="text-xl font-bold text-center mb-2">
+                    {{ $t("errorBoundary.title") || "组件渲染出错" }}
+                </h3>
             </div>
             <div class="px-6 py-6">
                 <div class="bg-base-200/50 p-4 rounded-lg border border-base-200 mb-4">
-                    <p class="text-base-600 text-center font-medium">{{ errorMessage }}</p>
+                    <p class="text-base-600 text-center font-medium">
+                        {{ errorMessage }}
+                    </p>
                 </div>
                 <button
-                    @click="resetError"
                     class="w-full py-3 px-4 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                    @click="resetError"
                 >
                     {{ $t("errorBoundary.retry") || "重试" }}
                 </button>

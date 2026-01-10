@@ -21,8 +21,12 @@ function getMonsterName(monsterId: number): string {
             <!-- 详情头部 -->
             <div class="flex items-center justify-between">
                 <div>
-                    <RouterLink :to="`/db/dungeon/${dungeon.id}`" class="text-lg font-bold link link-primary">{{ dungeon.n }}</RouterLink>
-                    <div class="text-sm text-base-content/70">{{ dungeon.desc }}</div>
+                    <RouterLink :to="`/db/dungeon/${dungeon.id}`" class="text-lg font-bold link link-primary">
+                        {{ dungeon.n }}
+                    </RouterLink>
+                    <div class="text-sm text-base-content/70">
+                        {{ dungeon.desc }}
+                    </div>
                 </div>
                 <span class="text-xs px-2 py-1 rounded" :class="getDungeonType(dungeon.t).color + ' text-white'">
                     {{ getDungeonType(dungeon.t).label }}
@@ -61,9 +65,9 @@ function getMonsterName(monsterId: number): string {
                 <h3 class="font-bold mb-2">普通怪物 ({{ dungeon.m.length }}个)</h3>
                 <div class="flex flex-wrap gap-1">
                     <RouterLink
-                        :to="`/db/monster/${monsterId}`"
                         v-for="monsterId in dungeon.m"
                         :key="monsterId"
+                        :to="`/db/monster/${monsterId}`"
                         class="px-2 py-1 bg-base-200 rounded text-xs hover:bg-base-300 transition-colors cursor-pointer"
                     >
                         {{ $t(getMonsterName(monsterId)) }}
@@ -76,9 +80,9 @@ function getMonsterName(monsterId: number): string {
                 <h3 class="font-bold mb-2">特殊怪物 ({{ dungeon.sm.length }}个)</h3>
                 <div class="flex flex-wrap gap-1">
                     <RouterLink
-                        :to="`/db/monster/${smId}`"
                         v-for="smId in dungeon.sm"
                         :key="smId"
+                        :to="`/db/monster/${smId}`"
                         class="px-2 py-1 bg-base-200 rounded text-xs hover:bg-base-300 transition-colors cursor-pointer"
                     >
                         {{ $t(getMonsterName(smId)) }}

@@ -20,7 +20,7 @@ const typeOptions = [
 
 const charOptions = computed(() => [
     { value: -1, label: "全部角色" },
-    ...charData.map((char) => ({
+    ...charData.map(char => ({
         value: char.id,
         label: char.名称,
     })),
@@ -57,7 +57,7 @@ async function fetchGuides(offset = 0) {
                     charId: selectedCharId.value,
                     limit: 20,
                     offset,
-                },
+                }
             )
             .toPromise()
 
@@ -92,7 +92,7 @@ function formatDate(dateString: string) {
 
 function getCharName(charId: number | null) {
     if (!charId) return ""
-    const char = charData.find((c) => c.id === charId)
+    const char = charData.find(c => c.id === charId)
     return char?.名称 || ""
 }
 
@@ -130,7 +130,7 @@ onMounted(() => {
         </div>
         <ScrollArea class="flex-1">
             <div v-if="loading" class="flex justify-center items-center h-full m-4">
-                <span class="loading loading-spinner"></span>
+                <span class="loading loading-spinner" />
             </div>
             <div v-else-if="guides.length === 0" class="flex justify-center items-center h-full text-base-content/50 m-4">暂无攻略</div>
             <div v-else class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -142,12 +142,16 @@ onMounted(() => {
                 >
                     <div class="card-body p-4">
                         <div class="flex items-start justify-between mb-2">
-                            <h3 class="card-title text-lg line-clamp-2">{{ guide.title }}</h3>
+                            <h3 class="card-title text-lg line-clamp-2">
+                                {{ guide.title }}
+                            </h3>
                             <div class="badge badge-sm" :class="guide.type === 'text' ? 'badge-primary' : 'badge-secondary'">
                                 {{ guide.type === "text" ? "图文" : "一图流" }}
                             </div>
                         </div>
-                        <p class="text-sm text-base-content/70 line-clamp-3 mb-3">{{ guide.content }}</p>
+                        <p class="text-sm text-base-content/70 line-clamp-3 mb-3">
+                            {{ guide.content }}
+                        </p>
                         <div v-if="guide.charId" class="flex items-center gap-2 mb-3">
                             <span class="text-xs text-base-content/50">关联角色:</span>
                             <span class="text-sm font-medium">{{ getCharName(guide.charId) }}</span>

@@ -207,7 +207,7 @@ export class LeveledMonster implements DynamicMonster {
     constructor(
         id: number | Monster,
         等级 = 180,
-        public isRouge = false,
+        public isRouge = false
     ) {
         let mData = typeof id === "number" ? monsterMap.get(id) : id
         if (!mData) {
@@ -274,7 +274,7 @@ export class LeveledMonster implements DynamicMonster {
     private updatePropertiesByLevel(level: number): void {
         const clampedLevel = Math.max(1, Math.min(180, level))
 
-        let multiplier = MOB_LEVEL_UP[clampedLevel - 1]
+        const multiplier = MOB_LEVEL_UP[clampedLevel - 1]
 
         this.atk = Math.round(this._baseAttack * multiplier.atk)
         this.hp = Math.round(this._baseLife * (this.isRouge ? multiplier.rhp : multiplier.hp))
@@ -287,7 +287,7 @@ export class LeveledMonster implements DynamicMonster {
 
     getProperties(): Partial<Monster> {
         const properties: Partial<Monster> = {}
-        LeveledMonster.properties.forEach((prop) => {
+        LeveledMonster.properties.forEach(prop => {
             if (this[prop] !== undefined) properties[prop] = this[prop] as any
         })
         return properties

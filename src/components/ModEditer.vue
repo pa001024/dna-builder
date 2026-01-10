@@ -34,7 +34,7 @@ const inv = useInvStore()
 const sortByIncome = ref(true)
 const selectedProperty = ref("")
 const auraModOptions = computed(() => {
-    return props.modOptions.filter((option) => option.ser === "羽蛇")
+    return props.modOptions.filter(option => option.ser === "羽蛇")
 })
 const sortedModOptions = computed(() => {
     // 获取已装备的互斥系列名称集合和非契约者MOD名称集合
@@ -43,11 +43,11 @@ const sortedModOptions = computed(() => {
     const idCount = new Map<number, number>()
 
     if (props.mods && Array.isArray(props.mods)) {
-        props.mods.forEach((mod) => {
+        props.mods.forEach(mod => {
             if (mod) {
                 // 记录互斥系列
                 if (CharBuild.exclusiveSeries.includes(mod.系列) || (mod.系列 === "囚狼" && mod.id > 100000)) {
-                    mod.excludeSeries.forEach((series) => equippedExclusiveSeries.add(series))
+                    mod.excludeSeries.forEach(series => equippedExclusiveSeries.add(series))
                 }
                 // 记录非契约者MOD名称（用于名称互斥）
                 if (mod.系列 !== "契约者") {
@@ -60,11 +60,11 @@ const sortedModOptions = computed(() => {
     }
 
     if (props.otherMods && Array.isArray(props.otherMods)) {
-        props.otherMods.forEach((mod) => {
+        props.otherMods.forEach(mod => {
             if (mod) {
                 // 记录互斥系列
                 if (CharBuild.exclusiveSeries.includes(mod.系列) || (mod.系列 === "囚狼" && mod.id > 100000)) {
-                    mod.excludeSeries.forEach((series) => equippedExclusiveSeries.add(series))
+                    mod.excludeSeries.forEach(series => equippedExclusiveSeries.add(series))
                 }
                 // 记录非契约者MOD名称（用于名称互斥）
                 if (mod.系列 !== "契约者") {
@@ -77,7 +77,7 @@ const sortedModOptions = computed(() => {
     }
 
     // 过滤选项：如果mod属于已装备的互斥系列或同名非契约者MOD，则不显示
-    const filteredOptions = props.modOptions.filter((option) => {
+    const filteredOptions = props.modOptions.filter(option => {
         const mod = new LeveledMod(option.value, option.lv, option.bufflv)
 
         if (mod.系列 === "羽蛇") return false
@@ -115,7 +115,7 @@ const sortedModOptions = computed(() => {
 
     // 按收益降序排序
     return filteredOptions
-        .map((option) => {
+        .map(option => {
             const mod = new LeveledMod(option.value, option.lv, option.bufflv)
             const income = props.charBuild.calcIncome(mod)
             return {
@@ -125,7 +125,7 @@ const sortedModOptions = computed(() => {
             }
         })
         .sort((a, b) => b.income - a.income)
-        .map((item) => item.option)
+        .map(item => item.option)
 })
 
 // 定义组件事件
@@ -135,6 +135,7 @@ const emit = defineEmits<{
     selectMod: [indexAndId: [number, number, number]]
     swapMods: [index1: number, index2: number]
     levelChange: [indexAndLevel: [number, number]]
+    sync: []
 }>()
 
 // 本地状态
@@ -225,6 +226,8 @@ async function handleImportCode() {
             for (let i = 0; i < result.mods.length; i++) {
                 if (result.mods[i]) {
                     emit("selectMod", [i, result.mods[i], inv.getModLv(result.mods[i], LeveledMod.getQuality(result.mods[i])) ?? 10])
+                } else {
+                    emit("removeMod", i)
                 }
             }
             if (result.auraMod) {
@@ -268,13 +271,13 @@ const mod_model_show = ref(false)
                                 <ScrollArea class="h-[calc(110vh/1.2-10.5rem)] w-full">
                                     <div class="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-3">
                                         <ModItem
-                                            v-for="mod in sortedModOptions.filter((m) => quality === '全部' || m.quality === quality)"
+                                            v-for="mod in sortedModOptions.filter(m => quality === '全部' || m.quality === quality)"
                                             :key="mod.value"
                                             :mod="new LeveledMod(mod.value, mod.lv, mod.bufflv)"
                                             :income="charBuild.calcIncome(new LeveledMod(mod.value, mod.lv, mod.bufflv))"
-                                            @click="handleSelectMod(localSelectedSlot, mod.value, mod.lv ?? 10)"
                                             :noremove="true"
-                                            :charBuild="charBuild"
+                                            :char-build="charBuild"
+                                            @click="handleSelectMod(localSelectedSlot, mod.value, mod.lv ?? 10)"
                                         />
                                     </div>
                                 </ScrollArea>
@@ -283,11 +286,11 @@ const mod_model_show = ref(false)
 
                         <!-- 属性筛选下拉框 -->
                         <Combobox
-                            class="ml-auto w-40 mr-4"
                             v-model="selectedProperty"
+                            class="ml-auto w-40 mr-4"
                             placeholder="搜索属性/描述"
                             :options="
-                                ['攻击', '生命', '防御', '护盾', '威力', '耐久', '范围', '效益', '增伤'].map((prop) => ({
+                                ['攻击', '生命', '防御', '护盾', '威力', '耐久', '范围', '效益', '增伤'].map(prop => ({
                                     label: prop,
                                     value: prop,
                                 }))
@@ -298,7 +301,7 @@ const mod_model_show = ref(false)
                         </button>
                     </div>
                 </div>
-                <div class="modal-backdrop" @click="mod_model_show = false"></div>
+                <div class="modal-backdrop" @click="mod_model_show = false" />
             </dialog>
         </Teleport>
         <div class="flex items-center gap-2 mb-3">
@@ -313,18 +316,28 @@ const mod_model_show = ref(false)
                     :effdesc="aMod.效果"
                     :eff="charBuild?.checkModEffective(aMod, true)"
                 >
-                    <Select
-                        class="w-30 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                        :model-value="auraMod"
-                        @update:model-value="handleSelectAuraMod($event)"
-                    >
-                        <SelectItem v-for="m in auraModOptions" :key="m.value" :value="m.value">
-                            {{ $t(m.quality + "色") }} - {{ $t(m.label) }}
-                        </SelectItem>
-                    </Select>
+                    <div class="flex">
+                        <img :src="aMod.url" :alt="aMod.名称" class="w-8 h-8 inline-block" />
+                        <Select
+                            class="w-30 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                            :model-value="auraMod"
+                            @update:model-value="handleSelectAuraMod($event)"
+                        >
+                            <SelectItem v-for="m in auraModOptions" :key="m.value" :value="m.value">
+                                {{ $t(m.quality + "色") }} - {{ $t(m.label) }}
+                            </SelectItem>
+                        </Select>
+                    </div>
                 </ShowProps>
-                <div class="btn btn-sm btn-primary" @click="handleImportCode">{{ $t("char-build.import_code") }}</div>
-                <div class="btn btn-sm btn-primary" @click="copyText(charBuild.getCode(type))">{{ $t("char-build.export_code") }}</div>
+                <div v-if="type !== '同律'" class="btn btn-sm btn-primary" @click="$emit('sync')">
+                    {{ $t("char-build.sync_game") }}
+                </div>
+                <div class="btn btn-sm btn-primary" @click="handleImportCode">
+                    {{ $t("char-build.import_code") }}
+                </div>
+                <div class="btn btn-sm btn-primary" @click="copyText(charBuild.getCode(type))">
+                    {{ $t("char-build.export_code") }}
+                </div>
             </div>
         </div>
         <div class="grid grid-cols-2 lg:grid-cols-4 2xl:grid-cols-8 gap-4">
@@ -335,18 +348,18 @@ const mod_model_show = ref(false)
                 :income="mod ? charBuild.calcIncome(mod, true) : 0"
                 :index="index"
                 :polset="polset?.includes(index)"
-                @click="!mod && handleSlotClick(index)"
-                @removeMod="handleRemoveMod(index)"
-                @dragStart="handleDragStart(index)"
-                @dragEnd="handleDragEnd"
-                @mouseenter="draggedModIndex !== null && handleDragOver(index)"
                 control
-                :charBuild="charBuild"
+                :char-build="charBuild"
                 :selected="undefined"
                 :class="{
                     'opacity-50': draggedModIndex === index,
                     'border-2 border-primary': dropTargetIndex === index && draggedModIndex !== index,
                 }"
+                @click="!mod && handleSlotClick(index)"
+                @remove-mod="handleRemoveMod(index)"
+                @drag-start="handleDragStart(index)"
+                @drag-end="handleDragEnd"
+                @mouseenter="draggedModIndex !== null && handleDragOver(index)"
                 @lv-change="handleLevelChange(index, $event)"
             />
         </div>

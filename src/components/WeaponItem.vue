@@ -35,24 +35,28 @@ const emit = defineEmits<{
                                 <NumberInput
                                     class="absolute w-full max-h-0 group-hover:max-h-20"
                                     :model-value="weapon.精炼"
-                                    @update:modelValue="emit('refineChange', $event)"
                                     :min="0"
                                     :max="5"
                                     :step="1"
+                                    @update:model-value="emit('refineChange', $event)"
                                 />
                                 <span class="absolute inline-flex text-base-300 text-xs max-h-20 overflow-hidden group-hover:max-h-0">
                                     {{ $t("精炼") }} {{ weapon.精炼 }}
                                 </span>
                             </div>
-                            <div v-else class="text-base-300 text-xs">{{ control ? $t("未拥有") : `精炼${weapon.精炼}` }}</div>
-                            <div class="text-base-300 text-xs" v-if="income">{{ format100r(income) }}</div>
+                            <div v-else class="text-base-300 text-xs">
+                                {{ control ? $t("未拥有") : `精炼${weapon.精炼}` }}
+                            </div>
+                            <div v-if="income" class="text-base-300 text-xs">
+                                {{ format100r(income) }}
+                            </div>
                         </div>
                     </div>
                     <!-- 关闭按钮 -->
                     <button
                         v-if="!noremove"
-                        @click.stop="emit('removeWeapon')"
                         class="absolute cursor-pointer -top-2 -right-2 w-5 h-5 bg-red-400 bg-opacity-50 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors"
+                        @click.stop="emit('removeWeapon')"
                     >
                         <span class="text-white text-xs">×</span>
                     </button>

@@ -20,7 +20,7 @@ watch(
     () => {
         currentLevel.value = 80
         currentRefine.value = 5
-    },
+    }
 )
 </script>
 
@@ -40,7 +40,7 @@ watch(
                 </div>
 
                 <div class="flex flex-wrap gap-2 text-sm opacity-70 mb-3">
-                    <span>{{ weapon.类型.map((t) => $t(t)).join(", ") }}</span>
+                    <span>{{ weapon.类型.map(t => $t(t)).join(", ") }}</span>
                     <span>
                         {{ $t(weapon.伤害类型) }}
                     </span>
@@ -55,28 +55,28 @@ watch(
             <div class="mb-3">
                 <div class="flex items-center gap-4">
                     <span class="text-sm min-w-20 flex-none"
-                        >Lv. <input type="text" v-model.number="currentLevel" class="w-12 text-center"
+                        >Lv. <input v-model.number="currentLevel" type="text" class="w-12 text-center"
                     /></span>
                     <input
+                        :key="leveledWeapon.id"
                         v-model.number="currentLevel"
                         type="range"
                         class="range range-primary range-xs grow"
                         :min="1"
                         :max="80"
                         step="1"
-                        :key="leveledWeapon.id"
                     />
                 </div>
                 <div class="flex items-center gap-4">
                     <span class="text-sm min-w-20 flex-none">熔炼 {{ ["0", "I", "II", "III", "IV", "V"][currentRefine] }}</span>
                     <input
+                        :key="leveledWeapon.id"
                         v-model.number="currentRefine"
                         type="range"
                         class="range range-primary range-xs grow"
                         :min="0"
                         :max="5"
                         step="1"
-                        :key="leveledWeapon.id"
                     />
                 </div>
             </div>
@@ -116,14 +116,18 @@ watch(
             </div>
 
             <div v-if="weapon.熔炼 && weapon.熔炼.length > 0" class="p-3 bg-base-200 rounded mb-3">
-                <div class="text-xs text-base-content/70 mb-2">{{ $t("属性") }}</div>
+                <div class="text-xs text-base-content/70 mb-2">
+                    {{ $t("属性") }}
+                </div>
                 <div class="space-y-1">
                     {{ weapon.熔炼[currentRefine] }}
                 </div>
             </div>
 
             <div v-if="leveledWeapon.技能 && leveledWeapon.技能.length > 0" class="p-3 bg-base-200 rounded">
-                <div class="text-xs text-base-content/70 mb-2">{{ $t("技能") }}</div>
+                <div class="text-xs text-base-content/70 mb-2">
+                    {{ $t("技能") }}
+                </div>
                 <div class="space-y-3">
                     <div v-for="skill in leveledWeapon.技能" :key="skill.名称">
                         <div
@@ -146,7 +150,7 @@ watch(
                                     {{
                                         val.影响
                                             .split(",")
-                                            .map((item) => $t(item))
+                                            .map(item => $t(item))
                                             .join(",")
                                     }}
                                 </div>

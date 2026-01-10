@@ -108,7 +108,7 @@ describe("getRewardDetails", () => {
                     if (item.pp !== undefined) {
                         expect(childPPSum).toBeCloseTo(item.pp, 6)
                     }
-                    item.child.forEach((child) => validatePP(child))
+                    item.child.forEach(child => validatePP(child))
                 }
             }
 
@@ -128,7 +128,7 @@ describe("getRewardDetails", () => {
             expect(item.p).toBeGreaterThanOrEqual(0)
 
             if (item.child) {
-                item.child.forEach((child) => validateStructure(child))
+                item.child.forEach(child => validateStructure(child))
             }
         }
 
@@ -144,7 +144,7 @@ describe("getRewardDetails", () => {
             const totalPP = result.child.reduce((sum: number, child: RewardItem) => sum + (child.pp || 0), 0)
             expect(totalPP).toBeCloseTo(1, 6)
 
-            result.child.forEach((child) => {
+            result.child.forEach(child => {
                 expect(child.pp).toBeGreaterThan(0)
                 expect(child.pp).toBeLessThanOrEqual(1)
             })

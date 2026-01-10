@@ -29,6 +29,7 @@ export const defaultCharSettings = {
     team1Weapon: "-",
     team2: "-",
     team2Weapon: "-",
+    timelineDPS: false,
 }
 export type CharSettings = typeof defaultCharSettings
 
@@ -40,7 +41,7 @@ export type CharSettings = typeof defaultCharSettings
  * 13:rangedWeapon 14:rangedWeaponLevel 15:rangedWeaponRefine
  * 16:auraMod 17:imbalance
  * 18:charMods 19:meleeMods 20:rangedMods 21:skillWeaponMods
- * 22:buffs 23:team1 24:team1Weapon 25:team2 26:team2Weapon
+ * 22:buffs 23:team1 24:team1Weapon 25:team2 26:team2Weapon 27:timelineDPS
  */
 
 /**
@@ -117,6 +118,7 @@ export function serializeCharSettings(settings: Partial<CharSettings>): string {
         settings.team1Weapon,
         settings.team2,
         settings.team2Weapon,
+        settings.timelineDPS,
     ]
 
     entries.forEach((val, idx) => {
@@ -137,7 +139,7 @@ export function serializeCharSettings(settings: Partial<CharSettings>): string {
                 encodedVal = "e"
             } else {
                 encodedVal = val
-                    .map((item) => {
+                    .map(item => {
                         if (item === null) return "_"
                         if (Array.isArray(item)) {
                             return `${item[0]}.${item[1]}`
@@ -231,7 +233,7 @@ export function deserializeCharSettings(str: string): Partial<CharSettings> {
                 settings.charMods =
                     val === "e"
                         ? []
-                        : val.split("_").map((v) => {
+                        : val.split("_").map(v => {
                               if (v === "_") return null
                               const [id, lv] = v.split(".")
                               return [decodeBase62(id), decodeBase62(lv)] as [number, number]
@@ -241,7 +243,7 @@ export function deserializeCharSettings(str: string): Partial<CharSettings> {
                 settings.meleeMods =
                     val === "e"
                         ? []
-                        : val.split("_").map((v) => {
+                        : val.split("_").map(v => {
                               if (v === "_") return null
                               const [id, lv] = v.split(".")
                               return [decodeBase62(id), decodeBase62(lv)] as [number, number]
@@ -251,7 +253,7 @@ export function deserializeCharSettings(str: string): Partial<CharSettings> {
                 settings.rangedMods =
                     val === "e"
                         ? []
-                        : val.split("_").map((v) => {
+                        : val.split("_").map(v => {
                               if (v === "_") return null
                               const [id, lv] = v.split(".")
                               return [decodeBase62(id), decodeBase62(lv)] as [number, number]
@@ -261,7 +263,7 @@ export function deserializeCharSettings(str: string): Partial<CharSettings> {
                 settings.skillWeaponMods =
                     val === "e"
                         ? []
-                        : val.split("_").map((v) => {
+                        : val.split("_").map(v => {
                               if (v === "_") return null
                               const [id, lv] = v.split(".")
                               return [decodeBase62(id), decodeBase62(lv)] as [number, number]
@@ -271,7 +273,7 @@ export function deserializeCharSettings(str: string): Partial<CharSettings> {
                 settings.buffs =
                     val === "e"
                         ? []
-                        : val.split("_").map((v) => {
+                        : val.split("_").map(v => {
                               const [name, valStr] = v.split("^")
                               return [name, parseFloat(valStr)] as [string, number]
                           })
@@ -288,6 +290,9 @@ export function deserializeCharSettings(str: string): Partial<CharSettings> {
             case 26: // team2Weapon
                 settings.team2Weapon = val === "" ? "" : decodeURIComponent(val)
                 break
+            case 27: // timelineDPS
+                settings.timelineDPS = val === "1"
+                break
         }
     }
 
@@ -297,10 +302,10 @@ export function deserializeCharSettings(str: string): Partial<CharSettings> {
 export const useCharSettings = (charNameRef: Ref<string>) => {
     const charSettingsKey = computed(() => `build.${charNameRef.value}`)
     const charSettings = useLocalStorage(charSettingsKey, defaultCharSettings)
-    Object.keys(defaultCharSettings).forEach((key) => {
+    Object.keys(defaultCharSettings).forEach(key => {
         const keyType = key as keyof typeof defaultCharSettings
-        if (!(keyType in charSettings.value)) {
-            // @ts-ignore
+        if (!(keyType in charSettings.value) || typeof charSettings.value[keyType] !== typeof defaultCharSettings[keyType]) {
+            // @ts-expect-error 类型“CharSettings”上不存在属性“keyType”
             charSettings.value[keyType] = defaultCharSettings[keyType]
         }
     })

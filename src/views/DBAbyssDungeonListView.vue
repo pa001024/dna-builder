@@ -11,12 +11,12 @@ const selectedDungeonGroup = ref<string>("")
 const allDungeons = computed(() => Array.from(abyssDungeonMap.values()))
 
 const allDungeonGroups = computed(() => {
-    const groups = new Set(allDungeons.value.map((d) => getAbyssDungeonGroup(d)))
+    const groups = new Set(allDungeons.value.map(d => getAbyssDungeonGroup(d)))
     return Array.from(groups)
 })
 
 const filteredDungeons = computed(() => {
-    return allDungeons.value.filter((d) => {
+    return allDungeons.value.filter(d => {
         const matchesGroup = selectedDungeonGroup.value === "" || getAbyssDungeonGroup(d) === selectedDungeonGroup.value
         const matchesKeyword =
             searchKeyword.value === "" ||
@@ -102,7 +102,7 @@ function getCharName(charId: number): string {
                                     }}</span>
                                     <span v-if="dungeon.mb" class="flex items-center gap-2">
                                         <img
-                                            v-for="key in ['暗', '水', '火', '雷', '风', '光'].filter((k) => dungeon.mb![k] > 0)"
+                                            v-for="key in ['暗', '水', '火', '雷', '风', '光'].filter(k => dungeon.mb![k] > 0)"
                                             :key="key"
                                             :src="`/imgs/${key}.png`"
                                             alt=""

@@ -7646,7 +7646,7 @@ const p = [
     },
 ] satisfies Partial<Mod>[]
 
-const idmap = new Map(p.map((item) => [item.id, item]))
+const idmap = new Map(p.map(item => [item.id, item]))
 
 export default t.map((item: Mod) => {
     const id = item.id
@@ -7654,8 +7654,8 @@ export default t.map((item: Mod) => {
     if (pi) {
         if (pi.生效) {
             Object.keys(pi.生效)
-                .filter((key) => key !== "条件")
-                .forEach((key) => {
+                .filter(key => key !== "条件")
+                .forEach(key => {
                     delete item[key]
                 })
         }

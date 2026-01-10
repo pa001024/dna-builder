@@ -30,11 +30,11 @@ const elementBorderColors: Record<string, string> = {
 
 // 过滤后的武器列表
 const filteredWeapons = computed(() => {
-    let filtered = weaponData.filter((w) => activeTab.value === "全部" || w.类型.includes(activeTab.value))
+    let filtered = weaponData.filter(w => activeTab.value === "全部" || w.类型.includes(activeTab.value))
 
     if (searchQuery.value) {
         const query = searchQuery.value.toLowerCase()
-        filtered = filtered.filter((w) => w.名称.toLowerCase().includes(query) || w.类型.includes(query))
+        filtered = filtered.filter(w => w.名称.toLowerCase().includes(query) || w.类型.includes(query))
     }
 
     return filtered
@@ -86,9 +86,9 @@ function selectWeapon(weapon: Weapon) {
                     <button
                         v-for="tab in tabs"
                         :key="tab"
-                        @click="activeTab = tab"
                         class="btn btn-sm whitespace-nowrap transition-all duration-200"
                         :class="activeTab === tab ? 'btn-primary shadow-lg scale-105' : 'btn-ghost hover:bg-base-200'"
+                        @click="activeTab = tab"
                     >
                         {{ tab }}
                     </button>
@@ -100,7 +100,9 @@ function selectWeapon(weapon: Weapon) {
         <ScrollArea class="h-[60vh]">
             <div v-if="filteredWeapons.length === 0" class="flex flex-col items-center justify-center h-full text-base-content/50 py-20">
                 <Icon icon="ri:emotion-sad-line" class="w-16 h-16 mb-4" />
-                <p class="text-lg">{{ $t("没有找到匹配的武器") }}</p>
+                <p class="text-lg">
+                    {{ $t("没有找到匹配的武器") }}
+                </p>
             </div>
 
             <div
@@ -123,7 +125,7 @@ function selectWeapon(weapon: Weapon) {
                     <div
                         class="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 bg-linear-to-br"
                         :class="elementColors[weapon.类型[0]] || 'from-gray-400 to-gray-600'"
-                    ></div>
+                    />
 
                     <!-- 顶部属性标签 -->
                     <div
@@ -166,7 +168,7 @@ function selectWeapon(weapon: Weapon) {
                             <span>
                                 {{ $t(weapon.伤害类型) }}
                             </span>
-                            <span class="text-primary" v-if="charBuild">
+                            <span v-if="charBuild" class="text-primary">
                                 收益: {{ format100r(charBuild.calcIncome(weapon.加成 as any)) }}
                             </span>
                         </p>
@@ -185,7 +187,7 @@ function selectWeapon(weapon: Weapon) {
                                     <path
                                         fill="currentColor"
                                         d="M7.755 1.651l1.643 1.643 1.928-1.926L11.3.25a.228.228 0 01.228-.22h2.2a.228.228 0 01.228.229c-.121 2.66.556 2.457-1.337 2.4l-1.933 1.925L12.33 6.23a.228.228 0 010 .322c-1.167 1.208-.775.907-1.892-.106l-7.151 7.147a.457.457 0 01-.313.137 21.32 21.32 0 01-2.954.238 21.172 21.172 0 01.238-2.953.451.451 0 01.134-.319l7.146-7.153-.838-.839a.229.229 0 010-.323l.732-.73a.228.228 0 01.322 0z"
-                                    ></path>
+                                    />
                                 </svg>
                                 <span>{{ format100(weapon.暴击) }}</span>
                             </div>
@@ -201,7 +203,7 @@ function selectWeapon(weapon: Weapon) {
                                     <path
                                         d="M14 0L7.256 3.5 1.973 1.465 3.5 6.236 0 14l7.256-3.5 4.771 1.527L10.5 7.256zm-3.24 3.24L8.88 7.136 9.701 9.7l-2.564-.82-3.898 1.88 1.88-4.17-.82-2.565L7.137 5.12z"
                                         fill="currentColor"
-                                    ></path>
+                                    />
                                 </svg>
                                 <span>{{ format100(weapon.暴伤) }}</span>
                             </div>
@@ -217,7 +219,7 @@ function selectWeapon(weapon: Weapon) {
                                     <path
                                         fill="currentColor"
                                         d="M8.076 8.152l-.017-.05A4.335 4.335 0 007.3 6.796a4.431 4.431 0 00-.325-.346A2.113 2.113 0 107 2.223a2.144 2.144 0 00-1.838 3.18 4.374 4.374 0 00-1.2-.168 4.42 4.42 0 00-.755.066l-.038.007C1.836-.24 10.7-1.672 10.962 4.342a3.985 3.985 0 01-2.886 3.81zm3.662-2.137a3.949 3.949 0 00-.626-.235 4.473 4.473 0 01-1.105 1.7h.031a2.113 2.113 0 11-2.113 2.113 4.09 4.09 0 00-.025-.445 3.968 3.968 0 00-1.863-2.931l-.19-.11a3.963 3.963 0 10.645 6.535c.082-.068.16-.14.236-.214L6.7 12.39a4.367 4.367 0 01-.891-1.765 2.112 2.112 0 11-.883-2.914q.1.05.189.11a2.111 2.111 0 01.942 1.49 2.159 2.159 0 01.018.28 3.963 3.963 0 105.663-3.577z"
-                                    ></path>
+                                    />
                                 </svg>
                                 <span>{{ format100(weapon.触发) }}</span>
                             </div>
@@ -227,7 +229,7 @@ function selectWeapon(weapon: Weapon) {
                     <!-- 悬停时的发光效果 -->
                     <div
                         class="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300 ring-2 ring-primary/50"
-                    ></div>
+                    />
                 </div>
             </div>
         </ScrollArea>

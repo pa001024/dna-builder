@@ -42,8 +42,8 @@ async function loadMapData() {
             }
 
             markers.value = []
-            matterCategorizes.forEach((category) => {
-                category.matters.forEach((matter) => {
+            matterCategorizes.forEach(category => {
+                category.matters.forEach(matter => {
                     matter.sites.forEach((site: DNAMapSite) => {
                         if (site.mapId === mapId.value) {
                             markers.value.push({

@@ -147,9 +147,9 @@ async function callMcpTool(tool: string, params: Record<string, any>, config: Op
 
             // 记录错误并等待后重试
             console.warn(
-                `MCP调用失败(${i + 1}/${retryCount + 1}次尝试)，${retryInterval}ms后重试: ${error instanceof Error ? error.message : "未知错误"}`,
+                `MCP调用失败(${i + 1}/${retryCount + 1}次尝试)，${retryInterval}ms后重试: ${error instanceof Error ? error.message : "未知错误"}`
             )
-            await new Promise((resolve) => setTimeout(resolve, retryInterval))
+            await new Promise(resolve => setTimeout(resolve, retryInterval))
         }
     }
 
@@ -326,7 +326,7 @@ export class AIClient {
             temperature?: number
             max_tokens?: number
             clearContext?: boolean
-        },
+        }
     ): Promise<string> {
         try {
             if (!this.client) {
@@ -452,7 +452,7 @@ export class AIClient {
             temperature?: number
             max_tokens?: number
             clearContext?: boolean
-        },
+        }
     ): Promise<string> {
         try {
             if (!this.client) {
@@ -494,7 +494,7 @@ export class AIClient {
             }
 
             // 构建消息数组
-            const messages = [...this.messages].map((m) => ({
+            const messages = [...this.messages].map(m => ({
                 role: m.role,
                 content: m.content,
             }))
@@ -547,7 +547,7 @@ export class AIClient {
             temperature?: number
             max_tokens?: number
             clearContext?: boolean
-        },
+        }
     ): Promise<void> {
         try {
             if (!this.client) {
@@ -564,15 +564,15 @@ export class AIClient {
             }
 
             // 构建消息数组，包含历史对话
-            const allMessages = [...this.messages].map((m) => ({
+            const allMessages = [...this.messages].map(m => ({
                 role: m.role,
                 content: m.content,
             }))
 
             // 添加新的消息（支持文本和图片消息）
             const filteredMessages = messages
-                .filter((msg) => msg.role === "user" || msg.role === "assistant" || msg.role === "system")
-                .map((msg) => ({
+                .filter(msg => msg.role === "user" || msg.role === "assistant" || msg.role === "system")
+                .map(msg => ({
                     role: msg.role as "user" | "assistant" | "system",
                     content: msg.content,
                 }))
@@ -628,7 +628,7 @@ export class AIClient {
             })
 
             let fullResponse = ""
-            let toolCalls: any[] = []
+            const toolCalls: any[] = []
             let currentToolCall: any = null
 
             for await (const chunk of stream) {
@@ -692,7 +692,7 @@ export class AIClient {
                         // 过滤掉可能的ChatCompletionContentPartRefusal类型
                         messageContent = lastMessage.content.filter(
                             (part): part is OpenAI.Chat.Completions.ChatCompletionContentPart =>
-                                "type" in part && (part.type === "text" || part.type === "image_url" || part.type === "file"),
+                                "type" in part && (part.type === "text" || part.type === "image_url" || part.type === "file")
                         )
                     }
 
@@ -767,8 +767,8 @@ export class AIClient {
 
             const models = await this.client.models.list()
             return models.data
-                .filter((model) => model.id.startsWith("glm-"))
-                .map((model) => ({
+                .filter(model => model.id.startsWith("glm-"))
+                .map(model => ({
                     id: model.id,
                     name: model.id,
                     owned_by: model.owned_by,
@@ -807,7 +807,7 @@ export class AIClient {
             model?: string
             temperature?: number
             max_tokens?: number
-        },
+        }
     ): Promise<void> {
         if (!this.client) {
             throw new Error("客户端未初始化")
@@ -821,7 +821,7 @@ export class AIClient {
         this.messages.push(...messages)
 
         let fullResponse = ""
-        let toolCalls: ChatCompletionMessageFunctionToolCall[] = []
+        const toolCalls: ChatCompletionMessageFunctionToolCall[] = []
         let currentToolCall: ChatCompletionMessageFunctionToolCall | null = null
 
         // 第一次请求

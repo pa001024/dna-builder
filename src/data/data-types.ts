@@ -104,6 +104,8 @@ export interface SkillWeapon {
     触发?: number
     攻速?: number
     技能?: Skill[]
+    filter?: string
+    inherit?: "melee" | "ranged"
 }
 
 export interface Weapon {

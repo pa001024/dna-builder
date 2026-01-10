@@ -54,7 +54,7 @@ async function fetchGuide() {
                     }
                 }
             `,
-                { id: id as string },
+                { id: id as string }
             )
             .toPromise()
 
@@ -100,7 +100,7 @@ async function handleLike() {
                             isLiked
                         }
                     }`,
-                    { id: id as string },
+                    { id: id as string }
                 )
                 .toPromise()
         } else {
@@ -113,7 +113,7 @@ async function handleLike() {
                             isLiked
                         }
                     }`,
-                    { id: id as string },
+                    { id: id as string }
                 )
                 .toPromise()
         }
@@ -173,7 +173,9 @@ onMounted(async () => {
     <div class="h-full flex flex-col">
         <div class="bg-base-300/50 backdrop-blur-sm p-4 border-b border-base-200">
             <div class="flex items-center gap-4">
-                <h1 class="text-xl font-bold flex-1 line-clamp-1">{{ guide?.title }}</h1>
+                <h1 class="text-xl font-bold flex-1 line-clamp-1">
+                    {{ guide?.title }}
+                </h1>
                 <div v-if="guide" class="badge badge-sm" :class="guide.type === 'text' ? 'badge-primary' : 'badge-secondary'">
                     {{ guide.type === "text" ? "图文" : "一图流" }}
                 </div>
@@ -183,9 +185,9 @@ onMounted(async () => {
             </div>
         </div>
 
-        <ScrollArea class="flex-1" @scroll="handleScroll" ref="scrollAreaRef">
+        <ScrollArea ref="scrollAreaRef" class="flex-1" @scroll="handleScroll">
             <div v-if="loading" class="flex justify-center items-center h-full">
-                <span class="loading loading-spinner"></span>
+                <span class="loading loading-spinner" />
             </div>
             <div v-else-if="!guide" class="flex justify-center items-center h-full text-base-content/50">攻略不存在</div>
             <div v-else class="p-6 max-w-4xl mx-auto space-y-6">
@@ -241,7 +243,7 @@ onMounted(async () => {
                 </div>
 
                 <div v-if="guide.content" class="markdown-content">
-                    <div v-html="renderedContent"></div>
+                    <div v-html="renderedContent" />
                 </div>
 
                 <div v-if="canShowBuild" class="card bg-base-200 border border-base-300">

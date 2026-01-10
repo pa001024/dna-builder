@@ -32,7 +32,7 @@ export function changeLanguage(language: string) {
 }
 
 export async function initI18n(selectedLanguage: string) {
-    const lngCodes = i18nLanguages.map((l) => l.code)
+    const lngCodes = i18nLanguages.map(l => l.code)
     return i18next.use(Backend).init<HttpBackendOptions>({
         backend: {
             loadPath: "/i18n/{{lng}}/{{ns}}.json",
@@ -64,7 +64,7 @@ export async function waitForInitialLoad({
 }: { lng?: string; ns?: string | string[]; timeout?: number } = {}): Promise<void> {
     // 第一步：先检查——若资源已加载，直接resolve，无需等待事件
     const nsList = Array.isArray(ns) ? ns : [ns]
-    const isAllLoaded = i18next.isInitialized && nsList.every((namespace) => i18next.hasResourceBundle(lng, namespace))
+    const isAllLoaded = i18next.isInitialized && nsList.every(namespace => i18next.hasResourceBundle(lng, namespace))
     if (isAllLoaded) {
         return
     }
@@ -80,7 +80,7 @@ export async function waitForInitialLoad({
         // loaded事件处理
         const handleLoaded = () => {
             // 二次校验：确保指定语言/命名空间真的加载完成（避免事件误触发）
-            const isLoadedAfterEvent = nsList.every((namespace) => i18next.hasResourceBundle(lng, namespace))
+            const isLoadedAfterEvent = nsList.every(namespace => i18next.hasResourceBundle(lng, namespace))
             if (isLoadedAfterEvent) {
                 clearTimeout(timeoutTimer) // 清除超时器
                 i18next.off("loaded", handleLoaded) // 清理事件监听

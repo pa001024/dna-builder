@@ -110,7 +110,7 @@ export class VoxelEngine {
         onStatsUpdate: (stats: PlayerStats) => void,
         onMonstersUpdate: (monsters: Monster[]) => void,
         onTextUpdate: (texts: FloatingText[]) => void,
-        onDpsUpdate: (dps: number, total: number) => void,
+        onDpsUpdate: (dps: number, total: number) => void
     ) {
         this.container = container
         this.onStatsUpdate = onStatsUpdate
@@ -200,7 +200,7 @@ export class VoxelEngine {
         window.addEventListener("mousedown", this.onMouseDown)
         window.addEventListener("mouseup", this.onMouseUp)
         window.addEventListener("mousemove", this.onMouseMove)
-        container.addEventListener("contextmenu", (e) => e.preventDefault())
+        container.addEventListener("contextmenu", e => e.preventDefault())
 
         this.animate()
     }
@@ -427,7 +427,7 @@ export class VoxelEngine {
         const group = new THREE.Group()
         const geometry = new THREE.BoxGeometry(1, 1, 1)
         const matMap = new Map<number, THREE.MeshStandardMaterial>()
-        data.forEach((v) => {
+        data.forEach(v => {
             if (!matMap.has(v.color)) {
                 matMap.set(v.color, new THREE.MeshStandardMaterial({ color: v.color }))
             }
@@ -528,7 +528,7 @@ export class VoxelEngine {
             skillName = this.skillWeaponOverrideMelee
         }
 
-        this.monsters.forEach((m) => {
+        this.monsters.forEach(m => {
             if (m.position.distanceTo(hitCenter) < rangeUnits) {
                 this.applySkillDamage(m, skillName)
                 this.addElectricEnergy(2)
@@ -616,7 +616,7 @@ export class VoxelEngine {
     private updateMonsters(dt: number) {
         const now = this.clock.getElapsedTime()
         if (
-            this.monsters.filter((m) => !m.isDead).length < this.settings.monsterCount &&
+            this.monsters.filter(m => !m.isDead).length < this.settings.monsterCount &&
             now - this.lastSpawnTime > this.settings.spawnInterval
         ) {
             this.spawnMonster()
@@ -632,7 +632,7 @@ export class VoxelEngine {
         const chaseDistanceThreshold = this.m2u(5) // 超过5米强制追逐
         const stopDistanceThreshold = this.m2u(2.5) // 小于2.5米停止追逐，进入决策状态
 
-        this.monsters.forEach((m) => {
+        this.monsters.forEach(m => {
             if (m.isDead) return
 
             // 1. 重力
@@ -711,12 +711,12 @@ export class VoxelEngine {
             }
         })
 
-        this.monsters = this.monsters.filter((m) => !m.isDead)
+        this.monsters = this.monsters.filter(m => !m.isDead)
         this.onMonstersUpdate(
-            this.monsters.map((m) => ({
+            this.monsters.map(m => ({
                 ...m,
                 screenPosition: this.getScreenPosition(m.position),
-            })),
+            }))
         )
     }
 
@@ -742,7 +742,7 @@ export class VoxelEngine {
                 if (p.aoeRadius > 0) {
                     // AOE逻辑
                     const range = this.m2u(p.aoeRadius)
-                    this.monsters.forEach((m) => {
+                    this.monsters.forEach(m => {
                         if (!m.isDead && m.position.distanceTo(p.mesh.position) <= range) {
                             // "射击" 触发投射物伤害逻辑
                             this.applySkillDamage(m, p.skillName)
@@ -931,7 +931,7 @@ export class VoxelEngine {
             if (this.playerStats.currentSanity < this.playerStats.maxSanity) {
                 this.playerStats.currentSanity = Math.min(
                     this.playerStats.maxSanity,
-                    this.playerStats.currentSanity + this.settings.sanityRegenAmount,
+                    this.playerStats.currentSanity + this.settings.sanityRegenAmount
                 )
             }
         }
@@ -959,10 +959,10 @@ export class VoxelEngine {
         }
 
         this.onTextUpdate(
-            this.floatingTexts.map((t) => ({
+            this.floatingTexts.map(t => ({
                 ...t,
                 screenPosition: this.getScreenPosition(t.position),
-            })),
+            }))
         )
 
         // DPS

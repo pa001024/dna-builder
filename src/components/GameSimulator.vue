@@ -36,10 +36,10 @@ watchEffect(() => {
     engine = new VoxelEngine(
         canvasRef.value,
         props.charBuild.clone(),
-        (stats) => (playerStats.value = stats),
-        (m) => (monsters.value = m),
-        (texts) => (floatingTexts.value = texts),
-        (current, total) => (dps.value = { current, total }),
+        stats => (playerStats.value = stats),
+        m => (monsters.value = m),
+        texts => (floatingTexts.value = texts),
+        (current, total) => (dps.value = { current, total })
     )
     engine.setSettings(localSettings.value)
 
@@ -61,9 +61,9 @@ onUnmounted(() => {
         <div ref="canvasRef" class="absolute inset-0 z-0 cursor-crosshair" @contextmenu.prevent />
         <GameOverlay
             v-if="playerStats"
-            :playerStats="playerStats"
+            :player-stats="playerStats"
             :monsters="monsters"
-            :floatingTexts="floatingTexts"
+            :floating-texts="floatingTexts"
             :dps="dps"
             :settings="localSettings"
             @update:settings="engine.settings = localSettings = $event"

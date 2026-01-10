@@ -7,7 +7,7 @@ const route = useRoute()
 
 const pet = computed(() => {
     const id = Number(route.params.id)
-    const foundPet = petData.find((p) => p.id === id)
+    const foundPet = petData.find(p => p.id === id)
     if (!foundPet) {
         throw new Error(`Pet with id ${id} not found`)
     }

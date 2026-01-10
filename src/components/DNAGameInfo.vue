@@ -71,18 +71,18 @@ async function syncInventory() {
                 if (cur.unLocked) acc[cur.name] = cur.skillLevel
                 return acc
             },
-            {} as Record<string, number>,
+            {} as Record<string, number>
         )
         inv.rangedWeapons = roleInfo.value.roleInfo.roleShow.langRangeWeapons.reduce(
             (acc, cur) => {
                 if (cur.unLocked) acc[cur.name] = cur.skillLevel
                 return acc
             },
-            {} as Record<string, number>,
+            {} as Record<string, number>
         )
         ui.showSuccessMessage("库存同步成功")
     } catch (e) {
-        ui.showErrorMessage("库存同步失败")
+        ui.showErrorMessage("库存同步失败:", e)
     }
 }
 
@@ -90,10 +90,16 @@ defineExpose({
     loadData,
     lastUpdateTime,
 })
+
+function getWeaponUnlockProgress(weapons: DNARoleEntity["roleInfo"]["roleShow"]["closeWeapons" | "langRangeWeapons"]) {
+    const my = [...new Set(weapons.filter(v => v.unLocked).map(v => v.weaponId))]
+    const all = [...new Set(weapons.map(v => v.weaponId))]
+    return `${my.length} / ${all.length}`
+}
 </script>
 <template>
     <div class="space-y-6">
-        <div class="flex justify-between items-center" v-if="!nobtn">
+        <div v-if="!nobtn" class="flex justify-between items-center">
             <span class="text-xs text-gray-500">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
             <Tooltip tooltip="刷新" side="bottom">
                 <button class="btn btn-primary btn-square btn-sm" @click="loadData(true)">
@@ -102,7 +108,7 @@ defineExpose({
             </Tooltip>
         </div>
         <div v-if="loading" class="flex justify-center items-center h-full py-8">
-            <span class="loading loading-spinner loading-lg"></span>
+            <span class="loading loading-spinner loading-lg" />
         </div>
         <div v-if="roleInfo" class="space-y-6">
             <div class="card bg-base-100 shadow-xl">
@@ -114,7 +120,9 @@ defineExpose({
                             </div>
                         </div>
                         <div class="flex-1">
-                            <h2 class="text-2xl font-bold">{{ roleInfo.roleInfo.roleShow.roleName }}</h2>
+                            <h2 class="text-2xl font-bold">
+                                {{ roleInfo.roleInfo.roleShow.roleName }}
+                            </h2>
                             <div class="text-sm text-base-content/70 mt-1">UID: {{ roleInfo.roleInfo.roleShow.roleId }}</div>
                             <div class="text-sm text-base-content/70 mt-1">Lv. {{ roleInfo.roleInfo.roleShow.level }}</div>
                         </div>
@@ -138,32 +146,49 @@ defineExpose({
                         </div>
                     </h3>
                     <div class="space-y-4">
-                        <DNAMihanItem :missions="roleInfo.instanceInfo.map((item) => item.instances.map((v) => v.name)) || []" />
+                        <DNAMihanItem :missions="roleInfo.instanceInfo.map(item => item.instances.map(v => v.name)) || []" />
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="roleInfo.roleInfo.roleShow.params.length > 0" class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div v-for="(p, index) in roleInfo.roleInfo.roleShow.params" :key="index" class="bg-base-200 p-3 rounded-lg">
+                            <div class="text-sm font-medium">{{ p.paramKey }}</div>
+                            <div class="text-xl font-bold">
+                                {{ p.paramValue }}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body">
-                    <h3 class="card-title mb-4">角色</h3>
+                    <h3 class="card-title mb-4">
+                        角色 ({{ roleInfo.roleInfo.roleShow.roleChars.filter(v => v.unLocked).length }}/{{
+                            roleInfo.roleInfo.roleShow.roleChars.length
+                        }})
+                    </h3>
                     <div
                         class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,160px),1fr))] sm:grid-cols-[repeat(auto-fill,minmax(min(100%,180px),1fr))] md:grid-cols-[repeat(auto-fill,minmax(min(100%,200px),1fr))] gap-4"
                     >
-                        <DNACharItem :char="char" v-for="char in roleInfo.roleInfo.roleShow.roleChars" :key="char.charId" />
+                        <DNACharItem v-for="char in roleInfo.roleInfo.roleShow.roleChars" :key="char.charId" :char="char" />
                     </div>
                 </div>
             </div>
 
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body">
-                    <h3 class="card-title mb-4">远程武器</h3>
+                    <h3 class="card-title mb-4">远程武器 ({{ getWeaponUnlockProgress(roleInfo.roleInfo.roleShow.langRangeWeapons) }})</h3>
                     <div
                         class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,160px),1fr))] sm:grid-cols-[repeat(auto-fill,minmax(min(100%,180px),1fr))] md:grid-cols-[repeat(auto-fill,minmax(min(100%,200px),1fr))] gap-4"
                     >
                         <DNAWeaponItem
-                            :weapon="weapon"
                             v-for="weapon in roleInfo.roleInfo.roleShow.langRangeWeapons"
                             :key="weapon.weaponId"
+                            :weapon="weapon"
                         />
                     </div>
                 </div>
@@ -171,11 +196,11 @@ defineExpose({
 
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body">
-                    <h3 class="card-title mb-4">近战武器</h3>
+                    <h3 class="card-title mb-4">近战武器 ({{ getWeaponUnlockProgress(roleInfo.roleInfo.roleShow.closeWeapons) }})</h3>
                     <div
                         class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,160px),1fr))] sm:grid-cols-[repeat(auto-fill,minmax(min(100%,180px),1fr))] md:grid-cols-[repeat(auto-fill,minmax(min(100%,200px),1fr))] gap-4"
                     >
-                        <DNAWeaponItem :weapon="weapon" v-for="weapon in roleInfo.roleInfo.roleShow.closeWeapons" :key="weapon.weaponId" />
+                        <DNAWeaponItem v-for="weapon in roleInfo.roleInfo.roleShow.closeWeapons" :key="weapon.weaponId" :weapon="weapon" />
                     </div>
                 </div>
             </div>
@@ -195,7 +220,9 @@ defineExpose({
                         </div>
                         <div class="bg-base-200 p-3 rounded-lg">
                             <div class="text-sm font-medium">本周行迹</div>
-                            <div class="text-xl font-bold">{{ roleInfo.roleInfo.roleShow.rougeLikeInfo.rewardCount }}</div>
+                            <div class="text-xl font-bold">
+                                {{ roleInfo.roleInfo.roleShow.rougeLikeInfo.rewardCount }}
+                            </div>
                             <div class="text-sm text-base-content/70">/ {{ roleInfo.roleInfo.roleShow.rougeLikeInfo.rewardTotal }}</div>
                         </div>
                         <div class="bg-base-200 p-3 rounded-lg">
@@ -251,7 +278,7 @@ defineExpose({
                                     alt="角色"
                                     class="size-40 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                 />
-                                <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50"></div>
+                                <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
                                 <div class="flex flex-col items-center gap-2">
                                     <img
                                         v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.closeWeaponIcon"
@@ -259,21 +286,21 @@ defineExpose({
                                         alt="近战武器"
                                         class="size-12 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                     />
-                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50"></div>
+                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
                                     <img
                                         v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.langRangeWeaponIcon"
                                         :src="roleInfo.roleInfo.abyssInfo.bestTimeVo1.langRangeWeaponIcon"
                                         alt="远程武器"
                                         class="size-12 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                     />
-                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50"></div>
+                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
                                     <img
                                         v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.petIcon"
                                         :src="roleInfo.roleInfo.abyssInfo.bestTimeVo1.petIcon"
                                         alt="魔灵"
                                         class="size-12 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                     />
-                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50"></div>
+                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
                                 </div>
                                 <div class="flex flex-col gap-2">
                                     <img
@@ -282,14 +309,14 @@ defineExpose({
                                         alt="协战角色1"
                                         class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                     />
-                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50"></div>
+                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
                                     <img
                                         v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon2"
                                         :src="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon2"
                                         alt="协战角色2"
                                         class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                     />
-                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50"></div>
+                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
                                 </div>
                                 <div class="flex flex-col gap-2">
                                     <img
@@ -298,14 +325,14 @@ defineExpose({
                                         alt="协战武器1"
                                         class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                     />
-                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50"></div>
+                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
                                     <img
                                         v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon2"
                                         :src="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon2"
                                         alt="协战武器2"
                                         class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                     />
-                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50"></div>
+                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
                                 </div>
                             </div>
                             <span v-else>暂无数据</span>

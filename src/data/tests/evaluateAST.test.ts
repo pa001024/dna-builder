@@ -381,7 +381,7 @@ describe("evaluateAST函数测试", () => {
             expect(attrs.攻击).toBeCloseTo(276.15 * 1.18 * (1 + 0.75 + 2 + 0.5), 2)
             expect(attrs.weapon?.攻击).toBe(225.94)
             expect(attrs.weapon?.暴伤).toBe(4.1)
-            const b = charBuild.meleeWeapon.技能!.find((x) => x.名称 === "普通攻击")!.字段.find((x) => x.名称.includes("伤害"))?.值! //  一段伤害: "40.0%",
+            const b = charBuild.meleeWeapon.技能!.find(x => x.名称 === "普通攻击")!.字段.find(x => x.名称.includes("伤害"))!.值! //  一段伤害: "40.0%",
             expect(b).toBe(0.4)
             const def = charBuild.calculateDefenseMultiplier(attrs)
             const result = charBuild.calculate()
@@ -392,7 +392,7 @@ describe("evaluateAST函数测试", () => {
                     1.1 * // * 1.1
                     (0.9 + 1.44) * // 增伤
                     4.1, // 暴伤盛怒
-                0,
+                0
             )
         })
     })

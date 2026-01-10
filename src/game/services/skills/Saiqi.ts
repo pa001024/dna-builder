@@ -21,11 +21,11 @@ export class SaiqiSkillE extends BaseSkill {
 
     constructor(
         engine: VoxelEngine,
-        public fields: LeveledSkillField[],
+        public fields: LeveledSkillField[]
     ) {
         super(engine, "抽茧成梦")
-        this.COST = this.fields.find((f) => f.名称 === "神智消耗")?.值 || 30
-        this.PHANTOM_RADIUS = this.fields.find((f) => f.名称 === "[幻象]效果半径")?.值 || 6
+        this.COST = this.fields.find(f => f.名称 === "神智消耗")?.值 || 30
+        this.PHANTOM_RADIUS = this.fields.find(f => f.名称 === "[幻象]效果半径")?.值 || 6
     }
 
     protected onCast(): void {
@@ -48,8 +48,8 @@ export class SaiqiSkillE extends BaseSkill {
             const projectileCount = 8
             for (let i = 0; i < projectileCount; i++) {
                 // 随机选择一个目标
-                let target = this.engine.monsters.find(
-                    (m) => !m.isDead && m.position.distanceTo(this.engine.getPlayerPosition()) < this.engine.m2u(20),
+                const target = this.engine.monsters.find(
+                    m => !m.isDead && m.position.distanceTo(this.engine.getPlayerPosition()) < this.engine.m2u(20)
                 )
                 if (!target) {
                     // 没有目标时，向前进方向发射投射物
@@ -64,7 +64,7 @@ export class SaiqiSkillE extends BaseSkill {
                             .clone()
                             .add(new THREE.Vector3(0, 2, 0)),
                         dir,
-                        null,
+                        null
                     )
                 } else {
                     // 更新中处理的跟踪行为很复杂，目前先直接射击
@@ -77,7 +77,7 @@ export class SaiqiSkillE extends BaseSkill {
                             .clone()
                             .add(new THREE.Vector3(0, 2, 0)),
                         dir,
-                        target,
+                        target
                     )
                 }
             }
@@ -137,7 +137,7 @@ export class SaiqiSkillE extends BaseSkill {
 
     private explodePhantom(p: Phantom) {
         // 对半径内的敌人造成伤害
-        this.engine.monsters.forEach((m) => {
+        this.engine.monsters.forEach(m => {
             if (!m.isDead && m.position.distanceTo(p.mesh.position) < p.radius) {
                 this.applyDamage(m, "幻象爆炸")
             }
@@ -160,14 +160,14 @@ export class SaiqiSkillQ extends BaseSkill {
 
     constructor(
         engine: VoxelEngine,
-        public fields: LeveledSkillField[],
+        public fields: LeveledSkillField[]
     ) {
         super(engine, "腐草为萤")
-        this.DRAIN_PER_SEC = this.fields.find((f) => f.名称 === "每秒神智消耗")?.值 || 30
-        this.HP_DRAIN_PER_SEC = this.fields.find((f) => f.名称 === "每秒流失生命值")?.值 || 0.05
-        this.SHIELD_CONVERT_RATIO = this.fields.find((f) => f.名称 === "超限护盾转化比例")?.值 || 1.5
-        this.ACTIVATION_COST = this.fields.find((f) => f.名称 === "神智消耗")?.值 || 10
-        this.shootRadius = this.fields.find((f) => f.名称 === "射击伤害半径")?.值 || 3
+        this.DRAIN_PER_SEC = this.fields.find(f => f.名称 === "每秒神智消耗")?.值 || 30
+        this.HP_DRAIN_PER_SEC = this.fields.find(f => f.名称 === "每秒流失生命值")?.值 || 0.05
+        this.SHIELD_CONVERT_RATIO = this.fields.find(f => f.名称 === "超限护盾转化比例")?.值 || 1.5
+        this.ACTIVATION_COST = this.fields.find(f => f.名称 === "神智消耗")?.值 || 10
+        this.shootRadius = this.fields.find(f => f.名称 === "射击伤害半径")?.值 || 3
     }
 
     protected onCast(): void {

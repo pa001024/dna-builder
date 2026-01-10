@@ -7,7 +7,7 @@ const route = useRoute()
 
 const weapon = computed(() => {
     const id = Number(route.params.id)
-    const foundWeapon = weaponData.find((w) => w.id === id)
+    const foundWeapon = weaponData.find(w => w.id === id)
     if (!foundWeapon) {
         throw new Error(`Weapon with id ${id} not found`)
     }

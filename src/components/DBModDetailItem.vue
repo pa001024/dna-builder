@@ -21,9 +21,9 @@ const leveledMod = computed(() => {
 // 监听mod变化，重置等级为新mod的等级上限
 watch(
     () => props.mod,
-    (newMod) => {
+    newMod => {
         currentLevel.value = LeveledMod.modQualityMaxLevel[newMod.品质] || 1
-    },
+    }
 )
 
 // 根据品质获取颜色
@@ -100,16 +100,16 @@ function formatDuration(minutes: number): string {
                 <div class="mb-3">
                     <div class="flex items-center gap-4">
                         <span class="text-sm min-w-12"
-                            >Lv. <input type="text" v-model.number="currentLevel" class="w-12 text-center" />
+                            >Lv. <input v-model.number="currentLevel" type="text" class="w-12 text-center" />
                         </span>
                         <input
+                            :key="leveledMod.id"
                             v-model.number="currentLevel"
                             type="range"
                             class="range range-primary range-xs grow"
                             :min="1"
                             :max="leveledMod.maxLevel"
                             step="1"
-                            :key="leveledMod.id"
                         />
                     </div>
                 </div>
@@ -118,7 +118,7 @@ function formatDuration(minutes: number): string {
                     <div class="text-xs text-base-content/70 mb-1">效果</div>
                     <div class="text-sm">
                         <span v-if="/(?:[DVOA])趋向/.test(leveledMod.效果)">
-                            <template v-for="(part, index) in formatEffDesc(leveledMod.效果)">
+                            <template v-for="(part, index) in formatEffDesc(leveledMod.效果)" :key="index">
                                 <span v-if="index !== 1">{{ part }}</span>
                                 <span v-else>
                                     <Icon class="inline-block mx-1" :icon="`po-${part as 'A' | 'D' | 'V' | 'O'}`" />
@@ -134,7 +134,7 @@ function formatDuration(minutes: number): string {
                     <div class="text-xs text-base-content/70 mb-1">Buff</div>
                     <div class="space-y-2">
                         <!-- 等级调整 -->
-                        <div class="flex items-center gap-4" v-if="leveledMod.buff.mx">
+                        <div v-if="leveledMod.buff.mx" class="flex items-center gap-4">
                             <span class="text-sm min-w-12">Lv. {{ buffLv }}</span>
                             <input
                                 v-model.number="buffLv"
@@ -166,7 +166,7 @@ function formatDuration(minutes: number): string {
                     </div>
                 </div>
 
-                <div class="p-3 bg-base-200 rounded" v-if="leveledMod.生效">
+                <div v-if="leveledMod.生效" class="p-3 bg-base-200 rounded">
                     <div class="text-xs text-base-content/70 mb-2">条件属性</div>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
                         <div
@@ -186,7 +186,9 @@ function formatDuration(minutes: number): string {
                     <div class="space-y-2 text-sm">
                         <div class="grid grid-cols-3 gap-2">
                             <div class="col-span-1 opacity-70">名称</div>
-                            <div class="col-span-2 font-medium">{{ modDraft.n }}</div>
+                            <div class="col-span-2 font-medium">
+                                {{ modDraft.n }}
+                            </div>
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <div class="col-span-1 opacity-70">稀有度</div>
@@ -196,19 +198,27 @@ function formatDuration(minutes: number): string {
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <div class="col-span-1 opacity-70">版本</div>
-                            <div class="col-span-2 font-medium">{{ modDraft.v }}</div>
+                            <div class="col-span-2 font-medium">
+                                {{ modDraft.v }}
+                            </div>
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <div class="col-span-1 opacity-70">铸造时间</div>
-                            <div class="col-span-2 font-medium">{{ formatDuration(modDraft.d) }}</div>
+                            <div class="col-span-2 font-medium">
+                                {{ formatDuration(modDraft.d) }}
+                            </div>
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <div class="col-span-1 opacity-70">批量制造</div>
-                            <div class="col-span-2 font-medium">{{ modDraft.b ? "支持" : "不支持" }}</div>
+                            <div class="col-span-2 font-medium">
+                                {{ modDraft.b ? "支持" : "不支持" }}
+                            </div>
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <div class="col-span-1 opacity-70">无限制造</div>
-                            <div class="col-span-2 font-medium">{{ modDraft.i ? "支持" : "不支持" }}</div>
+                            <div class="col-span-2 font-medium">
+                                {{ modDraft.i ? "支持" : "不支持" }}
+                            </div>
                         </div>
                         <div v-if="modDraft.x.length > 0" class="mt-3">
                             <div class="text-xs text-base-content/70 mb-1">消耗资源</div>
@@ -218,25 +228,27 @@ function formatDuration(minutes: number): string {
                                     <span class="font-medium text-primary">{{ modDraft.m }}</span>
                                 </div>
                                 <template v-for="item in modDraft.x" :key="item.id">
-                                    <ShowProps
-                                        v-for="mod in [new LeveledMod(item.id)]"
-                                        :props="mod.getProperties()"
-                                        :title="`${$t(mod.系列)}${$t(mod.名称)}`"
-                                        :rarity="mod.品质"
-                                        :polarity="mod.极性"
-                                        :cost="mod.耐受"
-                                        :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
-                                        :effdesc="mod.效果"
-                                        v-if="item.t === 'Mod'"
-                                    >
-                                        <RouterLink
-                                            :to="`/db/mod/${item.id}`"
-                                            class="flex justify-between items-center p-2 bg-base-300 rounded text-sm"
+                                    <template v-if="item.t === 'Mod'">
+                                        <ShowProps
+                                            v-for="detailMod in [new LeveledMod(item.id)]"
+                                            :key="detailMod.id"
+                                            :props="detailMod.getProperties()"
+                                            :title="`${$t(detailMod.系列)}${$t(detailMod.名称)}`"
+                                            :rarity="detailMod.品质"
+                                            :polarity="detailMod.极性"
+                                            :cost="detailMod.耐受"
+                                            :type="`${$t(detailMod.类型)}${detailMod.属性 ? `,${$t(detailMod.属性 + '属性')}` : ''}${detailMod.限定 ? `,${$t(detailMod.限定)}` : ''}`"
+                                            :effdesc="detailMod.效果"
                                         >
-                                            <span class="text-base-content/70">{{ item.n }}</span>
-                                            <span class="font-medium text-primary">{{ item.c }}</span>
-                                        </RouterLink>
-                                    </ShowProps>
+                                            <RouterLink
+                                                :to="`/db/mod/${item.id}`"
+                                                class="flex justify-between items-center p-2 bg-base-300 rounded text-sm"
+                                            >
+                                                <span class="text-base-content/70">{{ item.n }}</span>
+                                                <span class="font-medium text-primary">{{ item.c }}</span>
+                                            </RouterLink>
+                                        </ShowProps>
+                                    </template>
                                     <div v-else class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
                                         <span class="text-base-content/70">{{ item.n }}</span>
                                         <span class="font-medium text-primary">{{ item.c }}</span>

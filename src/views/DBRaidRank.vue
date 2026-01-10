@@ -19,7 +19,9 @@ const rankData = rawRankData[0].RankName.map((item, index) => ({
     <ScrollArea class="p-4 flex h-full min-h-0">
         <div class="flex-1 grid grid-cols-1 gap-4">
             <div v-for="item in rankData" :key="item.rank" class="bg-gray-100 p-4 rounded-md">
-                <p class="text-lg font-bold">{{ item.rank }}</p>
+                <p class="text-lg font-bold">
+                    {{ item.rank }}
+                </p>
                 <p class="text-sm text-gray-600">排名前{{ item.percent }}%的玩家获得</p>
 
                 <div v-for="rewardId in [item.reward]" :key="rewardId" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors">

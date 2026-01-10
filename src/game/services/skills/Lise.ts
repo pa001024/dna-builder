@@ -14,10 +14,10 @@ export class LiseSkillE extends BaseSkill {
 
     constructor(
         engine: VoxelEngine,
-        public fields: LeveledSkillField[],
+        public fields: LeveledSkillField[]
     ) {
         super(engine, "快速出击")
-        this.COST = this.fields.find((f) => f.名称 === "神智消耗")?.值 || 20
+        this.COST = this.fields.find(f => f.名称 === "神智消耗")?.值 || 20
     }
 
     protected onCast(): void {
@@ -54,7 +54,7 @@ export class LiseSkillE extends BaseSkill {
         const hitRadiusUnits = this.engine.m2u(this.DASH_WIDTH_M / 2) // 半径是宽度的一半
 
         // 遍历所有怪物，检查它们是否在路径上
-        this.engine.monsters.forEach((m) => {
+        this.engine.monsters.forEach(m => {
             if (m.isDead) return
 
             // 检查到线段的距离
@@ -84,10 +84,10 @@ export class LiseSkillQ extends BaseSkill {
 
     constructor(
         engine: VoxelEngine,
-        public fields: LeveledSkillField[],
+        public fields: LeveledSkillField[]
     ) {
         super(engine, "涡旋电场")
-        this.CHARGE_DURATION = this.fields.find((f) => f.名称 === "[电荷]持续时间")?.值 || 6
+        this.CHARGE_DURATION = this.fields.find(f => f.名称 === "[电荷]持续时间")?.值 || 6
     }
 
     protected onCast(): void {
@@ -110,7 +110,7 @@ export class LiseSkillQ extends BaseSkill {
         const playerPos = this.engine.getPlayerPosition()
         const burstRadiusUnits = this.engine.m2u(this.BURST_RADIUS_M)
 
-        this.engine.monsters.forEach((m) => {
+        this.engine.monsters.forEach(m => {
             if (m.position.distanceTo(playerPos) < burstRadiusUnits) {
                 this.applyDamage(m)
             }
@@ -119,7 +119,7 @@ export class LiseSkillQ extends BaseSkill {
 
     protected onUpdate(dt: number): void {
         // 更新怪物的电荷状态 (独立于技能激活状态)
-        this.engine.monsters.forEach((m) => {
+        this.engine.monsters.forEach(m => {
             if (!m.statusEffects) return
             for (let i = m.statusEffects.length - 1; i >= 0; i--) {
                 const effect = m.statusEffects[i]
@@ -153,11 +153,11 @@ export class LiseSkillQ extends BaseSkill {
         // 1. 每秒: 持续伤害 + 电荷应用
         if (this.timer >= 1.0) {
             this.timer = 0
-            const targets = this.engine.monsters.filter((m) => !m.isDead && m.position.distanceTo(playerPos) < fieldRadiusUnits)
+            const targets = this.engine.monsters.filter(m => !m.isDead && m.position.distanceTo(playerPos) < fieldRadiusUnits)
 
             if (targets.length > 0) {
                 // 优先选择无电荷的目标
-                let target = targets.find((m) => !m.statusEffects.some((e) => e.type.includes("CHARGE")))
+                let target = targets.find(m => !m.statusEffects.some(e => e.type.includes("CHARGE")))
                 if (!target) target = targets[Math.floor(Math.random() * targets.length)]
 
                 if (target) {
@@ -169,7 +169,7 @@ export class LiseSkillQ extends BaseSkill {
                     const label = chargeType === "POS_CHARGE" ? "+" : "-"
                     const color = chargeType === "POS_CHARGE" ? "#ef4444" : "#3b82f6" // Red / Blue
 
-                    const existing = target.statusEffects.find((e) => e.type.includes("CHARGE"))
+                    const existing = target.statusEffects.find(e => e.type.includes("CHARGE"))
 
                     if (existing) {
                         if (existing.type === chargeType) {
@@ -195,7 +195,7 @@ export class LiseSkillQ extends BaseSkill {
     }
 
     private triggerReactionFor(source: Monster) {
-        const charge = source.statusEffects.find((e) => e.type.includes("CHARGE"))
+        const charge = source.statusEffects.find(e => e.type.includes("CHARGE"))
         if (!charge) return
 
         const oppositeType = charge.type === "POS_CHARGE" ? "NEG_CHARGE" : "POS_CHARGE"
@@ -207,7 +207,7 @@ export class LiseSkillQ extends BaseSkill {
 
         for (const m of this.engine.monsters) {
             if (m === source || m.isDead) continue
-            if (m.statusEffects.some((e) => e.type === oppositeType)) {
+            if (m.statusEffects.some(e => e.type === oppositeType)) {
                 const dist = source.position.distanceTo(m.position)
                 if (dist < minDist) {
                     minDist = dist
@@ -236,17 +236,17 @@ export class LiseSkillQ extends BaseSkill {
     // Called when a monster dies
     public onMonsterDeath(monster: Monster) {
         if (!monster.statusEffects) return
-        const charge = monster.statusEffects.find((e) => e.type.includes("CHARGE"))
+        const charge = monster.statusEffects.find(e => e.type.includes("CHARGE"))
         if (!charge) return
 
         const range = this.engine.m2u(20) // 20m range to transfer
 
-        this.engine.monsters.forEach((m) => {
+        this.engine.monsters.forEach(m => {
             // Skip the dead monster itself and other dead monsters
             if (m.isDead || m.id === monster.id) return
 
             if (m.position.distanceTo(monster.position) <= range) {
-                const existing = m.statusEffects.find((e) => e.type.includes("CHARGE"))
+                const existing = m.statusEffects.find(e => e.type.includes("CHARGE"))
 
                 if (!existing) {
                     // Spread charge with remaining duration from dead monster

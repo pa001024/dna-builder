@@ -58,8 +58,8 @@ const loadedTiles = ref<Set<string>>(new Set())
 const userMarkersList = ref<UserMapMarker[]>([])
 
 const allMarkers = computed(() => {
-    const apiMarkers = props.markers.map((m) => ({ ...m, isUserMarker: false }))
-    const userMarkers = userMarkersList.value.map((m) => ({
+    const apiMarkers = props.markers.map(m => ({ ...m, isUserMarker: false }))
+    const userMarkers = userMarkersList.value.map(m => ({
         ...m,
         isUserMarker: true,
     }))
@@ -69,7 +69,7 @@ const allMarkers = computed(() => {
 const filteredMarkers = computed(() => {
     let markers = allMarkers.value
     if (selectedCategory.value !== null) {
-        markers = markers.filter((m) => m.categoryId === selectedCategory.value)
+        markers = markers.filter(m => m.categoryId === selectedCategory.value)
     }
     return markers
 })
@@ -322,7 +322,7 @@ function handleMapClick(e: MouseEvent) {
 function saveMarker(marker: Omit<DBMapMarker, "id">) {
     let iconUrl = marker.icon
     if (marker.categoryId && props.categories) {
-        const category = props.categories.find((c) => c.id === marker.categoryId)
+        const category = props.categories.find(c => c.id === marker.categoryId)
         if (category) {
             iconUrl = category.icon
         }
@@ -340,7 +340,7 @@ function saveMarker(marker: Omit<DBMapMarker, "id">) {
         updatedAt: Date.now(),
     }
 
-    db.userMapMarkers.add(newMarker).then((id) => {
+    db.userMapMarkers.add(newMarker).then(id => {
         userMarkersList.value.push({ ...newMarker, id })
         emit("markerAdd", {
             ...newMarker,
@@ -352,7 +352,7 @@ function saveMarker(marker: Omit<DBMapMarker, "id">) {
 }
 
 function deleteMarker(id: number) {
-    const index = userMarkersList.value.findIndex((m) => m.id === id)
+    const index = userMarkersList.value.findIndex(m => m.id === id)
     if (index !== -1) {
         db.userMapMarkers.delete(id).then(() => {
             userMarkersList.value.splice(index, 1)
@@ -364,7 +364,7 @@ function deleteMarker(id: number) {
 async function loadUserMarkers() {
     const markers = await db.userMapMarkers.where({ mapId: props.mapId }).toArray()
     userMarkersList.value = markers
-    markers.forEach((m) => {
+    markers.forEach(m => {
         emit("markerAdd", {
             ...m,
             isUserMarker: true,
@@ -383,7 +383,7 @@ watch([zoom, panOffset], () => {
     requestAnimationFrame(calculateVisibleTiles)
 })
 
-watch(selectedFloorIndex, (newIndex) => {
+watch(selectedFloorIndex, newIndex => {
     emit("floorChange", newIndex)
 })
 
@@ -457,13 +457,13 @@ onUnmounted(() => {
                 <div
                     class="absolute inset-0 rounded-full ring-2 ring-primary/0 transition-all"
                     :class="{ 'ring-primary ring-offset-2 ring-opacity-100': selectedMarkerId === marker.id }"
-                ></div>
+                />
                 <div
                     v-if="marker.icon"
                     class="h-8 w-8 transition-transform hover:scale-125 relative"
                     :class="{ 'drop-shadow-lg': marker.isUserMarker }"
                 >
-                    <div v-if="marker.isUserMarker" class="absolute inset-0 bg-accent rounded-full opacity-50"></div>
+                    <div v-if="marker.isUserMarker" class="absolute inset-0 bg-accent rounded-full opacity-50" />
                     <img :src="marker.icon" class="pointer-events-none" />
                 </div>
                 <div
@@ -500,37 +500,37 @@ onUnmounted(() => {
         </div>
 
         <div class="absolute left-4 top-14 z-20 flex flex-col gap-2">
-            <button @click="zoomIn" class="btn btn-circle btn-sm" title="放大">
+            <button class="btn btn-circle btn-sm" title="放大" @click="zoomIn">
                 <Icon icon="ri:add-line" />
             </button>
-            <button @click="zoomOut" class="btn btn-circle btn-sm" title="缩小">
+            <button class="btn btn-circle btn-sm" title="缩小" @click="zoomOut">
                 <Icon icon="ri:subtract-line" />
             </button>
-            <button @click="resetZoom" class="btn btn-circle btn-sm" title="重置">
+            <button class="btn btn-circle btn-sm" title="重置" @click="resetZoom">
                 <Icon icon="ri:crosshair-line" />
             </button>
         </div>
 
         <div v-if="categories && categories.length > 0" class="absolute right-4 top-4 z-20 flex flex-col gap-2">
             <button
-                @click="selectCategory(null)"
                 class="btn btn-xs whitespace-nowrap"
                 :class="selectedCategory === null ? 'btn-primary' : 'btn-ghost'"
+                @click="selectCategory(null)"
             >
                 全部
             </button>
             <button
                 v-for="category in categories"
                 :key="category.id"
-                @click="selectCategory(category.id)"
                 class="btn btn-xs flex items-center gap-1 whitespace-nowrap"
                 :class="selectedCategory === category.id ? 'btn-primary' : 'btn-ghost'"
+                @click="selectCategory(category.id)"
             >
                 <img v-if="category.icon" :src="category.icon" class="h-4 w-4" />
                 {{ category.name }}
             </button>
-            <div v-if="editable" class="divider my-1"></div>
-            <button @click="toggleEditMode" class="btn btn-xs whitespace-nowrap" :class="isEditMode ? 'btn-warning' : 'btn-ghost'">
+            <div v-if="editable" class="divider my-1" />
+            <button class="btn btn-xs whitespace-nowrap" :class="isEditMode ? 'btn-warning' : 'btn-ghost'" @click="toggleEditMode">
                 {{ isEditMode ? "退出编辑" : "添加标点" }}
             </button>
         </div>
@@ -549,15 +549,15 @@ onUnmounted(() => {
                 <div>
                     <label class="text-xs text-base-content/70 mb-1">分类</label>
                     <Select v-model="pendingMarker.categoryId" class="w-full input input-sm">
-                        <SelectItem :value="null">无分类</SelectItem>
+                        <SelectItem :value="null"> 无分类 </SelectItem>
                         <SelectItem v-for="category in categories" :key="category.id" :value="category.id">
                             {{ category.name }}
                         </SelectItem>
                     </Select>
                 </div>
                 <div class="flex gap-2">
-                    <button @click="pendingMarker = null" class="btn btn-xs btn-ghost flex-1">取消</button>
-                    <button @click="saveMarker(pendingMarker)" class="btn btn-xs btn-primary flex-1">保存</button>
+                    <button class="btn btn-xs btn-ghost flex-1" @click="pendingMarker = null">取消</button>
+                    <button class="btn btn-xs btn-primary flex-1" @click="saveMarker(pendingMarker)">保存</button>
                 </div>
             </div>
         </div>
@@ -565,12 +565,12 @@ onUnmounted(() => {
         <!-- 编辑模式下的标点删除按钮 -->
         <template v-if="editable && isEditMode">
             <div
-                v-for="marker in filteredMarkers.filter((m) => m.isUserMarker)"
+                v-for="marker in filteredMarkers.filter(m => m.isUserMarker)"
                 :key="marker.id"
                 class="absolute z-20"
                 :style="getMarkerStyle(marker)"
             >
-                <button @click="deleteMarker(marker.id)" class="btn btn-circle btn-xs btn-error -mt-10 ml-4" title="删除标点">
+                <button class="btn btn-circle btn-xs btn-error -mt-10 ml-4" title="删除标点" @click="deleteMarker(marker.id)">
                     <Icon icon="ri:delete-bin-line" />
                 </button>
             </div>
@@ -583,17 +583,19 @@ onUnmounted(() => {
             :style="detailPopupStyle"
         >
             <div class="flex items-center justify-between mb-2">
-                <div class="font-medium text-sm">{{ selectedMarker.name }}</div>
+                <div class="font-medium text-sm">
+                    {{ selectedMarker.name }}
+                </div>
                 <button
-                    @click.stop="((selectedMarkerId = null), (markerDetail = null), (selectedMarker = null))"
                     class="btn btn-circle btn-xs btn-ghost h-5 w-5"
+                    @click.stop="((selectedMarkerId = null), (markerDetail = null), (selectedMarker = null))"
                 >
                     <Icon icon="radix-icons:cross2" />
                 </button>
             </div>
 
             <div v-if="markerDetailLoading" class="flex items-center justify-center py-2">
-                <span class="loading loading-spinner loading-sm"></span>
+                <span class="loading loading-spinner loading-sm" />
                 <span class="ml-2 text-xs">加载中...</span>
             </div>
 
@@ -603,7 +605,9 @@ onUnmounted(() => {
                 </div>
                 <div v-if="markerDetail.description">
                     <div class="opacity-70 mb-0.5">描述</div>
-                    <div class="whitespace-pre-wrap max-w-full">{{ markerDetail.description }}</div>
+                    <div class="whitespace-pre-wrap max-w-full">
+                        {{ markerDetail.description }}
+                    </div>
                 </div>
             </div>
 

@@ -8,15 +8,15 @@ withDefaults(
     }>(),
     {
         side: "top",
-    },
+    }
 )
 const forceOpen = ref(false)
 </script>
 
 <template>
     <TooltipProvider>
-        <TooltipRoot :delayDuration="100" :open="forceOpen ? true : undefined">
-            <TooltipTrigger asChild @touchstart="forceOpen = true" @touchend="forceOpen = false">
+        <TooltipRoot :delay-duration="100" :open="forceOpen ? true : undefined">
+            <TooltipTrigger as-child @touchstart.passive="forceOpen = true" @touchend.passive="forceOpen = false">
                 <slot />
             </TooltipTrigger>
             <TooltipPortal>

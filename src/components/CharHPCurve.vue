@@ -16,7 +16,7 @@ const props = withDefaults(
     {
         width: 800,
         height: 400,
-    },
+    }
 )
 
 // 计算SVG画布尺寸
