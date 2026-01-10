@@ -691,7 +691,7 @@ export class CharBuild {
         // 添加MOD加成
         if (prefix === "角色" || !attribute.startsWith(prefix))
             this.mods.forEach(mod => {
-                if (prefix && mod.类型 !== prefix) return
+                if (prefix && mod.attrType !== prefix) return
                 if (typeof mod[attribute] === "number") {
                     bonus += mod[attribute]
                 }

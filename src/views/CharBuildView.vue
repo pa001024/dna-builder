@@ -789,7 +789,7 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                                 @click="charTab = tab.name"
                             >
                                 <ImageFallback :src="tab.url" alt="角色头像" class="w-full h-full object-cover object-top">
-                                    <Icon icon="ri:question-mark" class="w-full h-full" />
+                                    <Icon icon="kezhou" class="w-full h-full" />
                                 </ImageFallback>
                                 <div class="absolute inset-0 bg-linear-to-t from-yellow-500/20 via-transparent to-transparent" />
                             </div>

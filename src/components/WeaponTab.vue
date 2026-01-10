@@ -45,7 +45,7 @@ defineModel<boolean>("weapon_select_model_show")
         <h3 class="flex items-center gap-4 text-lg font-bold text-base-content/90 mb-2">
             <div class="flex flex-1 flex-col">
                 <div class="text-lg font-bold cursor-pointer" @click="wkey !== 'skill' && (weapon_select_model_show = true)">
-                    {{ $t(baseWeapon.名称 || "") }}
+                    {{ $t(charBuild[`${wkey}Weapon`]!.名称 || "") }}
                     <Icon v-if="wkey !== 'skill'" icon="ri:exchange-line" class="inline-block w-5 h-5 text-primary" />
                 </div>
                 <Select v-if="wkey !== 'skill'" v-model="charSettings[`${wkey}WeaponRefine`]" hidebtn class="text-sm text-primary">

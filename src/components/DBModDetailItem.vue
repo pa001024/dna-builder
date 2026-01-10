@@ -274,6 +274,7 @@ function formatDuration(minutes: number): string {
                                 <span v-if="dungeon.e" class="text-xs px-1.5 py-0.5 rounded bg-primary/20 text-primary">{{
                                     $t(dungeon.e)
                                 }}</span>
+                                <span class="text-xs text-base-content/70">ID: {{ dungeon.id }}</span>
                             </div>
                             <div class="flex items-center gap-2 text-base-content/70">
                                 <span v-if="dungeon.lv" class="text-xs">Lv.{{ dungeon.lv }}</span>
