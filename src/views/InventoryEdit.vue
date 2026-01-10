@@ -3,8 +3,10 @@
 import { ref, computed } from "vue"
 import { LeveledMod, LeveledWeapon, weaponData, modData } from "../data"
 import { useInvStore } from "../store/inv"
+import { copyText, pasteText } from "@/util"
+import { useUIStore } from "@/store/ui"
 const inv = useInvStore()
-
+const ui = useUIStore()
 // 武器
 const allWeapons = weaponData.filter(v => !v.类型[0].startsWith("同律"))
 const weaponSearchQuery = ref("")
@@ -19,7 +21,16 @@ const filteredWeapons = computed(() => {
 })
 const filteredInvWeapons = computed(() => {
     const query = weaponSearchQuery.value.trim()
-    return Object.keys(inv.weapons).filter(v => v.includes(query))
+    return Object.keys(inv.weapons).filter(v => {
+        try {
+            const weapon = new LeveledWeapon(+v)
+            return weapon.名称.includes(query) || weapon.类别.includes(query)
+        } catch {
+            delete inv.meleeWeapons[v as any]
+            delete inv.rangedWeapons[v as any]
+            return false
+        }
+    })
 })
 // MOD
 const allMods = modData.map(v => new LeveledMod(v.id))
@@ -107,13 +118,35 @@ function handleSelectAllMods() {
         })
     }
 }
+function handleExport() {
+    const dataStr = JSON.stringify({ melee: inv.meleeWeapons, ranged: inv.rangedWeapons }, null, 2)
+    copyText(dataStr)
+    ui.showSuccessMessage("已复制到剪贴板")
+}
+async function handleImport() {
+    const dataStr = await pasteText()
+    if (!dataStr) return
+    try {
+        const data = JSON.parse(dataStr)
+        if (!data.melee || !data.ranged || typeof data.melee !== "object" || typeof data.ranged !== "object") {
+            ui.showErrorMessage("导入数据格式错误")
+            return
+        }
+        inv.meleeWeapons = data.melee
+        inv.rangedWeapons = data.ranged
+        ui.showSuccessMessage("已导入")
+    } catch {
+        console.error("导入失败")
+        ui.showErrorMessage("导入失败")
+    }
+}
 </script>
 <template>
     <div class="h-full overflow-hidden overflow-y-auto">
         <div class="flex h-full flex-col p-4">
             <div class="flex justify-end gap-2 mb-4">
-                <div class="btn btn-primary">导入</div>
-                <div class="btn btn-primary">导出</div>
+                <div class="btn btn-sm btn-primary" @click="handleImport">导入</div>
+                <div class="btn btn-sm btn-primary" @click="handleExport">导出</div>
             </div>
             <div class="flex-1 bg-base-300 rounded-xl shadow-lg mb-6">
                 <div class="p-4 pb-0 flex flex-wrap items-center gap-2 mb-3">
@@ -153,7 +186,7 @@ function handleSelectAllMods() {
                         <WeaponItem
                             v-for="(weapon, index) in filteredWeapons"
                             :key="index"
-                            :selected="weapon.名称 in inv.weapons"
+                            :selected="weapon.id in inv.weapons"
                             :weapon="weapon"
                             :index="index"
                             noremove

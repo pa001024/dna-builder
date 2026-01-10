@@ -397,28 +397,12 @@ function getTimelineByName(name: string) {
     if (!raw) return undefined
     return CharBuildTimeline.fromRaw(raw)
 }
-const isTimeline = ref(false)
+const isTimeline = ref(timelines.value.find(v => v.name === charSettings.value.baseName) !== undefined)
 
-function setTimeline(name?: string) {
-    if (isTimeline.value) {
-        charSettings.value.baseName = charBuild.value.char.技能[0].名称
-        return
-    }
-    if (!name) {
-        if (timelines.value.length > 0) {
-            name = timelines.value[0].name
-        } else {
-            // name = charBuild.value.char.技能[0].名称
-            ui.showErrorMessage("当前角色没有时间线，无法切换")
-            return
-        }
-    }
-    const timeline = getTimelineByName(name)
-    if (!timeline) {
-        return
-    }
-    charSettings.value.baseName = name || ""
-}
+const pselectedChar = useLocalStorage("selectedChar", "赛琪")
+onMounted(() => {
+    pselectedChar.value = selectedChar.value
+})
 //#endregion
 
 // 更新CharBuild实例
@@ -930,24 +914,20 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                                     :value="charSettings.baseName"
                                     class="input input-sm input-primary w-full"
                                     @change="charSettings.baseName = $event"
+                                    placeholder="选择时间线"
                                 >
                                     <SelectItem v-for="timeline in timelines" :key="timeline.name" :value="timeline.name">
                                         {{ timeline.name }}
                                     </SelectItem>
                                 </Select>
                                 <div class="flex justify-between items-center gap-8">
-                                    <button class="btn grow btn-sm btn-primary">
+                                    <button class="btn grow btn-sm btn-primary" @click="$router.push('/timeline')">
                                         <Icon icon="ri:add-line" />
                                         新建
                                     </button>
                                     <label class="label cursor-pointer">
                                         <span class="text-sm text-base-content/80">DPS</span>
-                                        <input
-                                            v-model="charSettings.timelineDPS"
-                                            type="checkbox"
-                                            class="toggle toggle-secondary"
-                                            @click.prevent="setTimeline()"
-                                        />
+                                        <input v-model="charSettings.timelineDPS" type="checkbox" class="toggle toggle-secondary" />
                                     </label>
                                 </div>
                             </template>

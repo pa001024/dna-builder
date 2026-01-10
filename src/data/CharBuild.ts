@@ -122,6 +122,7 @@ export interface CharBuildOptions {
     targetFunction?: string
     skillLevel?: number
     timeline?: CharBuildTimeline
+    timelineDPS?: boolean
 }
 
 export class CharBuild {
@@ -131,18 +132,17 @@ export class CharBuild {
         DEF: "防御",
         HP: "生命",
         SP: "神智",
-        DPH: "伤害*or(多重,1)",
-        总伤: "伤害*max(1,召唤物攻击次数)",
+        DPH: "or(多重,1)*伤害",
+        总伤: "max(1,召唤物攻击次数)*伤害",
         暴击伤害: "伤害.暴击",
-        DCD: "伤害.暴击",
-        DPS: "伤害*or(攻速,1+技能速度)*or(多重,1)",
-        范围收益: "伤害*技能范围",
-        耐久收益: "伤害*技能耐久",
-        效益收益: "伤害*技能效益",
-        每神智DPH: "伤害/神智消耗",
-        每持续神智DPH: "伤害/每秒神智消耗",
-        每神智DPS: "伤害*or(攻速,1+技能速度)/神智消耗",
-        每持续神智DPS: "伤害*or(攻速,1+技能速度)/每秒神智消耗",
+        DPS: "or(攻速,1+技能速度)*or(多重,1)*伤害",
+        范围收益: "技能范围*伤害",
+        耐久收益: "技能耐久*伤害",
+        效益收益: "技能效益*伤害",
+        每神智DPH: "1/神智消耗*伤害",
+        每持续神智DPH: "1/每秒神智消耗*伤害",
+        每神智DPS: "or(攻速,1+技能速度)/神智消耗*伤害",
+        每持续神智DPS: "or(攻速,1+技能速度)/每秒神智消耗*伤害",
     }
 
     public _char!: LeveledChar
@@ -241,6 +241,7 @@ export class CharBuild {
     public skills!: LeveledSkill[]
     public skillWeapon?: LeveledSkillWeapon
     public timeline?: CharBuildTimeline
+    public timelineDPS = false
 
     get baseWithTarget() {
         return this.baseName + "::" + this.targetFunction
@@ -288,6 +289,7 @@ export class CharBuild {
         this.enemyResistance = options.enemyResistance || 0
         this.targetFunction = options.targetFunction || "伤害"
         this.timeline = options.timeline
+        this.timelineDPS = options.timelineDPS || false
     }
 
     static fromCharSetting(
@@ -326,6 +328,7 @@ export class CharBuild {
             enemyResistance: charSettings.enemyResistance,
             targetFunction: charSettings.targetFunction,
             timeline,
+            timelineDPS: charSettings.timelineDPS,
         })
     }
 
@@ -1027,7 +1030,7 @@ export class CharBuild {
                         // 检查是否是技能字段、属性或武器属性
                         const isSkillField = getSkillAttr(fieldName, node.namespace)
                         const isAttr = fieldName in attrs
-                        const isWeaponAttr = getWeaponAttr(fieldName, node.namespace)
+                        const isWeaponAttr = getWeaponAttr(fieldName, node.namespace || "ranged")
 
                         if (!isSkillField && !isAttr && !isWeaponAttr) {
                             const ns = node.namespace ? `${node.namespace}::` : ""
@@ -1406,6 +1409,9 @@ export class CharBuild {
             }
         })
         this.baseName = initBaseName
+        if (this.timelineDPS) {
+            totalDamage /= timeline.totalTime
+        }
         return Math.round(totalDamage)
     }
     charModsExclusiveSeries = new Set<string>()
@@ -1561,6 +1567,7 @@ export class CharBuild {
             targetFunction: this.targetFunction,
             skillLevel: this.skills[0].等级,
             timeline: this.timeline,
+            timelineDPS: this.timelineDPS,
         })
     }
     getMods(charTab: string) {
