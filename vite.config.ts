@@ -74,6 +74,7 @@ export default defineConfig(async () => ({
             },
             workbox: {
                 navigateFallbackDenylist: [/^\/graphql/, /^\/api/],
+                maximumFileSizeToCacheInBytes: 3000000,
                 runtimeCaching: [
                     // {
                     //     urlPattern: /^https:\/\/xn--chq26veyq\.icu\/api\/.+/,
