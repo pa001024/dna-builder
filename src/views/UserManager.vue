@@ -101,6 +101,9 @@ const handleIframeMessage = (event: MessageEvent) => {
 onMounted(() => {
     loadUsers()
     window.addEventListener("message", handleIframeMessage)
+    if (!env.isApp) {
+        setting.dnaUserId = 0
+    }
 })
 
 // 组件卸载时移除消息监听
@@ -116,9 +119,9 @@ onBeforeUnmount(() => {
                 <Icon icon="ri:error-warning-line" class="size-12 text-warning mr-2" />
                 网页端不可用
             </div>
-            <RouterLink to="/" class="btn btn-primary px-8">
+            <a href="/api/download" class="btn btn-primary px-8">
                 <Icon icon="ri:download-2-line" />
-                下载APP</RouterLink
+                下载APP</a
             >
         </div>
         <!-- 顶部操作栏 -->

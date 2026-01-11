@@ -2,6 +2,7 @@
 import { ref, computed } from "vue"
 import draftData from "../data/d/draft.data"
 import type { Draft } from "../data/data-types"
+import { matchPinyin } from "../utils/pinyin-utils"
 
 const searchKeyword = ref("")
 const selectedDraft = ref<Draft | null>(null)
@@ -29,7 +30,21 @@ const rarities = computed(() => {
 // 过滤图纸列表
 const filteredDrafts = computed(() => {
     return draftData.filter(d => {
-        const matchKeyword = searchKeyword.value === "" || d.n.includes(searchKeyword.value)
+        // 搜索筛选
+        let matchKeyword = false
+        if (searchKeyword.value === "") {
+            matchKeyword = true
+        } else {
+            const q = searchKeyword.value
+            // 直接中文匹配
+            if (d.n.includes(q)) {
+                matchKeyword = true
+            } else {
+                // 拼音匹配（全拼/首字母）
+                matchKeyword = matchPinyin(d.n, q).match
+            }
+        }
+
         const matchType = selectedType.value === "" || d.t === selectedType.value
         const matchRarity = selectedRarity.value === "" || d.r === selectedRarity.value
         return matchKeyword && matchType && matchRarity
@@ -77,7 +92,7 @@ function getTypeName(type: string): string {
                     <input
                         v-model="searchKeyword"
                         type="text"
-                        placeholder="搜索图纸名称..."
+                        placeholder="搜索图纸名称（支持拼音）..."
                         class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
                     />
                 </div>
@@ -166,6 +181,7 @@ function getTypeName(type: string): string {
                                 <span>产物数量: {{ draft.c }}</span>
                                 <span v-if="draft.b">批量制造</span>
                                 <span v-if="draft.i">无限制造</span>
+                                <span v-if="!draft.s">隐藏</span>
                                 <span class="ml-auto">ID: {{ draft.id }}</span>
                             </div>
                         </div>

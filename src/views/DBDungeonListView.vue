@@ -2,6 +2,7 @@
 import { ref, computed } from "vue"
 import dungeonData from "../data/d/dungeon.data"
 import { getDungeonType } from "../utils/dungeon-utils"
+import { matchPinyin } from "../utils/pinyin-utils"
 
 const searchKeyword = ref("")
 const selectedDungeon = ref<(typeof dungeonData)[0] | null>(null)
@@ -17,12 +18,27 @@ const allTypes = computed(() => {
 const filteredDungeons = computed(() => {
     return dungeonData.filter(d => {
         const matchesType = selectedType.value === "" || d.t === selectedType.value
-        const matchesKeyword =
-            searchKeyword.value === "" ||
-            `${d.id}`.includes(searchKeyword.value) ||
-            d.n.includes(searchKeyword.value) ||
-            d.desc?.includes(searchKeyword.value) ||
-            `${d.lv}`.includes(searchKeyword.value)
+
+        let matchesKeyword = false
+        if (searchKeyword.value === "") {
+            matchesKeyword = true
+        } else {
+            const q = searchKeyword.value
+            // 直接匹配（ID、名称、描述、等级）
+            if (`${d.id}`.includes(q) || d.n.includes(q) || d.desc?.includes(q) || `${d.lv}`.includes(q)) {
+                matchesKeyword = true
+            } else {
+                // 拼音匹配（名称、描述）
+                const nameMatch = matchPinyin(d.n, q).match
+                if (nameMatch) {
+                    matchesKeyword = true
+                } else if (d.desc) {
+                    const descMatch = matchPinyin(d.desc, q).match
+                    matchesKeyword = descMatch
+                }
+            }
+        }
+
         return matchesType && matchesKeyword
     })
 })
@@ -42,7 +58,7 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
                     <input
                         v-model="searchKeyword"
                         type="text"
-                        placeholder="搜索副本ID/名称/描述/等级..."
+                        placeholder="搜索副本ID/名称/描述/等级（支持拼音）..."
                         class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
                     />
                 </div>

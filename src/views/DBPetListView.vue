@@ -3,6 +3,7 @@ import { ref, computed } from "vue"
 import petData from "../data/d/pet.data"
 import type { Pet } from "../data/data-types"
 import { LeveledPet } from "../data/leveled/LeveledPet"
+import { matchPinyin } from "../utils/pinyin-utils"
 
 const searchKeyword = ref("")
 const selectedPet = ref<Pet | null>(null)
@@ -27,7 +28,21 @@ const qualities = computed(() => {
 
 const filteredPets = computed(() => {
     return petData.filter(p => {
-        const matchKeyword = searchKeyword.value === "" || p.名称.includes(searchKeyword.value)
+        // 搜索筛选
+        let matchKeyword = false
+        if (searchKeyword.value === "") {
+            matchKeyword = true
+        } else {
+            const q = searchKeyword.value
+            // 直接中文匹配
+            if (p.名称.includes(q)) {
+                matchKeyword = true
+            } else {
+                // 拼音匹配（全拼/首字母）
+                matchKeyword = matchPinyin(p.名称, q).match
+            }
+        }
+
         const matchType = selectedType.value === 0 || p.类型 === selectedType.value
         const matchQuality = selectedQuality.value === 0 || p.品质 === selectedQuality.value
         return matchKeyword && matchType && matchQuality
@@ -80,7 +95,7 @@ function formatSkillDescription(pet: Pet, type: "主动" | "被动"): string {
                     <input
                         v-model="searchKeyword"
                         type="text"
-                        placeholder="搜索魔灵名称..."
+                        placeholder="搜索魔灵名称（支持拼音）..."
                         class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
                     />
                 </div>

@@ -4,6 +4,7 @@ import modData from "../data/d/mod.data"
 import type { Mod } from "../data/data-types"
 import { LeveledMod } from "../data"
 import { formatProp } from "../util"
+import { matchPinyin } from "../utils/pinyin-utils"
 
 const searchKeyword = ref("")
 const selectedMod = ref<Mod | null>(null)
@@ -41,7 +42,28 @@ const qualities = computed(() => {
 // 过滤魔之楔列表
 const filteredMods = computed(() => {
     return modData.filter(m => {
-        const matchKeyword = searchKeyword.value === "" || m.名称.includes(searchKeyword.value)
+        // 搜索筛选
+        let matchKeyword = false
+        if (searchKeyword.value === "") {
+            matchKeyword = true
+        } else {
+            const q = searchKeyword.value
+            // 直接中文匹配
+            if (m.名称.includes(q)) {
+                matchKeyword = true
+            } else {
+                // 拼音匹配（全拼/首字母）
+                const nameMatch = matchPinyin(m.名称, q).match
+                if (nameMatch) {
+                    matchKeyword = true
+                } else {
+                    // 尝试匹配系列
+                    const seriesMatch = matchPinyin(m.系列, q).match
+                    matchKeyword = seriesMatch
+                }
+            }
+        }
+
         const matchType = selectedType.value === "" || m.类型 === selectedType.value
         const matchSeries = selectedSeries.value === "" || m.系列 === selectedSeries.value
         const matchQuality = selectedQuality.value === "" || m.品质 === selectedQuality.value
@@ -72,7 +94,7 @@ function getQualityColor(quality: string): string {
                     <input
                         v-model="searchKeyword"
                         type="text"
-                        placeholder="搜索魔之楔名称..."
+                        placeholder="搜索魔之楔名称/系列（支持拼音）..."
                         class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
                     />
                 </div>

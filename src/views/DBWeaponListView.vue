@@ -3,6 +3,7 @@ import { ref, computed } from "vue"
 import weaponData from "../data/d/weapon.data"
 import type { Weapon } from "../data/data-types"
 import { formatProp } from "../util"
+import { matchPinyin } from "../utils/pinyin-utils"
 
 const searchKeyword = ref("")
 const selectedWeapon = ref<Weapon | null>(null)
@@ -31,9 +32,28 @@ const damageTypes = computed(() => {
 
 const filteredWeapons = computed(() => {
     return weaponData.filter(w => {
-        const matchKeyword = searchKeyword.value === "" || w.名称.includes(searchKeyword.value)
         const matchCategory = selectedCategory.value === "" || w.类型.includes(selectedCategory.value)
         const matchDamageType = selectedDamageType.value === "" || w.伤害类型 === selectedDamageType.value
+
+        if (searchKeyword.value === "") {
+            return matchCategory && matchDamageType
+        }
+
+        const query = searchKeyword.value
+
+        // 直接中文匹配
+        const directMatch = w.名称.includes(query) || w.类型.some(t => t.includes(query)) || w.伤害类型.includes(query)
+        if (directMatch) {
+            return matchCategory && matchDamageType
+        }
+
+        // 拼音匹配（全拼/首字母）
+        const nameMatch = matchPinyin(w.名称, query).match
+        const typeMatch = w.类型.some(t => matchPinyin(t, query).match)
+        const damageMatch = matchPinyin(w.伤害类型, query).match
+
+        const matchKeyword = nameMatch || typeMatch || damageMatch
+
         return matchKeyword && matchCategory && matchDamageType
     })
 })
@@ -47,7 +67,7 @@ const filteredWeapons = computed(() => {
                     <input
                         v-model="searchKeyword"
                         type="text"
-                        placeholder="搜索武器名称..."
+                        placeholder="搜索武器名称（支持拼音）..."
                         class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
                     />
                 </div>

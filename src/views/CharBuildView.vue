@@ -870,6 +870,7 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                         :char-build="charBuild"
                         :attributes="attributes"
                         @add-skill="addSkill($event)"
+                        v-model:model-show="weapon_select_model_show"
                     />
                     <WeaponTab
                         v-if="charTab === '远程'"
@@ -877,6 +878,7 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                         :char-build="charBuild"
                         :attributes="attributes"
                         @add-skill="addSkill($event)"
+                        v-model:model-show="weapon_select_model_show"
                     />
                     <WeaponTab
                         v-if="charTab === '同律'"
@@ -1166,7 +1168,7 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                                             {{ $t("护盾") }}
                                         </div>
                                         <div class="text-primary font-bold text-right">
-                                            {{ charBuild.enemy.es }}
+                                            {{ charBuild.enemy.es || 0 }}
                                         </div>
                                     </div>
                                 </div>

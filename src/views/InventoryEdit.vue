@@ -5,6 +5,7 @@ import { LeveledMod, LeveledWeapon, weaponData, modData } from "../data"
 import { useInvStore } from "../store/inv"
 import { copyText, pasteText } from "@/util"
 import { useUIStore } from "@/store/ui"
+import { matchPinyin } from "../utils/pinyin-utils"
 const inv = useInvStore()
 const ui = useUIStore()
 // 武器
@@ -17,14 +18,34 @@ const filteredWeapons = computed(() => {
     if (!weaponSearchQuery.value) return mappedWeapons
 
     const query = weaponSearchQuery.value.trim()
-    return mappedWeapons.filter(weapon => weapon.名称.includes(query) || weapon.类别.includes(query))
+    return mappedWeapons.filter(weapon => {
+        // 直接中文匹配
+        if (weapon.名称.includes(query) || weapon.类别.includes(query)) {
+            return true
+        }
+        // 拼音匹配（全拼/首字母）
+        const nameMatch = matchPinyin(weapon.名称, query).match
+        if (nameMatch) return true
+        const categoryMatch = matchPinyin(weapon.类别, query).match
+        if (categoryMatch) return true
+        return false
+    })
 })
 const filteredInvWeapons = computed(() => {
     const query = weaponSearchQuery.value.trim()
     return Object.keys(inv.weapons).filter(v => {
         try {
             const weapon = new LeveledWeapon(+v)
-            return weapon.名称.includes(query) || weapon.类别.includes(query)
+            // 直接中文匹配
+            if (weapon.名称.includes(query) || weapon.类别.includes(query)) {
+                return true
+            }
+            // 拼音匹配（全拼/首字母）
+            const nameMatch = matchPinyin(weapon.名称, query).match
+            if (nameMatch) return true
+            const categoryMatch = matchPinyin(weapon.类别, query).match
+            if (categoryMatch) return true
+            return false
         } catch {
             delete inv.meleeWeapons[v as any]
             delete inv.rangedWeapons[v as any]
@@ -42,7 +63,25 @@ const filteredMods = computed(() => {
     if (!modSearchQuery.value) return mappedMods
 
     const query = modSearchQuery.value.trim()
-    return mappedMods.filter(mod => JSON.stringify((mod as any)._originalModData).includes(query))
+    return mappedMods.filter(mod => {
+        // 直接中文匹配
+        if (
+            mod.名称.includes(query) ||
+            mod.属性?.includes(query) ||
+            mod.系列.includes(query) ||
+            JSON.stringify((mod as any)._originalModData).includes(query)
+        ) {
+            return true
+        }
+        // 拼音匹配（全拼/首字母）
+        const nameMatch = matchPinyin(mod.名称, query).match
+        if (nameMatch) return true
+        const propMatch = mod.属性 ? matchPinyin(mod.属性, query).match : false
+        if (propMatch) return true
+        const seriesMatch = matchPinyin(mod.系列, query).match
+        if (seriesMatch) return true
+        return false
+    })
 })
 
 const filteredSelectedMods = computed(() => {
@@ -51,10 +90,21 @@ const filteredSelectedMods = computed(() => {
     return Object.keys(inv.mods).filter(v => {
         try {
             const mod = new LeveledMod(+v)
-            return (
+            // 直接中文匹配
+            if (
                 selectTypes.has(LeveledMod.getQuality(Number(v))) &&
                 (mod.名称.includes(query) || mod.属性?.includes(query) || mod.系列.includes(query))
-            )
+            ) {
+                return true
+            }
+            // 拼音匹配（全拼/首字母）
+            const nameMatch = matchPinyin(mod.名称, query).match
+            if (nameMatch && selectTypes.has(LeveledMod.getQuality(Number(v)))) return true
+            const propMatch = mod.属性 ? matchPinyin(mod.属性, query).match : false
+            if (propMatch && selectTypes.has(LeveledMod.getQuality(Number(v)))) return true
+            const seriesMatch = matchPinyin(mod.系列, query).match
+            if (seriesMatch && selectTypes.has(LeveledMod.getQuality(Number(v)))) return true
+            return false
         } catch {
             delete inv.mods[+v]
             return false
@@ -160,7 +210,7 @@ async function handleImport() {
                                     <path d="m21 21-4.3-4.3" />
                                 </g>
                             </svg>
-                            <input v-model="weaponSearchQuery" type="search" class="grow" placeholder="搜索..." />
+                            <input v-model="weaponSearchQuery" type="search" class="grow" placeholder="搜索（支持拼音）..." />
                         </label>
                         <div
                             class="btn btn-sm btn-secondary"
@@ -181,7 +231,7 @@ async function handleImport() {
                 <div class="min-h-80 w-full pb-4">
                     <div
                         v-if="inv.enableWeapons.近战 || inv.enableWeapons.远程"
-                        class="p-4 grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-4"
+                        class="p-4 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4"
                     >
                         <WeaponItem
                             v-for="(weapon, index) in filteredWeapons"
@@ -212,7 +262,7 @@ async function handleImport() {
                                     <path d="m21 21-4.3-4.3" />
                                 </g>
                             </svg>
-                            <input v-model="modSearchQuery" type="search" class="grow" placeholder="搜索..." />
+                            <input v-model="modSearchQuery" type="search" class="grow" placeholder="搜索（支持拼音）..." />
                         </label>
                         <div
                             class="btn btn-sm btn-secondary"
@@ -235,7 +285,7 @@ async function handleImport() {
                 <div class="min-h-80 w-full pb-4">
                     <div
                         v-if="(['金', '紫', '蓝', '绿', '白'] as const).some(color => inv.enableMods[color])"
-                        class="p-4 grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-4"
+                        class="p-4 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4"
                     >
                         <ModItem
                             v-for="(mod, index) in filteredMods"

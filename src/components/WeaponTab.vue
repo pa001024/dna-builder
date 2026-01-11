@@ -34,17 +34,17 @@ const baseKey = computed(() => {
     return wkey
 })
 
-defineModel<boolean>("weapon_select_model_show")
+defineModel<boolean>("modelShow")
 </script>
 <template>
     <!-- 武器 -->
     <div
-        v-if="charBuild[`${wkey}Weapon`]"
+        v-if="charBuild[`${wkey}Weapon`] && weaponAttrs"
         class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-md p-4 space-y-3 border border-base-200"
     >
         <h3 class="flex items-center gap-4 text-lg font-bold text-base-content/90 mb-2">
             <div class="flex flex-1 flex-col">
-                <div class="text-lg font-bold cursor-pointer" @click="wkey !== 'skill' && (weapon_select_model_show = true)">
+                <div class="text-lg font-bold cursor-pointer" @click="wkey !== 'skill' && $emit('update:modelShow', true)">
                     {{ $t(charBuild[`${wkey}Weapon`]!.名称 || "") }}
                     <Icon v-if="wkey !== 'skill'" icon="ri:exchange-line" class="inline-block w-5 h-5 text-primary" />
                 </div>

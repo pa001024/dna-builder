@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue"
 import { charData } from "../data"
+import { matchPinyin } from "../utils/pinyin-utils"
 
 const tabs = ["全部", "输出", "同律武器", "武器伤害", "技能伤害", "辅助", "召唤物", "控制", "神智回复", "治疗", "最大生命", "防御", "护盾"]
 const activeTab = ref(tabs[1])
@@ -31,10 +32,21 @@ const filteredChars = computed(() => {
     let filtered = charData.filter(c => activeTab.value === "全部" || c.标签?.includes(activeTab.value))
 
     if (searchQuery.value) {
-        const query = searchQuery.value.toLowerCase()
-        filtered = filtered.filter(
-            c => c.名称.toLowerCase().includes(query) || c.别名?.toLowerCase().includes(query) || c.阵营?.toLowerCase().includes(query)
-        )
+        const query = searchQuery.value
+        filtered = filtered.filter(c => {
+            // 直接中文匹配
+            if (c.名称.includes(query) || c.别名?.includes(query) || c.阵营?.includes(query)) {
+                return true
+            }
+            // 拼音匹配（全拼/首字母）
+            const nameMatch = matchPinyin(c.名称, query)
+            if (nameMatch.match) return true
+            const aliasMatch = c.别名 ? matchPinyin(c.别名, query) : false
+            if (aliasMatch && aliasMatch.match) return true
+            const factionMatch = c.阵营 ? matchPinyin(c.阵营, query) : false
+            if (factionMatch && factionMatch.match) return true
+            return false
+        })
     }
 
     return filtered
@@ -61,7 +73,7 @@ const getAnimationDelay = (index: number) => {
                 <input
                     v-model="searchQuery"
                     type="text"
-                    :placeholder="$t('搜索角色名称、别名、阵营...')"
+                    :placeholder="$t('搜索角色名称、别名、阵营（支持拼音）...')"
                     class="input input-bordered w-full pl-10 pr-4 focus:input-primary transition-all"
                 />
                 <Icon icon="ri:search-line" class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50 w-5 h-5" />

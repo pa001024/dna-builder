@@ -41,7 +41,7 @@ const routes: readonly RouteRecordRaw[] = [
         component: env.isApp ? () => import("./views/GameLauncher.vue") : () => undefined,
         beforeEnter: () => setMinSize(800, 700),
     },
-    { name: "login", path: "/login", component: UserManager, beforeEnter: () => setMinSize(600, 600) },
+    { name: "login", path: "/userlogin", component: UserManager, beforeEnter: () => setMinSize(600, 600) },
     { name: "more", path: "/more", component: More, beforeEnter: () => setMinSize(600, 600) },
     // more: lazy load
     { name: "ai", path: "/ai", component: () => import("./views/AIAgent.vue"), beforeEnter: () => setMinSize(600, 600) },

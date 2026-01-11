@@ -4,6 +4,7 @@ import { achievementData } from "../data"
 import { useLocalStorage } from "@vueuse/core"
 import { t } from "i18next"
 import { useUIStore } from "../store/ui"
+import { matchPinyin } from "../utils/pinyin-utils"
 
 const ui = useUIStore()
 
@@ -73,14 +74,30 @@ const showClearConfirmDialog = () => {
 
 // 根据选中分类筛选的成就列表
 const filteredAchievements = computed(() => {
-    const query = searchQuery.value.toLowerCase()
+    const query = searchQuery.value.trim()
     let filtered = achievementData.filter(achievement => {
         // 分类筛选
         const categoryMatch = !selectedCategory.value || achievement.分类 === selectedCategory.value
         // 版本筛选
         const versionMatch = selectedVersion.value === "所有版本" || achievement.版本 === selectedVersion.value
+
         // 搜索筛选
-        const searchMatch = achievement.名称.toLowerCase().includes(query) || achievement.描述.toLowerCase().includes(query)
+        let searchMatch = false
+        if (query) {
+            // 直接中文匹配
+            const directMatch = achievement.名称.includes(query) || achievement.描述.includes(query)
+            if (directMatch) {
+                searchMatch = true
+            } else {
+                // 拼音匹配（全拼/首字母）
+                const nameMatch = matchPinyin(achievement.名称, query).match
+                const descMatch = matchPinyin(achievement.描述, query).match
+                searchMatch = nameMatch || descMatch
+            }
+        } else {
+            searchMatch = true
+        }
+
         // 已完成筛选
         const completedMatch = !hideCompleted.value || userFinishedIds.value.indexOf(achievement.id) === -1
 
@@ -315,7 +332,7 @@ watch(
                         v-model="searchQuery"
                         type="text"
                         class="ml-auto inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap min-w-40 max-w-80"
-                        :placeholder="$t('achievement.searchAchievements')"
+                        :placeholder="$t('achievement.searchAchievements') + '（支持拼音）'"
                     />
                 </div>
                 <ScrollArea class="flex-1">

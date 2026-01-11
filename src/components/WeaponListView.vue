@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from "vue"
-import { CharBuild, weaponData } from "../data"
+import { CharBuild, LeveledWeapon, weaponData } from "../data"
 import { format100, format100r } from "../util"
 import type { Weapon } from "../data/data-types"
+import { matchPinyin } from "../utils/pinyin-utils"
 
 const props = defineProps<{
     charBuild?: CharBuild
@@ -11,7 +12,7 @@ const props = defineProps<{
 }>()
 
 const tabs = ["全部", "单手剑", "长柄", "重剑", "双刀", "鞭刃", "太刀", "手枪", "双枪", "榴炮", "霰弹枪", "突击枪", "弓"]
-const activeTab = ref(tabs[1])
+const activeTab = ref(tabs[0])
 const searchQuery = ref("")
 const selectedMelee = ref(props.melee || 0)
 const selectedRanged = ref(props.ranged || 0)
@@ -33,8 +34,19 @@ const filteredWeapons = computed(() => {
     let filtered = weaponData.filter(w => activeTab.value === "全部" || w.类型.includes(activeTab.value))
 
     if (searchQuery.value) {
-        const query = searchQuery.value.toLowerCase()
-        filtered = filtered.filter(w => w.名称.toLowerCase().includes(query) || w.类型.includes(query))
+        const query = searchQuery.value
+        filtered = filtered.filter(w => {
+            // 直接中文匹配
+            if (w.名称.includes(query) || w.类型.some(t => t.includes(query))) {
+                return true
+            }
+            // 拼音匹配（全拼/首字母）
+            const nameMatch = matchPinyin(w.名称, query)
+            if (nameMatch.match) return true
+            const typeMatch = w.类型.some(t => matchPinyin(t, query).match)
+            if (typeMatch) return true
+            return false
+        })
     }
 
     return filtered
@@ -74,7 +86,7 @@ function selectWeapon(weapon: Weapon) {
                 <input
                     v-model="searchQuery"
                     type="text"
-                    :placeholder="$t('搜索武器名称、类型...')"
+                    :placeholder="$t('搜索武器名称、类型（支持拼音）...')"
                     class="input input-bordered w-full pl-10 pr-4 focus:input-primary transition-all"
                 />
                 <Icon icon="ri:search-line" class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50 w-5 h-5" />
@@ -90,7 +102,7 @@ function selectWeapon(weapon: Weapon) {
                         :class="activeTab === tab ? 'btn-primary shadow-lg scale-105' : 'btn-ghost hover:bg-base-200'"
                         @click="activeTab = tab"
                     >
-                        {{ tab }}
+                        {{ $t(tab) }}
                     </button>
                 </div>
             </ScrollArea>
@@ -169,7 +181,7 @@ function selectWeapon(weapon: Weapon) {
                                 {{ $t(weapon.伤害类型) }}
                             </span>
                             <span v-if="charBuild" class="text-primary">
-                                收益: {{ format100r(charBuild.calcIncome(weapon.加成 as any)) }}
+                                收益: {{ format100r(charBuild.calcIncome(new LeveledWeapon(weapon))) }}
                             </span>
                         </p>
 

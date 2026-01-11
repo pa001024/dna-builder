@@ -494,7 +494,7 @@ export class CharBuild {
             const all = this.getAllWeaponsAttrs()
             if (this.dynamicBuffs.length > 0) {
                 for (const b of this.dynamicBuffs) {
-                    attrs = b.applyDynamicAttr(char, attrs, this.allWeapons, all)
+                    attrs = b.applyDynamicAttr(char, attrs, this.getAllWeapons(), all)
                 }
             }
         }
@@ -614,15 +614,15 @@ export class CharBuild {
             const all = this.getAllWeaponsAttrs(weapon, attrs.weapon)
             if (this.dynamicBuffs.length > 0) {
                 for (const b of this.dynamicBuffs) {
-                    attrs = b.applyDynamicAttr(char, attrs, this.allWeapons, all)
+                    attrs = b.applyDynamicAttr(char, attrs, this.getAllWeapons(weapon), all)
                 }
             }
         }
         return attrs
     }
 
-    get allWeapons() {
-        return [this.selectedWeapon, this.meleeWeapon, this.rangedWeapon, this.skillWeapon]
+    getAllWeapons(weapon = this.selectedWeapon) {
+        return [weapon, this.meleeWeapon, this.rangedWeapon, this.skillWeapon]
     }
 
     /**
@@ -634,7 +634,7 @@ export class CharBuild {
      * @returns 所有武器属性
      */
     getAllWeaponsAttrs(weapon?: LeveledWeapon | LeveledSkillWeapon, weaponAttrs?: WeaponAttr) {
-        return this.allWeapons
+        return this.getAllWeapons(weapon)
             .map(w => (w ? (w.名称 === weapon?.名称 ? { weapon: weaponAttrs } : this.calculateWeaponAttributes(w, true, true)) : undefined))
             .map(a => a?.weapon)
     }

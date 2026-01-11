@@ -4,6 +4,7 @@ import monsterData from "../data/d/monster.data"
 import type { Monster } from "../data/data-types"
 import { Faction } from "../data/data-types"
 import { getMonsterType } from "../utils/monster-utils"
+import { matchPinyin } from "../utils/pinyin-utils"
 
 const searchKeyword = ref("")
 const selectedMonster = ref<Monster | null>(null)
@@ -24,7 +25,22 @@ const factions = computed(() => {
 const filteredMonsters = computed(() => {
     return monsterData.filter(m => {
         if (m.id < 2000000) return false
-        const matchKeyword = searchKeyword.value === "" || m.n.includes(searchKeyword.value)
+
+        // 搜索筛选
+        let matchKeyword = false
+        if (searchKeyword.value === "") {
+            matchKeyword = true
+        } else {
+            const q = searchKeyword.value
+            // 直接中文匹配
+            if (m.n.includes(q)) {
+                matchKeyword = true
+            } else {
+                // 拼音匹配（全拼/首字母）
+                matchKeyword = matchPinyin(m.n, q).match
+            }
+        }
+
         const matchFaction = selectedFaction.value === "" || m.f === selectedFaction.value
         return matchKeyword && matchFaction
     })
@@ -47,7 +63,7 @@ function getFactionName(faction: number | undefined): string {
                     <input
                         v-model="searchKeyword"
                         type="text"
-                        placeholder="搜索怪物名称..."
+                        placeholder="搜索怪物名称（支持拼音）..."
                         class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
                     />
                 </div>

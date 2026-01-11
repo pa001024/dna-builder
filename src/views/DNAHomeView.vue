@@ -23,7 +23,7 @@ const signCalendarRef = ref()
 onMounted(async () => {
     const t = await setting.getDNAAPI()
     if (!t) {
-        router.push("/login")
+        router.push("/userlogin")
         return
     }
     api = t
