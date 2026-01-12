@@ -140,6 +140,165 @@ export interface Skill {
     字段?: SkillField[]
     术语解释?: Record<string, string>
     召唤物?: SkillSummon
+    cd?: number
+    e?: SkillEffect[]
+    b?: SkillBuff[]
+    p?: SkillPassive[]
+}
+
+export interface SkillPassive {
+    id: number
+    v?: Record<string, number | number[]>
+}
+
+export interface SkillBuff {
+    id: number
+    t: BuffBody[]
+}
+
+export interface BuffBody {
+    fn: string
+    dot?: BuffDot[]
+    t?: BuffAttr[]
+    aura?: BuffAura[]
+}
+
+export interface BuffAura {
+    id: number
+    t: BuffBody
+    range: number
+    camp: string
+}
+
+export interface BuffDot {
+    d?: number // DotDelay
+    it: number // Interval
+    t: string
+    v?: number // Value
+    asi?: 1 // AllowSkillIntensity
+    dg?: string[] // DamageTag
+    dt?: string // DamageType
+    im?: number // Immediately
+    r?: number[] | number // Rate
+    c?: number // Condition
+    h?: number
+    EffectId?: number
+    PlaySe?: number
+    Stackable?: 1
+}
+
+export interface BuffAttr {
+    k: string
+    v: number[] | number
+    t?: string
+    z?: string
+}
+
+export interface SkillEffect {
+    id: number
+    t: EffectAttr[]
+}
+
+export interface EffectAttr {
+    ba?: string
+    fn?: string
+    r?: number[] | number // Rate
+    v?: number[] | number // Value
+    co?: number
+    Dilation?: number
+    Duration?: number
+    t?: BuffAttr[]
+    cid?: number // CreatureId
+    si?: ShapeInfo // CreateSkillCreature
+    sp?: number // Speed
+    tg?: string[] // Tags
+    pe?: PassiveEffect
+    Delay?: number
+    dt?: string
+    tp?: number | string // TriggerProbability
+    ai?: number // AllowSkillIntensity
+    as?: number // AllowSkillSustain
+    bc?: string
+    os?: number
+    BuffType?: number
+    IsExpand?: boolean
+    LastTimeValue?: number
+    FixLocation?: boolean
+    FormationId?: number
+    LifeTime?: number
+    MaxSummonCount?: number
+    SingleSummonCount?: number
+    UnitId?: number
+    UnitType?: string
+    RefreshRule?: string
+    Key?: string
+    AttrRates?: AttrRates // CreateUnit
+    aura?: BuffAura[]
+    AutoAttach?: number
+    cr?: boolean
+    Camp?: string
+    dot?: BuffDot[]
+}
+
+export interface AttrRates {
+    EnmityValue: number
+    StrongValue: number
+    ATK?: number
+    DEF?: number
+    MaxHp?: number | string
+    SkillEfficiency?: number
+    SkillIntensity?: number
+    SkillRange?: number
+    SkillSustain?: number
+    ES?: number
+    MaxES?: number
+}
+
+export interface PassiveEffect {
+    Grade1MspOnHit?: number
+    Grade4ExtraRate?: number
+    MarkAddMsp?: number
+    MarkAddSp?: number
+    MarkDamageRate?: number[]
+    MspOnHit?: number
+    Skill1Msp1?: number
+    Skill1Msp2?: number
+    Skill2Msp?: number
+    Skill2SpCost?: number
+    Grade1BuffNum?: number
+    Grade6CritRate?: number
+    PassiveLastTime?: number
+    Skill1BuffNum?: number
+    Skill01MaxTarget?: number
+    Skill02Time?: number
+    SkillIntensityRate?: number[]
+    DropEnergyLayer?: number
+    Grade1PropReturn?: number
+    Grade6DamageRate?: number
+    Grade6LastTime?: number
+    Level1Layer?: number
+    Level2Layer?: number
+    Level3Layer?: number
+    Skill01AddRate?: number
+    Skill01Num?: number
+    DemageAddRate?: number | number[]
+    Grade1LastTime?: number
+    Grade2Rate?: number
+    Skill02BuffTime?: number
+    Skill02BuffTimeMax?: number
+    Skill02BuffTimePerNum?: number
+    Skill02HpValue?: number
+    Skill03CD?: number
+}
+
+export interface ShapeInfo {
+    st: "Sphere" | "Box" | "Capsule"
+    r?: number // 半径 Sphere
+    h?: number // 高度 Box
+    l?: number // 长度 Box
+    w?: number // 宽度 Box
+    cr?: number // 胶囊体半径
+    ch?: number // 胶囊体高度
 }
 
 export interface WeaponSkill {

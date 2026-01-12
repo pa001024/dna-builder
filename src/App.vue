@@ -162,7 +162,7 @@ onMounted(() => {
                 </div>
             </transition>
         </RouterView>
-        <template #sidebar>
+        <template v-if="!$route.meta.noSidebar" #sidebar>
             <Sidebar />
         </template>
     </ResizeableWindow>

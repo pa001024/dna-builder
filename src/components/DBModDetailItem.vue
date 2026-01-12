@@ -4,6 +4,8 @@ import type { Mod, Draft, Dungeon } from "../data/data-types"
 import { LeveledMod } from "../data/leveled/LeveledMod"
 import { formatProp } from "../util"
 import { modDraftMap, modDungeonMap } from "../data/d/index"
+import { getRewardDetails, type RewardItem as RewardItemType } from "../utils/reward-utils"
+import { getDungeonName } from "@/utils/dungeon-utils"
 
 const props = defineProps<{
     mod: Mod
@@ -63,6 +65,45 @@ function formatDuration(minutes: number): string {
     const hours = Math.floor(minutes / 60)
     const mins = minutes % 60
     return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`
+}
+
+/**
+ * 递归查找奖励树中当前Mod的掉落信息
+ */
+function findModInRewardTree(reward: RewardItemType | null, modId: number): { pp?: number; times?: number } | null {
+    if (!reward) return null
+
+    if (reward.child) {
+        for (const child of reward.child) {
+            if (child.t === "Mod" && child.id === modId) {
+                return { pp: child.pp, times: child.times }
+            } else {
+                const result = findModInRewardTree(child, modId)
+                if (result) return result
+            }
+        }
+    }
+
+    return null
+}
+
+/**
+ * 获取Mod在特定副本中的掉落概率信息
+ */
+function getModDropInfo(dungeon: Dungeon, modId: number): { pp?: number; times?: number } {
+    // 合并所有奖励组ID，确保r和sr都是数组
+    const allRewardIds = [...(dungeon.r || []), ...(dungeon.sr || [])]
+
+    // 遍历所有奖励组，查找当前Mod
+    for (const rewardId of allRewardIds) {
+        const rewardDetails = getRewardDetails(rewardId)
+        const modDropInfo = findModInRewardTree(rewardDetails, modId)
+        if (modDropInfo) {
+            return modDropInfo
+        }
+    }
+
+    return {}
 }
 </script>
 
@@ -263,24 +304,38 @@ function formatDuration(minutes: number): string {
                 <div v-if="modDungeons.length > 0" class="p-3 bg-base-200 rounded mt-2">
                     <div class="text-xs text-base-content/70 mb-2">掉落来源</div>
                     <div class="space-y-2 text-sm">
-                        <RouterLink
-                            v-for="dungeon in modDungeons"
-                            :key="dungeon.id"
-                            :to="`/db/dungeon/${dungeon.id}`"
-                            class="flex justify-between items-center p-2 bg-base-300 rounded hover:bg-base-content/10 transition-colors"
-                        >
-                            <div class="flex items-center gap-2">
-                                <span class="font-medium">{{ dungeon.n }}</span>
-                                <span v-if="dungeon.e" class="text-xs px-1.5 py-0.5 rounded bg-primary/20 text-primary">{{
-                                    $t(dungeon.e)
-                                }}</span>
-                                <span class="text-xs text-base-content/70">ID: {{ dungeon.id }}</span>
-                            </div>
-                            <div class="flex items-center gap-2 text-base-content/70">
-                                <span v-if="dungeon.lv" class="text-xs">Lv.{{ dungeon.lv }}</span>
-                                <span class="text-xs">{{ dungeon.t }}</span>
-                            </div>
-                        </RouterLink>
+                        <FullTooltip v-for="dungeon in modDungeons" :key="dungeon.id" side="bottom">
+                            <template #tooltip>
+                                <DBDungeonDetailItem :dungeon="dungeon" />
+                            </template>
+                            <RouterLink
+                                :to="`/db/dungeon/${dungeon.id}`"
+                                class="flex flex-col gap-1 p-2 bg-base-300 rounded hover:bg-base-content/10 transition-colors"
+                            >
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-medium">{{ getDungeonName(dungeon) }}</span>
+                                        <span v-if="dungeon.e" class="text-xs px-1.5 py-0.5 rounded bg-primary/20 text-primary">{{
+                                            $t(dungeon.e)
+                                        }}</span>
+                                        <span class="text-xs text-base-content/70">ID: {{ dungeon.id }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-base-content/70">
+                                        <span v-if="dungeon.lv" class="text-xs">Lv.{{ dungeon.lv }}</span>
+                                        <span class="text-xs">{{ dungeon.t }}</span>
+                                    </div>
+                                </div>
+                                <!-- 显示掉落概率信息 -->
+                                <div class="text-xs text-base-content/50">
+                                    <span v-if="getModDropInfo(dungeon, mod.id).pp" class="mr-2">
+                                        概率: {{ +(getModDropInfo(dungeon, mod.id).pp! * 100).toFixed(2) }}%
+                                    </span>
+                                    <span v-if="getModDropInfo(dungeon, mod.id).times">
+                                        期望: {{ +getModDropInfo(dungeon, mod.id).times!.toFixed(2) }}次
+                                    </span>
+                                </div>
+                            </RouterLink>
+                        </FullTooltip>
                     </div>
                 </div>
             </div>

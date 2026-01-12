@@ -1,4 +1,6 @@
-import { AbyssDungeon, abyssDungeonMap } from "../data"
+import { t } from "i18next"
+import { AbyssDungeon, abyssDungeonMap, Dungeon } from "../data"
+import { getRewardDetails } from "./reward-utils"
 
 // 获取副本类型信息
 export function getDungeonType(type: string): { t: string; label: string; color: string } {
@@ -41,4 +43,95 @@ export function getAbyssDungeonLevel(dungeon: AbyssDungeon) {
 
 export function getAbyssDungeonName(dungeon: AbyssDungeon) {
     return getAbyssDungeonGroup(dungeon) + " " + getAbyssDungeonLevel(dungeon)
+}
+
+export function getDungeonName(dungeon: Dungeon) {
+    const yehang = ["DefenceMove", "ExtermPro"]
+    if (yehang.includes(dungeon.t) && dungeon.sr) {
+        if (dungeon.sm && dungeon.sm.length > 1) {
+            return t(dungeon.n) + `(${t("夜航手册 多号令")})`
+        }
+        return t(dungeon.n) + `(${t("夜航手册")})`
+    }
+    return dungeon.n
+}
+
+/**
+ * 获取副本的实际奖励名称列表
+ * 优先显示特殊奖励第一个，然后是普通奖励前两个
+ * 如果没有特殊奖励则普通奖励前三个
+ */
+export function getDungeonRewardNames(dungeon: Dungeon) {
+    // 收集所有奖励名称的函数
+    function getRewardNamesFromIds(rewardIds: number[]) {
+        const rewardNames: string[] = []
+
+        /**
+         * 递归遍历所有奖励层级，收集奖励名称
+         */
+        function collectRewards(rewardItem: any) {
+            if (!rewardItem) {
+                return
+            }
+
+            // 如果当前奖励项有名称，添加到列表
+            if (rewardItem.n) {
+                rewardNames.push(rewardItem.n)
+            }
+
+            // 如果当前奖励项有子奖励，递归遍历
+            if (rewardItem.child && rewardItem.child.length > 0) {
+                for (const child of rewardItem.child) {
+                    collectRewards(child)
+                }
+            }
+        }
+
+        // 遍历所有奖励组ID
+        for (const rewardId of rewardIds) {
+            const rewardDetails = getRewardDetails(rewardId)
+            if (rewardDetails) {
+                collectRewards(rewardDetails)
+            }
+        }
+
+        return rewardNames
+    }
+
+    // 获取特殊奖励名称（来自sr字段）
+    const specialRewardNames = dungeon.sr ? getRewardNamesFromIds(dungeon.sr) : []
+
+    // 获取普通奖励名称（来自r字段）
+    const normalRewardNames = dungeon.r ? getRewardNamesFromIds(dungeon.r) : []
+
+    // 按照规则组合奖励名称
+    const result: string[] = []
+
+    // 添加第一个特殊奖励（如果有）
+    if (specialRewardNames.length > 0) {
+        result.push(specialRewardNames[0])
+    }
+
+    // 添加普通奖励
+    const neededNormals = specialRewardNames.length > 0 ? 2 : 3
+    for (let i = 0; i < neededNormals && i < normalRewardNames.length; i++) {
+        result.push(normalRewardNames[i])
+    }
+
+    // 限制最多显示3个奖励，超过则显示"等"
+    const displayRewards = result.slice(0, 3)
+    let displayText = displayRewards.join("、")
+
+    // 检查是否有更多奖励
+    const totalRewards = result.length
+    const hasMore =
+        totalRewards > 3 ||
+        (specialRewardNames.length > 1 && displayRewards.length >= 1) ||
+        (normalRewardNames.length > neededNormals && displayRewards.length >= 1)
+
+    if (hasMore) {
+        displayText += "等"
+    }
+
+    return displayText
 }

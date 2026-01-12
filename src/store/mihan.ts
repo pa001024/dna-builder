@@ -7,9 +7,11 @@ import { missionsIngameQuery } from "../api/query"
 import { useSettingStore } from "../store/setting"
 import { env } from "../env"
 import { useUIStore } from "./ui"
+import { getInstanceInfo } from "@/api/external"
 
 export class MihanNotify {
     mihanData = useLocalStorage<string[][] | undefined>("mihanData", [])
+    mihanUpdateTime = useLocalStorage<number>("mihanUpdateTime", 0)
     mihanEnableNotify = useLocalStorage("mihanNotify", false)
     mihanNotifyOnce = useLocalStorage("mihanNotifyOnce", true)
     mihanNotifyTypes = useLocalStorage("mihanNotifyTypes", [] as number[])
@@ -31,7 +33,7 @@ export class MihanNotify {
         })
     }
     async updateMihanData() {
-        if (this.mihanData.value && !this.shouldUpdate()) return true
+        if (this.mihanData.value && !this.isOutdated()) return true
         const setting = useSettingStore()
         const api = await setting.getDNAAPI()
         if (api) {
@@ -39,20 +41,44 @@ export class MihanNotify {
             const data = await api.defaultRoleForTool()
             if (data?.data?.instanceInfo) {
                 const missions = data.data.instanceInfo.map(v => v.instances.map(v => v.name.replace("勘探/无尽", "勘察/无尽")))
-                if (!missions || JSON.stringify(missions) === JSON.stringify(this.mihanData.value)) return false
+                if (!missions) return false
+                if (JSON.stringify(missions) === JSON.stringify(this.mihanData.value)) {
+                    this.mihanUpdateTime.value = Date.now()
+                    return false
+                }
                 this.mihanData.value = missions
+                this.mihanUpdateTime.value = Date.now()
                 return true
             }
         }
-        const data = await missionsIngameQuery()
-        const missions = data?.missions.map(v => v.map(v => v.replace("勘探/无尽", "勘察/无尽")))
-        if (!missions || JSON.stringify(missions) === JSON.stringify(this.mihanData.value)) return false
-        this.mihanData.value = missions
+        try {
+            // 自己服务器
+            const data = await missionsIngameQuery()
+            const missions = data?.missions.map(v => v.map(v => v.replace("勘探/无尽", "勘察/无尽")))
+            if (!missions) return false
+            if (JSON.stringify(missions) === JSON.stringify(this.mihanData.value)) {
+                this.mihanUpdateTime.value = Date.now()
+                return false
+            }
+            this.mihanData.value = missions
+            this.mihanUpdateTime.value = new Date(data!.createdAt).getTime()
+        } catch {}
+        if (this.isOutdated()) {
+            // gamekee
+            const instanceInfo = await getInstanceInfo()
+            if (instanceInfo) {
+                this.mihanData.value = instanceInfo.map(v => v.map(v => v.replace("勘探/无尽", "勘察/无尽")))
+                this.mihanUpdateTime.value = Date.now()
+            }
+        }
         return true
     }
     show() {
         const ui = useUIStore()
         ui.mihanVisible = true
+    }
+    isOutdated() {
+        return Date.now() > this.getNextUpdateTime(this.mihanUpdateTime.value)
     }
     async showMihanNotification() {
         if (this.mihanNotifyOnce.value) {
@@ -90,9 +116,6 @@ export class MihanNotify {
         const oneHour = 60 * 60 * 1000
         return Math.ceil(now / oneHour) * oneHour
     }
-    shouldUpdate() {
-        return true
-    }
     shouldNotify() {
         if (
             this.mihanData.value?.some(
@@ -129,7 +152,7 @@ export class MihanNotify {
             }
             await this.checkNotify()
             if (this.mihanEnableNotify.value) this.startWatch()
-        }, duration + 3e3)
+        }, duration + 25e3) // 由于服务器往往需要25s左右才能更新数据，所以这里设置25s
     }
     static TYPES = ["角色", "武器", "魔之楔"]
     static MISSIONS = ["探险/无尽", "驱离", "拆解", "驱逐", "避险", "扼守/无尽", "护送", "勘察/无尽", "追缉", "调停", "迁移"]

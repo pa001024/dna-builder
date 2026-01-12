@@ -10,12 +10,12 @@ import TimelineEditor from "./views/TimelineEditor.vue"
 import AchievementList from "./views/AchievementList.vue"
 import { env } from "./env"
 import { LogicalSize, getCurrentWindow } from "@tauri-apps/api/window"
-import UserManager from "./views/UserManager.vue"
-import CharListView from "./views/CharListView.vue"
 import GuideListView from "./views/GuideListView.vue"
 import GuideDetailView from "./views/GuideDetailView.vue"
 import GuideEditView from "./views/GuideEditView.vue"
-
+import NotFound from "./views/NotFound.vue"
+import CharListView from "./views/CharListView.vue"
+import UserManager from "./views/UserManager.vue"
 let setMinSize = async (_w: number, _h: number) => {}
 ;(async () => {
     if (!env.isApp) return
@@ -42,16 +42,67 @@ const routes: readonly RouteRecordRaw[] = [
         beforeEnter: () => setMinSize(800, 700),
     },
     { name: "login", path: "/userlogin", component: UserManager, beforeEnter: () => setMinSize(600, 600) },
-    { name: "more", path: "/more", component: More, beforeEnter: () => setMinSize(600, 600) },
+    {
+        name: "more",
+        path: "/more",
+        component: More,
+        beforeEnter: () => setMinSize(600, 600),
+    },
+    // {
+    //     name: "flow-editor",
+    //     path: "/flow-editor",
+    //     component: () => import("./views/FlowEditorView.vue"),
+    //     beforeEnter: () => setMinSize(900, 700),
+    // },
     // more: lazy load
     { name: "ai", path: "/ai", component: () => import("./views/AIAgent.vue"), beforeEnter: () => setMinSize(600, 600) },
     { name: "help", path: "/help", component: () => import("./views/Help.vue"), beforeEnter: () => setMinSize(800, 700) },
 
+    // admin
+    {
+        name: "admin-home",
+        path: "/admin",
+        component: () => import("./admin/Home.vue"),
+        beforeEnter: () => setMinSize(600, 600),
+        meta: {
+            noSidebar: true,
+        },
+    },
+    {
+        name: "admin-login",
+        path: "/admin/login",
+        component: () => import("./admin/Login.vue"),
+        beforeEnter: () => setMinSize(600, 600),
+        meta: {
+            noSidebar: true,
+        },
+    },
+    {
+        name: "admin-user",
+        path: "/admin/user",
+        component: () => import("./admin/UserManagement.vue"),
+        beforeEnter: () => setMinSize(600, 600),
+        meta: {
+            noSidebar: true,
+        },
+    },
     // 数据库路由
     {
         name: "database",
         path: "/db",
         component: () => import("./views/DBView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+    },
+    {
+        name: "walnut-list",
+        path: "/db/walnut",
+        component: () => import("./views/DBWalnutListView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+    },
+    {
+        name: "walnut-detail",
+        path: "/db/walnut/:id",
+        component: () => import("./views/DBWalnutDetailView.vue"),
         beforeEnter: () => setMinSize(320, 360),
     },
     {
@@ -207,6 +258,9 @@ const routes: readonly RouteRecordRaw[] = [
     { name: "guide-detail", path: "/guides/:id", component: GuideDetailView, beforeEnter: () => setMinSize(800, 600) },
     { name: "guide-create", path: "/guides/create", component: GuideEditView, beforeEnter: () => setMinSize(800, 800) },
     { name: "guide-edit", path: "/guides/:id/edit", component: GuideEditView, beforeEnter: () => setMinSize(800, 800) },
+
+    // 404 页面 - 必须放在最后作为捕获所有未匹配路由
+    { path: "/:pathMatch(.*)*", name: "notfound", component: NotFound, beforeEnter: () => setMinSize(360, 430) },
 ]
 
 export const router = createRouter({

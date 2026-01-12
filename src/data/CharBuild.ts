@@ -26,6 +26,7 @@ export interface CharAttr {
     独立增伤: number
     属性穿透: number
     无视防御: number
+    技能无视防御: number
     技能速度: number
     失衡易伤: number
     技能倍率加数: number
@@ -253,7 +254,10 @@ export class CharBuild {
     }
 
     get charModsWithAura() {
-        return (this.auraMod ? [this.auraMod!, ...this.charMods] : this.charMods).filter(v => v !== null)
+        const mods = [...this.charMods]
+        if (this.auraMod) mods.push(this.auraMod)
+        if (this.tempMod) mods.push(this.tempMod)
+        return mods.filter(v => v !== null)
     }
 
     // 血量类型系数表
@@ -406,6 +410,7 @@ export class CharBuild {
         let summonAttackSpeed = this.getTotalBonus("召唤物攻击速度")
         let summonRange = this.getTotalBonus("召唤物范围")
         const ignoreDefense = this.getTotalBonusMul("无视防御")
+        const skillIgnoreDefense = this.getTotalBonusMul("技能无视防御")
         const independentDamageIncrease = this.getTotalBonusMul("独立增伤")
         const damageReduce = this.getTotalBonusReduce("减伤")
         const skillMultiplierSet = this.getTotalBonus("技能倍率赋值")
@@ -479,6 +484,7 @@ export class CharBuild {
             独立增伤: independentDamageIncrease,
             属性穿透: penetration,
             无视防御: ignoreDefense,
+            技能无视防御: skillIgnoreDefense,
             技能速度: skillSpeed,
             失衡易伤: imbalanceDamageBonus,
             技能倍率加数: skillAdd,
@@ -487,6 +493,11 @@ export class CharBuild {
             减伤: damageReduce,
             技能倍率赋值: skillMultiplierSet,
             有效生命: (health / (1 - defense / (300 + defense)) + shield) / (1 - damageReduce),
+        }
+        // 应用MOD条件 如果有变化就再计算一次
+        const condMods = this.charModsWithAura.filter(mod => mod.生效?.条件)
+        if (this.applyCondition(attrs, condMods)) {
+            return this.calculateAttributes(nocode)
         }
         // 应用MOD条件
         if (nocode) return attrs
@@ -497,11 +508,6 @@ export class CharBuild {
                     attrs = b.applyDynamicAttr(char, attrs, this.getAllWeapons(), all)
                 }
             }
-        }
-        // 应用MOD条件 如果有变化就再计算一次
-        const condMods = this.charModsWithAura.filter(mod => mod.生效?.条件)
-        if (this.applyCondition(attrs, condMods)) {
-            return this.calculateAttributes(nocode)
         }
         return attrs
     }
@@ -807,13 +813,13 @@ export class CharBuild {
      * @param finalDef 可选, 最终防御值
      * @returns 防御乘区
      */
-    public calculateDefenseMultiplier(attrs: ReturnType<typeof this.calculateAttributes>, finalDef?: number): number {
+    public calculateDefenseMultiplier(attrs: ReturnType<typeof this.calculateAttributes>, finalDef?: number, isSkill = false): number {
         // 确保等级和敌方等级都是有效的数字
         const charLevel = this.char.等级 || 80
         const enemyLevel = this.enemy.等级 || 80
 
         const levelDiff = Math.max(0, Math.min(20, Math.min(80, enemyLevel) - charLevel))
-        const def = finalDef ?? this.enemy.def * (1 - attrs.无视防御)
+        const def = finalDef ?? this.enemy.def * (1 - (isSkill ? attrs.技能无视防御 : attrs.无视防御))
         const dmgReduce = def / (300 + def - levelDiff * 10) // 减伤率
         const defenseMultiplier = 1 - dmgReduce
         return Math.max(0, Math.min(1, defenseMultiplier))
@@ -937,7 +943,7 @@ export class CharBuild {
         }
         const final = this.calculateTargetFunction(damage, attrs, targetFunction)
         const floating = 1 + 0.1 * Math.random() - 0.05 // -0.05 ~ 0.05
-        const defenseMultiplier = this.calculateDefenseMultiplier(attrs)
+        const defenseMultiplier = this.calculateDefenseMultiplier(attrs, undefined, (attrs.weapon?.暴击 || 0) === 0)
         dmg = final * dmg * floating
         let finalDamage = 0
         if (!enemy) enemy = this.enemy
@@ -1334,7 +1340,7 @@ export class CharBuild {
         }
         // 计算目标函数
         const final = this.calculateTargetFunction(damage, attrs)
-        const defenseMultiplier = this.calculateDefenseMultiplier(attrs)
+        const defenseMultiplier = this.calculateDefenseMultiplier(attrs, undefined, !weapon)
         let finalDamage = 0
         // 计算防御乘区
         if (final > 0) {

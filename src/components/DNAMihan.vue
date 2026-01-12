@@ -27,7 +27,7 @@ onUnmounted(() => {
 })
 </script>
 <template>
-    <DNAMihanItem :missions="mihanData || []" :mihan-notify-missions="mihanNotifyMissions" />
+    <DNAMihanItem :missions="mihanNotify.isOutdated() ? [] : mihanData || []" :mihan-notify-missions="mihanNotifyMissions" />
     <div class="p-4 flex flex-col gap-2">
         <div class="text-lg font-bold pb-2">
             {{ $t("resizeableWindow.monitorSettings") }}

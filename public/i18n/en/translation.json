@@ -2702,6 +2702,26 @@
         "unfinishedFirst": "Unfinished First",
         "unnamedAchievement": "Unnamed Achievement"
     },
+    "activity-calendar": {
+        "click_to_complete": "Click to mark as completed",
+        "drag_hint": "Drag to view",
+        "end": "End",
+        "end_suffix": "remaining",
+        "ended_suffix": "ago",
+        "load_error": "Failed to load activity data",
+        "moling_completed": "This period's Echo completed",
+        "moling_desc": "Refreshes every 3 days",
+        "moling_refresh": "Echo Refresh",
+        "moling_refresh_next": "Next Echo Refresh",
+        "no_activities": "No activities",
+        "start": "Start",
+        "status_ended": "Ended",
+        "status_ongoing": "Ongoing",
+        "status_upcoming": "Upcoming",
+        "theater_desc": "Participate in performances and get commission letters!",
+        "theater_title": "Immersive Theater",
+        "title": "Activity Calendar"
+    },
     "ai": {
         "desc": "Interact with games using AI agents",
         "inputMessage": "Enter message, press Enter to send",
@@ -3051,6 +3071,10 @@
     "more": {
         "desc": "More features",
         "title": "More"
+    },
+    "notfound": {
+        "back_home": "Back to Home",
+        "title": "Page Not Found"
     },
     "pet-list": {
         "title": "Geniemon List"

@@ -45,6 +45,7 @@ export default defineConfig([
                     ignoreRestSiblings: true,
                 },
             ],
+            "vue/require-explicit-emits": "off",
         },
     },
 ])

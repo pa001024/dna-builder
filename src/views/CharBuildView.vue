@@ -363,22 +363,22 @@ function applyAutobuild() {
     charSettings.value.rangedWeaponLevel = newBuild.rangedWeapon.等级
     charSettings.value.rangedWeaponRefine = newBuild.rangedWeapon.精炼
     charSettings.value.charMods = pad(
-        newBuild.charMods.map(v => [v!.id, v!.等级]),
+        newBuild.charMods.filter(v => v !== null).map(v => [v.id, v.等级]),
         8,
         null
     )
     charSettings.value.meleeMods = pad(
-        newBuild.meleeMods.map(v => [v!.id, v!.等级]),
+        newBuild.meleeMods.filter(v => v !== null).map(v => [v.id, v.等级]),
         8,
         null
     )
     charSettings.value.rangedMods = pad(
-        newBuild.rangedMods.map(v => [v!.id, v!.等级]),
+        newBuild.rangedMods.filter(v => v !== null).map(v => [v.id, v.等级]),
         8,
         null
     )
     charSettings.value.skillWeaponMods = pad(
-        newBuild.skillMods.map(v => [v!.id, v!.等级]),
+        newBuild.skillMods.filter(v => v !== null).map(v => [v.id, v.等级]),
         4,
         null
     )
@@ -866,19 +866,19 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                     <!-- 武器 -->
                     <WeaponTab
                         v-if="charTab === '近战'"
+                        v-model:model-show="weapon_select_model_show"
                         wkey="melee"
                         :char-build="charBuild"
                         :attributes="attributes"
                         @add-skill="addSkill($event)"
-                        v-model:model-show="weapon_select_model_show"
                     />
                     <WeaponTab
                         v-if="charTab === '远程'"
+                        v-model:model-show="weapon_select_model_show"
                         wkey="ranged"
                         :char-build="charBuild"
                         :attributes="attributes"
                         @add-skill="addSkill($event)"
-                        v-model:model-show="weapon_select_model_show"
                     />
                     <WeaponTab
                         v-if="charTab === '同律'"
@@ -915,8 +915,8 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                                 <Select
                                     :value="charSettings.baseName"
                                     class="input input-sm input-primary w-full"
-                                    @change="charSettings.baseName = $event"
                                     placeholder="选择时间线"
+                                    @change="charSettings.baseName = $event"
                                 >
                                     <SelectItem v-for="timeline in timelines" :key="timeline.name" :value="timeline.name">
                                         {{ timeline.name }}
@@ -1031,6 +1031,13 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                                                 .join(",")
                                         }}
                                     </div>
+                                </div>
+                            </div>
+                            <div class="collapse p-2">
+                                <input type="checkbox" />
+                                <div class="collapse-title font-semibold p-0">底层数据</div>
+                                <div class="collapse-content p-0">
+                                    <SkillDetails :skill="selectedSkill.skillData" :lv="selectedSkillLevel" />
                                 </div>
                             </div>
                         </div>
@@ -1488,16 +1495,14 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                                 <h4 class="text-lg font-bold mb-3">MOD</h4>
                                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
                                     <div
-                                        v-for="mod in charBuild.mods
-                                            .filter(v => v.类型 === '角色')
-                                            .reduce((r, v) => {
-                                                if (r[v.名称]) {
-                                                    r[v.名称].count += 1
-                                                } else {
-                                                    r[v.名称] = { count: 1, mod: v }
-                                                }
-                                                return r
-                                            }, {} as any)"
+                                        v-for="mod in charBuild.mods.reduce((r, v) => {
+                                            if (r[v.名称]) {
+                                                r[v.名称].count += 1
+                                            } else {
+                                                r[v.名称] = { count: 1, mod: v }
+                                            }
+                                            return r
+                                        }, {} as any)"
                                         :key="mod.mod.名称"
                                         class="flex items-center gap-2 px-3 py-2 rounded-lg bg-linear-to-r from-secondary/10 to-secondary/5 border border-secondary/30 text-sm"
                                     >

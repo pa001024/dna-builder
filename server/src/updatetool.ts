@@ -92,6 +92,7 @@ async function updateMissionsIngame(server: string, missions: string[][]) {
 const updateMH = async (server: string = "cn", t: number = 10) => {
     console.log(`${new Date().toLocaleString()} 开始同步密函信息 - server: ${server}`)
     let is_success = false
+    await sleep(20000)
     for (let i = 0; i < t; i++) {
         await sleep(5000)
         try {

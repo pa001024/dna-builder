@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, computed } from "vue"
 import dungeonData from "../data/d/dungeon.data"
-import { getDungeonType } from "../utils/dungeon-utils"
+import { getDungeonName, getDungeonRewardNames, getDungeonType } from "../utils/dungeon-utils"
 import { matchPinyin } from "../utils/pinyin-utils"
 
 const searchKeyword = ref("")
@@ -24,8 +24,9 @@ const filteredDungeons = computed(() => {
             matchesKeyword = true
         } else {
             const q = searchKeyword.value
+            const iname = getDungeonName(d)
             // 直接匹配（ID、名称、描述、等级）
-            if (`${d.id}`.includes(q) || d.n.includes(q) || d.desc?.includes(q) || `${d.lv}`.includes(q)) {
+            if (`${d.id}`.includes(q) || d.n.includes(q) || d.desc?.includes(q) || `${d.lv}`.includes(q) || iname.includes(q)) {
                 matchesKeyword = true
             } else {
                 // 拼音匹配（名称、描述）
@@ -33,8 +34,9 @@ const filteredDungeons = computed(() => {
                 if (nameMatch) {
                     matchesKeyword = true
                 } else if (d.desc) {
-                    const descMatch = matchPinyin(d.desc, q).match
-                    matchesKeyword = descMatch
+                    matchesKeyword = matchPinyin(d.desc, q).match
+                } else if (iname !== d.n) {
+                    matchesKeyword = matchPinyin(iname, q).match
                 }
             }
         }
@@ -101,7 +103,7 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
                                 <div>
                                     <div class="font-medium flex gap-2 items-center">
                                         <img v-if="dungeon.e" :src="`/imgs/${dungeon.e}.png`" class="h-8 inline-block rounded" />
-                                        {{ dungeon.n }}
+                                        {{ getDungeonName(dungeon) }}
                                     </div>
                                     <div class="text-xs opacity-70 mt-1">
                                         {{ dungeon.desc }}
@@ -117,7 +119,7 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
                             <div class="flex items-center gap-2 mt-2 text-xs opacity-70">
                                 <span>怪物: {{ (dungeon.m || []).length }}个</span>
                                 <span v-if="(dungeon.sm || []).length">特殊: {{ (dungeon.sm || []).length }}个</span>
-                                <span v-if="dungeon.r?.length">奖励: {{ dungeon.r.length }}组</span>
+                                <span v-if="dungeon.r?.length"> 奖励: {{ getDungeonRewardNames(dungeon) }} </span>
                                 <span class="ml-auto">ID: {{ dungeon.id }}</span>
                             </div>
                         </div>

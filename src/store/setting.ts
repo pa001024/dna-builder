@@ -29,6 +29,8 @@ export const useSettingStore = defineStore("setting", {
             showAIChat: useLocalStorage("setting_show_ai_chat", false),
             // 身份验证
             jwtToken: useLocalStorage("jwt_token", ""),
+            // 上次刷新时间（秒）
+            lastCapInterval: useLocalStorage("last_cap_interval", 0),
         }
     },
     getters: {},

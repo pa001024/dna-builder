@@ -2702,6 +2702,26 @@
         "unfinishedFirst": "미완료 우선",
         "unnamedAchievement": "이름 없는 업적"
     },
+    "activity-calendar": {
+        "click_to_complete": "클릭하여 완료 표시",
+        "drag_hint": "드래그하여 보기",
+        "end": "종료",
+        "end_suffix": "후",
+        "ended_suffix": "전",
+        "load_error": "활동 데이터 로드 실패",
+        "moling_completed": "이번 주기 에코 완료",
+        "moling_desc": "3일마다 새로고침",
+        "moling_refresh": "에코 새로고침",
+        "moling_refresh_next": "다음 에코 새로고침",
+        "no_activities": "활동 없음",
+        "start": "시작",
+        "status_ended": "종료됨",
+        "status_ongoing": "진행 중",
+        "status_upcoming": "곧 시작",
+        "theater_desc": "공연에 참여하여 의뢰장을 획득!",
+        "theater_title": "몰입형 연극",
+        "title": "활동 달력"
+    },
     "ai": {
         "desc": "AI 에이전트를 사용하여 게임과 상호작용",
         "inputMessage": "메시지를 입력하고 Enter 키를 눌러 보내세요",
@@ -3051,6 +3071,10 @@
     "more": {
         "desc": "기타 기능",
         "title": "더보기"
+    },
+    "notfound": {
+        "back_home": "홈으로 돌아가기",
+        "title": "페이지를 찾을 수 없습니다"
     },
     "pet-list": {
         "title": "마령 목록"

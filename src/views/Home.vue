@@ -12,9 +12,9 @@ const items = [
         icon: "ri:hammer-line",
     },
     {
-        name: "inventory",
-        path: "/inventory",
-        icon: "ri:box-1-line",
+        name: "database",
+        path: "/db",
+        icon: "ri:book-line",
     },
     {
         name: "achievement",
@@ -109,6 +109,10 @@ onMounted(() => {
                     </div>
                 </RouterLink>
             </div>
+
+            <!-- 活动日历组件 -->
+            <ActivityCalendar />
+
             <RouterLink
                 v-if="env.isApp"
                 to="/game-launcher"

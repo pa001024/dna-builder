@@ -2702,6 +2702,26 @@
         "unfinishedFirst": "未完成優先",
         "unnamedAchievement": "未命名成就"
     },
+    "activity-calendar": {
+        "click_to_complete": "點擊標記完成",
+        "drag_hint": "可左右拖動查看",
+        "end": "結束時間",
+        "end_suffix": "結束",
+        "ended_suffix": "結束",
+        "load_error": "加載活動數據失敗",
+        "moling_completed": "本週期魔靈已完成",
+        "moling_desc": "每3天刷新一次",
+        "moling_refresh": "魔靈刷新",
+        "moling_refresh_next": "下一週期魔靈刷新",
+        "no_activities": "暫無活動",
+        "start": "開始時間",
+        "status_ended": "已結束",
+        "status_ongoing": "進行中",
+        "status_upcoming": "即將開始",
+        "theater_desc": "參演熱映劇目，領取委託密函！",
+        "theater_title": "沉浸式戲劇",
+        "title": "活動日曆"
+    },
     "ai": {
         "desc": "使用AI智能體與遊戲互動",
         "inputMessage": "輸入訊息，按 Enter 發送",
@@ -3051,6 +3071,10 @@
     "more": {
         "desc": "更多功能",
         "title": "更多"
+    },
+    "notfound": {
+        "back_home": "返回首頁",
+        "title": "頁面未找到"
     },
     "pet-list": {
         "title": "魔靈列表"

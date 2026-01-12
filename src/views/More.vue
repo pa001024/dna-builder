@@ -28,6 +28,21 @@ const items = [
         path: "/db",
         icon: "ri:book-line",
     },
+    // {
+    //     name: "flow-editor",
+    //     path: "/flow-editor",
+    //     icon: "ri:node-tree",
+    // },
+    {
+        name: "dna-home",
+        path: "/dna",
+        icon: "ri:chat-thread-line",
+    },
+    {
+        name: "more",
+        path: "/more",
+        icon: "ri:more-line",
+    },
     {
         name: "inventory",
         path: "/inventory",

@@ -2702,6 +2702,26 @@
         "unfinishedFirst": "未完了優先",
         "unnamedAchievement": "名前のない実績"
     },
+    "activity-calendar": {
+        "click_to_complete": "クリックして完了をマーク",
+        "drag_hint": "ドラッグして表示",
+        "end": "終了",
+        "end_suffix": "後",
+        "ended_suffix": "前",
+        "load_error": "アクティビティデータの読み込みに失敗しました",
+        "moling_completed": "今周期のエコー完了",
+        "moling_desc": "3日ごとに更新",
+        "moling_refresh": "エコー更新",
+        "moling_refresh_next": "次回エコー更新",
+        "no_activities": "アクティビティがありません",
+        "start": "開始",
+        "status_ended": "終了済み",
+        "status_ongoing": "進行中",
+        "status_upcoming": "開始予定",
+        "theater_desc": "上演に参加して、依頼状を入手！",
+        "theater_title": "没入式演劇",
+        "title": "アクティビティカレンダー"
+    },
     "ai": {
         "desc": "AI エージェントを使用してゲームと対話する",
         "inputMessage": "メッセージを入力し、Enterキーを押して送信",
@@ -3051,6 +3071,10 @@
     "more": {
         "desc": "その他の機能",
         "title": "もっと"
+    },
+    "notfound": {
+        "back_home": "ホームに戻る",
+        "title": "ページが見つかりません"
     },
     "pet-list": {
         "title": "ジェネモン一覧"

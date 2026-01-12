@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue"
-import { DNAAPI, DNAGameConfigResponse, DNARoleEntity } from "dna-api"
+import { DNAAPI, DNARoleEntity } from "dna-api"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
 import { useLocalStorage } from "@vueuse/core"
@@ -15,7 +15,6 @@ const inv = useInvStore()
 let api: DNAAPI
 
 const loading = ref(true)
-const gameConfig = useLocalStorage<DNAGameConfigResponse>("dna.gameConfig", {} as any)
 const roleInfo = useLocalStorage<DNARoleEntity>("dna.roleInfo", {} as any)
 const lastUpdateTime = useLocalStorage("dna.gameInfo.lastUpdateTime", 0)
 
@@ -36,13 +35,6 @@ async function loadData(force = false) {
             return
         }
         loading.value = true
-
-        const res = await api.getGameConfig()
-        if (res.is_success && res.data) {
-            gameConfig.value = res.data[0]
-        } else {
-            ui.showErrorMessage(res.msg || "获取游戏配置失败")
-        }
 
         const roleRes = await api.defaultRoleForTool()
         if (roleRes.is_success && roleRes.data) {
@@ -110,7 +102,7 @@ function getWeaponUnlockProgress(weapons: DNARoleEntity["roleInfo"]["roleShow"][
         <div v-if="loading" class="flex justify-center items-center h-full py-8">
             <span class="loading loading-spinner loading-lg" />
         </div>
-        <div v-if="roleInfo" class="space-y-6">
+        <div v-if="roleInfo && roleInfo.roleInfo?.roleShow" class="space-y-6">
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body">
                     <div class="flex flex-col md:flex-row items-center gap-4">

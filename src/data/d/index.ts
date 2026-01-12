@@ -147,3 +147,9 @@ export const petMap = new Map<number, Pet>()
 petData.forEach(v => petMap.set(v.id, v))
 
 export { type DBMap, type DBMapMarker } from "./map.data"
+
+import walnutData, { type Walnut } from "./walnut.data"
+export const walnutMap = new Map<number, Walnut>()
+walnutData.forEach(v => walnutMap.set(v.id, v))
+
+export { type WalnutReward, type Walnut } from "./walnut.data"

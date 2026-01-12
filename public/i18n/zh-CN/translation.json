@@ -75,6 +75,16 @@
     "异化夜魔": "异化夜魔之",
     "有效生命": "有效生命",
     "羽蛇": "羽蛇之",
+    "预定义": {
+        "暴击伤害": "暴击伤害",
+        "范围收益": "范围收益",
+        "耐久收益": "耐久收益",
+        "期望伤害": "期望伤害",
+        "伤害": "伤害",
+        "效益收益": "效益收益",
+        "DPH": "DPH",
+        "DPS": "DPS"
+    },
     "远程": "远程武器",
     "增伤": "增伤",
     "中庭蛇": "中庭蛇之",
@@ -106,6 +116,26 @@
         "title": "成就",
         "unfinishedFirst": "未完成优先",
         "unnamedAchievement": "未命名成就"
+    },
+    "activity-calendar": {
+        "click_to_complete": "点击标记完成",
+        "drag_hint": "可左右拖动查看",
+        "end": "结束时间",
+        "end_suffix": "结束",
+        "ended_suffix": "结束",
+        "load_error": "加载活动数据失败",
+        "moling_completed": "本周期魔灵已完成",
+        "moling_desc": "每3天刷新一次",
+        "moling_refresh": "魔灵刷新",
+        "moling_refresh_next": "下一周期魔灵刷新",
+        "no_activities": "暂无活动",
+        "start": "开始时间",
+        "status_ended": "已结束",
+        "status_ongoing": "进行中",
+        "status_upcoming": "即将开始",
+        "theater_desc": "参演热映剧目，领取委托密函！",
+        "theater_title": "沉浸式戏剧",
+        "title": "活动日历"
     },
     "ai": {
         "desc": "使用AI智能体与游戏互动",
@@ -207,6 +237,29 @@
     "char-list": {
         "title": "角色列表"
     },
+    "damageResult": {
+        "critDamage": {
+            "highCritNoTrigger": "高暴击未触发",
+            "highCritTrigger": "高暴击触发",
+            "lowCritNoTrigger": "低暴击未触发",
+            "lowCritTrigger": "低暴击触发",
+            "title": "暴击伤害"
+        },
+        "error": "错误",
+        "expectedDamage": {
+            "expected": "期望伤害",
+            "noHpDamage": "无HP伤害",
+            "title": "期望伤害"
+        },
+        "expectedValues": {
+            "expectedCritNoTrigger": "期望暴击未触发",
+            "expectedCritTrigger": "期望暴击触发",
+            "highCritExpectedTrigger": "高暴击期望触发",
+            "lowCritExpectedTrigger": "低暴击期望触发",
+            "title": "期望值"
+        },
+        "title": "伤害结果"
+    },
     "database": {
         "abyss_dungeon": "深渊副本",
         "abyss_dungeon_desc": "查看深渊副本信息和BUFF",
@@ -226,6 +279,8 @@
         "rank": "排名奖励",
         "rank_desc": "查看排名赛奖励",
         "title": "资料库",
+        "walnut": "密函",
+        "walnut_desc": "查看密函概率信息和模拟抽取",
         "weapon": "武器",
         "weapon_desc": "查看武器信息和属性"
     },
@@ -262,6 +317,12 @@
     "errorBoundary": {
         "retry": "重试",
         "title": "组件渲染出错"
+    },
+    "flowEditor": {
+        "canvas": "画布",
+        "nodePalette": "节点面板",
+        "resultPanel": "结果面板",
+        "title": "节点编辑器"
     },
     "game-launcher": {
         "addCustomType": "添加自定义类型",
@@ -397,10 +458,12 @@
         "step2": "第二步",
         "step3": "第三步",
         "step4": "第四步",
+        "swipeHint": "滑动切换",
         "timelineStep1": "创建战斗时间线序列",
         "timelineStep2": "配置技能释放顺序和时机",
         "timelineStep3": "模拟战斗流程和伤害输出",
         "title": "帮助中心",
+        "version": "DNA Builder 帮助中心",
         "workflow": "使用流程"
     },
     "home": {
@@ -450,6 +513,149 @@
     "more": {
         "desc": "更多功能",
         "title": "更多"
+    },
+    "nodes": {
+        "tier1": {
+            "charStats": {
+                "baseAttack": "基础攻击",
+                "baseDefense": "基础防御",
+                "baseHP": "基础生命",
+                "baseSanity": "基础神智",
+                "baseShield": "基础护盾",
+                "char": "角色",
+                "icon": "ri:user-line",
+                "label": "角色属性",
+                "level": "等级"
+            },
+            "enemyStats": {
+                "currentHP": "当前血量",
+                "defense": "防御",
+                "enemy": "敌人",
+                "hpType": "HP类型",
+                "icon": "ri:skull-line",
+                "label": "敌人属性",
+                "level": "等级",
+                "life": "生命",
+                "resistance": "抗性",
+                "shield": "护盾",
+                "stance": "战姿"
+            },
+            "label": "基础属性",
+            "modStats": {
+                "attack": "攻击",
+                "charSlot": "角色",
+                "crit": "暴击",
+                "critDamage": "暴伤",
+                "damageIncrease": "增伤",
+                "icon": "ri:box-3-line",
+                "label": "MOD属性",
+                "level": "等级",
+                "meleeSlot": "近战",
+                "mod": "MOD",
+                "rangedSlot": "远程",
+                "skillSlot": "同律",
+                "slot": "槽位"
+            },
+            "weaponStats": {
+                "baseAttack": "基础攻击",
+                "baseCrit": "基础暴击",
+                "baseCritDamage": "基础暴伤",
+                "baseTrigger": "基础触发",
+                "fireRate": "射速",
+                "icon": "ri:sword-line",
+                "label": "武器属性",
+                "level": "等级",
+                "melee": "近战",
+                "ranged": "远程",
+                "refine": "精炼",
+                "type": "类型",
+                "weapon": "武器"
+            }
+        },
+        "tier2": {
+            "bonusCollector": {
+                "attack": "攻击",
+                "damageIncrease": "增伤",
+                "description": "收集来自上游节点的所有加成",
+                "elementalDamage": "属性伤",
+                "icon": "ri:add-line",
+                "label": "加成收集"
+            },
+            "label": "加成收集"
+        },
+        "tier3": {
+            "defenseMultiplier": {
+                "defense": "防御值",
+                "description": "计算敌方防御带来的伤害减免",
+                "icon": "ri:shield-line",
+                "label": "防御乘区",
+                "multiplier": "乘区"
+            },
+            "hpMultiplier": {
+                "boost": "昂扬",
+                "desperate": "背水",
+                "hpPercent": "血量百分比",
+                "icon": "ri:heart-line",
+                "label": "HP乘区",
+                "total": "总计"
+            },
+            "label": "乘区计算"
+        },
+        "tier5": {
+            "label": "技能系统",
+            "skillField": {
+                "base": "基础",
+                "field": "字段",
+                "icon": "ri:magic-line",
+                "label": "技能字段",
+                "level": "等级",
+                "multiplier": "倍率",
+                "skill": "技能",
+                "times": "段数"
+            },
+            "summonStats": {
+                "attackSpeed": "攻击速度",
+                "attackTimes": "攻击次数",
+                "char": "角色",
+                "icon": "ri:team-line",
+                "label": "召唤物",
+                "level": "等级",
+                "range": "范围",
+                "summon": "召唤物"
+            }
+        },
+        "tier7": {
+            "label": "输出与时间线",
+            "output": {
+                "description": "最终输出节点",
+                "finalDamage": "最终伤害",
+                "icon": "ri:output-line",
+                "label": "输出"
+            },
+            "targetFunction": {
+                "calculationResult": "计算结果",
+                "custom": "自定义表达式",
+                "icon": "ri:function-line",
+                "label": "目标函数",
+                "macros": "可用宏:",
+                "placeholder": "输入AST表达式, 如: 伤害 * (1 + 增伤)",
+                "predefined": "预定义函数",
+                "validationError": "无法验证表达式"
+            },
+            "timeline": {
+                "avgDamage": "平均伤害",
+                "description": "根据持续时间和DPS计算总伤害输出",
+                "dps": "DPS",
+                "duration": "持续时间 (秒)",
+                "icon": "ri:time-line",
+                "label": "时间线伤害",
+                "totalDamage": "总伤害"
+            }
+        }
+    },
+    "notfound": {
+        "back_home": "返回首页",
+        "title": "页面未找到"
     },
     "pet-list": {
         "title": "魔灵列表"
@@ -517,6 +723,9 @@
         "updateErrorMessage": "下载或安装更新时出错，请稍后重试",
         "updateFailed": "更新失败",
         "updating": "更新中..."
+    },
+    "walnut-list": {
+        "title": "密函列表"
     },
     "weapon-detail": {
         "title": "武器详情"

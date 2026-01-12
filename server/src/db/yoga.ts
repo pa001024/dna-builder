@@ -39,6 +39,7 @@ export interface JWTUser {
     id: string
     name: string
     qq?: string
+    roles?: string[]
 }
 export const jwtToken = `${machineIdSync()}`
 

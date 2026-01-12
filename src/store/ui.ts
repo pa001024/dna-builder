@@ -1,6 +1,6 @@
 import { defineStore } from "pinia"
-import type { IconTypes } from "../components/Icon.vue"
-import { env } from "../env"
+import { IconTypes } from "@/components/Icon.vue"
+import { env } from "@/env"
 import { until } from "@vueuse/core"
 
 export interface ITab {
@@ -76,6 +76,11 @@ export const useUIStore = defineStore("ui", {
                     path: "/dna",
                     icon: "ri:chat-thread-line",
                 },
+                // {
+                //     name: "flow-editor",
+                //     path: "/flow-editor",
+                //     icon: "ri:node-tree",
+                // },
                 {
                     name: "more",
                     path: "/more",

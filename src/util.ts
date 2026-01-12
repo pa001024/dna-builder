@@ -16,6 +16,9 @@ export function format100(n100: number, di = 2) {
 export function format100r(n100: number, di = 2) {
     return `${n100 >= 0 ? "+" : ""}${+(n100 * 100).toFixed(di)}%`
 }
+export function format1000(n: number, di = 0) {
+    return `${n.toLocaleString("en-US", { minimumFractionDigits: di, maximumFractionDigits: di })}`
+}
 const numKeys = new Set([
     "有效生命",
     "基础攻击",

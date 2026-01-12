@@ -7663,6 +7663,9 @@ export default t.map((item: Mod) => {
             ...item,
             ...pi,
         }
+    } else if (id > 100000) {
+        const 限定 = item.效果?.match(/改变(.+?)的/)?.[1] || ""
+        return { ...item, 限定 }
     }
     return item
 })

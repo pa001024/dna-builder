@@ -1,9 +1,10 @@
 import jwt from "jsonwebtoken"
 import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
-import { eq } from "drizzle-orm"
+import { eq, like, sql, desc } from "drizzle-orm"
 import { Context, jwtToken } from "../yoga"
 import { db, schema } from ".."
 import { id } from "../schema"
+import { createGraphQLError } from "graphql-yoga"
 
 export const typeDefs = /* GraphQL */ `
     type Mutation {
@@ -12,16 +13,20 @@ export const typeDefs = /* GraphQL */ `
         guest(name: String!, qq: String): UserLoginResult!
         register(name: String!, qq: String!, email: String!, password: String!): UserLoginResult!
         updateUserMeta(data: UsersUpdateInput!): UserLoginResult!
+        deleteUser(id: String!): Boolean!
     }
 
     type Query {
         me: User
         user(id: String!): User!
+        users(limit: Int, offset: Int, search: String): [User!]!
+        usersCount(search: String): Int!
     }
 
     type User {
         id: String!
         name: String
+        email: String
         qq: String
         pic: String
         uid: String
@@ -50,7 +55,7 @@ export const typeDefs = /* GraphQL */ `
 `
 
 function signToken(user: typeof schema.users.$inferSelect) {
-    return jwt.sign({ id: user.id, email: user.email, name: user.name, qq: user.qq }, jwtToken)
+    return jwt.sign({ id: user.id, email: user.email, name: user.name, qq: user.qq, roles: user.roles }, jwtToken)
 }
 
 export const resolvers = {
@@ -67,6 +72,37 @@ export const resolvers = {
             return (await db.query.users.findFirst({
                 where: eq(schema.users.id, id),
             })) as any
+        },
+        users: async (parent, args, context) => {
+            if (!context.user || !context.user.roles?.includes("admin")) {
+                throw createGraphQLError("Unauthorized: Admin role required")
+            }
+
+            const limit = args?.limit || 20
+            const offset = args?.offset || 0
+            const search = args?.search || ""
+            const where = search ? like(schema.users.email, `%${search}%`) : undefined
+
+            return await db.query.users.findMany({
+                where,
+                offset,
+                limit,
+                orderBy: [desc(schema.users.createdAt)],
+            })
+        },
+        usersCount: async (parent, args, context) => {
+            if (!context.user || !context.user.roles?.includes("admin")) {
+                throw createGraphQLError("Unauthorized: Admin role required")
+            }
+
+            const search = args?.search || ""
+            const where = search ? like(schema.users.email, `%${search}%`) : undefined
+
+            const result = await db
+                .select({ count: sql<number>`count(*)` })
+                .from(schema.users)
+                .where(where)
+            return result[0]?.count || 0
         },
     },
     Mutation: {
@@ -169,6 +205,14 @@ export const resolvers = {
                 return { success: true, message: "User updated successfully", token, user }
             }
             return { success: false, message: "User not found" }
+        },
+        deleteUser: async (parent, { id }, context) => {
+            if (!context.user || !context.user.roles?.includes("admin")) {
+                throw createGraphQLError("Unauthorized: Admin role required")
+            }
+
+            const result = await db.delete(schema.users).where(eq(schema.users.id, id)).returning()
+            return result.length > 0
         },
     },
 } satisfies Resolver<CreateMobius<typeof typeDefs>, Context>
