@@ -180,7 +180,7 @@ function openOnce() {
     }
 
     // 最多保留50条记录
-    if (openResults.value.length > 50) {
+    if (openResults.value.length > 200) {
         openResults.value.pop()
     }
 }
@@ -362,7 +362,7 @@ function getRewardTypeColor(index: number): string {
 
                     <!-- 开函结果 -->
                     <div class="mb-3">
-                        <div class="text-xs text-base-content/70 mb-2">开函结果（最近50次）</div>
+                        <div class="text-xs text-base-content/70 mb-2">开函结果（最近200次）</div>
                         <div class="bg-base-300 rounded p-2 max-h-48 overflow-y-auto">
                             <div v-if="openResults.length === 0" class="text-center text-base-content/60 py-4">暂无开函记录</div>
                             <div v-else class="grid grid-cols-1 gap-1">

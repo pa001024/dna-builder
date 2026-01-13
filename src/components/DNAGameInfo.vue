@@ -60,14 +60,14 @@ async function syncInventory() {
         }
         inv.meleeWeapons = roleInfo.value.roleInfo.roleShow.closeWeapons.reduce(
             (acc, cur) => {
-                if (cur.unLocked) acc[cur.name] = cur.skillLevel
+                if (cur.unLocked) acc[cur.weaponId] = cur.skillLevel
                 return acc
             },
             {} as Record<string, number>
         )
         inv.rangedWeapons = roleInfo.value.roleInfo.roleShow.langRangeWeapons.reduce(
             (acc, cur) => {
-                if (cur.unLocked) acc[cur.name] = cur.skillLevel
+                if (cur.unLocked) acc[cur.weaponId] = cur.skillLevel
                 return acc
             },
             {} as Record<string, number>
