@@ -144,8 +144,8 @@ export class LeveledChar {
     get url() {
         return LeveledChar.url(this.icon)
     }
-    static url(icon: string) {
-        return `/imgs/webp/T_Head_${icon}.webp`
+    static url(icon?: string) {
+        return icon ? `/imgs/webp/T_Head_${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
     }
     get elementUrl() {
         return LeveledChar.elementUrl(this.属性)

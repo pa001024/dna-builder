@@ -14,7 +14,7 @@ const weaponSearchQuery = ref("")
 const filteredWeapons = computed(() => {
     const mappedWeapons = allWeapons
         .filter(v => inv.enableWeapons[v.类型[0] as keyof typeof inv.enableWeapons])
-        .map(v => new LeveledWeapon(v.id, v.名称 in inv.weapons ? inv.weapons[v.id] : 5))
+        .map(v => new LeveledWeapon(v.id, v.id in inv.weapons ? inv.weapons[v.id] : 5))
     if (!weaponSearchQuery.value) return mappedWeapons
 
     const query = weaponSearchQuery.value.trim()
@@ -36,6 +36,7 @@ const filteredInvWeapons = computed(() => {
     return Object.keys(inv.weapons).filter(v => {
         try {
             const weapon = new LeveledWeapon(+v)
+            if (!inv.enableWeapons[weapon.类型 as keyof typeof inv.enableWeapons]) return false
             // 直接中文匹配
             if (weapon.名称.includes(query) || weapon.类别.includes(query)) {
                 return true

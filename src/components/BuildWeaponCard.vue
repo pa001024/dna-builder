@@ -26,6 +26,7 @@ defineProps<{
                 <p class="text-gray-400 text-xs">
                     {{
                         Object.entries(weapon.getSimpleProperties())
+                            .filter(([_k, v]) => v)
                             .map(([k, v]) => `${$t(k)} ${formatProp(k, v)}`)
                             .join("，")
                     }}

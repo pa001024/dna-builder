@@ -302,6 +302,24 @@ export class LeveledWeapon {
         return icon ? `/imgs/webp/T_Head_${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
     }
 
+    static typeUrl(type: string) {
+        const typeMap: Record<string, string> = {
+            鞭刃: "Swordwhip",
+            弓: "Bow",
+            榴炮: "Cannon",
+            重剑: "Claymore",
+            双枪: "Crossbow",
+            双刀: "Dualblade",
+            太刀: "Katana",
+            突击枪: "Machinegun",
+            手枪: "Pistol",
+            长柄: "Polearm",
+            霰弹枪: "Shotgun",
+            单手剑: "Sword",
+        }
+        return `/imgs/webp/T_Gacha_WeaponType_${typeMap[type]}.webp`
+    }
+
     public clone(): LeveledWeapon {
         const weapon = new LeveledWeapon(this._originalWeaponData, this._精炼, this._等级, this.effectLv)
         return weapon

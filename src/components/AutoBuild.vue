@@ -33,8 +33,8 @@ function buildMods() {
         fixedMelee: !includeMelee,
         fixedRanged: !includeRanged,
         modOptions: inv.getModsWithCount(useInv, autoBuildSetting.value.includeTypes),
-        meleeOptions: inv.getMeleeWeapons(useInv),
-        rangedOptions: inv.getRangedWeapons(useInv),
+        meleeOptions: inv.getMeleeWeapons(useInv, props.charBuild.char.属性),
+        rangedOptions: inv.getRangedWeapons(useInv, props.charBuild.char.属性),
         enableLog: true,
     })
     return {

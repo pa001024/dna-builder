@@ -5,7 +5,7 @@ import { t } from "i18next"
 import { useGameStore } from "../store/game"
 import { useUIStore } from "../store/ui"
 import { openExplorer } from "../api/app"
-import { charData, weaponData } from "../data"
+import { charData, LeveledChar, weaponData } from "../data"
 import { env } from "../env"
 import { Mod } from "../store/db"
 // 状态管理
@@ -86,7 +86,7 @@ watchEffect(async () => {
         const data = await Promise.all(
             (entityType.value === "char" ? charData : weaponData).map(async v => ({
                 name: v.名称,
-                icon: `/imgs/${v.名称}.png`,
+                icon: LeveledChar.url(v.icon),
                 count: await game.getModsCountByEntity(v.名称),
             }))
         )

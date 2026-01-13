@@ -979,57 +979,55 @@ import { formatProp, formatSkillProp } from "../util"
 import { groupBy } from "lodash-es"
 import { useTimeline } from "../store/timeline"
 const inv = useInvStore()
-const charOptions = charData.map(char => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
+const charOptions = charData.map(char => ({ value: char.名称, label: char.名称, elm: char.属性, icon: LeveledChar.url(char.icon) }))
 const selectedChar = useLocalStorage("selectedChar", "赛琪")
 const charSettings = useCharSettings(selectedChar)
 const baseName = ref(charSettings.value.baseName)
 const targetFunction = ref("")
-const charBuild = computed(
-    () =>
-        new CharBuild({
-            char: new LeveledChar(selectedChar.value, charSettings.value.charLevel),
-            auraMod: new LeveledMod(charSettings.value.auraMod),
-            charMods: charSettings.value.charMods.filter(mod => mod !== null).map(m => new LeveledMod(m[0], m[1], inv.getBuffLv(m[0]))),
-            meleeMods: charSettings.value.meleeMods.filter(mod => mod !== null).map(m => new LeveledMod(m[0], m[1], inv.getBuffLv(m[0]))),
-            rangedMods: charSettings.value.rangedMods.filter(mod => mod !== null).map(m => new LeveledMod(m[0], m[1], inv.getBuffLv(m[0]))),
-            skillMods: charSettings.value.skillWeaponMods
-                .filter(mod => mod !== null)
-                .map(m => new LeveledMod(m[0], m[1], inv.getBuffLv(m[0]))),
-            skillLevel: charSettings.value.charSkillLevel,
-            buffs: charSettings.value.buffs
-                .map(v => {
-                    try {
-                        const b = new LeveledBuff(v[0], v[1])
-                        return b
-                    } catch (error) {
-                        console.error(error)
-                        charSettings.value.buffs = charSettings.value.buffs.filter(b => b[0] !== v[0])
-                        return null
-                    }
-                })
-                .filter(b => b !== null),
-            melee: new LeveledWeapon(
-                charSettings.value.meleeWeapon,
-                charSettings.value.meleeWeaponRefine,
-                charSettings.value.meleeWeaponLevel,
-                inv.getWBuffLv(charSettings.value.meleeWeapon)
-            ),
-            ranged: new LeveledWeapon(
-                charSettings.value.rangedWeapon,
-                charSettings.value.rangedWeaponRefine,
-                charSettings.value.rangedWeaponLevel,
-                inv.getWBuffLv(charSettings.value.rangedWeapon)
-            ),
-            baseName: charSettings.value.baseName,
-            imbalance: charSettings.value.imbalance,
-            hpPercent: charSettings.value.hpPercent,
-            resonanceGain: charSettings.value.resonanceGain,
-            enemyId: charSettings.value.enemyId,
-            enemyLevel: charSettings.value.enemyLevel,
-            enemyResistance: charSettings.value.enemyResistance,
-            targetFunction: charSettings.value.targetFunction,
-        })
-)
+const charBuild = computed(() => {
+    const char = new LeveledChar(selectedChar.value, charSettings.value.charLevel)
+    return new CharBuild({
+        char,
+        auraMod: new LeveledMod(charSettings.value.auraMod),
+        charMods: charSettings.value.charMods.filter(mod => mod !== null).map(m => new LeveledMod(m[0], m[1], inv.getBuffLv(m[0]))),
+        meleeMods: charSettings.value.meleeMods.filter(mod => mod !== null).map(m => new LeveledMod(m[0], m[1], inv.getBuffLv(m[0]))),
+        rangedMods: charSettings.value.rangedMods.filter(mod => mod !== null).map(m => new LeveledMod(m[0], m[1], inv.getBuffLv(m[0]))),
+        skillMods: charSettings.value.skillWeaponMods.filter(mod => mod !== null).map(m => new LeveledMod(m[0], m[1], inv.getBuffLv(m[0]))),
+        skillLevel: charSettings.value.charSkillLevel,
+        buffs: charSettings.value.buffs
+            .map(v => {
+                try {
+                    const b = new LeveledBuff(v[0], v[1])
+                    return b
+                } catch (error) {
+                    console.error(error)
+                    charSettings.value.buffs = charSettings.value.buffs.filter(b => b[0] !== v[0])
+                    return null
+                }
+            })
+            .filter(b => b !== null),
+        melee: new LeveledWeapon(
+            charSettings.value.meleeWeapon,
+            charSettings.value.meleeWeaponRefine,
+            charSettings.value.meleeWeaponLevel,
+            inv.getWBuffLv(charSettings.value.meleeWeapon, char.属性)
+        ),
+        ranged: new LeveledWeapon(
+            charSettings.value.rangedWeapon,
+            charSettings.value.rangedWeaponRefine,
+            charSettings.value.rangedWeaponLevel,
+            inv.getWBuffLv(charSettings.value.rangedWeapon, char.属性)
+        ),
+        baseName: charSettings.value.baseName,
+        imbalance: charSettings.value.imbalance,
+        hpPercent: charSettings.value.hpPercent,
+        resonanceGain: charSettings.value.resonanceGain,
+        enemyId: charSettings.value.enemyId,
+        enemyLevel: charSettings.value.enemyLevel,
+        enemyResistance: charSettings.value.enemyResistance,
+        targetFunction: charSettings.value.targetFunction,
+    })
+})
 const buffOptions = computed(() =>
     buffData
         .filter(buff => !buff.限定 || buff.限定 === selectedChar.value || buff.限定 === charBuild.value.char.属性)

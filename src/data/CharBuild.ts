@@ -302,8 +302,9 @@ export class CharBuild {
         charSettings: typeof import("../composables/useCharSettings").defaultCharSettings,
         timeline?: CharBuildTimeline
     ) {
+        const char = new LeveledChar(selectedChar, charSettings.charLevel)
         return new CharBuild({
-            char: new LeveledChar(selectedChar, charSettings.charLevel),
+            char,
             auraMod: new LeveledMod(charSettings.auraMod),
             charMods: charSettings.charMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv.getBuffLv(v[0]))),
             meleeMods: charSettings.meleeMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv.getBuffLv(v[0]))),
@@ -315,13 +316,13 @@ export class CharBuild {
                 charSettings.meleeWeapon,
                 charSettings.meleeWeaponRefine,
                 charSettings.meleeWeaponLevel,
-                inv.getWBuffLv(charSettings.meleeWeapon)
+                inv.getWBuffLv(charSettings.meleeWeapon, char.属性)
             ),
             ranged: new LeveledWeapon(
                 charSettings.rangedWeapon,
                 charSettings.rangedWeaponRefine,
                 charSettings.rangedWeaponLevel,
-                inv.getWBuffLv(charSettings.rangedWeapon)
+                inv.getWBuffLv(charSettings.rangedWeapon, char.属性)
             ),
             baseName: charSettings.baseName,
             imbalance: charSettings.imbalance,
@@ -1532,7 +1533,25 @@ export class CharBuild {
             return this.calculate() / mval - 1
         } else {
             let mval = 0
-            if (props instanceof LeveledBuff) {
+            if (
+                props instanceof LeveledWeapon &&
+                props.类型 === "近战" &&
+                (this.isMeleeWeapon || (this.isSkillWeapon && this.skillWeapon!.inherit === "melee"))
+            ) {
+                const temp = this.meleeWeapon
+                this.meleeWeapon = props
+                mval = this.calculate()
+                this.meleeWeapon = temp
+            } else if (
+                props instanceof LeveledWeapon &&
+                props.类型 === "远程" &&
+                (this.isRangedWeapon || (this.isSkillWeapon && this.skillWeapon!.inherit === "ranged"))
+            ) {
+                const temp = this.rangedWeapon
+                this.rangedWeapon = props
+                mval = this.calculate()
+                this.rangedWeapon = temp
+            } else if (props instanceof LeveledBuff) {
                 if (props.code) {
                     this.dynamicBuffs.push(props)
                     mval = this.calculate()
@@ -1813,14 +1832,23 @@ export class CharBuild {
             return mapped[Math.floor(Math.random() * (lastSameIncome + 1))]
         }
         function findMaxMelee() {
-            const tempBuild = localBuild.clone()
-            tempBuild.meleeWeapon = LeveledWeapon.emptyWeapon
-            return meleeOptions.reduce((a, b) => (tempBuild.calcIncome(b) > tempBuild.calcIncome(a) ? b : a))
+            let options = meleeOptions
+            // 当计算近战武器伤害时，只考虑相同类别武器
+            if (localBuild.isMeleeWeapon) {
+                options = options.filter(v => v.类别 === localBuild.meleeWeapon.类别)
+            }
+            return options.reduce((a, b) => {
+                // console.log(a.名称, localBuild.calcIncome(a))
+                return localBuild.calcIncome(b) > localBuild.calcIncome(a) ? b : a
+            })
         }
         function findMaxRanged() {
-            const tempBuild = localBuild.clone()
-            tempBuild.rangedWeapon = LeveledWeapon.emptyWeapon
-            return rangedOptions.reduce((a, b) => (tempBuild.calcIncome(b) > tempBuild.calcIncome(a) ? b : a))
+            let options = rangedOptions
+            // 当计算远程武器伤害时，只考虑相同类别武器
+            if (localBuild.isRangedWeapon) {
+                options = options.filter(v => v.类别 === localBuild.rangedWeapon.类别)
+            }
+            return options.reduce((a, b) => (localBuild.calcIncome(b) > localBuild.calcIncome(a) ? b : a))
         }
         function next(iter: number) {
             let changed = false
@@ -1829,10 +1857,10 @@ export class CharBuild {
                 const maxed = findMaxMelee()
                 if (maxed.名称 !== localBuild.meleeWeapon.名称) {
                     const oldName = localBuild.meleeWeapon.名称
-                    const oldIncome = localBuild.calcIncome(localBuild.meleeWeapon, true)
+                    const oldIncome = localBuild.calcIncome(localBuild.meleeWeapon)
                     localBuild.meleeWeapon = maxed
                     log(
-                        `第${iter}次迭代: 用近战 ${maxed.名称} 替换 ${oldName} 收益: ${+(oldIncome * 100).toFixed(2)}% -> ${+(localBuild.calcIncome(maxed, true) * 100).toFixed(2)}%`
+                        `第${iter}次迭代: 用近战 ${maxed.名称} 替换 ${oldName} 收益: ${+(oldIncome * 100).toFixed(2)}% -> ${+(localBuild.calcIncome(maxed) * 100).toFixed(2)}%`
                     )
                     changed = true
                 }
@@ -1841,10 +1869,10 @@ export class CharBuild {
                 const maxed = findMaxRanged()
                 if (maxed.名称 !== localBuild.rangedWeapon.名称) {
                     const oldName = localBuild.rangedWeapon.名称
-                    const oldIncome = localBuild.calcIncome(localBuild.rangedWeapon, true)
+                    const oldIncome = localBuild.calcIncome(localBuild.rangedWeapon)
                     localBuild.rangedWeapon = maxed
                     log(
-                        `第${iter}次迭代: 用远程 ${maxed.名称} 替换 ${oldName} 收益: ${+(oldIncome * 100).toFixed(2)}% -> ${+(localBuild.calcIncome(maxed, true) * 100).toFixed(2)}%`
+                        `第${iter}次迭代: 用远程 ${maxed.名称} 替换 ${oldName} 收益: ${+(oldIncome * 100).toFixed(2)}% -> ${+(localBuild.calcIncome(maxed) * 100).toFixed(2)}%`
                     )
                     changed = true
                 }

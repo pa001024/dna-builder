@@ -61,7 +61,7 @@ const charOptions = charData.map(char => ({
     value: char.名称,
     label: char.名称,
     elm: char.属性,
-    icon: `/imgs/${char.名称}.png`,
+    icon: LeveledChar.url(char.icon),
 }))
 const modOptions = modData
     .map(mod => ({
@@ -119,7 +119,7 @@ const meleeWeaponOptions = weaponData
         value: weapon.名称,
         label: weapon.名称,
         type: weapon.类型[1],
-        icon: `/imgs/${weapon.名称}.png`,
+        icon: LeveledWeapon.url(weapon.icon),
     }))
 const rangedWeaponOptions = weaponData
     .filter(weapon => weapon.类型[0] === "远程")
@@ -127,7 +127,7 @@ const rangedWeaponOptions = weaponData
         value: weapon.名称,
         label: weapon.名称,
         type: weapon.类型[0],
-        icon: `/imgs/${weapon.名称}.png`,
+        icon: LeveledWeapon.url(weapon.icon),
     }))
 
 // 状态变量
@@ -174,20 +174,21 @@ const teamWeaponOptions = computed(() =>
 // 创建CharBuild实例
 const charBuild = computed(() => {
     try {
+        const char = new LeveledChar(selectedChar.value, charSettings.value.charLevel)
         const melee = new LeveledWeapon(
             charSettings.value.meleeWeapon,
             charSettings.value.meleeWeaponRefine,
             charSettings.value.meleeWeaponLevel,
-            inv.getWBuffLv(charSettings.value.meleeWeapon)
+            inv.getWBuffLv(charSettings.value.meleeWeapon, char.属性)
         )
         const ranged = new LeveledWeapon(
             charSettings.value.rangedWeapon,
             charSettings.value.rangedWeaponRefine,
             charSettings.value.rangedWeaponLevel,
-            inv.getWBuffLv(charSettings.value.rangedWeapon)
+            inv.getWBuffLv(charSettings.value.rangedWeapon, char.属性)
         )
         const b = new CharBuild({
-            char: new LeveledChar(selectedChar.value, charSettings.value.charLevel),
+            char,
             auraMod: new LeveledMod(charSettings.value.auraMod),
             charMods: selectedCharMods.value,
             meleeMods: selectedMeleeMods.value,
@@ -1388,7 +1389,7 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                                 <!-- 角色 -->
                                 <div class="flex items-center justify-between">
                                     <h3 class="text-4xl font-bold text-base-content/80 flex items-center gap-2">
-                                        <img :src="`/imgs/${charBuild.char.属性}.png`" :alt="charBuild.char.属性" class="h-12" />
+                                        <img :src="charBuild.char.elementUrl" :alt="charBuild.char.属性" class="h-12 w-8 object-cover" />
                                         {{ $t(selectedChar) }}
                                     </h3>
 

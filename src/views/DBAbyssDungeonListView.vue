@@ -3,6 +3,7 @@ import { ref, computed } from "vue"
 import { abyssDungeonMap, charMap } from "../data/d/index"
 import type { AbyssDungeon } from "../data/d/abyss.data"
 import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
+import { LeveledChar } from "@/data"
 
 const searchKeyword = ref("")
 const selectedDungeon = ref<AbyssDungeon | null>(null)
@@ -104,7 +105,7 @@ function getCharName(charId: number): string {
                                         <img
                                             v-for="key in ['暗', '水', '火', '雷', '风', '光'].filter(k => dungeon.mb![k] > 0)"
                                             :key="key"
-                                            :src="`/imgs/${key}.png`"
+                                            :src="LeveledChar.elementUrl(key)"
                                             alt=""
                                             class="h-8 inline-block"
                                         />

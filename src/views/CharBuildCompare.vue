@@ -24,7 +24,7 @@ import {
 const inv = useInvStore()
 
 // Character options (same as CharBuildView)
-const charOptions = charData.map(char => ({ value: char.名称, label: char.名称, elm: char.属性, icon: `/imgs/${char.名称}.png` }))
+const charOptions = charData.map(char => ({ value: char.名称, label: char.名称, elm: char.属性, icon: LeveledChar.url(char.icon) }))
 
 // MOD options (same as CharBuildView)
 const modOptions = modData
@@ -35,7 +35,7 @@ const modOptions = modData
         type: mod.类型,
         limit: mod.属性 || mod.限定,
         ser: mod.系列,
-        icon: mod.系列 && CharBuild.elmSeries.includes(mod.系列) ? `/imgs/${mod.属性}${mod.系列}.png` : `/imgs/${mod.系列}系列.png`,
+        icon: LeveledMod.url(mod.icon),
         count: Math.min(inv.getModCount(mod.id, mod.品质), mod.系列 !== "契约者" ? 8 : 1),
         bufflv: inv.getBuffLv(mod.id),
         lv: inv.getModLv(mod.id, mod.品质),
@@ -178,8 +178,9 @@ const baseCharBuilds = computed(() => {
         }
 
         // Create character build from project settings
+        const char = new LeveledChar(config.selectedChar, settings.charLevel)
         return new CharBuild({
-            char: new LeveledChar(config.selectedChar, settings.charLevel),
+            char,
             auraMod: new LeveledMod(settings.auraMod),
             charMods: settings.charMods
                 .map((v: any) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null))
@@ -199,13 +200,13 @@ const baseCharBuilds = computed(() => {
                 settings.meleeWeapon,
                 settings.meleeWeaponRefine,
                 settings.meleeWeaponLevel,
-                inv.getWBuffLv(settings.meleeWeapon)
+                inv.getWBuffLv(settings.meleeWeapon, char.属性)
             ),
             ranged: new LeveledWeapon(
                 settings.rangedWeapon,
                 settings.rangedWeaponRefine,
                 settings.rangedWeaponLevel,
-                inv.getWBuffLv(settings.rangedWeapon)
+                inv.getWBuffLv(settings.rangedWeapon, char.属性)
             ),
             baseName: settings.baseName,
             imbalance: settings.imbalance,

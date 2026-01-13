@@ -589,8 +589,8 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
         params = { ...autoBuildSetting, ...params }
         const final = {
             modOptions: this.inv.getModsWithCount(autoBuildSetting.value.useInv, autoBuildSetting.value.includeTypes),
-            meleeOptions: this.inv.getMeleeWeapons(autoBuildSetting.value.useInv),
-            rangedOptions: this.inv.getRangedWeapons(autoBuildSetting.value.useInv),
+            meleeOptions: this.inv.getMeleeWeapons(autoBuildSetting.value.useInv, build.char.属性),
+            rangedOptions: this.inv.getRangedWeapons(autoBuildSetting.value.useInv, build.char.属性),
             ...params,
         }
         const result = build.autoBuild(final)

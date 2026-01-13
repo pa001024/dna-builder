@@ -52,12 +52,6 @@ const filteredWeapons = computed(() => {
     return filtered
 })
 
-// 获取武器图标路径
-const getWeaponIcon = (icon: string | undefined) => {
-    if (!icon) return "/imgs/未知武器.png"
-    return `/imgs/${icon}.png`
-}
-
 // 卡片进入动画延迟
 const getAnimationDelay = (index: number) => {
     return Math.min(index * 50, 500) // 最多延迟500ms
@@ -150,7 +144,7 @@ function selectWeapon(weapon: Weapon) {
                     <!-- 武器头像 -->
                     <div class="relative h-24 overflow-hidden bg-base-200">
                         <ImageFallback
-                            :src="getWeaponIcon(weapon.名称)"
+                            :src="LeveledWeapon.url(weapon.icon)"
                             :alt="weapon.名称"
                             class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
                             loading="lazy"
@@ -168,7 +162,11 @@ function selectWeapon(weapon: Weapon) {
                         <h3
                             class="inline-flex items-center gap-2 font-bold text-base truncate group-hover:text-primary transition-colors duration-200"
                         >
-                            <img :src="`/imgs/${weapon.类型[1]}.png`" :alt="weapon.类型[1]" class="h-8" />
+                            <img
+                                :src="LeveledWeapon.typeUrl(weapon.类型[1])"
+                                :alt="weapon.类型[1]"
+                                class="h-8 w-4 object-cover pointer-events-none"
+                            />
                             {{ $t(weapon.名称) }}
                         </h3>
 
