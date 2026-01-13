@@ -159,7 +159,10 @@ function formatSkillDescription(pet: Pet, type: "主动" | "被动"): string {
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedPet?.id === pet.id }"
                             @click="selectedPet = pet"
                         >
-                            <div class="flex items-start justify-between">
+                            <div class="flex items-start gap-2">
+                                <div class="w-12 h-12 overflow-hidden rounded-full">
+                                    <img :src="LeveledPet.url(pet.icon)" class="w-full h-full object-cover" />
+                                </div>
                                 <div>
                                     <div class="font-medium flex gap-2 items-center">
                                         {{ pet.名称 }}

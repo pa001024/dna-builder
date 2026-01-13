@@ -121,4 +121,11 @@ export class LeveledPet implements Pet {
     equals(pet: LeveledPet): boolean {
         return this.id === pet.id && this.等级 === pet.等级
     }
+
+    get url(): string {
+        return LeveledPet.url(this.icon)
+    }
+    static url(icon?: string): string {
+        return icon ? `/imgs/webp/T_Head_Pet_${icon}.webp` : ""
+    }
 }

@@ -1,20 +1,85 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue"
-import { DNAAPI, DNAGameSignInDayAward, DNAGameSignInShowDataBean, DNAUserTaskProcessEntity } from "dna-api"
+import { DNAAPI, DNAGameSignInDayAward, DNAGameSignInShowDataBean, DNAPostListBean, DNAUserTaskProcessEntity } from "dna-api"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
 import { useLocalStorage } from "@vueuse/core"
+import { shuffle } from "lodash-es"
 defineProps<{
     nobtn?: boolean
 }>()
 const setting = useSettingStore()
 const ui = useUIStore()
 
+/**
+ * 回复内容库 - 用于自动回复帖子
+ * 包含多种类型的积极回复，避免重复使用相同内容
+ */
+const REPLY_LIBRARY = [
+    // 支持/赞同类
+    "说得太好了！完全同意",
+    "分析得很到位，受教了",
+    "有道理，支持一下",
+    "确实如此，同感",
+    "说得在理",
+    "很棒的见解，赞同",
+    "分析得很有深度",
+    "这个观点很独特",
+
+    // 鼓励/赞赏类
+    "楼主用心了，感谢分享",
+    "写得真不错，继续加油",
+    "很有帮助的内容",
+    "感谢楼主的分享",
+    "写得非常详细，感谢",
+    "内容很有价值",
+    "感谢分享，学到了",
+
+    // 交流/互动类
+    "哈哈，有趣的观点",
+    "原来是这样，了解了",
+    "确实有启发",
+    "说得对，支持",
+    "不错的想法",
+    "很有参考价值",
+
+    // 简短回应类
+    "_[/皎皎-好耶]",
+    "_[/皎皎-冲鸭]",
+    "_[/皎皎-得意]",
+    "_[/皎皎-开摆]",
+    "_[/皎皎-好耶]",
+    "_[/皎皎-看书]",
+    "_[/皎皎-我的图图呢]",
+    "_[/奥特赛德-酷]",
+    "_[/菲娜-摸头]",
+    "_[/海尔法-得意]",
+    "_[/黑龙-佩服]",
+    "_[/赛琪-送花]",
+    "_[/松露-吐舌]",
+    "_[/希尔妲-微笑]",
+    "_[/章鱼-兴奋]",
+    "_[/松露-榛子开心]",
+    "_[/章鱼-兴奋]",
+]
+
+/**
+ * 从回复库中随机选择一个回复
+ */
+function getRandomReply(): string {
+    const index = Math.floor(Math.random() * REPLY_LIBRARY.length)
+    return REPLY_LIBRARY[index]
+}
+
 let api: DNAAPI
 
 const loading = ref(true)
 const signing = ref(false)
 const bbsSigning = ref(false)
+const viewingPosts = ref(false)
+const likingPosts = ref(false)
+const sharingContent = ref(false)
+const replyingPosts = ref(false)
 
 const calendarData = useLocalStorage<DNAGameSignInShowDataBean>("dna.sign.calendarData", {} as any)
 const taskProcess = useLocalStorage<DNAUserTaskProcessEntity>("dna.sign.taskProcess", {} as any)
@@ -78,6 +143,35 @@ async function loadTaskProcess() {
     }
 }
 
+async function handleSign() {
+    if (firstUnsignedDay.value) await handleGameSign(firstUnsignedDay.value)
+
+    let posts: DNAPostListBean[] = []
+    async function getPosts() {
+        if (posts.length > 0) return posts
+        const postsRes = await api.getPostList(46)
+        if (!postsRes.is_success || !postsRes.data?.postList || postsRes.data.postList.length === 0) {
+            ui.showErrorMessage("获取帖子列表失败")
+            return []
+        }
+        return (posts = shuffle(postsRes.data.postList))
+    }
+    // 顺序执行所有未完成的任务
+    for (const t of taskProcess.value.dailyTask) {
+        if (t.remark === "签到" && t.completeTimes < t.times) {
+            await handleBbsSign()
+        } else if (t.remark === "浏览3篇帖子" && t.completeTimes < t.times) {
+            await handlePostView(await getPosts())
+        } else if (t.remark === "完成5次点赞" && t.completeTimes < t.times) {
+            await handleLike(await getPosts())
+        } else if (t.remark === "分享一篇内容" && t.completeTimes < t.times) {
+            await handleShare()
+        } else if (t.remark === "回复他人帖子5次" && t.completeTimes < t.times) {
+            await handleReply(await getPosts())
+        }
+    }
+}
+
 async function handleGameSign(dayAward: DNAGameSignInDayAward) {
     if (!calendarData.value) return
 
@@ -111,6 +205,128 @@ async function handleBbsSign() {
         ui.showErrorMessage("论坛签到失败:", e)
     } finally {
         bbsSigning.value = false
+    }
+}
+
+/**
+ * 浏览3篇帖子完成任务
+ */
+async function handlePostView(posts: DNAPostListBean[]) {
+    try {
+        viewingPosts.value = true
+        // 浏览3篇帖子
+        const viewCount = Math.min(3, posts.length)
+
+        for (let i = 0; i < viewCount; i++) {
+            const post = posts[i]
+            await api.getPostDetail(post.postId)
+        }
+
+        ui.showSuccessMessage(`已浏览${viewCount}篇帖子`)
+        await loadTaskProcess()
+    } catch (e) {
+        ui.showErrorMessage("浏览帖子失败:", e)
+    } finally {
+        viewingPosts.value = false
+    }
+}
+
+/**
+ * 完成5次点赞任务
+ */
+async function handleLike(posts: DNAPostListBean[]) {
+    try {
+        likingPosts.value = true
+        // 点赞5篇帖子
+        const likeCount = Math.min(5, posts.length)
+        let successCount = 0
+
+        for (let i = 0; i < likeCount; i++) {
+            const post = posts[i]
+            const res = await api.likePost({
+                gameForumId: String(post.gameForumId),
+                postId: String(post.postId),
+                postType: String(post.postType),
+                userId: post.userId,
+            })
+            if (res.is_success) {
+                successCount++
+            }
+        }
+
+        ui.showSuccessMessage(`已点赞${successCount}篇帖子`)
+        await loadTaskProcess()
+    } catch (e) {
+        ui.showErrorMessage("点赞失败:", e)
+    } finally {
+        likingPosts.value = false
+    }
+}
+
+/**
+ * 分享一篇内容任务
+ */
+async function handleShare() {
+    try {
+        sharingContent.value = true
+        const res = await api.shareTask()
+        if (res.is_success) {
+            ui.showSuccessMessage("分享成功")
+            await loadTaskProcess()
+        } else {
+            ui.showErrorMessage(res.msg || "分享失败")
+        }
+    } catch (e) {
+        ui.showErrorMessage("分享失败:", e)
+    } finally {
+        sharingContent.value = false
+    }
+}
+
+/**
+ * 回复他人帖子5次任务
+ */
+async function handleReply(posts: DNAPostListBean[]) {
+    try {
+        replyingPosts.value = true
+        let replyCount = 0
+        const targetCount = 5
+
+        for (const post of posts) {
+            if (replyCount >= targetCount) break
+
+            // 获取帖子评论列表
+            const commentsRes = await api.getPostCommentList(post.postId, 1, 5)
+            if (!commentsRes.is_success || !commentsRes.data?.postCommentList || commentsRes.data.postCommentList.length === 0) {
+                continue
+            }
+
+            // 对每个评论进行回复
+            const comments = commentsRes.data.postCommentList
+            for (const comment of comments) {
+                if (replyCount >= targetCount) break
+
+                const res = await api.createReply(
+                    {
+                        userId: comment.userId,
+                        postId: String(post.postId),
+                        postCommentId: String(comment.commentId),
+                        gameForumId: post.gameForumId,
+                    },
+                    getRandomReply()
+                )
+                if (res.is_success) {
+                    replyCount++
+                }
+            }
+        }
+
+        ui.showSuccessMessage(`已回复${replyCount}次`)
+        await loadTaskProcess()
+    } catch (e) {
+        ui.showErrorMessage("回复失败:", e)
+    } finally {
+        replyingPosts.value = false
     }
 }
 
@@ -215,7 +431,7 @@ defineExpose({
                             class="btn btn-primary"
                             :class="{ loading: signing }"
                             :disabled="signing"
-                            @click="handleGameSign(firstUnsignedDay)"
+                            @click="handleSign()"
                         >
                             <Icon icon="ri:checkbox-circle-fill" />
                             签到
@@ -314,20 +530,6 @@ defineExpose({
 
                     <div v-else class="flex flex-col items-center justify-center py-8">
                         <p class="text-base-content/70">暂无任务数据</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h3 class="card-title mb-4">论坛签到</h3>
-
-                    <div class="flex items-center justify-between">
-                        <div class="text-sm text-base-content/70">完成论坛签到可获得额外奖励</div>
-                        <button class="btn btn-secondary" :class="{ loading: bbsSigning }" :disabled="bbsSigning" @click="handleBbsSign">
-                            <Icon icon="ri:chat-thread-line" />
-                            论坛签到
-                        </button>
                     </div>
                 </div>
             </div>

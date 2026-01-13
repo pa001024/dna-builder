@@ -230,6 +230,24 @@ watch(
     },
     { immediate: true }
 )
+
+function getAchievementIcon(category: string) {
+    const categoryMap: Record<string, number> = {
+        "此岸×彼岸": 2,
+        欢乐时日: 3,
+        "你好，世界": 5,
+        友人成行: 10,
+        美妙的一瞬: 4,
+        "我来，我见，我征服": 7,
+        完美主义: 6,
+        不止是数字: 1,
+        英雄的诞生: 9,
+        愿望清单: 11,
+        向最高处: 8,
+        迷宫花园: 12,
+    }
+    return `/imgs/webp/T_Achievement_${categoryMap[category] > 9 ? categoryMap[category] : "0" + categoryMap[category]}.webp`
+}
 //#endregion
 </script>
 
@@ -283,12 +301,20 @@ watch(
                             </span>
                         </div>
                     </div>
-                    <div v-for="(achievements, category) in categorizedAchievements" :key="category">
-                        <div
-                            class="flex flex-col items-end p-4 cursor-pointer transition-colors border-r-2 hover:bg-base-200"
-                            :class="selectedCategory === category ? 'border-primary text-primary' : 'border-transparent'"
-                            @click="selectCategory(category)"
-                        >
+                    <div
+                        v-for="(achievements, category) in categorizedAchievements"
+                        :key="category"
+                        class="flex gap-2 justify-between items-center cursor-pointer transition-colors border-r-2 hover:bg-base-200"
+                        :class="selectedCategory === category ? 'border-primary text-primary' : 'border-transparent'"
+                        @click="selectCategory(category)"
+                    >
+                        <img
+                            v-if="category !== '全部'"
+                            :src="getAchievementIcon(category)"
+                            :alt="$t(category)"
+                            class="size-12 object-cover"
+                        />
+                        <div class="flex flex-col items-end p-4">
                             <span class="text-sm font-medium">{{ $t(category) }}</span>
                             <span class="text-xs">
                                 {{ categoryFinishedCounts[category] || 0 }}/{{ achievements.length }} ({{
@@ -359,6 +385,12 @@ watch(
                                             {{ $t(achievement.名称) }}
                                         </h3>
                                     </div>
+                                    <img
+                                        v-if="achievement.品质"
+                                        :src="`/imgs/webp/Icon_Achievement_${['Copper', 'Silver', 'Gold'][achievement.品质 - 1]}.webp`"
+                                        alt="品质"
+                                        class="w-6 h-6"
+                                    />
                                 </div>
 
                                 <div class="text-sm text-base-content/70 mb-3">

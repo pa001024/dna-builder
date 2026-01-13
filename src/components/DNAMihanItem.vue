@@ -15,7 +15,7 @@ defineProps<{
                 <div class="flex flex-col justify-center items-center gap-2">
                     <img
                         class="size-12"
-                        :src="`/imgs/${MihanNotify.TYPES[missionId]}密函.png`"
+                        :src="`/imgs/webp/T_Walnut_${['Avatar', 'Weapon', 'Mod'][missionId]}.webp`"
                         :alt="`${MihanNotify.TYPES[missionId]}密函`"
                     />
                     <div

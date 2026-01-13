@@ -993,7 +993,12 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                             </button>
                         </div>
                         <div v-if="selectedSkill" class="text-sm">
-                            <div class="p-2 text-sm font-medium">
+                            <div class="p-2 text-sm font-medium flex items-center gap-2">
+                                <div
+                                    alt="技能图标"
+                                    class="size-8 rounded-full bg-base-content"
+                                    :style="{ mask: `url(${selectedSkill.url}) no-repeat center/contain` }"
+                                />
                                 {{ $t(selectedSkill.类型) }}
                             </div>
                             <div class="p-2 text-sm">

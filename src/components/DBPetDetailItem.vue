@@ -67,10 +67,10 @@ function getTypeName(type: number): string {
                         <span class="px-1.5 py-0.5 rounded bg-base-300">{{ getTypeName(pet.类型) }}</span>
                     </div>
                 </div>
-                <!-- 
+
                 <div class="flex justify-center items-center mb-3">
-                    <img :src="`/imgs/${pet.icon}.png`" class="w-24 h-24 object-cover rounded" />
-                </div> -->
+                    <img :src="leveledPet.url" class="w-24 object-cover rounded" />
+                </div>
 
                 <div class="flex flex-wrap gap-2 text-sm opacity-70 mb-3">
                     <span>最大等级: {{ pet.最大等级 }}</span>

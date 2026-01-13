@@ -194,7 +194,8 @@ export class LeveledWeapon {
                 const maxValue = buff[prop] || 0
                 const currentValue = (maxValue / 10) * (this._精炼 + 5)
                 const baseValue = (buff.baseValue / 10) * (this._精炼 + 5)
-                this[prop] = currentValue
+                if (this.baseProperties.includes(prop)) this[prop] = this[prop] + currentValue
+                else this[prop] = currentValue
                 this.buffProps[prop] = currentValue
                 if (buff.描述.includes(`{%}`)) {
                     buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(baseValue * 100).toFixed(1)}%`)
@@ -295,11 +296,10 @@ export class LeveledWeapon {
     }
 
     get url() {
-        return `/imgs/${this.名称}.png`
+        return LeveledWeapon.url(this._originalWeaponData.icon)
     }
-
-    static getUrl(weaponName: string) {
-        return `/imgs/${weaponName}.png`
+    static url(icon?: string) {
+        return icon ? `/imgs/webp/T_Head_${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
     }
 
     public clone(): LeveledWeapon {

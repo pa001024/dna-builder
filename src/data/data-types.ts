@@ -21,7 +21,7 @@ export interface Buff {
 }
 
 export interface AbstractMod {
-    readonly attrType: "角色" | "近战" | "远程" | "同律"
+    readonly attrType: "角色" | "近战" | "远程" | "同律近战" | "同律远程"
     readonly addAttr: Record<string, number>
     readonly minusAttr: AbstractMod
     isMinus?: boolean
@@ -96,6 +96,7 @@ export enum WeaponCategory {
 export interface SkillWeapon {
     id: number
     名称: string
+    icon?: string
     类型: string[]
     伤害类型?: keyof typeof DmgType
     攻击?: number
@@ -137,6 +138,7 @@ export interface Skill {
     类型: string
     武器?: string
     描述?: string
+    icon?: string
     字段?: SkillField[]
     术语解释?: Record<string, string>
     召唤物?: SkillSummon
@@ -371,6 +373,7 @@ export interface Monster {
     hp: number
     es?: number
     tn?: number
+    icon?: string
 }
 
 export enum Faction {

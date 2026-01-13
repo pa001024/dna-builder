@@ -188,18 +188,23 @@ function getQualityColor(quality: string): string {
                             @click="selectedMod = mod"
                         >
                             <div class="flex items-start justify-between">
-                                <div>
-                                    <div class="font-medium flex gap-2 items-center">
-                                        {{ $t(mod.系列) }}{{ $t(mod.名称) }}
-                                        <span class="text-xs px-2 py-0.5 rounded" :class="getQualityColor(mod.品质)">
-                                            {{ $t(mod.品质) }}
-                                        </span>
-                                        <span class="text-xs opacity-70">ID: {{ mod.id }}</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 overflow-hidden rounded-full">
+                                        <img :src="LeveledMod.url(mod.icon)" class="w-full h-full object-cover" />
                                     </div>
-                                    <div class="text-xs opacity-70 mt-1 flex gap-2">
-                                        <span>{{ $t(mod.类型) }}</span>
-                                        <span v-if="mod.属性">{{ $t(`${mod.属性}属性`) }}</span>
-                                        <span v-if="mod.限定">{{ $t(mod.限定) }}</span>
+                                    <div>
+                                        <div class="font-medium flex gap-2 items-center">
+                                            {{ $t(mod.系列) }}{{ $t(mod.名称) }}
+                                            <span class="text-xs px-2 py-0.5 rounded" :class="getQualityColor(mod.品质)">
+                                                {{ $t(mod.品质) }}
+                                            </span>
+                                            <span class="text-xs opacity-70">ID: {{ mod.id }}</span>
+                                        </div>
+                                        <div class="text-xs opacity-70 mt-1 flex gap-2">
+                                            <span>{{ $t(mod.类型) }}</span>
+                                            <span v-if="mod.属性">{{ $t(`${mod.属性}属性`) }}</span>
+                                            <span v-if="mod.限定">{{ $t(mod.限定) }}</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">

@@ -22,7 +22,7 @@ const emit = defineEmits<{
                 <div class="w-full h-full flex items-center justify-center bg-opacity-30 rounded-lg overflow-hidden">
                     <!-- 背景 -->
                     <div class="absolute inset-0 flex items-center justify-center">
-                        <img :src="weapon.url" :alt="weapon.名称" />
+                        <img class="object-cover w-full h-full" :src="weapon.url" :alt="weapon.名称" />
                     </div>
                     <!-- MOD名称 -->
                     <div class="relative mt-auto w-full bg-base-content/30 z-10 text-left p-2">

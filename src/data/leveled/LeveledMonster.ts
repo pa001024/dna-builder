@@ -196,9 +196,7 @@ export class LeveledMonster implements DynamicMonster {
     tn?: number
 
     _等级: number = 1
-    _baseAttack: number
-    _baseLife: number
-    _baseShield: number
+    _baseData: Monster
 
     currentHP: number
     currentShield: number
@@ -214,6 +212,7 @@ export class LeveledMonster implements DynamicMonster {
             console.error(`怪物 "${id}" 未在静态表中找到`)
             mData = monsterMap.get(130)!
         }
+        this._baseData = mData
 
         this.id = mData.id
         this.n = mData.n
@@ -228,10 +227,6 @@ export class LeveledMonster implements DynamicMonster {
         this.currentHP = this.hp
         this.currentShield = this.es || 0
         this.currentWarPose = this.tn || 0
-
-        this._baseAttack = mData.atk
-        this._baseLife = mData.hp
-        this._baseShield = mData.es || 0
 
         if (等级 > 1) {
             this.等级 = 等级
@@ -276,10 +271,10 @@ export class LeveledMonster implements DynamicMonster {
 
         const multiplier = MOB_LEVEL_UP[clampedLevel - 1]
 
-        this.atk = Math.round(this._baseAttack * multiplier.atk)
-        this.hp = Math.round(this._baseLife * (this.isRouge ? multiplier.rhp : multiplier.hp))
+        this.atk = Math.round(this._baseData.atk * multiplier.atk)
+        this.hp = Math.round(this._baseData.hp * (this.isRouge ? multiplier.rhp : multiplier.hp))
         if (this.es !== undefined) {
-            this.es = Math.round(this._baseShield * (this.isRouge ? multiplier.res : multiplier.es))
+            this.es = Math.round((this._baseData.es || 0) * (this.isRouge ? multiplier.res : multiplier.es))
         }
     }
 
@@ -294,6 +289,13 @@ export class LeveledMonster implements DynamicMonster {
     }
 
     getHPByLevel(level: number): number {
-        return Math.round(this._baseLife * (this.isRouge ? MOB_LEVEL_UP[level - 1].rhp : MOB_LEVEL_UP[level - 1].hp))
+        return Math.round(this._baseData.hp * (this.isRouge ? MOB_LEVEL_UP[level - 1].rhp : MOB_LEVEL_UP[level - 1].hp))
+    }
+
+    get url() {
+        return LeveledMonster.url(this._baseData.icon)
+    }
+    static url(icon?: string) {
+        return icon ? `/imgs/webp/T_Head_${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
     }
 }

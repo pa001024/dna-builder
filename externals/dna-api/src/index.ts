@@ -93,6 +93,15 @@ export class DNAAPI extends DNABaseAPI {
     }
     //#endregion
     //#region Home 模块便捷方法
+    /**
+     * 获取帖子列表
+     * @param forumId 论坛ID，默认48（主论坛）46 全部
+     * @param pageIndex 页码，默认1
+     * @param pageSize 每页数量，默认20
+     * @param searchType 搜索类型，默认1：最新  2:热门
+     * @param timeType 时间类型，默认0（全部时间）
+     * @returns 帖子列表响应
+     */
     async getPostList(forumId: number = 48, pageIndex: number = 1, pageSize: number = 20, searchType: number = 1, timeType: number = 0) {
         return await this.home.getPostList(forumId, pageIndex, pageSize, searchType, timeType)
     }

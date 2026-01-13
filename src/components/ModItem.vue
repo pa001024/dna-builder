@@ -185,7 +185,7 @@ function handleMouseUp(event: MouseEvent) {
                 <div class="w-full h-full flex items-center justify-center bg-opacity-30 rounded-lg overflow-hidden">
                     <!-- 背景 -->
                     <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <img :src="mod.url" :alt="mod.名称" />
+                        <img class="object-cover w-full h-full" :src="mod.url" :alt="mod.名称" />
                     </div>
                     <div class="absolute top-2 left-2 text-xs pointer-events-none flex items-center" :class="{ 'text-green-500': polset }">
                         <Icon v-if="mod.极性" class="inline-block" :icon="`po-${mod.极性 as 'A' | 'D' | 'V' | 'O'}`" />

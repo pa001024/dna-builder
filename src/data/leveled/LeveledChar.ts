@@ -142,7 +142,24 @@ export class LeveledChar {
     }
 
     get url() {
-        return `/imgs/${this.名称}.png`
+        return LeveledChar.url(this.icon)
+    }
+    static url(icon: string) {
+        return `/imgs/webp/T_Head_${icon}.webp`
+    }
+    get elementUrl() {
+        return LeveledChar.elementUrl(this.属性)
+    }
+    static elementUrl(element: string) {
+        const map: Record<string, string> = {
+            光: "Light",
+            暗: "Dark",
+            水: "Water",
+            火: "Fire",
+            风: "Wind",
+            雷: "Thunder",
+        }
+        return `/imgs/webp/T_Armory_${map[element]}.webp`
     }
 
     get bg() {

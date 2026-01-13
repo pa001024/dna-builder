@@ -5,6 +5,7 @@ import type { Monster } from "../data/data-types"
 import { Faction } from "../data/data-types"
 import { getMonsterType } from "../utils/monster-utils"
 import { matchPinyin } from "../utils/pinyin-utils"
+import { LeveledMonster } from "@/data"
 
 const searchKeyword = ref("")
 const selectedMonster = ref<Monster | null>(null)
@@ -103,12 +104,15 @@ function getFactionName(faction: number | undefined): string {
                             @click="selectedMonster = monster"
                         >
                             <div class="flex items-start justify-between">
-                                <div>
-                                    <div class="font-medium flex gap-2 items-center">
-                                        {{ monster.n }}
-                                    </div>
-                                    <div class="text-xs opacity-70 mt-1">
-                                        {{ $t(getFactionName(monster.f)) }}
+                                <div class="flex items-center gap-2">
+                                    <img :src="LeveledMonster.url(monster.icon)" alt="怪物图标" class="w-8 h-8 rounded" />
+                                    <div>
+                                        <div class="font-medium flex gap-2 items-center">
+                                            {{ monster.n }}
+                                        </div>
+                                        <div class="text-xs opacity-70 mt-1">
+                                            {{ $t(getFactionName(monster.f)) }}
+                                        </div>
                                     </div>
                                 </div>
                                 <div v-if="monster.t" class="flex flex-col items-end gap-1">

@@ -5,7 +5,7 @@ const mock = [
     { id: 200, n: "生命木桩200", f: 1, atk: 10, def: 200, hp: 1000000000, tn: 150 },
     { id: 300, n: "生命木桩300", f: 1, atk: 10, def: 300, hp: 1000000000, tn: 150 },
 ] satisfies Monster[]
-const t = [
+const t: Monster[] = [
     {
         id: 115,
         n: "巡逻狱卒",
@@ -25,6 +25,7 @@ const t = [
         def: 130,
         hp: 71,
         tn: 150,
+        icon: "Gr_Jichong_C01",
     },
     {
         id: 6001011,
@@ -35,6 +36,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 600,
+        icon: "Gr_Jichong_C01",
     },
     {
         id: 6001012,
@@ -45,6 +47,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 600,
+        icon: "Gr_Jichong_C01",
     },
     {
         id: 6001014,
@@ -55,6 +58,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 600,
+        icon: "Gr_Jichong_C01",
     },
     {
         id: 6001018,
@@ -65,6 +69,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 600,
+        icon: "Gr_Jichong_C01",
     },
     {
         id: 6001601,
@@ -74,6 +79,7 @@ const t = [
         def: 130,
         hp: 350,
         tn: 150,
+        icon: "Gr_Jichong_C01",
     },
     {
         id: 6002001,
@@ -83,6 +89,7 @@ const t = [
         def: 130,
         hp: 71,
         tn: 150,
+        icon: "Gr_Youji_C01",
     },
     {
         id: 6002011,
@@ -93,6 +100,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 600,
+        icon: "Gr_Youji_C01",
     },
     {
         id: 6002015,
@@ -103,6 +111,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 600,
+        icon: "Gr_Youji_C01",
     },
     {
         id: 6002016,
@@ -113,6 +122,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 600,
+        icon: "Gr_Youji_C01",
     },
     {
         id: 6002017,
@@ -123,6 +133,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 600,
+        icon: "Gr_Youji_C01",
     },
     {
         id: 6002601,
@@ -132,6 +143,7 @@ const t = [
         def: 130,
         hp: 350,
         tn: 150,
+        icon: "Gr_Youji_C01",
     },
     {
         id: 6003001,
@@ -141,6 +153,7 @@ const t = [
         def: 130,
         hp: 71,
         tn: 150,
+        icon: "Gr_Piaofu_C01",
     },
     {
         id: 6003601,
@@ -150,6 +163,7 @@ const t = [
         def: 130,
         hp: 350,
         tn: 150,
+        icon: "Gr_Piaofu_C01",
     },
     {
         id: 6004001,
@@ -159,6 +173,7 @@ const t = [
         def: 200,
         hp: 245,
         tn: 300,
+        icon: "Gr_Baotu_C01",
     },
     {
         id: 6004007,
@@ -178,6 +193,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 600,
+        icon: "Gr_Baotu_C01",
     },
     {
         id: 6004013,
@@ -188,6 +204,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 600,
+        icon: "Gr_Baotu_C01",
     },
     {
         id: 6004014,
@@ -198,6 +215,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 600,
+        icon: "Gr_Baotu_C01",
     },
     {
         id: 6004020,
@@ -208,6 +226,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 600,
+        icon: "Gr_Baotu_C01",
     },
     {
         id: 6004601,
@@ -217,6 +236,7 @@ const t = [
         def: 200,
         hp: 1225,
         tn: 300,
+        icon: "Gr_Baotu_C01",
     },
     {
         id: 6005001,
@@ -226,6 +246,7 @@ const t = [
         def: 130,
         hp: 71,
         tn: 600,
+        icon: "GR_Longcao",
     },
     {
         id: 6006001,
@@ -235,6 +256,7 @@ const t = [
         def: 130,
         hp: 71,
         tn: 150,
+        icon: "GR_Banyun",
     },
     {
         id: 6006002,
@@ -253,6 +275,7 @@ const t = [
         def: 130,
         hp: 71,
         tn: 150,
+        icon: "GR_Zhuoxin",
     },
     {
         id: 6007011,
@@ -263,6 +286,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 150,
+        icon: "GR_Zhuoxin",
     },
     {
         id: 6007016,
@@ -273,6 +297,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 150,
+        icon: "GR_Zhuoxin",
     },
     {
         id: 6007024,
@@ -283,6 +308,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 150,
+        icon: "GR_Zhuoxin",
     },
     {
         id: 6007601,
@@ -292,6 +318,7 @@ const t = [
         def: 130,
         hp: 350,
         tn: 150,
+        icon: "GR_Zhuoxin",
     },
     {
         id: 6011001,
@@ -301,6 +328,7 @@ const t = [
         def: 130,
         hp: 71,
         tn: 150,
+        icon: "Gr_Jichong_C01",
     },
     {
         id: 6011601,
@@ -310,6 +338,7 @@ const t = [
         def: 130,
         hp: 350,
         tn: 150,
+        icon: "Gr_Jichong_C01",
     },
     {
         id: 6012001,
@@ -319,6 +348,7 @@ const t = [
         def: 130,
         hp: 71,
         tn: 150,
+        icon: "Gr_Youji_C01",
     },
     {
         id: 6012601,
@@ -328,6 +358,7 @@ const t = [
         def: 130,
         hp: 350,
         tn: 150,
+        icon: "Gr_Youji_C01",
     },
     {
         id: 6013001,
@@ -337,6 +368,7 @@ const t = [
         def: 130,
         hp: 71,
         tn: 150,
+        icon: "Gr_Piaofu_C01",
     },
     {
         id: 6013015,
@@ -347,6 +379,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 150,
+        icon: "Gr_Piaofu_C01",
     },
     {
         id: 6013017,
@@ -357,6 +390,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 150,
+        icon: "Gr_Piaofu_C01",
     },
     {
         id: 6013018,
@@ -367,6 +401,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 150,
+        icon: "Gr_Piaofu_C01",
     },
     {
         id: 6013601,
@@ -376,6 +411,7 @@ const t = [
         def: 130,
         hp: 350,
         tn: 150,
+        icon: "Gr_Piaofu_C01",
     },
     {
         id: 6014001,
@@ -385,6 +421,7 @@ const t = [
         def: 200,
         hp: 245,
         tn: 300,
+        icon: "Gr_Baotu_C01",
     },
     {
         id: 6014601,
@@ -394,6 +431,7 @@ const t = [
         def: 200,
         hp: 1225,
         tn: 300,
+        icon: "Gr_Baotu_C01",
     },
     {
         id: 6015001,
@@ -403,6 +441,7 @@ const t = [
         def: 130,
         hp: 71,
         tn: 150,
+        icon: "GR_Fangjin",
     },
     {
         id: 6015013,
@@ -413,6 +452,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 150,
+        icon: "GR_Fangjin",
     },
     {
         id: 6016001,
@@ -422,6 +462,7 @@ const t = [
         def: 130,
         hp: 71,
         tn: 150,
+        icon: "GR_Eshi",
     },
     {
         id: 6016013,
@@ -432,6 +473,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 150,
+        icon: "GR_Eshi",
     },
     {
         id: 6016021,
@@ -442,6 +484,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 150,
+        icon: "GR_Eshi",
     },
     {
         id: 6017001,
@@ -451,6 +494,7 @@ const t = [
         def: 130,
         hp: 71,
         tn: 150,
+        icon: "GR_Kuirui",
     },
     {
         id: 6017014,
@@ -461,6 +505,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 150,
+        icon: "GR_Kuirui",
     },
     {
         id: 6017018,
@@ -471,6 +516,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 150,
+        icon: "GR_Kuirui",
     },
     {
         id: 7001001,
@@ -481,6 +527,7 @@ const t = [
         es: 34,
         hp: 47,
         tn: 150,
+        icon: "Jt_Juji_C01",
     },
     {
         id: 7001005,
@@ -492,6 +539,7 @@ const t = [
         es: 340,
         hp: 340,
         tn: 600,
+        icon: "Jt_Juji_C01",
     },
     {
         id: 7001008,
@@ -513,6 +561,7 @@ const t = [
         es: 340,
         hp: 340,
         tn: 600,
+        icon: "Jt_Juji_C01",
     },
     {
         id: 7001024,
@@ -524,6 +573,7 @@ const t = [
         es: 340,
         hp: 340,
         tn: 600,
+        icon: "Jt_Juji_C01",
     },
     {
         id: 7001601,
@@ -534,6 +584,7 @@ const t = [
         es: 170,
         hp: 230,
         tn: 150,
+        icon: "Jt_Juji_C01",
     },
     {
         id: 7002001,
@@ -544,6 +595,7 @@ const t = [
         es: 34,
         hp: 47,
         tn: 150,
+        icon: "Jt_Pizhuo_C01",
     },
     {
         id: 7002005,
@@ -555,6 +607,7 @@ const t = [
         es: 340,
         hp: 340,
         tn: 600,
+        icon: "Jt_Pizhuo_C01",
     },
     {
         id: 7002007,
@@ -576,6 +629,7 @@ const t = [
         es: 340,
         hp: 340,
         tn: 600,
+        icon: "Jt_Pizhuo_C01",
     },
     {
         id: 7002018,
@@ -587,6 +641,7 @@ const t = [
         es: 340,
         hp: 340,
         tn: 600,
+        icon: "Jt_Pizhuo_C01",
     },
     {
         id: 7002019,
@@ -598,6 +653,7 @@ const t = [
         es: 340,
         hp: 340,
         tn: 600,
+        icon: "Jt_Pizhuo_C01",
     },
     {
         id: 7002601,
@@ -608,6 +664,7 @@ const t = [
         es: 170,
         hp: 230,
         tn: 150,
+        icon: "Jt_Pizhuo_C01",
     },
     {
         id: 7003001,
@@ -618,6 +675,7 @@ const t = [
         es: 34,
         hp: 47,
         tn: 150,
+        icon: "Jt_Ranger_C01",
     },
     {
         id: 7003005,
@@ -629,6 +687,7 @@ const t = [
         es: 340,
         hp: 340,
         tn: 600,
+        icon: "Jt_Ranger_C01",
     },
     {
         id: 7003016,
@@ -640,6 +699,7 @@ const t = [
         es: 340,
         hp: 340,
         tn: 600,
+        icon: "Jt_Ranger_C01",
     },
     {
         id: 7003022,
@@ -651,6 +711,7 @@ const t = [
         es: 340,
         hp: 340,
         tn: 600,
+        icon: "Jt_Ranger_C01",
     },
     {
         id: 7003601,
@@ -661,6 +722,7 @@ const t = [
         es: 170,
         hp: 230,
         tn: 150,
+        icon: "Jt_Ranger_C01",
     },
     {
         id: 7004001,
@@ -671,6 +733,7 @@ const t = [
         es: 136,
         hp: 163,
         tn: 300,
+        icon: "Jt_Tuji_C01",
     },
     {
         id: 7004017,
@@ -682,6 +745,7 @@ const t = [
         es: 340,
         hp: 340,
         tn: 600,
+        icon: "Jt_Tuji_C01",
     },
     {
         id: 7004020,
@@ -693,6 +757,7 @@ const t = [
         es: 340,
         hp: 340,
         tn: 600,
+        icon: "Jt_Tuji_C01",
     },
     {
         id: 7004601,
@@ -703,6 +768,7 @@ const t = [
         es: 680,
         hp: 815,
         tn: 300,
+        icon: "Jt_Tuji_C01",
     },
     {
         id: 7006001,
@@ -713,6 +779,7 @@ const t = [
         es: 200,
         hp: 500,
         tn: 150,
+        icon: "Jt_HealRobot",
     },
     {
         id: 7007001,
@@ -722,6 +789,7 @@ const t = [
         def: 0,
         hp: 200,
         tn: 100,
+        icon: "Jt_BlastRobot",
     },
     {
         id: 7007002,
@@ -731,6 +799,7 @@ const t = [
         def: 0,
         hp: 2,
         tn: 150,
+        icon: "Jt_BlastRobot_C01",
     },
     {
         id: 7008001,
@@ -742,6 +811,7 @@ const t = [
         es: 340,
         hp: 340,
         tn: 600,
+        icon: "Jt_Zhihui",
     },
     {
         id: 7008023,
@@ -753,6 +823,7 @@ const t = [
         es: 340,
         hp: 340,
         tn: 600,
+        icon: "Jt_Zhihui",
     },
     {
         id: 7008071,
@@ -764,6 +835,7 @@ const t = [
         es: 1700,
         hp: 1700,
         tn: 600,
+        icon: "Jt_Zhihui",
     },
     {
         id: 7009001,
@@ -774,6 +846,7 @@ const t = [
         es: 136,
         hp: 163,
         tn: 300,
+        icon: "Jt_Zhiren",
     },
     {
         id: 7009020,
@@ -785,6 +858,7 @@ const t = [
         es: 340,
         hp: 340,
         tn: 300,
+        icon: "Jt_Zhiren",
     },
     {
         id: 7010001,
@@ -795,6 +869,7 @@ const t = [
         es: 34,
         hp: 47,
         tn: 150,
+        icon: "Jt_Zhijian",
     },
     {
         id: 7010022,
@@ -806,6 +881,7 @@ const t = [
         es: 340,
         hp: 340,
         tn: 150,
+        icon: "Jt_Zhijian",
     },
     {
         id: 7010601,
@@ -816,6 +892,7 @@ const t = [
         es: 170,
         hp: 235,
         tn: 150,
+        icon: "Jt_Zhijian",
     },
     {
         id: 7011001,
@@ -826,6 +903,7 @@ const t = [
         es: 34,
         hp: 47,
         tn: 150,
+        icon: "Jt_Juji_C01",
     },
     {
         id: 7011601,
@@ -836,6 +914,7 @@ const t = [
         es: 170,
         hp: 235,
         tn: 150,
+        icon: "Jt_Juji_C01",
     },
     {
         id: 7012001,
@@ -846,6 +925,7 @@ const t = [
         es: 34,
         hp: 47,
         tn: 150,
+        icon: "Jt_Pizhuo_C01",
     },
     {
         id: 7012005,
@@ -866,6 +946,7 @@ const t = [
         es: 170,
         hp: 235,
         tn: 150,
+        icon: "Jt_Pizhuo_C01",
     },
     {
         id: 7013001,
@@ -876,6 +957,7 @@ const t = [
         es: 34,
         hp: 47,
         tn: 150,
+        icon: "Jt_Ranger_C01",
     },
     {
         id: 7013601,
@@ -886,6 +968,7 @@ const t = [
         es: 170,
         hp: 235,
         tn: 150,
+        icon: "Jt_Ranger_C01",
     },
     {
         id: 7014001,
@@ -896,6 +979,7 @@ const t = [
         es: 136,
         hp: 163,
         tn: 300,
+        icon: "Jt_Tuji_C01",
     },
     {
         id: 7015001,
@@ -906,6 +990,7 @@ const t = [
         es: 34,
         hp: 47,
         tn: 150,
+        icon: "JT_Jingjie",
     },
     {
         id: 7015011,
@@ -917,6 +1002,7 @@ const t = [
         es: 340,
         hp: 340,
         tn: 150,
+        icon: "JT_Jingjie",
     },
     {
         id: 7015601,
@@ -927,6 +1013,7 @@ const t = [
         es: 170,
         hp: 235,
         tn: 150,
+        icon: "JT_Jingjie",
     },
     {
         id: 7016001,
@@ -937,6 +1024,7 @@ const t = [
         es: 20,
         hp: 100,
         tn: 150,
+        icon: "JT_Zhiyan",
     },
     {
         id: 8001001,
@@ -947,6 +1035,7 @@ const t = [
         es: 82,
         hp: 14,
         tn: 150,
+        icon: "Jh_Zhishi",
     },
     {
         id: 8001015,
@@ -958,6 +1047,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 150,
+        icon: "Jh_Zhishi",
     },
     {
         id: 8001019,
@@ -969,6 +1059,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 150,
+        icon: "Jh_Zhishi",
     },
     {
         id: 8001021,
@@ -980,6 +1071,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 150,
+        icon: "Jh_Zhishi",
     },
     {
         id: 8001601,
@@ -990,6 +1082,7 @@ const t = [
         es: 410,
         hp: 70,
         tn: 150,
+        icon: "Jh_Zhishi",
     },
     {
         id: 8002001,
@@ -1000,6 +1093,7 @@ const t = [
         es: 82,
         hp: 14,
         tn: 150,
+        icon: "Jh_Xianfeng",
     },
     {
         id: 8002012,
@@ -1011,6 +1105,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 150,
+        icon: "Jh_Xianfeng",
     },
     {
         id: 8002018,
@@ -1022,6 +1117,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 150,
+        icon: "Jh_Xianfeng",
     },
     {
         id: 8002020,
@@ -1033,6 +1129,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 150,
+        icon: "Jh_Xianfeng",
     },
     {
         id: 8002601,
@@ -1043,6 +1140,7 @@ const t = [
         es: 410,
         hp: 70,
         tn: 150,
+        icon: "Jh_Xianfeng",
     },
     {
         id: 8003001,
@@ -1053,6 +1151,7 @@ const t = [
         es: 82,
         hp: 14,
         tn: 150,
+        icon: "Jh_Shenfu",
     },
     {
         id: 8003016,
@@ -1064,6 +1163,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 150,
+        icon: "Jh_Shenfu",
     },
     {
         id: 8003021,
@@ -1075,6 +1175,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 150,
+        icon: "Jh_Shenfu",
     },
     {
         id: 8003024,
@@ -1086,6 +1187,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 150,
+        icon: "Jh_Shenfu",
     },
     {
         id: 8003601,
@@ -1096,6 +1198,7 @@ const t = [
         es: 410,
         hp: 70,
         tn: 150,
+        icon: "Jh_Shenfu",
     },
     {
         id: 8500001,
@@ -1105,6 +1208,7 @@ const t = [
         def: 415,
         hp: 4200,
         tn: 1400,
+        icon: "Boss_00_Xibi",
     },
     {
         id: 8500002,
@@ -1114,6 +1218,7 @@ const t = [
         def: 300,
         hp: 6000,
         tn: 8400,
+        icon: "Boss_00_Xibi",
     },
     {
         id: 8500601,
@@ -1123,6 +1228,7 @@ const t = [
         def: 300,
         hp: 6000,
         tn: 8400,
+        icon: "Boss_00_Xibi",
     },
     {
         id: 8501001,
@@ -1132,6 +1238,7 @@ const t = [
         def: 0,
         hp: 1440,
         tn: 2500,
+        icon: "Boss_04_Lizhan",
     },
     {
         id: 8501002,
@@ -1150,6 +1257,7 @@ const t = [
         def: 300,
         hp: 6000,
         tn: 6000,
+        icon: "Boss_04_Lizhan",
     },
     {
         id: 8502001,
@@ -1159,6 +1267,7 @@ const t = [
         def: 0,
         hp: 6000,
         tn: 4500,
+        icon: "Boss_01_Saiqi",
     },
     {
         id: 8502002,
@@ -1168,6 +1277,7 @@ const t = [
         def: 300,
         hp: 6000,
         tn: 8400,
+        icon: "Boss_01_Saiqi",
     },
     {
         id: 8502601,
@@ -1177,6 +1287,7 @@ const t = [
         def: 300,
         hp: 6000,
         tn: 8400,
+        icon: "Boss_01_Saiqi",
     },
     {
         id: 8503001,
@@ -1186,6 +1297,7 @@ const t = [
         def: 0,
         hp: 6000,
         tn: 99999,
+        icon: "Boss_03_Shijing",
     },
     {
         id: 8503601,
@@ -1195,6 +1307,7 @@ const t = [
         def: 0,
         hp: 6000,
         tn: 6000,
+        icon: "Boss_03_Shijing",
     },
     {
         id: 8505001,
@@ -1204,6 +1317,7 @@ const t = [
         def: 135,
         hp: 6000,
         tn: 4500,
+        icon: "Boss_05_Lianhuo",
     },
     {
         id: 8505601,
@@ -1213,6 +1327,7 @@ const t = [
         def: 300,
         hp: 6000,
         tn: 8400,
+        icon: "Boss_05_Lianhuo",
     },
     {
         id: 8509001,
@@ -1222,6 +1337,7 @@ const t = [
         def: 0,
         hp: 2000,
         tn: 4500,
+        icon: "Boss_Tuosi",
     },
     {
         id: 8509601,
@@ -1240,6 +1356,7 @@ const t = [
         def: 0,
         hp: 4800,
         tn: 99999,
+        icon: "Boss_Linen",
     },
     {
         id: 8512601,
@@ -1249,6 +1366,7 @@ const t = [
         def: 300,
         hp: 6000,
         tn: 10000,
+        icon: "Boss_Linen",
     },
     {
         id: 8513001,
@@ -1258,6 +1376,7 @@ const t = [
         def: 0,
         hp: 6000,
         tn: 2000,
+        icon: "Boss_Kuxiu",
     },
     {
         id: 8513601,
@@ -1267,6 +1386,7 @@ const t = [
         def: 300,
         hp: 6000,
         tn: 2000,
+        icon: "Boss_Kuxiu",
     },
     {
         id: 8514001,
@@ -1276,6 +1396,7 @@ const t = [
         def: 0,
         hp: 6000,
         tn: 4500,
+        icon: "Boss_Shenpan",
     },
     {
         id: 8514051,
@@ -1294,6 +1415,7 @@ const t = [
         def: 300,
         hp: 6000,
         tn: 4500,
+        icon: "Boss_Shenpan",
     },
     {
         id: 8514701,
@@ -1303,6 +1425,7 @@ const t = [
         def: 300,
         hp: 225000,
         tn: 4500,
+        icon: "Boss_Shenpan",
     },
     {
         id: 8515001,
@@ -1312,6 +1435,7 @@ const t = [
         def: 0,
         hp: 6000,
         tn: 1000,
+        icon: "Boss_Jushi",
     },
     {
         id: 8515601,
@@ -1321,6 +1445,7 @@ const t = [
         def: 300,
         hp: 6000,
         tn: 1000,
+        icon: "Boss_Jushi",
     },
     {
         id: 8516001,
@@ -1330,6 +1455,7 @@ const t = [
         def: 720,
         hp: 6000,
         tn: 1000,
+        icon: "Empty",
     },
     {
         id: 8519001,
@@ -1339,6 +1465,7 @@ const t = [
         def: 0,
         hp: 1500,
         tn: 0,
+        icon: "Empty",
     },
     {
         id: 8520001,
@@ -1348,6 +1475,7 @@ const t = [
         def: 0,
         hp: 4000,
         tn: 0,
+        icon: "Empty",
     },
     {
         id: 8522001,
@@ -1357,6 +1485,7 @@ const t = [
         def: 300,
         hp: 6000,
         tn: 4500,
+        icon: "Empty",
     },
     {
         id: 8523001,
@@ -1366,6 +1495,7 @@ const t = [
         def: 0,
         hp: 6000,
         tn: 2000,
+        icon: "Empty",
     },
     {
         id: 9001001,
@@ -1376,6 +1506,7 @@ const t = [
         es: 82,
         hp: 14,
         tn: 150,
+        icon: "SQ_Yinxie",
     },
     {
         id: 9001017,
@@ -1387,6 +1518,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 600,
+        icon: "SQ_Yinxie",
     },
     {
         id: 9001023,
@@ -1398,6 +1530,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 600,
+        icon: "SQ_Yinxie",
     },
     {
         id: 9001024,
@@ -1409,6 +1542,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 600,
+        icon: "SQ_Yinxie",
     },
     {
         id: 9001601,
@@ -1419,6 +1553,7 @@ const t = [
         es: 410,
         hp: 70,
         tn: 150,
+        icon: "SQ_Yinxie",
     },
     {
         id: 9002001,
@@ -1429,6 +1564,7 @@ const t = [
         es: 82,
         hp: 14,
         tn: 150,
+        icon: "SQ_Dufeng",
     },
     {
         id: 9002015,
@@ -1440,6 +1576,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 600,
+        icon: "SQ_Dufeng",
     },
     {
         id: 9002019,
@@ -1451,6 +1588,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 600,
+        icon: "SQ_Dufeng",
     },
     {
         id: 9002023,
@@ -1462,6 +1600,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 600,
+        icon: "SQ_Dufeng",
     },
     {
         id: 9002024,
@@ -1473,6 +1612,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 600,
+        icon: "SQ_Dufeng",
     },
     {
         id: 9002601,
@@ -1483,6 +1623,7 @@ const t = [
         es: 410,
         hp: 70,
         tn: 150,
+        icon: "SQ_Dufeng",
     },
     {
         id: 9003001,
@@ -1494,6 +1635,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 300,
+        icon: "SQ_Wanju",
     },
     {
         id: 9003004,
@@ -1505,6 +1647,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 300,
+        icon: "SQ_Wanju",
     },
     {
         id: 9005001,
@@ -1516,6 +1659,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 300,
+        icon: "SQ_Baozha",
     },
     {
         id: 9005004,
@@ -1527,6 +1671,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 300,
+        icon: "SQ_Baozha",
     },
     {
         id: 9006001,
@@ -1538,6 +1683,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 300,
+        icon: "SQ_Qizha",
     },
     {
         id: 9006004,
@@ -1549,6 +1695,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 300,
+        icon: "SQ_Qizha",
     },
     {
         id: 9007001,
@@ -1559,6 +1706,7 @@ const t = [
         es: 82,
         hp: 14,
         tn: 150,
+        icon: "SQ_Niaopao",
     },
     {
         id: 9007019,
@@ -1570,6 +1718,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 600,
+        icon: "SQ_Niaopao",
     },
     {
         id: 9007022,
@@ -1581,6 +1730,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 600,
+        icon: "SQ_Niaopao",
     },
     {
         id: 9007023,
@@ -1592,6 +1742,7 @@ const t = [
         es: 817,
         hp: 102,
         tn: 600,
+        icon: "SQ_Niaopao",
     },
     {
         id: 9007601,
@@ -1602,6 +1753,7 @@ const t = [
         es: 410,
         hp: 70,
         tn: 150,
+        icon: "SQ_Niaopao",
     },
     {
         id: 9500001,
@@ -1610,6 +1762,7 @@ const t = [
         def: 0,
         hp: 1000,
         tn: 300,
+        icon: "NE_Dajie",
     },
     {
         id: 9501001,
@@ -1619,6 +1772,7 @@ const t = [
         def: 75,
         hp: 450,
         tn: 100,
+        icon: "MN_Haer",
     },
     {
         id: 9801001,
@@ -1627,6 +1781,7 @@ const t = [
         def: 130,
         hp: 71,
         tn: 150,
+        icon: "Animal_Xuelang_01",
     },
     {
         id: 9801002,
@@ -1636,6 +1791,7 @@ const t = [
         def: 130,
         hp: 142,
         tn: 150,
+        icon: "Animal_Xuelang_02",
     },
     {
         id: 9802001,
@@ -1644,6 +1800,7 @@ const t = [
         def: 130,
         hp: 45,
         tn: 150,
+        icon: "Animal_Hongjiaolu_02",
     },
     {
         id: 9802002,
@@ -1652,6 +1809,7 @@ const t = [
         def: 130,
         hp: 45,
         tn: 150,
+        icon: "Animal_Hongjiaolu_01",
     },
     {
         id: 9803001,
@@ -1660,6 +1818,7 @@ const t = [
         def: 130,
         hp: 25,
         tn: 150,
+        icon: "Animal_Yinbeishu_02",
     },
     {
         id: 9803002,
@@ -1669,6 +1828,7 @@ const t = [
         def: 130,
         hp: 45,
         tn: 150,
+        icon: "Animal_Yinbeishu_02",
     },
     {
         id: 9804001,
@@ -1677,6 +1837,7 @@ const t = [
         def: 0,
         hp: 1,
         tn: 0,
+        icon: "Mon_Jiiujiu",
     },
     {
         id: 9805001,
@@ -1685,6 +1846,7 @@ const t = [
         def: 0,
         hp: 1,
         tn: 0,
+        icon: "Mon_Suoweng",
     },
     {
         id: 9806001,
@@ -1693,6 +1855,7 @@ const t = [
         def: 0,
         hp: 1,
         tn: 0,
+        icon: "Mon_Cuiping01",
     },
     {
         id: 9807001,
@@ -1701,6 +1864,7 @@ const t = [
         def: 0,
         hp: 1,
         tn: 0,
+        icon: "Mon_Zhenzhu",
     },
     {
         id: 9808001,
@@ -1709,6 +1873,7 @@ const t = [
         def: 0,
         hp: 1,
         tn: 0,
+        icon: "Mon_Chihu",
     },
     {
         id: 9809001,
@@ -1717,6 +1882,7 @@ const t = [
         def: 130,
         hp: 45,
         tn: 150,
+        icon: "Mon_Yunzong02",
     },
     {
         id: 9809002,
@@ -1725,6 +1891,7 @@ const t = [
         def: 130,
         hp: 45,
         tn: 150,
+        icon: "Mon_Yunzong01",
     },
     {
         id: 10001001,
@@ -1735,6 +1902,7 @@ const t = [
         es: 34,
         hp: 47,
         tn: 150,
+        icon: "HX_Tianshi02",
     },
     {
         id: 10002001,
@@ -1746,6 +1914,7 @@ const t = [
         es: 340,
         hp: 340,
         tn: 600,
+        icon: "HX_Tianwei",
     },
     {
         id: 10003001,
@@ -1756,6 +1925,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 1000,
+        icon: "HX_Bian01",
     },
     {
         id: 10004001,
@@ -1766,6 +1936,7 @@ const t = [
         def: 300,
         hp: 510,
         tn: 1000,
+        icon: "HX_Bian02",
     },
     {
         id: 10005001,
@@ -1776,6 +1947,7 @@ const t = [
         es: 34,
         hp: 47,
         tn: 150,
+        icon: "HX_Tianshi02",
     },
     {
         id: 10005012,
@@ -1787,7 +1959,8 @@ const t = [
         es: 817,
         hp: 102,
         tn: 150,
+        icon: "HX_Tianshi02",
     },
-] satisfies Monster[]
+]
 
 export default [...mock, ...t] as Monster[]

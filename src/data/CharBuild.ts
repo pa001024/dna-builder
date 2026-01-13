@@ -545,7 +545,6 @@ export class CharBuild {
             let critDamageBonus = this.getTotalBonus(`${prefix}暴伤`, prefix) + this.getTotalBonus(`暴伤`, prefix)
             let triggerRateBonus = this.getTotalBonus(`${prefix}触发`, prefix) + this.getTotalBonus(`触发`, prefix)
             let attackSpeedBonus = this.getTotalBonus(`${prefix}攻速`, prefix) + this.getTotalBonus(`攻速`, prefix)
-            if (weapon.名称 === "伊卡洛斯") console.log(this.meleeWeapon.buffProps, attackSpeedBonus)
             let multiShotBonus = this.getTotalBonus(`${prefix}多重`, prefix) + this.getTotalBonus(`多重`, prefix)
             let damageIncrease = this.getTotalBonus(`${prefix}增伤`, prefix) + this.getTotalBonus(`增伤`, prefix)
             let reloadTimeBonus = this.getTotalBonus(`${prefix}装填`, prefix) + this.getTotalBonus(`装填`, prefix)
@@ -1434,7 +1433,7 @@ export class CharBuild {
             charMods: mods.filter(v => v.attrType === "角色"),
             meleeMods: mods.filter(v => v.attrType === "近战"),
             rangedMods: mods.filter(v => v.attrType === "远程"),
-            skillMods: mods.filter(v => v.attrType === "同律"),
+            skillMods: mods.filter(v => v.attrType.startsWith("同律")),
         }
         // 处理互斥逻辑
         keys.forEach(key => {
@@ -1465,7 +1464,7 @@ export class CharBuild {
             charMods: mods.filter(v => v.attrType === "角色"),
             meleeMods: mods.filter(v => v.attrType === "近战"),
             rangedMods: mods.filter(v => v.attrType === "远程"),
-            skillMods: mods.filter(v => v.attrType === "同律"),
+            skillMods: mods.filter(v => v.attrType.startsWith("同律")),
         }
         keys.forEach(key => {
             for (const mod of toAddMods[key]) {

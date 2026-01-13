@@ -247,7 +247,7 @@ onBeforeUnmount(() => {
         <!-- 添加用户iframe模态框 -->
         <div class="modal" :class="{ 'modal-open': isAddIframeOpen }">
             <div class="modal-box bg-base-200 shadow-2xl rounded-xl p-0 w-114 h-116">
-                <iframe ref="iframeRef" src="/login.html" class="w-full h-full border-0 rounded-lg" />
+                <iframe ref="iframeRef" src="/login_jjj.html" class="w-full h-full border-0 rounded-lg" />
             </div>
 
             <!-- 模态框背景 -->

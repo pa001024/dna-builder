@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue"
-import { charData } from "../data"
+import { charData, LeveledChar } from "../data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
 const tabs = ["全部", "输出", "同律武器", "武器伤害", "技能伤害", "辅助", "召唤物", "控制", "神智回复", "治疗", "最大生命", "防御", "护盾"]
@@ -51,12 +51,6 @@ const filteredChars = computed(() => {
 
     return filtered
 })
-
-// 获取角色图标路径
-const getCharIcon = (icon: string | undefined) => {
-    if (!icon) return "/imgs/未知角色.png"
-    return `/imgs/${icon}.png`
-}
 
 // 卡片进入动画延迟
 const getAnimationDelay = (index: number) => {
@@ -124,7 +118,7 @@ const getAnimationDelay = (index: number) => {
                     <!-- 角色头像 -->
                     <div class="relative aspect-square overflow-hidden bg-base-200">
                         <ImageFallback
-                            :src="getCharIcon(char.名称)"
+                            :src="LeveledChar.url(char.icon!)"
                             :alt="char.名称"
                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                             loading="lazy"
@@ -142,7 +136,7 @@ const getAnimationDelay = (index: number) => {
                         <h3
                             class="inline-flex items-center gap-2 font-bold text-base truncate group-hover:text-primary transition-colors duration-200"
                         >
-                            <img :src="`/imgs/${char.属性}.png`" :alt="char.属性" class="h-8" />
+                            <img :src="LeveledChar.elementUrl(char.属性)" :alt="char.属性" class="h-8 w-4 object-cover" />
                             {{ $t(char.名称) }}
                         </h3>
 

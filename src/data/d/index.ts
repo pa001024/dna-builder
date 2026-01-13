@@ -153,3 +153,22 @@ export const walnutMap = new Map<number, Walnut>()
 walnutData.forEach(v => walnutMap.set(v.id, v))
 
 export { type WalnutReward, type Walnut } from "./walnut.data"
+
+import { fishs, fishingSpots, type Fish, type FishingSpot } from "./fish.data"
+export const fishMap = new Map<number, Fish>()
+fishs.forEach(v => fishMap.set(v.id, v))
+
+export const fishingSpotMap = new Map<number, FishingSpot>()
+fishingSpots.forEach(v => fishingSpotMap.set(v.id, v))
+
+export const fish2SpotMap = new Map<number, { spotId: number; weight: number }[]>()
+fishingSpots.forEach(v =>
+    v.fishIds.forEach((id, index) => {
+        if (!fish2SpotMap.has(id)) {
+            fish2SpotMap.set(id, [])
+        }
+        fish2SpotMap.get(id)!.push({ spotId: v.id, weight: v.weights[index] })
+    })
+)
+
+export { type Fish, type FishingSpot }

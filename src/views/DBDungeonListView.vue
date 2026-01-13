@@ -3,6 +3,7 @@ import { ref, computed } from "vue"
 import dungeonData from "../data/d/dungeon.data"
 import { getDungeonName, getDungeonRewardNames, getDungeonType } from "../utils/dungeon-utils"
 import { matchPinyin } from "../utils/pinyin-utils"
+import { LeveledChar } from "@/data"
 
 const searchKeyword = ref("")
 const selectedDungeon = ref<(typeof dungeonData)[0] | null>(null)
@@ -102,7 +103,11 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
                             <div class="flex items-start justify-between">
                                 <div>
                                     <div class="font-medium flex gap-2 items-center">
-                                        <img v-if="dungeon.e" :src="`/imgs/${dungeon.e}.png`" class="h-8 inline-block rounded" />
+                                        <img
+                                            v-if="dungeon.e"
+                                            :src="LeveledChar.elementUrl(dungeon.e)"
+                                            class="h-8 w-4 object-cover inline-block rounded"
+                                        />
                                         {{ getDungeonName(dungeon) }}
                                     </div>
                                     <div class="text-xs opacity-70 mt-1">

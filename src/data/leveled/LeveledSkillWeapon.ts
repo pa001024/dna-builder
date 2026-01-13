@@ -133,6 +133,10 @@ export class LeveledSkillWeapon {
     }
 
     get url() {
-        return `/imgs/${this.名称}.png`
+        return LeveledSkillWeapon.url(this._originalWeaponData.icon || "")
+    }
+
+    static url(icon?: string) {
+        return icon ? `/imgs/webp/T_Head_${icon}.webp` : "/imgs/webp/_.webp"
     }
 }

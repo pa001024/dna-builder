@@ -196,6 +196,18 @@ const routes: readonly RouteRecordRaw[] = [
         beforeEnter: () => setMinSize(320, 360),
     },
     {
+        name: "fish-list",
+        path: "/db/fish",
+        component: () => import("./views/DBFishListView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+    },
+    {
+        name: "fish-detail",
+        path: "/db/fish/:id",
+        component: () => import("./views/DBFishDetailView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+    },
+    {
         name: "map-list",
         path: "/db/map",
         component: () => import("./views/DBMapListView.vue"),

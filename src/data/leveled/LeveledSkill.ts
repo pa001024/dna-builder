@@ -227,4 +227,11 @@ export class LeveledSkill {
         }
         return []
     }
+
+    get url() {
+        return LeveledSkill.url(this.skillData.icon || "")
+    }
+    static url(icon?: string) {
+        return icon ? `/imgs/webp/T_Skill_${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+    }
 }

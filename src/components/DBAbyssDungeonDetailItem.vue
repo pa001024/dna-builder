@@ -168,7 +168,7 @@ function getChar(charId: number): Char | undefined {
                 <div class="space-y-2">
                     <div v-for="buff in dungeon.buff" :key="buff.id" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors">
                         <div class="flex items-start gap-2">
-                            <!-- <img :src="`/imgs/${buff.icon}.png`" class="h-8 inline-block rounded" /> -->
+                            <img :src="`/imgs/webp/T_Abyss_Buff_${buff.icon}.webp`" class="h-10 inline-block rounded" />
                             <div class="flex-1">
                                 <div class="font-medium text-sm">
                                     {{ buff.n }}

@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { AbyssDungeon, abyssDungeonMap, Dungeon } from "../data"
+import { AbyssDungeon, abyssDungeonMap, Dungeon, monsterMap } from "../data"
 import { getRewardDetails } from "./reward-utils"
 
 // 获取副本类型信息
@@ -47,11 +47,11 @@ export function getAbyssDungeonName(dungeon: AbyssDungeon) {
 
 export function getDungeonName(dungeon: Dungeon) {
     const yehang = ["DefenceMove", "ExtermPro"]
-    if (yehang.includes(dungeon.t) && dungeon.sr) {
-        if (dungeon.sm && dungeon.sm.length > 1) {
-            return t(dungeon.n) + `(${t("夜航手册 多号令")})`
+    if (yehang.includes(dungeon.t) && dungeon.sr && dungeon.sm) {
+        if (dungeon.sm.length > 1) {
+            return t(dungeon.n) + `(${t(monsterMap.get(dungeon.sm[0]!)!.n)} ${t("夜航手册 多号令")})`
         }
-        return t(dungeon.n) + `(${t("夜航手册")})`
+        return t(dungeon.n) + `(${t(monsterMap.get(dungeon.sm[0])!.n)} ${t("夜航手册")})`
     }
     return dungeon.n
 }

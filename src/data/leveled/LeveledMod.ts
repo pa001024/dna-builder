@@ -1,5 +1,5 @@
 import { LeveledBuff } from "."
-import { CharAttr, CharBuild } from "../CharBuild"
+import { CharAttr } from "../CharBuild"
 import { effectMap, modMap } from "../d"
 import { Mod, Quality } from "../data-types"
 
@@ -358,10 +358,11 @@ export class LeveledMod implements Mod {
     }
 
     get url() {
-        if (this.系列 === "羽蛇" && this.id > 40000) return `/imgs/${this.属性}${this.系列}.png`
-        if (this.系列 === "海妖" && this.名称.split("·").length > 2) return `/imgs/${this.属性}${this.系列}.png`
-        if (this.系列 && CharBuild.elmSeries.includes(this.系列)) return `/imgs/${this.属性}${this.系列}.png`
-        return `/imgs/${this.系列}系列.png`
+        return LeveledMod.url(this._originalModData.icon!)
+    }
+
+    static url(icon?: string) {
+        return icon ? `/imgs/webp/T_Mod_${icon}.webp` : ""
     }
 
     static getUrl(modId: number) {
@@ -389,7 +390,7 @@ export class LeveledMod implements Mod {
     }
 
     get attrType() {
-        return this.类型.slice(0, 2) as "角色" | "近战" | "远程" | "同律"
+        return this.类型 as "角色" | "近战" | "远程" | "同律近战" | "同律远程"
     }
     get addAttr(): Record<string, number> {
         const r: Record<string, number> = {}

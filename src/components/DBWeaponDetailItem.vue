@@ -35,7 +35,7 @@ watch(
                     <span class="text-xs text-base-content/70">ID: {{ weapon.id }}</span>
                 </div>
 
-                <div class="flex justify-center items-center">
+                <div class="flex justify-center items-center mb-3">
                     <img :src="leveledWeapon.url" class="w-24 object-cover rounded" />
                 </div>
 
@@ -53,10 +53,11 @@ watch(
             </div>
 
             <div class="mb-3">
-                <div class="flex items-center gap-4">
-                    <span class="text-sm min-w-20 flex-none"
-                        >Lv. <input v-model.number="currentLevel" type="text" class="w-12 text-center"
-                    /></span>
+                <div class="flex items-center gap-4 mb-3">
+                    <span class="text-sm min-w-20 flex-none grid grid-cols-2">
+                        <span> Lv. </span>
+                        <span> {{ currentLevel }} </span>
+                    </span>
                     <input
                         :key="leveledWeapon.id"
                         v-model.number="currentLevel"
@@ -68,7 +69,10 @@ watch(
                     />
                 </div>
                 <div class="flex items-center gap-4">
-                    <span class="text-sm min-w-20 flex-none">熔炼 {{ ["0", "I", "II", "III", "IV", "V"][currentRefine] }}</span>
+                    <span class="text-sm min-w-20 flex-none grid grid-cols-2">
+                        <span> 熔炼: </span>
+                        <span> {{ ["0", "I", "II", "III", "IV", "V"][currentRefine] }} </span>
+                    </span>
                     <input
                         :key="leveledWeapon.id"
                         v-model.number="currentRefine"

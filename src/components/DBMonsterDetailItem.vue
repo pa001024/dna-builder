@@ -96,6 +96,10 @@ function formatNumber(num: number): string {
                     </label>
                 </div>
 
+                <div v-if="leveledMonster" class="flex justify-center items-center mb-3">
+                    <img :src="leveledMonster.url" class="w-24 object-cover rounded" />
+                </div>
+
                 <div class="flex items-center gap-4 mb-3">
                     <span class="text-sm min-w-12">Lv. {{ currentLevel }}</span>
                     <input

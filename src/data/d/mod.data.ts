@@ -1,6 +1,6 @@
 import type { Mod } from "../data-types"
 
-const t = [
+const t: Mod[] = [
     {
         id: 11001,
         icon: "Phoenix01",
@@ -6861,7 +6861,7 @@ const t = [
         类型: "同律远程",
         效果: "改变太刀的蓄力攻击招式和威力，命中敌人后，自身会跃起并进行下劈，对周围的敌人造成多段伤害。对比默认招式，综合威力提高100%。",
     },
-] satisfies Mod[]
+]
 
 const p = [
     {

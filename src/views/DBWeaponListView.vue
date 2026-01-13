@@ -4,6 +4,7 @@ import weaponData from "../data/d/weapon.data"
 import type { Weapon } from "../data/data-types"
 import { formatProp } from "../util"
 import { matchPinyin } from "../utils/pinyin-utils"
+import { LeveledWeapon } from "@/data"
 
 const searchKeyword = ref("")
 const selectedWeapon = ref<Weapon | null>(null)
@@ -138,13 +139,18 @@ const filteredWeapons = computed(() => {
                             @click="selectedWeapon = weapon"
                         >
                             <div class="flex items-start justify-between">
-                                <div>
-                                    <div class="font-medium">
-                                        {{ $t(weapon.名称) }}
-                                    </div>
-                                    <div class="text-xs opacity-70 mt-1 flex gap-2">
-                                        <span>{{ weapon.类型.map(t => $t(t)).join(", ") }}</span>
-                                        <span>{{ $t(weapon.伤害类型) }}</span>
+                                <div class="flex">
+                                    <div class="flex items-center gap-2">
+                                        <img :src="LeveledWeapon.url(weapon.icon)" alt="武器图标" class="w-8 h-8 rounded" />
+                                        <div>
+                                            <div class="font-medium">
+                                                {{ $t(weapon.名称) }}
+                                            </div>
+                                            <div class="text-xs opacity-70 mt-1 flex gap-2">
+                                                <span>{{ weapon.类型.map(t => $t(t)).join(", ") }}</span>
+                                                <span>{{ $t(weapon.伤害类型) }}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="text-right">
