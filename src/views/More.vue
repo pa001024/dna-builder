@@ -28,6 +28,11 @@ const items = [
         path: "/db",
         icon: "ri:book-line",
     },
+    {
+        name: "chat",
+        path: "/chat",
+        icon: "ri:chat-3-line",
+    },
     // {
     //     name: "flow-editor",
     //     path: "/flow-editor",
@@ -70,8 +75,8 @@ const items = [
         icon: "ri:question-line",
     },
     {
-        name: "login",
-        path: "/userlogin",
+        name: "game-accounts",
+        path: "/game-accounts",
         icon: "ri:user-line",
     },
     {

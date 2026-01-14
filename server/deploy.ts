@@ -40,8 +40,8 @@ const CONFIG = {
         commands: ["rm -rf /var/www/dna-builder", "unzip -o /var/www/dist.zip -d /var/www/dna-builder"],
     },
     app: {
-        msiPath: `./src-tauri/target/release/bundle/msi/dna-builder_${version}_x64_zh-CN.msi`,
-        sigPath: `./src-tauri/target/release/bundle/msi/dna-builder_${version}_x64_zh-CN.msi.sig`,
+        msiPath: `./src-tauri/target/release/bundle/msi/DNA Builder_${version}_x64_zh-CN.msi`,
+        sigPath: `./src-tauri/target/release/bundle/msi/DNA Builder_${version}_x64_zh-CN.msi.sig`,
     },
 }
 

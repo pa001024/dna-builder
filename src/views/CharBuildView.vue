@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch, watchEffect } from "vue"
 import { t } from "i18next"
+import { VTour, type ITourStep } from "@globalhive/vuejs-tour"
 import {
     LeveledChar,
     LeveledMod,
@@ -27,6 +28,7 @@ import { useTimeline } from "../store/timeline"
 import { useSettingStore } from "../store/setting"
 import { useRoute } from "vue-router"
 import { useUIStore } from "../store/ui"
+import { useTourStore } from "../store/tour"
 import { waitForInitialLoad } from "../i18n"
 import { DNARoleCharsBean, DNARoleShowBean, DNAWeaponBean } from "dna-api"
 
@@ -35,6 +37,7 @@ const inv = useInvStore()
 const setting = useSettingStore()
 const ui = useUIStore()
 const route = useRoute()
+const tourStore = useTourStore()
 
 // 路由
 const selectedChar = computed(() => charMap.get(+route.params.charId)?.名称 || "")
@@ -440,6 +443,90 @@ const summonAttributes = computed(() => {
     return undefined
 })
 
+//#region Tour
+const tour = ref<typeof VTour>()
+
+// 定义按钮标签（使用 computed 支持 i18n 动态翻译）
+const buttonLabels = computed(() => ({
+    next: t("tour.next"),
+    back: t("tour.back"),
+    done: t("tour.done"),
+    skip: t("tour.skip"),
+}))
+
+// 定义 tour 步骤（使用 computed 支持 i18n 动态翻译）
+const steps = computed<ITourStep[]>(() => [
+    {
+        target: "[data-tour='char-tabs']",
+        content: t("tour.char_tabs"),
+        placement: "right",
+    },
+    {
+        target: "[data-tour='weapon-select']",
+        content: t("tour.weapon_select"),
+        placement: "right",
+    },
+    {
+        target: "[data-tour='skill-select']",
+        content: t("tour.skill_select"),
+        placement: "right",
+    },
+    {
+        target: "[data-tour='target-function']",
+        content: t("tour.target_function"),
+        placement: "right",
+    },
+    {
+        target: "[data-tour='damage-result']",
+        content: t("tour.damage_result"),
+        placement: "right",
+    },
+    {
+        target: "[data-tour='char-mods']", // 4
+        content: t("tour.char_mods"),
+        placement: "right",
+    },
+    {
+        target: "[data-tour='top-actions']",
+        content: t("tour.top_actions"),
+        placement: "bottom",
+    },
+    {
+        target: "[data-tour='tour-button']",
+        content: t("tour.finish"),
+        placement: "bottom",
+    },
+])
+
+// 处理 tour 步骤变化
+function handleTourStep(index: number) {
+    const step = steps.value[index]
+    const target = document.querySelector(step.target)
+    if (!target) return
+    const elementRect = target.getBoundingClientRect()
+    if (index === 0) {
+        charTab.value = "近战"
+    }
+    const scrollArea = document.querySelector(
+        index >= 5 ? "#char-build-scroll2 [data-radix-scroll-area-viewport]" : "#char-build-scroll1 [data-radix-scroll-area-viewport]"
+    )
+    if (!scrollArea) return
+    const viewportHeight = scrollArea.clientHeight
+    const viewportWidth = scrollArea.clientWidth
+
+    // 计算滚动目标位置（垂直居中 + 可选偏移，水平同理）
+    const scrollTop = scrollArea.scrollTop + elementRect.top - viewportHeight / 2 + elementRect.height / 2
+    const scrollLeft = scrollArea.scrollLeft + elementRect.left - viewportWidth / 2 + elementRect.width / 2
+
+    scrollArea.scrollTo({
+        top: scrollTop,
+        left: scrollLeft,
+        behavior: "smooth",
+    })
+}
+
+//#endregion
+
 const teamBuffLvs = useLocalStorage("teamBuffLvs", {} as Record<string, number>)
 
 function updateTeamBuff(newValue: string, oldValue: string) {
@@ -486,6 +573,15 @@ onMounted(async () => {
     }
     await waitForInitialLoad()
     ui.title = t("char-build.title1", { charName: t(selectedChar.value) })
+
+    // Tour 启动逻辑：检查是否已完成
+    const tourKey = `char-build`
+    if (!tourStore.isTourCompleted(tourKey)) {
+        // 延迟 1 秒后启动，等待组件完全渲染
+        setTimeout(() => {
+            tour.value?.startTour()
+        }, 1000)
+    }
 })
 
 onBeforeUnmount(() => {
@@ -642,6 +738,18 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
 </script>
 
 <template>
+    <!-- Tour 组件 -->
+    <VTour
+        ref="tour"
+        :steps="steps"
+        :button-labels="buttonLabels"
+        backdrop
+        highlight
+        no-scroll
+        @on-tour-step="handleTourStep"
+        @on-tour-end="tourStore.markTourCompleted('char-build')"
+    />
+
     <dialog class="modal" :class="{ 'modal-open': simulator_model_show }">
         <div class="modal-box bg-base-300 w-11/12 max-w-6xl">
             <GameSimulator v-if="simulator_model_show" :char-build="charBuild" />
@@ -709,9 +817,16 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
             }"
         />
         <!-- 顶部操作栏 -->
-        <div class="sticky top-0 z-1 bg-base-300/50 backdrop-blur-sm rounded-md p-2 sm:p-3 m-1 sm:m-2 shadow-lg border border-base-200">
+        <div
+            data-tour="top-actions"
+            class="sticky top-0 z-1 bg-base-300/50 backdrop-blur-sm rounded-md p-2 sm:p-3 m-1 sm:m-2 shadow-lg border border-base-200"
+        >
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-2">
                 <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto sm:ml-auto">
+                    <button class="btn btn-sm btn-ghost flex-1 sm:flex-none" data-tour="tour-button" @click="tour?.startTour()">
+                        <Icon icon="ri:question-line" class="w-4 h-4" />
+                        <span class="hidden sm:inline">{{ $t("char-build.tour") }}</span>
+                    </button>
                     <button class="btn btn-sm btn-ghost flex-1 sm:flex-none" @click="shareCharBuild">
                         <Icon icon="ri:share-line" class="w-4 h-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.share") }}</span>
@@ -755,9 +870,9 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
         </div>
         <div class="flex-1 flex flex-col sm:flex-row overflow-y-auto sm:overflow-hidden">
             <!-- 侧边栏 -->
-            <ScrollArea class="sm:w-92 flex-none flex flex-col gap-2 p-2">
+            <ScrollArea id="char-build-scroll1" class="sm:w-92 flex-none flex flex-col gap-2 p-2">
                 <div class="flex flex-col gap-4">
-                    <div class="flex m-auto gap-2 overflow-x-auto pb-2">
+                    <div data-tour="char-tabs" class="flex m-auto gap-2 overflow-x-auto pb-2">
                         <div
                             v-for="(tab, index) in [
                                 {
@@ -837,11 +952,13 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                             <Icon icon="radix-icons:chevron-down" :class="{ 'rotate-180': charDetailExpend }" />
                         </div>
                         <!-- 技能选择 -->
-                        <SkillTabs
-                            :skills="charBuild.charSkills"
-                            :selected-skill-name="charSettings.baseName"
-                            @select="charSettings.baseName = $event"
-                        />
+                        <div data-tour="skill-select">
+                            <SkillTabs
+                                :skills="charBuild.charSkills"
+                                :selected-skill-name="charSettings.baseName"
+                                @select="charSettings.baseName = $event"
+                            />
+                        </div>
                         <div class="flex items-center gap-4 text-sm p-1">
                             <div class="flex-1">
                                 <input
@@ -890,7 +1007,10 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                     />
 
                     <!-- 目标函数 -->
-                    <div class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-md p-4 space-y-3 border border-base-200">
+                    <div
+                        data-tour="target-function"
+                        class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-md p-4 space-y-3 border border-base-200"
+                    >
                         <div class="space-y-2 p-1">
                             <div class="text-sm flex justify-between">
                                 <div class="flex items-center gap-2">
@@ -938,7 +1058,7 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                             <div v-if="charBuild.validateAST(targetFunction)" class="flex text-xs items-center text-red-500">
                                 {{ charBuild.validateAST(targetFunction) }}
                             </div>
-                            <div v-else class="flex justify-between items-center p-1">
+                            <div v-else data-tour="damage-result" class="flex justify-between items-center p-1">
                                 <div class="text-sm text-base-content/80">{{ charSettings.baseName }}</div>
                                 <div class="text-primary font-bold text-md font-orbitron">
                                     {{ totalDamage }}
@@ -949,7 +1069,7 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                 </div>
             </ScrollArea>
             <!-- 正文 -->
-            <ScrollArea class="sm:flex-1 flex-none">
+            <ScrollArea id="char-build-scroll2" class="sm:flex-1 flex-none">
                 <div class="p-2 space-y-4">
                     <!-- 技能 -->
                     <CollapsibleSection :title="$t('角色详情')" :is-open="!collapsedSections.detail" @toggle="toggleSection('detail')">
@@ -1192,6 +1312,7 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                     <!-- MOD配置区域 -->
                     <!-- 角色MOD -->
                     <CollapsibleSection
+                        data-tour="char-mods"
                         :title="`${$t('魔之楔')} (${charBuild.getModCostMax(charTab)}/${charBuild.getModCap(charTab)})`"
                         :badge="`${charBuild.getModCostTransfer(charTab).length}模块`"
                         :is-open="!collapsedSections.mods"

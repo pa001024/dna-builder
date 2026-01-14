@@ -43,7 +43,7 @@ defineModel<boolean>("modelShow")
         class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-md p-4 space-y-3 border border-base-200"
     >
         <h3 class="flex items-center gap-4 text-lg font-bold text-base-content/90 mb-2">
-            <div class="flex flex-1 flex-col">
+            <div class="flex flex-1 flex-col" data-tour="weapon-select">
                 <div class="text-lg font-bold cursor-pointer" @click="wkey !== 'skill' && $emit('update:modelShow', true)">
                     {{ $t(charBuild[`${wkey}Weapon`]!.名称 || "") }}
                     <Icon v-if="wkey !== 'skill'" icon="ri:exchange-line" class="inline-block w-5 h-5 text-primary" />

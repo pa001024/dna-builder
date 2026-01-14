@@ -29,6 +29,20 @@
       "when": 1767766496659,
       "tag": "0003_cool_marauders",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1768340173989,
+      "tag": "0004_hot_shiva",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1768408673632,
+      "tag": "0005_natural_trish_tilby",
+      "breakpoints": true
     }
   ]
 }

@@ -107,6 +107,7 @@ const expectedValue = computed(() => {
     // 计算调整后的权重和总权重
     const adjustedWeights = spotFish.value.map((fish, index) => {
         const baseWeight = props.spot.weights[index] || 0
+        if (!fish.appear.includes(selectTime.value)) return 0
         // 稀有鱼（type > 1）的权重受鱼饵影响
         return fish.type > 1 ? baseWeight * (1 + AddRareFishProb) : baseWeight
     })
@@ -124,16 +125,20 @@ const expectedValue = computed(() => {
         // 计算基础鱼价格和变异后的期望价格
         let finalPrice = 0
 
+        function calculate(fish: Fish) {
+            return calculateFishPrice(fish, fish.length[0] + (fish.length[1] - fish.length[0]) / 1.3)
+        }
+
         // 计算基础鱼的变异期望
         if (fish.var && adjustedMutationProb > 0 && fish.var.length > 0) {
             // 基础鱼价格
-            const { price: basePrice } = calculateFishPrice(fish)
+            const { price: basePrice } = calculate(fish)
             // 计算变异后的期望价格
             const mutatedExpectedPrice =
                 fish.var.reduce((sum, varFishId) => {
                     const varFish = fishMap.get(varFishId)
                     if (varFish) {
-                        const { price: varPrice } = calculateFishPrice(varFish)
+                        const { price: varPrice } = calculate(varFish)
                         return sum + varPrice
                     }
                     return sum
@@ -143,7 +148,7 @@ const expectedValue = computed(() => {
             finalPrice = basePrice * (1 - adjustedMutationProb) + mutatedExpectedPrice * adjustedMutationProb
         } else {
             // 没有变异，直接使用基础价格
-            const { price: basePrice } = calculateFishPrice(fish)
+            const { price: basePrice } = calculate(fish)
             finalPrice = basePrice
         }
 
@@ -159,13 +164,13 @@ const expectedValue = computed(() => {
                 // 计算授渔以鱼的变异期望
                 if (s2bFish.var && s2bAdjustedMutationProb > 0 && s2bFish.var.length > 0) {
                     // 授渔以鱼基础价格
-                    const { price: s2bBasePrice } = calculateFishPrice(s2bFish)
+                    const { price: s2bBasePrice } = calculate(s2bFish)
                     // 计算授渔以鱼变异后的期望价格
                     const s2bMutatedExpectedPrice =
                         s2bFish.var.reduce((sum, varFishId) => {
                             const varFish = fishMap.get(varFishId)
                             if (varFish) {
-                                const { price: varPrice } = calculateFishPrice(varFish)
+                                const { price: varPrice } = calculate(varFish)
                                 return sum + varPrice
                             }
                             return sum
@@ -175,7 +180,7 @@ const expectedValue = computed(() => {
                     s2bFinalPrice = s2bBasePrice * (1 - s2bAdjustedMutationProb) + s2bMutatedExpectedPrice * s2bAdjustedMutationProb
                 } else {
                     // 授渔以鱼没有变异，直接使用基础价格
-                    const { price: s2bBasePrice } = calculateFishPrice(s2bFish)
+                    const { price: s2bBasePrice } = calculate(s2bFish)
                     s2bFinalPrice = s2bBasePrice
                 }
 
@@ -389,7 +394,11 @@ function clearHistory() {
                                             <div v-if="fish.varProb" class="badge badge-sm">
                                                 异种: {{ +(fish.varProb * 100).toFixed(2) }}%
                                             </div>
-                                            <div v-if="fish.s2b" class="badge badge-sm">授渔以鱼: {{ fishMap.get(fish.s2b)!.name }}</div>
+                                            <div v-if="fish.s2b" class="badge badge-sm">
+                                                授渔以鱼: {{ fishMap.get(fish.s2b)!.name }}({{
+                                                    calculateFishPrice(fishMap.get(fish.s2b)!, 10000).price
+                                                }})
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

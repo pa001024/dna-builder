@@ -3,7 +3,6 @@ import { onMounted } from "vue"
 import { env } from "../env"
 import pg from "../../package.json"
 import type { IconTypes } from "../components/Icon.vue"
-import { useGameStore } from "../store/game"
 
 const items = [
     {
@@ -28,8 +27,6 @@ const items = [
     },
 ] satisfies { name: string; path: string; icon: IconTypes }[]
 
-const game = useGameStore()
-
 onMounted(() => {
     if (env.isApp) {
         return
@@ -40,7 +37,7 @@ onMounted(() => {
 <template>
     <div class="h-full flex flex-col">
         <ScrollArea class="h-full">
-            <div class="hero bg-base-200 min-h-72 relative bg-linear-to-br from-purple-500/30 via-gray-500/30 to-blue-500/30">
+            <div class="hero bg-base-200 py-8 relative bg-linear-to-br from-purple-500/30 via-gray-500/30 to-blue-500/30">
                 <!-- 网格线 -->
                 <div class="absolute inset-0 opacity-20">
                     <div
@@ -110,18 +107,16 @@ onMounted(() => {
                 </RouterLink>
             </div>
 
+            <div class="w-full max-w-6xl mx-auto p-2 sm:p-4">
+                <div class="card bg-base-100 shadow-md">
+                    <div class="card-body p-3 sm:p-4">
+                        <TodoList />
+                    </div>
+                </div>
+            </div>
+
             <!-- 活动日历组件 -->
             <ActivityCalendar />
-
-            <RouterLink
-                v-if="env.isApp"
-                to="/game-launcher"
-                class="w-auto px-6 btn btn-primary btn-md sm:btn-lg fixed right-4 bottom-4 sm:right-8 sm:bottom-8 left-auto z-40"
-                :class="{ 'btn-disabled': game.running }"
-            >
-                <Icon icon="ri:rocket-2-line" class="w-5 h-5 sm:w-6 sm:h-6" />
-                <span class="hidden sm:inline">{{ game.running ? $t("game-launcher.launched") : $t("game-launcher.launch") }}</span>
-            </RouterLink>
         </ScrollArea>
     </div>
 </template>

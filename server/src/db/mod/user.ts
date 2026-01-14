@@ -14,6 +14,7 @@ export const typeDefs = /* GraphQL */ `
         register(name: String!, qq: String!, email: String!, password: String!): UserLoginResult!
         updateUserMeta(data: UsersUpdateInput!): UserLoginResult!
         deleteUser(id: String!): Boolean!
+        updateUser(id: String!, email: String, roles: String): User!
     }
 
     type Query {
@@ -46,6 +47,7 @@ export const typeDefs = /* GraphQL */ `
         id: String!
         name: String!
         qq: String
+        roles: String
     }
 
     input UsersUpdateInput {
@@ -113,8 +115,9 @@ export const resolvers = {
             if (email.length > 60 || email.length < 2 || !email.match(/.+@.+\..+/)) return { success: false, message: "Invalid email" }
             if (name.length > 20 || name.length < 2) return { success: false, message: "Name must be between 2 and 20 characters" }
             if (qq && qq.length > 20) return { success: false, message: "QQ must be between 2 and 20 characters" }
-
-            const user = (await db.insert(schema.users).values({ name, qq, email }).onConflictDoNothing().returning())[0]
+            const payload: typeof schema.users.$inferInsert = { name, qq, email }
+            if (process.env.ADMIN_EMAIL === email) payload.roles = "admin"
+            const user = (await db.insert(schema.users).values(payload).onConflictDoNothing().returning())[0]
             if (user) {
                 const token = signToken(user)
                 const hash = await Bun.password.hash(password)
@@ -213,6 +216,34 @@ export const resolvers = {
 
             const result = await db.delete(schema.users).where(eq(schema.users.id, id)).returning()
             return result.length > 0
+        },
+        updateUser: async (parent, { id, email, roles }, context) => {
+            if (!context.user || !context.user.roles?.includes("admin")) {
+                throw createGraphQLError("Unauthorized: Admin role required")
+            }
+
+            const updateData: any = {}
+            if (typeof email === "string") {
+                if (email.length > 60 || email.length < 2 || !email.match(/.+@.+\..+/)) {
+                    throw createGraphQLError("Invalid email")
+                }
+                updateData.email = email
+            }
+            if (typeof roles === "string") {
+                updateData.roles = roles
+            }
+
+            if (Object.keys(updateData).length === 0) {
+                throw createGraphQLError("No fields to update")
+            }
+
+            const [updatedUser] = await db.update(schema.users).set(updateData).where(eq(schema.users.id, id)).returning()
+
+            if (!updatedUser) {
+                throw createGraphQLError("User not found")
+            }
+
+            return updatedUser
         },
     },
 } satisfies Resolver<CreateMobius<typeof typeDefs>, Context>

@@ -304,6 +304,8 @@ export const guides = sqliteTable(
         charSettings: text("char_settings", { mode: "json" }).$type<Record<string, any>>(),
         views: integer("views").$default(() => 0),
         likes: integer("likes").$default(() => 0),
+        isRecommended: integer("is_recommended", { mode: "boolean" }).$default(() => false),
+        isPinned: integer("is_pinned", { mode: "boolean" }).$default(() => false),
         createdAt: text("created_at").$default(now),
         updateAt: text("update_at").$onUpdate(now),
     },
@@ -369,4 +371,49 @@ export const userRelations = relations(users, ({ one, many }) => ({
 
 export const dnaUserBindingsRelations = relations(dnaUserBindings, ({ one }) => ({
     user: one(users, { fields: [dnaUserBindings.userId], references: [users.id] }),
+}))
+
+/** 待办事项 */
+export const todos = sqliteTable(
+    "todos",
+    {
+        id: text("id").$default(id).primaryKey(),
+        title: text("title").notNull(),
+        description: text("desc"),
+        startTime: text("start_time"),
+        endTime: text("end_time"),
+        type: text("type").notNull(), // 'user' | 'system'
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        createdAt: text("created_at").$default(now),
+        updateAt: text("update_at").$onUpdate(now),
+    },
+    (todos) => [index("todos_user_id_idx").on(todos.userId), index("todos_type_idx").on(todos.type)],
+)
+
+export const todosRelations = relations(todos, ({ one, many }) => ({
+    user: one(users, { fields: [todos.userId], references: [users.id] }),
+    completions: many(todoCompletions),
+}))
+
+/** 待办事项完成记录 */
+export const todoCompletions = sqliteTable(
+    "todo_completions",
+    {
+        id: text("id").$default(id).primaryKey(),
+        todoId: text("todo_id")
+            .notNull()
+            .references(() => todos.id, { onDelete: "cascade" }),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        completedAt: text("completed_at").$default(now),
+    },
+    (todoCompletions) => [uniqueIndex("todo_completion_idx").on(todoCompletions.todoId, todoCompletions.userId)],
+)
+
+export const todoCompletionsRelations = relations(todoCompletions, ({ one }) => ({
+    todo: one(todos, { fields: [todoCompletions.todoId], references: [todos.id] }),
+    user: one(users, { fields: [todoCompletions.userId], references: [users.id] }),
 }))

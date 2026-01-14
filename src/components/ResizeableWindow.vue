@@ -287,7 +287,7 @@ watchEffect(() => {
                 <div
                     v-if="ui.errorMessage"
                     role="alert"
-                    class="alert alert-error absolute bottom-8 right-8 cursor-pointer"
+                    class="alert alert-error absolute bottom-8 right-8 cursor-pointer z-10000"
                     @click="ui.errorMessage = ''"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
@@ -305,7 +305,7 @@ watchEffect(() => {
                 <div
                     v-if="ui.successMessage"
                     role="alert"
-                    class="alert alert-success absolute bottom-8 right-8 cursor-pointer"
+                    class="alert alert-success absolute bottom-8 right-8 cursor-pointer z-10000"
                     @click="ui.successMessage = ''"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">

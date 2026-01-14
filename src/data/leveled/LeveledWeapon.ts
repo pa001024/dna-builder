@@ -194,8 +194,6 @@ export class LeveledWeapon {
                 const maxValue = buff[prop] || 0
                 const currentValue = (maxValue / 10) * (this._精炼 + 5)
                 const baseValue = (buff.baseValue / 10) * (this._精炼 + 5)
-                if (this.baseProperties.includes(prop)) this[prop] = this[prop] + currentValue
-                else this[prop] = currentValue
                 this.buffProps[prop] = currentValue
                 if (buff.描述.includes(`{%}`)) {
                     buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(baseValue * 100).toFixed(1)}%`)
@@ -212,6 +210,9 @@ export class LeveledWeapon {
         this.properties.forEach(prop => {
             properties[prop] = this[prop]
         })
+        for (const prop in this.buffProps) {
+            properties[prop] = this.buffProps[prop]
+        }
         return properties
     }
     getSimpleProperties(): Record<string, number> {
@@ -219,6 +220,9 @@ export class LeveledWeapon {
         this.simpleProperties.forEach(prop => {
             properties[prop] = this[prop]
         })
+        for (const prop in this.buffProps) {
+            properties[prop] = this.buffProps[prop]
+        }
         return properties
     }
     static _exclude_properties = new Set([

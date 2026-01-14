@@ -72,6 +72,11 @@ export const useUIStore = defineStore("ui", {
                     icon: "ri:book-line",
                 },
                 {
+                    name: "chat",
+                    path: "/chat",
+                    icon: "ri:chat-3-line",
+                },
+                {
                     name: "dna-home",
                     path: "/dna",
                     icon: "ri:chat-thread-line",

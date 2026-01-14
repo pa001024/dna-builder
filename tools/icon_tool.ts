@@ -21,7 +21,7 @@ type IconDataEntry = [string, number] | [string, number, Record<string, any>]
 async function loadIgnoreList(): Promise<Set<string>> {
     try {
         const content = await readFile(IGNORE_LIST_FILE, "utf-8")
-        return new Set(content.split("\n").filter((line) => line.trim() && !line.startsWith("#")))
+        return new Set(content.split("\n").filter(line => line.trim() && !line.startsWith("#")))
     } catch {
         return new Set()
     }
@@ -89,8 +89,12 @@ async function addIcon(iconName: string): Promise<void> {
 
     if (!iconData) {
         console.error(`❌ 在 remixicon 包中未找到图标: ${iconName}`)
-        console.log("可用的图标示例: subtract-line, add-line, delete-bin-line, heart-line")
-        process.exit(1)
+        console.log(`🔍 正在搜索包含 "${iconName}" 的图标...`)
+        for (const part of iconName.split("-")) {
+            if (["line", "fill"].includes(part)) continue
+            await listAvailableIcons(part)
+        }
+        return
     }
 
     const iconVueData = await loadIconVueData()
@@ -197,12 +201,12 @@ async function findUsedIcons(): Promise<Set<string>> {
             const stringTemplateIcon = trimmedLine.match(/icon:\s*`([^`]+)`/)
             if (stringTemplateIcon) {
                 const template = stringTemplateIcon[1]
-                const staticParts = template.split(/\$\{.*?\}/).filter((p) => p)
-                staticParts.forEach((part) => {
+                const staticParts = template.split(/\$\{.*?\}/).filter(p => p)
+                staticParts.forEach(part => {
                     if (part.includes("'") || part.includes('"')) {
                         const matches = part.match(/["']([^"']+)["']/g)
                         if (matches) {
-                            matches.forEach((m) => {
+                            matches.forEach(m => {
                                 const icon = m.slice(1, -1)
                                 if (icon.includes(":")) {
                                     usedIcons.add(icon)
@@ -371,11 +375,11 @@ async function findUsedIcons(): Promise<Set<string>> {
     const inferredIcons = new Set<string>()
     for (const info of variableMap.values()) {
         if (!info.isDynamic && info.possibleValues.length > 0) {
-            info.possibleValues.forEach((icon) => inferredIcons.add(icon))
+            info.possibleValues.forEach(icon => inferredIcons.add(icon))
         }
     }
 
-    inferredIcons.forEach((icon) => usedIcons.add(icon))
+    inferredIcons.forEach(icon => usedIcons.add(icon))
 
     return usedIcons
 }
@@ -416,17 +420,17 @@ async function checkIcons(): Promise<void> {
 
     if (remixiconIcons.length > 0) {
         console.log(`\n未使用的 Remixicon 图标 (${remixiconIcons.length} 个):`)
-        remixiconIcons.sort().forEach((icon) => console.log(`  - ${icon}`))
+        remixiconIcons.sort().forEach(icon => console.log(`  - ${icon}`))
     }
 
     if (otherIcons.length > 0) {
         console.log(`\n未使用的其他图标 (${otherIcons.length} 个):`)
-        otherIcons.sort().forEach((icon) => console.log(`  - ${icon}`))
+        otherIcons.sort().forEach(icon => console.log(`  - ${icon}`))
     }
 
     if (ignoredIconsList.length > 0) {
         console.log(`\n已忽略的图标 (${ignoredIconsList.length} 个):`)
-        ignoredIconsList.sort().forEach((icon) => console.log(`  - ${icon}`))
+        ignoredIconsList.sort().forEach(icon => console.log(`  - ${icon}`))
     }
 
     if (unusedIcons.length === 0) {
@@ -462,7 +466,7 @@ async function cleanIcons(): Promise<void> {
     await saveIconVueData(iconVueData)
 
     console.log(`✅ 已删除 ${deletedCount} 个未使用的图标:`)
-    deletedIcons.sort().forEach((icon) => console.log(`  - ${icon}`))
+    deletedIcons.sort().forEach(icon => console.log(`  - ${icon}`))
 }
 
 async function ignoreIcon(iconName: string): Promise<void> {
@@ -504,7 +508,7 @@ async function listIgnoredIcons(): Promise<void> {
     console.log(`忽略列表 (${ignoredIcons.size} 个图标):`)
     Array.from(ignoredIcons)
         .sort()
-        .forEach((icon) => console.log(`  - ${icon}`))
+        .forEach(icon => console.log(`  - ${icon}`))
 }
 
 async function listAvailableIcons(pattern?: string): Promise<void> {
@@ -512,12 +516,12 @@ async function listAvailableIcons(pattern?: string): Promise<void> {
     const icons = Object.keys(remixiconData)
 
     if (pattern) {
-        const filtered = icons.filter((icon) => icon.includes(pattern))
+        const filtered = icons.filter(icon => icon.includes(pattern))
         console.log(`匹配 "${pattern}" 的图标 (${filtered.length} 个):`)
         filtered
             .sort()
             .slice(0, 20)
-            .forEach((icon) => console.log(`  - ${icon}`))
+            .forEach(icon => console.log(`  - ${icon}`))
         if (filtered.length > 20) {
             console.log(`  ... 还有 ${filtered.length - 20} 个图标`)
         }
@@ -525,6 +529,20 @@ async function listAvailableIcons(pattern?: string): Promise<void> {
         console.log(`可用的 Remixicon 图标总数: ${icons.length}`)
         console.log("使用 list <pattern> 搜索特定图标")
         console.log("示例: bun tools/icon_tool.ts list subtract")
+    }
+}
+
+async function useIcon(pattern?: string): Promise<void> {
+    const usedIcons = await findUsedIcons()
+    const iconList = Array.from(usedIcons).sort()
+
+    if (pattern) {
+        const filtered = iconList.filter(icon => icon.includes(pattern))
+        console.log(`当前使用的匹配 "${pattern}" 的图标 (${filtered.length} 个):`)
+        filtered.forEach(icon => console.log(`  - ${icon}`))
+    } else {
+        console.log(`当前使用的图标总数: ${iconList.length}`)
+        iconList.forEach(icon => console.log(`  - ${icon}`))
     }
 }
 
@@ -541,6 +559,7 @@ async function main(): Promise<void> {
         console.log("  bun tools/icon_tool.ts unignore <icon>   - 从忽略列表中移除图标")
         console.log("  bun tools/icon_tool.ts ignored            - 列出所有被忽略的图标")
         console.log("  bun tools/icon_tool.ts list [pattern]     - 列出可用的 Remixicon 图标")
+        console.log("  bun tools/icon_tool.ts use [pattern]     - 查询当前使用的图标")
         console.log("")
         console.log("示例:")
         console.log("  bun tools/icon_tool.ts add subtract-line  # 添加 ri:subtract-line")
@@ -548,6 +567,7 @@ async function main(): Promise<void> {
         console.log("  bun tools/icon_tool.ts clean              # 清理未使用的图标")
         console.log("  bun tools/icon_tool.ts ignore ri:user-line  # 忽略 user-line 图标")
         console.log("  bun tools/icon_tool.ts list subtract     # 搜索包含 subtract 的图标")
+        console.log("  bun tools/icon_tool.ts use subtract      # 查询当前使用的包含 subtract 的图标")
         process.exit(0)
     }
 
@@ -584,6 +604,8 @@ async function main(): Promise<void> {
             await listIgnoredIcons()
         } else if (command === "list") {
             await listAvailableIcons(args[1])
+        } else if (command === "use") {
+            await useIcon(args[1])
         } else {
             console.error(`❌ 未知命令: ${command}`)
             console.log("使用 help 查看帮助信息")

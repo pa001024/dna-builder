@@ -41,7 +41,7 @@ const routes: readonly RouteRecordRaw[] = [
         component: env.isApp ? () => import("./views/GameLauncher.vue") : () => undefined,
         beforeEnter: () => setMinSize(800, 700),
     },
-    { name: "login", path: "/userlogin", component: UserManager, beforeEnter: () => setMinSize(600, 600) },
+    { name: "game-accounts", path: "/game-accounts", component: UserManager, beforeEnter: () => setMinSize(600, 600) },
     {
         name: "more",
         path: "/more",
@@ -57,34 +57,48 @@ const routes: readonly RouteRecordRaw[] = [
     // more: lazy load
     { name: "ai", path: "/ai", component: () => import("./views/AIAgent.vue"), beforeEnter: () => setMinSize(600, 600) },
     { name: "help", path: "/help", component: () => import("./views/Help.vue"), beforeEnter: () => setMinSize(800, 700) },
-
+    {
+        name: "chat",
+        path: "/chat",
+        component: () => import("./views/Chat.vue"),
+        beforeEnter: () => setMinSize(367, 430),
+        meta: { keepAlive: true },
+        children: [
+            { name: "room", path: ":room", component: () => import("./views/ChatRoom.vue") }, //
+        ],
+    },
     // admin
     {
-        name: "admin-home",
         path: "/admin",
-        component: () => import("./admin/Home.vue"),
+        component: () => import("./admin/AdminLayout.vue"),
         beforeEnter: () => setMinSize(600, 600),
-        meta: {
-            noSidebar: true,
-        },
-    },
-    {
-        name: "admin-login",
-        path: "/admin/login",
-        component: () => import("./admin/Login.vue"),
-        beforeEnter: () => setMinSize(600, 600),
-        meta: {
-            noSidebar: true,
-        },
-    },
-    {
-        name: "admin-user",
-        path: "/admin/user",
-        component: () => import("./admin/UserManagement.vue"),
-        beforeEnter: () => setMinSize(600, 600),
-        meta: {
-            noSidebar: true,
-        },
+        children: [
+            {
+                name: "admin-home",
+                path: "",
+                component: () => import("./admin/AdminHome.vue"),
+            },
+            {
+                name: "admin-user",
+                path: "user",
+                component: () => import("./admin/UserManagement.vue"),
+            },
+            {
+                name: "admin-guide",
+                path: "guide",
+                component: () => import("./admin/GuideManagement.vue"),
+            },
+            {
+                name: "admin-room",
+                path: "room",
+                component: () => import("./admin/RoomManagement.vue"),
+            },
+            {
+                name: "admin-todo",
+                path: "todo",
+                component: () => import("./admin/TodoManagement.vue"),
+            },
+        ],
     },
     // 数据库路由
     {

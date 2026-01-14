@@ -3,7 +3,7 @@ import { db, schema } from ".."
 import { Context } from "../yoga"
 import { desc, eq, getTableColumns, like, sql } from "drizzle-orm"
 import { getSubSelection } from "."
-import { addClient, hasUser, removeClient, getUsers, getClientRoom } from "../kv/room"
+import { addClient, hasUser, removeClient, getUsers, getClientRoom, waitForUser } from "../kv/room"
 import { createGraphQLError } from "graphql-yoga"
 
 export const typeDefs = /* GraphQL */ `
@@ -12,11 +12,13 @@ export const typeDefs = /* GraphQL */ `
         deleteRoom(id: String!): Boolean!
         "获取房间加入权限 实际加入事件由subscription触发"
         joinRoom(id: String!): Room
+        updateRoom(id: String!, data: RoomsUpdateInput!): Room
     }
 
     type Query {
         room(id: String!): Room
         rooms(name_like: String, limit: Int, offset: Int): [Room!]!
+        roomsCount: Int!
         timeOffset(t: Int!): Int!
     }
 
@@ -58,6 +60,12 @@ export const typeDefs = /* GraphQL */ `
 
     input RoomsCreateInput {
         name: String!
+        type: String
+        maxUsers: Int
+    }
+
+    input RoomsUpdateInput {
+        name: String
         type: String
         maxUsers: Int
     }
@@ -177,6 +185,10 @@ export const resolvers = {
 
             return rst
         },
+        roomsCount: async () => {
+            const [result] = await db.select({ count: sql<number>`count(*)` }).from(schema.rooms)
+            return result?.count || 0
+        },
         timeOffset: async (parent, { t }, context, info) => {
             return Date.now() - t
         },
@@ -184,7 +196,7 @@ export const resolvers = {
     Mutation: {
         createRoom: async (parent, { data: { name, type, maxUsers } }, context, info) => {
             const user = context.user
-            if (!user) return null
+            if (!user || !user.roles?.includes("admin")) return createGraphQLError("无权限")
             const rst = (
                 await db
                     .insert(schema.rooms)
@@ -223,14 +235,17 @@ export const resolvers = {
             if (rst.length) {
                 const room = rst[0]
                 if (room) {
-                    if (hasUser(room.id, user.id) || room.maxUsers > getUsers(room.id).length) return room
+                    if (hasUser(room.id, user.id) || room.maxUsers > getUsers(room.id).length) {
+                        await waitForUser(room.id, user.id)
+                        return room
+                    }
                 }
             }
             return null
         },
         deleteRoom: async (parent, { id }, context, info) => {
             const user = context.user
-            if (!user) return false
+            if (!user || !user.roles?.includes("admin")) return false
             const room = await db.query.rooms.findFirst({
                 where: eq(schema.rooms.id, id),
                 with: { owner: true },
@@ -240,6 +255,34 @@ export const resolvers = {
                 return true
             }
             return false
+        },
+        updateRoom: async (parent, { id, data: { name, type, maxUsers } }, context, info) => {
+            const user = context.user
+            if (!user || !user.roles?.includes("admin")) {
+                throw createGraphQLError("无权限")
+            }
+
+            const updateData: any = {}
+            if (typeof name === "string") updateData.name = name
+            if (typeof type === "string") updateData.type = type
+            if (typeof maxUsers === "number") updateData.maxUsers = maxUsers
+
+            if (Object.keys(updateData).length === 0) {
+                throw createGraphQLError("No fields to update")
+            }
+
+            const [updatedRoom] = await db.update(schema.rooms).set(updateData).where(eq(schema.rooms.id, id)).returning()
+
+            if (!updatedRoom) {
+                throw createGraphQLError("房间不存在")
+            }
+
+            const room = await db.query.rooms.findFirst({
+                where: eq(schema.rooms.id, id),
+                with: { owner: true },
+            })
+
+            return room
         },
     },
     Subscription: {

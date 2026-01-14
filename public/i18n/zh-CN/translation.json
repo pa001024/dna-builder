@@ -75,16 +75,6 @@
     "异化夜魔": "异化夜魔之",
     "有效生命": "有效生命",
     "羽蛇": "羽蛇之",
-    "预定义": {
-        "暴击伤害": "暴击伤害",
-        "范围收益": "范围收益",
-        "耐久收益": "耐久收益",
-        "期望伤害": "期望伤害",
-        "伤害": "伤害",
-        "效益收益": "效益收益",
-        "DPH": "DPH",
-        "DPS": "DPS"
-    },
     "远程": "远程武器",
     "增伤": "增伤",
     "中庭蛇": "中庭蛇之",
@@ -136,6 +126,9 @@
         "theater_desc": "参演热映剧目，领取委托密函！",
         "theater_title": "沉浸式戏剧",
         "title": "活动日历"
+    },
+    "admin-home": {
+        "title": "后台"
     },
     "ai": {
         "desc": "使用AI智能体与游戏互动",
@@ -231,11 +224,48 @@
         "timeline": "时间线",
         "title": "构筑",
         "title1": "{{charName}} - 构筑",
+        "tour": "新手引导",
         "weapon": "武器",
         "weapon_attributes": "武器属性"
     },
     "char-list": {
         "title": "角色列表"
+    },
+    "chat": {
+        "addRoom": "创建新房间",
+        "autoJoin": "自动加入",
+        "block": "屏蔽",
+        "chatPlaceholder": "输入聊天内容",
+        "copy": "复制",
+        "deleteRoomConfirm": "确认要删除房间吗?",
+        "deleteRoomFailed": "删除失败",
+        "edit": "编辑",
+        "edited": "(已编辑)",
+        "follow": "关注",
+        "hello": "大家好",
+        "insertImage": "发送图片",
+        "joinFailed": "加入失败",
+        "joinFailedTip": "可能是房间已满",
+        "keyboardShortcut": "快捷键加入|右键设置键位",
+        "keyboardShortcutSetting": "快捷键设置",
+        "micOn": "开启麦克风",
+        "needLogin": "聊天功能需要登录",
+        "newRoomBanner": "还没有人发言，快来做第一个吧！",
+        "reachedTop": "已经到顶了",
+        "refresh": "刷新",
+        "restore": "重新编辑",
+        "retractedAMessage": "{{name}}撤回了一条消息",
+        "revert": "撤回",
+        "roomMaxUser": "最大人数",
+        "roomName": "房间名",
+        "sayHello": "打个招呼",
+        "search": "搜索房间",
+        "send": "发送",
+        "sendTask": "发送UID(剪贴板)|右键自动发送",
+        "sound": "提示音",
+        "title": "聊天",
+        "unlimited": "不限制",
+        "you": "你"
     },
     "damageResult": {
         "critDamage": {
@@ -287,6 +317,7 @@
         "weapon_desc": "查看武器信息和属性"
     },
     "dna-home": {
+        "desc": "游戏信息/签到/浏览帖子",
         "title": "皎皎角"
     },
     "dna-post-detail": {
@@ -328,6 +359,10 @@
         "nodePalette": "节点面板",
         "resultPanel": "结果面板",
         "title": "节点编辑器"
+    },
+    "game-accounts": {
+        "desc": "皎皎角登录/签到/角色信息获取",
+        "title": "皎皎角账号"
     },
     "game-launcher": {
         "addCustomType": "添加自定义类型",
@@ -485,10 +520,6 @@
         "desc": "自定义你的魔之楔和武器配置",
         "title": "库存管理"
     },
-    "login": {
-        "desc": "皎皎角登录/签到/角色信息获取",
-        "title": "皎皎角"
-    },
     "main": {
         "btn_collapse_menu": "折叠菜单",
         "btn_pin_window": "窗口置顶",
@@ -519,145 +550,6 @@
         "desc": "更多功能",
         "title": "更多"
     },
-    "nodes": {
-        "tier1": {
-            "charStats": {
-                "baseAttack": "基础攻击",
-                "baseDefense": "基础防御",
-                "baseHP": "基础生命",
-                "baseSanity": "基础神智",
-                "baseShield": "基础护盾",
-                "char": "角色",
-                "icon": "ri:user-line",
-                "label": "角色属性",
-                "level": "等级"
-            },
-            "enemyStats": {
-                "currentHP": "当前血量",
-                "defense": "防御",
-                "enemy": "敌人",
-                "hpType": "HP类型",
-                "icon": "ri:skull-line",
-                "label": "敌人属性",
-                "level": "等级",
-                "life": "生命",
-                "resistance": "抗性",
-                "shield": "护盾",
-                "stance": "战姿"
-            },
-            "label": "基础属性",
-            "modStats": {
-                "attack": "攻击",
-                "charSlot": "角色",
-                "crit": "暴击",
-                "critDamage": "暴伤",
-                "damageIncrease": "增伤",
-                "icon": "ri:box-3-line",
-                "label": "MOD属性",
-                "level": "等级",
-                "meleeSlot": "近战",
-                "mod": "MOD",
-                "rangedSlot": "远程",
-                "skillSlot": "同律",
-                "slot": "槽位"
-            },
-            "weaponStats": {
-                "baseAttack": "基础攻击",
-                "baseCrit": "基础暴击",
-                "baseCritDamage": "基础暴伤",
-                "baseTrigger": "基础触发",
-                "fireRate": "射速",
-                "icon": "ri:sword-line",
-                "label": "武器属性",
-                "level": "等级",
-                "melee": "近战",
-                "ranged": "远程",
-                "refine": "精炼",
-                "type": "类型",
-                "weapon": "武器"
-            }
-        },
-        "tier2": {
-            "bonusCollector": {
-                "attack": "攻击",
-                "damageIncrease": "增伤",
-                "description": "收集来自上游节点的所有加成",
-                "elementalDamage": "属性伤",
-                "icon": "ri:add-line",
-                "label": "加成收集"
-            },
-            "label": "加成收集"
-        },
-        "tier3": {
-            "defenseMultiplier": {
-                "defense": "防御值",
-                "description": "计算敌方防御带来的伤害减免",
-                "icon": "ri:shield-line",
-                "label": "防御乘区",
-                "multiplier": "乘区"
-            },
-            "hpMultiplier": {
-                "boost": "昂扬",
-                "desperate": "背水",
-                "hpPercent": "血量百分比",
-                "icon": "ri:heart-line",
-                "label": "HP乘区",
-                "total": "总计"
-            },
-            "label": "乘区计算"
-        },
-        "tier5": {
-            "label": "技能系统",
-            "skillField": {
-                "base": "基础",
-                "field": "字段",
-                "icon": "ri:magic-line",
-                "label": "技能字段",
-                "level": "等级",
-                "multiplier": "倍率",
-                "skill": "技能",
-                "times": "段数"
-            },
-            "summonStats": {
-                "attackSpeed": "攻击速度",
-                "attackTimes": "攻击次数",
-                "char": "角色",
-                "icon": "ri:team-line",
-                "label": "召唤物",
-                "level": "等级",
-                "range": "范围",
-                "summon": "召唤物"
-            }
-        },
-        "tier7": {
-            "label": "输出与时间线",
-            "output": {
-                "description": "最终输出节点",
-                "finalDamage": "最终伤害",
-                "icon": "ri:output-line",
-                "label": "输出"
-            },
-            "targetFunction": {
-                "calculationResult": "计算结果",
-                "custom": "自定义表达式",
-                "icon": "ri:function-line",
-                "label": "目标函数",
-                "macros": "可用宏:",
-                "placeholder": "输入AST表达式, 如: 伤害 * (1 + 增伤)",
-                "predefined": "预定义函数",
-                "validationError": "无法验证表达式"
-            },
-            "timeline": {
-                "avgDamage": "平均伤害",
-                "description": "根据持续时间和DPS计算总伤害输出",
-                "dps": "DPS",
-                "duration": "持续时间 (秒)",
-                "icon": "ri:time-line",
-                "label": "时间线伤害",
-                "totalDamage": "总伤害"
-            }
-        }
-    },
     "notfound": {
         "back_home": "返回首页",
         "title": "页面未找到"
@@ -682,6 +574,7 @@
         "zhouben": "周本"
     },
     "setting": {
+        "account": "账号",
         "ai": "AI大模型设置",
         "aiApiKey": "API密钥",
         "aiApiKeyTip": "从智谱AI开放平台获取API密钥",
@@ -720,6 +613,20 @@
     "timeline": {
         "desc": "自定义角色的战斗逻辑(打轴)",
         "title": "时间线"
+    },
+    "tour": {
+        "back": "上一步",
+        "char_mods": "为角色装备魔之楔，提升属性，按需添加BUFF和特效",
+        "char_tabs": "点击这里切换角色、近战、远程或同律武器",
+        "damage_result": "这里显示计算后的伤害结果",
+        "done": "完成",
+        "finish": "引导完成！你可以随时点击右上角的问号按钮重新查看",
+        "next": "下一步",
+        "skill_select": "选择要使用的技能",
+        "skip": "跳过",
+        "target_function": "设置伤害计算目标函数，如伤害、DPS等",
+        "top_actions": "使用顶部按钮分享配置、自动构筑、保存项目等",
+        "weapon_select": "点击这里更换武器/设置精炼"
     },
     "updater": {
         "newVersionFound": "发现新版本 v{{version}}",

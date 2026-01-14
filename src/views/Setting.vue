@@ -60,11 +60,12 @@ function capitalize(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
-function resetStorage() {
+async function resetStorage() {
     localStorage.clear()
     db.delete()
     // 清除所有Service Worker
-    clearServiceWorkers()
+    await clearServiceWorkers()
+    location.reload()
 }
 
 async function openResetConfirmDialog() {
@@ -262,6 +263,15 @@ function resetAiSettings() {
                             </div>
                         </div>
                     </div>
+                </div>
+            </article>
+
+            <article>
+                <h2 class="text-sm font-bold m-2">
+                    {{ $t("setting.account") }}
+                </h2>
+                <div class="bg-base-100 p-2 rounded-lg">
+                    <DOBAccountSetting />
                 </div>
             </article>
 

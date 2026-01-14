@@ -40,6 +40,24 @@ export async function importPic(path: string) {
     return await invoke<string>("import_pic", { path })
 }
 
+/**
+ * 获取本地登录的QQ号
+ * @param port The port of the local QQ
+ * @example 4301 4303 4305 ...
+ * @returns JSON
+ */
+export async function getLocalQQ(port: number) {
+    return JSON.parse(await invoke<string>("get_local_qq", { port })) as {
+        uin: number
+        face_index: number
+        gender: number
+        nickname: string
+        client_type: number
+        uin_flag: number
+        account: number
+    }[]
+}
+
 class TauriResponse {
     readonly status: number
     readonly statusText: string

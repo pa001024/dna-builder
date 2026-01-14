@@ -7,7 +7,7 @@ import tailwindcss from "@tailwindcss/vite"
 import { VitePWA } from "vite-plugin-pwa"
 import { resolve } from "path"
 import { chunkSplitPlugin } from "vite-plugin-chunk-split"
-
+import graphqlTag from "rollup-plugin-graphql-tag"
 const host = process.env.TAURI_DEV_HOST
 
 // https://vite.dev/config/
@@ -44,6 +44,9 @@ export default defineConfig(async () => ({
                 dna: [/src\/views\/DNA/],
                 db: [/src\/views\/DB/],
             },
+        }),
+        graphqlTag({
+            include: ["src/**/*.{vue,js,ts}"],
         }),
         VitePWA({
             registerType: "autoUpdate",

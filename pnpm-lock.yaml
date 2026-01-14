@@ -8,9 +8,15 @@ importers:
 
   .:
     dependencies:
+      '@globalhive/vuejs-tour':
+        specifier: ^2.6.1
+        version: 2.6.1(vue@3.5.26(typescript@5.9.3))
       '@modelcontextprotocol/sdk':
         specifier: ^1.25.1
         version: 1.25.1(hono@4.11.1)(zod@4.2.1)
+      '@sentry/vue':
+        specifier: ^10.33.0
+        version: 10.33.0(pinia@3.0.4(typescript@5.9.3)(vue@3.5.26(typescript@5.9.3)))(vue@3.5.26(typescript@5.9.3))
       '@tauri-apps/api':
         specifier: ^2.9.1
         version: 2.9.1
@@ -35,9 +41,12 @@ importers:
       '@tauri-apps/plugin-updater':
         specifier: ^2.9.0
         version: 2.9.0
+      '@urql/exchange-graphcache':
+        specifier: ^8.1.0
+        version: 8.1.0(@urql/core@6.0.1(graphql@14.7.0))(graphql@14.7.0)
       '@urql/vue':
         specifier: ^2.0.0
-        version: 2.0.0(@urql/core@6.0.1)(vue@3.5.26(typescript@5.9.3))
+        version: 2.0.0(@urql/core@6.0.1(graphql@14.7.0))(vue@3.5.26(typescript@5.9.3))
       '@vue-flow/background':
         specifier: ^1.3.2
         version: 1.3.2(@vue-flow/core@1.48.1(vue@3.5.26(typescript@5.9.3)))(vue@3.5.26(typescript@5.9.3))
@@ -68,6 +77,9 @@ importers:
       dompurify:
         specifier: ^3.3.1
         version: 3.3.1
+      graphql-ws:
+        specifier: ^6.0.6
+        version: 6.0.6(graphql@14.7.0)
       gsap:
         specifier: ^3.14.2
         version: 3.14.2
@@ -83,6 +95,9 @@ importers:
       i18next-vue:
         specifier: ^5.4.0
         version: 5.4.0(i18next@25.7.3(typescript@5.9.3))(vue@3.5.26(typescript@5.9.3))
+      jwt-decode:
+        specifier: ^4.0.0
+        version: 4.0.0
       lodash-es:
         specifier: ^4.17.22
         version: 4.17.22
@@ -95,6 +110,9 @@ importers:
       markdown-it-katex:
         specifier: ^2.0.3
         version: 2.0.3
+      mitt:
+        specifier: ^3.0.1
+        version: 3.0.1
       nanoid:
         specifier: ^5.1.6
         version: 5.1.6
@@ -195,6 +213,9 @@ importers:
       remixicon:
         specifier: ^4.8.0
         version: 4.8.0
+      rollup-plugin-graphql-tag:
+        specifier: ^0.1.0
+        version: 0.1.0(graphql@14.7.0)
       tailwindcss:
         specifier: ^4.1.18
         version: 4.1.18
@@ -968,6 +989,11 @@ packages:
   '@floating-ui/vue@1.1.9':
     resolution: {integrity: sha512-BfNqNW6KA83Nexspgb9DZuz578R7HT8MZw1CfK9I6Ah4QReNWEJsXWHN+SdmOVLNGmTPDi+fDT535Df5PzMLbQ==}
 
+  '@globalhive/vuejs-tour@2.6.1':
+    resolution: {integrity: sha512-i47jwTxCZqP/fM5yuXnYScVrw0X+Ri8LDzOYjfS6B0HRk/2frEYz03HZYdc3ZjcmxkibmwlF4T/Rfw9LmqY4tw==}
+    peerDependencies:
+      vue: ^3.5.22
+
   '@hono/node-server@1.19.7':
     resolution: {integrity: sha512-vUcD0uauS7EU2caukW8z5lJKtoGMokxNbJtBiwHgpqxEXokaHCBkQUmCHhjFB1VUTWdqj25QoMkMKzgjq+uhrw==}
     engines: {node: '>=18.14.1'}
@@ -1220,6 +1246,43 @@ packages:
     resolution: {integrity: sha512-SPEpaL6DX4rmcXtnhdrQYgzQ5W2uW3SCJch88lB2zImhJRhIIK44fkUrgIV/Q8yUNfw5oyZ5vkeQsZLhCb06lw==}
     cpu: [x64]
     os: [win32]
+
+  '@sentry-internal/browser-utils@10.33.0':
+    resolution: {integrity: sha512-nDJFHAfiFifBfJB0OF6DV6BIsIV5uah4lDsV4UBAgPBf+YAHclO10y1gi2U/JMh58c+s4lXi9p+PI1TFXZ0c6w==}
+    engines: {node: '>=18'}
+
+  '@sentry-internal/feedback@10.33.0':
+    resolution: {integrity: sha512-sN/VLWtEf0BeV6w6wldIpTxUQxNVc9o9tjLRQa8je1ZV2FCgXA124Iff/zsowsz82dLqtg7qp6GA5zYXVq+JMA==}
+    engines: {node: '>=18'}
+
+  '@sentry-internal/replay-canvas@10.33.0':
+    resolution: {integrity: sha512-MTmP6uoAVzw4CCPeqCgCLsRSiOfGLxgyMFjGTCW3E7t62MJ9S0H5sLsQ34sHxXUa1gFU9UNAjEvRRpZ0JvWrPw==}
+    engines: {node: '>=18'}
+
+  '@sentry-internal/replay@10.33.0':
+    resolution: {integrity: sha512-UOU9PYxuXnPop3HoQ3l4Q7SZUXJC3Vmfm0Adgad8U03UcrThWIHYc5CxECSrVzfDFNOT7w9o7HQgRAgWxBPMXg==}
+    engines: {node: '>=18'}
+
+  '@sentry/browser@10.33.0':
+    resolution: {integrity: sha512-iWiPjik9zetM84jKfk01UveW1J0+X7w8XmJ8+IrhTyNDBVUWCRJWD8FrksiN1dRSg5mFWgfMRzKMz27hAScRwg==}
+    engines: {node: '>=18'}
+
+  '@sentry/core@10.33.0':
+    resolution: {integrity: sha512-ehH1VSUclIHZKEZVdv+klofsFIh8FFzqA6AAV23RtLepptzA8wqQzUGraEuSN25sYcNmYJ0jti5U0Ys+WZv5Dw==}
+    engines: {node: '>=18'}
+
+  '@sentry/vue@10.33.0':
+    resolution: {integrity: sha512-CUtoBl62DG8mkoYfgpkw2WdB187XA2CfPj7OJdIzt3lavhpSAPmsY4jUarK2RUJvcowr5zYbEfv50Y0tsQxuGA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@tanstack/vue-router': ^1.64.0
+      pinia: 2.x || 3.x
+      vue: 2.x || 3.x
+    peerDependenciesMeta:
+      '@tanstack/vue-router':
+        optional: true
+      pinia:
+        optional: true
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
@@ -1544,6 +1607,11 @@ packages:
 
   '@urql/core@6.0.1':
     resolution: {integrity: sha512-FZDiQk6jxbj5hixf2rEPv0jI+IZz0EqqGW8mJBEug68/zHTtT+f34guZDmyjJZyiWbj0vL165LoMr/TkeDHaug==}
+
+  '@urql/exchange-graphcache@8.1.0':
+    resolution: {integrity: sha512-KxdDFcGAWhYOkpCz/NLNHb8SaWSxE2G1iv+jlFty2f/ZlCkD+FjtzwQuieGl7fk1MVR8DG1zLmxGNlwfCNksfQ==}
+    peerDependencies:
+      '@urql/core': ^6.0.0
 
   '@urql/vue@2.0.0':
     resolution: {integrity: sha512-9eW8IfEPwnGHxvqfH2t8cBSI5eKPyLq2dizFVYIRGHi4ydMw5Q+vuMD+VP0I9zo0818zZ9b8TGLiyAmOzvyoAQ==}
@@ -2233,6 +2301,9 @@ packages:
     resolution: {integrity: sha512-MMdARuVEQziNTeJD8DgMqmhwR11BRQ/cBP+pLtYdSTnf3MIO8fFeiINEbX36ZdNlfU/7A9f3gUw49B3oQsvwBA==}
     engines: {node: '>=4.0'}
 
+  estree-walker@0.6.1:
+    resolution: {integrity: sha512-SqmZANLWS0mnatqbSfRP5g8OXZC12Fgg1IwNtLsyHDzJizORW4khDfjPqJZsemPWBB2uqykUah5YpQ6epsqC/w==}
+
   estree-walker@1.0.1:
     resolution: {integrity: sha512-1fMXF3YP4pZZVozF8j/ZLfvnR8NSIljt56UhbZ5PeeDmmGHpgpdwQt7ITlGvYaQukCvuBRMLEiKiYC+oeIg4cg==}
 
@@ -2409,6 +2480,36 @@ packages:
 
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
+
+  graphql-tag@2.12.6:
+    resolution: {integrity: sha512-FdSNcu2QQcWnM2VNvSCCDCVS5PpPqpzgFT8+GXzqJuoDd0CBncxCY278u4mhRO7tMgo2JjgJA5aZ+nWSQ/Z+xg==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      graphql: ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+
+  graphql-ws@6.0.6:
+    resolution: {integrity: sha512-zgfER9s+ftkGKUZgc0xbx8T7/HMO4AV5/YuYiFc+AtgcO5T0v8AxYYNQ+ltzuzDZgNkYJaFspm5MMYLjQzrkmw==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@fastify/websocket': ^10 || ^11
+      crossws: ~0.3
+      graphql: ^15.10.1 || ^16
+      uWebSockets.js: ^20
+      ws: ^8
+    peerDependenciesMeta:
+      '@fastify/websocket':
+        optional: true
+      crossws:
+        optional: true
+      uWebSockets.js:
+        optional: true
+      ws:
+        optional: true
+
+  graphql@14.7.0:
+    resolution: {integrity: sha512-l0xWZpoPKpppFzMfvVyFmp9vLN7w/ZZJPefUicMCepfJeQ8sMcztloGYY9DfjVPo6tIUDzU5Hw3MUbIjj9AVVA==}
+    engines: {node: '>= 6.x'}
+    deprecated: 'No longer supported; please update to a newer version. Details: https://github.com/graphql/graphql-js#version-support'
 
   gsap@3.14.2:
     resolution: {integrity: sha512-P8/mMxVLU7o4+55+1TCnQrPmgjPKnwkzkXOK1asnR9Jg2lna4tEY5qBJjMmAaOBDDZWtlRjBXjLa0w53G/uBLA==}
@@ -2664,6 +2765,9 @@ packages:
     resolution: {integrity: sha512-HGYWWS/ehqTV3xN10i23tkPkpH46MLCIMFNCaaKNavAXTF1RkqxawEPtnjnGZ6XKSInBKkiOA5BKS+aZiY3AvA==}
     engines: {node: '>=8'}
 
+  iterall@1.3.0:
+    resolution: {integrity: sha512-QZ9qOMdF+QLHxy1QIpUHUU1D5pS2CG2P69LF6L6CPjPYA/XMOmKV3PZpawHoAjHNyB0swdVTRxdYT4tbBbxqwg==}
+
   jackspeak@4.1.1:
     resolution: {integrity: sha512-zptv57P3GpL+O0I7VdMJNBZCu+BPHVQUk55Ft8/QCJjTVxrnJHuVuX/0Bl2A6/+2oyR/ZMEuFKwmzqqZ/U5nPQ==}
     engines: {node: 20 || >=22}
@@ -2724,6 +2828,13 @@ packages:
   jsonpointer@5.0.1:
     resolution: {integrity: sha512-p/nXbhSEcu3pZRdkW1OfJhpsVtW1gd4Wa1fnQc9YLiTfAjn0312eMKimbdIQzuZl9aa9xUGaRlP9T/CJE/ditQ==}
     engines: {node: '>=0.10.0'}
+
+  jump.js@1.0.2:
+    resolution: {integrity: sha512-oUkJJ/Y4ATU5qjkXBntCZSKctbSyS3ewe2jrLaUu/cc9jsQiAn0fnTUxQnZz3mJdDdem1Q279zrD6h3n+Cgxtg==}
+
+  jwt-decode@4.0.0:
+    resolution: {integrity: sha512-+KJGIyHgkGuIq3IEBNftfhW/LfWhXUIY6OmyVWjliu5KH1y0fw7VQ8YndE2O4qZdMSd9SqbnC8GOcZEy0Om7sA==}
+    engines: {node: '>=18'}
 
   katex@0.6.0:
     resolution: {integrity: sha512-rS4mY3SvHYg5LtQV6RBcK0if7ur6plyEukAOV+jGGPqFImuzu8fHL6M752iBmRGoUyF0bhZbAPoezehn7xYksA==}
@@ -2935,6 +3046,9 @@ packages:
     resolution: {integrity: sha512-c7+7RQ+dMB5dPwwCp4ee1/iV/q2P6aK1mTZcfr1BTuVlyW9hJYiMPybJCcnBlQtuSmTIWNeazm/zqNoZSSElBg==}
     engines: {node: ^18 || >=20}
     hasBin: true
+
+  nanopop@2.4.2:
+    resolution: {integrity: sha512-NzOgmMQ+elxxHeIha+OG/Pv3Oc3p4RU2aBhwWwAqDpXrdTbtRylbRLQztLy8dMMwfl6pclznBdfUhccEn9ZIzw==}
 
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
@@ -3203,6 +3317,14 @@ packages:
 
   rfdc@1.4.1:
     resolution: {integrity: sha512-q1b3N5QkRUWUl7iyylaaj3kOpIT0N2i9MqIEQXP73GVsN9cw3fdx8X63cEmWhJGi2PPCF23Ijp7ktmd39rawIA==}
+
+  rollup-plugin-graphql-tag@0.1.0:
+    resolution: {integrity: sha512-ZmhP1PNDInKl7OIT+1J7wweHEvK4MTz8q3YnIUZLm0FxY9XGNGOaRcv4OQsJ+gOuzgUMGEOiAol8YY3avF56hg==}
+    peerDependencies:
+      graphql: ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0
+
+  rollup-pluginutils@2.8.2:
+    resolution: {integrity: sha512-EEp9NhnUkwY8aif6bxgovPHMoMoNr2FulJziTndpt5H9RdwC47GSGuII9XxpSdzVGM0GWrNPHV6ie1LTNJPaLQ==}
 
   rollup@2.79.2:
     resolution: {integrity: sha512-fS6iqSPZDs3dr/y7Od6y5nha8dW1YnbgtsyotCVvoFGKbERG++CVRFv1meyGDE1SNItQA8BrnCw7ScdAhRJ3XQ==}
@@ -3847,7 +3969,9 @@ packages:
 
 snapshots:
 
-  '@0no-co/graphql.web@1.2.0': {}
+  '@0no-co/graphql.web@1.2.0(graphql@14.7.0)':
+    optionalDependencies:
+      graphql: 14.7.0
 
   '@apideck/better-ajv-errors@0.3.6(ajv@8.17.1)':
     dependencies:
@@ -4679,6 +4803,12 @@ snapshots:
       - '@vue/composition-api'
       - vue
 
+  '@globalhive/vuejs-tour@2.6.1(vue@3.5.26(typescript@5.9.3))':
+    dependencies:
+      jump.js: 1.0.2
+      nanopop: 2.4.2
+      vue: 3.5.26(typescript@5.9.3)
+
   '@hono/node-server@1.19.7(hono@4.11.1)':
     dependencies:
       hono: 4.11.1
@@ -4891,6 +5021,42 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.55.1':
     optional: true
+
+  '@sentry-internal/browser-utils@10.33.0':
+    dependencies:
+      '@sentry/core': 10.33.0
+
+  '@sentry-internal/feedback@10.33.0':
+    dependencies:
+      '@sentry/core': 10.33.0
+
+  '@sentry-internal/replay-canvas@10.33.0':
+    dependencies:
+      '@sentry-internal/replay': 10.33.0
+      '@sentry/core': 10.33.0
+
+  '@sentry-internal/replay@10.33.0':
+    dependencies:
+      '@sentry-internal/browser-utils': 10.33.0
+      '@sentry/core': 10.33.0
+
+  '@sentry/browser@10.33.0':
+    dependencies:
+      '@sentry-internal/browser-utils': 10.33.0
+      '@sentry-internal/feedback': 10.33.0
+      '@sentry-internal/replay': 10.33.0
+      '@sentry-internal/replay-canvas': 10.33.0
+      '@sentry/core': 10.33.0
+
+  '@sentry/core@10.33.0': {}
+
+  '@sentry/vue@10.33.0(pinia@3.0.4(typescript@5.9.3)(vue@3.5.26(typescript@5.9.3)))(vue@3.5.26(typescript@5.9.3))':
+    dependencies:
+      '@sentry/browser': 10.33.0
+      '@sentry/core': 10.33.0
+      vue: 3.5.26(typescript@5.9.3)
+    optionalDependencies:
+      pinia: 3.0.4(typescript@5.9.3)(vue@3.5.26(typescript@5.9.3))
 
   '@standard-schema/spec@1.1.0': {}
 
@@ -5208,16 +5374,24 @@ snapshots:
       '@typescript-eslint/types': 8.52.0
       eslint-visitor-keys: 4.2.1
 
-  '@urql/core@6.0.1':
+  '@urql/core@6.0.1(graphql@14.7.0)':
     dependencies:
-      '@0no-co/graphql.web': 1.2.0
+      '@0no-co/graphql.web': 1.2.0(graphql@14.7.0)
       wonka: 6.3.5
     transitivePeerDependencies:
       - graphql
 
-  '@urql/vue@2.0.0(@urql/core@6.0.1)(vue@3.5.26(typescript@5.9.3))':
+  '@urql/exchange-graphcache@8.1.0(@urql/core@6.0.1(graphql@14.7.0))(graphql@14.7.0)':
     dependencies:
-      '@urql/core': 6.0.1
+      '@0no-co/graphql.web': 1.2.0(graphql@14.7.0)
+      '@urql/core': 6.0.1(graphql@14.7.0)
+      wonka: 6.3.5
+    transitivePeerDependencies:
+      - graphql
+
+  '@urql/vue@2.0.0(@urql/core@6.0.1(graphql@14.7.0))(vue@3.5.26(typescript@5.9.3))':
+    dependencies:
+      '@urql/core': 6.0.1(graphql@14.7.0)
       vue: 3.5.26(typescript@5.9.3)
       wonka: 6.3.5
 
@@ -6073,6 +6247,8 @@ snapshots:
 
   estraverse@5.3.0: {}
 
+  estree-walker@0.6.1: {}
+
   estree-walker@1.0.1: {}
 
   estree-walker@2.0.2: {}
@@ -6270,6 +6446,19 @@ snapshots:
   gopd@1.2.0: {}
 
   graceful-fs@4.2.11: {}
+
+  graphql-tag@2.12.6(graphql@14.7.0):
+    dependencies:
+      graphql: 14.7.0
+      tslib: 2.8.1
+
+  graphql-ws@6.0.6(graphql@14.7.0):
+    dependencies:
+      graphql: 14.7.0
+
+  graphql@14.7.0:
+    dependencies:
+      iterall: 1.3.0
 
   gsap@3.14.2: {}
 
@@ -6506,6 +6695,8 @@ snapshots:
       html-escaper: 2.0.2
       istanbul-lib-report: 3.0.1
 
+  iterall@1.3.0: {}
+
   jackspeak@4.1.1:
     dependencies:
       '@isaacs/cliui': 8.0.2
@@ -6551,6 +6742,10 @@ snapshots:
       graceful-fs: 4.2.11
 
   jsonpointer@5.0.1: {}
+
+  jump.js@1.0.2: {}
+
+  jwt-decode@4.0.0: {}
 
   katex@0.6.0:
     dependencies:
@@ -6733,6 +6928,8 @@ snapshots:
   nanoid@3.3.11: {}
 
   nanoid@5.1.6: {}
+
+  nanopop@2.4.2: {}
 
   natural-compare@1.4.0: {}
 
@@ -6984,6 +7181,16 @@ snapshots:
       supports-preserve-symlinks-flag: 1.0.0
 
   rfdc@1.4.1: {}
+
+  rollup-plugin-graphql-tag@0.1.0(graphql@14.7.0):
+    dependencies:
+      graphql: 14.7.0
+      graphql-tag: 2.12.6(graphql@14.7.0)
+      rollup-pluginutils: 2.8.2
+
+  rollup-pluginutils@2.8.2:
+    dependencies:
+      estree-walker: 0.6.1
 
   rollup@2.79.2:
     optionalDependencies:

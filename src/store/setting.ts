@@ -4,7 +4,6 @@ import { applyMaterial, tauriFetch } from "../api/app"
 import { db } from "./db"
 import { DNAAPI } from "dna-api"
 import i18next from "i18next"
-import { env } from "../env"
 
 let apiCache: DNAAPI | null = null
 let apiCacheKey = ""
@@ -27,8 +26,6 @@ export const useSettingStore = defineStore("setting", {
             // 皎皎角
             dnaUserId: useLocalStorage("setting_user_id", 0),
             showAIChat: useLocalStorage("setting_show_ai_chat", false),
-            // 身份验证
-            jwtToken: useLocalStorage("jwt_token", ""),
             // 上次刷新时间（秒）
             lastCapInterval: useLocalStorage("last_cap_interval", 0),
         }
@@ -97,57 +94,6 @@ export const useSettingStore = defineStore("setting", {
             apiCache = api
             apiCacheKey = user.uid
             return api
-        },
-        async autoLoginDNA() {
-            if (this.jwtToken) return { success: true }
-            const user = await this.getCurrentUser()
-            if (!user) return { success: false, error: "未登录 DNA" }
-
-            try {
-                const qrResponse = await fetch(`${env.endpoint}/api/auth/dna/qr`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ dnaUid: user.uid }),
-                })
-
-                const qrResult = await qrResponse.json()
-                if (!qrResult.success) {
-                    return { success: false, error: qrResult.error || "获取验证码失败" }
-                }
-
-                const api = await this.getDNAAPI()
-                if (!api) {
-                    return { success: false, error: "DNA API 初始化失败" }
-                }
-
-                const imageResponse = await fetch(`${env.endpoint}${qrResult.imageUrl}`)
-                const blob = await imageResponse.blob()
-                const file = new File([blob], "verify.png", { type: "image/png" })
-
-                const uploadRes = await api.uploadImage(file)
-                if (!uploadRes.is_success || !uploadRes.data || uploadRes.data.length === 0) {
-                    return { success: false, error: "上传验证码失败" }
-                }
-
-                const imageUrl = uploadRes.data[0]
-
-                const verifyResponse = await fetch(`${env.endpoint}/api/auth/dna/verify`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ sessionId: qrResult.sessionId, imageUrl }),
-                })
-
-                const verifyResult = await verifyResponse.json()
-                if (verifyResult.success) {
-                    this.jwtToken = verifyResult.token
-                    return { success: true }
-                } else {
-                    return { success: false, error: verifyResult.error || "验证失败" }
-                }
-            } catch (error) {
-                console.error("DNA OAuth 登录失败:", error)
-                return { success: false, error: "登录失败" }
-            }
         },
     },
 })

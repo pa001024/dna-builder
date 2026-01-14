@@ -39,3 +39,5 @@ tools/i18n_diff.json
 externals/dna-api/java/
 .env
 public/imgs/map
+.opencode/skills/
+src-tauri/gen/android/keystore.properties

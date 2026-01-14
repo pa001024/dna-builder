@@ -131,6 +131,7 @@ export class LeveledSkill {
             }
             if (field.影响) {
                 let val = field.值
+                let val2 = field.值2 || 0
                 if (field.名称.includes("伤害")) {
                     val += attrs?.技能倍率加数 || 0
                 }
@@ -140,6 +141,7 @@ export class LeveledSkill {
                 }
                 if (propSet.has("技能威力")) {
                     val = val * tt["技能威力"]
+                    val2 = val2 * tt["技能威力"]
                 }
                 if (propSet.has("技能耐久")) {
                     if (field.名称.includes("每秒神智消耗")) {
@@ -162,6 +164,7 @@ export class LeveledSkill {
                 return {
                     ...field,
                     值: val,
+                    值2: val2,
                 }
             } else {
                 return field

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue"
-import { gql } from "@urql/vue"
-import { gqClient } from "@/api/graphql"
+import { usersQuery } from "@/api/query"
+import { deleteUserMutation, updateUserMutation } from "@/api/mutation"
 
 // 用户类型定义
 interface User {
@@ -14,6 +14,12 @@ interface User {
     updateAt: string
 }
 
+// 编辑用户表单数据
+interface EditUserForm {
+    email: string
+    roles: string
+}
+
 // 用户列表数据
 const users = ref<User[]>([])
 const total = ref(0)
@@ -22,49 +28,33 @@ const pageSize = ref(10)
 const search = ref("")
 const loading = ref(false)
 
-// 获取用户列表 query
-const usersQuery = gql`
-    query Users($limit: Int, $offset: Int, $search: String) {
-        users(limit: $limit, offset: $offset, search: $search) {
-            id
-            name
-            email
-            qq
-            roles
-            createdAt
-            updateAt
-        }
-        usersCount(search: $search)
-    }
-`
-
-// 删除用户 mutation
-const deleteUserMutation = gql`
-    mutation DeleteUser($id: String!) {
-        deleteUser(id: $id)
-    }
-`
+// 编辑用户相关状态
+const editDialogOpen = ref(false)
+const editingUser = ref<User | null>(null)
+const editForm = ref<EditUserForm>({
+    email: "",
+    roles: "",
+})
+const editFormSubmitting = ref(false)
 
 // 获取用户列表
 const fetchUsers = async () => {
     loading.value = true
     try {
         const offset = (page.value - 1) * pageSize.value
-        const result = await gqClient
-            .query(usersQuery, {
+        const result = await usersQuery(
+            {
                 limit: pageSize.value,
                 offset,
                 search: search.value,
-            })
-            .toPromise()
+            },
+            { requestPolicy: "network-only" }
+        )
 
-        if (result.error) {
-            console.error("获取用户列表失败:", result.error)
-            return
+        if (result) {
+            users.value = result.users || []
+            total.value = result.usersCount || 0
         }
-
-        users.value = result.data?.users || []
-        total.value = result.data?.usersCount || 0
     } catch (error) {
         console.error("获取用户列表失败:", error)
     } finally {
@@ -88,24 +78,71 @@ const handlePageChange = (newPage: number) => {
 const deleteUser = async (userId: string) => {
     if (confirm("确定要删除这个用户吗？")) {
         try {
-            const result = await gqClient
-                .mutation(deleteUserMutation, {
-                    id: userId,
-                })
-                .toPromise()
+            const result = await deleteUserMutation({ id: userId })
 
-            if (result.error) {
-                console.error("删除用户失败:", result.error)
-                return
-            }
-
-            if (result.data?.deleteUser) {
+            if (result) {
                 // 删除成功，刷新用户列表
                 await fetchUsers()
             }
         } catch (error) {
             console.error("删除用户失败:", error)
         }
+    }
+}
+
+// 打开编辑对话框
+const openEditDialog = (user: User) => {
+    editingUser.value = user
+    editForm.value = {
+        email: user.email,
+        roles: user.roles || "",
+    }
+    editDialogOpen.value = true
+}
+
+// 关闭编辑对话框
+const closeEditDialog = () => {
+    editDialogOpen.value = false
+    editingUser.value = null
+    editForm.value = {
+        email: "",
+        roles: "",
+    }
+}
+
+// 提交编辑
+const submitEdit = async () => {
+    if (!editingUser.value) return
+
+    // 表单验证
+    if (!editForm.value.email || !editForm.value.email.match(/.+@.+\..+/)) {
+        alert("请输入有效的邮箱地址")
+        return
+    }
+
+    if (!editForm.value.roles) {
+        alert("请输入用户角色")
+        return
+    }
+
+    editFormSubmitting.value = true
+    try {
+        const result = await updateUserMutation({
+            id: editingUser.value.id,
+            email: editForm.value.email,
+            roles: editForm.value.roles,
+        })
+
+        if (result) {
+            // 更新成功，刷新用户列表并关闭对话框
+            await fetchUsers()
+            closeEditDialog()
+        }
+    } catch (error) {
+        console.error("更新用户失败:", error)
+        alert("更新用户失败")
+    } finally {
+        editFormSubmitting.value = false
     }
 }
 
@@ -116,111 +153,158 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="animate-fadeIn p-6">
-        <h2 class="text-2xl font-semibold text-gray-800 mb-6">用户管理</h2>
+    <div class="animate-fadeIn p-6 bg-base-200/50 min-h-screen">
+        <!-- 页面标题 -->
+        <div class="mb-6">
+            <h2 class="text-2xl font-semibold text-base-content">用户管理</h2>
+            <p class="text-sm text-base-content/70 mt-1">管理系统用户和权限</p>
+        </div>
 
         <!-- 搜索和筛选 -->
-        <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-6 hover:shadow-lg transition-all duration-300">
+        <div class="card bg-base-100 shadow-sm border border-base-300 p-6 mb-6 hover:shadow-md transition-all duration-300">
             <div class="flex flex-col md:flex-row gap-4">
                 <div class="flex-1">
-                    <div class="relative">
-                        <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 ri:search-line text-lg"></span>
+                    <div class="relative group">
+                        <span
+                            class="absolute left-4 top-1/2 transform -translate-y-1/2 text-base-content/50 ri:search-line text-lg group-hover:text-primary transition-colors duration-200"
+                        ></span>
                         <input
                             v-model="search"
                             type="text"
                             placeholder="搜索用户邮箱..."
-                            class="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm focus:shadow-md"
+                            class="input input-bordered w-full pl-12 bg-base-100 text-base-content placeholder:text-base-content/50 focus:outline-none focus:border-primary transition-all duration-200 text-sm"
                             @keyup.enter="handleSearch"
                         />
                     </div>
                 </div>
                 <button
-                    class="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
+                    class="btn btn-primary px-8 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2 font-medium"
                     @click="handleSearch"
                 >
-                    <span class="ri:search-line"></span>
+                    <Icon icon="ri:search-line"></Icon>
                     <span>搜索</span>
                 </button>
             </div>
         </div>
 
         <!-- 用户列表 -->
-        <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
-            <div class="overflow-x-auto">
-                <table class="w-full min-w-full divide-y divide-gray-100">
-                    <thead class="bg-gradient-to-r from-gray-50 to-blue-50">
+        <div class="card bg-base-100 shadow-sm border border-base-300 overflow-hidden hover:shadow-md transition-all duration-300">
+            <ScrollArea horizontal>
+                <table class="table w-full">
+                    <thead class="bg-base-200">
                         <tr>
-                            <th class="px-8 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">ID</th>
-                            <th class="px-8 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">邮箱</th>
-                            <th class="px-8 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">姓名</th>
-                            <th class="px-8 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">QQ</th>
-                            <th class="px-8 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">角色</th>
-                            <th class="px-8 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">创建时间</th>
-                            <th class="px-8 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">操作</th>
+                            <th class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider">ID</th>
+                            <th class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider">邮箱</th>
+                            <th class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider">姓名</th>
+                            <th class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider">QQ</th>
+                            <th class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider">角色</th>
+                            <th class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider">
+                                创建时间
+                            </th>
+                            <th class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider">操作</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-100">
-                        <tr v-for="user in users" :key="user.id" class="hover:bg-gray-50 transition-colors duration-200">
-                            <td class="px-8 py-5 whitespace-nowrap text-sm font-medium text-gray-900">{{ user.id }}</td>
-                            <td class="px-8 py-5 whitespace-nowrap text-sm text-gray-600">{{ user.email }}</td>
-                            <td class="px-8 py-5 whitespace-nowrap text-sm text-gray-600">{{ user.name }}</td>
-                            <td class="px-8 py-5 whitespace-nowrap text-sm text-gray-600">{{ user.qq }}</td>
+                    <tbody class="divide-y divide-base-200">
+                        <tr
+                            v-for="(user, index) in users"
+                            :key="user.id"
+                            class="hover:bg-base-200/50 transition-colors duration-200"
+                            :class="{ 'bg-base-200/30': index % 2 === 0 }"
+                        >
+                            <td class="px-8 py-5 whitespace-nowrap text-sm font-medium text-base-content font-mono">{{ user.id }}</td>
+                            <td class="px-8 py-5 whitespace-nowrap text-sm text-base-content/85">{{ user.email }}</td>
+                            <td class="px-8 py-5 whitespace-nowrap text-sm text-base-content/85 font-medium">{{ user.name }}</td>
+                            <td class="px-8 py-5 whitespace-nowrap text-sm text-base-content/85">{{ user.qq }}</td>
                             <td class="px-8 py-5 whitespace-nowrap text-sm">
                                 <span
-                                    class="px-3 py-1 rounded-full text-xs font-medium"
+                                    class="badge badge-sm font-semibold"
                                     :class="{
-                                        'bg-green-100 text-green-800': user.roles === 'admin',
-                                        'bg-blue-100 text-blue-800': user.roles === 'user',
+                                        'badge-primary': user.roles === 'admin',
                                     }"
                                 >
                                     {{ user.roles || "user" }}
                                 </span>
                             </td>
-                            <td class="px-8 py-5 whitespace-nowrap text-sm text-gray-500">{{ user.createdAt }}</td>
+                            <td class="px-8 py-5 whitespace-nowrap text-sm text-base-content/70">{{ user.createdAt }}</td>
                             <td class="px-8 py-5 whitespace-nowrap text-sm font-medium">
-                                <button
-                                    class="text-blue-600 hover:text-blue-800 mr-6 transition-colors duration-200 flex items-center gap-1 group"
-                                >
-                                    <span class="ri:edit-line"></span>
-                                    <span class="group-hover:underline">编辑</span>
-                                </button>
-                                <button
-                                    class="text-red-600 hover:text-red-800 transition-colors duration-200 flex items-center gap-1 group"
-                                    @click="deleteUser(user.id)"
-                                >
-                                    <span class="ri:delete-bin-line"></span>
-                                    <span class="group-hover:underline">删除</span>
-                                </button>
+                                <div class="flex items-center gap-4">
+                                    <button
+                                        class="text-primary hover:text-primary/80 transition-colors duration-200 flex items-center gap-1.5 group font-medium text-sm"
+                                        @click="openEditDialog(user)"
+                                    >
+                                        <Icon icon="ri:edit-line" class="group-hover:scale-110 transition-transform duration-200"></Icon>
+                                        <span class="group-hover:underline">编辑</span>
+                                    </button>
+                                    <button
+                                        class="text-error hover:text-error/80 transition-colors duration-200 flex items-center gap-1.5 group font-medium text-sm"
+                                        @click="deleteUser(user.id)"
+                                    >
+                                        <Icon
+                                            icon="ri:delete-bin-line"
+                                            class="group-hover:scale-110 transition-transform duration-200"
+                                        ></Icon>
+                                        <span class="group-hover:underline">删除</span>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-            </div>
+            </ScrollArea>
+
+            <!-- 编辑用户对话框 -->
+            <Dialog
+                v-model:open="editDialogOpen"
+                :title="editingUser ? '编辑用户' : ''"
+                :description="editingUser ? `编辑用户: ${editingUser.name}` : ''"
+            >
+                <template #content>
+                    <div class="space-y-4 py-4">
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-base-content">邮箱</label>
+                            <input
+                                v-model="editForm.email"
+                                type="email"
+                                placeholder="user@example.com"
+                                class="input input-bordered w-full"
+                                :disabled="editFormSubmitting"
+                            />
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-base-content">角色</label>
+                            <select v-model="editForm.roles" class="select select-bordered w-full" :disabled="editFormSubmitting">
+                                <option value="user">user</option>
+                                <option value="admin">admin</option>
+                            </select>
+                        </div>
+                    </div>
+                </template>
+                <template #actions>
+                    <button class="btn" :disabled="editFormSubmitting" @click="closeEditDialog">取消</button>
+                    <button class="btn btn-primary" :disabled="editFormSubmitting" @click="submitEdit">
+                        <span v-if="editFormSubmitting" class="loading loading-spinner loading-sm mr-2"></span>
+                        保存
+                    </button>
+                </template>
+            </Dialog>
 
             <!-- 分页 -->
-            <div class="mt-0 py-6 px-8 bg-gray-50 border-t border-gray-100">
+            <div class="mt-0 py-6 px-8 bg-base-200/50 border-t border-base-200">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div class="text-sm text-gray-600">
-                        <span class="font-medium"
-                            >显示 {{ (page - 1) * pageSize + 1 }} 到 {{ Math.min(page * pageSize, total) }} 条，共 {{ total }} 条</span
+                    <div class="text-sm text-base-content/70">
+                        <span class="font-medium text-base-content/85"
+                            >显示 {{ (page - 1) * pageSize + 1 }} 到 {{ Math.min(page * pageSize, total) }} 条，共
+                            <span class="font-semibold">{{ total }}</span> 条</span
                         >
                     </div>
-                    <div class="flex space-x-3">
-                        <button
-                            class="px-5 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                            :disabled="page === 1"
-                            @click="handlePageChange(page - 1)"
-                        >
-                            <span class="ri:arrow-left-line mr-1"></span>
+                    <div class="flex items-center gap-3">
+                        <button class="btn btn-sm btn-outline" :disabled="page === 1" @click="handlePageChange(page - 1)">
+                            <span class="ri:arrow-left-line mr-1.5"></span>
                             上一页
                         </button>
-                        <button
-                            class="px-5 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                            :disabled="page * pageSize >= total"
-                            @click="handlePageChange(page + 1)"
-                        >
+                        <button class="btn btn-sm btn-outline" :disabled="page * pageSize >= total" @click="handlePageChange(page + 1)">
                             下一页
-                            <span class="ri:arrow-right-line ml-1"></span>
+                            <span class="ri:arrow-right-line ml-1.5"></span>
                         </button>
                     </div>
                 </div>

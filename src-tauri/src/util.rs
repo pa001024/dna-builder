@@ -1,4 +1,6 @@
+#![cfg(windows)]
 use std::{mem::size_of, ptr};
+
 use windows_sys::Win32::{
     Foundation::*,
     System::{

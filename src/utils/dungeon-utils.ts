@@ -45,13 +45,38 @@ export function getAbyssDungeonName(dungeon: AbyssDungeon) {
     return getAbyssDungeonGroup(dungeon) + " " + getAbyssDungeonLevel(dungeon)
 }
 
+const mhList = [
+    {
+        DungeonId: [60102, 60202, 60302, 60402, 60502, 60602, 60702, 60802, 60902, 61002, 61102],
+        WalnutType: 1,
+    },
+    {
+        DungeonId: [62102, 62202, 62302, 62402, 62502, 62602, 62702, 62802, 62902, 63002, 63102],
+        WalnutType: 2,
+    },
+    {
+        DungeonId: [64102, 64202, 64302, 64402, 64502, 64602, 64702, 64802, 64902, 65002, 65102],
+        WalnutType: 3,
+    },
+].reduce(
+    (acc, cur) => {
+        acc[cur.WalnutType] = new Set(cur.DungeonId)
+        return acc
+    },
+    {} as Record<number, Set<number>>
+)
+
 export function getDungeonName(dungeon: Dungeon) {
     const yehang = ["DefenceMove", "ExtermPro"]
     if (yehang.includes(dungeon.t) && dungeon.sr && dungeon.sm) {
         if (dungeon.sm.length > 1) {
-            return t(dungeon.n) + `(${t(monsterMap.get(dungeon.sm[0]!)!.n)} ${t("夜航手册 多号令")})`
+            return t(dungeon.n) + `(${t(monsterMap.get(dungeon.sm[0]!)!.n)} ${t("夜航手册")} 多号令)`
         }
         return t(dungeon.n) + `(${t(monsterMap.get(dungeon.sm[0])!.n)} ${t("夜航手册")})`
+    }
+    const walnutType = [1, 2, 3].find(walnutType => mhList[walnutType].has(dungeon.id))
+    if (walnutType) {
+        return t(dungeon.n) + `(${t(["角色", "武器", "魔之楔"][walnutType - 1])}${t("委托密函")})`
     }
     return dungeon.n
 }

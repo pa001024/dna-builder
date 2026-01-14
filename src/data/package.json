@@ -1,12 +1,12 @@
 {
     "name": "dna-builder-data",
-    "version": "0.3.0",
+    "version": "0.9.0",
     "description": "DNA Builder game data models and utilities",
     "type": "module",
     "main": "./index.ts",
     "types": "./index.ts",
     "scripts": {
-        "build": "tsc",
+        "build": "tsc --noEmit",
         "test": "vitest run",
         "test:coverage": "vitest run --coverage",
         "test:watch": "vitest",
@@ -35,7 +35,7 @@
     "files": [
         "*.ts",
         "leveled/*.ts",
-        "data.json",
-        "achievement.json"
+        "d/*.ts",
+        "README.md"
     ]
 }

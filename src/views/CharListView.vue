@@ -103,7 +103,7 @@ const getAnimationDelay = (index: number) => {
             >
                 <div
                     v-for="(char, index) in filteredChars"
-                    :key="char.id"
+                    :key="`${char.id}-${activeTab}`"
                     class="group relative bg-base-100 rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer border-2"
                     :class="[elementBorderColors[char.属性] || 'border-base-300']"
                     :style="{ animation: `fade-in-up 0.5s ease-out ${getAnimationDelay(index)}ms both` }"

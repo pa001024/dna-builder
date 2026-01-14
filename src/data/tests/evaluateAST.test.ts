@@ -53,14 +53,14 @@ describe("evaluateAST函数测试", () => {
             const attrs = charBuild.calculateWeaponAttributes()
 
             // 测试数字求值
-            const result = charBuild.evaluateAST("100", testDamage, attrs)
+            const result = charBuild.evaluateAST("100", attrs)
             expect(result).toBe(100)
         })
 
         it("应该正确求值负数", () => {
             const attrs = charBuild.calculateWeaponAttributes()
 
-            const result = charBuild.evaluateAST("-50", testDamage, attrs)
+            const result = charBuild.evaluateAST("-50", attrs)
             expect(result).toBe(-50)
         })
     })
@@ -70,63 +70,63 @@ describe("evaluateAST函数测试", () => {
             charBuild.targetFunction = "10 + 20"
             // 由于calculate中会除以时间（如果是DPS），我们需要直接测试evaluateAST
             const attrs = charBuild.calculateWeaponAttributes()
-            const evalResult = charBuild.evaluateAST("10 + 20", testDamage, attrs)
+            const evalResult = charBuild.evaluateAST("10 + 20", attrs)
 
             expect(evalResult).toBe(30)
         })
 
         it("应该正确执行减法运算", () => {
             const attrs = charBuild.calculateWeaponAttributes()
-            const result = charBuild.evaluateAST("50 - 20", testDamage, attrs)
+            const result = charBuild.evaluateAST("50 - 20", attrs)
 
             expect(result).toBe(30)
         })
 
         it("应该正确执行乘法运算", () => {
             const attrs = charBuild.calculateWeaponAttributes()
-            const result = charBuild.evaluateAST("5 * 6", testDamage, attrs)
+            const result = charBuild.evaluateAST("5 * 6", attrs)
 
             expect(result).toBe(30)
         })
 
         it("应该正确执行除法运算", () => {
             const attrs = charBuild.calculateWeaponAttributes()
-            const result = charBuild.evaluateAST("60 / 4", testDamage, attrs)
+            const result = charBuild.evaluateAST("60 / 4", attrs)
 
             expect(result).toBe(15)
         })
 
         it("应该正确执行取模运算", () => {
             const attrs = charBuild.calculateWeaponAttributes()
-            const result = charBuild.evaluateAST("17 % 5", testDamage, attrs)
+            const result = charBuild.evaluateAST("17 % 5", attrs)
 
             expect(result).toBe(2)
         })
 
         it("应该正确执行整数除法运算", () => {
             const attrs = charBuild.calculateWeaponAttributes()
-            const result = charBuild.evaluateAST("17 // 5", testDamage, attrs)
+            const result = charBuild.evaluateAST("17 // 5", attrs)
 
             expect(result).toBe(3)
         })
 
         it("应该处理除以零的情况", () => {
             const attrs = charBuild.calculateWeaponAttributes()
-            const result = charBuild.evaluateAST("10 / 0", testDamage, attrs)
+            const result = charBuild.evaluateAST("10 / 0", attrs)
 
             expect(result).toBe(0)
         })
 
         it("应该正确执行复杂表达式", () => {
             const attrs = charBuild.calculateWeaponAttributes()
-            const result = charBuild.evaluateAST("2 + 3 * 4 - 6 / 2", testDamage, attrs)
+            const result = charBuild.evaluateAST("2 + 3 * 4 - 6 / 2", attrs)
 
             expect(result).toBe(11) // 2 + 12 - 3 = 11
         })
 
         it("应该正确处理括号", () => {
             const attrs = charBuild.calculateWeaponAttributes()
-            const result = charBuild.evaluateAST("(2 + 3) * 4", testDamage, attrs)
+            const result = charBuild.evaluateAST("(2 + 3) * 4", attrs)
 
             expect(result).toBe(20) // (2 + 3) * 4 = 20
         })
@@ -135,28 +135,28 @@ describe("evaluateAST函数测试", () => {
     describe("函数调用测试", () => {
         it("应该正确执行min函数", () => {
             const attrs = charBuild.calculateWeaponAttributes()
-            const result = charBuild.evaluateAST("min(10, 5, 8)", testDamage, attrs)
+            const result = charBuild.evaluateAST("min(10, 5, 8)", attrs)
 
             expect(result).toBe(5)
         })
 
         it("应该正确执行max函数", () => {
             const attrs = charBuild.calculateWeaponAttributes()
-            const result = charBuild.evaluateAST("max(10, 5, 8)", testDamage, attrs)
+            const result = charBuild.evaluateAST("max(10, 5, 8)", attrs)
 
             expect(result).toBe(10)
         })
 
         it("应该正确执行floor函数", () => {
             const attrs = charBuild.calculateWeaponAttributes()
-            const result = charBuild.evaluateAST("floor(3.7)", testDamage, attrs)
+            const result = charBuild.evaluateAST("floor(3.7)", attrs)
 
             expect(result).toBe(3)
         })
 
         it("应该正确执行ceil函数", () => {
             const attrs = charBuild.calculateWeaponAttributes()
-            const result = charBuild.evaluateAST("ceil(3.2)", testDamage, attrs)
+            const result = charBuild.evaluateAST("ceil(3.2)", attrs)
 
             expect(result).toBe(4)
         })
@@ -165,11 +165,11 @@ describe("evaluateAST函数测试", () => {
             const attrs = charBuild.calculateWeaponAttributes()
 
             // 测试第一个非零值
-            const result1 = charBuild.evaluateAST("or(0, 5, 3)", testDamage, attrs)
+            const result1 = charBuild.evaluateAST("or(0, 5, 3)", attrs)
             expect(result1).toBe(5)
 
             // 测试全零情况
-            const result2 = charBuild.evaluateAST("or(0, 0, 0)", testDamage, attrs)
+            const result2 = charBuild.evaluateAST("or(0, 0, 0)", attrs)
             expect(result2).toBe(0)
         })
 
@@ -177,7 +177,7 @@ describe("evaluateAST函数测试", () => {
             const attrs = charBuild.calculateWeaponAttributes()
 
             // 使用攻击属性
-            const result = charBuild.evaluateAST("floor(攻击 / 100)", testDamage, attrs)
+            const result = charBuild.evaluateAST("floor(攻击 / 100)", attrs)
             expect(result).toBeGreaterThanOrEqual(0)
         })
     })
@@ -185,7 +185,7 @@ describe("evaluateAST函数测试", () => {
     describe("属性访问测试", () => {
         it("应该正确访问攻击属性", () => {
             const attrs = charBuild.calculateWeaponAttributes()
-            const result = charBuild.evaluateAST("攻击", testDamage, attrs)
+            const result = charBuild.evaluateAST("攻击", attrs)
 
             expect(result).toBeGreaterThan(0)
             // 验证结果接近攻击属性的数值
@@ -194,21 +194,21 @@ describe("evaluateAST函数测试", () => {
 
         it("应该正确访问生命属性", () => {
             const attrs = charBuild.calculateWeaponAttributes()
-            const result = charBuild.evaluateAST("生命", testDamage, attrs)
+            const result = charBuild.evaluateAST("生命", attrs)
 
             expect(result).toBeGreaterThan(0)
         })
 
         it("应该正确访问防御属性", () => {
             const attrs = charBuild.calculateWeaponAttributes()
-            const result = charBuild.evaluateAST("防御", testDamage, attrs)
+            const result = charBuild.evaluateAST("防御", attrs)
 
             expect(result).toBeGreaterThanOrEqual(0)
         })
 
         it("应该正确访问增伤属性", () => {
             const attrs = charBuild.calculateWeaponAttributes()
-            const result = charBuild.evaluateAST("增伤", testDamage, attrs)
+            const result = charBuild.evaluateAST("增伤", attrs)
 
             expect(result).toBeGreaterThanOrEqual(0)
         })
@@ -217,13 +217,13 @@ describe("evaluateAST函数测试", () => {
     describe("成员访问测试", () => {
         it("应该正确处理成员访问语法", () => {
             // 测试成员访问的语法解析，使用攻击.暴击（虽然攻击不是伤害属性，但可以测试语法）
-            const result = charBuild.evaluateAST("攻击 * 1.5", testDamage, testAttrs)
+            const result = charBuild.evaluateAST("攻击 * 1.5", testAttrs)
             expect(result).toBeGreaterThan(0)
             expect(result).toBeCloseTo(testAttrs.攻击 * 1.5, 0)
         })
 
         it("应该正确处理属性乘法", () => {
-            const result = charBuild.evaluateAST("增伤", testDamage, testAttrs)
+            const result = charBuild.evaluateAST("增伤", testAttrs)
 
             expect(result).toBeGreaterThanOrEqual(0)
         })
@@ -232,35 +232,35 @@ describe("evaluateAST函数测试", () => {
     describe("成员访问测试", () => {
         it("应该正确处理成员访问语法", () => {
             // 测试成员访问的语法解析，使用攻击.暴击（虽然攻击不是伤害属性，但可以测试语法）
-            const result = charBuild.evaluateAST("攻击 * 1.5", testDamage, testAttrs)
+            const result = charBuild.evaluateAST("攻击 * 1.5", testAttrs)
             expect(result).toBeGreaterThan(0)
             expect(result).toBeCloseTo(testAttrs.攻击 * 1.5, 0)
         })
 
         it("应该正确处理属性乘法", () => {
-            const result = charBuild.evaluateAST("攻击 * 2", testDamage, testAttrs)
+            const result = charBuild.evaluateAST("攻击 * 2", testAttrs)
             expect(result).toBeCloseTo(testAttrs.攻击 * 2, 0)
         })
     })
 
     describe("复杂表达式测试", () => {
         it("应该正确处理属性和运算符的组合", () => {
-            const result = charBuild.evaluateAST("攻击 * 2 + 100", testDamage, testAttrs)
+            const result = charBuild.evaluateAST("攻击 * 2 + 100", testAttrs)
             expect(result).toBeGreaterThan(0)
         })
 
         it("应该正确处理嵌套函数调用", () => {
-            const result = charBuild.evaluateAST("floor(max(攻击, 100) / 10)", testDamage, testAttrs)
+            const result = charBuild.evaluateAST("floor(max(攻击, 100) / 10)", testAttrs)
             expect(result).toBeGreaterThanOrEqual(0)
         })
 
         it("应该正确处理成员访问和运算符的组合", () => {
-            const result = charBuild.evaluateAST("攻击 * 1.5 + 50", testDamage, testAttrs)
+            const result = charBuild.evaluateAST("攻击 * 1.5 + 50", testAttrs)
             expect(result).toBeGreaterThan(0)
         })
 
         it("应该正确处理复杂混合表达式", () => {
-            const result = charBuild.evaluateAST("floor(攻击 / 100) * 10 + 50", testDamage, testAttrs)
+            const result = charBuild.evaluateAST("floor(攻击 / 100) * 10 + 50", testAttrs)
             expect(result).toBeGreaterThan(0)
         })
     })
@@ -269,14 +269,14 @@ describe("evaluateAST函数测试", () => {
         it("应该处理空字符串输入", () => {
             const attrs = charBuild.calculateWeaponAttributes()
 
-            const result = charBuild.evaluateAST("", testDamage, attrs)
+            const result = charBuild.evaluateAST("", attrs)
             expect(result).toBe(0)
         })
 
         it("应该处理不存在的属性", () => {
             const attrs = charBuild.calculateWeaponAttributes()
 
-            const result = charBuild.evaluateAST("不存在的属性", testDamage, attrs)
+            const result = charBuild.evaluateAST("不存在的属性", attrs)
             expect(result).toBe(0)
         })
 
@@ -284,14 +284,14 @@ describe("evaluateAST函数测试", () => {
             const attrs = charBuild.calculateWeaponAttributes()
 
             expect(() => {
-                charBuild.evaluateAST("unknownFunction(10)", testDamage, attrs)
+                charBuild.evaluateAST("unknownFunction(10)", attrs)
             }).toThrow()
         })
 
         it("应该处理大数值计算", () => {
             const attrs = charBuild.calculateWeaponAttributes()
 
-            const result = charBuild.evaluateAST("1000000 * 1000000", testDamage, attrs)
+            const result = charBuild.evaluateAST("1000000 * 1000000", attrs)
             expect(result).toBe(1000000000000)
         })
     })
@@ -303,10 +303,10 @@ describe("evaluateAST函数测试", () => {
             const expression = "攻击 + 100"
 
             // 第一次调用会解析并缓存
-            const result1 = charBuild.evaluateAST(expression, testDamage, attrs)
+            const result1 = charBuild.evaluateAST(expression, attrs)
 
             // 第二次调用应该使用缓存的AST
-            const result2 = charBuild.evaluateAST(expression, testDamage, attrs)
+            const result2 = charBuild.evaluateAST(expression, attrs)
 
             expect(result1).toBe(result2)
             expect(charBuild["astCache"].has(expression)).toBe(true)
@@ -315,8 +315,8 @@ describe("evaluateAST函数测试", () => {
         it("应该为不同表达式创建不同的缓存", () => {
             const attrs = charBuild.calculateWeaponAttributes()
 
-            charBuild.evaluateAST("攻击 + 100", testDamage, attrs)
-            charBuild.evaluateAST("攻击 * 2", testDamage, attrs)
+            charBuild.evaluateAST("攻击 + 100", attrs)
+            charBuild.evaluateAST("攻击 * 2", attrs)
             // console.log(charBuild["astCache"])
 
             expect(charBuild["astCache"].size).toBe(3)

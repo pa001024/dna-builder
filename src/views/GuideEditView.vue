@@ -8,11 +8,13 @@ import { useUIStore } from "../store/ui"
 import { env } from "../env"
 import { importPic } from "../api/app"
 import { useSettingStore } from "../store/setting"
+import { useUserStore } from "@/store/user"
 
 const route = useRoute()
 const router = useRouter()
 const ui = useUIStore()
 const setting = useSettingStore()
+const user = useUserStore()
 
 const isEdit = computed(() => !!route.params.id)
 const { id } = route.params
@@ -204,9 +206,8 @@ async function handleSubmit() {
     }
     isLoading.value = true
 
-    const loginResult = await setting.autoLoginDNA()
-    if (!loginResult.success) {
-        ui.showErrorMessage(loginResult.error)
+    if (!user.id) {
+        ui.showErrorMessage("请先登录")
         isLoading.value = false
         return
     }

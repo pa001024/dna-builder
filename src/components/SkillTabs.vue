@@ -17,7 +17,7 @@ const isSelected = (skillName: string) => skillName === props.selectedSkillName
 </script>
 
 <template>
-    <div class="join flex">
+    <div class="join flex" data-tour="skill-select">
         <button
             v-for="(skill, index) in skills"
             :key="index"

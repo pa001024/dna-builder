@@ -46,7 +46,7 @@ function closeMobileDrawer() {
                 </SidebarButton>
             </template>
             <div class="flex-1" data-tauri-drag-region />
-            <SidebarButton to="/userlogin" :tooltip="t(`login.title`)">
+            <SidebarButton to="/game-accounts" :tooltip="t(`login.title`)">
                 <Icon icon="ri:user-line" />
             </SidebarButton>
             <SidebarButton to="/setting" :tooltip="t(`setting.title`)">
@@ -84,7 +84,7 @@ function closeMobileDrawer() {
                 <!-- 底部操作 -->
                 <li>
                     <RouterLink
-                        to="/userlogin"
+                        to="/game-accounts"
                         class="flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors"
                         @click="closeMobileDrawer"
                     >

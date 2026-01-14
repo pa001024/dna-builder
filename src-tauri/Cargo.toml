@@ -1,6 +1,6 @@
 [package]
 name = "dna-builder"
-version = "0.9.9"
+version = "0.9.10"
 description = "A DNA Builder"
 authors = ["pa001024"]
 edition = "2024"
@@ -25,11 +25,37 @@ tauri-plugin-process = "2"
 tauri-plugin-window-state = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-notification = "2"
+tauri-plugin-http = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+sysinfo = "0.37.2"
+
+tokio = { version = "1", features = ["full"] }
+thiserror = "2.0.17"
+lazy_static = "1"
+widestring = "1"
+zip = { version = "0.6", default-features = false, features = ["deflate"] }
+base64 = "0.22.1"
+reqwest = { version = "0.12", default-features = false, features = [
+    "json",
+    "multipart",
+    "rustls-tls",
+] }
+
+[profile.dev]
+incremental = true # Compile your binary in smaller steps.
+
+[profile.release]
+codegen-units = 1 # Allows LLVM to perform better optimization.
+lto = true        # Enables link-time-optimizations.
+opt-level = "s"   # Prioritizes small binary size. Use `3` if you prefer speed.
+panic = "abort"   # Higher performance by disabling panic handlers.
+strip = true      # Ensures debug symbols are removed.
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-updater = "2"
 window-vibrancy = "0.7.1"
 winreg = "0.55.0"
-sysinfo = "0.37.2"
 windows-sys = { version = "0.61", features = [
     "Win32_Foundation",
     "Win32_System_Diagnostics_ToolHelp",
@@ -47,25 +73,3 @@ windows-sys = { version = "0.61", features = [
     "Win32_System_DataExchange",
 ] }
 windows-core = "0.62.2"
-tokio = { version = "1", features = ["full"] }
-thiserror = "2.0.17"
-
-lazy_static = "1"
-widestring = "1"
-zip = { version = "0.6", default-features = false, features = ["deflate"] }
-base64 = "0.22.1"
-tauri-plugin-http = "2"
-reqwest = { version = "0.12", features = ["json", "multipart"] }
-
-[profile.dev]
-incremental = true # Compile your binary in smaller steps.
-
-[profile.release]
-codegen-units = 1 # Allows LLVM to perform better optimization.
-lto = true        # Enables link-time-optimizations.
-opt-level = "s"   # Prioritizes small binary size. Use `3` if you prefer speed.
-panic = "abort"   # Higher performance by disabling panic handlers.
-strip = true      # Ensures debug symbols are removed.
-
-[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
-tauri-plugin-updater = "2"

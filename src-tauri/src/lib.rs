@@ -8,15 +8,7 @@ use std::{
 use reqwest::multipart;
 use serde::{Deserialize, Serialize};
 use tauri::Manager;
-use tauri::menu::*;
-use tauri::tray::*;
-use tauri_plugin_window_state::{AppHandleExt, StateFlags};
-use window_vibrancy::*;
-use winreg::{RegKey, enums::*};
 use zip::ZipArchive;
-
-use crate::util::{get_process_by_name, get_process_exe_path, shell_execute};
-
 mod util;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -41,11 +33,54 @@ async fn app_close(app_handle: tauri::AppHandle) {
     // let Some(window) = app_handle.get_webview_window("main") else {
     //     return app_handle.exit(0);
     // };
-    app_handle.save_window_state(StateFlags::all()).ok(); // don't really care if it saves it
-
+    #[cfg(target_os = "windows")]
+    {
+        use tauri_plugin_window_state::{AppHandleExt, StateFlags};
+        app_handle.save_window_state(StateFlags::all()).ok(); // don't really care if it saves it
+    }
     // if let Err(_) = window.close() {
     return app_handle.exit(0);
     // }
+}
+
+#[tauri::command]
+async fn get_local_qq(port: u32) -> String {
+    let client = reqwest::Client::builder()
+        .cookie_store(true)
+        .build()
+        .unwrap();
+    if let Ok(res) = {
+        client.get("https://xui.ptlogin2.qq.com/cgi-bin/xlogin?s_url=https%3A%2F%2Fgraph.qq.com%2Foauth2.0%2Flogin_jump").send().await
+    } {
+        let val = res
+            .cookies()
+            .into_iter()
+            .find(|x| x.name() == "pt_local_token")
+            .unwrap()
+            .value()
+            .to_string();
+
+        if let Ok(res) = {
+            let url = format!(
+                "https://localhost.ptlogin2.qq.com:{}/pt_get_uins?callback=ptui_getuins_CB&pt_local_tk={}",
+                port, val
+            );
+            client
+                .get(url)
+                .header("Referer", "https://xui.ptlogin2.qq.com/")
+                .send()
+                .await
+        } {
+            let text = res.text().await.unwrap();
+            if text.len() > 57 {
+                let s = text.as_str();
+                let s = &s[21..text.len() - 35];
+                return s.to_string();
+            }
+        }
+    }
+
+    return "[]".to_string();
 }
 
 fn is_zip_file(path: &Path) -> io::Result<bool> {
@@ -183,21 +218,25 @@ fn import_pic(path: String) -> Result<String, String> {
 
 #[tauri::command]
 fn get_game_install() -> String {
-    // 读取注册表
-    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-    let key = "Software\\Hero Games\\Duet Night Abyss";
-    let sk = hkcu.open_subkey(key);
-    if let Ok(sk) = sk {
-        for file in sk
-            .enum_keys()
-            .map(|x| x.unwrap())
-            .filter(|x| x.ends_with("EMLauncher.exe"))
-        {
-            // 截取文件夹路径
-            let parts: Vec<&str> = file.split("\\").collect();
-            let dir = &parts[..parts.len() - 1].join("\\");
-            let game_dir = dir.to_string() + "\\DNA Game\\EM.exe";
-            return game_dir;
+    #[cfg(target_os = "windows")]
+    {
+        use winreg::{RegKey, enums::*};
+        // 读取注册表
+        let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+        let key = "Software\\Hero Games\\Duet Night Abyss";
+        let sk = hkcu.open_subkey(key);
+        if let Ok(sk) = sk {
+            for file in sk
+                .enum_keys()
+                .map(|x| x.unwrap())
+                .filter(|x| x.ends_with("EMLauncher.exe"))
+            {
+                // 截取文件夹路径
+                let parts: Vec<&str> = file.split("\\").collect();
+                let dir = &parts[..parts.len() - 1].join("\\");
+                let game_dir = dir.to_string() + "\\DNA Game\\EM.exe";
+                return game_dir;
+            }
         }
     }
     return "".to_string();
@@ -205,22 +244,27 @@ fn get_game_install() -> String {
 
 #[tauri::command]
 async fn is_game_running(is_run: bool) -> String {
-    let mut elapsed = Duration::from_secs(0);
-    let timeout = Duration::from_secs(60 * 60); // 1h
-    let interval = Duration::from_millis(500); // 500ms
+    #[cfg(target_os = "windows")]
+    {
+        use crate::util::{get_process_by_name, get_process_exe_path};
 
-    while elapsed <= timeout {
-        let now_is_run = get_process_by_name(GAME_PROCESS).unwrap_or(0) > 0;
-        if now_is_run != is_run {
-            break;
+        let mut elapsed = Duration::from_secs(0);
+        let timeout = Duration::from_secs(60 * 60); // 1h
+        let interval = Duration::from_millis(500); // 500ms
+
+        while elapsed <= timeout {
+            let now_is_run = get_process_by_name(GAME_PROCESS).unwrap_or(0) > 0;
+            if now_is_run != is_run {
+                break;
+            }
+            tokio::time::sleep(interval).await;
+            elapsed += interval;
         }
-        tokio::time::sleep(interval).await;
-        elapsed += interval;
-    }
 
-    if !is_run {
-        if let Ok(Some(path)) = get_process_exe_path(GAME_PROCESS) {
-            return path;
+        if !is_run {
+            if let Ok(Some(path)) = get_process_exe_path(GAME_PROCESS) {
+                return path;
+            }
         }
     }
     "".to_string()
@@ -228,61 +272,69 @@ async fn is_game_running(is_run: bool) -> String {
 
 #[tauri::command]
 async fn launch_exe(path: String, params: String) -> bool {
-    let pid = shell_execute(path.as_str(), Some(params.as_str()), None);
-    if let Err(err) = pid {
-        println!("Failed to launch game: {:?}", err);
-        return false;
+    #[cfg(target_os = "windows")]
+    {
+        use crate::util::shell_execute;
+        let pid = shell_execute(path.as_str(), Some(params.as_str()), None);
+        if let Err(err) = pid {
+            println!("Failed to launch game: {:?}", err);
+            return false;
+        }
     }
     true
 }
 
 #[tauri::command]
 fn apply_material(window: tauri::WebviewWindow, material: &str) -> String {
+    #[cfg(target_os = "windows")]
     {
-        let _ = clear_blur(&window);
-        let _ = clear_acrylic(&window);
-        let _ = clear_mica(&window);
-        let _ = clear_tabbed(&window);
-    }
-    match material {
-        "None" => {}
-        "Blur" => {
-            if apply_blur(&window, Some((0, 0, 0, 0))).is_err() {
-                return "Unsupported platform! 'apply_blur' is only supported on Windows 7, Windows 10 v1809 or newer"
+        use window_vibrancy::*;
+        {
+            let _ = clear_blur(&window);
+            let _ = clear_acrylic(&window);
+            let _ = clear_mica(&window);
+            let _ = clear_tabbed(&window);
+        }
+        match material {
+            "None" => {}
+            "Blur" => {
+                if apply_blur(&window, Some((0, 0, 0, 0))).is_err() {
+                    return "Unsupported platform! 'apply_blur' is only supported on Windows 7, Windows 10 v1809 or newer"
                 .to_string();
+                }
             }
-        }
-        "Acrylic" => {
-            if apply_acrylic(&window, Some((0, 0, 0, 0))).is_err() {
-                return "Unsupported platform! 'apply_acrylic' is only supported on Windows 10 v1809 or newer"
+            "Acrylic" => {
+                if apply_acrylic(&window, Some((0, 0, 0, 0))).is_err() {
+                    return "Unsupported platform! 'apply_acrylic' is only supported on Windows 10 v1809 or newer"
                 .to_string();
+                }
             }
-        }
-        "Mica" => {
-            if apply_mica(&window, Some(false)).is_err() {
-                return "Unsupported platform! 'apply_mica' is only supported on Windows 11"
-                    .to_string();
+            "Mica" => {
+                if apply_mica(&window, Some(false)).is_err() {
+                    return "Unsupported platform! 'apply_mica' is only supported on Windows 11"
+                        .to_string();
+                }
             }
-        }
-        "Mica_Dark" => {
-            if apply_mica(&window, Some(true)).is_err() {
-                return "Unsupported platform! 'apply_mica' is only supported on Windows 11"
-                    .to_string();
+            "Mica_Dark" => {
+                if apply_mica(&window, Some(true)).is_err() {
+                    return "Unsupported platform! 'apply_mica' is only supported on Windows 11"
+                        .to_string();
+                }
             }
-        }
-        "Mica_Tabbed" => {
-            if apply_tabbed(&window, Some(false)).is_err() {
-                return "Unsupported platform! 'apply_mica' is only supported on Windows 11"
-                    .to_string();
+            "Mica_Tabbed" => {
+                if apply_tabbed(&window, Some(false)).is_err() {
+                    return "Unsupported platform! 'apply_mica' is only supported on Windows 11"
+                        .to_string();
+                }
             }
-        }
-        "Mica_Tabbed_Dark" => {
-            if apply_tabbed(&window, Some(true)).is_err() {
-                return "Unsupported platform! 'apply_mica' is only supported on Windows 11"
-                    .to_string();
+            "Mica_Tabbed_Dark" => {
+                if apply_tabbed(&window, Some(true)).is_err() {
+                    return "Unsupported platform! 'apply_mica' is only supported on Windows 11"
+                        .to_string();
+                }
             }
+            _ => return "Unsupported material!".to_string(),
         }
-        _ => return "Unsupported material!".to_string(),
     }
     "Success".to_string()
 }
@@ -379,164 +431,171 @@ fn get_os_version() -> String {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let mut app = tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_notification::init())
-        .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_window_state::Builder::default().build())
-        .plugin(tauri_plugin_clipboard_manager::init())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_process::init())
-        .setup(|app| {
-            let handle = app.handle();
-            let window = app.get_webview_window("main").unwrap();
-            // window.set_shadow(true).expect("Unsupported platform!");
+        .plugin(tauri_plugin_clipboard_manager::init());
+    #[cfg(target_os = "windows")]
+    {
+        app = app
+            .plugin(tauri_plugin_updater::Builder::new().build())
+            .plugin(tauri_plugin_window_state::Builder::default().build());
+    }
+    app.setup(|app| {
+        let handle = app.handle();
+        let window = app.get_webview_window("main").unwrap();
+        // window.set_shadow(true).expect("Unsupported platform!");
 
-            #[cfg(target_os = "macos")]
-            apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, None)
-                .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
+        #[cfg(target_os = "macos")]
+        apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, None)
+            .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
 
-            #[cfg(target_os = "windows")]
-            {
-                use sysinfo::System;
-                let mut sys = System::new_all();
-                sys.refresh_all();
+        #[cfg(target_os = "windows")]
+        {
+            use sysinfo::System;
+            use tauri::menu::*;
+            use tauri::tray::*;
+            use window_vibrancy::*;
+            let mut sys = System::new_all();
+            sys.refresh_all();
 
-                use windows_sys::Win32::Foundation::CloseHandle;
-                use windows_sys::Win32::System::Threading::CreateMutexA;
-                use windows_sys::Win32::UI::WindowsAndMessaging::*;
-                let h_mutex =
-                    unsafe { CreateMutexA(std::ptr::null_mut(), 0, "weys-mutex".as_ptr()) };
-                if h_mutex == std::ptr::null_mut() {
-                    // Mutex already exists, app is already running.
-                    unsafe {
-                        CloseHandle(h_mutex);
-                        let hwnd = FindWindowA(std::ptr::null(), "WeYS".as_ptr());
-                        let mut wpm = std::mem::zeroed::<WINDOWPLACEMENT>();
-                        if GetWindowPlacement(hwnd, &mut wpm) != 0 {
-                            ShowWindow(hwnd, SW_SHOWNORMAL);
-                            SetForegroundWindow(hwnd);
-                        }
-                    };
-                    handle.exit(0);
-                }
-                let submenu = SubmenuBuilder::new(handle, "材质")
-                    .check("None", "None")
-                    .check("Blur", "Blur")
-                    .check("Acrylic", "Acrylic")
-                    .check("Mica", "Mica")
-                    .check("Mica_Dark", "Mica_Dark")
-                    .check("Mica_Tabbed", "Mica_Tabbed")
-                    .check("Mica_Tabbed_Dark", "Mica_Tabbed_Dark")
-                    .build()?;
-                let menu = MenuBuilder::new(app)
-                    .items(&[&submenu])
-                    .text("exit", "退出 (&Q)")
-                    .build()?;
-
-                let set_mat_check = move |x: &str| {
-                    submenu.items().unwrap().iter().for_each(|item| {
-                        if let Some(check_menuitem) = item.as_check_menuitem() {
-                            let _ = check_menuitem.set_checked(check_menuitem.id() == x);
-                        }
-                    });
-                };
-                if let Some(version) = System::os_version() {
-                    if version.starts_with("11") {
-                        let acrylic_available = apply_acrylic(&window, Some((0, 0, 0, 0))).is_ok();
-                        if acrylic_available {
-                            println!("Acrylic is available");
-                            set_mat_check("Acrylic");
-                        }
-                    } else if version.starts_with("10") {
-                        let blur_available = apply_blur(&window, Some((0, 0, 0, 0))).is_ok();
-                        if blur_available {
-                            println!("Blur is available");
-                            set_mat_check("Blur");
-                        }
-                    } else {
-                        set_mat_check("None");
+            use windows_sys::Win32::Foundation::CloseHandle;
+            use windows_sys::Win32::System::Threading::CreateMutexA;
+            use windows_sys::Win32::UI::WindowsAndMessaging::*;
+            let h_mutex = unsafe { CreateMutexA(std::ptr::null_mut(), 0, "weys-mutex".as_ptr()) };
+            if h_mutex == std::ptr::null_mut() {
+                // Mutex already exists, app is already running.
+                unsafe {
+                    CloseHandle(h_mutex);
+                    let hwnd = FindWindowA(std::ptr::null(), "WeYS".as_ptr());
+                    let mut wpm = std::mem::zeroed::<WINDOWPLACEMENT>();
+                    if GetWindowPlacement(hwnd, &mut wpm) != 0 {
+                        ShowWindow(hwnd, SW_SHOWNORMAL);
+                        SetForegroundWindow(hwnd);
                     }
-                }
+                };
+                handle.exit(0);
+            }
+            let submenu = SubmenuBuilder::new(handle, "材质")
+                .check("None", "None")
+                .check("Blur", "Blur")
+                .check("Acrylic", "Acrylic")
+                .check("Mica", "Mica")
+                .check("Mica_Dark", "Mica_Dark")
+                .check("Mica_Tabbed", "Mica_Tabbed")
+                .check("Mica_Tabbed_Dark", "Mica_Tabbed_Dark")
+                .build()?;
+            let menu = MenuBuilder::new(app)
+                .items(&[&submenu])
+                .text("exit", "退出 (&Q)")
+                .build()?;
 
-                let _tray = TrayIconBuilder::new()
-                    .menu(&menu)
-                    .on_menu_event(move |_app, event| match event.id().as_ref() {
-                        "exit" => {
-                            std::process::exit(0);
-                        }
-                        "None" => {
-                            set_mat_check("None");
-                            let _ = apply_material(window.clone(), "None");
-                        }
-                        "Blur" => {
-                            set_mat_check("Blur");
-                            let _ = apply_material(window.clone(), "Blur");
-                        }
-                        "Acrylic" => {
-                            set_mat_check("Acrylic");
-                            let _ = apply_material(window.clone(), "Acrylic");
-                        }
-                        "Mica" => {
-                            set_mat_check("Mica");
-                            let _ = apply_material(window.clone(), "Mica");
-                        }
-                        "Mica_Dark" => {
-                            set_mat_check("Mica_Dark");
-                            let _ = apply_material(window.clone(), "Mica_Dark");
-                        }
-                        "Mica_Tabbed" => {
-                            set_mat_check("Mica_Tabbed");
-                            let _ = apply_material(window.clone(), "Mica_Tabbed");
-                        }
-                        "Mica_Tabbed_Dark" => {
-                            set_mat_check("Mica_Tabbed_Dark");
-                            let _ = apply_material(window.clone(), "Mica_Tabbed_Dark");
-                        }
-                        _ => (),
-                    })
-                    .on_tray_icon_event(|tray, event| {
-                        if let TrayIconEvent::Click {
-                            button: MouseButton::Left,
-                            button_state: MouseButtonState::Up,
-                            ..
-                        } = event
-                        {
-                            let app = tray.app_handle();
-                            if let Some(webview_window) = app.get_webview_window("main") {
-                                if let Ok(is_visible) = webview_window.is_visible() {
-                                    if is_visible {
-                                        let _ = webview_window.hide();
-                                    } else {
-                                        let _ = webview_window.show();
-                                        let _ = webview_window.set_focus();
-                                    }
+            let set_mat_check = move |x: &str| {
+                submenu.items().unwrap().iter().for_each(|item| {
+                    if let Some(check_menuitem) = item.as_check_menuitem() {
+                        let _ = check_menuitem.set_checked(check_menuitem.id() == x);
+                    }
+                });
+            };
+            if let Some(version) = System::os_version() {
+                if version.starts_with("11") {
+                    let acrylic_available = apply_acrylic(&window, Some((0, 0, 0, 0))).is_ok();
+                    if acrylic_available {
+                        println!("Acrylic is available");
+                        set_mat_check("Acrylic");
+                    }
+                } else if version.starts_with("10") {
+                    let blur_available = apply_blur(&window, Some((0, 0, 0, 0))).is_ok();
+                    if blur_available {
+                        println!("Blur is available");
+                        set_mat_check("Blur");
+                    }
+                } else {
+                    set_mat_check("None");
+                }
+            }
+
+            let _tray = TrayIconBuilder::new()
+                .menu(&menu)
+                .on_menu_event(move |_app, event| match event.id().as_ref() {
+                    "exit" => {
+                        std::process::exit(0);
+                    }
+                    "None" => {
+                        set_mat_check("None");
+                        let _ = apply_material(window.clone(), "None");
+                    }
+                    "Blur" => {
+                        set_mat_check("Blur");
+                        let _ = apply_material(window.clone(), "Blur");
+                    }
+                    "Acrylic" => {
+                        set_mat_check("Acrylic");
+                        let _ = apply_material(window.clone(), "Acrylic");
+                    }
+                    "Mica" => {
+                        set_mat_check("Mica");
+                        let _ = apply_material(window.clone(), "Mica");
+                    }
+                    "Mica_Dark" => {
+                        set_mat_check("Mica_Dark");
+                        let _ = apply_material(window.clone(), "Mica_Dark");
+                    }
+                    "Mica_Tabbed" => {
+                        set_mat_check("Mica_Tabbed");
+                        let _ = apply_material(window.clone(), "Mica_Tabbed");
+                    }
+                    "Mica_Tabbed_Dark" => {
+                        set_mat_check("Mica_Tabbed_Dark");
+                        let _ = apply_material(window.clone(), "Mica_Tabbed_Dark");
+                    }
+                    _ => (),
+                })
+                .on_tray_icon_event(|tray, event| {
+                    if let TrayIconEvent::Click {
+                        button: MouseButton::Left,
+                        button_state: MouseButtonState::Up,
+                        ..
+                    } = event
+                    {
+                        let app = tray.app_handle();
+                        if let Some(webview_window) = app.get_webview_window("main") {
+                            if let Ok(is_visible) = webview_window.is_visible() {
+                                if is_visible {
+                                    let _ = webview_window.hide();
+                                } else {
+                                    let _ = webview_window.show();
+                                    let _ = webview_window.set_focus();
                                 }
                             }
                         }
-                    })
-                    .icon(
-                        tauri::image::Image::from_bytes(include_bytes!("../icons/icon.ico"))
-                            .expect("icon missing"),
-                    )
-                    .build(app)?;
-            }
+                    }
+                })
+                .icon(
+                    tauri::image::Image::from_bytes(include_bytes!("../icons/icon.ico"))
+                        .expect("icon missing"),
+                )
+                .build(app)?;
+        }
 
-            Ok(())
-        })
-        .invoke_handler(tauri::generate_handler![
-            apply_material,
-            app_close,
-            get_os_version,
-            get_game_install,
-            is_game_running,
-            launch_exe,
-            import_mod,
-            enable_mod,
-            import_pic,
-            fetch
-        ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        Ok(())
+    })
+    .invoke_handler(tauri::generate_handler![
+        apply_material,
+        app_close,
+        get_os_version,
+        get_game_install,
+        is_game_running,
+        launch_exe,
+        import_mod,
+        enable_mod,
+        import_pic,
+        fetch,
+        get_local_qq
+    ])
+    .run(tauri::generate_context!())
+    .expect("error while running tauri application");
 }

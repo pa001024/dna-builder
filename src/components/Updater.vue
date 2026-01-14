@@ -28,13 +28,31 @@ async function fetchVersions() {
     }
 }
 
+// 版本比较函数，正确比较语义化版本号
+function compareVersions(v1: string, v2: string): number {
+    // 移除版本号前缀"v"并分割成数字数组
+    const parts1 = v1.replace("v", "").split(".").map(Number)
+    const parts2 = v2.replace("v", "").split(".").map(Number)
+
+    // 比较每个部分
+    for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
+        const p1 = parts1[i] || 0
+        const p2 = parts2[i] || 0
+
+        if (p1 > p2) return 1
+        if (p1 < p2) return -1
+    }
+
+    return 0
+}
+
 // Check if there are new versions to show
 function checkNewVersions() {
     if (!versions.value.length) return
 
     // Get versions newer than lastPopupVersion
     const newVersions = versions.value.filter(version => {
-        return version.version > lastPopupVersion.value
+        return compareVersions(version.version, lastPopupVersion.value) > 0
     })
 
     if (newVersions.length > 0) {
@@ -95,7 +113,7 @@ onMounted(async () => {
             <div class="max-h-96 overflow-y-auto py-4">
                 <div v-if="versions.length > 0" class="space-y-4">
                     <div
-                        v-for="version in versions.filter(v => v.version > lastPopupVersion)"
+                        v-for="version in versions.filter(v => compareVersions(v.version, lastPopupVersion) > 0)"
                         :key="version.version"
                         class="bg-base-200 p-4 rounded-lg"
                     >

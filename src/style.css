@@ -7,10 +7,17 @@
 
 /* these are necessary styles for vue flow */
 @import "@vue-flow/core/dist/style.css";
-
 /* this contains the default theme, these are optional styles */
 @import "@vue-flow/core/dist/theme-default.css";
 /* @import "animate.css"; */
+
+[id$="-tooltip"] {
+    max-width: 450px !important;
+}
+
+[class$="-actions"] button {
+    white-space: nowrap;
+}
 
 @theme {
     --breakpoint-xs: 30rem;

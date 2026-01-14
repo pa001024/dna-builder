@@ -5,6 +5,7 @@ import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
 import { useLocalStorage } from "@vueuse/core"
 import { shuffle } from "lodash-es"
+import { sleep } from "@/util"
 defineProps<{
     nobtn?: boolean
 }>()
@@ -144,7 +145,7 @@ async function loadTaskProcess() {
 }
 
 async function handleSign() {
-    if (firstUnsignedDay.value) await handleGameSign(firstUnsignedDay.value)
+    if (canSignToday.value && firstUnsignedDay.value) await handleGameSign(firstUnsignedDay.value)
 
     let posts: DNAPostListBean[] = []
     async function getPosts() {
@@ -160,16 +161,17 @@ async function handleSign() {
     for (const t of taskProcess.value.dailyTask) {
         if (t.remark === "签到" && t.completeTimes < t.times) {
             await handleBbsSign()
-        } else if (t.remark === "浏览3篇帖子" && t.completeTimes < t.times) {
+        } else if (t.remark.startsWith("浏览") && t.completeTimes < t.times) {
             await handlePostView(await getPosts())
-        } else if (t.remark === "完成5次点赞" && t.completeTimes < t.times) {
+        } else if (t.remark.startsWith("完成") && t.completeTimes < t.times) {
             await handleLike(await getPosts())
-        } else if (t.remark === "分享一篇内容" && t.completeTimes < t.times) {
+        } else if (t.remark.startsWith("分享") && t.completeTimes < t.times) {
             await handleShare()
-        } else if (t.remark === "回复他人帖子5次" && t.completeTimes < t.times) {
+        } else if (t.remark.startsWith("回复") && t.completeTimes < t.times) {
             await handleReply(await getPosts())
         }
     }
+    await loadTaskProcess()
 }
 
 async function handleGameSign(dayAward: DNAGameSignInDayAward) {
@@ -197,7 +199,6 @@ async function handleBbsSign() {
         const res = await api.bbsSign()
         if (res.is_success) {
             ui.showSuccessMessage("论坛签到成功")
-            await loadTaskProcess()
         } else {
             ui.showErrorMessage(res.msg || "论坛签到失败")
         }
@@ -223,7 +224,6 @@ async function handlePostView(posts: DNAPostListBean[]) {
         }
 
         ui.showSuccessMessage(`已浏览${viewCount}篇帖子`)
-        await loadTaskProcess()
     } catch (e) {
         ui.showErrorMessage("浏览帖子失败:", e)
     } finally {
@@ -255,7 +255,6 @@ async function handleLike(posts: DNAPostListBean[]) {
         }
 
         ui.showSuccessMessage(`已点赞${successCount}篇帖子`)
-        await loadTaskProcess()
     } catch (e) {
         ui.showErrorMessage("点赞失败:", e)
     } finally {
@@ -272,7 +271,6 @@ async function handleShare() {
         const res = await api.shareTask()
         if (res.is_success) {
             ui.showSuccessMessage("分享成功")
-            await loadTaskProcess()
         } else {
             ui.showErrorMessage(res.msg || "分享失败")
         }
@@ -295,34 +293,21 @@ async function handleReply(posts: DNAPostListBean[]) {
         for (const post of posts) {
             if (replyCount >= targetCount) break
 
-            // 获取帖子评论列表
-            const commentsRes = await api.getPostCommentList(post.postId, 1, 5)
-            if (!commentsRes.is_success || !commentsRes.data?.postCommentList || commentsRes.data.postCommentList.length === 0) {
-                continue
-            }
-
-            // 对每个评论进行回复
-            const comments = commentsRes.data.postCommentList
-            for (const comment of comments) {
-                if (replyCount >= targetCount) break
-
-                const res = await api.createReply(
-                    {
-                        userId: comment.userId,
-                        postId: String(post.postId),
-                        postCommentId: String(comment.commentId),
-                        gameForumId: post.gameForumId,
-                    },
-                    getRandomReply()
-                )
-                if (res.is_success) {
-                    replyCount++
-                }
+            const res = await api.createComment(
+                {
+                    userId: post.userId,
+                    postId: String(post.postId),
+                    gameForumId: post.gameForumId,
+                },
+                getRandomReply()
+            )
+            if (res.is_success) {
+                replyCount++
+                await sleep(3000)
             }
         }
 
         ui.showSuccessMessage(`已回复${replyCount}次`)
-        await loadTaskProcess()
     } catch (e) {
         ui.showErrorMessage("回复失败:", e)
     } finally {
@@ -391,6 +376,11 @@ defineExpose({
     loadData,
     lastUpdateTime,
 })
+
+const isSignFinished = computed(() => {
+    if (canSignToday.value) return false
+    return !taskProcess.value.dailyTask.some(task => task.completeTimes < task.times)
+})
 </script>
 <template>
     <div class="space-y-6">
@@ -427,7 +417,7 @@ defineExpose({
                             <span class="font-bold ml-2">{{ signedDaysCount }} 天</span>
                         </div>
                         <button
-                            v-if="canSignToday && firstUnsignedDay"
+                            v-if="!isSignFinished"
                             class="btn btn-primary"
                             :class="{ loading: signing }"
                             :disabled="signing"

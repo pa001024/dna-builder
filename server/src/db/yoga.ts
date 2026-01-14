@@ -71,11 +71,11 @@ export function yogaPlugin() {
 
         const handler = makeWSHandler({
             schema,
-            execute: (args: any) => args.rootValue.execute(args),
-            subscribe: (args: any) => args.rootValue.subscribe(args),
-            onSubscribe: async (ctx: any, msg: any) => {
-                // console.log("onSubscribe", ctx, msg)
-                const token = ctx.connectionParams?.token || (msg.payload.extensions?.headers as any).token
+            // execute: (args) => args.rootValue.execute(args),
+            // subscribe: (args) => args.rootValue.subscribe(args),
+            onSubscribe: async (ctx, id, payload) => {
+                // console.log("onSubscribe", ctx, id, payload)
+                const token = ctx.connectionParams?.token || (payload.extensions?.headers as any).token
                 const { schema, execute, subscribe, contextFactory, parse, validate } = yoga.getEnveloped({
                     ...ctx,
                     request: {
@@ -86,14 +86,14 @@ export function yogaPlugin() {
                         },
                     },
                     socket: ctx.extra.socket,
-                    params: msg.payload,
+                    params: payload,
                 })
 
                 const args = {
                     schema,
-                    operationName: msg.payload.operationName,
-                    document: parse(msg.payload.query),
-                    variableValues: msg.payload.variables,
+                    operationName: payload.operationName,
+                    document: parse(payload.query),
+                    variableValues: payload.variables,
                     contextValue: await contextFactory(),
                     rootValue: {
                         execute,

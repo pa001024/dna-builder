@@ -9,16 +9,16 @@ import { env } from "@/env"
 
 const ui = useUIStore()
 const setting = useSettingStore()
-// 用户列表
+// 皎皎角账号列表
 const users = ref<DNAUser[]>([])
-// 新增用户iframe状态
+// 新增皎皎角账号iframe状态
 const isAddIframeOpen = ref(false)
-// 新增用户通过token状态
+// 新增皎皎角账号通过token状态
 const isAddByTokenOpen = ref(false)
 // JSON输入
 const jsonInput = ref("")
 
-// 加载用户列表
+// 加载皎皎角账号列表
 const loadUsers = async () => {
     users.value = await db.dnaUsers.toArray()
     if (users.value.length > 0 && !setting.dnaUserId) {
@@ -26,7 +26,7 @@ const loadUsers = async () => {
     }
 }
 
-// 添加用户
+// 添加皎皎角账号
 const addUser = async (data: { dev_code: string; user: import("dna-api").DNAUserDataBean }) => {
     const userData = {
         uid: data.user.userId,
@@ -45,6 +45,7 @@ const addUser = async (data: { dev_code: string; user: import("dna-api").DNAUser
     isAddIframeOpen.value = false
 }
 
+// 通过 JSON 添加皎皎角账号
 const addUserByToken = async () => {
     const rawdata = JSON.parse(jsonInput.value)
     const userData = {
@@ -64,7 +65,7 @@ const addUserByToken = async () => {
     isAddByTokenOpen.value = false
 }
 
-// 删除用户
+// 删除皎皎角账号
 const deleteUser = async (id: number) => {
     if (await ui.showDialog("确认删除", "确定要删除这个用户吗？")) {
         await db.dnaUsers.delete(id)
@@ -75,12 +76,12 @@ const deleteUser = async (id: number) => {
     }
 }
 
-// 切换用户
+// 切换皎皎角账号
 const switchUser = (id: number) => {
     setting.dnaUserId = id
 }
 
-// 复制用户JSON
+// 复制皎皎角账号JSON
 const copyUser = (id: number) => {
     const user = users.value.find(u => u.id === id)
     if (user) {
@@ -90,14 +91,14 @@ const copyUser = (id: number) => {
     }
 }
 
-// 处理来自iframe的消息
+// 处理来自iframe的皎皎角账号登录消息
 const handleIframeMessage = (event: MessageEvent) => {
     if (event.data?.type === "LOGIN_SUCCESS") {
         addUser(event.data)
     }
 }
 
-// 组件挂载时加载用户列表并添加消息监听
+// 组件挂载时加载皎皎角账号列表并添加消息监听
 onMounted(() => {
     loadUsers()
     window.addEventListener("message", handleIframeMessage)
@@ -126,13 +127,13 @@ onBeforeUnmount(() => {
         </div>
         <!-- 顶部操作栏 -->
         <div class="flex justify-between items-center mb-4">
-            <h1 class="text-xl font-semibold text-base-content">账号管理</h1>
+            <h1 class="text-xl font-semibold text-base-content">皎皎角账号管理</h1>
             <div class="join">
                 <button class="join-item btn btn-primary" @click="isAddIframeOpen = true">
                     <Icon icon="ri:add-line" class="size-5 mr-1" />
                     <span> 添加账号 </span>
                 </button>
-                <Tooltip tooltip="通过JSON添加账号" side="bottom">
+                <Tooltip tooltip="通过JSON添加皎皎角账号(登录后可复制)" side="bottom">
                     <button class="join-item btn btn-primary btn-square" @click="((isAddByTokenOpen = true), (jsonInput = ''))">
                         <Icon icon="ri:more-line" class="size-5" />
                     </button>
@@ -165,17 +166,17 @@ onBeforeUnmount(() => {
                             <!-- 名称 -->
                             <td class="py-3 px-4">
                                 <div class="flex items-center">
-                                    <!-- 用户头像 -->
+                                    <!-- 皎皎角账号头像 -->
                                     <div
                                         class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold mr-2"
                                     >
-                                        <img :src="user.pic" alt="用户头像" class="w-full h-full rounded-full" />
+                                        <img :src="user.pic" alt="皎皎角账号头像" class="w-full h-full rounded-full" />
                                     </div>
                                     <span class="text-base-content">{{ user.name }}</span>
                                 </div>
                             </td>
 
-                            <!-- 用户ID -->
+                            <!-- 皎皎角账号ID -->
                             <td class="py-3 px-4">
                                 <span class="text-base-content/80 truncate max-w-37.5">{{ user.uid }}</span>
                             </td>
@@ -213,7 +214,7 @@ onBeforeUnmount(() => {
 
                         <!-- 空状态 -->
                         <tr v-if="users.length === 0">
-                            <td colspan="5" class="py-8 text-center">
+                            <td colspan="4" class="py-8 text-center">
                                 <div class="text-center py-6">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -235,7 +236,7 @@ onBeforeUnmount(() => {
                                             d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                                         />
                                     </svg>
-                                    <p class="text-base-content/60">暂无账号，请添加新账号</p>
+                                    <p class="text-base-content/60">暂无皎皎角账号，请添加新账号</p>
                                 </div>
                             </td>
                         </tr>
@@ -244,7 +245,7 @@ onBeforeUnmount(() => {
             </ScrollArea>
         </div>
 
-        <!-- 添加用户iframe模态框 -->
+        <!-- 添加皎皎角账号iframe模态框 -->
         <div class="modal" :class="{ 'modal-open': isAddIframeOpen }">
             <div class="modal-box bg-base-200 shadow-2xl rounded-xl p-0 w-114 h-116">
                 <iframe ref="iframeRef" src="/login_jjj.html" class="w-full h-full border-0 rounded-lg" />
@@ -253,7 +254,7 @@ onBeforeUnmount(() => {
             <!-- 模态框背景 -->
             <div class="modal-backdrop" @click="isAddIframeOpen = false" />
         </div>
-        <!-- 添加用户iframe模态框 -->
+        <!-- 通过JSON添加皎皎角账号模态框 -->
         <div class="modal" :class="{ 'modal-open': isAddByTokenOpen }">
             <div class="modal-box bg-base-200 shadow-2xl rounded-xl p-0 w-114 h-116">
                 <div class="w-full h-full card bg-base-200 shadow-xl overflow-hidden">
@@ -264,11 +265,11 @@ onBeforeUnmount(() => {
                             <textarea v-model="jsonInput" required placeholder="请输入JSON字符串" class="input w-full p-2 h-68 text-md" />
                         </fieldset>
                         <!-- 登录按钮 -->
-                        <button class="btn btn-primary btn-block" :disabled="!jsonInput.length" @click="addUserByToken">添加用户</button>
+                        <button class="btn btn-primary btn-block" :disabled="!jsonInput.length" @click="addUserByToken">添加账号</button>
 
                         <!-- 辅助信息 -->
                         <div class="text-center text-sm text-base-content/70">
-                            <p>导入JSON数据</p>
+                            <p>导入皎皎角账号JSON数据</p>
                         </div>
                     </form>
                 </div>

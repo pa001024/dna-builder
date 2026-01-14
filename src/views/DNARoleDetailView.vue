@@ -23,7 +23,7 @@ onMounted(async () => {
     const p = await setting.getDNAAPI()
     if (!p) {
         ui.showErrorMessage("请先登录")
-        router.push("/userlogin")
+        router.push("/game-accounts")
         return
     }
     api = p
