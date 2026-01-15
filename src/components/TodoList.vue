@@ -4,9 +4,10 @@ import { userTodosQuery } from "@/api/query"
 import { createTodoMutation, updateTodoMutation, deleteTodoMutation, completeTodoMutation } from "@/api/mutation"
 import { useUserStore } from "@/store/user"
 import { useLocalStorage } from "@vueuse/core"
-import Dialog from "./Dialog.vue"
+import { useUIStore } from "@/store/ui"
 
 const userStore = useUserStore()
+const ui = useUIStore()
 
 // 待办事项类型定义
 interface Todo {
@@ -147,7 +148,7 @@ const closeEditDialog = () => {
 const submitCreate = async () => {
     // 表单验证
     if (!createForm.value.title || createForm.value.title.trim() === "") {
-        alert("请输入待办事项标题")
+        ui.showErrorMessage("请输入待办事项标题")
         return
     }
 
@@ -174,7 +175,7 @@ const submitCreate = async () => {
         }
     } catch (error) {
         console.error("创建待办事项失败:", error)
-        alert("创建待办事项失败")
+        ui.showErrorMessage("创建待办事项失败")
     } finally {
         formSubmitting.value = false
     }
@@ -186,7 +187,7 @@ const submitEdit = async () => {
 
     // 表单验证
     if (!editForm.value.title || editForm.value.title.trim() === "") {
-        alert("请输入待办事项标题")
+        ui.showErrorMessage("请输入待办事项标题")
         return
     }
 
@@ -216,7 +217,7 @@ const submitEdit = async () => {
         }
     } catch (error) {
         console.error("更新待办事项失败:", error)
-        alert("更新待办事项失败")
+        ui.showErrorMessage("更新待办事项失败")
     } finally {
         formSubmitting.value = false
     }
@@ -224,7 +225,7 @@ const submitEdit = async () => {
 
 // 删除待办事项
 const deleteTodo = async (todoId: string) => {
-    if (confirm("确定要删除这个待办事项吗？")) {
+    if (await ui.showDialog("删除确认", "确定要删除这个待办事项吗？")) {
         try {
             const result = await deleteTodoMutation({ id: todoId })
 
@@ -252,7 +253,7 @@ const toggleComplete = async (todo: Todo) => {
             }
         } catch (error) {
             console.error("标记完成失败:", error)
-            alert("标记完成失败")
+            ui.showErrorMessage("标记完成失败")
         }
     } else {
         // 未登录，保存到本地存储
@@ -375,8 +376,7 @@ onMounted(() => {
             </div>
 
             <!-- 空状态 -->
-            <div v-if="todos.length === 0" class="text-center py-12 text-base-content/50">
-                <Icon icon="ri:checkbox-circle-line" class="text-4xl mb-2 block"></Icon>
+            <div v-if="todos.length === 0" class="text-center text-base-content/50">
                 <p>暂无待办事项</p>
             </div>
         </div>

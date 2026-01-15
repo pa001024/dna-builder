@@ -60,7 +60,7 @@ const currentMonster = computed(() => {
 <template>
     <div class="absolute inset-0 pointer-events-none select-none font-sans text-white">
         <!-- HUD: Player Status (Bottom Center) -->
-        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 w-[500px]">
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 w-125">
             <!-- Buff Icons Area -->
             <div class="flex gap-2 mb-2 flex-wrap justify-center">
                 <!-- Active Buffs from Engine -->

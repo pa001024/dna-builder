@@ -12,6 +12,7 @@ import mdHighlightjs from "markdown-it-highlightjs"
 import "highlight.js/styles/github.css"
 import { env } from "../env"
 import { launchExe } from "../api/app"
+import { useUIStore } from "../store/ui"
 
 // 创建markdown-it实例，支持latex和代码高亮
 const md = MarkdownIt({
@@ -31,6 +32,7 @@ function renderMarkdown(text: string): string {
 }
 
 const setting = useSettingStore()
+const ui = useUIStore()
 
 const client = new AIClient({
     api_key: setting.aiApiKey,
@@ -132,8 +134,13 @@ async function stopMCPServer() {
         console.log("MCP 服务器已标记为停止")
 
         // 提示用户如何手动停止
-        setTimeout(() => {
-            if (confirm("MCP 服务器需要手动结束进程。\n\n在任务管理器中结束 'dna_mcp_server.exe' 进程。\n\n是否打开任务管理器？")) {
+        setTimeout(async () => {
+            if (
+                await ui.showDialog(
+                    "确认",
+                    "MCP 服务器需要手动结束进程。\n\n在任务管理器中结束 'dna_mcp_server.exe' 进程。\n\n是否打开任务管理器？"
+                )
+            ) {
                 if (env.isApp) {
                     launchExe("taskmgr.exe", "")
                 }

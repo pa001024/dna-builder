@@ -127,7 +127,7 @@ const closeEditDialog = () => {
 const submitCreate = async () => {
     // 表单验证
     if (!createForm.value.name || createForm.value.name.trim() === "") {
-        alert("请输入房间名称")
+        ui.showErrorMessage("请输入房间名称")
         return
     }
 
@@ -148,7 +148,7 @@ const submitCreate = async () => {
         }
     } catch (error) {
         console.error("创建房间失败:", error)
-        alert("创建房间失败")
+        ui.showErrorMessage("创建房间失败")
     } finally {
         formSubmitting.value = false
     }
@@ -182,7 +182,7 @@ const submitEdit = async () => {
         }
     } catch (error) {
         console.error("更新房间失败:", error)
-        alert("更新房间失败")
+        ui.showErrorMessage("更新房间失败")
     } finally {
         formSubmitting.value = false
     }
@@ -190,7 +190,7 @@ const submitEdit = async () => {
 
 // 删除房间
 const deleteRoom = async (roomId: string) => {
-    if (confirm("确定要删除这个房间吗？")) {
+    if (await ui.showDialog("删除确认", "确定要删除这个房间吗？")) {
         try {
             const result = await deleteRoomMutation({ id: roomId })
 

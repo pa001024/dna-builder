@@ -87,7 +87,7 @@ const addTrack = (name?: string) => {
         // 限制轨道数量，防止性能问题
         const MAX_TRACKS = 50
         if (tracks.length >= MAX_TRACKS) {
-            alert(`轨道数量已达到上限 (${MAX_TRACKS})，无法添加更多轨道！`)
+            ui.showErrorMessage(`轨道数量已达到上限 (${MAX_TRACKS})，无法添加更多轨道！`)
             return -1
         }
 
@@ -99,7 +99,7 @@ const addTrack = (name?: string) => {
         const nameExists = tracks.some(track => track.name === trackName)
 
         if (nameExists) {
-            alert(`轨道名称 "${trackName}" 已存在，请使用其他名称！`)
+            ui.showErrorMessage(`轨道名称 "${trackName}" 已存在，请使用其他名称！`)
             return -1
         }
 
@@ -116,7 +116,7 @@ const addTrack = (name?: string) => {
         return newIndex // 返回新轨道的索引
     } catch (error) {
         console.error("添加轨道过程中发生错误:", error)
-        alert("添加轨道失败，请重试")
+        ui.showErrorMessage("添加轨道失败，请重试")
         return -1
     }
 }
@@ -131,7 +131,7 @@ const removeTrack = (trackIndex: number) => {
         }
 
         if (tracks.length <= 1) {
-            alert("不能删除最后一个轨道！")
+            ui.showErrorMessage("不能删除最后一个轨道！")
             return false // 至少保留一条轨道
         }
 
@@ -162,7 +162,7 @@ const removeTrack = (trackIndex: number) => {
         return true
     } catch (error) {
         console.error("删除轨道过程中发生错误:", error)
-        alert("删除轨道失败，请重试")
+        ui.showErrorMessage("删除轨道失败，请重试")
         return false
     }
 }
@@ -189,13 +189,13 @@ const renameTrack = (trackIndex: number, newName: string) => {
         // 验证名称
         const trimmedName = newName.trim()
         if (!trimmedName) {
-            alert("轨道名称不能为空！")
+            ui.showErrorMessage("轨道名称不能为空！")
             return false
         }
 
         // 限制名称长度
         if (trimmedName.length > 30) {
-            alert("轨道名称不能超过30个字符！")
+            ui.showErrorMessage("轨道名称不能超过30个字符！")
             return false
         }
 
@@ -203,7 +203,7 @@ const renameTrack = (trackIndex: number, newName: string) => {
         const nameExists = tracks.some((track, idx) => idx !== trackIndex && track.name === trimmedName)
 
         if (nameExists) {
-            alert("已存在相同名称的轨道！")
+            ui.showErrorMessage("已存在相同名称的轨道！")
             return false
         }
 
@@ -211,7 +211,7 @@ const renameTrack = (trackIndex: number, newName: string) => {
         return true
     } catch (error) {
         console.error("重命名轨道过程中发生错误:", error)
-        alert("重命名轨道失败，请重试")
+        ui.showErrorMessage("重命名轨道失败，请重试")
         return false
     }
 }
@@ -1120,7 +1120,7 @@ const finishEditTimelineName = () => {
         }
         // 检查重名
         if (baseOptions.value.some(base => base.value === editTimelineName.value)) {
-            alert(`时间线名称不能与技能名称相同`)
+            ui.showErrorMessage(`时间线名称不能与技能名称相同`)
             return
         }
         timelineData.value[editingTimelineIndex.value].name = editTimelineName.value

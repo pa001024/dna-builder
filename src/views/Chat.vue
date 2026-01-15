@@ -5,8 +5,10 @@ import { t } from "i18next"
 import { htmlToText } from "@/utils/html"
 import { deleteRoomMutation } from "@/api/mutation"
 import { useUserStore } from "@/store/user"
+import { useUIStore } from "@/store/ui"
 
 const user = useUserStore()
+const ui = useUIStore()
 const router = useRouter()
 const route = useRoute()
 const search = ref("")
@@ -68,10 +70,10 @@ async function enterRoom(room: Room) {
     router.push({ name: "room", params: { room: room.id } })
 }
 async function deleteRoom(room: Room) {
-    if ((await confirm(t("chat.deleteRoomConfirm"))) && (await deleteRoomMutation({ id: room.id }))) {
+    if ((await ui.showDialog("确认", t("chat.deleteRoomConfirm"))) && (await deleteRoomMutation({ id: room.id }))) {
         await reloadRooms()
     } else {
-        alert(t("chat.deleteRoomFailed"))
+        ui.showErrorMessage(t("chat.deleteRoomFailed"))
     }
 }
 

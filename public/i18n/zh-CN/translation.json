@@ -239,6 +239,7 @@
         "copy": "复制",
         "deleteRoomConfirm": "确认要删除房间吗?",
         "deleteRoomFailed": "删除失败",
+        "desc": "BUG反馈/交流",
         "edit": "编辑",
         "edited": "(已编辑)",
         "follow": "关注",
@@ -353,6 +354,10 @@
     },
     "fish-list": {
         "title": "钓鱼"
+    },
+    "flow": {
+        "desc": "伤害计算器节点版",
+        "title": "节点编辑器"
     },
     "flowEditor": {
         "canvas": "画布",

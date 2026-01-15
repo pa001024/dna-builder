@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue"
 import { guidesQuery } from "@/api/query"
 import { updateGuideMutation, deleteGuideMutation, recommendGuideMutation, pinGuideMutation } from "@/api/mutation"
+import { useUIStore } from "@/store/ui"
 
 // 攻略类型定义
 interface Guide {
@@ -32,6 +33,8 @@ interface EditGuideForm {
     content: string
     charId: number | null
 }
+
+const ui = useUIStore()
 
 // 攻略列表数据
 const guides = ref<Guide[]>([])
@@ -127,17 +130,17 @@ const submitEdit = async () => {
 
     // 表单验证
     if (!editForm.value.title || editForm.value.title.trim() === "") {
-        alert("请输入攻略标题")
+        ui.showErrorMessage("请输入攻略标题")
         return
     }
 
     if (!editForm.value.type) {
-        alert("请选择攻略类型")
+        ui.showErrorMessage("请选择攻略类型")
         return
     }
 
     if (!editForm.value.content || editForm.value.content.trim() === "") {
-        alert("请输入攻略内容")
+        ui.showErrorMessage("请输入攻略内容")
         return
     }
 
@@ -162,7 +165,7 @@ const submitEdit = async () => {
         }
     } catch (error) {
         console.error("更新攻略失败:", error)
-        alert("更新攻略失败")
+        ui.showErrorMessage("更新攻略失败")
     } finally {
         editFormSubmitting.value = false
     }
@@ -170,7 +173,7 @@ const submitEdit = async () => {
 
 // 删除攻略
 const deleteGuide = async (guideId: string) => {
-    if (confirm("确定要删除这个攻略吗？")) {
+    if (await ui.showDialog("删除确认", "确定要删除这个攻略吗？")) {
         try {
             const result = await deleteGuideMutation({ id: guideId })
 
@@ -199,7 +202,7 @@ const toggleRecommend = async (guide: Guide) => {
         }
     } catch (error) {
         console.error("更新推荐状态失败:", error)
-        alert("更新推荐状态失败")
+        ui.showErrorMessage("更新推荐状态失败")
     }
 }
 
@@ -218,7 +221,7 @@ const togglePin = async (guide: Guide) => {
         }
     } catch (error) {
         console.error("更新置顶状态失败:", error)
-        alert("更新置顶状态失败")
+        ui.showErrorMessage("更新置顶状态失败")
     }
 }
 

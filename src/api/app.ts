@@ -40,6 +40,10 @@ export async function importPic(path: string) {
     return await invoke<string>("import_pic", { path })
 }
 
+export async function exportJsonFile(filePath: string, jsonContent: string) {
+    return await invoke<string>("export_json_file", { filePath, jsonContent })
+}
+
 /**
  * 获取本地登录的QQ号
  * @param port The port of the local QQ

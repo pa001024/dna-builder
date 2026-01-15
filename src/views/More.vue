@@ -33,6 +33,11 @@ const items = [
         path: "/chat",
         icon: "ri:chat-3-line",
     },
+    {
+        name: "flow",
+        path: "/flow",
+        icon: "ri:node-tree",
+    },
     // {
     //     name: "flow-editor",
     //     path: "/flow-editor",

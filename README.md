@@ -44,7 +44,7 @@
 
 - **框架**：Vue 3 + TypeScript
 - **构建工具**：Vite
-- **UI 组件库**：Tailwind CSS + daisyui + radix-vue
+- **UI 组件库**：Tailwind CSS + daisyui + reka-ui
 - **状态管理**：Pinia
 - **路由**：Vue Router
 - **国际化**：i18next + i18next-http-backend

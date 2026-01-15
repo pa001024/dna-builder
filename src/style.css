@@ -5,10 +5,6 @@
     exclude: properties;
 }
 
-/* these are necessary styles for vue flow */
-@import "@vue-flow/core/dist/style.css";
-/* this contains the default theme, these are optional styles */
-@import "@vue-flow/core/dist/theme-default.css";
 /* @import "animate.css"; */
 
 [id$="-tooltip"] {
@@ -31,7 +27,7 @@
     --animate-slideUp: slideUp 0.3s cubic-bezier(0.87, 0, 0.13, 1);
     --animate-slideDown: slideDown 0.3s cubic-bezier(0.87, 0, 0.13, 1);
     --animate-overlayShow: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
-    --animate-contentShow: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+    --animate-contentShow: contentShow 300ms cubic-bezier(0.16, 1, 0.3, 1);
     --animate-shake: shake 0.4s;
 
     /* Keyframes */
@@ -143,12 +139,10 @@
     @keyframes contentShow {
         from {
             opacity: 0;
-            transform: translate(-50%, -48%) scale(0.96);
         }
 
         to {
             opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
         }
     }
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { matchPinyin } from "@/utils/pinyin-utils"
 import {
     ComboboxAnchor,
     ComboboxContent,
@@ -9,9 +10,10 @@ import {
     ComboboxRoot,
     ComboboxTrigger,
     ComboboxViewport,
-} from "radix-vue"
+} from "reka-ui"
+import { computed } from "vue"
 
-withDefaults(
+const props = withDefaults(
     defineProps<{
         placeholder?: string
         emptyMessage?: string
@@ -30,10 +32,14 @@ const model = defineModel<any>()
 const emit = defineEmits<{
     open: []
 }>()
+
+const filteredOptions = computed(() => {
+    return props.options.filter(option => option.label.includes(model.value) || matchPinyin(option.label, model.value))
+})
 </script>
 
 <template>
-    <ComboboxRoot v-model="model" class="relative" @update:open="open => open && emit('open')">
+    <ComboboxRoot v-model="model" class="relative" ignore-filter @update:open="open => open && emit('open')">
         <ComboboxAnchor v-bind="$attrs" class="input input-bordered input-sm">
             <ComboboxInput as-child class="bg-transparent! outline-none h-full" :placeholder="placeholder">
                 <input v-model="model" type="text" />
@@ -51,7 +57,7 @@ const emit = defineEmits<{
                     {{ emptyMessage }}
                 </ComboboxEmpty>
                 <ComboboxItem
-                    v-for="(option, index) in options"
+                    v-for="(option, index) in filteredOptions"
                     :key="index"
                     class="p-2 pl-7.5 text-sm leading-none text-secondary rounded-sm flex items-center relative select-none data-disabled:text-neutral-400 data-disabled:pointer-events-none data-highlighted:outline-none data-highlighted:bg-secondary data-highlighted:text-base-100"
                     :value="option.value"

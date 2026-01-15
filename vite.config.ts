@@ -2,7 +2,7 @@ import { defineConfig } from "vite"
 import vue from "@vitejs/plugin-vue"
 import vueJsx from "@vitejs/plugin-vue-jsx"
 import Component from "unplugin-vue-components/vite"
-import RadixVueResolver from "radix-vue/resolver"
+import RekaResolver from "reka-ui/resolver"
 import tailwindcss from "@tailwindcss/vite"
 import { VitePWA } from "vite-plugin-pwa"
 import { resolve } from "path"
@@ -31,7 +31,7 @@ export default defineConfig(async () => ({
         Component({
             dts: "./src/components.d.ts",
             resolvers: [
-                RadixVueResolver(),
+                RekaResolver(),
 
                 // RadixVueResolver({
                 //   prefix: '' // use the prefix option to add Prefix to the imported components

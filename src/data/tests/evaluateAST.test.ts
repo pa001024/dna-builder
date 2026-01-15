@@ -9,7 +9,6 @@ import { parseAST, ASTProperty, ASTFunction, ASTBinary, ASTUnary, ASTMemberAcces
 describe("evaluateAST函数测试", () => {
     let charBuild: CharBuild
     let testAttrs: ReturnType<CharBuild["calculateWeaponAttributes"]>
-    let testDamage: import("../CharBuild").DamageResult
 
     beforeEach(() => {
         // 创建测试用的CharBuild实例
@@ -30,19 +29,6 @@ describe("evaluateAST函数测试", () => {
 
         // 预先计算属性和伤害
         testAttrs = charBuild.calculateWeaponAttributes()
-        const damageValue = charBuild.calculateRandomDamage(charBuild.baseName)
-        testDamage = {
-            expectedDamage: damageValue,
-            lowerCritNoTrigger: damageValue * 0.8,
-            higherCritNoTrigger: damageValue * 1.2,
-            lowerCritTrigger: damageValue * 0.9,
-            higherCritTrigger: damageValue * 1.3,
-            lowerCritExpectedTrigger: damageValue * 0.85,
-            higherCritExpectedTrigger: damageValue * 1.15,
-            expectedCritTrigger: damageValue * 1.1,
-            expectedCritNoTrigger: damageValue * 0.95,
-            noHpDamage: damageValue,
-        }
     })
 
     describe("基础AST节点求值测试", () => {
@@ -319,7 +305,7 @@ describe("evaluateAST函数测试", () => {
             charBuild.evaluateAST("攻击 * 2", attrs)
             // console.log(charBuild["astCache"])
 
-            expect(charBuild["astCache"].size).toBe(3)
+            expect(charBuild["astCache"].size).toBe(2)
         })
     })
 

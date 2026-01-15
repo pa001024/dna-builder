@@ -45,8 +45,7 @@
         "@types/bcrypt": "^6.0.0",
         "@types/jsonwebtoken": "^9.0.6",
         "bun-types": "latest",
-        "drizzle-kit": "^0.31.8",
-        "radix-vue": "^1.9.1"
+        "drizzle-kit": "^0.31.8"
     },
     "module": "src/index.ts",
     "type": "module",

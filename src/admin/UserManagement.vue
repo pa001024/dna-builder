@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue"
 import { usersQuery } from "@/api/query"
 import { deleteUserMutation, updateUserMutation } from "@/api/mutation"
+import { useUIStore } from "@/store/ui"
 
 // 用户类型定义
 interface User {
@@ -27,6 +28,7 @@ const page = ref(1)
 const pageSize = ref(10)
 const search = ref("")
 const loading = ref(false)
+const ui = useUIStore()
 
 // 编辑用户相关状态
 const editDialogOpen = ref(false)
@@ -76,7 +78,7 @@ const handlePageChange = (newPage: number) => {
 
 // 删除用户
 const deleteUser = async (userId: string) => {
-    if (confirm("确定要删除这个用户吗？")) {
+    if (await ui.showDialog("删除确认", "确定要删除这个用户吗？")) {
         try {
             const result = await deleteUserMutation({ id: userId })
 
@@ -116,12 +118,12 @@ const submitEdit = async () => {
 
     // 表单验证
     if (!editForm.value.email || !editForm.value.email.match(/.+@.+\..+/)) {
-        alert("请输入有效的邮箱地址")
+        ui.showErrorMessage("请输入有效的邮箱地址")
         return
     }
 
     if (!editForm.value.roles) {
-        alert("请输入用户角色")
+        ui.showErrorMessage("请输入用户角色")
         return
     }
 
@@ -140,7 +142,7 @@ const submitEdit = async () => {
         }
     } catch (error) {
         console.error("更新用户失败:", error)
-        alert("更新用户失败")
+        ui.showErrorMessage("更新用户失败")
     } finally {
         editFormSubmitting.value = false
     }

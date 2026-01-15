@@ -32,7 +32,7 @@
     "scripts": {
         "test": "bun test && npm run test:types",
         "build": "rimraf dist && bun build.ts && tsc --project tsconfig.build.json",
-        "release": "npm run build && npm publish --access public",
+        "release": "npm run build && npm publish --access public --registry https://registry.npmjs.org/",
         "lint": "tsc --noEmit",
         "trace": "tsc --generateTrace ./trace --incremental false"
     },

@@ -183,7 +183,7 @@ async function deployApp() {
             throw new Error(`签名文件不存在: ${sigAbsPath}`)
         }
         const signature = fs.readFileSync(sigAbsPath, "utf-8").trim()
-        const msiUrl = `http://${OSS_CONFIG.bucket}.${OSS_CONFIG.endpoint}/${msiOssKey}`
+        const msiUrl = `https://${OSS_CONFIG.bucket}.${OSS_CONFIG.endpoint}/${msiOssKey}`
 
         console.log("4. 生成latest.json...")
         const latestJson = generateLatestJson(version, signature, msiUrl)

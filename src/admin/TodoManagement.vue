@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue"
 import { todosQuery } from "@/api/query"
 import { createSystemTodoMutation, updateSystemTodoMutation, deleteSystemTodoMutation } from "@/api/mutation"
+import { useUIStore } from "@/store/ui"
 
 // 待办事项类型定义
 interface Todo {
@@ -35,6 +36,7 @@ const total = ref(0)
 const page = ref(1)
 const pageSize = ref(10)
 const loading = ref(false)
+const ui = useUIStore()
 
 // 编辑待办事项相关状态
 const editDialogOpen = ref(false)
@@ -140,7 +142,7 @@ const closeEditDialog = () => {
 const submitCreate = async () => {
     // 表单验证
     if (!createForm.value.title || createForm.value.title.trim() === "") {
-        alert("请输入待办事项标题")
+        ui.showErrorMessage("请输入待办事项标题")
         return
     }
 
@@ -167,7 +169,7 @@ const submitCreate = async () => {
         }
     } catch (error) {
         console.error("创建待办事项失败:", error)
-        alert("创建待办事项失败")
+        ui.showErrorMessage("创建待办事项失败")
     } finally {
         formSubmitting.value = false
     }
@@ -179,7 +181,7 @@ const submitEdit = async () => {
 
     // 表单验证
     if (!editForm.value.title || editForm.value.title.trim() === "") {
-        alert("请输入待办事项标题")
+        ui.showErrorMessage("请输入待办事项标题")
         return
     }
 
@@ -209,7 +211,7 @@ const submitEdit = async () => {
         }
     } catch (error) {
         console.error("更新待办事项失败:", error)
-        alert("更新待办事项失败")
+        ui.showErrorMessage("更新待办事项失败")
     } finally {
         formSubmitting.value = false
     }
@@ -217,7 +219,7 @@ const submitEdit = async () => {
 
 // 删除待办事项
 const deleteTodo = async (todoId: string) => {
-    if (confirm("确定要删除这个待办事项吗？")) {
+    if (await ui.showDialog("删除确认", "确定要删除这个待办事项吗？")) {
         try {
             const result = await deleteSystemTodoMutation({ id: todoId })
 

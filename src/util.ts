@@ -19,6 +19,14 @@ export function format100r(n100: number, di = 2) {
 export function format1000(n: number, di = 0) {
     return `${n.toLocaleString("en-US", { minimumFractionDigits: di, maximumFractionDigits: di })}`
 }
+// 返回10K,10M,10B格式的大数字
+export function formatBigNumber(n: number) {
+    if (n >= 1e9) return `${+(n / 1e9).toFixed(2)}B`
+    if (n >= 1e6) return `${+(n / 1e6).toFixed(2)}M`
+    // if (n >= 1e3) return `${+(n / 1e3).toFixed(2)}K`
+    return n
+}
+
 const numKeys = new Set([
     "有效生命",
     "基础攻击",

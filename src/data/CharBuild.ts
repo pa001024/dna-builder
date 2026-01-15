@@ -1148,12 +1148,12 @@ export class CharBuild {
             defCache.set(isWeapon, def)
             return def
         }
-
         function evaluateSkill(fieldName: string, ns?: string) {
             if (fieldName === "[攻击]") return attrs.攻击 + getWeaponAttr("攻击", ns)
             else if (fieldName === "[防御]") return attrs.防御
             else if (fieldName === "[生命]") return attrs.生命
             const field = getSkillAttr(fieldName, ns)
+
             if (!field) return 0
             // 计算技能基础伤害
             const mul = field.值

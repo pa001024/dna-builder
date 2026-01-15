@@ -75,6 +75,18 @@ export interface Message {
 
 export type UMessage = Omit<Message, "id">
 
+// 节点编辑器相关接口
+export interface NodeEditorGraph {
+    id: number
+    name: string
+    nodes: any[]
+    edges: any[]
+    createdAt: number
+    updatedAt: number
+}
+
+export type UNodeEditorGraph = Omit<NodeEditorGraph, "id">
+
 export interface DNAUser {
     id: number
     uid: string // userId
@@ -115,6 +127,7 @@ interface DB {
     messages: Message
     dnaUsers: DNAUser
     userMapMarkers: UserMapMarker
+    nodeEditorGraphs: NodeEditorGraph
 }
 
 db.version(1).stores({
@@ -125,4 +138,5 @@ db.version(1).stores({
     messages: "++id, conversationId, createdAt",
     dnaUsers: "++id, uid",
     userMapMarkers: "++id, mapId, createdAt",
+    nodeEditorGraphs: "++id, name, createdAt, updatedAt",
 })

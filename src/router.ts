@@ -48,12 +48,12 @@ const routes: readonly RouteRecordRaw[] = [
         component: More,
         beforeEnter: () => setMinSize(600, 600),
     },
-    // {
-    //     name: "flow-editor",
-    //     path: "/flow-editor",
-    //     component: () => import("./views/FlowEditorView.vue"),
-    //     beforeEnter: () => setMinSize(900, 700),
-    // },
+    {
+        name: "flow",
+        path: "/flow",
+        component: () => import("./views/FlowBuildView.vue"),
+        beforeEnter: () => setMinSize(900, 700),
+    },
     // more: lazy load
     { name: "ai", path: "/ai", component: () => import("./views/AIAgent.vue"), beforeEnter: () => setMinSize(600, 600) },
     { name: "help", path: "/help", component: () => import("./views/Help.vue"), beforeEnter: () => setMinSize(800, 700) },

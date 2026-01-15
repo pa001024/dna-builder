@@ -1,6 +1,6 @@
 use std::{
     fs::{self, File},
-    io::{self, Read},
+    io::{self, Read, Write},
     path::{Path, PathBuf},
     time::Duration,
 };
@@ -417,6 +417,28 @@ async fn fetch(
     }
 }
 
+/// 导出JSON文件到指定路径
+#[tauri::command]
+async fn export_json_file(file_path: String, json_content: String) -> Result<String, String> {
+    // 创建文件路径
+    let path = Path::new(&file_path);
+
+    // 确保父目录存在
+    if let Some(parent) = path.parent() {
+        if !parent.exists() {
+            fs::create_dir_all(parent)
+                .map_err(|e| format!("Failed to create parent directory: {}", e))?;
+        }
+    }
+
+    // 写入JSON内容到文件
+    let mut file = File::create(path).map_err(|e| format!("Failed to create file: {}", e))?;
+    file.write_all(json_content.as_bytes())
+        .map_err(|e| format!("Failed to write JSON content: {}", e))?;
+
+    Ok(format!("Successfully exported JSON to {}", file_path))
+}
+
 #[tauri::command]
 fn get_os_version() -> String {
     use sysinfo::System;
@@ -594,7 +616,8 @@ pub fn run() {
         enable_mod,
         import_pic,
         fetch,
-        get_local_qq
+        get_local_qq,
+        export_json_file
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

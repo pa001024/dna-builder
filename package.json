@@ -1,7 +1,7 @@
 {
     "name": "dna-builder",
     "private": true,
-    "version": "0.9.10",
+    "version": "0.9.11",
     "type": "module",
     "packageManager": "pnpm@10.27.0+sha512.72d699da16b1179c14ba9e64dc71c9a40988cbdc65c264cb0e489db7de917f20dcf4d64d8723625f2969ba52d4b7e2a1170682d9ac2a5dcaeaab732b7e16f04a",
     "scripts": {
@@ -64,7 +64,7 @@
         "openai": "^6.15.0",
         "pinia": "^3.0.4",
         "pinyin-pro": "^3.27.0",
-        "radix-vue": "^1.9.17",
+        "reka-ui": "^2.7.0",
         "three": "^0.182.0",
         "typescript-memoize": "^1.1.1",
         "vue": "^3.5.26",

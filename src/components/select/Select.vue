@@ -9,8 +9,8 @@ import {
     SelectValue,
     SelectViewport,
     useForwardPropsEmits,
-} from "radix-vue"
-import type { SelectRootProps } from "radix-vue"
+} from "reka-ui"
+import type { SelectRootProps } from "reka-ui"
 import Icon from "../Icon.vue"
 import { watch } from "vue"
 
