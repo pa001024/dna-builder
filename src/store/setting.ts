@@ -1,9 +1,9 @@
 import { useLocalStorage } from "@vueuse/core"
+import { DNAAPI } from "dna-api"
+import i18next from "i18next"
 import { defineStore } from "pinia"
 import { applyMaterial, tauriFetch } from "../api/app"
 import { db } from "./db"
-import { DNAAPI } from "dna-api"
-import i18next from "i18next"
 
 let apiCache: DNAAPI | null = null
 let apiCacheKey = ""

@@ -1,11 +1,11 @@
 import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
 import { and, count, eq } from "drizzle-orm"
-import { Context } from "../yoga"
-import { db, schema } from ".."
-import { getSubSelection } from "."
-import { sanitizeHTML } from "../../util/html"
-import { hasUser } from "../kv/room"
 import { createGraphQLError } from "graphql-yoga"
+import { sanitizeHTML } from "../../util/html"
+import { db, schema } from ".."
+import { hasUser, waitForUser } from "../kv/room"
+import type { Context } from "../yoga"
+import { getSubSelection } from "."
 
 export const typeDefs = /* GraphQL */ `
     type Query {
@@ -60,19 +60,23 @@ export const typeDefs = /* GraphQL */ `
 
 export const resolvers = {
     Query: {
-        msgCount: async (parent, { roomId }, { user }, info) => {
+        msgCount: async (_parent, { roomId }, { user }, _info) => {
             if (!user) throw createGraphQLError("need login")
             if (!hasUser(roomId, user.id)) throw createGraphQLError("need room join")
 
             const rst = await db.select({ value: count() }).from(schema.msgs).where(eq(schema.msgs.roomId, roomId))
             return rst[0].value
         },
-        msgs: async (parent, { roomId, limit, offset }, context, info) => {
+        msgs: async (_parent, { roomId, limit, offset }, context, _info) => {
             if (!context.user) throw createGraphQLError("need login")
-            if (!hasUser(roomId, context.user.id)) throw createGraphQLError("need room join")
+            if (!hasUser(roomId, context.user.id)) {
+                await waitForUser(roomId, context.user.id)
+                // 等待用户加入房间后，再次检查是否加入成功
+                if (!hasUser(roomId, context.user.id)) throw createGraphQLError("need room join")
+            }
 
-            const user = getSubSelection(info, "user")
-            const reactions = getSubSelection(info, "reactions")
+            const user = getSubSelection(_info, "user")
+            const reactions = getSubSelection(_info, "reactions")
             const msgs = await db.query.msgs.findMany({
                 with: {
                     user: user && true,
@@ -84,7 +88,7 @@ export const resolvers = {
             })
             return msgs
         },
-        lastMsgs: async (parent, { roomId, limit, offset }, context, info) => {
+        lastMsgs: async (_parent, { roomId, limit, offset }, context, info) => {
             if (!context.user) throw createGraphQLError("need login")
             if (!hasUser(roomId, context.user.id)) throw createGraphQLError("need room join")
 
@@ -98,23 +102,24 @@ export const resolvers = {
                 where: eq(schema.msgs.roomId, roomId),
                 limit,
                 offset,
-                orderBy: (t, { desc, sql }) => desc(sql`rowid`),
+                orderBy: (_t, { desc, sql }) => desc(sql`rowid`),
             })
             return last.reverse()
         },
     },
     Mutation: {
-        sendMessage: async (parent, { roomId, content }, { user, pubsub }) => {
+        sendMessage: async (_parent, { roomId, content }, { user, pubsub }) => {
             if (!user) throw createGraphQLError("need login")
-            // TODO: check if user is in the room
             const userId = user.id
+            const parsedContent = sanitizeHTML(content)
+            if (!parsedContent) throw createGraphQLError("invalid content")
             const rst = (
                 await db
                     .insert(schema.msgs)
                     .values({
                         roomId,
                         userId,
-                        content: sanitizeHTML(content),
+                        content: parsedContent,
                     })
                     .onConflictDoNothing()
                     .returning()
@@ -133,7 +138,7 @@ export const resolvers = {
             return null
         },
 
-        addReaction: async (parent, { msgId, reaction }, { user }) => {
+        addReaction: async (_parent, { msgId, reaction }, { user }) => {
             if (!user) return null
             const userId = user.id
             // 查询是否已经存在该 reaction
@@ -146,7 +151,9 @@ export const resolvers = {
                     where: and(eq(schema.userReactions.reactionId, existReaction.id), eq(schema.userReactions.userId, userId)),
                 })
                 if (hasMe) {
-                    await db.delete(schema.userReactions).where(and(eq(schema.userReactions.reactionId, hasMe.reactionId), eq(schema.userReactions.userId, userId)))
+                    await db
+                        .delete(schema.userReactions)
+                        .where(and(eq(schema.userReactions.reactionId, hasMe.reactionId), eq(schema.userReactions.userId, userId)))
                 } else {
                     await db.insert(schema.userReactions).values({
                         userId,
@@ -171,7 +178,7 @@ export const resolvers = {
             return existReaction
         },
 
-        editMessage: async (parent, { msgId, content }, { user, pubsub }, info) => {
+        editMessage: async (_parent, { msgId, content }, { user, pubsub }, _info) => {
             if (!user) return null
             const msg = await db.query.msgs.findFirst({
                 with: { user: true },
@@ -195,23 +202,23 @@ export const resolvers = {
         },
     },
     Subscription: {
-        newMessage: async (parent, { roomId }, { user, pubsub }, info) => {
+        newMessage: async (_parent, { roomId }, { user, pubsub }, _info) => {
             if (!user) throw createGraphQLError("need login")
             return pubsub.subscribe("newMessage", roomId)
         },
-        newReaction: async (parent, { roomId }, { user, pubsub }, info) => {
+        newReaction: async (_parent, { roomId }, { user, pubsub }, _info) => {
             if (!user) throw createGraphQLError("need login")
             return pubsub.subscribe("newReaction", roomId)
         },
-        msgEdited: async (parent, { roomId }, { user, pubsub }, info) => {
+        msgEdited: async (_parent, { roomId }, { user, pubsub }, _info) => {
             if (!user) throw createGraphQLError("need login")
             return pubsub.subscribe("msgEdited", roomId)
         },
-        userJoined: async (parent, { roomId }, { user, pubsub }, info) => {
+        userJoined: async (_parent, { roomId }, { user, pubsub }, _info) => {
             if (!user) throw createGraphQLError("need login")
             return pubsub.subscribe("userJoined", roomId)
         },
-        userLeaved: async (parent, { roomId }, { user, pubsub }, info) => {
+        userLeaved: async (_parent, { roomId }, { user, pubsub }, _info) => {
             if (!user) throw createGraphQLError("need login")
             return pubsub.subscribe("userLeaved", roomId)
         },

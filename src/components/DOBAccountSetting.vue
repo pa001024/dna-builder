@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { nextTick, reactive, ref } from "vue"
-import { useUserStore } from "@/store/user"
-import { useUIStore } from "@/store/ui"
 import { loginMutation, registerMutation, updateUserMetaMutation } from "@/api/mutation"
+import { useUIStore } from "@/store/ui"
+import { useUserStore } from "@/store/user"
 
 const user = useUserStore()
 const ui = useUIStore()

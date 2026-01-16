@@ -1,12 +1,12 @@
-import { useLocalStorage } from "@vueuse/core"
-import { defineStore } from "pinia"
 import { getCurrentWindow } from "@tauri-apps/api/window"
+import { useLocalStorage } from "@vueuse/core"
 import { useObservable } from "@vueuse/rxjs"
 import { liveQuery } from "dexie"
+import { defineStore } from "pinia"
+import { enableMod, getGameInstall, importMod, importPic, isGameRunning, launchExe } from "../api/app"
 import { env } from "../env"
-import { isGameRunning, launchExe, getGameInstall, importMod, enableMod, importPic } from "../api/app"
-import { CustomEntity, db, Mod, UCustomEntity, UMod } from "./db"
 import { sleep } from "../util"
+import { type CustomEntity, db, type Mod, type UCustomEntity, type UMod } from "./db"
 
 if (env.isApp && getCurrentWindow().label === "main") {
     setTimeout(async () => {
@@ -214,7 +214,7 @@ export const useGameStore = defineStore("game", {
                     files.push(file)
                     totalSize += size
                 } else {
-                    console.error("importMods error: " + path)
+                    console.error(`importMods error: ${path}`)
                 }
             })
             this.addMod({

@@ -1,16 +1,30 @@
-import { typeDefs as userSchema, resolvers as userResolvers } from "./user"
-import { typeDefs as messageSchema, resolvers as messageResolvers } from "./message"
-import { typeDefs as roomSchema, resolvers as roomResolvers } from "./room"
-import { typeDefs as taskSchema, resolvers as taskResolvers } from "./task"
-import { typeDefs as rtcSchema, resolvers as rtcResolvers } from "./rtc"
-import { typeDefs as missionsIngameSchema, resolvers as missionsIngameResolvers } from "./missionsIngame"
-import { typeDefs as guideSchema, resolvers as guideResolvers } from "./guide"
-import { typeDefs as adminSchema, resolvers as adminResolvers } from "./admin"
-import { typeDefs as todoSchema, resolvers as todoResolvers } from "./todo"
-import { FieldNode, Kind, type GraphQLResolveInfo } from "graphql"
+import { type FieldNode, type GraphQLResolveInfo, Kind } from "graphql"
+import { resolvers as adminResolvers, typeDefs as adminSchema } from "./admin"
+import { resolvers as buildResolvers, typeDefs as buildSchema } from "./build"
+import { resolvers as guideResolvers, typeDefs as guideSchema } from "./guide"
+import { resolvers as messageResolvers, typeDefs as messageSchema } from "./message"
+import { resolvers as missionsIngameResolvers, typeDefs as missionsIngameSchema } from "./missionsIngame"
+import { resolvers as roomResolvers, typeDefs as roomSchema } from "./room"
+import { resolvers as rtcResolvers, typeDefs as rtcSchema } from "./rtc"
+import { resolvers as taskResolvers, typeDefs as taskSchema } from "./task"
+import { resolvers as timelineResolvers, typeDefs as timelineSchema } from "./timeline"
+import { resolvers as todoResolvers, typeDefs as todoSchema } from "./todo"
+import { resolvers as userResolvers, typeDefs as userSchema } from "./user"
 
 export function schemaWith(ctx: any) {
-    const typeDefs = [userSchema, messageSchema, roomSchema, taskSchema, rtcSchema, missionsIngameSchema, guideSchema, adminSchema, todoSchema]
+    const typeDefs = [
+        userSchema,
+        messageSchema,
+        roomSchema,
+        taskSchema,
+        rtcSchema,
+        missionsIngameSchema,
+        guideSchema,
+        adminSchema,
+        todoSchema,
+        buildSchema,
+        timelineSchema,
+    ]
     const resolvers = mergeResolvers(
         userResolvers,
         messageResolvers,
@@ -21,6 +35,8 @@ export function schemaWith(ctx: any) {
         guideResolvers,
         adminResolvers,
         todoResolvers,
+        buildResolvers,
+        timelineResolvers
     )
 
     function mergeResolvers(...items: any[]) {
@@ -29,7 +45,7 @@ export function schemaWith(ctx: any) {
             Mutation: {} as any,
             Subscription: {} as any,
         }
-        items.forEach((item) => {
+        items.forEach(item => {
             if (typeof item === "function") {
                 item = item(ctx)
             }

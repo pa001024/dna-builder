@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, watch } from "vue"
-import { parseAST, type ASTNode } from "../data/ast"
 import { debounce } from "lodash-es"
+import { computed, ref, watch } from "vue"
 import type { CharBuild, LeveledSkill } from "../data"
 import { CharBuild as CharBuildClass } from "../data"
+import { type ASTNode, parseAST } from "../data/ast"
 
 const props = defineProps<{
     skill?: LeveledSkill

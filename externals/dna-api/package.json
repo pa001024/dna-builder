@@ -1,6 +1,6 @@
 {
     "name": "dna-api",
-    "version": "0.3.9",
+    "version": "0.3.10",
     "description": "dna bbs api",
     "author": {
         "name": "pa001024",
@@ -18,10 +18,7 @@
         "default": "./dist/index.js",
         "types": "./dist/index.d.ts"
     },
-    "keywords": [
-        "dna",
-        "api"
-    ],
+    "keywords": ["dna", "api"],
     "homepage": "https://github.com/pa001024/dna-builder",
     "repository": {
         "type": "git",
@@ -45,9 +42,5 @@
         "rimraf": "6.1.2",
         "typescript": "^5.1.6"
     },
-    "files": [
-        "dist/**/*",
-        "README.md",
-        "LICENSE"
-    ]
+    "files": ["dist/**/*", "README.md", "LICENSE"]
 }

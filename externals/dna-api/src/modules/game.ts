@@ -1,17 +1,14 @@
-import { DNASubModule, DNABaseAPI } from "./base"
-import {
+import type {
+    DNACharDetailEntity,
+    DNAPushStringBean,
     DNARoleEntity,
     DNAShortNoteEntity,
-    DNACharDetailEntity,
-    DNAWeaponDetailEntity,
-    DNAPushStringBean,
     DNASoulTaskBean,
+    DNAWeaponDetailEntity,
 } from "../type-generated"
+import { DNASubModule } from "./base"
 
 export class GameAPI extends DNASubModule {
-    constructor(base: DNABaseAPI) {
-        super(base)
-    }
     async defaultRoleForTool(type: number = 1, otherUserId?: string) {
         const data = { otherUserId, type }
         if (!otherUserId) {

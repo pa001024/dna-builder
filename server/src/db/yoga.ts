@@ -1,22 +1,12 @@
-import Elysia from "elysia"
-import jwt from "jsonwebtoken"
-import { createSchema, createYoga, type YogaInitialContext } from "graphql-yoga"
-import { machineIdSync } from "node-machine-id"
 import { useGraphQlJit } from "@envelop/graphql-jit"
-import { schemaWith } from "./mod"
-import { makeHandler as makeWSHandler } from "graphql-ws/use/bun"
-import { pubsub } from "../rt/pubsub"
 import type { ServerWebSocket } from "bun"
-
-export const genSchema = () => {
-    const { typeDefs, resolvers } = schemaWith({})
-
-    return {
-        typeDefs,
-        resolvers,
-    }
-}
-
+import type Elysia from "elysia"
+import { makeHandler as makeWSHandler } from "graphql-ws/use/bun"
+import { createSchema, createYoga, type YogaInitialContext } from "graphql-yoga"
+import jwt from "jsonwebtoken"
+import { machineIdSync } from "node-machine-id"
+import { pubsub } from "../rt/pubsub"
+import { schemaWith } from "./mod"
 export type Context = YogaInitialContext & CustomContext
 
 export type CustomContext = {
@@ -24,11 +14,11 @@ export type CustomContext = {
     pubsub: typeof pubsub
     extra?: {
         socket: ServerWebSocket<{
-            validator: any
-            open: (ws: ServerWebSocket) => any
-            message: (ws: ServerWebSocket) => any
-            drain: (ws: ServerWebSocket) => any
-            close: (ws: ServerWebSocket) => any
+            validator: unknown
+            open: (ws: ServerWebSocket) => unknown
+            message: (ws: ServerWebSocket) => unknown
+            drain: (ws: ServerWebSocket) => unknown
+            close: (ws: ServerWebSocket) => unknown
             id: string
             userId: string
         }>
@@ -44,14 +34,13 @@ export interface JWTUser {
 export const jwtToken = `${machineIdSync()}`
 
 export function yogaPlugin() {
-    const schema = createSchema({
-        ...genSchema(),
-    })
+    const raw = schemaWith({})
+    const schema = createSchema<CustomContext>(raw)
     return (app: Elysia) => {
         const yoga = createYoga<CustomContext>({
             cors: false,
-            schema: schema as any,
-            context: (ctx) => {
+            schema,
+            context: ctx => {
                 const token = ctx.request.headers?.get("token")
                 let user: JWTUser | undefined = void 0
                 if (token) {
@@ -73,7 +62,7 @@ export function yogaPlugin() {
             schema,
             // execute: (args) => args.rootValue.execute(args),
             // subscribe: (args) => args.rootValue.subscribe(args),
-            onSubscribe: async (ctx, id, payload) => {
+            onSubscribe: async (ctx, _id, payload) => {
                 // console.log("onSubscribe", ctx, id, payload)
                 const token = ctx.connectionParams?.token || (payload.extensions?.headers as any).token
                 const { schema, execute, subscribe, contextFactory, parse, validate } = yoga.getEnveloped({
@@ -106,21 +95,6 @@ export function yogaPlugin() {
                 return args
             },
         })
-
-        // const sofa = useSofa({
-        //     basePath: "/rest",
-        //     schema,
-        //     swaggerUI: {
-        //         spec: {
-        //             info: {
-        //                 title: "WeYS API",
-        //                 // version: pkg.version,
-        //             },
-        //         },
-        //         endpoint: "/swagger",
-        //     },
-        // })
-
         const result = app
             .get(path, async ({ request }) => yoga.fetch(request))
             .post(path, async ({ request }) => yoga.fetch(request), {

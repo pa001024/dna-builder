@@ -1,30 +1,26 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue"
 import { useLocalStorage } from "@vueuse/core"
-import { groupBy, cloneDeep } from "lodash-es"
-import { useInvStore } from "../store/inv"
+import { cloneDeep } from "lodash-es"
+import { computed, reactive, ref } from "vue"
 import { useCharSettings } from "../composables/useCharSettings"
-import { useTimeline } from "../store/timeline"
 import {
-    LeveledChar,
-    LeveledMod,
-    LeveledBuff,
-    LeveledWeapon,
-    CharBuild,
+    buffData,
     buffMap,
     CharAttr,
-    WeaponAttr,
+    CharBuild,
     CharBuildTimeline,
-    charData,
+    LeveledBuff,
+    LeveledChar,
+    LeveledMod,
+    LeveledWeapon,
     modData,
-    buffData,
+    WeaponAttr,
 } from "../data"
+import { useInvStore } from "../store/inv"
+import { useTimeline } from "../store/timeline"
 
 // Initialize stores and data
 const inv = useInvStore()
-
-// Character options (same as CharBuildView)
-const charOptions = charData.map(char => ({ value: char.名称, label: char.名称, elm: char.属性, icon: LeveledChar.url(char.icon) }))
 
 // MOD options (same as CharBuildView)
 const modOptions = modData
@@ -466,21 +462,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                         <div class="text-xs text-gray-400">
                                             {{ $t("char-build.character") }}
                                         </div>
-                                        <Select
-                                            v-model="config.selectedChar"
-                                            class="w-40 inline-flex justify-between input input-bordered input-sm"
-                                        >
-                                            <template v-for="charWithElm in groupBy(charOptions, 'elm')" :key="charWithElm[0].elm">
-                                                <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                                    {{ charWithElm[0].elm }}
-                                                </SelectLabel>
-                                                <SelectGroup>
-                                                    <SelectItem v-for="char in charWithElm" :key="char.value" :value="char.value">
-                                                        {{ char.label }}
-                                                    </SelectItem>
-                                                </SelectGroup>
-                                            </template>
-                                        </Select>
+                                        <CharSelect v-model="config.selectedChar" />
                                     </div>
 
                                     <!-- Project Selection -->

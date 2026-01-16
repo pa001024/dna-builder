@@ -339,6 +339,13 @@ fn apply_material(window: tauri::WebviewWindow, material: &str) -> String {
     "Success".to_string()
 }
 
+// 定义响应结构体
+#[derive(Debug, Clone, Deserialize, Serialize)]
+struct FetchResponse {
+    status: u16,
+    body: String,
+}
+
 #[tauri::command]
 async fn fetch(
     url: String,
@@ -346,7 +353,7 @@ async fn fetch(
     body: Option<String>,
     headers: Option<Vec<(String, String)>>,
     multipart: Option<Vec<(String, FormDataValue)>>,
-) -> Result<String, String> {
+) -> Result<FetchResponse, String> {
     let client = reqwest::Client::new();
     let mut request_builder = match method.to_uppercase().as_str() {
         "GET" => client.get(&url),
@@ -404,14 +411,10 @@ async fn fetch(
                 Ok(t) => t,
                 Err(e) => return Err(format!("Failed to read response: {}", e)),
             };
-            // 使用serde_json正确转义JSON字符串中的特殊字符
-            let body_json = serde_json::to_string(&text)
-                .map_err(|e| format!("Failed to serialize response body: {}", e))?;
-            Ok(format!(
-                "{{\"status\":{},\"body\":{}}}",
-                status.as_u16(),
-                body_json
-            ))
+            Ok(FetchResponse {
+                status: status.as_u16(),
+                body: text,
+            })
         }
         Err(e) => Err(format!("Request failed: {}", e)),
     }

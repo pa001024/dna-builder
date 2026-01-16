@@ -1,11 +1,11 @@
-import type { AbyssDungeon, MonsterBuff, AbyssBuff } from "./d/abyss.data"
-export { AbyssDungeon, MonsterBuff, AbyssBuff }
+import type { AbyssBuff, AbyssDungeon, MonsterBuff } from "./d/abyss.data"
+export type { AbyssDungeon, MonsterBuff, AbyssBuff }
 
 import type { Pet } from "./d/pet.data"
-export { Pet }
+export type { Pet }
 
 import type { Draft } from "./d/draft.data"
-export { Draft }
+export type { Draft }
 
 export interface Buff {
     名称: string

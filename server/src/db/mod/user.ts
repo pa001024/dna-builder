@@ -1,10 +1,10 @@
-import jwt from "jsonwebtoken"
 import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
-import { eq, like, sql, desc } from "drizzle-orm"
-import { Context, jwtToken } from "../yoga"
+import { desc, eq, like, sql } from "drizzle-orm"
+import { createGraphQLError } from "graphql-yoga"
+import jwt from "jsonwebtoken"
 import { db, schema } from ".."
 import { id } from "../schema"
-import { createGraphQLError } from "graphql-yoga"
+import { type Context, jwtToken } from "../yoga"
 
 export const typeDefs = /* GraphQL */ `
     type Mutation {
@@ -62,20 +62,20 @@ function signToken(user: typeof schema.users.$inferSelect) {
 
 export const resolvers = {
     Query: {
-        me: async (parent, args, context) => {
+        me: async (_parent, _args, context) => {
             if (!context.user) return null
             return await db.query.users.findFirst({
                 where: eq(schema.users.id, context.user.id),
             })
         },
-        user: async (parent, { id }, context, info) => {
+        user: async (_parent, { id }, context, _info) => {
             if (!context.user) return []
 
             return (await db.query.users.findFirst({
                 where: eq(schema.users.id, id),
             })) as any
         },
-        users: async (parent, args, context) => {
+        users: async (_parent, args, context) => {
             if (!context.user || !context.user.roles?.includes("admin")) {
                 throw createGraphQLError("Unauthorized: Admin role required")
             }
@@ -92,7 +92,7 @@ export const resolvers = {
                 orderBy: [desc(schema.users.createdAt)],
             })
         },
-        usersCount: async (parent, args, context) => {
+        usersCount: async (_parent, args, context) => {
             if (!context.user || !context.user.roles?.includes("admin")) {
                 throw createGraphQLError("Unauthorized: Admin role required")
             }
@@ -100,15 +100,12 @@ export const resolvers = {
             const search = args?.search || ""
             const where = search ? like(schema.users.email, `%${search}%`) : undefined
 
-            const result = await db
-                .select({ count: sql<number>`count(*)` })
-                .from(schema.users)
-                .where(where)
+            const result = await db.select({ count: sql<number>`count(*)` }).from(schema.users).where(where)
             return result[0]?.count || 0
         },
     },
     Mutation: {
-        register: async (parent, { name, qq, email, password }, context) => {
+        register: async (_parent, { name, qq, email, password }) => {
             if (!email) return { success: false, message: "missing email" }
             if (!password) return { success: false, message: "missing password" }
             if (!name) return { success: false, message: "missing email name" }
@@ -121,12 +118,15 @@ export const resolvers = {
             if (user) {
                 const token = signToken(user)
                 const hash = await Bun.password.hash(password)
-                await db.insert(schema.passwords).values({ hash, userId: user.id }).onConflictDoUpdate({ target: schema.passwords.id, set: { hash } })
+                await db
+                    .insert(schema.passwords)
+                    .values({ hash, userId: user.id })
+                    .onConflictDoUpdate({ target: schema.passwords.id, set: { hash } })
                 return { success: true, message: "User created successfully", token, user }
             }
             return { success: false, message: "User already exists" }
         },
-        guest: async (parent, { name, qq }, context) => {
+        guest: async (_parent, { name, qq }) => {
             if (name.length > 20 || name.length < 2) return { success: false, message: "Name must be between 2 and 20 characters" }
             if (qq && qq.length > 20) return { success: false, message: "QQ must be between 2 and 20 characters" }
 
@@ -143,7 +143,7 @@ export const resolvers = {
             }
             return { success: false, message: "Guest failed" }
         },
-        login: async (parent, { email, password }, context) => {
+        login: async (_parent, { email, password }, context) => {
             if (!email) return { success: false, message: "missing email" }
             if (!password) return { success: false, message: "missing password" }
             const user = await db.query.users.findFirst({
@@ -156,7 +156,11 @@ export const resolvers = {
                     const token = signToken(user)
                     await db
                         .insert(schema.logins)
-                        .values({ userId: user.id, ip: context.request.headers.get("x-real-ip"), ua: context.request.headers.get("user-agent") })
+                        .values({
+                            userId: user.id,
+                            ip: context.request.headers.get("x-real-ip"),
+                            ua: context.request.headers.get("user-agent"),
+                        })
                         .onConflictDoNothing()
                     return {
                         success: true,
@@ -176,7 +180,7 @@ export const resolvers = {
             }
             return { success: false, message: "Invalid email or password" }
         },
-        updatePassword: async (parent, { old_password, new_password }, context) => {
+        updatePassword: async (_parent, { old_password, new_password }, context) => {
             if (!old_password) return { success: false, message: "missing old_password" }
             if (!new_password) return { success: false, message: "missing new_password" }
             if (!context.user) return { success: false, message: "Unauthorized" }
@@ -184,7 +188,7 @@ export const resolvers = {
                 with: { password: true },
                 where: eq(schema.users.id, context.user.id),
             })
-            if (user && user.password) {
+            if (user?.password) {
                 const isMatch = await Bun.password.verify(old_password, user.password.hash)
                 if (!isMatch) return { success: false, message: "Incorrect password" }
                 const hash = await Bun.password.hash(new_password)
@@ -195,9 +199,10 @@ export const resolvers = {
             }
             return { success: false, message: "User not found" }
         },
-        updateUserMeta: async (parent, { data: { name, qq } }, context) => {
+        updateUserMeta: async (_parent, { data: { name, qq } }, context) => {
             if (!context.user) return { success: false, message: "Unauthorized" }
-            if (typeof name === "string" && (name.length > 20 || name.length < 2)) return { success: false, message: "Name must be between 2 and 20 characters" }
+            if (typeof name === "string" && (name.length > 20 || name.length < 2))
+                return { success: false, message: "Name must be between 2 and 20 characters" }
             if (qq && qq.length > 20) return { success: false, message: "QQ must be between 2 and 20 characters" }
             const target: any = {}
             if (name) target.name = name
@@ -209,7 +214,7 @@ export const resolvers = {
             }
             return { success: false, message: "User not found" }
         },
-        deleteUser: async (parent, { id }, context) => {
+        deleteUser: async (_parent, { id }, context) => {
             if (!context.user || !context.user.roles?.includes("admin")) {
                 throw createGraphQLError("Unauthorized: Admin role required")
             }
@@ -217,7 +222,7 @@ export const resolvers = {
             const result = await db.delete(schema.users).where(eq(schema.users.id, id)).returning()
             return result.length > 0
         },
-        updateUser: async (parent, { id, email, roles }, context) => {
+        updateUser: async (_parent, { id, email, roles }, context) => {
             if (!context.user || !context.user.roles?.includes("admin")) {
                 throw createGraphQLError("Unauthorized: Admin role required")
             }

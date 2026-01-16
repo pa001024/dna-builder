@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, watchEffect } from "vue"
 import gsap from "gsap"
 import { useTranslation } from "i18next-vue"
-import SidebarButton from "./SidebarButton.vue"
-import { useState } from "../util"
+import { ref, watchEffect } from "vue"
 import { useUIStore } from "../store/ui"
+import { useState } from "../util"
+import SidebarButton from "./SidebarButton.vue"
 
 const { t } = useTranslation()
 const target = ref<HTMLDivElement | null>(null)

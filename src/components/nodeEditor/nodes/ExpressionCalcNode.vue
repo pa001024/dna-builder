@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { Handle, Position, useVueFlow } from "@vue-flow/core"
-import BaseNode from "./BaseNode.vue"
 import type { NodeProps } from "@vue-flow/core"
-import { ref, computed } from "vue"
+import { Handle, Position, useVueFlow } from "@vue-flow/core"
+import { computed, ref } from "vue"
 import { useNodeEditorStore } from "@/store/nodeEditor"
+import BaseNode from "./BaseNode.vue"
 
 const props = defineProps<NodeProps>()
 const store = useNodeEditorStore()

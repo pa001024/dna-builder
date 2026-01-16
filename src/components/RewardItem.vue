@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { RewardItem as RewardItemType } from "../utils/reward-utils"
 import { LeveledMod } from "../data"
+import { RewardItem as RewardItemType } from "../utils/reward-utils"
 
 // 递归
 defineOptions({

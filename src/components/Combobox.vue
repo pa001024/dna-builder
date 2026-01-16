@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { matchPinyin } from "@/utils/pinyin-utils"
 import {
     ComboboxAnchor,
     ComboboxContent,
@@ -12,6 +11,7 @@ import {
     ComboboxViewport,
 } from "reka-ui"
 import { computed } from "vue"
+import { matchPinyin } from "@/utils/pinyin-utils"
 
 const props = withDefaults(
     defineProps<{

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import BaseNode from "./BaseNode.vue"
-import { computed } from "vue"
-import { useNodeEditorStore } from "@/store/nodeEditor"
-import type { DamageResult } from "@/data/CharBuild"
 import { Handle, Position } from "@vue-flow/core"
+import { computed } from "vue"
+import type { DamageResult } from "@/data/CharBuild"
+import { useNodeEditorStore } from "@/store/nodeEditor"
+import BaseNode from "./BaseNode.vue"
 
 const props = defineProps<{
     id: string

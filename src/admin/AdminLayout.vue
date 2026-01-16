@@ -38,6 +38,16 @@ const menuItems: {
         path: "/admin/todo",
         icon: "ri:checkbox-circle-line",
     },
+    {
+        name: "构筑管理",
+        path: "/admin/build",
+        icon: "ri:hammer-line",
+    },
+    {
+        name: "时间线管理",
+        path: "/admin/timeline",
+        icon: "ri:timeline-view",
+    },
 ]
 
 const route = useRoute()

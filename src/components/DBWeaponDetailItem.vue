@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, watch } from "vue"
+import { computed, ref, watch } from "vue"
 import type { Weapon } from "../data/data-types"
 import { LeveledWeapon } from "../data/leveled/LeveledWeapon"
 import { formatProp, formatSkillProp } from "../util"

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, nextTick, watch } from "vue"
 import { useLocalStorage } from "@vueuse/core"
-import { env } from "../env"
+import { nextTick, ref, watch } from "vue"
 import { BuildAgent } from "../api/buildAgent"
-import { useSettingStore } from "../store/setting"
-import { useInvStore } from "../store/inv"
 import { useCharSettings } from "../composables/useCharSettings"
 import type { CharBuild } from "../data"
+import { env } from "../env"
+import { useInvStore } from "../store/inv"
+import { useSettingStore } from "../store/setting"
 
 const props = defineProps<{
     charBuild: CharBuild

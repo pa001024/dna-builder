@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue"
-import { PlayerStats, Monster, FloatingText, GameSettings } from "../game/types"
 import { LeveledMonster, monsterData } from "../data"
+import { FloatingText, GameSettings, Monster, PlayerStats } from "../game/types"
 
 interface Props {
     playerStats: PlayerStats

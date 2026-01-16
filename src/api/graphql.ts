@@ -1,10 +1,11 @@
-import { Client, fetchExchange, subscriptionExchange, gql } from "@urql/vue"
-import { env } from "../env"
-import { SubscribePayload, createClient } from "graphql-ws"
-import { nanoid } from "nanoid"
 import { offlineExchange } from "@urql/exchange-graphcache"
 import { makeDefaultStorage } from "@urql/exchange-graphcache/default-storage"
+import { Client, fetchExchange, gql, subscriptionExchange } from "@urql/vue"
+import { createClient, type SubscribePayload } from "graphql-ws"
+import { nanoid } from "nanoid"
 import { useUserStore } from "@/store/user"
+import { env } from "../env"
+
 // import schema from "../../schema.json"
 const storage = makeDefaultStorage({
     idbName: "graphcache-v3", // The name of the IndexedDB database
@@ -311,7 +312,7 @@ const cacheExchange = offlineExchange({
     optimistic: {},
 })
 
-export const gqClient = (function () {
+export const gqClient = (() => {
     const url = `${env.endpoint}/graphql`
     const ws = createClient({
         url: url.replace("http", "ws"),

@@ -1,5 +1,5 @@
 import { useLocalStorage } from "@vueuse/core"
-import { computed, Ref } from "vue"
+import { computed, type Ref } from "vue"
 
 export interface RawTimelineData {
     name: string

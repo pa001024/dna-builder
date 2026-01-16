@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { ref, computed } from "vue"
+import { computed, ref } from "vue"
+import { LeveledMonster } from "@/data"
 import monsterData from "../data/d/monster.data"
 import type { Monster } from "../data/data-types"
 import { Faction } from "../data/data-types"
 import { getMonsterType } from "../utils/monster-utils"
 import { matchPinyin } from "../utils/pinyin-utils"
-import { LeveledMonster } from "@/data"
 
 const searchKeyword = ref("")
 const selectedMonster = ref<Monster | null>(null)

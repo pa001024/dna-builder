@@ -1,18 +1,18 @@
 import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
-import { db, schema } from ".."
-import { Context } from "../yoga"
 import { desc, eq, getTableColumns, like, sql } from "drizzle-orm"
-import { getSubSelection } from "."
-import { addClient, hasUser, removeClient, getUsers, getClientRoom, waitForUser } from "../kv/room"
 import { createGraphQLError } from "graphql-yoga"
+import { db, schema } from ".."
+import { addClient, getClientRoom, getUsers, hasUser, removeClient, waitForUser } from "../kv/room"
+import type { Context } from "../yoga"
+import { getSubSelection } from "."
 
 export const typeDefs = /* GraphQL */ `
     type Mutation {
-        createRoom(data: RoomsCreateInput!): Room
+        createRoom(data: RoomInput!): Room
         deleteRoom(id: String!): Boolean!
         "获取房间加入权限 实际加入事件由subscription触发"
         joinRoom(id: String!): Room
-        updateRoom(id: String!, data: RoomsUpdateInput!): Room
+        updateRoom(id: String!, data: RoomInput!): Room
     }
 
     type Query {
@@ -58,14 +58,8 @@ export const typeDefs = /* GraphQL */ `
         ownerId: String
     }
 
-    input RoomsCreateInput {
+    input RoomInput {
         name: String!
-        type: String
-        maxUsers: Int
-    }
-
-    input RoomsUpdateInput {
-        name: String
         type: String
         maxUsers: Int
     }
@@ -73,20 +67,22 @@ export const typeDefs = /* GraphQL */ `
 
 export const resolvers = {
     Query: {
-        room: async (parent, { id }, context, info) => {
+        room: async (_parent, { id }, context, info) => {
             if (!context.user) return null
             const lastMsgSel = getSubSelection(info, "lastMsg")
             const onlineUsersSel = getSubSelection(info, "onlineUsers")
-            let query = db
+            const query = db
                 .select(
                     schema.removeNull({
                         ...getTableColumns(schema.rooms),
                         owner: schema.link(schema.users, schema.rooms.ownerId),
-                        msgCount: sql<number>`(select count(*) from ${schema.msgs} where ${schema.msgs.roomId} = "rooms"."id")`.as("msgCount"),
+                        msgCount: sql<number>`(select count(*) from ${schema.msgs} where ${schema.msgs.roomId} = "rooms"."id")`.as(
+                            "msgCount"
+                        ),
                         lastMsg:
                             lastMsgSel &&
                             sql`(select json_array("id", "room_id", "user_id", "content", "edited", "created_at", "update_at", (select json_array("id", "email", "name", "qq", "roles", "created_at", "update_at") from (select * from users where id = "rooms_lastMsgs"."user_id" limit 1))) from (select * from "msgs" "rooms_lastMsgs" where "rooms_lastMsgs"."room_id" = "rooms"."id" order by rowid desc limit 1) "rooms_lastMsgs" )`
-                                .mapWith((data) => {
+                                .mapWith(data => {
                                     data = JSON.parse(data)
                                     const userData = data[7]
                                     return {
@@ -109,7 +105,7 @@ export const resolvers = {
                                     }
                                 })
                                 .as("lastMsg"),
-                    }),
+                    })
                 )
                 .from(schema.rooms)
                 .where(eq(schema.rooms.id, id))
@@ -118,14 +114,14 @@ export const resolvers = {
             const rst = await query.execute()
 
             if (onlineUsersSel) {
-                rst.forEach((room) => {
-                    // @ts-ignore
+                rst.forEach(room => {
+                    // @ts-expect-error
                     room.onlineUsers = getUsers(room.id)
                 })
             }
             return rst[0]
         },
-        rooms: async (parent, args, context, info) => {
+        rooms: async (_parent, args, context, info) => {
             if (!context.user) return []
             const lastMsgSel = getSubSelection(info, "lastMsg")
             const onlineUsersSel = getSubSelection(info, "onlineUsers")
@@ -135,11 +131,13 @@ export const resolvers = {
                     schema.removeNull({
                         ...getTableColumns(schema.rooms),
                         owner: schema.link(schema.users, schema.rooms.ownerId),
-                        msgCount: sql<number>`(select count(*) from ${schema.msgs} where ${schema.msgs.roomId} = "rooms"."id")`.as("msgCount"),
+                        msgCount: sql<number>`(select count(*) from ${schema.msgs} where ${schema.msgs.roomId} = "rooms"."id")`.as(
+                            "msgCount"
+                        ),
                         lastMsg:
                             lastMsgSel &&
                             sql`(select json_array("id", "room_id", "user_id", "content", "edited", "created_at", "update_at", (select json_array("id", "email", "name", "qq", "roles", "created_at", "update_at") from (select * from users where id = "rooms_lastMsgs"."user_id" limit 1))) from (select * from "msgs" "rooms_lastMsgs" where "rooms_lastMsgs"."room_id" = "rooms"."id" order by rowid desc limit 1) "rooms_lastMsgs" )`
-                                .mapWith((data) => {
+                                .mapWith(data => {
                                     data = JSON.parse(data)
                                     const userData = data[7]
                                     return {
@@ -162,23 +160,23 @@ export const resolvers = {
                                     }
                                 })
                                 .as("lastMsg"),
-                    }),
+                    })
                 )
                 .from(schema.rooms)
                 .orderBy(desc(schema.rooms.updateAt))
 
-            // @ts-ignore
+            // @ts-expect-error
             if (args?.name_like) query = query.where(like(schema.rooms.name, `%${args.name_like}%`)) // 全表扫描
-            // @ts-ignore
+            // @ts-expect-error
             if (args?.limit) query = query.limit(args.limit)
-            // @ts-ignore
+            // @ts-expect-error
             if (args?.offset) query = query.offset(args.offset)
 
             const rst = await query.execute()
 
             if (onlineUsersSel) {
-                rst.forEach((room) => {
-                    // @ts-ignore
+                rst.forEach(room => {
+                    // @ts-expect-error
                     room.onlineUsers = getUsers(room.id)
                 })
             }
@@ -189,12 +187,12 @@ export const resolvers = {
             const [result] = await db.select({ count: sql<number>`count(*)` }).from(schema.rooms)
             return result?.count || 0
         },
-        timeOffset: async (parent, { t }, context, info) => {
+        timeOffset: async (_parent, { t }) => {
             return Date.now() - t
         },
     },
     Mutation: {
-        createRoom: async (parent, { data: { name, type, maxUsers } }, context, info) => {
+        createRoom: async (_parent, { data: { name, type, maxUsers } }, context, _info) => {
             const user = context.user
             if (!user || !user.roles?.includes("admin")) return createGraphQLError("无权限")
             const rst = (
@@ -217,16 +215,18 @@ export const resolvers = {
             }
             return null
         },
-        joinRoom: async (parent, { id }, context, info) => {
+        joinRoom: async (_parent, { id }, context) => {
             const user = context.user
             if (!user) return null
-            let query = db
+            const query = db
                 .select(
                     schema.removeNull({
                         ...getTableColumns(schema.rooms),
                         owner: schema.link(schema.users, schema.rooms.ownerId),
-                        msgCount: sql<number>`(select count(*) from ${schema.msgs} where ${schema.msgs.roomId} = "rooms"."id")`.as("msgCount"),
-                    }),
+                        msgCount: sql<number>`(select count(*) from ${schema.msgs} where ${schema.msgs.roomId} = "rooms"."id")`.as(
+                            "msgCount"
+                        ),
+                    })
                 )
                 .from(schema.rooms)
                 .where(eq(schema.rooms.id, id))
@@ -243,7 +243,7 @@ export const resolvers = {
             }
             return null
         },
-        deleteRoom: async (parent, { id }, context, info) => {
+        deleteRoom: async (_parent, { id }, context) => {
             const user = context.user
             if (!user || !user.roles?.includes("admin")) return false
             const room = await db.query.rooms.findFirst({
@@ -256,7 +256,7 @@ export const resolvers = {
             }
             return false
         },
-        updateRoom: async (parent, { id, data: { name, type, maxUsers } }, context, info) => {
+        updateRoom: async (_parent, { id, data: { name, type, maxUsers } }, context) => {
             const user = context.user
             if (!user || !user.roles?.includes("admin")) {
                 throw createGraphQLError("无权限")
@@ -286,12 +286,13 @@ export const resolvers = {
         },
     },
     Subscription: {
-        newRoomUser: async (parent, { roomId }, { user, pubsub, extra }, info) => {
+        newRoomUser: async (_parent, { roomId }, { user, pubsub, extra }, _info) => {
             if (!user) throw createGraphQLError("need login")
             const socket = extra?.socket
             const room = await db.query.rooms.findFirst({ where: eq(schema.rooms.id, roomId) })
             if (!room) throw createGraphQLError("room not found")
-            if (room.ownerId !== user.id && !hasUser(room.id, user.id) && room.maxUsers && room.maxUsers <= getUsers(room.id).length) throw createGraphQLError("room full")
+            if (room.ownerId !== user.id && !hasUser(room.id, user.id) && room.maxUsers && room.maxUsers <= getUsers(room.id).length)
+                throw createGraphQLError("room full")
             if (socket) {
                 const id = socket.data.id
                 if (!hasUser(roomId, user.id)) {
@@ -303,7 +304,7 @@ export const resolvers = {
                     const newRoomUser = addClient(id, roomId, user)
                     pubsub.publish("newRoomUser", roomId, { newRoomUser })
                     const oldclose = socket.data.close
-                    socket.data.close = async (ws) => {
+                    socket.data.close = async ws => {
                         oldclose?.(ws)
                         const newRoomUser = removeClient(id, roomId, user)
                         pubsub.publish("newRoomUser", roomId, { newRoomUser })

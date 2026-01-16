@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process"
-import fs from "fs"
+import fs from "node:fs"
 
 let extension = ""
 if (process.platform === "win32") {
@@ -15,6 +15,6 @@ async function main() {
     fs.copyFileSync(`target/release/dna_mcp_server${extension}`, `../src-tauri/sidecar/dna_mcp_server-${targetTriple}${extension}`)
 }
 
-main().catch((e) => {
+main().catch(e => {
     throw e
 })

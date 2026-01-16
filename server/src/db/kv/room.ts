@@ -1,4 +1,4 @@
-import { RoomUserEvent } from "../../rt/pubsub"
+import type { RoomUserEvent } from "../../rt/pubsub"
 
 const rtcClientsMap = new Map<string, RoomUserEvent[]>()
 const userRoomsMap = new Map<string, string[]>()
@@ -9,7 +9,7 @@ const clientRoomMap = new Map<string, string>()
  */
 export function addClient(id: string, roomId: string, user: { id: string; name: string; qq?: string }) {
     const clients = rtcClientsMap.get(roomId) || []
-    const newRtc = clients.find((v) => v.id === id) || {
+    const newRtc = clients.find(v => v.id === id) || {
         id,
         end: false,
         user: {
@@ -32,14 +32,14 @@ export function addClient(id: string, roomId: string, user: { id: string; name: 
  * 从房间移除客户端
  */
 export function removeClient(id: string, roomId: string, user: { id: string; name: string; qq?: string }) {
-    const clients = rtcClientsMap.get(roomId)?.filter((c) => c.id !== id) || []
+    const clients = rtcClientsMap.get(roomId)?.filter(c => c.id !== id) || []
     rtcClientsMap.set(roomId, clients)
 
-    if (!clients.some((v) => v.user.id === user.id)) {
+    if (!clients.some(v => v.user.id === user.id)) {
         const rooms = userRoomsMap.get(user.id) || []
         userRoomsMap.set(
             user.id,
-            rooms.filter((r) => r !== roomId),
+            rooms.filter(r => r !== roomId)
         )
     }
     clientRoomMap.delete(id)
@@ -59,7 +59,7 @@ export function removeClient(id: string, roomId: string, user: { id: string; nam
  * 检查用户是否在房间中
  */
 export function hasUser(roomId: string, userId: string) {
-    return rtcClientsMap.get(roomId)?.find((c) => c.user.id === userId)?.id
+    return rtcClientsMap.get(roomId)?.find(c => c.user.id === userId)?.id
 }
 
 /**
@@ -97,7 +97,7 @@ export function getClients(roomId: string) {
 }
 
 export function getUsers(roomId: string) {
-    return rtcClientsMap.get(roomId)?.map((c) => c.user) || []
+    return rtcClientsMap.get(roomId)?.map(c => c.user) || []
 }
 
 export function getUserRooms(userId: string) {

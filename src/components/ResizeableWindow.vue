@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core"
+import { getCurrentWindow } from "@tauri-apps/api/window"
 import { exit } from "@tauri-apps/plugin-process"
 import { onMounted, onUnmounted, ref, watch, watchEffect } from "vue"
+import { useRoute } from "vue-router"
+import { applyMaterial, getOSVersion } from "../api/app"
+import { env } from "../env"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
-import { env } from "../env"
-import { useRoute } from "vue-router"
-import { getCurrentWindow } from "@tauri-apps/api/window"
-import { applyMaterial, getOSVersion } from "../api/app"
 import { timeStr, useGameTimer } from "../util"
 
 const props = defineProps({

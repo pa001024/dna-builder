@@ -1,4 +1,4 @@
-import { VoxelData } from "../types"
+import type { VoxelData } from "../types"
 import { COLORS } from "./voxelConstants"
 
 // Helper to prevent overlapping voxels

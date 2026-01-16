@@ -1,15 +1,15 @@
-import { defineStore } from "pinia"
-import { ref, computed } from "vue"
-import type { Node, Edge, Connection } from "@vue-flow/core"
-import { CharBuild } from "../data/CharBuild"
-import { LeveledChar, LeveledWeapon, LeveledMod, LeveledBuff } from "../data/leveled"
-import { db } from "./db"
-import type { NodeEditorGraph, UNodeEditorGraph } from "./db"
-import { useUIStore } from "./ui"
-import { nanoid } from "nanoid"
-import { env } from "@/env"
-import { exportJsonFile } from "@/api/app"
 import * as dialog from "@tauri-apps/plugin-dialog"
+import type { Connection, Edge, Node } from "@vue-flow/core"
+import { nanoid } from "nanoid"
+import { defineStore } from "pinia"
+import { computed, ref } from "vue"
+import { exportJsonFile } from "@/api/app"
+import { env } from "@/env"
+import { CharBuild } from "../data/CharBuild"
+import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../data/leveled"
+import type { NodeEditorGraph, UNodeEditorGraph } from "./db"
+import { db } from "./db"
+import { useUIStore } from "./ui"
 
 /**
  * 节点类型枚举
@@ -852,8 +852,9 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                         // 使用节点中保存的selectedSkill作为baseName，如果没有则使用默认值
                         const options = {
                             char,
-                            hpPercent: 1,
-                            resonanceGain: 0,
+                            hpPercent: charData.hpPercent || 1,
+                            resonanceGain: charData.resonanceGain || 0,
+                            skillLevel: charData.skillLevel || 12,
                             melee: meleeWeapon,
                             ranged: rangedWeapon,
                             baseName: node.data.selectedSkill || char.技能[0].名称, // 使用保存的技能或默认第一个技能
@@ -1045,15 +1046,17 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                         case NodeType.WEAPON_ATTR_CALC:
                             result = charBuild.calculateWeaponAttributes()
                             break
-                        case NodeType.SKILL_DMG_CALC:
+                        case NodeType.SKILL_DMG_CALC: {
                             const skillAttrs = charBuild.calculateAttributes()
                             result = charBuild.calculateSkillDamage(skillAttrs)
                             break
-                        case NodeType.WEAPON_DMG_CALC:
+                        }
+                        case NodeType.WEAPON_DMG_CALC: {
                             const weaponAttrs = charBuild.calculateWeaponAttributes()
                             const weapon = charBuild.meleeWeapon
                             result = charBuild.calculateWeaponDamage(weaponAttrs, weapon)
                             break
+                        }
                         case NodeType.FULL_CALC:
                             // 完整计算：执行所有计算
                             try {

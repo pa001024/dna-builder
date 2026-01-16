@@ -1,6 +1,6 @@
-import { CommonLevelUp, LeveledSkill } from "."
 import { charMap } from "../d"
-import { CommonAttr, SkillWeapon } from "../data-types"
+import type { CommonAttr, SkillWeapon } from "../data-types"
+import { CommonLevelUp, LeveledSkill } from "."
 
 /**
  * LeveledChar类 - 继承Char接口，添加等级属性和动态属性计算

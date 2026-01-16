@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { t } from "i18next"
 import { computed, ref } from "vue"
 import { CharBuild } from "../data/CharBuild"
 import { LeveledMod } from "../data/leveled"
-import { copyText, pasteText } from "../util"
 import { useInvStore } from "../store/inv"
-import { t } from "i18next"
+import { copyText, pasteText } from "../util"
 
 interface ModOption {
     value: number

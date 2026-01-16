@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { DNAPostListBean } from "dna-api"
 import { useUIStore } from "../store/ui"
+
 const ui = useUIStore()
 
 defineProps<{

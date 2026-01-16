@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, nextTick } from "vue"
-import { getActivityInfo } from "../api/external"
 import { useTranslation } from "i18next-vue"
-import { useGameTimer } from "../util"
+import { computed, nextTick, onMounted, ref } from "vue"
+import { getActivityInfo } from "../api/external"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
+import { useGameTimer } from "../util"
 
 const { t, i18next } = useTranslation()
 const settingStore = useSettingStore()

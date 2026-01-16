@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import BaseNode from "./BaseNode.vue"
 import { computed } from "vue"
 import type { CharAttr } from "@/data/CharBuild"
 import { format100 } from "@/util"
+import BaseNode from "./BaseNode.vue"
 
 const props = defineProps<{
     id: string

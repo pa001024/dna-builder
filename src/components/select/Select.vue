@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { SelectRootProps } from "reka-ui"
 import {
     SelectContent,
     SelectPortal,
@@ -10,9 +11,8 @@ import {
     SelectViewport,
     useForwardPropsEmits,
 } from "reka-ui"
-import type { SelectRootProps } from "reka-ui"
-import Icon from "../Icon.vue"
 import { watch } from "vue"
+import Icon from "../Icon.vue"
 
 export interface SelectOption {
     type?: "label" | "group" | "separator" | "option"

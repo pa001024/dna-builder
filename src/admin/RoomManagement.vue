@@ -1,25 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
-import { roomsQuery } from "@/api/query"
-import { createRoomMutation, updateRoomMutation, deleteRoomMutation } from "@/api/mutation"
+import { computed, onMounted, ref } from "vue"
+import { createRoomMutation, deleteRoomMutation, updateRoomMutation } from "@/api/mutation"
+import { RoomItem, roomsQuery } from "@/api/query"
 import { useUIStore } from "@/store/ui"
 
 const ui = useUIStore()
-
-// 房间类型定义
-interface Room {
-    id: string
-    name: string
-    type: string | null
-    ownerId: string
-    maxUsers: number | null
-    createdAt: string
-    updateAt: string
-    owner: {
-        id: string
-        name: string
-    }
-}
 
 // 编辑房间表单数据
 interface EditRoomForm {
@@ -29,15 +14,15 @@ interface EditRoomForm {
 }
 
 // 房间列表数据
-const rooms = ref<Room[]>([])
+const rooms = ref<RoomItem[]>([])
 const total = ref(0)
 const page = ref(1)
-const pageSize = ref(10)
+const pageSize = 20
 const loading = ref(false)
 
 // 编辑房间相关状态
 const editDialogOpen = ref(false)
-const editingRoom = ref<Room | null>(null)
+const editingRoom = ref<RoomItem | null>(null)
 const editForm = ref<EditRoomForm>({
     name: "",
     type: "",
@@ -55,10 +40,10 @@ const formSubmitting = ref(false)
 const fetchRooms = async () => {
     loading.value = true
     try {
-        const offset = (page.value - 1) * pageSize.value
+        const offset = (page.value - 1) * pageSize
         const result = await roomsQuery(
             {
-                limit: pageSize.value,
+                limit: pageSize,
                 offset,
             },
             { requestPolicy: "network-only" }
@@ -102,7 +87,7 @@ const closeCreateDialog = () => {
 }
 
 // 打开编辑对话框
-const openEditDialog = (room: Room) => {
+const openEditDialog = (room: RoomItem) => {
     editingRoom.value = room
     editForm.value = {
         name: room.name,
@@ -170,7 +155,7 @@ const submitEdit = async () => {
             id: editingRoom.value.id,
             data: {
                 name: editForm.value.name,
-                type: editForm.value.type || null,
+                type: editForm.value.type,
                 maxUsers: editForm.value.maxUsers,
             },
         })
@@ -203,6 +188,7 @@ const deleteRoom = async (roomId: string) => {
         }
     }
 }
+const totalPages = computed(() => Math.ceil(total.value / pageSize))
 
 // 页面挂载时获取房间列表
 onMounted(() => {
@@ -233,7 +219,6 @@ onMounted(() => {
                 <table class="table w-full">
                     <thead class="bg-base-200">
                         <tr>
-                            <th class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider">ID</th>
                             <th class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider">
                                 房间名称
                             </th>
@@ -255,9 +240,6 @@ onMounted(() => {
                             class="hover:bg-base-200/50 transition-colors duration-200"
                             :class="{ 'bg-base-200/30': index % 2 === 0 }"
                         >
-                            <td class="px-8 py-5 whitespace-nowrap text-sm font-medium text-base-content font-mono">
-                                {{ room.id.slice(0, 8) }}...
-                            </td>
                             <td class="px-8 py-5 text-sm text-base-content font-medium">{{ room.name }}</td>
                             <td class="px-8 py-5 whitespace-nowrap text-sm">
                                 <span class="badge badge-sm badge-ghost">{{ room.type || "-" }}</span>
@@ -300,14 +282,11 @@ onMounted(() => {
                             <span class="font-semibold">{{ total }}</span> 条</span
                         >
                     </div>
-                    <div class="flex items-center gap-3">
-                        <button class="btn btn-sm btn-outline" :disabled="page === 1" @click="handlePageChange(page - 1)">
-                            <span class="ri:arrow-left-line mr-1.5"></span>
-                            上一页
-                        </button>
-                        <button class="btn btn-sm btn-outline" :disabled="page * pageSize >= total" @click="handlePageChange(page + 1)">
+                    <div class="flex gap-2">
+                        <button class="btn btn-sm btn-outline" :disabled="page <= 1" @click="handlePageChange(page - 1)">上一页</button>
+                        <input v-model="page" type="number" min="1" :max="totalPages" class="input input-bordered input-sm w-20" />
+                        <button class="btn btn-sm btn-outline" :disabled="page >= totalPages" @click="handlePageChange(page + 1)">
                             下一页
-                            <span class="ri:arrow-right-line ml-1.5"></span>
                         </button>
                     </div>
                 </div>

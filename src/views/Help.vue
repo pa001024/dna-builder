@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from "vue"
-import { t } from "i18next"
-import { gsap } from "gsap"
 import { useWindowSize } from "@vueuse/core"
+import { gsap } from "gsap"
+import { t } from "i18next"
+import { computed, nextTick, onMounted, ref } from "vue"
 import type { IconTypes } from "@/components/Icon.vue"
 
 const { width } = useWindowSize()

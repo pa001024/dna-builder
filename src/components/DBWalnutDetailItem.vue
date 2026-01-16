@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { ref, computed, watch } from "vue"
+import { computed, ref, watch } from "vue"
+import { draftMap } from "@/data"
 import { Walnut } from "../data/d/walnut.data"
 import { WalnutSequenceSimulator } from "../utils/walnut-utils"
-import { draftMap } from "@/data"
 
 const props = defineProps<{
     walnut: Walnut

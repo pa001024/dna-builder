@@ -1,8 +1,8 @@
-import { DNASubModule, DNABaseAPI } from "./base"
-import {
+import type {
     DNAAliProductConfigBean,
     DNAAliProductListBean,
     DNAApplyStatusBean,
+    DNACommonBooleanBean,
     DNACreatorDescriptionBean,
     DNACustomCreativeDesc,
     DNAGoldBuyBean,
@@ -13,18 +13,15 @@ import {
     DNAGoldTotalBean,
     DNALookPageBean,
     DNALuckyDrawBean,
+    DNAUserAddressBean,
     DNAUserExperienceRecordEntity,
     DNAUserGameLevelEntity,
     DNAUserTaskProcessEntity,
     DNAWinListBean,
-    DNACommonBooleanBean,
-    DNAUserAddressBean,
 } from "../type-generated"
+import { DNASubModule } from "./base"
 
 export class UserGrowingAPI extends DNASubModule {
-    constructor(base: DNABaseAPI) {
-        super(base)
-    }
     async addAddress(receiverName: string, receiverMobile: string, receiverAddress: string) {
         return await this._dna_request("user/more/userAddressAdd", { receiverName, receiverMobile, receiverAddress })
     }
@@ -37,7 +34,7 @@ export class UserGrowingAPI extends DNASubModule {
         otherPlatformUrl: string,
         otherPlatformFans: string,
         materialUrl: string,
-        gameId: number | null,
+        gameId: number | null
     ) {
         return await this._dna_request<DNAApplyStatusBean>("user/creator/apply", {
             type,

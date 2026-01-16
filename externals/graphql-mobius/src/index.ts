@@ -10,8 +10,8 @@
  * @author saltyAom
  */
 
+import type { GraphQLResolveInfo } from "graphql"
 import type { Repeater } from "graphql-yoga"
-import { type GraphQLResolveInfo } from "graphql"
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 type Whitespace =
@@ -31,7 +31,11 @@ type Split<S extends string, Delimiter extends string> = S extends `${infer Head
       ? []
       : [S]
 
-type SplitUnion<S extends string> = S extends `${infer Head}|${infer Tail}` ? [Trim<Head>, ...SplitUnion<Tail>] : S extends "|" ? [] : [Trim<S>]
+type SplitUnion<S extends string> = S extends `${infer Head}|${infer Tail}`
+    ? [Trim<Head>, ...SplitUnion<Tail>]
+    : S extends "|"
+      ? []
+      : [Trim<S>]
 
 type GetLastLine<S extends string> = S extends `${infer Head}\n${infer Tail}` ? GetLastLine<Tail> : S extends "\n" ? never : S
 
@@ -193,16 +197,16 @@ type MapSchema<T extends string, Known extends CustomTypes = {}> = T extends `${
 
 type RemovePrefixArrayBracket<T extends string> = T extends `[${infer Rest}` ? RemovePrefixArrayBracket<Rest> : T
 
-// @ts-ignore To hard to explain this shape in TS, I works trust me
+// @ts-expect-error To hard to explain this shape in TS, I works trust me
 type CreateArray<
     T extends string,
-    // @ts-ignore
+    // @ts-expect-error
     Carry extends string | null = (RemovePrefixArrayBracket<T> extends `${infer Name}]${string}` ? Name : T) extends infer Name
         ? Name extends `${infer A}!${string}`
             ? A
             : Name | null
         : never,
-    // @ts-ignore
+    // @ts-expect-error
 > = T extends `[${infer Rest}` ? CreateArray<Rest, [Carry]> : Carry
 
 type FormatType<T extends string> =
@@ -309,34 +313,33 @@ type MapFragment<
  * type Engine = CreateMobius<typeof typeDefs>
  * ```
  */
-export type CreateMobius<T extends string, Scalars extends Scalar = {}> =
-    CreateInnerMobius<T> extends infer Typed
-        ? Prettify<
-              // @ts-ignore
-              MapFragment<ResolveType<Typed, Scalars>> &
-                  ("Query" extends keyof Typed
-                      ? {}
-                      : {
-                            Query: {}
-                        }) &
-                  ("Mutation" extends keyof Typed
-                      ? {}
-                      : {
-                            Mutation: {}
-                        }) &
-                  ("Subscription" extends keyof Typed
-                      ? {}
-                      : {
-                            Subscription: {}
-                        }) &
-                  ("Fragment" extends keyof Typed
-                      ? {}
-                      : {
-                            Fragment: {}
-                        }) &
-                  Scalars
-          >
-        : never
+export type CreateMobius<T extends string, Scalars extends Scalar = {}> = CreateInnerMobius<T> extends infer Typed
+    ? Prettify<
+          // @ts-expect-error
+          MapFragment<ResolveType<Typed, Scalars>> &
+              ("Query" extends keyof Typed
+                  ? {}
+                  : {
+                        Query: {}
+                    }) &
+              ("Mutation" extends keyof Typed
+                  ? {}
+                  : {
+                        Mutation: {}
+                    }) &
+              ("Subscription" extends keyof Typed
+                  ? {}
+                  : {
+                        Subscription: {}
+                    }) &
+              ("Fragment" extends keyof Typed
+                  ? {}
+                  : {
+                        Fragment: {}
+                    }) &
+              Scalars
+      >
+    : never
 
 // ? Quick way to display an error (interface so it displays it correctly)
 interface Err<T> {
@@ -350,17 +353,16 @@ type UnwrapKey<
     Result extends Record<string, unknown>,
     Scalars extends Record<string, unknown>,
     Nullable = null extends K ? null : never,
-> =
-    NonNullable<K> extends (infer Next extends MData)[]
-        ? UnwrapKey<Next, Result, Scalars>[] | Nullable
-        : ResolveKey<K & string, Result, Scalars> | Nullable
+> = NonNullable<K> extends (infer Next extends MData)[]
+    ? UnwrapKey<Next, Result, Scalars>[] | Nullable
+    : ResolveKey<K & string, Result, Scalars> | Nullable
 
 type ResolveKey<K extends string, Result extends Record<string, unknown>, Scalars extends Record<string, unknown>> = K extends (
-    p: infer Params,
+    p: infer Params
 ) => infer Returned
     ? {
           [K in keyof Params]: UnwrapKey<
-              // @ts-ignore: Trust me bro
+              // @ts-expect-error: Trust me bro
               NonNullable<Params[K]>,
               Result,
               Scalars
@@ -418,13 +420,13 @@ export type Resolver<
                   parent: unknown,
                   args: Args,
                   context: Context,
-                  info: GraphQLResolveInfo,
+                  info: GraphQLResolveInfo
               ) => MaybePromise<UndefinedToNullableFields<Returned>> | (Returned extends null ? void : never)
             : (
                   parent: unknown,
                   args: null | undefined | {},
                   context: Context,
-                  info: GraphQLResolveInfo,
+                  info: GraphQLResolveInfo
               ) => MaybePromise<UndefinedToNullableFields<T["Query"][K]>> | (T["Query"][K] extends null ? void : never)
     } extends infer A
         ? {} extends A
@@ -437,13 +439,13 @@ export type Resolver<
                       parent: unknown,
                       args: Args,
                       context: Context,
-                      info: GraphQLResolveInfo,
+                      info: GraphQLResolveInfo
                   ) => MaybePromise<UndefinedToNullableFields<Returned>> | (Returned extends null ? void : never)
                 : (
                       parent: unknown,
                       args: null | undefined | {},
                       context: Context,
-                      info: GraphQLResolveInfo,
+                      info: GraphQLResolveInfo
                   ) => MaybePromise<UndefinedToNullableFields<T["Mutation"][K]>> | (T["Mutation"][K] extends null ? void : never)
         } extends infer A
             ? {} extends A
@@ -456,13 +458,15 @@ export type Resolver<
                       parent: unknown,
                       args: Args,
                       context: Context,
-                      info: GraphQLResolveInfo,
-                  ) => MaybePromise<MaybeRepeater<{ [k in K]: UndefinedToNullableFields<Returned> }>> | (Returned extends null ? void : never)
+                      info: GraphQLResolveInfo
+                  ) =>
+                      | MaybePromise<MaybeRepeater<{ [k in K]: UndefinedToNullableFields<Returned> }>>
+                      | (Returned extends null ? void : never)
                 : (
                       parent: unknown,
                       args: null | undefined | {},
                       context: Context,
-                      info: GraphQLResolveInfo,
+                      info: GraphQLResolveInfo
                   ) =>
                       | MaybePromise<MaybeRepeater<UndefinedToNullableFields<T["Subscription"][K]>>>
                       | (T["Subscription"][K] extends null ? void : never)
@@ -480,7 +484,7 @@ type Selective<T> = T extends object
       } & ("where" extends keyof T
           ? T["where"] extends NonNullable<T["where"]>
               ? {
-                    // @ts-ignore: always with where
+                    // @ts-expect-error: always with where
                     select: T["Select"]
                     where: T["where"]
                 }
@@ -534,28 +538,27 @@ type ResolveQuery<Query extends Record<string, unknown>, Model extends Record<st
         : never
 }
 
-type Resolve<Query extends Record<string, unknown>, M extends Record<string, unknown>> =
-    NonNullable<M> extends infer Model
-        ? Prettify<{
-              [K in keyof Query]: Model extends Record<K, infer Schema extends Record<string, unknown> | Function | null>
-                  ? Query[K] extends true
-                      ? Model[K]
-                      : Query[K] extends {
-                              select: infer Selected extends Record<string, unknown>
-                          }
-                        ? Resolve<Selected, UnwrapFunctionalSchema<Schema>>
-                        : Query[K] extends Record<string, unknown>
-                          ? Resolve<Query[K], UnwrapFunctionalSchema<Schema>>
-                          : {}
-                  : K extends keyof Model
-                    ? Model[K] extends Array<any>
-                        ? K extends keyof Query
-                            ? Resolve<Query[K] extends Record<string, unknown> ? Query[K] : {}, Model[K][number]>[]
-                            : unknown[]
-                        : Model[K]
-                    : never
-          }>
-        : never
+type Resolve<Query extends Record<string, unknown>, M extends Record<string, unknown>> = NonNullable<M> extends infer Model
+    ? Prettify<{
+          [K in keyof Query]: Model extends Record<K, infer Schema extends Record<string, unknown> | Function | null>
+              ? Query[K] extends true
+                  ? Model[K]
+                  : Query[K] extends {
+                          select: infer Selected extends Record<string, unknown>
+                      }
+                    ? Resolve<Selected, UnwrapFunctionalSchema<Schema>>
+                    : Query[K] extends Record<string, unknown>
+                      ? Resolve<Query[K], UnwrapFunctionalSchema<Schema>>
+                      : {}
+              : K extends keyof Model
+                ? Model[K] extends Array<any>
+                    ? K extends keyof Query
+                        ? Resolve<Query[K] extends Record<string, unknown> ? Query[K] : {}, Model[K][number]>[]
+                        : unknown[]
+                    : Model[K]
+                : never
+      }>
+    : never
 
 /**
  * Create Prisma-like function for GraphQL
@@ -599,7 +602,7 @@ export const mobiusToGraphQL = <T extends "query" | "mutation" | "subscription">
             for (const [key, child] of Object.entries(value)) {
                 if (typeof child === "object" && "where" in child!) {
                     mapped[`${key}(${JSON.stringify(child.where)})`] =
-                        // @ts-ignore select is always with where
+                        // @ts-expect-error select is always with where
                         child.select
                     continue
                 }
@@ -609,7 +612,7 @@ export const mobiusToGraphQL = <T extends "query" | "mutation" | "subscription">
 
             return mapped
         },
-        2,
+        2
     )
 
     return (
@@ -618,17 +621,17 @@ export const mobiusToGraphQL = <T extends "query" | "mutation" | "subscription">
         query
             .replace(/\\/g, "")
             // Query quote field to GraphQL
-            .replace(/(.*): {/g, (a) => a.slice(1, -3) + " {")
+            .replace(/(.*): {/g, a => a.slice(1, -3) + " {")
             // Quote field: true to GraphQL
-            .replace(/"(\w+)": true(,)?/g, (a) => a.slice(1, a[a.length - 1] === "," ? -8 : -7))
-            .replace(/"(\w+)(\((.*)\))?" {/g, (a) => a.slice(1, -3) + " {")
+            .replace(/"(\w+)": true(,)?/g, a => a.slice(1, a[a.length - 1] === "," ? -8 : -7))
+            .replace(/"(\w+)(\((.*)\))?" {/g, a => a.slice(1, -3) + " {")
             .replace(/\(\{/g, "(")
             .replace(/\}\)/g, ")")
             // Replace primitive value query
             .replace(/\): true/g, ")")
-            .replace(/"(\w+)":/g, (a) => a.slice(1, -2) + ":")
+            .replace(/"(\w+)":/g, a => a.slice(1, -2) + ":")
             // Remove query without object
-            .replace(/"(\w+)(\((.*)\))?": true/g, (a) => a.slice(1, -7))
+            .replace(/"(\w+)(\((.*)\))?": true/g, a => a.slice(1, -7))
     )
 }
 
@@ -660,7 +663,7 @@ export const createFragment = (schema: string) => {
 
     if (matches) {
         for (const match of matches) {
-            // @ts-ignore
+            // @ts-expect-error
             const [, name, content] = extractFragment.exec(matches)!
             const current: Record<string, true> = {}
 
@@ -702,7 +705,7 @@ export class Mobius<
             url?: string
             fetch?: (query: string) => Promise<unknown>
             typeDefs?: Declaration
-        },
+        }
     ) {
         if (config?.typeDefs) this.fragments = createFragment(config.typeDefs) as any
     }
@@ -720,7 +723,7 @@ export class Mobius<
                         query,
                         variables: {},
                     }),
-                }).then((x) => x.json().then((x) => (x as { data: unknown }).data)))
+                }).then(x => x.json().then(x => (x as { data: unknown }).data)))
         )
     }
 
@@ -745,23 +748,23 @@ export class Mobius<
     }
 
     query<Query extends Selective<CreateQuery<TypeDefs["Query"]>>>(
-        params: Query,
+        params: Query
     ): Promise<Prettify<{} extends Query ? {} : ResolveQuery<Query, TypeDefs["Query"] & Scalars>> | null> {
-        // @ts-ignore
+        // @ts-expect-error
         return this.fetch(mobiusToGraphQL("query", params))
     }
 
     mutate<Mutate extends Selective<CreateQuery<TypeDefs["Mutation"]>>>(
-        params: Mutate,
+        params: Mutate
     ): Promise<Prettify<{} extends Mutate ? {} : ResolveQuery<Mutate, TypeDefs["Mutation"] & Scalars>>> {
-        // @ts-ignore
+        // @ts-expect-error
         return this.fetch(mobiusToGraphQL("mutation", params))
     }
 
     subscription<Subscription extends Selective<CreateQuery<TypeDefs["Subscription"]>>>(
-        params: Subscription,
+        params: Subscription
     ): Promise<Prettify<{} extends Subscription ? {} : ResolveQuery<Subscription, TypeDefs["Subscription"] & Scalars>>> {
-        // @ts-ignore
+        // @ts-expect-error
         return this.fetch(mobiusToGraphQL("subscription", params))
     }
 }

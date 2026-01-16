@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, watch } from "vue"
+import { computed, ref, watch } from "vue"
 import type { Pet } from "../data/data-types"
 import { LeveledPet } from "../data/leveled/LeveledPet"
 

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue"
+import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI, DNAPostListBean } from "dna-api"
+import { onMounted, ref } from "vue"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
-import { useLocalStorage } from "@vueuse/core"
 
 defineProps<{
     nobtn?: boolean

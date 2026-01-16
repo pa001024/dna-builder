@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from "vue"
+import { computed, ref } from "vue"
 import { CharBuild, LeveledWeapon, weaponData } from "../data"
-import { format100, format100r } from "../util"
 import type { Weapon } from "../data/data-types"
+import { format100, format100r } from "../util"
 import { matchPinyin } from "../utils/pinyin-utils"
 
 const props = defineProps<{

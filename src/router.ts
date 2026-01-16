@@ -1,21 +1,21 @@
-import { RouteRecordRaw, createWebHashHistory, createRouter, createWebHistory } from "vue-router"
-
-import Home from "./views/Home.vue"
-import Setting from "./views/Setting.vue"
-import CharBuildView from "./views/CharBuildView.vue"
-import CharBuildCompare from "./views/CharBuildCompare.vue"
-import InventoryEdit from "./views/InventoryEdit.vue"
-import More from "./views/More.vue"
-import TimelineEditor from "./views/TimelineEditor.vue"
-import AchievementList from "./views/AchievementList.vue"
+import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window"
+import { createRouter, createWebHashHistory, createWebHistory, type RouteRecordRaw } from "vue-router"
 import { env } from "./env"
-import { LogicalSize, getCurrentWindow } from "@tauri-apps/api/window"
-import GuideListView from "./views/GuideListView.vue"
+import AchievementList from "./views/AchievementList.vue"
+import CharBuildCompare from "./views/CharBuildCompare.vue"
+import CharBuildView from "./views/CharBuildView.vue"
+import CharListView from "./views/CharListView.vue"
 import GuideDetailView from "./views/GuideDetailView.vue"
 import GuideEditView from "./views/GuideEditView.vue"
+import GuideListView from "./views/GuideListView.vue"
+import Home from "./views/Home.vue"
+import InventoryEdit from "./views/InventoryEdit.vue"
+import More from "./views/More.vue"
 import NotFound from "./views/NotFound.vue"
-import CharListView from "./views/CharListView.vue"
+import Setting from "./views/Setting.vue"
+import TimelineEditor from "./views/TimelineEditor.vue"
 import UserManager from "./views/UserManager.vue"
+
 let setMinSize = async (_w: number, _h: number) => {}
 ;(async () => {
     if (!env.isApp) return
@@ -30,7 +30,9 @@ const routes: readonly RouteRecordRaw[] = [
     { name: "setting", path: "/setting", component: Setting, beforeEnter: () => setMinSize(540, 430) },
     { name: "char-list", path: "/char", component: CharListView, beforeEnter: () => setMinSize(600, 600) },
     { name: "char-build", path: "/char/:charId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
-    { name: "char-build-code", path: "/char/:charId/:code", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
+    { name: "char-build-code", path: "/char/:charId/:buildId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
+    { name: "build-share", path: "/build/:buildId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
+    { name: "timeline-share", path: "/timeline/:timelineId", component: TimelineEditor, beforeEnter: () => setMinSize(600, 600) },
     { name: "build-compare", path: "/char-build-compare", component: CharBuildCompare, beforeEnter: () => setMinSize(600, 600) },
     { name: "inventory", path: "/inventory", component: InventoryEdit, beforeEnter: () => setMinSize(600, 600) },
     { name: "timeline", path: "/timeline", component: TimelineEditor, beforeEnter: () => setMinSize(600, 600) },
@@ -97,6 +99,16 @@ const routes: readonly RouteRecordRaw[] = [
                 name: "admin-todo",
                 path: "todo",
                 component: () => import("./admin/TodoManagement.vue"),
+            },
+            {
+                name: "admin-build",
+                path: "build",
+                component: () => import("./admin/BuildManagement.vue"),
+            },
+            {
+                name: "admin-timeline",
+                path: "timeline",
+                component: () => import("./admin/TimelineManagement.vue"),
             },
         ],
     },
@@ -290,8 +302,7 @@ const routes: readonly RouteRecordRaw[] = [
 ]
 
 export const router = createRouter({
-    // edgeone.dev 域名下使用 history 模式，其他域名下使用 hash 模式
-    history:
-        location.host.endsWith("edgeone.dev") || location.host.endsWith("xn--chq26veyq.icu") ? createWebHistory() : createWebHashHistory(),
+    // 应用内使用 hash 模式，其他环境使用 history 模式
+    history: env.isApp ? createWebHashHistory() : createWebHistory(),
     routes,
 })

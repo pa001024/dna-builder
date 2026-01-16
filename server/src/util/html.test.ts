@@ -164,7 +164,7 @@ describe("sanitizeHTML", () => {
 
     describe("长度限制", () => {
         it("应该返回提示如果输入过长", () => {
-            const longInput = "<p>".repeat(30000) + "Content" + "</p>".repeat(30000)
+            const longInput = `${"<p>".repeat(30000)}Content${"</p>".repeat(30000)}`
             const result = sanitizeHTML(longInput)
             expect(result).toBe("[消息过长]")
         })

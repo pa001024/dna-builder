@@ -1,8 +1,8 @@
-import { LeveledSkillField } from "../../data"
-import { BaseSkill } from "./BaseSkill"
+import type { LeveledSkillField } from "../../data"
+import type { BaseSkill } from "./BaseSkill"
 import { LiseSkillE, LiseSkillQ } from "./skills/Lise"
 import { SaiqiSkillE, SaiqiSkillQ } from "./skills/Saiqi"
-import { VoxelEngine } from "./VoxelEngine"
+import type { VoxelEngine } from "./VoxelEngine"
 
 /**
  * 技能注册表

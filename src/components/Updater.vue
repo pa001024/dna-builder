@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
-import { env } from "../env"
+import { useLocalStorage } from "@vueuse/core"
+import { t } from "i18next"
+import { onMounted, ref } from "vue"
 import pg from "../../package.json"
 import { checkUpdate, downloadAndInstallUpdate } from "../api/update"
+import { env } from "../env"
 import { useUIStore } from "../store/ui"
-import { t } from "i18next"
-import { useLocalStorage } from "@vueuse/core"
+
 const ui = useUIStore()
 
 const isUpdating = ref(false)

@@ -1,4 +1,4 @@
-import { DNASubModule, DNABaseAPI } from "./base"
+import { DNASubModule } from "./base"
 
 export interface DNAMapMatterCategorizeOption {
     icon: string
@@ -103,9 +103,6 @@ export interface DNAEmoji {
 }
 
 export class H5API extends DNASubModule {
-    constructor(base: DNABaseAPI) {
-        super(base)
-    }
     async getMapMatterCategorizeOptions() {
         return await this._dna_request_h5<DNAMapMatterCategorizeOption[]>("map/matter/categorize/getOptions")
     }

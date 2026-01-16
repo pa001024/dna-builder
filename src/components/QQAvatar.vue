@@ -3,7 +3,7 @@ import { useImage } from "@vueuse/core"
 import { computed } from "vue"
 
 const props = defineProps<{
-    qq: string | number
+    qq: string | number | undefined | null
     name: string
 }>()
 

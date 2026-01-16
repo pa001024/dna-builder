@@ -1,10 +1,10 @@
 import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
 import { and, eq, isNull } from "drizzle-orm"
-import { Context } from "../yoga"
-import { db, schema } from ".."
-import { now } from "../schema"
-import { clearTaskOnline, getTaskOnlineStatus, isTaskOnline, setTaskOnline, toggleTaskPaused } from "../kv/task"
 import { createGraphQLError } from "graphql-yoga"
+import { db, schema } from ".."
+import { clearTaskOnline, getTaskOnlineStatus, isTaskOnline, setTaskOnline, toggleTaskPaused } from "../kv/task"
+import { now } from "../schema"
+import type { Context } from "../yoga"
 
 export const typeDefs = /* GraphQL */ `
     type Query {
@@ -87,7 +87,7 @@ async function checkAndAddTask(roomId: string, userId: string, name: string, max
 
 export const resolvers = {
     Query: {
-        tasks: async (parent, { roomId, limit, offset }, context, info) => {
+        tasks: async (_parent, { roomId, limit, offset }, context, _info) => {
             if (!context.user) return []
             const tasks = await db.query.tasks.findMany({
                 with: {
@@ -99,7 +99,7 @@ export const resolvers = {
             })
             return tasks
         },
-        doingTasks: async (parent, { roomId }, context, info) => {
+        doingTasks: async (_parent, { roomId }, context, _info) => {
             if (!context.user) return []
             const tasks = await db.query.tasks.findMany({
                 with: {
@@ -108,7 +108,7 @@ export const resolvers = {
                 where: and(eq(schema.tasks.roomId, roomId), isNull(schema.tasks.endTime)),
             })
 
-            return tasks.map((task) => {
+            return tasks.map(task => {
                 const status = getTaskOnlineStatus(task.id)
                 if (status) {
                     return { ...task, ...status }
@@ -118,7 +118,7 @@ export const resolvers = {
         },
     },
     Mutation: {
-        addTask: async (parent, { roomId, name, maxUser, maxAge, desc }, { user, pubsub }, info) => {
+        addTask: async (_parent, { roomId, name, maxUser, maxAge, desc }, { user, pubsub }, _info) => {
             if (!user) return null
             const task = await checkAndAddTask(roomId, user.id, name, maxUser || 3, maxAge || 30, desc)
             if (task) {
@@ -127,7 +127,7 @@ export const resolvers = {
             }
             return null
         },
-        addTaskAsync: async (parent, { roomId, name, maxUser, maxAge, desc }, { user, pubsub }, info) => {
+        addTaskAsync: async (_parent, { roomId, name, maxUser, maxAge, desc }, { user, pubsub }, _info) => {
             if (!user) return null
             const task = await checkAndAddTask(roomId, user.id, name, maxUser || 3, maxAge || 30, desc)
             if (task) {
@@ -142,7 +142,7 @@ export const resolvers = {
             }
             return null
         },
-        addTaskEndAsync: async (parent, { roomId, name, maxUser, maxAge, desc }, { user, pubsub }, info) => {
+        addTaskEndAsync: async (_parent, { roomId, name, maxUser, maxAge, desc }, { user, pubsub }, _info) => {
             if (!user) return null
             const task = await checkAndAddTask(roomId, user.id, name, maxUser || 3, maxAge || 30, desc)
             if (task) {
@@ -157,7 +157,7 @@ export const resolvers = {
             }
             return null
         },
-        joinTask: async (parent, { taskId }, { user, pubsub }, info) => {
+        joinTask: async (_parent, { taskId }, { user, pubsub }, _info) => {
             if (!user) return false
             const task = await db.query.tasks.findFirst({
                 with: { user: true },
@@ -182,7 +182,7 @@ export const resolvers = {
             pubsub.publish("watchTask", task.id, { watchTask: { ...task, ...getTaskOnlineStatus(task.id) } })
             return true
         },
-        endTask: async (parent, { taskId }, { user, pubsub }, info) => {
+        endTask: async (_parent, { taskId }, { user, pubsub }, _info) => {
             if (!user) return false
             const task = await db.query.tasks.findFirst({
                 with: { user: true },
@@ -205,7 +205,7 @@ export const resolvers = {
             pubsub.publish("watchTask", task.id, { watchTask: task })
             return true
         },
-        pauseTask: async (parent, { taskId }, { user, pubsub }, info) => {
+        pauseTask: async (_parent, { taskId }, { user, pubsub }, _info) => {
             if (!user) return false
             if (!isTaskOnline(taskId)) return false
             const task = await db.query.tasks.findFirst({
@@ -223,15 +223,15 @@ export const resolvers = {
         },
     },
     Subscription: {
-        newTask: async (parent, { roomId }, { user, pubsub }, info) => {
+        newTask: async (_parent, { roomId }, { user, pubsub }, _info) => {
             if (!user) throw createGraphQLError("need login")
             return pubsub.subscribe("newTask", roomId)
         },
-        updateTask: async (parent, { roomId }, { user, pubsub, extra }, info) => {
+        updateTask: async (_parent, { roomId }, { user, pubsub }, _info) => {
             if (!user) throw createGraphQLError("need login")
             return pubsub.subscribe("updateTask", roomId)
         },
-        watchTask: async (parent, { taskId }, { user, pubsub, extra }, info) => {
+        watchTask: async (_parent, { taskId }, { user, pubsub, extra }, _info) => {
             if (!user) throw createGraphQLError("need login")
             const task = await db.query.tasks.findFirst({
                 with: { user: true },
@@ -244,7 +244,7 @@ export const resolvers = {
                 pubsub.publish("updateTask", task.roomId, { updateTask: { ...task, online: true } })
 
                 const oldclose = socket.data.close
-                socket.data.close = async (ws) => {
+                socket.data.close = async ws => {
                     oldclose?.(ws)
                     clearTaskOnline(taskId)
                     const task = await db.query.tasks.findFirst({

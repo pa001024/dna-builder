@@ -1,8 +1,8 @@
 import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
-import { Context } from "../yoga"
-import { id } from "../schema"
-import { getClients, hasUser } from "../kv/room"
 import { createGraphQLError } from "graphql-yoga"
+import { getClients, hasUser } from "../kv/room"
+import { id } from "../schema"
+import type { Context } from "../yoga"
 
 export const typeDefs = /* GraphQL */ `
     type Mutation {
@@ -46,13 +46,13 @@ export const typeDefs = /* GraphQL */ `
 // 内存RTC信令服务器
 export const resolvers = {
     Query: {
-        rtcClients: async (parent, { roomId }, context, info) => {
+        rtcClients: async (_parent, { roomId }, context) => {
             if (!context.user) return []
             return getClients(roomId)
         },
     },
     Mutation: {
-        rtcJoin: async (parent, { roomId }, { user, pubsub }, info) => {
+        rtcJoin: async (_parent, { roomId }, { user }) => {
             if (!user) return null
             if (!hasUser(roomId, user.id)) return null
             return {
@@ -66,17 +66,17 @@ export const resolvers = {
                 clients: getClients(roomId),
             }
         },
-        rtcSignal: async (parent, { roomId, type, from, to, body }, { user, pubsub }, info) => {
+        rtcSignal: async (_parent, { roomId, type, from, to, body }, { user, pubsub }) => {
             if (!user) return false
             const clients = getClients(roomId)
-            const rtc = clients?.find((c) => c.id === from && c.user.id === user.id)
+            const rtc = clients?.find(c => c.id === from && c.user.id === user.id)
             pubsub.publish("newRtcEvent", roomId, { newRtcEvent: { id: id(), type, from, to, body } })
             if (rtc) return true
             return false
         },
     },
     Subscription: {
-        newRtcEvent: (parent, { roomId }, { user, pubsub }, info) => {
+        newRtcEvent: (_parent, { roomId }, { user, pubsub }) => {
             if (!user) throw createGraphQLError("need login")
             return pubsub.subscribe("newRtcEvent", roomId)
         },

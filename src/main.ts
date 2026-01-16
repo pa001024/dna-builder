@@ -4,6 +4,7 @@ import { registerSW } from "virtual:pwa-register"
 import i18next from "i18next"
 import I18NextVue from "i18next-vue"
 import packageJson from "../package.json"
+
 // prevent rightclicks
 // window.addEventListener(
 //   "contextmenu",
@@ -19,17 +20,18 @@ import packageJson from "../package.json"
 
 initI18n(localStorage.getItem("setting_lang") || navigator.language)
 
-import App from "./App.vue"
-import { initI18n } from "./i18n"
 import { createPinia } from "pinia"
-import { router } from "./router"
+import App from "./App.vue"
 import { env } from "./env"
+import { initI18n } from "./i18n"
+import { router } from "./router"
 import "@globalhive/vuejs-tour/dist/style.css"
 const app = createApp(App)
 app.use(createPinia()).use(I18NextVue, { i18next }).use(router)
 
 // Sentry 初始化 - 必须在 app.use 之后
 import * as Sentry from "@sentry/vue"
+
 if (import.meta.env.PROD) {
     Sentry.init({
         app,

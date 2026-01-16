@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from "vue"
+import DOMPurify from "dompurify"
+import MarkdownIt from "markdown-it"
+import { computed, nextTick, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
+import { GuideItem, guideQuery } from "@/api/query"
 import { gqClient } from "../api/graphql"
 import { charMap } from "../data"
-import { serializeCharSettings } from "../composables/useCharSettings"
-import MarkdownIt from "markdown-it"
-import DOMPurify from "dompurify"
 
 const md = MarkdownIt({
     html: false,
@@ -22,44 +22,19 @@ const router = useRouter()
 const { id } = router.currentRoute.value.params
 
 const loading = ref(false)
-const guide = ref<any>(null)
+const guide = ref<GuideItem | null>(null)
 const scrollAreaRef = ref<HTMLElement | null>(null)
 const isUserAtBottom = ref<boolean>(true)
 
 async function fetchGuide() {
     loading.value = true
     try {
-        const result = await gqClient
-            .query(
-                `
-                query Guide($id: String!) {
-                    guide(id: $id) {
-                        id
-                        title
-                        type
-                        content
-                        images
-                        charId
-                        userId
-                        charSettings
-                        views
-                        likes
-                        createdAt
-                        updateAt
-                        user {
-                            id
-                            name
-                        }
-                        isLiked
-                    }
-                }
-            `,
-                { id: id as string }
-            )
-            .toPromise()
+        const result = await guideQuery({
+            id: id as string,
+        })
 
-        if (result.data?.guide) {
-            guide.value = result.data.guide
+        if (result) {
+            guide.value = result
         }
     } finally {
         loading.value = false
@@ -67,7 +42,7 @@ async function fetchGuide() {
 }
 
 const canShowBuild = computed(() => {
-    return guide.value?.charId && guide.value?.charSettings
+    return guide.value?.charId && guide.value?.buildId
 })
 
 const charName = computed(() => {
@@ -124,14 +99,14 @@ async function handleLike() {
 }
 
 function goToBuild() {
-    if (!guide.value?.charId || !guide.value?.charSettings) return
+    if (!guide.value?.charId || !guide.value?.buildId) return
 
     const char = charMap.get(guide.value.charId)
     if (!char) return
 
-    const code = serializeCharSettings(guide.value.charSettings)
+    const buildId = guide.value.buildId
 
-    router.push({ name: "char-build-code", params: { charId: guide.value.charId, code } })
+    router.push({ name: "char-build-code", params: { charId: guide.value.charId, buildId } })
 }
 
 function goToEdit() {
@@ -194,8 +169,8 @@ onMounted(async () => {
                 <div class="flex items-center gap-4 text-sm text-base-content/70">
                     <div class="flex items-center gap-2">
                         <div v-if="guide.user" class="avatar placeholder">
-                            <div class="bg-neutral text-neutral-content rounded-full w-8">
-                                <span class="text-xs">{{ guide.user.name?.[0] || "U" }}</span>
+                            <div class="bg-neutral text-neutral-content rounded-full w-8 inline-flex justify-center items-center">
+                                <QQAvatar :qq="guide.user.qq" :name="guide.user.name" />
                             </div>
                         </div>
                         <span>{{ guide.user?.name }}</span>
@@ -267,7 +242,7 @@ onMounted(async () => {
     </div>
 </template>
 
-<style scoped>
+<style>
 .markdown-content {
     line-height: 1.8;
     white-space: pre-wrap;

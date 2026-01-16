@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { provideClient } from "@urql/vue"
 import { onMounted, watchEffect } from "vue"
+import { gqClient } from "./api/graphql"
+import Updater from "./components/Updater.vue"
+import { env } from "./env"
 import { useSettingStore } from "./store/setting"
 import { useUIStore } from "./store/ui"
-import { env } from "./env"
-import Updater from "./components/Updater.vue"
-import { provideClient } from "@urql/vue"
-import { gqClient } from "./api/graphql"
+
 const setting = useSettingStore()
 const ui = useUIStore()
 watchEffect(() => {

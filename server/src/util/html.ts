@@ -9,7 +9,14 @@ function isSafeURL(value: string): boolean {
 
     if (valueLower.startsWith("javascript:")) return false
     if (valueLower.startsWith("vbscript:")) return false
-    if (valueLower.startsWith("data:")) return false
+    if (
+        valueLower.startsWith("data:") &&
+        !valueLower.startsWith("data:image/png;base64,") &&
+        !valueLower.startsWith("data:image/gif;base64,") &&
+        !valueLower.startsWith("data:image/jpeg;base64,") &&
+        !valueLower.startsWith("data:image/webp;base64,")
+    )
+        return false
     if (valueLower.startsWith("file:")) return false
     if (valueLower.startsWith("about:")) return false
 

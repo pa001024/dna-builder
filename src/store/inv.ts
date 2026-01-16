@@ -1,6 +1,6 @@
 import { useLocalStorage } from "@vueuse/core"
 import { defineStore } from "pinia"
-import { effectMap, LeveledModWithCount, LeveledWeapon, modData, modMap, ModTypeKey, ModTypeMap, weaponData, weaponMap } from "../data"
+import { effectMap, LeveledModWithCount, LeveledWeapon, type ModTypeKey, ModTypeMap, modData, modMap, weaponData, weaponMap } from "../data"
 
 export const useInvStore = defineStore("inv", {
     state: () => {
@@ -45,9 +45,7 @@ export const useInvStore = defineStore("inv", {
         getWBuffLv(weaponId: number, elm: string) {
             if (!(weaponId in this.wLv)) return 0
             const eff = effectMap.get(weaponMap.get(weaponId)!.名称!)
-            console.log("getWBuffLv: 元素", weaponId, elm, eff?.限定)
-            if (eff && eff.限定 && eff.限定 !== elm) {
-                console.log("getWBuffLv: 元素不匹配", weaponId, elm, eff.限定)
+            if (eff?.限定 && eff.限定 !== elm) {
                 return 0
             }
             return this.wLv[weaponId] || 0
@@ -89,7 +87,7 @@ export const useInvStore = defineStore("inv", {
         getMeleeWeapons(useInv: boolean, elm: string) {
             return useInv && this.enableWeapons.近战
                 ? Object.entries(this.meleeWeapons)
-                      .filter(([id]) => !isNaN(+id))
+                      .filter(([id]) => !Number.isNaN(+id))
                       .map(([id, level]) => new LeveledWeapon(+id, level, undefined, this.getWBuffLv(+id, elm)))
                 : weaponData
                       .filter(weapon => weapon.类型[0] === "近战")
@@ -98,7 +96,7 @@ export const useInvStore = defineStore("inv", {
         getRangedWeapons(useInv: boolean, elm: string) {
             return useInv && this.enableWeapons.远程
                 ? Object.entries(this.rangedWeapons)
-                      .filter(([id]) => !isNaN(+id))
+                      .filter(([id]) => !Number.isNaN(+id))
                       .map(([id, level]) => new LeveledWeapon(+id, level, undefined, this.getWBuffLv(+id, elm)))
                 : weaponData
                       .filter(weapon => weapon.类型[0] === "远程")

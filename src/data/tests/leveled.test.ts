@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { LeveledMod, LeveledBuff, LeveledChar, LeveledWeapon } from "../leveled"
-import { CharAttr } from "../CharBuild"
+import type { CharAttr } from "../CharBuild"
 
 // 测试LeveledMod类
 describe("LeveledMod类测试", () => {

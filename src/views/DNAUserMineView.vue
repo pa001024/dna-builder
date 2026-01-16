@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue"
-import { DNAAPI, DNAMineBean, DNAPostListBean } from "dna-api"
-import { useSettingStore } from "../store/setting"
-import { useRoute, useRouter } from "vue-router"
-import { useUIStore } from "../store/ui"
 import { useInfiniteScroll } from "@vueuse/core"
+import { DNAAPI, DNAMineBean, DNAPostListBean } from "dna-api"
+import { computed, onMounted, ref } from "vue"
+import { useRoute, useRouter } from "vue-router"
 import { initEmojiDict } from "@/util"
+import { useSettingStore } from "../store/setting"
+import { useUIStore } from "../store/ui"
 
 const setting = useSettingStore()
 const ui = useUIStore()

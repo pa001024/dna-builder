@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
-import { todosQuery } from "@/api/query"
-import { createSystemTodoMutation, updateSystemTodoMutation, deleteSystemTodoMutation } from "@/api/mutation"
+import { computed, onMounted, ref } from "vue"
+import { createSystemTodoMutation, deleteSystemTodoMutation, updateSystemTodoMutation } from "@/api/mutation"
+import { todosWithCountQuery } from "@/api/query"
 import { useUIStore } from "@/store/ui"
 
 // 待办事项类型定义
@@ -34,7 +34,7 @@ interface EditTodoForm {
 const todos = ref<Todo[]>([])
 const total = ref(0)
 const page = ref(1)
-const pageSize = ref(10)
+const pageSize = 20
 const loading = ref(false)
 const ui = useUIStore()
 
@@ -60,10 +60,10 @@ const formSubmitting = ref(false)
 const fetchTodos = async () => {
     loading.value = true
     try {
-        const offset = (page.value - 1) * pageSize.value
-        const result = await todosQuery(
+        const offset = (page.value - 1) * pageSize
+        const result = await todosWithCountQuery(
             {
-                limit: pageSize.value,
+                limit: pageSize,
                 offset,
                 type: "system", // 只获取系统待办事项
             },
@@ -239,6 +239,9 @@ const formatTime = (timeStr: string | null) => {
     return timeStr
 }
 
+// 计算总页数
+const totalPages = computed(() => Math.ceil(total.value / pageSize))
+
 // 页面挂载时获取待办事项列表
 onMounted(() => {
     fetchTodos()
@@ -268,7 +271,6 @@ onMounted(() => {
                 <table class="table w-full">
                     <thead class="bg-base-200">
                         <tr>
-                            <th class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider">ID</th>
                             <th class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider">标题</th>
                             <th class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider">描述</th>
                             <th class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider">
@@ -288,9 +290,6 @@ onMounted(() => {
                             class="hover:bg-base-200/50 transition-colors duration-200"
                             :class="{ 'bg-base-200/30': index % 2 === 0 }"
                         >
-                            <td class="px-8 py-5 whitespace-nowrap text-sm font-medium text-base-content font-mono">
-                                {{ todo.id.slice(0, 8) }}...
-                            </td>
                             <td class="px-8 py-5 text-sm text-base-content font-medium max-w-xs truncate">{{ todo.title }}</td>
                             <td class="px-8 py-5 text-sm text-base-content/70 max-w-xs truncate">
                                 {{ todo.description || "-" }}
@@ -338,14 +337,11 @@ onMounted(() => {
                             <span class="font-semibold">{{ total }}</span> 条</span
                         >
                     </div>
-                    <div class="flex items-center gap-3">
-                        <button class="btn btn-sm btn-outline" :disabled="page === 1" @click="handlePageChange(page - 1)">
-                            <span class="ri:arrow-left-line mr-1.5"></span>
-                            上一页
-                        </button>
-                        <button class="btn btn-sm btn-outline" :disabled="page * pageSize >= total" @click="handlePageChange(page + 1)">
+                    <div class="flex gap-2">
+                        <button class="btn btn-sm btn-outline" :disabled="page <= 1" @click="handlePageChange(page - 1)">上一页</button>
+                        <input v-model="page" type="number" min="1" :max="totalPages" class="input input-bordered input-sm w-20" />
+                        <button class="btn btn-sm btn-outline" :disabled="page >= totalPages" @click="handlePageChange(page + 1)">
                             下一页
-                            <span class="ri:arrow-right-line ml-1.5"></span>
                         </button>
                     </div>
                 </div>

@@ -1,58 +1,37 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
-import { guidesQuery } from "@/api/query"
-import { updateGuideMutation, deleteGuideMutation, recommendGuideMutation, pinGuideMutation } from "@/api/mutation"
+import { computed, onMounted, ref } from "vue"
+import { deleteGuideMutation, pinGuideMutation, recommendGuideMutation, updateGuideMutation } from "@/api/mutation"
+import { GuideItem, guidesQuery } from "@/api/query"
 import { useUIStore } from "@/store/ui"
-
-// 攻略类型定义
-interface Guide {
-    id: string
-    title: string
-    type: string
-    content: string
-    images: string[]
-    charId: number | null
-    userId: string
-    charSettings: string
-    views: number
-    likes: number
-    isRecommended: boolean | null
-    isPinned: boolean | null
-    createdAt: string
-    updateAt: string
-    user: {
-        id: string
-        name: string
-    }
-}
 
 // 编辑攻略表单数据
 interface EditGuideForm {
     title: string
     type: string
     content: string
-    charId: number | null
+    charId?: number
 }
 
 const ui = useUIStore()
 
 // 攻略列表数据
-const guides = ref<Guide[]>([])
+const guides = ref<GuideItem[]>([])
 const total = ref(0)
 const page = ref(1)
 const pageSize = ref(10)
 const search = ref("")
 const typeFilter = ref("")
 const loading = ref(false)
+const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
 
 // 编辑攻略相关状态
 const editDialogOpen = ref(false)
-const editingGuide = ref<Guide | null>(null)
+const editingGuide = ref<GuideItem | null>(null)
 const editForm = ref<EditGuideForm>({
     title: "",
     type: "",
     content: "",
-    charId: null,
+    charId: undefined,
 })
 const editFormSubmitting = ref(false)
 
@@ -66,7 +45,7 @@ const fetchGuides = async () => {
                 limit: pageSize.value,
                 offset,
                 search: search.value,
-                type: typeFilter.value || null,
+                type: typeFilter.value,
             },
             { requestPolicy: "network-only" }
         )
@@ -101,7 +80,7 @@ const handlePageChange = (newPage: number) => {
 }
 
 // 打开编辑对话框
-const openEditDialog = (guide: Guide) => {
+const openEditDialog = (guide: GuideItem) => {
     editingGuide.value = guide
     editForm.value = {
         title: guide.title,
@@ -120,7 +99,7 @@ const closeEditDialog = () => {
         title: "",
         type: "",
         content: "",
-        charId: null,
+        charId: undefined,
     }
 }
 
@@ -154,7 +133,7 @@ const submitEdit = async () => {
                 content: editForm.value.content,
                 images: editingGuide.value.images || [],
                 charId: editForm.value.charId,
-                charSettings: editingGuide.value.charSettings ? JSON.parse(editingGuide.value.charSettings) : null,
+                buildId: editingGuide.value.buildId,
             },
         })
 
@@ -188,7 +167,7 @@ const deleteGuide = async (guideId: string) => {
 }
 
 // 切换推荐状态
-const toggleRecommend = async (guide: Guide) => {
+const toggleRecommend = async (guide: GuideItem) => {
     try {
         const newStatus = !guide.isRecommended
         const result = await recommendGuideMutation({
@@ -207,7 +186,7 @@ const toggleRecommend = async (guide: Guide) => {
 }
 
 // 切换置顶状态
-const togglePin = async (guide: Guide) => {
+const togglePin = async (guide: GuideItem) => {
     try {
         const newStatus = !guide.isPinned
         const result = await pinGuideMutation({
@@ -280,7 +259,6 @@ onMounted(() => {
                 <table class="table w-full">
                     <thead class="bg-base-200">
                         <tr>
-                            <th class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider">ID</th>
                             <th class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider">标题</th>
                             <th class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider">类型</th>
                             <th class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider">作者</th>
@@ -298,20 +276,16 @@ onMounted(() => {
                             class="hover:bg-base-200/50 transition-colors duration-200"
                             :class="{ 'bg-base-200/30': index % 2 === 0 }"
                         >
-                            <td class="px-8 py-5 whitespace-nowrap text-sm font-medium text-base-content font-mono">
-                                {{ guide.id.slice(0, 8) }}...
-                            </td>
                             <td class="px-8 py-5 text-sm text-base-content font-medium max-w-xs truncate">{{ guide.title }}</td>
                             <td class="px-8 py-5 whitespace-nowrap text-sm">
                                 <span
                                     class="badge badge-sm"
                                     :class="{
-                                        'badge-primary': guide.type === 'char',
-                                        'badge-secondary': guide.type === 'mission',
-                                        'badge-ghost': guide.type === 'other',
+                                        'badge-primary': guide.type === 'text',
+                                        'badge-secondary': guide.type === 'image',
                                     }"
                                 >
-                                    {{ guide.type === "char" ? "角色" : guide.type === "mission" ? "任务" : guide.type }}
+                                    {{ guide.type === "text" ? "图文" : guide.type === "image" ? "一图流" : guide.type }}
                                 </span>
                             </td>
                             <td class="px-8 py-5 whitespace-nowrap text-sm text-base-content/85">{{ guide.user.name }}</td>
@@ -382,14 +356,11 @@ onMounted(() => {
                             <span class="font-semibold">{{ total }}</span> 条</span
                         >
                     </div>
-                    <div class="flex items-center gap-3">
-                        <button class="btn btn-sm btn-outline" :disabled="page === 1" @click="handlePageChange(page - 1)">
-                            <span class="ri:arrow-left-line mr-1.5"></span>
-                            上一页
-                        </button>
-                        <button class="btn btn-sm btn-outline" :disabled="page * pageSize >= total" @click="handlePageChange(page + 1)">
+                    <div class="flex gap-2">
+                        <button class="btn btn-sm btn-outline" :disabled="page <= 1" @click="handlePageChange(page - 1)">上一页</button>
+                        <input v-model="page" type="number" min="1" :max="totalPages" class="input input-bordered input-sm w-20" />
+                        <button class="btn btn-sm btn-outline" :disabled="page >= totalPages" @click="handlePageChange(page + 1)">
                             下一页
-                            <span class="ri:arrow-right-line ml-1.5"></span>
                         </button>
                     </div>
                 </div>

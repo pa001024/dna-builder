@@ -1,3 +1,5 @@
+import { Client as McpClient } from "@modelcontextprotocol/sdk/client"
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js"
 import OpenAI from "openai"
 import type {
     ChatCompletionMessageFunctionToolCall,
@@ -5,8 +7,6 @@ import type {
     ChatCompletionTool,
     ChatCompletionToolMessageParam,
 } from "openai/resources/index.mjs"
-import { Client as McpClient } from "@modelcontextprotocol/sdk/client"
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js"
 
 // 智谱AI OpenAI兼容API接口
 // 参考: https://docs.bigmodel.cn/cn/guide/develop/openai/introduction
@@ -241,7 +241,7 @@ export class AIClient {
         const functionName = toolCall.function.name
         const args = JSON.parse(toolCall.function.arguments)
 
-        let result
+        let result: string | { output: string; error: string }
         switch (functionName) {
             case "image_grab":
                 result = await imageGrab(args.process_name, this.config)

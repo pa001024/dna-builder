@@ -1,6 +1,6 @@
-import { TimeBasicResponse, RespCode } from "../TimeBasicResponse"
-import { DNACommonConfigEntity } from "../type-generated"
-import { build_signature, build_upload_signature, rsa_encrypt, RequestOptions, HeadersPayload, aesDecryptImageUrl } from "./utils"
+import { RespCode, TimeBasicResponse } from "../TimeBasicResponse"
+import type { DNACommonConfigEntity } from "../type-generated"
+import { aesDecryptImageUrl, build_signature, build_upload_signature, type HeadersPayload, type RequestOptions, rsa_encrypt } from "./utils"
 
 export class DNABaseAPI {
     public fetchFn?: typeof fetch
@@ -14,7 +14,7 @@ export class DNABaseAPI {
     constructor(
         public dev_code: string,
         public token = "",
-        options: { fetchFn?: typeof fetch; is_h5?: boolean; rsa_public_key?: string } = {},
+        options: { fetchFn?: typeof fetch; is_h5?: boolean; rsa_public_key?: string } = {}
     ) {
         this.fetchFn = options.fetchFn
         if (options.is_h5 !== undefined) this.is_h5 = options.is_h5
@@ -24,7 +24,7 @@ export class DNABaseAPI {
     async fileUpload(url: string, data: FormData) {
         const res = await this._dna_request<string[]>(url, data, { sign: true })
         if (res.is_success && res.data) {
-            res.data = res.data.map((url) => aesDecryptImageUrl(url, this.uploadKey))
+            res.data = res.data.map(url => aesDecryptImageUrl(url, this.uploadKey))
         }
         return res
     }
@@ -138,7 +138,7 @@ export class DNABaseAPI {
                         "/media/av/cfg/getAudios",
                         "/media/av/cfg/getImages",
                         "/encourage/signin/signin",
-                    ].map((item) => item.replace(/^\/+/, "")),
+                    ].map(item => item.replace(/^\/+/, ""))
                 )
             }
         }
@@ -149,7 +149,7 @@ export class DNABaseAPI {
         try {
             const configRes = await this._dna_request<DNACommonConfigEntity>("config/getCommonConfig", undefined, { sign: false })
             if (configRes.is_success && configRes.data?.signApiConfigVo?.signApiList) {
-                this.sign_api_urls = new Set(configRes.data.signApiConfigVo.signApiList.map((item) => item.replace(/^\/+/, "")))
+                this.sign_api_urls = new Set(configRes.data.signApiConfigVo.signApiList.map(item => item.replace(/^\/+/, "")))
             }
         } catch (error) {
             console.error("初始化签名配置失败:", error)
@@ -230,14 +230,14 @@ export class DNABaseAPI {
                         if (typeof raw_res.data === "string") {
                             raw_res.data = JSON.parse(raw_res.data)
                         }
-                    } catch (e) {}
+                    } catch {}
                 }
 
                 return new TimeBasicResponse<T>(raw_res)
             } catch (e) {
                 console.error(`请求失败: ${(e as Error).message}`)
                 if (attempt < max_retries - 1) {
-                    await new Promise((resolve) => setTimeout(resolve, retry_delay * Math.pow(2, attempt)))
+                    await new Promise(resolve => setTimeout(resolve, retry_delay * 2 ** attempt))
                 }
             }
         }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { IconTypes } from "@/components/Icon.vue"
 import { Handle, Position } from "@vue-flow/core"
 import { computed } from "vue"
+import { IconTypes } from "@/components/Icon.vue"
 import { useNodeEditorStore } from "@/store/nodeEditor"
 
 const props = defineProps<{

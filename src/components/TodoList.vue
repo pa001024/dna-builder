@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue"
-import { userTodosQuery } from "@/api/query"
-import { createTodoMutation, updateTodoMutation, deleteTodoMutation, completeTodoMutation } from "@/api/mutation"
-import { useUserStore } from "@/store/user"
 import { useLocalStorage } from "@vueuse/core"
+import { computed, onMounted, ref } from "vue"
+import { completeTodoMutation, createTodoMutation, deleteTodoMutation, updateTodoMutation } from "@/api/mutation"
+import { userTodosWithCountQuery } from "@/api/query"
 import { useUIStore } from "@/store/ui"
+import { useUserStore } from "@/store/user"
 
 const userStore = useUserStore()
 const ui = useUIStore()
@@ -74,7 +74,7 @@ const systemTodos = computed(() => {
 const fetchTodos = async () => {
     loading.value = true
     try {
-        const result = await userTodosQuery(
+        const result = await userTodosWithCountQuery(
             {
                 limit: 100,
                 offset: 0,

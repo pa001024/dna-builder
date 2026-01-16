@@ -1,5 +1,5 @@
-import { Skill, SkillField } from "../data-types"
-import { CharAttr, WeaponAttr } from "../CharBuild"
+import type { CharAttr, WeaponAttr } from "../CharBuild"
+import type { Skill, SkillField } from "../data-types"
 
 export interface LeveledSkillField {
     名称: string
@@ -137,25 +137,25 @@ export class LeveledSkill {
                 }
                 const propSet = new Set(field.影响.split(","))
                 if (propSet.has("技能范围")) {
-                    val = val * tt["技能范围"]
+                    val = val * tt.技能范围
                 }
                 if (propSet.has("技能威力")) {
-                    val = val * tt["技能威力"]
-                    val2 = val2 * tt["技能威力"]
+                    val = val * tt.技能威力
+                    val2 = val2 * tt.技能威力
                 }
                 if (propSet.has("技能耐久")) {
                     if (field.名称.includes("每秒神智消耗")) {
-                        val = val / tt["技能耐久"]
+                        val = val / tt.技能耐久
                     } else {
-                        val = val * tt["技能耐久"]
+                        val = val * tt.技能耐久
                     }
                 }
                 if (propSet.has("技能效益")) {
                     if (propSet.has("技能耐久")) {
                         // 耐久和效益共同影响下仍有175%最大上限
-                        val = field.值 * Math.max(0.25, (2 - tt["技能效益"]) / tt["技能耐久"])
+                        val = field.值 * Math.max(0.25, (2 - tt.技能效益) / tt.技能耐久)
                     } else {
-                        val = field.值 * (2 - tt["技能效益"])
+                        val = field.值 * (2 - tt.技能效益)
                     }
                 }
                 if (field.名称.includes("神智消耗")) {

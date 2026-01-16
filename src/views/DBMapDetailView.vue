@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { ref, computed, onMounted } from "vue"
-import { useRoute } from "vue-router"
-import type { DBMapMarker, DBMap } from "../data/d/map.data"
 import type { DNAMapMatterCategorizeOption, DNAMapSite } from "dna-api"
+import { computed, onMounted, ref } from "vue"
+import { useRoute } from "vue-router"
 import { getMapAPI } from "../api/app"
+import type { DBMap, DBMapMarker } from "../data/d/map.data"
 
 const route = useRoute()
 

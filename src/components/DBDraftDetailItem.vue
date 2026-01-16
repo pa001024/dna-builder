@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { computed } from "vue"
-import type { Draft } from "../data/data-types"
-import { modMap, weaponMap } from "../data/d/index"
 import { LeveledMod } from "../data"
+import { modMap, weaponMap } from "../data/d/index"
+import type { Draft } from "../data/data-types"
 
 const props = defineProps<{
     draft: Draft

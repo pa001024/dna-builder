@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue"
-import { ref } from "vue"
 import { DNAAPI } from "dna-api"
+import { computed, onMounted, ref } from "vue"
 import { tauriFetch } from "../api/app"
 
 const errorMessage = ref("")

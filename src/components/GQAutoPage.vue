@@ -1,6 +1,10 @@
-<script lang="ts" setup>
+<script
+    lang="ts"
+    setup
+    generic="T extends { (...args: any[]): any; raw: string }, V extends T extends (variables: infer V) => any ? V : never"
+>
 import { until, useInfiniteScroll } from "@vueuse/core"
-import { Ref, computed, nextTick, onMounted, ref, watch } from "vue"
+import { computed, nextTick, onMounted, Ref, ref, watch } from "vue"
 
 const props = defineProps<{
     distance?: number
@@ -8,14 +12,14 @@ const props = defineProps<{
     limit?: number
     offset?: number
     innerClass?: string
-    query: string
-    variables: any
-    dataKey: string
+    query: T
+    variables: V
+    dataKey?: string
     requestPolicy?: "cache-first" | "cache-only" | "network-only" | "cache-and-network"
 }>()
 
 defineSlots<{
-    default: (props: { data: any; fetching: boolean; stale: boolean }) => any
+    default: (props: { data: Awaited<ReturnType<T>>; fetching: boolean; stale: boolean }) => void
 }>()
 
 const el = ref<HTMLElement | null>(null)

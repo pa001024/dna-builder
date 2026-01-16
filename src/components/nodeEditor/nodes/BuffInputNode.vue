@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, computed } from "vue"
-import BaseNode from "./BaseNode.vue"
+import { computed, ref } from "vue"
+import { buffData, buffMap } from "@/data"
 import { useNodeEditorStore } from "@/store/nodeEditor"
 import { matchPinyin } from "@/utils/pinyin-utils"
-import { buffData, buffMap } from "@/data"
+import BaseNode from "./BaseNode.vue"
 
 const props = defineProps<{
     id: string

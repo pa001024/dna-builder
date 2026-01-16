@@ -12,12 +12,7 @@
         "test:watch": "vitest",
         "test:ui": "vitest --ui"
     },
-    "keywords": [
-        "dna-builder",
-        "game",
-        "data",
-        "models"
-    ],
+    "keywords": ["dna-builder", "game", "data", "models"],
     "author": "pa001024",
     "license": "MIT",
     "repository": {
@@ -32,10 +27,5 @@
         "typescript": "~5.6.2",
         "vitest": "^4.0.15"
     },
-    "files": [
-        "*.ts",
-        "leveled/*.ts",
-        "d/*.ts",
-        "README.md"
-    ]
+    "files": ["*.ts", "leveled/*.ts", "d/*.ts", "README.md"]
 }

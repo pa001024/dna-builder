@@ -1,15 +1,15 @@
-import { AIClient, OpenAIConfig } from "./openai"
-import { charData, modData, buffData, weaponData, CharBuild, ModTypeKey, LeveledMod } from "../data"
+import { useLocalStorage } from "@vueuse/core"
 import type {
     ChatCompletionMessageFunctionToolCall,
     ChatCompletionMessageParam,
     ChatCompletionTool,
     ChatCompletionToolMessageParam,
 } from "openai/resources/index.mjs"
-import type { CharSettings, useCharSettings } from "../composables/useCharSettings"
-import type { useInvStore } from "../store/inv"
 import type { Ref } from "vue"
-import { useLocalStorage } from "@vueuse/core"
+import type { CharSettings, useCharSettings } from "../composables/useCharSettings"
+import { buffData, CharBuild, charData, LeveledMod, type ModTypeKey, modData, weaponData } from "../data"
+import type { useInvStore } from "../store/inv"
+import { AIClient, type OpenAIConfig } from "./openai"
 
 /**
  * 角色配装AI Agent
@@ -492,7 +492,7 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
         }
         if (params.keywords) {
             const keyword = params.keywords.toLowerCase()
-            mods = mods.filter(m => m.名称.toLowerCase().includes(keyword) || (m.效果 && m.效果.toLowerCase().includes(keyword)))
+            mods = mods.filter(m => m.名称.toLowerCase().includes(keyword) || m.效果?.toLowerCase().includes(keyword))
         }
 
         // 限制返回数量

@@ -1,5 +1,5 @@
-import { getCurrentWindow } from "@tauri-apps/api/window"
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow"
+import { getCurrentWindow } from "@tauri-apps/api/window"
 
 export async function openSChat(path: string) {
     const app = getCurrentWindow()
@@ -7,7 +7,7 @@ export async function openSChat(path: string) {
     const size = await app.innerSize()
 
     const win = new WebviewWindow("si", {
-        url: location.origin + "/#" + path,
+        url: `${location.origin}/#${path}`,
         x: pos.x,
         y: pos.y,
         minWidth: 447,

@@ -1,8 +1,8 @@
 import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
-import { eq, and, or, desc, sql, like } from "drizzle-orm"
+import { and, desc, eq, or, sql } from "drizzle-orm"
+import { createGraphQLError } from "graphql-yoga"
 import { db, schema } from ".."
 import type { Context } from "../yoga"
-import { createGraphQLError } from "graphql-yoga"
 import { getSubSelection } from "."
 
 export const typeDefs = /* GraphQL */ `
@@ -46,7 +46,7 @@ export const typeDefs = /* GraphQL */ `
 
 export const resolvers = {
     Query: {
-        todos: async (parent, args, context, info) => {
+        todos: async (_parent, args, context, info) => {
             const { type, limit = 20, offset = 0 } = args || {}
             const conditions: any[] = []
 
@@ -79,13 +79,13 @@ export const resolvers = {
             })
 
             // 使用数据库查询结果中的 completions，无需 Promise.all
-            const todosWithCompleted = result.map((todo) => {
+            const todosWithCompleted = result.map(todo => {
                 let isCompleted = false
 
                 // 只有系统待办事项需要检查完成状态
                 if (todo.type === "system" && context.user && todo.completions) {
                     // 检查当前用户是否已完成该系统todo
-                    isCompleted = todo.completions.some((c) => c.userId === context.user!.id)
+                    isCompleted = todo.completions.some(c => c.userId === context.user!.id)
                 }
 
                 return {
@@ -101,7 +101,7 @@ export const resolvers = {
 
             return todosWithCompleted
         },
-        todo: async (parent, args, context, info) => {
+        todo: async (_parent, args, context, info) => {
             const { id } = args
 
             const withUser = getSubSelection(info, "user")
@@ -126,7 +126,7 @@ export const resolvers = {
             // 计算完成状态（使用数据库查询结果中的 completions）
             let isCompleted = false
             if (todo.type === "system" && context.user && todo.completions) {
-                isCompleted = todo.completions.some((c) => c.userId === context.user!.id)
+                isCompleted = todo.completions.some(c => c.userId === context.user!.id)
             }
 
             return {
@@ -139,7 +139,7 @@ export const resolvers = {
                 isCompleted,
             }
         },
-        todosCount: async (parent, args, context) => {
+        todosCount: async (_parent, args, context) => {
             const { type } = args || {}
             const conditions: any[] = []
 
@@ -160,15 +160,12 @@ export const resolvers = {
 
             const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
-            const [result] = await db
-                .select({ count: sql<number>`count(*)` })
-                .from(schema.todos)
-                .where(whereClause)
+            const [result] = await db.select({ count: sql<number>`count(*)` }).from(schema.todos).where(whereClause)
             return result?.count || 0
         },
     },
     Mutation: {
-        createTodo: async (parent, args, context, info) => {
+        createTodo: async (_parent, args, context, info) => {
             if (!context.user) {
                 throw createGraphQLError("需要登录")
             }
@@ -203,7 +200,7 @@ export const resolvers = {
                 isCompleted: false,
             }
         },
-        updateTodo: async (parent, args, context, info) => {
+        updateTodo: async (_parent, args, context, info) => {
             if (!context.user) {
                 throw createGraphQLError("需要登录")
             }
@@ -243,7 +240,7 @@ export const resolvers = {
                 isCompleted: false,
             }
         },
-        deleteTodo: async (parent, { id }, context) => {
+        deleteTodo: async (_parent, { id }, context) => {
             if (!context.user) {
                 throw createGraphQLError("需要登录")
             }
@@ -264,7 +261,7 @@ export const resolvers = {
             await db.delete(schema.todos).where(eq(schema.todos.id, id))
             return true
         },
-        createSystemTodo: async (parent, args, context, info) => {
+        createSystemTodo: async (_parent, args, context, info) => {
             if (!context.user || !context.user.roles?.includes("admin")) {
                 throw createGraphQLError("无权限")
             }
@@ -299,7 +296,7 @@ export const resolvers = {
                 isCompleted: false,
             }
         },
-        updateSystemTodo: async (parent, args, context, info) => {
+        updateSystemTodo: async (_parent, args, context, info) => {
             if (!context.user || !context.user.roles?.includes("admin")) {
                 throw createGraphQLError("无权限")
             }
@@ -319,6 +316,10 @@ export const resolvers = {
             }
 
             const [updated] = await db.update(schema.todos).set(input).where(eq(schema.todos.id, id)).returning()
+
+            if (!updated) {
+                throw createGraphQLError("更新待办事项失败")
+            }
 
             // 重新查询完整数据（包含 completions）
             const withUser = getSubSelection(info, "user")
@@ -350,7 +351,7 @@ export const resolvers = {
                 isCompleted,
             }
         },
-        deleteSystemTodo: async (parent, { id }, context) => {
+        deleteSystemTodo: async (_parent, { id }, context) => {
             if (!context.user || !context.user.roles?.includes("admin")) {
                 throw createGraphQLError("无权限")
             }
@@ -371,7 +372,7 @@ export const resolvers = {
             await db.delete(schema.todos).where(eq(schema.todos.id, id))
             return true
         },
-        completeTodo: async (parent, args, context, info) => {
+        completeTodo: async (_parent, args, context, info) => {
             if (!context.user) {
                 throw createGraphQLError("需要登录")
             }

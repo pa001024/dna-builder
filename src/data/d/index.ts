@@ -1,15 +1,15 @@
-import { Mod, Buff, Weapon, WeaponBase, Char, Monster, Reward, Draft, Dungeon } from "../data-types"
-import charData from "./char.data"
-import monsterData from "./monster.data"
-import modData from "./mod.data"
-import buffData from "./buff.data"
-import effectData from "./effect.data"
-import weaponData from "./weapon.data"
+import type { Buff, Char, Draft, Dungeon, Mod, Monster, Reward, Weapon, WeaponBase } from "../data-types"
+import { type AbyssBuff, type AbyssDungeon, abyssBuffs, abyssDungeons } from "./abyss.data"
 import baseData from "./base.data"
-import rewardData from "./reward.data"
+import buffData from "./buff.data"
+import charData from "./char.data"
 import draftData from "./draft.data"
 import dungeonData from "./dungeon.data"
-import { AbyssBuff, abyssBuffs, AbyssDungeon, abyssDungeons } from "./abyss.data"
+import effectData from "./effect.data"
+import modData from "./mod.data"
+import monsterData from "./monster.data"
+import rewardData from "./reward.data"
+import weaponData from "./weapon.data"
 
 // 将静态表转换为Map，提高查找效率
 export const charMap = new Map<number | string, Char>()
@@ -107,7 +107,7 @@ function findModRewards(child: any[], modIds: Set<number>, visited: Set<number> 
             visited.add(item.id)
 
             const reward = rewardMap.get(item.id)
-            if (reward && reward.child) {
+            if (reward?.child) {
                 // 递归查找子奖励
                 findModRewards(reward.child, modIds, visited)
             }
@@ -125,7 +125,7 @@ dungeonData.forEach(dungeon => {
     if (rewardIds.length > 0) {
         rewardIds.forEach(rewardId => {
             const reward = rewardMap.get(rewardId)
-            if (reward && reward.child) {
+            if (reward?.child) {
                 // 递归查找Mod类型的奖励
                 const modIds = new Set<number>()
                 findModRewards(reward.child, modIds)
@@ -146,15 +146,15 @@ import petData, { type Pet } from "./pet.data"
 export const petMap = new Map<number, Pet>()
 petData.forEach(v => petMap.set(v.id, v))
 
-export { type DBMap, type DBMapMarker } from "./map.data"
+export type { DBMap, DBMapMarker } from "./map.data"
 
 import walnutData, { type Walnut } from "./walnut.data"
 export const walnutMap = new Map<number, Walnut>()
 walnutData.forEach(v => walnutMap.set(v.id, v))
 
-export { type WalnutReward, type Walnut } from "./walnut.data"
+export type { Walnut, WalnutReward } from "./walnut.data"
 
-import { fishs, fishingSpots, type Fish, type FishingSpot } from "./fish.data"
+import { type Fish, type FishingSpot, fishingSpots, fishs } from "./fish.data"
 export const fishMap = new Map<number, Fish>()
 fishs.forEach(v => fishMap.set(v.id, v))
 
@@ -171,4 +171,4 @@ fishingSpots.forEach(v =>
     })
 )
 
-export { type Fish, type FishingSpot }
+export type { Fish, FishingSpot }

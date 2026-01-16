@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import BaseNode from "./BaseNode.vue"
-import { computed, ref } from "vue"
-import { useNodeEditorStore } from "@/store/nodeEditor"
-import { modData } from "@/data"
 import { t } from "i18next"
+import { computed, ref } from "vue"
+import { modData } from "@/data"
+import { useNodeEditorStore } from "@/store/nodeEditor"
+import BaseNode from "./BaseNode.vue"
 
 const props = defineProps<{
     id: string

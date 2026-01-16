@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue"
+import { computed, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
-import { gqClient } from "../api/graphql"
+import { GuideItem, guidesQuery } from "@/api/query"
 import { charData } from "../data"
 
 const router = useRouter()
 
 const searchKeyword = ref("")
 const selectedType = ref<"all" | "text" | "image">("all")
-const selectedCharId = ref<number | null>(null)
+const selectedCharId = ref<number | undefined>(undefined)
 const loading = ref(false)
-const guides = ref<any[]>([])
+const guides = ref<GuideItem[]>([])
 
 const typeOptions = [
     { value: "all", label: "全部" },
@@ -29,43 +29,18 @@ const charOptions = computed(() => [
 async function fetchGuides(offset = 0) {
     loading.value = true
     try {
-        const result = await gqClient
-            .query(
-                `query Guides($type: String, $charId: Int, $limit: Int, $offset: Int) {
-                    guides(type: $type, charId: $charId, limit: $limit, offset: $offset) {
-                        id
-                        title
-                        type
-                        content
-                        images
-                        charId
-                        userId
-                        charSettings
-                        views
-                        likes
-                        createdAt
-                        user {
-                            id
-                            name
-                            pic
-                        }
-                        isLiked
-                    }
-                }`,
-                {
-                    type: selectedType.value === "all" ? undefined : selectedType.value,
-                    charId: selectedCharId.value,
-                    limit: 20,
-                    offset,
-                }
-            )
-            .toPromise()
+        const result = await guidesQuery({
+            type: selectedType.value === "all" ? undefined : selectedType.value,
+            charId: selectedCharId.value,
+            limit: 20,
+            offset,
+        })
 
-        if (result.data?.guides) {
+        if (result?.guides) {
             if (offset === 0) {
-                guides.value = result.data.guides
+                guides.value = result.guides
             } else {
-                guides.value.push(...result.data.guides)
+                guides.value.push(...result.guides)
             }
         }
     } finally {
@@ -162,22 +137,13 @@ onMounted(() => {
                                     <Icon icon="ri:eye-line" class="w-4 h-4" />
                                     <span>{{ guide.views }}</span>
                                 </div>
-                                <div class="flex items-center gap-1">
-                                    <Icon
-                                        :icon="guide.isLiked ? 'ri:heart-fill' : 'ri:heart-line'"
-                                        class="w-4 h-4"
-                                        :class="guide.isLiked ? 'text-red-500' : ''"
-                                    />
-                                    <span>{{ guide.likes }}</span>
-                                </div>
                             </div>
                             <span>{{ formatDate(guide.createdAt) }}</span>
                         </div>
                         <div v-if="guide.user" class="flex items-center gap-2 mt-2">
                             <div class="avatar placeholder">
                                 <div class="bg-neutral text-neutral-content rounded-full w-8 inline-flex justify-center items-center">
-                                    <img v-if="guide.user.pic" :src="guide.user.pic" alt="用户头像" class="w-full h-full rounded-full" />
-                                    <span v-else class="text-xs">{{ guide.user.name?.[0] || "U" }}</span>
+                                    <QQAvatar :qq="guide.user.qq" :name="guide.user.name" />
                                 </div>
                             </div>
                             <span class="text-xs text-base-content/70">{{ guide.user.name }}</span>

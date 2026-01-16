@@ -1,35 +1,39 @@
 <script setup lang="ts">
-import { VueFlow, useVueFlow } from "@vue-flow/core"
 import { Background } from "@vue-flow/background"
 import { Controls } from "@vue-flow/controls"
+import { useVueFlow, VueFlow } from "@vue-flow/core"
 import { MiniMap } from "@vue-flow/minimap"
 import "@vue-flow/core/dist/style.css"
 import "@vue-flow/core/dist/theme-default.css"
-import { computed, ref, markRaw, onMounted, onUnmounted } from "vue"
+import type { EdgeMouseEvent, NodeMouseEvent } from "@vue-flow/core"
+import { nanoid } from "nanoid"
+import { computed, markRaw, onMounted, onUnmounted, ref } from "vue"
+import { useCharSettings } from "@/composables/useCharSettings"
+import { useUIStore } from "@/store/ui"
+import { importCharSettingsToNodeEditor } from "@/utils/importCharSettingsToNodeEditor"
 import { useNodeEditorStore } from "../../store/nodeEditor"
-import { PALETTE_ITEMS, type PaletteItem, type NodeData } from "./types"
-import CharInputNode from "./nodes/CharInputNode.vue"
-import MeleeWeaponInputNode from "./nodes/MeleeWeaponInputNode.vue"
-import RangedWeaponInputNode from "./nodes/RangedWeaponInputNode.vue"
-import ModInputNode from "./nodes/ModInputNode.vue"
-import BuffInputNode from "./nodes/BuffInputNode.vue"
-import CoreCalcNode from "./nodes/CoreCalcNode.vue"
-import AttrCalcNode from "./nodes/AttrCalcNode.vue"
-import SkillDmgCalcNode from "./nodes/SkillDmgCalcNode.vue"
+import AddCalcNode from "./nodes/AddCalcNode.vue"
 import ASTExpressionNode from "./nodes/ASTExpressionNode.vue"
+import AttrCalcNode from "./nodes/AttrCalcNode.vue"
+import BuffInputNode from "./nodes/BuffInputNode.vue"
+import CharInputNode from "./nodes/CharInputNode.vue"
+import CoreCalcNode from "./nodes/CoreCalcNode.vue"
+import EnemyInputNode from "./nodes/EnemyInputNode.vue"
+import ExpressionCalcNode from "./nodes/ExpressionCalcNode.vue"
 import FullCalcNode from "./nodes/FullCalcNode.vue"
+import HubNode from "./nodes/HubNode.vue"
+import MeleeWeaponInputNode from "./nodes/MeleeWeaponInputNode.vue"
+import ModInputNode from "./nodes/ModInputNode.vue"
+import MultiplyCalcNode from "./nodes/MultiplyCalcNode.vue"
+import RangedWeaponInputNode from "./nodes/RangedWeaponInputNode.vue"
+import SkillDmgCalcNode from "./nodes/SkillDmgCalcNode.vue"
 import WeaponAttrCalcNode from "./nodes/WeaponAttrCalcNode.vue"
 import WeaponDmgCalcNode from "./nodes/WeaponDmgCalcNode.vue"
-import type { NodeMouseEvent, EdgeMouseEvent } from "@vue-flow/core"
-import EnemyInputNode from "./nodes/EnemyInputNode.vue"
-import AddCalcNode from "./nodes/AddCalcNode.vue"
-import MultiplyCalcNode from "./nodes/MultiplyCalcNode.vue"
-import ExpressionCalcNode from "./nodes/ExpressionCalcNode.vue"
-import HubNode from "./nodes/HubNode.vue"
-import { nanoid } from "nanoid"
+import { type NodeData, PALETTE_ITEMS, type PaletteItem } from "./types"
 
 // Store
 const store = useNodeEditorStore()
+const ui = useUIStore()
 
 // VueFlow 实例
 const { onInit, fitView, getSelectedNodes, getSelectedEdges } = useVueFlow()
@@ -460,10 +464,31 @@ onUnmounted(() => {
     // 停止自动保存
     store.stopAutoSave()
 })
+
+const transferDialogShow = ref(false)
+const selectedCharName = ref("")
+function handleTransfer(charName: string) {
+    const charSettings = useCharSettings(computed(() => charName))
+    if (!charSettings) {
+        ui.showErrorMessage(`角色 ${charName} 不存在`)
+        return
+    }
+    importCharSettingsToNodeEditor(charName, charSettings.value)
+    transferDialogShow.value = false
+}
 </script>
 
 <template>
     <div class="flex h-full w-full" style="touch-action: manipulation">
+        <DialogModel v-model="transferDialogShow">
+            <div class="flex flex-col gap-2">
+                <div>从角色构筑导入数据</div>
+                <CharSelect v-model="selectedCharName" />
+            </div>
+            <template #action>
+                <button class="btn btn-sm btn-primary" :disabled="!selectedCharName" @click="handleTransfer(selectedCharName)">迁移</button>
+            </template>
+        </DialogModel>
         <!-- 调色板侧边栏 -->
         <div class="w-64 bg-base-200 border-r border-base-300 p-4 overflow-y-auto">
             <h2 class="text-lg font-bold mb-4">节点列表</h2>
@@ -539,6 +564,10 @@ onUnmounted(() => {
 
                 <!-- 导入导出 -->
                 <div class="flex items-center gap-2">
+                    <button class="btn btn-sm btn-outline" @click="transferDialogShow = true">
+                        <Icon icon="ri:file-transfer-line" class="mr-1" />
+                        迁移
+                    </button>
                     <button class="btn btn-sm btn-outline" @click="handleImport">
                         <Icon icon="ri:upload-2-line" class="mr-1" />
                         导入

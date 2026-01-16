@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { onUnmounted, ref, watchEffect } from "vue"
-import GameOverlay from "./GameOverlay.vue"
-import { VoxelEngine } from "../game/services/VoxelEngine"
-import { CharBuild } from "../data"
-import { FloatingText, PlayerStats, Monster, GameSettings } from "../game/types"
 import { useLocalStorage } from "@vueuse/core"
+import { onUnmounted, ref, watchEffect } from "vue"
+import { CharBuild } from "../data"
+import { VoxelEngine } from "../game/services/VoxelEngine"
+import { FloatingText, GameSettings, Monster, PlayerStats } from "../game/types"
+import GameOverlay from "./GameOverlay.vue"
 
 const props = defineProps<{
     charBuild: CharBuild

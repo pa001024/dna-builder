@@ -1,10 +1,7 @@
-import { describe, it, expect, beforeEach } from "vitest"
+import { beforeEach, describe, expect, it } from "vitest"
+import { type ASTBinary, type ASTFunction, type ASTMemberAccess, type ASTProperty, type ASTUnary, parseAST } from "../ast"
 import { CharBuild } from "../CharBuild"
-import { LeveledChar } from "../leveled"
-import { LeveledWeapon } from "../leveled"
-import { LeveledMod } from "../leveled"
-import { LeveledBuff } from "../leveled"
-import { parseAST, ASTProperty, ASTFunction, ASTBinary, ASTUnary, ASTMemberAccess } from "../ast"
+import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
 
 describe("evaluateAST函数测试", () => {
     let charBuild: CharBuild
@@ -295,7 +292,7 @@ describe("evaluateAST函数测试", () => {
             const result2 = charBuild.evaluateAST(expression, attrs)
 
             expect(result1).toBe(result2)
-            expect(charBuild["astCache"].has(expression)).toBe(true)
+            expect(charBuild.astCache.has(expression)).toBe(true)
         })
 
         it("应该为不同表达式创建不同的缓存", () => {
@@ -305,7 +302,7 @@ describe("evaluateAST函数测试", () => {
             charBuild.evaluateAST("攻击 * 2", attrs)
             // console.log(charBuild["astCache"])
 
-            expect(charBuild["astCache"].size).toBe(2)
+            expect(charBuild.astCache.size).toBe(2)
         })
     })
 

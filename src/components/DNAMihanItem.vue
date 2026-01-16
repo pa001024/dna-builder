@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { MihanNotify } from "../store/mihan"
 import { timeStr, useGameTimer } from "../util"
+
 const { mihan } = useGameTimer()
 
 defineProps<{

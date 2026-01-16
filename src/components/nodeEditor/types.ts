@@ -1,6 +1,6 @@
 import type { Node } from "@vue-flow/core"
 import { NodeType } from "../../store/nodeEditor"
-import { IconTypes } from "../Icon.vue"
+import type { IconTypes } from "../Icon.vue"
 
 /**
  * 节点数据接口

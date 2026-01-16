@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { AbyssDungeon, abyssDungeonMap, Dungeon, monsterMap } from "../data"
+import { type AbyssDungeon, abyssDungeonMap, type Dungeon, monsterMap } from "../data"
 import { getRewardDetails } from "./reward-utils"
 
 // 获取副本类型信息
@@ -28,9 +28,9 @@ export function getDungeonType(type: string): { t: string; label: string; color:
 
 export function getAbyssDungeonGroup(dungeon: AbyssDungeon) {
     const typeMap: Record<string, string> = {
-        "奖励进度·经典剧目": "经典剧目",
-        "奖励进度·热映剧目": "热映剧目",
-        "奖励进度·不朽剧目": "不朽剧目",
+        奖励进度·经典剧目: "经典剧目",
+        奖励进度·热映剧目: "热映剧目",
+        奖励进度·不朽剧目: "不朽剧目",
     }
     return typeMap[dungeon.art || ""] || "经典剧目"
 }
@@ -42,7 +42,7 @@ export function getAbyssDungeonLevel(dungeon: AbyssDungeon) {
 }
 
 export function getAbyssDungeonName(dungeon: AbyssDungeon) {
-    return getAbyssDungeonGroup(dungeon) + " " + getAbyssDungeonLevel(dungeon)
+    return `${getAbyssDungeonGroup(dungeon)} ${getAbyssDungeonLevel(dungeon)}`
 }
 
 const mhList = [
@@ -70,13 +70,13 @@ export function getDungeonName(dungeon: Dungeon) {
     const yehang = ["DefenceMove", "ExtermPro"]
     if (yehang.includes(dungeon.t) && dungeon.sr && dungeon.sm) {
         if (dungeon.sm.length > 1) {
-            return t(dungeon.n) + `(${t(monsterMap.get(dungeon.sm[0]!)!.n)} ${t("夜航手册")} 多号令)`
+            return `${t(dungeon.n)}(${t(monsterMap.get(dungeon.sm[0]!)!.n)} ${t("夜航手册")} 多号令)`
         }
-        return t(dungeon.n) + `(${t(monsterMap.get(dungeon.sm[0])!.n)} ${t("夜航手册")})`
+        return `${t(dungeon.n)}(${t(monsterMap.get(dungeon.sm[0])!.n)} ${t("夜航手册")})`
     }
     const walnutType = [1, 2, 3].find(walnutType => mhList[walnutType].has(dungeon.id))
     if (walnutType) {
-        return t(dungeon.n) + `(${t(["角色", "武器", "魔之楔"][walnutType - 1])}${t("委托密函")})`
+        return `${t(dungeon.n)}(${t(["角色", "武器", "魔之楔"][walnutType - 1])}${t("委托密函")})`
     }
     return dungeon.n
 }

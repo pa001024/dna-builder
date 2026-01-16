@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from "vue"
 import { DNAAPI, DNAWeaponDetailBean } from "dna-api"
-import { useSettingStore } from "../store/setting"
-import { useRouter, useRoute } from "vue-router"
-import { useUIStore } from "../store/ui"
+import { computed, onMounted, ref } from "vue"
+import { useRoute, useRouter } from "vue-router"
 import { LeveledMod } from "../data"
+import { useSettingStore } from "../store/setting"
+import { useUIStore } from "../store/ui"
 
 const setting = useSettingStore()
 const ui = useUIStore()

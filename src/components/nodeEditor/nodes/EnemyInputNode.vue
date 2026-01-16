@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, computed } from "vue"
-import BaseNode from "./BaseNode.vue"
-import { useNodeEditorStore } from "@/store/nodeEditor"
-import { LeveledMonster } from "@/data/leveled"
+import { computed, ref } from "vue"
 import { monsterData } from "@/data"
+import { LeveledMonster } from "@/data/leveled"
+import { useNodeEditorStore } from "@/store/nodeEditor"
 import { formatBigNumber } from "@/util"
+import BaseNode from "./BaseNode.vue"
 
 const props = defineProps<{
     id: string
@@ -69,6 +69,11 @@ function updateEnemyResistance(value: number) {
     enemyResistance.value = value
     updateStore()
 }
+
+const imbalance = computed({
+    get: () => props.data.imbalance,
+    set: value => store.updateNodeData(props.id, { imbalance: value }),
+})
 </script>
 
 <template>
@@ -109,6 +114,15 @@ function updateEnemyResistance(value: number) {
                     step="0.1"
                     @change="updateEnemyResistance(enemyResistance)"
                 />
+            </div>
+
+            <div class="flex-1">
+                <div class="px-2 text-xs text-gray-400 mb-1">
+                    {{ $t("失衡") }}
+                </div>
+                <div class="p-0.5">
+                    <input v-model="imbalance" type="checkbox" class="toggle toggle-secondary" />
+                </div>
             </div>
 
             <!-- 敌人属性显示 -->

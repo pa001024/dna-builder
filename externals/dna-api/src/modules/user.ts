@@ -1,31 +1,27 @@
-import { DNASubModule, DNABaseAPI } from "./base"
-import {
+import type {
     DNABlockBean,
     DNACanEditNickNameBean,
     DNACommonConfigEntity,
     DNAConfigSwitchBean,
+    DNAEmojiConfigBean,
     DNAFollowGameIdBean,
+    DNAGameConfigResponse,
+    DNAGameNewHeadBean,
     DNAHaveOfficialRoleBean,
     DNAIsRedPointBean,
+    DNAModeratorPermission,
     DNARecommendConfig,
     DNAScreenResponse,
     DNASplashResponse,
     DNATokenBean,
+    DNAUserDataBean,
     DNAUserHeadResponse,
     DNAWikiVoEntity,
-    DNAModeratorPermission,
-    DNAUserDataBean,
-    DNAGameConfigResponse,
-    DNAGameNewHeadBean,
-    DNAEmojiConfigBean,
 } from "../type-generated"
-import { aesDecryptImageUrl } from "./utils"
+import { DNASubModule } from "./base"
 import { DNA_GAME_ID } from "./types"
 
 export class UserAPI extends DNASubModule {
-    constructor(base: DNABaseAPI) {
-        super(base)
-    }
     // 检查登录
     async loginLog() {
         return await this._dna_request("user/login/log")

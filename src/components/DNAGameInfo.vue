@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue"
+import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI, DNARoleEntity } from "dna-api"
+import { toPng } from "html-to-image"
+import { onMounted, ref } from "vue"
+import { useInvStore } from "../store/inv"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
-import { useLocalStorage } from "@vueuse/core"
-import { useInvStore } from "../store/inv"
+
 defineProps<{
     nobtn?: boolean
 }>()
@@ -17,6 +19,11 @@ let api: DNAAPI
 const loading = ref(true)
 const roleInfo = useLocalStorage<DNARoleEntity>("dna.roleInfo", {} as any)
 const lastUpdateTime = useLocalStorage("dna.gameInfo.lastUpdateTime", 0)
+
+// 截图相关状态
+const screenshotResult = ref<string | null>(null)
+const showScreenshotModal = ref(false)
+const screenshotError = ref<string | null>(null)
 
 onMounted(async () => {
     const t = await setting.getDNAAPI()
@@ -88,21 +95,58 @@ function getWeaponUnlockProgress(weapons: DNARoleEntity["roleInfo"]["roleShow"][
     const all = [...new Set(weapons.map(v => v.weaponId))]
     return `${my.length} / ${all.length}`
 }
+
+const isScreenshotLoading = ref(false)
+/**
+ * 生成完整页面截图
+ */
+async function generateScreenshot() {
+    try {
+        screenshotError.value = null
+
+        // 获取要截图的根元素
+        const targetElement = document.querySelector("#screenshot-container") as HTMLElement
+        if (!targetElement) {
+            throw new Error("找不到截图目标元素")
+        }
+
+        showScreenshotModal.value = true
+        isScreenshotLoading.value = true
+        targetElement.classList.add("screenshot")
+
+        // 使用 html-to-image 生成截图
+        const dataUrl = await toPng(targetElement, {
+            // pixelRatio: 2,
+            backgroundColor: "var(--color-base-100)",
+        })
+        targetElement.classList.remove("screenshot")
+
+        screenshotResult.value = dataUrl
+    } catch (error) {
+        console.error("截图生成失败:", error)
+        screenshotError.value = error instanceof Error ? error.message : "截图生成失败"
+        ui.showErrorMessage("截图生成失败: " + screenshotError.value)
+    } finally {
+        isScreenshotLoading.value = false
+    }
+}
 </script>
 <template>
     <div class="space-y-6">
         <div v-if="!nobtn" class="flex justify-between items-center">
             <span class="text-xs text-gray-500">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
-            <Tooltip tooltip="刷新" side="bottom">
-                <button class="btn btn-primary btn-square btn-sm" @click="loadData(true)">
-                    <Icon icon="ri:refresh-line" />
-                </button>
-            </Tooltip>
+            <div class="flex gap-2">
+                <Tooltip tooltip="刷新" side="bottom">
+                    <button class="btn btn-primary btn-square btn-sm" @click="loadData(true)">
+                        <Icon icon="ri:refresh-line" />
+                    </button>
+                </Tooltip>
+            </div>
         </div>
         <div v-if="loading" class="flex justify-center items-center h-full py-8">
             <span class="loading loading-spinner loading-lg" />
         </div>
-        <div v-if="roleInfo && roleInfo.roleInfo?.roleShow" class="space-y-6">
+        <div v-if="roleInfo && roleInfo.roleInfo?.roleShow" class="space-y-6" id="screenshot-container">
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body">
                     <div class="flex flex-col md:flex-row items-center gap-4">
@@ -118,7 +162,12 @@ function getWeaponUnlockProgress(weapons: DNARoleEntity["roleInfo"]["roleShow"][
                             <div class="text-sm text-base-content/70 mt-1">UID: {{ roleInfo.roleInfo.roleShow.roleId }}</div>
                             <div class="text-sm text-base-content/70 mt-1">Lv. {{ roleInfo.roleInfo.roleShow.level }}</div>
                         </div>
-                        <div class="ml-auto">
+                        <div class="ml-auto space-x-2 print:hidden">
+                            <button class="btn btn-primary" @click="generateScreenshot" :class="{ 'btn-disabled': isScreenshotLoading }">
+                                <span v-if="isScreenshotLoading" class="loading loading-spinner loading-sm"></span>
+                                <Icon v-else icon="ri:screenshot-line" />
+                                生成截图
+                            </button>
                             <button class="btn btn-primary" @click="syncInventory">
                                 <Icon icon="ri:refresh-line" />
                                 同步库存
@@ -128,7 +177,7 @@ function getWeaponUnlockProgress(weapons: DNARoleEntity["roleInfo"]["roleShow"][
                 </div>
             </div>
 
-            <div v-if="roleInfo.instanceInfo.length > 0" class="card bg-base-100 shadow-xl">
+            <div v-if="roleInfo.instanceInfo.length > 0" class="card bg-base-100 shadow-xl print:hidden">
                 <div class="card-body">
                     <h3 class="card-title mb-4">
                         <span>委托密函</span>
@@ -137,19 +186,23 @@ function getWeaponUnlockProgress(weapons: DNARoleEntity["roleInfo"]["roleShow"][
                             推送设置
                         </div>
                     </h3>
-                    <div class="space-y-4">
-                        <DNAMihanItem :missions="roleInfo.instanceInfo.map(item => item.instances.map(v => v.name)) || []" />
+                    <div class="flex justify-center">
+                        <div class="space-y-4 max-w-4xl grow">
+                            <DNAMihanItem :missions="roleInfo.instanceInfo.map(item => item.instances.map(v => v.name)) || []" />
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div v-if="roleInfo.roleInfo.roleShow.params.length > 0" class="card bg-base-100 shadow-xl">
                 <div class="card-body">
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                        <div v-for="(p, index) in roleInfo.roleInfo.roleShow.params" :key="index" class="bg-base-200 p-3 rounded-lg">
-                            <div class="text-sm font-medium">{{ p.paramKey }}</div>
-                            <div class="text-xl font-bold">
-                                {{ p.paramValue }}
+                    <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center">
+                        <div v-for="(p, index) in roleInfo.roleInfo.roleShow.params" :key="index" class="card hover-3d">
+                            <div class="card-body bg-linear-0 from-base-300 to-base-200 rounded-2xl relative p-4">
+                                <div class="text-sm font-medium">{{ p.paramKey }}</div>
+                                <div class="text-xl font-bold">
+                                    {{ p.paramValue }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -163,9 +216,7 @@ function getWeaponUnlockProgress(weapons: DNARoleEntity["roleInfo"]["roleShow"][
                             roleInfo.roleInfo.roleShow.roleChars.length
                         }})
                     </h3>
-                    <div
-                        class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,160px),1fr))] sm:grid-cols-[repeat(auto-fill,minmax(min(100%,180px),1fr))] md:grid-cols-[repeat(auto-fill,minmax(min(100%,200px),1fr))] gap-4"
-                    >
+                    <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center">
                         <DNACharItem v-for="char in roleInfo.roleInfo.roleShow.roleChars" :key="char.charId" :char="char" />
                     </div>
                 </div>
@@ -174,9 +225,7 @@ function getWeaponUnlockProgress(weapons: DNARoleEntity["roleInfo"]["roleShow"][
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body">
                     <h3 class="card-title mb-4">远程武器 ({{ getWeaponUnlockProgress(roleInfo.roleInfo.roleShow.langRangeWeapons) }})</h3>
-                    <div
-                        class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,160px),1fr))] sm:grid-cols-[repeat(auto-fill,minmax(min(100%,180px),1fr))] md:grid-cols-[repeat(auto-fill,minmax(min(100%,200px),1fr))] gap-4"
-                    >
+                    <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center">
                         <DNAWeaponItem
                             v-for="weapon in roleInfo.roleInfo.roleShow.langRangeWeapons"
                             :key="weapon.weaponId"
@@ -189,9 +238,7 @@ function getWeaponUnlockProgress(weapons: DNARoleEntity["roleInfo"]["roleShow"][
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body">
                     <h3 class="card-title mb-4">近战武器 ({{ getWeaponUnlockProgress(roleInfo.roleInfo.roleShow.closeWeapons) }})</h3>
-                    <div
-                        class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,160px),1fr))] sm:grid-cols-[repeat(auto-fill,minmax(min(100%,180px),1fr))] md:grid-cols-[repeat(auto-fill,minmax(min(100%,200px),1fr))] gap-4"
-                    >
+                    <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center">
                         <DNAWeaponItem v-for="weapon in roleInfo.roleInfo.roleShow.closeWeapons" :key="weapon.weaponId" :weapon="weapon" />
                     </div>
                 </div>
@@ -262,7 +309,7 @@ function getWeaponUnlockProgress(weapons: DNARoleEntity["roleInfo"]["roleShow"][
                             >
                         </div>
 
-                        <div class="flex justify-center">
+                        <div class="flex justify-center" style="--spacing: max(0.25rem, calc(1vw / 2))">
                             <div v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1" class="flex gap-2">
                                 <img
                                     v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.charIcon"
@@ -339,4 +386,30 @@ function getWeaponUnlockProgress(weapons: DNARoleEntity["roleInfo"]["roleShow"][
             </div>
         </div>
     </div>
+
+    {{ showScreenshotModal }}
+    <!-- 截图弹窗 -->
+    <DialogModel v-model="showScreenshotModal">
+        <div class="flex-1 overflow-auto p-6">
+            <div v-if="isScreenshotLoading" class="flex justify-center items-center">
+                <span class="loading loading-spinner loading-sm"></span>
+                <span class="ml-2">正在生成截图，请稍后...</span>
+            </div>
+            <div v-else-if="screenshotError" class="flex justify-center items-center py-12 text-red-500">
+                {{ screenshotError }}
+            </div>
+            <div v-else-if="screenshotResult" class="relative overflow-auto max-h-[60vh]">
+                <img :src="screenshotResult" alt="游戏信息截图" class="mx-auto max-w-full" />
+            </div>
+        </div>
+    </DialogModel>
 </template>
+
+<style lang="less">
+#screenshot-container.screenshot {
+    width: 922px;
+    .print\:hidden {
+        display: none;
+    }
+}
+</style>

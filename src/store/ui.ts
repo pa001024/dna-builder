@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import { IconTypes } from "@/components/Icon.vue"
+import type { IconTypes } from "@/components/Icon.vue"
 import { env } from "@/env"
 import { until } from "@vueuse/core"
 

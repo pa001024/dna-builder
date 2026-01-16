@@ -1,6 +1,6 @@
-import { Pet } from "../data-types"
 import { petMap } from "../d"
-import { type PetSkill } from "../d/pet.data"
+import type { PetSkill } from "../d/pet.data"
+import type { Pet } from "../data-types"
 
 export class LeveledPet implements Pet {
     id: number

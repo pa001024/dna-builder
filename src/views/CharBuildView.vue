@@ -1,36 +1,38 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch, watchEffect } from "vue"
-import { t } from "i18next"
-import { VTour, type ITourStep } from "@globalhive/vuejs-tour"
+import { type ITourStep, VTour } from "@globalhive/vuejs-tour"
+import { useLocalStorage } from "@vueuse/core"
+import { DNARoleCharsBean, DNARoleShowBean, DNAWeaponBean } from "dna-api"
+import { useTranslation } from "i18next-vue"
+import { cloneDeep, debounce, groupBy } from "lodash-es"
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
+import { useRoute } from "vue-router"
+import { createBuildMutation } from "@/api/mutation"
+import { buildQuery } from "@/api/query"
+import { env } from "@/env"
+import { defaultCharSettings, useCharSettings } from "../composables/useCharSettings"
 import {
-    LeveledChar,
-    LeveledMod,
-    LeveledBuff,
-    LeveledWeapon,
+    buffData,
+    buffMap,
     CharBuild,
     CharBuildTimeline,
-    buffMap,
     charData,
+    charMap,
+    LeveledBuff,
+    LeveledChar,
+    LeveledMod,
+    LeveledWeapon,
     modData,
-    buffData,
-    weaponData,
     monsterData,
     monsterMap,
-    charMap,
-    LeveledSkill,
+    weaponData,
 } from "../data"
-import { useLocalStorage } from "@vueuse/core"
-import { groupBy, cloneDeep, debounce } from "lodash-es"
-import { copyText, formatSkillProp } from "../util"
-import { useInvStore } from "../store/inv"
-import { defaultCharSettings, deserializeCharSettings, serializeCharSettings, useCharSettings } from "../composables/useCharSettings"
-import { useTimeline } from "../store/timeline"
-import { useSettingStore } from "../store/setting"
-import { useRoute } from "vue-router"
-import { useUIStore } from "../store/ui"
-import { useTourStore } from "../store/tour"
 import { waitForInitialLoad } from "../i18n"
-import { DNARoleCharsBean, DNARoleShowBean, DNAWeaponBean } from "dna-api"
+import { useInvStore } from "../store/inv"
+import { useSettingStore } from "../store/setting"
+import { useTimeline } from "../store/timeline"
+import { useTourStore } from "../store/tour"
+import { useUIStore } from "../store/ui"
+import { copyText, formatSkillProp } from "../util"
 
 //#region 角色
 const inv = useInvStore()
@@ -38,26 +40,16 @@ const setting = useSettingStore()
 const ui = useUIStore()
 const route = useRoute()
 const tourStore = useTourStore()
+const { t } = useTranslation()
 
 // 路由
 const selectedChar = computed(() => charMap.get(+route.params.charId)?.名称 || "")
-const code = computed(() => route.params.code || "")
 const charSettings = useCharSettings(selectedChar)
 const charProjectKey = computed(() => `project.${selectedChar.value}`)
 const charProject = useLocalStorage(charProjectKey, {
     selected: "",
     projects: [] as { name: string; charSettings: typeof charSettings.value }[],
 })
-if (code.value) {
-    // 代码存在时，判断是否需要添加项目
-    if (JSON.stringify(defaultCharSettings) !== JSON.stringify(charSettings.value)) {
-        charProject.value.projects.push({
-            name: `${selectedChar.value} - ${Math.random().toString(36).substr(2, 9)}`,
-            charSettings: cloneDeep(charSettings.value),
-        })
-    }
-    Object.assign(charSettings.value, deserializeCharSettings(code.value as string))
-}
 
 // 获取实际数据
 const charOptions = charData.map(char => ({
@@ -296,7 +288,7 @@ function setBuffLv(buff: LeveledBuff, lv: number) {
     updateCharBuild()
 }
 
-// 保存配置
+// 保存配置到本地
 const saveConfig = () => {
     console.log("保存配置")
     const inputName = prompt(t("char-build.please_enter_config_name"))
@@ -312,6 +304,28 @@ const saveConfig = () => {
             name: inputName,
             charSettings: cloneDeep(charSettings.value),
         })
+    }
+}
+
+// 从数据库加载分享的构筑
+const loadSharedBuild = async (buildId: string) => {
+    try {
+        const build = await buildQuery({ id: buildId })
+        if (build && build.charSettings) {
+            const loadedSettings = JSON.parse(build.charSettings)
+            // 代码存在时，判断是否需要添加项目
+            if (JSON.stringify(defaultCharSettings) !== JSON.stringify(charSettings.value)) {
+                charProject.value.projects.push({
+                    name: `${selectedChar.value} - ${Math.random().toString(36).slice(2, 11)}`,
+                    charSettings: cloneDeep(charSettings.value),
+                })
+            }
+            // 将加载的设置应用到当前构筑
+            Object.assign(charSettings.value, loadedSettings)
+            ui.showSuccessMessage("已加载分享的构筑")
+        }
+    } catch (error) {
+        ui.showErrorMessage("加载构筑失败:", error instanceof Error ? error.message : "未知错误")
     }
 }
 
@@ -404,8 +418,10 @@ function getTimelineByName(name: string) {
 const isTimeline = ref(timelines.value.find(v => v.name === charSettings.value.baseName) !== undefined)
 
 const pselectedChar = useLocalStorage("selectedChar", "赛琪")
-onMounted(() => {
+
+onMounted(async () => {
     pselectedChar.value = selectedChar.value
+    if (route.params.buildId && typeof route.params.buildId === "string") await loadSharedBuild(route.params.buildId)
 })
 //#endregion
 
@@ -596,23 +612,12 @@ const collapsedSections = useLocalStorage("build-collapsed-sections", {
     effects: false,
     buffs: false,
     preview: false,
+    share: false,
 })
 
 function toggleSection(section: keyof typeof collapsedSections.value) {
     collapsedSections.value[section] = !collapsedSections.value[section]
 }
-
-const detailTab = ref("溯源")
-const selectedSkill = ref<LeveledSkill | null>(null)
-const selectedSkillLevel = ref(12)
-watchEffect(() => {
-    let skill = charBuild.value.char.技能.find(s => s.名称 === detailTab.value)
-    if (!skill) {
-        detailTab.value = charBuild.value.char.技能[0].名称
-        skill = charBuild.value.char.技能[0]
-    }
-    selectedSkill.value = skill.clone(selectedSkillLevel.value)
-})
 
 const charTab = ref(charBuild.value.selectedSkillType)
 
@@ -648,10 +653,25 @@ function applyWeaponSelection() {
 
 const ast_help_model_show = ref(false)
 
-function shareCharBuild() {
-    const shareUrl = `https://xn--chq26veyq.icu/char/${route.params.charId}/${serializeCharSettings(charSettings.value)}`
-    copyText(shareUrl)
-    ui.showSuccessMessage(t("分享链接已复制"))
+async function shareCharBuild() {
+    try {
+        const settingsString = JSON.stringify(charSettings.value)
+        const result = await createBuildMutation({
+            input: {
+                title: `${selectedChar.value}构筑`,
+                charId: parseInt(route.params.charId as string),
+                charSettings: settingsString,
+            },
+        })
+
+        if (result) {
+            const shareUrl = `${env.endpoint}/char/${route.params.charId}/${result.id}`
+            await copyText(shareUrl)
+            ui.showSuccessMessage("分享链接已复制")
+        }
+    } catch (error) {
+        ui.showErrorMessage("分享失败:", error instanceof Error ? error.message : "未知错误")
+    }
 }
 ;(globalThis as any).__chapterCounter = 1
 
@@ -1071,102 +1091,13 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
             <!-- 正文 -->
             <ScrollArea id="char-build-scroll2" class="sm:flex-1 flex-none">
                 <div class="p-2 space-y-4">
-                    <!-- 技能 -->
+                    <!-- 配装分享 -->
+                    <CollapsibleSection :title="$t('配装分享')" :is-open="!collapsedSections.share" @toggle="toggleSection('share')">
+                        <DOBBuildShow :charId="charBuild.char.id" :charName="charBuild.char.名称" />
+                    </CollapsibleSection>
+                    <!-- 角色详情 -->
                     <CollapsibleSection :title="$t('角色详情')" :is-open="!collapsedSections.detail" @toggle="toggleSection('detail')">
-                        <h2 v-if="charBuild.char.溯源" class="text-lg font-bold p-2 mt-2">
-                            {{ $t("溯源") }}
-                        </h2>
-                        <div v-if="charBuild.char.溯源" class="flex flex-col gap-2 p-2">
-                            <div
-                                v-for="(grade, i) in charBuild.char.溯源"
-                                :key="i"
-                                class="font-medium flex text-sm justify-between items-center gap-8"
-                            >
-                                <div class="font-medium whitespace-nowrap opacity-70">
-                                    {{ $t("第" + ["一", "二", "三", "四", "五", "六"][i] + "根源") }}
-                                </div>
-                                <div>{{ $t(grade) }}</div>
-                            </div>
-                        </div>
-                        <h2 class="text-lg font-bold p-2 flex gap-4 justify-between items-center">
-                            {{ $t("技能") }}
-                            <span class="text-base-content/50 text-sm">Lv. {{ selectedSkillLevel }}</span>
-
-                            <input
-                                v-model.number="selectedSkillLevel"
-                                type="range"
-                                class="range range-primary range-xs ml-auto max-w-64"
-                                min="1"
-                                max="12"
-                                step="1"
-                            />
-                        </h2>
-
-                        <div class="flex gap-2 p-2">
-                            <button
-                                v-for="skill in charBuild.char.技能"
-                                :key="skill.名称"
-                                class="btn btn-sm rounded-full whitespace-nowrap transition-all duration-200"
-                                :class="detailTab === skill.名称 ? 'btn-primary shadow-lg scale-105' : 'btn-ghost hover:bg-base-200'"
-                                @click="detailTab = skill.名称"
-                            >
-                                {{ $t(skill.名称) }}
-                            </button>
-                        </div>
-                        <div v-if="selectedSkill" class="text-sm">
-                            <div class="p-2 text-sm font-medium flex items-center gap-2">
-                                <div
-                                    alt="技能图标"
-                                    class="size-8 rounded-full bg-base-content"
-                                    :style="{ mask: `url(${selectedSkill.url}) no-repeat center/contain` }"
-                                />
-                                {{ $t(selectedSkill.类型) }}
-                            </div>
-                            <div class="p-2 text-sm">
-                                {{ $t(selectedSkill.描述 || "") }}
-                            </div>
-                            <div v-for="(value, key) in selectedSkill.术语解释" :key="key" class="p-2">
-                                <div class="text-xs font-medium underline">
-                                    {{ $t(key) }}
-                                </div>
-                                <div class="text-xs">
-                                    {{ $t(value) }}
-                                </div>
-                            </div>
-                            <div
-                                v-for="(val, index) in selectedSkill!.getFieldsWithAttr()"
-                                :key="index"
-                                class="flex flex-col group hover:bg-base-200/50 rounded-md p-2"
-                            >
-                                <div class="flex justify-between items-center gap-4">
-                                    <div>{{ $t(val.名称) }}</div>
-                                    <div class="font-medium text-primary">
-                                        {{ formatSkillProp(val.名称, val) }}
-                                    </div>
-                                </div>
-                                <div
-                                    v-if="val.影响"
-                                    class="opacity-0 group-hover:opacity-80 justify-between items-center gap-4 flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
-                                >
-                                    <div>{{ $t("属性影响") }}</div>
-                                    <div class="ml-auto font-medium">
-                                        {{
-                                            val.影响
-                                                .split(",")
-                                                .map(item => $t(item))
-                                                .join(",")
-                                        }}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="collapse p-2">
-                                <input type="checkbox" />
-                                <div class="collapse-title font-semibold p-0">底层数据</div>
-                                <div class="collapse-content p-0">
-                                    <SkillDetails :skill="selectedSkill.skillData" :lv="selectedSkillLevel" />
-                                </div>
-                            </div>
-                        </div>
+                        <CharSkillShow :char="charBuild.char" />
                     </CollapsibleSection>
                     <!-- 基本设置卡片 -->
                     <CollapsibleSection
@@ -1182,32 +1113,24 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                                         <div class="px-2 text-xs text-gray-400 mb-1">
                                             {{ $t("char-build.hp_percent") }}
                                         </div>
-                                        <FullTooltip side="bottom">
-                                            <template #tooltip>
-                                                <div class="flex flex-col">
-                                                    <h1 class="text-lg font-bold">血量收益曲线</h1>
-                                                    <CharHPCurve :desperate="attributes.背水" :boost="attributes.昂扬" />
-                                                </div>
-                                            </template>
-                                            <Select
-                                                v-model="charSettings.hpPercent"
-                                                class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                                @change="updateCharBuild"
+                                        <Select
+                                            v-model="charSettings.hpPercent"
+                                            class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                            @change="updateCharBuild"
+                                        >
+                                            <SelectItem
+                                                v-for="hp in [
+                                                    1,
+                                                    ...Array(20)
+                                                        .keys()
+                                                        .map(i => (i + 1) * 5),
+                                                ]"
+                                                :key="hp"
+                                                :value="hp / 100"
                                             >
-                                                <SelectItem
-                                                    v-for="hp in [
-                                                        1,
-                                                        ...Array(20)
-                                                            .keys()
-                                                            .map(i => (i + 1) * 5),
-                                                    ]"
-                                                    :key="hp"
-                                                    :value="hp / 100"
-                                                >
-                                                    {{ hp }}%
-                                                </SelectItem>
-                                            </Select>
-                                        </FullTooltip>
+                                                {{ hp }}%
+                                            </SelectItem>
+                                        </Select>
                                     </div>
                                     <div class="flex-1">
                                         <div class="px-2 text-xs text-gray-400 mb-1">
@@ -1264,6 +1187,7 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                                     </div>
                                 </div>
                             </div>
+                            <!-- 敌人等级 -->
                             <div class="flex-1">
                                 <div class="px-2 text-xs text-gray-400 mb-1">
                                     {{ $t("char-build.enemy_level") }} (Lv. {{ charSettings.enemyLevel }})
@@ -1306,6 +1230,9 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div class="mt-4">
+                            <CharHPCurve :desperate="attributes.背水" :boost="attributes.昂扬" />
                         </div>
                     </CollapsibleSection>
 

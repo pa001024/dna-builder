@@ -1,8 +1,8 @@
 import * as THREE from "three"
-import { VoxelData, PlayerStats, Monster, GameSettings, FloatingText } from "../types"
+import { type CharBuild, type DynamicMonster, LeveledMonster } from "../../data/index"
+import type { FloatingText, GameSettings, Monster, PlayerStats, VoxelData } from "../types"
 import { Generators } from "../utils/voxelGenerators"
-import { BaseSkill } from "./BaseSkill"
-import { CharBuild, LeveledMonster, DynamicMonster } from "../../data/index"
+import type { BaseSkill } from "./BaseSkill"
 import { SkillRegistry } from "./SkillRegistry"
 
 export class VoxelEngine {
@@ -344,10 +344,10 @@ export class VoxelEngine {
 
     formatNumber(num: number): string {
         if (num >= 1000000) {
-            return (num / 1000000).toFixed(1) + "M"
+            return `${(num / 1000000).toFixed(1)}M`
         }
         if (num >= 1000) {
-            return (num / 1000).toFixed(1) + "K"
+            return `${(num / 1000).toFixed(1)}K`
         }
         return num.toString()
     }
@@ -369,7 +369,7 @@ export class VoxelEngine {
 
         // 为CharBuild构建兼容的DynamicMonster对象
         const adapter = {
-            id: parseInt(target.id) || 130,
+            id: parseInt(target.id, 10) || 130,
             n: target.name,
             f: target.faction,
             atk: target.attack,
@@ -775,10 +775,10 @@ export class VoxelEngine {
         } else {
             const inputVector = new THREE.Vector3(0, 0, 0)
 
-            if (this.keys["KeyW"]) inputVector.z -= 1
-            if (this.keys["KeyS"]) inputVector.z += 1
-            if (this.keys["KeyA"]) inputVector.x -= 1
-            if (this.keys["KeyD"]) inputVector.x += 1
+            if (this.keys.KeyW) inputVector.z -= 1
+            if (this.keys.KeyS) inputVector.z += 1
+            if (this.keys.KeyA) inputVector.x -= 1
+            if (this.keys.KeyD) inputVector.x += 1
 
             if (inputVector.length() > 0) {
                 inputVector.applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 4)
@@ -817,8 +817,8 @@ export class VoxelEngine {
             const flySpeed = this.m2u(20)
             let targetVY = 0
 
-            const isUp = this.keys["Space"]
-            const isDown = this.keys["ShiftLeft"] || this.keys["ShiftRight"]
+            const isUp = this.keys.Space
+            const isDown = this.keys.ShiftLeft || this.keys.ShiftRight
 
             if (isUp) targetVY += flySpeed
             if (isDown) targetVY -= flySpeed

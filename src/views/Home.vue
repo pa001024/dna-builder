@@ -1,8 +1,8 @@
 <script lang="tsx" setup>
 import { onMounted } from "vue"
-import { env } from "../env"
 import pg from "../../package.json"
 import type { IconTypes } from "../components/Icon.vue"
+import { env } from "../env"
 
 const items = [
     {

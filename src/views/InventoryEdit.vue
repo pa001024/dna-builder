@@ -1,11 +1,12 @@
 <script setup lang="ts">
 // 引入必要的依赖
-import { ref, computed } from "vue"
-import { LeveledMod, LeveledWeapon, weaponData, modData } from "../data"
-import { useInvStore } from "../store/inv"
-import { copyText, pasteText } from "@/util"
+import { computed, ref } from "vue"
 import { useUIStore } from "@/store/ui"
+import { copyText, pasteText } from "@/util"
+import { LeveledMod, LeveledWeapon, modData, weaponData } from "../data"
+import { useInvStore } from "../store/inv"
 import { matchPinyin } from "../utils/pinyin-utils"
+
 const inv = useInvStore()
 const ui = useUIStore()
 // 武器

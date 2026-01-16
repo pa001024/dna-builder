@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue"
+import { computed, ref } from "vue"
 import { charData, LeveledChar } from "../data"
 import { matchPinyin } from "../utils/pinyin-utils"
 

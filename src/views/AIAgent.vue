@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { AIClient } from "../api/openai"
-import { useSettingStore } from "../store/setting"
-import { ref, onMounted, watch } from "vue"
-import { db } from "../store/db"
-import type { Conversation, Message, UMessage, UConversation } from "../store/db"
-import type { ChatCompletionMessageParam } from "openai/resources/index.mjs"
 import MarkdownIt from "markdown-it"
+import mdHighlightjs from "markdown-it-highlightjs"
 // @ts-expect-error 模块无ts定义 也不需要类型检查
 import mdKatex from "markdown-it-katex"
-import mdHighlightjs from "markdown-it-highlightjs"
+import type { ChatCompletionMessageParam } from "openai/resources/index.mjs"
+import { onMounted, ref, watch } from "vue"
+import { AIClient } from "../api/openai"
+import type { Conversation, Message, UConversation, UMessage } from "../store/db"
+import { db } from "../store/db"
+import { useSettingStore } from "../store/setting"
 import "highlight.js/styles/github.css"
-import { env } from "../env"
 import { launchExe } from "../api/app"
+import { env } from "../env"
 import { useUIStore } from "../store/ui"
 
 // 创建markdown-it实例，支持latex和代码高亮

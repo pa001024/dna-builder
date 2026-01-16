@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { ref, computed } from "vue"
+import { computed, ref } from "vue"
+import { LeveledMod } from "../data"
 import modData from "../data/d/mod.data"
 import type { Mod } from "../data/data-types"
-import { LeveledMod } from "../data"
 import { formatProp } from "../util"
 import { matchPinyin } from "../utils/pinyin-utils"
 

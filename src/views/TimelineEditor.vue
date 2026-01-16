@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, reactive, nextTick, computed, onMounted, onUnmounted, watchEffect } from "vue"
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watchEffect } from "vue"
 
 //#region UI
 import { useUIStore } from "../store/ui"
+
 const ui = useUIStore()
 
 // 工具类型定义
@@ -301,7 +302,7 @@ const generateId = () => {
     return "item-" + Date.now() + "-" + Math.random().toString(36).substring(2)
 }
 
-const randomColor = (function () {
+const randomColor = (() => {
     const colors = ["#3b82f6", "#ef4444", "#10b981", "#8b5cf6", "#f59e0b", "#ec4899"]
     const gen = (function* () {
         while (true) {
@@ -310,9 +311,7 @@ const randomColor = (function () {
             }
         }
     })()
-    return function () {
-        return gen.next().value
-    }
+    return () => gen.next().value
 })()
 
 // 在指定位置添加项目
@@ -661,10 +660,10 @@ const startSelection = (event: MouseEvent) => {
 const startResize = (event: MouseEvent, item: TimelineItem, side: "left" | "right") => {
     event.preventDefault()
 
-    let resizingItem = item
-    let resizeSide = side
-    let resizeStartPos = { x: event.clientX, y: event.clientY }
-    let resizeStartValues = {
+    const resizingItem = item
+    const resizeSide = side
+    const resizeStartPos = { x: event.clientX, y: event.clientY }
+    const resizeStartValues = {
         startTime: item.startTime,
         duration: item.duration,
     }
@@ -969,15 +968,17 @@ const resetView = () => {
     timelineStartTime.value = 0
     timelineEndTime.value = 300
 }
+
 //#endregion
 //#region 游戏
 import { useLocalStorage } from "@vueuse/core"
-import { CharBuild, LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon, buffData, charData } from "../data"
-import { useInvStore } from "../store/inv"
-import { useCharSettings } from "../composables/useCharSettings"
-import { formatProp, formatSkillProp } from "../util"
 import { groupBy } from "lodash-es"
+import { useCharSettings } from "../composables/useCharSettings"
+import { buffData, CharBuild, charData, LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../data"
+import { useInvStore } from "../store/inv"
 import { useTimeline } from "../store/timeline"
+import { formatProp, formatSkillProp } from "../util"
+
 const inv = useInvStore()
 const charOptions = charData.map(char => ({ value: char.名称, label: char.名称, elm: char.属性, icon: LeveledChar.url(char.icon) }))
 const selectedChar = useLocalStorage("selectedChar", "赛琪")

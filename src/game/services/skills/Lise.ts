@@ -1,8 +1,8 @@
 import * as THREE from "three"
+import type { LeveledSkillField } from "../../../data"
+import type { Monster } from "../../types"
 import { BaseSkill, distanceToSegment } from "../BaseSkill"
-import { VoxelEngine } from "../VoxelEngine"
-import { LeveledSkillField } from "../../../data"
-import { Monster } from "../../types"
+import type { VoxelEngine } from "../VoxelEngine"
 
 // --- Lise 技能 E: 快速出击 ---
 // 逻辑: 向前冲刺（以米为单位的距离），对路径上的所有敌人造成伤害（以米为单位的宽度）。

@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { readdir, readFile, writeFile, unlink } from "node:fs/promises"
+import { readdir, readFile, unlink, writeFile } from "node:fs/promises"
 import { join } from "node:path"
 
 const I18N_DIR = "public/i18n"
@@ -12,7 +12,7 @@ function flattenKeys(obj: Record<string, any>, prefix = ""): Map<string, string>
         const fullKey = prefix ? `${prefix}.${key}` : key
         if (typeof value === "object" && value !== null) {
             const nested = flattenKeys(value, fullKey)
-            nested.forEach((v, k) => result.set(k, v))
+            nested.forEach((v, k) => void result.set(k, v))
         } else {
             result.set(fullKey, value)
         }
@@ -47,7 +47,7 @@ async function exportDiff() {
     for (const [locale, translations] of langFiles) {
         const keys = flattenKeys(translations)
         localeKeysMap.set(locale, keys)
-        keys.forEach((_, key) => allKeys.add(key))
+        keys.forEach((_, key) => void allKeys.add(key))
     }
 
     const diff: Record<string, Record<string, string>> = {}

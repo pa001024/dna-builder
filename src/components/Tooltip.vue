@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import { ref } from "vue"
 import { TooltipArrow, TooltipContent, TooltipPortal, TooltipProvider, TooltipRoot, TooltipTrigger } from "reka-ui"
+import { ref } from "vue"
+
 withDefaults(
     defineProps<{
         tooltip: string

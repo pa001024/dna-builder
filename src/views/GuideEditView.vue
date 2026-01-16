@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from "vue"
+import { computed, onMounted, onUnmounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { gqClient } from "../api/graphql"
-import { charData } from "../data"
-import { useCharSettings } from "../composables/useCharSettings"
-import { useUIStore } from "../store/ui"
-import { env } from "../env"
-import { importPic } from "../api/app"
-import { useSettingStore } from "../store/setting"
+import { createGuideMutation, updateGuideMutation } from "@/api/mutation"
+import { buildsQuery, guideQuery } from "@/api/query"
 import { useUserStore } from "@/store/user"
+import { dataUrlToFile } from "@/util"
+import { importPic } from "../api/app"
+import { charData } from "../data"
+import { env } from "../env"
+import { useSettingStore } from "../store/setting"
+import { useUIStore } from "../store/ui"
 
 const route = useRoute()
 const router = useRouter()
@@ -19,16 +20,17 @@ const user = useUserStore()
 const isEdit = computed(() => !!route.params.id)
 const { id } = route.params
 
-const selectedChar = ref("")
 const title = ref("")
 const type = ref<"text" | "image">("text")
 const content = ref("")
 const images = ref<string[]>([])
-const selectedCharId = ref<number | null>(null)
-const includeCharSettings = ref(false)
+const selectedCharId = ref<number>(0)
+const buildId = ref<string>("")
 const isLoading = ref(false)
 
-const charSettings = useCharSettings(selectedChar)
+const variables = computed(() => ({
+    charId: selectedCharId.value,
+}))
 
 const typeOptions = [
     { value: "text", label: "图文攻略" },
@@ -119,7 +121,12 @@ async function handleTauriDrop(paths: string[]) {
         if (/\.(?:png|jpg|jpeg|gif|webp)$/i.test(path)) {
             const imageUrl = await importPic(path)
             if (imageUrl) {
-                await addImageToContent(imageUrl)
+                const file = dataUrlToFile(imageUrl, `image_${Date.now()}.png`)
+                if (file) {
+                    await processFile(file)
+                } else {
+                    ui.showErrorMessage("图片转换失败")
+                }
             } else {
                 ui.showErrorMessage("图片导入失败")
             }
@@ -218,32 +225,13 @@ async function handleSubmit() {
         content: content.value,
         images: images.value,
         charId: selectedCharId.value,
-        charSettings: includeCharSettings.value && selectedCharId.value ? charSettings.value : null,
+        buildId: buildId.value,
     }
 
     if (isEdit.value) {
         try {
-            const result = await gqClient
-                .mutation(
-                    `mutation UpdateGuide($id: String!, $input: GuideInput!) {
-                        updateGuide(id: $id, input: $input) {
-                            id
-                            title
-                            type
-                        }
-                    }`,
-                    { id: id as string, input }
-                )
-                .toPromise()
-            if (result.error?.graphQLErrors?.[0]) {
-                ui.showErrorMessage(result.error.graphQLErrors[0].message)
-                return
-            }
-            if (result.error) {
-                ui.showErrorMessage(result.error.message)
-                return
-            }
-            if (result.data?.updateGuide) {
+            const result = await updateGuideMutation({ id: id as string, input })
+            if (result?.id) {
                 router.back()
             }
         } finally {
@@ -251,32 +239,26 @@ async function handleSubmit() {
         }
     } else {
         try {
-            const result = await gqClient
-                .mutation(
-                    `mutation CreateGuide($input: GuideInput!) {
-                        createGuide(input: $input) {
-                            id
-                            title
-                            type
-                        }
-                    }`,
-                    { input }
-                )
-                .toPromise()
-            if (result.error?.graphQLErrors?.[0]) {
-                ui.showErrorMessage(result.error.graphQLErrors[0].message)
-                return
-            }
-            if (result.error) {
-                ui.showErrorMessage(result.error.message)
-                return
-            }
-            if (result.data?.createGuide) {
-                router.push({ name: "guide-detail", params: { id: result.data.createGuide.id } })
+            const result = await createGuideMutation({ input })
+            if (result?.id) {
+                router.push({ name: "guide-detail", params: { id: result.id } })
             }
         } finally {
             isLoading.value = false
         }
+    }
+}
+
+async function loadGuide() {
+    if (!id) return
+    const result = await guideQuery({ id: id as string }, { requestPolicy: "network-only" })
+    if (result) {
+        title.value = result.title
+        type.value = result.type
+        content.value = result.content
+        images.value = result.images
+        selectedCharId.value = result.charId || 0
+        buildId.value = result.buildId || ""
     }
 }
 
@@ -297,7 +279,12 @@ onMounted(async () => {
             await handleTauriDrop(event.payload.paths)
         })
     }
-    ui.title = isEdit.value ? "编辑攻略" : "发布攻略"
+    if (isEdit.value) {
+        ui.title = "编辑攻略"
+        loadGuide()
+    } else {
+        ui.title = "发布攻略"
+    }
 })
 
 onUnmounted(() => {
@@ -352,12 +339,22 @@ onUnmounted(() => {
                         <div v-if="selectedCharId && selectedCharId !== -1" class="card bg-base-200 border border-base-300">
                             <div class="card-body p-4">
                                 <label class="flex items-start gap-3 cursor-pointer">
-                                    <input v-model="includeCharSettings" type="checkbox" class="checkbox checkbox-primary" />
                                     <div>
-                                        <span class="block text-sm font-medium">包含当前配装信息</span>
-                                        <span class="block text-xs text-base-content/60 mt-1">勾选后，当前的角色配装将随攻略一同发布</span>
+                                        <span class="block text-sm font-medium">关联构筑</span>
+                                        <span class="block text-xs text-base-content/60 mt-1">勾选后，角色构筑将随攻略一同发布</span>
                                     </div>
                                 </label>
+
+                                <GQQuery v-slot="{ data: builds }" :query="buildsQuery" :variables="variables">
+                                    <label class="flex items-center gap-2">
+                                        <input type="radio" v-model="buildId" value="" class="radio radio-sm" />
+                                        <span>不关联</span>
+                                    </label>
+                                    <label v-if="builds" v-for="build in builds" :key="build.id" class="flex items-center gap-2">
+                                        <input type="radio" v-model="buildId" :value="build.id" class="radio radio-sm" />
+                                        <span>{{ build.title }}</span>
+                                    </label>
+                                </GQQuery>
                             </div>
                         </div>
                     </div>

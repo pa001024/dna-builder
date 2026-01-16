@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from "vue"
-import { copyText } from "../util"
-import { db } from "../store/db"
-import type { DNAUser, UDNAUser } from "../store/db"
-import { useUIStore } from "../store/ui"
-import { useSettingStore } from "../store/setting"
+import { onBeforeUnmount, onMounted, ref } from "vue"
 import { env } from "@/env"
+import type { DNAUser, UDNAUser } from "@/store/db"
+import { db } from "@/store/db"
+import { useSettingStore } from "@/store/setting"
+import { useUIStore } from "@/store/ui"
+import { copyText } from "@/util"
 
 const ui = useUIStore()
 const setting = useSettingStore()

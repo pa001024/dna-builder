@@ -1,13 +1,13 @@
 <script lang="ts" setup>
+import { t } from "i18next"
 import { ref, watch } from "vue"
 import { MATERIALS } from "../api/app"
-import { useSettingStore } from "../store/setting"
+import { listModels, validateApiKey } from "../api/openai"
 import { env } from "../env"
 import { i18nLanguages } from "../i18n"
 import { db } from "../store/db"
-import { listModels, validateApiKey } from "../api/openai"
+import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
-import { t } from "i18next"
 
 const setting = useSettingStore()
 const ui = useUIStore()

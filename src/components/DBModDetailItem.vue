@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { ref, computed, watch } from "vue"
-import type { Mod, Draft, Dungeon } from "../data/data-types"
+import { computed, ref, watch } from "vue"
+import { getDungeonName } from "@/utils/dungeon-utils"
+import { modDraftMap, modDungeonMap } from "../data/d/index"
+import type { Draft, Dungeon, Mod } from "../data/data-types"
 import { LeveledMod } from "../data/leveled/LeveledMod"
 import { formatProp } from "../util"
-import { modDraftMap, modDungeonMap } from "../data/d/index"
 import { getRewardDetails, type RewardItem as RewardItemType } from "../utils/reward-utils"
-import { getDungeonName } from "@/utils/dungeon-utils"
 
 const props = defineProps<{
     mod: Mod

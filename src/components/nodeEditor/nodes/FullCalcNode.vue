@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { NodeProps } from "@vue-flow/core"
 import { Handle, Position } from "@vue-flow/core"
 import BaseNode from "./BaseNode.vue"
-import type { NodeProps } from "@vue-flow/core"
 
 // 定义节点属性
 defineProps<NodeProps>()

@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest"
-import { getPinyin, getPinyinFirst, matchPinyin, filterByPinyin, searchByPinyin, isPinyinInput } from "./pinyin-utils"
+import { describe, expect, it } from "vitest"
+import { filterByPinyin, getPinyin, getPinyinFirst, isPinyinInput, matchPinyin, searchByPinyin } from "./pinyin-utils"
 
 describe("Pinyin Utils", () => {
     describe("getPinyin", () => {

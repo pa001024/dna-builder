@@ -1,8 +1,8 @@
-import { Elysia } from "elysia"
 import { Cron } from "croner"
 import { desc, eq } from "drizzle-orm"
-import { db, schema } from "./db"
+import { Elysia } from "elysia"
 import { getDNAAPI } from "./api/dna"
+import { db, schema } from "./db"
 
 export const cronPlugin = () => {
     const app = new Elysia({
@@ -18,7 +18,8 @@ export const cronPlugin = () => {
             where: eq(schema.missionsIngame.server, server),
             orderBy: desc(schema.missionsIngame.id),
         })
-        if (lastMissionsIngame && JSON.stringify(lastMissionsIngame.missions) === JSON.stringify(missions)) throw new Error("duplicate missions")
+        if (lastMissionsIngame && JSON.stringify(lastMissionsIngame.missions) === JSON.stringify(missions))
+            throw new Error("duplicate missions")
 
         const missionsIngame = await db
             .insert(schema.missionsIngame)
@@ -32,7 +33,7 @@ export const cronPlugin = () => {
         }
     }
     const sleep = (ms: number) => {
-        return new Promise((resolve) => setTimeout(resolve, ms))
+        return new Promise(resolve => setTimeout(resolve, ms))
     }
     const updateMH = async (t = 10) => {
         const server = "cn"
@@ -45,7 +46,7 @@ export const cronPlugin = () => {
                 const dnaAPI = getDNAAPI()
                 const res = await dnaAPI.defaultRoleForTool()
                 if (res.is_success && res.data?.instanceInfo) {
-                    const missions = res.data.instanceInfo.map((item) => item.instances.map((v) => v.name))
+                    const missions = res.data.instanceInfo.map(item => item.instances.map(v => v.name))
                     await updateServerMH(server, missions)
                     is_success = true
                 } else {
@@ -78,12 +79,12 @@ export const cronPlugin = () => {
         })
         const last = lastMissionsIngame?.createdAt ? Date.parse(lastMissionsIngame.createdAt) : 0
         const getNextUpdateTime = (t?: number) => {
-            const now = t ?? new Date().getTime()
+            const now = t ?? Date.now()
             const oneHour = 60 * 60 * 1000
             return Math.ceil(now / oneHour) * oneHour
         }
         const next = getNextUpdateTime(last)
-        if (next <= new Date().getTime()) {
+        if (next <= Date.now()) {
             await updateMH(1)
         } else {
             console.log(`${new Date().toLocaleString()} 下一次同步密函信息 - server: ${server} - next: ${new Date(next).toLocaleString()}`)

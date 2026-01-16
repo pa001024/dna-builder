@@ -1,12 +1,13 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref, watchEffect } from "vue"
-import { useRoute } from "vue-router"
-import { useScroll } from "@vueuse/core"
 import { gql, useQuery, useSubscription } from "@urql/vue"
-import { isImage, sanitizeHTML, copyHtmlContent } from "@/utils/html"
+import { useScroll } from "@vueuse/core"
+import { computed, onMounted, ref, watchEffect } from "vue"
+import { onBeforeRouteLeave, useRoute } from "vue-router"
 import { editMessageMutation, rtcJoinMutation, sendMessageMutation } from "@/api/mutation"
+import { Msg, msgsQuery, rtcClientsQuery } from "@/api/query"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
+import { copyHtmlContent, isImage, sanitizeHTML } from "@/utils/html"
 
 const route = useRoute()
 const roomId = computed(() => route.params.room as string)
@@ -90,17 +91,13 @@ watchEffect(() => {
     if (title.value) ui.title = maxUsers.value ? `${title.value} (${maxUsers.value})` : `${title.value}`
 })
 
+onBeforeRouteLeave(() => {
+    ui.title = ""
+})
+
 onMounted(async () => {
     if (msgCount.value > 0) user.setRoomReadedCount(roomId.value, msgCount.value)
 })
-
-type Msg = {
-    id: string
-    edited: number
-    content: string
-    createdAt: string
-    user: { id: string; name: string; qq: number }
-}
 
 useSubscription<{ newMessage: Msg }>(
     {
@@ -270,24 +267,18 @@ async function startEdit(msg: Msg) {
             <div class="flex-1 flex flex-col overflow-hidden relative">
                 <GQAutoPage
                     v-if="msgCount"
-                    v-slot="{ data: msgData }"
+                    v-slot="{ data: msgs }"
                     direction="top"
                     class="flex-1 overflow-hidden"
                     inner-class="flex w-full h-full flex-col gap-2 p-4"
                     :limit="20"
                     :offset="msgCount"
-                    :query="`query ($roomId: String!, $limit: Int, $offset: Int) {
-    msgs(roomId: $roomId, limit: $limit, offset: $offset) {
-        id, edited, content, createdAt, user { id, name, qq }
-    }
-}
-`"
+                    :query="msgsQuery"
                     :variables="variables"
-                    data-key="msgs"
                     @loadref="r => (el = r)"
                 >
                     <!-- 消息列表 -->
-                    <div v-for="item in msgData.msgs" v-if="msgData" :key="item.id" class="group flex items-start gap-2">
+                    <div v-for="item in msgs" v-if="msgs" :key="item.id" class="group flex items-start gap-2">
                         <div v-if="!item.content && editId !== item.id" class="text-xs text-base-content/60 m-auto">
                             {{ $t("chat.retractedAMessage", { name: user.id === item.user.id ? $t("chat.you") : item.user?.name }) }}
                             <span class="text-xs text-primary underline cursor-pointer" @click="restoreMessage(item)">{{
@@ -373,15 +364,7 @@ async function startEdit(msg: Msg) {
                 </div>
             </div>
             <!-- 在线用户 -->
-            <GQQuery
-                v-slot="{ data: onlines }"
-                :query="`query ($roomId: String!) {
-    rtcClients(roomId: $roomId) {
-        id, end, user { id, name, qq }
-    }
-}`"
-                :variables="variables"
-            >
+            <GQQuery v-slot="{ data: onlines }" :query="rtcClientsQuery" :variables="variables">
                 <div v-if="onlines" class="flex items-center p-1 gap-1">
                     <div class="flex group bg-primary items-center rounded-full px-1">
                         <QQAvatar class="size-6 my-1" :name="user.name!" :qq="user.qq!" />
@@ -392,7 +375,7 @@ async function startEdit(msg: Msg) {
                         </div>
                     </div>
                     <div
-                        v-for="item in onlines.rtcClients.filter((v: any) => v.user.id !== user.id)"
+                        v-for="item in onlines.filter(v => v.user.id !== user.id)"
                         :key="item.id"
                         class="flex group bg-primary items-center rounded-full px-1"
                     >

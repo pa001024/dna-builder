@@ -1,11 +1,12 @@
 <script lang="ts" setup>
+import { t } from "i18next"
 import { computed, onBeforeMount, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { t } from "i18next"
-import { htmlToText } from "@/utils/html"
 import { deleteRoomMutation } from "@/api/mutation"
-import { useUserStore } from "@/store/user"
+import { RoomWithLastMsg, roomsWithLastMsgQuery } from "@/api/query"
 import { useUIStore } from "@/store/ui"
+import { useUserStore } from "@/store/user"
+import { htmlToText } from "@/utils/html"
 
 const user = useUserStore()
 const ui = useUIStore()
@@ -13,47 +14,9 @@ const router = useRouter()
 const route = useRoute()
 const search = ref("")
 const actived = computed(() => route.params.room)
-const variables = computed(() => ({ name_like: search.value.trim() || null }))
+const variables = computed(() => ({ name_like: search.value.trim() || undefined }))
 
-const Query = /* GraphQL */ `
-    query ($name_like: String, $limit: Int, $offset: Int) {
-        rooms(name_like: $name_like, limit: $limit, offset: $offset) {
-            id
-            name
-            type
-            updateAt
-            maxUsers
-            msgCount
-            owner {
-                id
-                name
-                qq
-            }
-            lastMsg {
-                id
-                content
-                createdAt
-                user {
-                    id
-                    name
-                    qq
-                }
-            }
-        }
-    }
-`
-
-interface Room {
-    id: string
-    name: string
-    type: string
-    updateAt: string
-    maxUsers: string
-    owner: string
-    msgs: any[]
-}
-
-function toLocaleTimeString(timestamp: number) {
+function toLocaleTimeString(timestamp: number | string) {
     const date = new Date(timestamp)
     if (date.toLocaleDateString() !== new Date().toLocaleDateString()) {
         return date.toLocaleDateString()
@@ -66,10 +29,10 @@ async function reloadRooms() {
     await handle.value!()
 }
 
-async function enterRoom(room: Room) {
+async function enterRoom(room: RoomWithLastMsg) {
     router.push({ name: "room", params: { room: room.id } })
 }
-async function deleteRoom(room: Room) {
+async function deleteRoom(room: RoomWithLastMsg) {
     if ((await ui.showDialog("确认", t("chat.deleteRoomConfirm"))) && (await deleteRoomMutation({ id: room.id }))) {
         await reloadRooms()
     } else {
@@ -108,15 +71,14 @@ onBeforeMount(() => {
                 </div>
                 <!-- 列表 -->
                 <GQAutoPage
-                    v-slot="{ data }"
+                    v-slot="{ data: rooms }"
                     class="flex-1 overflow-hidden"
                     :size="10"
-                    :query="Query"
+                    :query="roomsWithLastMsgQuery"
                     :variables="variables"
-                    data-key="rooms"
                     @load="handle = $event"
                 >
-                    <ContextMenu v-for="r in data.rooms" v-if="data" :key="r.id">
+                    <ContextMenu v-for="r in rooms" v-if="rooms" :key="r.id">
                         <div
                             class="h-16 bg-base-100/50 p-4 flex flex-col justify-center group"
                             :class="{ 'active bg-primary': actived === r.id }"

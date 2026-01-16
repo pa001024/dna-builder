@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue"
-import { DNAAPI, DNAMineBean } from "dna-api"
-import { useSettingStore } from "../store/setting"
-import { useRouter } from "vue-router"
 import { useLocalStorage } from "@vueuse/core"
-import { initEmojiDict } from "@/util"
+import { DNAAPI, DNAMineBean } from "dna-api"
+import { computed, onMounted, ref } from "vue"
+import { useRouter } from "vue-router"
 import { useUIStore } from "@/store/ui"
+import { initEmojiDict } from "@/util"
+import { useSettingStore } from "../store/setting"
 
 const setting = useSettingStore()
 const router = useRouter()

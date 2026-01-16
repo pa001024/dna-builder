@@ -1,9 +1,9 @@
 import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
-import { eq, and, desc, sql, like } from "drizzle-orm"
-import { db, schema } from ".."
-import type { Context } from "../yoga"
+import { and, desc, eq, like, sql } from "drizzle-orm"
 import { createGraphQLError } from "graphql-yoga"
 import { sanitizeHTML } from "../../util/html"
+import { db, schema } from ".."
+import type { Context } from "../yoga"
 import { getSubSelection } from "."
 
 function isSafeURL(value: string): boolean {
@@ -23,7 +23,7 @@ function isSafeURL(value: string): boolean {
 function sanitizeImages(images: string[]): string[] {
     if (!images || !Array.isArray(images)) return []
 
-    return images.filter((url) => isSafeURL(url))
+    return images.filter(url => isSafeURL(url))
 }
 
 export { isSafeURL, sanitizeImages }
@@ -37,7 +37,7 @@ export const typeDefs = /* GraphQL */ `
         images: [String!]!
         charId: Int
         userId: String!
-        charSettings: String
+        buildId: String
         views: Int!
         likes: Int!
         isRecommended: Boolean
@@ -54,7 +54,7 @@ export const typeDefs = /* GraphQL */ `
         content: String!
         images: [String!]!
         charId: Int
-        charSettings: String
+        buildId: String
     }
 
     type Mutation {
@@ -76,7 +76,7 @@ export const typeDefs = /* GraphQL */ `
 
 export const resolvers = {
     Query: {
-        guides: async (parent, args, context, info) => {
+        guides: async (_parent, args, context, info) => {
             const { search, type, charId, userId, limit = 20, offset = 0 } = args || {}
             const conditions = []
 
@@ -102,35 +102,31 @@ export const resolvers = {
                 with: { user: getSubSelection(info, "user") ? true : undefined },
             })
 
-            const guidesWithLiked = await Promise.all(
-                result.map(async (guide) => {
-                    let isLiked = false
-                    if (context.user) {
-                        const [like] = await db
-                            .select()
-                            .from(schema.guideLikes)
-                            .where(and(eq(schema.guideLikes.userId, context.user.id), eq(schema.guideLikes.guideId, guide.id)))
-                        isLiked = !!like
-                    }
-
-                    return {
-                        ...guide,
-                        images: guide.images || [],
-                        charSettings: guide.charSettings ? JSON.stringify(guide.charSettings) : undefined,
-                        views: guide.views ?? 0,
-                        likes: guide.likes ?? 0,
-                        isRecommended: guide.isRecommended ?? false,
-                        isPinned: guide.isPinned ?? false,
-                        createdAt: guide.createdAt ?? "",
-                        updateAt: guide.updateAt ?? "",
-                        isLiked,
-                    }
-                }),
-            )
-
-            return guidesWithLiked
+            const likedGuideIds = context.user
+                ? new Set(
+                      (
+                          await db
+                              .select({ guideId: schema.guideLikes.guideId })
+                              .from(schema.guideLikes)
+                              .where(eq(schema.guideLikes.userId, context.user.id))
+                      ).map(r => r.guideId)
+                  )
+                : new Set()
+            return result.map(guide => {
+                return {
+                    ...guide,
+                    images: guide.images || [],
+                    views: guide.views ?? 0,
+                    likes: guide.likes ?? 0,
+                    isRecommended: guide.isRecommended ?? false,
+                    isPinned: guide.isPinned ?? false,
+                    createdAt: guide.createdAt ?? "",
+                    updateAt: guide.updateAt ?? "",
+                    isLiked: likedGuideIds.has(guide.id),
+                }
+            })
         },
-        guidesCount: async (parent, args) => {
+        guidesCount: async (_parent, args) => {
             const search = args?.search
             const type = args?.type
             const conditions = []
@@ -145,13 +141,10 @@ export const resolvers = {
 
             const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
-            const [result] = await db
-                .select({ count: sql<number>`count(*)` })
-                .from(schema.guides)
-                .where(whereClause)
+            const [result] = await db.select({ count: sql<number>`count(*)` }).from(schema.guides).where(whereClause)
             return result?.count || 0
         },
-        guide: async (parent, args, context, info) => {
+        guide: async (_parent, args, context, info) => {
             const { id } = args
             const guide = await db.query.guides.findFirst({
                 where: eq(schema.guides.id, id),
@@ -179,7 +172,6 @@ export const resolvers = {
             return {
                 ...guide,
                 images: guide.images || [],
-                charSettings: guide.charSettings ? JSON.stringify(guide.charSettings) : undefined,
                 views: (guide.views ?? 0) + 1,
                 likes: guide.likes ?? 0,
                 isRecommended: guide.isRecommended ?? false,
@@ -191,7 +183,7 @@ export const resolvers = {
         },
     },
     Mutation: {
-        createGuide: async (parent, args, context, info) => {
+        createGuide: async (_parent, args, context, info) => {
             if (!context.user) {
                 throw createGraphQLError("需要登录")
             }
@@ -200,7 +192,6 @@ export const resolvers = {
             const sanitizedInput = {
                 ...input,
                 images: sanitizeImages(input.images),
-                charSettings: input.charSettings ? JSON.parse(input.charSettings) : undefined,
             }
 
             const [guide] = await db
@@ -223,7 +214,6 @@ export const resolvers = {
             return {
                 ...result,
                 images: result.images || [],
-                charSettings: result.charSettings ? JSON.stringify(result.charSettings) : undefined,
                 views: result.views ?? 0,
                 likes: result.likes ?? 0,
                 isRecommended: result.isRecommended ?? false,
@@ -233,7 +223,7 @@ export const resolvers = {
                 isLiked: false,
             }
         },
-        updateGuide: async (parent, args, context, info) => {
+        updateGuide: async (_parent, args, context, info) => {
             if (!context.user) {
                 throw createGraphQLError("需要登录")
             }
@@ -254,7 +244,6 @@ export const resolvers = {
             const sanitizedInput = {
                 ...input,
                 images: sanitizeImages(input.images),
-                charSettings: input.charSettings ? JSON.parse(input.charSettings) : undefined,
             }
 
             const [updated] = await db.update(schema.guides).set(sanitizedInput).where(eq(schema.guides.id, id)).returning()
@@ -279,7 +268,6 @@ export const resolvers = {
                 ...result,
                 content: sanitizeHTML(result.content),
                 images: result.images || [],
-                charSettings: result.charSettings ? JSON.stringify(result.charSettings) : undefined,
                 views: result.views ?? 0,
                 likes: result.likes ?? 0,
                 isRecommended: result.isRecommended ?? false,
@@ -289,7 +277,7 @@ export const resolvers = {
                 isLiked,
             }
         },
-        deleteGuide: async (parent, { id }, context) => {
+        deleteGuide: async (_parent, { id }, context) => {
             if (!context.user) {
                 throw createGraphQLError("需要登录")
             }
@@ -309,7 +297,7 @@ export const resolvers = {
             await db.delete(schema.guides).where(eq(schema.guides.id, id))
             return true
         },
-        likeGuide: async (parent, args, context, info) => {
+        likeGuide: async (_parent, args, context, info) => {
             if (!context.user) {
                 throw createGraphQLError("需要登录")
             }
@@ -354,7 +342,6 @@ export const resolvers = {
             return {
                 ...updated,
                 images: updated.images || [],
-                charSettings: updated.charSettings ? JSON.stringify(updated.charSettings) : undefined,
                 views: updated.views ?? 0,
                 likes: (guide.likes ?? 0) + 1,
                 isRecommended: updated.isRecommended ?? false,
@@ -364,7 +351,7 @@ export const resolvers = {
                 isLiked: true,
             }
         },
-        unlikeGuide: async (parent, args, context, info) => {
+        unlikeGuide: async (_parent, args, context, info) => {
             if (!context.user) {
                 throw createGraphQLError("需要登录")
             }
@@ -397,7 +384,6 @@ export const resolvers = {
             return {
                 ...updated,
                 images: updated.images || [],
-                charSettings: updated.charSettings ? JSON.stringify(updated.charSettings) : undefined,
                 views: updated.views ?? 0,
                 likes: Math.max(0, (guide.likes ?? 0) - 1),
                 isRecommended: updated.isRecommended ?? false,
@@ -407,7 +393,7 @@ export const resolvers = {
                 isLiked: false,
             }
         },
-        recommendGuide: async (parent, { id, recommended }, context, info) => {
+        recommendGuide: async (_parent, { id, recommended }, context, info) => {
             if (!context.user || !context.user.roles?.includes("admin")) {
                 throw createGraphQLError("无权限")
             }
@@ -422,6 +408,10 @@ export const resolvers = {
 
             const [updated] = await db.update(schema.guides).set({ isRecommended: recommended }).where(eq(schema.guides.id, id)).returning()
 
+            if (!updated) {
+                throw createGraphQLError("更新攻略失败")
+            }
+
             const result = await db.query.guides.findFirst({
                 where: eq(schema.guides.id, id),
                 with: { user: getSubSelection(info, "user") ? true : undefined },
@@ -441,7 +431,6 @@ export const resolvers = {
             return {
                 ...result,
                 images: result.images || [],
-                charSettings: result.charSettings ? JSON.stringify(result.charSettings) : undefined,
                 views: result.views ?? 0,
                 likes: result.likes ?? 0,
                 createdAt: result.createdAt ?? "",
@@ -449,7 +438,7 @@ export const resolvers = {
                 isLiked,
             }
         },
-        pinGuide: async (parent, { id, pinned }, context, info) => {
+        pinGuide: async (_parent, { id, pinned }, context, info) => {
             if (!context.user || !context.user.roles?.includes("admin")) {
                 throw createGraphQLError("无权限")
             }
@@ -464,6 +453,10 @@ export const resolvers = {
 
             const [updated] = await db.update(schema.guides).set({ isPinned: pinned }).where(eq(schema.guides.id, id)).returning()
 
+            if (!updated) {
+                throw createGraphQLError("更新攻略失败")
+            }
+
             const result = await db.query.guides.findFirst({
                 where: eq(schema.guides.id, id),
                 with: { user: getSubSelection(info, "user") ? true : undefined },
@@ -483,7 +476,6 @@ export const resolvers = {
             return {
                 ...result,
                 images: result.images || [],
-                charSettings: result.charSettings ? JSON.stringify(result.charSettings) : undefined,
                 views: result.views ?? 0,
                 likes: result.likes ?? 0,
                 createdAt: result.createdAt ?? "",

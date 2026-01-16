@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { ref, computed } from "vue"
+import { computed, ref } from "vue"
+import { LeveledWeapon } from "@/data"
 import weaponData from "../data/d/weapon.data"
 import type { Weapon } from "../data/data-types"
 import { formatProp } from "../util"
 import { matchPinyin } from "../utils/pinyin-utils"
-import { LeveledWeapon } from "@/data"
 
 const searchKeyword = ref("")
 const selectedWeapon = ref<Weapon | null>(null)

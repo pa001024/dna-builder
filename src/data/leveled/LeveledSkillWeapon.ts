@@ -1,5 +1,5 @@
+import type { DmgType, SkillWeapon } from "../data-types"
 import { CommonLevelUp, LeveledSkill } from "."
-import { DmgType, SkillWeapon } from "../data-types"
 
 /**
  * LeveledSkillWeapon类 - 继承Weapon接口，添加等级和技能等级和动态属性计算

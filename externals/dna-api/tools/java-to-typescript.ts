@@ -1,5 +1,5 @@
-import { readdirSync, readFileSync, writeFileSync, existsSync } from "fs"
-import { join, basename } from "path"
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
+import { join } from "node:path"
 
 const JAVA_DIR = process.argv[2] || join(__dirname, "../java")
 const OUTPUT_FILE = process.argv[3] || join(__dirname, "../src/type-generated.ts")
@@ -118,9 +118,9 @@ type SymbolTableEntry = {
 
 const symbolTable = new Map<string, SymbolTableEntry>()
 
-function capitalizeFirstLetter(str: string): string {
-    return str.charAt(0).toUpperCase() + str.slice(1)
-}
+// function capitalizeFirstLetter(str: string): string {
+//     return str.charAt(0).toUpperCase() + str.slice(1)
+// }
 
 function extractTypeName(typeStr: string): string {
     typeStr = typeStr.trim()
@@ -343,7 +343,7 @@ function parseClassFile(filePath: string, innerClassName: string | null = null):
 
     let packageName = ""
     let className = ""
-    let isStatic = false
+    const isStatic = false
 
     const fields: FieldInfo[] = []
     const innerClasses: ClassInfo[] = []
@@ -362,7 +362,7 @@ function parseClassFile(filePath: string, innerClassName: string | null = null):
         }
     }
 
-    const baseFileName = basename(filePath, ".java")
+    // const baseFileName = basename(filePath, ".java")
 
     let braceDepth = 0
     let inTargetClass = false
@@ -507,8 +507,8 @@ function processClass(className: string): string | null {
     let result = ""
 
     for (const innerClass of classInfo.innerClasses) {
-        const innerTypeName = extractTypeName(`${classInfo.name}.${innerClass.name}`)
-        const innerTsName = `DNA${innerClass.name}`
+        // const innerTypeName = extractTypeName(`${classInfo.name}.${innerClass.name}`)
+        // const innerTsName = `DNA${innerClass.name}`
 
         result += generateInterface(innerClass)
     }

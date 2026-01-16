@@ -1,13 +1,13 @@
-import { watchEffect } from "vue"
+import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification"
 import { useLocalStorage } from "@vueuse/core"
 import { useSound } from "@vueuse/sound"
-import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification"
 import { t } from "i18next"
-import { missionsIngameQuery } from "../api/query"
-import { useSettingStore } from "../store/setting"
-import { env } from "../env"
-import { useUIStore } from "./ui"
+import { watchEffect } from "vue"
 import { getInstanceInfo } from "@/api/external"
+import { missionsIngameQuery } from "../api/query"
+import { env } from "../env"
+import { useSettingStore } from "../store/setting"
+import { useUIStore } from "./ui"
 
 export class MihanNotify {
     mihanData = useLocalStorage<string[][] | undefined>("mihanData", [])
@@ -112,7 +112,7 @@ export class MihanNotify {
         this.show()
     }
     getNextUpdateTime(t?: number) {
-        const now = t ?? new Date().getTime()
+        const now = t ?? Date.now()
         const oneHour = 60 * 60 * 1000
         return Math.ceil(now / oneHour) * oneHour
     }
@@ -139,7 +139,7 @@ export class MihanNotify {
         console.log("start watch")
         this.watch = true
         const next = this.getNextUpdateTime()
-        const duration = next - new Date().getTime()
+        const duration = next - Date.now()
         setTimeout(async () => {
             this.watch = false
             let ok = await this.updateMihanData()

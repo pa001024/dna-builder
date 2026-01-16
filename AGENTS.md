@@ -273,6 +273,7 @@ mcp_server/
 
 ## Important Notes
 
+- **Maintain consistency**: Check other files in the same directory before writing to maintain a consistent code style.
 - **CHINESE COMMENTS** needs for every function or complex logic, no need for simple code lines
 - **JSDOC**: Use JSDoc for function documentation, including parameters, return values, and exceptions
 - Chinese is acceptable in comments and strings (Chinese project)

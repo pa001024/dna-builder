@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { ref, computed } from "vue"
-import { LeveledMonster } from "../data/leveled/LeveledMonster"
+import { computed, ref } from "vue"
+import { abyssDungeonMap } from "../data"
 import dungeonData from "../data/d/dungeon.data"
 import { Faction, Monster } from "../data/data-types"
-import { abyssDungeonMap } from "../data"
+import { LeveledMonster } from "../data/leveled/LeveledMonster"
 import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
 
 const props = defineProps<{

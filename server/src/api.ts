@@ -103,7 +103,7 @@ export const apiPlugin = () => {
             body: t.Object({
                 file: t.File(),
             }),
-        },
+        }
     )
 
     /**
@@ -122,7 +122,7 @@ export const apiPlugin = () => {
         }
 
         set.status = 302
-        set.headers["Location"] = downloadUrl
+        set.headers.Location = downloadUrl
         return new Response(null, { status: 302, headers: { Location: downloadUrl } })
     })
 

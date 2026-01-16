@@ -10,6 +10,8 @@ const stats = ref({
     totalGuides: 0,
     totalRooms: 0,
     totalMessages: 0,
+    totalBuilds: 0,
+    totalTimelines: 0,
 })
 
 // 最近活动
@@ -32,8 +34,8 @@ const loading = ref(false)
 async function loadStats() {
     try {
         const data = await adminStatsQuery({}, { requestPolicy: "network-only" })
-        if (data) {
-            stats.value = data
+        if (data?.adminStats) {
+            stats.value = data.adminStats
         }
     } catch (error) {
         console.error("Failed to load stats:", error)
@@ -59,8 +61,11 @@ async function loadRecentActivities() {
  */
 async function loadData() {
     loading.value = true
-    await Promise.all([loadStats(), loadRecentActivities()])
-    loading.value = false
+    try {
+        await Promise.all([loadStats(), loadRecentActivities()])
+    } finally {
+        loading.value = false
+    }
 }
 
 // 组件挂载时加载数据
@@ -118,6 +123,7 @@ onMounted(() => {
             <!-- 房间数量 -->
             <div
                 class="card bg-base-100 shadow-sm border border-base-300 p-6 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group"
+                @click="$router.push('/admin/room')"
             >
                 <div class="flex items-start justify-between">
                     <div class="flex-1">
@@ -137,6 +143,7 @@ onMounted(() => {
             <!-- 消息数量 -->
             <div
                 class="card bg-base-100 shadow-sm border border-base-300 p-6 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group"
+                @click="$router.push('/admin/message')"
             >
                 <div class="flex items-start justify-between">
                     <div class="flex-1">
@@ -151,6 +158,48 @@ onMounted(() => {
                         </span>
                     </div>
                 </div>
+            </div>
+
+            <!-- 构筑数量 -->
+            <div
+                class="card bg-base-100 shadow-sm border border-base-300 p-6 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group"
+                @click="$router.push('/admin/build')"
+            >
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-base-content/70 mb-2">总构筑数</p>
+                        <h3 class="text-3xl font-bold text-base-content tracking-tight">{{ stats.totalBuilds }}</h3>
+                    </div>
+                    <div
+                        class="w-14 h-14 bg-linear-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-xl transition-shadow duration-300"
+                    >
+                        <span class="text-white text-2xl">
+                            <Icon icon="ri:hammer-line" />
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 时间线数量 -->
+            <div
+                class="card bg-base-100 shadow-sm border border-base-300 p-6 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group"
+                @click="$router.push('/admin/timeline')"
+            >
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-base-content/70 mb-2">总时间线数</p>
+                        <h3 class="text-3xl font-bold text-base-content tracking-tight">{{ stats.totalTimelines }}</h3>
+                    </div>
+                    <div
+                        class="w-14 h-14 bg-linear-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-xl transition-shadow duration-300"
+                    >
+                        <span class="text-white text-2xl">
+                            <Icon icon="ri:time-line" />
+                        </span>
+                    </div>
+                </div>
+                <!-- 装饰性渐变 -->
+                <div class="absolute inset-0 bg-linear-to-br from-cyan-500/5 to-transparent rounded-2xl pointer-events-none"></div>
             </div>
         </div>
 

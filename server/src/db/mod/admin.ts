@@ -3,10 +3,10 @@
  * 提供统计数据和最近活动查询
  */
 import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
-import { sql, count, desc, and, like, or, eq } from "drizzle-orm"
+import { count, desc, eq } from "drizzle-orm"
+import { createGraphQLError } from "graphql-yoga"
 import { db, schema } from ".."
 import type { Context } from "../yoga"
-import { createGraphQLError } from "graphql-yoga"
 
 export const typeDefs = /* GraphQL */ `
     type Query {
@@ -21,6 +21,8 @@ export const typeDefs = /* GraphQL */ `
         totalGuides: Int!
         totalRooms: Int!
         totalMessages: Int!
+        totalBuilds: Int!
+        totalTimelines: Int!
     }
 
     type RecentActivity {
@@ -38,7 +40,7 @@ export const resolvers = {
          * 获取后台统计数据
          * 需要管理员权限
          */
-        adminStats: async (parent, args, context) => {
+        adminStats: async (_parent, _args, context) => {
             if (!context.user || !context.user.roles?.includes("admin")) {
                 throw createGraphQLError("Unauthorized: Admin role required")
             }
@@ -59,11 +61,21 @@ export const resolvers = {
             const msgsResult = await db.select({ count: count() }).from(schema.msgs)
             const totalMessages = msgsResult[0]?.count || 0
 
+            // 查询构筑总数
+            const buildsResult = await db.select({ count: count() }).from(schema.builds)
+            const totalBuilds = buildsResult[0]?.count || 0
+
+            // 查询时间线总数
+            const timelinesResult = await db.select({ count: count() }).from(schema.timelines)
+            const totalTimelines = timelinesResult[0]?.count || 0
+
             return {
                 totalUsers,
                 totalGuides,
                 totalRooms,
                 totalMessages,
+                totalBuilds,
+                totalTimelines,
             }
         },
 
@@ -72,7 +84,7 @@ export const resolvers = {
          * 需要管理员权限
          * limit: 返回数量，默认5条
          */
-        recentActivities: async (parent, args, context) => {
+        recentActivities: async (_parent, args, context) => {
             if (!context.user || !context.user.roles?.includes("admin")) {
                 throw createGraphQLError("Unauthorized: Admin role required")
             }

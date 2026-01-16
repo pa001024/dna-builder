@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
-import { Fish, fishMap, fish2SpotMap, fishingSpotMap } from "../data"
 import { calculateFishPrice } from "@/utils/fish-utils"
+import { Fish, fish2SpotMap, fishingSpotMap, fishMap } from "../data"
 
 const props = defineProps<{
     fish: Fish

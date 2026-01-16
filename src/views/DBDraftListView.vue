@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed } from "vue"
+import { computed, ref } from "vue"
 import draftData from "../data/d/draft.data"
 import type { Draft } from "../data/data-types"
 import { matchPinyin } from "../utils/pinyin-utils"

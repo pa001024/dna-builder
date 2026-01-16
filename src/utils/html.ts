@@ -1,5 +1,5 @@
 import { copyText } from "@/util"
-import DOMPurify from "dompurify"
+
 // 定义允许的标签
 const allowedTags = new Set(["br", "b", "i", "s", "u", "em", "a", "img"])
 
@@ -31,7 +31,7 @@ export const sanitizeHTML = (inputHTML: string) => {
         }
     }
 
-    return DOMPurify.sanitize(doc.body.innerHTML)
+    return doc.body.innerHTML
 }
 
 export const htmlToText = (inputHTML: string) => {

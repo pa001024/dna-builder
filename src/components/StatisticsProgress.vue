@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref } from "vue"
 import gsap from "gsap"
+import { computed, onMounted, ref } from "vue"
 
 const props = defineProps<{
     progress: number

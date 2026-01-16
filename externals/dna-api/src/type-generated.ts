@@ -590,7 +590,7 @@ export interface DNAFollowGameIdBean {
     userGameList: DNAUserGameListBean[]
 }
 
-export interface DNAWikiVoEntity {}
+export type DNAWikiVoEntity = {}
 
 export interface DNAHaveOfficialRoleBean {
     canBoundOfficialRole: boolean

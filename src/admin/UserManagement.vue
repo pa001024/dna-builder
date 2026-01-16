@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
+import { ref, onMounted, watchEffect, computed } from "vue"
 import { usersQuery } from "@/api/query"
 import { deleteUserMutation, updateUserMutation } from "@/api/mutation"
 import { useUIStore } from "@/store/ui"
@@ -25,7 +25,7 @@ interface EditUserForm {
 const users = ref<User[]>([])
 const total = ref(0)
 const page = ref(1)
-const pageSize = ref(10)
+const pageSize = 20
 const search = ref("")
 const loading = ref(false)
 const ui = useUIStore()
@@ -43,10 +43,10 @@ const editFormSubmitting = ref(false)
 const fetchUsers = async () => {
     loading.value = true
     try {
-        const offset = (page.value - 1) * pageSize.value
+        const offset = (page.value - 1) * pageSize
         const result = await usersQuery(
             {
-                limit: pageSize.value,
+                limit: pageSize,
                 offset,
                 search: search.value,
             },
@@ -148,9 +148,10 @@ const submitEdit = async () => {
     }
 }
 
+const totalPages = computed(() => Math.ceil(total.value / pageSize))
 // 页面挂载时获取用户列表
 onMounted(() => {
-    fetchUsers()
+    watchEffect(fetchUsers)
 })
 </script>
 
@@ -254,6 +255,17 @@ onMounted(() => {
                 </table>
             </ScrollArea>
 
+            <!-- 分页 -->
+            <div class="flex justify-between items-center p-4 border-t border-base-300">
+                <div class="text-sm text-base-content/70">
+                    显示 {{ (page - 1) * pageSize + 1 }} 到 {{ Math.min(page * pageSize, users.length) }} 条，共 {{ users.length }} 条记录
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-sm btn-outline" :disabled="page <= 1" @click="page--">上一页</button>
+                    <input v-model="page" type="number" min="1" :max="totalPages" class="input input-bordered input-sm w-20" />
+                    <button class="btn btn-sm btn-outline" :disabled="page >= totalPages" @click="page++">下一页</button>
+                </div>
+            </div>
             <!-- 编辑用户对话框 -->
             <Dialog
                 v-model:open="editDialogOpen"

@@ -1,39 +1,36 @@
-import { DNASubModule, DNABaseAPI } from "./base"
-import {
-    DNAPostDetailResponse,
-    DNAGameSignInShowDataBean,
-    DNAGameSignInResultBean,
-    DNAUserTaskProcessEntity,
-    DNADiscussAreaResponse,
-    DNAHomeOffWaterResponse,
-    DNATipsBean,
-    DNAIsRedPointBean,
-    DNARecommendBean,
-    DNATopicListResponse,
-    DNAReplyListResponse,
-    DNACommentListResponse,
-    DNASignInBean,
+import type {
     DNABlockBean,
+    DNACommentListResponse,
     DNACreateCommentResponse,
-    DNAReplayCommentResponse,
+    DNADiscussAreaResponse,
     DNAFollowBean,
-    DNAGameBannerBean,
     DNAFraternityResponse,
-    DNAStatisticsBean,
+    DNAGameBannerBean,
+    DNAGameSignInResultBean,
+    DNAGameSignInShowDataBean,
+    DNAHomeOffWaterResponse,
+    DNAIsRedPointBean,
+    DNAPostDetailResponse,
     DNAPostListBean,
     DNAReceiveRecord,
+    DNARecommendBean,
+    DNAReplayCommentResponse,
+    DNAReplyListResponse,
     DNASearchPostBean,
     DNASearchTopicBean,
     DNASearchUserBean,
+    DNASignInBean,
     DNASoulTaskBean,
+    DNAStatisticsBean,
+    DNATipsBean,
+    DNATopicListResponse,
+    DNAUserTaskProcessEntity,
 } from "../type-generated"
+import { DNASubModule } from "./base"
 
 const DNA_GAME_ID = 268
 
 export class HomeAPI extends DNASubModule {
-    constructor(base: DNABaseAPI) {
-        super(base)
-    }
     async adminAdjustScore(postId: number, gameForumId: number, weight: string, gameId: number = DNA_GAME_ID) {
         const data = { postId, gameId: gameId ?? DNA_GAME_ID, gameForumId, weight }
         return await this._dna_request("forum/moderator/setPostWeight", data)
@@ -182,7 +179,7 @@ export class HomeAPI extends DNASubModule {
 
     async gameSignIn(dayAwardId: number, period: number) {
         const data = { dayAwardId, periodId: period, signinType: 1 }
-        return await this._dna_request<DNAGameSignInResultBean>("encourage/signin/signin", data, { sign: true })
+        return await this._dna_request<DNAGameSignInResultBean>("encourage/signin/signin", data, { sign: true, tokenSig: true })
     }
 
     async getDoujin(forumId: number) {

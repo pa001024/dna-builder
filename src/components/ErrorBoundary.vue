@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onErrorCaptured } from "vue"
+import { onErrorCaptured, ref } from "vue"
 
 const hasError = ref(false)
 const errorMessage = ref("")

@@ -1,5 +1,6 @@
-import { LeveledChar, LeveledMod, LeveledBuff, LeveledWeapon, LeveledSkillWeapon, LeveledSkill, LeveledMonster } from "./leveled"
-import { LeveledModWithCount } from "./leveled/LeveledMod"
+import { LeveledBuff, LeveledChar, LeveledMod, LeveledMonster, LeveledSkill, LeveledSkillWeapon, LeveledWeapon } from "./leveled"
+import type { LeveledModWithCount } from "./leveled/LeveledMod"
+
 // 本地实现base36Pad函数，避免依赖浏览器API
 function base36Pad(num: number): string {
     const base36 = num.toString(36).toUpperCase()
@@ -64,11 +65,11 @@ export interface WeaponAttr {
     武器倍率: number
 }
 
-import type { RawTimelineData } from "../store/timeline"
 import { groupBy } from "lodash-es"
-import { AbstractMod, DmgType, HpType, Skill, WeaponSkillType } from "./data-types"
-import { ASTNode, parseAST } from "./ast"
-import { DynamicMonster } from "."
+import type { RawTimelineData } from "../store/timeline"
+import type { DynamicMonster } from "."
+import { type ASTNode, parseAST } from "./ast"
+import { type AbstractMod, type DmgType, type HpType, type Skill, WeaponSkillType } from "./data-types"
 export class CharBuildTimeline {
     totalTime: number = 0
     constructor(
@@ -245,7 +246,7 @@ export class CharBuild {
     public timelineDPS = false
 
     get baseWithTarget() {
-        return this.baseName + "::" + this.targetFunction
+        return `${this.baseName}::${this.targetFunction}`
     }
     set baseWithTarget(value: string) {
         const [base, target] = value.split("::")
@@ -718,8 +719,8 @@ export class CharBuild {
         if (prefix === "角色" || !attribute.startsWith(prefix))
             this.mods.forEach(mod => {
                 if (prefix && mod.attrType !== prefix) return
-                if (typeof mod[attribute] === "number") {
-                    bonus += mod[attribute]
+                if (typeof mod.addAttr[attribute] === "number") {
+                    bonus += mod.addAttr[attribute]
                 }
             })
 
@@ -1000,8 +1001,13 @@ export class CharBuild {
         const astInput = targetFunction || this.targetFunction || "伤害"
 
         // 调用ast解析器解析目标函数表达式
-        const result = this.evaluateAST(astInput, attrs)
-        return result
+        try {
+            const result = this.evaluateAST(astInput, attrs)
+            return result
+        } catch (e) {
+            console.error("计算目标函数时出错:", e)
+            return 0
+        }
     }
     astCache = new Map<string, ASTNode>()
     getIdentifierNames(astInput: string) {
@@ -1054,6 +1060,7 @@ export class CharBuild {
                 switch (node.type) {
                     case "property": {
                         const fieldName = node.name
+                        if (["[攻击]", "[防御]", "[生命]"].includes(fieldName)) break
                         // 检查是否是技能字段、属性或武器属性
                         const isSkillField = getSkillAttr(fieldName, node.namespace)
                         const isAttr = fieldName in attrs
@@ -1065,26 +1072,31 @@ export class CharBuild {
                         }
                         break
                     }
-                    case "binary":
+                    case "binary": {
                         const leftError = validateNode(node.left)
                         if (leftError) return leftError
                         const rightError = validateNode(node.right)
                         if (rightError) return rightError
                         break
-                    case "unary":
+                    }
+                    case "unary": {
                         const unaryError = validateNode(node.argument)
                         if (unaryError) return unaryError
                         break
+                    }
                     case "function":
+                        if (!["min", "max", "floor", "ceil", "or", "log", "power", "hp"].includes(node.name))
+                            return `未知函数: "${node.name}"`
                         for (const arg of node.args) {
                             const argError = validateNode(arg)
                             if (argError) return argError
                         }
                         break
-                    case "member_access":
+                    case "member_access": {
                         const memberError = validateNode(node.object)
                         if (memberError) return memberError
                         break
+                    }
                 }
                 return undefined
             }
@@ -1263,7 +1275,7 @@ export class CharBuild {
                         case "log":
                             return Math.log(args[0])
                         case "power":
-                            return Math.pow(args[0], args[1])
+                            return args[0] ** args[1]
                         case "hp":
                             return this.calculateDesperateMultiplier(attrs, args[0]) * this.calculateBoostMultiplier(attrs, args[0])
                         default:
@@ -1679,7 +1691,7 @@ export class CharBuild {
         } else if (charTab === "远程") {
             charOrWeapon = this.rangedWeapon
         }
-        return 20 + ((charTab === "角色" && this.auraMod?.["最大耐受"]) || 0) + charOrWeapon.等级
+        return 20 + ((charTab === "角色" && this.auraMod?.最大耐受) || 0) + charOrWeapon.等级
     }
     getModCostTransfer(charTab: string) {
         if (charTab === "同律" && this.skillWeapon?.inherit) {
@@ -1801,7 +1813,7 @@ export class CharBuild {
         })
         let logString = ""
         function log(msg: string) {
-            if (enableLog) logString += msg + "\n"
+            if (enableLog) logString += `${msg}\n`
         }
         log(`开始自动构筑`)
         function addMod(key: ModTypeKey, mod: LeveledMod) {
@@ -1856,7 +1868,7 @@ export class CharBuild {
                                 localBuild.skillWeapon &&
                                 [localBuild.skillWeapon.伤害类型, localBuild.skillWeapon.类别].includes(v.限定))) &&
                         !selectedExclusiveNames[key].has(v.名称) &&
-                        !selectedExclusiveSeries[key].has(v.系列 == "囚狼" && v.id > 100000 ? "囚狼1" : v.系列) &&
+                        !selectedExclusiveSeries[key].has(v.系列 === "囚狼" && v.id > 100000 ? "囚狼1" : v.系列) &&
                         (selectedModCount.get(v.id) || 0) < v.count
                 )
                 .map(v => ({ mod: v, income: localBuild.calcIncome(v) }))
@@ -1892,25 +1904,35 @@ export class CharBuild {
             if (!fixedMelee && !initBuild.isMeleeWeapon && meleeOptions.length) {
                 const maxed = findMaxMelee()
                 if (maxed.名称 !== localBuild.meleeWeapon.名称) {
-                    const oldName = localBuild.meleeWeapon.名称
+                    const old = localBuild.meleeWeapon
                     const oldIncome = localBuild.calcIncome(localBuild.meleeWeapon)
                     localBuild.meleeWeapon = maxed
-                    log(
-                        `第${iter}次迭代: 用近战 ${maxed.名称} 替换 ${oldName} 收益: ${+(oldIncome * 100).toFixed(2)}% -> ${+(localBuild.calcIncome(maxed) * 100).toFixed(2)}%`
-                    )
-                    changed = true
+                    const newIncome = localBuild.calcIncome(maxed)
+                    if (newIncome > oldIncome) {
+                        log(
+                            `第${iter}次迭代: 用近战 ${maxed.名称} 替换 ${old.名称} 收益: ${+(oldIncome * 100).toFixed(2)}% -> ${+(newIncome * 100).toFixed(2)}%`
+                        )
+                        changed = true
+                    } else {
+                        localBuild.meleeWeapon = old
+                    }
                 }
             }
             if (!fixedRanged && !initBuild.isRangedWeapon && rangedOptions.length) {
                 const maxed = findMaxRanged()
                 if (maxed.名称 !== localBuild.rangedWeapon.名称) {
-                    const oldName = localBuild.rangedWeapon.名称
+                    const old = localBuild.rangedWeapon
                     const oldIncome = localBuild.calcIncome(localBuild.rangedWeapon)
                     localBuild.rangedWeapon = maxed
-                    log(
-                        `第${iter}次迭代: 用远程 ${maxed.名称} 替换 ${oldName} 收益: ${+(oldIncome * 100).toFixed(2)}% -> ${+(localBuild.calcIncome(maxed) * 100).toFixed(2)}%`
-                    )
-                    changed = true
+                    const newIncome = localBuild.calcIncome(maxed)
+                    if (newIncome > oldIncome) {
+                        log(
+                            `第${iter}次迭代: 用远程 ${maxed.名称} 替换 ${old.名称} 收益: ${+(oldIncome * 100).toFixed(2)}% -> ${+(newIncome * 100).toFixed(2)}%`
+                        )
+                        changed = true
+                    } else {
+                        localBuild.rangedWeapon = old
+                    }
                 }
             }
             // 最大化MOD

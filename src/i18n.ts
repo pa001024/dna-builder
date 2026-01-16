@@ -1,5 +1,5 @@
 import i18next from "i18next"
-import Backend, { HttpBackendOptions } from "i18next-http-backend"
+import Backend, { type HttpBackendOptions } from "i18next-http-backend"
 export const i18nLanguages = [
     {
         name: "English",
@@ -61,7 +61,11 @@ export async function waitForInitialLoad({
     lng = localStorage.getItem("setting_lang") || navigator.language,
     ns = "translation",
     timeout = 10000,
-}: { lng?: string; ns?: string | string[]; timeout?: number } = {}): Promise<void> {
+}: {
+    lng?: string
+    ns?: string | string[]
+    timeout?: number
+} = {}): Promise<void> {
     // 第一步：先检查——若资源已加载，直接resolve，无需等待事件
     const nsList = Array.isArray(ns) ? ns : [ns]
     const isAllLoaded = i18next.isInitialized && nsList.every(namespace => i18next.hasResourceBundle(lng, namespace))

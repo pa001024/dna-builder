@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Ref, onMounted, ref } from "vue"
+import { onMounted, Ref, ref } from "vue"
 
 defineProps({
     vertical: {

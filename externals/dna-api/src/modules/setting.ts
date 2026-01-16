@@ -1,19 +1,16 @@
-import { DNASubModule, DNABaseAPI } from "./base"
-import {
+import type {
     DNACancleStatus,
     DNACommonBooleanBean,
+    DNANotifySwitchEntity,
     DNAPrivateSetBean,
-    DNAUserAddressBean,
     DNAsettingBlackBean,
     DNAsettingMsgShiledBean,
     DNAsettingPostShiledBean,
-    DNANotifySwitchEntity,
+    DNAUserAddressBean,
 } from "../type-generated"
+import { DNASubModule } from "./base"
 
 export class SettingAPI extends DNASubModule {
-    constructor(base: DNABaseAPI) {
-        super(base)
-    }
     async addAddress(receiverName: string, receiverMobile: string, receiverAddress: string) {
         return await this._dna_request("user/more/userAddressAdd", { receiverName, receiverMobile, receiverAddress })
     }

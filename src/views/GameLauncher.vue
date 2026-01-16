@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watchEffect, computed } from "vue"
 import * as dialog from "@tauri-apps/plugin-dialog"
 import { t } from "i18next"
-import { useGameStore } from "../store/game"
-import { useUIStore } from "../store/ui"
+import { computed, onMounted, onUnmounted, ref, watchEffect } from "vue"
 import { openExplorer } from "../api/app"
 import { charData, LeveledChar, weaponData } from "../data"
 import { env } from "../env"
 import { Mod } from "../store/db"
+import { useGameStore } from "../store/game"
+import { useUIStore } from "../store/ui"
+
 // 状态管理
 const ui = useUIStore()
 const keys = ["path", "beforeGame", "afterGame"] as const

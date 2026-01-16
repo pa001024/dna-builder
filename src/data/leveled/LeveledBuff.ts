@@ -1,7 +1,7 @@
-import { LeveledChar, LeveledSkillWeapon, LeveledWeapon } from "."
-import { CharAttr, CharBuild, WeaponAttr } from "../CharBuild"
+import type { CharAttr, CharBuild, WeaponAttr } from "../CharBuild"
 import { buffMap } from "../d"
-import { Buff } from "../data-types"
+import type { Buff } from "../data-types"
+import type { LeveledChar, LeveledSkillWeapon, LeveledWeapon } from "."
 
 /**
  * LeveledBuff类 - 继承Buff接口，添加等级属性和动态属性计算
@@ -35,8 +35,8 @@ export class LeveledBuff implements Buff {
         // 复制基础属性
         this.名称 = buffData.名称
         this.描述 = buffData.描述
-        if (buffData.a !== undefined && buffData.a != 1) this.a = buffData.a
-        if (buffData.b !== undefined && buffData.b != 1) this.b = buffData.b
+        if (buffData.a !== undefined && buffData.a !== 1) this.a = buffData.a
+        if (buffData.b !== undefined && buffData.b !== 1) this.b = buffData.b
         if (buffData.lx !== undefined) {
             this.lx = buffData.lx
         }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import BaseNode from "./BaseNode.vue"
 import { computed } from "vue"
 import type { WeaponAttr } from "@/data/CharBuild"
+import BaseNode from "./BaseNode.vue"
 
 const props = defineProps<{
     id: string

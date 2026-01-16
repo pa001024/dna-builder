@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue"
 import { MihanNotify } from "../store/mihan"
+
 const props = defineProps<{
     loadref?: (ref: MihanNotify) => void
 }>()

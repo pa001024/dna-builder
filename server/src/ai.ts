@@ -17,7 +17,7 @@ export const aiPlugin = () =>
     new Elysia({ prefix: "/api/v1" })
         .post(
             "/chat/completions",
-            async ({ body, request }) => {
+            async ({ body }) => {
                 // 验证API Key
                 if (!AI_API_KEY || AI_API_KEY === "your_zhipu_api_key_here") {
                     const errorMsg = {
@@ -147,7 +147,7 @@ export const aiPlugin = () =>
                                 tool_call_id: t.String(),
                                 content: t.String(),
                             }),
-                        ]),
+                        ])
                     ),
                     model: t.Optional(t.String()),
                     temperature: t.Optional(t.Number()),
@@ -156,7 +156,7 @@ export const aiPlugin = () =>
                     tools: t.Optional(t.Any()),
                     tool_choice: t.Optional(t.Any()),
                 }),
-            },
+            }
         )
         .get("/models", async () => {
             // 验证API Key

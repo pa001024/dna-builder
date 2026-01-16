@@ -1,8 +1,8 @@
-import { computed, onMounted, onUnmounted, ref } from "vue"
 import * as clipboard from "@tauri-apps/plugin-clipboard-manager"
-import { env } from "./env"
-import { LeveledSkillField } from "./data/leveled/LeveledSkill"
+import { computed, onMounted, onUnmounted, ref } from "vue"
 import { getMapAPI } from "./api/app"
+import type { LeveledSkillField } from "./data/leveled/LeveledSkill"
+import { env } from "./env"
 
 export function useState<T, N extends keyof T>(obj: T, key: N) {
     return [computed(() => obj[key]), (val: T[N]) => (obj[key] = val)] as const
@@ -54,7 +54,7 @@ export function formatProp(prop: string, val: any): string {
 export function formatWeaponProp(prop: string, val: any): string {
     // 实现属性格式化的逻辑
     if (typeof val !== "number") return String(val)
-    if (numKeys.has(prop)) return "" + val.toFixed(2)
+    if (numKeys.has(prop)) return `${val.toFixed(2)}`
     return format100(val, 1)
 }
 const propRegex = /神智消耗|神智回复$/
@@ -206,7 +206,7 @@ export function useGameTimer() {
      */
     function getIntervalDayTime(interval: number = 3, offset: number = 0): number {
         // 获取当前UTC时间戳
-        const now = new Date().getTime()
+        const now = Date.now()
 
         // 3天的毫秒数：3 * 24小时 * 60分钟 * 60秒 * 1000毫秒
         const oneDay = 24 * 60 * 60 * 1000
@@ -221,7 +221,7 @@ export function useGameTimer() {
 
     function getIntervalHourTime(interval: number = 3, offset: number = 0): number {
         // 获取当前UTC时间戳
-        const now = new Date().getTime()
+        const now = Date.now()
 
         // 3天的毫秒数：3 * 24小时 * 60分钟 * 60秒 * 1000毫秒
         const oneHour = 60 * 60 * 1000
@@ -258,5 +258,76 @@ export function useGameTimer() {
         moling,
         zhouben,
         mihan,
+    }
+}
+
+/**
+ * Base62 编码字符集 (0-9, a-z, A-Z)
+ */
+const BASE62_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+/**
+ * 将数字编码为 base62 字符串
+ */
+export function encodeBase62(num: number): string {
+    if (num === 0) return "0"
+    let result = ""
+    let n = Math.abs(num)
+    while (n > 0) {
+        result = BASE62_CHARS[n % 62] + result
+        n = Math.floor(n / 62)
+    }
+    return num < 0 ? `-${result}` : result
+}
+
+/**
+ * 将 base62 字符串解码为数字
+ */
+export function decodeBase62(str: string): number {
+    const isNegative = str.startsWith("-")
+    const s = isNegative ? str.slice(1) : str
+    let result = 0
+    for (let i = 0; i < s.length; i++) {
+        const charIndex = BASE62_CHARS.indexOf(s[i])
+        if (charIndex === -1) {
+            throw new Error(`Invalid base62 character: ${s[i]}`)
+        }
+        result = result * 62 + charIndex
+    }
+    return isNegative ? -result : result
+}
+
+/**
+ * 将 DataURL 转换为 File 对象
+ * @param {string} dataUrl - 标准 DataURL（如 data:image/png;base64,iVBORw0KGgo...）
+ * @param {string} filename - 生成 File 的文件名（如 "avatar.png"）
+ * @returns {File | null} 转换后的 File 对象，失败返回 null
+ */
+export function dataUrlToFile(dataUrl: string, filename: string): File | null {
+    const dataUrlRegex = /^data:([^;]+);base64,/
+    const match = dataUrl.match(dataUrlRegex)
+
+    if (!match) {
+        console.error("无效的 DataURL 格式")
+        return null
+    }
+
+    const mimeType = match[1] // 如 "image/png"
+    const base64Data = dataUrl.split(",")[1]
+
+    try {
+        const binaryStr = atob(base64Data)
+        const len = binaryStr.length
+        const uint8Array = new Uint8Array(len)
+
+        for (let i = 0; i < len; i++) {
+            uint8Array[i] = binaryStr.charCodeAt(i)
+        }
+
+        const blob = new Blob([uint8Array], { type: mimeType })
+        return new File([blob], filename, { type: mimeType })
+    } catch (error) {
+        console.error("Base64 解码或 File 生成失败:", error)
+        return null
     }
 }

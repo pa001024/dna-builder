@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from "vue"
 import { DNAAPI, DNAPostDetailResponse } from "dna-api"
+import { computed, onMounted, ref } from "vue"
+import { useRoute, useRouter } from "vue-router"
 import { useSettingStore } from "../store/setting"
-import { useRouter, useRoute } from "vue-router"
 import { useUIStore } from "../store/ui"
 
 const setting = useSettingStore()

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SelectItem, type SelectItemProps, SelectItemText, SelectItemIndicator } from "reka-ui"
+import { SelectItem, SelectItemIndicator, type SelectItemProps, SelectItemText } from "reka-ui"
 import Icon from "../Icon.vue"
 
 const props = defineProps<Omit<SelectItemProps, "value"> & { value: any }>()

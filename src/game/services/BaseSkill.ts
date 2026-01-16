@@ -1,6 +1,6 @@
-import * as THREE from "three"
-import { VoxelEngine } from "./VoxelEngine"
-import { Monster } from "../types"
+import type * as THREE from "three"
+import type { Monster } from "../types"
+import type { VoxelEngine } from "./VoxelEngine"
 
 // --- Helper: Distance from point to line segment ---
 // p: point, a: line start, b: line end

@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { getRewardDetails, getDropModeText } from "../utils/reward-utils"
+import type { Dungeon } from "../data"
 import { monsterMap } from "../data/d/index"
 import { getDungeonType } from "../utils/dungeon-utils"
-import type { Dungeon } from "../data"
+import { getDropModeText, getRewardDetails } from "../utils/reward-utils"
 
 defineProps<{
     dungeon: Dungeon

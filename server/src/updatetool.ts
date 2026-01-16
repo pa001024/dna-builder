@@ -19,7 +19,7 @@ if (!API_TOKEN || !DEV_CODE || !USER_TOKEN) {
 
 // 休眠函数
 const sleep = (ms: number) => {
-    return new Promise((resolve) => setTimeout(resolve, ms))
+    return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 // 从 DNA API 获取委托数据
@@ -28,7 +28,7 @@ async function fetchMissionsFromDNA() {
         const dnaAPI = getDNAAPI()
         const res = await dnaAPI.defaultRoleForTool()
         if (res.is_success && res.data?.instanceInfo) {
-            const missions = res.data.instanceInfo.map((item) => item.instances.map((v) => v.name))
+            const missions = res.data.instanceInfo.map(item => item.instances.map(v => v.name))
             return missions
         } else {
             throw new Error(`DNA API 返回失败: ${res.msg}`)
@@ -53,7 +53,7 @@ async function updateMissionsIngame(server: string, missions: string[][]) {
     `
 
     try {
-        const response = await fetch(API_BASE_URL + "/graphql", {
+        const response = await fetch(`${API_BASE_URL}/graphql`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -122,7 +122,7 @@ const updateMH = async (server: string = "cn", t: number = 10) => {
 
 // 获取下一次更新时间
 const getNextUpdateTime = (t?: number) => {
-    const now = t ?? new Date().getTime()
+    const now = t ?? Date.now()
     const oneHour = 60 * 60 * 1000
     return Math.ceil(now / oneHour) * oneHour
 }

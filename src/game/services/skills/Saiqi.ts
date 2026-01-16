@@ -1,8 +1,8 @@
 import * as THREE from "three"
+import type { LeveledSkillField } from "../../../data"
+import type { Monster } from "../../types"
 import { BaseSkill } from "../BaseSkill"
-import { VoxelEngine } from "../VoxelEngine"
-import { LeveledSkillField } from "../../../data"
-import { Monster } from "../../types"
+import type { VoxelEngine } from "../VoxelEngine"
 
 // 幻象实体接口
 interface Phantom {

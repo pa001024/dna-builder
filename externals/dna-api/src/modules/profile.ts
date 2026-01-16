@@ -1,24 +1,21 @@
-import { DNASubModule, DNABaseAPI } from "./base"
-import {
-    DNARoleEntityForTrend,
-    DNARoleListBean,
-    DNAMineFansBean,
-    DNAMineFollowBean,
+import type {
+    DNAAcewarBean,
+    DNABindStatus,
     DNADraftBean,
     DNAFastBindResultBean,
-    DNABindStatus,
-    DNAProfileResponse,
-    DNAProfileLoadResponse,
-    DNANotifySwitchEntity,
     DNAHistoryBean,
-    DNAAcewarBean,
+    DNAMineFansBean,
+    DNAMineFollowBean,
     DNAModeratorByGame,
+    DNANotifySwitchEntity,
+    DNAProfileLoadResponse,
+    DNAProfileResponse,
+    DNARoleEntityForTrend,
+    DNARoleListBean,
 } from "../type-generated"
+import { DNASubModule } from "./base"
 
 export class ProfileAPI extends DNASubModule {
-    constructor(base: DNABaseAPI) {
-        super(base)
-    }
     async blackUser(toUserId: string, type: number) {
         return await this._dna_request("user/blackUser", { toUserId, type })
     }

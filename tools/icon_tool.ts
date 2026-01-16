@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { readFile, writeFile, readdir } from "node:fs/promises"
+import { readdir, readFile, writeFile } from "node:fs/promises"
 import { join } from "node:path"
 import { format } from "prettier"
 
@@ -16,7 +16,7 @@ type IconData = {
     horizAdvX: string
 }
 
-type IconDataEntry = [string, number] | [string, number, Record<string, any>]
+// type IconDataEntry = [string, number] | [string, number, Record<string, any>]
 
 async function loadIgnoreList(): Promise<Set<string>> {
     try {
@@ -28,7 +28,7 @@ async function loadIgnoreList(): Promise<Set<string>> {
 }
 
 async function saveIgnoreList(icons: Set<string>): Promise<void> {
-    const content = Array.from(icons).sort().join("\n") + "\n"
+    const content = `${Array.from(icons).sort().join("\n")}\n`
     await writeFile(IGNORE_LIST_FILE, content, "utf-8")
 }
 
@@ -45,7 +45,8 @@ async function loadIconVueData(): Promise<Record<string, any>> {
         throw new Error("无法找到 Icon.vue 中的 data 对象")
     }
 
-    const dataContent = "{" + dataMatch[1] + "}"
+    const dataContent = `{${dataMatch[1]}}`
+    // biome-ignore lint/security/noGlobalEval: false positive
     return eval(`(${dataContent})`)
 }
 
@@ -166,7 +167,6 @@ async function findUsedIcons(): Promise<Set<string>> {
 
             const constObjectAssignment = trimmedLine.match(/const\s+(\w+)\s*[=:]\s*\{[^}]*icon\s*:\s*["']([^"']+)["']/)
             if (constObjectAssignment) {
-                const varName = constObjectAssignment[1]
                 const icon = constObjectAssignment[2]
                 usedIcons.add(icon)
                 continue
@@ -248,10 +248,10 @@ async function findUsedIcons(): Promise<Set<string>> {
         for (const match of ternaryMatches) {
             // match[1] 是第一个分支（? 后面的值）
             // match[2] 是第二个分支（: 后面的值）
-            if (match[1] && match[1].includes(":")) {
+            if (match[1]?.includes(":")) {
                 usedIcons.add(match[1])
             }
-            if (match[2] && match[2].includes(":")) {
+            if (match[2]?.includes(":")) {
                 usedIcons.add(match[2])
             }
         }
@@ -268,7 +268,7 @@ async function findUsedIcons(): Promise<Set<string>> {
         for (const match of propAccess) {
             const propName = match[0].match(/\.(\w+)/)?.[1]
             if (propName) {
-                const iconCandidates = content.matchAll(new RegExp(`icon:\\s*["']([^"']+)["']`, "g"))
+                const iconCandidates = content.matchAll(/icon:\s*["']([^"']+)["']/g)
                 for (const candidate of iconCandidates) {
                     if (candidate[1].includes(":")) {
                         usedIcons.add(candidate[1])
@@ -315,7 +315,7 @@ async function findUsedIcons(): Promise<Set<string>> {
         for (const polarity of polarityValues) {
             const regex = new RegExp(`['"]\\s*${polarity}['"]\\s*\\|`, "g")
             const matches = content.matchAll(regex)
-            for (const match of matches) {
+            for (const _match of matches) {
                 usedIcons.add(`po-${polarity}`)
             }
         }
@@ -375,11 +375,11 @@ async function findUsedIcons(): Promise<Set<string>> {
     const inferredIcons = new Set<string>()
     for (const info of variableMap.values()) {
         if (!info.isDynamic && info.possibleValues.length > 0) {
-            info.possibleValues.forEach(icon => inferredIcons.add(icon))
+            info.possibleValues.forEach(icon => void inferredIcons.add(icon))
         }
     }
 
-    inferredIcons.forEach(icon => usedIcons.add(icon))
+    inferredIcons.forEach(icon => void usedIcons.add(icon))
 
     return usedIcons
 }

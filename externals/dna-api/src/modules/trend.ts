@@ -1,20 +1,17 @@
-import { DNASubModule, DNABaseAPI } from "./base"
-import {
-    DNATopicListBean,
+import type {
+    DNACommonBooleanBean,
     DNAParseLinkBean,
     DNAPostPublishPageBean,
     DNAPublishPostResponse,
     DNARecomdBean,
+    DNATipsBean,
+    DNATopicListBean,
     DNATrendPostBean,
     DNAVodTokenBean,
-    DNATipsBean,
-    DNACommonBooleanBean,
 } from "../type-generated"
+import { DNASubModule } from "./base"
 
 export class TrendAPI extends DNASubModule {
-    constructor(base: DNABaseAPI) {
-        super(base)
-    }
     async draftSave(
         content: string,
         draftId: string,
@@ -22,7 +19,7 @@ export class TrendAPI extends DNASubModule {
         postTitle: string,
         postType: number,
         gameId: number,
-        videoReUpload: number,
+        videoReUpload: number
     ) {
         return await this._dna_request("forum/draftSave", { content, draftId, h5Content, postTitle, postType, gameId, videoReUpload })
     }
@@ -60,7 +57,7 @@ export class TrendAPI extends DNASubModule {
         postCommentReplyId: number,
         postId: number,
         postType: number,
-        toUserId: string,
+        toUserId: string
     ) {
         return await this._dna_request("forum/like", {
             forumId,
@@ -92,7 +89,7 @@ export class TrendAPI extends DNASubModule {
         topics: string,
         postType: number,
         gameId: number,
-        videoReUpload: number,
+        videoReUpload: number
     ) {
         return await this._dna_request<DNAPublishPostResponse>("forum/moderator/postEdit", {
             content,
@@ -115,7 +112,7 @@ export class TrendAPI extends DNASubModule {
         postTitle: string,
         topics: string,
         postType: number,
-        videoReUpload: number,
+        videoReUpload: number
     ) {
         return await this._dna_request<DNAPublishPostResponse>("forum/postEdit", {
             content,
@@ -137,7 +134,7 @@ export class TrendAPI extends DNASubModule {
         h5Content: string,
         postTitle: string,
         postType: number,
-        topics: string,
+        topics: string
     ) {
         return await this._dna_request<DNAPublishPostResponse>("forum/postPublish", {
             content,
@@ -173,7 +170,7 @@ export class TrendAPI extends DNASubModule {
         h5Content: string,
         postTitle: string,
         postType: number,
-        topics: string,
+        topics: string
     ) {
         return await this._dna_request<DNAPublishPostResponse>("forum/moderator/postPublish", {
             content,

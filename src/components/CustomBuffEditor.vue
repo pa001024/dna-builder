@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, reactive } from "vue"
+import { useLocalStorage } from "@vueuse/core"
+import { reactive, ref } from "vue"
 import { buffMap } from "../data"
 import { formatProp } from "../util"
-import { useLocalStorage } from "@vueuse/core"
 
 // 获取所有可用的属性名
 const properties = [

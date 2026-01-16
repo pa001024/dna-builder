@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, expect, it } from "vitest"
 import { getDropModeText, getRewardDetails, type RewardItem } from "./reward-utils"
 
 describe("getDropModeText", () => {
@@ -31,33 +31,33 @@ describe("getRewardDetails", () => {
     it("应该正确处理Independent模式的奖励", () => {
         const result = getRewardDetails(1)
         expect(result).not.toBeNull()
-        expect(result?.m).toBe("Independent")
-        expect(result?.child).toBeDefined()
-        expect(result?.child!.length).toBeGreaterThan(0)
+        expect(result!.m).toBe("Independent")
+        expect(result!.child).toBeDefined()
+        expect(result!.child!.length).toBeGreaterThan(0)
     })
 
     it("应该正确处理Weight模式的奖励", () => {
         const result = getRewardDetails(2)
         expect(result).not.toBeNull()
-        expect(result?.m).toBe("Weight")
-        expect(result?.child).toBeDefined()
-        expect(result?.child!.length).toBeGreaterThan(0)
+        expect(result!.m).toBe("Weight")
+        expect(result!.child).toBeDefined()
+        expect(result!.child!.length).toBeGreaterThan(0)
     })
 
     it("应该正确处理Sequence模式的奖励", () => {
         const result = getRewardDetails(50)
         expect(result).not.toBeNull()
-        expect(result?.m).toBe("Sequence")
-        expect(result?.child).toBeDefined()
-        expect(result?.child!.length).toBeGreaterThan(0)
-        expect(result?.p).toBeGreaterThan(0)
+        expect(result!.m).toBe("Sequence")
+        expect(result!.child).toBeDefined()
+        expect(result!.child!.length).toBeGreaterThan(0)
+        expect(result!.p).toBeGreaterThan(0)
     })
 
     it("应该正确计算Sequence模式的pp值（reward id 300167）", () => {
         const result = getRewardDetails(300167)
         expect(result).not.toBeNull()
-        expect(result?.m).toBe("Sequence")
-        expect(result?.totalP).toBe(12)
+        expect(result!.m).toBe("Sequence")
+        expect(result!.totalP).toBe(12)
 
         if (result?.child) {
             expect(result.child[0].pp).toBeCloseTo(1 / 12, 6)

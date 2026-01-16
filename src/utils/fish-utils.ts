@@ -1,4 +1,4 @@
-import { fishMap, type Fish, type FishingSpot } from "@/data"
+import { type Fish, type FishingSpot, fishMap } from "@/data"
 
 const RANDOM_LENGTH_FISH_IDS = [
     // 鳌虾

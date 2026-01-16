@@ -1,8 +1,8 @@
 import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
 import { desc, eq } from "drizzle-orm"
-import { Context } from "../yoga"
-import { db, schema } from ".."
 import { createGraphQLError } from "graphql-yoga"
+import { db, schema } from ".."
+import type { Context } from "../yoga"
 
 export const typeDefs = /* GraphQL */ `
     type Query {
@@ -28,7 +28,7 @@ export const typeDefs = /* GraphQL */ `
 
 export const resolvers = {
     Query: {
-        missionsIngame: async (parent, { server }, context, info) => {
+        missionsIngame: async (_parent, { server }) => {
             const missionsIngame = await db.query.missionsIngame.findFirst({
                 where: eq(schema.missionsIngame.server, server),
                 orderBy: desc(schema.missionsIngame.id),
@@ -37,14 +37,15 @@ export const resolvers = {
         },
     },
     Mutation: {
-        addMissionsIngame: async (parent, { token, server, missions }, { user, pubsub }, info) => {
+        addMissionsIngame: async (_parent, { token, server, missions }, { pubsub }) => {
             if (!token || token !== process.env.API_TOKEN) throw createGraphQLError("need api token")
             // 同server最后一个值重复校验
             const lastMissionsIngame = await db.query.missionsIngame.findFirst({
                 where: eq(schema.missionsIngame.server, server),
                 orderBy: desc(schema.missionsIngame.id),
             })
-            if (lastMissionsIngame && JSON.stringify(lastMissionsIngame.missions) === JSON.stringify(missions)) throw createGraphQLError("duplicate missions")
+            if (lastMissionsIngame && JSON.stringify(lastMissionsIngame.missions) === JSON.stringify(missions))
+                throw createGraphQLError("duplicate missions")
 
             const missionsIngame = await db
                 .insert(schema.missionsIngame)
@@ -53,11 +54,14 @@ export const resolvers = {
                     missions,
                 })
                 .returning()
+            pubsub.publish("updateMissionsIngame", server, {
+                updateMissionsIngame: missionsIngame[0],
+            })
             return missionsIngame[0]
         },
     },
     Subscription: {
-        updateMissionsIngame: async (parent, { server }, { user, pubsub, extra }, info) => {
+        updateMissionsIngame: async (_parent, { server }, { user, pubsub }) => {
             if (!user) throw createGraphQLError("need login")
             return pubsub.subscribe("updateMissionsIngame", server)
         },

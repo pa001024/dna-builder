@@ -1,7 +1,7 @@
-import { LeveledBuff } from "."
-import { CharAttr } from "../CharBuild"
+import type { CharAttr } from "../CharBuild"
 import { effectMap, modMap } from "../d"
-import { Mod, Quality } from "../data-types"
+import { type Mod, Quality } from "../data-types"
+import { LeveledBuff } from "."
 
 /**
  * LeveledMod类 - 继承Mod接口，添加等级属性和动态属性计算
@@ -50,7 +50,7 @@ export class LeveledMod implements Mod {
         if (modMap.has(+dnaMod.id)) {
             return new LeveledMod(+dnaMod.id)
         }
-        if (+dnaMod.id == -1) return null
+        if (+dnaMod.id === -1) return null
         return new LeveledMod({
             id: +dnaMod.id,
             名称: dnaMod.name || "?",

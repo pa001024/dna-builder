@@ -1,6 +1,6 @@
 import { gql, useSubscription } from "@urql/vue"
 import { rtcJoinMutation, rtcSignalMutation } from "./mutation"
-import { MaybeRef, onMounted, onUnmounted, Ref, ref, watch } from "vue"
+import { type MaybeRef, onMounted, onUnmounted, type Ref, ref, watch } from "vue"
 import mitt from "mitt"
 import { useUserStore } from "@/store/user"
 

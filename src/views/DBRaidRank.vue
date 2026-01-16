@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { getRewardDetails, getDropModeText } from "../utils/reward-utils"
+import { getDropModeText, getRewardDetails } from "../utils/reward-utils"
+
 const rawRankData = [
     {
         IsOnline: [true, true, false, false, false],

@@ -1,13 +1,14 @@
-import { defineConfig } from "vite"
+import { resolve } from "node:path"
+import tailwindcss from "@tailwindcss/vite"
 import vue from "@vitejs/plugin-vue"
 import vueJsx from "@vitejs/plugin-vue-jsx"
-import Component from "unplugin-vue-components/vite"
 import RekaResolver from "reka-ui/resolver"
-import tailwindcss from "@tailwindcss/vite"
-import { VitePWA } from "vite-plugin-pwa"
-import { resolve } from "path"
-import { chunkSplitPlugin } from "vite-plugin-chunk-split"
 import graphqlTag from "rollup-plugin-graphql-tag"
+import Component from "unplugin-vue-components/vite"
+import { defineConfig } from "vite"
+import { chunkSplitPlugin } from "vite-plugin-chunk-split"
+import { VitePWA } from "vite-plugin-pwa"
+
 const host = process.env.TAURI_DEV_HOST
 
 // https://vite.dev/config/
@@ -130,6 +131,13 @@ export default defineConfig(async () => ({
     // 1. prevent Vite from obscuring rust errors
     clearScreen: false,
     // 2. tauri expects a fixed port, fail if that port is not available
+    css: {
+        preprocessorOptions: {
+            less: {
+                javascriptEnabled: true,
+            },
+        },
+    },
     server: {
         port: 1420,
         strictPort: true,

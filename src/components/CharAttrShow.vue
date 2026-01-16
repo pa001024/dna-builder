@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import { computed } from "vue"
 import { useCharSettings } from "@/composables/useCharSettings"
 import type { CharAttr, CharBuild, LeveledChar, LeveledMod } from "@/data"
 import { format100r } from "@/util"
-import { computed } from "vue"
 
 const props = withDefaults(
     defineProps<{
@@ -49,17 +49,17 @@ defineEmits<{
                         <div class="text-base-content/80">{{ $t("char-build.resonance_gain") }}</div>
                         {{ format100r(charSettings.resonanceGain) }}
                     </li>
-                    <li v-if="key in (charBuild.meleeWeapon || {})" class="flex justify-between gap-8 text-sm text-primary">
+                    <li v-if="key in (charBuild.meleeWeapon.addAttr || {})" class="flex justify-between gap-8 text-sm text-primary">
                         <div class="text-base-content/80">
                             {{ $t(charBuild.meleeWeapon.名称) }}
                         </div>
-                        {{ format100r(charBuild.meleeWeapon[key]!) }}
+                        {{ format100r(charBuild.meleeWeapon.addAttr[key]!) }}
                     </li>
-                    <li v-if="key in (charBuild.rangedWeapon || {})" class="flex justify-between gap-8 text-sm text-primary">
+                    <li v-if="key in (charBuild.rangedWeapon.addAttr || {})" class="flex justify-between gap-8 text-sm text-primary">
                         <div class="text-base-content/80">
                             {{ $t(charBuild.rangedWeapon.名称) }}
                         </div>
-                        {{ format100r(charBuild.rangedWeapon[key]!) }}
+                        {{ format100r(charBuild.rangedWeapon.addAttr[key]!) }}
                     </li>
                     <li
                         v-for="(mod, index) in [charBuild.auraMod].filter((m): m is LeveledMod => m && m[key])"

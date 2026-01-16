@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import { computed } from "vue"
 import { useCharSettings } from "@/composables/useCharSettings"
 import { CharAttr, CharBuild, LeveledMod, LeveledWeapon } from "@/data"
 import { format100, format100r } from "@/util"
-import { computed } from "vue"
 
 const props = defineProps<{
     charBuild: CharBuild

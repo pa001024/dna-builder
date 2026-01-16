@@ -18,12 +18,7 @@
         "default": "./dist/index.js",
         "types": "./dist/index.d.ts"
     },
-    "keywords": [
-        "elysia",
-        "graphql",
-        "mobius",
-        "graphql-mobius"
-    ],
+    "keywords": ["elysia", "graphql", "mobius", "graphql-mobius"],
     "homepage": "https://github.com/SaltyAom/mobius",
     "repository": {
         "type": "git",

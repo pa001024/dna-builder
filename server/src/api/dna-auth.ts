@@ -1,13 +1,13 @@
+import { readFileSync } from "node:fs"
+import { dirname, join } from "node:path"
+import { fileURLToPath } from "node:url"
+import { createCanvas, loadImage } from "canvas"
+import { eq } from "drizzle-orm"
 import { Elysia, t } from "elysia"
+import jwt from "jsonwebtoken"
 import { db, schema } from "../db"
 import { id, now } from "../db/schema"
-import { eq } from "drizzle-orm"
-import jwt from "jsonwebtoken"
 import { jwtToken } from "../db/yoga"
-import { createCanvas, loadImage } from "canvas"
-import { readFileSync } from "fs"
-import { dirname, join } from "path"
-import { fileURLToPath } from "url"
 import { getDNAAPI } from "./dna"
 
 const SESSION_EXPIRE_MINUTES = 5
@@ -187,7 +187,7 @@ export const dnaAuthPlugin = () => {
             body: t.Object({
                 dnaUid: t.String(),
             }),
-        },
+        }
     )
 
     app.get("/session/:id/image", async ({ params: { id }, set }) => {
@@ -247,11 +247,11 @@ export const dnaAuthPlugin = () => {
                     return { success: false, error: "图片验证失败" }
                 }
 
-                let binding = await db.query.dnaUserBindings.findFirst({
+                const binding = await db.query.dnaUserBindings.findFirst({
                     where: eq(schema.dnaUserBindings.dnaUid, session.dnaUid),
                 })
 
-                let user
+                let user: typeof schema.users.$inferSelect | undefined
                 if (binding) {
                     user = await db.query.users.findFirst({
                         where: eq(schema.users.id, binding.userId),
@@ -326,7 +326,7 @@ export const dnaAuthPlugin = () => {
                 sessionId: t.String(),
                 imageUrl: t.String(),
             }),
-        },
+        }
     )
 
     return app

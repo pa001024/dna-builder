@@ -1,7 +1,6 @@
 <script lang="ts" setup>
-import { ref, computed } from "vue"
-import { Walnut } from "../data/d/walnut.data"
-import walnutData from "../data/d/walnut.data"
+import { computed, ref } from "vue"
+import walnutData, { Walnut } from "../data/d/walnut.data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
 const searchKeyword = ref("")

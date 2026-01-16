@@ -1,10 +1,10 @@
 #!/usr/bin/env bun
 
-import { $ } from "bun"
-import fs from "fs"
-import path from "path"
-import { parse } from "dotenv"
+import fs from "node:fs"
+import path from "node:path"
 import OSS from "ali-oss"
+import { $ } from "bun"
+import { parse } from "dotenv"
 
 const args = process.argv.slice(2)
 const isAppMode = args.includes("app")
@@ -64,7 +64,7 @@ async function uploadToOss(filePath: string, ossKey: string): Promise<void> {
     try {
         await client.delete(ossKey)
         console.log(`🗑️  已删除旧文件: ${ossKey}`)
-    } catch (error) {
+    } catch {
         // 文件不存在时忽略错误
         console.log(`ℹ️  文件不存在，跳过删除: ${ossKey}`)
     }

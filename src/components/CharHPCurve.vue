@@ -41,9 +41,10 @@ const tooltipY = ref(0)
  */
 const handleMouseMove = (event: MouseEvent) => {
     const svgElement = event.currentTarget as SVGElement
-    const rect = svgElement.getBoundingClientRect()
-    const x = event.clientX - rect.left
-    const y = event.clientY - rect.top
+    // 处理缩放
+    const parentRect = svgElement.parentElement!.getBoundingClientRect()
+    const x = ((event.clientX - parentRect.left) / parentRect.width) * props.width
+    const y = ((event.clientY - parentRect.top) / parentRect.height) * props.height
 
     // 计算鼠标位置对应的血量百分比
     const hpPercent = Math.max(0, Math.min(1, (x - padding) / chartWidth))
@@ -108,18 +109,16 @@ const maxMultiplier = computed(() => {
     const steps = 100
 
     // 计算背水的最大收益
-    for (let i = 0; i <= steps; i++) {
-        const hpPercent = i / steps
-        const multiplier = calculateDesperateMultiplier(hpPercent)
+    {
+        const multiplier = calculateDesperateMultiplier(0)
         if (multiplier > maxValue) {
             maxValue = multiplier
         }
     }
 
     // 计算昂扬的最大收益
-    for (let i = 0; i <= steps; i++) {
-        const hpPercent = i / steps
-        const multiplier = calculateBoostMultiplier(hpPercent)
+    {
+        const multiplier = calculateBoostMultiplier(1)
         if (multiplier > maxValue) {
             maxValue = multiplier
         }
@@ -248,7 +247,9 @@ const totalPath = computed(() => {
         const hpPercent = i / steps
         const multiplier = calculateTotalMultiplier(hpPercent)
         const x = padding + hpPercent * 100 * (chartWidth / 100) // 100% 是因为血量从0到100%显示
-        const y = padding + chartHeight - (multiplier - 1) * (chartHeight / (maxMultiplier.value - 1)) // 使用动态计算的最大收益倍数
+        // 防止0除错误
+        const ratio = multiplier === maxMultiplier.value ? 1 : (multiplier - 1) / (maxMultiplier.value - 1)
+        const y = padding + chartHeight - ratio * chartHeight // 使用动态计算的最大收益倍数
 
         if (i === 0) {
             path += `M ${x} ${y}`
@@ -261,7 +262,7 @@ const totalPath = computed(() => {
 })
 </script>
 <template>
-    <div class="w-full h-full overflow-hidden">
+    <div class="w-full h-full overflow-hidden" id="char-hp-curve">
         <svg
             :width="width"
             :height="height"

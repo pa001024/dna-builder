@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import fs from "fs"
-import path from "path"
+import fs from "node:fs"
+import path from "node:path"
 
 // 从环境变量中读取VERSION
 const version = (process.env.VERSION || "").trim()
@@ -18,10 +18,10 @@ const cargoTomlPath = path.join(import.meta.url.replace("file:///", ""), "..", "
 const cargoTomlContent = fs.readFileSync(cargoTomlPath, "utf8")
 
 // 递增小版本号
-function incrementPatchVersion(version) {
-    const [major, minor, patch] = version.split(".").map(Number)
-    return `${major}.${minor}.${patch + 1}`
-}
+// function incrementPatchVersion(version) {
+//     const [major, minor, patch] = version.split(".").map(Number)
+//     return `${major}.${minor}.${patch + 1}`
+// }
 
 // 更新版本号
 const newVersion = version || packageJson.version // incrementPatchVersion(packageJson.version)
@@ -31,8 +31,8 @@ const updatedCargoTomlContent = cargoTomlContent.replace(/version = "(.*?)"/, `v
 
 // 写入更新后的文件
 // 更新Cargo.toml中的版本号
-fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 4) + "\n")
-fs.writeFileSync(tauriConfPath, JSON.stringify(tauriConf, null, 4) + "\n")
+fs.writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 4)}\n`)
+fs.writeFileSync(tauriConfPath, `${JSON.stringify(tauriConf, null, 4)}\n`)
 fs.writeFileSync(cargoTomlPath, updatedCargoTomlContent)
 
 // console.log(`Version updated to ${newVersion}`)
@@ -44,7 +44,7 @@ function sortJson(obj) {
     return Object.fromEntries(
         Object.entries(obj)
             .map(([key, value]) => [key, sortJson(value)])
-            .sort(([a], [b]) => a.localeCompare(b)),
+            .sort(([a], [b]) => a.localeCompare(b))
     )
 }
 
@@ -53,5 +53,5 @@ for (const lang of langs) {
     const i18nPath = path.join(import.meta.url.replace("file:///", ""), "..", "..", "public", "i18n", lang, `translation.json`)
     let i18n = JSON.parse(fs.readFileSync(i18nPath, "utf8"))
     i18n = sortJson(i18n)
-    fs.writeFileSync(i18nPath, JSON.stringify(i18n, null, 4) + "\n")
+    fs.writeFileSync(i18nPath, `${JSON.stringify(i18n, null, 4)}\n`)
 }

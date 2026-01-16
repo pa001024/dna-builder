@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue"
+import { computed, ref } from "vue"
 import { CharBuild, LeveledMod } from "../data"
 import { format100r } from "../util"
 

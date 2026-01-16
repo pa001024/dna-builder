@@ -1,6 +1,6 @@
-import { CommonLevelUp, LeveledBuff, LeveledSkill } from "."
 import { effectMap, weaponMap, weaponNameMap } from "../d"
-import { DmgType, Skill, SkillField, Weapon } from "../data-types"
+import type { DmgType, Skill, SkillField, Weapon } from "../data-types"
+import { CommonLevelUp, LeveledBuff, LeveledSkill } from "."
 
 /**
  * LeveledWeapon类 - 继承Weapon接口，添加等级和精炼属性和动态属性计算
@@ -343,12 +343,18 @@ export class LeveledWeapon {
         this.baseProperties.forEach(prop => {
             r[prop] = this[prop]
         })
+        Object.entries(this.buffProps).forEach(([key, prop]) => {
+            r[key] = (r[key] || 0) + prop
+        })
         return r
     }
     get minusAttr() {
         const r: Record<string, any> = this.clone()
         this.baseProperties.forEach(prop => {
             r[prop] = -this[prop]
+        })
+        Object.entries(this.buffProps).forEach(([key, prop]) => {
+            r[key] = (r[key] || 0) - prop
         })
         r.isMinus = true
         return r as LeveledWeapon
