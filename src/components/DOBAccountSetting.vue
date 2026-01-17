@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { nextTick, reactive, ref } from "vue"
-import { loginMutation, registerMutation, updateUserMetaMutation } from "@/api/mutation"
+import { loginMutation, registerMutation, updateUserMetaMutation } from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 
@@ -46,7 +46,7 @@ const handleLogin = async () => {
             password: loginForm.password,
         })
 
-        if (!loginResult?.success) {
+        if (!loginResult?.success || !loginResult.token) {
             ui.showErrorMessage(loginResult?.message || "登录失败")
             return
         }
@@ -81,7 +81,7 @@ const handleRegister = async () => {
             password: registerForm.password,
         })
 
-        if (!registerResult?.success) {
+        if (!registerResult?.success || !registerResult.token) {
             ui.showErrorMessage(registerResult?.message || "注册失败")
             return
         }
@@ -123,8 +123,8 @@ const nameEl = ref<HTMLSpanElement>()
 async function startNameEdit() {
     if (nameEdit.active) {
         nameEdit.active = false
-        const result = await updateUserMetaMutation({ name: nameEdit.name })
-        if (result?.success) {
+        const result = await updateUserMetaMutation({ data: { name: nameEdit.name } })
+        if (result?.success && result.token) {
             user.jwtToken = result.token
         } else {
             nameEl.value!.innerText = user.name || "用户"

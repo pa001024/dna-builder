@@ -1,5 +1,55 @@
-import { type AnyVariables, gql, type OperationContext } from "@urql/vue"
+import { type AnyVariables, type OperationContext, gql as urqlGql } from "@urql/vue"
 import { gqClient } from "./graphql"
+
+// ==========================================
+// 1. 深度修复的类型解析器
+// ==========================================
+
+type Whitespace = " " | "\n" | "\t" | "\r"
+type TrimLeft<S extends string> = S extends `${Whitespace}${infer R}` ? TrimLeft<R> : S
+type TrimRight<S extends string> = S extends `${infer R}${Whitespace}` ? TrimRight<R> : S
+type Trim<S extends string> = TrimLeft<TrimRight<S>>
+
+// 提取 Body
+type GetQueryBody<S extends string> = S extends `${string}{${infer Body}` ? TrimLeft<Body> : never
+
+// 辅助工具：检查字符串 S 是否包含字符 C
+type Contains<S extends string, C extends string> = S extends `${string}${C}${string}` ? true : false
+
+// 核心提取逻辑 (无 Alias)
+// 依次尝试用 '(', '{', ' ', '\n' 截断
+type ExtractSimpleName<S extends string> = S extends `${infer Key}(${infer _}`
+    ? Trim<Key>
+    : S extends `${infer Key}{${infer _}`
+      ? Trim<Key>
+      : S extends `${infer Key} ${infer _}`
+        ? Trim<Key>
+        : S extends `${infer Key}\n${infer _}`
+          ? Trim<Key>
+          : Trim<S>
+
+/**
+ * 1. 尝试匹配 Alias (冒号 :)
+ * 2. 如果匹配到冒号，检查冒号前的 Key 是否包含 '(' 或 '{'
+ *    - 如果包含，说明这个冒号其实是在参数列表里 (如 builds(id: 1))，并非 Alias。-> 走 ExtractSimpleName
+ *    - 如果不包含，说明这就是 Alias (如 myBuilds: builds)。-> 提取 Alias
+ * 3. 如果没匹配到冒号 -> 走 ExtractSimpleName
+ */
+type GetFirstKey<S extends string> = S extends `${infer Key}:${infer _}`
+    ? Contains<Key, "("> extends true
+        ? ExtractSimpleName<S>
+        : Contains<Key, "{"> extends true
+          ? ExtractSimpleName<S>
+          : Trim<Key>
+    : ExtractSimpleName<S>
+
+type ExtractQueryName<S extends string> = GetFirstKey<GetQueryBody<S>>
+
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never
+
+// ==========================================
+// 2. API 定义 (柯里化风格)
+// ==========================================
 
 export function extractType<T extends string>(gqlQuery: T) {
     const match = gqlQuery.match(/query[\s\S]*?\s(\w+?)\s*[({]/m)
@@ -8,760 +58,67 @@ export function extractType<T extends string>(gqlQuery: T) {
     }
     return ""
 }
-export type ExtractVariablesFromTypedQuery<T> = T extends (variables?: infer V, context?: Partial<OperationContext>) => Promise<any>
-    ? V // 提取到变量类型 V（继承 AnyVariables）
-    : never
 
-/**
- * 从GraphQL查询字符串中提取查询名称，并返回一个异步函数，用于执行该查询。
- * @param gqlQuery GraphQL查询字符串
- * @returns 解构后的查询结果
- */
-export function typedQuery<R = { id: string }, V extends AnyVariables = AnyVariables, G extends string = string>(
-    gqlQuery: G,
-    name?: string
-) {
-    name = name || extractType(gqlQuery)
-    const query = gql(gqlQuery)
-    const fn = async (variables?: V, context?: Partial<OperationContext> | undefined) => {
-        const raw = await gqClient.query(query, variables, context).toPromise()
-        return raw?.data?.[name] as R | undefined
+export interface TypedQueryFn<R, V, G extends string> {
+    (variables?: V, context?: Partial<OperationContext>): Promise<R | undefined>
+    raw: G
+}
+
+export const typedQuery = <G extends string>(gqlQuery: G) => {
+    const name = extractType(gqlQuery)
+    const query = urqlGql(gqlQuery)
+
+    return <R, V extends AnyVariables = AnyVariables>() => {
+        const fn = async (variables?: V, context?: Partial<OperationContext> | undefined) => {
+            const raw = await gqClient.query(query, variables, context).toPromise()
+            return raw?.data?.[name] as R | undefined
+        }
+        fn.raw = gqlQuery
+        return fn as TypedQueryFn<R, V, G>
     }
-    fn.raw = gqlQuery
+}
+
+export function combinedQuery<T extends TypedQueryFn<any, any, string>[]>(...queries: [...T]) {
+    type VarsTuple = {
+        [K in keyof T]: T[K] extends TypedQueryFn<any, infer V, any> ? V : never
+    }
+    type MergedVariables = UnionToIntersection<VarsTuple[number]>
+
+    type ResultsTuple = {
+        [K in keyof T]: T[K] extends TypedQueryFn<infer R, any, infer G> ? { [Key in ExtractQueryName<G>]: R } : never
+    }
+    type MergedResult = UnionToIntersection<ResultsTuple[number]>
+
+    const varDefs = new Map<string, string>()
+    const bodies: string[] = []
+
+    queries.forEach(q => {
+        const queryStr = q.raw
+        const argsMatch = queryStr.match(/query\s*(?:\((.*?)\))?\s*\{/)
+        if (argsMatch?.[1]) {
+            argsMatch[1].split(",").forEach(arg => {
+                const [key, val] = arg.split(":").map(s => s.trim())
+                if (key && val) varDefs.set(key, val)
+            })
+        }
+        const start = queryStr.indexOf("{")
+        const end = queryStr.lastIndexOf("}")
+        if (start > -1 && end > -1) {
+            bodies.push(queryStr.substring(start + 1, end))
+        }
+    })
+
+    const mergedVars = Array.from(varDefs.entries())
+        .map(([k, v]) => `${k}: ${v}`)
+        .join(", ")
+    const mergedBody = bodies.join("\n")
+    const finalQueryStr = mergedVars ? `query (${mergedVars}) { ${mergedBody} }` : `query { ${mergedBody} }`
+    const query = urqlGql(finalQueryStr)
+
+    const fn = async (variables?: MergedVariables, context?: Partial<OperationContext>) => {
+        const raw = await gqClient.query(query, variables as any, context).toPromise()
+        return raw?.data as MergedResult | undefined
+    }
+    fn.raw = finalQueryStr
     return fn
 }
-
-/**
- * 从GraphQL查询字符串中提取查询名称，并返回一个异步函数，用于执行该查询。
- * @param gqlQuery GraphQL查询字符串
- * @returns 原始查询结果
- */
-function typedQueryRaw<R = { id: string }, V extends AnyVariables = AnyVariables, G extends string = string>(gqlQuery: G) {
-    const query = gql(gqlQuery)
-    const fn = async (variables?: V, context?: Partial<OperationContext> | undefined) => {
-        const raw = await gqClient.query(query, variables, context).toPromise()
-        return raw?.data as R | undefined
-    }
-    fn.raw = gqlQuery
-    return fn
-}
-
-export const missionsIngameQuery = typedQuery<{
-    missions: string[][]
-    createdAt: string
-}>(/* GraphQL */ `
-    query {
-        missionsIngame(server: "cn") {
-            missions
-            createdAt
-        }
-    }
-`)
-
-export interface Msg {
-    id: string
-    edited: number
-    content: string
-    createdAt: string
-    user: {
-        id: string
-        name: string
-        qq: string
-    }
-}
-
-export const msgsQuery = typedQuery<
-    Msg[],
-    {
-        roomId: string
-        limit?: number
-        offset?: number
-    }
->(/* GraphQL */ `
-    query ($roomId: String!, $limit: Int, $offset: Int) {
-        msgs(roomId: $roomId, limit: $limit, offset: $offset) {
-            id, edited, content, createdAt, user { id, name, qq }
-        }
-    }
-`)
-
-export const adminStatsQuery = typedQuery<{
-    adminStats: {
-        totalUsers: number
-        totalGuides: number
-        totalRooms: number
-        totalMessages: number
-        totalBuilds: number
-        totalTimelines: number
-    }
-}>(/* GraphQL */ `
-    query {
-        adminStats {
-            totalUsers
-            totalGuides
-            totalRooms
-            totalMessages
-            totalBuilds
-            totalTimelines
-        }
-    }
-`)
-
-export const recentActivitiesQuery = typedQuery<
-    {
-        id: string
-        user: string
-        action: string
-        target: string
-        time: string
-    }[],
-    {
-        limit?: number
-    }
->(/* GraphQL */ `
-    query ($limit: Int) {
-        recentActivities(limit: $limit) {
-            id
-            user
-            action
-            target
-            time
-        }
-    }
-`)
-
-// ========== Admin Queries ==========
-
-export interface UsersItem {
-    id: string
-    name: string
-    email: string
-    qq: string
-    roles: string
-    createdAt: string
-    updateAt: string
-}
-
-export const usersQuery = typedQueryRaw<
-    {
-        users: UsersItem[]
-        usersCount: number
-    },
-    {
-        limit?: number
-        offset?: number
-        search?: string
-    }
->(/* GraphQL */ `
-    query ($limit: Int, $offset: Int, $search: String) {
-        users(limit: $limit, offset: $offset, search: $search) {
-            id
-            name
-            email
-            qq
-            roles
-            createdAt
-            updateAt
-        }
-        usersCount(search: $search)
-    }
-`)
-
-export interface GuideItem {
-    id: string
-    title: string
-    type: "text" | "image"
-    content: string
-    images: string[]
-    charId?: number
-    userId: string
-    buildId?: string
-    views: number
-    likes: number
-    isRecommended?: boolean
-    isPinned?: boolean
-    isLiked: boolean
-    createdAt: string
-    updateAt: string
-    user: {
-        id: string
-        name: string
-        qq: string
-    }
-}
-
-export const guideQuery = typedQuery<GuideItem, { id: string }>(/* GraphQL */ `
-    query ($id: String!) {
-        guide(id: $id) {
-            id
-            title
-            type
-            content
-            images
-            charId
-            userId
-            buildId
-            views
-            likes
-            isRecommended
-            isPinned
-            isLiked
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
-        }
-    }
-`)
-
-export const guidesQuery = typedQueryRaw<
-    {
-        guides: GuideItem[]
-        guidesCount: number
-    },
-    {
-        limit?: number
-        offset?: number
-        search?: string
-        type?: string
-        charId?: number
-        userId?: string
-    }
->(/* GraphQL */ `
-    query ($limit: Int, $offset: Int, $search: String, $type: String, $charId: Int, $userId: String) {
-        guides(limit: $limit, offset: $offset, search: $search, type: $type, charId: $charId, userId: $userId) {
-            id
-            title
-            type
-            content
-            images
-            charId
-            userId
-            buildId
-            views
-            likes
-            isRecommended
-            isPinned
-            isLiked
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
-        }
-        guidesCount(search: $search, type: $type)
-    }
-`)
-
-export interface RoomItem {
-    id: string
-    name: string
-    type?: string
-    ownerId: string
-    maxUsers?: number
-    createdAt: string
-    updateAt: string
-    owner: {
-        id: string
-        name: string
-        qq: string
-    }
-}
-
-export const roomsQuery = typedQueryRaw<
-    {
-        rooms: RoomItem[]
-        roomsCount: number
-    },
-    {
-        limit?: number
-        offset?: number
-    }
->(/* GraphQL */ `
-    query ($limit: Int, $offset: Int) {
-        rooms(limit: $limit, offset: $offset) {
-            id
-            name
-            type
-            ownerId
-            maxUsers
-            createdAt
-            updateAt
-            owner {
-                id
-                name
-                qq
-            }
-        }
-        roomsCount
-    }
-`)
-
-export type RoomWithLastMsg = {
-    id: string
-    name: string
-    type?: string
-    ownerId: string
-    maxUsers?: number
-    createdAt: string
-    updateAt: string
-    msgCount: number
-    owner: {
-        id: string
-        name: string
-        qq: string
-    }
-    lastMsg: {
-        id: string
-        content: string
-        createdAt: string
-        user: {
-            id: string
-            name: string
-            qq: string
-        }
-    }
-}
-export const roomsWithLastMsgQuery = typedQuery<
-    RoomWithLastMsg[],
-    {
-        limit?: number
-        offset?: number
-        name_like?: string
-    }
->(/* GraphQL */ `
-    query ($limit: Int, $offset: Int, $name_like: String) {
-        rooms(limit: $limit, offset: $offset, name_like: $name_like) {
-            id
-            name
-            type
-            ownerId
-            maxUsers
-            createdAt
-            updateAt
-            owner {
-                id
-                name
-                qq
-            }
-            lastMsg {
-                id
-                content
-                createdAt
-                user {
-                    id
-                    name
-                    qq
-                }
-            }
-        }
-    }
-`)
-
-export interface TodoItem {
-    id: string
-    title: string
-    description: string | null
-    startTime: string | null
-    endTime: string | null
-    type: string
-    userId: string
-    createdAt: string
-    updateAt: string
-    isCompleted: boolean
-    user: {
-        id: string
-        name: string
-        qq: string
-    }
-}
-
-export const todosWithCountQuery = typedQueryRaw<
-    {
-        todos: TodoItem[]
-        todosCount: number
-    },
-    {
-        limit?: number
-        offset?: number
-        type?: string
-    }
->(/* GraphQL */ `
-    query ($limit: Int, $offset: Int, $type: String) {
-        todos(limit: $limit, offset: $offset, type: $type) {
-            id
-            title
-            description
-            startTime
-            endTime
-            type
-            userId
-            createdAt
-            updateAt
-            isCompleted
-            user {
-                id
-                name
-                qq
-            }
-        }
-        todosCount(type: $type)
-    }
-`)
-
-// ========== User Todo Query (获取用户+系统todos) ==========
-
-export const userTodosWithCountQuery = typedQueryRaw<
-    {
-        todos: TodoItem[]
-        todosCount: number
-    },
-    {
-        limit?: number
-        offset?: number
-    }
->(/* GraphQL */ `
-    query UserTodos($limit: Int, $offset: Int) {
-        todos(limit: $limit, offset: $offset) {
-            id
-            title
-            description
-            startTime
-            endTime
-            type
-            userId
-            createdAt
-            updateAt
-            isCompleted
-            user {
-                id
-                name
-            }
-        }
-        todosCount
-    }
-`)
-
-// ========== Build & Timeline Queries ==========
-export const buildsQuery = typedQuery<
-    Build[],
-    {
-        limit?: number
-        offset?: number
-        search?: string
-        charId?: number
-        userId?: string
-    }
->(/* GraphQL */ `
-    query ($limit: Int, $offset: Int, $search: String, $charId: Int, $userId: String) {
-        builds(limit: $limit, offset: $offset, search: $search, charId: $charId, userId: $userId) {
-            id
-            title
-            desc
-            charId
-            views
-            likes
-            isRecommended
-            isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
-            isLiked
-        }
-        buildsCount(search: $search, charId: $charId)
-    }
-`)
-export const buildsWithCountQuery = typedQueryRaw<
-    {
-        builds: Build[]
-        buildsCount: number
-    },
-    {
-        limit?: number
-        offset?: number
-        search?: string
-        charId?: number
-        userId?: string
-    }
->(/* GraphQL */ `
-    query ($limit: Int, $offset: Int, $search: String, $charId: Int, $userId: String) {
-        builds(limit: $limit, offset: $offset, search: $search, charId: $charId, userId: $userId) {
-            id
-            title
-            desc
-            charId
-            views
-            likes
-            isRecommended
-            isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
-            isLiked
-        }
-        buildsCount(search: $search, charId: $charId)
-    }
-`)
-
-export const timelinesWithCountQuery = typedQueryRaw<{
-    timelines: Timeline[]
-    timelinesCount: number
-}>(/* GraphQL */ `
-    query ($limit: Int, $offset: Int, $search: String, $charId: Int, $userId: String) {
-        timelines(limit: $limit, offset: $offset, search: $search, charId: $charId, userId: $userId) {
-            id
-            title
-            charId
-            views
-            likes
-            isRecommended
-            isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
-            isLiked
-        }
-        timelinesCount(search: $search, charId: $charId, userId: $userId)
-    }
-`)
-
-export interface BuildDetail extends Build {
-    charSettings: string
-}
-
-export interface Build {
-    id: string
-    title: string
-    desc: string
-    charId: number
-    userId: string
-    views: number
-    likes: number
-    isRecommended: boolean
-    isPinned: boolean
-    createdAt: string
-    updateAt: string
-    user: {
-        id: string
-        name: string
-        qq: string
-    }
-    isLiked: boolean
-}
-
-export const recommendedBuildsQuery = typedQuery<
-    Build[],
-    {
-        limit?: number
-    }
->(/* GraphQL */ `
-    query ($limit: Int) {
-        recommendedBuilds(limit: $limit) {
-            id
-            title
-            desc
-            charId
-            userId
-            views
-            likes
-            isRecommended
-            isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
-            isLiked
-        }
-    }
-`)
-
-export const trendingBuildsQuery = typedQuery<
-    Build[],
-    {
-        limit?: number
-    }
->(/* GraphQL */ `
-    query ($limit: Int) {
-        trendingBuilds(limit: $limit) {
-            id
-            title
-            desc
-            charId
-            userId
-            views
-            likes
-            isRecommended
-            isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
-            isLiked
-        }
-    }
-`)
-
-export interface Timeline {
-    id: string
-    title: string
-    charId: number
-    userId: string
-    views: number
-    likes: number
-    isRecommended: boolean
-    isPinned: boolean
-    createdAt: string
-    updateAt: string
-    user: {
-        id: string
-        name: string
-    }
-    isLiked: boolean
-}
-
-export const recommendedTimelinesQuery = typedQuery<
-    Timeline[],
-    {
-        limit?: number
-    }
->(/* GraphQL */ `
-    query ($limit: Int = 10) {
-        recommendedTimelines(limit: $limit) {
-            id
-            title
-            charId
-            userId
-            views
-            likes
-            isRecommended
-            isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
-            isLiked
-        }
-    }
-`)
-
-export const trendingTimelinesQuery = typedQuery<
-    Timeline[],
-    {
-        limit?: number
-    }
->(/* GraphQL */ `
-    query ($limit: Int = 10) {
-        trendingTimelines(limit: $limit) {
-            id
-            title
-            charId
-            userId
-            views
-            likes
-            isRecommended
-            isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
-            isLiked
-        }
-    }
-`)
-
-export const buildQuery = typedQuery<BuildDetail>(/* GraphQL */ `
-    query ($id: String!) {
-        build(id: $id) {
-            id
-            title
-            desc
-            charId
-            charSettings
-            userId
-            views
-            likes
-            isRecommended
-            isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
-        }
-    }
-`)
-
-export const timelineQuery = typedQuery<Timeline>(/* GraphQL */ `
-    query ($id: String!) {
-        timeline(id: $id) {
-            id
-            title
-            charId
-            userId
-            views
-            likes
-            isRecommended
-            isPinned
-            createdAt
-            updateAt
-            tracks
-            items
-        }
-    }
-`)
-
-export const rtcClientsQuery = typedQuery<
-    {
-        id: string
-        end: string
-        user: {
-            id: string
-            name: string
-            qq?: string
-        }
-    }[],
-    { roomId: string }
->(/* GraphQL */ `
-    query ($roomId: String!) {
-        rtcClients(roomId: $roomId) {
-            id
-            end
-            user {
-                id
-                name
-                qq
-            }
-        }
-    }
-`)

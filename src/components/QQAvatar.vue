@@ -4,7 +4,7 @@ import { computed } from "vue"
 
 const props = defineProps<{
     qq: string | number | undefined | null
-    name: string
+    name?: string
 }>()
 
 const avatar = computed(() => ({

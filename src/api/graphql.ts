@@ -1,3 +1,4 @@
+// biome-ignore assist/source/organizeImports: 实例化顺序不可排序
 import { offlineExchange } from "@urql/exchange-graphcache"
 import { makeDefaultStorage } from "@urql/exchange-graphcache/default-storage"
 import { Client, fetchExchange, gql, subscriptionExchange } from "@urql/vue"
@@ -6,7 +7,13 @@ import { nanoid } from "nanoid"
 import { useUserStore } from "@/store/user"
 import { env } from "../env"
 
-// import schema from "../../schema.json"
+// 先导出基础查询
+export * from "./gen/api-mutations"
+export * from "./gen/api-queries"
+export * from "./gen/api-types"
+// 再导出组合查询
+export * from "./combined"
+
 const storage = makeDefaultStorage({
     idbName: "graphcache-v3", // The name of the IndexedDB database
     maxAge: 7, // The maximum age of the persisted data in days

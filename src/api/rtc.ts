@@ -1,8 +1,8 @@
 import { gql, useSubscription } from "@urql/vue"
-import { rtcJoinMutation, rtcSignalMutation } from "./mutation"
-import { type MaybeRef, onMounted, onUnmounted, type Ref, ref, watch } from "vue"
 import mitt from "mitt"
+import { type MaybeRef, onMounted, onUnmounted, type Ref, ref, watch } from "vue"
 import { useUserStore } from "@/store/user"
+import { rtcJoinMutation, rtcSignalMutation } from "./graphql"
 
 export function useRTC(roomId: MaybeRef<string>) {
     const state = ref("loading")
@@ -144,7 +144,7 @@ export class RTCClient {
             roomId: this.roomId,
         })
         const user = useUserStore()
-        if (rst) {
+        if (rst?.clients) {
             this.clientId = rst.id
             console.log("[rtc] join success", this.clientId, rst.clients)
             for (const session of rst.clients) {

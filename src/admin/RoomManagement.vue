@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue"
-import { createRoomMutation, deleteRoomMutation, updateRoomMutation } from "@/api/mutation"
-import { RoomItem, roomsQuery } from "@/api/query"
+import { createRoomMutation, deleteRoomMutation, Room, roomsWithCountQuery, updateRoomMutation } from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
 
 const ui = useUIStore()
@@ -14,7 +13,7 @@ interface EditRoomForm {
 }
 
 // 房间列表数据
-const rooms = ref<RoomItem[]>([])
+const rooms = ref<Room[]>([])
 const total = ref(0)
 const page = ref(1)
 const pageSize = 20
@@ -22,7 +21,7 @@ const loading = ref(false)
 
 // 编辑房间相关状态
 const editDialogOpen = ref(false)
-const editingRoom = ref<RoomItem | null>(null)
+const editingRoom = ref<Room | null>(null)
 const editForm = ref<EditRoomForm>({
     name: "",
     type: "",
@@ -41,7 +40,7 @@ const fetchRooms = async () => {
     loading.value = true
     try {
         const offset = (page.value - 1) * pageSize
-        const result = await roomsQuery(
+        const result = await roomsWithCountQuery(
             {
                 limit: pageSize,
                 offset,
@@ -87,7 +86,7 @@ const closeCreateDialog = () => {
 }
 
 // 打开编辑对话框
-const openEditDialog = (room: RoomItem) => {
+const openEditDialog = (room: Room) => {
     editingRoom.value = room
     editForm.value = {
         name: room.name,
@@ -121,7 +120,7 @@ const submitCreate = async () => {
         const result = await createRoomMutation({
             data: {
                 name: createForm.value.name,
-                type: createForm.value.type || null,
+                type: createForm.value.type,
                 maxUsers: createForm.value.maxUsers || 0,
             },
         })
@@ -245,7 +244,7 @@ onMounted(() => {
                                 <span class="badge badge-sm badge-ghost">{{ room.type || "-" }}</span>
                             </td>
                             <td class="px-8 py-5 whitespace-nowrap text-sm text-base-content/85">{{ room.maxUsers }}</td>
-                            <td class="px-8 py-5 whitespace-nowrap text-sm text-base-content/85">{{ room.owner.name }}</td>
+                            <td class="px-8 py-5 whitespace-nowrap text-sm text-base-content/85">{{ room.owner?.name || "-" }}</td>
                             <td class="px-8 py-5 whitespace-nowrap text-sm text-base-content/70">{{ room.createdAt }}</td>
                             <td class="px-8 py-5 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center gap-4">

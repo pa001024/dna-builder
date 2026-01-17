@@ -1,26 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue"
-import { createSystemTodoMutation, deleteSystemTodoMutation, updateSystemTodoMutation } from "@/api/mutation"
-import { todosWithCountQuery } from "@/api/query"
+import { createSystemTodoMutation, deleteSystemTodoMutation, Todo, todosWithCountQuery, updateSystemTodoMutation } from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
-
-// 待办事项类型定义
-interface Todo {
-    id: string
-    title: string
-    description: string | null
-    startTime: string | null
-    endTime: string | null
-    type: string
-    userId: string
-    createdAt: string
-    updateAt: string
-    isCompleted: boolean
-    user: {
-        id: string
-        name: string
-    }
-}
 
 // 编辑待办事项表单数据
 interface EditTodoForm {
@@ -295,12 +276,12 @@ onMounted(() => {
                                 {{ todo.description || "-" }}
                             </td>
                             <td class="px-8 py-5 whitespace-nowrap text-sm text-base-content/70">
-                                <span v-if="todo.startTime || todo.endTime">
+                                <span v-if="todo.startTime && todo.endTime">
                                     {{ formatTime(todo.startTime) }} ~ {{ formatTime(todo.endTime) }}
                                 </span>
                                 <span v-else>-</span>
                             </td>
-                            <td class="px-8 py-5 whitespace-nowrap text-sm text-base-content/85">{{ todo.user.name }}</td>
+                            <td class="px-8 py-5 whitespace-nowrap text-sm text-base-content/85">{{ todo.user!.name }}</td>
                             <td class="px-8 py-5 whitespace-nowrap text-sm text-base-content/70">{{ todo.createdAt }}</td>
                             <td class="px-8 py-5 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center gap-4">

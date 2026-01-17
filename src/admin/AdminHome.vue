@@ -1,8 +1,6 @@
 <script setup lang="ts">
-// 后台管理首页组件
-// 用于管理server中的数据
-import { ref, onMounted } from "vue"
-import { adminStatsQuery, recentActivitiesQuery } from "@/api/query"
+import { onMounted, ref } from "vue"
+import { adminStatsQuery, recentActivitiesQuery } from "@/api/graphql"
 
 // 统计数据
 const stats = ref({
@@ -34,8 +32,8 @@ const loading = ref(false)
 async function loadStats() {
     try {
         const data = await adminStatsQuery({}, { requestPolicy: "network-only" })
-        if (data?.adminStats) {
-            stats.value = data.adminStats
+        if (data) {
+            stats.value = data
         }
     } catch (error) {
         console.error("Failed to load stats:", error)

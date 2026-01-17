@@ -43,10 +43,10 @@ importers:
         version: 2.9.0
       '@urql/exchange-graphcache':
         specifier: ^8.1.0
-        version: 8.1.0(@urql/core@6.0.1(graphql@14.7.0))(graphql@14.7.0)
+        version: 8.1.0(@urql/core@6.0.1(graphql@16.12.0))(graphql@16.12.0)
       '@urql/vue':
         specifier: ^2.0.0
-        version: 2.0.0(@urql/core@6.0.1(graphql@14.7.0))(vue@3.5.26(typescript@5.9.3))
+        version: 2.0.0(@urql/core@6.0.1(graphql@16.12.0))(vue@3.5.26(typescript@5.9.3))
       '@vue-flow/background':
         specifier: ^1.3.2
         version: 1.3.2(@vue-flow/core@1.48.1(vue@3.5.26(typescript@5.9.3)))(vue@3.5.26(typescript@5.9.3))
@@ -77,9 +77,15 @@ importers:
       dompurify:
         specifier: ^3.3.1
         version: 3.3.1
+      glob:
+        specifier: ^13.0.0
+        version: 13.0.0
+      graphql:
+        specifier: ^16.12.0
+        version: 16.12.0
       graphql-ws:
         specifier: ^6.0.6
-        version: 6.0.6(graphql@14.7.0)
+        version: 6.0.6(graphql@16.12.0)
       gsap:
         specifier: ^3.14.2
         version: 3.14.2
@@ -227,7 +233,7 @@ importers:
         version: 4.8.0
       rollup-plugin-graphql-tag:
         specifier: ^0.1.0
-        version: 0.1.0(graphql@14.7.0)
+        version: 0.1.0(graphql@16.12.0)
       tailwindcss:
         specifier: ^4.1.18
         version: 4.1.18
@@ -2569,6 +2575,10 @@ packages:
     engines: {node: 20 || >=22}
     hasBin: true
 
+  glob@13.0.0:
+    resolution: {integrity: sha512-tvZgpqk6fz4BaNZ66ZsRaZnbHvP/jG3uKJvAZOwEVUL4RTA5nJeeLYfyN9/VA8NX/V3IBG+hkeuGpKjvELkVhA==}
+    engines: {node: 20 || >=22}
+
   globals@14.0.0:
     resolution: {integrity: sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==}
     engines: {node: '>=18'}
@@ -2613,10 +2623,9 @@ packages:
       ws:
         optional: true
 
-  graphql@14.7.0:
-    resolution: {integrity: sha512-l0xWZpoPKpppFzMfvVyFmp9vLN7w/ZZJPefUicMCepfJeQ8sMcztloGYY9DfjVPo6tIUDzU5Hw3MUbIjj9AVVA==}
-    engines: {node: '>= 6.x'}
-    deprecated: 'No longer supported; please update to a newer version. Details: https://github.com/graphql/graphql-js#version-support'
+  graphql@16.12.0:
+    resolution: {integrity: sha512-DKKrynuQRne0PNpEbzuEdHlYOMksHSUI8Zc9Unei5gTsMNA2/vMpoMz/yKba50pejK56qj98qM0SjYxAKi13gQ==}
+    engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
 
   gsap@3.14.2:
     resolution: {integrity: sha512-P8/mMxVLU7o4+55+1TCnQrPmgjPKnwkzkXOK1asnR9Jg2lna4tEY5qBJjMmAaOBDDZWtlRjBXjLa0w53G/uBLA==}
@@ -2886,9 +2895,6 @@ packages:
   istanbul-reports@3.2.0:
     resolution: {integrity: sha512-HGYWWS/ehqTV3xN10i23tkPkpH46MLCIMFNCaaKNavAXTF1RkqxawEPtnjnGZ6XKSInBKkiOA5BKS+aZiY3AvA==}
     engines: {node: '>=8'}
-
-  iterall@1.3.0:
-    resolution: {integrity: sha512-QZ9qOMdF+QLHxy1QIpUHUU1D5pS2CG2P69LF6L6CPjPYA/XMOmKV3PZpawHoAjHNyB0swdVTRxdYT4tbBbxqwg==}
 
   jackspeak@4.1.1:
     resolution: {integrity: sha512-zptv57P3GpL+O0I7VdMJNBZCu+BPHVQUk55Ft8/QCJjTVxrnJHuVuX/0Bl2A6/+2oyR/ZMEuFKwmzqqZ/U5nPQ==}
@@ -4145,9 +4151,9 @@ packages:
 
 snapshots:
 
-  '@0no-co/graphql.web@1.2.0(graphql@14.7.0)':
+  '@0no-co/graphql.web@1.2.0(graphql@16.12.0)':
     optionalDependencies:
-      graphql: 14.7.0
+      graphql: 16.12.0
 
   '@apideck/better-ajv-errors@0.3.6(ajv@8.17.1)':
     dependencies:
@@ -5585,24 +5591,24 @@ snapshots:
       '@typescript-eslint/types': 8.52.0
       eslint-visitor-keys: 4.2.1
 
-  '@urql/core@6.0.1(graphql@14.7.0)':
+  '@urql/core@6.0.1(graphql@16.12.0)':
     dependencies:
-      '@0no-co/graphql.web': 1.2.0(graphql@14.7.0)
+      '@0no-co/graphql.web': 1.2.0(graphql@16.12.0)
       wonka: 6.3.5
     transitivePeerDependencies:
       - graphql
 
-  '@urql/exchange-graphcache@8.1.0(@urql/core@6.0.1(graphql@14.7.0))(graphql@14.7.0)':
+  '@urql/exchange-graphcache@8.1.0(@urql/core@6.0.1(graphql@16.12.0))(graphql@16.12.0)':
     dependencies:
-      '@0no-co/graphql.web': 1.2.0(graphql@14.7.0)
-      '@urql/core': 6.0.1(graphql@14.7.0)
+      '@0no-co/graphql.web': 1.2.0(graphql@16.12.0)
+      '@urql/core': 6.0.1(graphql@16.12.0)
       wonka: 6.3.5
     transitivePeerDependencies:
       - graphql
 
-  '@urql/vue@2.0.0(@urql/core@6.0.1(graphql@14.7.0))(vue@3.5.26(typescript@5.9.3))':
+  '@urql/vue@2.0.0(@urql/core@6.0.1(graphql@16.12.0))(vue@3.5.26(typescript@5.9.3))':
     dependencies:
-      '@urql/core': 6.0.1(graphql@14.7.0)
+      '@urql/core': 6.0.1(graphql@16.12.0)
       vue: 3.5.26(typescript@5.9.3)
       wonka: 6.3.5
 
@@ -6671,6 +6677,12 @@ snapshots:
       package-json-from-dist: 1.0.1
       path-scurry: 2.0.1
 
+  glob@13.0.0:
+    dependencies:
+      minimatch: 10.1.1
+      minipass: 7.1.2
+      path-scurry: 2.0.1
+
   globals@14.0.0: {}
 
   globals@17.0.0: {}
@@ -6684,18 +6696,16 @@ snapshots:
 
   graceful-fs@4.2.11: {}
 
-  graphql-tag@2.12.6(graphql@14.7.0):
+  graphql-tag@2.12.6(graphql@16.12.0):
     dependencies:
-      graphql: 14.7.0
+      graphql: 16.12.0
       tslib: 2.8.1
 
-  graphql-ws@6.0.6(graphql@14.7.0):
+  graphql-ws@6.0.6(graphql@16.12.0):
     dependencies:
-      graphql: 14.7.0
+      graphql: 16.12.0
 
-  graphql@14.7.0:
-    dependencies:
-      iterall: 1.3.0
+  graphql@16.12.0: {}
 
   gsap@3.14.2: {}
 
@@ -6943,8 +6953,6 @@ snapshots:
     dependencies:
       html-escaper: 2.0.2
       istanbul-lib-report: 3.0.1
-
-  iterall@1.3.0: {}
 
   jackspeak@4.1.1:
     dependencies:
@@ -7470,10 +7478,10 @@ snapshots:
 
   rfdc@1.4.1: {}
 
-  rollup-plugin-graphql-tag@0.1.0(graphql@14.7.0):
+  rollup-plugin-graphql-tag@0.1.0(graphql@16.12.0):
     dependencies:
-      graphql: 14.7.0
-      graphql-tag: 2.12.6(graphql@14.7.0)
+      graphql: 16.12.0
+      graphql-tag: 2.12.6(graphql@16.12.0)
       rollup-pluginutils: 2.8.2
 
   rollup-pluginutils@2.8.2:

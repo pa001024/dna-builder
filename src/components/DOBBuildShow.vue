@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref } from "vue"
-import { Build, buildQuery, buildsWithCountQuery } from "@/api/query"
+import { Build, buildQuery, buildsWithCountQuery } from "@/api/graphql"
 import { useCharSettings } from "@/composables/useCharSettings"
 import { useUIStore } from "@/store/ui"
 

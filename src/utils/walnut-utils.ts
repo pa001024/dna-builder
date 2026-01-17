@@ -208,12 +208,3 @@ export class WalnutSequenceSimulator {
         return dist
     }
 }
-
-// ---------------------- 测试验证 ----------------------
-try {
-    for (let n = 1; n <= 20; n++) {
-        console.log(`开${n}次密函，至少一次出金的概率：${WalnutSequenceSimulator.calculateGoldProbability(n)}`)
-    }
-} catch (error) {
-    console.error("错误：", (error as Error).message)
-}

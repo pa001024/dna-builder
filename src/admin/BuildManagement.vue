@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watchEffect } from "vue"
 import { useRoute } from "vue-router"
-import { deleteBuildMutation, likeBuildMutation, pinBuildMutation, recommendBuildMutation, unlikeBuildMutation } from "@/api/mutation"
-import { Build, buildsWithCountQuery } from "@/api/query"
+import {
+    Build,
+    buildsWithCountQuery,
+    deleteBuildMutation,
+    likeBuildMutation,
+    pinBuildMutation,
+    recommendBuildMutation,
+    unlikeBuildMutation,
+} from "@/api/graphql"
 import { charData } from "@/data"
 import { useUIStore } from "@/store/ui"
 

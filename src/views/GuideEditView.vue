@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { createGuideMutation, updateGuideMutation } from "@/api/mutation"
-import { buildsQuery, guideQuery } from "@/api/query"
+import { buildsQuery, createGuideMutation, guideQuery, updateGuideMutation } from "@/api/graphql"
 import { useUserStore } from "@/store/user"
 import { dataUrlToFile } from "@/util"
 import { importPic } from "../api/app"
@@ -256,7 +255,7 @@ async function loadGuide() {
         title.value = result.title
         type.value = result.type
         content.value = result.content
-        images.value = result.images
+        images.value = result.images || []
         selectedCharId.value = result.charId || 0
         buildId.value = result.buildId || ""
     }

@@ -1,21 +1,22 @@
 <script lang="ts" setup>
 import { gql, useQuery, useSubscription } from "@urql/vue"
 import { useScroll } from "@vueuse/core"
+import { useSound } from "@vueuse/sound"
 import { computed, onMounted, ref, watchEffect } from "vue"
 import { onBeforeRouteLeave, useRoute } from "vue-router"
-import { editMessageMutation, rtcJoinMutation, sendMessageMutation } from "@/api/mutation"
-import { Msg, msgsQuery, rtcClientsQuery } from "@/api/query"
+import { editMessageMutation, Msg, msgsQuery, rtcClientsQuery, rtcJoinMutation, sendMessageMutation } from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
+import { sleep } from "@/util"
 import { copyHtmlContent, isImage, sanitizeHTML } from "@/utils/html"
 
 const route = useRoute()
 const roomId = computed(() => route.params.room as string)
 const user = useUserStore()
 const ui = useUIStore()
-const newMsgTip = ref(true)
-const newMsgJoin = ref(true)
+const newMsgTip = ref(false)
 const variables = computed(() => ({ roomId: roomId.value }))
+const sfx = useSound("/sfx/notice.mp3")
 
 //#region RTC
 const loading = ref(true)
@@ -147,8 +148,11 @@ useSubscription<{ msgEdited: Msg }>({
 
 async function addMessage(msg: Msg) {
     console.debug("addMessage", msg)
+    if (msg.user.id !== user.id) {
+        sfx.play()
+    }
     if (arrivedState.bottom) {
-        await new Promise(resolve => setTimeout(resolve, 50))
+        await sleep(50)
         el.value?.scrollTo({
             top: el.value.scrollHeight,
             left: 0,
@@ -420,15 +424,6 @@ async function startEdit(msg: Msg) {
                             @click="newMsgTip = !newMsgTip"
                         >
                             <Icon icon="ri:volume-up-line" />
-                        </div>
-                    </Tooltip>
-                    <Tooltip side="top" :tooltip="$t('chat.autoJoin')">
-                        <div
-                            class="btn btn-ghost btn-sm btn-square text-xl"
-                            :class="{ 'text-primary': newMsgJoin }"
-                            @click="newMsgJoin = !newMsgJoin"
-                        >
-                            A
                         </div>
                     </Tooltip>
                 </div>

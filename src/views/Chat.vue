@@ -2,8 +2,7 @@
 import { t } from "i18next"
 import { computed, onBeforeMount, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { deleteRoomMutation } from "@/api/mutation"
-import { RoomWithLastMsg, roomsWithLastMsgQuery } from "@/api/query"
+import { deleteRoomMutation, Room, roomsQuery } from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { htmlToText } from "@/utils/html"
@@ -29,10 +28,10 @@ async function reloadRooms() {
     await handle.value!()
 }
 
-async function enterRoom(room: RoomWithLastMsg) {
+async function enterRoom(room: Room) {
     router.push({ name: "room", params: { room: room.id } })
 }
-async function deleteRoom(room: RoomWithLastMsg) {
+async function deleteRoom(room: Room) {
     if ((await ui.showDialog("确认", t("chat.deleteRoomConfirm"))) && (await deleteRoomMutation({ id: room.id }))) {
         await reloadRooms()
     } else {
@@ -74,7 +73,7 @@ onBeforeMount(() => {
                     v-slot="{ data: rooms }"
                     class="flex-1 overflow-hidden"
                     :size="10"
-                    :query="roomsWithLastMsgQuery"
+                    :query="roomsQuery"
                     :variables="variables"
                     @load="handle = $event"
                 >
@@ -103,17 +102,17 @@ onBeforeMount(() => {
                                     {{ r.lastMsg.user.name }}: {{ htmlToText(r.lastMsg.content) }}
                                 </div>
                                 <div
-                                    v-if="r.msgCount - (user.roomReadedCount[r.id] || 0) > 0"
+                                    v-if="(r.msgCount || 0) - (user.roomReadedCount[r.id] || 0) > 0"
                                     class="whitespace-nowrap text-xs font-bold text-base-100 rounded-lg bg-primary px-2 group-[.active]:hidden"
                                 >
-                                    {{ r.msgCount - (user.roomReadedCount[r.id] || 0) }}
+                                    {{ (r.msgCount || 0) - (user.roomReadedCount[r.id] || 0) }}
                                 </div>
                             </div>
                         </div>
 
                         <template #menu>
                             <ContextMenuItem
-                                :disabled="r.owner.id !== user.id && !user.isAdmin"
+                                :disabled="(r.owner?.id || '') !== user.id && !user.isAdmin"
                                 class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
                                 @click="deleteRoom(r)"
                             >

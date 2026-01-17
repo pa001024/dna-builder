@@ -18,7 +18,7 @@ export const typeDefs = /* GraphQL */ `
     type Query {
         room(id: String!): Room
         rooms(name_like: String, limit: Int, offset: Int): [Room!]!
-        roomsCount: Int!
+        roomsCount(name_like: String): Int!
         timeOffset(t: Int!): Int!
     }
 
@@ -46,16 +46,10 @@ export const typeDefs = /* GraphQL */ `
 
         "房间创建者"
         owner: User
-        msgCount: Int
+        msgCount: Int!
         "最后一条消息 仅在rooms中可用"
         lastMsg: Msg
         onlineUsers: [TinyUser!]
-    }
-
-    type RoomFilter {
-        name: String
-        type: String
-        ownerId: String
     }
 
     input RoomInput {
@@ -192,7 +186,7 @@ export const resolvers = {
         },
     },
     Mutation: {
-        createRoom: async (_parent, { data: { name, type, maxUsers } }, context, _info) => {
+        createRoom: async (_parent, { data: { name, type, maxUsers } }, context, info) => {
             const user = context.user
             if (!user || !user.roles?.includes("admin")) return createGraphQLError("无权限")
             const rst = (
@@ -209,7 +203,7 @@ export const resolvers = {
             )[0]
             if (rst) {
                 const room = await db.query.rooms.findFirst({
-                    with: { owner: true },
+                    with: { owner: getSubSelection(info, "owner") ? true : undefined },
                 })
                 return room
             }

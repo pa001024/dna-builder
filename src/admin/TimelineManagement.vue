@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue"
 import { useRoute } from "vue-router"
+import { timelinesWithCountQuery } from "@/api/combined"
 import {
     deleteTimelineMutation,
     likeTimelineMutation,
     pinTimelineMutation,
     recommendTimelineMutation,
     unlikeTimelineMutation,
-} from "@/api/mutation"
-import { timelinesWithCountQuery } from "@/api/query"
+} from "@/api/graphql"
 import { charData } from "@/data"
 import { useUIStore } from "@/store/ui"
 

@@ -41,7 +41,7 @@ export const cronPlugin = () => {
         console.log(`${new Date().toLocaleString()} 开始同步密函信息 - server: ${server}`)
         let is_success = false
         for (let i = 0; i < t; i++) {
-            await sleep(3000)
+            await sleep(5000)
             try {
                 const dnaAPI = getDNAAPI()
                 const res = await dnaAPI.defaultRoleForTool()

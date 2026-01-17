@@ -1,19 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, watchEffect, computed } from "vue"
-import { usersQuery } from "@/api/query"
-import { deleteUserMutation, updateUserMutation } from "@/api/mutation"
+import { computed, onMounted, ref, watchEffect } from "vue"
+import { deleteUserMutation, User, updateUserMutation, usersWithCountQuery } from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
-
-// 用户类型定义
-interface User {
-    id: string
-    email: string
-    name: string
-    qq: string
-    roles: string
-    createdAt: string
-    updateAt: string
-}
 
 // 编辑用户表单数据
 interface EditUserForm {
@@ -44,7 +32,7 @@ const fetchUsers = async () => {
     loading.value = true
     try {
         const offset = (page.value - 1) * pageSize
-        const result = await usersQuery(
+        const result = await usersWithCountQuery(
             {
                 limit: pageSize,
                 offset,
@@ -96,7 +84,7 @@ const deleteUser = async (userId: string) => {
 const openEditDialog = (user: User) => {
     editingUser.value = user
     editForm.value = {
-        email: user.email,
+        email: user.email || "",
         roles: user.roles || "",
     }
     editDialogOpen.value = true

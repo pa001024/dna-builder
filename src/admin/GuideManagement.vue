@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue"
-import { deleteGuideMutation, pinGuideMutation, recommendGuideMutation, updateGuideMutation } from "@/api/mutation"
-import { GuideItem, guidesQuery } from "@/api/query"
+import {
+    deleteGuideMutation,
+    Guide,
+    guidesWithCountQuery,
+    pinGuideMutation,
+    recommendGuideMutation,
+    updateGuideMutation,
+} from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
 
 // 编辑攻略表单数据
@@ -15,7 +21,7 @@ interface EditGuideForm {
 const ui = useUIStore()
 
 // 攻略列表数据
-const guides = ref<GuideItem[]>([])
+const guides = ref<Guide[]>([])
 const total = ref(0)
 const page = ref(1)
 const pageSize = ref(10)
@@ -26,7 +32,7 @@ const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
 
 // 编辑攻略相关状态
 const editDialogOpen = ref(false)
-const editingGuide = ref<GuideItem | null>(null)
+const editingGuide = ref<Guide | null>(null)
 const editForm = ref<EditGuideForm>({
     title: "",
     type: "",
@@ -40,7 +46,7 @@ const fetchGuides = async () => {
     loading.value = true
     try {
         const offset = (page.value - 1) * pageSize.value
-        const result = await guidesQuery(
+        const result = await guidesWithCountQuery(
             {
                 limit: pageSize.value,
                 offset,
@@ -80,7 +86,7 @@ const handlePageChange = (newPage: number) => {
 }
 
 // 打开编辑对话框
-const openEditDialog = (guide: GuideItem) => {
+const openEditDialog = (guide: Guide) => {
     editingGuide.value = guide
     editForm.value = {
         title: guide.title,
@@ -167,7 +173,7 @@ const deleteGuide = async (guideId: string) => {
 }
 
 // 切换推荐状态
-const toggleRecommend = async (guide: GuideItem) => {
+const toggleRecommend = async (guide: Guide) => {
     try {
         const newStatus = !guide.isRecommended
         const result = await recommendGuideMutation({
@@ -186,7 +192,7 @@ const toggleRecommend = async (guide: GuideItem) => {
 }
 
 // 切换置顶状态
-const togglePin = async (guide: GuideItem) => {
+const togglePin = async (guide: Guide) => {
     try {
         const newStatus = !guide.isPinned
         const result = await pinGuideMutation({
@@ -288,7 +294,7 @@ onMounted(() => {
                                     {{ guide.type === "text" ? "图文" : guide.type === "image" ? "一图流" : guide.type }}
                                 </span>
                             </td>
-                            <td class="px-8 py-5 whitespace-nowrap text-sm text-base-content/85">{{ guide.user.name }}</td>
+                            <td class="px-8 py-5 whitespace-nowrap text-sm text-base-content/85">{{ guide.user?.name || "-" }}</td>
                             <td class="px-8 py-5 whitespace-nowrap text-sm text-base-content/70">
                                 <span class="ri:eye-line mr-1"></span>{{ guide.views }} <span class="ri:heart-line mr-1 ml-2"></span
                                 >{{ guide.likes }}

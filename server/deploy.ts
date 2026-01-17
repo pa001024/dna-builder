@@ -10,6 +10,8 @@ const args = process.argv.slice(2)
 const isAppMode = args.includes("app")
 const isAllMode = args.includes("all")
 const skipBuild = args.includes("skip-build")
+const printJson = args.includes("-v")
+const generateOnly = args.includes("json")
 
 const envPath = path.resolve("server/.env")
 const envConfig = fs.existsSync(envPath) ? parse(fs.readFileSync(envPath)) : {}
@@ -62,16 +64,36 @@ async function uploadToOss(filePath: string, ossKey: string): Promise<void> {
 
     // 强制覆盖：先删除旧文件，再上传新文件
     try {
-        await client.delete(ossKey)
-        console.log(`🗑️  已删除旧文件: ${ossKey}`)
+        const info = await client.head(ossKey)
+        if (info.status === 200) {
+            await client.delete(ossKey)
+            console.log(`🗑️  已删除旧文件: ${ossKey}`)
+        }
     } catch {
         // 文件不存在时忽略错误
         console.log(`ℹ️  文件不存在，跳过删除: ${ossKey}`)
     }
 
-    await client.put(ossKey, filePath)
+    // 大文件使用分片上传并显示进度
+    if (fs.statSync(filePath).size > 1024 * 1024) {
+        console.log(`📤 大文件 ${filePath} 开始分片上传...`)
+        await client.multipartUpload(ossKey, filePath, {
+            progress: function* (p) {
+                const percentage = Math.round(p * 100)
+                // 使用 \r 实现进度条覆盖效果
+                process.stdout.write(`\r📊 上传进度: ${percentage}%`)
+                yield
+            },
+            // 设置分片大小为1MB
+            partSize: 1024 * 1024,
+        })
+    } else {
+        // 小文件直接上传
+        await client.put(ossKey, filePath)
+    }
 
-    console.log(`✅ 上传成功: ${ossKey}`)
+    // 换行避免进度条与后续输出重叠
+    console.log(`\n✅ 上传成功: ${ossKey}`)
 }
 
 /**
@@ -93,11 +115,11 @@ function generateLatestJson(version: string, signature: string, msiUrl: string):
         platforms: {
             "windows-x86_64": {
                 signature: signature,
-                url: msiUrl,
+                url: msiUrl.replace(/ /g, "%20"),
             },
             "windows-x86_64-msi": {
                 signature: signature,
-                url: msiUrl,
+                url: msiUrl.replace(/ /g, "%20"),
             },
         },
     }
@@ -183,10 +205,23 @@ async function deployApp() {
             throw new Error(`签名文件不存在: ${sigAbsPath}`)
         }
         const signature = fs.readFileSync(sigAbsPath, "utf-8").trim()
-        const msiUrl = `https://${OSS_CONFIG.bucket}.${OSS_CONFIG.endpoint}/${msiOssKey}`
+        // 生成原始OSS地址
+        const originalMsiUrl = `https://${OSS_CONFIG.bucket}.${OSS_CONFIG.endpoint}/${msiOssKey}`
+
+        // 将OSS域名替换为CDN域名（如果CDN_URL存在）
+        const cdnUrl = envConfig.CDN_URL?.trim()
+        const msiUrl = cdnUrl
+            ? originalMsiUrl.replace(`https://${OSS_CONFIG.bucket}.${OSS_CONFIG.endpoint}`, cdnUrl.replace(/\/$/, ""))
+            : originalMsiUrl
 
         console.log("4. 生成latest.json...")
         const latestJson = generateLatestJson(version, signature, msiUrl)
+
+        // 如果指定了--print-json参数，则输出生成的json内容到控制台
+        if (printJson) {
+            console.log("\n📋 生成的latest.json内容:")
+            console.log(JSON.stringify(latestJson, null, 2))
+        }
 
         const newLatestJsonPath = path.resolve("./latest.json")
         fs.writeFileSync(newLatestJsonPath, JSON.stringify(latestJson, null, 2))
@@ -205,8 +240,48 @@ async function deployApp() {
 }
 
 async function main() {
-    if (isAllMode || !isAppMode) await deployWeb()
-    if (isAllMode || isAppMode) await deployApp()
+    if (generateOnly) {
+        // 只生成json，不执行构建上传或任何其他操作
+        console.log("=== 开始仅生成JSON流程 ===")
+
+        // 从package.json获取版本号
+        const packageJsonPath = path.resolve("./package.json")
+        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"))
+        const version = packageJson.version
+
+        const sigAbsPath = path.resolve(CONFIG.app.sigPath)
+
+        // 检查文件是否存在，如果不存在则使用模拟数据
+        let signature = "mock-signature-for-testing"
+        if (fs.existsSync(sigAbsPath)) {
+            signature = fs.readFileSync(sigAbsPath, "utf-8").trim()
+        } else {
+            console.log("⚠️  未找到签名文件，使用模拟签名")
+        }
+
+        // 生成MSI文件名和OSS路径
+        const msiOssKey = `msi/DNA Builder_${version}_x64_zh-CN.msi`
+
+        // 生成原始OSS地址
+        const originalMsiUrl = `https://${OSS_CONFIG.bucket}.${OSS_CONFIG.endpoint}/${msiOssKey}`
+
+        // 将OSS域名替换为CDN域名（如果CDN_URL存在）
+        const cdnUrl = envConfig.CDN_URL?.trim()
+        const msiUrl = cdnUrl
+            ? originalMsiUrl.replace(`https://${OSS_CONFIG.bucket}.${OSS_CONFIG.endpoint}`, cdnUrl.replace(/\/$/, ""))
+            : originalMsiUrl
+
+        // 生成latest.json
+        const latestJson = generateLatestJson(version, signature, msiUrl)
+
+        // 输出生成的json内容到控制台
+        console.log("\n📋 生成的latest.json内容:")
+        console.log(JSON.stringify(latestJson, null, 2))
+    } else {
+        // 原有的部署逻辑
+        if (isAllMode || !isAppMode) await deployWeb()
+        if (isAllMode || isAppMode) await deployApp()
+    }
 }
 
 main()

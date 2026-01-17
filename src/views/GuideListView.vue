@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
-import { GuideItem, guidesQuery } from "@/api/query"
+import { Guide, guidesQuery } from "@/api/graphql"
 import { charData } from "../data"
 
 const router = useRouter()
@@ -10,7 +10,7 @@ const searchKeyword = ref("")
 const selectedType = ref<"all" | "text" | "image">("all")
 const selectedCharId = ref<number | undefined>(undefined)
 const loading = ref(false)
-const guides = ref<GuideItem[]>([])
+const guides = ref<Guide[]>([])
 
 const typeOptions = [
     { value: "all", label: "全部" },
@@ -36,11 +36,11 @@ async function fetchGuides(offset = 0) {
             offset,
         })
 
-        if (result?.guides) {
+        if (result) {
             if (offset === 0) {
-                guides.value = result.guides
+                guides.value = result
             } else {
-                guides.value.push(...result.guides)
+                guides.value.push(...result)
             }
         }
     } finally {

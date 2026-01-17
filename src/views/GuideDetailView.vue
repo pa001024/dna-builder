@@ -3,8 +3,7 @@ import DOMPurify from "dompurify"
 import MarkdownIt from "markdown-it"
 import { computed, nextTick, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
-import { GuideItem, guideQuery } from "@/api/query"
-import { gqClient } from "../api/graphql"
+import { Guide, guideQuery, likeGuideMutation, unlikeGuideMutation } from "@/api/graphql"
 import { charMap } from "../data"
 
 const md = MarkdownIt({
@@ -22,7 +21,7 @@ const router = useRouter()
 const { id } = router.currentRoute.value.params
 
 const loading = ref(false)
-const guide = ref<GuideItem | null>(null)
+const guide = ref<Guide | null>(null)
 const scrollAreaRef = ref<HTMLElement | null>(null)
 const isUserAtBottom = ref<boolean>(true)
 
@@ -66,31 +65,13 @@ async function handleLike() {
 
     try {
         if (guide.value.isLiked) {
-            await gqClient
-                .mutation(
-                    `mutation UnlikeGuide($id: String!) {
-                        unlikeGuide(id: $id) {
-                            id
-                            likes
-                            isLiked
-                        }
-                    }`,
-                    { id: id as string }
-                )
-                .toPromise()
+            await unlikeGuideMutation({
+                id: id as string,
+            })
         } else {
-            await gqClient
-                .mutation(
-                    `mutation LikeGuide($id: String!) {
-                        likeGuide(id: $id) {
-                            id
-                            likes
-                            isLiked
-                        }
-                    }`,
-                    { id: id as string }
-                )
-                .toPromise()
+            await likeGuideMutation({
+                id: id as string,
+            })
         }
         await fetchGuide()
     } catch (error) {

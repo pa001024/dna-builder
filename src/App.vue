@@ -141,7 +141,7 @@ onMounted(() => {
     <Updater />
     <ResizeableWindow
         id="main-window"
-        :title="ui.title || $t(`${String($route.name)}.title`)"
+        :title="ui.title || $t(`${String($route.name)}.title`, '')"
         darkable
         pinable
         :class="{ 'is-app': env.isApp }"

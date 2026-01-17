@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
 import { computed, onMounted, ref } from "vue"
-import { completeTodoMutation, createTodoMutation, deleteTodoMutation, updateTodoMutation } from "@/api/mutation"
-import { userTodosWithCountQuery } from "@/api/query"
+import { completeTodoMutation, createTodoMutation, deleteTodoMutation, todosQuery, updateTodoMutation } from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 
@@ -74,7 +73,7 @@ const systemTodos = computed(() => {
 const fetchTodos = async () => {
     loading.value = true
     try {
-        const result = await userTodosWithCountQuery(
+        const result = await todosQuery(
             {
                 limit: 100,
                 offset: 0,
@@ -83,7 +82,7 @@ const fetchTodos = async () => {
         )
 
         if (result) {
-            todos.value = (result.todos || []).map(todo => ({
+            todos.value = (result || []).map(todo => ({
                 ...todo,
                 description: todo.description ?? "",
                 startTime: todo.startTime ?? "",

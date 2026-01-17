@@ -21,7 +21,8 @@
         "format": "biome format --write",
         "ver": "node .husky/update-version.js",
         "deploy": "bun server/deploy.ts",
-        "icon": "bun run tools/icon_tool.ts"
+        "icon": "bun run tools/icon_tool.ts",
+        "gen": "bun run tools/generateApiCalls.ts"
     },
     "dependencies": {
         "@globalhive/vuejs-tour": "^2.6.1",
@@ -47,6 +48,8 @@
         "dexie": "^4.2.1",
         "dna-api": "^0.3.10",
         "dompurify": "^3.3.1",
+        "glob": "^13.0.0",
+        "graphql": "^16.12.0",
         "graphql-ws": "^6.0.6",
         "gsap": "^3.14.2",
         "highlight.js": "^11.11.1",
