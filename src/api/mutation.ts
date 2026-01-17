@@ -1,8 +1,14 @@
 import { type AnyVariables, gql, type OperationContext } from "@urql/vue"
 import { useUIStore } from "@/store/ui"
 import { gqClient } from "./graphql"
-import { extractType } from "./query"
 
+function extractType<T extends string>(gqlQuery: T) {
+    const match = gqlQuery.match(/mutation[\s\S]*?\s(\w+?)\s*[({]/m)
+    if (match) {
+        return match[1]
+    }
+    return ""
+}
 /**
  * 从GraphQL查询字符串中提取查询名称，并返回一个异步函数，用于执行该查询。
  * @param gqlQuery GraphQL查询字符串

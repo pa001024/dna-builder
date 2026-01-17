@@ -41,3 +41,4 @@ externals/dna-api/java/
 public/imgs/map
 .opencode/skills/
 src-tauri/gen/android/keystore.properties
+docs/

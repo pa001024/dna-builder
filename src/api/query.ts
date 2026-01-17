@@ -52,7 +52,7 @@ type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
 // ==========================================
 
 export function extractType<T extends string>(gqlQuery: T) {
-    const match = gqlQuery.match(/query[\s\S]*?\s(\w+?)\s*[({]/m)
+    const match = gqlQuery.match(/(?:query|mutation)[\s\S]*?\s(\w+?)\s*[({]/m)
     if (match) {
         return match[1]
     }
