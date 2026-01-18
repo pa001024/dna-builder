@@ -1780,7 +1780,7 @@ export interface DNABestTimeVoBean {
 export interface DNAWeaponBean {
     elementIcon: string
     icon: string
-    level: string
+    level: number
     name: string
     skillLevel: number
     unLocked: boolean

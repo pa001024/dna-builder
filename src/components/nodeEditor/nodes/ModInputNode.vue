@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { t } from "i18next"
 import { computed, ref } from "vue"
-import { modData } from "@/data"
+import { LeveledMod, modData } from "@/data"
 import { useNodeEditorStore } from "@/store/nodeEditor"
 import BaseNode from "./BaseNode.vue"
 
@@ -65,7 +64,7 @@ const modOptions = computed(() => {
         })
         .map(mod => ({
             id: mod.id,
-            name: `${t(mod.属性 || "")}${t(mod.系列)}${t(mod.名称)}(${mod.品质})`,
+            name: LeveledMod.fullName(mod),
             type: mod.类型,
         }))
         .sort((a, b) => b.id - a.id)

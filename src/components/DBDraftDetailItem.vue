@@ -1,8 +1,10 @@
 <script lang="ts" setup>
 import { computed } from "vue"
+import { getDungeonName } from "@/utils/dungeon-utils"
+import { getDraftDropInfo } from "@/utils/reward-utils"
 import { LeveledMod } from "../data"
-import { modMap, weaponMap } from "../data/d/index"
-import type { Draft } from "../data/data-types"
+import { draftDungeonMap, modMap, weaponMap } from "../data/d/index"
+import type { Draft, Dungeon } from "../data/data-types"
 
 const props = defineProps<{
     draft: Draft
@@ -34,6 +36,11 @@ const product = computed(() => {
         return weaponMap.get(props.draft.p)
     }
     return null
+})
+
+// 获取当前图纸的掉落来源
+const draftDungeons = computed<Dungeon[]>(() => {
+    return draftDungeonMap.get(props.draft.p) || []
 })
 </script>
 
@@ -174,6 +181,45 @@ const product = computed(() => {
                                 <span class="font-medium text-primary">{{ item.c }}</span>
                             </div>
                         </template>
+                    </div>
+                </div>
+
+                <!-- 掉落来源 -->
+                <div v-if="draftDungeons.length > 0" class="p-3 bg-base-200 rounded mt-2">
+                    <div class="text-xs text-base-content/70 mb-2">掉落来源</div>
+                    <div class="space-y-2 text-sm">
+                        <FullTooltip v-for="dungeon in draftDungeons" :key="dungeon.id" side="bottom">
+                            <template #tooltip>
+                                <DBDungeonDetailItem :dungeon="dungeon" />
+                            </template>
+                            <RouterLink
+                                :to="`/db/dungeon/${dungeon.id}`"
+                                class="flex flex-col gap-1 p-2 bg-base-300 rounded hover:bg-base-content/10 transition-colors"
+                            >
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-medium">{{ getDungeonName(dungeon) }}</span>
+                                        <span v-if="dungeon.e" class="text-xs px-1.5 py-0.5 rounded bg-primary/20 text-primary">{{
+                                            $t(dungeon.e)
+                                        }}</span>
+                                        <span class="text-xs text-base-content/70">ID: {{ dungeon.id }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-base-content/70">
+                                        <span v-if="dungeon.lv" class="text-xs">Lv.{{ dungeon.lv }}</span>
+                                        <span class="text-xs">{{ dungeon.t }}</span>
+                                    </div>
+                                </div>
+                                <!-- 显示掉落概率信息 -->
+                                <div class="text-xs text-base-content/50">
+                                    <span v-if="getDraftDropInfo(dungeon, draft.id).pp" class="mr-2">
+                                        概率: {{ +(getDraftDropInfo(dungeon, draft.id).pp! * 100).toFixed(2) }}%
+                                    </span>
+                                    <span v-if="getDraftDropInfo(dungeon, draft.id).times">
+                                        期望: {{ +getDraftDropInfo(dungeon, draft.id).times!.toFixed(2) }}次
+                                    </span>
+                                </div>
+                            </RouterLink>
+                        </FullTooltip>
                     </div>
                 </div>
             </div>

@@ -1,4 +1,4 @@
-import type { Buff, Char, Draft, Dungeon, Mod, Monster, Reward, Weapon, WeaponBase } from "../data-types"
+import type { Buff, Char, Draft, Dungeon, Mod, Monster, Reward, RewardChild, Weapon, WeaponBase } from "../data-types"
 import { type AbyssBuff, type AbyssDungeon, abyssBuffs, abyssDungeons } from "./abyss.data"
 import baseData from "./base.data"
 import buffData from "./buff.data"
@@ -71,10 +71,12 @@ rewardData.forEach(v => {
 export const modDraftMap = new Map<number, Draft>()
 export const weaponDraftMap = new Map<number, Draft>()
 export const draftMap = new Map<number, Draft>()
+export const resourceDraftMap = new Map<number, Draft>()
 
 draftData.forEach(v => {
     if (v.t === "Mod") modDraftMap.set(v.p, v)
     if (v.t === "Weapon") weaponDraftMap.set(v.p, v)
+    if (v.t === "Resource") resourceDraftMap.set(v.p, v)
     draftMap.set(v.id, v)
 })
 
@@ -93,11 +95,12 @@ abyssDungeons.forEach(v => {
 // 将副本数据转换为Map，并建立Mod到副本的反向映射
 export const dungeonMap = new Map<number, Dungeon>()
 export const modDungeonMap = new Map<number, Dungeon[]>()
+export const draftDungeonMap = new Map<number, Dungeon[]>()
 
 /**
  * 递归查找奖励树中的所有Mod类型的奖励
  */
-function findModRewards(child: any[], modIds: Set<number>, visited: Set<number> = new Set()): void {
+function findModRewards(child: RewardChild[], modIds: Set<number>, draftIds: Set<number>, visited: Set<number> = new Set()): void {
     if (!child || child.length === 0) return
 
     for (const item of child) {
@@ -109,11 +112,14 @@ function findModRewards(child: any[], modIds: Set<number>, visited: Set<number> 
             const reward = rewardMap.get(item.id)
             if (reward?.child) {
                 // 递归查找子奖励
-                findModRewards(reward.child, modIds, visited)
+                findModRewards(reward.child, modIds, draftIds, visited)
             }
         } else if (item.t === "Mod") {
             // 找到Mod类型的奖励
             modIds.add(item.id)
+            if (item.d) {
+                draftIds.add(item.id)
+            }
         }
     }
 }
@@ -128,7 +134,8 @@ dungeonData.forEach(dungeon => {
             if (reward?.child) {
                 // 递归查找Mod类型的奖励
                 const modIds = new Set<number>()
-                findModRewards(reward.child, modIds)
+                const draftIds = new Set<number>()
+                findModRewards(reward.child, modIds, draftIds)
 
                 // 建立Mod ID到Dungeon的映射
                 modIds.forEach(modId => {
@@ -136,6 +143,13 @@ dungeonData.forEach(dungeon => {
                         modDungeonMap.set(modId, [])
                     }
                     modDungeonMap.get(modId)!.push(dungeon as Dungeon)
+                })
+                // 建立Draft ID到Dungeon的映射
+                draftIds.forEach(draftId => {
+                    if (!draftDungeonMap.has(draftId)) {
+                        draftDungeonMap.set(draftId, [])
+                    }
+                    draftDungeonMap.get(draftId)!.push(dungeon as Dungeon)
                 })
             }
         })
@@ -150,7 +164,13 @@ export type { DBMap, DBMapMarker } from "./map.data"
 
 import walnutData, { type Walnut } from "./walnut.data"
 export const walnutMap = new Map<number, Walnut>()
-walnutData.forEach(v => walnutMap.set(v.id, v))
+export const walnutRewardMap = new Map<number, Walnut>()
+walnutData.forEach(v => {
+    walnutMap.set(v.id, v)
+    if (v.奖励[0].type === "Mod" || v.奖励[0].type === "Weapon") {
+        walnutRewardMap.set(v.奖励[0].id, v)
+    }
+})
 
 export type { Walnut, WalnutReward } from "./walnut.data"
 
@@ -172,3 +192,13 @@ fishingSpots.forEach(v =>
 )
 
 export type { Fish, FishingSpot }
+
+import resourceData, { type Resource } from "./resource.data"
+
+export const resourceMap = new Map<number | string, Resource>()
+resourceData.forEach(v => {
+    resourceMap.set(v.id, v)
+    resourceMap.set(v.name, v)
+})
+
+export type { Resource }

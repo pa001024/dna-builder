@@ -30,3 +30,5 @@ export { achievementData }
 export * from "./d"
 
 export * from "./data-types"
+
+export { LevelUpCalculator } from "./LevelUpCalculator"

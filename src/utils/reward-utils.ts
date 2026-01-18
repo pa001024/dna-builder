@@ -1,4 +1,4 @@
-import { rewardMap } from "../data"
+import { type Dungeon, rewardMap } from "../data"
 /**
  * 奖励项类型定义，包含掉落模式
  */
@@ -117,4 +117,62 @@ export function getRewardDetails(
     }
 
     return result
+}
+
+/**
+ * 递归查找奖励树中当前Mod的掉落信息
+ */
+export function findInRewardTree(reward: RewardItem | null, id: number, type = "Mod"): { pp?: number; times?: number } | null {
+    if (!reward) return null
+
+    if (reward.child) {
+        for (const child of reward.child) {
+            if (child.t === type && child.id === id) {
+                return { pp: child.pp, times: child.times }
+            } else {
+                const result = findInRewardTree(child, id, type)
+                if (result) return result
+            }
+        }
+    }
+
+    return null
+}
+
+/**
+ * 获取Mod在特定副本中的掉落概率信息
+ */
+export function getModDropInfo(dungeon: Dungeon, modId: number): { pp?: number; times?: number } {
+    // 合并所有奖励组ID，确保r和sr都是数组
+    const allRewardIds = [...(dungeon.r || []), ...(dungeon.sr || [])]
+
+    // 遍历所有奖励组，查找当前Mod
+    for (const rewardId of allRewardIds) {
+        const rewardDetails = getRewardDetails(rewardId)
+        const modDropInfo = findInRewardTree(rewardDetails, modId, "Mod")
+        if (modDropInfo) {
+            return modDropInfo
+        }
+    }
+
+    return {}
+}
+
+/**
+ * 获取Draft在特定副本中的掉落概率信息
+ */
+export function getDraftDropInfo(dungeon: Dungeon, draftId: number): { pp?: number; times?: number } {
+    // 合并所有奖励组ID，确保r和sr都是数组
+    const allRewardIds = [...(dungeon.r || []), ...(dungeon.sr || [])]
+
+    // 遍历所有奖励组，查找当前Draft
+    for (const rewardId of allRewardIds) {
+        const rewardDetails = getRewardDetails(rewardId)
+        const draftDropInfo = findInRewardTree(rewardDetails, draftId, "Draft")
+        if (draftDropInfo) {
+            return draftDropInfo
+        }
+    }
+
+    return {}
 }

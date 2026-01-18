@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { ref, computed } from "vue"
+import { computed, ref } from "vue"
+import { LeveledChar } from "@/data"
 import dungeonData from "../data/d/dungeon.data"
 import { getDungeonName, getDungeonRewardNames, getDungeonType } from "../utils/dungeon-utils"
 import { matchPinyin } from "../utils/pinyin-utils"
-import { LeveledChar } from "@/data"
 
 const searchKeyword = ref("")
 const selectedDungeon = ref<(typeof dungeonData)[0] | null>(null)
@@ -19,30 +19,35 @@ const allTypes = computed(() => {
 const filteredDungeons = computed(() => {
     return dungeonData.filter(d => {
         const matchesType = selectedType.value === "" || d.t === selectedType.value
+        if (!matchesType) {
+            return false
+        }
 
-        let matchesKeyword = false
         if (searchKeyword.value === "") {
-            matchesKeyword = true
+            return true
         } else {
             const q = searchKeyword.value
             const iname = getDungeonName(d)
             // 直接匹配（ID、名称、描述、等级）
             if (`${d.id}`.includes(q) || d.n.includes(q) || d.desc?.includes(q) || `${d.lv}`.includes(q) || iname.includes(q)) {
-                matchesKeyword = true
+                return true
             } else {
                 // 拼音匹配（名称、描述）
                 const nameMatch = matchPinyin(d.n, q).match
                 if (nameMatch) {
-                    matchesKeyword = true
-                } else if (d.desc) {
-                    matchesKeyword = matchPinyin(d.desc, q).match
-                } else if (iname !== d.n) {
-                    matchesKeyword = matchPinyin(iname, q).match
+                    return true
+                }
+                if (d.desc && matchPinyin(d.desc, q).match) {
+                    return true
+                }
+                if (iname !== d.n && matchPinyin(iname, q).match) {
+                    return true
+                }
+                if (matchPinyin(getDungeonRewardNames(d), q).match) {
+                    return true
                 }
             }
         }
-
-        return matchesType && matchesKeyword
     })
 })
 
@@ -61,7 +66,7 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
                     <input
                         v-model="searchKeyword"
                         type="text"
-                        placeholder="搜索副本ID/名称/描述/等级（支持拼音）..."
+                        placeholder="搜索副本ID/名称/描述/等级/奖励（支持拼音）..."
                         class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
                     />
                 </div>

@@ -525,6 +525,10 @@
         "desc": "自定义你的魔之楔和武器配置",
         "title": "库存管理"
     },
+    "levelup": {
+        "desc": "计算角色、武器和魔之楔的养成资源需求",
+        "title": "养成计算"
+    },
     "main": {
         "btn_collapse_menu": "折叠菜单",
         "btn_pin_window": "窗口置顶",
@@ -577,6 +581,9 @@
         "nextRefresh": "下次刷新",
         "onlyOnce": "仅一次",
         "zhouben": "周本"
+    },
+    "room": {
+        "remove": "删除房间"
     },
     "setting": {
         "account": "账号",

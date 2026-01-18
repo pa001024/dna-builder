@@ -16,11 +16,11 @@ export function getDungeonType(type: string): { t: string; label: string; color:
         Rescue: { t: "Rescue", label: "护送", color: "bg-cyan-500" },
         Sabotage: { t: "Sabotage", label: "调停", color: "bg-teal-500" },
         SabotagePro: { t: "SabotagePro", label: "拆解", color: "bg-emerald-600" },
-        SoloRaid: { t: "SoloRaid", label: "单人", color: "bg-indigo-500" },
+        SoloRaid: { t: "SoloRaid", label: "排位", color: "bg-indigo-500" },
         Survival: { t: "Survival", label: "探险", color: "bg-lime-500" },
-        SurvivalMini: { t: "SurvivalMini", label: "探险M", color: "bg-lime-500" },
-        SurvivalMiniPro: { t: "SurvivalMiniPro", label: "探险M+", color: "bg-lime-500" },
-        SurvivalPro: { t: "SurvivalPro", label: "探险+", color: "bg-lime-500" },
+        SurvivalMini: { t: "SurvivalMini", label: "探险+", color: "bg-lime-500" },
+        SurvivalMiniPro: { t: "SurvivalMiniPro", label: "避险", color: "bg-lime-500" },
+        SurvivalPro: { t: "SurvivalPro", label: "避险+", color: "bg-lime-500" },
         Synthesis: { t: "Synthesis", label: "竞逐", color: "bg-violet-500" },
     }
     return typeMap[type] || { t: type, label: type, color: "bg-gray-500" }
@@ -67,7 +67,7 @@ const mhList = [
 )
 
 export function getDungeonName(dungeon: Dungeon) {
-    const yehang = ["DefenceMove", "ExtermPro"]
+    const yehang = ["DefenceMove", "ExtermPro", "SurvivalMiniPro"]
     if (yehang.includes(dungeon.t) && dungeon.sr && dungeon.sm) {
         if (dungeon.sm.length > 1) {
             return `${t(dungeon.n)}(${t(monsterMap.get(dungeon.sm[0]!)!.n)} ${t("夜航手册")} 多号令)`
