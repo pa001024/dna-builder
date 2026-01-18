@@ -24,6 +24,11 @@ const items = [
         icon: "ri:table-view",
     },
     {
+        name: "levelup",
+        path: "/levelup",
+        icon: "ri:calculator-line",
+    },
+    {
         name: "database",
         path: "/db",
         icon: "ri:book-line",

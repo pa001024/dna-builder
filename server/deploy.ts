@@ -69,10 +69,7 @@ async function uploadToOss(filePath: string, ossKey: string): Promise<void> {
             await client.delete(ossKey)
             console.log(`🗑️  已删除旧文件: ${ossKey}`)
         }
-    } catch {
-        // 文件不存在时忽略错误
-        console.log(`ℹ️  文件不存在，跳过删除: ${ossKey}`)
-    }
+    } catch {}
 
     // 大文件使用分片上传并显示进度
     if (fs.statSync(filePath).size > 1024 * 1024) {
@@ -115,11 +112,11 @@ function generateLatestJson(version: string, signature: string, msiUrl: string):
         platforms: {
             "windows-x86_64": {
                 signature: signature,
-                url: msiUrl.replace(/ /g, "%20"),
+                url: msiUrl,
             },
             "windows-x86_64-msi": {
                 signature: signature,
-                url: msiUrl.replace(/ /g, "%20"),
+                url: msiUrl,
             },
         },
     }
@@ -232,7 +229,7 @@ async function deployApp() {
         fs.unlinkSync(newLatestJsonPath)
 
         console.log("=== App部署流程完成 ===")
-        console.log(`MSI下载链接: ${msiUrl}`)
+        console.log(`MSI下载链接: ${msiUrl.replace(/ /g, "%20")}`)
     } catch (error) {
         console.error("部署失败:", error)
         process.exit(1)

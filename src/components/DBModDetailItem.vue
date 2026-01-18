@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
 import { getDungeonName } from "@/utils/dungeon-utils"
+import { getModDropInfo } from "@/utils/reward-utils"
 import { modDraftMap, modDungeonMap } from "../data/d/index"
 import type { Draft, Dungeon, Mod } from "../data/data-types"
 import { LeveledMod } from "../data/leveled/LeveledMod"
 import { formatProp } from "../util"
-import { getRewardDetails, type RewardItem as RewardItemType } from "../utils/reward-utils"
 
 const props = defineProps<{
     mod: Mod
@@ -65,45 +65,6 @@ function formatDuration(minutes: number): string {
     const hours = Math.floor(minutes / 60)
     const mins = minutes % 60
     return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`
-}
-
-/**
- * 递归查找奖励树中当前Mod的掉落信息
- */
-function findModInRewardTree(reward: RewardItemType | null, modId: number): { pp?: number; times?: number } | null {
-    if (!reward) return null
-
-    if (reward.child) {
-        for (const child of reward.child) {
-            if (child.t === "Mod" && child.id === modId) {
-                return { pp: child.pp, times: child.times }
-            } else {
-                const result = findModInRewardTree(child, modId)
-                if (result) return result
-            }
-        }
-    }
-
-    return null
-}
-
-/**
- * 获取Mod在特定副本中的掉落概率信息
- */
-function getModDropInfo(dungeon: Dungeon, modId: number): { pp?: number; times?: number } {
-    // 合并所有奖励组ID，确保r和sr都是数组
-    const allRewardIds = [...(dungeon.r || []), ...(dungeon.sr || [])]
-
-    // 遍历所有奖励组，查找当前Mod
-    for (const rewardId of allRewardIds) {
-        const rewardDetails = getRewardDetails(rewardId)
-        const modDropInfo = findModInRewardTree(rewardDetails, modId)
-        if (modDropInfo) {
-            return modDropInfo
-        }
-    }
-
-    return {}
 }
 </script>
 

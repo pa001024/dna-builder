@@ -57,6 +57,12 @@ const routes: readonly RouteRecordRaw[] = [
         beforeEnter: () => setMinSize(900, 700),
     },
     // more: lazy load
+    {
+        name: "levelup",
+        path: "/levelup",
+        component: () => import("./views/LevelUpCalculatorView.vue"),
+        beforeEnter: () => setMinSize(600, 600),
+    },
     { name: "ai", path: "/ai", component: () => import("./views/AIAgent.vue"), beforeEnter: () => setMinSize(600, 600) },
     { name: "help", path: "/help", component: () => import("./views/Help.vue"), beforeEnter: () => setMinSize(800, 700) },
     {

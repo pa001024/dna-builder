@@ -91,4 +91,3 @@ export function getRandomFish(spot: FishingSpot, time: 1 | 2 | 3, lure: 0 | 1 | 
                 : Math.random() * (fishs[0].fish.length[1] - fishs[0].fish.length[0]) + fishs[0].fish.length[0],
     }
 }
-console.log(calculateFishPrice(fishMap.get(270501)!))

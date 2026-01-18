@@ -1,3 +1,4 @@
+import { t as translate } from "i18next"
 import type { CharAttr } from "../CharBuild"
 import { effectMap, modMap } from "../d"
 import { type Mod, Quality } from "../data-types"
@@ -7,6 +8,10 @@ import { LeveledBuff } from "."
  * LeveledMod类 - 继承Mod接口，添加等级属性和动态属性计算
  */
 export class LeveledMod implements Mod {
+    static fullName(mod: Mod, t: (key: string) => string = translate) {
+        return `${t(mod.属性 || "")}${t(mod.系列)}${t(mod.名称)}(${mod.品质})`
+    }
+
     // MOD品质对应的等级上限
     static modQualityMaxLevel: Record<string, number> = {
         [Quality.金]: 10,

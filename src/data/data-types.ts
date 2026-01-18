@@ -56,6 +56,7 @@ export interface Char {
     别名?: string
     阵营?: string
     属性: string
+    突破?: Record<string, number>[]
     精通: string[]
     标签?: string[]
     基础攻击: number
@@ -121,6 +122,7 @@ export interface Weapon {
     暴击: number
     暴伤: number
     触发: number
+    突破?: Record<string, number>[]
     弹匣?: number
     最大弹药?: number
     弹药转化率?: number
@@ -137,6 +139,7 @@ export interface Skill {
     名称: string
     类型: string
     武器?: string
+    升级?: Record<string, number>[]
     描述?: string
     icon?: string
     字段?: SkillField[]
@@ -310,8 +313,9 @@ export interface WeaponSkill {
     武器?: string
     描述?: string
     字段?: Record<string, string>
-    术语解释?: Record<string, string>
-    召唤物?: SkillSummon
+    削韧?: number[]
+    延迟?: number[]
+    卡肉?: number[]
 }
 
 export enum WeaponSkillType {

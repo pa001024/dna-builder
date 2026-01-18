@@ -278,6 +278,21 @@ export const rtcJoinMutation = typedMutation<Types.RtcJoinResult, { roomId: stri
     mutation ($roomId: String!) {
         rtcJoin(roomId: $roomId) {
             id
+            end
+            user {
+                id
+                name
+                qq
+            }
+            clients {
+                id
+                end
+                user {
+                    id
+                    name
+                    qq
+                }
+            }
         }
     }
 `)

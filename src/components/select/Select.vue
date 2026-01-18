@@ -68,7 +68,7 @@ const forward = useForwardPropsEmits(props, emits)
         <slot name="trigger">
             <SelectTrigger class="inline-flex items-center justify-between" v-bind="$attrs">
                 <SelectValue :placeholder="placeholder" />
-                <Icon v-if="!hidebtn" icon="radix-icons:chevron-down" class="text-primary ml-auto" />
+                <Icon v-if="!hidebtn" icon="radix-icons:chevron-down" class="ml-auto" />
             </SelectTrigger>
         </slot>
 
