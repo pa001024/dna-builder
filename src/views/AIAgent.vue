@@ -554,7 +554,7 @@ onMounted(() => {
             </button>
 
             <!-- MCP 服务器控制 -->
-            <div class="mt-4 p-3 bg-base-200 rounded-lg">
+            <div v-if="env.isApp && !env.isMSStore" class="mt-4 p-3 bg-base-200 rounded-lg">
                 <div class="text-sm font-medium mb-2">MCP 服务器</div>
                 <div class="text-xs opacity-70 mb-2">
                     {{ mcpStatus }}

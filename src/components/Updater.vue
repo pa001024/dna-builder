@@ -69,7 +69,7 @@ function closeModal() {
 
 // Initialize on mount
 onMounted(async () => {
-    if (env.isApp) {
+    if (env.isApp && !env.isMSStore) {
         const updateInfo = await checkUpdate()
         if (updateInfo) {
             const message = t("updater.newVersionMessage", { version: updateInfo.latestVersion, body: updateInfo.body || "" })

@@ -542,68 +542,6 @@ pub fn run() {
                     set_mat_check("None");
                 }
             }
-
-            let _tray = TrayIconBuilder::new()
-                .menu(&menu)
-                .on_menu_event(move |_app, event| match event.id().as_ref() {
-                    "exit" => {
-                        std::process::exit(0);
-                    }
-                    "None" => {
-                        set_mat_check("None");
-                        let _ = apply_material(window.clone(), "None");
-                    }
-                    "Blur" => {
-                        set_mat_check("Blur");
-                        let _ = apply_material(window.clone(), "Blur");
-                    }
-                    "Acrylic" => {
-                        set_mat_check("Acrylic");
-                        let _ = apply_material(window.clone(), "Acrylic");
-                    }
-                    "Mica" => {
-                        set_mat_check("Mica");
-                        let _ = apply_material(window.clone(), "Mica");
-                    }
-                    "Mica_Dark" => {
-                        set_mat_check("Mica_Dark");
-                        let _ = apply_material(window.clone(), "Mica_Dark");
-                    }
-                    "Mica_Tabbed" => {
-                        set_mat_check("Mica_Tabbed");
-                        let _ = apply_material(window.clone(), "Mica_Tabbed");
-                    }
-                    "Mica_Tabbed_Dark" => {
-                        set_mat_check("Mica_Tabbed_Dark");
-                        let _ = apply_material(window.clone(), "Mica_Tabbed_Dark");
-                    }
-                    _ => (),
-                })
-                .on_tray_icon_event(|tray, event| {
-                    if let TrayIconEvent::Click {
-                        button: MouseButton::Left,
-                        button_state: MouseButtonState::Up,
-                        ..
-                    } = event
-                    {
-                        let app = tray.app_handle();
-                        if let Some(webview_window) = app.get_webview_window("main") {
-                            if let Ok(is_visible) = webview_window.is_visible() {
-                                if is_visible {
-                                    let _ = webview_window.hide();
-                                } else {
-                                    let _ = webview_window.show();
-                                    let _ = webview_window.set_focus();
-                                }
-                            }
-                        }
-                    }
-                })
-                .icon(
-                    tauri::image::Image::from_bytes(include_bytes!("../icons/icon.ico"))
-                        .expect("icon missing"),
-                )
-                .build(app)?;
         }
 
         Ok(())
