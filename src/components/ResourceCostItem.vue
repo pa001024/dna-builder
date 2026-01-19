@@ -7,6 +7,10 @@ defineProps<{
     value: number | [number, number, "Mod" | "Draft"]
 }>()
 
+defineEmits<{
+    click: []
+}>()
+
 function getIcon(name: string) {
     const res = resourceMap.get(name)
     return res?.icon ? `/imgs/res/${res?.icon}.webp` : `/imgs/webp/T_Head_Empty.webp`
@@ -25,18 +29,24 @@ function getIcon(name: string) {
         :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
         :effdesc="mod.效果"
     >
-        <RouterLink
-            :to="`/db/mod/${mod.id}`"
-            class="flex items-center p-3 bg-base-200 rounded-xl hover:bg-base-300 transition-colors duration-200"
+        <div
+            class="flex items-center p-3 rounded-xl hover:bg-base-300 transition-colors duration-200"
+            v-bind="$attrs"
+            @click="$emit('click')"
         >
             <span class="font-medium text-base-content">
                 <img :src="mod.url" :alt="mod.名称" class="w-6 h-6 inline-block mr-2" />
                 {{ $t(name) }}</span
             >
             <span class="font-bold text-primary ml-auto">{{ value[0] }}</span>
-        </RouterLink>
+        </div>
     </ShowProps>
-    <div v-else class="flex items-center p-3 bg-base-200 rounded-xl hover:bg-base-300 transition-colors duration-200">
+    <div
+        v-else
+        class="flex items-center p-3 rounded-xl hover:bg-base-300 transition-colors duration-200"
+        v-bind="$attrs"
+        @click="$emit('click')"
+    >
         <span class="font-medium text-base-content">
             <img :src="getIcon(name)" alt="" class="w-6 h-6 inline-block mr-2" />
             {{ $t(name) }}</span

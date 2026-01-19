@@ -46,6 +46,7 @@ const props = defineProps<{
     count?: number
     selected?: boolean
     control?: boolean
+    nolv?: boolean
     charBuild?: CharBuild
     index?: number
     polset?: boolean
@@ -201,9 +202,10 @@ function handleMouseUp(event: MouseEvent) {
                             <div
                                 v-if="control && (selected || selected === undefined)"
                                 class="text-base-300 text-xs pb-4"
-                                :class="[count ? 'group-hover:pb-16' : 'group-hover:pb-8']"
+                                :class="[count && !nolv ? 'group-hover:pb-16' : 'group-hover:pb-8']"
                             >
                                 <NumberInput
+                                    v-if="!nolv"
                                     class="absolute w-full max-h-0 group-hover:max-h-20"
                                     :model-value="mod.等级"
                                     :min="0"
@@ -213,7 +215,8 @@ function handleMouseUp(event: MouseEvent) {
                                 />
                                 <NumberInput
                                     v-if="count"
-                                    class="absolute mt-8 w-full max-h-0 group-hover:max-h-20"
+                                    class="absolute w-full max-h-0 group-hover:max-h-20"
+                                    :class="{ 'mt-8': !nolv }"
                                     :model-value="count"
                                     :min="1"
                                     :max="8"
@@ -230,7 +233,7 @@ function handleMouseUp(event: MouseEvent) {
                             </div>
                             <div v-else class="flex justify-between">
                                 <div class="text-base-300 text-xs">
-                                    {{ control && selected !== undefined ? $t("未拥有") : `Lv.${mod.等级}` }}
+                                    {{ control && selected !== undefined && !nolv ? $t("未拥有") : `Lv.${mod.等级}` }}
                                 </div>
                                 <div v-if="income" class="text-base-300 text-xs">
                                     {{ format100r(income, 1) }}

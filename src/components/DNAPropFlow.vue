@@ -702,7 +702,7 @@ defineExpose({
     </div>
 
     <!-- 角色验证模态框 -->
-    <DialogModel v-model="showVerifyModal" class="modal">
+    <DialogModel v-model="showVerifyModal">
         <h3 class="font-bold text-lg">角色验证</h3>
         <p class="py-4">请输入游戏内邮件收到的验证码</p>
 

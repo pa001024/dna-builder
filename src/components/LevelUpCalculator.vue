@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI, DNARoleEntity } from "dna-api"
-import { computed, onMounted, ref } from "vue"
+import { computed, onBeforeUnmount, onMounted, ref } from "vue"
 import {
     charData,
     charMap,
@@ -16,9 +16,10 @@ import {
     weaponData,
     weaponMap,
 } from "@/data"
-import { type CharLevelUpConfig, LevelUpCalculator, type ModLevelUpConfig, type WeaponLevelUpConfig } from "@/data/LevelUpCalculator"
+import { type CharLevelUpConfig, type LevelUpResult, type ModLevelUpConfig, type WeaponLevelUpConfig } from "@/data/LevelUpCalculator"
 import { initEmojiDict } from "@/util"
 import { getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
+import { LevelUpCalculator } from "../data/LevelUpCalculator"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
 
@@ -56,6 +57,60 @@ const mods = useLocalStorage<ModItem[]>("lvup.mods", [])
 // 同步状态
 const syncing = ref(false)
 const roleInfo = useLocalStorage<DNARoleEntity>("dna.roleInfo", {} as any)
+
+// 批量添加魔之楔相关
+const isBatchAddModalOpen = ref(false)
+const modSearchQuery = ref("")
+const selectedModsForBatch = ref<Map<number, { count: number }>>(new Map())
+const enableMods = ref({
+    金: true,
+    紫: false,
+    蓝: false,
+    绿: false,
+    白: false,
+})
+
+// 资源过滤相关
+const excludedResources = ref<Set<string>>(new Set())
+
+// 切换资源过滤状态
+const toggleResourceFilter = (resourceName: string) => {
+    if (excludedResources.value.has(resourceName)) {
+        excludedResources.value.delete(resourceName)
+    } else {
+        excludedResources.value.add(resourceName)
+    }
+}
+
+// 清除所有资源过滤
+const clearResourceFilters = () => {
+    excludedResources.value.clear()
+}
+
+// 创建 LevelUpCalculator 实例
+const levelUpCalculator = ref<LevelUpCalculator | null>(null)
+
+// 销毁计算器实例
+onBeforeUnmount(() => {
+    levelUpCalculator.value?.destroy()
+})
+
+const filteredMods = computed(() => {
+    if (!isBatchAddModalOpen.value) return []
+    const filteredIds = modData.filter(v => enableMods.value[v.品质 as keyof typeof enableMods.value]).map(v => v.id)
+    const query = modSearchQuery.value.trim()
+    const mappedMods = filteredIds.map(id => new LeveledMod(id))
+    if (!query) return mappedMods
+
+    // 根据搜索查询过滤
+    return mappedMods.filter(mod => {
+        // 直接中文匹配
+        if (matchPinyin(mod.名称, query).match || mod.属性?.includes(query) || matchPinyin(mod.系列, query).match) {
+            return true
+        }
+        return false
+    })
+})
 
 onMounted(async () => {
     const p = await setting.getDNAAPI()
@@ -175,34 +230,116 @@ async function loadRoleInfo() {
     }
 }
 
-// 计算总结果
-const result = computed(() => {
-    // 获取实际的角色、武器、魔之楔数据
-    const actualChars = chars.value.map(item => charMap.get(item.id)).filter((char): char is (typeof charData)[0] => char !== undefined)
+// 结果状态
+const calculating = ref(false)
+const result = ref<ReturnType<typeof LevelUpCalculator.mergeResults> | null>(null)
 
-    const actualWeapons = weapons.value
-        .map(item => weaponMap.get(item.id))
-        .filter((weapon): weapon is (typeof weaponData)[0] => weapon !== undefined)
+/**
+ * 计算结果
+ */
+async function calculateResult() {
+    if (!levelUpCalculator.value) return
 
-    const actualMods = mods.value.map(item => modMap.get(item.id)).filter((mod): mod is (typeof modData)[0] => mod !== undefined)
+    calculating.value = true
+    try {
+        // 获取实际的角色、武器、魔之楔数据
+        const actualChars = chars.value.map(item => charMap.get(item.id)).filter((char): char is (typeof charData)[0] => char !== undefined)
 
-    // 计算角色养成结果
-    const charResult = LevelUpCalculator.calculateCharLevelUp(actualChars, {
-        chars: chars.value.map(item => item.config),
-    })
+        const actualWeapons = weapons.value
+            .map(item => weaponMap.get(item.id))
+            .filter((weapon): weapon is (typeof weaponData)[0] => weapon !== undefined)
 
-    // 计算武器养成结果
-    const weaponResult = LevelUpCalculator.calculateWeaponLevelUp(actualWeapons, {
-        weapons: weapons.value.map(item => item.config),
-    })
+        const actualMods = mods.value.map(item => modMap.get(item.id)).filter((mod): mod is (typeof modData)[0] => mod !== undefined)
 
-    // 计算魔之楔养成结果
-    const modResult = LevelUpCalculator.calculateModLevelUp(actualMods, {
-        mods: mods.value.map(item => item.config),
-    })
+        // 使用合并计算方法，减少异步通信开销，提高性能
+        const mergeResults = await levelUpCalculator.value.mergeCalculate(
+            actualChars,
+            chars.value.map(item => item.config),
+            actualWeapons,
+            weapons.value.map(item => item.config),
+            actualMods,
+            mods.value.map(item => item.config)
+        )
 
-    // 合并结果
-    return LevelUpCalculator.mergeResults([charResult, weaponResult, modResult])
+        // 合并所有结果
+        const resultsToMerge = [mergeResults.charResult, mergeResults.weaponResult, mergeResults.modResult].filter(
+            Boolean
+        ) as LevelUpResult[]
+
+        let mergedResult = LevelUpCalculator.mergeResults(resultsToMerge)
+
+        // 如果有排除的资源，重新计算结果
+        if (excludedResources.value.size > 0) {
+            // 过滤总消耗
+            const filteredTotalCost: typeof mergedResult.totalCost = {}
+            for (const [resource, value] of Object.entries(mergedResult.totalCost)) {
+                if (!excludedResources.value.has(resource) && value !== undefined) {
+                    filteredTotalCost[resource] = value
+                }
+            }
+
+            // 过滤详细消耗
+            const filterResourceObject = (obj: typeof mergedResult.totalCost) => {
+                const filtered: typeof mergedResult.totalCost = {}
+                for (const [resource, value] of Object.entries(obj)) {
+                    if (!excludedResources.value.has(resource) && value !== undefined) {
+                        filtered[resource] = value
+                    }
+                }
+                return filtered
+            }
+
+            // 过滤详情
+            const filteredDetails = {
+                levelUp: filterResourceObject(mergedResult.details.levelUp),
+                breakthrough: mergedResult.details.breakthrough ? filterResourceObject(mergedResult.details.breakthrough) : undefined,
+                craft: mergedResult.details.craft ? filterResourceObject(mergedResult.details.craft) : undefined,
+                skills: mergedResult.details.skills ? filterResourceObject(mergedResult.details.skills) : undefined,
+            }
+
+            // 返回过滤后的结果
+            mergedResult = {
+                totalCost: filteredTotalCost,
+                details: filteredDetails,
+            }
+        }
+        // 重新计算时间，基于过滤后的资源
+        mergedResult.timeEstimate = await levelUpCalculator.value.estimateTime(mergedResult.totalCost)
+
+        result.value = mergedResult
+    } catch (error) {
+        console.error("计算失败:", error)
+        ui.showErrorMessage("计算失败，请重试")
+    } finally {
+        calculating.value = false
+    }
+}
+
+// 监听数据变化，重新计算结果
+import { watch } from "vue"
+import { matchPinyin } from "@/utils/pinyin-utils"
+
+// 防抖函数，避免频繁计算导致UI卡顿
+let debounceTimer: number | null = null
+
+watch(
+    [chars, weapons, mods, excludedResources],
+    () => {
+        if (debounceTimer) {
+            clearTimeout(debounceTimer)
+        }
+        // 500ms防抖，数据稳定后再计算
+        debounceTimer = window.setTimeout(() => {
+            calculateResult()
+        }, 500)
+    },
+    { deep: true }
+)
+
+// 初始化计算器实例并计算结果
+onMounted(() => {
+    levelUpCalculator.value = new LevelUpCalculator()
+    calculateResult()
 })
 
 // 添加角色
@@ -253,22 +390,55 @@ const removeWeapon = (index: number) => {
     weapons.value.splice(index, 1)
 }
 
-// 添加魔之楔
-const addMod = () => {
-    mods.value.push({
-        id: 56154,
-        config: {
-            currentLevel: 1,
-            targetLevel: 10,
-        },
-    })
-}
-
 // 移除魔之楔
 const removeMod = (index: number) => {
-    if (mods.value.length > 1) {
-        mods.value.splice(index, 1)
+    mods.value.splice(index, 1)
+}
+
+// 批量添加魔之楔相关函数
+const toggleSelectModForBatch = (modId: number) => {
+    if (selectedModsForBatch.value.has(modId)) {
+        selectedModsForBatch.value.delete(modId)
+    } else {
+        selectedModsForBatch.value.set(modId, { count: 1 })
     }
+}
+
+const handleSelectAllModsForBatch = () => {
+    if (selectedModsForBatch.value.size === filteredMods.value.length) {
+        selectedModsForBatch.value.clear()
+    } else {
+        filteredMods.value.forEach(mod => {
+            selectedModsForBatch.value.set(mod.id, { count: 1 })
+        })
+    }
+}
+
+const updateModCountForBatch = (modId: number, count: number) => {
+    if (selectedModsForBatch.value.has(modId)) {
+        selectedModsForBatch.value.set(modId, { count })
+    }
+}
+
+const handleBatchAddMods = () => {
+    // 将选中的MOD添加到mods列表
+    selectedModsForBatch.value.forEach((modInfo, modId) => {
+        // 检查是否已存在
+        const exists = mods.value.some(mod => mod.id === modId)
+        if (!exists) {
+            mods.value.push({
+                id: modId,
+                config: {
+                    currentLevel: 1,
+                    targetLevel: 10,
+                    count: modInfo.count,
+                },
+            })
+        }
+    })
+    // 关闭弹窗并清空选择
+    isBatchAddModalOpen.value = false
+    selectedModsForBatch.value.clear()
 }
 </script>
 
@@ -474,10 +644,12 @@ const removeMod = (index: number) => {
                             <Icon icon="po-A" />
                             魔之楔养成
                         </h3>
-                        <button class="btn btn-primary btn-sm gap-2" @click="addMod" aria-label="添加魔之楔">
-                            <span class="text-xl font-bold">+</span>
-                            添加魔之楔
-                        </button>
+                        <div class="flex gap-2">
+                            <button class="btn btn-primary btn-sm gap-2" @click="isBatchAddModalOpen = true" aria-label="批量添加魔之楔">
+                                <span class="text-xl font-bold">+</span>
+                                添加魔之楔
+                            </button>
+                        </div>
                     </div>
 
                     <div class="flex flex-col gap-4">
@@ -486,24 +658,9 @@ const removeMod = (index: number) => {
                             :key="index"
                             class="card bg-base-200 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg"
                         >
-                            <div class="card-body p-4">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="flex-1 max-w-xs">
-                                        <ModSelect v-model="mod.id" class="w-full" />
-                                    </div>
-                                    <button
-                                        class="btn btn-error btn-sm"
-                                        @click="removeMod(index)"
-                                        :disabled="mods.length <= 1"
-                                        :aria-disabled="mods.length <= 1"
-                                        aria-label="删除魔之楔"
-                                    >
-                                        删除
-                                    </button>
-                                </div>
-
+                            <div class="card-body p-2">
                                 <!-- 魔之楔信息卡片 -->
-                                <div v-if="modMap.get(mod.id)" class="bg-base-100 rounded-xl p-4 mb-4 flex items-center gap-4">
+                                <div v-if="modMap.get(mod.id)" class="rounded-xl p-4 flex items-center gap-4">
                                     <div class="relative bg-linear-15 from-yellow-500/80 to-yellow-700/80 rounded-lg overflow-hidden">
                                         <img
                                             :src="LeveledMod.url(modMap.get(mod.id)?.icon)"
@@ -512,8 +669,14 @@ const removeMod = (index: number) => {
                                         />
                                     </div>
                                     <div class="flex-1">
-                                        <h4 class="text-lg font-semibold">{{ modMap.get(mod.id)?.名称 }}</h4>
-                                        <div class="mt-1">
+                                        <div class="flex justify-between">
+                                            <h4 class="text-lg font-semibold">{{ modMap.get(mod.id)?.名称 }}</h4>
+
+                                            <button class="btn btn-error btn-sm" @click="removeMod(index)" aria-label="删除魔之楔">
+                                                删除
+                                            </button>
+                                        </div>
+                                        <div class="mt-1 flex items-center gap-4">
                                             <label class="flex flex-col gap-1">
                                                 <span class="text-xs opacity-80">选择等级</span>
                                                 <RangeSelector
@@ -523,6 +686,12 @@ const removeMod = (index: number) => {
                                                     :min="1"
                                                     :max="80"
                                                 />
+                                            </label>
+                                            <label class="flex flex-col gap-1">
+                                                <span class="text-xs opacity-80">选择数量</span>
+                                                <Select class="input input-sm w-40" v-model="mod.config.count">
+                                                    <SelectItem v-for="i in 8" :key="i" :value="i">{{ i }}</SelectItem>
+                                                </Select>
                                             </label>
                                         </div>
                                     </div>
@@ -536,7 +705,7 @@ const removeMod = (index: number) => {
         <ScrollArea class="md:h-full flex-1">
             <div class="p-4">
                 <!-- 结果显示 -->
-                <section class="mb-4">
+                <section class="mb-4" v-if="result">
                     <h3 class="text-xl font-bold text-base-content mb-6 flex items-center gap-2">
                         <Icon icon="ri:bar-chart-line" />
                         结果
@@ -604,14 +773,48 @@ const removeMod = (index: number) => {
                         </div>
                     </div>
 
+                    <!-- 资源过滤状态 -->
+                    <div
+                        v-if="excludedResources.size > 0"
+                        class="card bg-base-100 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg mb-6"
+                    >
+                        <div class="card-body p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex text-lg items-center gap-2">
+                                    <Icon icon="ri:filter-line" />
+                                    <h4 class="font-semibold text-base-content">已过滤资源</h4>
+                                </div>
+                                <button class="btn btn-sm btn-secondary" @click="clearResourceFilters">
+                                    <Icon icon="codicon:chrome-close" />
+                                    清除过滤
+                                </button>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <span
+                                    v-for="resource in excludedResources"
+                                    :key="resource"
+                                    class="px-3 py-1 bg-error/20 text-error rounded-full text-sm flex items-center gap-1"
+                                >
+                                    <span>{{ $t(resource) }}</span>
+                                    <button @click.stop="toggleResourceFilter(resource)" class="text-xs hover:underline">
+                                        <Icon icon="codicon:chrome-close" class="h-3 w-3" />
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- 总消耗 -->
                     <div
                         class="card bg-base-100 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg mb-6"
                     >
                         <div class="card-body p-6">
-                            <div class="flex text-lg items-center mb-4 gap-2">
-                                <Icon icon="ri:file-list-line" />
-                                <h4 class="font-semibold text-base-content">总消耗</h4>
+                            <div class="flex text-lg items-center justify-between mb-4 gap-2">
+                                <div class="flex items-center gap-2">
+                                    <Icon icon="ri:file-list-line" />
+                                    <h4 class="font-semibold text-base-content">总消耗</h4>
+                                </div>
+                                <div class="text-xs opacity-70">点击资源可过滤</div>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                 <ResourceCostItem
@@ -619,7 +822,8 @@ const removeMod = (index: number) => {
                                     :key="key"
                                     :name="key"
                                     :value="value!"
-                                    class="flex justify-between items-center p-3 bg-base-200 rounded-xl hover:bg-base-300 transition-colors duration-200"
+                                    class="bg-base-200 hover:bg-base-300 cursor-pointer"
+                                    @click="toggleResourceFilter(key)"
                                 />
                             </div>
                         </div>
@@ -642,7 +846,8 @@ const removeMod = (index: number) => {
                                         :key="key"
                                         :name="key"
                                         :value="value!"
-                                        class="flex justify-between items-center p-3 bg-base-200 rounded-xl hover:bg-base-300 transition-colors duration-200"
+                                        class="bg-base-200 hover:bg-base-300 cursor-pointer"
+                                        @click="toggleResourceFilter(key)"
                                     />
                                 </div>
                             </div>
@@ -664,7 +869,8 @@ const removeMod = (index: number) => {
                                         :key="key"
                                         :name="key"
                                         :value="value!"
-                                        class="flex justify-between items-center p-3 bg-base-200 rounded-xl hover:bg-base-300 transition-colors duration-200"
+                                        class="bg-base-200 hover:bg-base-300 cursor-pointer"
+                                        @click="toggleResourceFilter(key)"
                                     />
                                 </div>
                             </div>
@@ -686,7 +892,8 @@ const removeMod = (index: number) => {
                                         :key="key"
                                         :name="key"
                                         :value="value!"
-                                        class="flex justify-between items-center p-3 bg-base-200 rounded-xl hover:bg-base-300 transition-colors duration-200"
+                                        class="bg-base-200 hover:bg-base-300 cursor-pointer"
+                                        @click="toggleResourceFilter(key)"
                                     />
                                 </div>
                             </div>
@@ -708,14 +915,89 @@ const removeMod = (index: number) => {
                                         :key="key"
                                         :name="key"
                                         :value="value!"
-                                        class="flex justify-between items-center p-3 bg-base-200 rounded-xl hover:bg-base-300 transition-colors duration-200"
+                                        class="bg-base-200 hover:bg-base-300 cursor-pointer"
+                                        @click="toggleResourceFilter(key)"
                                     />
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
+                <div v-else class="loading loading-spinner"></div>
             </div>
         </ScrollArea>
     </div>
+
+    <!-- 批量添加魔之楔弹窗 -->
+    <DialogModel v-model="isBatchAddModalOpen" class="w-[80vw] max-w-200">
+        <div class="w-full max-w-4xl">
+            <h2 class="text-2xl font-bold mb-4">批量添加魔之楔</h2>
+            <p class="mb-4">选择要添加的魔之楔，然后点击确认添加</p>
+
+            <!-- 筛选和搜索 -->
+            <div class="p-4 pb-0 flex flex-wrap items-center gap-2 mb-3 bg-base-100 rounded-lg">
+                <div class="ml-auto flex items-center gap-4">
+                    <label class="w-40 input input-sm">
+                        <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="m21 21-4.3-4.3" />
+                            </g>
+                        </svg>
+                        <input v-model="modSearchQuery" type="search" class="grow" placeholder="搜索魔之楔..." />
+                    </label>
+                    <div
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'btn-disabled': !filteredMods.length }"
+                        @click="handleSelectAllModsForBatch"
+                    >
+                        {{ selectedModsForBatch.size === filteredMods.length ? "取消全选" : "全选" }}
+                    </div>
+                    <div v-for="color in ['金', '紫', '蓝', '绿', '白'] as const" :key="color" class="label text-xs">
+                        {{ color }}
+                        <input
+                            :checked="enableMods[color]"
+                            type="checkbox"
+                            class="toggle toggle-secondary"
+                            @change="enableMods[color] = ($event.target! as any).checked"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <!-- MOD列表 -->
+            <div class="min-h-80 w-full pb-4 max-h-[60vh] overflow-auto">
+                <div
+                    v-if="(['金', '紫', '蓝', '绿', '白'] as const).some(color => enableMods[color])"
+                    class="p-4 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4"
+                >
+                    <div
+                        v-for="(mod, index) in filteredMods"
+                        :key="index"
+                        class="relative cursor-pointer transition-all duration-200 hover:scale-105"
+                    >
+                        <ModItem
+                            :mod="mod"
+                            :selected="selectedModsForBatch.has(mod.id)"
+                            :count="selectedModsForBatch.get(mod.id)?.count || 1"
+                            :index="index"
+                            control
+                            nolv
+                            noremove
+                            @click="toggleSelectModForBatch(mod.id)"
+                            @count-change="updateModCountForBatch(mod.id, $event)"
+                        />
+                    </div>
+                </div>
+                <div v-else class="p-4 flex w-full h-72 justify-center items-center text-gray-500">请选择要显示的魔之楔品质</div>
+            </div>
+        </div>
+
+        <template #action>
+            <div class="flex justify-end gap-2">
+                <button class="btn btn-secondary" @click="isBatchAddModalOpen = false">取消</button>
+                <button class="btn btn-primary" @click="handleBatchAddMods">确认添加 ({{ selectedModsForBatch.size }})</button>
+            </div>
+        </template>
+    </DialogModel>
 </template>

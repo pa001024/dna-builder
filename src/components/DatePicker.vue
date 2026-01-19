@@ -28,7 +28,7 @@ import {
         <DatePickerRoot id="birthday" :is-date-unavailable="date => date.day === 19">
             <DatePickerField
                 v-slot="{ segments }"
-                class="w-36 flex select-none bg-white items-center rounded-lg shadow-sm text-center justify-between text-green10 border p-1 data-[invalid]:border-red-500"
+                class="w-36 flex select-none bg-white items-center rounded-lg shadow-sm text-center justify-between text-green-900 border p-1 data-invalid:border-red-500"
             >
                 <div class="flex items-center">
                     <template v-for="item in segments" :key="item.part">
@@ -38,7 +38,7 @@ import {
                         <DatePickerInput
                             v-else
                             :part="item.part"
-                            class="rounded p-0.5 focus:outline-none focus:shadow-[0_0_0_2px] focus:shadow-black data-[placeholder]:text-green9"
+                            class="rounded p-0.5 focus:outline-none focus:shadow-[0_0_0_2px] focus:shadow-black data-placeholder:text-green-900"
                         >
                             {{ item.value }}
                         </DatePickerInput>
@@ -78,7 +78,7 @@ import {
                         >
                             <DatePickerGridHead>
                                 <DatePickerGridRow class="mb-1 flex w-full justify-between">
-                                    <DatePickerHeadCell v-for="day in weekDays" :key="day" class="w-8 rounded-md text-xs text-green8">
+                                    <DatePickerHeadCell v-for="day in weekDays" :key="day" class="w-8 rounded-md text-xs text-green-800">
                                         {{ day }}
                                     </DatePickerHeadCell>
                                 </DatePickerGridRow>
@@ -89,7 +89,7 @@ import {
                                         <DatePickerCellTrigger
                                             :day="weekDate"
                                             :month="month.value"
-                                            class="relative flex items-center justify-center whitespace-nowrap rounded-[9px] border border-transparent bg-transparent text-sm font-normal text-black w-8 h-8 outline-none focus:shadow-[0_0_0_2px] focus:shadow-black hover:border-black data-[selected]:bg-black data-[selected]:font-medium data-[outside-view]:text-black/30 data-[selected]:text-white data-[unavailable]:pointer-events-none data-[unavailable]:text-black/30 data-[unavailable]:line-through before:absolute before:top-[5px] before:hidden before:rounded-full before:w-1 before:h-1 before:bg-white data-[today]:before:block data-[today]:before:bg-green9 data-[selected]:before:bg-white"
+                                            class="relative flex items-center justify-center whitespace-nowrap rounded-[9px] border border-transparent bg-transparent text-sm font-normal text-black w-8 h-8 outline-none focus:shadow-[0_0_0_2px] focus:shadow-black hover:border-black data-selected:bg-black data-selected:font-medium data-outside-view:text-black/30 data-selected:text-white data-unavailable:pointer-events-none data-unavailable:text-black/30 data-unavailable:line-through before:absolute before:top-1.25 before:hidden before:rounded-full before:w-1 before:h-1 before:bg-white data-today:before:block data-today:before:bg-green-900 data-selected:before:bg-white"
                                         />
                                     </DatePickerCell>
                                 </DatePickerGridRow>

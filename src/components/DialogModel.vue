@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const show = defineModel<boolean>()
+defineOptions({ inheritAttrs: false })
 const emit = defineEmits<{
     submit: []
 }>()
@@ -11,7 +12,7 @@ function submit() {
 
 <template>
     <dialog class="modal" :class="{ 'modal-open': show }">
-        <div class="modal-box">
+        <div class="modal-box" v-bind="$attrs">
             <slot></slot>
             <div class="modal-action">
                 <form class="flex justify-end gap-2" method="dialog">
