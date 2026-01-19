@@ -675,7 +675,7 @@ async function shareCharBuild() {
 ;(globalThis as any).__chapterCounter = 1
 
 let roleCache: DNARoleShowBean | null = null
-async function syncModFromGame(id: number, isWeapon: boolean) {
+async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boolean = false) {
     const dna = await setting.getDNAAPI()
     if (!dna) {
         ui.showErrorMessage("请先登录")
@@ -704,7 +704,7 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
         {} as Record<number, DNAWeaponBean>
     )
 
-    if (isWeapon) {
+    if (isWeapon || isConWeapon) {
         if (!weapons[id]) {
             ui.showErrorMessage("不可用的武器")
             return
@@ -744,13 +744,14 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
         charSettings.value.charMods = char.data.charDetail.modes
             .map(m => {
                 try {
-                    const mod = new LeveledMod(+m.id, inv.getModLv(+m.id))
+                    const mod = new LeveledMod(+m.id, m.level)
                     return [+m.id, mod.等级] as [number, number]
                 } catch {
                     return null
                 }
             })
             .slice(0, 8)
+        charSettings.value.auraMod = +char.data.charDetail.modes[8].id
     }
     localStorage.setItem(`build.${selectedChar.value}`, JSON.stringify(charSettings.value))
 }
@@ -1321,6 +1322,7 @@ async function syncModFromGame(id: number, isWeapon: boolean) {
                                 @select-mod="selectMod('同律', $event[0], $event[1], $event[2])"
                                 @level-change="charSettings.skillWeaponMods[$event[0]]![1] = $event[1]"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '同律')"
+                                @sync="syncModFromGame(charBuild.char.id, false, true)"
                             />
                         </div>
                     </CollapsibleSection>

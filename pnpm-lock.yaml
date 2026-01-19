@@ -72,11 +72,14 @@ importers:
         specifier: ^4.2.1
         version: 4.2.1
       dna-api:
-        specifier: ^0.3.10
-        version: 0.3.10
+        specifier: ^0.3.16
+        version: 0.3.16
       dompurify:
         specifier: ^3.3.1
         version: 3.3.1
+      echarts:
+        specifier: ^6.0.0
+        version: 6.0.0
       glob:
         specifier: ^13.0.0
         version: 13.0.0
@@ -2249,8 +2252,8 @@ packages:
   dexie@4.2.1:
     resolution: {integrity: sha512-Ckej0NS6jxQ4Po3OrSQBFddayRhTCic2DoCAG5zacOfOVB9P2Q5Xc5uL/nVa7ZVs+HdMnvUPzLFCB/JwpB6Csg==}
 
-  dna-api@0.3.10:
-    resolution: {integrity: sha512-DES8Pbp+GXm8fyLWj4aIWyI5/j35qeRF4AKOQKd535S82ZiLf3JI2vBtSfv9dXqMSXhI8WBx/jBuFqWbW1GVIQ==}
+  dna-api@0.3.16:
+    resolution: {integrity: sha512-IJv1T+Y458ZzWHYSlk9ScdyXwTLVVTJiBbAH1B8685hwvfYYUkmqs2XI+j7fDFZwE7yUKXVkEJlsgj/ZxyIW1g==}
 
   dompurify@3.3.1:
     resolution: {integrity: sha512-qkdCKzLNtrgPFP1Vo+98FRzJnBRGe4ffyCea9IwHB1fyxPOeNTHpLKYGd4Uk9xvNoH0ZoOjwZxNptyMwqrId1Q==}
@@ -2261,6 +2264,9 @@ packages:
 
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
+
+  echarts@6.0.0:
+    resolution: {integrity: sha512-Tte/grDQRiETQP4xz3iZWSvoHrkCQtwqd6hs+mifXcjrCuo2iKWbajFObuLJVBlDIJlOzgQPd1hsaKt/3+OMkQ==}
 
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
@@ -3755,6 +3761,9 @@ packages:
     peerDependencies:
       typescript: '>=4.8.4'
 
+  tslib@2.3.0:
+    resolution: {integrity: sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==}
+
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
@@ -4148,6 +4157,9 @@ packages:
 
   zod@4.2.1:
     resolution: {integrity: sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw==}
+
+  zrender@6.0.0:
+    resolution: {integrity: sha512-41dFXEEXuJpNecuUQq6JlbybmnHaqqpGlbH1yxnA5V9MMP4SbohSVZsJIwz+zdjQXSSlR1Vc34EgH1zxyTDvhg==}
 
 snapshots:
 
@@ -6239,7 +6251,7 @@ snapshots:
 
   dexie@4.2.1: {}
 
-  dna-api@0.3.10:
+  dna-api@0.3.16:
     dependencies:
       node-forge: 1.3.3
 
@@ -6254,6 +6266,11 @@ snapshots:
       gopd: 1.2.0
 
   eastasianwidth@0.2.0: {}
+
+  echarts@6.0.0:
+    dependencies:
+      tslib: 2.3.0
+      zrender: 6.0.0
 
   ee-first@1.1.1: {}
 
@@ -7819,6 +7836,8 @@ snapshots:
     dependencies:
       typescript: 5.9.3
 
+  tslib@2.3.0: {}
+
   tslib@2.8.1: {}
 
   type-check@0.4.0:
@@ -8280,3 +8299,7 @@ snapshots:
       zod: 4.2.1
 
   zod@4.2.1: {}
+
+  zrender@6.0.0:
+    dependencies:
+      tslib: 2.3.0

@@ -684,6 +684,8 @@ export interface DNACharDetailBean {
     attribute: DNAAttributeBean
     charId: number
     charName: string
+    conWeaponEid?: string
+    conWeaponId?: number
     currentVolume: string
     elementIcon: string
     elementName: string
@@ -1569,6 +1571,7 @@ export interface DNAAttributeBean {
 export interface DNAModesBean {
     icon: string
     id: string
+    level: number
     name: string
     quality: number
 }

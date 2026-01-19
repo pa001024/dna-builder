@@ -19,6 +19,7 @@ const announcementRef = ref()
 const gameInfoRef = ref()
 const forumRef = ref()
 const signCalendarRef = ref()
+const propFlowRef = ref()
 
 onMounted(async () => {
     const t = await setting.getDNAAPI()
@@ -48,6 +49,8 @@ const lastUpdateTime = computed(() => {
         return forumRef.value.lastUpdateTime
     } else if (activeTab.value === "签到" && signCalendarRef.value) {
         return signCalendarRef.value.lastUpdateTime
+    } else if (activeTab.value === "流水查询" && propFlowRef.value) {
+        return propFlowRef.value.lastUpdateTime
     }
     return 0
 })
@@ -61,6 +64,8 @@ function handleRefreshAll() {
         forumRef.value.loadData(true)
     } else if (activeTab.value === "签到" && signCalendarRef.value) {
         signCalendarRef.value.loadData(true)
+    } else if (activeTab.value === "流水查询" && propFlowRef.value) {
+        propFlowRef.value.loadData(true)
     }
 }
 </script>
@@ -68,11 +73,12 @@ function handleRefreshAll() {
     <div class="w-full h-full flex flex-col">
         <div class="flex-none flex justify-between items-center p-4 bg-base-100 border-b border-base-200">
             <div class="tabs tabs-border gap-2">
-                <div class="tab" :class="{ 'tab-active': activeTab === '公告' }" @click="activeTab = '公告'">公告</div>
-                <div class="tab" :class="{ 'tab-active': activeTab === '游戏信息' }" @click="activeTab = '游戏信息'">游戏信息</div>
-                <div class="tab" :class="{ 'tab-active': activeTab === '论坛' }" @click="activeTab = '论坛'">论坛</div>
-                <div class="tab" :class="{ 'tab-active': activeTab === '签到' }" @click="activeTab = '签到'">签到</div>
-            </div>
+                    <div class="tab" :class="{ 'tab-active': activeTab === '公告' }" @click="activeTab = '公告'">公告</div>
+                    <div class="tab" :class="{ 'tab-active': activeTab === '游戏信息' }" @click="activeTab = '游戏信息'">游戏信息</div>
+                    <div class="tab" :class="{ 'tab-active': activeTab === '论坛' }" @click="activeTab = '论坛'">论坛</div>
+                    <div class="tab" :class="{ 'tab-active': activeTab === '签到' }" @click="activeTab = '签到'">签到</div>
+                    <div class="tab" :class="{ 'tab-active': activeTab === '流水查询' }" @click="activeTab = '流水查询'">流水查询</div>
+                </div>
             <RouterLink to="/dna/mine" class="flex items-center">
                 <img :src="mine?.headUrl" alt="User Head" class="w-8 h-8 rounded-full mr-2" />
                 <span>
@@ -93,6 +99,7 @@ function handleRefreshAll() {
             <DNAGameInfo v-if="activeTab === '游戏信息'" ref="gameInfoRef" nobtn />
             <DNAForum v-if="activeTab === '论坛'" ref="forumRef" nobtn />
             <DNASignCalendar v-if="activeTab === '签到'" ref="signCalendarRef" nobtn />
+            <DNAPropFlow v-if="activeTab === '流水查询'" ref="propFlowRef" nobtn />
         </ScrollArea>
     </div>
 </template>

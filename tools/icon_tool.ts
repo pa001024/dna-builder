@@ -85,6 +85,45 @@ async function saveIconVueData(data: Record<string, any>): Promise<void> {
 async function addIcon(iconName: string): Promise<void> {
     console.log(`正在添加图标: ${iconName}`)
 
+    // 处理 radix-icons 前缀
+    if (iconName.startsWith("radix-icons:")) {
+        const radixIconName = iconName.replace("radix-icons:", "")
+        const iconVueData = await loadIconVueData()
+
+        // 检查图标是否已存在
+        if (iconVueData[iconName]) {
+            console.log(`⚠️  图标 ${iconName} 已存在于 Icon.vue 中`)
+            return
+        }
+
+        // 从 radix-icons 目录读取 SVG 文件
+        const svgPath = join(__dirname, "radix-icons", `${radixIconName}.svg`)
+
+        try {
+            const svgContent = await readFile(svgPath, "utf-8")
+
+            // 提取 path 数据
+            const pathMatch = svgContent.match(/<path[^>]*d="([^"]*)"[^>]*>/)
+            if (!pathMatch) {
+                console.error(`❌ 无法从 ${svgPath} 中提取 path 数据`)
+                return
+            }
+
+            const pathData = pathMatch[1]
+            // radix-icons 的 size 固定为 15
+            iconVueData[iconName] = [pathData, 15]
+            await saveIconVueData(iconVueData)
+
+            console.log(`✅ 成功添加图标: ${iconName}`)
+        } catch (error) {
+            console.error(`❌ 无法读取 radix-icons 文件: ${svgPath}`)
+            console.error(error)
+            return
+        }
+        return
+    }
+
+    // 原有的 remixicon 处理逻辑
     const remixiconData = await loadRemixiconData()
     const iconData = remixiconData[iconName]
 

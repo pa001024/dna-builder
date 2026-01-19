@@ -28,7 +28,7 @@ const props = withDefaults(
 )
 
 const model = defineModel<any>()
-
+defineOptions({ inheritAttrs: false })
 const emit = defineEmits<{
     open: []
 }>()
@@ -45,12 +45,12 @@ const filteredOptions = computed(() => {
                 <input v-model="model" type="text" />
             </ComboboxInput>
             <ComboboxTrigger>
-                <Icon icon="radix-icons:chevron-down" class="h-4 w-4 text-secondary" />
+                <Icon icon="radix-icons:chevron-down" class="h-4 w-4" />
             </ComboboxTrigger>
         </ComboboxAnchor>
 
         <ComboboxContent
-            class="absolute z-100 w-full mt-2 min-w-40 bg-white overflow-hidden rounded shadow-xl will-change-[opacity,transform] data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade"
+            class="absolute z-100 w-full mt-2 min-w-40 bg-base-100 overflow-hidden rounded shadow-xl will-change-[opacity,transform] data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade"
         >
             <ComboboxViewport class="p-1.25">
                 <ComboboxEmpty class="text-neutral-500 text-xs font-medium text-center py-2">
@@ -59,7 +59,7 @@ const filteredOptions = computed(() => {
                 <ComboboxItem
                     v-for="(option, index) in filteredOptions"
                     :key="index"
-                    class="p-2 pl-7.5 text-sm leading-none text-secondary rounded-sm flex items-center relative select-none data-disabled:text-neutral-400 data-disabled:pointer-events-none data-highlighted:outline-none data-highlighted:bg-secondary data-highlighted:text-base-100"
+                    class="p-2 pl-7.5 text-sm leading-none rounded-sm flex items-center relative select-none data-disabled:text-neutral-400 data-disabled:pointer-events-none data-highlighted:outline-none data-highlighted:bg-base-300"
                     :value="option.value"
                 >
                     <ComboboxItemIndicator class="absolute left-0 w-6.25 inline-flex items-center justify-center">

@@ -5,6 +5,7 @@ export interface RequestOptions {
     sign?: boolean
     file?: File
     tokenSig?: boolean
+    kf?: boolean
     h5?: boolean
     token?: boolean
     refer?: boolean

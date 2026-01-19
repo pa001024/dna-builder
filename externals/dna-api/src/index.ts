@@ -1,27 +1,30 @@
-export { TimeBasicResponse, RespCode } from "./TimeBasicResponse"
 export { DNABaseAPI, DNASubModule } from "./modules/base"
 export { GameAPI } from "./modules/game"
+export * from "./modules/h5"
 export { HomeAPI } from "./modules/home"
 export { ProfileAPI } from "./modules/profile"
 export { SettingAPI } from "./modules/setting"
 export { TrendAPI } from "./modules/trend"
+export * from "./modules/types"
 export { UserAPI } from "./modules/user"
 export { UserGrowingAPI } from "./modules/usergrowing"
-export * from "./modules/h5"
-export * from "./modules/types"
-export * from "./type-generated"
 export * from "./modules/utils"
+export { RespCode, TimeBasicResponse } from "./TimeBasicResponse"
+export * from "./type-generated"
 
 import { DNABaseAPI } from "./modules/base"
 import { GameAPI } from "./modules/game"
+import { H5API } from "./modules/h5"
 import { HomeAPI } from "./modules/home"
+import { KFAPI } from "./modules/kf"
 import { ProfileAPI } from "./modules/profile"
 import { SettingAPI } from "./modules/setting"
 import { TrendAPI } from "./modules/trend"
+import { DNA_GAME_ID } from "./modules/types"
 import { UserAPI } from "./modules/user"
 import { UserGrowingAPI } from "./modules/usergrowing"
-import { H5API } from "./modules/h5"
-import { DNA_GAME_ID } from "./modules/types"
+
+export * from "./modules/kf"
 
 /**
  * DNA API类，用于与DNA游戏服务器交互
@@ -33,15 +36,21 @@ export class DNAAPI extends DNABaseAPI {
     setting: SettingAPI
     trend: TrendAPI
     user: UserAPI
+    kf: KFAPI
     userGrowing: UserGrowingAPI
     h5: H5API
 
-    constructor({
-        dev_code = "",
-        token = "",
-        ...options
-    }: { dev_code?: string; token?: string; fetchFn?: typeof fetch; is_h5?: boolean; rsa_public_key?: string } = {}) {
-        super(dev_code, token, options)
+    constructor(
+        options: {
+            dev_code?: string
+            token?: string
+            kf_token?: string
+            fetchFn?: typeof fetch
+            is_h5?: boolean
+            rsa_public_key?: string
+        } = {}
+    ) {
+        super(options)
 
         this.game = new GameAPI(this)
         this.home = new HomeAPI(this)
@@ -51,6 +60,7 @@ export class DNAAPI extends DNABaseAPI {
         this.user = new UserAPI(this)
         this.userGrowing = new UserGrowingAPI(this)
         this.h5 = new H5API(this)
+        this.kf = new KFAPI(this)
     }
 
     /**

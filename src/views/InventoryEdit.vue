@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // 引入必要的依赖
 import { computed, ref } from "vue"
+import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { copyText, pasteText } from "@/util"
 import { LeveledMod, LeveledWeapon, modData, weaponData } from "../data"
@@ -192,13 +193,52 @@ async function handleImport() {
         ui.showErrorMessage("导入失败")
     }
 }
+
+async function syncInventory() {
+    try {
+        const setting = useSettingStore()
+        const api = await setting.getDNAAPI()
+        if (!api) {
+            ui.showErrorMessage("请先登录皎皎角账号")
+            return
+        }
+        const res = await api?.defaultRoleForTool()
+        if (!res.is_success) {
+            ui.showErrorMessage("库存同步失败")
+            return
+        }
+        const roleInfo = res.data
+        if (!roleInfo?.roleInfo.roleShow.closeWeapons || !roleInfo.roleInfo.roleShow.langRangeWeapons) {
+            ui.showErrorMessage("无库存, 请先到官方APP绑定角色")
+            return
+        }
+        inv.meleeWeapons = roleInfo.roleInfo.roleShow.closeWeapons.reduce(
+            (acc, cur) => {
+                if (cur.unLocked) acc[cur.weaponId] = cur.skillLevel
+                return acc
+            },
+            {} as Record<string, number>
+        )
+        inv.rangedWeapons = roleInfo.roleInfo.roleShow.langRangeWeapons.reduce(
+            (acc, cur) => {
+                if (cur.unLocked) acc[cur.weaponId] = cur.skillLevel
+                return acc
+            },
+            {} as Record<string, number>
+        )
+        ui.showSuccessMessage("库存同步成功")
+    } catch (e) {
+        ui.showErrorMessage("库存同步失败:", e)
+    }
+}
 </script>
 <template>
     <div class="h-full overflow-hidden overflow-y-auto">
         <div class="flex h-full flex-col p-4">
             <div class="flex justify-end gap-2 mb-4">
-                <div class="btn btn-sm btn-primary" @click="handleImport">导入</div>
-                <div class="btn btn-sm btn-primary" @click="handleExport">导出</div>
+                <div class="btn btn-sm btn-primary" @click="syncInventory">同步游戏</div>
+                <div class="btn btn-sm btn-primary" @click="handleImport">导入JSON</div>
+                <div class="btn btn-sm btn-primary" @click="handleExport">复制JSON</div>
             </div>
             <div class="flex-1 bg-base-300 rounded-xl shadow-lg mb-6">
                 <div class="p-4 pb-0 flex flex-wrap items-center gap-2 mb-3">
