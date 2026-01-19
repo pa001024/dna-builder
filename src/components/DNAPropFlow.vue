@@ -214,11 +214,11 @@ async function savePropFlowToDB(data: DNAPropInfo[]) {
     if (!data || data.length === 0) return
 
     try {
-        // 第一步：按时间和道具名称分组，合并同一时间、同一道具的多条记录
+        // 第一步：按时间、道具名称和remark分组，合并同一时间、同一道具、同一remark的多条记录
         const groupedData = new Map<string, { item: DNAPropInfo; totalChange: number }>()
 
         for (const item of data) {
-            const key = `${item.time}-${item.prop_name}`
+            const key = `${item.time}-${item.prop_name}-${item.remark}`
             const changeValue = parseFloat(item.change) || 0
 
             if (groupedData.has(key)) {
@@ -246,11 +246,11 @@ async function savePropFlowToDB(data: DNAPropInfo[]) {
             .where("time")
             .anyOf(processedData.map(item => item.time))
             .toArray()
-        const existingKeys = new Set(existingRecords.map(record => `${record.time}-${record.prop_name}`))
+        const existingKeys = new Set(existingRecords.map(record => `${record.time}-${record.prop_name}-${record.remark}`))
 
         // 第四步：过滤出需要插入的新记录
         const newRecords = processedData.filter(item => {
-            const key = `${item.time}-${item.prop_name}`
+            const key = `${item.time}-${item.prop_name}-${item.remark}`
             return !existingKeys.has(key)
         })
 
@@ -526,8 +526,8 @@ function renderChart() {
         },
     }
 
-    // 渲染图表
-    chartInstance.setOption(option)
+    // 渲染图表 - 使用notMerge: true完全替换所有配置，确保过滤后的数据和图例完全匹配
+    chartInstance.setOption(option, { notMerge: true })
 }
 
 // 添加防抖watch，当资源类型、道具名称、查询日期或时间范围变化时，重新加载数据
