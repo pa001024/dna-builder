@@ -751,7 +751,10 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                 }
             })
             .slice(0, 8)
-        charSettings.value.auraMod = +char.data.charDetail.modes[8].id
+        const modes = char.data.charDetail.modes
+        if (modes.length > 8 && modes[8]?.id) {
+            charSettings.value.auraMod = +modes[8].id
+        }
     }
     localStorage.setItem(`build.${selectedChar.value}`, JSON.stringify(charSettings.value))
 }

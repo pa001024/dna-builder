@@ -100,6 +100,7 @@ export const useSettingStore = defineStore("setting", {
             const user = await this.getCurrentUser()
             if (!user) return
             await db.dnaUsers.update(user.id, { kf_token: token })
+            apiCache = null
         },
     },
 })

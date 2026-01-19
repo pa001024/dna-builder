@@ -76,6 +76,10 @@ onMounted(async () => {
 
 onUnmounted(() => {
     window.removeEventListener("resize", handleChartResize)
+    if (chartInstance) {
+        chartInstance.dispose()
+        chartInstance = null
+    }
 })
 
 /**
@@ -530,18 +534,13 @@ function renderChart() {
     chartInstance.setOption(option, { notMerge: true })
 }
 
+import { debounce } from "lodash-es"
+
+const debouncedLoadDisplayData = debounce(() => {
+    loadDisplayData()
+}, 300)
 // 添加防抖watch，当资源类型、道具名称、查询日期或时间范围变化时，重新加载数据
-watch(
-    [selectedPropCategory, propName, queryDate, selectedTimeRange],
-    () => {
-        // 防抖300ms
-        const timer = setTimeout(() => {
-            loadDisplayData()
-        }, 300)
-        return () => clearTimeout(timer)
-    },
-    { immediate: false }
-)
+watch([selectedPropCategory, propName, queryDate, selectedTimeRange], debouncedLoadDisplayData, { immediate: false })
 
 // 暴露方法给父组件
 defineExpose({

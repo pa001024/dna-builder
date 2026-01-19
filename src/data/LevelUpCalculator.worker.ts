@@ -835,7 +835,7 @@ export class LevelUpCalculator {
                     const runsNeeded = Math.ceil(c / amount)
                     const minutesNeeded = runsNeeded * category.time
                     totalMinutes += minutesNeeded
-                    dungeonTimes[category.id] = [dungeonTimes[category.id]?.[0] || 0 + runsNeeded, [category.name]]
+                    dungeonTimes[category.id] = [(dungeonTimes[category.id]?.[0] || 0) + runsNeeded, [category.name]]
                 }
             }
         }

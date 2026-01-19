@@ -81,7 +81,7 @@ async function syncInventory() {
         )
         ui.showSuccessMessage("库存同步成功")
     } catch (e) {
-        ui.showErrorMessage("库存同步失败:", e)
+        ui.showErrorMessage("库存同步失败:", e instanceof Error ? e.message : String(e))
     }
 }
 

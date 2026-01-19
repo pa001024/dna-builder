@@ -92,7 +92,12 @@ const levelUpCalculator = ref<LevelUpCalculator | null>(null)
 
 // 销毁计算器实例
 onBeforeUnmount(() => {
+    if (debounceTimer) {
+        clearTimeout(debounceTimer)
+        debounceTimer = null
+    }
     levelUpCalculator.value?.destroy()
+    levelUpCalculator.value = null
 })
 
 const filteredMods = computed(() => {
@@ -233,6 +238,8 @@ async function loadRoleInfo() {
 // 结果状态
 const calculating = ref(false)
 const result = ref<ReturnType<typeof LevelUpCalculator.mergeResults> | null>(null)
+// 请求ID，用于解决异步竞态条件
+const latestRequestId = ref(0)
 
 /**
  * 计算结果
@@ -240,6 +247,8 @@ const result = ref<ReturnType<typeof LevelUpCalculator.mergeResults> | null>(nul
 async function calculateResult() {
     if (!levelUpCalculator.value) return
 
+    // 递增请求ID并保存当前请求ID
+    const requestId = ++latestRequestId.value
     calculating.value = true
     try {
         // 获取实际的角色、武器、魔之楔数据
@@ -260,6 +269,11 @@ async function calculateResult() {
             actualMods,
             mods.value.map(item => item.config)
         )
+
+        // 检查是否为最新请求，如果不是则终止
+        if (requestId !== latestRequestId.value) {
+            return
+        }
 
         // 合并所有结果
         const resultsToMerge = [mergeResults.charResult, mergeResults.weaponResult, mergeResults.modResult].filter(
@@ -306,12 +320,23 @@ async function calculateResult() {
         // 重新计算时间，基于过滤后的资源
         mergedResult.timeEstimate = await levelUpCalculator.value.estimateTime(mergedResult.totalCost)
 
+        // 检查是否为最新请求，如果不是则终止
+        if (requestId !== latestRequestId.value) {
+            return
+        }
+
         result.value = mergedResult
     } catch (error) {
         console.error("计算失败:", error)
-        ui.showErrorMessage("计算失败，请重试")
+        // 只有最新请求的错误才显示
+        if (requestId === latestRequestId.value) {
+            ui.showErrorMessage("计算失败，请重试")
+        }
     } finally {
-        calculating.value = false
+        // 只有最新请求才会更新calculating状态
+        if (requestId === latestRequestId.value) {
+            calculating.value = false
+        }
     }
 }
 
@@ -683,8 +708,8 @@ const handleBatchAddMods = () => {
                                                     class="w-40"
                                                     v-model:from="mod.config.currentLevel"
                                                     v-model:to="mod.config.targetLevel"
-                                                    :min="1"
-                                                    :max="80"
+                                                    :min="0"
+                                                    :max="10"
                                                 />
                                             </label>
                                             <label class="flex flex-col gap-1">

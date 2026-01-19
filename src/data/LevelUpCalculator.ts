@@ -512,6 +512,7 @@ export class LevelUpCalculator {
         if (this.worker) {
             this.worker.terminate()
             this.worker = null
+            this.pendingPromises.forEach(promise => promise.reject(new Error("Worker destroyed")))
             this.pendingPromises.clear()
         }
     }
