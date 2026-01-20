@@ -489,12 +489,13 @@ pub fn run() {
             use windows_sys::Win32::Foundation::CloseHandle;
             use windows_sys::Win32::System::Threading::CreateMutexA;
             use windows_sys::Win32::UI::WindowsAndMessaging::*;
-            let h_mutex = unsafe { CreateMutexA(std::ptr::null_mut(), 0, "weys-mutex".as_ptr()) };
+            let h_mutex =
+                unsafe { CreateMutexA(std::ptr::null_mut(), 0, "dna-builder-mutex".as_ptr()) };
             if h_mutex == std::ptr::null_mut() {
                 // Mutex already exists, app is already running.
                 unsafe {
                     CloseHandle(h_mutex);
-                    let hwnd = FindWindowA(std::ptr::null(), "WeYS".as_ptr());
+                    let hwnd = FindWindowA(std::ptr::null(), "DNA Builder".as_ptr());
                     let mut wpm = std::mem::zeroed::<WINDOWPLACEMENT>();
                     if GetWindowPlacement(hwnd, &mut wpm) != 0 {
                         ShowWindow(hwnd, SW_SHOWNORMAL);
