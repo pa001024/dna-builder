@@ -58,6 +58,12 @@ const routes: readonly RouteRecordRaw[] = [
     },
     // more: lazy load
     {
+        name: "dps",
+        path: "/dps",
+        component: () => import("./views/CharDPSView.vue"),
+        beforeEnter: () => setMinSize(600, 600),
+    },
+    {
         name: "levelup",
         path: "/levelup",
         component: () => import("./views/LevelUpCalculatorView.vue"),

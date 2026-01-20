@@ -238,9 +238,17 @@ import { LeveledBuff } from "../data"
 // 获取所有武器和MOD的buffs
 const allItemsWithBuffs = computed(() => {
     // 获取所有武器
-    const allWeapons = [...Object.keys(inv.meleeWeapons), ...Object.keys(inv.rangedWeapons)].map(id => {
-        return new LeveledWeapon(+id)
-    })
+    const allWeapons = [...Object.keys(inv.meleeWeapons), ...Object.keys(inv.rangedWeapons)]
+        .map(id => {
+            try {
+                return new LeveledWeapon(+id)
+            } catch {
+                delete inv.meleeWeapons[+id]
+                delete inv.rangedWeapons[+id]
+                return null
+            }
+        })
+        .filter(item => item !== null) as LeveledWeapon[]
 
     // 获取所有MOD
     const allMods = Object.keys(inv.mods).map(id => {

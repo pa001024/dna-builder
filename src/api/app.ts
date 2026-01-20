@@ -43,6 +43,16 @@ export async function importPic(path: string) {
 export async function exportJsonFile(filePath: string, jsonContent: string) {
     return await invoke<string>("export_json_file", { filePath, jsonContent })
 }
+
+/**
+ * 导出二进制文件到指定路径
+ * @param filePath 文件路径
+ * @param binaryContent 二进制内容
+ * @returns 成功消息
+ */
+export async function exportBinaryFile(filePath: string, binaryContent: Uint8Array) {
+    return await invoke<string>("export_binary_file", { filePath, binaryContent })
+}
 /**
  * 获取本地登录的QQ号
  * @param port The port of the local QQ

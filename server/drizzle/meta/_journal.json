@@ -57,6 +57,13 @@
             "when": 1768581234090,
             "tag": "0007_simple_annihilus",
             "breakpoints": true
+        },
+        {
+            "idx": 8,
+            "version": "6",
+            "when": 1768926052245,
+            "tag": "0008_spotty_brood",
+            "breakpoints": true
         }
     ]
 }

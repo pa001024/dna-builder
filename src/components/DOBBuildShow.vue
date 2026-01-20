@@ -21,6 +21,7 @@ const loading = ref(false)
 const loadingBuild = ref<string | null>(null)
 const builds = ref<Build[]>([])
 const totalCount = ref(0)
+const LIMIT = 10
 
 // 编辑弹窗
 const edit_model_show = ref(false)
@@ -44,12 +45,15 @@ function formatDate(dateString: string): string {
 async function fetchBuilds(offset = 0) {
     loading.value = true
     try {
-        const result = await buildsWithCountQuery({
-            limit: 20,
-            offset,
-            search: searchKeyword.value || undefined,
-            charId: props.charId,
-        })
+        const result = await buildsWithCountQuery(
+            {
+                limit: LIMIT,
+                offset,
+                search: searchKeyword.value || undefined,
+                charId: props.charId,
+            },
+            { requestPolicy: "cache-and-network" }
+        )
 
         if (result) {
             builds.value = result.builds
@@ -71,7 +75,7 @@ function handleSearch() {
 async function useBuild(buildId: string) {
     loadingBuild.value = buildId
     try {
-        const result = await buildQuery({ id: buildId })
+        const result = await buildQuery({ id: buildId }, { requestPolicy: "network-only" })
 
         if (result?.charSettings) {
             const loadedSettings = JSON.parse(result.charSettings)
@@ -184,12 +188,15 @@ async function loadMore() {
         const offset = builds.value.length
         loading.value = true
         try {
-            const result = await buildsWithCountQuery({
-                limit: 20,
-                offset,
-                search: searchKeyword.value || undefined,
-                charId: props.charId,
-            })
+            const result = await buildsWithCountQuery(
+                {
+                    limit: LIMIT,
+                    offset,
+                    search: searchKeyword.value || undefined,
+                    charId: props.charId,
+                },
+                { requestPolicy: "cache-and-network" }
+            )
 
             if (result) {
                 builds.value.push(...result.builds)
@@ -326,7 +333,7 @@ defineExpose({
             <!-- 加载更多 -->
             <div class="flex justify-center p-4">
                 <button
-                    v-if="builds.length >= 20 && builds.length < totalCount"
+                    v-if="builds.length >= LIMIT && builds.length < totalCount"
                     class="btn btn-sm"
                     :class="{ 'btn-disabled': loading }"
                     @click="loadMore"

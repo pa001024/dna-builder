@@ -442,6 +442,31 @@ async fn export_json_file(file_path: String, json_content: String) -> Result<Str
     Ok(format!("Successfully exported JSON to {}", file_path))
 }
 
+/// 导出二进制文件到指定路径
+#[tauri::command]
+async fn export_binary_file(file_path: String, binary_content: Vec<u8>) -> Result<String, String> {
+    // 创建文件路径
+    let path = Path::new(&file_path);
+
+    // 确保父目录存在
+    if let Some(parent) = path.parent() {
+        if !parent.exists() {
+            fs::create_dir_all(parent)
+                .map_err(|e| format!("Failed to create parent directory: {}", e))?;
+        }
+    }
+
+    // 写入二进制内容到文件
+    let mut file = File::create(path).map_err(|e| format!("Failed to create file: {}", e))?;
+    file.write_all(&binary_content)
+        .map_err(|e| format!("Failed to write binary content: {}", e))?;
+
+    Ok(format!(
+        "Successfully exported binary file to {}",
+        file_path
+    ))
+}
+
 #[tauri::command]
 fn get_os_version() -> String {
     use sysinfo::System;
@@ -621,7 +646,8 @@ pub fn run() {
         import_pic,
         fetch,
         get_local_qq,
-        export_json_file
+        export_json_file,
+        export_binary_file
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

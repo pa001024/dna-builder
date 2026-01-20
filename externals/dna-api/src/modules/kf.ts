@@ -213,7 +213,14 @@ export class KFAPI extends DNASubModule {
      * @param server_id 区服ID
      * @access 访问限制 1分钟一次
      */
-    async queryFlow(date: string, name: string, role: string, category_id: string = "Resource", server_id: string | number = 29046) {
+    async queryFlow(
+        date: string,
+        name: string,
+        role: string,
+        category_id: string = "Resource",
+        next_cursor?: string,
+        server_id: string | number = 29046
+    ) {
         return this._dna_request_kf<PropInfo[]>("/v1/frontend/selfService/queryFlow", {
             ...this.base_param,
             date,
@@ -221,6 +228,7 @@ export class KFAPI extends DNASubModule {
             role,
             server_id,
             category_id,
+            next_cursor,
         })
     }
     //#endregion

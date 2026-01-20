@@ -1,6 +1,7 @@
 import { type FieldNode, type GraphQLResolveInfo, Kind } from "graphql"
 import { resolvers as adminResolvers, typeDefs as adminSchema } from "./admin"
 import { resolvers as buildResolvers, typeDefs as buildSchema } from "./build"
+import { resolvers as dpsResolvers, typeDefs as dpsSchema } from "./dps"
 import { resolvers as guideResolvers, typeDefs as guideSchema } from "./guide"
 import { resolvers as messageResolvers, typeDefs as messageSchema } from "./message"
 import { resolvers as missionsIngameResolvers, typeDefs as missionsIngameSchema } from "./missionsIngame"
@@ -24,6 +25,7 @@ export function schemaWith(ctx: any) {
         todoSchema,
         buildSchema,
         timelineSchema,
+        dpsSchema,
     ]
     const resolvers = mergeResolvers(
         userResolvers,
@@ -36,7 +38,8 @@ export function schemaWith(ctx: any) {
         adminResolvers,
         todoResolvers,
         buildResolvers,
-        timelineResolvers
+        timelineResolvers,
+        dpsResolvers
     )
 
     function mergeResolvers(...items: any[]) {

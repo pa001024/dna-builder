@@ -486,6 +486,11 @@ export const buildLikes = sqliteTable(
     ]
 )
 
+export const buildLikesRelations = relations(buildLikes, ({ one }) => ({
+    build: one(builds, { fields: [buildLikes.buildId], references: [builds.id] }),
+    user: one(users, { fields: [buildLikes.userId], references: [users.id] }),
+}))
+
 /** 时间线 */
 export const timelines = sqliteTable(
     "timelines",
@@ -532,7 +537,32 @@ export const timelineLikes = sqliteTable(
     ]
 )
 
-export const buildLikesRelations = relations(buildLikes, ({ one }) => ({
-    build: one(builds, { fields: [buildLikes.buildId], references: [builds.id] }),
-    user: one(users, { fields: [buildLikes.userId], references: [users.id] }),
+/** DPS数据 */
+export const dps = sqliteTable(
+    "dps",
+    {
+        id: text("id").$default(id).primaryKey(),
+        charId: integer("char_id").notNull(),
+        buildId: text("build_id").references(() => builds.id, { onDelete: "cascade" }),
+        timelineId: text("timeline_id").references(() => timelines.id, { onDelete: "cascade" }),
+        dpsValue: integer("dps_value").notNull(),
+        details: text("details"),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        createdAt: text("created_at").$default(now),
+        updateAt: text("update_at").$onUpdate(now),
+    },
+    dps => [
+        index("dps_char_id_idx").on(dps.charId),
+        index("dps_build_id_idx").on(dps.buildId),
+        index("dps_timeline_id_idx").on(dps.timelineId),
+        index("dps_dps_value_idx").on(dps.dpsValue),
+    ]
+)
+
+export const dpsRelations = relations(dps, ({ one }) => ({
+    user: one(users, { fields: [dps.userId], references: [users.id] }),
+    build: one(builds, { fields: [dps.buildId], references: [builds.id] }),
+    timeline: one(timelines, { fields: [dps.timelineId], references: [timelines.id] }),
 }))

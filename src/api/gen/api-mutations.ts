@@ -462,6 +462,28 @@ export const pinGuideMutation = typedMutation<Types.Guide, { id: string; pinned:
     }
 `)
 
+export const createDPSMutation = typedMutation<Types.DPS, { input: Types.DPSInput }>(/* GraphQL */ `
+    mutation ($input: DPSInput!) {
+        createDPS(input: $input) {
+            id
+        }
+    }
+`)
+
+export const updateDPSMutation = typedMutation<Types.DPS, { id: string; input: Types.DPSInput }>(/* GraphQL */ `
+    mutation ($id: String!, $input: DPSInput!) {
+        updateDPS(id: $id, input: $input) {
+            id
+        }
+    }
+`)
+
+export const deleteDPSMutation = typedMutation<boolean, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        deleteDPS(id: $id)
+    }
+`)
+
 export const createBuildMutation = typedMutation<Types.Build, { input: Types.BuildInput }>(/* GraphQL */ `
     mutation ($input: BuildInput!) {
         createBuild(input: $input) {

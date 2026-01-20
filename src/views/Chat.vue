@@ -93,7 +93,7 @@ onBeforeMount(() => {
                                 </div>
                                 <div class="whitespace-nowrap flex-1 overflow-hidden text-ellipsis text-sm">{{ r.name }}</div>
                                 <div class="text-xs text-base-content/70 group-[.active]:text-base-100">
-                                    {{ toLocaleTimeString(r.lastMsg?.createdAt || r.updateAt) }}
+                                    {{ toLocaleTimeString(r.lastMsg?.createdAt || r.updateAt || "") }}
                                 </div>
                             </div>
                             <!-- 最新消息 -->

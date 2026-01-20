@@ -23,13 +23,25 @@ const loading = ref(true)
 const lastUpdateTime = useLocalStorage("dna.propFlow.lastUpdateTime", 0)
 const selectedRole = ref<string>("")
 const selectedPropCategory = ref<string>("Resource")
-const propName = ref("")
+const propName = useLocalStorage("dna.propFlow.propName", "")
 const queryDate = ref(new Date().toISOString().split("T")[0])
 const propFlowList = ref<PropFlow[]>([])
 const isVerified = computed(() => selectedVerifyRole.value?.is_verified || false)
 const lastQueryTime = useLocalStorage("dna.propFlow.lastQueryTime", 0)
 const queryColdDown = computed(() => 1000 * 60 - (ui.timeNow - lastQueryTime.value))
 const chartRef = ref<HTMLElement | null>(null)
+
+// 批量查询相关状态
+const isBatchQuerying = ref(false) // 是否正在批量查询
+const batchQueryStopped = ref(false) // 是否已停止批量查询
+const batchQueryProgress = ref({
+    currentPage: 0, // 当前查询页数
+    currentDate: 0, // 当前查询日期索引
+    totalRecords: 0, // 总记录数
+    totalPages: 0, // 总页数
+    totalDates: 0, // 总日期数
+})
+const queryDates = ref<string[]>([]) // 待查询的日期列表
 
 // 时间范围选择
 const timeRangeOptions = [
@@ -328,12 +340,7 @@ async function queryPropFlow() {
         await checkAndRefreshKFToken()
 
         loading.value = true
-        const res = await api.kf.queryFlow(
-            queryDate.value,
-            propName.value,
-            selectedRole.value,
-            selectedPropCategory.value === "-" ? undefined : selectedPropCategory.value
-        )
+        const res = await api.kf.queryFlow(queryDate.value, propName.value, selectedRole.value, selectedPropCategory.value)
 
         if (res.is_success && res.data) {
             lastUpdateTime.value = ui.timeNow
@@ -352,6 +359,101 @@ async function queryPropFlow() {
     } finally {
         loading.value = false
     }
+}
+
+/**
+ * 生成查询日期列表
+ */
+function generateQueryDates() {
+    const dates: string[] = []
+    const endDate = new Date(queryDate.value)
+    const startDate = new Date(queryDate.value)
+    startDate.setDate(endDate.getDate() - selectedTimeRange.value + 1)
+
+    // 生成从开始日期到结束日期的所有日期字符串
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+        dates.push(d.toISOString().split("T")[0])
+    }
+
+    // 反转日期数组，从后往前查询
+    return dates.reverse()
+}
+
+/**
+ * 批量查询道具流水
+ */
+async function batchQueryPropFlow() {
+    if (!selectedRole.value || !isVerified.value) {
+        ui.showErrorMessage("请先选择并验证角色")
+        return
+    }
+
+    // 初始化批量查询状态
+    isBatchQuerying.value = true
+    batchQueryStopped.value = false
+
+    // 生成待查询的日期列表
+    queryDates.value = generateQueryDates()
+    batchQueryProgress.value = {
+        currentPage: 0,
+        currentDate: 0,
+        totalRecords: 0,
+        totalPages: 0,
+        totalDates: queryDates.value.length,
+    }
+    // 检查并刷新KF Token
+    await checkAndRefreshKFToken()
+
+    try {
+        // 遍历所有日期
+        for (let dateIndex = 0; dateIndex < queryDates.value.length && !batchQueryStopped.value; dateIndex++) {
+            const currentDate = queryDates.value[dateIndex]
+            batchQueryProgress.value.currentDate = dateIndex
+
+            // 检查冷却时间
+            if (queryColdDown.value > 0) {
+                // 等待冷却时间结束
+                await new Promise(resolve => setTimeout(resolve, queryColdDown.value))
+            }
+
+            // 执行查询
+            const res = await api.kf.queryFlow(currentDate, propName.value, selectedRole.value, selectedPropCategory.value)
+
+            lastQueryTime.value = ui.timeNow
+
+            if (res.is_success && res.data) {
+                // 保存到数据库
+                await savePropFlowToDB(res.data)
+                await loadDisplayData()
+
+                // 更新总记录数
+                batchQueryProgress.value.totalRecords += res.data.length
+            } else {
+                ui.showErrorMessage(res.msg || "查询失败")
+                break
+            }
+        }
+
+        // 批量查询完成
+        if (!batchQueryStopped.value) {
+            ui.showSuccessMessage("批量查询完成")
+        }
+    } catch (e) {
+        console.error("批量查询失败", e)
+        ui.showErrorMessage("批量查询失败")
+    } finally {
+        isBatchQuerying.value = false
+        batchQueryStopped.value = false
+    }
+}
+
+/**
+ * 停止批量查询
+ */
+function stopBatchQuery() {
+    isBatchQuerying.value = false
+    batchQueryStopped.value = true
+    ui.showSuccessMessage("批量查询已停止")
 }
 
 /**
@@ -534,13 +636,87 @@ function renderChart() {
     chartInstance.setOption(option, { notMerge: true })
 }
 
+import * as dialog from "@tauri-apps/plugin-dialog"
 import { debounce } from "lodash-es"
+import * as XLSX from "xlsx"
+import { exportBinaryFile } from "@/api/app"
+import { env } from "../env"
 
 const debouncedLoadDisplayData = debounce(() => {
     loadDisplayData()
 }, 300)
 // 添加防抖watch，当资源类型、道具名称、查询日期或时间范围变化时，重新加载数据
 watch([selectedPropCategory, propName, queryDate, selectedTimeRange], debouncedLoadDisplayData, { immediate: false })
+
+/**
+ * 导出数据库所有记录到Excel文件
+ */
+async function exportToExcel() {
+    try {
+        // 获取数据库中所有的流水记录
+        const allRecords = await db.propFlows.toArray()
+
+        // 转换数据格式，将时间戳转换为可读日期
+        const excelData = allRecords.map(record => ({
+            时间: new Date(record.time * 1000).toLocaleString(),
+            道具名称: record.prop_name,
+            分类: record.category_name,
+            数量变化: record.change,
+            备注: record.remark,
+        }))
+
+        // 创建工作簿和工作表
+        const workbook = XLSX.utils.book_new()
+        const worksheet = XLSX.utils.json_to_sheet(excelData)
+
+        // 设置列宽
+        const colWidths = [
+            { wch: 20 }, // 时间列
+            { wch: 20 }, // 道具名称列
+            { wch: 15 }, // 分类列
+            { wch: 15 }, // 数量变化列
+            { wch: 40 }, // 备注列
+        ]
+        worksheet["!cols"] = colWidths
+
+        // 将工作表添加到工作簿
+        XLSX.utils.book_append_sheet(workbook, worksheet, "道具流水记录")
+
+        // 生成Excel文件
+        const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" })
+
+        if (env.isApp) {
+            // 桌面端：使用对话框保存文件
+            const path = await dialog.save({
+                title: "保存道具流水为Excel文件",
+                defaultPath: `道具流水_${new Date().toISOString().split("T")[0]}.xlsx`,
+                filters: [{ name: "Excel 文件", extensions: ["xlsx"] }],
+            })
+
+            if (path) {
+                // 将ArrayBuffer转换为Uint8Array
+                const uint8Array = new Uint8Array(excelBuffer)
+                await exportBinaryFile(path, uint8Array)
+                ui.showSuccessMessage("导出成功")
+            }
+        } else {
+            // 网页端：使用Blob和a标签下载
+            const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement("a")
+            a.href = url
+            a.download = `道具流水_${new Date().toISOString().split("T")[0]}.xlsx`
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            URL.revokeObjectURL(url)
+            ui.showSuccessMessage("导出成功")
+        }
+    } catch (e) {
+        console.error("导出Excel失败", e)
+        ui.showErrorMessage("导出失败")
+    }
+}
 
 // 暴露方法给父组件
 defineExpose({
@@ -569,7 +745,11 @@ defineExpose({
             <!-- 查询表单 -->
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body">
-                    <h3 class="card-title text-xl font-bold">道具流水查询</h3>
+                    <h3 class="card-title text-xl font-bold">
+                        道具流水查询
+
+                        <button class="btn btn-primary btn-sm ml-auto" @click="exportToExcel" :disabled="loading">导出EXCEL</button>
+                    </h3>
 
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
                         <!-- 角色 -->
@@ -617,7 +797,11 @@ defineExpose({
 
                         <!-- 查询按钮 -->
                         <div class="flex items-end">
-                            <button class="btn btn-primary w-full" :disabled="loading || queryColdDown > 0" @click="queryPropFlow()">
+                            <button
+                                class="btn btn-primary w-full"
+                                :disabled="loading || queryColdDown > 0 || isBatchQuerying"
+                                @click="queryPropFlow()"
+                            >
                                 <span v-if="loading">加载中...</span>
                                 <span v-else-if="queryColdDown > 0"> 冷却中 {{ ~~(queryColdDown / 1000) | 0 }} 秒 </span>
                                 <span v-else> 查询流水 </span>
@@ -630,7 +814,6 @@ defineExpose({
                                 <span class="label-text font-medium">道具分类</span>
                             </label>
                             <Select v-model="selectedPropCategory" class="input w-full">
-                                <SelectItem :value="'-'"> 全部 </SelectItem>
                                 <SelectItem v-for="category in propCategories" :key="category.id" :value="category.id">
                                     {{ category.name }}
                                 </SelectItem>
@@ -648,6 +831,26 @@ defineExpose({
                                 class="input-md! input-bordered w-full"
                                 :options="['时之纺线', '皎皎之民的信物'].map(v => ({ label: v, value: v }))"
                             />
+                        </div>
+                        <!-- 批量查询按钮 -->
+                        <div class="flex items-end">
+                            <button
+                                class="btn w-full"
+                                :class="isBatchQuerying ? 'btn-error' : 'btn-primary'"
+                                @click="isBatchQuerying ? stopBatchQuery() : batchQueryPropFlow()"
+                            >
+                                {{ isBatchQuerying ? "停止批量查询" : "开始批量查询" }}
+                            </button>
+                        </div>
+
+                        <!-- 批量查询进度 -->
+                        <div v-if="isBatchQuerying">
+                            <label class="label">
+                                <span class="label-text font-medium">进度显示</span>
+                            </label>
+                            <div class="flex items-center h-full">
+                                已查询 {{ batchQueryProgress.currentDate }} 日 共 {{ batchQueryProgress.totalRecords }} 条记录
+                            </div>
                         </div>
                     </div>
                 </div>
