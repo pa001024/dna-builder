@@ -698,7 +698,7 @@ export class CharBuild {
         let bonus = 0
 
         // 添加角色自带加成
-        if (prefix === "角色" && typeof this.char.加成?.[attribute] === "number") {
+        if (prefix === "角色" || attribute !== "攻击") {
             bonus += this.char.加成?.[attribute] || 0
         }
 
@@ -1976,7 +1976,7 @@ export class CharBuild {
             return changed
         }
         // 最大迭代次数
-        const MAX_ITER = 200
+        const MAX_ITER = 20
         // 最大化MOD直到不再有变化
         for (let index = 0; index < MAX_ITER; index++) {
             if (!next(index + 1)) {

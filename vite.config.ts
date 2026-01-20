@@ -166,7 +166,7 @@ export default defineConfig(async () => ({
                 "**/*.test.ts",
                 "**/mcp_server/**",
                 "**/server/**",
-                "**/externals/**",
+                // "**/externals/**",
                 // ...
             ],
         },

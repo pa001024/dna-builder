@@ -14,12 +14,18 @@ export interface DNACharDetailEntity {
 }
 
 export interface DNAShortNoteEntity {
-    battlePassInfo: DNABattlePassInfo
+    /** 每日任务 */
     currentTaskProgress: number
+    maxDailyTaskProgress: number
+    /** 铸造信息 */
     draftInfo: DNADraftInfo
+    /** 竞逐 */
+    dungeonReward: number
+    dungeonRewardTotal: number
+    /** 周本 */
     hardBossRewardCount: number
     hardBossRewardTotal: number
-    maxDailyTaskProgress: number
+    /** 迷津 */
     rougeLikeRewardCount: number
     rougeLikeRewardTotal: number
 }
@@ -1696,7 +1702,6 @@ export interface DNAInstanceBean {
 
 export interface DNAAbyssInfoBean {
     bestTimeVo1: DNABestTimeVoBean
-    bestTimeVo2: DNABestTimeVoBean
     endTime: number
     operaName: string
     progressName: string
@@ -1710,10 +1715,19 @@ export interface DNARoleShowBean {
     langRangeWeapons: DNAWeaponBean[]
     level: number
     params: DNARoleParamBean[]
+    roleAchv: DNARoleAchv
     roleChars: DNARoleCharsBean[]
     roleId: string
     roleName: string
     rougeLikeInfo: DNARougeLikeInfoBean
+}
+
+/** 成就 */
+export interface DNARoleAchv {
+    bronze: number
+    gold: number
+    silver: number
+    total: number
 }
 
 export interface DNARoleListVoBean {
@@ -1730,10 +1744,10 @@ export interface DNARoleListVoBean {
 export interface DNADraftDoingInfo {
     draftCompleteNum: number
     draftDoingNum: number
-    endTime: number
+    endTime: string
     productId: number
     productName: string
-    startTime: number
+    startTime: string
 }
 
 export interface DNAWeaponAttributeBean {

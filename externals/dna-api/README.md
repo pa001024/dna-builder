@@ -526,7 +526,6 @@ interface RequestOptions {
     method?: "GET" | "POST" // HTTP 方法
     sign?: boolean // 是否签名
     file?: File // 文件
-    tokenSig?: boolean // 是否使用 token 签名
     h5?: boolean // 是否为 H5 请求
     token?: boolean // 是否使用 token
     refer?: boolean // 是否添加 referer

@@ -407,6 +407,24 @@ function applyAutobuild() {
     }
 }
 //#endregion
+//#region 配装分享弹窗
+const share_model_show = ref(false)
+const share_title = ref(``)
+const share_desc = ref(``)
+const buildShow = ref()
+
+function openShareModal() {
+    share_title.value = `${selectedChar.value}构筑`
+    share_desc.value = ``
+    share_model_show.value = true
+}
+
+async function confirmShare() {
+    share_model_show.value = false
+    await shareCharBuild(share_title.value, share_desc.value)
+    buildShow.value.fetchBuilds()
+}
+//#endregion
 //#region 时间线
 const timelines = useTimeline(selectedChar)
 function getTimelineByName(name: string) {
@@ -652,12 +670,13 @@ function applyWeaponSelection() {
 
 const ast_help_model_show = ref(false)
 
-async function shareCharBuild() {
+async function shareCharBuild(title: string, desc: string = "") {
     try {
         const settingsString = JSON.stringify(charSettings.value)
         const result = await createBuildMutation({
             input: {
-                title: `${selectedChar.value}构筑`,
+                title,
+                desc,
                 charId: parseInt(route.params.charId as string),
                 charSettings: settingsString,
             },
@@ -829,6 +848,39 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         </div>
         <div class="modal-backdrop" @click="weapon_select_model_show = false" />
     </dialog>
+
+    <!-- 配装分享弹窗 -->
+    <DialogModel v-model="share_model_show" @submit="confirmShare" class="bg-base-300">
+        <div class="space-y-4">
+            <h3 class="text-xl font-bold">{{ $t("char-build.share_build") }}</h3>
+            <div>
+                <label class="label" for="share-title">
+                    <span class="label-text">{{ $t("char-build.title") }}</span>
+                </label>
+                <input
+                    id="share-title"
+                    v-model="share_title"
+                    type="text"
+                    class="input input-bordered w-full"
+                    :placeholder="$t('char-build.enter_title')"
+                    maxlength="50"
+                />
+            </div>
+            <div>
+                <label class="label" for="share-desc">
+                    <span class="label-text">{{ $t("char-build.description") }}</span>
+                </label>
+                <textarea
+                    id="share-desc"
+                    v-model="share_desc"
+                    class="textarea textarea-bordered w-full"
+                    :placeholder="$t('char-build.enter_description')"
+                    rows="3"
+                    maxlength="200"
+                ></textarea>
+            </div>
+        </div>
+    </DialogModel>
     <div class="h-full flex flex-col relative">
         <!-- 背景图 -->
         <div
@@ -850,7 +902,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         <Icon icon="ri:question-line" class="w-4 h-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.tour") }}</span>
                     </button>
-                    <button class="btn btn-sm btn-ghost flex-1 sm:flex-none" @click="shareCharBuild">
+                    <button class="btn btn-sm btn-ghost flex-1 sm:flex-none" @click="openShareModal">
                         <Icon icon="ri:share-line" class="w-4 h-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.share") }}</span>
                     </button>
@@ -1095,11 +1147,19 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
             <ScrollArea id="char-build-scroll2" class="sm:flex-1 flex-none">
                 <div class="p-2 space-y-4">
                     <!-- 配装分享 -->
-                    <CollapsibleSection :title="$t('配装分享')" :is-open="!collapsedSections.share" @toggle="toggleSection('share')">
-                        <DOBBuildShow :charId="charBuild.char.id" :charName="charBuild.char.名称" />
+                    <CollapsibleSection
+                        :title="$t('char-build.share_build')"
+                        :is-open="!collapsedSections.share"
+                        @toggle="toggleSection('share')"
+                    >
+                        <DOBBuildShow :charId="charBuild.char.id" :charName="charBuild.char.名称" ref="buildShow" />
                     </CollapsibleSection>
                     <!-- 角色详情 -->
-                    <CollapsibleSection :title="$t('角色详情')" :is-open="!collapsedSections.detail" @toggle="toggleSection('detail')">
+                    <CollapsibleSection
+                        :title="$t('dna-role-detail.title')"
+                        :is-open="!collapsedSections.detail"
+                        @toggle="toggleSection('detail')"
+                    >
                         <CharSkillShow :char="charBuild.char" />
                     </CollapsibleSection>
                     <!-- 基本设置卡片 -->
@@ -1122,12 +1182,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                             @change="updateCharBuild"
                                         >
                                             <SelectItem
-                                                v-for="hp in [
-                                                    1,
-                                                    ...Array(20)
-                                                        .keys()
-                                                        .map(i => (i + 1) * 5),
-                                                ]"
+                                                v-for="hp in [1, ...Array.from({ length: 20 }, (_, i) => (i + 1) * 5)]"
                                                 :key="hp"
                                                 :value="hp / 100"
                                             >

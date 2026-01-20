@@ -2780,11 +2780,13 @@
         "damage_per_energy_per_second": "성지당 초당 피해",
         "damage_per_second": "초당 피해",
         "desc": "캐릭터/무기/스킬 빌드",
+        "description": "설명",
         "dynamic_prop": "동적 속성",
         "enemy": "적",
         "enemy_level": "적 레벨",
         "enemy_resistance": "적 저항력",
         "enemy_type": "타입",
+        "enter_description": "설명을 입력해주세요",
         "equipment_preview": "장비 미리보기",
         "export_code": "코드 복사",
         "general_attributes": "종합 속성",
@@ -2807,12 +2809,14 @@
         "refine": "정련",
         "reset_config": "초기화",
         "resonance_gain": "공명 이득",
+        "save": "저장",
         "save_project": "프로젝트 저장",
         "select_character": "캐릭터 선택",
         "select_mod_slot": "MOD 선택 - 슬롯",
         "select_skill_weapon": "스킬/무기 선택",
         "selected_count": "{{count}}개 선택됨",
         "share": "공유하다",
+        "share_build": "빌드 공유",
         "shield": "실드",
         "shot_damage": "탄환 피해",
         "simulator": "시뮬레이션",
@@ -2843,6 +2847,7 @@
         "copy": "복사",
         "deleteRoomConfirm": "방을 삭제하시겠습니까?",
         "deleteRoomFailed": "삭제 실패",
+        "desc": "버그 피드백/소통",
         "edit": "편집",
         "edited": "(수정됨)",
         "follow": "팔로우",
@@ -2871,6 +2876,29 @@
         "unlimited": "무제한",
         "you": "당신"
     },
+    "damageResult": {
+        "critDamage": {
+            "highCritNoTrigger": "고 크리티컬 미발동",
+            "highCritTrigger": "고 크리티컬 발동",
+            "lowCritNoTrigger": "저 크리티컬 미발동",
+            "lowCritTrigger": "저 크리티컬 발동",
+            "title": "크리티컬 대미지"
+        },
+        "error": "오류",
+        "expectedDamage": {
+            "expected": "기대 대미지",
+            "noHpDamage": "HP 대미지 없음",
+            "title": "기대 대미지"
+        },
+        "expectedValues": {
+            "expectedCritNoTrigger": "기대 크리티컬 미발동",
+            "expectedCritTrigger": "기대 크리티컬 발동",
+            "highCritExpectedTrigger": "고 크리티컬 기대 발동",
+            "lowCritExpectedTrigger": "저 크리티컬 기대 발동",
+            "title": "기대값"
+        },
+        "title": "대미지 결과"
+    },
     "database": {
         "abyss_dungeon": "심연 던전",
         "abyss_dungeon_desc": "심연 던전 정보와 버프 확인",
@@ -2879,6 +2907,8 @@
         "draft_desc": "도면 정보와 필요 재료 확인",
         "dungeon": "던전",
         "dungeon_desc": "던전 정보와 보상 드롭 확인",
+        "fish": "낚시",
+        "fish_desc": "낚시터 상세 수익 계산",
         "map": "지도",
         "map_desc": "지도 마커 보기",
         "mod": "모드",
@@ -2890,10 +2920,13 @@
         "rank": "순위 보상",
         "rank_desc": "랭킹 대회 보상 확인",
         "title": "데이터 베이스",
+        "walnut": "호두",
+        "walnut_desc": "호두 확률 정보 보기 및 시뮬레이션 추첨",
         "weapon": "무기",
         "weapon_desc": "무기 정보와 속성 확인"
     },
     "dna-home": {
+        "desc": "게임 정보/출석/게시물 브라우징",
         "title": "교교각"
     },
     "dna-post-detail": {
@@ -2932,6 +2965,19 @@
         "title": "컴포넌트 렌더링 오류"
     },
     "Fire Keeper Ⅰ": "불의 수호자 Ⅰ",
+    "fish-list": {
+        "title": "낚시"
+    },
+    "flow": {
+        "desc": "대미지 계산기 노드 버전",
+        "title": "노드 편집기"
+    },
+    "flowEditor": {
+        "canvas": "캔버스",
+        "nodePalette": "노드 팔레트",
+        "resultPanel": "결과 패널",
+        "title": "노드 편집기"
+    },
     "game-accounts": {
         "desc": "교교각 로그인/체크인/캐릭터 정보 가져오기",
         "title": "교교각"
@@ -3070,10 +3116,12 @@
         "step2": "단계 2",
         "step3": "단계 3",
         "step4": "단계 4",
+        "swipeHint": "스와이프로 전환",
         "timelineStep1": "전투 타임라인 시퀀스 생성",
         "timelineStep2": "스킬 발동 순서와 타이밍 설정",
         "timelineStep3": "전투 과정과 피해 출력 시뮬레이션",
         "title": "도움 센터",
+        "version": "DNA Builder 도움 센터",
         "workflow": "사용 흐름"
     },
     "home": {
@@ -3090,6 +3138,10 @@
     "inventory": {
         "desc": "웨지와 무기 장비 사용자 지정",
         "title": "재고 관리"
+    },
+    "levelup": {
+        "desc": "캐릭터、무기、마법 쐐기 육성 자원 요구 사항 계산",
+        "title": "육성 계산"
     },
     "main": {
         "btn_collapse_menu": "메뉴 접기",
@@ -3144,8 +3196,12 @@
         "onlyOnce": "한 번만",
         "zhouben": "주간 보스"
     },
+    "room": {
+        "remove": "방 제거"
+    },
     "S级蓄力攻击伤害": "S급 차지 공격 대미지",
     "setting": {
+        "account": "계정",
         "ai": "AI 대형 모델 설정",
         "aiApiKey": "API 키",
         "aiApiKeyTip": "지스펙 AI 오픈 플랫폼에서 API 키를 가져오세요",
@@ -3187,6 +3243,7 @@
     },
     "tour": {
         "back": "이전",
+        "char_mods": "캐릭터에 마법 쐐기를 장착하고 속성을 향상시키며 필요에 따라 BUFF와 효과를 추가",
         "char_tabs": "캐릭터, 근접, 원거리 또는 동률 무기를 전환하려면 여기를 클릭하세요",
         "damage_result": "계산된 피해 결과를 여기에 표시",
         "done": "완료",
@@ -3195,7 +3252,8 @@
         "skill_select": "사용할 스킬을 선택하세요",
         "skip": "건너뛰기",
         "target_function": "피해 계산 목표 함수를 설정합니다（예: 피해, DPS 등）",
-        "top_actions": "상단 버튼으로 설정 공유, 자동 구축, 프로젝트 저장 등을 수행하세요"
+        "top_actions": "상단 버튼으로 설정 공유, 자동 구축, 프로젝트 저장 등을 수행하세요",
+        "weapon_select": "여기를 클릭하여 무기 변경/정련 설정"
     },
     "UI_CHAR_SUBTITLE_2102": "UI_CHAR_SUBTITLE_2102",
     "UI_CHAR_SUBTITLE_3202": "UI_CHAR_SUBTITLE_3202",
@@ -3206,6 +3264,9 @@
         "updateErrorMessage": "업데이트 다운로드 또는 설치 중 오류가 발생했습니다. 나중에 다시 시도해 주세요",
         "updateFailed": "업데이트 실패",
         "updating": "업데이트 중..."
+    },
+    "walnut-list": {
+        "title": "호두 목록"
     },
     "weapon-detail": {
         "title": "무기 세부정보"

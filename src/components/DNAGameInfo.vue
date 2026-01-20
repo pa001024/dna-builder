@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
-import { DNAAPI, DNARoleEntity } from "dna-api"
+import { DNAAPI, DNARoleEntity, DNAShortNoteEntity } from "dna-api"
 import { toPng } from "html-to-image"
 import { onMounted, ref } from "vue"
+import { Draft } from "@/data"
+import { modDraftMap, modMap, resourceDraftMap, resourceMap, weaponDraftMap, weaponMap } from "../data/d"
+import { LeveledMod } from "../data/leveled/LeveledMod"
+import { LeveledWeapon } from "../data/leveled/LeveledWeapon"
 import { useInvStore } from "../store/inv"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
@@ -18,6 +22,79 @@ let api: DNAAPI
 
 const loading = ref(true)
 const roleInfo = useLocalStorage<DNARoleEntity>("dna.roleInfo", {} as any)
+const shortNoteInfo = useLocalStorage<DNAShortNoteEntity>("dna.shortNoteInfo", {} as any)
+
+/**
+ * 计算铸造的真实结束时间
+ * @param startTime 开始时间（秒数时间戳）
+ * @param doingNum 进行中数量
+ * @param draft 图纸信息
+ * @returns 结束时间字符串
+ */
+function calculateRealEndTime(startTime: string | number, doingNum: number, draft?: Draft): string {
+    if (!draft) return ""
+
+    try {
+        // 转换startTime为秒数
+        const startSeconds = typeof startTime === "string" ? parseInt(startTime) : startTime
+        if (isNaN(startSeconds)) return ""
+
+        // 计算单个产物的制造时间（秒）
+        const secs = (draft.d || 0) * 60 * doingNum
+        if (secs <= 0) return ""
+
+        // 计算真实结束时间（毫秒）
+        const endTimeMs = (startSeconds + secs) * 1000
+
+        return ui.timeDistanceFutureFix(endTimeMs)
+    } catch (error) {
+        console.error("计算结束时间失败:", error)
+        return ""
+    }
+}
+
+/**
+ * 获取产物图片URL
+ * @param draft 图纸信息
+ * @returns 图片URL
+ */
+function getProductImageUrl(draft?: Draft): string {
+    if (!draft) return "/imgs/webp/T_Head_Empty.webp"
+
+    try {
+        if (draft.t === "Mod") {
+            const mod = modMap.get(draft.p)
+            return LeveledMod.url(mod?.icon)
+        } else if (draft.t === "Weapon") {
+            const weapon = weaponMap.get(draft.p)
+            return LeveledWeapon.url(weapon?.icon)
+        } else if (draft.t === "Resource") {
+            // 参考ResourceCostItem.vue的资源图片处理方式
+            const res = resourceMap.get(draft.n || draft.p)
+            return res?.icon ? `/imgs/res/${res?.icon}.webp` : `/imgs/webp/T_Head_Empty.webp`
+        }
+        return "/imgs/webp/T_Head_Empty.webp"
+    } catch (error) {
+        console.error("获取产物图片失败:", error)
+        return "/imgs/webp/T_Head_Empty.webp"
+    }
+}
+
+/**
+ * 获取图纸信息
+ * @param productId 产物ID
+ * @returns 图纸信息
+ */
+function getDraftInfo(productId: number) {
+    if (modDraftMap.has(productId)) {
+        return modDraftMap.get(productId)
+    } else if (weaponDraftMap.has(productId)) {
+        return weaponDraftMap.get(productId)
+    } else if (resourceDraftMap.has(productId)) {
+        return resourceDraftMap.get(productId)
+    }
+}
+
 const lastUpdateTime = useLocalStorage("dna.gameInfo.lastUpdateTime", 0)
 
 // 截图相关状态
@@ -48,6 +125,14 @@ async function loadData(force = false) {
             roleInfo.value = roleRes.data
         } else {
             ui.showErrorMessage(roleRes.msg || "获取默认角色信息失败")
+        }
+
+        // 获取铸造信息
+        const shortNoteRes = await api.getShortNoteInfo()
+        if (shortNoteRes.is_success && shortNoteRes.data) {
+            shortNoteInfo.value = shortNoteRes.data
+        } else {
+            ui.showErrorMessage(shortNoteRes.msg || "获取额外信息失败")
         }
 
         lastUpdateTime.value = ui.timeNow
@@ -194,6 +279,103 @@ async function generateScreenshot() {
                 </div>
             </div>
 
+            <!-- 铸造信息 -->
+            <div v-if="shortNoteInfo" class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">基本信息</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-base-200 p-3 rounded-lg">
+                            <div class="text-sm font-medium">每日任务</div>
+                            <div class="text-xl font-bold">
+                                {{ shortNoteInfo.currentTaskProgress }} / {{ shortNoteInfo.maxDailyTaskProgress }}
+                            </div>
+                        </div>
+                        <div class="bg-base-200 p-3 rounded-lg">
+                            <div class="text-sm font-medium">迷津奖励</div>
+                            <div class="text-xl font-bold">
+                                {{ shortNoteInfo.rougeLikeRewardCount }} / {{ shortNoteInfo.rougeLikeRewardTotal }}
+                            </div>
+                        </div>
+                        <div class="bg-base-200 p-3 rounded-lg">
+                            <div class="text-sm font-medium">竞逐次数</div>
+                            <div class="text-xl font-bold">{{ shortNoteInfo.dungeonReward }} / {{ shortNoteInfo.dungeonRewardTotal }}</div>
+                        </div>
+                        <div class="bg-base-200 p-3 rounded-lg">
+                            <div class="text-sm font-medium">周本次数</div>
+                            <div class="text-xl font-bold">
+                                {{ shortNoteInfo.hardBossRewardCount }} / {{ shortNoteInfo.hardBossRewardTotal }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 锻造信息 -->
+                    <div v-if="shortNoteInfo.draftInfo" class="mt-6">
+                        <!-- 锻造列表 -->
+                        <div class="space-y-3">
+                            <div class="text-lg font-semibold mb-3">
+                                锻造 ({{ shortNoteInfo.draftInfo.draftDoingNum }}/{{ shortNoteInfo.draftInfo.draftMaxNum }})
+                            </div>
+                            <div
+                                v-if="shortNoteInfo.draftInfo.draftDoingInfo && shortNoteInfo.draftInfo.draftDoingInfo.length > 0"
+                                class="space-y-4"
+                            >
+                                <div
+                                    v-for="(draft, index) in shortNoteInfo.draftInfo.draftDoingInfo"
+                                    :key="index"
+                                    class="bg-base-200 p-4 rounded-lg flex gap-4 items-start shadow-sm"
+                                >
+                                    <!-- 产物图片 -->
+                                    <div class="shrink-0">
+                                        <img
+                                            :src="getProductImageUrl(getDraftInfo(draft.productId))"
+                                            :alt="draft.productName"
+                                            class="w-16 h-16 object-cover rounded-lg border border-base-300 shadow-md"
+                                        />
+                                    </div>
+
+                                    <!-- 锻造信息 -->
+                                    <div class="flex-1">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <h4 class="text-lg font-bold">{{ draft.productName }}</h4>
+                                            <span class="text-sm bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                                                已拥有: {{ draft.draftCompleteNum }}
+                                            </span>
+                                        </div>
+
+                                        <!-- 进度条 -->
+                                        <div class="mb-2">
+                                            <div class="w-full bg-base-300 rounded-full h-3 overflow-hidden">
+                                                <div
+                                                    class="bg-primary h-full rounded-full transition-all duration-500 ease-out"
+                                                    :style="{
+                                                        width: `${Math.min(100, (draft.draftCompleteNum / (draft.draftCompleteNum + draft.draftDoingNum)) * 100)}%`,
+                                                    }"
+                                                ></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 时间信息 -->
+                                        <div class="flex justify-between items-center text-sm">
+                                            <span class="text-base-content/70">铸造时间:</span>
+                                            <span class="font-medium text-primary">
+                                                {{
+                                                    calculateRealEndTime(
+                                                        draft.startTime,
+                                                        draft.draftDoingNum + draft.draftCompleteNum,
+                                                        getDraftInfo(draft.productId)
+                                                    )
+                                                }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-else class="bg-base-200 p-4 rounded-lg text-center text-base-content/70">暂无进行中的锻造</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div v-if="roleInfo.roleInfo.roleShow.params.length > 0" class="card bg-base-100 shadow-xl">
                 <div class="card-body">
                     <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center">
@@ -202,6 +384,37 @@ async function generateScreenshot() {
                                 <div class="text-sm font-medium">{{ p.paramKey }}</div>
                                 <div class="text-xl font-bold">
                                     {{ p.paramValue }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center mt-2">
+                        <div class="card hover-3d">
+                            <div class="card-body bg-linear-0 from-base-300 to-base-200 rounded-2xl relative p-4">
+                                <div class="text-sm font-medium">成就达成</div>
+                                <div class="text-xl font-bold">
+                                    {{ roleInfo.roleInfo.roleShow.roleAchv.total }}
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            v-for="[k, p] in ['gold', 'silver', 'bronze'].map(v => [
+                                v,
+                                roleInfo.roleInfo.roleShow.roleAchv[v as keyof typeof roleInfo.roleInfo.roleShow.roleAchv],
+                            ])"
+                            :key="k"
+                            class="card hover-3d"
+                        >
+                            <div class="card-body bg-linear-0 from-base-300 to-base-200 rounded-2xl relative p-4">
+                                <div class="text-xl font-bold flex flex-col justify-center h-full">
+                                    <div class="flex items-end gap-4">
+                                        <img
+                                            :src="`/imgs/webp/Icon_Achievement_${{ bronze: 'Copper', silver: 'Silver', gold: 'Gold' }[k]}.webp`"
+                                            alt="品质"
+                                            class="size-10"
+                                        />
+                                        {{ p }}
+                                    </div>
                                 </div>
                             </div>
                         </div>

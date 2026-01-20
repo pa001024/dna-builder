@@ -1,6 +1,6 @@
 import { RespCode, TimeBasicResponse } from "../TimeBasicResponse"
 import type { DNACommonConfigEntity } from "../type-generated"
-import { aesDecryptImageUrl, build_signature, build_upload_signature, type HeadersPayload, type RequestOptions, rsa_encrypt } from "./utils"
+import { aesDecryptImageUrl, build_signature, build_upload_signature, type HeadersPayload, type RequestOptions } from "./utils"
 
 export class DNABaseAPI {
     public fetchFn?: typeof fetch
@@ -63,28 +63,26 @@ export class DNABaseAPI {
         refer?: boolean
         token?: string
         kf_token?: string
-        tokenSig?: boolean
         h5?: boolean
         kf?: boolean
     }): Promise<HeadersPayload> {
         let {
-            payload,
+            payload = {},
             exparams,
             dev_code = this.dev_code,
             refer,
             token = this.token,
             kf_token = this.kf_token,
-            tokenSig,
             h5,
             kf,
         } = options || {}
 
-        const CONTENT_TYPE = "application/x-www-form-urlencoded; charset=utf-8"
+        const CONTENT_TYPE = "application/x-www-form-urlencoded"
         const iosBaseHeader = {
-            version: "1.1.3",
+            version: "1.2.0",
             source: "ios",
             "Content-Type": CONTENT_TYPE,
-            "User-Agent": "DoubleHelix/4 CFNetwork/3860.100.1 Darwin/25.0.0",
+            "User-Agent": "DoubleHelix/3 CFNetwork/3860.300.31 Darwin/25.2.0",
         }
         const h5BaseHeader = {
             version: "3.11.0",
@@ -103,7 +101,7 @@ export class DNABaseAPI {
         const is_h5 = this.is_h5 || h5 || false
         const headers: Record<string, any> = kf ? kfBaseHeader : is_h5 ? h5BaseHeader : iosBaseHeader
         if (dev_code && !kf) {
-            headers.devCode = dev_code
+            headers.devcode = dev_code
         }
         if (refer || is_h5) {
             headers.origin = "https://dnabbs.yingxiong.com"
@@ -126,10 +124,16 @@ export class DNABaseAPI {
 
             delete headers["Content-Type"]
         } else if (typeof payload === "object") {
-            const si = kf ? {} : build_signature(payload, tokenSig ? token : "")
             if (!kf) {
-                Object.assign(payload, { sign: si.s, timestamp: si.t })
+                const pk = await this.getRsaPublicKey()
+                const { rk, tn, sa } = build_signature(pk, payload, token)
+
+                // 更新 headers
+                headers.rk = rk
+                headers.tn = tn
+                headers.sa = sa
             }
+
             if (exparams) {
                 Object.assign(payload, exparams)
             }
@@ -139,18 +143,6 @@ export class DNABaseAPI {
                 params.append(key, String(value))
             })
             payload = params.toString()
-
-            if (!kf) {
-                const rk = si.k
-                const pk = await this.getRsaPublicKey()
-                const ek = rsa_encrypt(rk, pk)
-                if (this.is_h5) {
-                    headers.k = ek
-                } else {
-                    headers.rk = rk
-                    headers.key = ek
-                }
-            }
         }
         return { headers, payload }
     }
@@ -161,20 +153,27 @@ export class DNABaseAPI {
                 await this.initializeSignConfig()
             } catch (error) {
                 console.error("初始化签名配置失败:", error)
-                this.sign_api_urls = new Set(
-                    [
-                        "/user/sdkLogin",
-                        "/forum/postPublish",
-                        "/forum/comment/createComment",
-                        "/forum/comment/createReply",
-                        "/user/getSmsCode",
-                        "/role/defaultRoleForTool",
-                        "/media/av/cfg/getVideos",
-                        "/media/av/cfg/getAudios",
-                        "/media/av/cfg/getImages",
-                        "/encourage/signin/signin",
-                    ].map(item => item.replace(/^\/+/, ""))
-                )
+            } finally {
+                if (this.sign_api_urls.size === 0)
+                    this.sign_api_urls = new Set(
+                        [
+                            "/user/sdkLogin",
+                            "/user/getSmsCode",
+                            "/role/defaultRoleForTool",
+                            "/media/av/cfg/getVideos",
+                            "/media/av/cfg/getAudios",
+                            "/media/av/cfg/getImages",
+                            "/encourage/signin/signin",
+                            "/user/refreshToken",
+                            "/user/signIn",
+                            "/user/refreshToken",
+                            "/role/defaultRole",
+                            "/role/list",
+                            "/role/getShortNoteInfo",
+                            "/forum/like",
+                            "/encourage/calendar/Activity/list",
+                        ].map(item => item.replace(/^\/+/, ""))
+                    )
             }
         }
         return this.sign_api_urls.has(url)
@@ -200,39 +199,28 @@ export class DNABaseAPI {
     }
 
     public async _dna_request<T = any>(url: string, data?: any, options?: RequestOptions): Promise<TimeBasicResponse<T>> {
-        let {
-            method = "POST",
-            sign,
-            h5,
-            kf,
-            refer,
-            params,
-            max_retries = 3,
-            retry_delay = 1,
-            timeout = 10000,
-            token,
-            tokenSig,
-        } = options || {}
+        let { method = "POST", sign, h5, kf, refer, params, max_retries = 3, retry_delay = 1, timeout = 10000 } = options || {}
         if (url.startsWith("/")) url = url.slice(1)
 
         // 如果未明确指定 sign，则根据 URL 自动判断
         if (sign === undefined && (await this.needSign(url))) {
             sign = true
         }
+        console.debug("sign:", sign, "url:", url)
         let headers: Record<string, any>
         if (sign) {
             const { payload: p, headers: h } = await this.getHeaders({
                 payload: data,
                 refer,
                 exparams: params,
-                token: token ? this.token : undefined,
-                tokenSig,
+                token: this.token,
                 h5,
             })
             data = p
             headers = h
+            console.debug("data:", data, "headers:", headers)
         } else {
-            const { headers: h } = await this.getHeaders({ token: token ? this.token : undefined, refer, h5, kf })
+            const { headers: h } = await this.getHeaders({ refer, h5, kf })
             headers = h
         }
 
@@ -384,7 +372,6 @@ export abstract class DNASubModule {
         dev_code?: string
         refer?: boolean
         token?: string
-        tokenSig?: boolean
         h5?: boolean
     }): Promise<HeadersPayload> {
         return this._base.getHeaders(options)

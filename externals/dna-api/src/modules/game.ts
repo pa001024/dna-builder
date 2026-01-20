@@ -14,7 +14,7 @@ export class GameAPI extends DNASubModule {
         if (!otherUserId) {
             delete data.otherUserId
         }
-        return await this._dna_request<DNARoleEntity>("role/defaultRoleForTool", data, { sign: true, token: true, tokenSig: true })
+        return await this._dna_request<DNARoleEntity>("role/defaultRoleForTool", data, { sign: true })
     }
 
     async getMhSwitchStatus() {
@@ -26,8 +26,11 @@ export class GameAPI extends DNASubModule {
         return await this._dna_request<DNACharDetailEntity>("role/getCharDetail", data)
     }
 
+    /**
+     * 获取铸造信息
+     */
     async getShortNoteInfo() {
-        return await this._dna_request<DNAShortNoteEntity>("role/getShortNoteInfo")
+        return await this._dna_request<DNAShortNoteEntity>("role/getShortNoteInfo", undefined, { sign: true })
     }
 
     async getWeaponDetail(weapon_id: number | string, weapon_eid: string, otherUserId?: string) {

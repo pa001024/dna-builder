@@ -98,6 +98,14 @@ defineModel<boolean>("modelShow")
                                         : +(baseWeapon as LeveledWeapon)[("基础" + key) as keyof LeveledWeapon].toFixed(2)
                                 }}
                             </li>
+                            <!-- 角色自带加成 -->
+                            <li
+                                v-if="key != '攻击' && key in (charBuild.char.加成 || {})"
+                                class="flex justify-between gap-8 text-sm text-primary"
+                            >
+                                <div class="text-base-content/80">{{ $t(charBuild.char.名称) }}</div>
+                                {{ format100r(charBuild.char.加成![key]!) }}
+                            </li>
                             <!-- 武器特效自身暴击攻速等 -->
                             <li
                                 v-if="wkey !== 'skill' && key != '攻击' && key in (baseWeapon || {})"

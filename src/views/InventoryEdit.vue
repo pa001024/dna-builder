@@ -231,9 +231,71 @@ async function syncInventory() {
         ui.showErrorMessage("库存同步失败:", e instanceof Error ? e.message : String(e))
     }
 }
+
+// 特效编辑功能
+import { LeveledBuff } from "../data"
+
+// 获取所有武器和MOD的buffs
+const allItemsWithBuffs = computed(() => {
+    // 获取所有武器
+    const allWeapons = [...Object.keys(inv.meleeWeapons), ...Object.keys(inv.rangedWeapons)].map(id => {
+        return new LeveledWeapon(+id)
+    })
+
+    // 获取所有MOD
+    const allMods = Object.keys(inv.mods).map(id => {
+        return new LeveledMod(+id)
+    })
+
+    // 合并所有物品
+    return [...allWeapons, ...allMods]
+})
+
+// 特效选项
+const buffOptions = computed(() => {
+    return allItemsWithBuffs.value
+        .filter(item => item.buff)
+        .map(item => {
+            const buff = item.buff!
+            const lv = buff.pt === "Weapon" ? inv.getWBuffLv(item.id, "any") : inv.getBuffLv(item.id)
+            return {
+                label: buff.名称 || "",
+                value: buff,
+                lv: lv <= 0 ? buff.等级 : lv,
+                description: buff.描述 || "",
+            }
+        })
+})
+
+// 已选择的特效
+const selectedBuffs = computed(() => {
+    return allItemsWithBuffs.value
+        .filter(item => item.buff && (item.buff.pt === "Weapon" ? inv.getWBuffLv(item.id, "any") : inv.getBuffLv(item.id)) > 0)
+        .map(item => item.buff!)
+})
+
+// 切换特效
+function toggleBuff(buff: LeveledBuff) {
+    if (buff.pt === "Weapon") {
+        const lv = inv.getWBuffLv(buff.pid, "any")
+        inv.setWBuffLv(buff.pid, lv <= 0 ? buff.mx || 1 : 0)
+    } else {
+        const lv = inv.getBuffLv(buff.pid)
+        inv.setBuffLv(buff.pid, lv <= 0 ? buff.mx || 1 : 0)
+    }
+}
+
+// 设置特效等级
+function setBuffLv(buff: LeveledBuff, lv: number) {
+    if (buff.pt === "Weapon") {
+        inv.setWBuffLv(buff.pid, lv)
+    } else {
+        inv.setBuffLv(buff.pid, lv)
+    }
+}
 </script>
 <template>
-    <div class="h-full overflow-hidden overflow-y-auto">
+    <ScrollArea class="h-full">
         <div class="flex h-full flex-col p-4">
             <div class="flex justify-end gap-2 mb-4">
                 <div class="btn btn-sm btn-primary" @click="syncInventory">同步游戏</div>
@@ -348,6 +410,28 @@ async function syncInventory() {
                     </div>
                 </div>
             </div>
+            <!-- 特效编辑 -->
+            <div class="flex-1 bg-base-300 rounded-xl shadow-lg mb-6">
+                <div class="p-4 pb-0 flex flex-wrap items-center gap-2 mb-3">
+                    <SectionMarker />
+                    <h3 class="text-lg font-semibold">特效编辑</h3>
+                    <div class="ml-auto flex flex-wrap items-center gap-4">
+                        <div class="btn btn-sm btn-primary" @click="buffOptions.forEach(buff => setBuffLv(buff.value, buff.value.mx || 1))">
+                            全部最大
+                        </div>
+                        <div class="btn btn-sm btn-primary" @click="buffOptions.forEach(buff => setBuffLv(buff.value, 0))">全部关闭</div>
+                    </div>
+                </div>
+                <div class="min-h-80 w-full p-4">
+                    <BuffEditer
+                        class="h-120"
+                        :buff-options="buffOptions"
+                        :selected-buffs="selectedBuffs"
+                        @toggle-buff="toggleBuff"
+                        @set-buff-lv="setBuffLv"
+                    />
+                </div>
+            </div>
         </div>
-    </div>
+    </ScrollArea>
 </template>
