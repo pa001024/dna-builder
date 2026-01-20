@@ -206,7 +206,6 @@ export class DNABaseAPI {
         if (sign === undefined && (await this.needSign(url))) {
             sign = true
         }
-        console.debug("sign:", sign, "url:", url)
         let headers: Record<string, any>
         if (sign) {
             const { payload: p, headers: h } = await this.getHeaders({
@@ -218,7 +217,6 @@ export class DNABaseAPI {
             })
             data = p
             headers = h
-            console.debug("data:", data, "headers:", headers)
         } else {
             const { headers: h } = await this.getHeaders({ refer, h5, kf })
             headers = h
