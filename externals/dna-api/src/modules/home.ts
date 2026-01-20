@@ -19,6 +19,7 @@ import type {
     DNASearchPostBean,
     DNASearchTopicBean,
     DNASearchUserBean,
+    DNASignCenterBean,
     DNASignInBean,
     DNASoulTaskBean,
     DNAStatisticsBean,
@@ -179,7 +180,7 @@ export class HomeAPI extends DNASubModule {
 
     async gameSignIn(dayAwardId: number, period: number) {
         const data = { dayAwardId, periodId: period, signinType: 1 }
-        return await this._dna_request<DNAGameSignInResultBean>("encourage/signin/signin", data, { sign: true, tokenSig: true })
+        return await this._dna_request<DNAGameSignInResultBean>("encourage/signin/signin", data, { sign: true })
     }
 
     async getDoujin(forumId: number) {
@@ -268,6 +269,11 @@ export class HomeAPI extends DNASubModule {
     async haveSignIn() {
         const data = { gameId: DNA_GAME_ID }
         return await this._dna_request<DNASignInBean>("user/haveSignInNew", data)
+    }
+
+    async isHaveSignin() {
+        const data = { gameId: DNA_GAME_ID }
+        return await this._dna_request<DNASignCenterBean>("encourage/signin/isHaveSignin", data)
     }
 
     async isRedPoint() {

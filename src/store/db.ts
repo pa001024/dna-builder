@@ -1,5 +1,5 @@
+import type { EntityTable, TypedDB, Version } from "dexie"
 import Dexie from "dexie"
-import type { TypedDB, EntityTable, Version } from "dexie"
 export const db = new Dexie("dna") as unknown as TypedDB<DB>
 declare module "dexie" {
     interface DBTable {
@@ -93,6 +93,7 @@ export interface DNAUser {
     name: string // userName
     dev_code: string
     token: string
+    kf_token: string
     refreshToken: string
     pic: string
     status: number
@@ -119,6 +120,19 @@ export interface UserMapMarker {
 
 export type UUserMapMarker = Omit<UserMapMarker, "id">
 
+// 道具流水记录
+export interface PropFlow {
+    id: number
+    time: number // 时间戳
+    prop_name: string // 道具名称
+    category_id: string // 分类id
+    category_name: string // 分类名称
+    change: number // 数量变化（数值类型）
+    remark: string // 备注
+}
+
+export type UPropFlow = Omit<PropFlow, "id">
+
 interface DB {
     mods: Mod
     customEntitys: CustomEntity
@@ -128,6 +142,7 @@ interface DB {
     dnaUsers: DNAUser
     userMapMarkers: UserMapMarker
     nodeEditorGraphs: NodeEditorGraph
+    propFlows: PropFlow
 }
 
 db.version(1).stores({
@@ -139,4 +154,5 @@ db.version(1).stores({
     dnaUsers: "++id, uid",
     userMapMarkers: "++id, mapId, createdAt",
     nodeEditorGraphs: "++id, name, createdAt, updatedAt",
+    propFlows: "++id, time, prop_name, category_name",
 })

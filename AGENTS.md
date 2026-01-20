@@ -110,40 +110,6 @@ bun tools/icon_tool.ts ignore po-A         # 忽略 po-A 图标
 - 扫描时自动排除 `Icon.vue` 本身
 - clean 前建议先运行 check 确认
 
-## GLM API Usage Query
-
-**Tool**: `tools/query-usage.mjs` - 查询 GLM Coding Plan 使用量统计
-
-### 查询使用量
-
-查询智谱AI (GLM) API 和知识库的使用量信息：
-
-```bash
-# 方法 1: 直接指定 API Key
-node tools/query-usage.mjs your_api_key_here
-
-# 方法 2: 使用环境变量
-export ZHIPU_API_KEY=your_api_key_here  # Linux/Mac
-set ZHIPU_API_KEY=your_api_key_here     # Windows
-node tools/query-usage.mjs
-
-# 方法 3: 使用 .env 文件
-# 在项目根目录创建 .env 文件并添加:
-# ZHIPU_API_KEY=your_api_key_here
-node tools/query-usage.mjs
-```
-
-**输出信息**:
-
-- 📚 **知识库使用量**: 字数使用、存储使用及使用率
-- 🔌 **API 使用量**: 尝试查询多个可能的端点
-
-**说明**:
-
-- 工具会自动尝试多个可能的 API 端点来获取使用量信息
-- 智谱AI可能没有公开的通用使用量查询 API，工具会提示访问控制台查看
-- 控制台地址: https://open.bigmodel.cn/usercenter/billing
-
 ## Code Style Guidelines
 
 ### Formatting

@@ -11,6 +11,7 @@ const selectedMod = ref<Mod | null>(null)
 const selectedType = ref<string | "">("")
 const selectedSeries = ref<string | "">("")
 const selectedQuality = ref<string | "">("")
+const selectedElem = ref<string | "">("")
 
 // 获取所有可用类型
 const types = computed(() => {
@@ -38,6 +39,8 @@ const qualities = computed(() => {
     })
     return Array.from(qualitySet).sort()
 })
+
+const elems = ["火", "水", "雷", "风", "暗", "光"]
 
 // 过滤魔之楔列表
 const filteredMods = computed(() => {
@@ -67,7 +70,8 @@ const filteredMods = computed(() => {
         const matchType = selectedType.value === "" || m.类型 === selectedType.value
         const matchSeries = selectedSeries.value === "" || m.系列 === selectedSeries.value
         const matchQuality = selectedQuality.value === "" || m.品质 === selectedQuality.value
-        return matchKeyword && matchType && matchSeries && matchQuality
+        const matchElem = selectedElem.value === "" || m.属性 === selectedElem.value
+        return matchKeyword && matchType && matchSeries && matchQuality && matchElem
     })
 })
 
@@ -172,6 +176,28 @@ function getQualityColor(quality: string): string {
                                 @click="selectedQuality = quality"
                             >
                                 {{ $t(quality) }}
+                            </button>
+                        </div>
+                    </div>
+                    <!-- 元素筛选 -->
+                    <div>
+                        <div class="text-xs text-base-content/70 mb-1">元素</div>
+                        <div class="flex flex-wrap gap-1 pb-1">
+                            <button
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                                :class="selectedElem === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                                @click="selectedElem = ''"
+                            >
+                                全部
+                            </button>
+                            <button
+                                v-for="elem in elems"
+                                :key="elem"
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
+                                :class="selectedElem === elem ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                                @click="selectedElem = elem"
+                            >
+                                {{ $t(elem) }}
                             </button>
                         </div>
                     </div>

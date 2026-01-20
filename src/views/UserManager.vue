@@ -28,16 +28,17 @@ const loadUsers = async () => {
 
 // 添加皎皎角账号
 const addUser = async (data: { dev_code: string; user: import("dna-api").DNAUserDataBean }) => {
-    const userData = {
+    const userData: UDNAUser = {
         uid: data.user.userId,
         name: data.user.userName,
         dev_code: data.dev_code,
         token: data.user.token,
+        kf_token: "",
         refreshToken: data.user.refreshToken,
         pic: data.user.headUrl,
         status: data.user.status,
         isComplete: data.user.isComplete,
-    } satisfies UDNAUser as UDNAUser
+    }
     if (data.user.isOfficial) userData.isOfficial = data.user.isOfficial
     if (data.user.isRegister) userData.isRegister = data.user.isRegister
     await db.dnaUsers.add(userData)
@@ -48,16 +49,17 @@ const addUser = async (data: { dev_code: string; user: import("dna-api").DNAUser
 // 通过 JSON 添加皎皎角账号
 const addUserByToken = async () => {
     const rawdata = JSON.parse(jsonInput.value)
-    const userData = {
+    const userData: UDNAUser = {
         uid: rawdata.uid || rawdata.userId,
         name: rawdata.name || rawdata.userName,
         dev_code: rawdata.dev_code,
         token: rawdata.token,
+        kf_token: rawdata.kf_token || "",
         refreshToken: rawdata.refreshToken,
         pic: rawdata.pic || rawdata.headUrl,
         status: rawdata.status,
         isComplete: rawdata.isComplete,
-    } satisfies UDNAUser as UDNAUser
+    }
     if (rawdata.isOfficial) userData.isOfficial = rawdata.isOfficial
     if (rawdata.isRegister) userData.isRegister = rawdata.isRegister
     await db.dnaUsers.add(userData)

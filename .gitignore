@@ -42,3 +42,5 @@ public/imgs/map
 .opencode/skills/
 src-tauri/gen/android/keystore.properties
 docs/
+externals/dna-api/js/
+tools/radix-icons/

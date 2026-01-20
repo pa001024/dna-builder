@@ -698,7 +698,7 @@ export class CharBuild {
         let bonus = 0
 
         // 添加角色自带加成
-        if (prefix === "角色" && typeof this.char.加成?.[attribute] === "number") {
+        if (prefix === "角色" || attribute !== "攻击") {
             bonus += this.char.加成?.[attribute] || 0
         }
 
@@ -765,7 +765,7 @@ export class CharBuild {
     }
 
     // 获取总加成
-    private getTotalBonusMul(attribute: string, prefix?: string): number {
+    private getTotalBonusMul(attribute: string, prefix = "角色"): number {
         let bonus = 1
 
         // 添加角色自带加成
@@ -774,12 +774,13 @@ export class CharBuild {
         }
 
         // 添加MOD加成
-        this.mods.forEach(mod => {
-            if (prefix && mod.类型 !== prefix) return
-            if (typeof mod[attribute] === "number") {
-                bonus *= 1 + mod[attribute]
-            }
-        })
+        if (prefix === "角色" || !attribute.startsWith(prefix))
+            this.mods.forEach(mod => {
+                if (prefix && mod.attrType !== prefix) return
+                if (typeof mod.addAttr[attribute] === "number") {
+                    bonus *= 1 + mod.addAttr[attribute]
+                }
+            })
 
         // 添加BUFF加成
         this.buffs.forEach(buff => {
@@ -1975,7 +1976,7 @@ export class CharBuild {
             return changed
         }
         // 最大迭代次数
-        const MAX_ITER = 200
+        const MAX_ITER = 20
         // 最大化MOD直到不再有变化
         for (let index = 0; index < MAX_ITER; index++) {
             if (!next(index + 1)) {

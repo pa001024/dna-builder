@@ -2780,11 +2780,13 @@
         "damage_per_energy_per_second": "Damage Per Energy Per Second",
         "damage_per_second": "Damage Per Second",
         "desc": "Character/Weapon/Skill Build",
+        "description": "Description",
         "dynamic_prop": "Dynamic Property",
         "enemy": "Enemy",
         "enemy_level": "Enemy Level",
         "enemy_resistance": "Enemy Resistance",
         "enemy_type": "Type",
+        "enter_description": "Please enter description",
         "equipment_preview": "Equipment Preview",
         "export_code": "Copy code",
         "general_attributes": "General Attributes",
@@ -2807,12 +2809,14 @@
         "refine": "Refine",
         "reset_config": "Reset",
         "resonance_gain": "Harmony Gain",
+        "save": "Save",
         "save_project": "Save Project",
         "select_character": "Select Character",
         "select_mod_slot": "Select MOD - Slot",
         "select_skill_weapon": "Select Skill/Weapon",
         "selected_count": "Selected {{count}}",
         "share": "Share",
+        "share_build": "Share Build",
         "shield": "Shield",
         "shot_damage": "Shot Damage",
         "simulator": "simulation",
@@ -2843,6 +2847,7 @@
         "copy": "Copy",
         "deleteRoomConfirm": "Are you sure you want to delete this room?",
         "deleteRoomFailed": "Deletion Failed",
+        "desc": "BUG Feedback/Communication",
         "edit": "Edit",
         "edited": "(Edited)",
         "follow": "Follow",
@@ -2871,6 +2876,29 @@
         "unlimited": "Unlimited",
         "you": "You"
     },
+    "damageResult": {
+        "critDamage": {
+            "highCritNoTrigger": "High Crit Not Triggered",
+            "highCritTrigger": "High Crit Triggered",
+            "lowCritNoTrigger": "Low Crit Not Triggered",
+            "lowCritTrigger": "Low Crit Triggered",
+            "title": "Crit Damage"
+        },
+        "error": "Error",
+        "expectedDamage": {
+            "expected": "Expected Damage",
+            "noHpDamage": "No HP Damage",
+            "title": "Expected Damage"
+        },
+        "expectedValues": {
+            "expectedCritNoTrigger": "Expected Crit Not Triggered",
+            "expectedCritTrigger": "Expected Crit Triggered",
+            "highCritExpectedTrigger": "High Crit Expected Trigger",
+            "lowCritExpectedTrigger": "Low Crit Expected Trigger",
+            "title": "Expected Values"
+        },
+        "title": "Damage Result"
+    },
     "database": {
         "abyss_dungeon": "Abyss Dungeon",
         "abyss_dungeon_desc": "View abyss dungeon information and buffs",
@@ -2879,6 +2907,8 @@
         "draft_desc": "View blueprint information and required materials",
         "dungeon": "Dungeon",
         "dungeon_desc": "View dungeon information and reward drops",
+        "fish": "Fishing",
+        "fish_desc": "Detailed fishing spot yield calculation",
         "map": "Map",
         "map_desc": "View Map Markers",
         "mod": "Mod",
@@ -2890,10 +2920,13 @@
         "rank": "Rank Rewards",
         "rank_desc": "View ranking tournament rewards",
         "title": "Database",
+        "walnut": "Walnut",
+        "walnut_desc": "View walnut probability information and simulate draws",
         "weapon": "Weapon",
         "weapon_desc": "View weapon information and attributes"
     },
     "dna-home": {
+        "desc": "Game Information/Check-in/Browse Posts",
         "title": "Jiaojiaojiao"
     },
     "dna-post-detail": {
@@ -2932,6 +2965,19 @@
         "title": "Component Rendering Error"
     },
     "Fire Keeper Ⅰ": "Fire Keeper Ⅰ",
+    "fish-list": {
+        "title": "Fishing"
+    },
+    "flow": {
+        "desc": "Damage Calculator Node Version",
+        "title": "Node Editor"
+    },
+    "flowEditor": {
+        "canvas": "Canvas",
+        "nodePalette": "Node Palette",
+        "resultPanel": "Result Panel",
+        "title": "Node Editor"
+    },
     "game-accounts": {
         "desc": "Jiaojiaojiao Login/Sign-in/Character Info Retrieval",
         "title": "Jiaojiaojiao"
@@ -3070,10 +3116,12 @@
         "step2": "Step 2",
         "step3": "Step 3",
         "step4": "Step 4",
+        "swipeHint": "Swipe to switch",
         "timelineStep1": "Create combat timeline sequence",
         "timelineStep2": "Configure skill release order and timing",
         "timelineStep3": "Simulate combat process and damage output",
         "title": "Help Center",
+        "version": "DNA Builder Help Center",
         "workflow": "Usage Workflow"
     },
     "home": {
@@ -3090,6 +3138,10 @@
     "inventory": {
         "desc": "Customize your Wedge and weapon loadout",
         "title": "Inventory Management"
+    },
+    "levelup": {
+        "desc": "Calculate character, weapon and magic wedge cultivation resource requirements",
+        "title": "Cultivation Calculation"
     },
     "main": {
         "btn_collapse_menu": "Collapse menu",
@@ -3144,8 +3196,12 @@
         "onlyOnce": "Only Once",
         "zhouben": "Weekly Boss"
     },
+    "room": {
+        "remove": "Remove Room"
+    },
     "S级蓄力攻击伤害": "Charged Attack Damage: Level S",
     "setting": {
+        "account": "Account",
         "ai": "AI Model Settings",
         "aiApiKey": "API Key",
         "aiApiKeyTip": "Get API key from Zhipu AI platform",
@@ -3187,6 +3243,7 @@
     },
     "tour": {
         "back": "Previous",
+        "char_mods": "Equip magic wedges to characters, improve attributes, and add BUFFs and effects as needed",
         "char_tabs": "Click here to switch between Character, Melee, Ranged, or Resonance weapons",
         "damage_result": "Display calculated damage results here",
         "done": "Done",
@@ -3195,7 +3252,8 @@
         "skill_select": "Select the skill to use",
         "skip": "Skip",
         "target_function": "Set damage calculation target function, e.g., Damage, DPS",
-        "top_actions": "Use top buttons to share configuration, auto-build, save project, etc."
+        "top_actions": "Use top buttons to share configuration, auto-build, save project, etc.",
+        "weapon_select": "Click here to change weapon/set refinement"
     },
     "UI_CHAR_SUBTITLE_2102": "UI_CHAR_SUBTITLE_2102",
     "UI_CHAR_SUBTITLE_3202": "UI_CHAR_SUBTITLE_3202",
@@ -3206,6 +3264,9 @@
         "updateErrorMessage": "An error occurred while downloading or installing the update, please try again later",
         "updateFailed": "Update Failed",
         "updating": "Updating..."
+    },
+    "walnut-list": {
+        "title": "Walnut List"
     },
     "weapon-detail": {
         "title": "Weapon details"

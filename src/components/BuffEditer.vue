@@ -13,7 +13,7 @@ interface BuffOption {
 const props = defineProps<{
     buffOptions: BuffOption[]
     selectedBuffs: LeveledBuff[]
-    charBuild: CharBuild
+    charBuild?: CharBuild
 }>()
 
 const emit = defineEmits<{
@@ -30,6 +30,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
 }
 
 const sortedBuffs = computed(() => {
+    if (!props.charBuild) return [...props.buffOptions.filter(b => !props.selectedBuffs.some(v => v.名称 === b.label))]
     // 获取角色名称
     const charName = props.charBuild.char.名称 || ""
 
@@ -58,7 +59,7 @@ const sortedBuffs = computed(() => {
                 :buff="buff.value"
                 :lv="buff.lv"
                 selected
-                :income="charBuild.calcIncome(buff.value, true)"
+                :income="charBuild?.calcIncome(buff.value, true) || 0"
                 @set-buff-lv="setBuffLv"
                 @click="toggleBuff(buff.value)"
             />
@@ -69,7 +70,7 @@ const sortedBuffs = computed(() => {
                 :title="buff.label"
                 :buff="buff.value"
                 :lv="buff.lv"
-                :income="charBuild.calcIncome(buff.value, false)"
+                :income="charBuild?.calcIncome(buff.value, false) || 0"
                 @set-buff-lv="setBuffLv"
                 @click="toggleBuff(buff.value)"
             />

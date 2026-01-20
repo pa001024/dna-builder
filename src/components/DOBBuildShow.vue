@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref } from "vue"
-import { Build, buildQuery, buildsWithCountQuery } from "@/api/graphql"
+import { Build, buildQuery, buildsWithCountQuery, deleteBuildMutation, updateBuildMutation } from "@/api/graphql"
 import { useCharSettings } from "@/composables/useCharSettings"
 import { useUIStore } from "@/store/ui"
+import { useUserStore } from "@/store/user"
 
 const props = defineProps<{
     charName: string
@@ -11,6 +12,7 @@ const props = defineProps<{
 }>()
 
 const ui = useUIStore()
+const userStore = useUserStore()
 const { t } = useTranslation()
 
 // 搜索和筛选
@@ -19,6 +21,15 @@ const loading = ref(false)
 const loadingBuild = ref<string | null>(null)
 const builds = ref<Build[]>([])
 const totalCount = ref(0)
+
+// 编辑弹窗
+const edit_model_show = ref(false)
+const editingBuildId = ref<string | null>(null)
+const editingBuild = ref<Build | null>(null)
+const edit_title = ref("")
+const edit_desc = ref("")
+const updatingBuild = ref<string | null>(null)
+const deletingBuild = ref<string | null>(null)
 
 // 当前角色的 charSettings
 const charSettings = useCharSettings(computed(() => props.charName))
@@ -77,6 +88,96 @@ async function useBuild(buildId: string) {
     }
 }
 
+// 打开编辑弹窗
+function openEditModal(build: Build) {
+    editingBuildId.value = build.id
+    editingBuild.value = build
+    edit_title.value = build.title
+    edit_desc.value = build.desc || ""
+    edit_model_show.value = true
+}
+
+// 确认编辑
+async function confirmEdit() {
+    if (!editingBuildId.value || !editingBuild.value) return
+
+    // 权限检查：只有当前用户创建的配装或管理员才能被编辑
+    if (userStore.id !== editingBuild.value.userId && !userStore.isAdmin) {
+        ui.showErrorMessage("没有权限编辑该构筑")
+        edit_model_show.value = false
+        editingBuildId.value = null
+        editingBuild.value = null
+        return
+    }
+
+    updatingBuild.value = editingBuildId.value
+    try {
+        const result = await updateBuildMutation({
+            id: editingBuildId.value,
+            input: {
+                title: edit_title.value,
+                desc: edit_desc.value,
+                charId: editingBuild.value.charId,
+                charSettings: JSON.stringify(charSettings.value),
+            },
+        })
+
+        if (result) {
+            // 更新本地构筑列表
+            const index = builds.value.findIndex(b => b.id === editingBuildId.value)
+            if (index > -1) {
+                builds.value[index].title = edit_title.value
+                builds.value[index].desc = edit_desc.value
+            }
+            ui.showSuccessMessage("构筑已更新")
+        }
+    } catch (error) {
+        ui.showErrorMessage("更新构筑失败:", error instanceof Error ? error.message : "未知错误")
+    } finally {
+        updatingBuild.value = null
+        edit_model_show.value = false
+        editingBuildId.value = null
+        editingBuild.value = null
+    }
+}
+
+// 删除构筑
+async function deleteBuild() {
+    if (!editingBuildId.value || !editingBuild.value) return
+
+    // 权限检查：只有当前用户创建的配装或管理员才能删除
+    if (userStore.id !== editingBuild.value.userId && !userStore.isAdmin) {
+        ui.showErrorMessage("没有权限删除该构筑")
+        return
+    }
+
+    // 确认删除
+    if (!(await ui.showDialog("删除确认", "确定要删除该构筑吗？此操作不可恢复。"))) {
+        return
+    }
+
+    deletingBuild.value = editingBuildId.value
+    try {
+        const result = await deleteBuildMutation({
+            id: editingBuildId.value,
+        })
+
+        if (result) {
+            // 从本地列表中移除
+            builds.value = builds.value.filter(b => b.id !== editingBuildId.value)
+            totalCount.value--
+            ui.showSuccessMessage("构筑已删除")
+            edit_model_show.value = false
+        }
+    } catch (error) {
+        ui.showErrorMessage("删除构筑失败:", error instanceof Error ? error.message : "未知错误")
+    } finally {
+        deletingBuild.value = null
+        editingBuildId.value = null
+        editingBuild.value = null
+    }
+}
+
 // 加载更多
 async function loadMore() {
     if (builds.value.length < totalCount.value) {
@@ -103,6 +204,10 @@ async function loadMore() {
 
 onMounted(() => {
     fetchBuilds()
+})
+
+defineExpose({
+    fetchBuilds,
 })
 </script>
 
@@ -138,11 +243,11 @@ onMounted(() => {
                 </div>
             </div>
 
-            <div v-else class="p-4 grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
+            <div v-else class="p-2 grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
                 <div
                     v-for="build in builds"
                     :key="build.id"
-                    class="card bg-base-100 shadow-lg hover:shadow-xl transition-all cursor-pointer border border-base-200"
+                    class="card bg-base-100 shadow-lg hover:shadow-xl transition-all border border-base-200"
                 >
                     <div class="card-body p-4">
                         <!-- 标题和标签 -->
@@ -193,15 +298,25 @@ onMounted(() => {
                         </div>
 
                         <!-- 操作按钮 -->
-                        <div class="card-actions justify-end mt-2">
+                        <div class="card-actions justify-end mt-2 flex gap-2">
                             <button
-                                class="btn btn-primary btn-sm w-full"
+                                v-if="userStore.id === build.userId || userStore.isAdmin"
+                                class="btn btn-secondary btn-sm flex-1"
+                                :class="{ 'btn-disabled': updatingBuild === build.id }"
+                                @click.stop="openEditModal(build)"
+                            >
+                                <span v-if="updatingBuild === build.id" class="loading loading-spinner loading-sm" />
+                                <Icon v-else icon="ri:edit-line" class="w-4 h-4" />
+                                {{ $t("编辑") }}
+                            </button>
+                            <button
+                                class="btn btn-primary btn-sm flex-1"
                                 :class="{ 'btn-disabled': loadingBuild === build.id }"
                                 @click.stop="useBuild(build.id)"
                             >
                                 <span v-if="loadingBuild === build.id" class="loading loading-spinner loading-sm" />
                                 <Icon v-else icon="ri:download-2-line" class="w-4 h-4" />
-                                {{ loadingBuild === build.id ? t("加载中...") : t("使用") }}
+                                {{ loadingBuild === build.id ? $t("加载中...") : $t("使用") }}
                             </button>
                         </div>
                     </div>
@@ -217,14 +332,68 @@ onMounted(() => {
                     @click="loadMore"
                 >
                     <span v-if="loading" class="loading loading-spinner loading-sm" />
-                    <span v-else>{{ t("加载更多") }}</span>
+                    <span v-else>{{ $t("加载更多") }}</span>
                 </button>
             </div>
         </ScrollArea>
 
         <!-- 统计栏 -->
         <div class="p-2 border-t border-base-200 text-center text-xs text-base-content/50">
-            {{ t("共") }} {{ totalCount }} {{ t("个构筑") }}
+            {{ $t("共") }} {{ totalCount }} {{ $t("个构筑") }}
         </div>
     </div>
+
+    <!-- 编辑弹窗 -->
+    <DialogModel v-model="edit_model_show" class="bg-base-300">
+        <div class="space-y-4">
+            <h3 class="text-xl font-bold">{{ $t("编辑构筑") }}</h3>
+            <div>
+                <label class="label" for="edit-title">
+                    <span class="label-text">{{ $t("标题") }}</span>
+                </label>
+                <input
+                    id="edit-title"
+                    v-model="edit_title"
+                    type="text"
+                    class="input input-bordered w-full"
+                    :placeholder="t('输入标题...')"
+                    maxlength="50"
+                />
+            </div>
+            <div>
+                <label class="label" for="edit-desc">
+                    <span class="label-text">{{ $t("描述") }}</span>
+                </label>
+                <textarea
+                    id="edit-desc"
+                    v-model="edit_desc"
+                    class="textarea textarea-bordered w-full"
+                    :placeholder="t('输入描述...')"
+                    rows="3"
+                    maxlength="200"
+                ></textarea>
+            </div>
+        </div>
+        <template #action>
+            <button
+                type="button"
+                class="btn btn-danger flex-1"
+                @click="deleteBuild"
+                :class="{ 'btn-disabled': deletingBuild === editingBuildId }"
+            >
+                <span v-if="deletingBuild === editingBuildId" class="loading loading-spinner loading-sm" />
+                <Icon v-else icon="ri:delete-bin-line" class="w-4 h-4" />
+                {{ $t("game-launcher.delete") }}
+            </button>
+            <button
+                type="button"
+                class="btn btn-primary flex-1"
+                @click="confirmEdit"
+                :class="{ 'btn-disabled': updatingBuild === editingBuildId }"
+            >
+                <span v-if="updatingBuild === editingBuildId" class="loading loading-spinner loading-sm" />
+                {{ $t("char-build.save") }}
+            </button>
+        </template>
+    </DialogModel>
 </template>

@@ -1,7 +1,7 @@
+import { until } from "@vueuse/core"
 import { defineStore } from "pinia"
 import type { IconTypes } from "@/components/Icon.vue"
 import { env } from "@/env"
-import { until } from "@vueuse/core"
 
 export interface ITab {
     name?: string
@@ -156,6 +156,27 @@ export const useUIStore = defineStore("ui", {
             const diffMinute = Math.floor(diff / (1000 * 60))
             if (diffMinute > 0) {
                 return `${diffMinute}分钟后`
+            }
+            return "已过期"
+        },
+        timeDistanceFutureFix(time: number) {
+            const now = this.timeNow
+            const diff = time - now
+            const diffDay = Math.floor(diff / (1000 * 60 * 60 * 24))
+            const diffHour = Math.floor((diff / (1000 * 60 * 60)) % 24)
+            const diffMinute = Math.floor((diff / (1000 * 60)) % 60)
+            const diffSecond = Math.floor((diff / 1000) % 60)
+            if (diffDay > 0) {
+                return `${diffDay}天${diffHour}:${diffMinute}:${diffSecond}后`
+            }
+            if (diffHour > 0) {
+                return `${diffHour > 10 ? diffHour : `0${diffHour}`}:${diffMinute > 10 ? diffMinute : `0${diffMinute}`}:${diffSecond > 10 ? diffSecond : `0${diffSecond}`}后`
+            }
+            if (diffMinute > 0) {
+                return `${diffMinute > 10 ? diffMinute : `0${diffMinute}`}:${diffSecond > 10 ? diffSecond : `0${diffSecond}`}后`
+            }
+            if (diffSecond > 0) {
+                return `${diffSecond > 10 ? diffSecond : `0${diffSecond}`}秒后`
             }
             return "已过期"
         },

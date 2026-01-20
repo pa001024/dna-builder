@@ -56,6 +56,12 @@ async function exportDiff() {
         const keyData: Record<string, string> = {}
         let hasMissing = false
 
+        // Check if zh-CN has a value for this key
+        const zhCNValue = localeKeysMap.get("zh-CN")?.get(key) ?? ""
+        if (!zhCNValue) {
+            continue // Skip keys where zh-CN has no value
+        }
+
         for (const [locale, keys] of localeKeysMap) {
             const value = keys.get(key) ?? ""
             keyData[locale] = value

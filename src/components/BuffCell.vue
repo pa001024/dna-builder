@@ -49,7 +49,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
                 <div class="text-xs text-base-content/50 mb-2">
                     {{ buff.描述 }}
                 </div>
-                <div class="text-xs text-base-content/30">
+                <div class="text-xs text-base-content/30" v-if="income">
                     {{ $t("char-build.income") }}:
                     {{ format100(income) }}
                 </div>

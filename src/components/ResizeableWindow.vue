@@ -261,7 +261,7 @@ watchEffect(() => {
                 </div>
             </div>
             <!-- 全局通用浮层 -->
-            <dialog class="modal" :class="{ 'modal-open': ui.dialogVisible }">
+            <dialog class="modal z-3000" :class="{ 'modal-open': ui.dialogVisible }">
                 <div class="modal-box bg-base-300">
                     <p class="text-lg font-bold">
                         {{ ui.dialogTitle }}
@@ -270,14 +270,12 @@ watchEffect(() => {
                         {{ ui.dialogContent }}
                     </p>
                     <div class="modal-action">
-                        <div class="flex justify-end gap-2">
-                            <button class="min-w-20 btn btn-secondary" @click="ui.confirmDialog">
-                                {{ $t("setting.confirm") }}
-                            </button>
-                            <button class="min-w-20 btn btn-ghost" @click="ui.cancelDialog">
-                                {{ $t("setting.cancel") }}
-                            </button>
-                        </div>
+                        <button class="min-w-24 btn" @click="ui.cancelDialog">
+                            {{ $t("setting.cancel") }}
+                        </button>
+                        <button class="min-w-24 btn btn-primary" @click="ui.confirmDialog">
+                            {{ $t("setting.confirm") }}
+                        </button>
                     </div>
                 </div>
                 <!-- 模态框背景 -->

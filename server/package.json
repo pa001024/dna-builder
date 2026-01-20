@@ -23,7 +23,7 @@
         "bcrypt": "^6.0.0",
         "canvas": "^3.2.0",
         "croner": "^9.1.0",
-        "dna-api": "0.3.10",
+        "dna-api": "0.4.3",
         "dompurify": "^3.3.1",
         "dotenv": "^17.2.3",
         "drizzle-graphql": "^0.8.4",

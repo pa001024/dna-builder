@@ -116,9 +116,10 @@ function findModRewards(child: RewardChild[], modIds: Set<number>, draftIds: Set
             }
         } else if (item.t === "Mod") {
             // 找到Mod类型的奖励
-            modIds.add(item.id)
             if (item.d) {
                 draftIds.add(item.id)
+            } else {
+                modIds.add(item.id)
             }
         }
     }

@@ -89,11 +89,18 @@ export const useSettingStore = defineStore("setting", {
             const api = new DNAAPI({
                 dev_code: user.dev_code,
                 token: user.token,
+                kf_token: user.kf_token,
                 fetchFn: tauriFetch,
             })
             apiCache = api
             apiCacheKey = user.uid
             return api
+        },
+        async saveKFToken(token: string) {
+            const user = await this.getCurrentUser()
+            if (!user) return
+            await db.dnaUsers.update(user.id, { kf_token: token })
+            apiCache = null
         },
     },
 })

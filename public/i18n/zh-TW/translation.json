@@ -2779,11 +2779,13 @@
         "damage_per_energy_per_second": "每神智每秒傷害",
         "damage_per_second": "每秒傷害",
         "desc": "角色/武器/技能構築",
+        "description": "描述",
         "dynamic_prop": "動態屬性",
         "enemy": "敵人",
         "enemy_level": "敵人等級",
         "enemy_resistance": "敵人抗性",
         "enemy_type": "類型",
+        "enter_description": "請輸入描述",
         "equipment_preview": "裝配預覽",
         "export_code": "複製代碼",
         "general_attributes": "綜合屬性",
@@ -2806,12 +2808,14 @@
         "refine": "精煉",
         "reset_config": "重設",
         "resonance_gain": "和鳴增益",
+        "save": "保存",
         "save_project": "保存項目",
         "select_character": "選擇角色",
         "select_mod_slot": "選擇MOD - 槽位",
         "select_skill_weapon": "選擇技能/武器",
         "selected_count": "已選 {{count}} 個",
         "share": "分享",
+        "share_build": "配裝分享",
         "shield": "護盾",
         "shot_damage": "彈片傷害",
         "simulator": "模擬",
@@ -2842,6 +2846,7 @@
         "copy": "複製",
         "deleteRoomConfirm": "確認要刪除房間嗎?",
         "deleteRoomFailed": "刪除失敗",
+        "desc": "BUG反饋/交流",
         "edit": "編輯",
         "edited": "(已編輯)",
         "follow": "關注",
@@ -2870,6 +2875,29 @@
         "unlimited": "不限製",
         "you": "你"
     },
+    "damageResult": {
+        "critDamage": {
+            "highCritNoTrigger": "高暴擊未觸發",
+            "highCritTrigger": "高暴擊觸發",
+            "lowCritNoTrigger": "低暴擊未觸發",
+            "lowCritTrigger": "低暴擊觸發",
+            "title": "暴擊傷害"
+        },
+        "error": "錯誤",
+        "expectedDamage": {
+            "expected": "期望傷害",
+            "noHpDamage": "無HP傷害",
+            "title": "期望傷害"
+        },
+        "expectedValues": {
+            "expectedCritNoTrigger": "期望暴擊未觸發",
+            "expectedCritTrigger": "期望暴擊觸發",
+            "highCritExpectedTrigger": "高暴擊期望觸發",
+            "lowCritExpectedTrigger": "低暴擊期望觸發",
+            "title": "期望值"
+        },
+        "title": "傷害結果"
+    },
     "database": {
         "abyss_dungeon": "深淵副本",
         "abyss_dungeon_desc": "查看深淵副本信息和BUFF",
@@ -2878,6 +2906,8 @@
         "draft_desc": "查看圖紙信息和需求材料",
         "dungeon": "副本",
         "dungeon_desc": "查看副本信息和獎勵掉落",
+        "fish": "釣魚",
+        "fish_desc": "釣魚點詳細收益計算",
         "map": "地圖",
         "map_desc": "查看地圖標點",
         "mod": "魔之楔",
@@ -2889,10 +2919,13 @@
         "rank": "排名獎勵",
         "rank_desc": "查看排名賽獎勵",
         "title": "資料庫",
+        "walnut": "密函",
+        "walnut_desc": "查看密函機率資訊和模擬抽取",
         "weapon": "武器",
         "weapon_desc": "查看武器信息和屬性"
     },
     "dna-home": {
+        "desc": "遊戲資訊/簽到/瀏覽帖子",
         "title": "皎皎角"
     },
     "dna-post-detail": {
@@ -2931,6 +2964,19 @@
         "title": "組件渲染出錯"
     },
     "Fire Keeper Ⅰ": "Fire Keeper Ⅰ",
+    "fish-list": {
+        "title": "釣魚"
+    },
+    "flow": {
+        "desc": "傷害計算器節點版",
+        "title": "節點編輯器"
+    },
+    "flowEditor": {
+        "canvas": "畫布",
+        "nodePalette": "節點面板",
+        "resultPanel": "結果面板",
+        "title": "節點編輯器"
+    },
     "game-accounts": {
         "desc": "皎皎角登入/簽到/角色資訊獲取",
         "title": "皎皎角账号"
@@ -3069,10 +3115,12 @@
         "step2": "第二步",
         "step3": "第三步",
         "step4": "第四步",
+        "swipeHint": "滑動切換",
         "timelineStep1": "建立戰鬥時間線序列",
         "timelineStep2": "配置技能釋放順序和時機",
         "timelineStep3": "模擬戰鬥流程和傷害輸出",
         "title": "幫助中心",
+        "version": "DNA Builder 幫助中心",
         "workflow": "使用流程"
     },
     "home": {
@@ -3089,6 +3137,10 @@
     "inventory": {
         "desc": "自定義你的魔之楔和武器配置",
         "title": "庫存管理"
+    },
+    "levelup": {
+        "desc": "計算角色、武器和魔之楔的養成資源需求",
+        "title": "養成計算"
     },
     "main": {
         "btn_collapse_menu": "折疊菜單",
@@ -3143,8 +3195,12 @@
         "onlyOnce": "僅一次",
         "zhouben": "周本"
     },
+    "room": {
+        "remove": "刪除房間"
+    },
     "S级蓄力攻击伤害": "S級蓄力攻擊傷害",
     "setting": {
+        "account": "帳號",
         "ai": "AI大模型設定",
         "aiApiKey": "API密鑰",
         "aiApiKeyTip": "從智譜AI開放平台獲取API密鑰",
@@ -3186,6 +3242,7 @@
     },
     "tour": {
         "back": "上一步",
+        "char_mods": "為角色裝備魔之楔，提升屬性，按需添加BUFF和特效",
         "char_tabs": "點擊這裡切換角色、近戰、遠程或同律武器",
         "damage_result": "這裡顯示計算後的傷害結果",
         "done": "完成",
@@ -3194,7 +3251,8 @@
         "skill_select": "選擇要使用的技能",
         "skip": "跳過",
         "target_function": "設置傷害計算目標函數，如傷害、DPS等",
-        "top_actions": "使用頂部按鈕分享配置、自動構築、保存項目等"
+        "top_actions": "使用頂部按鈕分享配置、自動構築、保存項目等",
+        "weapon_select": "點擊這裡更換武器/設定精煉"
     },
     "UI_CHAR_SUBTITLE_2102": "UI_CHAR_SUBTITLE_2102",
     "UI_CHAR_SUBTITLE_3202": "UI_CHAR_SUBTITLE_3202",
@@ -3205,6 +3263,9 @@
         "updateErrorMessage": "下載或安裝更新時出錯，請稍後重試",
         "updateFailed": "更新失敗",
         "updating": "更新中..."
+    },
+    "walnut-list": {
+        "title": "密函列表"
     },
     "weapon-detail": {
         "title": "武器詳情"

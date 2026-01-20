@@ -2780,11 +2780,13 @@
         "damage_per_energy_per_second": "毎神智毎秒ダメージ",
         "damage_per_second": "毎秒ダメージ",
         "desc": "キャラクター/武器/スキルビルド",
+        "description": "説明",
         "dynamic_prop": "動的属性",
         "enemy": "敵",
         "enemy_level": "敵のレベル",
         "enemy_resistance": "敵耐性",
         "enemy_type": "タイプ",
+        "enter_description": "説明を入力してください",
         "equipment_preview": "装備プレビュー",
         "export_code": "コードをコピーする",
         "general_attributes": "総合属性",
@@ -2807,12 +2809,14 @@
         "refine": "精錬",
         "reset_config": "リセット",
         "resonance_gain": "和鳴増益",
+        "save": "保存",
         "save_project": "プロジェクトの保存",
         "select_character": "キャラクターを選択",
         "select_mod_slot": "MOD - スロットを選択します",
         "select_skill_weapon": "スキル/武器を選択",
         "selected_count": "{{count}}個選択済み",
         "share": "共有",
+        "share_build": "ビルド共有",
         "shield": "シールド",
         "shot_damage": "弾片ダメージ",
         "simulator": "シミュレーション",
@@ -2843,6 +2847,7 @@
         "copy": "コピー",
         "deleteRoomConfirm": "ルームを削除してもよろしいですか？",
         "deleteRoomFailed": "削除に失敗しました",
+        "desc": "バグ報告/交流",
         "edit": "編集",
         "edited": "(編集済み)",
         "follow": "フォロー",
@@ -2871,6 +2876,29 @@
         "unlimited": "無制限",
         "you": "あなた"
     },
+    "damageResult": {
+        "critDamage": {
+            "highCritNoTrigger": "高クリティカル未発動",
+            "highCritTrigger": "高クリティカル発動",
+            "lowCritNoTrigger": "低クリティカル未発動",
+            "lowCritTrigger": "低クリティカル発動",
+            "title": "クリティカルダメージ"
+        },
+        "error": "エラー",
+        "expectedDamage": {
+            "expected": "期待ダメージ",
+            "noHpDamage": "HPダメージなし",
+            "title": "期待ダメージ"
+        },
+        "expectedValues": {
+            "expectedCritNoTrigger": "期待クリティカル未発動",
+            "expectedCritTrigger": "期待クリティカル発動",
+            "highCritExpectedTrigger": "高クリティカル期待発動",
+            "lowCritExpectedTrigger": "低クリティカル期待発動",
+            "title": "期待値"
+        },
+        "title": "ダメージ結果"
+    },
     "database": {
         "abyss_dungeon": "深淵ダンジョン",
         "abyss_dungeon_desc": "深淵ダンジョン情報とバフを確認",
@@ -2879,6 +2907,8 @@
         "draft_desc": "設計図情報と必要材料を確認",
         "dungeon": "ダンジョン",
         "dungeon_desc": "ダンジョン情報と報酬ドロップを確認",
+        "fish": "釣り",
+        "fish_desc": "釣り場の詳細収益計算",
         "map": "マップ",
         "map_desc": "マップのマーカーを表示",
         "mod": "モッド",
@@ -2890,10 +2920,13 @@
         "rank": "ランキング報酬",
         "rank_desc": "ランキング大会の報酬を確認",
         "title": "データベース",
+        "walnut": "クルミ",
+        "walnut_desc": "クルミの確率情報を表示し、模擬抽選",
         "weapon": "武器",
         "weapon_desc": "武器情報と属性を確認"
     },
     "dna-home": {
+        "desc": "ゲーム情報/チェックイン/投稿閲覧",
         "title": "皎皎角"
     },
     "dna-post-detail": {
@@ -2932,6 +2965,19 @@
         "title": "コンポーネントのレンダリングエラー"
     },
     "Fire Keeper Ⅰ": "ファイアキーパー Ⅰ",
+    "fish-list": {
+        "title": "釣り"
+    },
+    "flow": {
+        "desc": "ダメージ計算機ノードバージョン",
+        "title": "ノードエディター"
+    },
+    "flowEditor": {
+        "canvas": "キャンバス",
+        "nodePalette": "ノードパレット",
+        "resultPanel": "結果パネル",
+        "title": "ノードエディター"
+    },
     "game-accounts": {
         "desc": "皎皎角ログイン/チェックイン/キャラクター情報取得",
         "title": "皎皎角"
@@ -3070,10 +3116,12 @@
         "step2": "ステップ2",
         "step3": "ステップ3",
         "step4": "ステップ4",
+        "swipeHint": "スワイプで切り替え",
         "timelineStep1": "戦闘タイムラインシーケンスを作成",
         "timelineStep2": "スキル発動順序とタイミングを設定",
         "timelineStep3": "戦闘プロセスとダメージ出力をシミュレート",
         "title": "ヘルプセンター",
+        "version": "DNA Builder ヘルプセンター",
         "workflow": "使用フロー"
     },
     "home": {
@@ -3090,6 +3138,10 @@
     "inventory": {
         "desc": "ウェッジと武器の装備をカスタマイズする",
         "title": "在庫管理"
+    },
+    "levelup": {
+        "desc": "キャラクター、武器、マジックウェッジの育成資源要件を計算",
+        "title": "育成計算"
     },
     "main": {
         "btn_collapse_menu": "メニューを折りたたむ",
@@ -3144,8 +3196,12 @@
         "onlyOnce": "一回だけ",
         "zhouben": "週替わりボス"
     },
+    "room": {
+        "remove": "ルームを削除"
+    },
     "S级蓄力攻击伤害": "Lv..S溜め攻撃ダメージ",
     "setting": {
+        "account": "アカウント",
         "ai": "AI大模型設定",
         "aiApiKey": "APIキー",
         "aiApiKeyTip": "智譜AIオープンプラットフォームからAPIキーを取得",
@@ -3187,6 +3243,7 @@
     },
     "tour": {
         "back": "前へ",
+        "char_mods": "キャラクターにマジックウェッジを装備し、属性を向上させ、必要に応じてBUFFと効果を追加",
         "char_tabs": "キャラクター、近接、遠隔、または同律武器を切り替えるにはここをクリック",
         "damage_result": "計算後のダメージ結果をここに表示",
         "done": "完了",
@@ -3195,7 +3252,8 @@
         "skill_select": "使用するスキルを選択",
         "skip": "スキップ",
         "target_function": "ダメージ計算の目標関数を設定します（例：ダメージ、DPSなど）",
-        "top_actions": "上部のボタンで設定の共有、自動構築、プロジェクトの保存などを行います"
+        "top_actions": "上部のボタンで設定の共有、自動構築、プロジェクトの保存などを行います",
+        "weapon_select": "ここをクリックして武器を変更/精錬を設定"
     },
     "UI_CHAR_SUBTITLE_2102": "UI_CHAR_SUBTITLE_2102",
     "UI_CHAR_SUBTITLE_3202": "UI_CHAR_SUBTITLE_3202",
@@ -3206,6 +3264,9 @@
         "updateErrorMessage": "更新のダウンロードまたはインストール中にエラーが発生しました。後でもう一度お試しください",
         "updateFailed": "更新に失敗しました",
         "updating": "更新中..."
+    },
+    "walnut-list": {
+        "title": "クルミリスト"
     },
     "weapon-detail": {
         "title": "武器の詳細"
