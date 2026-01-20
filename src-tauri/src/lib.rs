@@ -482,7 +482,6 @@ pub fn run() {
         {
             use sysinfo::System;
             use tauri::menu::*;
-            use tauri::tray::*;
             use window_vibrancy::*;
             let mut sys = System::new_all();
             sys.refresh_all();
@@ -512,10 +511,6 @@ pub fn run() {
                 .check("Mica_Dark", "Mica_Dark")
                 .check("Mica_Tabbed", "Mica_Tabbed")
                 .check("Mica_Tabbed_Dark", "Mica_Tabbed_Dark")
-                .build()?;
-            let menu = MenuBuilder::new(app)
-                .items(&[&submenu])
-                .text("exit", "退出 (&Q)")
                 .build()?;
 
             let set_mat_check = move |x: &str| {

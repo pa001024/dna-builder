@@ -275,7 +275,7 @@ function resetAiSettings() {
                 </div>
             </article>
 
-            <article>
+            <article v-if="!env.isMSStore">
                 <h2 class="text-sm font-bold m-2">
                     {{ $t("setting.ai") }}
                 </h2>

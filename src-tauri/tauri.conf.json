@@ -22,8 +22,7 @@
                 "transparent": true,
                 "minWidth": 330,
                 "minHeight": 430,
-                "dragDropEnabled": true,
-                "devtools": false
+                "dragDropEnabled": true
             }
         ],
         "security": {

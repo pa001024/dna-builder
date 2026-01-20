@@ -72,7 +72,7 @@ const items = [
         name: "ai",
         path: "/ai",
         icon: "ri:robot-2-line",
-        show: env.isApp,
+        show: env.isApp && !env.isMSStore,
     },
     {
         name: "help",
