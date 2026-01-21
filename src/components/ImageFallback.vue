@@ -12,7 +12,9 @@ const props = defineProps({
     },
 })
 
-const { isLoading, error } = useImage({ src: props.src })
+const { isLoading, error } = useImage({
+    src: props.src,
+})
 </script>
 
 <template>

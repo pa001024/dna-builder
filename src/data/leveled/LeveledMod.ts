@@ -53,7 +53,7 @@ export class LeveledMod implements Mod {
      */
     static fromDNA(dnaMod: import("dna-api").DNAModesBean) {
         if (modMap.has(+dnaMod.id)) {
-            return new LeveledMod(+dnaMod.id)
+            return new LeveledMod(+dnaMod.id, dnaMod.level)
         }
         if (+dnaMod.id === -1) return null
         return new LeveledMod({

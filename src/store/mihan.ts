@@ -2,7 +2,7 @@ import { isPermissionGranted, requestPermission, sendNotification } from "@tauri
 import { useLocalStorage } from "@vueuse/core"
 import { useSound } from "@vueuse/sound"
 import { t } from "i18next"
-import { watchEffect } from "vue"
+import { watch } from "vue"
 import { getInstanceInfo } from "@/api/external"
 import { missionsIngameQuery } from "@/api/graphql"
 import { env } from "../env"
@@ -19,25 +19,30 @@ export class MihanNotify {
     sfx = useSound("/sfx/notice.mp3")
     watch = false
     constructor() {
-        watchEffect(() => {
-            const ui = useUIStore()
-            if (ui.mihanVisible) {
-                this.updateMihanData()
+        const ui = useUIStore()
+        watch(
+            () => ui.mihanVisible,
+            async val => {
+                if (val) {
+                    await this.updateMihanData(true)
+                }
             }
-        })
+        )
 
-        watchEffect(() => {
-            if (this.mihanEnableNotify.value) {
+        watch(this.mihanEnableNotify, val => {
+            if (val) {
                 this.startWatch()
             }
         })
     }
-    async updateMihanData() {
-        if (this.mihanData.value && !this.isOutdated()) return true
+    async updateMihanData(force = false) {
+        if (this.mihanData.value && !this.isOutdated() && !force) return true
         const setting = useSettingStore()
         const api = await setting.getDNAAPI()
         if (api) {
             // 用户登录尝试使用DNAAPI获取密函
+            // 模拟别的请求 防止返回空值
+            await Promise.all([api.getCommonConfig(), api.getMhSwitchStatus(), api.home.isHaveSignin(), api.getMine()])
             const data = await api.defaultRoleForTool()
             if (data?.data?.instanceInfo) {
                 const missions = data.data.instanceInfo.map(v => v.instances.map(v => v.name.replace("勘探/无尽", "勘察/无尽")))

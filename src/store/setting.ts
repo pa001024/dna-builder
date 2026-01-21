@@ -92,7 +92,16 @@ export const useSettingStore = defineStore("setting", {
                 kf_token: user.kf_token,
                 fetchFn: tauriFetch,
             })
+            const res = await api.loginLog()
+            if (res.msg.includes("失效")) {
+                const res = await api.refreshToken(user.refreshToken)
+                if (res.is_success && res.data) {
+                    api.token = res.data.token
+                    await db.dnaUsers.update(user.id, { token: res.data.token })
+                }
+            }
             apiCache = api
+            ;(window as any).DNAAPI = api
             apiCacheKey = user.uid
             return api
         },

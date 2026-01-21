@@ -22,6 +22,12 @@ interface TimelineItem {
     isSelected: boolean
 }
 
+// 血量曲线点接口定义
+interface HealthPoint {
+    time: number
+    value: number
+}
+
 // 时间轨道接口定义
 interface TimelineTrack {
     id: string
@@ -45,6 +51,7 @@ const tracks = reactive<TimelineTrack[]>([
 ])
 const trackHeight = ref(60)
 const items = reactive<TimelineItem[]>([])
+const healthPoints = reactive<HealthPoint[]>([])
 const isDragging = ref(false)
 const currentDragPreview = ref<HTMLElement | null>(null)
 const dragOffset = reactive({ x: 0, y: 0 })
@@ -60,6 +67,7 @@ const timelineScale = ref(100) // 每个时间单位的像素数
 const timelineStartTime = ref(0)
 const timelineEndTime = ref(300) // 默认5分钟时间轴
 const isBuff = ref(false)
+const showHealthCurve = ref(true) // 是否显示血量曲线
 
 // 轨道编辑状态
 const editingTrackIndex = ref<number>(-1)
@@ -930,6 +938,50 @@ const formatDuration = (seconds: number): string => {
     return `${secs * 1000 + ms}ms`
 }
 
+// 计算血量曲线的SVG路径
+const healthCurvePath = computed(() => {
+    if (healthPoints.length === 0) return ""
+
+    // 排序血量点
+    const sortedPoints = [...healthPoints].sort((a, b) => a.time - b.time)
+
+    // 生成路径
+    let path = `M ${(sortedPoints[0].time - timelineStartTime.value) * timelineScale.value} ${100 - sortedPoints[0].value}`
+
+    for (let i = 1; i < sortedPoints.length; i++) {
+        const point = sortedPoints[i]
+        const x = (point.time - timelineStartTime.value) * timelineScale.value
+        const y = 100 - point.value // 血量值映射到0-100范围
+        path += ` L ${x} ${y}`
+    }
+
+    return path
+})
+
+// 添加血量点
+const addHealthPoint = (time: number, value: number) => {
+    // 确保血量值在0-100范围内
+    const validValue = Math.max(0, Math.min(100, value))
+    const validTime = Math.max(timelineStartTime.value, Math.min(timelineEndTime.value, time))
+
+    healthPoints.push({ time: validTime, value: validValue })
+}
+
+// 清除血量曲线
+const clearHealthCurve = () => {
+    healthPoints.splice(0, healthPoints.length)
+}
+
+// 生成示例血量曲线
+const generateSampleHealthCurve = () => {
+    clearHealthCurve()
+    // 生成一个简单的波动曲线
+    for (let time = 0; time <= timelineEndTime.value; time += 5) {
+        const value = 50 + 40 * Math.sin(time * 0.1) + Math.random() * 10
+        addHealthPoint(time, value)
+    }
+}
+
 // 计算可见刻度
 const visibleTimeMarks = computed(() => {
     const marks = []
@@ -1074,9 +1126,13 @@ const getTimelineItems = () => {
 const loadTimeline = (index: number) => {
     const raw = timelineData.value[index].items
     const trackNames = timelineData.value[index].tracks
+    const hpData = timelineData.value[index].hp || []
     currentTimelineName.value = timelineData.value[index].name
     items.length = 0
     tracks.length = 0
+    healthPoints.length = 0
+
+    // 加载轨道
     tracks.push(
         ...trackNames.map((name, index) => ({
             id: `track-${index}`,
@@ -1084,8 +1140,15 @@ const loadTimeline = (index: number) => {
             name,
         }))
     )
+
+    // 加载项目
     raw.forEach(item => {
         addItem(item.i, item.t, item.d, item.n, item.l)
+    })
+
+    // 加载血量曲线，转换为HealthPoint格式
+    hpData.forEach(([time, value]) => {
+        healthPoints.push({ time, value })
     })
 }
 const addTimeline = () => {
@@ -1095,6 +1158,7 @@ const addTimeline = () => {
         name: newName,
         tracks: tracks.map(track => track.name),
         items: getTimelineItems(),
+        hp: healthPoints.map(point => [point.time, point.value] as [number, number]),
     })
 }
 const editingTimelineIndex = ref(-1)
@@ -1102,6 +1166,7 @@ const editTimelineName = ref("")
 const saveTimeline = (index: number) => {
     timelineData.value[index].items = getTimelineItems()
     timelineData.value[index].tracks = tracks.map(track => track.name)
+    timelineData.value[index].hp = healthPoints.map(point => [point.time, point.value] as [number, number])
 }
 const renameTimeline = (index: number) => {
     editTimelineName.value = timelineData.value[index].name
@@ -1124,6 +1189,11 @@ const finishEditTimelineName = () => {
             ui.showErrorMessage(`时间线名称不能与技能名称相同`)
             return
         }
+        // 检查非法符号 ()+-*/.
+        if (/[()+\-*/.]/.test(editTimelineName.value)) {
+            ui.showErrorMessage(`时间线名称不能包含 ()+-*/. 等符号`)
+            return
+        }
         timelineData.value[editingTimelineIndex.value].name = editTimelineName.value
         editingTimelineIndex.value = -1
     }
@@ -1134,6 +1204,7 @@ const exportTimelineJson = () => {
         name: newName,
         tracks: tracks.map(track => track.name),
         items: getTimelineItems(),
+        hp: healthPoints.map(point => [point.time, point.value]),
     })
     const blob = new Blob([json], { type: "application/json" })
     const url = URL.createObjectURL(blob)
@@ -1164,6 +1235,7 @@ const importTimelineJson = () => {
                             name: json.name,
                             tracks: json.tracks,
                             items: json.items,
+                            hp: json.hp || [],
                         }
                         if (index !== -1) {
                             if (!(await ui.showDialog("确认覆盖", `时间线 ${json.name} 已存在，是否覆盖？`))) {
@@ -1301,6 +1373,15 @@ const importTimelineJson = () => {
             <div class="flex space-x-3 ml-auto items-center">
                 <div class="tooltip tooltip-bottom" data-tip="BUFF只会对同一轨道或其上方的技能生效">
                     <button class="btn btn-sm btn-square btn-circle">?</button>
+                </div>
+                <!-- 血量曲线控制 -->
+                <div class="flex items-center gap-2">
+                    <label class="label">
+                        <span class="label-text text-sm font-semibold text-secondary whitespace-nowrap">血量曲线</span>
+                        <input v-model="showHealthCurve" type="checkbox" class="toggle toggle-secondary" />
+                    </label>
+                    <button class="btn btn-xs btn-secondary" @click="generateSampleHealthCurve">生成示例</button>
+                    <button v-if="healthPoints.length > 0" class="btn btn-xs btn-error" @click="clearHealthCurve">清除</button>
                 </div>
                 <div class="p-2 font-orbitron">{{ zoomLevel }}x</div>
                 <div class="btn btn-ghost btn-square border-0" title="缩小" @click="zoomOut">
@@ -1531,6 +1612,32 @@ const importTimelineJson = () => {
                     :style="{ width: `${300 * timelineScale}px` }"
                     @mousedown="startSelection"
                 >
+                    <!-- 血量曲线 -->
+                    <svg
+                        v-if="showHealthCurve && healthPoints.length > 0"
+                        class="absolute top-0 left-0 right-0 h-20 z-10 opacity-80"
+                        :style="{ height: `${trackHeight * 0.33}px` }"
+                    >
+                        <path
+                            :d="healthCurvePath"
+                            fill="none"
+                            stroke="#ef4444"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                        <!-- 血量点标记 -->
+                        <circle
+                            v-for="(point, index) in healthPoints"
+                            :key="`health-point-${index}`"
+                            :cx="(point.time - timelineStartTime) * timelineScale"
+                            :cy="100 - point.value"
+                            r="3"
+                            fill="#ef4444"
+                            stroke="white"
+                            stroke-width="1"
+                        />
+                    </svg>
                     <!-- 轨道上的项目 -->
                     <ContextMenu v-for="item in items" :key="item.id">
                         <template #menu>

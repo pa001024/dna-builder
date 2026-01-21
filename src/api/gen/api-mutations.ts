@@ -511,6 +511,7 @@ export const likeBuildMutation = typedMutation<Types.Build, { id: string }>(/* G
         likeBuild(id: $id) {
             id
             isLiked
+            likes
         }
     }
 `)
@@ -520,6 +521,7 @@ export const unlikeBuildMutation = typedMutation<Types.Build, { id: string }>(/*
         unlikeBuild(id: $id) {
             id
             isLiked
+            likes
         }
     }
 `)

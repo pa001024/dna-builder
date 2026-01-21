@@ -160,14 +160,15 @@
         "title": "构筑对比"
     },
     "char-build": {
+        "actions": "动作序列",
         "auto_build": "自动构筑",
         "basic_settings": "基本设置",
         "boss": "首领",
         "buff_list": "BUFF列表",
+        "char": "角色",
         "char_attributes": "角色属性",
         "char_info": "角色信息",
         "char_mod_config": "角色MOD配置",
-        "character": "角色",
         "custom_buff": "自定义BUFF",
         "damage": "伤害",
         "damage_per_continuous_energy": "每持续神智伤害",

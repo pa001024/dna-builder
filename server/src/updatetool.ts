@@ -26,6 +26,8 @@ const sleep = (ms: number) => {
 async function fetchMissionsFromDNA() {
     try {
         const dnaAPI = getDNAAPI()
+        // 模拟别的请求 防止返回空值
+        await Promise.all([dnaAPI.getCommonConfig(), dnaAPI.getMhSwitchStatus(), dnaAPI.home.isHaveSignin(), dnaAPI.getMine()])
         const res = await dnaAPI.defaultRoleForTool()
         if (res.is_success && res.data?.instanceInfo) {
             const missions = res.data.instanceInfo.map(item => item.instances.map(v => v.name))

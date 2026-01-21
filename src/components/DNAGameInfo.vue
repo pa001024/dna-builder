@@ -309,7 +309,7 @@ async function generateScreenshot() {
                     </div>
 
                     <!-- 锻造信息 -->
-                    <div v-if="shortNoteInfo.draftInfo" class="mt-6">
+                    <div v-if="shortNoteInfo.draftInfo" class="mt-6 print:hidden">
                         <!-- 锻造列表 -->
                         <div class="space-y-3">
                             <div class="text-lg font-semibold mb-3">
@@ -338,7 +338,7 @@ async function generateScreenshot() {
                                         <div class="flex justify-between items-start mb-2">
                                             <h4 class="text-lg font-bold">{{ draft.productName }}</h4>
                                             <span class="text-sm bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                                                已拥有: {{ draft.draftCompleteNum }}
+                                                已完成: {{ draft.draftCompleteNum }}
                                             </span>
                                         </div>
 
@@ -356,7 +356,7 @@ async function generateScreenshot() {
 
                                         <!-- 时间信息 -->
                                         <div class="flex justify-between items-center text-sm">
-                                            <span class="text-base-content/70">铸造时间:</span>
+                                            <span class="text-base-content/70">剩余时间:</span>
                                             <span class="font-medium text-primary">
                                                 {{
                                                     calculateRealEndTime(

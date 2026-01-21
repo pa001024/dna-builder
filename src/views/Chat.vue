@@ -145,7 +145,9 @@ onBeforeMount(() => {
             <RouterView v-slot="{ Component, route: { path } }">
                 <transition name="slide-right">
                     <Suspense>
-                        <component :is="Component" :key="path" :room="actived" />
+                        <div class="w-full h-full overflow-hidden">
+                            <component :is="Component" :key="path" :room="actived" />
+                        </div>
                         <template #fallback>
                             <div class="w-full h-full flex justify-center items-center">
                                 <span class="loading loading-spinner loading-md"></span>

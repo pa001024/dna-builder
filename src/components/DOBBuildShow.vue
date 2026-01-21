@@ -1,10 +1,20 @@
 <script setup lang="ts">
 import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref } from "vue"
-import { Build, buildQuery, buildsWithCountQuery, deleteBuildMutation, updateBuildMutation } from "@/api/graphql"
+import {
+    Build,
+    buildQuery,
+    buildsWithCountQuery,
+    deleteBuildMutation,
+    likeBuildMutation,
+    unlikeBuildMutation,
+    updateBuildMutation,
+} from "@/api/graphql"
 import { useCharSettings } from "@/composables/useCharSettings"
+import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
+import { copyText } from "@/util"
 
 const props = defineProps<{
     charName: string
@@ -182,6 +192,40 @@ async function deleteBuild() {
     }
 }
 
+function copyLink(url: string) {
+    copyText(url)
+    ui.showSuccessMessage("链接已复制")
+}
+
+// 点赞/取消点赞
+async function toggleLike(build: Build) {
+    // 检查用户是否已登录
+    if (!userStore.id) {
+        ui.showErrorMessage("请先登录后再进行点赞操作")
+        return
+    }
+
+    try {
+        if (build.isLiked) {
+            // 取消点赞
+            const result = await unlikeBuildMutation({ id: build.id })
+            if (result) {
+                build.isLiked = result.isLiked
+                build.likes = result.likes
+            }
+        } else {
+            // 点赞
+            const result = await likeBuildMutation({ id: build.id })
+            if (result) {
+                build.isLiked = result.isLiked
+                build.likes = result.likes
+            }
+        }
+    } catch (error) {
+        ui.showErrorMessage("点赞操作失败:", error instanceof Error ? error.message : "未知错误")
+    }
+}
+
 // 加载更多
 async function loadMore() {
     if (builds.value.length < totalCount.value) {
@@ -259,9 +303,14 @@ defineExpose({
                     <div class="card-body p-4">
                         <!-- 标题和标签 -->
                         <div class="flex items-start justify-between mb-2">
-                            <h3 class="card-title text-base line-clamp-2 flex-1">
+                            <a
+                                :href="`${env.endpoint}/char/${charId}/${build.id}`"
+                                title="点击复制链接"
+                                @click.prevent="copyLink(`${env.endpoint}/char/${charId}/${build.id}`)"
+                                class="card-title text-base line-clamp-2 flex-1 link"
+                            >
                                 {{ build.title }}
-                            </h3>
+                            </a>
                             <div class="flex gap-1 ml-2">
                                 <div v-if="build.isRecommended" class="badge badge-warning badge-sm">
                                     <Icon icon="ri:star-fill" class="w-3 h-3" />
@@ -271,7 +320,7 @@ defineExpose({
                                 </div>
                             </div>
                         </div>
-                        <div class="text-sm text-base-content/60 line-clamp-2 flex-1">{{ build.desc }}</div>
+                        <div class="text-sm text-base-content/60 line-clamp-2 flex-1">{{ build.desc || "作者很懒没填任何东西..." }}</div>
 
                         <!-- 用户信息 -->
                         <div v-if="build.user" class="flex items-center gap-2 mb-3">
@@ -292,11 +341,14 @@ defineExpose({
                                     <Icon icon="ri:eye-line" class="w-4 h-4" />
                                     <span>{{ build.views }}</span>
                                 </div>
-                                <div class="flex items-center gap-1">
+                                <div
+                                    class="flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity"
+                                    @click="toggleLike(build)"
+                                >
                                     <Icon
                                         :icon="build.isLiked ? 'ri:heart-fill' : 'ri:heart-line'"
                                         class="w-4 h-4"
-                                        :class="build.isLiked ? 'text-red-500' : ''"
+                                        :class="build.isLiked ? 'text-secondary' : ''"
                                     />
                                     <span>{{ build.likes }}</span>
                                 </div>

@@ -11,6 +11,11 @@ const code = ref("")
 const captchaId = "a9d7b33f6daf81efea5e3dcea8d92bd7"
 const dev_code = ref(uuid())
 
+const api = new DNAAPI({
+    dev_code: dev_code.value,
+    fetchFn: tauriFetch,
+})
+
 function showSuccessMessage(message: string) {
     successMessage.value = message
     setTimeout(() => {
@@ -30,27 +35,13 @@ function uuid(): string {
         return v.toString(16)
     })
 }
+
 async function getSMSCode(validate: any) {
-    const formData = new URLSearchParams()
-    formData.append("isCaptcha", "1")
-    formData.append("mobile", phone.value)
-    formData.append("vJson", JSON.stringify(validate))
-    formData.append("timestamp", Date.now().toString())
-    const response = await tauriFetch("https://dnabbs-api.yingxiong.com/user/getSmsCode", {
-        method: "POST",
-        body: formData,
-        headers: {
-            devcode: dev_code.value,
-            source: "ios",
-            version: "3.11.0",
-            "content-type": "application/x-www-form-urlencoded; charset=utf-8",
-        },
-    })
-    const data = await response.json()
-    if (data.code === 200) {
+    const response = await api.getSmsCode(phone.value, JSON.stringify(validate))
+    if (response.is_success) {
         // showSuccessMessage("验证码发送成功")
     } else {
-        showErrorMessage(`验证码发送失败: ${data.msg}`)
+        showErrorMessage(`验证码发送失败: ${response.msg}`)
     }
 }
 const login = async () => {
@@ -66,22 +57,18 @@ const login = async () => {
     try {
         // 向父窗口发送登录成功消息
         if (window.parent) {
-            const api = new DNAAPI({
-                dev_code: dev_code.value,
-                fetchFn: tauriFetch,
-            })
-            const data = await api.login(phone.value, code.value)
-            if (data.code === 200 && data.data) {
+            const res = await api.login(phone.value, code.value)
+            if (res.is_success && res.data) {
                 window.parent.postMessage(
                     {
                         type: "LOGIN_SUCCESS",
                         dev_code: dev_code.value,
-                        user: { ...data.data },
+                        user: { ...res.data },
                     },
                     "*"
                 )
             } else {
-                showErrorMessage(`登录失败: ${data.msg}`)
+                showErrorMessage(`登录失败: ${res.msg}`)
                 return
             }
         }

@@ -4,13 +4,13 @@ import { aesDecryptImageUrl, build_signature, build_upload_signature, type Heade
 
 export class DNABaseAPI {
     public fetchFn?: typeof fetch
-    public is_h5 = false
     public RSA_PUBLIC_KEY =
         "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDGpdbezK+eknQZQzPOjp8mr/dP+QHwk8CRkQh6C6qFnfLH3tiyl0pnt3dePuFDnM1PUXGhCkQ157ePJCQgkDU2+mimDmXh0oLFn9zuWSp+U8uLSLX3t3PpJ8TmNCROfUDWvzdbnShqg7JfDmnrOJz49qd234W84nrfTHbzdqeigQIDAQAB"
     public BASE_URL = "https://dnabbs-api.yingxiong.com/"
     public KF_BASE_URL = "https://kf.yingxiong.com/"
     public uploadKey: string = ""
     public sign_api_urls = new Set<string>()
+    public baseHeaders: Record<string, string> = {}
 
     public dev_code = ""
     public token = ""
@@ -21,16 +21,36 @@ export class DNABaseAPI {
             token?: string
             kf_token?: string
             fetchFn?: typeof fetch
-            is_h5?: boolean
             rsa_public_key?: string
+            mode?: "ios" | "android"
         } = {}
     ) {
         this.fetchFn = options.fetchFn
-        if (options.is_h5 !== undefined) this.is_h5 = options.is_h5
         if (options.rsa_public_key !== undefined) this.RSA_PUBLIC_KEY = options.rsa_public_key
         if (options.dev_code !== undefined) this.dev_code = options.dev_code
         if (options.token !== undefined) this.token = options.token
         if (options.kf_token !== undefined) this.kf_token = options.kf_token
+        if (options.mode === "android") {
+            this.baseHeaders = {
+                "log-header": "I am the log request header.",
+                countrycode: "CN",
+                version: "1.2.0",
+                versioncode: "7",
+                source: "android",
+                "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": "okhttp/3.10.0",
+            }
+        } else {
+            this.baseHeaders = {
+                "log-header": "I am the log request header.",
+                countrycode: "CN",
+                version: "1.2.0",
+                versioncode: "7",
+                source: "ios",
+                "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": "DoubleHelix/3 CFNetwork/3860.300.31 Darwin/25.2.0",
+            }
+        }
     }
 
     async fileUpload(url: string, data: FormData) {
@@ -77,29 +97,22 @@ export class DNABaseAPI {
             kf,
         } = options || {}
 
-        const CONTENT_TYPE = "application/x-www-form-urlencoded"
-        const iosBaseHeader = {
-            version: "1.2.0",
-            source: "ios",
-            "Content-Type": CONTENT_TYPE,
-            "User-Agent": "DoubleHelix/3 CFNetwork/3860.300.31 Darwin/25.2.0",
-        }
         const h5BaseHeader = {
             version: "3.11.0",
             source: "h5",
-            "Content-Type": CONTENT_TYPE,
+            "Content-Type": "application/x-www-form-urlencoded",
             "User-Agent":
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
         }
         const kfBaseHeader = {
             Authorization: kf_token,
             Referer: `https://kf.yingxiong.com/kf2.0/user-center?game_id=2277&herot=${Date.now()}`,
-            "Content-Type": CONTENT_TYPE,
+            "Content-Type": "application/x-www-form-urlencoded",
             "User-Agent":
                 "Mozilla/5.0 (Linux; Android 16; PLQ110 Build/BP2A.250605.015; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/143.0.7499.192 Mobile Safari/537.36CP6.TgzO Hero/1.1.4",
         }
-        const is_h5 = this.is_h5 || h5 || false
-        const headers: Record<string, any> = kf ? kfBaseHeader : is_h5 ? h5BaseHeader : iosBaseHeader
+        const is_h5 = h5 || false
+        const headers: Record<string, any> = kf ? kfBaseHeader : is_h5 ? h5BaseHeader : this.baseHeaders
         if (dev_code && !kf) {
             headers.devcode = dev_code
         }
@@ -166,7 +179,6 @@ export class DNABaseAPI {
                             "/encourage/signin/signin",
                             "/user/refreshToken",
                             "/user/signIn",
-                            "/user/refreshToken",
                             "/role/defaultRole",
                             "/role/list",
                             "/role/getShortNoteInfo",
@@ -277,6 +289,10 @@ export class DNABaseAPI {
                     } catch {}
                 }
 
+                if (typeof raw_res.data === "object" && Object.keys(raw_res.data).length === 0) {
+                    throw new Error("空返回值")
+                }
+
                 return new TimeBasicResponse<T>(raw_res)
             } catch (e) {
                 console.error(`请求失败: ${(e as Error).message}`)
@@ -295,73 +311,69 @@ export class DNABaseAPI {
  * 所有子模块都通过这个类代理到共享的 BaseAPI 实例
  */
 export abstract class DNASubModule {
-    protected _base: DNABaseAPI
+    base: DNABaseAPI
 
     constructor(base: DNABaseAPI) {
-        this._base = base
+        this.base = base
     }
 
     // 代理属性访问
     get dev_code(): string {
-        return this._base.dev_code
+        return this.base.dev_code
     }
 
     get token(): string {
-        return this._base.token
+        return this.base.token
     }
     set token(value: string) {
-        this._base.token = value
+        this.base.token = value
     }
 
     get kf_token(): string {
-        return this._base.kf_token
+        return this.base.kf_token
     }
     set kf_token(value: string) {
-        this._base.kf_token = value
+        this.base.kf_token = value
     }
 
     get fetchFn(): typeof fetch | undefined {
-        return this._base.fetchFn
-    }
-
-    get is_h5(): boolean {
-        return this._base.is_h5
+        return this.base.fetchFn
     }
 
     get RSA_PUBLIC_KEY(): string {
-        return this._base.RSA_PUBLIC_KEY
+        return this.base.RSA_PUBLIC_KEY
     }
 
     get BASE_URL(): string {
-        return this._base.BASE_URL
+        return this.base.BASE_URL
     }
 
     get uploadKey(): string {
-        return this._base.uploadKey
+        return this.base.uploadKey
     }
 
     // 代理方法
     async getRsaPublicKey(): Promise<string> {
-        return this._base.getRsaPublicKey()
+        return this.base.getRsaPublicKey()
     }
 
     /**
      * 图片上传
      */
     async fileUpload(url: string, data: FormData) {
-        return await this._base.fileUpload(url, data)
+        return await this.base.fileUpload(url, data)
     }
 
     public async _dna_request<T = any>(url: string, data?: any, options?: RequestOptions): Promise<TimeBasicResponse<T>> {
-        return this._base._dna_request(url, data, options)
+        return this.base._dna_request(url, data, options)
     }
 
     public async _dna_request_h5<T = any>(url: string, data?: any, options?: RequestOptions): Promise<TimeBasicResponse<T>> {
-        return this._base._dna_request_h5(url, data, options)
+        return this.base._dna_request_h5(url, data, options)
     }
 
     public async _dna_request_kf<T = any>(url: string, data?: any, options?: RequestOptions): Promise<TimeBasicResponse<T>> {
-        return this._base._dna_request_kf(url, data, options)
+        return this.base._dna_request_kf(url, data, options)
     }
 
     public async getHeaders(options?: {
@@ -372,6 +384,6 @@ export abstract class DNASubModule {
         token?: string
         h5?: boolean
     }): Promise<HeadersPayload> {
-        return this._base.getHeaders(options)
+        return this.base.getHeaders(options)
     }
 }

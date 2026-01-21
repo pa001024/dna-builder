@@ -1560,39 +1560,37 @@ export interface DNAImgCoverBean {
 }
 
 export interface DNAAttributeBean {
-    atk: string
-    def: string
+    atk: number
+    def: number
     enmityValue: string
-    maxES: string
-    maxHp: string
-    maxSp: string
-    skillEfficiency: string
+    maxES: number
+    maxHp: number
+    maxSp: number
+    skillEfficiency: string // "105%"
     skillIntensity: string
     skillRange: string
     skillSustain: string
-    strongValue: string
+    strongValue: string // "0%"
     weaponTags: string[]
 }
 
 export interface DNAModesBean {
     icon: string
-    id: string
+    id: number
     level: number
     name: string
     quality: number
 }
 
 export interface DNASkillBean {
-    bgColor: number
     grandeLevel: number
     icon: string
-    level: string
-    skillId: string
+    level: number
+    skillId: number
     skillName: string
 }
 
 export interface DNATraceBean {
-    bgColor: number
     description: string
     icon: string
     isUnLock: boolean

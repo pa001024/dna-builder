@@ -460,7 +460,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     <!-- Character Selection -->
                                     <div class="bg-base-200 rounded-lg flex items-center gap-4">
                                         <div class="text-xs text-gray-400">
-                                            {{ $t("char-build.character") }}
+                                            {{ $t("char-build.char") }}
                                         </div>
                                         <CharSelect v-model="config.selectedChar" />
                                     </div>
