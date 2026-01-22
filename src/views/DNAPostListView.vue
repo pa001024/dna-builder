@@ -3,7 +3,7 @@ import { useInfiniteScroll } from "@vueuse/core"
 import { DNAAPI, DNAPostListBean } from "dna-api"
 import { computed, onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { initEmojiDict } from "@/util"
+import { initEmojiDict } from "@/utils/emoji"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
 

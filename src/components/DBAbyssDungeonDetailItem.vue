@@ -1,18 +1,16 @@
 <script lang="ts" setup>
-import type { AbyssDungeon } from "../data/d/abyss.data"
-import { charMap, monsterMap } from "../data/d/index"
-import type { Char } from "../data/data-types"
+import { ref } from "vue"
+import type { AbyssDungeon, Char } from "@/data"
+import { charMap, Faction, LeveledChar, LeveledMonster } from "@/data"
+import { formatBigNumber } from "@/util"
 import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
 import { getDropModeText, getRewardDetails } from "../utils/reward-utils"
 
-defineProps<{
+const props = defineProps<{
     dungeon: AbyssDungeon
 }>()
 
-function getMonsterName(monsterId: number): string {
-    const monster = monsterMap.get(monsterId)
-    return monster?.n || `ID: ${monsterId}`
-}
+const currentLevel = ref(180)
 
 function getCharName(charId: number): string {
     const char = charMap.get(charId)
@@ -21,6 +19,12 @@ function getCharName(charId: number): string {
 
 function getChar(charId: number): Char | undefined {
     return charMap.get(charId)
+}
+
+// 获取阵营名称
+function getFactionName(faction: number | undefined): string {
+    if (faction === undefined) return "其他"
+    return Faction[faction] || `${faction}`
 }
 </script>
 
@@ -132,25 +136,25 @@ function getChar(charId: number): Char | undefined {
 
             <div v-if="dungeon.cid" class="card bg-base-100 border border-base-200 rounded-lg p-3">
                 <h3 class="font-bold mb-2">关联角色</h3>
-                <div v-if="getChar(dungeon.cid)" class="space-y-2">
+                <div v-for="char in [getChar(dungeon.cid)!]" :key="dungeon.cid" class="space-y-2">
                     <div class="flex items-center gap-2">
-                        <RouterLink :to="`/char/${dungeon.cid}`" class="font-medium link link-primary">
-                            {{ getChar(dungeon.cid)?.名称 }}
+                        <img :src="LeveledChar.url(char.icon)" alt="角色头像" class="w-8 h-8 rounded-full" />
+                        <RouterLink :to="`/char/${char.id}`" class="font-medium link link-primary">
+                            {{ char.名称 }}
                         </RouterLink>
-                        <span class="text-xs text-base-content/70">ID: {{ dungeon.cid }}</span>
+                        <span class="text-xs text-base-content/70">ID: {{ char.id }}</span>
                     </div>
                     <div class="grid grid-cols-2 gap-2 text-sm">
                         <div class="flex justify-between">
                             <span class="text-base-content/70">元素属性</span>
-                            <span>{{ getChar(dungeon.cid)?.属性 }}</span>
+                            <span>{{ char.属性 }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-base-content/70">精通</span>
-                            <span>{{ getChar(dungeon.cid)?.精通?.join(", ") }}</span>
+                            <span>{{ char.精通?.join("/") }}</span>
                         </div>
                     </div>
                 </div>
-                <div v-else class="text-sm text-base-content/70">角色ID: {{ dungeon.cid }} (未找到角色数据)</div>
             </div>
 
             <div v-if="dungeon.mb" class="card bg-base-100 border border-base-200 rounded-lg p-3">
@@ -184,17 +188,73 @@ function getChar(charId: number): Char | undefined {
                 </div>
             </div>
 
+            <!-- 怪物列表 -->
             <div v-if="dungeon.m?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
                 <h3 class="font-bold mb-2">怪物列表 ({{ dungeon.m.length }}种)</h3>
-                <div class="flex flex-wrap gap-1">
-                    <RouterLink
-                        v-for="monsterId in dungeon.m"
-                        :key="monsterId"
-                        :to="`/db/monster/${monsterId}`"
-                        class="px-2 py-1 bg-base-200 rounded text-xs hover:bg-base-300 transition-colors cursor-pointer"
+                <!-- 等级控制 -->
+                <div class="flex items-center gap-4 mb-3">
+                    <span class="text-sm min-w-12">Lv. {{ currentLevel }}</span>
+                    <input
+                        v-model.number="currentLevel"
+                        type="range"
+                        class="range range-primary range-xs grow"
+                        min="1"
+                        max="180"
+                        step="1"
+                    />
+                </div>
+                <div class="space-y-3">
+                    <div
+                        v-for="mon in dungeon.m.map(id => new LeveledMonster(id, currentLevel, false))"
+                        :key="mon.id"
+                        class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors"
                     >
-                        {{ $t(getMonsterName(monsterId)) }}
-                    </RouterLink>
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-10 h-10">
+                                    <img :src="mon.url" class="w-full h-full object-cover rounded" :alt="mon.n" />
+                                </div>
+                                <div>
+                                    <RouterLink
+                                        :to="`/db/monster/${mon.id}`"
+                                        class="px-2 py-1 bg-base-300 rounded text-xs hover:bg-base-400 transition-colors cursor-pointer"
+                                    >
+                                        {{ $t(mon.n) }}
+                                    </RouterLink>
+                                    <span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-base-300">
+                                        {{ $t(getFactionName(mon.f)) }}
+                                    </span>
+                                    <span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-base-300"> Lv. {{ mon.等级 }} </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2 text-xs">
+                            <div class="bg-base-300 rounded p-1 text-center">
+                                <div class="text-base-content/70">攻击</div>
+                                <div class="font-bold text-primary">
+                                    {{ formatBigNumber(mon.atk) }}
+                                </div>
+                            </div>
+                            <div class="bg-base-300 rounded p-1 text-center">
+                                <div class="text-base-content/70">防御</div>
+                                <div class="font-bold text-success">
+                                    {{ formatBigNumber(mon.def) }}
+                                </div>
+                            </div>
+                            <div class="bg-base-300 rounded p-1 text-center">
+                                <div class="text-base-content/70">生命</div>
+                                <div class="font-bold text-error">
+                                    {{ formatBigNumber(mon.hp) }}
+                                </div>
+                            </div>
+                            <div v-if="mon.es !== undefined" class="bg-base-300 rounded p-1 text-center">
+                                <div class="text-base-content/70">护盾</div>
+                                <div class="font-bold text-info">
+                                    {{ formatBigNumber(mon.es || 0) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

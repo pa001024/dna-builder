@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watchEffect } from "vue"
-import { type EmojiStyle, getEmoji } from "../util"
+import { EmojiStyle, getEmoji } from "@/utils/emoji"
 
 const props = withDefaults(
     defineProps<{

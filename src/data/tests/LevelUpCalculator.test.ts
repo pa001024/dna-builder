@@ -1,5 +1,6 @@
-import { beforeEach, describe, expect, it, afterEach } from "vitest"
-import { LevelUpCalculator, type ResourceCost } from "../LevelUpCalculator"
+import { describe, expect, it } from "vitest"
+import type { ResourceCost } from "../LevelUpCalculator"
+import { LevelUpCalculatorImpl } from "../LevelUpCalculatorImpl"
 
 describe("LevelUpCalculator", () => {
     const mockResourceNeeds: ResourceCost = {
@@ -14,19 +15,8 @@ describe("LevelUpCalculator", () => {
         海妖之羽翼·鼓舞: [100, 31301, "Mod"],
     }
 
-    // 创建计算器实例
-    let calculator: LevelUpCalculator
-
-    beforeEach(() => {
-        calculator = new LevelUpCalculator()
-    })
-
-    afterEach(() => {
-        calculator.destroy()
-    })
-
-    it("test estimateTime", async () => {
-        const result = await calculator.estimateTime(mockResourceNeeds)
+    it("test estimateTime", () => {
+        const result = LevelUpCalculatorImpl.estimateTime(mockResourceNeeds)
         console.log(result)
         // 检查天数必须大于0
         expect(result.days).toBeGreaterThan(0)

@@ -1,18 +1,29 @@
 <script lang="ts" setup>
-import type { Dungeon } from "../data"
-import { monsterMap } from "../data/d/index"
-import { getDungeonType } from "../utils/dungeon-utils"
-import { getDropModeText, getRewardDetails } from "../utils/reward-utils"
+import { ref, watch } from "vue"
+import type { Dungeon } from "@/data"
+import { Faction, LeveledMonster } from "@/data"
+import { formatBigNumber } from "@/util"
+import { getDungeonType } from "@/utils/dungeon-utils"
+import { getDropModeText, getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
 
-defineProps<{
+const props = defineProps<{
     dungeon: Dungeon
 }>()
 
-// 获取怪物名称
-function getMonsterName(monsterId: number): string {
-    const monster = monsterMap.get(monsterId)
-    return monster?.n || `ID: ${monsterId}`
+const currentLevel = ref(props.dungeon.lv)
+
+// 获取阵营名称
+function getFactionName(faction: number | undefined): string {
+    if (faction === undefined) return "其他"
+    return Faction[faction] || `${faction}`
 }
+
+watch(
+    () => props.dungeon.id,
+    () => {
+        currentLevel.value = props.dungeon.lv
+    }
+)
 </script>
 
 <template>
@@ -62,31 +73,129 @@ function getMonsterName(monsterId: number): string {
 
             <!-- 普通怪物 -->
             <div v-if="dungeon.m?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
+                <!-- 等级控制 -->
+                <div class="flex items-center gap-4 mb-3">
+                    <span class="text-sm min-w-12">Lv. {{ currentLevel }}</span>
+                    <input
+                        v-model.number="currentLevel"
+                        type="range"
+                        class="range range-primary range-xs grow"
+                        min="1"
+                        max="180"
+                        step="1"
+                    />
+                </div>
                 <h3 class="font-bold mb-2">普通怪物 ({{ dungeon.m.length }}个)</h3>
-                <div class="flex flex-wrap gap-1">
-                    <RouterLink
-                        v-for="monsterId in dungeon.m"
-                        :key="monsterId"
-                        :to="`/db/monster/${monsterId}`"
-                        class="px-2 py-1 bg-base-200 rounded text-xs hover:bg-base-300 transition-colors cursor-pointer"
+                <div class="space-y-3">
+                    <div
+                        v-for="mon in dungeon.m.map(id => new LeveledMonster(id, currentLevel))"
+                        :key="mon.id"
+                        class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors"
                     >
-                        {{ $t(getMonsterName(monsterId)) }}
-                    </RouterLink>
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-10 h-10">
+                                    <img :src="mon.url" class="w-full h-full object-cover rounded" :alt="mon.n" />
+                                </div>
+                                <div>
+                                    <RouterLink
+                                        :to="`/db/monster/${mon.id}`"
+                                        class="px-2 py-1 bg-base-300 rounded text-xs hover:bg-base-400 transition-colors cursor-pointer"
+                                    >
+                                        {{ $t(mon.n) }}
+                                    </RouterLink>
+                                    <span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-base-300">
+                                        {{ $t(getFactionName(mon.f)) }}
+                                    </span>
+                                    <span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-base-300"> Lv. {{ mon.等级 }} </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2 text-xs">
+                            <div class="bg-base-300 rounded p-1 text-center">
+                                <div class="text-base-content/70">攻击</div>
+                                <div class="font-bold text-primary">
+                                    {{ formatBigNumber(mon.atk) }}
+                                </div>
+                            </div>
+                            <div class="bg-base-300 rounded p-1 text-center">
+                                <div class="text-base-content/70">防御</div>
+                                <div class="font-bold text-success">
+                                    {{ formatBigNumber(mon.def) }}
+                                </div>
+                            </div>
+                            <div class="bg-base-300 rounded p-1 text-center">
+                                <div class="text-base-content/70">生命</div>
+                                <div class="font-bold text-error">
+                                    {{ formatBigNumber(mon.hp) }}
+                                </div>
+                            </div>
+                            <div v-if="mon.es !== undefined" class="bg-base-300 rounded p-1 text-center">
+                                <div class="text-base-content/70">护盾</div>
+                                <div class="font-bold text-info">
+                                    {{ formatBigNumber(mon.es || 0) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- 特殊怪物 -->
             <div v-if="dungeon.sm?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
                 <h3 class="font-bold mb-2">特殊怪物 ({{ dungeon.sm.length }}个)</h3>
-                <div class="flex flex-wrap gap-1">
-                    <RouterLink
-                        v-for="smId in dungeon.sm"
-                        :key="smId"
-                        :to="`/db/monster/${smId}`"
-                        class="px-2 py-1 bg-base-200 rounded text-xs hover:bg-base-300 transition-colors cursor-pointer"
+                <div class="space-y-3">
+                    <div
+                        v-for="mon in dungeon.sm.map(id => new LeveledMonster(id, currentLevel))"
+                        :key="mon.id"
+                        class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors"
                     >
-                        {{ $t(getMonsterName(smId)) }}
-                    </RouterLink>
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-10 h-10">
+                                    <img :src="mon.url" class="w-full h-full object-cover rounded" :alt="mon.n" />
+                                </div>
+                                <div>
+                                    <RouterLink
+                                        :to="`/db/monster/${mon.id}`"
+                                        class="px-2 py-1 bg-base-300 rounded text-xs hover:bg-base-400 transition-colors cursor-pointer"
+                                    >
+                                        {{ $t(mon.n) }}
+                                    </RouterLink>
+                                    <span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-base-300">
+                                        {{ $t(getFactionName(mon.f)) }}
+                                    </span>
+                                    <span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-base-300"> Lv. {{ mon.等级 }} </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2 text-xs">
+                            <div class="bg-base-300 rounded p-1 text-center">
+                                <div class="text-base-content/70">攻击</div>
+                                <div class="font-bold text-primary">
+                                    {{ formatBigNumber(mon.atk) }}
+                                </div>
+                            </div>
+                            <div class="bg-base-300 rounded p-1 text-center">
+                                <div class="text-base-content/70">防御</div>
+                                <div class="font-bold text-success">
+                                    {{ formatBigNumber(mon.def) }}
+                                </div>
+                            </div>
+                            <div class="bg-base-300 rounded p-1 text-center">
+                                <div class="text-base-content/70">生命</div>
+                                <div class="font-bold text-error">
+                                    {{ formatBigNumber(mon.hp) }}
+                                </div>
+                            </div>
+                            <div v-if="mon.es !== undefined" class="bg-base-300 rounded p-1 text-center">
+                                <div class="text-base-content/70">护盾</div>
+                                <div class="font-bold text-info">
+                                    {{ formatBigNumber(mon.es || 0) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -94,24 +203,28 @@ function getMonsterName(monsterId: number): string {
             <div v-if="dungeon.r?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
                 <h3 class="font-bold mb-2">奖励列表</h3>
                 <div class="space-y-3">
-                    <div v-for="rewardId in dungeon.r" :key="rewardId" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors">
+                    <div
+                        v-for="reward in dungeon.r.map(id => getRewardDetails(id)).filter((r): r is RewardItemType => !!r)"
+                        :key="reward.id"
+                        class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors"
+                    >
                         <div class="flex items-center justify-between mb-1">
-                            <span class="text-sm font-medium">奖励组 {{ rewardId }}</span>
+                            <span class="text-sm font-medium">奖励组 {{ reward.id }}</span>
 
                             <span
                                 class="text-xs px-1.5 py-0.5 rounded"
                                 :class="
-                                    getDropModeText(getRewardDetails(rewardId)?.m || '') === '独立'
+                                    getDropModeText(reward.m || '') === '独立'
                                         ? 'bg-success text-success-content'
                                         : 'bg-warning text-warning-content'
                                 "
                             >
-                                {{ getDropModeText(getRewardDetails(rewardId)?.m || "") }}
-                                <span v-if="getRewardDetails(rewardId)?.totalP">总容量 {{ getRewardDetails(rewardId)!.totalP }}</span>
+                                {{ getDropModeText(reward.m || "") }}
+                                <span v-if="reward.totalP">总容量 {{ reward.totalP }}</span>
                             </span>
                         </div>
                         <!-- 使用 RewardItem 组件显示奖励 -->
-                        <RewardItem :reward="getRewardDetails(rewardId)!" />
+                        <RewardItem :reward="reward" />
                     </div>
                 </div>
             </div>
@@ -120,23 +233,27 @@ function getMonsterName(monsterId: number): string {
             <div v-if="dungeon.sr?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
                 <h3 class="font-bold mb-2">特殊奖励 ({{ dungeon.sr.length }}组)</h3>
                 <div class="space-y-3">
-                    <div v-for="rewardId in dungeon.sr" :key="rewardId" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors">
+                    <div
+                        v-for="reward in dungeon.sr.map(id => getRewardDetails(id)).filter((r): r is RewardItemType => !!r)"
+                        :key="reward.id"
+                        class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors"
+                    >
                         <div class="flex items-center justify-between mb-1">
-                            <span class="text-sm font-medium">特殊奖励组 {{ rewardId }}</span>
+                            <span class="text-sm font-medium">特殊奖励组 {{ reward.id }}</span>
                             <span
                                 class="text-xs px-1.5 py-0.5 rounded"
                                 :class="
-                                    getDropModeText(getRewardDetails(rewardId)?.m || '') === '独立'
+                                    getDropModeText(reward.m || '') === '独立'
                                         ? 'bg-success text-success-content'
                                         : 'bg-warning text-warning-content'
                                 "
                             >
-                                {{ getDropModeText(getRewardDetails(rewardId)?.m || "") }}
-                                <span v-if="getRewardDetails(rewardId)?.totalP">总容量 {{ getRewardDetails(rewardId)!.totalP }}</span>
+                                {{ getDropModeText(reward.m || "") }}
+                                <span v-if="reward.totalP">总容量 {{ reward.totalP }}</span>
                             </span>
                         </div>
                         <!-- 使用 RewardItem 组件显示奖励 -->
-                        <RewardItem :reward="getRewardDetails(rewardId)!" />
+                        <RewardItem :reward="reward" />
                     </div>
                 </div>
             </div>

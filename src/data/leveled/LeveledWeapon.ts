@@ -189,16 +189,14 @@ export class LeveledWeapon {
         })
         if (this.buff) {
             const buff = this.buff
+            this.buff.ratio = (this._精炼 + 5) / 10
             const props = this.buff.getProperties()
-            Object.keys(props).forEach(prop => {
-                const maxValue = buff[prop] || 0
-                const currentValue = (maxValue / 10) * (this._精炼 + 5)
-                const baseValue = (buff.baseValue / 10) * (this._精炼 + 5)
-                this.buffProps[prop] = currentValue
-                if (buff.描述.includes(`{%}`)) {
-                    buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(baseValue * 100).toFixed(1)}%`)
-                }
-            })
+            this.buffProps = props
+            if (buff._originalBuffData.描述.includes(`{%}`)) {
+                const vals: number[] = Object.values(props)
+                let i = 0
+                buff.描述 = buff._originalBuffData.描述.replace(/\{%\}/g, () => `${(vals[i++] * 100).toFixed(1)}%`)
+            }
         }
     }
 

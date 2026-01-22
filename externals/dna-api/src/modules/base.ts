@@ -161,6 +161,7 @@ export class DNABaseAPI {
     }
 
     async needSign(url: string): Promise<boolean> {
+        if (url === "config/getCommonConfig") return false
         if (this.sign_api_urls.size === 0) {
             try {
                 await this.initializeSignConfig()
@@ -211,7 +212,7 @@ export class DNABaseAPI {
     }
 
     public async _dna_request<T = any>(url: string, data?: any, options?: RequestOptions): Promise<TimeBasicResponse<T>> {
-        let { method = "POST", sign, h5, kf, refer, params, max_retries = 3, retry_delay = 1, timeout = 10000 } = options || {}
+        let { method = "POST", sign, h5, kf, refer, params, max_retries = 3, retry_delay = 2000, timeout = 10000 } = options || {}
         if (url.startsWith("/")) url = url.slice(1)
 
         // 如果未明确指定 sign，则根据 URL 自动判断

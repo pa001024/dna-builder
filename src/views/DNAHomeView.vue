@@ -4,7 +4,7 @@ import { DNAAPI, DNAMineBean } from "dna-api"
 import { computed, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
 import { useUIStore } from "@/store/ui"
-import { initEmojiDict } from "@/util"
+import { initEmojiDict } from "@/utils/emoji"
 import { useSettingStore } from "../store/setting"
 
 const setting = useSettingStore()
@@ -73,12 +73,12 @@ function handleRefreshAll() {
     <div class="w-full h-full flex flex-col">
         <div class="flex-none flex justify-between items-center p-4 bg-base-100 border-b border-base-200">
             <div class="tabs tabs-border gap-2">
-                    <div class="tab" :class="{ 'tab-active': activeTab === '公告' }" @click="activeTab = '公告'">公告</div>
-                    <div class="tab" :class="{ 'tab-active': activeTab === '游戏信息' }" @click="activeTab = '游戏信息'">游戏信息</div>
-                    <div class="tab" :class="{ 'tab-active': activeTab === '论坛' }" @click="activeTab = '论坛'">论坛</div>
-                    <div class="tab" :class="{ 'tab-active': activeTab === '签到' }" @click="activeTab = '签到'">签到</div>
-                    <div class="tab" :class="{ 'tab-active': activeTab === '流水查询' }" @click="activeTab = '流水查询'">流水查询</div>
-                </div>
+                <div class="tab" :class="{ 'tab-active': activeTab === '公告' }" @click="activeTab = '公告'">公告</div>
+                <div class="tab" :class="{ 'tab-active': activeTab === '游戏信息' }" @click="activeTab = '游戏信息'">游戏信息</div>
+                <div class="tab" :class="{ 'tab-active': activeTab === '论坛' }" @click="activeTab = '论坛'">论坛</div>
+                <div class="tab" :class="{ 'tab-active': activeTab === '签到' }" @click="activeTab = '签到'">签到</div>
+                <div class="tab" :class="{ 'tab-active': activeTab === '流水查询' }" @click="activeTab = '流水查询'">流水查询</div>
+            </div>
             <RouterLink to="/dna/mine" class="flex items-center">
                 <img :src="mine?.headUrl" alt="User Head" class="w-8 h-8 rounded-full mr-2" />
                 <span>

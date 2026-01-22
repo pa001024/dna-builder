@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core"
-import { env } from "../env"
 import { DNAAPI } from "dna-api"
+import { env } from "../env"
 
 export const MATERIALS = ["None", "Blur", "Acrylic", "Mica", "Mica_Dark", "Mica_Tabbed", "Mica_Tabbed_Dark"] as const
 export async function applyMaterial(material: (typeof MATERIALS)[number]) {

@@ -17,7 +17,6 @@ import {
     weaponMap,
 } from "@/data"
 import { type CharLevelUpConfig, type LevelUpResult, type ModLevelUpConfig, type WeaponLevelUpConfig } from "@/data/LevelUpCalculator"
-import { initEmojiDict } from "@/util"
 import { getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
 import { LevelUpCalculator } from "../data/LevelUpCalculator"
 import { useSettingStore } from "../store/setting"
@@ -120,11 +119,9 @@ const filteredMods = computed(() => {
 onMounted(async () => {
     const p = await setting.getDNAAPI()
     if (!p) {
-        ui.showErrorMessage("请先登录")
         return
     }
     api = p
-    await initEmojiDict()
 })
 
 /**
@@ -224,6 +221,7 @@ async function syncChars() {
  */
 async function loadRoleInfo() {
     try {
+        await api.getMine()
         const roleRes = await api.defaultRoleForTool()
         if (roleRes.is_success && roleRes.data) {
             roleInfo.value = roleRes.data
