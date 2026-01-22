@@ -2,14 +2,35 @@ use std::{
     fs::{self, File},
     io::{self, Read, Write},
     path::{Path, PathBuf},
+    sync::Arc,
     time::Duration,
 };
 
+use lazy_static::lazy_static;
 use reqwest::multipart;
 use serde::{Deserialize, Serialize};
 use tauri::Manager;
 use zip::ZipArchive;
 mod util;
+
+// 全局HTTP客户端，用于复用连接
+lazy_static! {
+    static ref HTTP_CLIENT: Arc<reqwest::Client> = Arc::new(
+        reqwest::Client::builder()
+            // 启用keepalive，设置超时为2分钟
+            .tcp_keepalive(Some(Duration::from_secs(120)))
+            // 设置连接超时为10秒
+            .connect_timeout(Duration::from_secs(10))
+            // 设置连接池最大空闲时间为2分钟
+            .pool_idle_timeout(Some(Duration::from_secs(120)))
+            // 允许最大连接数
+            .pool_max_idle_per_host(10)
+            // 启用HTTP/2支持（默认启用）
+            .http2_prior_knowledge()
+            .build()
+            .expect("Failed to create HTTP client")
+    );
+}
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
@@ -45,8 +66,16 @@ async fn app_close(app_handle: tauri::AppHandle) {
 
 #[tauri::command]
 async fn get_local_qq(port: u32) -> String {
+    // 使用全局客户端的构建器来创建带cookie_store的客户端
+    // 注意：每次调用都会创建新客户端，但会复用底层连接池
     let client = reqwest::Client::builder()
         .cookie_store(true)
+        // 复用全局客户端的配置
+        .tcp_keepalive(Some(Duration::from_secs(120)))
+        .connect_timeout(Duration::from_secs(30))
+        .pool_idle_timeout(Some(Duration::from_secs(120)))
+        .pool_max_idle_per_host(10)
+        .http2_prior_knowledge()
         .build()
         .unwrap();
     if let Ok(res) = {
@@ -354,7 +383,7 @@ async fn fetch(
     headers: Option<Vec<(String, String)>>,
     multipart: Option<Vec<(String, FormDataValue)>>,
 ) -> Result<FetchResponse, String> {
-    let client = reqwest::Client::new();
+    let client = HTTP_CLIENT.clone();
     let mut request_builder = match method.to_uppercase().as_str() {
         "GET" => client.get(&url),
         "POST" => client.post(&url),
