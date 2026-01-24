@@ -8,8 +8,8 @@ export async function openSChat(path: string) {
 
     const win = new WebviewWindow("si", {
         url: `${location.origin}/#${path}`,
-        x: pos.x,
-        y: pos.y,
+        x: pos.x + 20,
+        y: pos.y + 20,
         minWidth: 447,
         minHeight: 392,
         width: size.width,

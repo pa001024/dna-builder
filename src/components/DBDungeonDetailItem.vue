@@ -32,9 +32,9 @@ watch(
             <!-- 详情头部 -->
             <div class="flex items-center justify-between">
                 <div>
-                    <RouterLink :to="`/db/dungeon/${dungeon.id}`" class="text-lg font-bold link link-primary">
+                    <SRouterLink :to="`/db/dungeon/${dungeon.id}`" class="text-lg font-bold link link-primary">
                         {{ dungeon.n }}
-                    </RouterLink>
+                    </SRouterLink>
                     <div class="text-sm text-base-content/70">
                         {{ dungeon.desc }}
                     </div>
@@ -98,12 +98,12 @@ watch(
                                     <img :src="mon.url" class="w-full h-full object-cover rounded" :alt="mon.n" />
                                 </div>
                                 <div>
-                                    <RouterLink
+                                    <SRouterLink
                                         :to="`/db/monster/${mon.id}`"
                                         class="px-2 py-1 bg-base-300 rounded text-xs hover:bg-base-400 transition-colors cursor-pointer"
                                     >
                                         {{ $t(mon.n) }}
-                                    </RouterLink>
+                                    </SRouterLink>
                                     <span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-base-300">
                                         {{ $t(getFactionName(mon.f)) }}
                                     </span>
@@ -156,12 +156,12 @@ watch(
                                     <img :src="mon.url" class="w-full h-full object-cover rounded" :alt="mon.n" />
                                 </div>
                                 <div>
-                                    <RouterLink
+                                    <SRouterLink
                                         :to="`/db/monster/${mon.id}`"
                                         class="px-2 py-1 bg-base-300 rounded text-xs hover:bg-base-400 transition-colors cursor-pointer"
                                     >
                                         {{ $t(mon.n) }}
-                                    </RouterLink>
+                                    </SRouterLink>
                                     <span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-base-300">
                                         {{ $t(getFactionName(mon.f)) }}
                                     </span>

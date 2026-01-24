@@ -760,7 +760,7 @@ const handleBatchAddMods = () => {
                                 <Icon icon="ri:refresh-line" />
                                 <h4 class="font-semibold">副本次数</h4>
                             </div>
-                            <RouterLink
+                            <SRouterLink
                                 :to="`/db/dungeon/${dungeon.id}`"
                                 v-for="[dungeon, [times, reason]] in Object.entries(result.timeEstimate.dungeonTimes).map(
                                     v => [dungeonMap.get(+v[0]), v[1]] as [Dungeon, [number, string]]
@@ -792,7 +792,7 @@ const handleBatchAddMods = () => {
                                     <span class="ml-auto">ID: {{ dungeon.id }}</span>
                                     <span class="text-xs opacity-70">Lv.{{ dungeon.lv }}</span>
                                 </div>
-                            </RouterLink>
+                            </SRouterLink>
                         </div>
                     </div>
 

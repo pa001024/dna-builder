@@ -64,6 +64,15 @@ const mailCode = ref("")
 const showVerifyModal = ref(false)
 const selectedVerifyRole = computed(() => roles.value.find(role => role.role_id === selectedRole.value))
 
+// 手机号登录相关状态
+const showPhoneLoginModal = ref(false)
+const phoneNumber = ref("")
+const phoneVerifyCode = ref("")
+const captchaImage = ref("")
+const captchaCode = ref("")
+const lastSmsTime = useLocalStorage("dna.propFlow.lastSmsTime", 0)
+const smsColdDown = computed(() => 1000 * 60 - (ui.timeNow - lastSmsTime.value))
+
 const handleChartResize = () => {
     chartInstance?.resize()
 }
@@ -108,7 +117,11 @@ async function checkAndRefreshKFToken() {
                 // 保存token到数据库
                 await setting.saveKFToken(newToken)
             } else {
-                ui.showErrorMessage("获取客服token失败")
+                // sdkLogin失败，显示手机号登录弹窗
+                ui.showErrorMessage("sdk登录失败，将使用手机号登录")
+                showPhoneLoginModal.value = true
+                // 自动获取验证码图片
+                await getCaptcha()
             }
         }
     } catch (e) {
@@ -213,6 +226,75 @@ async function verifyRoleMail() {
         }
     } catch (e) {
         ui.showErrorMessage("验证失败")
+    }
+}
+
+/**
+ * 获取验证码图片
+ */
+async function getCaptcha() {
+    try {
+        const res = await api.kf.captcha()
+        if (res.is_success && res.data) {
+            captchaImage.value = res.data.picPath
+        } else {
+            ui.showErrorMessage("获取验证码失败")
+        }
+    } catch (e) {
+        console.error("获取验证码失败", e)
+        ui.showErrorMessage("获取验证码失败")
+    }
+}
+
+/**
+ * 发送短信验证码
+ */
+async function sendVerifyCode() {
+    if (!phoneNumber.value || !captchaImage.value) {
+        ui.showErrorMessage("请输入手机号并获取验证码")
+        return
+    }
+
+    try {
+        const res = await api.kf.sendVerifyCode(phoneNumber.value, captchaCode.value)
+        if (res.is_success) {
+            ui.showSuccessMessage("短信验证码已发送")
+            // 开始倒计时
+            lastSmsTime.value = ui.timeNow
+        } else {
+            ui.showErrorMessage(res.msg || "发送验证码失败")
+        }
+    } catch (e) {
+        console.error("发送短信失败", e)
+        ui.showErrorMessage("发送短信失败")
+    }
+}
+
+/**
+ * 手机号登录
+ */
+async function loginByPhone() {
+    if (!phoneNumber.value || !phoneVerifyCode.value || !Number.isInteger(+phoneVerifyCode.value)) {
+        ui.showErrorMessage("请输入手机号和验证码")
+        return
+    }
+
+    try {
+        const res = await api.kf.loginByPhone(phoneNumber.value, +phoneVerifyCode.value)
+        if (res.is_success && res.data?.token) {
+            const newToken = res.data.token
+            // 保存token到数据库
+            await setting.saveKFToken(newToken)
+            ui.showSuccessMessage("登录成功")
+            showPhoneLoginModal.value = false
+            phoneNumber.value = ""
+            phoneVerifyCode.value = ""
+        } else {
+            ui.showErrorMessage(res.msg || "登录失败")
+        }
+    } catch (e) {
+        console.error("手机号登录失败", e)
+        ui.showErrorMessage("登录失败")
     }
 }
 
@@ -922,6 +1004,68 @@ defineExpose({
         <template #action>
             <button @click="showVerifyModal = false" class="btn">取消</button>
             <button @click="verifyRoleMail" class="btn btn-primary">验证</button>
+        </template>
+    </DialogModel>
+
+    <!-- 手机号登录模态框 -->
+    <DialogModel v-model="showPhoneLoginModal">
+        <h3 class="font-bold text-lg">手机号登录</h3>
+        <p class="py-4">自动登录失败, 请使用手机号登录获取客服token</p>
+
+        <div class="space-y-4">
+            <!-- 手机号输入 -->
+            <div>
+                <label class="label">
+                    <span class="label-text">手机号</span>
+                </label>
+                <input v-model="phoneNumber" type="tel" placeholder="请输入手机号" class="input input-bordered w-full" maxlength="11" />
+            </div>
+
+            <!-- 验证码图片 -->
+            <div>
+                <label class="label">
+                    <span class="label-text">图形验证码</span>
+                </label>
+                <div class="flex gap-2 items-center">
+                    <input
+                        v-model="captchaCode"
+                        type="text"
+                        placeholder="请输入图形验证码"
+                        class="input input-bordered w-full"
+                        maxlength="6"
+                    />
+                    <img
+                        v-if="captchaImage"
+                        :src="captchaImage"
+                        alt="验证码"
+                        class="w-40 h-12 object-cover border rounded cursor-pointer bg-white"
+                        @click="getCaptcha"
+                    />
+                </div>
+            </div>
+
+            <!-- 短信验证码 -->
+            <div>
+                <label class="label">
+                    <span class="label-text">短信验证码</span>
+                </label>
+                <div class="flex gap-2">
+                    <input
+                        v-model="phoneVerifyCode"
+                        type="text"
+                        placeholder="请输入短信验证码"
+                        class="input input-bordered flex-1"
+                        maxlength="6"
+                    />
+                    <button @click="sendVerifyCode" class="btn btn-secondary" :disabled="smsColdDown > 0 || captchaCode.length !== 6">
+                        {{ smsColdDown > 0 ? `${smsColdDown}s` : "发送验证码" }}
+                    </button>
+                </div>
+            </div>
+        </div>
+        <template #action>
+            <button @click="showPhoneLoginModal = false" class="btn">取消</button>
+            <button @click="loginByPhone" class="btn btn-primary">登录</button>
         </template>
     </DialogModel>
 </template>

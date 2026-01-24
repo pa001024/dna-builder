@@ -25,6 +25,7 @@ export const useSettingStore = defineStore("setting", {
             aiTemperature: useLocalStorage("ai_temperature", 0.6),
             // 皎皎角
             dnaUserId: useLocalStorage("setting_user_id", 0),
+            dnaUserUID: useLocalStorage("setting_user_uid", ""),
             showAIChat: useLocalStorage("setting_show_ai_chat", false),
             // 上次刷新时间（秒）
             lastCapInterval: useLocalStorage("last_cap_interval", 0),
@@ -86,10 +87,13 @@ export const useSettingStore = defineStore("setting", {
             const user = await this.getCurrentUser()
             if (!user) return undefined
             if (apiCache && apiCacheKey === user.uid) return apiCache
+            this.dnaUserUID = user.uid
             const api = new DNAAPI({
                 dev_code: user.dev_code,
                 token: user.token,
                 kf_token: user.kf_token,
+                debug: import.meta.env.DEV,
+                mode: "android",
                 fetchFn: tauriFetch,
             })
             const res = await api.loginLog()
@@ -109,7 +113,7 @@ export const useSettingStore = defineStore("setting", {
             const user = await this.getCurrentUser()
             if (!user) return
             await db.dnaUsers.update(user.id, { kf_token: token })
-            apiCache = null
+            // apiCache = null
         },
     },
 })

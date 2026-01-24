@@ -30,9 +30,9 @@ onMounted(async () => {
     await loadPostDetail()
 })
 
-async function loadPostDetail() {
+async function loadPostDetail(softReload = false) {
     try {
-        loading.value = true
+        if (!softReload) loading.value = true
         const res = await api.getPostDetail(postId.value)
         if (res.is_success && res.data) {
             postRes.value = res.data
@@ -49,7 +49,7 @@ async function loadPostDetail() {
 async function follow(userId: string, unfollow?: boolean) {
     const res = await api.followUser(userId, unfollow)
     if (res.is_success) {
-        await api.getFollowState(userId)
+        await loadPostDetail(true)
     }
 }
 
@@ -118,11 +118,13 @@ async function submitComment() {
                 <div class="card bg-base-100 shadow-xl">
                     <div class="card-body">
                         <div class="flex items-center gap-3 mb-2">
-                            <img
-                                :src="postRes.postDetail.headCodeUrl"
-                                alt="用户头像"
-                                class="w-10 h-10 rounded-full object-cover border border-base-300"
-                            />
+                            <SRouterLink :to="`/dna/mine/${postRes.postDetail.postUserId}`" class="cursor-pointer">
+                                <img
+                                    :src="postRes.postDetail.headCodeUrl"
+                                    alt="用户头像"
+                                    class="w-10 h-10 rounded-full object-cover border border-base-300"
+                                />
+                            </SRouterLink>
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
                                     <span class="font-medium text-base-content">{{ postRes.postDetail.userName }}</span>
@@ -181,16 +183,20 @@ async function submitComment() {
                             <div v-for="comment in postRes.comment" :key="comment.commentId" class="p-4 bg-base-200 rounded-lg">
                                 <!-- 评论头部 -->
                                 <div class="flex items-center gap-3 mb-2">
-                                    <img
-                                        :src="comment.userHeadUrl"
-                                        alt="用户头像"
-                                        class="w-10 h-10 rounded-full object-cover border border-base-300"
-                                    />
+                                    <SRouterLink :to="`/dna/mine/${comment.userId}`" class="cursor-pointer">
+                                        <img
+                                            :src="comment.userHeadUrl"
+                                            alt="用户头像"
+                                            class="w-10 h-10 rounded-full object-cover border border-base-300"
+                                        />
+                                    </SRouterLink>
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2">
                                             <span class="font-medium text-base-content">{{ comment.userName }}</span>
-                                            <span v-if="comment.isOfficial === 1" class="badge badge-primary text-xs">官方</span>
-                                            <span v-if="comment.isCreator === 1" class="badge badge-secondary text-xs">作者</span>
+                                            <span v-if="comment.isOfficial === 1" class="badge badge-sm badge-primary text-xs">官方</span>
+                                            <span v-if="comment.isCreator === 1" class="badge badge-sm badge-secondary text-xs"
+                                                >创作者</span
+                                            >
                                         </div>
                                         <div class="text-xs text-base-content/60">
                                             {{ comment.commentTime }}
@@ -282,7 +288,7 @@ async function submitComment() {
             <div v-else class="flex justify-center items-center h-full">
                 <div class="text-center">
                     <p class="text-lg mb-4">无法获取帖子详情</p>
-                    <button class="btn btn-secondary" @click="loadPostDetail">重试</button>
+                    <button class="btn btn-secondary" @click="loadPostDetail()">重试</button>
                 </div>
             </div>
         </div>

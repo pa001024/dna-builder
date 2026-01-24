@@ -76,9 +76,9 @@ function getFactionName(faction: number | undefined): string {
         <div class="p-3 space-y-4">
             <div class="p-3">
                 <div class="flex items-center gap-3 mb-3">
-                    <RouterLink :to="`/db/monster/${monster.id}`" class="text-lg font-bold link link-primary">
+                    <SRouterLink :to="`/db/monster/${monster.id}`" class="text-lg font-bold link link-primary">
                         {{ $t(monster.n) }}
-                    </RouterLink>
+                    </SRouterLink>
                     <div class="text-sm text-base-content/70 flex items-center gap-2">
                         <span class="px-1.5 py-0.5 rounded bg-base-200 text-xs">
                             {{ $t(getFactionName(monster.f)) }}

@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { useInfiniteScroll } from "@vueuse/core"
-import { DNAAPI, DNAMineBean, DNAPostListBean } from "dna-api"
+import { DNAAPI, DNAMineBean, DNAPostListBean, DNARoleInfoBean } from "dna-api"
 import { computed, onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { initEmojiDict } from "@/utils/emoji"
@@ -15,21 +14,13 @@ const route = useRoute()
 
 const mineData = ref<DNAMineBean | null>(null)
 const postList = ref<DNAPostListBean[]>([])
+const roleInfo = ref<DNARoleInfoBean | null>(null)
 const loading = ref(true)
-const userId = computed(() => route.params.userId as string)
-const limit = 20
+const userId = computed(() => (route.params.userId as string) || setting.dnaUserUID)
+const activeTab = ref("游戏信息")
 
 const scrollContainer = ref<HTMLElement | null>(null)
 const isEnd = ref(false)
-useInfiniteScroll(scrollContainer, async () => {
-    if (loading.value || isEnd.value) return
-    loading.value = true
-    await loadPosts(~~(postList.value.length / limit) + 1)
-    loading.value = false
-    if (postList.value.length === 0 || postList.value.length % limit !== 0) {
-        isEnd.value = true
-    }
-})
 
 onMounted(async () => {
     const p = await setting.getDNAAPI()
@@ -41,6 +32,7 @@ onMounted(async () => {
     api = p
     await initEmojiDict()
     await loadMine()
+    await loadRole()
 })
 
 async function loadMine() {
@@ -61,19 +53,17 @@ async function loadMine() {
     }
 }
 
-async function loadPosts(page = 1) {
+async function loadRole() {
     try {
         loading.value = true
-        const res = userId.value ? await api.getOtherMine(userId.value) : await api.getMine()
+        const res = userId.value ? await api.defaultRoleForTool(2, userId.value) : await api.defaultRoleForTool()
         if (res.is_success && res.data) {
-            mineData.value = res.data.mine
-            postList.value = page === 1 ? res.data.postList : [...postList.value, ...res.data.postList]
-            isEnd.value = res.data.hasNext === 0
+            roleInfo.value = res.data.roleInfo
         } else {
-            ui.showErrorMessage(res.msg || "获取帖子列表失败")
+            ui.showErrorMessage(res.msg || "获取游戏信息失败")
         }
     } catch (e) {
-        ui.showErrorMessage("获取帖子列表失败", e)
+        ui.showErrorMessage("获取游戏信息失败", e)
     } finally {
         loading.value = false
     }
@@ -93,80 +83,70 @@ async function loadPosts(page = 1) {
 
         <ScrollArea class="flex-1 p-4" @loadref="r => (scrollContainer = r)">
             <div v-if="mineData" class="space-y-4">
-                <div class="card bg-base-200">
+                <div class="card bg-base-100">
                     <div class="card-body">
                         <div class="flex items-start gap-4">
                             <img :src="mineData.headUrl" alt="avatar" class="w-20 h-20 rounded-full object-cover" />
                             <div class="flex-1">
                                 <h2 class="text-xl font-bold">
                                     {{ mineData.userName }}
+                                    <span class="badge badge-sm">Lv. {{ mineData.levelTotal }}</span>
                                 </h2>
-                                <p class="text-sm text-base-content/70">ID: {{ mineData.userId }}</p>
-                                <p class="text-sm text-base-content/70 mt-1">等级: {{ mineData.levelTotal }}</p>
+                                <p class="text-sm text-base-content/70">ID: {{ mineData.userId || userId }}</p>
+                                <p class="text-sm text-base-content/70 mt-1">{{ mineData.signature }}</p>
                             </div>
                         </div>
-                        <div class="grid grid-cols-4 gap-4 mt-4 text-center">
-                            <div>
-                                <p class="text-lg font-bold">
-                                    {{ mineData.postCount }}
-                                </p>
-                                <p class="text-sm text-base-content/70">帖子</p>
+                        <div class="flex gap-4 mt-4 flex-wrap">
+                            <div class="flex gap-1 items-baseline">
+                                <span class="text-lg font-bold">{{ mineData.followCount }}</span>
+                                <span class="text-sm text-base-content/70">关注</span>
                             </div>
-                            <div>
-                                <p class="text-lg font-bold">
-                                    {{ mineData.followCount }}
-                                </p>
-                                <p class="text-sm text-base-content/70">关注</p>
+                            <div class="flex gap-1 items-baseline">
+                                <span class="text-lg font-bold">{{ mineData.fansCount }}</span>
+                                <span class="text-sm text-base-content/70">粉丝</span>
                             </div>
-                            <div>
-                                <p class="text-lg font-bold">
-                                    {{ mineData.fansCount }}
-                                </p>
-                                <p class="text-sm text-base-content/70">粉丝</p>
+                            <div class="flex gap-1 items-baseline">
+                                <span class="text-lg font-bold">{{ mineData.likeCount }}</span>
+                                <span class="text-sm text-base-content/70">获赞</span>
                             </div>
-                            <div>
-                                <p class="text-lg font-bold">
-                                    {{ mineData.likeCount }}
-                                </p>
-                                <p class="text-sm text-base-content/70">点赞</p>
+                            <div class="flex gap-1 items-baseline">
+                                <span class="text-lg font-bold">{{ mineData.collectCount }}</span>
+                                <span class="text-sm text-base-content/70">收藏</span>
                             </div>
-                        </div>
-                        <div class="divider" />
-                        <div class="grid grid-cols-4 gap-4 text-center text-sm">
-                            <div>
-                                <p class="text-base-content/70">收藏</p>
-                                <p>{{ mineData.collectCount }}</p>
+                            <div class="flex gap-1 items-baseline">
+                                <span class="text-lg font-bold">{{ mineData.commentCount }}</span>
+                                <span class="text-sm text-base-content/70">评论</span>
                             </div>
-                            <div>
-                                <p class="text-base-content/70">评论</p>
-                                <p>{{ mineData.commentCount }}</p>
+                            <div class="flex gap-1 items-baseline">
+                                <span class="text-lg font-bold">{{ mineData.postCount }}</span>
+                                <span class="text-sm text-base-content/70">帖子</span>
                             </div>
-                            <div>
-                                <p class="text-base-content/70">文章</p>
-                                <p>{{ mineData.postCount }}</p>
-                            </div>
-                            <div>
-                                <p class="text-base-content/70">精华</p>
-                                <p>{{ mineData.goldNum }}</p>
+                            <div class="flex gap-1 items-baseline">
+                                <span class="text-lg font-bold">{{ mineData.goldNum }}</span>
+                                <span class="text-sm text-base-content/70">金币</span>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div v-if="postList.length > 0" class="space-y-4">
-                    <DNAPostListItem v-for="post in postList" :key="post.postId" :post="post" />
+                <div class="tabs tabs-border gap-2">
+                    <div class="tab" :class="{ 'tab-active': activeTab === '游戏信息' }" @click="activeTab = '游戏信息'">游戏信息</div>
+                    <div class="tab" :class="{ 'tab-active': activeTab === '帖子' }" @click="activeTab = '帖子'">帖子</div>
+                </div>
+                <!-- 游戏角色信息 -->
+                <div v-if="roleInfo && activeTab === '游戏信息'" class="card bg-base-200">
+                    <DNAGameInfoShow :roleInfo="roleInfo" />
                 </div>
 
-                <div v-else class="flex justify-center items-center py-8">
-                    <div class="text-center">
-                        <p class="text-lg mb-4">暂无帖子数据</p>
-                        <button class="btn btn-secondary" @click="loadMine()">刷新</button>
+                <div v-if="activeTab === '帖子'">
+                    <div v-if="postList.length > 0" class="space-y-4">
+                        <DNAPostListItem v-for="post in postList" :key="post.postId" :post="post" />
+                    </div>
+                    <div v-else class="flex justify-center items-center py-8">
+                        <div class="text-center">
+                            <p class="mb-4">暂无帖子数据</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div v-else-if="loading" class="flex justify-center items-center h-full">
-                <span class="loading loading-spinner loading-lg" />
             </div>
 
             <div v-if="loading" class="flex justify-center items-center py-4">

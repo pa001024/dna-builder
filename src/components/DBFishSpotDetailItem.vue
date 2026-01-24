@@ -338,9 +338,9 @@ function clearHistory() {
                                     <img :src="`/imgs/webp/${spot.icon}.webp`" class="w-full h-full object-cover" />
                                 </div>
                                 <div>
-                                    <RouterLink :to="`/fish/${spot.id}`" class="font-medium text-lg link link-primary">{{
+                                    <SRouterLink :to="`/fish/${spot.id}`" class="font-medium text-lg link link-primary">{{
                                         spot.name
-                                    }}</RouterLink>
+                                    }}</SRouterLink>
                                     <div class="text-sm text-base-content/70">ID: {{ spot.id }}</div>
                                 </div>
                             </div>

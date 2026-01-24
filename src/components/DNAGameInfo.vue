@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
-import { DNAAPI, DNARoleEntity, DNAShortNoteEntity } from "dna-api"
+import { DNAAPI, DNARoleEntity, DNAShortNoteEntity, DNAWeaponBean } from "dna-api"
 import { toPng } from "html-to-image"
 import { onMounted, ref } from "vue"
 import { Draft } from "@/data"
@@ -175,7 +175,7 @@ defineExpose({
     lastUpdateTime,
 })
 
-function getWeaponUnlockProgress(weapons: DNARoleEntity["roleInfo"]["roleShow"]["closeWeapons" | "langRangeWeapons"]) {
+function getWeaponUnlockProgress(weapons: DNAWeaponBean[]) {
     const my = [...new Set(weapons.filter(v => v.unLocked).map(v => v.weaponId))]
     const all = [...new Set(weapons.map(v => v.weaponId))]
     return `${my.length} / ${all.length}`

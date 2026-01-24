@@ -33,12 +33,12 @@ function getFactionName(faction: number | undefined): string {
         <div class="p-3 space-y-4">
             <div class="flex items-center justify-between">
                 <div>
-                    <RouterLink :to="`/db/abyss/${dungeon.id}`" class="text-lg font-bold link link-primary">
+                    <SRouterLink :to="`/db/abyss/${dungeon.id}`" class="text-lg font-bold link link-primary">
                         <span v-if="dungeon.sn">{{ dungeon.sn }}</span
                         >&nbsp;
                         <span v-if="dungeon.cid">{{ $t(getCharName(dungeon.cid)) }}</span>
                         #{{ getAbyssDungeonLevel(dungeon) }}
-                    </RouterLink>
+                    </SRouterLink>
                     <div class="text-sm text-base-content/70">ID: {{ dungeon.id }}</div>
                 </div>
             </div>
@@ -76,9 +76,9 @@ function getFactionName(faction: number | undefined): string {
                     </div>
                     <div v-if="dungeon.cid" class="flex justify-between">
                         <span class="text-base-content/70">关联角色</span>
-                        <RouterLink :to="`/char/${dungeon.cid}`" class="link link-primary">
+                        <SRouterLink :to="`/char/${dungeon.cid}`" class="link link-primary">
                             {{ getCharName(dungeon.cid) }}
-                        </RouterLink>
+                        </SRouterLink>
                     </div>
                 </div>
             </div>
@@ -139,9 +139,9 @@ function getFactionName(faction: number | undefined): string {
                 <div v-for="char in [getChar(dungeon.cid)!]" :key="dungeon.cid" class="space-y-2">
                     <div class="flex items-center gap-2">
                         <img :src="LeveledChar.url(char.icon)" alt="角色头像" class="w-8 h-8 rounded-full" />
-                        <RouterLink :to="`/char/${char.id}`" class="font-medium link link-primary">
+                        <SRouterLink :to="`/char/${char.id}`" class="font-medium link link-primary">
                             {{ char.名称 }}
-                        </RouterLink>
+                        </SRouterLink>
                         <span class="text-xs text-base-content/70">ID: {{ char.id }}</span>
                     </div>
                     <div class="grid grid-cols-2 gap-2 text-sm">
@@ -215,12 +215,12 @@ function getFactionName(faction: number | undefined): string {
                                     <img :src="mon.url" class="w-full h-full object-cover rounded" :alt="mon.n" />
                                 </div>
                                 <div>
-                                    <RouterLink
+                                    <SRouterLink
                                         :to="`/db/monster/${mon.id}`"
                                         class="px-2 py-1 bg-base-300 rounded text-xs hover:bg-base-400 transition-colors cursor-pointer"
                                     >
                                         {{ $t(mon.n) }}
-                                    </RouterLink>
+                                    </SRouterLink>
                                     <span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-base-300">
                                         {{ $t(getFactionName(mon.f)) }}
                                     </span>

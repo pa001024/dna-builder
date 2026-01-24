@@ -25,8 +25,6 @@ lazy_static! {
             .pool_idle_timeout(Some(Duration::from_secs(120)))
             // 允许最大连接数
             .pool_max_idle_per_host(10)
-            // 启用HTTP/2支持（默认启用）
-            .http2_prior_knowledge()
             .build()
             .expect("Failed to create HTTP client")
     );
@@ -373,6 +371,7 @@ fn apply_material(window: tauri::WebviewWindow, material: &str) -> String {
 struct FetchResponse {
     status: u16,
     body: String,
+    headers: Vec<(String, String)>,
 }
 
 #[tauri::command]
@@ -436,6 +435,13 @@ async fn fetch(
     match response {
         Ok(resp) => {
             let status = resp.status();
+            // 提取响应头
+            let headers: Vec<(String, String)> = resp
+                .headers()
+                .iter()
+                .map(|(name, value)| (name.to_string(), value.to_str().unwrap_or("").to_string()))
+                .collect();
+
             let text = match resp.text().await {
                 Ok(t) => t,
                 Err(e) => return Err(format!("Failed to read response: {}", e)),
@@ -443,6 +449,7 @@ async fn fetch(
             Ok(FetchResponse {
                 status: status.as_u16(),
                 body: text,
+                headers,
             })
         }
         Err(e) => Err(format!("Request failed: {}", e)),

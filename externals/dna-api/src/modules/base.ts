@@ -15,6 +15,8 @@ export class DNABaseAPI {
     public dev_code = ""
     public token = ""
     public kf_token = ""
+    public debug = false
+    public cookieToken = ""
     constructor(
         options: {
             dev_code?: string
@@ -23,6 +25,7 @@ export class DNABaseAPI {
             fetchFn?: typeof fetch
             rsa_public_key?: string
             mode?: "ios" | "android"
+            debug?: boolean
         } = {}
     ) {
         this.fetchFn = options.fetchFn
@@ -30,6 +33,7 @@ export class DNABaseAPI {
         if (options.dev_code !== undefined) this.dev_code = options.dev_code
         if (options.token !== undefined) this.token = options.token
         if (options.kf_token !== undefined) this.kf_token = options.kf_token
+        if (options.debug) this.debug = true
         if (options.mode === "android") {
             this.baseHeaders = {
                 "log-header": "I am the log request header.",
@@ -106,15 +110,16 @@ export class DNABaseAPI {
         }
         const kfBaseHeader = {
             Authorization: kf_token,
-            Referer: `https://kf.yingxiong.com/kf2.0/user-center?game_id=2277&herot=${Date.now()}`,
-            "Content-Type": "application/x-www-form-urlencoded",
+            Referer: `https://kf.yingxiong.com/kf2.0/im-chat`,
+            "X-Requested-With": "com.hero.dna",
+            "Content-Type": "application/json; charset=utf-8",
             "User-Agent":
                 "Mozilla/5.0 (Linux; Android 16; PLQ110 Build/BP2A.250605.015; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/143.0.7499.192 Mobile Safari/537.36CP6.TgzO Hero/1.1.4",
         }
         const is_h5 = h5 || false
-        const headers: Record<string, any> = kf ? kfBaseHeader : is_h5 ? h5BaseHeader : this.baseHeaders
+        const headers: Record<string, any> = kf ? kfBaseHeader : is_h5 ? h5BaseHeader : { ...this.baseHeaders }
         if (dev_code && !kf) {
-            headers.devcode = dev_code
+            headers.devCode = dev_code
         }
         if (refer || is_h5) {
             headers.origin = "https://dnabbs.yingxiong.com"
@@ -123,18 +128,19 @@ export class DNABaseAPI {
         if (token && !kf) {
             headers.token = token
         }
+        if (kf && this.cookieToken) {
+            headers.Cookie = this.cookieToken
+        }
         if (payload instanceof FormData) {
             const pk = await this.getRsaPublicKey()
             const { signature, key } = build_upload_signature(pk)
             headers.t = signature
             this.uploadKey = key
-
             if (exparams) {
                 for (const [key, value] of Object.entries(exparams)) {
                     payload.append(key, String(value))
                 }
             }
-
             delete headers["Content-Type"]
         } else if (typeof payload === "object") {
             if (!kf) {
@@ -145,17 +151,18 @@ export class DNABaseAPI {
                 headers.rk = rk
                 headers.tn = tn
                 headers.sa = sa
-            }
 
-            if (exparams) {
-                Object.assign(payload, exparams)
+                if (exparams) {
+                    Object.assign(payload, exparams)
+                }
+                const params = new URLSearchParams()
+                Object.entries(payload).forEach(([key, value]) => {
+                    params.append(key, String(value))
+                })
+                payload = params.toString()
+            } else {
+                payload = JSON.stringify(payload)
             }
-
-            const params = new URLSearchParams()
-            Object.entries(payload).forEach(([key, value]) => {
-                params.append(key, String(value))
-            })
-            payload = params.toString()
         }
         return { headers, payload }
     }
@@ -212,7 +219,7 @@ export class DNABaseAPI {
     }
 
     public async _dna_request<T = any>(url: string, data?: any, options?: RequestOptions): Promise<TimeBasicResponse<T>> {
-        let { method = "POST", sign, h5, kf, refer, params, max_retries = 3, retry_delay = 2000, timeout = 10000 } = options || {}
+        let { method = "POST", sign, h5, kf, refer, params, max_retries = 3, retry_delay = 2000, timeout = 3000 } = options || {}
         if (url.startsWith("/")) url = url.slice(1)
 
         // 如果未明确指定 sign，则根据 URL 自动判断
@@ -234,16 +241,21 @@ export class DNABaseAPI {
             const { headers: h } = await this.getHeaders({ refer, h5, kf })
             headers = h
         }
-
+        if (this.debug) console.debug("[_dna_request] url:", url, "headers:", headers, "data:", data)
+        let lastError: Error | null = null
         for (let attempt = 0; attempt < max_retries; attempt++) {
             try {
                 let body: string | FormData | undefined = data
                 if (data && typeof data === "object" && !(data instanceof FormData)) {
-                    const p = new URLSearchParams()
-                    Object.entries(data).forEach(([key, value]) => {
-                        if (value !== undefined) p.append(key, String(value))
-                    })
-                    body = p.toString()
+                    if (!kf) {
+                        const p = new URLSearchParams()
+                        Object.entries(data).forEach(([key, value]) => {
+                            if (value !== undefined) p.append(key, String(value))
+                        })
+                        body = p.toString()
+                    } else {
+                        body = JSON.stringify(data)
+                    }
                 }
                 const fetchOptions: RequestInit =
                     method === "GET"
@@ -270,6 +282,13 @@ export class DNABaseAPI {
                 clearTimeout(timeoutId)
 
                 const contentType = response.headers.get("content-type") || ""
+                // 处理kf的cookie
+                if (kf) {
+                    const cookie = response.headers.get("set-cookie")
+                    if (cookie) {
+                        this.cookieToken = cookie.split(";")[0]
+                    }
+                }
                 let raw_res: any
 
                 if (contentType.includes("text/")) {
@@ -289,21 +308,29 @@ export class DNABaseAPI {
                         }
                     } catch {}
                 }
-
-                if (typeof raw_res.data === "object" && Object.keys(raw_res.data).length === 0) {
+                if (this.debug) console.debug("[_dna_request] raw_res:", raw_res)
+                if (
+                    typeof raw_res.data === "object" &&
+                    raw_res.data !== null &&
+                    Object.keys(raw_res.data).length === 0 &&
+                    url.includes("role")
+                ) {
                     throw new Error("空返回值")
                 }
 
                 return new TimeBasicResponse<T>(raw_res)
             } catch (e) {
-                console.error(`请求失败: ${(e as Error).message}`)
-                if (attempt < max_retries - 1) {
-                    await new Promise(resolve => setTimeout(resolve, retry_delay * 2 ** attempt))
+                if (e instanceof Error && e.message.includes("AbortError")) {
+                    await new Promise(resolve => setTimeout(resolve, retry_delay))
+                } else {
+                    console.trace(`请求失败: ${(e as Error).message}`)
+                    lastError = e as Error
+                    break
                 }
             }
         }
 
-        return TimeBasicResponse.err("请求服务器失败,已达最大重试次数")
+        return TimeBasicResponse.err(lastError?.message || "请求服务器失败,已达最大重试次数")
     }
 }
 

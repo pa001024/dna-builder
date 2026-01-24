@@ -79,12 +79,12 @@ function handleRefreshAll() {
                 <div class="tab" :class="{ 'tab-active': activeTab === '签到' }" @click="activeTab = '签到'">签到</div>
                 <div class="tab" :class="{ 'tab-active': activeTab === '流水查询' }" @click="activeTab = '流水查询'">流水查询</div>
             </div>
-            <RouterLink to="/dna/mine" class="flex items-center">
+            <SRouterLink to="/dna/mine" class="flex items-center">
                 <img :src="mine?.headUrl" alt="User Head" class="w-8 h-8 rounded-full mr-2" />
                 <span>
                     {{ mine?.userName || "?" }}
                 </span>
-            </RouterLink>
+            </SRouterLink>
             <div class="flex items-center gap-4">
                 <span class="text-xs text-gray-500"> 最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }} </span>
                 <Tooltip tooltip="刷新当前页面" side="bottom">

@@ -50,9 +50,9 @@ const draftDungeons = computed<Dungeon[]>(() => {
             <div class="p-3">
                 <div class="flex items-center gap-3 mb-3">
                     <div class="text-lg font-bold">
-                        <RouterLink :to="`/db/draft/${draft.id}`" class="text-lg font-bold link link-primary">
+                        <SRouterLink :to="`/db/draft/${draft.id}`" class="text-lg font-bold link link-primary">
                             图纸: {{ draft.n }}
-                        </RouterLink>
+                        </SRouterLink>
                         <div class="text-xs opacity-70">ID: {{ draft.id }}</div>
                     </div>
                 </div>
@@ -168,13 +168,13 @@ const draftDungeons = computed<Dungeon[]>(() => {
                                 :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
                                 :effdesc="mod.效果"
                             >
-                                <RouterLink
+                                <SRouterLink
                                     :to="`/db/mod/${item.id}`"
                                     class="flex justify-between items-center p-2 bg-base-300 rounded text-sm"
                                 >
                                     <span class="text-base-content/70">{{ item.n }}</span>
                                     <span class="font-medium text-primary">{{ item.c }}</span>
-                                </RouterLink>
+                                </SRouterLink>
                             </ShowProps>
                             <div v-else class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
                                 <span class="text-base-content/70">{{ item.n }}</span>
@@ -192,7 +192,7 @@ const draftDungeons = computed<Dungeon[]>(() => {
                             <template #tooltip>
                                 <DBDungeonDetailItem :dungeon="dungeon" />
                             </template>
-                            <RouterLink
+                            <SRouterLink
                                 :to="`/db/dungeon/${dungeon.id}`"
                                 class="flex flex-col gap-1 p-2 bg-base-300 rounded hover:bg-base-content/10 transition-colors"
                             >
@@ -218,7 +218,7 @@ const draftDungeons = computed<Dungeon[]>(() => {
                                         期望: {{ +getDraftDropInfo(dungeon, draft.id).times!.toFixed(2) }}次
                                     </span>
                                 </div>
-                            </RouterLink>
+                            </SRouterLink>
                         </FullTooltip>
                     </div>
                 </div>
