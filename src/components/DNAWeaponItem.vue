@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { DNAWeaponBean } from "dna-api"
+import { LeveledWeapon } from "@/data"
 import { useUIStore } from "../store/ui"
 
 defineProps<{
@@ -15,15 +16,10 @@ const ui = useUIStore()
         @click="weapon.unLocked ? $router.push(`/dna/weapon/${weapon.weaponId}/${weapon.weaponEid}`) : ui.showErrorMessage('武器未解锁')"
     >
         <div class="card-body bg-linear-30 from-purple-300/50 to-purple-600/50 rounded-2xl relative p-2">
-            <!-- 防止css发送refer -->
-            <img :src="weapon.icon" class="hidden" />
-            <div
-                class="absolute inset-0 pointer-events-none mask-b-from-60%"
-                :style="{
-                    backgroundImage: `url(${weapon.icon})`,
-                    backgroundSize: 'cover',
-                }"
-            ></div>
+            <img
+                class="absolute inset-0 h-full object-cover pointer-events-none mask-b-from-60%"
+                :src="LeveledWeapon.idToUrl(weapon.weaponId)"
+            />
             <div class="absolute size-8 aura-pulse-dark">
                 <span class="aura-pulse-aura"></span>
                 <img :src="weapon.elementIcon" alt="icon" class="z-2 w-full h-full object-contain" />

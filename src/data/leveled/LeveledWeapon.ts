@@ -303,6 +303,10 @@ export class LeveledWeapon {
     static url(icon?: string) {
         return icon ? `/imgs/webp/T_Head_${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
     }
+    static idToUrl(id?: number) {
+        const icon = weaponMap.get(id || 0)?.icon || ""
+        return LeveledWeapon.url(icon)
+    }
 
     static typeUrl(type: string) {
         const typeMap: Record<string, string> = {

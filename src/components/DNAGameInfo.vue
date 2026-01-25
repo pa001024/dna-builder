@@ -4,6 +4,7 @@ import { DNAAPI, DNARoleEntity, DNAShortNoteEntity, DNAWeaponBean } from "dna-ap
 import { toPng } from "html-to-image"
 import { onMounted, ref } from "vue"
 import { Draft } from "@/data"
+import { imgRemoteToLocal } from "@/utils/remoteImg"
 import { modDraftMap, modMap, resourceDraftMap, resourceMap, weaponDraftMap, weaponMap } from "../data/d"
 import { LeveledMod } from "../data/leveled/LeveledMod"
 import { LeveledWeapon } from "../data/leveled/LeveledWeapon"
@@ -125,7 +126,7 @@ async function loadData(force = false) {
         if (roleRes.is_success && roleRes.data) {
             roleInfo.value = roleRes.data
         } else {
-            ui.showErrorMessage(roleRes.msg || "获取默认角色信息失败")
+            throw new Error(roleRes.msg || "获取默认角色信息失败")
         }
 
         // 获取铸造信息
@@ -133,14 +134,15 @@ async function loadData(force = false) {
         if (shortNoteRes.is_success && shortNoteRes.data) {
             shortNoteInfo.value = shortNoteRes.data
         } else {
-            ui.showErrorMessage(shortNoteRes.msg || "获取额外信息失败")
+            throw new Error(shortNoteRes.msg || "获取额外信息失败")
         }
 
         lastUpdateTime.value = ui.timeNow
     } catch (e) {
         console.error(e)
-        ui.showErrorMessage("获取游戏配置失败")
+        ui.showErrorMessage(e instanceof Error ? e.message : String(e))
     } finally {
+        await setting.stopHeartbeat()
         loading.value = false
     }
 }
@@ -238,7 +240,10 @@ async function generateScreenshot() {
                     <div class="flex flex-col md:flex-row items-center gap-4">
                         <div class="avatar">
                             <div class="w-24 h-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                                <img :src="roleInfo.roleInfo.roleShow.headUrl" :alt="roleInfo.roleInfo.roleShow.roleName" />
+                                <img
+                                    :src="imgRemoteToLocal(roleInfo.roleInfo.roleShow.headUrl)"
+                                    :alt="roleInfo.roleInfo.roleShow.roleName"
+                                />
                             </div>
                         </div>
                         <div class="flex-1">
@@ -527,7 +532,7 @@ async function generateScreenshot() {
                             <div v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1" class="flex gap-2">
                                 <img
                                     v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.charIcon"
-                                    :src="roleInfo.roleInfo.abyssInfo.bestTimeVo1.charIcon"
+                                    :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.charIcon)"
                                     alt="角色"
                                     class="size-40 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                 />
@@ -535,21 +540,21 @@ async function generateScreenshot() {
                                 <div class="flex flex-col items-center gap-2">
                                     <img
                                         v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.closeWeaponIcon"
-                                        :src="roleInfo.roleInfo.abyssInfo.bestTimeVo1.closeWeaponIcon"
+                                        :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.closeWeaponIcon)"
                                         alt="近战武器"
                                         class="size-12 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                     />
                                     <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
                                     <img
                                         v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.langRangeWeaponIcon"
-                                        :src="roleInfo.roleInfo.abyssInfo.bestTimeVo1.langRangeWeaponIcon"
+                                        :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.langRangeWeaponIcon)"
                                         alt="远程武器"
                                         class="size-12 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                     />
                                     <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
                                     <img
                                         v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.petIcon"
-                                        :src="roleInfo.roleInfo.abyssInfo.bestTimeVo1.petIcon"
+                                        :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.petIcon)"
                                         alt="魔灵"
                                         class="size-12 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                     />
@@ -558,14 +563,14 @@ async function generateScreenshot() {
                                 <div class="flex flex-col gap-2">
                                     <img
                                         v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon1"
-                                        :src="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon1"
+                                        :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon1)"
                                         alt="协战角色1"
                                         class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                     />
                                     <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
                                     <img
                                         v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon2"
-                                        :src="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon2"
+                                        :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon2)"
                                         alt="协战角色2"
                                         class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                     />
@@ -574,14 +579,14 @@ async function generateScreenshot() {
                                 <div class="flex flex-col gap-2">
                                     <img
                                         v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon1"
-                                        :src="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon1"
+                                        :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon1)"
                                         alt="协战武器1"
                                         class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                     />
                                     <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
                                     <img
                                         v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon2"
-                                        :src="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon2"
+                                        :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon2)"
                                         alt="协战武器2"
                                         class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                     />

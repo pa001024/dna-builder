@@ -149,6 +149,10 @@ fn init_global_ws(
                                         }
                                     }
                                     Some(WsCommand::Close) => {
+                                        // 发送关闭指令
+                                        if let Err(e) = write.send(Message::Close(None)).await {
+                                            eprintln!("[WS] Close error: {}", e);
+                                        }
                                         println!("[WS] Closing connection...");
                                         return; // 关闭连接，结束任务
                                     }
@@ -307,8 +311,11 @@ async fn start_heartbeat(
 #[tauri::command]
 async fn stop_heartbeat() -> Result<(), String> {
     // 发送关闭指令
-    let tx_guard = WS_TX.lock().unwrap();
-    if let Some(tx) = &*tx_guard {
+    let opt_tx = {
+        let tx_guard = WS_TX.lock().unwrap();
+        tx_guard.clone()
+    };
+    if let Some(tx) = opt_tx {
         if let Err(e) = tx.send(WsCommand::Close) {
             eprintln!("Failed to send close command: {}", e);
         }

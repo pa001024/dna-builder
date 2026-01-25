@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { DNARoleCharsBean } from "dna-api"
+import { LeveledChar } from "@/data"
+import { imgRemoteToLocal } from "@/utils/remoteImg"
 import { useUIStore } from "../store/ui"
 
 defineProps<{
@@ -34,15 +36,7 @@ const getAuraClass = (element: string) => {
         @click="char.unLocked ? $router.push(`/dna/char/${char.charId}/${char.charEid}`) : ui.showErrorMessage('角色未解锁')"
     >
         <div class="card-body bg-linear-30 from-indigo-300/50 to-indigo-600/50 rounded-2xl relative p-2">
-            <!-- 防止css发送refer -->
-            <img :src="char.icon" class="hidden" />
-            <div
-                class="absolute inset-0 pointer-events-none mask-b-from-60%"
-                :style="{
-                    backgroundImage: `url(${char.icon})`,
-                    backgroundSize: 'cover',
-                }"
-            ></div>
+            <img class="absolute inset-0 h-full object-cover pointer-events-none mask-b-from-60%" :src="LeveledChar.idToUrl(char.charId)" />
             <div class="absolute size-8 left-0" :class="[getAuraClass(char.elementIcon)]">
                 <span class="aura-pulse-aura"></span>
                 <img :src="char.elementIcon" alt="icon" class="z-2 w-full h-full object-contain" />

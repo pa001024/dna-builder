@@ -132,9 +132,6 @@ export const useSettingStore = defineStore("setting", {
                     ;(window as any).DNAAPI = api
                     apiCacheKey = user.uid
 
-                    // 启动心跳计时器
-                    await this.startHeartbeat(user.uid, user.token)
-
                     return api
                 } catch (error) {
                     console.error("获取DNAAPI失败:", error)
