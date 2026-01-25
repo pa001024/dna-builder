@@ -13,7 +13,7 @@
         "build:api": "cd externals/dna-api && bun run build && cd ../.. && pnpm install",
         "preview": "vite preview",
         "tauri": "tauri",
-        "tb": "tauri build",
+        "tb": "tauri build && bun run tools/build_msix.ts",
         "dd": "tauri dev",
         "test": "vitest run",
         "coverage": "vitest run --coverage",
