@@ -7,21 +7,32 @@
   <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/pa001024/dna-builder">
 </p>
 
-**DNA Builder** （二重螺旋构筑模拟器）简称DOB，是一个用于游戏《Duet Night Abyss》的角色构建和伤害计算工具，帮助玩家优化角色配置和计算战斗输出。
+**DNA Builder** （二重螺旋构筑模拟器）简称DOB，是一个用于游戏《二重螺旋 Duet Night Abyss》的多功能工具，提供资料库、养成计算、角色构建和伤害计算工具等诸多功能
 
 ## 网页版
 
-支持 PWA( Progressive Web App ), 可以在浏览器中安装为应用(支持断网访问), 无需下载安装
+支持 PWA (Progressive Web App), 可以在浏览器中安装为应用(支持断网访问), 无需下载安装
 
 - **国内服务器**: [https://xn--chq26veyq.icu/](https://xn--chq26veyq.icu/)
 - **EdgeOne(国内访问不了)**：[https://dna-builder.edgeone.dev/](https://dna-builder.edgeone.dev/)
 - **Vercel(国内访问不了)**：[https://dna-builder.vercel.app/](https://dna-builder.vercel.app/)
 
-## 桌面应用
+## 桌面应用(推荐)
 
 - **winget**: `winget install pa001024.dna-builder`
+- **微软商店**: [https://apps.microsoft.com/detail/9nk8zw43shb1](https://apps.microsoft.com/detail/9nk8zw43shb1)
 - **Windows**：[https://github.com/pa001024/dna-builder/releases/latest](https://github.com/pa001024/dna-builder/releases/latest)
 - **无法运行**? 请确保已安装 [Microsoft Edge WebView2](https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/)。
+
+微软商店截图
+![微软商店截图](./misc/1.png)
+
+## 支持作者
+
+如果您喜欢这个项目，并且想支持作者的工作，请考虑以下方式：
+
+- **直接捐赠**：[https://afdian.com/a/pa001024](https://afdian.com/a/pa001024)
+- **购买应用**：[https://apps.microsoft.com/detail/9nk8zw43shb1](https://apps.microsoft.com/detail/9nk8zw43shb1)
 
 ## 功能特点
 
