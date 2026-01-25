@@ -257,6 +257,39 @@ async fn start_heartbeat(
     user_id: String,
     interval: u64,
 ) -> Result<String, String> {
+    // 检查是否已存在WebSocket客户端，如果存在则先关闭
+    let need_restart = {
+        let tx_guard = WS_TX.lock().unwrap();
+        tx_guard.is_some()
+    };
+
+    if need_restart {
+        eprintln!("[WS] Existing client found, closing...");
+
+        // 2. 保存发送端以便发送关闭指令
+        let opt_tx = {
+            let tx_guard = WS_TX.lock().unwrap();
+            tx_guard.clone()
+        };
+
+        // 3. 发送关闭指令
+        if let Some(tx) = opt_tx {
+            let _ = tx.send(WsCommand::Close);
+        }
+
+        // 4. 清空全局状态
+        {
+            let mut global_tx = WS_TX.lock().unwrap();
+            *global_tx = None;
+
+            let mut global_config = WS_CONFIG.lock().unwrap();
+            *global_config = None;
+        }
+
+        // 5. 短暂延迟，确保旧连接完全关闭
+        tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+    }
+
     // 初始化全局WebSocket客户端，获取接收第一条消息的Receiver
     let first_msg_rx = init_global_ws(&url, &token, &user_id, interval);
 

@@ -3,10 +3,13 @@ import { DNAAPI } from "dna-api"
 import i18next from "i18next"
 import { defineStore } from "pinia"
 import { applyMaterial, startHeartbeat, stopHeartbeat, tauriFetch } from "../api/app"
+import { executeSignFlow } from "../api/dna-sign"
 import { db } from "./db"
 
 let apiCache: DNAAPI | null = null
 let apiCacheKey = ""
+let signInterval: number | null = null
+let apiInitPromise: Promise<DNAAPI | undefined> | null = null
 
 export const useSettingStore = defineStore("setting", {
     state: () => {
@@ -29,6 +32,9 @@ export const useSettingStore = defineStore("setting", {
             showAIChat: useLocalStorage("setting_show_ai_chat", false),
             // 上次刷新时间（秒）
             lastCapInterval: useLocalStorage("last_cap_interval", 0),
+            // 自动签到设置
+            autoSign: useLocalStorage("setting_auto_sign", false),
+            nextSignCheckTime: useLocalStorage("setting_next_sign_check_time", 0),
         }
     },
     getters: {},
@@ -89,32 +95,57 @@ export const useSettingStore = defineStore("setting", {
                 this.stopHeartbeat()
                 return undefined
             }
-            if (apiCache && apiCacheKey === user.uid) return apiCache
-            this.dnaUserUID = user.uid
-            const api = new DNAAPI({
-                dev_code: user.dev_code,
-                token: user.token,
-                kf_token: user.kf_token,
-                debug: import.meta.env.DEV,
-                mode: "android",
-                fetchFn: tauriFetch,
-            })
-            const res = await api.loginLog()
-            if (res.msg.includes("失效")) {
-                const res = await api.refreshToken(user.refreshToken)
-                if (res.is_success && res.data) {
-                    api.token = res.data.token
-                    await db.dnaUsers.update(user.id, { token: res.data.token })
-                }
+
+            // 检查缓存是否有效
+            if (apiCache && apiCacheKey === user.uid) {
+                return apiCache
             }
-            apiCache = api
-            ;(window as any).DNAAPI = api
-            apiCacheKey = user.uid
 
-            // 启动心跳计时器
-            this.startHeartbeat(user.uid, user.token)
+            // 如果已有初始化Promise，直接返回
+            if (apiInitPromise) {
+                return await apiInitPromise
+            }
 
-            return api
+            // 创建新的初始化Promise
+            apiInitPromise = (async () => {
+                try {
+                    this.dnaUserUID = user.uid
+                    const api = new DNAAPI({
+                        dev_code: user.dev_code,
+                        token: user.token,
+                        kf_token: user.kf_token,
+                        debug: import.meta.env.DEV,
+                        mode: "android",
+                        fetchFn: tauriFetch,
+                    })
+                    const res = await api.loginLog()
+                    if (res.msg.includes("失效")) {
+                        const refreshRes = await api.refreshToken(user.refreshToken)
+                        if (refreshRes.is_success && refreshRes.data?.token) {
+                            api.token = refreshRes.data.token
+                            await db.dnaUsers.update(user.id, { token: refreshRes.data.token })
+                        }
+                    }
+
+                    // 更新缓存
+                    apiCache = api
+                    ;(window as any).DNAAPI = api
+                    apiCacheKey = user.uid
+
+                    // 启动心跳计时器
+                    await this.startHeartbeat(user.uid, user.token)
+
+                    return api
+                } catch (error) {
+                    console.error("获取DNAAPI失败:", error)
+                    return undefined
+                } finally {
+                    // 清除初始化Promise，允许下次重新初始化
+                    apiInitPromise = null
+                }
+            })()
+
+            return await apiInitPromise
         },
 
         // 启动心跳计时器
@@ -147,6 +178,93 @@ export const useSettingStore = defineStore("setting", {
             if (!user) return
             await db.dnaUsers.update(user.id, { kf_token: token })
             // apiCache = null
+        },
+
+        /**
+         * 设置自动签到开关
+         */
+        setAutoSign(enabled: boolean) {
+            this.autoSign = enabled
+            if (enabled) {
+                console.log("自动签到已启用")
+                this.startAutoSign()
+            } else {
+                console.log("自动签到已禁用")
+                this.stopAutoSign()
+            }
+        },
+
+        /**
+         * 开始自动签到定时任务
+         */
+        startAutoSign() {
+            // 清除现有的定时器
+            this.stopAutoSign()
+
+            // 立即执行一次签到检查
+            this.checkAutoSign()
+
+            // 设置定时器，每分钟检查一次
+            signInterval = window.setInterval(() => {
+                this.checkAutoSign()
+            }, 60 * 1000)
+        },
+
+        /**
+         * 停止自动签到定时任务
+         */
+        stopAutoSign() {
+            if (signInterval !== null) {
+                clearInterval(signInterval)
+                signInterval = null
+            }
+        },
+
+        /**
+         * 检查是否需要执行自动签到
+         */
+        async checkAutoSign() {
+            const now = Date.now()
+            // 如果当前时间小于下次检查时间，则不需要执行
+            if (now < this.nextSignCheckTime) {
+                return
+            }
+
+            // 获取API实例
+            const api = await this.getDNAAPI()
+            if (!api) {
+                // API获取失败，1小时后重试
+                this.setNextCheckTime(60 * 60 * 1000)
+                return
+            }
+
+            // 执行签到流程
+            const success = await executeSignFlow(api)
+            if (success) {
+                // 签到成功，设置下次检查时间为明天1点
+                this.setNextCheckTimeToTomorrow()
+            } else {
+                // 签到失败，1小时后重试
+                this.setNextCheckTime(60 * 60 * 1000)
+            }
+        },
+
+        /**
+         * 设置下次检查时间
+         * @param delay 延迟时间（毫秒）
+         */
+        setNextCheckTime(delay: number) {
+            this.nextSignCheckTime = Date.now() + delay
+        },
+
+        /**
+         * 设置下次检查时间为明天1点
+         */
+        setNextCheckTimeToTomorrow() {
+            const tomorrow = new Date()
+            tomorrow.setDate(tomorrow.getDate() + 1)
+            tomorrow.setHours(1, 0, 0, 0)
+            this.nextSignCheckTime = tomorrow.getTime()
         },
     },
 })

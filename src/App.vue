@@ -16,7 +16,10 @@ watchEffect(() => {
 })
 provideClient(gqClient)
 if (env.isApp) {
-    //
+    // 自动签到
+    if (setting.autoSign) {
+        setting.startAutoSign()
+    }
 } else {
     onMounted(() => {
         if (!setting.windowTrasnparent) return
