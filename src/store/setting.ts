@@ -2,7 +2,7 @@ import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI } from "dna-api"
 import i18next from "i18next"
 import { defineStore } from "pinia"
-import { applyMaterial, tauriFetch } from "../api/app"
+import { applyMaterial, startHeartbeat, stopHeartbeat, tauriFetch } from "../api/app"
 import { db } from "./db"
 
 let apiCache: DNAAPI | null = null
@@ -85,7 +85,10 @@ export const useSettingStore = defineStore("setting", {
         },
         async getDNAAPI() {
             const user = await this.getCurrentUser()
-            if (!user) return undefined
+            if (!user) {
+                this.stopHeartbeat()
+                return undefined
+            }
             if (apiCache && apiCacheKey === user.uid) return apiCache
             this.dnaUserUID = user.uid
             const api = new DNAAPI({
@@ -107,7 +110,37 @@ export const useSettingStore = defineStore("setting", {
             apiCache = api
             ;(window as any).DNAAPI = api
             apiCacheKey = user.uid
+
+            // 启动心跳计时器
+            this.startHeartbeat(user.uid, user.token)
+
             return api
+        },
+
+        // 启动心跳计时器
+        async startHeartbeat(userId: string, token: string) {
+            try {
+                // 调用Rust实现的心跳功能
+                const res = await startHeartbeat("wss://dnabbs-api.yingxiong.com:8180/ws-community-websocket", token, userId)
+                if (res.includes("成功")) {
+                    console.log("心跳已启动")
+                } else {
+                    await stopHeartbeat()
+                }
+            } catch (error) {
+                console.error("启动心跳失败:", error)
+            }
+        },
+
+        // 停止心跳计时器
+        async stopHeartbeat() {
+            try {
+                // 调用Rust实现的停止心跳功能
+                await stopHeartbeat()
+                console.log("心跳已停止")
+            } catch (error) {
+                console.error("停止心跳失败:", error)
+            }
         },
         async saveKFToken(token: string) {
             const user = await this.getCurrentUser()

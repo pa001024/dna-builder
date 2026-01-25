@@ -45,6 +45,28 @@ export async function exportJsonFile(filePath: string, jsonContent: string) {
 }
 
 /**
+ * 启动心跳
+ * @param url The url of the websocket server
+ * @param token The token of the user
+ * @param userId The userId of the user
+ */
+export async function startHeartbeat(url: string, token: string, userId: string) {
+    return await invoke<string>("start_heartbeat", {
+        url,
+        token,
+        userId,
+        interval: 10, // 10秒间隔
+    })
+}
+
+/**
+ * 停止心跳
+ */
+export async function stopHeartbeat() {
+    return await invoke("stop_heartbeat")
+}
+
+/**
  * 导出二进制文件到指定路径
  * @param filePath 文件路径
  * @param binaryContent 二进制内容
