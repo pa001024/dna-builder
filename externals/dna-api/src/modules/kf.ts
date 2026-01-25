@@ -124,7 +124,7 @@ export class KFAPI extends DNASubModule {
      */
     async sdkLogin() {
         const tokenCs = await this.getTokenForCs()
-        if (tokenCs.data) {
+        if (tokenCs.data?.token) {
             const moyu = await this.sdkMoyuLogin(tokenCs.data.token)
             if (moyu.data) {
                 this.kf_token = moyu.data.token
@@ -213,7 +213,14 @@ export class KFAPI extends DNASubModule {
      * @param server_id 区服ID
      * @access 访问限制 1分钟一次
      */
-    async queryFlow(date: string, name: string, role: string, category_id: string = "Resource", server_id: string | number = 29046) {
+    async queryFlow(
+        date: string,
+        name: string,
+        role: string,
+        category_id: string = "Resource",
+        next_cursor?: string,
+        server_id: string | number = 29046
+    ) {
         return this._dna_request_kf<PropInfo[]>("/v1/frontend/selfService/queryFlow", {
             ...this.base_param,
             date,
@@ -221,6 +228,7 @@ export class KFAPI extends DNASubModule {
             role,
             server_id,
             category_id,
+            next_cursor,
         })
     }
     //#endregion
@@ -231,7 +239,7 @@ export class KFAPI extends DNASubModule {
      * @param roleName 角色名称
      * @param mailCode 邮件验证码
      */
-    async bindRole(serverId: string, roleName: string, mailCode?: string) {
+    async bindRole(serverId: string, roleName: string, mailCode: string) {
         return this._dna_request_kf<RoleInfo>("/v1/frontend/role/bindRole", {
             server_id: serverId,
             role: roleName,
@@ -240,53 +248,44 @@ export class KFAPI extends DNASubModule {
     }
 
     /**
-     * 绑定默认角色
+     * 获取登录验证码图片
      */
-    async bindDefaultRole() {
-        return this._dna_request_kf<RoleInfo>("/v1/public/role/default", this.base_param)
+    async captcha() {
+        return this._dna_request_kf<{
+            captchaId: string
+            picPath: string
+        }>("/v1/public/login/captcha", undefined, { method: "GET" })
     }
-
-    /**
-     * 获取验证码
-     */
-    async getCode() {
-        return this._dna_request_kf<any>("/v1/frontend/selfService/getCode")
-    }
-
     /**
      * 获取手机验证码
      */
-    async sendVerifyCode() {
-        return this._dna_request_kf<any>("/v1/frontend/selfService/sendVerifyCode")
+    async sendVerifyCode(phone: string, code: string) {
+        return this._dna_request_kf("/v1/public/login/sendSms", {
+            ...this.base_param,
+            phone,
+            code,
+            type: "login",
+        })
     }
 
     /**
-     * 变更手机
+     * 手机验证码登录
      */
-    async changePhone() {
-        return this._dna_request_kf<any>("/v1/frontend/selfService/changePhone")
+    async loginByPhone(phone: string, code: number) {
+        const res = await this._dna_request_kf<{
+            UserInfo: {
+                id: string
+                phone: string
+                email: string
+                login_type: number
+            }
+            token: string
+        }>("/v1/public/login/byphone", { ...this.base_param, code, phone })
+        if (res.is_success && res.data?.token) {
+            this.kf_token = res.data.token
+        }
+        return res
     }
 
-    /**
-     * 选择角色
-     */
-    async chooseRole() {
-        return this._dna_request_kf<any>("/v1/frontend/role/chooseRole")
-    }
-
-    /**
-     * 解码手机验证码
-     * @param verifyCode 手机验证码
-     */
-    async decodePhone(verifyCode: string) {
-        return this._dna_request_kf<any>("/v1/public/kf/decode", { verify_code: verifyCode })
-    }
-
-    /**
-     * 获取登录验证码
-     */
-    async captcha() {
-        return this._dna_request_kf("/v1/public/login/captcha", undefined, { method: "GET" })
-    }
     //#endregion
 }

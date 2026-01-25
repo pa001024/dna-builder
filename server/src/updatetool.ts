@@ -4,6 +4,7 @@
 import "dotenv/config"
 import { fetch } from "bun"
 import { Cron } from "croner"
+import { WebSocket } from "ws"
 import { getDNAAPI } from "./api/dna"
 
 // 环境变量配置
@@ -11,6 +12,7 @@ const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:8887"
 const API_TOKEN = process.env.API_TOKEN
 const DEV_CODE = process.env.DEV_CODE
 const USER_TOKEN = process.env.USER_TOKEN
+const USER_ID = process.env.USER_ID
 
 if (!API_TOKEN || !DEV_CODE || !USER_TOKEN) {
     console.error("缺少必要的环境变量: API_TOKEN, DEV_CODE, USER_TOKEN")
@@ -22,10 +24,141 @@ const sleep = (ms: number) => {
     return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+// WebSocket客户端类，实现心跳机制和自定义请求头
+class WsClient {
+    private ws: WebSocket | null = null
+    private heartbeatInterval: NodeJS.Timeout | null = null
+    private reconnectTimeout: NodeJS.Timeout | null = null
+    private url: string
+    private token: string
+    private userId: string
+    private heartbeatIntervalMs: number
+    private isConnected: boolean = false
+
+    constructor(url: string, token: string, userId: string, heartbeatIntervalMs: number) {
+        this.url = url
+        this.token = token
+        this.userId = userId
+        this.heartbeatIntervalMs = heartbeatIntervalMs
+    }
+
+    // 建立WebSocket连接
+    connect(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            try {
+                // 创建WebSocket连接，添加自定义请求头
+                const ws = new WebSocket(this.url, {
+                    headers: {
+                        token: this.token,
+                        appVersion: "1.2.0",
+                        sourse: "android",
+                    },
+                })
+
+                ws.on("open", () => {
+                    console.log(`${new Date().toLocaleString()} WebSocket连接已建立`)
+                    this.isConnected = true
+                    this.startHeartbeat()
+                    resolve()
+                })
+
+                ws.on("message", (data: WebSocket.Data) => {
+                    console.log(`${new Date().toLocaleString()} 收到WebSocket消息: ${data}`)
+                })
+
+                ws.on("close", () => {
+                    console.log(`${new Date().toLocaleString()} WebSocket连接已关闭`)
+                    this.isConnected = false
+                    this.stopHeartbeat()
+                })
+
+                ws.on("error", (error: Error) => {
+                    console.error(`${new Date().toLocaleString()} WebSocket错误: ${error}`)
+                    this.isConnected = false
+                    this.stopHeartbeat()
+                })
+
+                this.ws = ws
+            } catch (error) {
+                console.error(`${new Date().toLocaleString()} WebSocket连接失败: ${error}`)
+                reject(error)
+            }
+        })
+    }
+
+    // 开始心跳
+    private startHeartbeat() {
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval)
+        }
+
+        this.heartbeatInterval = setInterval(() => {
+            if (this.ws && this.isConnected) {
+                try {
+                    const pingMessage = JSON.stringify({
+                        data: { userId: this.userId },
+                        event: "ping",
+                    })
+                    this.ws.send(pingMessage)
+                    console.log(`${new Date().toLocaleString()} 发送心跳消息: ${pingMessage}`)
+                } catch (error) {
+                    console.error(`${new Date().toLocaleString()} 发送心跳失败: ${error}`)
+                    this.isConnected = false
+                    this.stopHeartbeat()
+                }
+            }
+        }, this.heartbeatIntervalMs)
+    }
+
+    // 停止心跳
+    private stopHeartbeat() {
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval)
+            this.heartbeatInterval = null
+        }
+    }
+
+    // 发送消息
+    send(message: string): void {
+        if (this.ws && this.isConnected) {
+            try {
+                this.ws.send(message)
+            } catch (error) {
+                console.error(`${new Date().toLocaleString()} 发送消息失败: ${error}`)
+                this.isConnected = false
+                this.stopHeartbeat()
+            }
+        } else {
+            console.error(`${new Date().toLocaleString()} WebSocket未连接，无法发送消息`)
+        }
+    }
+
+    // 关闭WebSocket连接
+    close(): void {
+        this.stopHeartbeat()
+        if (this.reconnectTimeout) {
+            clearTimeout(this.reconnectTimeout)
+            this.reconnectTimeout = null
+        }
+        if (this.ws) {
+            this.ws.close()
+            this.ws = null
+        }
+        this.isConnected = false
+        console.log(`${new Date().toLocaleString()} WebSocket连接已手动关闭`)
+    }
+
+    // 检查连接状态
+    isWsConnected(): boolean {
+        return this.isConnected
+    }
+}
+
 // 从 DNA API 获取委托数据
 async function fetchMissionsFromDNA() {
     try {
         const dnaAPI = getDNAAPI()
+        // 模拟别的请求 防止返回空值
         const res = await dnaAPI.defaultRoleForTool()
         if (res.is_success && res.data?.instanceInfo) {
             const missions = res.data.instanceInfo.map(item => item.instances.map(v => v.name))
@@ -96,13 +229,23 @@ const updateMH = async (server: string = "cn", t: number = 10) => {
     for (let i = 0; i < t; i++) {
         await sleep(5000)
         try {
-            const missions = await fetchMissionsFromDNA()
-            const result = await updateMissionsIngame(server, missions)
-            if (result !== null) {
-                is_success = true
-            } else {
-                // duplicate missions 视为成功
-                is_success = true
+            // 每次请求前创建并连接WebSocket
+            const wsClient = new WsClient("wss://dnabbs-api.yingxiong.com:8180/ws-community-websocket", USER_TOKEN, USER_ID || "", 10000)
+            await wsClient.connect()
+
+            try {
+                // 执行委托数据同步
+                const missions = await fetchMissionsFromDNA()
+                const result = await updateMissionsIngame(server, missions)
+                if (result !== null) {
+                    is_success = true
+                } else {
+                    // duplicate missions 视为成功
+                    is_success = true
+                }
+            } finally {
+                // 无论请求成功与否，都关闭WebSocket连接
+                wsClient.close()
             }
         } catch (e: any) {
             console.error(`${new Date().toLocaleString()} 同步失败: ${e.message} retry: ${i}`)

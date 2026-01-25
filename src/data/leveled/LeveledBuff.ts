@@ -17,6 +17,17 @@ export class LeveledBuff implements Buff {
     // 原始Buff对象
     _originalBuffData: Buff
 
+    // 武器精炼数值
+    _ratio = 1
+
+    get ratio() {
+        return this._ratio
+    }
+    set ratio(value: number) {
+        this._ratio = value
+        this.updatePropertiesByLevel()
+    }
+
     /**
      * 构造函数
      * @param 名称 buff的名称
@@ -190,10 +201,10 @@ export class LeveledBuff implements Buff {
             const maxValue = this._originalBuffData[prop]
             if (maxValue !== undefined) {
                 if (Array.isArray(maxValue)) {
-                    this[prop] = maxValue[x - 1]
+                    this[prop] = maxValue[x - 1] * this._ratio
                 } else if (typeof maxValue === "number") {
                     // 属性值 = 满级属性/a*(1+(x-1)/b)
-                    let currentValue = (maxValue / a) * (1 + (x - lx) / b)
+                    let currentValue = (maxValue / a) * (1 + (x - lx) / b) * this._ratio
                     if (prop === "神智回复") currentValue = Math.round(currentValue)
                     this[prop] = currentValue
                 }
@@ -204,8 +215,8 @@ export class LeveledBuff implements Buff {
     /**
      * 获取Buff的属性信息
      */
-    getProperties(): Partial<Buff> {
-        const properties: Partial<Buff> = {}
+    getProperties(): Record<string, number> {
+        const properties: Record<string, number> = {}
         this.properties.forEach(prop => {
             properties[prop] = this[prop]
         })
@@ -227,6 +238,7 @@ export class LeveledBuff implements Buff {
         "pid",
         "pt",
         "code",
+        "_ratio",
     ])
     get properties(): string[] {
         return Object.keys(this).filter(prop => !LeveledBuff._exclude_properties.has(prop))

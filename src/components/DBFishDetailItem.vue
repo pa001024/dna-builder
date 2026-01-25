@@ -81,9 +81,9 @@ const fishSpots = computed(() => {
             <!-- 鱼基本信息 -->
             <div class="p-3">
                 <div class="flex items-center gap-3 mb-3">
-                    <RouterLink :to="`/db/fish/${fish.id}`" class="text-lg font-bold link link-primary">
+                    <SRouterLink :to="`/db/fish/${fish.id}`" class="text-lg font-bold link link-primary">
                         {{ fish.name }}
-                    </RouterLink>
+                    </SRouterLink>
                     <span class="text-xs text-base-content/70">ID: {{ fish.id }}</span>
                     <div class="text-sm text-base-content/70 flex items-center gap-2">
                         <span class="px-1.5 py-0.5 rounded" :class="getRarityColor(fish.type)">
@@ -116,9 +116,9 @@ const fishSpots = computed(() => {
                     <div class="text-xs text-base-content/70 mb-1">授渔以鱼</div>
                     <div class="flex items-center gap-2">
                         <img :src="`/imgs/webp/T_Fish_${s2bFish.icon}.webp`" class="w-10 h-10 object-cover rounded" />
-                        <RouterLink :to="`/db/fish/${s2bFish.id}`" class="text-sm link link-primary">
+                        <SRouterLink :to="`/db/fish/${s2bFish.id}`" class="text-sm link link-primary">
                             {{ s2bFish.name }}
-                        </RouterLink>
+                        </SRouterLink>
                         <span class="text-xs text-base-content/70">价格: {{ calculateFishPrice(s2bFish).price }}</span>
                     </div>
                 </div>
@@ -127,9 +127,9 @@ const fishSpots = computed(() => {
                     <div class="text-xs text-base-content/70 mb-1">出现鱼池及权重</div>
                     <div class="space-y-2">
                         <div v-for="spot in fishSpots" :key="spot.spotId" class="flex items-center justify-between">
-                            <RouterLink :to="`/fish/${spot.spotId}`" class="text-sm link link-primary">
+                            <SRouterLink :to="`/fish/${spot.spotId}`" class="text-sm link link-primary">
                                 {{ spot.spotName }}
-                            </RouterLink>
+                            </SRouterLink>
                             <span class="text-sm">{{ spot.weight }}</span>
                         </div>
                     </div>

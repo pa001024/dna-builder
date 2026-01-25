@@ -93,7 +93,7 @@ onBeforeMount(() => {
                                 </div>
                                 <div class="whitespace-nowrap flex-1 overflow-hidden text-ellipsis text-sm">{{ r.name }}</div>
                                 <div class="text-xs text-base-content/70 group-[.active]:text-base-100">
-                                    {{ toLocaleTimeString(r.lastMsg?.createdAt || r.updateAt) }}
+                                    {{ toLocaleTimeString(r.lastMsg?.createdAt || r.updateAt || "") }}
                                 </div>
                             </div>
                             <!-- 最新消息 -->
@@ -145,7 +145,9 @@ onBeforeMount(() => {
             <RouterView v-slot="{ Component, route: { path } }">
                 <transition name="slide-right">
                     <Suspense>
-                        <component :is="Component" :key="path" :room="actived" />
+                        <div class="w-full h-full overflow-hidden">
+                            <component :is="Component" :key="path" :room="actived" />
+                        </div>
                         <template #fallback>
                             <div class="w-full h-full flex justify-center items-center">
                                 <span class="loading loading-spinner loading-md"></span>

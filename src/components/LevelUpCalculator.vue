@@ -17,7 +17,6 @@ import {
     weaponMap,
 } from "@/data"
 import { type CharLevelUpConfig, type LevelUpResult, type ModLevelUpConfig, type WeaponLevelUpConfig } from "@/data/LevelUpCalculator"
-import { initEmojiDict } from "@/util"
 import { getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
 import { LevelUpCalculator } from "../data/LevelUpCalculator"
 import { useSettingStore } from "../store/setting"
@@ -120,11 +119,9 @@ const filteredMods = computed(() => {
 onMounted(async () => {
     const p = await setting.getDNAAPI()
     if (!p) {
-        ui.showErrorMessage("请先登录")
         return
     }
     api = p
-    await initEmojiDict()
 })
 
 /**
@@ -224,6 +221,7 @@ async function syncChars() {
  */
 async function loadRoleInfo() {
     try {
+        await api.getMine()
         const roleRes = await api.defaultRoleForTool()
         if (roleRes.is_success && roleRes.data) {
             roleInfo.value = roleRes.data
@@ -762,7 +760,7 @@ const handleBatchAddMods = () => {
                                 <Icon icon="ri:refresh-line" />
                                 <h4 class="font-semibold">副本次数</h4>
                             </div>
-                            <RouterLink
+                            <SRouterLink
                                 :to="`/db/dungeon/${dungeon.id}`"
                                 v-for="[dungeon, [times, reason]] in Object.entries(result.timeEstimate.dungeonTimes).map(
                                     v => [dungeonMap.get(+v[0]), v[1]] as [Dungeon, [number, string]]
@@ -794,7 +792,7 @@ const handleBatchAddMods = () => {
                                     <span class="ml-auto">ID: {{ dungeon.id }}</span>
                                     <span class="text-xs opacity-70">Lv.{{ dungeon.lv }}</span>
                                 </div>
-                            </RouterLink>
+                            </SRouterLink>
                         </div>
                     </div>
 

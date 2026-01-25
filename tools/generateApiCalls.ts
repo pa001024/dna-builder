@@ -15,6 +15,7 @@ import {
 /**
  * 从服务器端API定义生成客户端API调用代码
  * 读取server/src/db/mod/下的所有文件，解析GraphQL typeDefs，生成对应的query和mutation调用代码
+ * 保留现有文件中用户自定义的查询字段定义
  */
 
 // 配置
@@ -22,6 +23,118 @@ const SERVER_API_DIR = "server/src/db/mod"
 const OUTPUT_DIR = "src/api/gen"
 const OUTPUT_QUERY_FILE = "api-queries.ts"
 const OUTPUT_MUTATION_FILE = "api-mutations.ts"
+
+/**
+ * 使用状态机解析GraphQL字段定义，处理嵌套括号
+ */
+function parseFieldsWithStateMachine(fieldsStr: string): string {
+    const lines = fieldsStr.split("\n")
+    const result: string[] = []
+    let indent = 0
+    const indentSize = 4
+
+    for (const line of lines) {
+        const trimmedLine = line.trim()
+
+        // 处理注释行
+        if (trimmedLine.startsWith("#") || trimmedLine.startsWith("//")) {
+            // 只保留注释内容，重新生成缩进
+            result.push(" ".repeat(indent * indentSize) + trimmedLine)
+            continue
+        }
+
+        // 处理空行
+        if (!trimmedLine) {
+            continue
+        }
+
+        // 处理行内注释，只保留注释前的内容用于括号匹配
+        const lineWithoutComment = trimmedLine.split("#")[0].split("//")[0].trim()
+        if (!lineWithoutComment) {
+            continue
+        }
+
+        // 处理闭合括号，减少缩进
+        let currentLine = lineWithoutComment
+        while (currentLine.startsWith("}")) {
+            indent--
+            result.push(`${" ".repeat(indent * indentSize)}}`)
+            currentLine = currentLine.slice(1).trim()
+            if (!currentLine) break
+        }
+
+        if (currentLine) {
+            // 添加当前行，使用当前缩进
+            result.push(" ".repeat(indent * indentSize) + currentLine)
+
+            // 处理打开括号，增加缩进
+            if (currentLine.endsWith("{")) {
+                indent++
+            }
+        }
+    }
+
+    // 处理剩余的闭合括号
+    while (indent > 0) {
+        indent--
+        result.push(`${" ".repeat(indent * indentSize)}}`)
+    }
+
+    return result.join("\n")
+}
+
+/**
+ * 解析现有API文件，提取每个查询/突变的字段定义
+ */
+function parseExistingApiFile(filePath: string): Map<string, string> {
+    const existingQueries = new Map<string, string>()
+
+    if (!existsSync(filePath)) {
+        return existingQueries
+    }
+
+    try {
+        const content = readFileSync(filePath, "utf-8")
+
+        // 首先提取所有GraphQL模板字符串
+        const gqlTemplateRegex = /\/\*\s*GraphQL\s*\*\/\s*`([\s\S]*?)`/g
+        let templateMatch: RegExpExecArray | null
+
+        while ((templateMatch = gqlTemplateRegex.exec(content)) !== null) {
+            const gqlContent = templateMatch[1]
+
+            // 从每个模板字符串中提取操作名称和字段定义
+            // 使用更精确的正则表达式，确保只匹配操作内部的字段定义
+            const operationRegex = /(query|mutation)\s*(\w+)?\s*(\([^)]*\))?\s*{[^{}]*?(\w+)[^{}]*?\{([\s\S]*?)\}\s*}/g
+            const operationMatch = operationRegex.exec(gqlContent)
+
+            if (operationMatch) {
+                // 新的正则表达式有5个捕获组，需要正确解构
+                // [0] - 完整匹配
+                // [1] - 操作类型 (query/mutation)
+                // [2] - 查询名称 (可选)
+                // [3] - 参数 (可选)
+                // [4] - 操作名称 (如lastMsgs、updateGuide等)
+                // [5] - 字段定义
+                const [, , _queryName, _params, operationName, fields] = operationMatch
+
+                // 移除字段定义中每行的前导空白，确保从0缩进开始
+                // 这样在生成代码时可以正确添加基础缩进
+                const lines = fields.split("\n")
+                const trimmedFields = lines
+                    .map(line => line.trim())
+                    .filter(line => line !== "")
+                    .join("\n")
+
+                existingQueries.set(operationName, trimmedFields)
+            }
+        }
+    } catch (error) {
+        console.error(`解析现有文件 ${filePath} 时出错:`, error)
+    }
+
+    return existingQueries
+}
 
 /**
  * 读取文件内容
@@ -191,7 +304,8 @@ function generateGraphQLFields(typeName: string, allObjectTypes: Map<string, Obj
 function generateClientCode(
     fields: FieldDefinitionNode[],
     isMutation: boolean = false,
-    allObjectTypes: Map<string, ObjectTypeDefinitionNode>
+    allObjectTypes: Map<string, ObjectTypeDefinitionNode>,
+    existingQueries: Map<string, string> = new Map()
 ): string {
     let code = ""
 
@@ -279,13 +393,34 @@ function generateClientCode(
             gqlQueryStr += `(${fieldArgsStr})`
         }
 
+        // 检查是否有现有的字段定义
+        const existingFields = existingQueries.get(fieldName)
+
         // 根据是否为标量类型决定是否输出嵌套字段
         if (isScalar) {
             gqlQueryStr += "\n"
         } else {
             gqlQueryStr += " {\n"
-            // 生成所有字段，包括嵌套字段
-            gqlQueryStr += generateGraphQLFields(objectTypeName, allObjectTypes, 3)
+
+            if (existingFields) {
+                // 使用状态机解析现有字段定义，确保正确的嵌套结构
+                const parsedFields = parseFieldsWithStateMachine(existingFields)
+
+                // 基础缩进级别
+                const baseIndent = "            "
+
+                // 为解析后的字段添加基础缩进
+                const indentedFields = parsedFields
+                    .split("\n")
+                    .map(line => `${baseIndent}${line}`)
+                    .join("\n")
+
+                gqlQueryStr += `${indentedFields}\n`
+            } else {
+                // 生成所有字段，包括嵌套字段
+                gqlQueryStr += generateGraphQLFields(objectTypeName, allObjectTypes, 3)
+            }
+
             gqlQueryStr += "        }\n"
         }
 
@@ -426,22 +561,27 @@ async function main() {
     // 写入类型文件
     writeFile(`${OUTPUT_DIR}/api-types.ts`, typesCode)
 
+    // 读取现有文件，提取现有查询定义
+    const existingQueries = parseExistingApiFile(`${OUTPUT_DIR}/${OUTPUT_QUERY_FILE}`)
+    const existingMutations = parseExistingApiFile(`${OUTPUT_DIR}/${OUTPUT_MUTATION_FILE}`)
+
     // 生成查询代码
     const queryCode = `import { typedQuery } from '@/api/query'
 import type * as Types from './api-types'
 
-${generateClientCode(allQueries, false, allObjectTypes)}`
+${generateClientCode(allQueries, false, allObjectTypes, existingQueries)}`
 
     // 生成突变代码
     const mutationCode = `import { typedMutation } from '@/api/mutation'
 import type * as Types from './api-types'
 
-${generateClientCode(allMutations, true, allObjectTypes)}`
+${generateClientCode(allMutations, true, allObjectTypes, existingMutations)}`
 
     // 写入文件
     writeFile(`${OUTPUT_DIR}/${OUTPUT_QUERY_FILE}`, queryCode)
     writeFile(`${OUTPUT_DIR}/${OUTPUT_MUTATION_FILE}`, mutationCode)
 
+    await $`bun prettier --write ${OUTPUT_DIR}/*.ts`
     await $`bun biome format --write ${OUTPUT_DIR}/*.ts`
 
     console.log(`\n生成完成！`)

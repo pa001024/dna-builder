@@ -80,9 +80,9 @@ function getRewardTypeText(type: string): string {
                                 :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
                                 :effdesc="mod.效果"
                             >
-                                <RouterLink :to="`/db/mod/${item.id}`" class="text-xs hover:text-primary hover:underline">{{
+                                <SRouterLink :to="`/db/mod/${item.id}`" class="text-xs hover:text-primary hover:underline">{{
                                     (item.n && $t(item.n)) || `ID: ${item.id}`
-                                }}</RouterLink>
+                                }}</SRouterLink>
                             </ShowProps>
                             <span v-else>{{
                                 (item.n && $t(item.n)) || (item.t === "Reward" ? `奖励组 ${item.id}` : `ID: ${item.id}`)
@@ -91,7 +91,7 @@ function getRewardTypeText(type: string): string {
                         </span>
                         <span v-if="item.c" class="text-base-content/70">x{{ item.c }}</span>
                         <span v-if="item.p" class="text-base-content/70">
-                            ({{ `权重:${item.p}` }}
+                            ({{ item.m === "Sequence" ? `容量:${item.p}` : `权重:${item.p}` }}
                             {{ item.pp ? `比例:${+(item.pp * 100).toFixed(2)}%` : "" }}
                             {{ item.times ? `每个期望:${+item.times.toFixed(2)}次` : "" }}
                             )

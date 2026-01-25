@@ -100,6 +100,7 @@ export function getRewardDetails(
         const calculatePP = (item: RewardItem, parentPP: number): void => {
             if (item.child && item.child.length > 0) {
                 const childTotalP = item.child.reduce((sum, child) => sum + child.p, 0)
+                if (currentDropMode === "Sequence") item.totalP = childTotalP
                 item.child.forEach(child => {
                     child.pp = parentPP * (child.p / childTotalP)
                     calculatePP(child, child.pp!)

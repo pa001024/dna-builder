@@ -73,9 +73,9 @@ function formatDuration(minutes: number): string {
         <div class="p-3 space-y-4">
             <div class="p-3">
                 <div class="flex items-center gap-3 mb-3">
-                    <RouterLink :to="`/db/mod/${mod.id}`" class="text-lg font-bold link link-primary">
+                    <SRouterLink :to="`/db/mod/${mod.id}`" class="text-lg font-bold link link-primary">
                         {{ $t(mod.系列) }}{{ $t(mod.名称) }}
-                    </RouterLink>
+                    </SRouterLink>
                     <span class="text-xs text-base-content/70">ID: {{ mod.id }}</span>
                     <div class="text-sm text-base-content/70 flex items-center gap-2">
                         <span class="px-1.5 py-0.5 rounded" :class="getQualityColor(leveledMod.品质)">
@@ -242,13 +242,13 @@ function formatDuration(minutes: number): string {
                                             :type="`${$t(detailMod.类型)}${detailMod.属性 ? `,${$t(detailMod.属性 + '属性')}` : ''}${detailMod.限定 ? `,${$t(detailMod.限定)}` : ''}`"
                                             :effdesc="detailMod.效果"
                                         >
-                                            <RouterLink
+                                            <SRouterLink
                                                 :to="`/db/mod/${item.id}`"
                                                 class="flex justify-between items-center p-2 bg-base-300 rounded text-sm"
                                             >
                                                 <span class="text-base-content/70">{{ item.n }}</span>
                                                 <span class="font-medium text-primary">{{ item.c }}</span>
-                                            </RouterLink>
+                                            </SRouterLink>
                                         </ShowProps>
                                     </template>
                                     <div v-else class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
@@ -269,7 +269,7 @@ function formatDuration(minutes: number): string {
                             <template #tooltip>
                                 <DBDungeonDetailItem :dungeon="dungeon" />
                             </template>
-                            <RouterLink
+                            <SRouterLink
                                 :to="`/db/dungeon/${dungeon.id}`"
                                 class="flex flex-col gap-1 p-2 bg-base-300 rounded hover:bg-base-content/10 transition-colors"
                             >
@@ -295,7 +295,7 @@ function formatDuration(minutes: number): string {
                                         期望: {{ +getModDropInfo(dungeon, mod.id).times!.toFixed(2) }}次
                                     </span>
                                 </div>
-                            </RouterLink>
+                            </SRouterLink>
                         </FullTooltip>
                     </div>
                 </div>

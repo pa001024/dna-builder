@@ -102,7 +102,7 @@ const getAnimationDelay = (index: number) => {
                 >
                     <RouterLink
                         :to="item.path"
-                        class="flex flex-col justify-center items-center p-8 gap-2 bg-base-100/50 hover:bg-base-100 rounded-lg"
+                        class="flex flex-col justify-center items-center p-6 gap-2 bg-base-100/50 hover:bg-base-100 rounded-lg"
                     >
                         <div class="group-hover:text-primary transition-colors duration-300">
                             <Icon :icon="item.icon" class="w-12 h-12" />

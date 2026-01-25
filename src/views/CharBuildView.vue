@@ -8,7 +8,8 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import { useRoute } from "vue-router"
 import { buildQuery, createBuildMutation } from "@/api/graphql"
 import { env } from "@/env"
-import { defaultCharSettings, useCharSettings } from "../composables/useCharSettings"
+import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
+import { useCharSettings } from "../composables/useCharSettings"
 import {
     buffData,
     buffMap,
@@ -31,7 +32,7 @@ import { useSettingStore } from "../store/setting"
 import { useTimeline } from "../store/timeline"
 import { useTourStore } from "../store/tour"
 import { useUIStore } from "../store/ui"
-import { copyText, formatSkillProp } from "../util"
+import { copyText } from "../util"
 
 //#region 角色
 const inv = useInvStore()
@@ -165,6 +166,11 @@ const teamWeaponOptions = computed(() =>
     [{ value: "-", label: "无", type: "", icon: `/imgs/1.png` }].concat(meleeWeaponOptions.concat(rangedWeaponOptions))
 )
 
+const getInlineActions = () => {
+    const raw = inlineActionsToTimeline(charSettings.value.actions, selectedChar.value)
+    return CharBuildTimeline.fromRaw(raw)
+}
+
 // 创建CharBuild实例
 const charBuild = computed(() => {
     try {
@@ -200,7 +206,7 @@ const charBuild = computed(() => {
             enemyLevel: charSettings.value.enemyLevel,
             enemyResistance: charSettings.value.enemyResistance,
             targetFunction: charSettings.value.targetFunction,
-            timeline: getTimelineByName(charSettings.value.baseName),
+            timeline: charSettings.value.actions.enable ? getInlineActions() : getTimelineByName(charSettings.value.baseName),
         })
         return b
     } catch {
@@ -209,14 +215,6 @@ const charBuild = computed(() => {
         return {} as CharBuild
     }
 })
-
-// 计算属性
-const attributes = computed(() => charBuild.value.calculateAttributes())
-
-// 计算武器属性
-const weaponAttrs = computed(() => (charBuild.value.selectedWeapon ? charBuild.value.calculateWeaponAttributes().weapon : null))
-// 计算总伤害
-const totalDamage = computed(() => charBuild.value.calculate())
 
 function selectMod(type: string, slotIndex: number, modId: number, lv: number) {
     if (type === "角色") {
@@ -312,13 +310,6 @@ const loadSharedBuild = async (buildId: string) => {
         const build = await buildQuery({ id: buildId })
         if (build && build.charSettings) {
             const loadedSettings = JSON.parse(build.charSettings)
-            // 代码存在时，判断是否需要添加项目
-            if (JSON.stringify(defaultCharSettings) !== JSON.stringify(charSettings.value)) {
-                charProject.value.projects.push({
-                    name: `${selectedChar.value} - ${Math.random().toString(36).slice(2, 11)}`,
-                    charSettings: cloneDeep(charSettings.value),
-                })
-            }
             // 将加载的设置应用到当前构筑
             Object.assign(charSettings.value, loadedSettings)
             ui.showSuccessMessage("已加载分享的构筑")
@@ -467,14 +458,8 @@ function updateCharBuild() {
 }
 updateCharBuild()
 
-const summonAttributes = computed(() => {
-    const skill = charBuild.value.selectedSkill
-    if (skill?.召唤物) {
-        const attrs = charBuild.value.calculateWeaponAttributes(charBuild.value.meleeWeapon)
-        return skill.getSummonAttrs(attrs)
-    }
-    return undefined
-})
+// 计算属性
+const attributes = computed(() => charBuild.value.calculateAttributes())
 
 //#region Tour
 const tour = ref<typeof VTour>()
@@ -629,6 +614,7 @@ const collapsedSections = useLocalStorage("build-collapsed-sections", {
     effects: false,
     buffs: false,
     preview: false,
+    actions: false,
     share: false,
 })
 
@@ -1136,7 +1122,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             <div v-else data-tour="damage-result" class="flex justify-between items-center p-1">
                                 <div class="text-sm text-base-content/80">{{ charSettings.baseName }}</div>
                                 <div class="text-primary font-bold text-md font-orbitron">
-                                    {{ totalDamage }}
+                                    {{ charBuild.calculate() }}
                                 </div>
                             </div>
                         </div>
@@ -1476,169 +1462,27 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         </div>
                     </div>
 
+                    <!-- 动作序列 -->
+                    <CollapsibleSection
+                        :title="$t('char-build.actions')"
+                        :is-open="!collapsedSections.actions"
+                        @toggle="toggleSection('actions')"
+                    >
+                        <CharActionEditor :char-name="selectedChar" :char-build="charBuild" />
+                    </CollapsibleSection>
+
                     <!-- 装配预览 -->
                     <CollapsibleSection
                         :title="$t('char-build.equipment_preview')"
                         :is-open="!collapsedSections.preview"
                         @toggle="toggleSection('preview')"
                     >
-                        <!-- 角色头部信息 -->
-                        <div class="flex flex-col md:flex-row gap-6 mb-6 mt-2">
-                            <div
-                                class="relative w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden border-2 border-primary/30 shadow-xl self-start"
-                            >
-                                <ImageFallback :src="charBuild.char.url" alt="角色头像" class="w-full h-full object-cover object-top">
-                                    <Icon icon="ri:question-mark" class="w-full h-full" />
-                                </ImageFallback>
-                                <div class="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
-                            </div>
-                            <div class="flex-1 flex flex-col justify-end gap-4">
-                                <!-- 角色 -->
-                                <div class="flex items-center justify-between">
-                                    <h3 class="text-4xl font-bold text-base-content/80 flex items-center gap-2">
-                                        <img :src="charBuild.char.elementUrl" :alt="charBuild.char.属性" class="h-12 w-8 object-cover" />
-                                        {{ $t(selectedChar) }}
-                                    </h3>
-
-                                    <span
-                                        class="px-4 py-2 rounded-full bg-cyan-500/20 text-cyan-400 text-sm border border-cyan-500/30 font-orbitron"
-                                        >LV {{ charBuild.char.等级 }}</span
-                                    >
-                                </div>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <BuildWeaponCard :weapon="charBuild.meleeWeapon" />
-                                    <BuildWeaponCard :weapon="charBuild.rangedWeapon" />
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 属性展示 -->
-                        <div class="space-y-6">
-                            <!-- 角色属性 -->
-                            <div>
-                                <h4 class="text-lg font-bold mb-3 flex items-center gap-2">
-                                    <span>{{ $t("char-build.char_attributes") }}</span>
-                                    <span class="text-sm text-base-content/50"
-                                        >{{ $t("char-build.resonance_gain") }} {{ charSettings.resonanceGain * 100 }}%</span
-                                    >
-                                </h4>
-                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                                    <div
-                                        class="col-span-2 bg-linear-to-br from-primary/10 to-primary/5 rounded-lg p-3 border border-primary/20 hover:border-primary/40 transition-colors"
-                                    >
-                                        <div class="text-xs text-base-content/60 mb-1">
-                                            {{ charSettings.baseName }} -
-                                            {{ charBuild.selectedSkill?.召唤物?.名称 ? `[${charBuild.selectedSkill?.召唤物?.名称}]` : ""
-                                            }}{{ charSettings.targetFunction || $t("伤害") }}
-                                        </div>
-                                        <div class="text-primary font-bold text-lg font-orbitron">
-                                            {{ Math.round(totalDamage) }}
-                                        </div>
-                                    </div>
-                                    <div
-                                        v-for="[key, val] in Object.entries(attributes).filter(
-                                            ([k, v]) => !['召唤物攻击速度', '召唤物范围'].includes(k) && v
-                                        )"
-                                        :key="key"
-                                        class="bg-linear-to-br from-secondary/10 to-secondary/5 rounded-lg p-3 border border-secondary/20 hover:border-secondary/40 transition-colors"
-                                    >
-                                        <div class="text-xs text-base-content/60 mb-1">
-                                            {{ key === "攻击" ? $t(`${charBuild.char.属性}属性`) : "" }}{{ $t(key) }}
-                                        </div>
-                                        <div class="text-secondary font-bold text-lg font-orbitron">
-                                            {{
-                                                ["攻击", "生命", "护盾", "防御", "神智", "有效生命"].includes(key)
-                                                    ? `${+val.toFixed(key === "攻击" ? 2 : 0)}`
-                                                    : `${+(val * 100).toFixed(2)}%`
-                                            }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 召唤物属性 -->
-                            <div v-if="summonAttributes">
-                                <h4 class="text-lg font-bold mb-3">
-                                    {{ summonAttributes.find(p => p.名称 === "召唤物名称")?.格式 || "召唤物" }}
-                                </h4>
-                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                                    <div
-                                        v-for="prop in summonAttributes.filter(p => p.值)"
-                                        :key="prop.名称"
-                                        class="bg-linear-to-br from-secondary/10 to-secondary/5 rounded-lg p-3 border border-secondary/20"
-                                    >
-                                        <div class="text-xs text-base-content/60 mb-1">
-                                            {{ prop.名称 }}
-                                        </div>
-                                        <div class="text-secondary font-bold text-lg font-orbitron">
-                                            {{ formatSkillProp(prop.名称, prop) }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 武器属性 -->
-                            <div v-if="charBuild.selectedWeapon && weaponAttrs">
-                                <h4 class="text-lg font-bold mb-3">
-                                    {{ $t("char-build.weapon_attributes") }}
-                                </h4>
-                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                                    <div
-                                        v-for="[key, val] in Object.entries(weaponAttrs).filter(([_, v]) => v)"
-                                        :key="key"
-                                        class="bg-linear-to-br from-secondary/10 to-secondary/5 rounded-lg p-3 border border-secondary/20"
-                                    >
-                                        <div class="text-xs text-base-content/60 mb-1">
-                                            {{ key === "攻击" ? charBuild.selectedWeapon.伤害类型 : "" }}{{ $t(key) }}
-                                        </div>
-                                        <div class="text-secondary font-bold text-lg font-orbitron">
-                                            {{ ["攻击", "攻速", "多重"].includes(key) ? val : `${+(val * 100).toFixed(2)}%` }}
-                                            {{
-                                                key === "多重" && (charBuild.selectedWeapon?.弹片数 || 1) > 1
-                                                    ? ` * ${charBuild.selectedWeapon.弹片数! * val}`
-                                                    : ""
-                                            }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- MOD展示 -->
-                            <div v-if="charBuild.mods.length > 0">
-                                <h4 class="text-lg font-bold mb-3">MOD</h4>
-                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                                    <div
-                                        v-for="mod in charBuild.mods.reduce((r, v) => {
-                                            if (r[v.名称]) {
-                                                r[v.名称].count += 1
-                                            } else {
-                                                r[v.名称] = { count: 1, mod: v }
-                                            }
-                                            return r
-                                        }, {} as any)"
-                                        :key="mod.mod.名称"
-                                        class="flex items-center gap-2 px-3 py-2 rounded-lg bg-linear-to-r from-secondary/10 to-secondary/5 border border-secondary/30 text-sm"
-                                    >
-                                        <img class="w-8 h-8 object-cover rounded" :src="mod.mod.url" alt="" />
-                                        <span class="font-medium">{{ mod.count > 1 ? `${mod.count} x ` : "" }}{{ $t(mod.mod.名称) }}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- BUFF展示 -->
-                            <div v-if="charBuild.buffs.length > 0">
-                                <h4 class="text-lg font-bold mb-3">BUFF</h4>
-                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                                    <span
-                                        v-for="buff in charBuild.buffs.map(v => v.名称)"
-                                        :key="buff"
-                                        class="px-4 py-2 rounded-lg bg-linear-to-r from-secondary/10 to-secondary/5 border border-secondary/30 text-sm"
-                                    >
-                                        {{ buff }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
+                        <EquipmentPreview
+                            :char-build="charBuild"
+                            :attributes="attributes"
+                            :char-name="selectedChar"
+                            :char-settings="charSettings"
+                        />
                     </CollapsibleSection>
                 </div>
             </ScrollArea>

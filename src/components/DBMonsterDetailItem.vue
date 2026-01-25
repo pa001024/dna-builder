@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue"
+import { formatBigNumber } from "@/util"
 import { abyssDungeonMap } from "../data"
 import dungeonData from "../data/d/dungeon.data"
 import { Faction, Monster } from "../data/data-types"
@@ -68,13 +69,6 @@ function getFactionName(faction: number | undefined): string {
     if (faction === undefined) return "其他"
     return Faction[faction] || `阵营${faction}`
 }
-
-function formatNumber(num: number): string {
-    if (num >= 10000) {
-        return (num / 10000).toFixed(1) + "万"
-    }
-    return num.toString()
-}
 </script>
 
 <template>
@@ -82,9 +76,9 @@ function formatNumber(num: number): string {
         <div class="p-3 space-y-4">
             <div class="p-3">
                 <div class="flex items-center gap-3 mb-3">
-                    <RouterLink :to="`/db/monster/${monster.id}`" class="text-lg font-bold link link-primary">
+                    <SRouterLink :to="`/db/monster/${monster.id}`" class="text-lg font-bold link link-primary">
                         {{ $t(monster.n) }}
-                    </RouterLink>
+                    </SRouterLink>
                     <div class="text-sm text-base-content/70 flex items-center gap-2">
                         <span class="px-1.5 py-0.5 rounded bg-base-200 text-xs">
                             {{ $t(getFactionName(monster.f)) }}
@@ -116,31 +110,31 @@ function formatNumber(num: number): string {
                     <div class="bg-base-200 rounded p-2 text-center">
                         <div class="text-xs text-base-content/70 mb-1">攻击</div>
                         <div class="font-bold text-primary">
-                            {{ formatNumber(leveledMonster.atk) }}
+                            {{ formatBigNumber(leveledMonster.atk) }}
                         </div>
                     </div>
                     <div class="bg-base-200 rounded p-2 text-center">
                         <div class="text-xs text-base-content/70 mb-1">防御</div>
                         <div class="font-bold text-success">
-                            {{ formatNumber(leveledMonster.def) }}
+                            {{ formatBigNumber(leveledMonster.def) }}
                         </div>
                     </div>
                     <div class="bg-base-200 rounded p-2 text-center">
                         <div class="text-xs text-base-content/70 mb-1">生命</div>
                         <div class="font-bold text-error">
-                            {{ formatNumber(leveledMonster.hp) }}
+                            {{ formatBigNumber(leveledMonster.hp) }}
                         </div>
                     </div>
                     <div v-if="leveledMonster.es !== undefined" class="bg-base-200 rounded p-2 text-center">
                         <div class="text-xs text-base-content/70 mb-1">护盾</div>
                         <div class="font-bold text-info">
-                            {{ formatNumber(leveledMonster.es) }}
+                            {{ formatBigNumber(leveledMonster.es) }}
                         </div>
                     </div>
                     <div v-if="leveledMonster.tn !== undefined" class="bg-base-200 rounded p-2 text-center">
                         <div class="text-xs text-base-content/70 mb-1">战姿</div>
                         <div class="font-bold text-secondary">
-                            {{ formatNumber(leveledMonster.tn) }}
+                            {{ formatBigNumber(leveledMonster.tn) }}
                         </div>
                     </div>
                 </div>

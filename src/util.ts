@@ -1,7 +1,7 @@
 import * as clipboard from "@tauri-apps/plugin-clipboard-manager"
+import i18next from "i18next"
 import { computed, onMounted, onUnmounted, ref } from "vue"
-import { getMapAPI } from "./api/app"
-import type { LeveledSkillField } from "./data/leveled/LeveledSkill"
+import type { LeveledSkillField } from "@/data"
 import { env } from "./env"
 
 export function useState<T, N extends keyof T>(obj: T, key: N) {
@@ -19,12 +19,18 @@ export function format100r(n100: number, di = 2) {
 export function format1000(n: number, di = 0) {
     return `${n.toLocaleString("en-US", { minimumFractionDigits: di, maximumFractionDigits: di })}`
 }
+
 // 返回10K,10M,10B格式的大数字
 export function formatBigNumber(n: number) {
-    if (n >= 1e9) return `${+(n / 1e9).toFixed(2)}B`
-    if (n >= 1e6) return `${+(n / 1e6).toFixed(2)}M`
-    // if (n >= 1e3) return `${+(n / 1e3).toFixed(2)}K`
-    return n
+    if (i18next.language.startsWith("zh")) {
+        if (n >= 1e8) return `${+(n / 1e8).toFixed(3)}E`
+        if (n >= 1e4) return `${+(n / 1e4).toFixed(3)}W`
+    } else {
+        if (n >= 1e9) return `${+(n / 1e9).toFixed(3)}B`
+        if (n >= 1e6) return `${+(n / 1e6).toFixed(3)}M`
+        // if (n >= 1e3) return `${+(n / 1e3).toFixed(2)}K`
+    }
+    return `${+n.toFixed(2)}`
 }
 
 const numKeys = new Set([
@@ -100,75 +106,6 @@ export function base36Pad(num: number) {
 
 export function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-import emojiJson from "./assets/emoji.json"
-
-export interface EmojiStyle {
-    type: "local" | "remote"
-    src: string
-    size?: number
-    position?: string
-}
-
-const emojiDict = emojiJson.dict.reduce(
-    (acc, cur) => {
-        acc[cur.desc] = { type: "local", src: cur.image }
-        return acc
-    },
-    {} as Record<string, EmojiStyle>
-)
-let emojiDictLoaded = false
-
-export function getEmoji(emoji: string): EmojiStyle | null {
-    const result = emojiDict[emoji]
-    if (!result) return null
-    if (result.type === "local") {
-        return { type: "local", src: result.src.startsWith("http") ? result.src : `/emojiimg/${result.src}` }
-    }
-    return result
-}
-
-export async function initEmojiDict() {
-    if (emojiDictLoaded) return
-    try {
-        const api = getMapAPI()
-        const res = await api.getEmojiList()
-        if (res.is_success && res.data) {
-            emojiDictLoaded = true
-            for (const item of res.data) {
-                const sizeEnum = item.size || 0
-                if (sizeEnum === 1) {
-                    continue
-                }
-                const emojiSize = 56
-                const padding = 16
-                const totalWidth = 2256
-                const bgSize = totalWidth / 2
-                const cols = 20
-                const cellWidth = (bgSize - padding / 2) / cols
-                for (let i = 0; i < item.content.length; i++) {
-                    const content = item.content[i]
-                    const key = content.startsWith("[") ? content : `[/${content}]`
-                    if (emojiDict[key]) {
-                        continue
-                    }
-                    const row = Math.floor(i / cols)
-                    const col = i % cols
-                    const posX = col * cellWidth + padding / 2
-                    const posY = row * emojiSize + padding / 2
-                    emojiDict[key] = {
-                        type: "remote",
-                        src: `${item.url}?x-oss-process=image/resize,w_${totalWidth}`,
-                        size: bgSize,
-                        position: `-${posX}px -${posY}px`,
-                    }
-                }
-            }
-        }
-    } catch (e) {
-        console.error("获取 Emoji 列表失败", e)
-    }
 }
 
 /**

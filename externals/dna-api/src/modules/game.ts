@@ -9,11 +9,8 @@ import type {
 import { DNASubModule } from "./base"
 
 export class GameAPI extends DNASubModule {
-    async defaultRoleForTool(type: number = 1, otherUserId?: string) {
+    async defaultRoleForTool(type: number = 1, otherUserId = "") {
         const data = { otherUserId, type }
-        if (!otherUserId) {
-            delete data.otherUserId
-        }
         return await this._dna_request<DNARoleEntity>("role/defaultRoleForTool", data, { sign: true })
     }
 

@@ -529,6 +529,50 @@ export const guideQuery = typedQuery(
     ` as const
 )<Types.Guide, { id: string }>()
 
+export const dpsListQuery = typedQuery(
+    /* GraphQL */ `
+        query ($charId: Int, $buildId: String, $timelineId: String, $limit: Int, $offset: Int, $sortBy: String) {
+            dpsList(charId: $charId, buildId: $buildId, timelineId: $timelineId, limit: $limit, offset: $offset, sortBy: $sortBy) {
+                id
+                charId
+                buildId
+                timelineId
+                dpsValue
+                details
+                userId
+                createdAt
+                updateAt
+            }
+        }
+    ` as const
+)<Types.DPS[], { charId?: number; buildId?: string; timelineId?: string; limit?: number; offset?: number; sortBy?: string }>()
+
+export const dpsCountQuery = typedQuery(
+    /* GraphQL */ `
+        query ($charId: Int, $buildId: String, $timelineId: String) {
+            dpsCount(charId: $charId, buildId: $buildId, timelineId: $timelineId)
+        }
+    ` as const
+)<number, { charId?: number; buildId?: string; timelineId?: string }>()
+
+export const charDPSQuery = typedQuery(
+    /* GraphQL */ `
+        query ($charId: Int!, $limit: Int) {
+            charDPS(charId: $charId, limit: $limit) {
+                id
+                charId
+                buildId
+                timelineId
+                dpsValue
+                details
+                userId
+                createdAt
+                updateAt
+            }
+        }
+    ` as const
+)<Types.DPS[], { charId: number; limit?: number }>()
+
 export const buildsQuery = typedQuery(
     /* GraphQL */ `
         query ($search: String, $charId: Int, $userId: String, $limit: Int, $offset: Int, $sortBy: String) {

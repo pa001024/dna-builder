@@ -167,16 +167,16 @@ export const useUIStore = defineStore("ui", {
             const diffMinute = Math.floor((diff / (1000 * 60)) % 60)
             const diffSecond = Math.floor((diff / 1000) % 60)
             if (diffDay > 0) {
-                return `${diffDay}天${diffHour}:${diffMinute}:${diffSecond}后`
+                return `${diffDay}天${diffHour}:${diffMinute}:${diffSecond}`
             }
             if (diffHour > 0) {
-                return `${diffHour > 10 ? diffHour : `0${diffHour}`}:${diffMinute > 10 ? diffMinute : `0${diffMinute}`}:${diffSecond > 10 ? diffSecond : `0${diffSecond}`}后`
+                return `${diffHour > 10 ? diffHour : `0${diffHour}`}:${diffMinute > 10 ? diffMinute : `0${diffMinute}`}:${diffSecond > 10 ? diffSecond : `0${diffSecond}`}`
             }
             if (diffMinute > 0) {
-                return `${diffMinute > 10 ? diffMinute : `0${diffMinute}`}:${diffSecond > 10 ? diffSecond : `0${diffSecond}`}后`
+                return `${diffMinute > 10 ? diffMinute : `0${diffMinute}`}:${diffSecond > 10 ? diffSecond : `0${diffSecond}`}`
             }
             if (diffSecond > 0) {
-                return `${diffSecond > 10 ? diffSecond : `0${diffSecond}`}秒后`
+                return `${diffSecond > 10 ? `00:${diffSecond}` : `00:0${diffSecond}`}`
             }
             return "已过期"
         },

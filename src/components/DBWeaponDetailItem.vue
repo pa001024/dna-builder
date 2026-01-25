@@ -29,9 +29,9 @@ watch(
         <div class="p-3 space-y-4">
             <div class="p-3">
                 <div class="flex items-center gap-3 mb-3">
-                    <RouterLink :to="`/db/weapon/${weapon.id}`" class="text-lg font-bold link link-primary">
+                    <SRouterLink :to="`/db/weapon/${weapon.id}`" class="text-lg font-bold link link-primary">
                         {{ $t(weapon.名称) }}
-                    </RouterLink>
+                    </SRouterLink>
                     <span class="text-xs text-base-content/70">ID: {{ weapon.id }}</span>
                 </div>
 

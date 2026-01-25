@@ -56,9 +56,9 @@ function getTypeName(type: number): string {
         <div class="p-3 space-y-4">
             <div class="p-3">
                 <div class="flex items-center gap-3 mb-3">
-                    <RouterLink :to="`/db/pet/${pet.id}`" class="text-lg font-bold link link-primary">
+                    <SRouterLink :to="`/db/pet/${pet.id}`" class="text-lg font-bold link link-primary">
                         {{ pet.名称 }}
-                    </RouterLink>
+                    </SRouterLink>
                     <span class="text-xs text-base-content/70">ID: {{ pet.id }}</span>
                     <div class="text-sm text-base-content/70 flex items-center gap-2">
                         <span class="px-1.5 py-0.5 rounded" :class="getQualityColor(pet.品质)">

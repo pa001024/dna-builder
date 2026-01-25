@@ -72,7 +72,7 @@ defineExpose({
                 <div class="card-body">
                     <h3 class="card-title">游戏板块</h3>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-4">
-                        <RouterLink
+                        <SRouterLink
                             v-for="forum in gameConfig.gameAllForumList"
                             :key="forum.id"
                             :to="`/dna/posts/${forum.id}`"
@@ -80,7 +80,7 @@ defineExpose({
                         >
                             <img :src="forum.iconUrl" alt="Forum Icon" class="w-6 h-6 mr-2" />
                             <span>{{ forum.name }}</span>
-                        </RouterLink>
+                        </SRouterLink>
                     </div>
                 </div>
             </div>
@@ -89,7 +89,7 @@ defineExpose({
                 <div class="card-body">
                     <h3 class="card-title">话题列表</h3>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-4">
-                        <RouterLink
+                        <SRouterLink
                             v-for="topic in gameConfig.topicList"
                             :key="topic.topicId"
                             :to="`/dna/topic/${topic.topicId}`"
@@ -97,7 +97,7 @@ defineExpose({
                         >
                             <img :src="topic.topicIconUrl" alt="Wiki Icon" class="w-6 h-6 mr-2" />
                             <span>{{ topic.topicName }}</span>
-                        </RouterLink>
+                        </SRouterLink>
                     </div>
                 </div>
             </div>

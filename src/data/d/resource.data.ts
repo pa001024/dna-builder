@@ -6,6 +6,16 @@ export interface Resource {
 
 const t: Resource[] = [
     {
+        id: 99,
+        name: "月石晶胚",
+        icon: "T_Coin_Main_Lv1",
+    },
+    {
+        id: 100,
+        name: "月石",
+        icon: "T_Coin_Main_Lv2",
+    },
+    {
         id: 101,
         name: "铜币",
         icon: "T_Coin_Main_Lv3",
@@ -14,6 +24,16 @@ const t: Resource[] = [
         id: 102,
         name: "深红凝珠",
         icon: "T_Coin_Other_Mod",
+    },
+    {
+        id: 110,
+        name: "水色棱镜",
+        icon: "T_Gacha_Coin01",
+    },
+    {
+        id: 111,
+        name: "虹色棱镜",
+        icon: "T_Gacha_Coin02",
     },
     {
         id: 201,
@@ -46,9 +66,54 @@ const t: Resource[] = [
         icon: "T_Resource_Ticket04",
     },
     {
+        id: 210,
+        name: "丰渔之证",
+        icon: "T_Coin_Other_Fishing",
+    },
+    {
         id: 211,
         name: "委托密函线索",
         icon: "T_Icon_Random_Box_Part_01",
+    },
+    {
+        id: 214,
+        name: "剧目票根",
+        icon: "T_Resource_Abyss_Coin",
+    },
+    {
+        id: 215,
+        name: "时之纺线",
+        icon: "T_Rouge_ShopToken",
+    },
+    {
+        id: 216,
+        name: "狩月之歌",
+        icon: "T_Coin_WeeklyDungeon",
+    },
+    {
+        id: 218,
+        name: "狩月纪念币",
+        icon: "T_Resource_Raid_Coin01",
+    },
+    {
+        id: 1001,
+        name: "纯白沙漏",
+        icon: "T_Resource_GachaTicket_01",
+    },
+    {
+        id: 1002,
+        name: "玩具气锤",
+        icon: "T_Resource_Jiasu",
+    },
+    {
+        id: 1003,
+        name: "华彩沙漏",
+        icon: "T_Resource_GachaTicket_02",
+    },
+    {
+        id: 1006,
+        name: "熔炼模具",
+        icon: "T_Resource_GeneralWeaponCard",
     },
     {
         id: 2008,
@@ -61,6 +126,11 @@ const t: Resource[] = [
         icon: "T_Resource_Weapon_Exp04",
     },
     {
+        id: 2010,
+        name: "武器说明书·四",
+        icon: "T_Resource_Weapon_Exp05",
+    },
+    {
         id: 2012,
         name: "战斗旋律·二",
         icon: "T_Resource_Char_Exp03",
@@ -69,6 +139,11 @@ const t: Resource[] = [
         id: 2013,
         name: "战斗旋律·三",
         icon: "T_Resource_Char_Exp04",
+    },
+    {
+        id: 2014,
+        name: "战斗旋律·四",
+        icon: "T_Resource_Char_Exp05",
     },
     {
         id: 3001,
@@ -84,6 +159,26 @@ const t: Resource[] = [
         id: 3003,
         name: "妙妙妙罐罐",
         icon: "T_Resource_PetFood03",
+    },
+    {
+        id: 3005,
+        name: "妙妙膏膏",
+        icon: "T_Resource_PetExp02",
+    },
+    {
+        id: 3006,
+        name: "妙妙妙膏膏",
+        icon: "T_Resource_PetExp03",
+    },
+    {
+        id: 3007,
+        name: "妙妙乳饮",
+        icon: "T_Resource_PetBreak",
+    },
+    {
+        id: 3016,
+        name: "增幅激化器",
+        icon: "T_Resourece_GeneralModLevelUpItem",
     },
     {
         id: 10001,
@@ -1156,6 +1251,31 @@ const t: Resource[] = [
         icon: "T_Resource_Forge_Product06",
     },
     {
+        id: 29001,
+        name: "探险之证·净界岛",
+        icon: "T_ExploreBadge_Beibao_Prologue",
+    },
+    {
+        id: 29002,
+        name: "探险之证·冰湖城",
+        icon: "T_ExploreBadge_Beibao_Chapter01",
+    },
+    {
+        id: 29003,
+        name: "探险之证·龙莎要塞",
+        icon: "T_ExploreBadge_Beibao_EXChapter01",
+    },
+    {
+        id: 29004,
+        name: "探险之证·烟津渡",
+        icon: "T_ExploreBadge_Beibao_East",
+    },
+    {
+        id: 29005,
+        name: "太虚符文",
+        icon: "T_Icon_CrystalDust",
+    },
+    {
         id: 30001,
         name: "生物萃取物",
         icon: "T_Resource_PolarityPart01",
@@ -1164,6 +1284,51 @@ const t: Resource[] = [
         id: 30002,
         name: "精工磁石",
         icon: "T_Resource_PolarityPart02",
+    },
+    {
+        id: 30101,
+        name: "高级染剂·泪湖",
+        icon: "T_Dye_01",
+    },
+    {
+        id: 30102,
+        name: "基础染剂·海盐",
+        icon: "T_Dye_02",
+    },
+    {
+        id: 30103,
+        name: "基础染剂·林梢",
+        icon: "T_Dye_03",
+    },
+    {
+        id: 30104,
+        name: "基础染剂·豌豆",
+        icon: "T_Dye_04",
+    },
+    {
+        id: 30105,
+        name: "基础染剂·沙丘",
+        icon: "T_Dye_05",
+    },
+    {
+        id: 30106,
+        name: "基础染剂·红土",
+        icon: "T_Dye_06",
+    },
+    {
+        id: 30107,
+        name: "基础染剂·胭脂",
+        icon: "T_Dye_07",
+    },
+    {
+        id: 30108,
+        name: "高级染剂·群鸦",
+        icon: "T_Dye_08",
+    },
+    {
+        id: 30109,
+        name: "基础染剂·雷雨",
+        icon: "T_Dye_09",
     },
     {
         id: 40001,
@@ -1194,6 +1359,191 @@ const t: Resource[] = [
         id: 40013,
         name: "弹药补给箱·二",
         icon: "T_Drop_Ammo",
+    },
+    {
+        id: 41002,
+        name: "箱中之猫·本色",
+        icon: "T_Resource_Gesture_Zhixiang",
+    },
+    {
+        id: 41005,
+        name: "箱中之猫·铅灰",
+        icon: "T_Resource_Gesture_Zhixiang",
+    },
+    {
+        id: 41006,
+        name: "箱中之猫·白樱",
+        icon: "T_Resource_Gesture_Zhixiang",
+    },
+    {
+        id: 41012,
+        name: "弦上诗篇·黛蓝",
+        icon: "T_Resource_Gesture_ViolinDarkIndigo",
+    },
+    {
+        id: 41013,
+        name: "“绝不空军”",
+        icon: "T_Resource_Gesture_Angling",
+    },
+    {
+        id: 41014,
+        name: "极速定格·本色",
+        icon: "T_Resource_Gesture_CarBlack",
+    },
+    {
+        id: 41015,
+        name: "弦上诗篇·焦糖",
+        icon: "T_Resource_Gesture_ViolinCaramel",
+    },
+    {
+        id: 41016,
+        name: "弦上诗篇·涅白",
+        icon: "T_Resource_Gesture_Violin",
+    },
+    {
+        id: 41017,
+        name: "极速定格·白樱",
+        icon: "T_Resource_Gesture_CarPink",
+    },
+    {
+        id: 41018,
+        name: "极速定格·鎏金",
+        icon: "T_Resource_Gesture_Car",
+    },
+    {
+        id: 41019,
+        name: "泡泡泡泡鸭",
+        icon: "T_Resource_Gesture_Bubblegun",
+    },
+    {
+        id: 41020,
+        name: "悠游水岸·本色",
+        icon: "T_Resource_Gesture_Beach",
+    },
+    {
+        id: 41021,
+        name: "悠游水岸·白樱",
+        icon: "T_Resource_Gesture_BeachPink",
+    },
+    {
+        id: 41022,
+        name: "悠游水岸·绛紫",
+        icon: "T_Resource_Gesture_BeachBlue",
+    },
+    {
+        id: 41028,
+        name: "技能五子棋",
+        icon: "T_Resource_Gesture_SkillGomoku",
+    },
+    {
+        id: 110006,
+        name: "启航自选形象礼箱·星芒",
+        icon: "T_Pack_Christmas",
+    },
+    {
+        id: 110012,
+        name: "闻香自选形象礼箱·墨玉",
+        icon: "T_Pack_Common02",
+    },
+    {
+        id: 1001101,
+        name: "思绪片段·贝蕾妮卡",
+        icon: "T_CharPiece_Heitao",
+    },
+    {
+        id: 1001103,
+        name: "思绪片段·幻景",
+        icon: "T_CharPiece_Tuosi",
+    },
+    {
+        id: 1001501,
+        name: "思绪片段·莉兹贝尔",
+        icon: "T_CharPiece_Baonu",
+    },
+    {
+        id: 1001502,
+        name: "思绪片段·妮弗尔夫人",
+        icon: "T_CharPiece_Nifu",
+    },
+    {
+        id: 1001503,
+        name: "思绪片段·刻舟",
+        icon: "T_CharPiece_Kezhou",
+    },
+    {
+        id: 1001801,
+        name: "思绪片段·菲娜",
+        icon: "T_CharPiece_Feina",
+    },
+    {
+        id: 1002101,
+        name: "思绪片段·丽蓓卡",
+        icon: "T_CharPiece_Shuimu",
+    },
+    {
+        id: 1002301,
+        name: "思绪片段·塔比瑟",
+        icon: "T_CharPiece_Zhangyu",
+    },
+    {
+        id: 1002401,
+        name: "思绪片段·扶疏",
+        icon: "T_CharPiece_Baiheng",
+    },
+    {
+        id: 1003101,
+        name: "思绪片段·琳恩",
+        icon: "T_CharPiece_Linen",
+    },
+    {
+        id: 1003103,
+        name: "思绪片段·耶尔与奥利弗",
+        icon: "T_CharPiece_Yeer",
+    },
+    {
+        id: 1003201,
+        name: "思绪片段·海尔法",
+        icon: "T_CharPiece_Haier",
+    },
+    {
+        id: 1003301,
+        name: "思绪片段·玛尔洁",
+        icon: "T_CharPiece_Maer",
+    },
+    {
+        id: 1004101,
+        name: "思绪片段·黎瑟",
+        icon: "T_CharPiece_Lise",
+    },
+    {
+        id: 1004202,
+        name: "思绪片段·兰迪",
+        icon: "T_CharPiece_Landi",
+    },
+    {
+        id: 1004301,
+        name: "思绪片段·西比尔",
+        icon: "T_CharPiece_Xibi",
+    },
+    {
+        id: 1005101,
+        name: "思绪片段·松露与榛子",
+        icon: "T_CharPiece_Songlu",
+    },
+    {
+        id: 1005102,
+        name: "思绪片段·奥特赛德",
+        icon: "T_CharPiece_Aote",
+    },
+    {
+        id: 1005301,
+        name: "思绪片段·赛琪",
+        icon: "T_CharPiece_Saiqi",
+    },
+    {
+        id: 1005401,
+        name: "思绪片段·达芙涅",
+        icon: "T_CharPiece_Dafu",
     },
     {
         id: 3000012,
@@ -1319,6 +1669,51 @@ const t: Resource[] = [
         id: 4020003,
         name: "银辉石",
         icon: "T_Pickup_Stone01",
+    },
+    {
+        id: 5110200,
+        name: "入门鱼竿",
+        icon: "T_FishingRod_Normal_2",
+    },
+    {
+        id: 5110300,
+        name: "进阶鱼竿",
+        icon: "T_FishingRod_Normal_3",
+    },
+    {
+        id: 5110400,
+        name: "专家鱼竿",
+        icon: "T_FishingRod_Normal_4",
+    },
+    {
+        id: 5110500,
+        name: "大师鱼竿",
+        icon: "T_FishingRod_Normal_5",
+    },
+    {
+        id: 5210100,
+        name: "通用鱼饵",
+        icon: "T_FishingLure_Normal",
+    },
+    {
+        id: 5210200,
+        name: "蚓鱼上钩",
+        icon: "T_FishingLure_Special_3",
+    },
+    {
+        id: 5210300,
+        name: "同类相吸",
+        icon: "T_FishingLure_Special_1",
+    },
+    {
+        id: 5210400,
+        name: "好翅爱吃",
+        icon: "T_FishingLure_Special_2",
+    },
+    {
+        id: 6000001,
+        name: "春泽玄宝",
+        icon: "T_Coin_ActivityZhiliu01",
     },
 ]
 

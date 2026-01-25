@@ -149,6 +149,7 @@ export interface Skill {
     e?: SkillEffect[]
     b?: SkillBuff[]
     p?: SkillPassive[]
+    子技能?: Omit<Skill, "名称">[]
 }
 
 export interface SkillPassive {

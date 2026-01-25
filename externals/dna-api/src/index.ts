@@ -48,6 +48,8 @@ export class DNAAPI extends DNABaseAPI {
             fetchFn?: typeof fetch
             is_h5?: boolean
             rsa_public_key?: string
+            mode?: "android" | "ios"
+            debug?: boolean
         } = {}
     ) {
         super(options)

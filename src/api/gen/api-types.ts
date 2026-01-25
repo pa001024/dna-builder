@@ -115,18 +115,12 @@ export interface Room {
     type?: string
     ownerId: string
     maxUsers?: number
-    createdAt: string
-    updateAt: string
+    createdAt?: string
+    updateAt?: string
     owner?: User
-    msgCount?: number
+    msgCount: number
     lastMsg?: Msg
     onlineUsers?: TinyUser[]
-}
-
-export interface RoomFilter {
-    name?: string
-    type?: string
-    ownerId?: string
 }
 
 export interface MissionsIngame {
@@ -142,8 +136,8 @@ export interface Msg {
     userId: string
     content: string
     edited?: number
-    createdAt: string
-    updateAt: string
+    createdAt?: string
+    updateAt?: string
     user: User
     reactions?: Reaction[]
 }
@@ -173,6 +167,21 @@ export interface Guide {
     updateAt: string
     user?: User
     isLiked?: boolean
+}
+
+export interface DPS {
+    id: string
+    charId: number
+    buildId?: string
+    timelineId?: string
+    dpsValue: number
+    details?: string
+    userId: string
+    createdAt: string
+    updateAt: string
+    user?: User
+    build?: Build
+    timeline?: Timeline
 }
 
 export interface Build {
@@ -242,6 +251,14 @@ export interface GuideInput {
     images: string[]
     charId?: number
     buildId?: string
+}
+
+export interface DPSInput {
+    charId: number
+    buildId?: string
+    timelineId?: string
+    dpsValue: number
+    details?: string
 }
 
 export interface BuildInput {
