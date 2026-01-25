@@ -119,6 +119,7 @@ async function loadData(force = false) {
             return
         }
         loading.value = true
+        await setting.startHeartbeat()
 
         const roleRes = await api.defaultRoleForTool()
         if (roleRes.is_success && roleRes.data) {

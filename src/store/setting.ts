@@ -149,18 +149,26 @@ export const useSettingStore = defineStore("setting", {
         },
 
         // 启动心跳计时器
-        async startHeartbeat(userId: string, token: string) {
+        async startHeartbeat(userId?: string, token?: string) {
+            if (!userId || !token) {
+                const user = await this.getCurrentUser()
+                if (!user) return false
+                userId = user.uid
+                token = user.token
+            }
             try {
                 // 调用Rust实现的心跳功能
                 const res = await startHeartbeat("wss://dnabbs-api.yingxiong.com:8180/ws-community-websocket", token, userId)
                 if (res.includes("成功")) {
                     console.log("心跳已启动")
+                    return true
                 } else {
                     await stopHeartbeat()
                 }
             } catch (error) {
                 console.error("启动心跳失败:", error)
             }
+            return false
         },
 
         // 停止心跳计时器

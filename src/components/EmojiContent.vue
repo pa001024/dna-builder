@@ -85,7 +85,10 @@ watchEffect(() => {
                     'background-size': `${segment.emojiStyle.size}px`,
                     'background-position': segment.emojiStyle.position,
                 }"
-            />
+            >
+                <!-- 防止css发送refer -->
+                <img :src="segment.emojiStyle.src" class="hidden" />
+            </span>
             <span v-else>{{ segment.content }}</span>
         </template>
     </component>

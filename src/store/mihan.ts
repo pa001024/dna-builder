@@ -41,8 +41,7 @@ export class MihanNotify {
         const api = await setting.getDNAAPI()
         if (api) {
             // 用户登录尝试使用DNAAPI获取密函
-            // 模拟别的请求 防止返回空值
-            await Promise.all([api.getCommonConfig(), api.getMhSwitchStatus(), api.home.isHaveSignin(), api.getMine()])
+            await setting.startHeartbeat()
             const data = await api.defaultRoleForTool()
             if (data?.data?.instanceInfo) {
                 const missions = data.data.instanceInfo.map(v => v.instances.map(v => v.name.replace("勘探/无尽", "勘察/无尽")))

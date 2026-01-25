@@ -896,7 +896,7 @@ dependencies = [
 
 [[package]]
 name = "dna-builder"
-version = "0.9.20"
+version = "0.9.21"
 dependencies = [
  "base64 0.22.1",
  "futures-util",

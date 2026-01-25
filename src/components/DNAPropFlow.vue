@@ -911,7 +911,7 @@ defineExpose({
                                 v-model="propName"
                                 placeholder="可选，留空查询所有道具"
                                 class="input-md! input-bordered w-full"
-                                :options="['时之纺线', '皎皎之民的信物'].map(v => ({ label: v, value: v }))"
+                                :options="['时之纺线', '皎皎之民的信物', '委托密函线索'].map(v => ({ label: v, value: v }))"
                             />
                         </div>
                         <!-- 批量查询按钮 -->
@@ -1058,7 +1058,7 @@ defineExpose({
                         maxlength="6"
                     />
                     <button @click="sendVerifyCode" class="btn btn-secondary" :disabled="smsColdDown > 0 || captchaCode.length !== 6">
-                        {{ smsColdDown > 0 ? `${smsColdDown}s` : "发送验证码" }}
+                        {{ smsColdDown > 0 ? `${~~(smsColdDown / 1000) | 0}s` : "发送验证码" }}
                     </button>
                 </div>
             </div>

@@ -189,8 +189,8 @@ const isSignFinished = computed(() => {
                                 <input
                                     type="checkbox"
                                     class="toggle toggle-primary"
-                                    :model-value="setting.autoSign"
-                                    @update:model-value="setting.setAutoSign($event)"
+                                    :checked="setting.autoSign"
+                                    @change="setting.setAutoSign(($event.target as HTMLInputElement)!.checked)"
                                 />
                             </div>
 

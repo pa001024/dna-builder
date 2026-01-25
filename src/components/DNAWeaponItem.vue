@@ -15,6 +15,8 @@ const ui = useUIStore()
         @click="weapon.unLocked ? $router.push(`/dna/weapon/${weapon.weaponId}/${weapon.weaponEid}`) : ui.showErrorMessage('武器未解锁')"
     >
         <div class="card-body bg-linear-30 from-purple-300/50 to-purple-600/50 rounded-2xl relative p-2">
+            <!-- 防止css发送refer -->
+            <img :src="weapon.icon" class="hidden" />
             <div
                 class="absolute inset-0 pointer-events-none mask-b-from-60%"
                 :style="{
