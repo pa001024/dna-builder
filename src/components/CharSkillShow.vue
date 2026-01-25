@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watchEffect } from "vue"
-import type { LeveledChar, LeveledSkill } from "@/data"
+import type { LeveledChar } from "@/data"
+import { LeveledSkill } from "@/data/leveled/LeveledSkill"
 import { formatSkillProp } from "@/util"
 
 const detailTab = ref("溯源")
@@ -62,7 +63,12 @@ watchEffect(() => {
                 class="size-8 rounded-full bg-base-content"
                 :style="{ mask: `url(${selectedSkill.url}) no-repeat center/contain` }"
             />
-            {{ $t(selectedSkill.类型) }}
+            <div class="flex items-center gap-2">
+                {{ $t(selectedSkill.类型) }}
+                <span v-if="selectedSkill.skillData.cd" class="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
+                    CD: {{ selectedSkill.skillData.cd }}s
+                </span>
+            </div>
         </div>
         <div class="p-2 text-sm">
             {{ $t(selectedSkill.描述 || "") }}
@@ -101,9 +107,30 @@ watchEffect(() => {
                 </div>
             </div>
         </div>
+
+        <!-- 子技能区域 -->
+        <div v-if="selectedSkill.skillData.子技能 && selectedSkill.skillData.子技能.length > 0" class="mt-4 p-2">
+            <h3 class="text-base font-semibold mb-2">{{ $t("子技能") }}</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div v-for="(subSkill, subIndex) in selectedSkill.skillData.子技能" :key="subIndex" class="p-3">
+                    <div class="flex items-center gap-2">
+                        <div
+                            alt="子技能图标"
+                            class="size-6 rounded-full bg-base-content"
+                            :style="{ mask: `url(${LeveledSkill.url(subSkill.icon)}) no-repeat center/contain` }"
+                        />
+                        <div class="font-medium text-sm">{{ $t(subSkill.类型) }}</div>
+                        <span v-if="subSkill.cd" class="text-xs bg-primary/30 text-primary px-2 py-0.5 rounded-full">
+                            CD: {{ subSkill.cd }}s
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="collapse p-2">
             <input type="checkbox" />
-            <div class="collapse-title font-semibold p-0">底层数据</div>
+            <div class="collapse-title font-semibold p-0">底层数据(点击展开)</div>
             <div class="collapse-content p-0">
                 <SkillDetails :skill="selectedSkill.skillData" :lv="selectedSkillLevel" />
             </div>
