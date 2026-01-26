@@ -72,14 +72,17 @@ import { type ASTNode, parseAST } from "./ast"
 import { type AbstractMod, type DmgType, type HpType, type Skill, WeaponSkillType } from "./data-types"
 export class CharBuildTimeline {
     totalTime: number = 0
+    hp: [number, number][] = []
     constructor(
         public name: string,
-        public items: CharBuildTimelineItem[]
+        public items: CharBuildTimelineItem[],
+        hp?: [number, number][]
     ) {
         this.items.forEach(item => {
             const endTime = item.time + item.duration
             this.totalTime = Math.max(this.totalTime, endTime)
         })
+        this.hp = hp || []
     }
     static fromRaw(raw: RawTimelineData) {
         return new CharBuildTimeline(
@@ -90,7 +93,8 @@ export class CharBuildTimeline {
                 time: item.t,
                 duration: item.d,
                 lv: item.l,
-            }))
+            })),
+            raw.hp
         )
     }
 }
@@ -1421,11 +1425,13 @@ export class CharBuild {
         if (!timeline) {
             return Math.round(this.calculateOneTime())
         }
+
         let totalDamage = 0
         const buffItems = timeline.items.filter(i => i.lv).map(i => ({ ...i, buff: new LeveledBuff(i.name, i.lv) }))
         const skillItems = timeline.items.filter(i => !i.lv)
         const skillLayers = groupBy(skillItems, i => i.track)
         const skillLayerKeys = Object.keys(skillLayers).map(Number).sort()
+
         function getBuffsAtTime(time: number, track: number) {
             // 查找当前轨道及后续轨道的 buff, 但不能超过下一层技能的轨道
             const maxTrack = skillLayerKeys.find(t => t > track) || Infinity
@@ -1433,8 +1439,44 @@ export class CharBuild {
                 .filter(i => i.time <= time && i.time + i.duration >= time && i.track >= track && i.track < maxTrack)
                 .map(i => i.buff)
         }
+
+        // 根据时间和hp数据计算当前生命值百分比
+        function getHpPercentAtTime(time: number, hpData: [number, number][]): number {
+            if (!hpData || hpData.length === 0) {
+                return 0
+            }
+
+            // 处理时间超出范围的情况
+            if (time <= hpData[0][0]) {
+                return hpData[0][1]
+            }
+            if (time >= hpData[hpData.length - 1][0]) {
+                return hpData[hpData.length - 1][1]
+            }
+
+            // 找到时间所在的区间
+            for (let i = 0; i < hpData.length - 1; i++) {
+                const [time1, hp1] = hpData[i]
+                const [time2, hp2] = hpData[i + 1]
+
+                if (time >= time1 && time <= time2) {
+                    // 线性插值计算当前hp值
+                    const ratio = (time - time1) / (time2 - time1)
+                    return hp1 + (hp2 - hp1) * ratio
+                }
+            }
+
+            return 0
+        }
+
+        const initHpPercent = this.hpPercent
         const initBaseName = this.baseName
         skillItems.forEach(i => {
+            // 根据时间计算当前hpPercent
+            if (timeline.hp?.length > 0) {
+                this.hpPercent = getHpPercentAtTime(i.time, timeline.hp)
+            }
+
             const buffs = getBuffsAtTime(i.time, i.track)
             const build = buffs.length ? this.clone().applyBuffs(buffs) : this
             build.baseWithTarget = i.name
@@ -1452,6 +1494,7 @@ export class CharBuild {
                 const attackTimes = Math.floor((duration - delay) / interval)
                 totalDamage *= attackTimes
             }
+
             if (attrs.weapon && this.selectedWeapon?.射速) {
                 const reloadTime = attrs.weapon.装填 || 0
                 const magazine = attrs.weapon.弹匣 || 1e11
@@ -1463,6 +1506,7 @@ export class CharBuild {
                 totalDamage *= attackTimes
             }
         })
+        this.hpPercent = initHpPercent
         this.baseName = initBaseName
         if (this.timelineDPS) {
             totalDamage /= timeline.totalTime

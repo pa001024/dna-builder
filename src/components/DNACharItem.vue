@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { DNARoleCharsBean } from "dna-api"
 import { LeveledChar } from "@/data"
-import { imgRemoteToLocal } from "@/utils/remoteImg"
 import { useUIStore } from "../store/ui"
 
 defineProps<{
@@ -81,12 +80,12 @@ const getAuraClass = (element: string) => {
     --aura-color: #374151;
 }
 .aura-pulse-aura {
-    @size: 4px;
+    --size: 4px;
     position: absolute;
-    top: -@size;
-    left: -@size;
-    right: -@size;
-    bottom: -@size;
+    top: calc(-1 * var(--size));
+    left: calc(-1 * var(--size));
+    right: calc(-1 * var(--size));
+    bottom: calc(-1 * var(--size));
     border-radius: 50%;
     background: radial-gradient(
         circle,
@@ -95,7 +94,7 @@ const getAuraClass = (element: string) => {
         color-mix(in srgb, var(--aura-color), black 40%) 50%,
         transparent 20%
     );
-    filter: blur(@size);
+    filter: blur(var(--size));
     opacity: 0.3;
     animation: aura-pulse 2.5s ease-in-out infinite;
 }

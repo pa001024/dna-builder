@@ -144,6 +144,25 @@ export const passwords = sqliteTable("passwords", {
     updateAt: text("update_at").$onUpdate(now),
 })
 
+/** 密码重置 */
+export const passwordResets = sqliteTable(
+    "password_resets",
+    {
+        id: text("id").$default(id).primaryKey(),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        token: text("token").notNull(),
+        expiresAt: text("expires_at").notNull(),
+        createdAt: text("created_at").$default(now),
+    },
+    table => [uniqueIndex("password_resets_user_id_unique").on(table.userId)]
+)
+
+export const passwordResetsRelations = relations(passwordResets, ({ one }) => ({
+    user: one(users, { fields: [passwordResets.userId], references: [users.id] }),
+}))
+
 /** 房间 */
 export const rooms = sqliteTable("rooms", {
     id: text("id").$default(id).primaryKey(),

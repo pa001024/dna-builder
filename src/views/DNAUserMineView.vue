@@ -56,7 +56,9 @@ async function loadMine() {
 async function loadRole() {
     try {
         loading.value = true
+        await setting.startHeartbeat()
         const res = userId.value ? await api.defaultRoleForTool(2, userId.value) : await api.defaultRoleForTool()
+        setting.stopHeartbeat()
         if (res.is_success && res.data) {
             roleInfo.value = res.data.roleInfo
         } else {

@@ -2,6 +2,7 @@ import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
 import { desc, eq, like, sql } from "drizzle-orm"
 import { createGraphQLError } from "graphql-yoga"
 import jwt from "jsonwebtoken"
+import { sendPasswordResetEmail } from "../../util/email"
 import { db, schema } from ".."
 import { id } from "../schema"
 import { type Context, jwtToken } from "../yoga"
@@ -15,6 +16,8 @@ export const typeDefs = /* GraphQL */ `
         updateUserMeta(data: UsersUpdateInput!): UserLoginResult!
         deleteUser(id: String!): Boolean!
         updateUser(id: String!, email: String, roles: String): User!
+        forgotPassword(email: String!): Boolean!
+        resetPassword(token: String!, new_password: String!): UserLoginResult!
     }
 
     type Query {
@@ -249,6 +252,101 @@ export const resolvers = {
             }
 
             return updatedUser
+        },
+        forgotPassword: async (_parent, { email }) => {
+            // 查找用户
+            const user = await db.query.users.findFirst({
+                where: eq(schema.users.email, email),
+            })
+
+            if (!user) {
+                // 即使用户不存在也返回true，避免信息泄露
+                return true
+            }
+
+            // 生成6位数字验证码
+            const token = Math.floor(100000 + Math.random() * 900000).toString()
+            const expiresAt = new Date(Date.now() + 1000 * 60 * 30).toISOString() // 30分钟过期
+
+            // 保存重置验证码
+            await db
+                .insert(schema.passwordResets)
+                .values({
+                    userId: user.id,
+                    token,
+                    expiresAt,
+                })
+                .onConflictDoUpdate({
+                    target: schema.passwordResets.userId,
+                    set: { token, expiresAt },
+                })
+
+            // 发送密码重置邮件
+            try {
+                const result = await sendPasswordResetEmail(email, token)
+                if (!result.accepted) {
+                    throw createGraphQLError(`Failed to send email: ${result.response}`)
+                }
+                console.log(`Password reset code sent to ${email}: ${token}`)
+            } catch (error) {
+                console.error(`Failed to send password reset email to ${email}:`, error)
+                return false
+            }
+
+            return true
+        },
+        resetPassword: async (_parent, { token, new_password }) => {
+            // 验证验证码
+            // 查找最新的未过期验证码
+            const resets = await db.query.passwordResets.findMany({
+                with: { user: true },
+                where: eq(schema.passwordResets.token, token),
+                orderBy: [desc(schema.passwordResets.createdAt)],
+                limit: 1,
+            })
+
+            const reset = resets[0]
+
+            if (!reset) {
+                throw createGraphQLError("Invalid or expired reset token")
+            }
+
+            // 检查验证码是否过期
+            const now = new Date()
+            const expiresAt = new Date(reset.expiresAt)
+            if (now > expiresAt) {
+                // 删除过期的验证码
+                await db.delete(schema.passwordResets).where(eq(schema.passwordResets.id, reset.id))
+                throw createGraphQLError("Reset token has expired")
+            }
+
+            // 哈希新密码
+            const hash = await Bun.password.hash(new_password)
+
+            // 更新密码
+            await db.update(schema.passwords).set({ hash }).where(eq(schema.passwords.userId, reset.userId))
+
+            // 删除使用过的验证码
+            await db.delete(schema.passwordResets).where(eq(schema.passwordResets.userId, reset.userId))
+
+            // 获取更新后的用户信息
+            const user = await db.query.users.findFirst({
+                where: eq(schema.users.id, reset.userId),
+            })
+
+            if (!user) {
+                throw createGraphQLError("User not found")
+            }
+
+            // 生成新的JWT令牌
+            const jwtToken = signToken(user)
+
+            return {
+                success: true,
+                message: "Password reset successful",
+                token: jwtToken,
+                user,
+            }
         },
     },
 } satisfies Resolver<CreateMobius<typeof typeDefs>, Context>

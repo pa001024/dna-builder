@@ -232,6 +232,9 @@ export const resolvers = {
             }
 
             const { input } = args
+            if (input.charSettings.length > 20000) {
+                throw createGraphQLError("非法请求")
+            }
             const [build] = await db
                 .insert(schema.builds)
                 .values({
@@ -270,6 +273,9 @@ export const resolvers = {
             }
 
             const { id, input } = args
+            if (input.charSettings.length > 20000) {
+                throw createGraphQLError("非法请求")
+            }
             const build = await db.query.builds.findFirst({
                 where: eq(schema.builds.id, id),
             })

@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+    dna-builder-server:
+        build: .
+        ports:
+            - "8887:8887"
+        volumes:
+            - ./data.db:/app/data.db
+            - ./.env:/app/.env
+        environment:
+            - NODE_ENV=production
+        restart: unless-stopped
+        healthcheck:
+            test: ["CMD", "bun", "-e", "fetch('http://localhost:8887/graphql').then(res => res.ok ? process.exit(0) : process.exit(1))"]
+            interval: 30s
+            timeout: 10s
+            retries: 3

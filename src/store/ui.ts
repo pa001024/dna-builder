@@ -57,11 +57,6 @@ export const useUIStore = defineStore("ui", {
                     icon: "ri:box-1-line",
                 },
                 {
-                    name: "timeline",
-                    path: "/timeline",
-                    icon: "ri:timeline-view",
-                },
-                {
                     name: "achievement",
                     path: "/achievement",
                     icon: "ri:trophy-line",

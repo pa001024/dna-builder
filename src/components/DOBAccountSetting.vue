@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { nextTick, reactive, ref } from "vue"
-import { loginMutation, registerMutation, updateUserMetaMutation } from "@/api/graphql"
+import { forgotPasswordMutation, loginMutation, registerMutation, resetPasswordMutation, updateUserMetaMutation } from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 
@@ -22,6 +22,15 @@ const registerForm = reactive({
     qq: "",
     email: "",
     password: "",
+})
+
+// 密码重置表单
+const resetPasswordForm = reactive({
+    open: false,
+    step: 1, // 1: 输入邮箱, 2: 输入验证码和新密码
+    email: "",
+    code: "",
+    newPassword: "",
 })
 
 const nameEdit = reactive({
@@ -102,6 +111,80 @@ const handleLogout = async () => {
     if (await ui.showDialog("确认退出", "确定要退出当前账号吗？")) {
         user.jwtToken = ""
         ui.showSuccessMessage("已退出登录")
+    }
+}
+
+// 密码重置处理
+const openResetPasswordModal = () => {
+    resetPasswordForm.open = true
+    resetPasswordForm.step = 1
+    resetPasswordForm.email = ""
+    resetPasswordForm.code = ""
+    resetPasswordForm.newPassword = ""
+}
+
+const closeResetPasswordModal = () => {
+    resetPasswordForm.open = false
+}
+
+const sendResetCode = async () => {
+    // 表单验证
+    if (!resetPasswordForm.email) {
+        ui.showErrorMessage("请输入邮箱")
+        return
+    }
+
+    loading.value = true
+
+    try {
+        // 发送验证码请求
+        const result = await forgotPasswordMutation({
+            email: resetPasswordForm.email,
+        })
+
+        if (result) {
+            ui.showSuccessMessage("验证码已发送到邮箱，请查收")
+            resetPasswordForm.step = 2
+        } else {
+            ui.showErrorMessage("发送验证码失败，请稍后重试")
+        }
+    } catch (error) {
+        ui.showErrorMessage("发送验证码失败，请稍后重试")
+        console.error("发送验证码失败:", error)
+    } finally {
+        loading.value = false
+    }
+}
+
+const handleResetPassword = async () => {
+    // 表单验证
+    if (!resetPasswordForm.code || !resetPasswordForm.newPassword) {
+        ui.showErrorMessage("请输入验证码和新密码")
+        return
+    }
+
+    loading.value = true
+
+    try {
+        // 发送重置密码请求
+        const result = await resetPasswordMutation({
+            token: resetPasswordForm.code,
+            new_password: resetPasswordForm.newPassword,
+        })
+
+        if (result?.success && result.token) {
+            // 保存新的登录状态
+            user.jwtToken = result.token
+            closeResetPasswordModal()
+            ui.showSuccessMessage("密码重置成功")
+        } else {
+            ui.showErrorMessage(result?.message || "密码重置失败")
+        }
+    } catch (error) {
+        ui.showErrorMessage("密码重置失败，请稍后重试")
+        console.error("密码重置失败:", error)
+    } finally {
+        loading.value = false
     }
 }
 
@@ -242,6 +325,16 @@ async function startNameEdit() {
                             </div>
                             <span v-else>登录</span>
                         </button>
+                        <!-- 忘记密码链接 -->
+                        <div class="text-center">
+                            <button
+                                type="button"
+                                class="text-sm link link-primary transition-colors duration-200"
+                                @click="openResetPasswordModal"
+                            >
+                                忘记密码？
+                            </button>
+                        </div>
                     </form>
                     <!-- 额外信息 -->
                     <div class="text-center mt-4 text-sm text-base-content/60">
@@ -313,6 +406,114 @@ async function startNameEdit() {
 
             <!-- 模态框背景 -->
             <div class="modal-backdrop" @click="registerForm.open = false" />
+        </div>
+
+        <!-- 密码重置模态框 -->
+        <div class="modal" :class="{ 'modal-open': resetPasswordForm.open }">
+            <div class="modal-box bg-base-200 shadow-2xl rounded-xl p-0 w-96">
+                <div class="p-6">
+                    <!-- 密码重置表单 -->
+                    <div class="space-y-4">
+                        <div class="text-center mb-6">
+                            <div class="w-16 h-16 bg-base-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                <img src="/app-icon.png" alt="DNA Builder" class="w-12 h-12" />
+                            </div>
+                            <span class="text-lg font-bold">密码重置</span>
+                        </div>
+
+                        <!-- 步骤1: 输入邮箱 -->
+                        <div v-if="resetPasswordForm.step === 1">
+                            <div class="space-y-4">
+                                <div>
+                                    <p class="text-sm text-base-content/60 mb-2">请输入您的邮箱，我们将发送验证码到您的邮箱</p>
+                                    <label class="input input-bordered flex items-center gap-2 w-full">
+                                        <Icon icon="ri:mail-line" class="w-4 h-4 opacity-70" />
+                                        <input v-model="resetPasswordForm.email" type="text" class="grow" placeholder="邮箱" />
+                                    </label>
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <button
+                                        type="button"
+                                        class="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white py-2.5 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                                        :disabled="loading"
+                                        @click="sendResetCode"
+                                    >
+                                        <div v-if="loading" class="flex items-center justify-center gap-2">
+                                            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                            <span>发送中...</span>
+                                        </div>
+                                        <span v-else>发送验证码</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 步骤2: 输入验证码和新密码 -->
+                        <div v-else-if="resetPasswordForm.step === 2">
+                            <div class="space-y-4">
+                                <div>
+                                    <p class="text-sm text-base-content/60 mb-2">请输入邮箱中的6位验证码</p>
+                                    <label class="input input-bordered flex items-center gap-2 w-full">
+                                        <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
+                                        <input
+                                            v-model="resetPasswordForm.code"
+                                            type="text"
+                                            class="grow"
+                                            placeholder="6位验证码"
+                                            maxlength="6"
+                                        />
+                                    </label>
+                                </div>
+
+                                <div>
+                                    <p class="text-sm text-base-content/60 mb-2">请输入新密码</p>
+                                    <label class="input input-bordered flex items-center gap-2 w-full">
+                                        <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
+                                        <input v-model="resetPasswordForm.newPassword" type="password" class="grow" placeholder="新密码" />
+                                    </label>
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <button
+                                        type="button"
+                                        class="w-1/3 bg-base-100 text-base-content py-2.5 px-4 rounded-lg hover:bg-base-300 transition-all duration-200 shadow-md hover:shadow-lg"
+                                        @click="resetPasswordForm.step = 1"
+                                    >
+                                        上一步
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="flex-1 bg-linear-to-r from-blue-600 to-indigo-600 text-white py-2.5 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                                        :disabled="loading"
+                                        @click="handleResetPassword"
+                                    >
+                                        <div v-if="loading" class="flex items-center justify-center gap-2">
+                                            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                            <span>重置中...</span>
+                                        </div>
+                                        <span v-else>重置密码</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 关闭按钮 -->
+                        <div class="text-center mt-4">
+                            <button
+                                type="button"
+                                class="text-sm text-base-content/60 hover:text-base-content transition-colors duration-200"
+                                @click="closeResetPasswordModal"
+                            >
+                                返回登录
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 模态框背景 -->
+            <div class="modal-backdrop" @click="closeResetPasswordModal" />
         </div>
     </div>
 </template>

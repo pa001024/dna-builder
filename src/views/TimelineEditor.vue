@@ -24,6 +24,7 @@ interface TimelineItem {
 
 // 血量曲线点接口定义
 interface HealthPoint {
+    id: string
     time: number
     value: number
 }
@@ -72,6 +73,24 @@ const showHealthCurve = ref(true) // 是否显示血量曲线
 // 轨道编辑状态
 const editingTrackIndex = ref<number>(-1)
 const editTrackName = ref<string>("")
+
+// 血量曲线编辑状态
+const isDraggingHealthPoint = ref(false)
+const dragHealthPointIndex = ref(-1)
+
+// 血量曲线悬停状态
+const isHovering = ref(false)
+const hoverX = ref(0)
+const hoverY = ref(0)
+const tooltipX = ref(0)
+const tooltipY = ref(0)
+const hoverTime = ref(0)
+const hoverHealthValue = ref(0)
+const chartHeight = ref(80) // 图表高度
+const padding = ref(0)
+
+// 血量曲线容器引用
+const healthCurveContainerRef = ref<HTMLElement | null>(null)
 
 // 工具选择方法
 const selectTool = (tool: ToolType) => {
@@ -945,15 +964,60 @@ const healthCurvePath = computed(() => {
     // 排序血量点
     const sortedPoints = [...healthPoints].sort((a, b) => a.time - b.time)
 
+    // 使用与模板相同的高度值
+    const svgHeight = chartHeight.value
+
     // 生成路径
-    let path = `M ${(sortedPoints[0].time - timelineStartTime.value) * timelineScale.value} ${100 - sortedPoints[0].value}`
+    let path = `M ${(sortedPoints[0].time - timelineStartTime.value) * timelineScale.value} ${svgHeight - (sortedPoints[0].value / 100) * svgHeight}`
 
     for (let i = 1; i < sortedPoints.length; i++) {
         const point = sortedPoints[i]
         const x = (point.time - timelineStartTime.value) * timelineScale.value
-        const y = 100 - point.value // 血量值映射到0-100范围
+        const y = svgHeight - (point.value / 100) * svgHeight // 血量值映射到SVG高度范围
         path += ` L ${x} ${y}`
     }
+
+    return path
+})
+
+// 计算血量曲线填充路径
+const healthCurveFillPath = computed(() => {
+    if (healthPoints.length === 0) return ""
+
+    // 排序血量点
+    const sortedPoints = [...healthPoints].sort((a, b) => a.time - b.time)
+    const svgHeight = chartHeight.value
+    const containerWidth = 300 * timelineScale.value
+
+    const firstPoint = sortedPoints[0]
+    const lastPoint = sortedPoints[sortedPoints.length - 1]
+
+    // 计算第一个点和最后一个点的y坐标
+    const firstY = svgHeight - (firstPoint.value / 100) * svgHeight
+    const lastY = svgHeight - (lastPoint.value / 100) * svgHeight
+
+    // 生成填充路径
+    let path = ""
+
+    if (sortedPoints.length === 1) {
+        // 只有一个点时，生成水平线
+        path = `M 0 ${firstY} L ${containerWidth} ${firstY}`
+    } else {
+        // 多个点时，从第一个点水平向左扩展到x=0，然后沿着曲线绘制，最后从最后一个点水平向右扩展到x=containerWidth
+        path = `M 0 ${firstY} L ${(firstPoint.time - timelineStartTime.value) * timelineScale.value} ${firstY}`
+
+        for (let i = 1; i < sortedPoints.length; i++) {
+            const point = sortedPoints[i]
+            const x = (point.time - timelineStartTime.value) * timelineScale.value
+            const y = svgHeight - (point.value / 100) * svgHeight
+            path += ` L ${x} ${y}`
+        }
+
+        path += ` L ${containerWidth} ${lastY}`
+    }
+
+    // 闭合路径
+    path += ` L ${containerWidth} ${svgHeight} L 0 ${svgHeight} Z`
 
     return path
 })
@@ -964,7 +1028,13 @@ const addHealthPoint = (time: number, value: number) => {
     const validValue = Math.max(0, Math.min(100, value))
     const validTime = Math.max(timelineStartTime.value, Math.min(timelineEndTime.value, time))
 
-    healthPoints.push({ time: validTime, value: validValue })
+    healthPoints.push({
+        id: `health-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        time: validTime,
+        value: validValue,
+    })
+    // 按时间排序
+    healthPoints.sort((a, b) => a.time - b.time)
 }
 
 // 清除血量曲线
@@ -979,6 +1049,162 @@ const generateSampleHealthCurve = () => {
     for (let time = 0; time <= timelineEndTime.value; time += 5) {
         const value = 50 + 40 * Math.sin(time * 0.1) + Math.random() * 10
         addHealthPoint(time, value)
+    }
+}
+
+// 处理鼠标进入
+const handleHealthCurveMouseEnter = () => {
+    isHovering.value = true
+}
+
+// 处理鼠标移动
+const handleHealthCurveMouseMove = (event: MouseEvent) => {
+    if (!healthCurveContainerRef.value) return
+
+    const rect = healthCurveContainerRef.value.getBoundingClientRect()
+    const x = event.clientX - rect.left
+    const y = event.clientY - rect.top
+
+    hoverX.value = x
+    hoverY.value = y
+
+    // 计算tooltip位置
+    tooltipX.value = x + 10
+    tooltipY.value = y - 10
+
+    // 计算悬停位置对应的时间
+    const containerWidth = rect.width
+    const time = (x / containerWidth) * (timelineEndTime.value - timelineStartTime.value) + timelineStartTime.value
+    hoverTime.value = time
+
+    // 计算悬停位置对应的血量值
+    // 找到最接近的两个点，计算插值
+    if (healthPoints.length > 0) {
+        // 按时间排序
+        const sortedPoints = [...healthPoints].sort((a, b) => a.time - b.time)
+
+        // 找到第一个时间大于悬停时间的点
+        let index = sortedPoints.findIndex(point => point.time > time)
+
+        if (index === 0) {
+            // 悬停在第一个点之前
+            hoverHealthValue.value = sortedPoints[0].value
+        } else if (index === -1) {
+            // 悬停在最后一个点之后
+            hoverHealthValue.value = sortedPoints[sortedPoints.length - 1].value
+        } else {
+            // 计算两点之间的插值
+            const prevPoint = sortedPoints[index - 1]
+            const nextPoint = sortedPoints[index]
+            const ratio = (time - prevPoint.time) / (nextPoint.time - prevPoint.time)
+            hoverHealthValue.value = prevPoint.value + (nextPoint.value - prevPoint.value) * ratio
+        }
+    }
+}
+
+// 处理鼠标离开
+const handleHealthCurveMouseLeave = () => {
+    isHovering.value = false
+}
+
+// 开始拖动血量点
+const startDragHealthPoint = (event: MouseEvent, index: number) => {
+    event.preventDefault()
+    event.stopPropagation() // 阻止事件冒泡，避免触发点击创建新节点
+    isDraggingHealthPoint.value = true
+    dragHealthPointIndex.value = index
+
+    // 添加全局事件监听器
+    window.addEventListener("mousemove", handleHealthPointMouseMove)
+    window.addEventListener("mouseup", handleHealthPointMouseUp)
+}
+
+// 处理血量点拖动
+const handleHealthPointMouseMove = (event: MouseEvent) => {
+    if (!isDraggingHealthPoint.value || dragHealthPointIndex.value === -1) return
+
+    // 使用血量曲线容器计算位置
+    const healthElement = healthCurveContainerRef.value
+    if (!healthElement) return
+
+    const rect = healthElement.getBoundingClientRect()
+    const x = event.clientX - rect.left
+    const y = event.clientY - rect.top
+    const containerWidth = rect.width
+    const containerHeight = rect.height || 80 // 使用实际容器高度，默认为80px
+
+    // 计算时间和血量值
+    const time = (x / containerWidth) * (timelineEndTime.value - timelineStartTime.value) + timelineStartTime.value
+    const value = Math.max(0, Math.min(100, 100 - (y / containerHeight) * 100))
+
+    // 获取当前拖动的点
+    const draggedPoint = healthPoints[dragHealthPointIndex.value]
+    // 更新点的时间和值
+    draggedPoint.time = +time.toFixed(2)
+    draggedPoint.value = Math.round(value)
+
+    // 手动处理排序，确保dragHealthPointIndex始终指向正确的点
+    let newIndex = dragHealthPointIndex.value
+
+    // 向左移动（时间减小）
+    while (newIndex > 0 && healthPoints[newIndex].time < healthPoints[newIndex - 1].time) {
+        // 交换元素
+        ;[healthPoints[newIndex], healthPoints[newIndex - 1]] = [healthPoints[newIndex - 1], healthPoints[newIndex]]
+        newIndex--
+    }
+
+    // 向右移动（时间增加）
+    while (newIndex < healthPoints.length - 1 && healthPoints[newIndex].time > healthPoints[newIndex + 1].time) {
+        // 交换元素
+        ;[healthPoints[newIndex], healthPoints[newIndex + 1]] = [healthPoints[newIndex + 1], healthPoints[newIndex]]
+        newIndex++
+    }
+
+    // 更新dragHealthPointIndex到新位置
+    dragHealthPointIndex.value = newIndex
+}
+
+// 结束拖动血量点
+const handleHealthPointMouseUp = () => {
+    isDraggingHealthPoint.value = false
+    dragHealthPointIndex.value = -1
+
+    // 移除全局事件监听器
+    window.removeEventListener("mousemove", handleHealthPointMouseMove)
+    window.removeEventListener("mouseup", handleHealthPointMouseUp)
+}
+
+// 处理点击添加血量点
+const handleAddHealthPoint = (event: MouseEvent) => {
+    // 如果正在拖动，不添加新节点
+    if (isDraggingHealthPoint.value) {
+        return
+    }
+
+    const target = event.currentTarget as HTMLElement
+    if (!target) return
+
+    // 检查事件是否来自血量点本身，避免点击血量点时添加新节点
+    if ((event.target as HTMLElement).tagName === "circle") {
+        return
+    }
+
+    const rect = target.getBoundingClientRect()
+    const containerWidth = rect.width
+    const containerHeight = rect.height
+    const x = event.clientX - rect.left
+    const y = event.clientY - rect.top
+    const time = (x / containerWidth) * (timelineEndTime.value - timelineStartTime.value) + timelineStartTime.value
+    const value = Math.max(0, Math.min(100, 100 - (y / containerHeight) * 100))
+
+    addHealthPoint(+time.toFixed(2), Math.round(value))
+}
+
+// 删除血量点
+const deleteHealthPoint = (id: string) => {
+    const index = healthPoints.findIndex(point => point.id === id)
+    if (index !== -1) {
+        healthPoints.splice(index, 1)
     }
 }
 
@@ -1148,8 +1374,14 @@ const loadTimeline = (index: number) => {
 
     // 加载血量曲线，转换为HealthPoint格式
     hpData.forEach(([time, value]) => {
-        healthPoints.push({ time, value })
+        healthPoints.push({
+            id: `health-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            time,
+            value,
+        })
     })
+    // 按时间排序
+    healthPoints.sort((a, b) => a.time - b.time)
 }
 const addTimeline = () => {
     const newName = `${selectedChar.value}${(~~(Math.random() * 1e6)).toString(36)}`
@@ -1578,196 +1810,268 @@ const importTimelineJson = () => {
                     </div>
                 </div>
             </div>
-            <div
-                id="timeline-container"
-                class="flex-1 flex flex-col overflow-x-auto"
-                :style="{ minHeight: `${80 + tracks.length * trackHeight}px` }"
-            >
-                <!-- 时间刻度 -->
-                <div class="h-16 flex-none relative border-b border-gray-700 top-0" :style="{ width: `${300 * timelineScale}px` }">
-                    <!-- 时间刻度线 -->
-                    <div
-                        v-for="mark in visibleTimeMarks"
-                        :key="`time-mark-${mark.time}`"
-                        :style="{ left: `${mark.position}px` }"
-                        class="absolute top-0 w-0.5"
-                        :class="mark.isMajor ? 'h-full border-r border-gray-700' : 'h-1/2 border-r border-gray-600'"
-                    />
+            <div class="flex-1 flex flex-col">
+                <div
+                    id="timeline-container"
+                    class="flex-1 flex flex-col overflow-x-auto"
+                    :style="{ minHeight: `${80 + tracks.length * trackHeight}px` }"
+                >
+                    <!-- 时间刻度 -->
+                    <div class="h-16 flex-none relative border-b border-gray-700 top-0" :style="{ width: `${300 * timelineScale}px` }">
+                        <!-- 时间刻度线 -->
+                        <div
+                            v-for="mark in visibleTimeMarks"
+                            :key="`time-mark-${mark.time}`"
+                            :style="{ left: `${mark.position}px` }"
+                            class="absolute top-0 w-0.5"
+                            :class="mark.isMajor ? 'h-full border-r border-gray-700' : 'h-1/2 border-r border-gray-600'"
+                        />
 
-                    <!-- 时间标签 -->
+                        <!-- 时间标签 -->
+                        <div
+                            v-for="mark in visibleTimeMarks.filter(m => m.isMajor)"
+                            :key="`time-label-${mark.time}`"
+                            :style="{ left: `${mark.position + 10}px` }"
+                            class="absolute bottom-1 text-xs text-gray-400 whitespace-nowrap"
+                        >
+                            {{ mark.label }}
+                        </div>
+                    </div>
+
+                    <!-- 轨道内容 -->
                     <div
-                        v-for="mark in visibleTimeMarks.filter(m => m.isMajor)"
-                        :key="`time-label-${mark.time}`"
-                        :style="{ left: `${mark.position + 10}px` }"
-                        class="absolute bottom-1 text-xs text-gray-400 whitespace-nowrap"
+                        id="track-content"
+                        class="flex-1 min-h-125 relative"
+                        :style="{ width: `${300 * timelineScale}px` }"
+                        @mousedown="startSelection"
                     >
-                        {{ mark.label }}
+                        <!-- 轨道上的项目 -->
+                        <ContextMenu v-for="item in items" :key="item.id">
+                            <template #menu>
+                                <ContextMenuItem
+                                    class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
+                                    @click="prepareDeleteItem(item)"
+                                >
+                                    删除
+                                </ContextMenuItem>
+                            </template>
+                            <FullTooltip side="bottom">
+                                <template #tooltip>
+                                    <div v-if="item.props && !item.lv" class="flex flex-col">
+                                        <div class="text-md text-neutral-500 p-2">
+                                            {{ item.label }}
+                                        </div>
+                                        <div
+                                            v-for="(val, index) in item.props"
+                                            :key="index"
+                                            class="flex flex-col group hover:bg-base-200 rounded-md p-2"
+                                        >
+                                            <div class="flex justify-between items-center gap-4 text-sm">
+                                                <div class="text-xs text-neutral-500">
+                                                    {{ val.名称 }}
+                                                </div>
+                                                <div class="font-medium text-primary">
+                                                    {{ formatSkillProp(val.名称, val) }}
+                                                </div>
+                                            </div>
+                                            <div
+                                                v-if="val.属性影响"
+                                                class="justify-between items-center gap-4 text-sm flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
+                                            >
+                                                <div class="text-xs text-neutral-500">属性影响</div>
+                                                <div class="text-xs ml-auto font-medium text-neutral-500">技能{{ val.属性影响 }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div v-if="item.props && item.lv" class="flex flex-col">
+                                        <div class="text-md text-neutral-500 p-2">
+                                            {{ item.label }}
+                                        </div>
+                                        <div
+                                            v-for="(val, prop) in item.props"
+                                            :key="prop"
+                                            class="flex flex-col group hover:bg-base-200 rounded-md p-2"
+                                        >
+                                            <div class="flex justify-between items-center gap-4 text-sm">
+                                                <div class="text-xs text-neutral-500">
+                                                    {{ prop }}
+                                                </div>
+                                                <div class="font-medium text-primary">
+                                                    {{ formatProp(prop as any, val) }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <div
+                                    :data-id="item.id"
+                                    class="absolute h-8 rounded-md flex items-center cursor-move transition-all duration-200 hover:shadow-lg hover:z-20 transform hover:-translate-y-0.5"
+                                    :class="{
+                                        'ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900 shadow-md z-30 hover:z-31':
+                                            item.isSelected,
+                                        'opacity-80 hover:opacity-100': !item.isSelected,
+                                        'scale-110 rotate-1 z-40': isDragging && selectedItems.some(selected => selected.id === item.id),
+                                    }"
+                                    :style="{
+                                        top: `${item.trackIndex * trackHeight + 5}px`,
+                                        left: `${(item.startTime - timelineStartTime) * timelineScale + 5}px`,
+                                        width: `${item.duration * timelineScale}px`,
+                                        height: `${trackHeight - 10}px`,
+                                        backgroundColor: item.color,
+                                        transitionProperty: isDragging ? 'none' : 'all',
+                                        boxShadow: item.isSelected ? '0 2px 12px rgba(59, 130, 246, 0.5)' : 'none',
+                                        userSelect: 'none',
+                                        transformOrigin: 'center',
+                                    }"
+                                    @mousedown.stop="e => startDrag(e, item)"
+                                    @click.stop="currentTool === 'delete' && prepareDeleteItem(item)"
+                                    @mouseenter="hoveredItemId = item.id"
+                                    @mouseleave="hoveredItemId = null"
+                                >
+                                    <!-- 左侧拖拽区域 -->
+                                    <div
+                                        class="group absolute left-0 top-0 h-full w-3 cursor-col-resize z-50 flex items-center justify-center hover:bg-white/10 rounded-l-md transition-colors duration-150"
+                                        :title="'拖拽调整开始时间'"
+                                        @mousedown.stop="e => startResize(e, item, 'left')"
+                                    >
+                                        <span class="text-white opacity-0 group-hover:opacity-100 text-sm transition-opacity duration-150">
+                                            <Icon icon="ri:expand-left-line" />
+                                        </span>
+                                    </div>
+
+                                    <!-- 右侧拖拽区域 -->
+                                    <div
+                                        class="group absolute right-0 top-0 h-full w-3 cursor-col-resize z-50 flex items-center justify-center hover:bg-white/10 rounded-r-md transition-colors duration-150"
+                                        :title="'拖拽调整持续时间'"
+                                        @mousedown.stop="e => startResize(e, item, 'right')"
+                                    >
+                                        <span class="text-white opacity-0 group-hover:opacity-100 text-sm transition-opacity duration-150">
+                                            <Icon icon="ri:expand-right-line" />
+                                        </span>
+                                    </div>
+
+                                    <!-- 项目内容 -->
+                                    <div class="px-1 w-full">
+                                        <span class="text-xs font-medium text-white truncate flex flex-col items-center w-full">
+                                            {{ item.label }}
+                                            <span v-if="hoveredItemId === item.id" class="text-[10px] text-white/70 mt-0.5 hidden sm:block">
+                                                {{ formatTime(item.startTime) }} / {{ formatDuration(item.duration) }}
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </FullTooltip>
+                        </ContextMenu>
+
+                        <!-- 框选指示器 -->
+                        <div
+                            v-if="isSelecting"
+                            :style="{
+                                left: `${Math.min(selectionStart.x, selectionEnd.x)}px`,
+                                top: `${Math.min(selectionStart.y, selectionEnd.y)}px`,
+                                width: `${Math.abs(selectionEnd.x - selectionStart.x)}px`,
+                                height: `${Math.abs(selectionEnd.y - selectionStart.y)}px`,
+                                boxShadow: '0 0 10px rgba(59, 130, 246, 0.5)',
+                                backdropFilter: 'blur(1px)',
+                            }"
+                            class="absolute border-2 border-blue-400 bg-blue-400/20 pointer-events-none z-20"
+                        />
                     </div>
                 </div>
 
-                <!-- 轨道内容 -->
+                <!-- 独立的血量曲线区域 -->
                 <div
-                    id="track-content"
-                    class="flex-1 min-h-125 relative"
-                    :style="{ width: `${300 * timelineScale}px` }"
-                    @mousedown="startSelection"
+                    ref="healthCurveContainerRef"
+                    class="h-20 border-t border-gray-700 overflow-x-auto cursor-crosshair"
+                    :style="{ width: '100%' }"
+                    @click="handleAddHealthPoint"
+                    @mouseenter.passive="handleHealthCurveMouseEnter()"
+                    @mousemove.passive="handleHealthCurveMouseMove($event)"
+                    @mouseleave.passive="handleHealthCurveMouseLeave()"
                 >
-                    <!-- 血量曲线 -->
-                    <svg
-                        v-if="showHealthCurve && healthPoints.length > 0"
-                        class="absolute top-0 left-0 right-0 h-20 z-10 opacity-80"
-                        :style="{ height: `${trackHeight * 0.33}px` }"
-                    >
-                        <path
-                            :d="healthCurvePath"
-                            fill="none"
-                            stroke="#ef4444"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        />
-                        <!-- 血量点标记 -->
-                        <circle
-                            v-for="(point, index) in healthPoints"
-                            :key="`health-point-${index}`"
-                            :cx="(point.time - timelineStartTime) * timelineScale"
-                            :cy="100 - point.value"
-                            r="3"
-                            fill="#ef4444"
-                            stroke="white"
-                            stroke-width="1"
-                        />
-                    </svg>
-                    <!-- 轨道上的项目 -->
-                    <ContextMenu v-for="item in items" :key="item.id">
-                        <template #menu>
-                            <ContextMenuItem
-                                class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                @click="prepareDeleteItem(item)"
-                            >
-                                删除
-                            </ContextMenuItem>
-                        </template>
-                        <FullTooltip side="bottom">
-                            <template #tooltip>
-                                <div v-if="item.props && !item.lv" class="flex flex-col">
-                                    <div class="text-md text-neutral-500 p-2">
-                                        {{ item.label }}
-                                    </div>
-                                    <div
-                                        v-for="(val, index) in item.props"
-                                        :key="index"
-                                        class="flex flex-col group hover:bg-base-200 rounded-md p-2"
-                                    >
-                                        <div class="flex justify-between items-center gap-4 text-sm">
-                                            <div class="text-xs text-neutral-500">
-                                                {{ val.名称 }}
-                                            </div>
-                                            <div class="font-medium text-primary">
-                                                {{ formatSkillProp(val.名称, val) }}
-                                            </div>
-                                        </div>
-                                        <div
-                                            v-if="val.属性影响"
-                                            class="justify-between items-center gap-4 text-sm flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
-                                        >
-                                            <div class="text-xs text-neutral-500">属性影响</div>
-                                            <div class="text-xs ml-auto font-medium text-neutral-500">技能{{ val.属性影响 }}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div v-if="item.props && item.lv" class="flex flex-col">
-                                    <div class="text-md text-neutral-500 p-2">
-                                        {{ item.label }}
-                                    </div>
-                                    <div
-                                        v-for="(val, prop) in item.props"
-                                        :key="prop"
-                                        class="flex flex-col group hover:bg-base-200 rounded-md p-2"
-                                    >
-                                        <div class="flex justify-between items-center gap-4 text-sm">
-                                            <div class="text-xs text-neutral-500">
-                                                {{ prop }}
-                                            </div>
-                                            <div class="font-medium text-primary">
-                                                {{ formatProp(prop as any, val) }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-                            <div
-                                :data-id="item.id"
-                                class="absolute h-8 rounded-md flex items-center cursor-move transition-all duration-200 hover:shadow-lg hover:z-20 transform hover:-translate-y-0.5"
-                                :class="{
-                                    'ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900 shadow-md z-30 hover:z-31': item.isSelected,
-                                    'opacity-80 hover:opacity-100': !item.isSelected,
-                                    'scale-110 rotate-1 z-40': isDragging && selectedItems.some(selected => selected.id === item.id),
-                                }"
+                    <div class="relative h-full" :style="{ width: `${300 * timelineScale}px` }">
+                        <svg class="w-full h-full">
+                            <!-- 背景网格 -->
+                            <defs>
+                                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#374151" stroke-width="0.5" />
+                                </pattern>
+                            </defs>
+                            <rect width="100%" height="100%" fill="url(#grid)" opacity="0.3" />
+
+                            <!-- 血量曲线填充 -->
+                            <path v-if="healthPoints.length > 0" :d="healthCurveFillPath" fill="#ef444420" />
+
+                            <!-- 血量曲线 -->
+                            <path
+                                v-if="healthPoints.length > 0"
+                                :d="healthCurvePath"
+                                fill="none"
+                                stroke="#ef4444"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+
+                            <!-- 血量点标记 -->
+                            <circle
+                                v-for="(point, index) in healthPoints"
+                                :key="`health-point-${index}`"
+                                :cx="(point.time - timelineStartTime) * timelineScale"
+                                :cy="chartHeight - (point.value / 100) * chartHeight"
+                                r="5"
+                                fill="#ef4444"
+                                stroke="white"
+                                stroke-width="2"
+                                class="cursor-move hover:fill-red-500"
+                                @mousedown="startDragHealthPoint($event, index)"
+                                @contextmenu.prevent="deleteHealthPoint(point.id)"
+                            />
+
+                            <!-- 鼠标悬停垂直线 -->
+                            <line
+                                v-if="isHovering"
+                                class="pointer-events-none"
+                                x1="0"
+                                :y1="padding"
+                                x2="0"
+                                :y2="padding + chartHeight"
                                 :style="{
-                                    top: `${item.trackIndex * trackHeight + 5}px`,
-                                    left: `${(item.startTime - timelineStartTime) * timelineScale + 5}px`,
-                                    width: `${item.duration * timelineScale}px`,
-                                    height: `${trackHeight - 10}px`,
-                                    backgroundColor: item.color,
-                                    transitionProperty: isDragging ? 'none' : 'all',
-                                    boxShadow: item.isSelected ? '0 2px 12px rgba(59, 130, 246, 0.5)' : 'none',
-                                    userSelect: 'none',
-                                    transformOrigin: 'center',
+                                    transform: `translate(${hoverX}px, 0px)`,
                                 }"
-                                @mousedown.stop="e => startDrag(e, item)"
-                                @click.stop="currentTool === 'delete' && prepareDeleteItem(item)"
-                                @mouseenter="hoveredItemId = item.id"
-                                @mouseleave="hoveredItemId = null"
+                                stroke="#3498db"
+                                stroke-width="1"
+                                stroke-dasharray="2,2"
+                            />
+
+                            <!-- 工具提示 -->
+                            <g
+                                v-if="isHovering"
+                                class="pointer-events-none"
+                                :style="{
+                                    transform: `translate(${tooltipX}px, ${tooltipY - 20}px)`,
+                                }"
                             >
-                                <!-- 左侧拖拽区域 -->
-                                <div
-                                    class="group absolute left-0 top-0 h-full w-3 cursor-col-resize z-50 flex items-center justify-center hover:bg-white/10 rounded-l-md transition-colors duration-150"
-                                    :title="'拖拽调整开始时间'"
-                                    @mousedown.stop="e => startResize(e, item, 'left')"
-                                >
-                                    <span class="text-white opacity-0 group-hover:opacity-100 text-sm transition-opacity duration-150">
-                                        <Icon icon="ri:expand-left-line" />
-                                    </span>
-                                </div>
-
-                                <!-- 右侧拖拽区域 -->
-                                <div
-                                    class="group absolute right-0 top-0 h-full w-3 cursor-col-resize z-50 flex items-center justify-center hover:bg-white/10 rounded-r-md transition-colors duration-150"
-                                    :title="'拖拽调整持续时间'"
-                                    @mousedown.stop="e => startResize(e, item, 'right')"
-                                >
-                                    <span class="text-white opacity-0 group-hover:opacity-100 text-sm transition-opacity duration-150">
-                                        <Icon icon="ri:expand-right-line" />
-                                    </span>
-                                </div>
-
-                                <!-- 项目内容 -->
-                                <div class="px-1 w-full">
-                                    <span class="text-xs font-medium text-white truncate flex flex-col items-center w-full">
-                                        {{ item.label }}
-                                        <span v-if="hoveredItemId === item.id" class="text-[10px] text-white/70 mt-0.5 hidden sm:block">
-                                            {{ formatTime(item.startTime) }} / {{ formatDuration(item.duration) }}
-                                        </span>
-                                    </span>
-                                </div>
-                            </div>
-                        </FullTooltip>
-                    </ContextMenu>
-
-                    <!-- 框选指示器 -->
-                    <div
-                        v-if="isSelecting"
-                        :style="{
-                            left: `${Math.min(selectionStart.x, selectionEnd.x)}px`,
-                            top: `${Math.min(selectionStart.y, selectionEnd.y)}px`,
-                            width: `${Math.abs(selectionEnd.x - selectionStart.x)}px`,
-                            height: `${Math.abs(selectionEnd.y - selectionStart.y)}px`,
-                            boxShadow: '0 0 10px rgba(59, 130, 246, 0.5)',
-                            backdropFilter: 'blur(1px)',
-                        }"
-                        class="absolute border-2 border-blue-400 bg-blue-400/20 pointer-events-none z-20"
-                    />
+                                <!-- 工具提示背景 -->
+                                <rect
+                                    x="0"
+                                    y="0"
+                                    width="120"
+                                    height="50"
+                                    rx="4"
+                                    ry="4"
+                                    fill="rgba(0, 0, 0, 0.8)"
+                                    stroke="#e0e0e0"
+                                    stroke-width="1"
+                                />
+                                <!-- 血量数值 -->
+                                <text x="5" y="20" font-size="12" fill="#ffffff">血量: {{ hoverHealthValue.toFixed(2) }}%</text>
+                                <!-- 时间数值 -->
+                                <text x="5" y="40" font-size="12" fill="#ffffff">时间: {{ hoverTime.toFixed(2) }}s</text>
+                            </g>
+                        </svg>
+                        <div class="absolute top-1 left-2 text-xs text-red-400 font-semibold">血量</div>
+                    </div>
                 </div>
             </div>
         </div>

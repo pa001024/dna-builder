@@ -75,6 +75,22 @@ export const updateUserMutation = typedMutation<Types.User, { id: string; email?
     }
 `)
 
+export const forgotPasswordMutation = typedMutation<boolean, { email: string }>(/* GraphQL */ `
+    mutation ($email: String!) {
+        forgotPassword(email: $email)
+    }
+`)
+
+export const resetPasswordMutation = typedMutation<Types.UserLoginResult, { token: string; new_password: string }>(/* GraphQL */ `
+    mutation ($token: String!, $new_password: String!) {
+        resetPassword(token: $token, new_password: $new_password) {
+            success
+            message
+            token
+        }
+    }
+`)
+
 export const createTodoMutation = typedMutation<Types.Todo, { input: Types.TodoInput }>(/* GraphQL */ `
     mutation ($input: TodoInput!) {
         createTodo(input: $input) {

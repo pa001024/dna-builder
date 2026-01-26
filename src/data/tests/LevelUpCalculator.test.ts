@@ -17,7 +17,7 @@ describe("LevelUpCalculator", () => {
 
     it("test estimateTime", () => {
         const result = LevelUpCalculatorImpl.estimateTime(mockResourceNeeds)
-        console.log(result)
+        // console.log(result)
         // 检查天数必须大于0
         expect(result.days).toBeGreaterThan(0)
     })

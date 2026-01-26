@@ -9,7 +9,7 @@ use std::{
 use lazy_static::lazy_static;
 use reqwest::multipart;
 use serde::{Deserialize, Serialize};
-use tauri::Manager;
+use tauri::{Emitter, Manager};
 use zip::ZipArchive;
 mod util;
 
@@ -778,6 +778,95 @@ async fn export_binary_file(file_path: String, binary_content: Vec<u8>) -> Resul
     ))
 }
 
+/// 从指定URL下载文件到本地，并通过事件系统发送进度更新
+#[tauri::command]
+async fn download_file(
+    app_handle: tauri::AppHandle,
+    url: String,
+    filename: String,
+) -> Result<String, String> {
+    let client = HTTP_CLIENT.clone();
+
+    // 发送GET请求下载文件
+    let response = client
+        .get(&url)
+        .send()
+        .await
+        .map_err(|e| format!("Failed to send request: {}", e))?;
+
+    // 检查响应状态
+    if !response.status().is_success() {
+        return Err(format!(
+            "Failed to download file: HTTP {}",
+            response.status()
+        ));
+    }
+
+    // 获取文件总大小
+    let total_size = response.content_length().unwrap_or(0);
+
+    // 获取当前工作目录
+    let current_dir =
+        std::env::current_dir().map_err(|e| format!("Failed to get current directory: {}", e))?;
+
+    // 创建文件路径
+    let file_path = current_dir.join(&filename);
+
+    // 确保父目录存在
+    if let Some(parent_dir) = file_path.parent() {
+        if !parent_dir.exists() {
+            fs::create_dir_all(parent_dir)
+                .map_err(|e| format!("Failed to create parent directories: {}", e))?;
+        }
+    }
+
+    // 创建文件
+    let mut file = File::create(&file_path).map_err(|e| format!("Failed to create file: {}", e))?;
+
+    // 获取响应体流
+    let mut stream = response.bytes_stream();
+
+    // 已下载字节数
+    let mut downloaded = 0u64;
+
+    // 读取并写入文件，同时发送进度更新
+    while let Some(chunk) = stream.next().await {
+        let chunk = chunk.map_err(|e| format!("Failed to read chunk: {}", e))?;
+
+        // 写入文件
+        file.write_all(&chunk)
+            .map_err(|e| format!("Failed to write file: {}", e))?;
+
+        // 更新已下载字节数
+        downloaded += chunk.len() as u64;
+
+        // 计算进度百分比
+        let progress = if total_size > 0 {
+            (downloaded * 100) / total_size
+        } else {
+            0
+        };
+
+        // 发送进度事件
+        app_handle
+            .emit(
+                "download_progress",
+                serde_json::json!({
+                    "filename": &filename,
+                    "progress": progress,
+                    "downloaded": downloaded,
+                    "total": total_size,
+                }),
+            )
+            .map_err(|e| format!("Failed to emit progress event: {}", e))?;
+    }
+
+    Ok(format!(
+        "Successfully downloaded file to {}",
+        file_path.to_string_lossy()
+    ))
+}
+
 #[tauri::command]
 fn get_os_version() -> String {
     use sysinfo::System;
@@ -961,7 +1050,8 @@ pub fn run() {
         export_binary_file,
         start_heartbeat,
         stop_heartbeat,
-        send_ws_msg
+        send_ws_msg,
+        download_file
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

@@ -32,6 +32,7 @@ function getResourceIcon(name: string) {
                     <div>
                         <span class="font-medium">{{ item.typeName }}</span>
                         <span class="ml-1 text-xs text-base-content/70">({{ item.itemType }})</span>
+                        <span class="text-xs px-1.5 py-0.5 rounded bg-base-300">x{{ item.num }}</span>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -39,29 +40,20 @@ function getResourceIcon(name: string) {
                         <img :src="getResourceIcon(item.priceName)" class="w-4 h-4 object-cover rounded" :alt="item.priceName" />
                         <span class="text-sm font-medium">{{ item.price }}</span>
                     </div>
-                    <span class="text-xs px-1.5 py-0.5 rounded bg-base-300">x{{ item.num }}</span>
                 </div>
             </div>
             <div class="grid grid-cols-4 gap-2 text-xs">
-                <div>
-                    <span class="text-base-content/70">ID:</span> {{ item.id }}
-                </div>
-                <div>
-                    <span class="text-base-content/70">类型ID:</span> {{ item.typeId }}
-                </div>
-                <div v-if="item.limit">
-                    <span class="text-base-content/70">限制:</span> {{ item.limit }}个
-                </div>
-                <div>
-                    <span class="text-base-content/70">排序:</span> {{ item.sequence }}
-                </div>
+                <div><span class="text-base-content/70">ID:</span> {{ item.id }}</div>
+                <div><span class="text-base-content/70">物品ID:</span> {{ item.typeId }}</div>
+                <div><span class="text-base-content/70">限购:</span> {{ item.limit || "∞" }}</div>
             </div>
             <div v-if="item.startTime" class="mt-1 text-xs text-base-content/70">
                 <span>开始时间:</span> {{ new Date(item.startTime * 1000).toLocaleString() }}
-                <span v-if="item.endTime" class="ml-2">结束时间:</span> {{ item.endTime ? new Date(item.endTime * 1000).toLocaleString() : '' }}
+                <span v-if="item.endTime" class="ml-2">结束时间:</span>
+                {{ item.endTime ? new Date(item.endTime * 1000).toLocaleString() : "" }}
             </div>
         </div>
-        
+
         <!-- 递归渲染子项 -->
         <div v-if="item.children && item.children.length" class="ml-6 pl-3 border-l-2 border-base-300">
             <ShopItem v-for="child in item.children" :key="child.id" :item="child" />
