@@ -198,7 +198,7 @@ async function updateBaseVersionFile() {
 
         const content = JSON.stringify(localVersionList, null, 2)
         await exportJsonFile(baseVersionPath.value, content)
-        ui.showSuccessMessage("BaseVersion.json 更新成功")
+        ui.showSuccessMessage("更新成功")
     } catch (err) {
         ui.showErrorMessage(`更新 BaseVersion.json 失败: ${err instanceof Error ? err.message : String(err)}`)
         console.error("更新 BaseVersion.json 失败:", err)
@@ -561,7 +561,7 @@ onMounted(async () => {
                             {{ downloadSpeed }}
                         </span>
                         <span v-else-if="isExtracting" class="text-success">
-                            {{ extractionCurrentFileCount }} / {{ extractionTotalFiles }} 文件
+                            {{ extractionCurrentFile }} : {{ extractionCurrentFileCount }} / {{ extractionTotalFiles }} 文件
                         </span>
                     </div>
                 </div>

@@ -1,5 +1,6 @@
 import type { DNAAPI, DNAGameSignInDayAward, DNAGameSignInShowDataBean, DNAPostListBean } from "dna-api"
 import { shuffle } from "lodash-es"
+import { useSettingStore } from "@/store/setting"
 import { sleep } from "@/util"
 import { useUIStore } from "../store/ui"
 
@@ -205,6 +206,9 @@ export async function handleReply(api: DNAAPI, posts: DNAPostListBean[]): Promis
  */
 export async function executeSignFlow(api: DNAAPI): Promise<boolean> {
     const ui = useUIStore()
+
+    const setting = useSettingStore()
+    await setting.startHeartbeat()
     try {
         // 加载日历数据和任务进度
         const [calendarRes, taskRes] = await Promise.all([api.signCalendar(), api.getTaskProcess()])
@@ -285,5 +289,7 @@ export async function executeSignFlow(api: DNAAPI): Promise<boolean> {
         console.error("签到流程执行失败:", error)
         ui.showErrorMessage("签到流程执行失败")
         return false
+    } finally {
+        setting.stopHeartbeat()
     }
 }
