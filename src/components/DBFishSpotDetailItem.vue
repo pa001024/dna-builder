@@ -108,8 +108,8 @@ const expectedValue = computed(() => {
     const adjustedWeights = spotFish.value.map((fish, index) => {
         const baseWeight = props.spot.weights[index] || 0
         if (!fish.appear.includes(selectTime.value)) return 0
-        // 稀有鱼（type > 1）的权重受鱼饵影响
-        return fish.type > 1 ? baseWeight * (1 + AddRareFishProb) : baseWeight
+        // 稀有鱼（level > 3）的权重受鱼饵影响
+        return fish.level > 3 ? baseWeight * (1 + AddRareFishProb) : baseWeight
     })
 
     const totalWeight = adjustedWeights.reduce((sum, w) => sum + w, 0)

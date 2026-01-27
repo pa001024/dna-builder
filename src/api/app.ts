@@ -75,6 +75,15 @@ export async function stopHeartbeat() {
 export async function exportBinaryFile(filePath: string, binaryContent: Uint8Array) {
     return await invoke<string>("export_binary_file", { filePath, binaryContent })
 }
+
+/**
+ * 读取JSON文件
+ * @param filePath 文件路径
+ * @returns 文件内容
+ */
+export async function readJsonFile(filePath: string) {
+    return await invoke<string>("read_json_file", { filePath })
+}
 /**
  * 获取本地登录的QQ号
  * @param port The port of the local QQ
@@ -296,6 +305,24 @@ export async function tauriFetch(url: RequestInfo | URL, options?: RequestInit):
         multipart,
     })
     return new TauriResponse(result.status, result.body, result.headers)
+}
+
+/**
+ * 获取文件大小
+ * @param filePath 文件路径
+ * @returns 文件大小（字节），如果文件不存在返回0
+ */
+export async function getFileSize(filePath: string) {
+    return await invoke<number>("get_file_size", { filePath })
+}
+
+/**
+ * 清理临时目录
+ * @param tempDir 临时目录路径
+ * @returns 清理结果消息
+ */
+export async function cleanupTempDir(tempDir: string) {
+    return await invoke<string>("cleanup_temp_dir", { tempDir })
 }
 
 export const getMapAPI = () => {

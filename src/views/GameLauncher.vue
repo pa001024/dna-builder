@@ -39,7 +39,7 @@ const openGameDirectory = async () => {
     }
 
     try {
-        await openExplorer(game.modsDir)
+        await openExplorer(game.gameDir)
     } catch (error) {
         console.error("打开目录失败:", error)
         ui.showErrorMessage(t("game-launcher.openDirFailed", { error: error instanceof Error ? error.message : String(error) }))
@@ -247,6 +247,7 @@ onUnmounted(() => {
         <div class="flex-none tabs tabs-lift tabs-lg items-center">
             <input v-model="tab" type="radio" name="game_mod" class="tab" value="mod" :aria-label="$t('game-launcher.modManager')" />
             <input v-model="tab" type="radio" name="game_mod" class="tab" value="setting" :aria-label="$t('game-launcher.gameSetting')" />
+            <input v-model="tab" type="radio" name="game_mod" class="tab" value="update" :aria-label="$t('game-launcher.gameUpdate')" />
             <div
                 class="ml-auto btn btn-square tooltip tooltip-bottom"
                 :data-tip="$t('game-launcher.openGameDir')"
@@ -450,7 +451,7 @@ onUnmounted(() => {
                 </div>
             </div>
         </div>
-        <div v-if="tab === 'setting'" class="flex-1 bg-base-100 border-base-300 p-6">
+        <div v-if="tab === 'setting'" class="flex-1 bg-base-100 border-base-300 p-6 h-full overflow-hidden">
             <div v-for="key in keys" :key="key">
                 <div class="p-2 flex flex-row justify-between items-center flex-wrap">
                     <label class="label cursor-pointer space-x-2 min-w-32 justify-start">
@@ -498,6 +499,9 @@ onUnmounted(() => {
                     </div>
                 </div>
             </div>
+        </div>
+        <div v-if="tab === 'update'" class="flex-1 bg-base-100 border-base-300 h-full overflow-hidden">
+            <GameUpdate />
         </div>
 
         <!-- 拖拽提示 -->

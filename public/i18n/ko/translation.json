@@ -2764,6 +2764,7 @@
         "title": "빌드 비교"
     },
     "char-build": {
+        "actions": "액션 시퀀스",
         "auto_build": "자동 건설",
         "basic_settings": "기본 설정",
         "boss": "보스",
@@ -2919,6 +2920,8 @@
         "pet_desc": "마령의 정보와 스킬 확인",
         "rank": "순위 보상",
         "rank_desc": "랭킹 대회 보상 확인",
+        "shop": "상점",
+        "shop_desc": "상점 아이템 정보 보기",
         "title": "데이터 베이스",
         "walnut": "호두",
         "walnut_desc": "호두 확률 정보 보기 및 시뮬레이션 추첨",
@@ -2997,6 +3000,7 @@
         "enterCustomTypeName": "사용자 지정 유형 이름을 입력하세요",
         "exec_files": "실행 파일",
         "gameSetting": "게임 설정",
+        "gameUpdate": "업데이트 다운로드",
         "importModFailed": "MOD 가져오기 실패",
         "importModSuccess": "{{ count }}개의 MOD를 가져왔습니다",
         "importPicFailed": "MOD 이미지 가져오기 실패: {{ error }}",
@@ -3236,6 +3240,12 @@
         "windowTrasnparent": "투명 효과",
         "windowTrasnparentTip": "창과 표면에 반투명을 표시",
         "winMaterial": "창 재료"
+    },
+    "shop-detail": {
+        "title": "상점"
+    },
+    "shop-list": {
+        "title": "상점"
     },
     "timeline": {
         "desc": "캐릭터의 전투 로직 사용자 지정",

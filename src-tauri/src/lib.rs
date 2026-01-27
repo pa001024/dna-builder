@@ -9,6 +9,8 @@ use std::{
 use lazy_static::lazy_static;
 use reqwest::multipart;
 use serde::{Deserialize, Serialize};
+use sevenz_rust2;
+
 use tauri::{Emitter, Manager};
 use zip::ZipArchive;
 mod util;
@@ -391,35 +393,302 @@ fn is_zip_file(path: &Path) -> io::Result<bool> {
         return Ok(false);
     }
     let mut file = File::open(path)?;
-    let mut signature = [0u8; 4];
+    let mut signature = [0u8; 6];
     let read = file.read(&mut signature)?;
-    Ok(read >= 2 && signature[0] == b'P' && signature[1] == b'K')
+
+    // 检查是否是ZIP文件 (PK)
+    if read >= 2 && signature[0] == b'P' && signature[1] == b'K' {
+        return Ok(true);
+    }
+
+    // 检查是否是7z文件 (7z)
+    if read >= 6 && &signature[..6] == &[0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C] {
+        return Ok(true);
+    }
+
+    Ok(false)
 }
 
 fn extract_zip_into(
     archive_path: &Path,
     target_dir: &Path,
     output: &mut Vec<(String, u64)>,
+    app_handle: Option<&tauri::AppHandle>,
 ) -> io::Result<()> {
     let file = File::open(archive_path)?;
-    let mut archive = ZipArchive::new(file)
-        .map_err(|err| io::Error::new(io::ErrorKind::Other, err.to_string()))?;
-    for i in 0..archive.len() {
-        let mut entry = archive
-            .by_index(i)
+
+    // 检查文件签名以确定文件类型
+    let mut signature = [0u8; 6];
+    let mut file_clone = file.try_clone()?;
+    let read = file_clone.read(&mut signature)?;
+
+    // 重置文件指针
+    drop(file_clone);
+    let file = File::open(archive_path)?;
+
+    // 处理ZIP文件
+    if read >= 2 && signature[0] == b'P' && signature[1] == b'K' {
+        let mut archive = ZipArchive::new(file)
             .map_err(|err| io::Error::new(io::ErrorKind::Other, err.to_string()))?;
-        if entry.is_dir() {
-            continue;
+        let total_files = archive.len();
+
+        // 计算总大小
+        let mut total_size = 0;
+        for i in 0..total_files {
+            if let Ok(entry) = archive.by_index(i) {
+                if !entry.is_dir() {
+                    total_size += entry.size();
+                }
+            }
         }
-        let relative = entry.mangled_name();
-        let out_path = target_dir.join(relative);
-        if let Some(parent) = out_path.parent() {
-            fs::create_dir_all(parent)?;
+
+        // 发送开始解压的进度
+        if let Some(app) = app_handle {
+            let _ = app.emit(
+                "extract_progress",
+                serde_json::json!({
+                    "current_file_count": 0,
+                    "current_size": 0,
+                    "total_files": total_files,
+                    "total_size": total_size,
+                    "current_file": "",
+                }),
+            );
         }
-        let mut extracted = File::create(&out_path)?;
-        io::copy(&mut entry, &mut extracted)?;
-        output.push((out_path.to_string_lossy().to_string(), entry.size()));
+
+        // 重置归档以便重新读取
+        let file = File::open(archive_path)?;
+        let mut archive = ZipArchive::new(file)
+            .map_err(|err| io::Error::new(io::ErrorKind::Other, err.to_string()))?;
+
+        let mut current_file_index = 0;
+        let mut current_size = 0;
+
+        for (_i, entry_index) in (0..total_files).enumerate() {
+            let mut entry = archive
+                .by_index(entry_index)
+                .map_err(|err| io::Error::new(io::ErrorKind::Other, err.to_string()))?;
+            if entry.is_dir() {
+                continue;
+            }
+
+            // 增加当前文件索引和大小
+            current_file_index += 1;
+            current_size += entry.size();
+
+            let relative = entry.mangled_name();
+            let out_path = target_dir.join(relative);
+            if let Some(parent) = out_path.parent() {
+                fs::create_dir_all(parent)?;
+            }
+            let mut extracted = File::create(&out_path)?;
+            io::copy(&mut entry, &mut extracted)?;
+            output.push((out_path.to_string_lossy().to_string(), entry.size()));
+
+            // 发送进度更新
+            if let Some(app) = app_handle {
+                let _ = app.emit(
+                    "extract_progress",
+                    serde_json::json!({
+                        "current_file_count": current_file_index,
+                        "current_size": current_size,
+                        "total_files": total_files,
+                        "total_size": total_size,
+                        "current_file": entry.name(),
+                    }),
+                );
+            }
+        }
+
+        // 发送解压完成的进度
+        if let Some(app) = app_handle {
+            let _ = app.emit(
+                "extract_progress",
+                serde_json::json!({
+                    "current_file_count": current_file_index,
+                    "current_size": current_size,
+                    "total_files": current_file_index,
+                    "total_size": total_size,
+                    "current_file": "",
+                }),
+            );
+        }
     }
+    // 处理7z文件
+    else if read >= 6 && &signature[..6] == &[0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C] {
+        // 导入 sevenz_rust2 的必要类型
+        use sevenz_rust2::{ArchiveEntry, Error};
+        use std::io::Read;
+        use std::path::PathBuf;
+
+        // 第一次调用：只计算文件数量和大小，不写入文件
+        let mut total_files = 0;
+        let mut total_size = 0;
+
+        match sevenz_rust2::decompress_file_with_extract_fn(
+            archive_path,
+            target_dir,
+            |entry: &ArchiveEntry, _reader: &mut dyn Read, _path: &PathBuf| {
+                // 只统计文件，跳过目录
+                if !entry.is_directory() {
+                    total_files += 1;
+                    total_size += entry.size();
+                }
+                Ok(true) // 继续处理下一个条目，但不写入文件
+            },
+        ) {
+            Err(err) => {
+                return Err(io::Error::new(io::ErrorKind::Other, format!("{:?}", err)));
+            }
+            _ => {}
+        }
+
+        // 发送开始解压的进度（使用实际计算的文件数量和大小）
+        if let Some(app) = app_handle {
+            let _ = app.emit(
+                "extract_progress",
+                serde_json::json!({
+                    "current_file_count": 0,
+                    "current_size": 0,
+                    "total_files": total_files,
+                    "total_size": total_size,
+                    "current_file": "",
+                }),
+            );
+        }
+
+        // 第二次调用：实际解压文件并更新进度
+        let mut current_file_index = 0;
+        let mut current_size = 0;
+        let app_handle_clone = app_handle.clone();
+
+        match sevenz_rust2::decompress_file_with_extract_fn(
+            archive_path,
+            target_dir,
+            move |entry: &ArchiveEntry, reader: &mut dyn Read, path: &PathBuf| {
+                // 跳过目录
+                if entry.is_directory() {
+                    return Ok(true);
+                }
+
+                // 增加当前文件索引
+                current_file_index += 1;
+                // 更新当前处理的大小
+                current_size += entry.size();
+
+                // 发送解压进度
+                if let Some(app) = &app_handle_clone {
+                    let _ = app.emit(
+                        "extract_progress",
+                        serde_json::json!({
+                            "current_file_count": current_file_index,
+                            "current_size": current_size,
+                            "total_files": total_files,
+                            "total_size": total_size,
+                            "current_file": entry.name(),
+                        }),
+                    );
+                }
+
+                // 处理目录和文件
+                if entry.is_directory() {
+                    // 创建目录
+                    if !path.exists() {
+                        if let Err(e) = std::fs::create_dir_all(path) {
+                            return Err(Error::from(std::io::Error::new(
+                                std::io::ErrorKind::Other,
+                                e,
+                            )));
+                        }
+                    }
+                } else {
+                    // 确保父目录存在
+                    if let Some(parent) = path.parent() {
+                        if !parent.exists() {
+                            if let Err(e) = std::fs::create_dir_all(parent) {
+                                return Err(Error::from(std::io::Error::new(
+                                    std::io::ErrorKind::Other,
+                                    e,
+                                )));
+                            }
+                        }
+                    }
+
+                    // 创建文件并写入内容
+                    use std::io::BufWriter;
+                    let file = match std::fs::File::create(path) {
+                        Ok(f) => f,
+                        Err(e) => {
+                            return Err(Error::from(std::io::Error::new(
+                                std::io::ErrorKind::Other,
+                                e,
+                            )));
+                        }
+                    };
+
+                    if entry.size() > 0 {
+                        let mut writer = BufWriter::new(file);
+                        if let Err(e) = std::io::copy(reader, &mut writer) {
+                            return Err(Error::from(std::io::Error::new(
+                                std::io::ErrorKind::Other,
+                                e,
+                            )));
+                        }
+
+                        // 设置文件时间戳
+                        use std::fs::FileTimes;
+                        #[cfg(target_os = "macos")]
+                        use std::os::macos::fs::FileTimesExt;
+                        #[cfg(windows)]
+                        use std::os::windows::fs::FileTimesExt;
+
+                        let file = writer.get_mut();
+                        let file_times = FileTimes::new()
+                            .set_accessed(entry.access_date().into())
+                            .set_modified(entry.last_modified_date().into());
+
+                        #[cfg(any(windows, target_os = "macos"))]
+                        let file_times = file_times.set_created(entry.creation_date().into());
+
+                        let _ = file.set_times(file_times);
+                    }
+                }
+
+                // 添加到输出列表
+                if let Ok(metadata) = std::fs::metadata(path) {
+                    let path_str = path.to_string_lossy().to_string();
+                    output.push((path_str, metadata.len()));
+                }
+
+                Ok(true)
+            },
+        ) {
+            Ok(_) => {
+                // 发送解压完成的进度
+                if let Some(app) = app_handle {
+                    let _ = app.emit(
+                        "extract_progress",
+                        serde_json::json!({
+                            "current_file_count": current_file_index,
+                            "current_size": current_size,
+                            "total_files": current_file_index,
+                            "total_size": total_size,
+                            "current_file": "",
+                        }),
+                    );
+                }
+            }
+            Err(err) => {
+                return Err(io::Error::new(io::ErrorKind::Other, format!("{:?}", err)));
+            }
+        }
+    } else {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            "Unsupported archive format",
+        ));
+    }
+
     Ok(())
 }
 
@@ -461,7 +730,7 @@ fn import_mod(gamebase: String, paths: Vec<String>) -> String {
         }
         match is_zip_file(&src) {
             Ok(true) => {
-                if let Err(err) = extract_zip_into(&src, &base_path, &mut output) {
+                if let Err(err) = extract_zip_into(&src, &base_path, &mut output, None) {
                     eprintln!("Failed to extract {:?}: {err}", src);
                 }
             }
@@ -867,6 +1136,104 @@ async fn download_file(
     ))
 }
 
+/// 解压缩游戏资源文件
+#[tauri::command]
+async fn extract_game_assets(
+    app_handle: tauri::AppHandle,
+    zip_path: String,
+    target_dir: String,
+) -> Result<String, String> {
+    // 获取当前工作目录
+    let current_dir =
+        std::env::current_dir().map_err(|e| format!("Failed to get current directory: {}", e))?;
+
+    // 创建文件路径
+    let zip_file_path = current_dir.join(&zip_path);
+    let target_directory = current_dir.join(&target_dir);
+
+    // 确保目标目录存在
+    if !target_directory.exists() {
+        fs::create_dir_all(&target_directory)
+            .map_err(|e| format!("Failed to create target directory: {}", e))?;
+    }
+
+    // 检查是否是ZIP文件
+    if !is_zip_file(&zip_file_path).map_err(|e| format!("Failed to check if file is zip: {}", e))? {
+        return Err("Provided file is not a ZIP archive".to_string());
+    }
+
+    // 解压缩文件
+    let mut extracted_files = Vec::new();
+    if let Err(err) = extract_zip_into(
+        &zip_file_path,
+        &target_directory,
+        &mut extracted_files,
+        Some(&app_handle),
+    ) {
+        return Err(format!("Failed to extract zip file: {}", err));
+    }
+
+    Ok(format!(
+        "Successfully extracted {} files to {}",
+        extracted_files.len(),
+        target_directory.to_string_lossy()
+    ))
+}
+
+/// 读取JSON文件
+#[tauri::command]
+async fn read_json_file(file_path: String) -> Result<String, String> {
+    let path = Path::new(&file_path);
+    if !path.exists() {
+        return Err(format!("File not found: {}", file_path));
+    }
+
+    let content = fs::read_to_string(path).map_err(|e| format!("Failed to read file: {}", e))?;
+
+    Ok(content)
+}
+
+/// 获取文件大小
+#[tauri::command]
+async fn get_file_size(file_path: String) -> Result<u64, String> {
+    let path = Path::new(&file_path);
+    if !path.exists() {
+        return Ok(0);
+    }
+
+    let metadata = fs::metadata(path).map_err(|e| format!("Failed to get file metadata: {}", e))?;
+    if !metadata.is_file() {
+        return Ok(0);
+    }
+
+    Ok(metadata.len())
+}
+
+/// 清理临时目录
+#[tauri::command]
+async fn cleanup_temp_dir(temp_dir: String) -> Result<String, String> {
+    let path = Path::new(&temp_dir);
+    if !path.exists() {
+        return Ok(format!("临时目录不存在: {}", temp_dir));
+    }
+
+    // 遍历目录，只删除文件，保留目录结构
+    if let Ok(entries) = fs::read_dir(path) {
+        for entry in entries {
+            if let Ok(entry) = entry {
+                let entry_path = entry.path();
+                if entry_path.is_file() {
+                    if let Err(e) = fs::remove_file(&entry_path) {
+                        eprintln!("Failed to remove file {}: {}", entry_path.display(), e);
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(format!("临时目录清理完成: {}", temp_dir))
+}
+
 #[tauri::command]
 fn get_os_version() -> String {
     use sysinfo::System;
@@ -1047,11 +1414,15 @@ pub fn run() {
         fetch,
         get_local_qq,
         export_json_file,
+        read_json_file,
         export_binary_file,
         start_heartbeat,
         stop_heartbeat,
         send_ws_msg,
-        download_file
+        download_file,
+        extract_game_assets,
+        get_file_size,
+        cleanup_temp_dir
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

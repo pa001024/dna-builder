@@ -239,6 +239,8 @@ mcp_server/
 
 ## Important Notes
 
+- It is prohibited to remove functions, skip processing, or simplify processing due to implementation difficulties for any reason. It is prohibited to use functions marked as TODO instead of actual code implementation.
+- **DO NOT RUN DEV/BUILD**: Do not run the dev/build command, directly view the http://localhost:1420/ in the browser.
 - **Maintain consistency**: Check other files in the same directory before writing to maintain a consistent code style.
 - **CHINESE COMMENTS** needs for every function or complex logic, no need for simple code lines
 - **JSDOC**: Use JSDoc for function documentation, including parameters, return values, and exceptions

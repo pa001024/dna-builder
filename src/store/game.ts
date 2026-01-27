@@ -73,8 +73,9 @@ export const useGameStore = defineStore("game", {
         }
     },
     getters: {
-        modsDir: state => state.path.replace(/EM.exe$/, "DNA Game\\EM\\Content\\Paks\\~mods"),
-        modsLib: state => state.path.replace(/EM.exe$/, "DNA Game\\EM\\Content\\Paks\\lib"),
+        gameDir: state => state.path.replace(/EM\.exe$/, ""),
+        modsDir: state => state.path.replace(/EM\.exe$/, "EM\\Content\\Paks\\~mods"),
+        modsLib: state => state.path.replace(/EM\.exe$/, "EM\\Content\\Paks\\lib"),
     },
     actions: {
         async launchGame() {

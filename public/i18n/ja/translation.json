@@ -2764,6 +2764,7 @@
         "title": "ビルド比較"
     },
     "char-build": {
+        "actions": "アクションシーケンス",
         "auto_build": "自動構築",
         "basic_settings": "基本設定",
         "boss": "ボス",
@@ -2919,6 +2920,8 @@
         "pet_desc": "ジェネモンの情報とスキルを確認",
         "rank": "ランキング報酬",
         "rank_desc": "ランキング大会の報酬を確認",
+        "shop": "ショップ",
+        "shop_desc": "ショップアイテム情報を表示",
         "title": "データベース",
         "walnut": "クルミ",
         "walnut_desc": "クルミの確率情報を表示し、模擬抽選",
@@ -2997,6 +3000,7 @@
         "enterCustomTypeName": "カスタムタイプ名を入力してください",
         "exec_files": "実行可能ファイル",
         "gameSetting": "ゲーム設定",
+        "gameUpdate": "アップデートをダウンロード",
         "importModFailed": "MODのインポートに失敗しました",
         "importModSuccess": "{{ count }}個のMODをインポートしました",
         "importPicFailed": "MOD画像のインポートに失敗しました: {{ error }}",
@@ -3236,6 +3240,12 @@
         "windowTrasnparent": "透明効果",
         "windowTrasnparentTip": "ウィンドウと表面に半透明を表示",
         "winMaterial": "ウィンドウ素材"
+    },
+    "shop-detail": {
+        "title": "ショップ"
+    },
+    "shop-list": {
+        "title": "ショップ"
     },
     "timeline": {
         "desc": "キャラクターの戦闘ロジックをカスタマイズする",

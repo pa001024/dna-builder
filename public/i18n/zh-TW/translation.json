@@ -2763,6 +2763,7 @@
         "title": "構築對比"
     },
     "char-build": {
+        "actions": "動作序列",
         "auto_build": "自動構築",
         "basic_settings": "基本設置",
         "boss": "首領",
@@ -2918,6 +2919,8 @@
         "pet_desc": "查看魔靈信息和技能",
         "rank": "排名獎勵",
         "rank_desc": "查看排名賽獎勵",
+        "shop": "商店",
+        "shop_desc": "查看商店物品資訊",
         "title": "資料庫",
         "walnut": "密函",
         "walnut_desc": "查看密函機率資訊和模擬抽取",
@@ -2996,6 +2999,7 @@
         "enterCustomTypeName": "請輸入自定義類型名稱",
         "exec_files": "可執行檔案",
         "gameSetting": "遊戲設定",
+        "gameUpdate": "下載更新",
         "importModFailed": "匯入MOD失敗",
         "importModSuccess": "成功匯入 {{ count }} 個MOD",
         "importPicFailed": "匯入MOD圖片失敗: {{ error }}",
@@ -3235,6 +3239,12 @@
         "windowTrasnparent": "透明效果",
         "windowTrasnparentTip": "視窗和表面顯示半透明",
         "winMaterial": "視窗材質"
+    },
+    "shop-detail": {
+        "title": "商店"
+    },
+    "shop-list": {
+        "title": "商店"
     },
     "timeline": {
         "desc": "自訂角色的戰鬥邏輯(打軸)",

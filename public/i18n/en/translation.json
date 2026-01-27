@@ -2764,6 +2764,7 @@
         "title": "Build Compare"
     },
     "char-build": {
+        "actions": "Action Sequence",
         "auto_build": "Auto Build",
         "basic_settings": "Basic settings",
         "boss": "Boss",
@@ -2919,6 +2920,8 @@
         "pet_desc": "View Geniemon info and skills",
         "rank": "Rank Rewards",
         "rank_desc": "View ranking tournament rewards",
+        "shop": "Shop",
+        "shop_desc": "View shop item information",
         "title": "Database",
         "walnut": "Walnut",
         "walnut_desc": "View walnut probability information and simulate draws",
@@ -2997,6 +3000,7 @@
         "enterCustomTypeName": "Please enter custom type name",
         "exec_files": "Executable Files",
         "gameSetting": "Game Settings",
+        "gameUpdate": "Download Update",
         "importModFailed": "Failed to import MOD",
         "importModSuccess": "Successfully imported {{ count }} MODs",
         "importPicFailed": "Failed to import MOD image: {{ error }}",
@@ -3236,6 +3240,12 @@
         "windowTrasnparent": "Window Transparency",
         "windowTrasnparentTip": "Windows and surfaces show translucency",
         "winMaterial": "Window Material"
+    },
+    "shop-detail": {
+        "title": "Shop"
+    },
+    "shop-list": {
+        "title": "Shop"
     },
     "timeline": {
         "desc": "Customize the character's combat logic (axis fighting)",

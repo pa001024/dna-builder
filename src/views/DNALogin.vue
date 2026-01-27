@@ -215,7 +215,7 @@ interface Captcha4Instance {
 
                 <!-- 辅助信息 -->
                 <div class="text-center text-sm text-base-content/70">
-                    <p>登录服务不是由DNA Builder提供的。</p>
+                    <p>*账号信息仅储存在本地, 不会被上传到服务器。</p>
                 </div>
             </div>
         </div>

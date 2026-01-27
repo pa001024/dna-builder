@@ -186,6 +186,81 @@ function getWeaponUnlockProgress(weapons: DNAWeaponBean[]) {
 
 const isScreenshotLoading = ref(false)
 /**
+ * 计算锻造进度百分比
+ * @param draft 锻造信息
+ * @param draftInfo 图纸信息
+ * @returns 进度百分比（0-100）
+ */
+function calculateProgress(draft: any, draftInfo?: Draft): number {
+    if (!draftInfo) return 0
+
+    try {
+        // 转换startTime为秒数
+        const startSeconds = typeof draft.startTime === "string" ? parseInt(draft.startTime) : draft.startTime
+        if (isNaN(startSeconds)) return 0
+
+        // 计算总数量
+        const totalNum = draft.draftCompleteNum + draft.draftDoingNum
+        if (totalNum <= 0) return 0
+
+        // 计算单个产物的制造时间（秒）
+        const singleTimeSecs = (draftInfo.d || 0) * 60
+        if (singleTimeSecs <= 0) return 0
+
+        // 计算总制造时间（秒）
+        const totalTimeSecs = singleTimeSecs * totalNum
+
+        // 计算已经过去的时间（秒）
+        const elapsedSecs = Math.max(0, Math.floor(ui.timeNow / 1000) - startSeconds)
+
+        // 计算进度百分比
+        const progress = (elapsedSecs / totalTimeSecs) * 100
+
+        // 确保进度在0-100之间
+        return Math.min(100, Math.max(0, progress))
+    } catch (error) {
+        console.error("计算进度失败:", error)
+        return 0
+    }
+}
+
+/**
+ * 计算已完成的锻造数量
+ * @param draft 锻造信息
+ * @param draftInfo 图纸信息
+ * @returns 已完成的数量
+ */
+function calculateCompletedNum(draft: any, draftInfo?: Draft): number {
+    if (!draftInfo) return draft.draftCompleteNum || 0
+
+    try {
+        // 转换startTime为秒数
+        const startSeconds = typeof draft.startTime === "string" ? parseInt(draft.startTime) : draft.startTime
+        if (isNaN(startSeconds)) return draft.draftCompleteNum || 0
+
+        // 计算总数量
+        const totalNum = draft.draftCompleteNum + draft.draftDoingNum
+        if (totalNum <= 0) return draft.draftCompleteNum || 0
+
+        // 计算单个产物的制造时间（秒）
+        const singleTimeSecs = (draftInfo.d || 0) * 60
+        if (singleTimeSecs <= 0) return draft.draftCompleteNum || 0
+
+        // 计算已经过去的时间（秒）
+        const elapsedSecs = Math.max(0, Math.floor(ui.timeNow / 1000) - startSeconds)
+
+        // 计算已完成的数量
+        const completedNum = Math.floor(elapsedSecs / singleTimeSecs)
+
+        // 确保已完成的数量不超过总数量，且不小于原始的已完成数量
+        return Math.min(totalNum, Math.max(draft.draftCompleteNum || 0, completedNum))
+    } catch (error) {
+        console.error("计算已完成数量失败:", error)
+        return draft.draftCompleteNum || 0
+    }
+}
+
+/**
  * 生成完整页面截图
  */
 async function generateScreenshot() {
@@ -344,7 +419,7 @@ async function generateScreenshot() {
                                         <div class="flex justify-between items-start mb-2">
                                             <h4 class="text-lg font-bold">{{ draft.productName }}</h4>
                                             <span class="text-sm bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                                                已完成: {{ draft.draftCompleteNum }}
+                                                已完成: {{ calculateCompletedNum(draft, getDraftInfo(draft.productId)) }}
                                             </span>
                                         </div>
 
@@ -354,7 +429,7 @@ async function generateScreenshot() {
                                                 <div
                                                     class="bg-primary h-full rounded-full transition-all duration-500 ease-out"
                                                     :style="{
-                                                        width: `${Math.min(100, (draft.draftCompleteNum / (draft.draftCompleteNum + draft.draftDoingNum)) * 100)}%`,
+                                                        width: `${Math.min(100, calculateProgress(draft, getDraftInfo(draft.productId)))}%`,
                                                     }"
                                                 ></div>
                                             </div>

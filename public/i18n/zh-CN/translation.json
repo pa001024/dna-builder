@@ -391,6 +391,7 @@
         "enterCustomTypeName": "请输入自定义类型名称",
         "exec_files": "可执行文件",
         "gameSetting": "游戏设置",
+        "gameUpdate": "下载更新",
         "importModFailed": "导入MOD失败",
         "importModSuccess": "成功导入 {{ count }} 个MOD",
         "importPicFailed": "导入MOD图片失败: {{ error }}",
