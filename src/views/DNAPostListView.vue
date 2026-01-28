@@ -2,7 +2,7 @@
 import { useInfiniteScroll } from "@vueuse/core"
 import { DNAAPI, DNAPostListBean } from "dna-api"
 import { computed, onMounted, ref } from "vue"
-import { useRoute, useRouter } from "vue-router"
+import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router"
 import { initEmojiDict } from "@/utils/emoji"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
@@ -17,7 +17,7 @@ const postList = ref<DNAPostListBean[]>([])
 const loading = ref(true)
 const forumId = computed(() => route.params.forumId as string)
 const topicId = computed(() => route.params.topicId as string)
-const limit = 20
+const limit = 19
 
 const scrollContainer = ref<HTMLElement | null>(null)
 const isEnd = ref(false)
@@ -60,6 +60,9 @@ async function loadPosts(page = 1) {
         loading.value = false
     }
 }
+onBeforeRouteLeave(() => {
+    ui.previewVisible = false
+})
 </script>
 <template>
     <div class="w-full h-full flex flex-col">

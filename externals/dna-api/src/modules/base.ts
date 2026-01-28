@@ -247,7 +247,7 @@ export class DNABaseAPI {
             try {
                 let body: string | FormData | undefined = data
                 if (data && typeof data === "object" && !(data instanceof FormData)) {
-                    if (!kf) {
+                    if (!kf || method === "GET") {
                         const p = new URLSearchParams()
                         Object.entries(data).forEach(([key, value]) => {
                             if (value !== undefined) p.append(key, String(value))

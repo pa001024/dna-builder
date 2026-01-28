@@ -28,14 +28,23 @@ let setMinSize = async (_w: number, _h: number) => {}
 const routes: readonly RouteRecordRaw[] = [
     { name: "home", path: "/", component: Home, beforeEnter: () => setMinSize(360, 430) },
     { name: "setting", path: "/setting", component: Setting, beforeEnter: () => setMinSize(540, 430) },
-    { name: "char-list", path: "/char", component: CharListView, beforeEnter: () => setMinSize(600, 600) },
-    { name: "char-build", path: "/char/:charId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
-    { name: "char-build-code", path: "/char/:charId/:buildId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
-    { name: "build-share", path: "/build/:buildId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
-    { name: "timeline-share", path: "/timeline/:timelineId", component: TimelineEditor, beforeEnter: () => setMinSize(600, 600) },
+    {
+        path: "/char",
+        children: [
+            { name: "char-list", path: "", component: CharListView, beforeEnter: () => setMinSize(600, 600) },
+            { name: "char-build", path: ":charId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
+            { name: "char-build-code", path: ":charId/:buildId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
+        ],
+    },
     { name: "build-compare", path: "/char-build-compare", component: CharBuildCompare, beforeEnter: () => setMinSize(600, 600) },
+    {
+        path: "/timeline",
+        children: [
+            { name: "timeline", path: "", component: TimelineEditor, beforeEnter: () => setMinSize(600, 600) },
+            { name: "timeline-share", path: ":timelineId", component: TimelineEditor, beforeEnter: () => setMinSize(600, 600) },
+        ],
+    },
     { name: "inventory", path: "/inventory", component: InventoryEdit, beforeEnter: () => setMinSize(600, 600) },
-    { name: "timeline", path: "/timeline", component: TimelineEditor, beforeEnter: () => setMinSize(600, 600) },
     { name: "achievement", path: "/achievement", component: AchievementList, beforeEnter: () => setMinSize(600, 600) },
     {
         name: "game-launcher",

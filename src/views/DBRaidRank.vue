@@ -190,7 +190,7 @@ function getDungeonName(dungeonId: number) {
                             placeholder="输入剩余时间"
                         />
                         <p class="text-xs text-gray-500 mt-1">
-                            最大允许时间: {{ maxAllowedTime }}秒 用时: {{ maxAllowedTime - remainingTime }}秒
+                            最大允许时间: {{ maxAllowedTime }}秒 用时: {{ +(maxAllowedTime - remainingTime).toFixed(2) }}秒
                         </p>
                     </div>
                 </div>
