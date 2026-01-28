@@ -7,6 +7,7 @@ const OSS_CONFIG = {
     bucket: process.env.OSS_BUCKET || "",
     accessKeyId: process.env.OSS_ACCESS_KEY_ID || "",
     accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET || "",
+    cdn: process.env.CDN_URL || "",
 }
 
 const MAX_FILE_SIZE = 3 * 1024 * 1024
@@ -42,7 +43,7 @@ export async function uploadImage(file: File): Promise<string> {
         const buffer = Buffer.from(await file.arrayBuffer())
         await client.put(ossKey, buffer)
 
-        const url = `https://${OSS_CONFIG.bucket}.${OSS_CONFIG.endpoint}/${ossKey}`
+        const url = OSS_CONFIG.cdn ? `${OSS_CONFIG.cdn}/${ossKey}` : `https://${OSS_CONFIG.bucket}.${OSS_CONFIG.endpoint}/${ossKey}`
         return url
     } catch (error) {
         console.error("上传图片到 OSS 失败:", error)
