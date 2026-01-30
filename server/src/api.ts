@@ -22,21 +22,22 @@ async function getMsiDownloadUrl(): Promise<string | null> {
         region: process.env.OSS_REGION || process.env.OSS_ENDPOINT?.replace(".aliyuncs.com", "") || "oss-cn-hongkong",
         endpoint: process.env.OSS_ENDPOINT || "",
         bucket: process.env.OSS_BUCKET || "",
+        cdn: process.env.CDN_URL || "",
     }
 
     if (!OSS_CONFIG.endpoint || !OSS_CONFIG.bucket) {
         return null
     }
 
-    // 检查缓存（1 小时有效期）
-    const CACHE_DURATION = 60 * 60 * 1000 // 1 小时
+    // 检查缓存（5 分钟有效期）
+    const CACHE_DURATION = 5 * 60 * 1000 // 5 分钟
     if (cachedVersion && Date.now() < cachedVersion.expireTime) {
         return cachedVersion.url
     }
 
     try {
         // 从在线的 latest.json 获取最新版本信息
-        const latestJsonUrl = `http://${OSS_CONFIG.bucket}.${OSS_CONFIG.endpoint}/latest.json`
+        const latestJsonUrl = `${OSS_CONFIG.cdn || `https://${OSS_CONFIG.bucket}.${OSS_CONFIG.endpoint}`}/latest.json`
         const response = await fetch(latestJsonUrl)
 
         if (!response.ok) {
