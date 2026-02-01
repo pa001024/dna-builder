@@ -282,6 +282,65 @@ export const pauseTaskMutation = typedMutation<boolean, { taskId: string }>(/* G
     }
 `)
 
+export const createScriptMutation = typedMutation<Types.Script, { input: Types.ScriptInput }>(/* GraphQL */ `
+    mutation ($input: ScriptInput!) {
+        createScript(input: $input) {
+            id
+            user {
+                name
+            }
+        }
+    }
+`)
+
+export const updateScriptMutation = typedMutation<Types.Script, { id: string; input: Types.ScriptInput }>(/* GraphQL */ `
+    mutation ($id: String!, $input: ScriptInput!) {
+        updateScript(id: $id, input: $input) {
+            id
+        }
+    }
+`)
+
+export const deleteScriptMutation = typedMutation<boolean, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        deleteScript(id: $id)
+    }
+`)
+
+export const likeScriptMutation = typedMutation<Types.Script, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        likeScript(id: $id) {
+            id
+            isLiked
+        }
+    }
+`)
+
+export const unlikeScriptMutation = typedMutation<Types.Script, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        unlikeScript(id: $id) {
+            id
+            isLiked
+        }
+    }
+`)
+
+export const recommendScriptMutation = typedMutation<Types.Script, { id: string; recommended: boolean }>(/* GraphQL */ `
+    mutation ($id: String!, $recommended: Boolean!) {
+        recommendScript(id: $id, recommended: $recommended) {
+            id
+        }
+    }
+`)
+
+export const pinScriptMutation = typedMutation<Types.Script, { id: string; pinned: boolean }>(/* GraphQL */ `
+    mutation ($id: String!, $pinned: Boolean!) {
+        pinScript(id: $id, pinned: $pinned) {
+            id
+        }
+    }
+`)
+
 export const rtcSignalMutation = typedMutation<boolean, { roomId: string; type: string; from: string; to: string; body: string }>(
     /* GraphQL */ `
         mutation ($roomId: String!, $type: String!, $from: String!, $to: String!, $body: String!) {

@@ -279,6 +279,65 @@ export const doingTasksQuery = typedQuery(
     ` as const
 )<Types.Task[], { roomId: string }>()
 
+export const scriptsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($search: String, $category: String, $userId: String, $limit: Int, $offset: Int) {
+            scripts(search: $search, category: $category, userId: $userId, limit: $limit, offset: $offset) {
+                id
+                title
+                description
+                views
+                likes
+                isRecommended
+                isPinned
+                createdAt
+                updateAt
+                user {
+                    id
+                    name
+                    qq
+                }
+                isLiked
+            }
+        }
+    ` as const
+)<Types.Script[], { search?: string; category?: string; userId?: string; limit?: number; offset?: number }>()
+
+export const scriptsCountQuery = typedQuery(
+    /* GraphQL */ `
+        query ($search: String, $category: String) {
+            scriptsCount(search: $search, category: $category)
+        }
+    ` as const
+)<number, { search?: string; category?: string }>()
+
+export const scriptQuery = typedQuery(
+    /* GraphQL */ `
+        query ($id: String!) {
+            script(id: $id) {
+                id
+                title
+                description
+                content
+                category
+                userId
+                views
+                likes
+                isRecommended
+                isPinned
+                createdAt
+                updateAt
+                user {
+                    id
+                    name
+                    qq
+                }
+                isLiked
+            }
+        }
+    ` as const
+)<Types.Script, { id: string }>()
+
 export const rtcClientsQuery = typedQuery(
     /* GraphQL */ `
         query ($roomId: String!) {

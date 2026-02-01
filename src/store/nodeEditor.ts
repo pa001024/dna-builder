@@ -3,7 +3,7 @@ import type { Connection, Edge, Node } from "@vue-flow/core"
 import { nanoid } from "nanoid"
 import { defineStore } from "pinia"
 import { computed, ref } from "vue"
-import { exportJsonFile } from "@/api/app"
+import { writeTextFile } from "@/api/app"
 import { env } from "@/env"
 import { CharBuild } from "../data/CharBuild"
 import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../data/leveled"
@@ -583,7 +583,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                 filters: [{ name: "JSON 文件", extensions: ["json"] }],
             })
             if (!path) return
-            await exportJsonFile(path, json)
+            await writeTextFile(path, json)
         } else {
             const blob = new Blob([json], { type: "application/json" })
             const url = URL.createObjectURL(blob)

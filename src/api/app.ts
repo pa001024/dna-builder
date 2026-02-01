@@ -23,8 +23,12 @@ export async function launchExe(path: string, params: string) {
     return await invoke<string>("launch_exe", { path, params })
 }
 
+export async function launchNormal(path: string, params: string) {
+    return await invoke<string>("launch_normal", { path, params })
+}
+
 export async function openExplorer(dir: string) {
-    return await invoke<string>("launch_exe", { path: "explorer.exe", params: dir })
+    return await invoke<string>("launch_normal", { path: "explorer.exe", params: dir })
 }
 
 export async function importMod(gamebase: string, paths: string[]) {
@@ -38,10 +42,6 @@ export async function enableMod(srcdir: string, dstdir: string, files: string[])
 
 export async function importPic(path: string) {
     return await invoke<string>("import_pic", { path })
-}
-
-export async function exportJsonFile(filePath: string, jsonContent: string) {
-    return await invoke<string>("export_json_file", { filePath, jsonContent })
 }
 
 /**
@@ -77,12 +77,93 @@ export async function exportBinaryFile(filePath: string, binaryContent: Uint8Arr
 }
 
 /**
- * 读取JSON文件
+ * 读取文本文件内容
  * @param filePath 文件路径
  * @returns 文件内容
  */
-export async function readJsonFile(filePath: string) {
-    return await invoke<string>("read_json_file", { filePath })
+export async function readTextFile(filePath: string) {
+    return await invoke<string>("read_text_file", { filePath })
+}
+
+/**
+ * 写入文本文件内容
+ * @param filePath 文件路径
+ * @param content 文件内容
+ * @returns 成功消息
+ */
+export async function writeTextFile(filePath: string, content: string) {
+    return await invoke<string>("write_text_file", { filePath, content })
+}
+
+/**
+ * 列出指定目录下的所有 JS 文件
+ * @param dirPath 目录路径
+ * @returns 文件名列表
+ */
+export async function listScriptFiles(dirPath: string) {
+    return await invoke<string[]>("list_script_files", { dirPath: dirPath })
+}
+
+/**
+ * 重命名文件
+ * @param oldPath 原文件路径
+ * @param newPath 新文件路径
+ * @returns 成功消息
+ */
+export async function renameFile(oldPath: string, newPath: string) {
+    return await invoke<string>("rename_file", { oldPath, newPath })
+}
+
+/**
+ * 删除文件
+ * @param filePath 文件路径
+ * @returns 成功消息
+ */
+export async function deleteFile(filePath: string) {
+    return await invoke<string>("delete_file", { filePath })
+}
+
+/**
+ * 监听文件变化
+ * @param filePath 文件路径
+ * @returns 成功消息
+ */
+export async function watchFile(filePath: string) {
+    return await invoke<string>("watch_file", { filePath })
+}
+
+/**
+ * 取消监听文件
+ * @param filePath 文件路径
+ * @returns 成功消息
+ */
+export async function unwatchFile(filePath: string) {
+    return await invoke<string>("unwatch_file", { filePath })
+}
+
+/**
+ * 运行指定的脚本文件
+ * @param filePath 脚本文件路径
+ * @returns 成功消息
+ */
+export async function runScript(scriptPath: string) {
+    return await invoke<string>("run_script", { scriptPath })
+}
+
+/**
+ * 停止当前运行的脚本
+ * @returns 成功消息
+ */
+export async function stopScript() {
+    return await invoke<string>("stop_script")
+}
+
+/**
+ * 获取文档目录路径
+ * @returns 文档目录路径
+ */
+export async function getDocumentsDir() {
+    return await invoke<string>("get_documents_dir")
 }
 /**
  * 获取本地登录的QQ号

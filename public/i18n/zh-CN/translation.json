@@ -123,7 +123,7 @@
         "status_ended": "已结束",
         "status_ongoing": "进行中",
         "status_upcoming": "即将开始",
-        "theater_desc": "参演热映剧目，领取委托密函！",
+        "theater_desc": "参演热映剧目，领取{{charName}}委托密函！",
         "theater_title": "沉浸式戏剧",
         "title": "活动日历"
     },
@@ -520,6 +520,7 @@
         "workflow": "使用流程"
     },
     "home": {
+        "checkUpdate": "检查更新",
         "cureent_version": "当前版本:",
         "download": "下载 Windows 应用",
         "noupdate": "当前版本无更新内容",
@@ -592,6 +593,10 @@
     },
     "room": {
         "remove": "删除房间"
+    },
+    "script-list": {
+        "desc": "浏览和编辑自动化脚本",
+        "title": "自动化"
     },
     "setting": {
         "account": "账号",

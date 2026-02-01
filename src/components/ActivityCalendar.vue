@@ -2,6 +2,9 @@
 import { useTranslation } from "i18next-vue"
 import { computed, nextTick, onMounted, ref } from "vue"
 import { getActivityInfo } from "../api/external"
+import type { AbyssDungeon } from "../data"
+import { charMap } from "../data"
+import { abyssDungeons } from "../data/d/abyss.data"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
 import { useGameTimer } from "../util"
@@ -37,52 +40,68 @@ const { moling: _moling } = useGameTimer()
 
 /**
  * 获取沉浸式戏剧的开始和结束时间（秒）
- * 沉浸式戏剧：每期约56天，分上下半，各约28天
+ * 使用深渊地牢数据中的实际开始和结束时间
  */
 const getTheaterTimes = () => {
-    const now = Date.now()
-    const oneDay = 24 * 60 * 60 * 1000
+    const now = Date.now() / 1000
 
-    // 基准时间：2025年11月21日 5:00 UTC (沉浸式戏剧第1期上半开始）
-    // 1766419200 秒 = 2025年11月21日 5:00:00 UTC
-    const baseTimestamp = 1766419200 * 1000
-    const halfPeriod = 28 * oneDay // 每半期约28天
+    // 从深渊地牢数据中筛选出有时间信息的记录
+    const timedDungeons = abyssDungeons.filter(dungeon => dungeon.st && dungeon.et).sort((a, b) => (a.st || 0) - (b.st || 0))
 
-    // 计算当前时间相对于基准时间的偏移
-    const timeDiff = now - baseTimestamp
+    // 找到当前正在进行或最近的活动
+    let currentDungeon: AbyssDungeon | undefined
+    let nextDungeon: AbyssDungeon | undefined
 
-    // 计算当前所在的期数和半期
-    const totalHalfPeriods = Math.floor(timeDiff / halfPeriod)
-    const currentHalfPeriod = totalHalfPeriods % 2 // 0=上半, 1=下半
-    const currentPeriod = Math.floor(totalHalfPeriods / 2) + 2
+    for (const dungeon of timedDungeons) {
+        if (dungeon.st && dungeon.et) {
+            if (now >= dungeon.st && now <= dungeon.et) {
+                currentDungeon = dungeon
+            } else if (now < dungeon.st && !nextDungeon) {
+                nextDungeon = dungeon
+            }
+        }
+    }
 
-    // 计算当前半期的开始和结束时间
-    const currentHalfStart = baseTimestamp + totalHalfPeriods * halfPeriod
-    const currentHalfEnd = currentHalfStart + halfPeriod
+    // 如果没有当前活动，使用最近的一个
+    if (!currentDungeon && timedDungeons.length > 0) {
+        currentDungeon = timedDungeons[timedDungeons.length - 1]
+    }
 
-    // 计算下一个半期的开始和结束时间
-    const nextHalfStart = currentHalfEnd
-    const nextHalfEnd = nextHalfStart + halfPeriod
-    const nextHalfPeriod = (currentHalfPeriod + 1) % 2 // 0=上半, 1=下半
-    const nextPeriod = nextHalfPeriod === 0 ? currentPeriod + 1 : currentPeriod
+    // 如果没有下一个活动，使用第一个活动
+    if (!nextDungeon && timedDungeons.length > 0) {
+        nextDungeon = timedDungeons[0]
+    }
+
+    // 获取当前活动的角色名称
+    const currentCharName = currentDungeon?.cid ? charMap.get(currentDungeon.cid)?.名称 || "" : ""
+    // 获取下一个活动的角色名称
+    const nextCharName = nextDungeon?.cid ? charMap.get(nextDungeon.cid)?.名称 || "" : ""
+
+    // 生成当前活动信息
+    const current = {
+        title: t("activity-calendar.theater_title", "沉浸式戏剧"),
+        description: t("activity-calendar.theater_desc", {
+            charName: t(currentCharName),
+        }),
+        begin_at: currentDungeon?.st || Math.floor(now),
+        end_at: currentDungeon?.et || Math.floor(now + 7 * 24 * 60 * 60),
+        isTheater: true,
+        category: "theater",
+    }
+
+    // 生成下一个活动信息
+    const next = {
+        title: t("activity-calendar.theater_title", "沉浸式戏剧"),
+        description: t("activity-calendar.theater_desc", { charName: nextCharName }),
+        begin_at: nextDungeon?.st || Math.floor(now + 7 * 24 * 60 * 60),
+        end_at: nextDungeon?.et || Math.floor(now + 14 * 24 * 60 * 60),
+        isTheater: true,
+        category: "theater",
+    }
 
     return {
-        current: {
-            title: t("activity-calendar.theater_title", "沉浸式戏剧") + `-${currentPeriod}期${currentHalfPeriod === 0 ? "上半" : "下半"}`,
-            description: t("activity-calendar.theater_desc", "参演热映剧目，领取赛琪委托密函！"),
-            begin_at: currentHalfStart / 1000,
-            end_at: currentHalfEnd / 1000,
-            isTheater: true,
-            category: "theater",
-        },
-        next: {
-            title: t("activity-calendar.theater_title", "沉浸式戏剧") + `-${nextPeriod}期${nextHalfPeriod === 0 ? "上半" : "下半"}`,
-            description: t("activity-calendar.theater_desc", "参演热映剧目，领取赛琪委托密函！"),
-            begin_at: nextHalfStart / 1000,
-            end_at: nextHalfEnd / 1000,
-            isTheater: true,
-            category: "theater",
-        },
+        current,
+        next,
     }
 }
 

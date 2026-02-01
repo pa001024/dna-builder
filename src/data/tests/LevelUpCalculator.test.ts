@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
-import type { ResourceCost } from "../LevelUpCalculator"
-import { LevelUpCalculatorImpl } from "../LevelUpCalculatorImpl"
+import modData from "../d/mod.data"
+import { LevelUpCalculator, type ResourceCost } from "../LevelUpCalculator"
+import { estimateTime, type ModExt } from "../LevelUpCalculatorImpl"
 
 describe("LevelUpCalculator", () => {
     const mockResourceNeeds: ResourceCost = {
@@ -15,8 +16,16 @@ describe("LevelUpCalculator", () => {
         海妖之羽翼·鼓舞: [100, 31301, "Mod"],
     }
 
+    const calc = new LevelUpCalculator()
+
     it("test estimateTime", () => {
-        const result = LevelUpCalculatorImpl.estimateTime(mockResourceNeeds)
+        const modMap = modData
+            .map(mod => calc.extractMinimalModData(mod))
+            .reduce((acc, mod) => {
+                acc.set(mod.id, mod)
+                return acc
+            }, new Map<number, ModExt>())
+        const result = estimateTime(mockResourceNeeds, Object.fromEntries(modMap))
         // console.log(result)
         // 检查天数必须大于0
         expect(result.days).toBeGreaterThan(0)

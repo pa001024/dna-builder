@@ -3129,6 +3129,7 @@
         "workflow": "Usage Workflow"
     },
     "home": {
+        "checkUpdate": "Check for Updates",
         "cureent_version": "Current version:",
         "download": "Download Windows App",
         "noupdate": "No updates available",
@@ -3204,6 +3205,10 @@
         "remove": "Remove Room"
     },
     "S级蓄力攻击伤害": "Charged Attack Damage: Level S",
+    "script-list": {
+        "desc": "Browse and edit automation scripts",
+        "title": "Automation"
+    },
     "setting": {
         "account": "Account",
         "ai": "AI Model Settings",

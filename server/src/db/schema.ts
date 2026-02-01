@@ -144,6 +144,10 @@ export const passwords = sqliteTable("passwords", {
     updateAt: text("update_at").$onUpdate(now),
 })
 
+export const passwordsRelations = relations(passwords, ({ one }) => ({
+    user: one(users, { fields: [passwords.userId], references: [users.id] }),
+}))
+
 /** 密码重置 */
 export const passwordResets = sqliteTable(
     "password_resets",
@@ -313,6 +317,8 @@ export const missionsIngame = sqliteTable(
     missionsIngame => [index("missions_ingame_server_idx").on(missionsIngame.server)]
 )
 
+export const missionsIngameRelations = relations(missionsIngame, () => ({}))
+
 /** 攻略 */
 export const guides = sqliteTable(
     "guides",
@@ -380,6 +386,8 @@ export const dnaAuthSessions = sqliteTable("dna_auth_sessions", {
     createdAt: text("created_at").$default(now),
 })
 
+export const dnaAuthSessionsRelations = relations(dnaAuthSessions, () => ({}))
+
 /** DNA 用户绑定 */
 export const dnaUserBindings = sqliteTable(
     "dna_user_bindings",
@@ -404,6 +412,8 @@ export const userRelations = relations(users, ({ one, many }) => ({
     buildLikes: many(buildLikes),
     timelines: many(timelines),
     timelineLikes: many(timelineLikes),
+    scripts: many(scripts),
+    scriptLikes: many(scriptLikes),
 }))
 
 export const dnaUserBindingsRelations = relations(dnaUserBindings, ({ one }) => ({
@@ -537,6 +547,12 @@ export const timelines = sqliteTable(
     ]
 )
 
+export const timelinesRelations = relations(timelines, ({ one, many }) => ({
+    user: one(users, { fields: [timelines.userId], references: [users.id] }),
+    likes: many(timelineLikes),
+    dps: many(dps),
+}))
+
 /** 时间线点赞 */
 export const timelineLikes = sqliteTable(
     "timeline_likes",
@@ -555,6 +571,11 @@ export const timelineLikes = sqliteTable(
         index("timeline_like_timeline_idx").on(timelineLikes.timelineId),
     ]
 )
+
+export const timelineLikesRelations = relations(timelineLikes, ({ one }) => ({
+    timeline: one(timelines, { fields: [timelineLikes.timelineId], references: [timelines.id] }),
+    user: one(users, { fields: [timelineLikes.userId], references: [users.id] }),
+}))
 
 /** DPS数据 */
 export const dps = sqliteTable(
@@ -584,4 +605,59 @@ export const dpsRelations = relations(dps, ({ one }) => ({
     user: one(users, { fields: [dps.userId], references: [users.id] }),
     build: one(builds, { fields: [dps.buildId], references: [builds.id] }),
     timeline: one(timelines, { fields: [dps.timelineId], references: [timelines.id] }),
+}))
+
+/** 脚本 */
+export const scripts = sqliteTable(
+    "scripts",
+    {
+        id: text("id").$default(id).primaryKey(),
+        title: text("title").notNull(),
+        description: text("desc"),
+        content: text("content").notNull(),
+        category: text("category").notNull(),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        views: integer("views").default(0),
+        likes: integer("likes").default(0),
+        isRecommended: integer("is_recommended", { mode: "boolean" }).default(false),
+        isPinned: integer("is_pinned", { mode: "boolean" }).default(false),
+        createdAt: text("created_at").$default(now),
+        updateAt: text("update_at").$onUpdate(now),
+    },
+    scripts => [
+        index("scripts_category_idx").on(scripts.category),
+        index("scripts_user_id_idx").on(scripts.userId),
+        index("scripts_is_recommended_idx").on(scripts.isRecommended),
+    ]
+)
+
+export const scriptsRelations = relations(scripts, ({ one, many }) => ({
+    user: one(users, { fields: [scripts.userId], references: [users.id] }),
+    likes: many(scriptLikes),
+}))
+
+/** 脚本点赞 */
+export const scriptLikes = sqliteTable(
+    "script_likes",
+    {
+        id: text("id").$default(id).primaryKey(),
+        scriptId: text("script_id")
+            .notNull()
+            .references(() => scripts.id, { onDelete: "cascade" }),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        createdAt: text("created_at").$default(now),
+    },
+    scriptLikes => [
+        uniqueIndex("script_like_idx").on(scriptLikes.userId, scriptLikes.scriptId),
+        index("script_like_script_idx").on(scriptLikes.scriptId),
+    ]
+)
+
+export const scriptLikesRelations = relations(scriptLikes, ({ one }) => ({
+    script: one(scripts, { fields: [scriptLikes.scriptId], references: [scripts.id] }),
+    user: one(users, { fields: [scriptLikes.userId], references: [users.id] }),
 }))

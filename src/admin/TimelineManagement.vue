@@ -18,7 +18,7 @@ const ui = useUIStore()
 // 状态
 const loading = ref(false)
 const search = ref("")
-const currentPage = ref(1)
+const page = ref(1)
 const pageSize = 20
 const selectedItems = ref<string[]>([])
 const timelineDialogOpen = ref(false)
@@ -37,7 +37,7 @@ const charName = (charId: number) => {
 const fetchTimelines = async () => {
     loading.value = true
     try {
-        const offset = (currentPage.value - 1) * pageSize
+        const offset = (page.value - 1) * pageSize
         const result = await timelinesWithCountQuery(
             {
                 limit: pageSize,
@@ -58,6 +58,10 @@ const fetchTimelines = async () => {
     } finally {
         loading.value = false
     }
+}
+function handlePageChange(newPage: number) {
+    page.value = newPage
+    fetchTimelines()
 }
 
 // 计算属性
@@ -103,7 +107,7 @@ const clearSelection = () => {
 }
 
 const handleSearch = () => {
-    currentPage.value = 1
+    page.value = 1
     fetchTimelines()
 }
 
@@ -348,17 +352,7 @@ onMounted(() => {
             </ScrollArea>
 
             <!-- 分页 -->
-            <div class="flex justify-between items-center p-4 border-t border-base-300">
-                <div class="text-sm text-base-content/70">
-                    显示 {{ (currentPage - 1) * pageSize + 1 }} 到 {{ Math.min(currentPage * pageSize, filteredTimelines.length) }} 条，共
-                    {{ filteredTimelines.length }} 条记录
-                </div>
-                <div class="flex gap-2">
-                    <button class="btn btn-sm btn-outline" :disabled="currentPage <= 1" @click="currentPage--">上一页</button>
-                    <input v-model="currentPage" type="number" min="1" :max="totalPages" class="input input-bordered input-sm w-20" />
-                    <button class="btn btn-sm btn-outline" :disabled="currentPage >= totalPages" @click="currentPage++">下一页</button>
-                </div>
-            </div>
+            <PageFoot :page="page" :pageSize="pageSize" :totalPages="totalPages" :count="total" @update:page="handlePageChange" />
         </div>
 
         <!-- 加载状态 -->

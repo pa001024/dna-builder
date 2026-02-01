@@ -71,6 +71,13 @@
             "when": 1769453596092,
             "tag": "0009_marvelous_pepper_potts",
             "breakpoints": true
+        },
+        {
+            "idx": 10,
+            "version": "6",
+            "when": 1769880901667,
+            "tag": "0010_daffy_vision",
+            "breakpoints": true
         }
     ]
 }

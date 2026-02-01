@@ -67,32 +67,44 @@ function closeModal() {
     lastPopupVersion.value = currentVersion
 }
 
+async function updateApp() {
+    const updateInfo = await checkUpdate()
+    if (updateInfo) {
+        const message = t("updater.newVersionMessage", { version: updateInfo.latestVersion, body: updateInfo.body || "" })
+        if (await ui.showDialog(t("updater.newVersionTitle"), message)) {
+            try {
+                isUpdating.value = true
+                await downloadAndInstallUpdate(progress => {
+                    updateProgress.value = progress
+                    // console.log(`下载进度: ${progress}%`)
+                })
+            } catch (error: any) {
+                console.error("更新失败:", error)
+                await ui.showDialog(t("updater.updateFailed"), error || t("updater.updateErrorMessage"))
+            } finally {
+                updateProgress.value = 0
+                isUpdating.value = false
+            }
+        }
+    }
+}
+
 // Initialize on mount
 onMounted(async () => {
     if (env.isApp) {
-        const updateInfo = await checkUpdate()
-        if (updateInfo) {
-            const message = t("updater.newVersionMessage", { version: updateInfo.latestVersion, body: updateInfo.body || "" })
-            if (await ui.showDialog(t("updater.newVersionTitle"), message)) {
-                try {
-                    isUpdating.value = true
-                    await downloadAndInstallUpdate(progress => {
-                        updateProgress.value = progress
-                        // console.log(`下载进度: ${progress}%`)
-                    })
-                } catch (error: any) {
-                    console.error("更新失败:", error)
-                    await ui.showDialog(t("updater.updateFailed"), error || t("updater.updateErrorMessage"))
-                } finally {
-                    updateProgress.value = 0
-                    isUpdating.value = false
-                }
-            }
-        }
+        await updateApp()
     }
     await fetchVersions()
     checkNewVersions()
 })
+
+window.updateApp = updateApp
+
+declare global {
+    interface Window {
+        updateApp: () => Promise<void>
+    }
+}
 </script>
 <template>
     <div

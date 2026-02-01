@@ -1,5 +1,6 @@
 <script lang="tsx" setup>
 import { onMounted } from "vue"
+import { useUIStore } from "@/store/ui"
 import pg from "../../package.json"
 import type { IconTypes } from "../components/Icon.vue"
 import { env } from "../env"
@@ -32,6 +33,11 @@ onMounted(() => {
         return
     }
 })
+
+async function checkUpdate() {
+    await window.updateApp()
+    useUIStore().showSuccessMessage("已是最新版本")
+}
 </script>
 
 <template>
@@ -80,6 +86,10 @@ onMounted(() => {
                                 <Icon icon="ri:windows-fill" class="w-5 h-5 sm:w-6 sm:h-6" />
                                 <span class="hidden sm:inline">{{ $t("home.download") }}</span>
                             </a>
+                            <button v-else @click="checkUpdate" class="btn btn-primary btn-sm sm:btn-md">
+                                <Icon icon="ri:refresh-line" class="w-5 h-5 sm:w-6 sm:h-6" />
+                                <span class="hidden sm:inline">{{ $t("home.checkUpdate") }}</span>
+                            </button>
                             <a href="https://github.com/pa001024/dna-builder" target="_blank" class="btn btn-primary btn-sm sm:btn-md">
                                 <Icon icon="ri:github-fill" class="w-5 h-5 sm:w-6 sm:h-6" />
                                 <span class="hidden sm:inline">{{ $t("home.starme") }}</span>

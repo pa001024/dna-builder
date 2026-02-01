@@ -14,6 +14,11 @@ const items = [
         icon: "ri:book-line",
     },
     {
+        name: "script-list",
+        path: "/scripts",
+        icon: "ri:code-s-slash-line",
+    },
+    {
         name: "build-compare",
         path: "/char-build-compare",
         icon: "ri:table-view",

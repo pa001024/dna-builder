@@ -6,10 +6,10 @@ use std::{
     time::Duration,
 };
 
+use hotwatch::{Event, EventKind, Hotwatch};
 use lazy_static::lazy_static;
 use reqwest::multipart;
 use serde::{Deserialize, Serialize};
-use sevenz_rust2;
 
 use tauri::{Emitter, Manager};
 use zip::ZipArchive;
@@ -70,6 +70,7 @@ enum WsCommand {
 lazy_static! {
     static ref WS_TX: Mutex<Option<mpsc::UnboundedSender<WsCommand>>> = Mutex::new(None);
     static ref WS_CONFIG: Mutex<Option<(String, String)>> = Mutex::new(None); // (userId, token)
+    static ref HOTWATCH: Arc<Mutex<Option<Hotwatch>>> = Arc::new(Mutex::new(None));
 }
 
 /// WebSocket消息响应结构
@@ -817,14 +818,14 @@ fn get_game_install() -> String {
 async fn is_game_running(is_run: bool) -> String {
     #[cfg(target_os = "windows")]
     {
-        use crate::util::{get_process_by_name, get_process_exe_path};
+        use crate::util::get_process_exe_path;
 
         let mut elapsed = Duration::from_secs(0);
         let timeout = Duration::from_secs(60 * 60); // 1h
         let interval = Duration::from_millis(500); // 500ms
 
         while elapsed <= timeout {
-            let now_is_run = get_process_by_name(GAME_PROCESS).unwrap_or(0) > 0;
+            let now_is_run = submodules::win::get_pid_by_name(GAME_PROCESS).unwrap_or(0) > 0;
             if now_is_run != is_run {
                 break;
             }
@@ -845,6 +846,19 @@ async fn is_game_running(is_run: bool) -> String {
 async fn launch_exe(path: String, params: String) -> bool {
     #[cfg(target_os = "windows")]
     {
+        use crate::util::shell_execute_runas;
+        let pid = shell_execute_runas(path.as_str(), Some(params.as_str()), None);
+        if let Err(err) = pid {
+            println!("Failed to launch game: {:?}", err);
+            return false;
+        }
+    }
+    true
+}
+#[tauri::command]
+async fn launch_normal(path: String, params: String) -> bool {
+    #[cfg(target_os = "windows")]
+    {
         use crate::util::shell_execute;
         let pid = shell_execute(path.as_str(), Some(params.as_str()), None);
         if let Err(err) = pid {
@@ -853,6 +867,53 @@ async fn launch_exe(path: String, params: String) -> bool {
         }
     }
     true
+}
+
+/// 以管理员权限重新启动当前程序
+#[tauri::command]
+async fn run_as_admin(app_handle: tauri::AppHandle) -> Result<bool, String> {
+    #[cfg(target_os = "windows")]
+    {
+        use crate::util::shell_execute_runas;
+        use std::env;
+
+        // 获取当前可执行文件路径
+        let exe_path = env::current_exe().map_err(|e| format!("获取可执行文件路径失败: {}", e))?;
+
+        // 使用 shell_execute 以管理员权限启动
+        let exe_path_str = exe_path.to_string_lossy().to_string();
+        let result = shell_execute_runas(&exe_path_str, None, None);
+
+        match result {
+            Ok(_) => {
+                // 启动成功后退出当前进程
+                let _ = app_handle.exit(0);
+                Ok(true)
+            }
+            Err(e) => Err(format!("以管理员权限启动失败: {:?}", e)),
+        }
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Ok(false)
+    }
+}
+
+/// 检查当前进程是否以管理员权限运行
+#[tauri::command]
+fn check_is_admin() -> bool {
+    #[cfg(target_os = "windows")]
+    {
+        use crate::util::is_elevated;
+        match is_elevated() {
+            Ok(is_admin) => is_admin,
+            Err(_) => false,
+        }
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        false
+    }
 }
 
 #[tauri::command]
@@ -1000,28 +1061,6 @@ async fn fetch(
     }
 }
 
-/// 导出JSON文件到指定路径
-#[tauri::command]
-async fn export_json_file(file_path: String, json_content: String) -> Result<String, String> {
-    // 创建文件路径
-    let path = Path::new(&file_path);
-
-    // 确保父目录存在
-    if let Some(parent) = path.parent() {
-        if !parent.exists() {
-            fs::create_dir_all(parent)
-                .map_err(|e| format!("Failed to create parent directory: {}", e))?;
-        }
-    }
-
-    // 写入JSON内容到文件
-    let mut file = File::create(path).map_err(|e| format!("Failed to create file: {}", e))?;
-    file.write_all(json_content.as_bytes())
-        .map_err(|e| format!("Failed to write JSON content: {}", e))?;
-
-    Ok(format!("Successfully exported JSON to {}", file_path))
-}
-
 /// 导出二进制文件到指定路径
 #[tauri::command]
 async fn export_binary_file(file_path: String, binary_content: Vec<u8>) -> Result<String, String> {
@@ -1045,6 +1084,80 @@ async fn export_binary_file(file_path: String, binary_content: Vec<u8>) -> Resul
         "Successfully exported binary file to {}",
         file_path
     ))
+}
+
+/// 读取文本文件内容
+#[tauri::command]
+async fn read_text_file(file_path: String) -> Result<String, String> {
+    let path = Path::new(&file_path);
+    if !path.exists() {
+        return Err(format!("文件不存在: {}", file_path));
+    }
+
+    let content = fs::read_to_string(path).map_err(|e| format!("读取文件失败: {}", e))?;
+    Ok(content)
+}
+
+/// 写入文本文件内容
+#[tauri::command]
+async fn write_text_file(file_path: String, content: String) -> Result<String, String> {
+    let path = Path::new(&file_path);
+
+    // 确保父目录存在
+    if let Some(parent) = path.parent() {
+        if !parent.exists() {
+            fs::create_dir_all(parent)
+                .map_err(|e| format!("Failed to create parent directory: {}", e))?;
+        }
+    }
+
+    fs::write(path, content).map_err(|e| format!("写入文件失败: {}", e))?;
+    Ok(format!("文件已保存: {}", file_path))
+}
+
+/// 获取文档目录路径
+#[tauri::command]
+fn get_documents_dir() -> String {
+    #[cfg(target_os = "windows")]
+    {
+        use widestring::U16CStr;
+        use windows::Win32::System::Com::CoTaskMemFree;
+        use windows::Win32::UI::Shell::FOLDERID_Documents;
+        use windows::Win32::UI::Shell::KNOWN_FOLDER_FLAG;
+        use windows::Win32::UI::Shell::SHGetKnownFolderPath;
+
+        unsafe {
+            let result = SHGetKnownFolderPath(&FOLDERID_Documents, KNOWN_FOLDER_FLAG(0), None);
+
+            match result {
+                Ok(path_ptr) => {
+                    let ptr = path_ptr.as_ptr();
+                    if ptr.is_null() {
+                        return "C:/Users/Public/Documents".to_string();
+                    }
+
+                    let u16cstr = U16CStr::from_ptr_str(ptr);
+                    let result = u16cstr.to_string_lossy().to_string();
+
+                    CoTaskMemFree(Some(ptr as *const _));
+                    result
+                }
+                Err(_) => "C:/Users/Public/Documents".to_string(),
+            }
+        }
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        use std::env;
+        if let Some(home) = env::var("HOME").ok() {
+            let docs_dir = format!("{}/Documents", home);
+            if Path::new(&docs_dir).exists() {
+                return docs_dir;
+            }
+        }
+        "/tmp".to_string()
+    }
 }
 
 /// 从指定URL下载文件到本地，并通过事件系统发送进度更新
@@ -1180,19 +1293,6 @@ async fn extract_game_assets(
     ))
 }
 
-/// 读取JSON文件
-#[tauri::command]
-async fn read_json_file(file_path: String) -> Result<String, String> {
-    let path = Path::new(&file_path);
-    if !path.exists() {
-        return Err(format!("File not found: {}", file_path));
-    }
-
-    let content = fs::read_to_string(path).map_err(|e| format!("Failed to read file: {}", e))?;
-
-    Ok(content)
-}
-
 /// 获取文件大小
 #[tauri::command]
 async fn get_file_size(file_path: String) -> Result<u64, String> {
@@ -1234,6 +1334,101 @@ async fn cleanup_temp_dir(temp_dir: String) -> Result<String, String> {
     Ok(format!("临时目录清理完成: {}", temp_dir))
 }
 
+/// 列出指定目录下的所有 JS 文件
+#[tauri::command]
+async fn list_script_files(dir_path: String) -> Result<Vec<String>, String> {
+    let path = Path::new(&dir_path);
+    if !path.exists() {
+        return Ok(vec![]);
+    }
+
+    let mut files = vec![];
+    if let Ok(entries) = fs::read_dir(path) {
+        for entry in entries.flatten() {
+            let entry_path = entry.path();
+            if entry_path.is_file() {
+                if let Some(ext) = entry_path.extension() {
+                    if ext == "js" {
+                        if let Some(file_name) = entry_path.file_name() {
+                            if let Some(name_str) = file_name.to_str() {
+                                files.push(name_str.to_string());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(files)
+}
+
+/// 重命名文件
+#[tauri::command]
+async fn rename_file(old_path: String, new_path: String) -> Result<String, String> {
+    let old = Path::new(&old_path);
+    let new = Path::new(&new_path);
+
+    if !old.exists() {
+        return Err(format!("源文件不存在: {}", old_path));
+    }
+
+    if new.exists() {
+        return Err(format!("目标文件已存在: {}", new_path));
+    }
+
+    fs::rename(old, new).map_err(|e| format!("重命名文件失败: {}", e))?;
+    Ok(format!("文件已重命名: {} -> {}", old_path, new_path))
+}
+
+/// 删除文件（移动到回收站）
+#[tauri::command]
+async fn delete_file(file_path: String) -> Result<String, String> {
+    let path = Path::new(&file_path);
+
+    if !path.exists() {
+        return Err(format!("文件不存在: {}", file_path));
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        use windows::Win32::Foundation::HWND;
+        use windows::Win32::UI::Shell::*;
+        use windows::core::{BOOL, PCWSTR};
+
+        // 将路径转换为 Windows 需要的格式（双 null 终止的宽字符串）
+        let mut from = file_path.encode_utf16().collect::<Vec<u16>>();
+        from.push(0); // 添加 null 终止符
+        from.push(0); // 双 null 终止符
+
+        let mut op = SHFILEOPSTRUCTW {
+            hwnd: HWND::default(),
+            wFunc: FO_DELETE,
+            pFrom: PCWSTR::from_raw(from.as_ptr()),
+            pTo: PCWSTR::null(),
+            fFlags: (FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_SILENT).0 as u16,
+            fAnyOperationsAborted: BOOL::from(false),
+            hNameMappings: std::ptr::null_mut(),
+            lpszProgressTitle: PCWSTR::null(),
+        };
+
+        unsafe {
+            let result = SHFileOperationW(&mut op);
+            if result != 0 {
+                return Err(format!("删除文件失败: 错误代码 {}", result));
+            }
+        }
+
+        Ok(format!("文件已移动到回收站: {}", file_path))
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        fs::remove_file(path).map_err(|e| format!("删除文件失败: {}", e))?;
+        Ok(format!("文件已删除: {}", file_path))
+    }
+}
+
 #[tauri::command]
 fn get_os_version() -> String {
     use sysinfo::System;
@@ -1243,6 +1438,106 @@ fn get_os_version() -> String {
         version
     } else {
         "".to_string()
+    }
+}
+mod submodules;
+
+#[tauri::command]
+async fn run_script(script_path: String, app_handle: tauri::AppHandle) -> Result<String, String> {
+    use std::env;
+    use std::path::PathBuf;
+    use submodules::script::run_script_with_tauri_console;
+
+    // 步骤1：将字符串路径转换为 PathBuf（Rust 推荐的路径类型，支持跨平台）
+    let script_path_buf = PathBuf::from(script_path.clone());
+
+    // 步骤2：从脚本路径中提取其所在的目录（父目录）
+    let script_dir = match script_path_buf.parent() {
+        Some(dir) => dir, // 成功提取父目录（脚本所在目录）
+        None => {
+            // 错误：无法提取父目录（比如 script_path 是根路径、空路径或无效路径）
+            return Err(format!("无法提取脚本所在目录：{}", script_path));
+        }
+    };
+
+    // 步骤3：验证脚本目录是否存在（避免切换到不存在的目录）
+    if !script_dir.exists() || !script_dir.is_dir() {
+        return Err(format!(
+            "脚本所在目录不存在或不是有效目录：{}",
+            script_dir.display()
+        ));
+    }
+
+    // 步骤4：切换工作目录到脚本所在目录
+    if let Err(e) = env::set_current_dir(script_dir) {
+        return Err(format!(
+            "切换工作目录失败：{}，错误信息：{:?}",
+            script_dir.display(),
+            e
+        ));
+    }
+
+    // 步骤5：执行原有脚本逻辑（此时工作目录已为脚本所在目录，相对路径基于该目录）
+    match run_script_with_tauri_console(script_path.clone(), app_handle).await {
+        Ok(_) => Ok(format!("脚本执行成功: {}", script_path)),
+        Err(e) => Err(format!("脚本执行失败: {:?}", e)),
+    }
+}
+
+#[tauri::command]
+fn stop_script() -> Result<String, String> {
+    use submodules::script::stop_script;
+    match stop_script() {
+        Ok(_) => Ok("脚本已停止".to_string()),
+        Err(e) => Err(format!("停止脚本失败: {:?}", e)),
+    }
+}
+
+/// 监听文件变化
+#[tauri::command]
+fn watch_file(file_path: String, app_handle: tauri::AppHandle) -> Result<String, String> {
+    let mut hotwatch_guard = HOTWATCH
+        .lock()
+        .map_err(|e| format!("获取 hotwatch 锁失败: {:?}", e))?;
+
+    // 如果 hotwatch 不存在，则创建
+    if hotwatch_guard.is_none() {
+        *hotwatch_guard = Some(
+            Hotwatch::new_with_custom_delay(Duration::from_millis(500))
+                .map_err(|e| format!("创建 hotwatch 失败: {:?}", e))?,
+        );
+    }
+
+    let hotwatch = hotwatch_guard.as_mut().unwrap();
+
+    // 克隆文件路径用于闭包
+    let file_path_clone = file_path.clone();
+    // 监听文件
+    hotwatch
+        .watch(&file_path, move |event: Event| {
+            // 检查事件类型
+            if let EventKind::Modify(_) = event.kind {
+                // 文件被修改，发送事件到前端
+                let _ = app_handle.emit("file-changed", &file_path_clone);
+            }
+        })
+        .map_err(|e| format!("监听文件失败: {:?}", e))?;
+
+    Ok(format!("开始监听文件: {}", file_path))
+}
+
+/// 取消监听文件
+#[tauri::command]
+fn unwatch_file(file_path: String) -> Result<String, String> {
+    let mut hotwatch_guard = HOTWATCH
+        .lock()
+        .map_err(|e| format!("获取 hotwatch 锁失败: {:?}", e))?;
+
+    if let Some(hotwatch) = hotwatch_guard.as_mut() {
+        let _ = hotwatch.unwatch(&file_path);
+        Ok(format!("取消监听文件: {}", file_path))
+    } else {
+        Err("Hotwatch 未初始化".to_string())
     }
 }
 
@@ -1279,24 +1574,6 @@ pub fn run() {
             let mut sys = System::new_all();
             sys.refresh_all();
 
-            use windows_sys::Win32::Foundation::CloseHandle;
-            use windows_sys::Win32::System::Threading::CreateMutexA;
-            use windows_sys::Win32::UI::WindowsAndMessaging::*;
-            let h_mutex =
-                unsafe { CreateMutexA(std::ptr::null_mut(), 0, "dna-builder-mutex".as_ptr()) };
-            if h_mutex == std::ptr::null_mut() {
-                // Mutex already exists, app is already running.
-                unsafe {
-                    CloseHandle(h_mutex);
-                    let hwnd = FindWindowA(std::ptr::null(), "DNA Builder".as_ptr());
-                    let mut wpm = std::mem::zeroed::<WINDOWPLACEMENT>();
-                    if GetWindowPlacement(hwnd, &mut wpm) != 0 {
-                        ShowWindow(hwnd, SW_SHOWNORMAL);
-                        SetForegroundWindow(hwnd);
-                    }
-                };
-                handle.exit(0);
-            }
             let submenu = SubmenuBuilder::new(handle, "材质")
                 .check("None", "None")
                 .check("Blur", "Blur")
@@ -1408,13 +1685,17 @@ pub fn run() {
         get_game_install,
         is_game_running,
         launch_exe,
+        launch_normal,
+        run_as_admin,
+        check_is_admin,
         import_mod,
         enable_mod,
         import_pic,
         fetch,
         get_local_qq,
-        export_json_file,
-        read_json_file,
+        list_script_files,
+        read_text_file,
+        write_text_file,
         export_binary_file,
         start_heartbeat,
         stop_heartbeat,
@@ -1422,7 +1703,14 @@ pub fn run() {
         download_file,
         extract_game_assets,
         get_file_size,
-        cleanup_temp_dir
+        cleanup_temp_dir,
+        run_script,
+        stop_script,
+        get_documents_dir,
+        rename_file,
+        delete_file,
+        watch_file,
+        unwatch_file
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

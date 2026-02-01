@@ -3128,6 +3128,7 @@
         "workflow": "使用流程"
     },
     "home": {
+        "checkUpdate": "檢查更新",
         "cureent_version": "當前版本:",
         "download": "下載 Windows App",
         "noupdate": "當前版本無更新內容",
@@ -3203,6 +3204,10 @@
         "remove": "刪除房間"
     },
     "S级蓄力攻击伤害": "S級蓄力攻擊傷害",
+    "script-list": {
+        "desc": "瀏覽和編輯自動化腳本",
+        "title": "自動化"
+    },
     "setting": {
         "account": "帳號",
         "ai": "AI大模型設定",

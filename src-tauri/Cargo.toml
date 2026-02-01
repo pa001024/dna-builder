@@ -1,6 +1,6 @@
 [package]
 name = "dna-builder"
-version = "0.9.26"
+version = "0.10.1"
 description = "A DNA Builder"
 authors = ["pa001024"]
 edition = "2024"
@@ -29,9 +29,10 @@ tauri-plugin-http = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sysinfo = "0.37.2"
-
 tokio = { version = "1", features = ["full"] }
-thiserror = "2.0.17"
+futures-concurrency = "7.7.1"
+futures-lite = "2.6.1"
+thiserror = "2.0.18"
 lazy_static = "1"
 widestring = "1"
 zip = { version = "0.6", default-features = false, features = ["deflate"] }
@@ -41,12 +42,15 @@ reqwest = { version = "0.12", default-features = false, features = [
     "json",
     "multipart",
     "rustls-tls",
+    "blocking",
 ] }
+arboard = "3.6.1"
 tokio-tungstenite = { version = "0.25", features = ["rustls-tls-native-roots"] }
 tungstenite = { version = "0.25" }
 url = "2.5.0"
 futures-util = "0.3.31"
 http = "1.1.0"
+scopeguard = "1.2.0"
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.
@@ -62,7 +66,7 @@ strip = true      # Ensures debug symbols are removed.
 tauri-plugin-updater = "2"
 window-vibrancy = "0.7.1"
 winreg = "0.55.0"
-windows-sys = { version = "0.61", features = [
+windows = { version = "0.62.2", features = [
     "Win32_Foundation",
     "Win32_System_Diagnostics_ToolHelp",
     "Win32_System_Diagnostics_Debug",
@@ -77,5 +81,34 @@ windows-sys = { version = "0.61", features = [
     "Win32_Graphics_Gdi",
     "Win32_System_Registry",
     "Win32_System_DataExchange",
+    "Win32_System",
+    "Win32_System_Variant",
+    "Win32_System_Com",
+    "Win32_System_Com_StructuredStorage",
+    "Win32_System_WinRT",
+    "Win32_System_WinRT_Direct3D11",
+    "Win32_System_WinRT_Graphics_Capture",
+    "Win32_Media",
+    "Win32_Media_Audio",
+    "Win32_Graphics",
+    "Win32_Graphics_Direct3D",
+    "Win32_Graphics_Direct3D11",
+    "Win32_Graphics_Dxgi",
+    "Win32_Graphics_Dxgi_Common",
+    "Graphics",
+    "Graphics_Capture",
+    "Graphics_DirectX",
+    "Graphics_DirectX_Direct3D11",
+    "Win32_UI",
+    "Win32_UI_Input",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_Storage",
+    "Win32_Storage_Xps",
+    "Win32_System_LibraryLoader",
 ] }
 windows-core = "0.62.2"
+opencv = "0.97.2"
+boa_engine = "0.21.0"
+boa_gc = "0.21.0"
+boa_runtime = "0.21.0"
+hotwatch = "0.5.0"

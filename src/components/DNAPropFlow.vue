@@ -109,13 +109,14 @@ onUnmounted(() => {
 async function checkAndRefreshKFToken() {
     try {
         // 检查kf_token是否为空
-        if (!api?.kf?.kf_token) {
+        if (!api.kf.kf_token) {
             // 执行sdkLogin获取新token
             const res = await api.kf.sdkLogin()
             if (res.is_success && res.data?.token) {
                 const newToken = res.data.token
                 // 保存token到数据库
                 await setting.saveKFToken(newToken)
+                api.kf.kf_token = newToken
             } else {
                 // sdkLogin失败，显示手机号登录弹窗
                 ui.showErrorMessage("sdk登录失败，将使用手机号登录")
@@ -169,6 +170,10 @@ async function loadRoles() {
             if (roles.value.length > 0 && !selectedRole.value) {
                 selectedRole.value = roles.value[0].role_id
             }
+        } else if (!res.is_success || !res.msg.includes("未登录")) {
+            roles.value = res.data
+            api.kf.kf_token = ""
+            await setting.saveKFToken("")
         }
     } catch (e) {
         ui.showErrorMessage("加载角色列表失败")
@@ -289,6 +294,7 @@ async function loginByPhone() {
             showPhoneLoginModal.value = false
             phoneNumber.value = ""
             phoneVerifyCode.value = ""
+            await loadData()
         } else {
             ui.showErrorMessage(res.msg || "登录失败")
         }

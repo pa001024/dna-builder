@@ -79,6 +79,7 @@ export default defineConfig(async () => ({
             workbox: {
                 navigateFallbackDenylist: [/^\/graphql/, /^\/api/],
                 maximumFileSizeToCacheInBytes: 3000000,
+                globPatterns: ["**/*.{js,css,html,json}"],
                 runtimeCaching: [
                     // {
                     //     urlPattern: /^https:\/\/xn--chq26veyq\.icu\/api\/.+/,
@@ -161,7 +162,6 @@ export default defineConfig(async () => ({
             // 3. tell Vite to ignore watching `src-tauri`
             ignored: [
                 "**/src-tauri/**",
-                "**/*.d.ts",
                 "**/*.md",
                 "**/*.test.ts",
                 "**/mcp_server/**",

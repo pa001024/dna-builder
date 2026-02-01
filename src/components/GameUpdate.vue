@@ -4,7 +4,7 @@ import { listen } from "@tauri-apps/api/event"
 import * as dialog from "@tauri-apps/plugin-dialog"
 import { computed, onMounted, onUnmounted, ref } from "vue"
 import { useUIStore } from "@/store/ui"
-import { cleanupTempDir, exportJsonFile, getFileSize, readJsonFile } from "../api/app"
+import { cleanupTempDir, getFileSize, readTextFile, writeTextFile } from "../api/app"
 import { useGameStore } from "../store/game"
 import {
     type DownloadProgress,
@@ -144,7 +144,7 @@ async function checkForUpdates() {
 
     try {
         // 读取本地 BaseVersion.json
-        const localContent = await readJsonFile(baseVersionPath.value)
+        const localContent = await readTextFile(baseVersionPath.value)
         const localVersionList = JSON.parse(localContent) as GameVersionListLocal
         // 对比版本信息
         if (versionList.value && localVersionList) {
@@ -197,7 +197,7 @@ async function updateBaseVersionFile() {
         }
 
         const content = JSON.stringify(localVersionList, null, 2)
-        await exportJsonFile(baseVersionPath.value, content)
+        await writeTextFile(baseVersionPath.value, content)
         ui.showSuccessMessage("更新成功")
     } catch (err) {
         ui.showErrorMessage(`更新 BaseVersion.json 失败: ${err instanceof Error ? err.message : String(err)}`)

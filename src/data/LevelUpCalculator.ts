@@ -1,4 +1,9 @@
+import { getModDropInfo } from "../utils/reward-utils"
+import { draftDungeonMap, modDraftMap, modDungeonMap, resourceDraftMap, walnutMap, weaponDraftMap } from "./d"
+import modData from "./d/mod.data"
 import type { Char, Mod, Weapon } from "./data-types"
+import type { MergeCalculateData, WorkerMessageData, WorkerMethod, WorkerResponse } from "./LevelUpCalculator.worker"
+import type { ModExt, WeaponExt } from "./LevelUpCalculatorImpl"
 
 /**
  * 角色养成配置
@@ -91,82 +96,6 @@ export interface TimeEstimateResult {
     hours: number
     mins: number
     dungeonTimes: Record<number, [number, string]>
-}
-
-// 定义 Worker 消息类型
-type WorkerMethod = "calculateCharLevelUp" | "calculateWeaponLevelUp" | "calculateModLevelUp" | "estimateTime" | "mergeCalculate"
-
-// 精简角色数据类型
-type MinimalChar = {
-    id: number
-    突破?: Record<string, number>[]
-    技能: {
-        升级?: Record<string, number>[]
-    }[]
-}
-
-// 精简武器数据类型
-type MinimalWeapon = {
-    id: number
-    突破?: Record<string, number>[]
-    熔炼?: string[]
-}
-
-// 精简魔之楔数据类型
-type MinimalMod = {
-    id: number
-    品质: string
-    名称: string
-}
-
-// 合并计算请求数据类型
-type MergeCalculateData = {
-    chars?: {
-        chars: MinimalChar[]
-        config: LevelUpCalculatorConfig
-    }
-    weapons?: {
-        weapons: MinimalWeapon[]
-        config: LevelUpCalculatorConfig
-    }
-    mods?: {
-        mods: MinimalMod[]
-        config: LevelUpCalculatorConfig
-    }
-}
-
-type CalculateCharLevelUpData = {
-    chars: MinimalChar[]
-    config: LevelUpCalculatorConfig
-}
-
-type CalculateWeaponLevelUpData = {
-    weapons: MinimalWeapon[]
-    config: LevelUpCalculatorConfig
-}
-
-type CalculateModLevelUpData = {
-    mods: MinimalMod[]
-    config: LevelUpCalculatorConfig
-}
-
-type EstimateTimeData = {
-    totalCost: ResourceCost
-}
-
-type WorkerMessageData =
-    | CalculateCharLevelUpData
-    | CalculateWeaponLevelUpData
-    | CalculateModLevelUpData
-    | EstimateTimeData
-    | MergeCalculateData
-
-// Worker 响应类型
-interface WorkerResponse {
-    success: boolean
-    result?: LevelUpResult | TimeEstimateResult | { charResult?: LevelUpResult; weaponResult?: LevelUpResult; modResult?: LevelUpResult }
-    error?: string
-    id: number
 }
 
 /**
@@ -271,11 +200,12 @@ export class LevelUpCalculator {
      * @param weapon 武器数据
      * @returns 精简后的武器数据
      */
-    private extractMinimalWeaponData(weapon: Weapon) {
+    private extractMinimalWeaponData(weapon: Weapon): WeaponExt {
         return {
             id: weapon.id,
             突破: weapon.突破,
-            熔炼: weapon.熔炼,
+            walnut: walnutMap.get(weapon.id) && 1,
+            draft: weaponDraftMap.get(weapon.id),
         }
     }
 
@@ -284,11 +214,25 @@ export class LevelUpCalculator {
      * @param mod 魔之楔数据
      * @returns 精简后的魔之楔数据
      */
-    private extractMinimalModData(mod: Mod) {
+    extractMinimalModData(mod: Mod): ModExt {
         return {
             id: mod.id,
             品质: mod.品质,
             名称: mod.名称,
+            draft: modDraftMap.get(mod.id),
+            walnut: walnutMap.get(mod.id) && 1,
+            dropInfo: modDungeonMap.get(mod.id)?.map(d => ({
+                id: d.id,
+                name: d.n,
+                t: d.t,
+                dropInfo: getModDropInfo(d, mod.id),
+            })),
+            draftInfo: draftDungeonMap.get(mod.id)?.map(d => ({
+                id: d.id,
+                name: d.n,
+                t: d.t,
+                dropInfo: getModDropInfo(d, mod.id),
+            })),
         }
     }
 
@@ -323,7 +267,11 @@ export class LevelUpCalculator {
         const cleanConfig = this.cleanConfig(config)
         // 提取最小数据集，只传递计算所需的字段
         const minimalWeapons = weapons.map(weapon => this.extractMinimalWeaponData(weapon))
-        return this.sendMessage("calculateWeaponLevelUp", { weapons: minimalWeapons, config: cleanConfig }) as Promise<LevelUpResult>
+        return this.sendMessage("calculateWeaponLevelUp", {
+            weapons: minimalWeapons,
+            config: cleanConfig,
+            resourceDraftMap,
+        }) as Promise<LevelUpResult>
     }
 
     /**
@@ -340,7 +288,12 @@ export class LevelUpCalculator {
         const cleanConfig = this.cleanConfig(config)
         // 提取最小数据集，只传递计算所需的字段
         const minimalMods = mods.map(mod => this.extractMinimalModData(mod))
-        return this.sendMessage("calculateModLevelUp", { mods: minimalMods, config: cleanConfig }) as Promise<LevelUpResult>
+        return this.sendMessage("calculateModLevelUp", {
+            mods: minimalMods,
+            config: cleanConfig,
+            modDraftMap,
+            resourceDraftMap,
+        }) as Promise<LevelUpResult>
     }
 
     /**
@@ -349,7 +302,13 @@ export class LevelUpCalculator {
      * @returns 时间估算
      */
     async estimateTime(totalCost: ResourceCost): Promise<TimeEstimateResult> {
-        return (await this.sendMessage("estimateTime", { totalCost })) as TimeEstimateResult
+        const modMap = modData
+            .map(mod => this.extractMinimalModData(mod))
+            .reduce((acc, mod) => {
+                acc.set(mod.id, mod)
+                return acc
+            }, new Map<number, ModExt>())
+        return (await this.sendMessage("estimateTime", { totalCost, modMap })) as TimeEstimateResult
     }
 
     /**
@@ -370,7 +329,10 @@ export class LevelUpCalculator {
         mods?: Mod[],
         modConfig?: ModLevelUpConfig[]
     ): Promise<{ charResult?: LevelUpResult; weaponResult?: LevelUpResult; modResult?: LevelUpResult }> {
-        const message: MergeCalculateData = {}
+        const message: MergeCalculateData = {
+            modDraftMap,
+            resourceDraftMap,
+        }
 
         // 添加角色计算请求
         if (chars && charConfig && chars.length > 0 && charConfig.length > 0) {

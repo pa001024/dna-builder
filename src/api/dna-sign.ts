@@ -284,7 +284,12 @@ export async function executeSignFlow(api: DNAAPI): Promise<boolean> {
         const todaySigned = newCalendarData.todaySignin || false
         const allTasksCompleted = !newTaskProcess.dailyTask.some(task => task.completeTimes < task.times)
 
-        return todaySigned && allTasksCompleted
+        if (todaySigned && allTasksCompleted) {
+            ui.showSuccessMessage("签到成功")
+            return true
+        }
+        ui.showErrorMessage("签到流程未完成, 将在1小时后重试")
+        return false
     } catch (error) {
         console.error("签到流程执行失败:", error)
         ui.showErrorMessage("签到流程执行失败")

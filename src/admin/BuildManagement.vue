@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watchEffect } from "vue"
+import { computed, onMounted, ref } from "vue"
 import { useRoute } from "vue-router"
 import {
     Build,
@@ -59,6 +59,11 @@ const fetchBuilds = async () => {
     } finally {
         loading.value = false
     }
+}
+
+function handlePageChange(newPage: number) {
+    page.value = newPage
+    fetchBuilds()
 }
 
 // 计算属性
@@ -198,7 +203,7 @@ const handleBatchDelete = async () => {
 
 // 页面挂载时获取构筑列表
 onMounted(() => {
-    watchEffect(fetchBuilds)
+    fetchBuilds()
 })
 </script>
 
@@ -345,17 +350,7 @@ onMounted(() => {
             </ScrollArea>
 
             <!-- 分页 -->
-            <div class="flex justify-between items-center p-4 border-t border-base-300">
-                <div class="text-sm text-base-content/70">
-                    显示 {{ (page - 1) * pageSize + 1 }} 到 {{ Math.min(page * pageSize, filteredItems.length) }} 条，共
-                    {{ filteredItems.length }} 条记录
-                </div>
-                <div class="flex gap-2">
-                    <button class="btn btn-sm btn-outline" :disabled="page <= 1" @click="page--">上一页</button>
-                    <input v-model="page" type="number" min="1" :max="totalPages" class="input input-bordered input-sm w-20" />
-                    <button class="btn btn-sm btn-outline" :disabled="page >= totalPages" @click="page++">下一页</button>
-                </div>
-            </div>
+            <PageFoot :page="page" :pageSize="pageSize" :totalPages="totalPages" :count="total" @update:page="handlePageChange" />
         </div>
 
         <!-- 加载状态 -->

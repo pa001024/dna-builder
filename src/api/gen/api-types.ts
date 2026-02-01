@@ -80,6 +80,23 @@ export interface Task {
     user: User
 }
 
+export interface Script {
+    id: string
+    title: string
+    description?: string
+    content: string
+    category: string
+    userId: string
+    views: number
+    likes: number
+    isRecommended?: boolean
+    isPinned?: boolean
+    createdAt: string
+    updateAt: string
+    user?: User
+    isLiked?: boolean
+}
+
 export interface RtcJoinResult {
     id: string
     end: boolean
@@ -236,6 +253,13 @@ export interface TimelineInput {
     charName: string
     tracks: string
     items: string
+}
+
+export interface ScriptInput {
+    title: string
+    description?: string
+    content: string
+    category: string
 }
 
 export interface RoomInput {

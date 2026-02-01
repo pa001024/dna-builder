@@ -1,6 +1,6 @@
 import { useLocalStorage } from "@vueuse/core"
-import { defineStore } from "pinia"
 import { jwtDecode } from "jwt-decode"
+import { defineStore } from "pinia"
 
 function getPayload(token: string) {
     if (!token) return
@@ -42,9 +42,6 @@ export const useUserStore = defineStore("user", {
         },
         isGuest(state) {
             return getPayload(state.jwtToken)?.email?.endsWith("guest") || false
-        },
-        today() {
-            return new Date(Date.now() - 4 * 36e5).toLocaleDateString("zh-CN")
         },
         userInfo(state) {
             const payload = getPayload(state.jwtToken)

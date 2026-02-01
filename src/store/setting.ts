@@ -18,7 +18,7 @@ export const useSettingStore = defineStore("setting", {
             theme: useLocalStorage("setting_theme", "dark"),
             uiScale: useLocalStorage("setting_ui_scale", 1),
             winMaterial: useLocalStorage("setting_win_material", "Unset"),
-            windowTrasnparent: useLocalStorage("setting_window_trasnparent", true),
+            windowTrasnparent: useLocalStorage("setting_window_trasnparent", false),
             lang: useLocalStorage("setting_lang", navigator.language),
             // AI大模型设置
             aiBaseUrl: useLocalStorage("ai_base_url", "https://open.bigmodel.cn/api/paas/v4/"),

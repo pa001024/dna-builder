@@ -236,7 +236,7 @@ body {
         "Mona Sans", -apple-system, BlinkMacSystemFont, "SourceHanSansCN", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
         "Fira Sans", "Droid Sans", "Helvetica Neue";
     /* 640px */
-    @media (width < 40rem) {
+    @media (max-width: calc(40rem - 1px)) {
         font-size: calc(13px * var(--uiscale));
     }
 }

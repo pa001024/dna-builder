@@ -3129,6 +3129,7 @@
         "workflow": "사용 흐름"
     },
     "home": {
+        "checkUpdate": "업데이트 확인",
         "cureent_version": "현재 버전:",
         "download": "Windows 앱 다운로드",
         "noupdate": "현재 버전에 업데이트 내용이 없습니다",
@@ -3204,6 +3205,10 @@
         "remove": "방 제거"
     },
     "S级蓄力攻击伤害": "S급 차지 공격 대미지",
+    "script-list": {
+        "desc": "자동화 스크립트 찾아보기 및 편집",
+        "title": "자동화"
+    },
     "setting": {
         "account": "계정",
         "ai": "AI 대형 모델 설정",

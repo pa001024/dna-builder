@@ -3129,6 +3129,7 @@
         "workflow": "使用フロー"
     },
     "home": {
+        "checkUpdate": "更新を確認",
         "cureent_version": "現在のバージョン:",
         "download": "Windows アプリをダウンロード",
         "noupdate": "現在のバージョンに更新はありません",
@@ -3204,6 +3205,10 @@
         "remove": "ルームを削除"
     },
     "S级蓄力攻击伤害": "Lv..S溜め攻撃ダメージ",
+    "script-list": {
+        "desc": "自動化スクリプトの閲覧と編集",
+        "title": "自動化"
+    },
     "setting": {
         "account": "アカウント",
         "ai": "AI大模型設定",

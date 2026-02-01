@@ -3,9 +3,9 @@
  * 后台管理布局组件
  * 实现页内菜单控制，显示admin下其他页面
  */
-import { IconTypes } from "@/components/Icon.vue"
-import { ref, computed } from "vue"
+import { computed, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
+import { IconTypes } from "@/components/Icon.vue"
 
 // 定义菜单选项
 const menuItems: {
@@ -47,6 +47,11 @@ const menuItems: {
         name: "时间线管理",
         path: "/admin/timeline",
         icon: "ri:timeline-view",
+    },
+    {
+        name: "脚本管理",
+        path: "/admin/script",
+        icon: "ri:code-s-slash-line",
     },
 ]
 

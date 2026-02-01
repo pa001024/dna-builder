@@ -131,6 +131,11 @@ const routes: readonly RouteRecordRaw[] = [
                 path: "timeline",
                 component: () => import("./admin/TimelineManagement.vue"),
             },
+            {
+                name: "admin-script",
+                path: "script",
+                component: () => import("./admin/ScriptManagement.vue"),
+            },
         ],
     },
     // 数据库路由
@@ -338,6 +343,14 @@ const routes: readonly RouteRecordRaw[] = [
     { name: "guide-detail", path: "/guides/:id", component: GuideDetailView, beforeEnter: () => setMinSize(800, 600) },
     { name: "guide-create", path: "/guides/create", component: GuideEditView, beforeEnter: () => setMinSize(800, 800) },
     { name: "guide-edit", path: "/guides/:id/edit", component: GuideEditView, beforeEnter: () => setMinSize(800, 800) },
+
+    // 脚本 routes
+    {
+        name: "script-list",
+        path: "/scripts",
+        component: () => import("./views/ScriptListView.vue"),
+        beforeEnter: () => setMinSize(800, 600),
+    },
 
     // 404 页面 - 必须放在最后作为捕获所有未匹配路由
     { path: "/:pathMatch(.*)*", name: "notfound", component: NotFound, beforeEnter: () => setMinSize(360, 430) },

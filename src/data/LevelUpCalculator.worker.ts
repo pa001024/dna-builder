@@ -1,53 +1,67 @@
-import type { Char, Mod, Weapon } from "./data-types"
+import type { Draft } from "./data-types"
 import type { LevelUpCalculatorConfig, LevelUpResult, ResourceCost } from "./LevelUpCalculator"
-import { LevelUpCalculatorImpl } from "./LevelUpCalculatorImpl"
+import {
+    type CharExt,
+    calculateCharLevelUp,
+    calculateModLevelUp,
+    calculateWeaponLevelUp,
+    estimateTime,
+    type ModExt,
+    type WeaponExt,
+} from "./LevelUpCalculatorImpl"
 
 // 定义 Worker 消息类型
-type WorkerMethod = "calculateCharLevelUp" | "calculateWeaponLevelUp" | "calculateModLevelUp" | "estimateTime" | "mergeCalculate"
+export type WorkerMethod = "calculateCharLevelUp" | "calculateWeaponLevelUp" | "calculateModLevelUp" | "estimateTime" | "mergeCalculate"
 
 // 合并计算请求数据类型
-type MergeCalculateData = {
+export type MergeCalculateData = {
     chars?: {
-        chars: Char[]
+        chars: CharExt[]
         config: LevelUpCalculatorConfig
     }
     weapons?: {
-        weapons: Weapon[]
+        weapons: WeaponExt[]
         config: LevelUpCalculatorConfig
     }
     mods?: {
-        mods: Mod[]
+        mods: ModExt[]
         config: LevelUpCalculatorConfig
     }
+    modDraftMap: Map<number, Draft>
+    resourceDraftMap: Map<number, Draft>
 }
 
-type CalculateCharLevelUpData = {
-    chars: Char[]
+export type CalculateCharLevelUpData = {
+    chars: CharExt[]
     config: LevelUpCalculatorConfig
 }
 
-type CalculateWeaponLevelUpData = {
-    weapons: Weapon[]
+export type CalculateWeaponLevelUpData = {
+    weapons: WeaponExt[]
     config: LevelUpCalculatorConfig
+    resourceDraftMap: Map<number, Draft>
 }
 
-type CalculateModLevelUpData = {
-    mods: Mod[]
+export type CalculateModLevelUpData = {
+    mods: ModExt[]
     config: LevelUpCalculatorConfig
+    modDraftMap: Map<number, Draft>
+    resourceDraftMap: Map<number, Draft>
 }
 
-type EstimateTimeData = {
+export type EstimateTimeData = {
     totalCost: ResourceCost
+    modMap: Map<number, ModExt>
 }
 
-type WorkerMessageData =
+export type WorkerMessageData =
     | CalculateCharLevelUpData
     | CalculateWeaponLevelUpData
     | CalculateModLevelUpData
     | EstimateTimeData
     | MergeCalculateData
 
-interface WorkerMessage {
+export interface WorkerMessage {
     type: "calculate"
     method: WorkerMethod
     data: WorkerMessageData
@@ -55,11 +69,11 @@ interface WorkerMessage {
 }
 
 // Worker 响应类型
-interface WorkerResponse {
+export interface WorkerResponse {
     success: boolean
     result?:
         | LevelUpResult
-        | ReturnType<typeof LevelUpCalculatorImpl.estimateTime>
+        | ReturnType<typeof estimateTime>
         | { charResult?: LevelUpResult; weaponResult?: LevelUpResult; modResult?: LevelUpResult }
     error?: string
     id: number
@@ -73,29 +87,32 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
         try {
             let result:
                 | LevelUpResult
-                | ReturnType<typeof LevelUpCalculatorImpl.estimateTime>
+                | ReturnType<typeof estimateTime>
                 | { charResult?: LevelUpResult; weaponResult?: LevelUpResult; modResult?: LevelUpResult }
-
             // 使用主进程传递的精简数据直接计算，不再加载全部数据
             switch (method) {
                 case "calculateCharLevelUp": {
                     const charDataMsg = data as CalculateCharLevelUpData
-                    result = LevelUpCalculatorImpl.calculateCharLevelUp(charDataMsg.chars, charDataMsg.config)
+                    result = calculateCharLevelUp(charDataMsg.chars, charDataMsg.config)
                     break
                 }
                 case "calculateWeaponLevelUp": {
                     const weaponDataMsg = data as CalculateWeaponLevelUpData
-                    result = LevelUpCalculatorImpl.calculateWeaponLevelUp(weaponDataMsg.weapons, weaponDataMsg.config)
+                    result = calculateWeaponLevelUp(
+                        weaponDataMsg.weapons,
+                        Object.fromEntries(weaponDataMsg.resourceDraftMap),
+                        weaponDataMsg.config
+                    )
                     break
                 }
                 case "calculateModLevelUp": {
                     const modDataMsg = data as CalculateModLevelUpData
-                    result = LevelUpCalculatorImpl.calculateModLevelUp(modDataMsg.mods, modDataMsg.config)
+                    result = calculateModLevelUp(modDataMsg.mods, modDataMsg.modDraftMap, modDataMsg.resourceDraftMap, modDataMsg.config)
                     break
                 }
                 case "estimateTime": {
                     const timeData = data as EstimateTimeData
-                    result = LevelUpCalculatorImpl.estimateTime(timeData.totalCost)
+                    result = estimateTime(timeData.totalCost, Object.fromEntries(timeData.modMap))
                     break
                 }
                 case "mergeCalculate": {
@@ -105,20 +122,26 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 
                     // 计算角色养成结果
                     if (mergeData.chars) {
-                        results.charResult = LevelUpCalculatorImpl.calculateCharLevelUp(mergeData.chars.chars, mergeData.chars.config)
+                        results.charResult = calculateCharLevelUp(mergeData.chars.chars, mergeData.chars.config)
                     }
 
                     // 计算武器养成结果
                     if (mergeData.weapons) {
-                        results.weaponResult = LevelUpCalculatorImpl.calculateWeaponLevelUp(
+                        results.weaponResult = calculateWeaponLevelUp(
                             mergeData.weapons.weapons,
+                            Object.fromEntries(mergeData.resourceDraftMap),
                             mergeData.weapons.config
                         )
                     }
 
                     // 计算魔之楔养成结果
                     if (mergeData.mods) {
-                        results.modResult = LevelUpCalculatorImpl.calculateModLevelUp(mergeData.mods.mods, mergeData.mods.config)
+                        results.modResult = calculateModLevelUp(
+                            mergeData.mods.mods,
+                            mergeData.modDraftMap,
+                            mergeData.resourceDraftMap,
+                            mergeData.mods.config
+                        )
                     }
 
                     result = results

@@ -229,14 +229,11 @@ onMounted(() => {
             <div class="flex flex-col md:flex-row gap-4">
                 <div class="flex-1">
                     <div class="relative group">
-                        <span
-                            class="absolute left-4 top-1/2 transform -translate-y-1/2 text-base-content/50 ri:search-line text-lg group-hover:text-primary transition-colors duration-200"
-                        ></span>
                         <input
                             v-model="search"
                             type="text"
                             placeholder="搜索攻略标题..."
-                            class="input input-bordered w-full pl-12 bg-base-100 text-base-content placeholder:text-base-content/50 focus:outline-none focus:border-primary transition-all duration-200 text-sm"
+                            class="input input-bordered w-full"
                             @keyup.enter="handleSearch"
                         />
                     </div>
@@ -252,7 +249,7 @@ onMounted(() => {
                         class="btn btn-primary px-8 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2 font-medium"
                         @click="handleSearch"
                     >
-                        <Icon icon="ri:search-line"></Icon>
+                        <Icon icon="ri:search-line" />
                         <span>搜索</span>
                     </button>
                 </div>
@@ -354,23 +351,7 @@ onMounted(() => {
             </ScrollArea>
 
             <!-- 分页 -->
-            <div class="mt-0 py-6 px-8 bg-base-200/50 border-t border-base-200">
-                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div class="text-sm text-base-content/70">
-                        <span class="font-medium text-base-content/85"
-                            >显示 {{ (page - 1) * pageSize + 1 }} 到 {{ Math.min(page * pageSize, total) }} 条，共
-                            <span class="font-semibold">{{ total }}</span> 条</span
-                        >
-                    </div>
-                    <div class="flex gap-2">
-                        <button class="btn btn-sm btn-outline" :disabled="page <= 1" @click="handlePageChange(page - 1)">上一页</button>
-                        <input v-model="page" type="number" min="1" :max="totalPages" class="input input-bordered input-sm w-20" />
-                        <button class="btn btn-sm btn-outline" :disabled="page >= totalPages" @click="handlePageChange(page + 1)">
-                            下一页
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <PageFoot :page="page" :pageSize="pageSize" :totalPages="totalPages" :count="total" @update:page="handlePageChange" />
         </div>
 
         <!-- 编辑攻略对话框 -->
