@@ -1,4 +1,5 @@
 import type { BaseCommand, CommandContext } from "./interfaces"
+import { MihanCommand } from "./mihan"
 import { TestCommand } from "./test"
 
 /**
@@ -18,10 +19,8 @@ export class CommandManager {
      * 注册所有命令
      */
     private registerCommands() {
-        // 注册测试命令
         this.registerCommand(new TestCommand())
-
-        // 可以在这里注册其他命令
+        this.registerCommand(new MihanCommand())
     }
 
     /**

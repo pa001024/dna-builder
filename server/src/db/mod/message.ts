@@ -70,7 +70,11 @@ export const resolvers = {
         msgs: async (_parent, { roomId, limit, offset }, context, _info) => {
             if (!context.user) throw createGraphQLError("need login")
             if (!hasUser(roomId, context.user.id)) {
-                await waitForUser(roomId, context.user.id)
+                try {
+                    await waitForUser(roomId, context.user.id)
+                } catch {
+                    throw createGraphQLError("wait for user timeout")
+                }
                 // 等待用户加入房间后，再次检查是否加入成功
                 if (!hasUser(roomId, context.user.id)) throw createGraphQLError("need room join")
             }

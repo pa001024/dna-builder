@@ -3,9 +3,9 @@ import { db, schema } from "../../db"
 import type { BaseCommand, CommandContext } from "./interfaces"
 
 /**
- * 测试命令
+ * 委托命令
  */
-export class TestCommand implements BaseCommand {
+export class MihanCommand implements BaseCommand {
     /**
      * 命令名称
      */

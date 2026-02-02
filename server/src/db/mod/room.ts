@@ -230,8 +230,12 @@ export const resolvers = {
                 const room = rst[0]
                 if (room) {
                     if (hasUser(room.id, user.id) || room.maxUsers > getUsers(room.id).length) {
-                        await waitForUser(room.id, user.id)
-                        return room
+                        try {
+                            await waitForUser(room.id, user.id)
+                            return room
+                        } catch {
+                            throw createGraphQLError("wait for user timeout")
+                        }
                     }
                 }
             }
