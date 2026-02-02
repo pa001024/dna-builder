@@ -46,6 +46,7 @@ function getTypeName(type: number): string {
     const typeMap: Record<number, string> = {
         1: "活力魔灵",
         2: "失活魔灵",
+        3: "活动魔灵",
     }
     return typeMap[type] || type.toString()
 }
