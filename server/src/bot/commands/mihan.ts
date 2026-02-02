@@ -1,3 +1,5 @@
+import { desc, eq } from "drizzle-orm"
+import { db, schema } from "../../db"
 import type { BaseCommand, CommandContext } from "./interfaces"
 
 /**
@@ -17,11 +19,25 @@ export class TestCommand implements BaseCommand {
     /**
      * 执行命令
      */
-    async execute(context: CommandContext) {
-        if (context.type !== "group") {
-            return null
+    async execute(_context: CommandContext) {
+        const next = (t?: number) => {
+            const now = t ?? Date.now()
+            const oneHour = 60 * 60 * 1000
+            return Math.ceil(now / oneHour) * oneHour
         }
-        await context.client.sendGroupImageMessage("", context.groupId, "https://example.com/委托密函.jpg")
-        return null
+        const missionsIngame = await db.query.missionsIngame.findFirst({
+            where: eq(schema.missionsIngame.server, "cn"),
+            orderBy: desc(schema.missionsIngame.id),
+        })
+        if (!missionsIngame) return "数据异常"
+        const nextHour = next(new Date(missionsIngame.createdAt ?? 0).getTime())
+        if (nextHour <= Date.now()) {
+            return "数据过期"
+        }
+        return `角色: ${missionsIngame.missions[0].map(v => v.replace("/无尽", "")).join(" | ")}
+武器: ${missionsIngame.missions[1].map(v => v.replace("/无尽", "")).join(" | ")}
+魔之楔: ${missionsIngame.missions[2].map(v => v.replace("/无尽", "")).join(" | ")}
+
+下次刷新 ${new Date(nextHour).toLocaleString()}`
     }
 }

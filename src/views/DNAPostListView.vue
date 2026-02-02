@@ -2,7 +2,7 @@
 import { useInfiniteScroll } from "@vueuse/core"
 import { DNAAPI, DNAPostListBean } from "dna-api"
 import { computed, onMounted, ref } from "vue"
-import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
 import { initEmojiDict } from "@/utils/emoji"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
@@ -60,9 +60,6 @@ async function loadPosts(page = 1) {
         loading.value = false
     }
 }
-onBeforeRouteLeave(() => {
-    ui.previewVisible = false
-})
 </script>
 <template>
     <div class="w-full h-full flex flex-col">

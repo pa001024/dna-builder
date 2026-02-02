@@ -21,6 +21,10 @@ export const botPlugin = () => {
 }
 
 async function initBot() {
+    if (!process.env.QQ_BOT_TOKEN || !process.env.QQ_BOT_SECRET || !process.env.QQ_BOT_APP_ID) {
+        console.warn("未配置QQ_BOT_TOKEN，跳过初始化机器人")
+        return
+    }
     // 初始化机器人客户端
     const botClient = new QQBotClient({
         appId: process.env.QQ_BOT_APP_ID || "",

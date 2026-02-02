@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { DNAPostListBean } from "dna-api"
+import type { DNAPostListBean } from "dna-api"
+import { onUnmounted } from "vue"
 import { useUIStore } from "../store/ui"
 
 const ui = useUIStore()
@@ -7,6 +8,10 @@ const ui = useUIStore()
 defineProps<{
     post: DNAPostListBean
 }>()
+
+onUnmounted(() => {
+    ui.stopImagePreview()
+})
 </script>
 
 <template>
