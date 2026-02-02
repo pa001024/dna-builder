@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { resourceMap } from "@/data"
 import type { ShopItem } from "@/data/d/shop.data"
+import { getRewardDetails } from "@/utils/reward-utils"
 
 // 定义带有子项的商品类型
 interface ShopItemWithChildren extends ShopItem {
@@ -51,6 +52,9 @@ function getResourceIcon(name: string) {
                 <span>开始时间:</span> {{ new Date(item.startTime * 1000).toLocaleString() }}
                 <span v-if="item.endTime" class="ml-2">结束时间:</span>
                 {{ item.endTime ? new Date(item.endTime * 1000).toLocaleString() : "" }}
+            </div>
+            <div v-if="item.itemType === 'Reward'" class="mt-1">
+                <RewardItem :reward="getRewardDetails(item.typeId)!" />
             </div>
         </div>
 

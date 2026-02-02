@@ -304,8 +304,12 @@
         "draft_desc": "查看图纸信息和需求材料",
         "dungeon": "副本",
         "dungeon_desc": "查看副本信息和奖励掉落",
+        "dynquest": "派遣委托",
+        "dynquest_desc": "查看派遣委托信息和奖励",
         "fish": "钓鱼",
         "fish_desc": "钓鱼点详细收益计算",
+        "hardboss": "梦魇残声",
+        "hardboss_desc": "查看梦魇残声信息和奖励",
         "map": "地图",
         "map_desc": "查看地图标点",
         "mod": "魔之楔",
@@ -463,6 +467,12 @@
         "upload_images": "上传图片",
         "view_build": "查看配装",
         "views": "浏览"
+    },
+    "hardboss-detail": {
+        "title": "梦魇残声详情"
+    },
+    "hardboss-list": {
+        "title": "梦魇残声列表"
     },
     "help": {
         "achievementFeature1": "查看游戏成就解锁进度",

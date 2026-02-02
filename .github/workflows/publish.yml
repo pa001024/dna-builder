@@ -59,7 +59,7 @@ jobs:
               run: |
                   git clone https://github.com/microsoft/vcpkg.git && ./vcpkg/bootstrap-vcpkg.bat
                   ./vcpkg/vcpkg install opencv4:x64-windows
-                  echo "VCPKG_ROOT=${GITHUB_WORKSPACE}/vcpkg" >> $GITHUB_ENV
+                  echo "VCPKG_ROOT=${{ github.workspace }}/vcpkg" >> $GITHUB_ENV
 
             - name: Rust cache
               uses: swatinem/rust-cache@v2

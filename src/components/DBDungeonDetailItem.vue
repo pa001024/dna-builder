@@ -204,12 +204,12 @@ watch(
                 <h3 class="font-bold mb-2">奖励列表</h3>
                 <div class="space-y-3">
                     <div
-                        v-for="reward in dungeon.r.map(id => getRewardDetails(id)).filter((r): r is RewardItemType => !!r)"
+                        v-for="(reward, index) in dungeon.r.map(id => getRewardDetails(id)).filter((r): r is RewardItemType => !!r)"
                         :key="reward.id"
                         class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors"
                     >
                         <div class="flex items-center justify-between mb-1">
-                            <span class="text-sm font-medium">奖励组 {{ reward.id }}</span>
+                            <span class="text-sm font-medium">#{{ index + 1 }} 奖励组 {{ reward.id }}</span>
 
                             <span
                                 class="text-xs px-1.5 py-0.5 rounded"

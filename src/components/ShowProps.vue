@@ -13,6 +13,7 @@ withDefaults(
         polarity?: "A" | "D" | "V" | "O"
         cost?: number
         type?: string
+        link?: string
         eff?: { isEffective: boolean; props?: Record<string, any> }
     }>(),
     {
@@ -44,8 +45,9 @@ function getQualityColor(quality: string): string {
         <template #tooltip>
             <div class="flex flex-col gap-2 max-w-75 min-w-28">
                 <div v-if="title" class="text-sm font-bold">
-                    {{ title }}
-                    <span v-if="rarity" class="text-xs p-1 rounded-sm" :class="getQualityColor(rarity)">{{ rarity }}</span>
+                    <SRouterLink v-if="link" :to="link" class="link">{{ title }}</SRouterLink>
+                    <span v-else>{{ title }}</span>
+                    <span v-if="rarity" class="text-xs p-1 rounded-sm ml-1" :class="getQualityColor(rarity)">{{ rarity }}</span>
                 </div>
                 <div v-if="desc" class="text-xs text-gray-400">
                     {{ desc }}

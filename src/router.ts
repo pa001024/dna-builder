@@ -286,6 +286,30 @@ const routes: readonly RouteRecordRaw[] = [
                 component: () => import("./views/DBShopDetailView.vue"),
                 beforeEnter: () => setMinSize(320, 360),
             },
+            {
+                name: "hardboss-list",
+                path: "hardboss",
+                component: () => import("./views/DBHardbossListView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "hardboss-detail",
+                path: "hardboss/:bossId",
+                component: () => import("./views/DBHardbossDetailView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "dynquest-list",
+                path: "dynquest",
+                component: () => import("./views/DBDynQuestListView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "dynquest-detail",
+                path: "dynquest/:questId",
+                component: () => import("./views/DBDynQuestDetailView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
         ],
     },
     // DNA routes

@@ -70733,7 +70733,7 @@ const t: import("../data-types").Reward[] = [
                 id: 10013,
                 t: "TitleFrame",
                 c: 1,
-                n: "SSS级狩月人——1.2版本【待包装】",
+                n: "SSS级狩月人",
             },
             {
                 id: 220,
@@ -70763,7 +70763,7 @@ const t: import("../data-types").Reward[] = [
                 id: 10014,
                 t: "TitleFrame",
                 c: 1,
-                n: "SS级狩月人——1.2版本【待包装】",
+                n: "SS级狩月人",
             },
             {
                 id: 220,
@@ -70793,7 +70793,7 @@ const t: import("../data-types").Reward[] = [
                 id: 10015,
                 t: "TitleFrame",
                 c: 1,
-                n: "S级狩月人——1.2版本【待包装】",
+                n: "S级狩月人",
             },
             {
                 id: 220,
@@ -70823,7 +70823,7 @@ const t: import("../data-types").Reward[] = [
                 id: 10016,
                 t: "TitleFrame",
                 c: 1,
-                n: "B级狩月人——1.2版本【待包装】",
+                n: "A级狩月人",
             },
             {
                 id: 220,
@@ -70853,7 +70853,7 @@ const t: import("../data-types").Reward[] = [
                 id: 10017,
                 t: "TitleFrame",
                 c: 1,
-                n: "A级狩月人——1.2版本【待包装】",
+                n: "B级狩月人",
             },
             {
                 id: 220,

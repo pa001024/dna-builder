@@ -267,11 +267,21 @@ function getDungeonName(dungeonId: number) {
         </div>
         <div class="flex-1 grid grid-cols-1 gap-4">
             <div v-for="item in rankData" :key="item.rank" class="bg-base-100 p-4 rounded-md">
-                <p class="text-lg font-bold">
-                    {{ item.rank }}
-                </p>
-                <p class="text-sm opacity-80">排名前{{ item.percent }}%的玩家获得</p>
-
+                <div class="flex items-center gap-2 mb-2">
+                    <img class="h-12" :src="`/imgs/rank/T_Activity_GuildWar_Rank_${item.rank}.webp`" :alt="item.rank" />
+                    <div>
+                        <p class="text-lg font-bold">
+                            {{ item.rank }}
+                        </p>
+                        <p class="text-sm opacity-80">排名前{{ item.percent }}%的玩家获得</p>
+                    </div>
+                </div>
+                <div class="inline-flex relative">
+                    <img class="h-12" :src="`/imgs/rank/${selectedSeason}_${item.rank}.webp`" :alt="item.rank" />
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <p class="text-sm font-bold">{{ getRewardDetails(item.reward)!.child?.[0].n }}</p>
+                    </div>
+                </div>
                 <div
                     v-for="reward in [getRewardDetails(item.reward)]"
                     :key="reward?.id"

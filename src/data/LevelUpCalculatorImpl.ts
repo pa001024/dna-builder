@@ -442,19 +442,20 @@ function calculateWeaponCraft(
 
     // 查找武器图纸
     const draft = weapon.draft
+    if (weapon.walnut) {
+        cost.委托密函线索 = ((cost.委托密函线索 as number) || 0) + 100 * (needRefine + 1)
+        console.log(weapon, cost.委托密函线索)
+    }
     function calcDraftCost(d: Draft, n = 1) {
         // 计算锻造材料
         if (d.m) {
             cost.铜币 = (cost.铜币 || 0) + d.m * n
         }
 
-        if (weapon.walnut) {
-            cost.委托密函线索 = ((cost.委托密函线索 as number) || 0) + 100 * n
-        }
-
         if (d.x) {
             d.x.forEach(item => {
                 cost[item.n] = ((cost[item.n] as number) || 0) + item.c * n
+                // 固定支架, 冷却液 不需要制造
                 if (item.t === "Resource" && item.id !== 20029 && item.id !== 20032) {
                     const sub = resourceDraftMap[item.id]
                     if (sub) {
@@ -521,11 +522,11 @@ function calculateModLevelUpCost(
         }
     }
     const draft = mod.draft
+    if (mod.walnut) {
+        cost.委托密函线索 = ((cost.委托密函线索 as number) || 0) + 100 * count
+    }
     function calcDraftCost(d: Draft, n = 1, sub: boolean = false) {
         const name = `图纸: ${mod.名称}`
-        if (mod.walnut) {
-            cost.委托密函线索 = ((cost.委托密函线索 as number) || 0) + 100 * n
-        }
         let totalGold = 1 * n
         if (mod.品质 === "金" && targetLevel > 5 && !sub) {
             // 计算6-10级增幅消耗（仅金色魔之楔）
@@ -543,13 +544,15 @@ function calculateModLevelUpCost(
             if (costmod.t === "Mod") {
                 cost[costmod.n] = [((cost[costmod.n] as number[]) || [0])[0] + costmod.c * totalGold, costmod.id, "Mod"]
                 // 递归查询 如羽翼消耗换生灵
-                if (modDraftMap.get(costmod.id)) {
-                    calcDraftCost(modDraftMap.get(costmod.id)!, totalGold, true)
+                const sub = modDraftMap.get(costmod.id)
+                if (sub) {
+                    calcDraftCost(sub, totalGold, true)
                 }
             } else if (costmod.t === "Resource") {
+                cost[costmod.n] = ((cost[costmod.n] as number) || 0) + costmod.c * totalGold
                 const sub = resourceDraftMap.get(costmod.id)
                 if (sub) {
-                    calcDraftCost(sub, costmod.c * totalGold, true)
+                    calcDraftCost(sub, totalGold, true)
                 }
             }
         }

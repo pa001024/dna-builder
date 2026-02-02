@@ -35,7 +35,7 @@ export class LeveledPet implements Pet {
         this._originalPetData = petData
 
         this.id = petData.id
-        this.uid = petData.uid
+        this.uid = petData.uid || 0
         this.名称 = petData.名称
         this.icon = petData.icon
         this.品质 = petData.品质

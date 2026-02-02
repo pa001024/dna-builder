@@ -28,6 +28,7 @@ function getIcon(name: string) {
         :cost="mod.耐受"
         :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
         :effdesc="mod.效果"
+        :link="`/db/mod/${mod.id}`"
     >
         <div
             class="flex items-center p-3 rounded-xl hover:bg-base-300 transition-colors duration-200"

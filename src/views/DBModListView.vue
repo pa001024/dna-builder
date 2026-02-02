@@ -12,6 +12,14 @@ const selectedType = ref<string | "">("")
 const selectedSeries = ref<string | "">("")
 const selectedQuality = ref<string | "">("")
 const selectedElem = ref<string | "">("")
+const selectedVersion = ref<string | "">("")
+
+// 过滤选项显示控制
+const showTypeFilter = ref(false)
+const showSeriesFilter = ref(false)
+const showQualityFilter = ref(false)
+const showElemFilter = ref(false)
+const showVersionFilter = ref(false)
 
 // 获取所有可用类型
 const types = computed(() => {
@@ -38,6 +46,17 @@ const qualities = computed(() => {
         qualitySet.add(m.品质)
     })
     return Array.from(qualitySet).sort()
+})
+
+// 获取所有可用版本
+const versions = computed(() => {
+    const versionSet = new Set<string>()
+    modData.forEach(m => {
+        if (m.版本) {
+            versionSet.add(m.版本)
+        }
+    })
+    return Array.from(versionSet).sort()
 })
 
 const elems = ["火", "水", "雷", "风", "暗", "光"]
@@ -71,7 +90,8 @@ const filteredMods = computed(() => {
         const matchSeries = selectedSeries.value === "" || m.系列 === selectedSeries.value
         const matchQuality = selectedQuality.value === "" || m.品质 === selectedQuality.value
         const matchElem = selectedElem.value === "" || m.属性 === selectedElem.value
-        return matchKeyword && matchType && matchSeries && matchQuality && matchElem
+        const matchVersion = selectedVersion.value === "" || m.版本 === selectedVersion.value
+        return matchKeyword && matchType && matchSeries && matchQuality && matchElem && matchVersion
     })
 })
 
@@ -85,6 +105,18 @@ function getQualityColor(quality: string): string {
         金: "bg-yellow-200 text-yellow-800",
     }
     return colorMap[quality] || "bg-base-200 text-base-content"
+}
+
+// 切换过滤选项显示
+function toggleFilter(filterName: string, show: boolean) {
+    if (!show) {
+        // 取消勾选时清空对应的过滤
+        if (filterName === "type") selectedType.value = ""
+        if (filterName === "series") selectedSeries.value = ""
+        if (filterName === "quality") selectedQuality.value = ""
+        if (filterName === "elem") selectedElem.value = ""
+        if (filterName === "version") selectedVersion.value = ""
+    }
 }
 </script>
 
@@ -104,102 +136,158 @@ function getQualityColor(quality: string): string {
                 </div>
 
                 <!-- 筛选条件 -->
-                <div class="p-2 border-b border-base-200 space-y-2">
+                <div class="p-2 border-b border-base-200">
+                    <!-- Checkbox 行 -->
+                    <div class="flex flex-wrap gap-2 mb-2">
+                        <label class="flex items-center gap-1 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                v-model="showTypeFilter"
+                                @change="toggleFilter('type', showTypeFilter)"
+                                class="checkbox checkbox-xs"
+                            />
+                            <span class="text-xs text-base-content/70">类型</span>
+                        </label>
+                        <label class="flex items-center gap-1 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                v-model="showSeriesFilter"
+                                @change="toggleFilter('series', showSeriesFilter)"
+                                class="checkbox checkbox-xs"
+                            />
+                            <span class="text-xs text-base-content/70">系列</span>
+                        </label>
+                        <label class="flex items-center gap-1 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                v-model="showQualityFilter"
+                                @change="toggleFilter('quality', showQualityFilter)"
+                                class="checkbox checkbox-xs"
+                            />
+                            <span class="text-xs text-base-content/70">品质</span>
+                        </label>
+                        <label class="flex items-center gap-1 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                v-model="showElemFilter"
+                                @change="toggleFilter('elem', showElemFilter)"
+                                class="checkbox checkbox-xs"
+                            />
+                            <span class="text-xs text-base-content/70">元素</span>
+                        </label>
+                        <label class="flex items-center gap-1 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                v-model="showVersionFilter"
+                                @change="toggleFilter('version', showVersionFilter)"
+                                class="checkbox checkbox-xs"
+                            />
+                            <span class="text-xs text-base-content/70">版本</span>
+                        </label>
+                    </div>
+
                     <!-- 类型筛选 -->
-                    <div>
-                        <div class="text-xs text-base-content/70 mb-1">类型</div>
-                        <div class="flex flex-wrap gap-1 pb-1">
-                            <button
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
-                                :class="selectedType === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedType = ''"
-                            >
-                                全部
-                            </button>
-                            <button
-                                v-for="type in types"
-                                :key="type"
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                                :class="selectedType === type ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedType = type"
-                            >
-                                {{ type }}
-                            </button>
-                        </div>
+                    <div v-show="showTypeFilter" class="flex flex-wrap gap-1 mb-2">
+                        <button
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                            :class="selectedType === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            @click="selectedType = ''"
+                        >
+                            全部
+                        </button>
+                        <button
+                            v-for="type in types"
+                            :key="type"
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
+                            :class="selectedType === type ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            @click="selectedType = type"
+                        >
+                            {{ type }}
+                        </button>
                     </div>
 
                     <!-- 系列筛选 -->
-                    <div>
-                        <div class="text-xs text-base-content/70 mb-1">系列</div>
-                        <div class="flex flex-wrap gap-1 pb-1">
-                            <button
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
-                                :class="selectedSeries === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedSeries = ''"
-                            >
-                                全部
-                            </button>
-                            <button
-                                v-for="s in series"
-                                :key="s"
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                                :class="selectedSeries === s ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedSeries = s"
-                            >
-                                {{ s }}
-                            </button>
-                        </div>
+                    <div v-show="showSeriesFilter" class="flex flex-wrap gap-1 mb-2">
+                        <button
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                            :class="selectedSeries === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            @click="selectedSeries = ''"
+                        >
+                            全部
+                        </button>
+                        <button
+                            v-for="s in series"
+                            :key="s"
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
+                            :class="selectedSeries === s ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            @click="selectedSeries = s"
+                        >
+                            {{ s }}
+                        </button>
                     </div>
 
                     <!-- 品质筛选 -->
-                    <div>
-                        <div class="text-xs text-base-content/70 mb-1">品质</div>
-                        <div class="flex flex-wrap gap-1 pb-1">
-                            <button
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
-                                :class="
-                                    selectedQuality === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                "
-                                @click="selectedQuality = ''"
-                            >
-                                全部
-                            </button>
-                            <button
-                                v-for="quality in qualities"
-                                :key="quality"
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                                :class="
-                                    selectedQuality === quality
-                                        ? 'bg-primary text-white'
-                                        : `bg-base-200 text-base-content hover:bg-base-300`
-                                "
-                                @click="selectedQuality = quality"
-                            >
-                                {{ $t(quality) }}
-                            </button>
-                        </div>
+                    <div v-show="showQualityFilter" class="flex flex-wrap gap-1 mb-2">
+                        <button
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                            :class="selectedQuality === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            @click="selectedQuality = ''"
+                        >
+                            全部
+                        </button>
+                        <button
+                            v-for="quality in qualities"
+                            :key="quality"
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
+                            :class="
+                                selectedQuality === quality ? 'bg-primary text-white' : `bg-base-200 text-base-content hover:bg-base-300`
+                            "
+                            @click="selectedQuality = quality"
+                        >
+                            {{ $t(quality) }}
+                        </button>
                     </div>
+
                     <!-- 元素筛选 -->
-                    <div>
-                        <div class="text-xs text-base-content/70 mb-1">元素</div>
-                        <div class="flex flex-wrap gap-1 pb-1">
-                            <button
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
-                                :class="selectedElem === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedElem = ''"
-                            >
-                                全部
-                            </button>
-                            <button
-                                v-for="elem in elems"
-                                :key="elem"
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                                :class="selectedElem === elem ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedElem = elem"
-                            >
-                                {{ $t(elem) }}
-                            </button>
-                        </div>
+                    <div v-show="showElemFilter" class="flex flex-wrap gap-1 mb-2">
+                        <button
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                            :class="selectedElem === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            @click="selectedElem = ''"
+                        >
+                            全部
+                        </button>
+                        <button
+                            v-for="elem in elems"
+                            :key="elem"
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
+                            :class="selectedElem === elem ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            @click="selectedElem = elem"
+                        >
+                            {{ $t(elem) }}
+                        </button>
+                    </div>
+
+                    <!-- 版本筛选 -->
+                    <div v-show="showVersionFilter" class="flex flex-wrap gap-1">
+                        <button
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                            :class="selectedVersion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            @click="selectedVersion = ''"
+                        >
+                            全部
+                        </button>
+                        <button
+                            v-for="version in versions"
+                            :key="version"
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
+                            :class="
+                                selectedVersion === version ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                            "
+                            @click="selectedVersion = version"
+                        >
+                            {{ version }}
+                        </button>
                     </div>
                 </div>
 

@@ -90,12 +90,13 @@ function getRewardTypeText(type: string): string {
                             <span class="text-xs text-base-content/50">({{ $t(getRewardTypeText(item.t)) }})</span>
                         </span>
                         <span v-if="item.c" class="text-base-content/70">x{{ item.c }}</span>
-                        <span v-if="item.p" class="text-base-content/70">
+                        <span v-if="item.p && item.m !== 'Independent'" class="text-base-content/70">
                             ({{ item.m === "Sequence" ? `容量:${item.p}` : `权重:${item.p}` }}
                             {{ item.pp ? `比例:${+(item.pp * 100).toFixed(2)}%` : "" }}
                             {{ item.times ? `每个期望:${+item.times.toFixed(2)}次` : "" }}
                             )
                         </span>
+                        <span v-if="item.m === 'Independent'">独立掉落 {{ `概率:${+(item.p / 100).toFixed(2)}%` }}</span>
                         <!-- 显示掉落模式 -->
                         <span
                             v-if="item.t === 'Reward'"

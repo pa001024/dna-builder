@@ -9,9 +9,10 @@ import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-uti
 
 const props = defineProps<{
     monster: Monster
+    defaultLevel?: number
 }>()
 
-const currentLevel = ref(180)
+const currentLevel = ref(props.defaultLevel || 180)
 const showRougeStats = ref(false)
 
 const leveledMonster = computed(() => {
@@ -79,6 +80,7 @@ function getFactionName(faction: number | undefined): string {
                     <SRouterLink :to="`/db/monster/${monster.id}`" class="text-lg font-bold link link-primary">
                         {{ $t(monster.n) }}
                     </SRouterLink>
+                    <span class="text-sm text-base-content/70">ID: {{ monster.id }}</span>
                     <div class="text-sm text-base-content/70 flex items-center gap-2">
                         <span class="px-1.5 py-0.5 rounded bg-base-200 text-xs">
                             {{ $t(getFactionName(monster.f)) }}

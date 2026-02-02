@@ -418,6 +418,10 @@ const removeMod = (index: number) => {
     mods.value.splice(index, 1)
 }
 
+const clearMods = () => {
+    mods.value = []
+}
+
 // 批量添加魔之楔相关函数
 const toggleSelectModForBatch = (modId: number) => {
     if (selectedModsForBatch.value.has(modId)) {
@@ -466,7 +470,7 @@ const handleBatchAddMods = () => {
 </script>
 
 <template>
-    <div class="h-full flex flex-col gap-4 md:flex-row">
+    <div class="h-full flex flex-col gap-4 lg:flex-row">
         <ScrollArea class="md:h-full flex-1">
             <div class="p-4 space-y-4">
                 <!-- 角色养成 -->
@@ -668,6 +672,7 @@ const handleBatchAddMods = () => {
                             魔之楔养成
                         </h3>
                         <div class="flex gap-2">
+                            <button class="btn btn-primary btn-sm gap-2" @click="clearMods" aria-label="清空">清空</button>
                             <button class="btn btn-primary btn-sm gap-2" @click="isBatchAddModalOpen = true" aria-label="批量添加魔之楔">
                                 <span class="text-xl font-bold">+</span>
                                 添加魔之楔
@@ -683,7 +688,7 @@ const handleBatchAddMods = () => {
                         >
                             <div class="card-body p-2">
                                 <!-- 魔之楔信息卡片 -->
-                                <div v-if="modMap.get(mod.id)" class="rounded-xl p-4 flex items-center gap-4">
+                                <div v-if="modMap.get(mod.id)" class="rounded-xl p-2 flex items-center gap-4">
                                     <div class="relative bg-linear-15 from-yellow-500/80 to-yellow-700/80 rounded-lg overflow-hidden">
                                         <img
                                             :src="LeveledMod.url(modMap.get(mod.id)?.icon)"
@@ -693,17 +698,13 @@ const handleBatchAddMods = () => {
                                     </div>
                                     <div class="flex-1">
                                         <div class="flex justify-between">
-                                            <h4 class="text-lg font-semibold">{{ modMap.get(mod.id)?.名称 }}</h4>
-
-                                            <button class="btn btn-error btn-sm" @click="removeMod(index)" aria-label="删除魔之楔">
-                                                删除
-                                            </button>
+                                            <h4 class="text-md font-semibold">{{ modMap.get(mod.id)?.名称 }}</h4>
                                         </div>
-                                        <div class="mt-1 flex items-center gap-4">
+                                        <div class="mt-1 grid grid-cols-3 items-center gap-4">
                                             <label class="flex flex-col gap-1">
                                                 <span class="text-xs opacity-80">选择等级</span>
                                                 <RangeSelector
-                                                    class="w-40"
+                                                    class="w-full"
                                                     v-model:from="mod.config.currentLevel"
                                                     v-model:to="mod.config.targetLevel"
                                                     :min="0"
@@ -712,9 +713,15 @@ const handleBatchAddMods = () => {
                                             </label>
                                             <label class="flex flex-col gap-1">
                                                 <span class="text-xs opacity-80">选择数量</span>
-                                                <Select class="input input-sm w-40" v-model="mod.config.count">
+                                                <Select class="input input-sm w-full" v-model="mod.config.count">
                                                     <SelectItem v-for="i in 8" :key="i" :value="i">{{ i }}</SelectItem>
                                                 </Select>
+                                            </label>
+                                            <label class="flex flex-col gap-1">
+                                                <span class="text-xs opacity-80">操作</span>
+                                                <button class="btn btn-error btn-sm" @click="removeMod(index)" aria-label="删除魔之楔">
+                                                    删除
+                                                </button>
                                             </label>
                                         </div>
                                     </div>
@@ -839,7 +846,7 @@ const handleBatchAddMods = () => {
                                 </div>
                                 <div class="text-xs opacity-70">点击资源可过滤</div>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
                                 <ResourceCostItem
                                     v-for="(value, key) in result.totalCost"
                                     :key="key"
@@ -863,7 +870,7 @@ const handleBatchAddMods = () => {
                                     <Icon icon="ri:lightbulb-line" />
                                     <h4 class="font-semibold text-base-content">等级升级消耗</h4>
                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
                                     <ResourceCostItem
                                         v-for="(value, key) in result.details.levelUp"
                                         :key="key"
@@ -886,7 +893,7 @@ const handleBatchAddMods = () => {
                                     <Icon icon="ri:flashlight-line" />
                                     <h4 class="font-semibold text-base-content">技能升级消耗</h4>
                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
                                     <ResourceCostItem
                                         v-for="(value, key) in result.details.skills"
                                         :key="key"
@@ -909,7 +916,7 @@ const handleBatchAddMods = () => {
                                     <Icon icon="ri:star-line" />
                                     <h4 class="font-semibold text-base-content">突破消耗</h4>
                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
                                     <ResourceCostItem
                                         v-for="(value, key) in result.details.breakthrough"
                                         :key="key"
@@ -932,7 +939,7 @@ const handleBatchAddMods = () => {
                                     <Icon icon="ri:hammer-line" />
                                     <h4 class="font-semibold text-base-content">锻造消耗</h4>
                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
                                     <ResourceCostItem
                                         v-for="(value, key) in result.details.craft"
                                         :key="key"
