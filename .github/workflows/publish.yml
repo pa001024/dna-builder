@@ -55,6 +55,12 @@ jobs:
               # webkitgtk 4.0 is for Tauri v1 - webkitgtk 4.1 is for Tauri v2.
               # You can remove the one that doesn't apply to your app to speed up the workflow a bit.
 
+            - name: Set up OpenCV
+              run: |
+                  git clone https://github.com/microsoft/vcpkg.git && ./vcpkg/bootstrap-vcpkg.bat
+                  ./vcpkg/vcpkg install opencv4:x64-windows
+                  echo "VCPKG_ROOT=${GITHUB_WORKSPACE}/vcpkg" >> $GITHUB_ENV
+
             - name: Rust cache
               uses: swatinem/rust-cache@v2
               with:
@@ -129,7 +135,7 @@ jobs:
 
                       > 夸克网盘链接：https://pan.quark.cn/s/1419bbc8aa2d
 
-                      > 直接下载: [${{ github.ref_name }}](http://rm-build.oss-cn-hongkong.aliyuncs.com/msi/DNA%20Builder_${{ steps.commit_diff.outputs.version }}_x64_zh-CN.msi)
+                      > 直接下载: [${{ github.ref_name }}](https://cdn.xn--chq26veyq.icu/msi/DNA%20Builder_${{ steps.commit_diff.outputs.version }}_x64_zh-CN.msi)
                       "
                   releaseDraft: false
                   prerelease: false

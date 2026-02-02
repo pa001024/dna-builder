@@ -47,6 +47,12 @@ jobs:
               with:
                   cache: true
 
+            - name: Set up OpenCV
+              run: |
+                  git clone https://github.com/microsoft/vcpkg.git && ./vcpkg/bootstrap-vcpkg.bat
+                  ./vcpkg/vcpkg install opencv4:x64-windows
+                  echo "VCPKG_ROOT=${GITHUB_WORKSPACE}/vcpkg" >> $GITHUB_ENV
+
             - name: Build
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
