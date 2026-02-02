@@ -119,18 +119,6 @@ watch(
                 </div>
             </div>
 
-            <div v-if="weapon.突破 && weapon.突破.length > 0" class="p-3 bg-base-200 rounded mb-3">
-                <div class="text-xs text-base-content/70 mb-2">突破消耗</div>
-                <div class="space-y-3">
-                    <div v-for="(cost, index) in weapon.突破" :key="index" class="p-2 bg-base-300 rounded">
-                        <div class="text-sm font-medium mb-2 text-primary">突破 {{ ["I", "II", "III", "IV", "V", "VI"][index] }}</div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            <ResourceCostItem v-for="(value, key) in cost" :key="key" :name="key" :value="value" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div v-if="weapon.熔炼 && weapon.熔炼.length > 0" class="p-3 bg-base-200 rounded mb-3">
                 <div class="text-xs text-base-content/70 mb-2">
                     {{ $t("属性") }}
@@ -171,6 +159,18 @@ watch(
                                     }}
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="weapon.突破 && weapon.突破.length > 0" class="p-3 bg-base-200 rounded mb-3">
+                <div class="text-xs text-base-content/70 mb-2">突破消耗</div>
+                <div class="space-y-3">
+                    <div v-for="(cost, index) in weapon.突破" :key="index" class="p-2">
+                        <div class="text-sm font-medium mb-2 text-primary">突破 {{ ["I", "II", "III", "IV", "V", "VI"][index] }}</div>
+                        <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
+                            <ResourceCostItem v-for="(value, key) in cost" :key="key" :name="key" :value="value" />
                         </div>
                     </div>
                 </div>
