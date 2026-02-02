@@ -91,7 +91,22 @@ const t: Resource[] = [
         icon: "T_Coin_WeeklyDungeon",
     },
     {
+        id: 217,
+        name: "小队邀请函",
+        icon: "T_Resource_Raid_Ticket",
+    },
+    {
         id: 218,
+        name: "狩月纪念币",
+        icon: "T_Resource_Raid_Coin01",
+    },
+    {
+        id: 219,
+        name: "齿轮",
+        icon: "T_Activity_Autochess_Coin01",
+    },
+    {
+        id: 220,
         name: "狩月纪念币",
         icon: "T_Resource_Raid_Coin01",
     },
@@ -174,6 +189,11 @@ const t: Resource[] = [
         id: 3007,
         name: "妙妙乳饮",
         icon: "T_Resource_PetBreak",
+    },
+    {
+        id: 3015,
+        name: "天工竿·薄荷",
+        icon: "T_FishingRod_East02",
     },
     {
         id: 3016,
@@ -1127,17 +1147,47 @@ const t: Resource[] = [
     },
     {
         id: 12135,
-        name: "雀舞云屏的枪机",
+        name: "雀舞银屏的枪机",
         icon: "T_Range_Weapon_Part02",
     },
     {
         id: 12136,
-        name: "雀舞云屏的枪身",
+        name: "雀舞银屏的枪身",
         icon: "T_Range_Weapon_Part03",
     },
     {
         id: 12137,
-        name: "雀舞云屏的枪管",
+        name: "雀舞银屏的枪管",
+        icon: "T_Range_Weapon_Part01",
+    },
+    {
+        id: 12138,
+        name: "风云决的握柄",
+        icon: "T_Melee_Weapon_Part01",
+    },
+    {
+        id: 12139,
+        name: "风云决的左刀刃",
+        icon: "T_Melee_Weapon_Part02",
+    },
+    {
+        id: 12140,
+        name: "风云决的右刀刃",
+        icon: "T_Melee_Weapon_Part02",
+    },
+    {
+        id: 12141,
+        name: "三角缪斯的枪机",
+        icon: "T_Range_Weapon_Part02",
+    },
+    {
+        id: 12142,
+        name: "三角缪斯的枪身",
+        icon: "T_Range_Weapon_Part03",
+    },
+    {
+        id: 12143,
+        name: "三角缪斯的枪管",
         icon: "T_Range_Weapon_Part01",
     },
     {
@@ -1331,6 +1381,11 @@ const t: Resource[] = [
         icon: "T_Dye_09",
     },
     {
+        id: 30112,
+        name: "虹彩染剂",
+        icon: "T_Dye_12",
+    },
+    {
         id: 40001,
         name: "嗅盐·一",
         icon: "T_Hp_Full",
@@ -1436,6 +1491,61 @@ const t: Resource[] = [
         icon: "T_Resource_Gesture_SkillGomoku",
     },
     {
+        id: 41031,
+        name: "承露",
+        icon: "T_Resource_Gesture_06",
+    },
+    {
+        id: 41032,
+        name: "睥睨山河·鎏金",
+        icon: "T_Resource_DragonThrone_Golden",
+    },
+    {
+        id: 41037,
+        name: "怦然心动·鎏金",
+        icon: "T_Resource_Gesture_0401",
+    },
+    {
+        id: 41038,
+        name: "怦然心动·黛蓝",
+        icon: "T_Resource_Gesture_0403",
+    },
+    {
+        id: 41039,
+        name: "怦然心动·白樱",
+        icon: "T_Resource_Gesture_0402",
+    },
+    {
+        id: 41040,
+        name: "睥睨山河·铅灰",
+        icon: "T_Resource_DragonThrone_Grey",
+    },
+    {
+        id: 41041,
+        name: "睥睨山河·绛紫",
+        icon: "T_Resource_DragonThrone_Purple",
+    },
+    {
+        id: 41042,
+        name: "千丝雨·鎏金",
+        icon: "T_Resource_Gesture_0501",
+    },
+    {
+        id: 41043,
+        name: "千丝雨·杏黄",
+        icon: "T_Resource_Gesture_0502",
+    },
+    {
+        id: 41044,
+        name: "千丝雨·黛蓝",
+        icon: "T_Resource_Gesture_0503",
+    },
+    {
+        id: 41045,
+        name: "垂天彩帘",
+        icon: "T_Resource_Gesture_03",
+    },
+    {
         id: 110006,
         name: "启航自选形象礼箱·星芒",
         icon: "T_Pack_Christmas",
@@ -1444,6 +1554,16 @@ const t: Resource[] = [
         id: 110012,
         name: "闻香自选形象礼箱·墨玉",
         icon: "T_Pack_Common02",
+    },
+    {
+        id: 110015,
+        name: "流年自选形象礼箱·匆匆",
+        icon: "T_Pack_JKSkin",
+    },
+    {
+        id: 110016,
+        name: "流年自选形象礼箱·冬日",
+        icon: "T_Pack_SnowmanSkin",
     },
     {
         id: 1001101,
@@ -1514,6 +1634,16 @@ const t: Resource[] = [
         id: 1004101,
         name: "思绪片段·黎瑟",
         icon: "T_CharPiece_Lise",
+    },
+    {
+        id: 1004102,
+        name: "思绪片段·止流",
+        icon: "T_CharPiece_Zhiliu",
+    },
+    {
+        id: 1004201,
+        name: "思绪片段·煜明",
+        icon: "T_CharPiece_Yuming",
     },
     {
         id: 1004202,
@@ -1689,6 +1819,16 @@ const t: Resource[] = [
         id: 5110500,
         name: "大师鱼竿",
         icon: "T_FishingRod_Normal_5",
+    },
+    {
+        id: 5110601,
+        name: "天工竿·锈红",
+        icon: "T_FishingRod_East01",
+    },
+    {
+        id: 5110602,
+        name: "天工竿·绛紫",
+        icon: "T_FishingRod_East03",
     },
     {
         id: 5210100,

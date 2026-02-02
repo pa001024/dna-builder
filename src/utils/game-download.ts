@@ -2,7 +2,35 @@ import { invoke } from "@tauri-apps/api/core"
 import { listen, type UnlistenFn } from "@tauri-apps/api/event"
 import { tauriFetch } from "@/api/app"
 
-export const VERSION_URL_PUB = "http://pan01-1-hs.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/"
+/**
+ * rawurl
+ * 正式服
+ * http://pan01-1-eo.shyxhy.com/Patches/FinalPatch/CN/Default/WindowsNoEditor/PC_OBT_CN_Pub/VersionList.json
+ * http://pan01-cdn-dna-ali.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/BaseVersion.json
+ * 媒体服
+ * http://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT12_Media_CN_Pub/PackageBaseVersion.txt
+ * http://pan01-1-eo.shyxhy.com/Patches/FinalPatch/CN/Default/WindowsNoEditor/PC_OBT12_Media_CN_Pub/VersionList.json
+ * http://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT12_Media_CN_Pub/3/BaseVersion.json
+ *
+ * CDN
+ * http://pan01-1-hs.shyxhy.com
+ */
+
+export const CDN_LIST = [
+    {
+        name: "阿里",
+        url: "http://pan01-cdn-dna-ali.shyxhy.com",
+    },
+    {
+        name: "火山",
+        url: "http://pan01-1-hs.shyxhy.com",
+    },
+    {
+        name: "腾讯",
+        url: "http://pan01-1-eo.shyxhy.com",
+    },
+]
+export const VERSION_URL_PUB = "/Packages/CN/WindowsNoEditor/"
 
 export interface GameVersionListRes {
     GameVersionList: GameVersionList
@@ -43,9 +71,22 @@ export interface DownloadProgress {
  */
 export type ProgressCallback = (progress: DownloadProgress) => void
 
-export async function getBaseVersion() {
-    const res = await tauriFetch(`${VERSION_URL_PUB}BaseVersion.json`)
-    return res.json() as Promise<GameVersionListRes>
+export async function getBaseVersion(cdn: string, channel: string) {
+    const subVersion = await tauriFetch(`${cdn}${VERSION_URL_PUB}${channel}/PackageBaseVersion.txt`)
+    const subVersionText = await subVersion.text()
+    try {
+        const res = await tauriFetch(`${cdn}${VERSION_URL_PUB}${channel}${subVersionText ? `/${subVersionText}` : ""}/BaseVersion.json`)
+        return {
+            subVersion: subVersionText,
+            gameVersionList: await res.json(),
+        }
+    } catch {
+        const res = await tauriFetch(`${cdn}${VERSION_URL_PUB}${channel}/BaseVersion.json`)
+        return {
+            subVersion: "",
+            gameVersionList: await res.json(),
+        }
+    }
 }
 
 /**
@@ -56,7 +97,14 @@ export async function getBaseVersion() {
  * @returns 下载结果消息
  * @throws 下载失败时抛出错误
  */
-export async function downloadAssets(filename: string, onProgress?: ProgressCallback, downloadDir: string = "download/"): Promise<string> {
+export async function downloadAssets(
+    cdn: string,
+    filename: string,
+    channel: string,
+    subVersion: string,
+    onProgress?: ProgressCallback,
+    downloadDir: string = "download/"
+): Promise<string> {
     let unlistenFn: UnlistenFn | undefined
 
     try {
@@ -80,7 +128,7 @@ export async function downloadAssets(filename: string, onProgress?: ProgressCall
         }
 
         const result = await invoke<string>("download_file", {
-            url: `${VERSION_URL_PUB}${filename}`,
+            url: `${cdn}${VERSION_URL_PUB}${channel}/${subVersion ? `${subVersion}/` : ""}${filename}`,
             filename: fullFilePath,
         })
 

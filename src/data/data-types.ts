@@ -513,7 +513,7 @@ export interface Dungeon {
     rd: number
     desc?: string
     m: number[]
-    r?: number[]
+    r: number[]
     win: number
     sm?: number[]
     sr?: number[]

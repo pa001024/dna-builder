@@ -9565,6 +9565,282 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 7485,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20069,
+                t: "Title",
+                c: 1,
+                n: "贝蕾妮卡",
+            },
+        ],
+    },
+    {
+        id: 7486,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20070,
+                t: "Title",
+                c: 1,
+                n: "幻景",
+            },
+        ],
+    },
+    {
+        id: 7487,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20071,
+                t: "Title",
+                c: 1,
+                n: "莉兹贝尔",
+            },
+        ],
+    },
+    {
+        id: 7488,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20072,
+                t: "Title",
+                c: 1,
+                n: "妮弗尔夫人",
+            },
+        ],
+    },
+    {
+        id: 7489,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20073,
+                t: "Title",
+                c: 1,
+                n: "刻舟",
+            },
+        ],
+    },
+    {
+        id: 7490,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20074,
+                t: "Title",
+                c: 1,
+                n: "苏乙",
+            },
+        ],
+    },
+    {
+        id: 7491,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20075,
+                t: "Title",
+                c: 1,
+                n: "菲娜",
+            },
+        ],
+    },
+    {
+        id: 7492,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20076,
+                t: "Title",
+                c: 1,
+                n: "丽蓓卡",
+            },
+        ],
+    },
+    {
+        id: 7493,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20077,
+                t: "Title",
+                c: 1,
+                n: "伊薇",
+            },
+        ],
+    },
+    {
+        id: 7494,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20078,
+                t: "Title",
+                c: 1,
+                n: "塔比瑟",
+            },
+        ],
+    },
+    {
+        id: 7495,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20079,
+                t: "Title",
+                c: 1,
+                n: "扶疏",
+            },
+        ],
+    },
+    {
+        id: 7496,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20080,
+                t: "Title",
+                c: 1,
+                n: "琳恩",
+            },
+        ],
+    },
+    {
+        id: 7497,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20081,
+                t: "Title",
+                c: 1,
+                n: "希尔妲",
+            },
+        ],
+    },
+    {
+        id: 7498,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20082,
+                t: "Title",
+                c: 1,
+                n: "耶尔",
+            },
+            {
+                id: 20083,
+                t: "Title",
+                c: 1,
+                n: "奥利弗",
+            },
+        ],
+    },
+    {
+        id: 7499,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20084,
+                t: "Title",
+                c: 1,
+                n: "海尔法",
+            },
+        ],
+    },
+    {
         id: 7501,
         m: "Fixed",
         child: [
@@ -12156,6 +12432,102 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 12061,
+        m: "Fixed",
+        child: [
+            {
+                id: 3016,
+                t: "Resource",
+                c: 3,
+                n: "增幅激化器",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 20000,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 100000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 12062,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 7500000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 12063,
+        m: "Fixed",
+        child: [
+            {
+                id: 102,
+                t: "Resource",
+                c: 60000,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 12064,
+        m: "Fixed",
+        child: [
+            {
+                id: 20013,
+                t: "Resource",
+                c: 1200,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 12098,
+        m: "Fixed",
+        child: [
+            {
+                id: 410201,
+                t: "Skin",
+                c: 1,
+                n: "携金宴夜",
+            },
+            {
+                id: 3010107,
+                t: "WeaponSkin",
+                c: 1,
+                n: "大荒宴",
+            },
+            {
+                id: 10068,
+                t: "CharAccessory",
+                c: 1,
+                n: "诸天月相·鎏金",
+            },
+            {
+                id: 80003,
+                t: "CharAccessory",
+                c: 1,
+                n: "游龙诀·鎏金",
+            },
+            {
+                id: 10030,
+                t: "WeaponAccessory",
+                c: 1,
+                n: "龙渊穗·锈红",
+            },
+        ],
+    },
+    {
         id: 12099,
         m: "Fixed",
         child: [
@@ -12554,6 +12926,528 @@ const t: import("../data-types").Reward[] = [
                 t: "CharAccessory",
                 c: 1,
                 n: "星霜羽翼",
+            },
+        ],
+    },
+    {
+        id: 12122,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 400,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 12123,
+        m: "Fixed",
+        child: [
+            {
+                id: 1004,
+                t: "Resource",
+                c: 10,
+                n: "华彩沙漏·限时",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 3000,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 60000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 12124,
+        m: "Fixed",
+        child: [
+            {
+                id: 1004,
+                t: "Resource",
+                c: 20,
+                n: "华彩沙漏·限时",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 5000,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 100000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 12125,
+        m: "Fixed",
+        child: [
+            {
+                id: 1004,
+                t: "Resource",
+                c: 30,
+                n: "华彩沙漏·限时",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 10000,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 200000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 12126,
+        m: "Fixed",
+        child: [
+            {
+                id: 1004,
+                t: "Resource",
+                c: 1,
+                n: "华彩沙漏·限时",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 20260,
+                n: "铜币",
+            },
+            {
+                id: 10072,
+                t: "CharAccessory",
+                c: 1,
+                n: "神行发饰·涅白",
+            },
+        ],
+    },
+    {
+        id: 12127,
+        m: "Fixed",
+        child: [
+            {
+                id: 1004,
+                t: "Resource",
+                c: 4,
+                n: "华彩沙漏·限时",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 2026,
+                n: "深红凝珠",
+            },
+            {
+                id: 13001,
+                t: "CharAccessory",
+                c: 1,
+                n: "神行腰饰·涅白",
+            },
+        ],
+    },
+    {
+        id: 12128,
+        m: "Fixed",
+        child: [
+            {
+                id: 1004,
+                t: "Resource",
+                c: 1,
+                n: "华彩沙漏·限时",
+            },
+        ],
+    },
+    {
+        id: 12129,
+        m: "Fixed",
+        child: [
+            {
+                id: 1004,
+                t: "Resource",
+                c: 3,
+                n: "华彩沙漏·限时",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 20000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 12130,
+        m: "Fixed",
+        child: [
+            {
+                id: 1004,
+                t: "Resource",
+                c: 8,
+                n: "华彩沙漏·限时",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 60000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 12131,
+        m: "Fixed",
+        child: [
+            {
+                id: 1004,
+                t: "Resource",
+                c: 12,
+                n: "华彩沙漏·限时",
+            },
+        ],
+    },
+    {
+        id: 12132,
+        m: "Fixed",
+        child: [
+            {
+                id: 1004,
+                t: "Resource",
+                c: 15,
+                n: "华彩沙漏·限时",
+            },
+        ],
+    },
+    {
+        id: 12133,
+        m: "Fixed",
+        child: [
+            {
+                id: 1004,
+                t: "Resource",
+                c: 25,
+                n: "华彩沙漏·限时",
+            },
+        ],
+    },
+    {
+        id: 12134,
+        m: "Fixed",
+        child: [
+            {
+                id: 16010122,
+                t: "Skin",
+                c: 1,
+                n: "昨日匆匆",
+            },
+            {
+                id: 16010222,
+                t: "Skin",
+                c: 1,
+                n: "昨日匆匆",
+            },
+        ],
+    },
+    {
+        id: 12135,
+        m: "Fixed",
+        child: [
+            {
+                id: 16010121,
+                t: "Skin",
+                c: 1,
+                n: "冬日幻想",
+            },
+            {
+                id: 16010221,
+                t: "Skin",
+                c: 1,
+                n: "冬日幻想",
+            },
+        ],
+    },
+    {
+        id: 12136,
+        m: "Fixed",
+        child: [
+            {
+                id: 1004102,
+                t: "Resource",
+                c: 10,
+                n: "思绪片段·止流",
+            },
+        ],
+    },
+    {
+        id: 12137,
+        m: "Fixed",
+        child: [
+            {
+                id: 1004201,
+                t: "Resource",
+                c: 10,
+                n: "思绪片段·煜明",
+            },
+        ],
+    },
+    {
+        id: 12138,
+        m: "Fixed",
+        child: [
+            {
+                id: 99,
+                t: "Resource",
+                c: 150,
+                n: "月石晶胚",
+            },
+            {
+                id: 1002,
+                t: "Resource",
+                c: 5,
+                n: "玩具气锤",
+            },
+        ],
+    },
+    {
+        id: 12139,
+        m: "Fixed",
+        child: [
+            {
+                id: 1004102,
+                t: "Resource",
+                c: 1,
+                n: "思绪片段·止流",
+            },
+            {
+                id: 1002,
+                t: "Resource",
+                c: 1,
+                n: "玩具气锤",
+            },
+        ],
+    },
+    {
+        id: 12140,
+        m: "Fixed",
+        child: [
+            {
+                id: 99,
+                t: "Resource",
+                c: 150,
+                n: "月石晶胚",
+            },
+            {
+                id: 1002,
+                t: "Resource",
+                c: 5,
+                n: "玩具气锤",
+            },
+        ],
+    },
+    {
+        id: 12141,
+        m: "Fixed",
+        child: [
+            {
+                id: 1004201,
+                t: "Resource",
+                c: 1,
+                n: "思绪片段·煜明",
+            },
+            {
+                id: 1002,
+                t: "Resource",
+                c: 1,
+                n: "玩具气锤",
+            },
+        ],
+    },
+    {
+        id: 12142,
+        m: "Fixed",
+        child: [
+            {
+                id: 10067,
+                t: "CharAccessory",
+                c: 1,
+                n: "财源滚滚",
+            },
+            {
+                id: 40033,
+                t: "CharAccessory",
+                c: 1,
+                n: "阴阳玉背饰",
+            },
+            {
+                id: 30031,
+                t: "CharAccessory",
+                c: 1,
+                n: "神算子",
+            },
+            {
+                id: 10023,
+                t: "HeadFrame",
+                c: 1,
+                n: "UI_HeadFrame_Name_10023",
+            },
+        ],
+    },
+    {
+        id: 12143,
+        m: "Fixed",
+        child: [
+            {
+                id: 110015,
+                t: "Resource",
+                c: 1,
+                n: "流年自选形象礼箱·匆匆",
+            },
+            {
+                id: 12124,
+                t: "CharAccessory",
+                c: 1,
+                n: "UI_Accessory_Name_12124",
+            },
+        ],
+    },
+    {
+        id: 12144,
+        m: "Fixed",
+        child: [
+            {
+                id: 110016,
+                t: "Resource",
+                c: 1,
+                n: "流年自选形象礼箱·冬日",
+            },
+            {
+                id: 10080,
+                t: "CharAccessory",
+                c: 1,
+                n: "星霜王冠·鎏金",
+            },
+            {
+                id: 40052,
+                t: "CharAccessory",
+                c: 1,
+                n: "星霜披肩·锈红",
+            },
+        ],
+    },
+    {
+        id: 12145,
+        m: "Fixed",
+        child: [
+            {
+                id: 1004102,
+                t: "Resource",
+                c: 1,
+                n: "思绪片段·止流",
+            },
+            {
+                id: 1002,
+                t: "Resource",
+                c: 1,
+                n: "玩具气锤",
+            },
+        ],
+    },
+    {
+        id: 12146,
+        m: "Fixed",
+        child: [
+            {
+                id: 1004201,
+                t: "Resource",
+                c: 1,
+                n: "思绪片段·煜明",
+            },
+            {
+                id: 1002,
+                t: "Resource",
+                c: 1,
+                n: "玩具气锤",
+            },
+        ],
+    },
+    {
+        id: 12147,
+        m: "Fixed",
+        child: [
+            {
+                id: 207,
+                t: "Resource",
+                c: 1,
+                n: "委托手册·二",
+            },
+        ],
+    },
+    {
+        id: 12148,
+        m: "Fixed",
+        child: [
+            {
+                id: 208,
+                t: "Resource",
+                c: 1,
+                n: "委托手册·三",
+            },
+        ],
+    },
+    {
+        id: 12149,
+        m: "Fixed",
+        child: [
+            {
+                id: 100,
+                t: "Resource",
+                c: 60,
+                n: "月石",
+            },
+        ],
+    },
+    {
+        id: 12150,
+        m: "Fixed",
+        child: [
+            {
+                id: 100,
+                t: "Resource",
+                c: 300,
+                n: "月石",
+            },
+        ],
+    },
+    {
+        id: 12151,
+        m: "Fixed",
+        child: [
+            {
+                id: 1001,
+                t: "Resource",
+                c: 1,
+                n: "纯白沙漏",
             },
         ],
     },
@@ -19180,6 +20074,78 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 40538,
+        m: "Fixed",
+        child: [
+            {
+                id: 102,
+                t: "Resource",
+                c: 500,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 40539,
+        m: "Fixed",
+        child: [
+            {
+                id: 102,
+                t: "Resource",
+                c: 360,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 40540,
+        m: "Fixed",
+        child: [
+            {
+                id: 102,
+                t: "Resource",
+                c: 280,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 40541,
+        m: "Fixed",
+        child: [
+            {
+                id: 102,
+                t: "Resource",
+                c: 840,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 40542,
+        m: "Fixed",
+        child: [
+            {
+                id: 102,
+                t: "Resource",
+                c: 400,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 40543,
+        m: "Fixed",
+        child: [
+            {
+                id: 102,
+                t: "Resource",
+                c: 320,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
         id: 45001,
         m: "Fixed",
         child: [
@@ -22546,7 +23512,7 @@ const t: import("../data-types").Reward[] = [
             {
                 id: 1004,
                 t: "Walnut",
-                c: 1,
+                c: 4,
                 n: "密函：刻舟",
             },
             {
@@ -22588,7 +23554,7 @@ const t: import("../data-types").Reward[] = [
             {
                 id: 1004,
                 t: "Walnut",
-                c: 1,
+                c: 4,
                 n: "密函：刻舟",
             },
             {
@@ -22630,7 +23596,7 @@ const t: import("../data-types").Reward[] = [
             {
                 id: 1004,
                 t: "Walnut",
-                c: 1,
+                c: 4,
                 n: "密函：刻舟",
             },
             {
@@ -22672,7 +23638,7 @@ const t: import("../data-types").Reward[] = [
             {
                 id: 1004,
                 t: "Walnut",
-                c: 1,
+                c: 4,
                 n: "密函：刻舟",
             },
             {
@@ -22714,7 +23680,7 @@ const t: import("../data-types").Reward[] = [
             {
                 id: 1004,
                 t: "Walnut",
-                c: 1,
+                c: 4,
                 n: "密函：刻舟",
             },
             {
@@ -22754,12 +23720,6 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 1004,
-                t: "Walnut",
-                c: 1,
-                n: "密函：刻舟",
-            },
-            {
                 id: 214,
                 t: "Resource",
                 c: 150,
@@ -22795,12 +23755,6 @@ const t: import("../data-types").Reward[] = [
         id: 46052,
         m: "Fixed",
         child: [
-            {
-                id: 1004,
-                t: "Walnut",
-                c: 1,
-                n: "密函：刻舟",
-            },
             {
                 id: 214,
                 t: "Resource",
@@ -22838,12 +23792,6 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 1004,
-                t: "Walnut",
-                c: 1,
-                n: "密函：刻舟",
-            },
-            {
                 id: 214,
                 t: "Resource",
                 c: 150,
@@ -22879,12 +23827,6 @@ const t: import("../data-types").Reward[] = [
         id: 46054,
         m: "Fixed",
         child: [
-            {
-                id: 1004,
-                t: "Walnut",
-                c: 1,
-                n: "密函：刻舟",
-            },
             {
                 id: 214,
                 t: "Resource",
@@ -22922,12 +23864,6 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 1004,
-                t: "Walnut",
-                c: 1,
-                n: "密函：刻舟",
-            },
-            {
                 id: 214,
                 t: "Resource",
                 c: 150,
@@ -22963,12 +23899,6 @@ const t: import("../data-types").Reward[] = [
         id: 46056,
         m: "Fixed",
         child: [
-            {
-                id: 1004,
-                t: "Walnut",
-                c: 2,
-                n: "密函：刻舟",
-            },
             {
                 id: 214,
                 t: "Resource",
@@ -23006,12 +23936,6 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 1004,
-                t: "Walnut",
-                c: 2,
-                n: "密函：刻舟",
-            },
-            {
                 id: 214,
                 t: "Resource",
                 c: 200,
@@ -23047,12 +23971,6 @@ const t: import("../data-types").Reward[] = [
         id: 46058,
         m: "Fixed",
         child: [
-            {
-                id: 1004,
-                t: "Walnut",
-                c: 2,
-                n: "密函：刻舟",
-            },
             {
                 id: 214,
                 t: "Resource",
@@ -23090,12 +24008,6 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 1004,
-                t: "Walnut",
-                c: 2,
-                n: "密函：刻舟",
-            },
-            {
                 id: 214,
                 t: "Resource",
                 c: 200,
@@ -23132,11 +24044,1145 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 1004,
-                t: "Walnut",
-                c: 2,
-                n: "密函：刻舟",
+                id: 214,
+                t: "Resource",
+                c: 200,
+                n: "剧目票根",
             },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 3,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 3,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 300,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 15000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46061,
+        m: "Fixed",
+        child: [
+            {
+                id: 1016,
+                t: "Walnut",
+                c: 4,
+                n: "密函：止流",
+            },
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46062,
+        m: "Fixed",
+        child: [
+            {
+                id: 1016,
+                t: "Walnut",
+                c: 4,
+                n: "密函：止流",
+            },
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46063,
+        m: "Fixed",
+        child: [
+            {
+                id: 1016,
+                t: "Walnut",
+                c: 4,
+                n: "密函：止流",
+            },
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46064,
+        m: "Fixed",
+        child: [
+            {
+                id: 1016,
+                t: "Walnut",
+                c: 4,
+                n: "密函：止流",
+            },
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46065,
+        m: "Fixed",
+        child: [
+            {
+                id: 1016,
+                t: "Walnut",
+                c: 4,
+                n: "密函：止流",
+            },
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46066,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46067,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46068,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46069,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46070,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46071,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 200,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 3,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 3,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 300,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 15000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46072,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 200,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 3,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 3,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 300,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 15000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46073,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 200,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 3,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 3,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 300,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 15000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46074,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 200,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 3,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 3,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 300,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 15000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46075,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 200,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 3,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 3,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 300,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 15000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46076,
+        m: "Fixed",
+        child: [
+            {
+                id: 1017,
+                t: "Walnut",
+                c: 4,
+                n: "密函：煜明",
+            },
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46077,
+        m: "Fixed",
+        child: [
+            {
+                id: 1017,
+                t: "Walnut",
+                c: 4,
+                n: "密函：煜明",
+            },
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46078,
+        m: "Fixed",
+        child: [
+            {
+                id: 1017,
+                t: "Walnut",
+                c: 4,
+                n: "密函：煜明",
+            },
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46079,
+        m: "Fixed",
+        child: [
+            {
+                id: 1017,
+                t: "Walnut",
+                c: 4,
+                n: "密函：煜明",
+            },
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46080,
+        m: "Fixed",
+        child: [
+            {
+                id: 1017,
+                t: "Walnut",
+                c: 4,
+                n: "密函：煜明",
+            },
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46081,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46082,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46083,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46084,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46085,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 150,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 2,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 2,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 200,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46086,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 200,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 3,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 3,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 300,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 15000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46087,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 200,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 3,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 3,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 300,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 15000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46088,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 200,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 3,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 3,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 300,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 15000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46089,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 200,
+                n: "剧目票根",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 3,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 3,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 300,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 15000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 46090,
+        m: "Fixed",
+        child: [
             {
                 id: 214,
                 t: "Resource",
@@ -23447,6 +25493,162 @@ const t: import("../data-types").Reward[] = [
     },
     {
         id: 48014,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 10,
+                n: "剧目票根",
+            },
+        ],
+    },
+    {
+        id: 48015,
+        m: "Fixed",
+        child: [
+            {
+                id: 1016,
+                t: "Walnut",
+                c: 7,
+                n: "密函：止流",
+            },
+            {
+                id: 214,
+                t: "Resource",
+                c: 200,
+                n: "剧目票根",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 3,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 300,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 12000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 48016,
+        m: "Fixed",
+        child: [
+            {
+                id: 1016,
+                t: "Walnut",
+                c: 4,
+                n: "密函：止流",
+            },
+            {
+                id: 214,
+                t: "Resource",
+                c: 75,
+                n: "剧目票根",
+            },
+        ],
+    },
+    {
+        id: 48017,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 20,
+                n: "剧目票根",
+            },
+        ],
+    },
+    {
+        id: 48018,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 10,
+                n: "剧目票根",
+            },
+        ],
+    },
+    {
+        id: 48019,
+        m: "Fixed",
+        child: [
+            {
+                id: 1017,
+                t: "Walnut",
+                c: 7,
+                n: "密函：煜明",
+            },
+            {
+                id: 214,
+                t: "Resource",
+                c: 200,
+                n: "剧目票根",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 3,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 300,
+                n: "深红凝珠",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 12000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 48020,
+        m: "Fixed",
+        child: [
+            {
+                id: 1017,
+                t: "Walnut",
+                c: 4,
+                n: "密函：煜明",
+            },
+            {
+                id: 214,
+                t: "Resource",
+                c: 75,
+                n: "剧目票根",
+            },
+        ],
+    },
+    {
+        id: 48021,
+        m: "Fixed",
+        child: [
+            {
+                id: 214,
+                t: "Resource",
+                c: 20,
+                n: "剧目票根",
+            },
+        ],
+    },
+    {
+        id: 48022,
         m: "Fixed",
         child: [
             {
@@ -28836,7 +31038,7 @@ const t: import("../data-types").Reward[] = [
             {
                 id: 101,
                 t: "Resource",
-                c: 1000,
+                c: 30000,
                 n: "铜币",
             },
             {
@@ -28848,19 +31050,19 @@ const t: import("../data-types").Reward[] = [
             {
                 id: 211,
                 t: "Resource",
-                c: 5,
+                c: 20,
                 n: "委托密函线索",
             },
             {
                 id: 2009,
                 t: "Resource",
-                c: 1,
+                c: 3,
                 n: "武器说明书·三",
             },
             {
                 id: 102,
                 t: "Resource",
-                c: 100,
+                c: 600,
                 n: "深红凝珠",
             },
             {
@@ -28920,7 +31122,7 @@ const t: import("../data-types").Reward[] = [
             {
                 id: 101,
                 t: "Resource",
-                c: 1000,
+                c: 30000,
                 n: "铜币",
             },
             {
@@ -28932,19 +31134,19 @@ const t: import("../data-types").Reward[] = [
             {
                 id: 211,
                 t: "Resource",
-                c: 5,
+                c: 20,
                 n: "委托密函线索",
             },
             {
                 id: 2009,
                 t: "Resource",
-                c: 1,
+                c: 3,
                 n: "武器说明书·三",
             },
             {
                 id: 102,
                 t: "Resource",
-                c: 100,
+                c: 600,
                 n: "深红凝珠",
             },
             {
@@ -29029,6 +31231,306 @@ const t: import("../data-types").Reward[] = [
                 id: 102,
                 t: "Resource",
                 c: 100,
+                n: "深红凝珠",
+            },
+            {
+                id: 2001,
+                t: "Resource",
+                c: 150,
+                n: "历练经验",
+            },
+        ],
+    },
+    {
+        id: 50605,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 30000,
+                n: "铜币",
+            },
+            {
+                id: 3001,
+                t: "Resource",
+                c: 1,
+                n: "十面骰",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 3,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 600,
+                n: "深红凝珠",
+            },
+            {
+                id: 2001,
+                t: "Resource",
+                c: 150,
+                n: "历练经验",
+            },
+        ],
+    },
+    {
+        id: 50606,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 30000,
+                n: "铜币",
+            },
+            {
+                id: 3001,
+                t: "Resource",
+                c: 1,
+                n: "十面骰",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 3,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 600,
+                n: "深红凝珠",
+            },
+            {
+                id: 2001,
+                t: "Resource",
+                c: 150,
+                n: "历练经验",
+            },
+        ],
+    },
+    {
+        id: 50607,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 30000,
+                n: "铜币",
+            },
+            {
+                id: 3001,
+                t: "Resource",
+                c: 1,
+                n: "十面骰",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 3,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 600,
+                n: "深红凝珠",
+            },
+            {
+                id: 2001,
+                t: "Resource",
+                c: 150,
+                n: "历练经验",
+            },
+        ],
+    },
+    {
+        id: 50608,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 30000,
+                n: "铜币",
+            },
+            {
+                id: 3001,
+                t: "Resource",
+                c: 1,
+                n: "十面骰",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 3,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 600,
+                n: "深红凝珠",
+            },
+            {
+                id: 2001,
+                t: "Resource",
+                c: 150,
+                n: "历练经验",
+            },
+        ],
+    },
+    {
+        id: 50609,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 30000,
+                n: "铜币",
+            },
+            {
+                id: 3001,
+                t: "Resource",
+                c: 1,
+                n: "十面骰",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 3,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 600,
+                n: "深红凝珠",
+            },
+            {
+                id: 2001,
+                t: "Resource",
+                c: 150,
+                n: "历练经验",
+            },
+        ],
+    },
+    {
+        id: 50610,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 30000,
+                n: "铜币",
+            },
+            {
+                id: 3001,
+                t: "Resource",
+                c: 1,
+                n: "十面骰",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 3,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 600,
+                n: "深红凝珠",
+            },
+            {
+                id: 2001,
+                t: "Resource",
+                c: 150,
+                n: "历练经验",
+            },
+            {
+                id: 1000,
+                t: "Mount",
+                c: 1,
+                n: "Mount_1000",
+            },
+        ],
+    },
+    {
+        id: 50611,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 30000,
+                n: "铜币",
+            },
+            {
+                id: 3001,
+                t: "Resource",
+                c: 1,
+                n: "十面骰",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 3,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 600,
                 n: "深红凝珠",
             },
             {
@@ -29210,6 +31712,66 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 50905,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 12600,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50906,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 13800,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50907,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 15000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50908,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 16200,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50909,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 17400,
+                n: "铜币",
+            },
+        ],
+    },
+    {
         id: 50910,
         m: "Fixed",
         child: [
@@ -29265,6 +31827,66 @@ const t: import("../data-types").Reward[] = [
                 id: 101,
                 t: "Resource",
                 c: 17900,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50915,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 19900,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50916,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 21900,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50917,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 23900,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50918,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 25900,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50919,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 27900,
                 n: "铜币",
             },
         ],
@@ -29330,6 +31952,66 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 50925,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 27000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50926,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 29700,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50927,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 32400,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50928,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 35100,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50929,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 37800,
+                n: "铜币",
+            },
+        ],
+    },
+    {
         id: 50930,
         m: "Fixed",
         child: [
@@ -29385,6 +32067,66 @@ const t: import("../data-types").Reward[] = [
                 id: 101,
                 t: "Resource",
                 c: 30800,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50935,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 34300,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50936,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 37800,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50937,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 41300,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50938,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 44800,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50939,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 48300,
                 n: "铜币",
             },
         ],
@@ -29450,6 +32192,66 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 50945,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 41400,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50946,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 45600,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50947,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 49800,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50948,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 54000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50949,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 58200,
+                n: "铜币",
+            },
+        ],
+    },
+    {
         id: 50950,
         m: "Fixed",
         child: [
@@ -29510,6 +32312,66 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 50955,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 48600,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50956,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 53400,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50957,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 58200,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50958,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 63000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50959,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 67800,
+                n: "铜币",
+            },
+        ],
+    },
+    {
         id: 50960,
         m: "Fixed",
         child: [
@@ -29565,6 +32427,66 @@ const t: import("../data-types").Reward[] = [
                 id: 101,
                 t: "Resource",
                 c: 48600,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50965,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 54000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50966,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 59400,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50967,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 64800,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50968,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 70200,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 50969,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 75600,
                 n: "铜币",
             },
         ],
@@ -31839,6 +34761,756 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 51821,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 500,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 7,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51822,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 600,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 8,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51823,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 700,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 9,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51824,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 800,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 10,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51825,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 900,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 11,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51826,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 750,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 10,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51827,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 900,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 11,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51828,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 1050,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 12,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51829,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 1200,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 13,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51830,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 1350,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 14,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51831,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 1000,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 13,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51832,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 1200,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 14,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51833,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 1400,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 15,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51834,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 1600,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 16,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51835,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 1800,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 17,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51836,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 1250,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 16,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51837,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 1500,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 17,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51838,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 1750,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 18,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51839,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 2000,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 19,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51840,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 2250,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 20,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51841,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 1500,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 20,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51842,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 1800,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 22,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51843,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 2100,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 24,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51844,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 2400,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 26,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51845,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 2700,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 28,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 51846,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 1700,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 20,
+                n: "皎皎之民的信物",
+            },
+            {
+                id: 20021,
+                t: "Resource",
+                c: 1,
+                n: "圣烛",
+            },
+            {
+                id: 20024,
+                t: "Resource",
+                c: 1,
+                n: "秽兽触须",
+            },
+        ],
+    },
+    {
+        id: 51847,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 2000,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 22,
+                n: "皎皎之民的信物",
+            },
+            {
+                id: 20021,
+                t: "Resource",
+                c: 1,
+                n: "圣烛",
+            },
+            {
+                id: 20024,
+                t: "Resource",
+                c: 1,
+                n: "秽兽触须",
+            },
+        ],
+    },
+    {
+        id: 51848,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 2300,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 24,
+                n: "皎皎之民的信物",
+            },
+            {
+                id: 20021,
+                t: "Resource",
+                c: 1,
+                n: "圣烛",
+            },
+            {
+                id: 20024,
+                t: "Resource",
+                c: 1,
+                n: "秽兽触须",
+            },
+        ],
+    },
+    {
+        id: 51849,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 2600,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 26,
+                n: "皎皎之民的信物",
+            },
+            {
+                id: 20021,
+                t: "Resource",
+                c: 1,
+                n: "圣烛",
+            },
+            {
+                id: 20024,
+                t: "Resource",
+                c: 1,
+                n: "秽兽触须",
+            },
+        ],
+    },
+    {
+        id: 51850,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 2900,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 28,
+                n: "皎皎之民的信物",
+            },
+            {
+                id: 20021,
+                t: "Resource",
+                c: 2,
+                n: "圣烛",
+            },
+            {
+                id: 20024,
+                t: "Resource",
+                c: 2,
+                n: "秽兽触须",
+            },
+        ],
+    },
+    {
+        id: 51851,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 1800,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 21,
+                n: "皎皎之民的信物",
+            },
+            {
+                id: 20021,
+                t: "Resource",
+                c: 4,
+                n: "圣烛",
+            },
+            {
+                id: 20024,
+                t: "Resource",
+                c: 4,
+                n: "秽兽触须",
+            },
+        ],
+    },
+    {
+        id: 51852,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 2100,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 24,
+                n: "皎皎之民的信物",
+            },
+            {
+                id: 20021,
+                t: "Resource",
+                c: 4,
+                n: "圣烛",
+            },
+            {
+                id: 20024,
+                t: "Resource",
+                c: 4,
+                n: "秽兽触须",
+            },
+        ],
+    },
+    {
+        id: 51853,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 2400,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 27,
+                n: "皎皎之民的信物",
+            },
+            {
+                id: 20021,
+                t: "Resource",
+                c: 5,
+                n: "圣烛",
+            },
+            {
+                id: 20024,
+                t: "Resource",
+                c: 5,
+                n: "秽兽触须",
+            },
+        ],
+    },
+    {
+        id: 51854,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 2700,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 30,
+                n: "皎皎之民的信物",
+            },
+            {
+                id: 20021,
+                t: "Resource",
+                c: 5,
+                n: "圣烛",
+            },
+            {
+                id: 20024,
+                t: "Resource",
+                c: 5,
+                n: "秽兽触须",
+            },
+        ],
+    },
+    {
+        id: 51855,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 3000,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 33,
+                n: "皎皎之民的信物",
+            },
+            {
+                id: 20021,
+                t: "Resource",
+                c: 5,
+                n: "圣烛",
+            },
+            {
+                id: 20024,
+                t: "Resource",
+                c: 5,
+                n: "秽兽触须",
+            },
+        ],
+    },
+    {
         id: 51901,
         m: "Fixed",
         child: [
@@ -33185,6 +36857,936 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 52136,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 5,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 1,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 310,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52137,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 6,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 1,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 350,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52138,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 7,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 1,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 390,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52139,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 8,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 1,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 430,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52140,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 9,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 1,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 470,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52141,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 7,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 2,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 480,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52142,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 4,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 3,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 530,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52143,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 6,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 3,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 580,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52144,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 8,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 3,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 630,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52145,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 5,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 4,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 680,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52146,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 4,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 5,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 680,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52147,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 7,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 5,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 770,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52148,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 5,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 6,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 860,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52149,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 8,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 6,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 950,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52150,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 6,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 7,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1040,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52151,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 8,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 6,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 880,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52152,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 6,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 7,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52153,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 4,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 8,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1120,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52154,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 7,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 8,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1240,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52155,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 5,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 9,
+                n: "保水剂",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1360,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52156,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 4,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 6,
+                n: "保水剂",
+            },
+            {
+                id: 10011,
+                t: "Resource",
+                c: 1,
+                n: "净水装置",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1070,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52157,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 8,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 6,
+                n: "保水剂",
+            },
+            {
+                id: 10011,
+                t: "Resource",
+                c: 1,
+                n: "净水装置",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1210,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52158,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 7,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 7,
+                n: "保水剂",
+            },
+            {
+                id: 10011,
+                t: "Resource",
+                c: 1,
+                n: "净水装置",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1350,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52159,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 6,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 8,
+                n: "保水剂",
+            },
+            {
+                id: 10011,
+                t: "Resource",
+                c: 1,
+                n: "净水装置",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1490,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52160,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 5,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 4,
+                n: "保水剂",
+            },
+            {
+                id: 10011,
+                t: "Resource",
+                c: 2,
+                n: "净水装置",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1630,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52161,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 5,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 5,
+                n: "保水剂",
+            },
+            {
+                id: 10011,
+                t: "Resource",
+                c: 2,
+                n: "净水装置",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1240,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52162,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 5,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 6,
+                n: "保水剂",
+            },
+            {
+                id: 10011,
+                t: "Resource",
+                c: 2,
+                n: "净水装置",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1390,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52163,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 5,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 7,
+                n: "保水剂",
+            },
+            {
+                id: 10011,
+                t: "Resource",
+                c: 2,
+                n: "净水装置",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1540,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52164,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 5,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 8,
+                n: "保水剂",
+            },
+            {
+                id: 10011,
+                t: "Resource",
+                c: 2,
+                n: "净水装置",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1690,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52165,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 5,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 4,
+                n: "保水剂",
+            },
+            {
+                id: 10011,
+                t: "Resource",
+                c: 3,
+                n: "净水装置",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1840,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52166,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 7,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 6,
+                n: "保水剂",
+            },
+            {
+                id: 10011,
+                t: "Resource",
+                c: 3,
+                n: "净水装置",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1400,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52167,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 7,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 7,
+                n: "保水剂",
+            },
+            {
+                id: 10011,
+                t: "Resource",
+                c: 3,
+                n: "净水装置",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1580,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52168,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 7,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 8,
+                n: "保水剂",
+            },
+            {
+                id: 10011,
+                t: "Resource",
+                c: 3,
+                n: "净水装置",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1760,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52169,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 7,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 4,
+                n: "保水剂",
+            },
+            {
+                id: 10011,
+                t: "Resource",
+                c: 4,
+                n: "净水装置",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1940,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52170,
+        m: "Fixed",
+        child: [
+            {
+                id: 10009,
+                t: "Resource",
+                c: 7,
+                n: "蔚蓝珍珠",
+            },
+            {
+                id: 10010,
+                t: "Resource",
+                c: 5,
+                n: "保水剂",
+            },
+            {
+                id: 10011,
+                t: "Resource",
+                c: 4,
+                n: "净水装置",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 2120,
+                n: "铜币",
+            },
+        ],
+    },
+    {
         id: 52200,
         m: "Sequence",
         child: [
@@ -34100,6 +38702,936 @@ const t: import("../data-types").Reward[] = [
                 id: 101,
                 t: "Resource",
                 c: 1220,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52236,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 5,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 1,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 310,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52237,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 6,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 1,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 350,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52238,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 7,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 1,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 390,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52239,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 8,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 1,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 430,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52240,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 9,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 1,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 470,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52241,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 7,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 2,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 480,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52242,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 4,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 3,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 530,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52243,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 6,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 3,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 580,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52244,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 8,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 3,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 630,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52245,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 5,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 4,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 680,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52246,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 4,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 5,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 680,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52247,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 7,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 5,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 770,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52248,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 5,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 6,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 860,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52249,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 8,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 6,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 950,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52250,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 6,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 7,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1040,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52251,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 8,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 6,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 880,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52252,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 6,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 7,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52253,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 4,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 8,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1120,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52254,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 7,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 8,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1240,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52255,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 5,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 9,
+                n: "永明火",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1360,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52256,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 4,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 6,
+                n: "永明火",
+            },
+            {
+                id: 10007,
+                t: "Resource",
+                c: 1,
+                n: "淬焰镣铐",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1070,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52257,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 8,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 6,
+                n: "永明火",
+            },
+            {
+                id: 10007,
+                t: "Resource",
+                c: 1,
+                n: "淬焰镣铐",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1210,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52258,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 7,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 7,
+                n: "永明火",
+            },
+            {
+                id: 10007,
+                t: "Resource",
+                c: 1,
+                n: "淬焰镣铐",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1350,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52259,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 6,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 8,
+                n: "永明火",
+            },
+            {
+                id: 10007,
+                t: "Resource",
+                c: 1,
+                n: "淬焰镣铐",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1490,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52260,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 5,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 4,
+                n: "永明火",
+            },
+            {
+                id: 10007,
+                t: "Resource",
+                c: 2,
+                n: "淬焰镣铐",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1630,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52261,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 5,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 5,
+                n: "永明火",
+            },
+            {
+                id: 10007,
+                t: "Resource",
+                c: 2,
+                n: "淬焰镣铐",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1240,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52262,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 5,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 6,
+                n: "永明火",
+            },
+            {
+                id: 10007,
+                t: "Resource",
+                c: 2,
+                n: "淬焰镣铐",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1390,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52263,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 5,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 7,
+                n: "永明火",
+            },
+            {
+                id: 10007,
+                t: "Resource",
+                c: 2,
+                n: "淬焰镣铐",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1540,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52264,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 5,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 8,
+                n: "永明火",
+            },
+            {
+                id: 10007,
+                t: "Resource",
+                c: 2,
+                n: "淬焰镣铐",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1690,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52265,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 5,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 4,
+                n: "永明火",
+            },
+            {
+                id: 10007,
+                t: "Resource",
+                c: 3,
+                n: "淬焰镣铐",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1840,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52266,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 7,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 6,
+                n: "永明火",
+            },
+            {
+                id: 10007,
+                t: "Resource",
+                c: 3,
+                n: "淬焰镣铐",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1400,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52267,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 7,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 7,
+                n: "永明火",
+            },
+            {
+                id: 10007,
+                t: "Resource",
+                c: 3,
+                n: "淬焰镣铐",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1580,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52268,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 7,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 8,
+                n: "永明火",
+            },
+            {
+                id: 10007,
+                t: "Resource",
+                c: 3,
+                n: "淬焰镣铐",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1760,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52269,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 7,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 4,
+                n: "永明火",
+            },
+            {
+                id: 10007,
+                t: "Resource",
+                c: 4,
+                n: "淬焰镣铐",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1940,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52270,
+        m: "Fixed",
+        child: [
+            {
+                id: 10005,
+                t: "Resource",
+                c: 7,
+                n: "火蜥鳞片",
+            },
+            {
+                id: 10006,
+                t: "Resource",
+                c: 5,
+                n: "永明火",
+            },
+            {
+                id: 10007,
+                t: "Resource",
+                c: 4,
+                n: "淬焰镣铐",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 2120,
                 n: "铜币",
             },
         ],
@@ -35025,6 +40557,936 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 52336,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 5,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 1,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 310,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52337,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 6,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 1,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 350,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52338,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 7,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 1,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 390,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52339,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 8,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 1,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 430,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52340,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 9,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 1,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 470,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52341,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 7,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 2,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 480,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52342,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 4,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 3,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 530,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52343,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 6,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 3,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 580,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52344,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 8,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 3,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 630,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52345,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 5,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 4,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 680,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52346,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 4,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 5,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 680,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52347,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 7,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 5,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 770,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52348,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 5,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 6,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 860,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52349,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 8,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 6,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 950,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52350,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 6,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 7,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1040,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52351,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 8,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 6,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 880,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52352,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 6,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 7,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52353,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 4,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 8,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1120,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52354,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 7,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 8,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1240,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52355,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 5,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 9,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1360,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52356,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 4,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 6,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 10015,
+                t: "Resource",
+                c: 1,
+                n: "金羊毛",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1070,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52357,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 8,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 6,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 10015,
+                t: "Resource",
+                c: 1,
+                n: "金羊毛",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1210,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52358,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 7,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 7,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 10015,
+                t: "Resource",
+                c: 1,
+                n: "金羊毛",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1350,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52359,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 6,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 8,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 10015,
+                t: "Resource",
+                c: 1,
+                n: "金羊毛",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1490,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52360,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 5,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 4,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 10015,
+                t: "Resource",
+                c: 2,
+                n: "金羊毛",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1630,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52361,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 5,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 5,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 10015,
+                t: "Resource",
+                c: 2,
+                n: "金羊毛",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1240,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52362,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 5,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 6,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 10015,
+                t: "Resource",
+                c: 2,
+                n: "金羊毛",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1390,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52363,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 5,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 7,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 10015,
+                t: "Resource",
+                c: 2,
+                n: "金羊毛",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1540,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52364,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 5,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 8,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 10015,
+                t: "Resource",
+                c: 2,
+                n: "金羊毛",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1690,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52365,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 5,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 4,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 10015,
+                t: "Resource",
+                c: 3,
+                n: "金羊毛",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1840,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52366,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 7,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 6,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 10015,
+                t: "Resource",
+                c: 3,
+                n: "金羊毛",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1400,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52367,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 7,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 7,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 10015,
+                t: "Resource",
+                c: 3,
+                n: "金羊毛",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1580,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52368,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 7,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 8,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 10015,
+                t: "Resource",
+                c: 3,
+                n: "金羊毛",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1760,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52369,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 7,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 4,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 10015,
+                t: "Resource",
+                c: 4,
+                n: "金羊毛",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1940,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52370,
+        m: "Fixed",
+        child: [
+            {
+                id: 10013,
+                t: "Resource",
+                c: 7,
+                n: "引雷针",
+            },
+            {
+                id: 10014,
+                t: "Resource",
+                c: 5,
+                n: "雷夜陨玉",
+            },
+            {
+                id: 10015,
+                t: "Resource",
+                c: 4,
+                n: "金羊毛",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 2120,
+                n: "铜币",
+            },
+        ],
+    },
+    {
         id: 52400,
         m: "Sequence",
         child: [
@@ -35940,6 +42402,936 @@ const t: import("../data-types").Reward[] = [
                 id: 101,
                 t: "Resource",
                 c: 1220,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52436,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 5,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 1,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 310,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52437,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 6,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 1,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 350,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52438,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 7,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 1,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 390,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52439,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 8,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 1,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 430,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52440,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 9,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 1,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 470,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52441,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 7,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 2,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 480,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52442,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 4,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 3,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 530,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52443,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 6,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 3,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 580,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52444,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 8,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 3,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 630,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52445,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 5,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 4,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 680,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52446,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 4,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 5,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 680,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52447,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 7,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 5,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 770,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52448,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 5,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 6,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 860,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52449,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 8,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 6,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 950,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52450,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 6,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 7,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1040,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52451,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 8,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 6,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 880,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52452,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 6,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 7,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52453,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 4,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 8,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1120,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52454,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 7,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 8,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1240,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52455,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 5,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 9,
+                n: "收束气流",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1360,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52456,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 4,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 6,
+                n: "收束气流",
+            },
+            {
+                id: 10003,
+                t: "Resource",
+                c: 1,
+                n: "渡海蝶",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1070,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52457,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 8,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 6,
+                n: "收束气流",
+            },
+            {
+                id: 10003,
+                t: "Resource",
+                c: 1,
+                n: "渡海蝶",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1210,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52458,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 7,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 7,
+                n: "收束气流",
+            },
+            {
+                id: 10003,
+                t: "Resource",
+                c: 1,
+                n: "渡海蝶",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1350,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52459,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 6,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 8,
+                n: "收束气流",
+            },
+            {
+                id: 10003,
+                t: "Resource",
+                c: 1,
+                n: "渡海蝶",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1490,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52460,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 5,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 4,
+                n: "收束气流",
+            },
+            {
+                id: 10003,
+                t: "Resource",
+                c: 2,
+                n: "渡海蝶",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1630,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52461,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 5,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 5,
+                n: "收束气流",
+            },
+            {
+                id: 10003,
+                t: "Resource",
+                c: 2,
+                n: "渡海蝶",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1240,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52462,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 5,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 6,
+                n: "收束气流",
+            },
+            {
+                id: 10003,
+                t: "Resource",
+                c: 2,
+                n: "渡海蝶",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1390,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52463,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 5,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 7,
+                n: "收束气流",
+            },
+            {
+                id: 10003,
+                t: "Resource",
+                c: 2,
+                n: "渡海蝶",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1540,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52464,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 5,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 8,
+                n: "收束气流",
+            },
+            {
+                id: 10003,
+                t: "Resource",
+                c: 2,
+                n: "渡海蝶",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1690,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52465,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 5,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 4,
+                n: "收束气流",
+            },
+            {
+                id: 10003,
+                t: "Resource",
+                c: 3,
+                n: "渡海蝶",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1840,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52466,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 7,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 6,
+                n: "收束气流",
+            },
+            {
+                id: 10003,
+                t: "Resource",
+                c: 3,
+                n: "渡海蝶",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1400,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52467,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 7,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 7,
+                n: "收束气流",
+            },
+            {
+                id: 10003,
+                t: "Resource",
+                c: 3,
+                n: "渡海蝶",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1580,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52468,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 7,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 8,
+                n: "收束气流",
+            },
+            {
+                id: 10003,
+                t: "Resource",
+                c: 3,
+                n: "渡海蝶",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1760,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52469,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 7,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 4,
+                n: "收束气流",
+            },
+            {
+                id: 10003,
+                t: "Resource",
+                c: 4,
+                n: "渡海蝶",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1940,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52470,
+        m: "Fixed",
+        child: [
+            {
+                id: 10001,
+                t: "Resource",
+                c: 7,
+                n: "枯桑枝干",
+            },
+            {
+                id: 10002,
+                t: "Resource",
+                c: 5,
+                n: "收束气流",
+            },
+            {
+                id: 10003,
+                t: "Resource",
+                c: 4,
+                n: "渡海蝶",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 2120,
                 n: "铜币",
             },
         ],
@@ -36865,6 +44257,936 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 52536,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 5,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 1,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 310,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52537,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 6,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 1,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 350,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52538,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 7,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 1,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 390,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52539,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 8,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 1,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 430,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52540,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 9,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 1,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 470,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52541,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 7,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 2,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 480,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52542,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 4,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 3,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 530,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52543,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 6,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 3,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 580,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52544,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 8,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 3,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 630,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52545,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 5,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 4,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 680,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52546,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 4,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 5,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 680,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52547,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 7,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 5,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 770,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52548,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 5,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 6,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 860,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52549,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 8,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 6,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 950,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52550,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 6,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 7,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1040,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52551,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 8,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 6,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 880,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52552,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 6,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 7,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52553,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 4,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 8,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1120,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52554,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 7,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 8,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1240,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52555,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 5,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 9,
+                n: "黑曜匙",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1360,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52556,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 4,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 6,
+                n: "黑曜匙",
+            },
+            {
+                id: 10023,
+                t: "Resource",
+                c: 1,
+                n: "暗月仪典",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1070,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52557,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 8,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 6,
+                n: "黑曜匙",
+            },
+            {
+                id: 10023,
+                t: "Resource",
+                c: 1,
+                n: "暗月仪典",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1210,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52558,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 7,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 7,
+                n: "黑曜匙",
+            },
+            {
+                id: 10023,
+                t: "Resource",
+                c: 1,
+                n: "暗月仪典",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1350,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52559,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 6,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 8,
+                n: "黑曜匙",
+            },
+            {
+                id: 10023,
+                t: "Resource",
+                c: 1,
+                n: "暗月仪典",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1490,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52560,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 5,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 4,
+                n: "黑曜匙",
+            },
+            {
+                id: 10023,
+                t: "Resource",
+                c: 2,
+                n: "暗月仪典",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1630,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52561,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 5,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 5,
+                n: "黑曜匙",
+            },
+            {
+                id: 10023,
+                t: "Resource",
+                c: 2,
+                n: "暗月仪典",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1240,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52562,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 5,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 6,
+                n: "黑曜匙",
+            },
+            {
+                id: 10023,
+                t: "Resource",
+                c: 2,
+                n: "暗月仪典",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1390,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52563,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 5,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 7,
+                n: "黑曜匙",
+            },
+            {
+                id: 10023,
+                t: "Resource",
+                c: 2,
+                n: "暗月仪典",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1540,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52564,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 5,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 8,
+                n: "黑曜匙",
+            },
+            {
+                id: 10023,
+                t: "Resource",
+                c: 2,
+                n: "暗月仪典",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1690,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52565,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 5,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 4,
+                n: "黑曜匙",
+            },
+            {
+                id: 10023,
+                t: "Resource",
+                c: 3,
+                n: "暗月仪典",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1840,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52566,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 7,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 6,
+                n: "黑曜匙",
+            },
+            {
+                id: 10023,
+                t: "Resource",
+                c: 3,
+                n: "暗月仪典",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1400,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52567,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 7,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 7,
+                n: "黑曜匙",
+            },
+            {
+                id: 10023,
+                t: "Resource",
+                c: 3,
+                n: "暗月仪典",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1580,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52568,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 7,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 8,
+                n: "黑曜匙",
+            },
+            {
+                id: 10023,
+                t: "Resource",
+                c: 3,
+                n: "暗月仪典",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1760,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52569,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 7,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 4,
+                n: "黑曜匙",
+            },
+            {
+                id: 10023,
+                t: "Resource",
+                c: 4,
+                n: "暗月仪典",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1940,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52570,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "Resource",
+                c: 7,
+                n: "锈痕匕首",
+            },
+            {
+                id: 10022,
+                t: "Resource",
+                c: 5,
+                n: "黑曜匙",
+            },
+            {
+                id: 10023,
+                t: "Resource",
+                c: 4,
+                n: "暗月仪典",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 2120,
+                n: "铜币",
+            },
+        ],
+    },
+    {
         id: 52600,
         m: "Sequence",
         child: [
@@ -37780,6 +46102,936 @@ const t: import("../data-types").Reward[] = [
                 id: 101,
                 t: "Resource",
                 c: 1220,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52636,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 5,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 1,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 310,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52637,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 6,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 1,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 350,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52638,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 7,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 1,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 390,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52639,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 8,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 1,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 430,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52640,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 9,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 1,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 470,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52641,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 7,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 2,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 480,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52642,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 4,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 3,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 530,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52643,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 6,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 3,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 580,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52644,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 8,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 3,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 630,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52645,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 5,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 4,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 680,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52646,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 4,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 5,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 680,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52647,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 7,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 5,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 770,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52648,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 5,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 6,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 860,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52649,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 8,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 6,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 950,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52650,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 6,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 7,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1040,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52651,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 8,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 6,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 880,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52652,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 6,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 7,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52653,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 4,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 8,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1120,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52654,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 7,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 8,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1240,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52655,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 5,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 9,
+                n: "花叶金冕",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1360,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52656,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 4,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 6,
+                n: "花叶金冕",
+            },
+            {
+                id: 10019,
+                t: "Resource",
+                c: 1,
+                n: "《圣歌》印本",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1070,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52657,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 8,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 6,
+                n: "花叶金冕",
+            },
+            {
+                id: 10019,
+                t: "Resource",
+                c: 1,
+                n: "《圣歌》印本",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1210,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52658,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 7,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 7,
+                n: "花叶金冕",
+            },
+            {
+                id: 10019,
+                t: "Resource",
+                c: 1,
+                n: "《圣歌》印本",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1350,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52659,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 6,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 8,
+                n: "花叶金冕",
+            },
+            {
+                id: 10019,
+                t: "Resource",
+                c: 1,
+                n: "《圣歌》印本",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1490,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52660,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 5,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 4,
+                n: "花叶金冕",
+            },
+            {
+                id: 10019,
+                t: "Resource",
+                c: 2,
+                n: "《圣歌》印本",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1630,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52661,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 5,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 5,
+                n: "花叶金冕",
+            },
+            {
+                id: 10019,
+                t: "Resource",
+                c: 2,
+                n: "《圣歌》印本",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1240,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52662,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 5,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 6,
+                n: "花叶金冕",
+            },
+            {
+                id: 10019,
+                t: "Resource",
+                c: 2,
+                n: "《圣歌》印本",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1390,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52663,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 5,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 7,
+                n: "花叶金冕",
+            },
+            {
+                id: 10019,
+                t: "Resource",
+                c: 2,
+                n: "《圣歌》印本",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1540,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52664,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 5,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 8,
+                n: "花叶金冕",
+            },
+            {
+                id: 10019,
+                t: "Resource",
+                c: 2,
+                n: "《圣歌》印本",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1690,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52665,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 5,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 4,
+                n: "花叶金冕",
+            },
+            {
+                id: 10019,
+                t: "Resource",
+                c: 3,
+                n: "《圣歌》印本",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1840,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52666,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 7,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 6,
+                n: "花叶金冕",
+            },
+            {
+                id: 10019,
+                t: "Resource",
+                c: 3,
+                n: "《圣歌》印本",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1400,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52667,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 7,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 7,
+                n: "花叶金冕",
+            },
+            {
+                id: 10019,
+                t: "Resource",
+                c: 3,
+                n: "《圣歌》印本",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1580,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52668,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 7,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 8,
+                n: "花叶金冕",
+            },
+            {
+                id: 10019,
+                t: "Resource",
+                c: 3,
+                n: "《圣歌》印本",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1760,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52669,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 7,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 4,
+                n: "花叶金冕",
+            },
+            {
+                id: 10019,
+                t: "Resource",
+                c: 4,
+                n: "《圣歌》印本",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 1940,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 52670,
+        m: "Fixed",
+        child: [
+            {
+                id: 10017,
+                t: "Resource",
+                c: 7,
+                n: "启迪透镜",
+            },
+            {
+                id: 10018,
+                t: "Resource",
+                c: 5,
+                n: "花叶金冕",
+            },
+            {
+                id: 10019,
+                t: "Resource",
+                c: 4,
+                n: "《圣歌》印本",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 2120,
                 n: "铜币",
             },
         ],
@@ -42206,8 +51458,692 @@ const t: import("../data-types").Reward[] = [
             {
                 id: 207,
                 t: "Resource",
-                c: 1,
+                c: 2,
                 n: "委托手册·二",
+            },
+        ],
+    },
+    {
+        id: 74100,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20085,
+                t: "Title",
+                c: 1,
+                n: "卡米拉",
+            },
+        ],
+    },
+    {
+        id: 74101,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20086,
+                t: "Title",
+                c: 1,
+                n: "玛尔洁",
+            },
+        ],
+    },
+    {
+        id: 74102,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20087,
+                t: "Title",
+                c: 1,
+                n: "黎瑟",
+            },
+        ],
+    },
+    {
+        id: 74103,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20088,
+                t: "Title",
+                c: 1,
+                n: "止流",
+            },
+        ],
+    },
+    {
+        id: 74104,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20089,
+                t: "Title",
+                c: 1,
+                n: "煜明",
+            },
+        ],
+    },
+    {
+        id: 74105,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20090,
+                t: "Title",
+                c: 1,
+                n: "兰迪",
+            },
+        ],
+    },
+    {
+        id: 74106,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20091,
+                t: "Title",
+                c: 1,
+                n: "西比尔",
+            },
+        ],
+    },
+    {
+        id: 74107,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20092,
+                t: "Title",
+                c: 1,
+                n: "松露",
+            },
+            {
+                id: 20093,
+                t: "Title",
+                c: 1,
+                n: "榛子",
+            },
+        ],
+    },
+    {
+        id: 74108,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20094,
+                t: "Title",
+                c: 1,
+                n: "奥特赛德",
+            },
+        ],
+    },
+    {
+        id: 74109,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20095,
+                t: "Title",
+                c: 1,
+                n: "赛琪",
+            },
+        ],
+    },
+    {
+        id: 74110,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 20096,
+                t: "Title",
+                c: 1,
+                n: "达芙涅",
+            },
+        ],
+    },
+    {
+        id: 74111,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10085,
+                t: "Title",
+                c: 1,
+                n: "贝蕾妮卡的",
+            },
+        ],
+    },
+    {
+        id: 74112,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10086,
+                t: "Title",
+                c: 1,
+                n: "幻景的",
+            },
+        ],
+    },
+    {
+        id: 74113,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10087,
+                t: "Title",
+                c: 1,
+                n: "莉兹贝尔的",
+            },
+        ],
+    },
+    {
+        id: 74114,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10088,
+                t: "Title",
+                c: 1,
+                n: "妮弗尔夫人的",
+            },
+        ],
+    },
+    {
+        id: 74115,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10089,
+                t: "Title",
+                c: 1,
+                n: "刻舟的",
+            },
+        ],
+    },
+    {
+        id: 74116,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10090,
+                t: "Title",
+                c: 1,
+                n: "苏乙的",
+            },
+        ],
+    },
+    {
+        id: 74117,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10091,
+                t: "Title",
+                c: 1,
+                n: "菲娜的",
+            },
+        ],
+    },
+    {
+        id: 74118,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10092,
+                t: "Title",
+                c: 1,
+                n: "丽蓓卡的",
+            },
+        ],
+    },
+    {
+        id: 74119,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10093,
+                t: "Title",
+                c: 1,
+                n: "伊薇的",
+            },
+        ],
+    },
+    {
+        id: 74120,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10094,
+                t: "Title",
+                c: 1,
+                n: "塔比瑟的",
+            },
+        ],
+    },
+    {
+        id: 74121,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10095,
+                t: "Title",
+                c: 1,
+                n: "扶疏的",
+            },
+        ],
+    },
+    {
+        id: 74122,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10096,
+                t: "Title",
+                c: 1,
+                n: "琳恩的",
+            },
+        ],
+    },
+    {
+        id: 74123,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10097,
+                t: "Title",
+                c: 1,
+                n: "希尔妲的",
+            },
+        ],
+    },
+    {
+        id: 74124,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10098,
+                t: "Title",
+                c: 1,
+                n: "耶尔的",
+            },
+            {
+                id: 10099,
+                t: "Title",
+                c: 1,
+                n: "奥利弗的",
+            },
+        ],
+    },
+    {
+        id: 74125,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10100,
+                t: "Title",
+                c: 1,
+                n: "海尔法的",
+            },
+        ],
+    },
+    {
+        id: 74126,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10101,
+                t: "Title",
+                c: 1,
+                n: "卡米拉的",
+            },
+        ],
+    },
+    {
+        id: 74127,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10102,
+                t: "Title",
+                c: 1,
+                n: "玛尔洁的",
+            },
+        ],
+    },
+    {
+        id: 74128,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10103,
+                t: "Title",
+                c: 1,
+                n: "黎瑟的",
+            },
+        ],
+    },
+    {
+        id: 74129,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10104,
+                t: "Title",
+                c: 1,
+                n: "止流的",
+            },
+        ],
+    },
+    {
+        id: 74130,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10105,
+                t: "Title",
+                c: 1,
+                n: "煜明的",
+            },
+        ],
+    },
+    {
+        id: 74131,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10106,
+                t: "Title",
+                c: 1,
+                n: "兰迪的",
+            },
+        ],
+    },
+    {
+        id: 74132,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10107,
+                t: "Title",
+                c: 1,
+                n: "西比尔的",
+            },
+        ],
+    },
+    {
+        id: 74133,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10108,
+                t: "Title",
+                c: 1,
+                n: "松露的",
+            },
+            {
+                id: 10109,
+                t: "Title",
+                c: 1,
+                n: "榛子的",
+            },
+        ],
+    },
+    {
+        id: 74134,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10110,
+                t: "Title",
+                c: 1,
+                n: "奥特赛德的",
+            },
+        ],
+    },
+    {
+        id: 74135,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10111,
+                t: "Title",
+                c: 1,
+                n: "赛琪的",
+            },
+        ],
+    },
+    {
+        id: 74136,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 1,
+                n: "委托密函线索",
+            },
+            {
+                id: 10112,
+                t: "Title",
+                c: 1,
+                n: "达芙涅的",
             },
         ],
     },
@@ -43172,6 +53108,90 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 82020,
+        m: "Fixed",
+        child: [
+            {
+                id: 10020,
+                t: "HeadFrame",
+                c: 1,
+                n: "UI_HeadFrame_Name_10020",
+            },
+        ],
+    },
+    {
+        id: 82021,
+        m: "Fixed",
+        child: [
+            {
+                id: 10021,
+                t: "HeadFrame",
+                c: 1,
+                n: "UI_HeadFrame_Name_10021",
+            },
+        ],
+    },
+    {
+        id: 82022,
+        m: "Fixed",
+        child: [
+            {
+                id: 10022,
+                t: "HeadFrame",
+                c: 1,
+                n: "UI_HeadFrame_Name_10022",
+            },
+        ],
+    },
+    {
+        id: 82023,
+        m: "Fixed",
+        child: [
+            {
+                id: 10023,
+                t: "HeadFrame",
+                c: 1,
+                n: "UI_HeadFrame_Name_10023",
+            },
+        ],
+    },
+    {
+        id: 82024,
+        m: "Fixed",
+        child: [
+            {
+                id: 10024,
+                t: "HeadFrame",
+                c: 1,
+                n: "UI_HeadFrame_Name_10024",
+            },
+        ],
+    },
+    {
+        id: 82025,
+        m: "Fixed",
+        child: [
+            {
+                id: 10025,
+                t: "HeadFrame",
+                c: 1,
+                n: "UI_HeadFrame_Name_10025",
+            },
+        ],
+    },
+    {
+        id: 82026,
+        m: "Fixed",
+        child: [
+            {
+                id: 10026,
+                t: "HeadFrame",
+                c: 1,
+                n: "UI_HeadFrame_Name_10026",
+            },
+        ],
+    },
+    {
         id: 91001,
         m: "Fixed",
         child: [
@@ -43370,6 +53390,36 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 100004,
+        m: "Fixed",
+        child: [
+            {
+                id: 100,
+                t: "Resource",
+                c: 200,
+                n: "月石",
+            },
+            {
+                id: 110015,
+                t: "Resource",
+                c: 1,
+                n: "流年自选形象礼箱·匆匆",
+            },
+            {
+                id: 208,
+                t: "Resource",
+                c: 5,
+                n: "委托手册·三",
+            },
+            {
+                id: 2004,
+                t: "Resource",
+                c: 5000,
+                n: "诗歌段落",
+            },
+        ],
+    },
+    {
         id: 107001,
         m: "Fixed",
         child: [
@@ -43474,6 +53524,30 @@ const t: import("../data-types").Reward[] = [
                 t: "Walnut",
                 c: 1,
                 n: "密函：幻景",
+            },
+        ],
+    },
+    {
+        id: 109001,
+        m: "Fixed",
+        child: [
+            {
+                id: 208,
+                t: "Resource",
+                c: 3,
+                n: "委托手册·三",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 30000,
+                n: "铜币",
             },
         ],
     },
@@ -43796,20 +53870,20 @@ const t: import("../data-types").Reward[] = [
             {
                 id: 211,
                 t: "Resource",
-                c: 20,
+                c: 40,
                 n: "委托密函线索",
             },
             {
-                id: 2008,
+                id: 102,
                 t: "Resource",
-                c: 4,
-                n: "武器说明书·二",
+                c: 1200,
+                n: "深红凝珠",
             },
             {
-                id: 2012,
+                id: 20013,
                 t: "Resource",
-                c: 4,
-                n: "战斗旋律·二",
+                c: 30,
+                n: "皎皎之民的信物",
             },
         ],
     },
@@ -43820,7 +53894,7 @@ const t: import("../data-types").Reward[] = [
             {
                 id: 101,
                 t: "Resource",
-                c: 10000,
+                c: 40000,
                 n: "铜币",
             },
         ],
@@ -43830,63 +53904,27 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 211,
-                t: "Resource",
-                c: 60,
-                n: "委托密函线索",
-            },
-            {
-                id: 2009,
-                t: "Resource",
-                c: 3,
-                n: "武器说明书·三",
-            },
-            {
-                id: 2013,
-                t: "Resource",
-                c: 3,
-                n: "战斗旋律·三",
-            },
-            {
-                id: 102,
-                t: "Resource",
-                c: 240,
-                n: "深红凝珠",
-            },
-        ],
-    },
-    {
-        id: 110204,
-        m: "Fixed",
-        child: [
-            {
                 id: 202,
                 t: "Resource",
                 c: 1,
                 n: "武器移转模块",
             },
             {
-                id: 2009,
+                id: 101,
                 t: "Resource",
-                c: 3,
-                n: "武器说明书·三",
+                c: 120000,
+                n: "铜币",
             },
             {
-                id: 2013,
+                id: 2014,
                 t: "Resource",
-                c: 3,
-                n: "战斗旋律·三",
-            },
-            {
-                id: 102,
-                t: "Resource",
-                c: 240,
-                n: "深红凝珠",
+                c: 8,
+                n: "战斗旋律·四",
             },
         ],
     },
     {
-        id: 110205,
+        id: 110204,
         m: "Fixed",
         child: [
             {
@@ -43896,57 +53934,45 @@ const t: import("../data-types").Reward[] = [
                 n: "移转模块",
             },
             {
-                id: 2009,
+                id: 2010,
                 t: "Resource",
-                c: 3,
-                n: "武器说明书·三",
-            },
-            {
-                id: 2013,
-                t: "Resource",
-                c: 3,
-                n: "战斗旋律·三",
+                c: 8,
+                n: "武器说明书·四",
             },
             {
                 id: 102,
                 t: "Resource",
-                c: 240,
+                c: 2500,
                 n: "深红凝珠",
             },
         ],
     },
     {
-        id: 110206,
+        id: 110205,
         m: "Fixed",
         child: [
             {
                 id: 211,
                 t: "Resource",
-                c: 120,
+                c: 240,
                 n: "委托密函线索",
             },
             {
-                id: 2009,
+                id: 101,
                 t: "Resource",
-                c: 3,
-                n: "武器说明书·三",
+                c: 160000,
+                n: "铜币",
             },
             {
-                id: 2013,
+                id: 2014,
                 t: "Resource",
-                c: 3,
-                n: "战斗旋律·三",
-            },
-            {
-                id: 102,
-                t: "Resource",
-                c: 240,
-                n: "深红凝珠",
+                c: 8,
+                n: "战斗旋律·四",
             },
         ],
     },
     {
-        id: 110207,
+        id: 110206,
         m: "Fixed",
         child: [
             {
@@ -43956,22 +53982,46 @@ const t: import("../data-types").Reward[] = [
                 n: "暮夜的履迹",
             },
             {
-                id: 2009,
+                id: 2010,
                 t: "Resource",
-                c: 3,
-                n: "武器说明书·三",
-            },
-            {
-                id: 2013,
-                t: "Resource",
-                c: 3,
-                n: "战斗旋律·三",
+                c: 8,
+                n: "武器说明书·四",
             },
             {
                 id: 102,
                 t: "Resource",
-                c: 240,
+                c: 2500,
                 n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 110207,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 200000,
+                n: "铜币",
+            },
+            {
+                id: 2010,
+                t: "Resource",
+                c: 8,
+                n: "武器说明书·四",
+            },
+            {
+                id: 2014,
+                t: "Resource",
+                c: 8,
+                n: "战斗旋律·四",
+            },
+            {
+                id: 10023,
+                t: "WeaponAccessory",
+                c: 1,
+                n: "蛋皎玩偶",
             },
         ],
     },
@@ -44846,6 +54896,1848 @@ const t: import("../data-types").Reward[] = [
                 t: "Resource",
                 c: 20,
                 n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 110601,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 90000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 110602,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 40,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 110603,
+        m: "Fixed",
+        child: [
+            {
+                id: 207,
+                t: "Resource",
+                c: 8,
+                n: "委托手册·二",
+            },
+        ],
+    },
+    {
+        id: 110604,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 180000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 110605,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 110606,
+        m: "Fixed",
+        child: [
+            {
+                id: 208,
+                t: "Resource",
+                c: 3,
+                n: "委托手册·三",
+            },
+        ],
+    },
+    {
+        id: 110607,
+        m: "Fixed",
+        child: [
+            {
+                id: 10100,
+                t: "Resource",
+                c: 1,
+                n: "暮夜的履迹",
+            },
+        ],
+    },
+    {
+        id: 110608,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 45,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 110609,
+        m: "Fixed",
+        child: [
+            {
+                id: 207,
+                t: "Resource",
+                c: 8,
+                n: "委托手册·二",
+            },
+        ],
+    },
+    {
+        id: 110610,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 75,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 110611,
+        m: "Fixed",
+        child: [
+            {
+                id: 208,
+                t: "Resource",
+                c: 3,
+                n: "委托手册·三",
+            },
+        ],
+    },
+    {
+        id: 110612,
+        m: "Fixed",
+        child: [
+            {
+                id: 10100,
+                t: "Resource",
+                c: 1,
+                n: "暮夜的履迹",
+            },
+        ],
+    },
+    {
+        id: 110701,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 100000,
+                n: "铜币",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 9,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 30,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 110702,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 9,
+                n: "武器说明书·三",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1000,
+                n: "深红凝珠",
+            },
+            {
+                id: 30113,
+                t: "Resource",
+                c: 1,
+                n: "中级染剂·棕色-浅【待包装】",
+            },
+        ],
+    },
+    {
+        id: 110703,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 100000,
+                n: "铜币",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1000,
+                n: "深红凝珠",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 30,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 110704,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 120000,
+                n: "铜币",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1000,
+                n: "深红凝珠",
+            },
+            {
+                id: 30114,
+                t: "Resource",
+                c: 1,
+                n: "中级染剂·棕色-深【待包装】",
+            },
+        ],
+    },
+    {
+        id: 110705,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+            {
+                id: 2014,
+                t: "Resource",
+                c: 5,
+                n: "战斗旋律·四",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1500,
+                n: "深红凝珠",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 40,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 110706,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+            {
+                id: 2010,
+                t: "Resource",
+                c: 5,
+                n: "武器说明书·四",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 40,
+                n: "皎皎之民的信物",
+            },
+            {
+                id: 30115,
+                t: "Resource",
+                c: 1,
+                n: "中级染剂·绿色-浅【待包装】",
+            },
+        ],
+    },
+    {
+        id: 110707,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 160000,
+                n: "铜币",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1500,
+                n: "深红凝珠",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 40,
+                n: "皎皎之民的信物",
+            },
+            {
+                id: 30116,
+                t: "Resource",
+                c: 1,
+                n: "中级染剂·绿色-深【待包装】",
+            },
+        ],
+    },
+    {
+        id: 110801,
+        m: "Fixed",
+        child: [
+            {
+                id: 207,
+                t: "Resource",
+                c: 8,
+                n: "委托手册·二",
+            },
+        ],
+    },
+    {
+        id: 110802,
+        m: "Fixed",
+        child: [
+            {
+                id: 208,
+                t: "Resource",
+                c: 4,
+                n: "委托手册·三",
+            },
+        ],
+    },
+    {
+        id: 110803,
+        m: "Fixed",
+        child: [
+            {
+                id: 208,
+                t: "Resource",
+                c: 4,
+                n: "委托手册·三",
+            },
+        ],
+    },
+    {
+        id: 110804,
+        m: "Fixed",
+        child: [
+            {
+                id: 208,
+                t: "Resource",
+                c: 4,
+                n: "委托手册·三",
+            },
+        ],
+    },
+    {
+        id: 110805,
+        m: "Fixed",
+        child: [
+            {
+                id: 209,
+                t: "Resource",
+                c: 2,
+                n: "委托手册·四",
+            },
+        ],
+    },
+    {
+        id: 110806,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 110807,
+        m: "Fixed",
+        child: [
+            {
+                id: 208,
+                t: "Resource",
+                c: 4,
+                n: "委托手册·三",
+            },
+        ],
+    },
+    {
+        id: 110808,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 100,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 110809,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 400,
+                n: "委托密函线索",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 240000,
+                n: "铜币",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 10000,
+                n: "深红凝珠",
+            },
+            {
+                id: 208,
+                t: "Resource",
+                c: 5,
+                n: "委托手册·三",
+            },
+            {
+                id: 41001,
+                t: "Mod",
+                c: 1,
+                n: "炽灼",
+            },
+            {
+                id: 41002,
+                t: "Mod",
+                c: 1,
+                n: "涅槃",
+            },
+            {
+                id: 41004,
+                t: "Mod",
+                c: 1,
+                n: "羽翼",
+            },
+            {
+                id: 42001,
+                t: "Mod",
+                c: 1,
+                n: "攻势",
+            },
+            {
+                id: 42006,
+                t: "Mod",
+                c: 1,
+                n: "缠缚",
+            },
+            {
+                id: 43001,
+                t: "Mod",
+                c: 1,
+                n: "攻势",
+            },
+            {
+                id: 43006,
+                t: "Mod",
+                c: 1,
+                n: "缠缚",
+            },
+        ],
+    },
+    {
+        id: 110901,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 300000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 110902,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+            {
+                id: 2014,
+                t: "Resource",
+                c: 8,
+                n: "战斗旋律·四",
+            },
+        ],
+    },
+    {
+        id: 110903,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+            {
+                id: 2010,
+                t: "Resource",
+                c: 8,
+                n: "武器说明书·四",
+            },
+        ],
+    },
+    {
+        id: 110904,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+            {
+                id: 10087,
+                t: "CharAccessory",
+                c: 1,
+                n: "银鳞鱼",
+            },
+        ],
+    },
+    {
+        id: 110905,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 5000,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 110906,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 100,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 110907,
+        m: "Fixed",
+        child: [
+            {
+                id: 10088,
+                t: "CharAccessory",
+                c: 1,
+                n: "死鱗鱼",
+            },
+        ],
+    },
+    {
+        id: 110908,
+        m: "Fixed",
+        child: [
+            {
+                id: 10089,
+                t: "CharAccessory",
+                c: 1,
+                n: "红鳞鱼",
+            },
+        ],
+    },
+    {
+        id: 111001,
+        m: "Fixed",
+        child: [
+            {
+                id: 2014,
+                t: "Resource",
+                c: 4,
+                n: "战斗旋律·四",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 800,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111002,
+        m: "Fixed",
+        child: [
+            {
+                id: 2010,
+                t: "Resource",
+                c: 4,
+                n: "武器说明书·四",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 40,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111003,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 80000,
+                n: "铜币",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 800,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111004,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 80000,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 40,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111005,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+            {
+                id: 41007,
+                t: "Resource",
+                c: 1,
+                n: "整备动作·近战武器",
+            },
+            {
+                id: 30112,
+                t: "Resource",
+                c: 5,
+                n: "虹彩染剂",
+            },
+        ],
+    },
+    {
+        id: 111006,
+        m: "Fixed",
+        child: [
+            {
+                id: 2014,
+                t: "Resource",
+                c: 4,
+                n: "战斗旋律·四",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1000,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111007,
+        m: "Fixed",
+        child: [
+            {
+                id: 2010,
+                t: "Resource",
+                c: 4,
+                n: "武器说明书·四",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 60,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111008,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 100000,
+                n: "铜币",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1000,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111009,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 100000,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 60,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111010,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 80,
+                n: "委托密函线索",
+            },
+            {
+                id: 301,
+                t: "Resource",
+                c: 1,
+                n: "声名许可·冰湖城",
+            },
+            {
+                id: 30105,
+                t: "HeadSculpture",
+                c: 1,
+                n: "大军团长的肖像·俯瞰",
+            },
+        ],
+    },
+    {
+        id: 111011,
+        m: "Fixed",
+        child: [
+            {
+                id: 2014,
+                t: "Resource",
+                c: 4,
+                n: "战斗旋律·四",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1200,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111012,
+        m: "Fixed",
+        child: [
+            {
+                id: 2010,
+                t: "Resource",
+                c: 4,
+                n: "武器说明书·四",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 80,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111013,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 120000,
+                n: "铜币",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1200,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111014,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 120000,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 80,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111015,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 100,
+                n: "委托密函线索",
+            },
+            {
+                id: 202,
+                t: "Resource",
+                c: 1,
+                n: "武器移转模块",
+            },
+            {
+                id: 30106,
+                t: "HeadSculpture",
+                c: 1,
+                n: "粮秣专员的肖像·慌乱",
+            },
+        ],
+    },
+    {
+        id: 111016,
+        m: "Fixed",
+        child: [
+            {
+                id: 2014,
+                t: "Resource",
+                c: 4,
+                n: "战斗旋律·四",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1500,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111017,
+        m: "Fixed",
+        child: [
+            {
+                id: 2010,
+                t: "Resource",
+                c: 4,
+                n: "武器说明书·四",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 100,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111018,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 150000,
+                n: "铜币",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1500,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111019,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 150000,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 100,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111020,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 120,
+                n: "委托密函线索",
+            },
+            {
+                id: 10018,
+                t: "WeaponAccessory",
+                c: 1,
+                n: "小鸡啾啾·涅白",
+            },
+            {
+                id: 30104,
+                t: "HeadSculpture",
+                c: 1,
+                n: "逐灯者的肖像·眺望",
+            },
+        ],
+    },
+    {
+        id: 111021,
+        m: "Fixed",
+        child: [
+            {
+                id: 2014,
+                t: "Resource",
+                c: 4,
+                n: "战斗旋律·四",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1800,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111022,
+        m: "Fixed",
+        child: [
+            {
+                id: 2010,
+                t: "Resource",
+                c: 4,
+                n: "武器说明书·四",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 120,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111023,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 180000,
+                n: "铜币",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1800,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111024,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 180000,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 120,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111025,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 120,
+                n: "委托密函线索",
+            },
+            {
+                id: 201,
+                t: "Resource",
+                c: 1,
+                n: "移转模块",
+            },
+            {
+                id: 30103,
+                t: "HeadSculpture",
+                c: 1,
+                n: "夜莺小姐的肖像·绿荫",
+            },
+        ],
+    },
+    {
+        id: 111026,
+        m: "Fixed",
+        child: [
+            {
+                id: 2014,
+                t: "Resource",
+                c: 5,
+                n: "战斗旋律·四",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 2400,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111027,
+        m: "Fixed",
+        child: [
+            {
+                id: 2010,
+                t: "Resource",
+                c: 5,
+                n: "武器说明书·四",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 150,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111028,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 240000,
+                n: "铜币",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 2400,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111029,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 240000,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 150,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111030,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 120,
+                n: "委托密函线索",
+            },
+            {
+                id: 10100,
+                t: "Resource",
+                c: 2,
+                n: "暮夜的履迹",
+            },
+            {
+                id: 30102,
+                t: "HeadSculpture",
+                c: 1,
+                n: "回忆中的肖像·决意",
+            },
+        ],
+    },
+    {
+        id: 111031,
+        m: "Fixed",
+        child: [
+            {
+                id: 2014,
+                t: "Resource",
+                c: 4,
+                n: "战斗旋律·四",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 800,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111032,
+        m: "Fixed",
+        child: [
+            {
+                id: 2010,
+                t: "Resource",
+                c: 4,
+                n: "武器说明书·四",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 40,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111033,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 80000,
+                n: "铜币",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 800,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111034,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 80000,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 40,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111035,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+            {
+                id: 41008,
+                t: "Resource",
+                c: 1,
+                n: "整备动作·远程武器",
+            },
+            {
+                id: 30112,
+                t: "Resource",
+                c: 5,
+                n: "虹彩染剂",
+            },
+        ],
+    },
+    {
+        id: 111036,
+        m: "Fixed",
+        child: [
+            {
+                id: 2014,
+                t: "Resource",
+                c: 4,
+                n: "战斗旋律·四",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1000,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111037,
+        m: "Fixed",
+        child: [
+            {
+                id: 2010,
+                t: "Resource",
+                c: 4,
+                n: "武器说明书·四",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 60,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111038,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 100000,
+                n: "铜币",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1000,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111039,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 100000,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 60,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111040,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 80,
+                n: "委托密函线索",
+            },
+            {
+                id: 302,
+                t: "Resource",
+                c: 1,
+                n: "声名许可·烟津渡",
+            },
+            {
+                id: 30097,
+                t: "HeadSculpture",
+                c: 1,
+                n: "负罪者的肖像·小憩",
+            },
+        ],
+    },
+    {
+        id: 111041,
+        m: "Fixed",
+        child: [
+            {
+                id: 2014,
+                t: "Resource",
+                c: 4,
+                n: "战斗旋律·四",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1200,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111042,
+        m: "Fixed",
+        child: [
+            {
+                id: 2010,
+                t: "Resource",
+                c: 4,
+                n: "武器说明书·四",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 80,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111043,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 120000,
+                n: "铜币",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1200,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111044,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 120000,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 80,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111045,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 100,
+                n: "委托密函线索",
+            },
+            {
+                id: 202,
+                t: "Resource",
+                c: 1,
+                n: "武器移转模块",
+            },
+            {
+                id: 30101,
+                t: "HeadSculpture",
+                c: 1,
+                n: "华胥药师的肖像·专注",
+            },
+        ],
+    },
+    {
+        id: 111046,
+        m: "Fixed",
+        child: [
+            {
+                id: 2014,
+                t: "Resource",
+                c: 4,
+                n: "战斗旋律·四",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1500,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111047,
+        m: "Fixed",
+        child: [
+            {
+                id: 2010,
+                t: "Resource",
+                c: 4,
+                n: "武器说明书·四",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 100,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111048,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 150000,
+                n: "铜币",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1500,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111049,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 150000,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 100,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111050,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 120,
+                n: "委托密函线索",
+            },
+            {
+                id: 10020,
+                t: "WeaponAccessory",
+                c: 1,
+                n: "小鸡啾啾·黛蓝",
+            },
+            {
+                id: 30098,
+                t: "HeadSculpture",
+                c: 1,
+                n: "飘零剑客的肖像·雨夜",
+            },
+        ],
+    },
+    {
+        id: 111051,
+        m: "Fixed",
+        child: [
+            {
+                id: 2014,
+                t: "Resource",
+                c: 4,
+                n: "战斗旋律·四",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1800,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111052,
+        m: "Fixed",
+        child: [
+            {
+                id: 2010,
+                t: "Resource",
+                c: 4,
+                n: "武器说明书·四",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 120,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111053,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 180000,
+                n: "铜币",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 1800,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111054,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 180000,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 120,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111055,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 120,
+                n: "委托密函线索",
+            },
+            {
+                id: 201,
+                t: "Resource",
+                c: 1,
+                n: "移转模块",
+            },
+            {
+                id: 30100,
+                t: "HeadSculpture",
+                c: 1,
+                n: "黑与白·烛阴",
+            },
+        ],
+    },
+    {
+        id: 111056,
+        m: "Fixed",
+        child: [
+            {
+                id: 2014,
+                t: "Resource",
+                c: 5,
+                n: "战斗旋律·四",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 2400,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111057,
+        m: "Fixed",
+        child: [
+            {
+                id: 2010,
+                t: "Resource",
+                c: 5,
+                n: "武器说明书·四",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 150,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111058,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 240000,
+                n: "铜币",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 2400,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 111059,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 240000,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 150,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 111060,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 120,
+                n: "委托密函线索",
+            },
+            {
+                id: 10100,
+                t: "Resource",
+                c: 2,
+                n: "暮夜的履迹",
+            },
+            {
+                id: 30099,
+                t: "HeadSculpture",
+                c: 1,
+                n: "黑与白·太皓",
+            },
+        ],
+    },
+    {
+        id: 114001,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 80000,
+                n: "铜币",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+            {
+                id: 207,
+                t: "Resource",
+                c: 8,
+                n: "委托手册·二",
+            },
+            {
+                id: 208,
+                t: "Resource",
+                c: 5,
+                n: "委托手册·三",
             },
         ],
     },
@@ -46534,6 +58426,66 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 135005,
+        m: "Sequence",
+        child: [
+            {
+                id: 43701,
+                t: "Mod",
+                c: 1,
+                p: 6,
+                dp: 1,
+                n: "摄魂",
+            },
+            {
+                id: 43702,
+                t: "Mod",
+                c: 1,
+                p: 6,
+                dp: 1,
+                n: "变幻",
+            },
+            {
+                id: 43703,
+                t: "Mod",
+                c: 1,
+                p: 6,
+                dp: 1,
+                n: "诅咒",
+            },
+        ],
+    },
+    {
+        id: 135006,
+        m: "Sequence",
+        child: [
+            {
+                id: 43312,
+                t: "Mod",
+                c: 1,
+                p: 6,
+                dp: 1,
+                n: "狂热",
+            },
+            {
+                id: 43342,
+                t: "Mod",
+                c: 1,
+                p: 6,
+                dp: 1,
+                n: "反转",
+            },
+            {
+                id: 43343,
+                t: "Mod",
+                c: 1,
+                p: 6,
+                dp: 1,
+                n: "衰朽",
+            },
+        ],
+    },
+    {
         id: 135501,
         m: "Sequence",
         child: [
@@ -46950,6 +58902,66 @@ const t: import("../data-types").Reward[] = [
                 p: 45,
                 dp: 1,
                 n: "失速",
+            },
+        ],
+    },
+    {
+        id: 136009,
+        m: "Sequence",
+        child: [
+            {
+                id: 41745,
+                t: "Mod",
+                c: 1,
+                p: 10,
+                dp: 1,
+                n: "权能",
+            },
+            {
+                id: 42412,
+                t: "Mod",
+                c: 1,
+                p: 45,
+                dp: 1,
+                n: "迅捷蓄势",
+            },
+            {
+                id: 43404,
+                t: "Mod",
+                c: 1,
+                p: 45,
+                dp: 1,
+                n: "增速",
+            },
+        ],
+    },
+    {
+        id: 136010,
+        m: "Sequence",
+        child: [
+            {
+                id: 41746,
+                t: "Mod",
+                c: 1,
+                p: 10,
+                dp: 1,
+                n: "决断",
+            },
+            {
+                id: 42511,
+                t: "Mod",
+                c: 1,
+                p: 45,
+                dp: 1,
+                n: "刺透",
+            },
+            {
+                id: 43511,
+                t: "Mod",
+                c: 1,
+                p: 45,
+                dp: 1,
+                n: "刺透",
             },
         ],
     },
@@ -47404,6 +59416,36 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 137007,
+        m: "Sequence",
+        child: [
+            {
+                id: 53009,
+                t: "Mod",
+                c: 1,
+                p: 10,
+                d: 1,
+                n: "专注·威压",
+            },
+            {
+                id: 53010,
+                t: "Mod",
+                c: 1,
+                p: 10,
+                d: 1,
+                n: "盛怒·聚焦",
+            },
+            {
+                id: 53012,
+                t: "Mod",
+                c: 1,
+                p: 10,
+                d: 1,
+                n: "迅捷·箭匣",
+            },
+        ],
+    },
+    {
         id: 138001,
         m: "Sequence",
         child: [
@@ -47566,6 +59608,158 @@ const t: import("../data-types").Reward[] = [
                 p: 10,
                 d: 1,
                 n: "羽翼·鼓舞·背水",
+            },
+            {
+                id: 51002,
+                t: "Mod",
+                c: 1,
+                p: 30,
+                d: 1,
+                n: "涅槃",
+            },
+            {
+                id: 51003,
+                t: "Mod",
+                c: 1,
+                p: 30,
+                d: 1,
+                n: "庇佑",
+            },
+            {
+                id: 51007,
+                t: "Mod",
+                c: 1,
+                p: 30,
+                d: 1,
+                n: "坚守",
+            },
+        ],
+    },
+    {
+        id: 138006,
+        m: "Sequence",
+        child: [
+            {
+                id: 56141,
+                t: "Mod",
+                c: 1,
+                p: 10,
+                d: 1,
+                n: "决断",
+            },
+            {
+                id: 51002,
+                t: "Mod",
+                c: 1,
+                p: 30,
+                d: 1,
+                n: "涅槃",
+            },
+            {
+                id: 51003,
+                t: "Mod",
+                c: 1,
+                p: 30,
+                d: 1,
+                n: "庇佑",
+            },
+            {
+                id: 51007,
+                t: "Mod",
+                c: 1,
+                p: 30,
+                d: 1,
+                n: "坚守",
+            },
+        ],
+    },
+    {
+        id: 138007,
+        m: "Sequence",
+        child: [
+            {
+                id: 56143,
+                t: "Mod",
+                c: 1,
+                p: 10,
+                d: 1,
+                n: "昂扬",
+            },
+            {
+                id: 51002,
+                t: "Mod",
+                c: 1,
+                p: 30,
+                d: 1,
+                n: "涅槃",
+            },
+            {
+                id: 51003,
+                t: "Mod",
+                c: 1,
+                p: 30,
+                d: 1,
+                n: "庇佑",
+            },
+            {
+                id: 51007,
+                t: "Mod",
+                c: 1,
+                p: 30,
+                d: 1,
+                n: "坚守",
+            },
+        ],
+    },
+    {
+        id: 138008,
+        m: "Sequence",
+        child: [
+            {
+                id: 56142,
+                t: "Mod",
+                c: 1,
+                p: 10,
+                d: 1,
+                n: "羽翼·鼓舞·决断",
+            },
+            {
+                id: 51002,
+                t: "Mod",
+                c: 1,
+                p: 30,
+                d: 1,
+                n: "涅槃",
+            },
+            {
+                id: 51003,
+                t: "Mod",
+                c: 1,
+                p: 30,
+                d: 1,
+                n: "庇佑",
+            },
+            {
+                id: 51007,
+                t: "Mod",
+                c: 1,
+                p: 30,
+                d: 1,
+                n: "坚守",
+            },
+        ],
+    },
+    {
+        id: 138009,
+        m: "Sequence",
+        child: [
+            {
+                id: 56144,
+                t: "Mod",
+                c: 1,
+                p: 10,
+                d: 1,
+                n: "羽翼·鼓舞·昂扬",
             },
             {
                 id: 51002,
@@ -58452,7 +70646,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 218,
+                id: 220,
                 t: "Resource",
                 c: 500,
                 n: "狩月纪念币",
@@ -58464,7 +70658,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 218,
+                id: 220,
                 t: "Resource",
                 c: 1000,
                 n: "狩月纪念币",
@@ -58476,7 +70670,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 218,
+                id: 220,
                 t: "Resource",
                 c: 1500,
                 n: "狩月纪念币",
@@ -58488,7 +70682,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 218,
+                id: 220,
                 t: "Resource",
                 c: 3000,
                 n: "狩月纪念币",
@@ -58500,7 +70694,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 218,
+                id: 220,
                 t: "Resource",
                 c: 4000,
                 n: "狩月纪念币",
@@ -58512,7 +70706,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 218,
+                id: 220,
                 t: "Resource",
                 c: 5000,
                 n: "狩月纪念币",
@@ -58524,7 +70718,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 218,
+                id: 220,
                 t: "Resource",
                 c: 1,
                 n: "狩月纪念币",
@@ -58536,13 +70730,13 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 10008,
+                id: 10013,
                 t: "TitleFrame",
                 c: 1,
-                n: "SSS级狩月人",
+                n: "SSS级狩月人——1.2版本【待包装】",
             },
             {
-                id: 218,
+                id: 220,
                 t: "Resource",
                 c: 3000,
                 n: "狩月纪念币",
@@ -58566,13 +70760,13 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 10009,
+                id: 10014,
                 t: "TitleFrame",
                 c: 1,
-                n: "SS级狩月人",
+                n: "SS级狩月人——1.2版本【待包装】",
             },
             {
-                id: 218,
+                id: 220,
                 t: "Resource",
                 c: 2500,
                 n: "狩月纪念币",
@@ -58596,13 +70790,13 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 10010,
+                id: 10015,
                 t: "TitleFrame",
                 c: 1,
-                n: "S级狩月人",
+                n: "S级狩月人——1.2版本【待包装】",
             },
             {
-                id: 218,
+                id: 220,
                 t: "Resource",
                 c: 2000,
                 n: "狩月纪念币",
@@ -58626,13 +70820,13 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 10012,
+                id: 10016,
                 t: "TitleFrame",
                 c: 1,
-                n: "A级狩月人",
+                n: "B级狩月人——1.2版本【待包装】",
             },
             {
-                id: 218,
+                id: 220,
                 t: "Resource",
                 c: 1500,
                 n: "狩月纪念币",
@@ -58656,13 +70850,13 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 10011,
+                id: 10017,
                 t: "TitleFrame",
                 c: 1,
-                n: "B级狩月人",
+                n: "A级狩月人——1.2版本【待包装】",
             },
             {
-                id: 218,
+                id: 220,
                 t: "Resource",
                 c: 1000,
                 n: "狩月纪念币",
@@ -58734,7 +70928,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 218,
+                id: 220,
                 t: "Resource",
                 c: 30,
                 n: "狩月纪念币",
@@ -58746,7 +70940,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 218,
+                id: 220,
                 t: "Resource",
                 c: 40,
                 n: "狩月纪念币",
@@ -58758,10 +70952,1258 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 218,
+                id: 220,
                 t: "Resource",
                 c: 50,
                 n: "狩月纪念币",
+            },
+        ],
+    },
+    {
+        id: 301000,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 301001,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 30000,
+                n: "铜币",
+            },
+            {
+                id: 102,
+                t: "Resource",
+                c: 500,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 301002,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 30000,
+                n: "铜币",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 3,
+                n: "战斗旋律·三",
+            },
+        ],
+    },
+    {
+        id: 301003,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 30000,
+                n: "铜币",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 3,
+                n: "武器说明书·三",
+            },
+        ],
+    },
+    {
+        id: 301004,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 30000,
+                n: "铜币",
+            },
+            {
+                id: 20013,
+                t: "Resource",
+                c: 10,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 301005,
+        m: "Fixed",
+        child: [
+            {
+                id: 102,
+                t: "Resource",
+                c: 500,
+                n: "深红凝珠",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 3,
+                n: "战斗旋律·三",
+            },
+        ],
+    },
+    {
+        id: 301006,
+        m: "Fixed",
+        child: [
+            {
+                id: 102,
+                t: "Resource",
+                c: 500,
+                n: "深红凝珠",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 3,
+                n: "武器说明书·三",
+            },
+        ],
+    },
+    {
+        id: 301007,
+        m: "Fixed",
+        child: [
+            {
+                id: 20013,
+                t: "Resource",
+                c: 10,
+                n: "皎皎之民的信物",
+            },
+            {
+                id: 2013,
+                t: "Resource",
+                c: 3,
+                n: "战斗旋律·三",
+            },
+        ],
+    },
+    {
+        id: 301008,
+        m: "Fixed",
+        child: [
+            {
+                id: 20013,
+                t: "Resource",
+                c: 10,
+                n: "皎皎之民的信物",
+            },
+            {
+                id: 2009,
+                t: "Resource",
+                c: 3,
+                n: "武器说明书·三",
+            },
+        ],
+    },
+    {
+        id: 302001,
+        m: "Fixed",
+        child: [
+            {
+                id: 6100120,
+                t: "Resource",
+                c: 1,
+                n: "野蜂暗箭机傀I",
+            },
+            {
+                id: 6100009,
+                t: "Resource",
+                c: 1,
+                n: "攻击·护盾符石",
+            },
+        ],
+    },
+    {
+        id: 302002,
+        m: "Fixed",
+        child: [
+            {
+                id: 6100108,
+                t: "Resource",
+                c: 1,
+                n: "狙击列兵机傀I",
+            },
+            {
+                id: 6100007,
+                t: "Resource",
+                c: 1,
+                n: "攻击·生命符石",
+            },
+        ],
+    },
+    {
+        id: 302003,
+        m: "Fixed",
+        child: [
+            {
+                id: 6100121,
+                t: "Resource",
+                c: 1,
+                n: "野蜂密探机傀I",
+            },
+            {
+                id: 6100006,
+                t: "Resource",
+                c: 1,
+                n: "攻击·防御符石",
+            },
+        ],
+    },
+    {
+        id: 302004,
+        m: "Fixed",
+        child: [
+            {
+                id: 6100010,
+                t: "Resource",
+                c: 1,
+                n: "击溃符石",
+            },
+        ],
+    },
+    {
+        id: 302005,
+        m: "Fixed",
+        child: [
+            {
+                id: 6100105,
+                t: "Resource",
+                c: 1,
+                n: "笼草秽兽机傀I",
+            },
+            {
+                id: 6100011,
+                t: "Resource",
+                c: 1,
+                n: "瓦解符石",
+            },
+        ],
+    },
+    {
+        id: 302006,
+        m: "Fixed",
+        child: [
+            {
+                id: 6100012,
+                t: "Resource",
+                c: 1,
+                n: "淬炼符石",
+            },
+        ],
+    },
+    {
+        id: 302007,
+        m: "Fixed",
+        child: [
+            {
+                id: 6100107,
+                t: "Resource",
+                c: 1,
+                n: "游击秽兽机傀II",
+            },
+            {
+                id: 6100036,
+                t: "Resource",
+                c: 1,
+                n: "浴血符石",
+            },
+        ],
+    },
+    {
+        id: 302008,
+        m: "Fixed",
+        child: [
+            {
+                id: 6100113,
+                t: "Resource",
+                c: 1,
+                n: "远征列兵机傀II",
+            },
+        ],
+    },
+    {
+        id: 302009,
+        m: "Fixed",
+        child: [
+            {
+                id: 6100118,
+                t: "Resource",
+                c: 1,
+                n: "蒙恩的神甫机傀I",
+            },
+            {
+                id: 6100028,
+                t: "Resource",
+                c: 1,
+                n: "猩红符石",
+            },
+        ],
+    },
+    {
+        id: 302010,
+        m: "Fixed",
+        child: [
+            {
+                id: 6100106,
+                t: "Resource",
+                c: 1,
+                n: "疾冲秽兽机傀II",
+            },
+            {
+                id: 6100034,
+                t: "Resource",
+                c: 1,
+                n: "舍身符石",
+            },
+        ],
+    },
+    {
+        id: 302011,
+        m: "Fixed",
+        child: [
+            {
+                id: 6100112,
+                t: "Resource",
+                c: 1,
+                n: "帝皇之仁机傀I",
+            },
+            {
+                id: 6100025,
+                t: "Resource",
+                c: 1,
+                n: "爆破符石",
+            },
+        ],
+    },
+    {
+        id: 302012,
+        m: "Fixed",
+        child: [
+            {
+                id: 6100115,
+                t: "Resource",
+                c: 1,
+                n: "警戒机机傀I",
+            },
+            {
+                id: 6100031,
+                t: "Resource",
+                c: 1,
+                n: "复仇符石",
+            },
+        ],
+    },
+    {
+        id: 302013,
+        m: "Fixed",
+        child: [
+            {
+                id: 6100111,
+                t: "Resource",
+                c: 1,
+                n: "精锐士官机傀I",
+            },
+            {
+                id: 6100026,
+                t: "Resource",
+                c: 1,
+                n: "侵蚀符石",
+            },
+        ],
+    },
+    {
+        id: 302014,
+        m: "Fixed",
+        child: [
+            {
+                id: 6100033,
+                t: "Resource",
+                c: 1,
+                n: "残火符石",
+            },
+        ],
+    },
+    {
+        id: 302015,
+        m: "Fixed",
+        child: [
+            {
+                id: 10113,
+                t: "Title",
+                c: 1,
+                n: "机枢派的",
+            },
+        ],
+    },
+    {
+        id: 302016,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 50,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302017,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 50,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+            {
+                id: 6100119,
+                t: "Resource",
+                c: 1,
+                n: "野蜂利刃机傀I",
+            },
+            {
+                id: 6100005,
+                t: "Resource",
+                c: 1,
+                n: "生命·防御符石",
+            },
+        ],
+    },
+    {
+        id: 302018,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 50,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+            {
+                id: 6100103,
+                t: "Resource",
+                c: 1,
+                n: "漂浮秽兽机傀I",
+            },
+            {
+                id: 6100014,
+                t: "Resource",
+                c: 1,
+                n: "疗愈符石",
+            },
+        ],
+    },
+    {
+        id: 302019,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 60,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 30,
+                n: "委托密函线索",
+            },
+            {
+                id: 6100017,
+                t: "Resource",
+                c: 1,
+                n: "亢奋符石",
+            },
+        ],
+    },
+    {
+        id: 302020,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 60,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 30,
+                n: "委托密函线索",
+            },
+            {
+                id: 6100104,
+                t: "Resource",
+                c: 1,
+                n: "暴徒秽兽机傀I",
+            },
+            {
+                id: 6100019,
+                t: "Resource",
+                c: 1,
+                n: "仁心符石",
+            },
+        ],
+    },
+    {
+        id: 302021,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 60,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 30,
+                n: "委托密函线索",
+            },
+            {
+                id: 6100114,
+                t: "Resource",
+                c: 1,
+                n: "突击列兵机傀II",
+            },
+        ],
+    },
+    {
+        id: 302022,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 80,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 30,
+                n: "委托密函线索",
+            },
+            {
+                id: 6100027,
+                t: "Resource",
+                c: 1,
+                n: "霹雳符石",
+            },
+        ],
+    },
+    {
+        id: 302023,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 100,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 30,
+                n: "委托密函线索",
+            },
+            {
+                id: 20097,
+                t: "Title",
+                c: 1,
+                n: "神之一手",
+            },
+        ],
+    },
+    {
+        id: 302024,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 60,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 25,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302025,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 100,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 50,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302026,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 60,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 25,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302027,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 100,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 50,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302028,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 80,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 30,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302029,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 80,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 40,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302030,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 60,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 30,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302031,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 60,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 30,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302032,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 100,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 50,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302033,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 60,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 30,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302034,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 60,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 30,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302035,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 100,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 50,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302036,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 20,
+                n: "齿轮",
+            },
+        ],
+    },
+    {
+        id: 302037,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 25,
+                n: "齿轮",
+            },
+        ],
+    },
+    {
+        id: 302038,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 10,
+                n: "齿轮",
+            },
+        ],
+    },
+    {
+        id: 302039,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 15,
+                n: "齿轮",
+            },
+        ],
+    },
+    {
+        id: 302040,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 30,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302041,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 30,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302042,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 30,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302043,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 30,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302044,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 30,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302045,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 30,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302046,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 30,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302047,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 30,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302048,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 30,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302049,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 30,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 20,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302050,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 40,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 30,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302051,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 40,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 30,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302052,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 40,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 30,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302053,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 40,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 30,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302054,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 40,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 30,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302055,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 80,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 40,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302056,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 80,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 40,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302057,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 80,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 40,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302058,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 80,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 40,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302059,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 100,
+                n: "齿轮",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 40,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 302060,
+        m: "Fixed",
+        child: [
+            {
+                id: 219,
+                t: "Resource",
+                c: 10,
+                n: "齿轮",
+            },
+        ],
+    },
+    {
+        id: 302061,
+        m: "Fixed",
+        child: [
+            {
+                id: 30107,
+                t: "HeadSculpture",
+                c: 1,
+                n: "机傀大乱斗",
             },
         ],
     },
@@ -59157,21 +72599,21 @@ const t: import("../data-types").Reward[] = [
                 t: "Walnut",
                 c: 3,
                 p: 10000,
-                n: "密函：雀舞云屏",
+                n: "密函：雀舞银屏",
             },
             {
                 id: 2052,
                 t: "Walnut",
                 c: 1,
                 p: 8000,
-                n: "密函：雀舞云屏",
+                n: "密函：雀舞银屏",
             },
             {
                 id: 2052,
                 t: "Walnut",
                 c: 1,
                 p: 2000,
-                n: "密函：雀舞云屏",
+                n: "密函：雀舞银屏",
             },
             {
                 id: 10104,
@@ -59636,6 +73078,312 @@ const t: import("../data-types").Reward[] = [
                 p: 100,
                 dp: 1,
                 n: "时运",
+            },
+        ],
+    },
+    {
+        id: 1140011,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 80,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 1140012,
+        m: "Fixed",
+        child: [
+            {
+                id: 207,
+                t: "Resource",
+                c: 12,
+                n: "委托手册·二",
+            },
+        ],
+    },
+    {
+        id: 1140013,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 120,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 1140014,
+        m: "Fixed",
+        child: [
+            {
+                id: 208,
+                t: "Resource",
+                c: 5,
+                n: "委托手册·三",
+            },
+        ],
+    },
+    {
+        id: 1140015,
+        m: "Fixed",
+        child: [
+            {
+                id: 10100,
+                t: "Resource",
+                c: 1,
+                n: "暮夜的履迹",
+            },
+        ],
+    },
+    {
+        id: 1201035,
+        m: "Independent",
+        child: [
+            {
+                id: 2049,
+                t: "Walnut",
+                c: 3,
+                p: 10000,
+                n: "密函：若华的飞光",
+            },
+            {
+                id: 2049,
+                t: "Walnut",
+                c: 1,
+                p: 8000,
+                n: "密函：若华的飞光",
+            },
+            {
+                id: 2049,
+                t: "Walnut",
+                c: 1,
+                p: 2000,
+                n: "密函：若华的飞光",
+            },
+            {
+                id: 10104,
+                t: "Resource",
+                c: 3,
+                p: 10000,
+                n: "重铸正义之环",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                p: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 1201036,
+        m: "Independent",
+        child: [
+            {
+                id: 1004,
+                t: "Walnut",
+                c: 3,
+                p: 10000,
+                n: "密函：刻舟",
+            },
+            {
+                id: 1004,
+                t: "Walnut",
+                c: 1,
+                p: 8000,
+                n: "密函：刻舟",
+            },
+            {
+                id: 1004,
+                t: "Walnut",
+                c: 1,
+                p: 2000,
+                n: "密函：刻舟",
+            },
+            {
+                id: 10104,
+                t: "Resource",
+                c: 3,
+                p: 10000,
+                n: "重铸正义之环",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                p: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 1201043,
+        m: "Independent",
+        child: [
+            {
+                id: 2053,
+                t: "Walnut",
+                c: 3,
+                p: 10000,
+                n: "密函：风云决",
+            },
+            {
+                id: 2053,
+                t: "Walnut",
+                c: 1,
+                p: 8000,
+                n: "密函：风云决",
+            },
+            {
+                id: 2053,
+                t: "Walnut",
+                c: 1,
+                p: 2000,
+                n: "密函：风云决",
+            },
+            {
+                id: 10101,
+                t: "Resource",
+                c: 3,
+                p: 10000,
+                n: "弃绝怯懦之环",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                p: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 1211027,
+        m: "Independent",
+        child: [
+            {
+                id: 1016,
+                t: "Walnut",
+                c: 3,
+                p: 10000,
+                n: "密函：止流",
+            },
+            {
+                id: 1016,
+                t: "Walnut",
+                c: 1,
+                p: 8000,
+                n: "密函：止流",
+            },
+            {
+                id: 1016,
+                t: "Walnut",
+                c: 1,
+                p: 2000,
+                n: "密函：止流",
+            },
+            {
+                id: 10102,
+                t: "Resource",
+                c: 3,
+                p: 10000,
+                n: "逃离困顿之环",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                p: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 1211039,
+        m: "Independent",
+        child: [
+            {
+                id: 2046,
+                t: "Walnut",
+                c: 3,
+                p: 10000,
+                n: "密函：万古的诀别",
+            },
+            {
+                id: 2046,
+                t: "Walnut",
+                c: 1,
+                p: 8000,
+                n: "密函：万古的诀别",
+            },
+            {
+                id: 2046,
+                t: "Walnut",
+                c: 1,
+                p: 2000,
+                n: "密函：万古的诀别",
+            },
+            {
+                id: 10104,
+                t: "Resource",
+                c: 3,
+                p: 10000,
+                n: "重铸正义之环",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                p: 10000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 1211044,
+        m: "Independent",
+        child: [
+            {
+                id: 2054,
+                t: "Walnut",
+                c: 3,
+                p: 10000,
+                n: "密函：三角缪斯",
+            },
+            {
+                id: 2054,
+                t: "Walnut",
+                c: 1,
+                p: 8000,
+                n: "密函：三角缪斯",
+            },
+            {
+                id: 2054,
+                t: "Walnut",
+                c: 1,
+                p: 2000,
+                n: "密函：三角缪斯",
+            },
+            {
+                id: 10101,
+                t: "Resource",
+                c: 3,
+                p: 10000,
+                n: "弃绝怯懦之环",
+            },
+            {
+                id: 101,
+                t: "Resource",
+                c: 10000,
+                p: 10000,
+                n: "铜币",
             },
         ],
     },
@@ -62269,6 +76017,606 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 11200101,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 200000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 11200102,
+        m: "Fixed",
+        child: [
+            {
+                id: 102,
+                t: "Resource",
+                c: 3000,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 11200103,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 200000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 11200104,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 200,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 11200105,
+        m: "Fixed",
+        child: [
+            {
+                id: 2013,
+                t: "Resource",
+                c: 8,
+                n: "战斗旋律·三",
+            },
+        ],
+    },
+    {
+        id: 11200106,
+        m: "Fixed",
+        child: [
+            {
+                id: 2009,
+                t: "Resource",
+                c: 8,
+                n: "武器说明书·三",
+            },
+        ],
+    },
+    {
+        id: 11200107,
+        m: "Fixed",
+        child: [
+            {
+                id: 20013,
+                t: "Resource",
+                c: 120,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 11200108,
+        m: "Fixed",
+        child: [
+            {
+                id: 41026,
+                t: "Resource",
+                c: 1,
+                n: "否定",
+            },
+        ],
+    },
+    {
+        id: 11200109,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 300000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 11200110,
+        m: "Fixed",
+        child: [
+            {
+                id: 102,
+                t: "Resource",
+                c: 5000,
+                n: "深红凝珠",
+            },
+        ],
+    },
+    {
+        id: 11200111,
+        m: "Fixed",
+        child: [
+            {
+                id: 20013,
+                t: "Resource",
+                c: 120,
+                n: "皎皎之民的信物",
+            },
+        ],
+    },
+    {
+        id: 11200112,
+        m: "Fixed",
+        child: [
+            {
+                id: 41025,
+                t: "Resource",
+                c: 1,
+                n: "肯定",
+            },
+            {
+                id: 211,
+                t: "Resource",
+                c: 200,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 11300101,
+        m: "Fixed",
+        child: [
+            {
+                id: 207,
+                t: "Resource",
+                c: 3,
+                n: "委托手册·二",
+            },
+        ],
+    },
+    {
+        id: 11300102,
+        m: "Fixed",
+        child: [
+            {
+                id: 208,
+                t: "Resource",
+                c: 6,
+                n: "委托手册·三",
+            },
+        ],
+    },
+    {
+        id: 11300103,
+        m: "Fixed",
+        child: [
+            {
+                id: 209,
+                t: "Resource",
+                c: 3,
+                n: "委托手册·四",
+            },
+        ],
+    },
+    {
+        id: 11300104,
+        m: "Fixed",
+        child: [
+            {
+                id: 40030,
+                t: "CharAccessory",
+                c: 1,
+                n: "鎏金飞羽·涅白",
+            },
+            {
+                id: 201,
+                t: "Resource",
+                c: 2,
+                n: "移转模块",
+            },
+        ],
+    },
+    {
+        id: 11300105,
+        m: "Fixed",
+        child: [
+            {
+                id: 10003,
+                t: "HeadFrame",
+                c: 1,
+                n: "信封·墨玉",
+            },
+            {
+                id: 202,
+                t: "Resource",
+                c: 2,
+                n: "武器移转模块",
+            },
+        ],
+    },
+    {
+        id: 11300106,
+        m: "Fixed",
+        child: [
+            {
+                id: 41031,
+                t: "Resource",
+                c: 1,
+                n: "承露",
+            },
+            {
+                id: 10100,
+                t: "Resource",
+                c: 2,
+                n: "暮夜的履迹",
+            },
+        ],
+    },
+    {
+        id: 11300107,
+        m: "Fixed",
+        child: [
+            {
+                id: 3016,
+                t: "Resource",
+                c: 5,
+                n: "增幅激化器",
+            },
+            {
+                id: 209,
+                t: "Resource",
+                c: 10,
+                n: "委托手册·四",
+            },
+        ],
+    },
+    {
+        id: 11300108,
+        m: "Fixed",
+        child: [
+            {
+                id: 1002,
+                t: "Mount",
+                c: 1,
+                n: "Mount_1002",
+            },
+            {
+                id: 209,
+                t: "Resource",
+                c: 10,
+                n: "委托手册·四",
+            },
+        ],
+    },
+    {
+        id: 11400101,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 80000,
+                n: "铜币",
+            },
+            {
+                id: 2005,
+                t: "Resource",
+                c: 30,
+                n: "回归积分",
+            },
+        ],
+    },
+    {
+        id: 11400102,
+        m: "Fixed",
+        child: [
+            {
+                id: 102,
+                t: "Resource",
+                c: 1500,
+                n: "深红凝珠",
+            },
+            {
+                id: 2005,
+                t: "Resource",
+                c: 30,
+                n: "回归积分",
+            },
+        ],
+    },
+    {
+        id: 11400103,
+        m: "Fixed",
+        child: [
+            {
+                id: 2013,
+                t: "Resource",
+                c: 8,
+                n: "战斗旋律·三",
+            },
+            {
+                id: 2005,
+                t: "Resource",
+                c: 30,
+                n: "回归积分",
+            },
+        ],
+    },
+    {
+        id: 11400104,
+        m: "Fixed",
+        child: [
+            {
+                id: 2009,
+                t: "Resource",
+                c: 8,
+                n: "武器说明书·三",
+            },
+            {
+                id: 2005,
+                t: "Resource",
+                c: 30,
+                n: "回归积分",
+            },
+        ],
+    },
+    {
+        id: 11400105,
+        m: "Fixed",
+        child: [
+            {
+                id: 20013,
+                t: "Resource",
+                c: 50,
+                n: "皎皎之民的信物",
+            },
+            {
+                id: 2005,
+                t: "Resource",
+                c: 40,
+                n: "回归积分",
+            },
+        ],
+    },
+    {
+        id: 11400106,
+        m: "Fixed",
+        child: [
+            {
+                id: 207,
+                t: "Resource",
+                c: 4,
+                n: "委托手册·二",
+            },
+            {
+                id: 2005,
+                t: "Resource",
+                c: 40,
+                n: "回归积分",
+            },
+        ],
+    },
+    {
+        id: 11400107,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 100000,
+                n: "铜币",
+            },
+            {
+                id: 2005,
+                t: "Resource",
+                c: 30,
+                n: "回归积分",
+            },
+        ],
+    },
+    {
+        id: 11400108,
+        m: "Fixed",
+        child: [
+            {
+                id: 102,
+                t: "Resource",
+                c: 2000,
+                n: "深红凝珠",
+            },
+            {
+                id: 2005,
+                t: "Resource",
+                c: 30,
+                n: "回归积分",
+            },
+        ],
+    },
+    {
+        id: 11400109,
+        m: "Fixed",
+        child: [
+            {
+                id: 2014,
+                t: "Resource",
+                c: 5,
+                n: "战斗旋律·四",
+            },
+            {
+                id: 2005,
+                t: "Resource",
+                c: 30,
+                n: "回归积分",
+            },
+        ],
+    },
+    {
+        id: 11400110,
+        m: "Fixed",
+        child: [
+            {
+                id: 2010,
+                t: "Resource",
+                c: 5,
+                n: "武器说明书·四",
+            },
+            {
+                id: 2005,
+                t: "Resource",
+                c: 30,
+                n: "回归积分",
+            },
+        ],
+    },
+    {
+        id: 11400111,
+        m: "Fixed",
+        child: [
+            {
+                id: 20013,
+                t: "Resource",
+                c: 75,
+                n: "皎皎之民的信物",
+            },
+            {
+                id: 2005,
+                t: "Resource",
+                c: 40,
+                n: "回归积分",
+            },
+        ],
+    },
+    {
+        id: 11400112,
+        m: "Fixed",
+        child: [
+            {
+                id: 207,
+                t: "Resource",
+                c: 4,
+                n: "委托手册·二",
+            },
+            {
+                id: 2005,
+                t: "Resource",
+                c: 40,
+                n: "回归积分",
+            },
+        ],
+    },
+    {
+        id: 11400113,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 120000,
+                n: "铜币",
+            },
+            {
+                id: 2005,
+                t: "Resource",
+                c: 30,
+                n: "回归积分",
+            },
+        ],
+    },
+    {
+        id: 11400114,
+        m: "Fixed",
+        child: [
+            {
+                id: 102,
+                t: "Resource",
+                c: 3000,
+                n: "深红凝珠",
+            },
+            {
+                id: 2005,
+                t: "Resource",
+                c: 30,
+                n: "回归积分",
+            },
+        ],
+    },
+    {
+        id: 11400115,
+        m: "Fixed",
+        child: [
+            {
+                id: 2014,
+                t: "Resource",
+                c: 8,
+                n: "战斗旋律·四",
+            },
+            {
+                id: 2005,
+                t: "Resource",
+                c: 30,
+                n: "回归积分",
+            },
+        ],
+    },
+    {
+        id: 11400116,
+        m: "Fixed",
+        child: [
+            {
+                id: 2010,
+                t: "Resource",
+                c: 8,
+                n: "武器说明书·四",
+            },
+            {
+                id: 2005,
+                t: "Resource",
+                c: 30,
+                n: "回归积分",
+            },
+        ],
+    },
+    {
+        id: 11400117,
+        m: "Fixed",
+        child: [
+            {
+                id: 20013,
+                t: "Resource",
+                c: 100,
+                n: "皎皎之民的信物",
+            },
+            {
+                id: 2005,
+                t: "Resource",
+                c: 40,
+                n: "回归积分",
+            },
+        ],
+    },
+    {
+        id: 11400118,
+        m: "Fixed",
+        child: [
+            {
+                id: 207,
+                t: "Resource",
+                c: 4,
+                n: "委托手册·二",
+            },
+            {
+                id: 2005,
+                t: "Resource",
+                c: 40,
+                n: "回归积分",
+            },
+        ],
+    },
+    {
         id: 100001012,
         m: "Fixed",
         child: [
@@ -64747,6 +79095,90 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 114001001,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 300000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 114001002,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 60,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 114001003,
+        m: "Fixed",
+        child: [
+            {
+                id: 207,
+                t: "Resource",
+                c: 12,
+                n: "委托手册·二",
+            },
+        ],
+    },
+    {
+        id: 114001004,
+        m: "Fixed",
+        child: [
+            {
+                id: 101,
+                t: "Resource",
+                c: 500000,
+                n: "铜币",
+            },
+        ],
+    },
+    {
+        id: 114001005,
+        m: "Fixed",
+        child: [
+            {
+                id: 211,
+                t: "Resource",
+                c: 100,
+                n: "委托密函线索",
+            },
+        ],
+    },
+    {
+        id: 114001006,
+        m: "Fixed",
+        child: [
+            {
+                id: 208,
+                t: "Resource",
+                c: 5,
+                n: "委托手册·三",
+            },
+        ],
+    },
+    {
+        id: 114001007,
+        m: "Fixed",
+        child: [
+            {
+                id: 10100,
+                t: "Resource",
+                c: 1,
+                n: "暮夜的履迹",
+            },
+        ],
+    },
+    {
         id: 1000060011,
         m: "Fixed",
         child: [
@@ -64773,6 +79205,42 @@ const t: import("../data-types").Reward[] = [
                 t: "HeadSculpture",
                 c: 1,
                 n: "画太阳",
+            },
+            {
+                id: 100,
+                t: "Resource",
+                c: 100,
+                n: "月石",
+            },
+        ],
+    },
+    {
+        id: 1000060013,
+        m: "Fixed",
+        child: [
+            {
+                id: 30109,
+                t: "HeadSculpture",
+                c: 1,
+                n: "UI_PlayerHead_Name_30109",
+            },
+            {
+                id: 100,
+                t: "Resource",
+                c: 100,
+                n: "月石",
+            },
+        ],
+    },
+    {
+        id: 1000060014,
+        m: "Fixed",
+        child: [
+            {
+                id: 30096,
+                t: "HeadSculpture",
+                c: 1,
+                n: "快乐起飞",
             },
             {
                 id: 100,
@@ -64887,6 +79355,42 @@ const t: import("../data-types").Reward[] = [
                 t: "Resource",
                 c: 1,
                 n: "高雅人士",
+            },
+        ],
+    },
+    {
+        id: 1000060403,
+        m: "Fixed",
+        child: [
+            {
+                id: 1003,
+                t: "Resource",
+                c: 2,
+                n: "华彩沙漏",
+            },
+            {
+                id: 41046,
+                t: "Resource",
+                c: 1,
+                n: "转动螺旋",
+            },
+        ],
+    },
+    {
+        id: 1000060404,
+        m: "Fixed",
+        child: [
+            {
+                id: 1003,
+                t: "Resource",
+                c: 2,
+                n: "华彩沙漏",
+            },
+            {
+                id: 41047,
+                t: "Resource",
+                c: 1,
+                n: "慷慨解囊",
             },
         ],
     },

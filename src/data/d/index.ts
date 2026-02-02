@@ -128,7 +128,7 @@ function findModRewards(child: RewardChild[], modIds: Set<number>, draftIds: Set
 dungeonData.forEach(dungeon => {
     dungeonMap.set(dungeon.id, dungeon as Dungeon)
     // 获取副本的所有奖励ID
-    const rewardIds = [...dungeon.r, ...(dungeon.sr || [])]
+    const rewardIds = [...(dungeon.r || []), ...(dungeon.sr || [])]
     if (rewardIds.length > 0) {
         rewardIds.forEach(rewardId => {
             const reward = rewardMap.get(rewardId)

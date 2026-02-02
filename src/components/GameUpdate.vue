@@ -2,11 +2,13 @@
 import { invoke } from "@tauri-apps/api/core"
 import { listen } from "@tauri-apps/api/event"
 import * as dialog from "@tauri-apps/plugin-dialog"
-import { computed, onMounted, onUnmounted, ref } from "vue"
+import { useLocalStorage } from "@vueuse/core"
+import { computed, onMounted, onUnmounted, ref, watch } from "vue"
 import { useUIStore } from "@/store/ui"
 import { cleanupTempDir, getFileSize, readTextFile, writeTextFile } from "../api/app"
 import { useGameStore } from "../store/game"
 import {
+    CDN_LIST,
     type DownloadProgress,
     downloadAssets,
     GameVersionListLocal,
@@ -17,7 +19,10 @@ import {
 // 状态管理
 const gameStore = useGameStore()
 const ui = useUIStore()
-const versionList = ref<GameVersionListRes | null>(null)
+const versionList = ref<{
+    subVersion: string
+    gameVersionList: GameVersionListRes
+} | null>(null)
 const isLoading = ref(false)
 const isDownloading = ref(false)
 const isExtracting = ref(false)
@@ -48,6 +53,22 @@ let lastTimestamp = 0
 // 版本更新相关状态
 const needUpdate = ref(false)
 const updateSize = ref(0)
+
+const channels = [
+    {
+        name: "正式服",
+        value: "PC_OBT_CN_Pub",
+    },
+    {
+        name: "1.2媒体服",
+        value: "PC_OBT12_Media_CN_Pub",
+    },
+]
+
+const selectedChannel = useLocalStorage("selectedChannel", channels[0].value)
+const selectedCDN = useLocalStorage("selectedCDN", CDN_LIST[1].url)
+
+watch(selectedChannel, fetchVersionList)
 
 // 计算属性
 const gamePath = computed(() => gameStore.path.replace(/\\DNA Game\\EM\.exe/, ""))
@@ -107,7 +128,7 @@ async function fetchVersionList() {
     isLoading.value = true
 
     try {
-        versionList.value = await getBaseVersion()
+        versionList.value = await getBaseVersion(selectedCDN.value, selectedChannel.value)
         calculateTotalSize()
     } catch (err) {
         ui.showErrorMessage(`获取版本列表失败: ${err instanceof Error ? err.message : String(err)}`)
@@ -126,7 +147,7 @@ function calculateTotalSize() {
     let size = 0
     let files = 0
 
-    const gameVersionList = versionList.value.GameVersionList["1"].GameVersionList
+    const gameVersionList = versionList.value.gameVersionList.GameVersionList["1"].GameVersionList
     for (const assets of Object.values(gameVersionList)) {
         size += assets.ZipSize
         files++
@@ -148,7 +169,7 @@ async function checkForUpdates() {
         const localVersionList = JSON.parse(localContent) as GameVersionListLocal
         // 对比版本信息
         if (versionList.value && localVersionList) {
-            const remoteVersions = versionList.value.GameVersionList["1"].GameVersionList
+            const remoteVersions = versionList.value.gameVersionList.GameVersionList["1"].GameVersionList
             const localVersions = localVersionList.gameVersionList["1"].gameVersionList
 
             // 检查是否需要更新
@@ -191,7 +212,7 @@ async function updateBaseVersionFile() {
         const localVersionList: GameVersionListLocal = {
             gameVersionList: {
                 "1": {
-                    gameVersionList: versionList.value.GameVersionList["1"].GameVersionList,
+                    gameVersionList: versionList.value.gameVersionList.GameVersionList["1"].GameVersionList,
                 },
             },
         }
@@ -258,7 +279,7 @@ async function downloadAllFiles() {
     lastTimestamp = Date.now()
 
     try {
-        const gameVersionList = versionList.value.GameVersionList["1"].GameVersionList
+        const gameVersionList = versionList.value.gameVersionList.GameVersionList["1"].GameVersionList
         const files = Object.entries(gameVersionList)
 
         for (const [filename, assets] of files) {
@@ -316,7 +337,14 @@ async function downloadAllFiles() {
             }
 
             // 执行下载
-            const result = await downloadAssets(filename, onProgress, tempDownloadDir.value)
+            const result = await downloadAssets(
+                selectedCDN.value,
+                filename,
+                selectedChannel.value,
+                versionList.value.subVersion,
+                onProgress,
+                tempDownloadDir.value
+            )
             console.debug("下载结果:", result)
 
             // 保存最后下载的文件路径
@@ -362,7 +390,7 @@ async function extractAllFiles() {
     overallProgress.value = 0
 
     try {
-        const gameVersionList = versionList.value.GameVersionList["1"].GameVersionList
+        const gameVersionList = versionList.value.gameVersionList.GameVersionList["1"].GameVersionList
         const files = Object.entries(gameVersionList)
         const totalFilesCount = files.length
 
@@ -451,21 +479,40 @@ onMounted(async () => {
     <ScrollArea class="h-full p-6">
         <div class="space-y-4">
             <!-- 游戏目录设置 -->
-            <div class="bg-base-100/50 backdrop-blur-sm rounded-xl border border-base-200 p-6 shadow-lg">
-                <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
+            <div class="bg-base-100/50 backdrop-blur-sm rounded-xl border border-base-200 p-6 shadow-lg space-y-4">
+                <div class="flex flex-col md:flex-row items-start gap-4">
+                    <div>
+                        <p class="text-gray-400 mb-2">服务器</p>
+                        <Select v-model="selectedChannel" class="w-40 input">
+                            <SelectItem v-for="channel in channels" :key="channel.value" :value="channel.value">
+                                {{ channel.name }}
+                            </SelectItem>
+                        </Select>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 mb-2">CDN</p>
+                        <Select v-model="selectedCDN" class="w-40 input">
+                            <SelectItem v-for="cdn in CDN_LIST" :key="cdn.url" :value="cdn.url">
+                                {{ cdn.name }}
+                            </SelectItem>
+                        </Select>
+                    </div>
                     <div class="flex-1">
                         <p class="text-gray-400 mb-2">游戏安装目录</p>
                         <div class="input input-bordered input-primary w-full">
                             {{ gamePath || "未设置" }}
+                            <button
+                                @click="selectGameDir"
+                                class="ml-auto hover:text-primary transition-colors duration-300 flex gap-2 rounded-md p-2 cursor-pointer"
+                            >
+                                <Icon icon="ri:folder-line" class="w-5 h-5 mr-2" />
+                                选择目录
+                            </button>
                         </div>
                         <p class="opacity-60 text-xs mt-2">
                             {{ gamePath ? `游戏将下载到${gamePath}\\DNA Game文件夹` : `游戏将下载到该文件夹下的DNA Game文件夹` }}
                         </p>
                     </div>
-                    <button @click="selectGameDir" class="btn btn-primary">
-                        <Icon icon="ri:folder-line" class="w-5 h-5 mr-2" />
-                        选择目录
-                    </button>
                 </div>
             </div>
 

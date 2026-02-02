@@ -1,24 +1,32 @@
-import type { QQBotClient } from "../client"
-import type { QQBotEventC2CMessageCreate, QQBotEventGroupAtMessageCreate } from "../types"
+import type { Bot, GroupMessageEvent, GuildMessageEvent, PrivateMessageEvent } from "qq-official-bot"
 
 /**
  * 命令上下文接口
  */
 export type CommandContext =
     | {
-          client: QQBotClient
+          client: Bot
           type: "group"
-          message: QQBotEventGroupAtMessageCreate["d"]
+          message: GroupMessageEvent
           content: string
           groupId: string
           userId: string
           messageId: string
       }
     | {
-          client: QQBotClient
+          client: Bot
           type: "c2c"
-          message: QQBotEventC2CMessageCreate["d"]
+          message: PrivateMessageEvent
           content: string
+          userId: string
+          messageId: string
+      }
+    | {
+          client: Bot
+          type: "guild"
+          message: GuildMessageEvent
+          content: string
+          channelId: string
           userId: string
           messageId: string
       }

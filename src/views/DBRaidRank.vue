@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { computed, ref, watch } from "vue"
 import { dungeonMap } from "@/data"
-import { PreRaidRank, RaidCalculation, RaidDungeon, RaidSeason } from "../data/d/raid.data"
+import { PreRaidRank, RaidBuff, RaidCalculation, RaidDungeon, RaidSeason } from "../data/d/raid.data"
 import { getDropModeText, getRewardDetails } from "../utils/reward-utils"
 
 // 计算分数函数
@@ -42,6 +42,11 @@ const calculateScore = (baseRaidPoint: number, remainingTime: number, formulaId:
 const selectedSeason = ref<number>(1001)
 const remainingTime = ref(30)
 const selectedDungeon = ref<number>(21013)
+
+watch(selectedSeason, newSeason => {
+    if (RaidDungeon[selectedDungeon.value].RaidSeason !== newSeason)
+        selectedDungeon.value = Object.values(RaidDungeon).find(dungeon => dungeon.RaidSeason === newSeason)?.DungeonId || 21013
+})
 
 // 计算当前选中副本的最大允许剩余时间
 const maxAllowedTime = computed(() => {
@@ -207,6 +212,10 @@ function getDungeonName(dungeonId: number) {
 
         <!-- 计算说明 -->
         <div class="mb-4 p-4 bg-base-100 rounded-md">
+            <h3 class="font-medium mb-2">Buff:</h3>
+            <p class="text-sm mb-2">
+                {{ RaidDungeon[selectedDungeon]?.RaidBuffID.map(id => RaidBuff[id].RaidBuffDes).join("、") }}
+            </p>
             <h3 class="font-medium mb-2">分数计算说明:</h3>
             <p class="text-sm">
                 最终分数 = BaseRaidPoint + (1 + 时间区间1×速率1 + 时间区间2×速率2 + 时间区间3×速率3)
