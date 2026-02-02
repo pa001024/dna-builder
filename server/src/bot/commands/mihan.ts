@@ -38,6 +38,6 @@ export class MihanCommand implements BaseCommand {
 武器: ${missionsIngame.missions[1].map(v => v.replace("/无尽", "")).join(" | ")}
 魔之楔: ${missionsIngame.missions[2].map(v => v.replace("/无尽", "")).join(" | ")}
 
-下次刷新 ${new Date(nextHour).toLocaleString()}`
+下次刷新 ${new Date(nextHour).toLocaleString("zh-CN").split(" ").pop()}`
     }
 }
