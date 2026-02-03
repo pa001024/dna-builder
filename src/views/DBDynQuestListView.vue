@@ -195,9 +195,9 @@ function selectSubRegion(subRegionId: string) {
             </div>
 
             <!-- 右侧详情面板 -->
-            <div v-if="selectedQuest" class="flex-1 overflow-hidden">
+            <ScrollArea v-if="selectedQuest" class="flex-1">
                 <DBDynQuestDetailItem :quest="selectedQuest" />
-            </div>
+            </ScrollArea>
         </div>
     </div>
 </template>

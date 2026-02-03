@@ -202,9 +202,9 @@ function getTypeName(type: string): string {
             </div>
 
             <!-- 右侧详情面板 -->
-            <div v-if="selectedDraft" class="flex-1 overflow-hidden">
+            <ScrollArea v-if="selectedDraft" class="flex-1">
                 <DBDraftDetailItem :draft="selectedDraft" />
-            </div>
+            </ScrollArea>
         </div>
     </div>
 </template>

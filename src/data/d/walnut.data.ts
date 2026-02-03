@@ -7820,4 +7820,13 @@ const t: Walnut[] = [
     },
 ]
 
+export const walnutMap = new Map<number, Walnut>()
+export const walnutRewardMap = new Map<number, Walnut>()
+t.forEach(v => {
+    walnutMap.set(v.id, v)
+    if (v.奖励[0].type === "Mod" || v.奖励[0].type === "Weapon") {
+        walnutRewardMap.set(v.奖励[0].id, v)
+    }
+})
+
 export default t

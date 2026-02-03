@@ -318,6 +318,7 @@ function toggleFilter(filterName: string, show: boolean) {
                                             <span>{{ $t(mod.类型) }}</span>
                                             <span v-if="mod.属性">{{ $t(`${mod.属性}属性`) }}</span>
                                             <span v-if="mod.限定">{{ $t(mod.限定) }}</span>
+                                            <span v-if="mod.版本">{{ mod.版本 }}版本</span>
                                         </div>
                                     </div>
                                 </div>
@@ -368,9 +369,9 @@ function toggleFilter(filterName: string, show: boolean) {
             </div>
 
             <!-- 右侧详情面板 -->
-            <div v-if="selectedMod" class="flex-1 overflow-hidden">
+            <ScrollArea v-if="selectedMod" class="flex-1">
                 <DBModDetailItem :mod="selectedMod" />
-            </div>
+            </ScrollArea>
         </div>
     </div>
 </template>

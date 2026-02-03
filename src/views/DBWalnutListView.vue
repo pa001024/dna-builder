@@ -124,9 +124,9 @@ function selectWalnut(walnut: Walnut | null) {
             </div>
 
             <!-- 右侧详情面板 -->
-            <div v-if="selectedWalnut" class="flex-1 overflow-hidden">
+            <ScrollArea v-if="selectedWalnut" class="flex-1">
                 <DBWalnutDetailItem :walnut="selectedWalnut" />
-            </div>
+            </ScrollArea>
         </div>
     </div>
 </template>

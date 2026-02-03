@@ -257,6 +257,12 @@ const routes: readonly RouteRecordRaw[] = [
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
+                name: "fish-spot-detail",
+                path: "fishspot/:id",
+                component: () => import("./views/DBFishSpotDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
                 name: "fish-detail",
                 path: "fish/:id",
                 component: () => import("./views/DBFishDetailView.vue"),

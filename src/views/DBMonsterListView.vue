@@ -146,9 +146,9 @@ function getFactionName(faction: number | undefined): string {
             </div>
 
             <!-- 右侧详情面板 -->
-            <div v-if="selectedMonster" class="flex-1 overflow-hidden">
+            <ScrollArea v-if="selectedMonster" class="flex-1">
                 <DBMonsterDetailItem :monster="selectedMonster" />
-            </div>
+            </ScrollArea>
         </div>
     </div>
 </template>

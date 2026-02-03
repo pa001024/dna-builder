@@ -73,162 +73,151 @@ function getFactionName(faction: number | undefined): string {
 </script>
 
 <template>
-    <ScrollArea class="h-full">
-        <div class="p-3 space-y-4">
-            <div class="p-3">
-                <div class="flex items-center gap-3 mb-3">
-                    <SRouterLink :to="`/db/monster/${monster.id}`" class="text-lg font-bold link link-primary">
-                        {{ $t(monster.n) }}
-                    </SRouterLink>
-                    <span class="text-sm text-base-content/70">ID: {{ monster.id }}</span>
-                    <div class="text-sm text-base-content/70 flex items-center gap-2">
-                        <span class="px-1.5 py-0.5 rounded bg-base-200 text-xs">
-                            {{ $t(getFactionName(monster.f)) }}
-                        </span>
-                    </div>
-                    <label class="ml-auto flex items-center gap-1 text-xs">
-                        <input v-model="showRougeStats" type="checkbox" class="toggle toggle-sm toggle-primary" />
-                        <span>迷津</span>
-                    </label>
-                </div>
+    <div class="p-3 space-y-3">
+        <div class="flex items-center gap-3">
+            <SRouterLink :to="`/db/monster/${monster.id}`" class="text-lg font-bold link link-primary">
+                {{ $t(monster.n) }}
+            </SRouterLink>
+            <span class="text-sm text-base-content/70">ID: {{ monster.id }}</span>
+            <div class="text-sm text-base-content/70 flex items-center gap-2">
+                <span class="px-1.5 py-0.5 rounded bg-base-200 text-xs">
+                    {{ $t(getFactionName(monster.f)) }}
+                </span>
+            </div>
+            <label class="ml-auto flex items-center gap-1 text-xs">
+                <input v-model="showRougeStats" type="checkbox" class="toggle toggle-sm toggle-primary" />
+                <span>迷津</span>
+            </label>
+        </div>
 
-                <div v-if="leveledMonster" class="flex justify-center items-center mb-3">
-                    <img :src="leveledMonster.url" class="w-24 object-cover rounded" />
-                </div>
+        <div v-if="leveledMonster" class="flex justify-center items-center">
+            <img :src="leveledMonster.url" class="w-24 object-cover rounded" />
+        </div>
 
-                <div class="flex items-center gap-4 mb-3">
-                    <span class="text-sm min-w-12">Lv. {{ currentLevel }}</span>
-                    <input
-                        v-model.number="currentLevel"
-                        type="range"
-                        class="range range-primary range-xs grow"
-                        min="1"
-                        max="180"
-                        step="1"
-                    />
-                </div>
+        <div class="flex items-center gap-4">
+            <span class="text-sm min-w-12">Lv. {{ currentLevel }}</span>
+            <input v-model.number="currentLevel" type="range" class="range range-primary range-xs grow" min="1" max="180" step="1" />
+        </div>
 
-                <div v-if="leveledMonster" class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                    <div class="bg-base-200 rounded p-2 text-center">
-                        <div class="text-xs text-base-content/70 mb-1">攻击</div>
-                        <div class="font-bold text-primary">
-                            {{ formatBigNumber(leveledMonster.atk) }}
-                        </div>
-                    </div>
-                    <div class="bg-base-200 rounded p-2 text-center">
-                        <div class="text-xs text-base-content/70 mb-1">防御</div>
-                        <div class="font-bold text-success">
-                            {{ formatBigNumber(leveledMonster.def) }}
-                        </div>
-                    </div>
-                    <div class="bg-base-200 rounded p-2 text-center">
-                        <div class="text-xs text-base-content/70 mb-1">生命</div>
-                        <div class="font-bold text-error">
-                            {{ formatBigNumber(leveledMonster.hp) }}
-                        </div>
-                    </div>
-                    <div v-if="leveledMonster.es !== undefined" class="bg-base-200 rounded p-2 text-center">
-                        <div class="text-xs text-base-content/70 mb-1">护盾</div>
-                        <div class="font-bold text-info">
-                            {{ formatBigNumber(leveledMonster.es) }}
-                        </div>
-                    </div>
-                    <div v-if="leveledMonster.tn !== undefined" class="bg-base-200 rounded p-2 text-center">
-                        <div class="text-xs text-base-content/70 mb-1">战姿</div>
-                        <div class="font-bold text-secondary">
-                            {{ formatBigNumber(leveledMonster.tn) }}
-                        </div>
-                    </div>
+        <div v-if="leveledMonster" class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
+            <div class="bg-base-200 rounded p-2 text-center">
+                <div class="text-xs text-base-content/70 mb-1">攻击</div>
+                <div class="font-bold text-primary">
+                    {{ formatBigNumber(leveledMonster.atk) }}
                 </div>
+            </div>
+            <div class="bg-base-200 rounded p-2 text-center">
+                <div class="text-xs text-base-content/70 mb-1">防御</div>
+                <div class="font-bold text-success">
+                    {{ formatBigNumber(leveledMonster.def) }}
+                </div>
+            </div>
+            <div class="bg-base-200 rounded p-2 text-center">
+                <div class="text-xs text-base-content/70 mb-1">生命</div>
+                <div class="font-bold text-error">
+                    {{ formatBigNumber(leveledMonster.hp) }}
+                </div>
+            </div>
+            <div v-if="leveledMonster.es !== undefined" class="bg-base-200 rounded p-2 text-center">
+                <div class="text-xs text-base-content/70 mb-1">护盾</div>
+                <div class="font-bold text-info">
+                    {{ formatBigNumber(leveledMonster.es) }}
+                </div>
+            </div>
+            <div v-if="leveledMonster.tn !== undefined" class="bg-base-200 rounded p-2 text-center">
+                <div class="text-xs text-base-content/70 mb-1">战姿</div>
+                <div class="font-bold text-secondary">
+                    {{ formatBigNumber(leveledMonster.tn) }}
+                </div>
+            </div>
+        </div>
 
-                <div v-if="leveledMonster" class="mt-3">
-                    <div class="text-xs text-base-content/70 mb-1">等级成长预览</div>
-                    <div class="h-24 flex items-end gap-0.5">
+        <div v-if="leveledMonster">
+            <div class="text-xs text-base-content/70 mb-1">等级成长预览</div>
+            <div class="h-24 flex items-end gap-0.5">
+                <div
+                    v-for="level in [80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180]"
+                    :key="level"
+                    class="h-full flex-1 flex flex-col items-center min-h-0"
+                >
+                    <div class="w-full relative flex-1 h-full flex flex-col justify-end">
                         <div
-                            v-for="level in [80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180]"
-                            :key="level"
-                            class="h-full flex-1 flex flex-col items-center min-h-0"
-                        >
-                            <div class="w-full relative flex-1 h-full flex flex-col justify-end">
-                                <div
-                                    class="w-full bg-primary rounded-t"
-                                    :style="{
-                                        height: `${(leveledMonster.getHPByLevel(level) / leveledMonster.getHPByLevel(180)) * 100}%`,
-                                    }"
-                                />
-                            </div>
-                            <span class="text-[10px] mt-1">Lv{{ level }}</span>
-                        </div>
+                            class="w-full bg-primary rounded-t"
+                            :style="{
+                                height: `${(leveledMonster.getHPByLevel(level) / leveledMonster.getHPByLevel(180)) * 100}%`,
+                            }"
+                        />
                     </div>
+                    <span class="text-[10px] mt-1">Lv{{ level }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="dungeons.length > 0">
+            <h3 class="font-bold mb-2">出现副本</h3>
+
+            <!-- 副本名称Tab筛选 -->
+            <div class="mb-3 overflow-x-auto">
+                <div class="flex space-x-2 pb-2">
+                    <button
+                        v-for="dungeonName in allDungeonNames"
+                        :key="dungeonName"
+                        class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                        :class="
+                            selectedDungeonName === dungeonName
+                                ? 'bg-primary text-white'
+                                : 'bg-base-200 text-base-content hover:bg-base-300'
+                        "
+                        @click="selectedDungeonName = dungeonName"
+                    >
+                        {{ dungeonName }}
+                    </button>
                 </div>
             </div>
 
-            <div v-if="dungeons.length > 0" class="p-3">
-                <h3 class="font-bold mb-2">出现副本</h3>
-
-                <!-- 副本名称Tab筛选 -->
-                <div class="mb-3 overflow-x-auto">
-                    <div class="flex space-x-2 pb-2">
-                        <button
-                            v-for="dungeonName in allDungeonNames"
-                            :key="dungeonName"
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
-                            :class="
-                                selectedDungeonName === dungeonName
-                                    ? 'bg-primary text-white'
-                                    : 'bg-base-200 text-base-content hover:bg-base-300'
-                            "
-                            @click="selectedDungeonName = dungeonName"
-                        >
-                            {{ dungeonName }}
-                        </button>
+            <!-- 副本列表 -->
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2">
+                <div
+                    v-for="dungeon in selectedDungeons"
+                    :key="dungeon.id"
+                    class="p-2 bg-base-200 rounded cursor-pointer hover:bg-base-300 transition-colors"
+                    @click="$router.push(`/db/dungeon/${dungeon.id}`)"
+                >
+                    <div class="flex items-center justify-between">
+                        <span class="font-medium">{{ dungeon.n }}</span>
+                        <div class="flex flex-col items-end">
+                            <span class="text-xs text-base-content/70">Lv.{{ dungeon.lv }}</span>
+                            <span class="text-xs text-base-content/70">ID: {{ dungeon.id }}</span>
+                        </div>
                     </div>
-                </div>
-
-                <!-- 副本列表 -->
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    <div
-                        v-for="dungeon in selectedDungeons"
-                        :key="dungeon.id"
-                        class="p-2 bg-base-200 rounded cursor-pointer hover:bg-base-300 transition-colors"
-                        @click="$router.push(`/db/dungeon/${dungeon.id}`)"
-                    >
-                        <div class="flex items-center justify-between">
-                            <span class="font-medium">{{ dungeon.n }}</span>
-                            <div class="flex flex-col items-end">
-                                <span class="text-xs text-base-content/70">Lv.{{ dungeon.lv }}</span>
-                                <span class="text-xs text-base-content/70">ID: {{ dungeon.id }}</span>
-                            </div>
-                        </div>
-                        <div class="text-xs text-base-content/70 mt-1">
-                            {{ dungeon.desc }}
-                        </div>
+                    <div class="text-xs text-base-content/70 mt-1">
+                        {{ dungeon.desc }}
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div v-if="abyssDungeonsFiltered.length > 0" class="p-3">
-                <h3 class="font-bold mb-2">出现深渊</h3>
+        <div v-if="abyssDungeonsFiltered.length > 0">
+            <h3 class="font-bold mb-2">出现深渊</h3>
 
-                <!-- 深渊列表 -->
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    <div
-                        v-for="dungeon in abyssDungeonsFiltered"
-                        :key="dungeon.id"
-                        class="p-2 bg-base-200 rounded cursor-pointer hover:bg-base-300 transition-colors"
-                        @click="$router.push(`/db/abyss/${dungeon.id}`)"
-                    >
-                        <div class="flex items-center justify-between">
-                            <span class="font-medium">
-                                {{ dungeon.cname }} {{ $t(getAbyssDungeonGroup(dungeon)) }} #{{ getAbyssDungeonLevel(dungeon) }}</span
-                            >
-                            <div class="flex flex-col items-end">
-                                <span class="text-xs text-base-content/70">ID: {{ dungeon.id }}</span>
-                            </div>
+            <!-- 深渊列表 -->
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2">
+                <div
+                    v-for="dungeon in abyssDungeonsFiltered"
+                    :key="dungeon.id"
+                    class="p-2 bg-base-200 rounded cursor-pointer hover:bg-base-300 transition-colors"
+                    @click="$router.push(`/db/abyss/${dungeon.id}`)"
+                >
+                    <div class="flex items-center justify-between">
+                        <span class="font-medium">
+                            {{ dungeon.cname }} {{ $t(getAbyssDungeonGroup(dungeon)) }} #{{ getAbyssDungeonLevel(dungeon) }}</span
+                        >
+                        <div class="flex flex-col items-end">
+                            <span class="text-xs text-base-content/70">ID: {{ dungeon.id }}</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </ScrollArea>
+    </div>
 </template>

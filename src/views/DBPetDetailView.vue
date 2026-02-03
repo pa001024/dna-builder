@@ -16,7 +16,7 @@ const pet = computed(() => {
 </script>
 
 <template>
-    <div class="h-full flex flex-col">
-        <DBPetDetailItem :pet="pet" class="flex-1" />
-    </div>
+    <ScrollArea class="h-full">
+        <DBPetDetailItem :pet="pet" />
+    </ScrollArea>
 </template>

@@ -2,7 +2,7 @@ import fs from "node:fs"
 import { Children, cloneElement, isValidElement, type JSX } from "react"
 import satori, { type SatoriOptions } from "satori"
 import sharp from "sharp"
-import { type TailwindConfig, tailwindToCSS } from "tw-to-css"
+import { tailwindToCSS } from "tw-to-css"
 import Demo from "./components/Demo"
 
 const { twj } = tailwindToCSS({

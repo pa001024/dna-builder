@@ -53,6 +53,7 @@ function getTypeName(type: number): string {
     const typeMap: Record<number, string> = {
         1: "活力魔灵",
         2: "失活魔灵",
+        3: "活动魔灵",
     }
     return typeMap[type] || type.toString()
 }
@@ -196,9 +197,9 @@ function formatSkillDescription(pet: Pet, type: "主动" | "被动"): string {
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 
-            <div v-if="selectedPet" class="flex-1 overflow-hidden">
+            <ScrollArea v-if="selectedPet" class="flex-1">
                 <DBPetDetailItem :pet="selectedPet" />
-            </div>
+            </ScrollArea>
         </div>
     </div>
 </template>

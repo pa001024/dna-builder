@@ -127,7 +127,7 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 mt-2 text-xs opacity-70">
-                                <span>怪物: {{ (dungeon.m || []).length }}个</span>
+                                <span>怪物: {{ (dungeon.m || []).length }}种</span>
                                 <span v-if="(dungeon.sm || []).length">特殊: {{ (dungeon.sm || []).length }}个</span>
                                 <span v-if="dungeon.r?.length"> 奖励: {{ getDungeonRewardNames(dungeon) }} </span>
                                 <span class="ml-auto">ID: {{ dungeon.id }}</span>
@@ -150,9 +150,9 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
             </div>
 
             <!-- 右侧详情面板 -->
-            <div v-if="selectedDungeon" class="flex-1 overflow-hidden">
+            <ScrollArea v-if="selectedDungeon" class="flex-1">
                 <DBDungeonDetailItem :dungeon="selectedDungeon" />
-            </div>
+            </ScrollArea>
         </div>
     </div>
 </template>

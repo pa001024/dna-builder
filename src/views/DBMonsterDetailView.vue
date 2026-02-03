@@ -12,7 +12,7 @@ if (!monster.value) {
 </script>
 
 <template>
-    <div class="h-full flex flex-col">
-        <DBMonsterDetailItem :monster="monster!" class="flex-1" />
-    </div>
+    <ScrollArea class="h-full">
+        <DBMonsterDetailItem :monster="monster!" />
+    </ScrollArea>
 </template>

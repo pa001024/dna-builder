@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { ref, computed } from "vue"
-import { matchPinyin } from "../utils/pinyin-utils"
+import { computed, ref } from "vue"
 import { FishingSpot, fishMap } from "@/data"
 import { Fish, fishingSpots, fishs } from "@/data/d/fish.data"
+import { matchPinyin } from "../utils/pinyin-utils"
 
 const searchKeyword = ref("")
 const selectedSpot = ref<FishingSpot | null>(null)
@@ -136,9 +136,9 @@ const filteredFish = computed(() => {
                 <DBFishSpotDetailItem :spot="selectedSpot" />
             </div>
 
-            <div v-if="selectedFish" class="flex-1 overflow-hidden">
+            <ScrollArea v-if="selectedFish" class="flex-1">
                 <DBFishDetailItem :fish="selectedFish" />
-            </div>
+            </ScrollArea>
         </div>
     </div>
 </template>

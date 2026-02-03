@@ -11,10 +11,10 @@ const walnut = computed(() => walnutData.find(w => w.id === walnutId.value))
 
 <template>
     <div class="h-full flex flex-col bg-base-300">
-        <template v-if="walnut">
+        <ScrollArea v-if="walnut" class="flex-1">
             <!-- 使用 DBWalnutDetailItem 组件显示密函详情 -->
-            <DBWalnutDetailItem :walnut="walnut" class="flex-1" />
-        </template>
+            <DBWalnutDetailItem :walnut="walnut" />
+        </ScrollArea>
 
         <div v-else class="flex-1 flex items-center justify-center">
             <div class="text-base-content/70">未找到密函</div>

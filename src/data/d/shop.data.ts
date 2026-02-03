@@ -1,3 +1,6 @@
+import { modMap } from "."
+import { walnutMap } from "./walnut.data"
+
 export interface Shop {
     id: string
     name: string
@@ -15751,5 +15754,34 @@ const t: Shop[] = [
         ],
     },
 ]
+
+export const modShopSourceMap = new Map<number, { shop: string; cost: string; n: number; t: "Walnut" | "Mod" }>()
+export const weaponShopSourceMap = new Map<number, { shop: string; cost: string; n: number; t: "Walnut" | "Mod" }>()
+export const draftShopSourceMap = new Map<number, { shop: string; cost: string; n: number; t: "Walnut" | "Draft" }>()
+
+t.forEach(shop => {
+    shop.mainTabs.forEach(mt => {
+        mt.subTabs.forEach(t => {
+            t.items.forEach(i => {
+                const shop = `${mt.name}-${t.name}`
+                if (i.itemType === "Walnut") {
+                    const walnut = walnutMap.get(i.typeId)
+                    if (walnut) {
+                        const reward = walnut.奖励[0]
+                        if (reward.type === "Mod") {
+                            modShopSourceMap.set(reward.id, { shop, cost: i.priceName, n: i.price, t: "Walnut" })
+                        } else if (reward.type === "Weapon") {
+                            weaponShopSourceMap.set(reward.id, { shop, cost: i.priceName, n: i.price, t: "Walnut" })
+                        }
+                    } else if (modMap.has(i.typeId)) {
+                        modShopSourceMap.set(i.typeId, { shop, cost: i.priceName, n: i.price, t: "Mod" })
+                    }
+                } else if (i.itemType === "Draft") {
+                    draftShopSourceMap.set(i.typeId, { shop, cost: i.priceName, n: i.price, t: "Draft" })
+                }
+            })
+        })
+    })
+})
 
 export default t

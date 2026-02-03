@@ -4171,7 +4171,7 @@ export const abyssDungeons: AbyssDungeon[] = [
                 a: 2,
             },
         ],
-        art: "奖励进度·热映剧目",
+        art: "奖励进度·不朽剧目",
         sn: "勇者们的传说",
         cid: 4102,
     },
@@ -4215,7 +4215,7 @@ export const abyssDungeons: AbyssDungeon[] = [
                 a: 2,
             },
         ],
-        art: "奖励进度·热映剧目",
+        art: "奖励进度·不朽剧目",
         sn: "勇者们的传说",
         cid: 4102,
     },
@@ -4259,7 +4259,7 @@ export const abyssDungeons: AbyssDungeon[] = [
                 a: 2,
             },
         ],
-        art: "奖励进度·热映剧目",
+        art: "奖励进度·不朽剧目",
         sn: "勇者们的传说",
         cid: 4102,
     },
@@ -5241,7 +5241,15 @@ export const abyssDungeons: AbyssDungeon[] = [
         sn: "勇者们的传说",
         cid: 4201,
     },
-]
+].map(v =>
+    // 1.2 bug patch
+    Object.values(v.mb || {}).filter(v => v > 0).length > 1
+        ? ({
+              ...v,
+              art: v.art?.replace("热映", "不朽"),
+          } as AbyssDungeon)
+        : (v as AbyssDungeon)
+)
 
 export const abyssBuffs: AbyssBuff[] = [
     {

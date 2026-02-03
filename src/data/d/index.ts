@@ -163,17 +163,7 @@ petData.forEach(v => petMap.set(v.id, v))
 
 export type { DBMap, DBMapMarker } from "./map.data"
 
-import walnutData, { type Walnut } from "./walnut.data"
-export const walnutMap = new Map<number, Walnut>()
-export const walnutRewardMap = new Map<number, Walnut>()
-walnutData.forEach(v => {
-    walnutMap.set(v.id, v)
-    if (v.奖励[0].type === "Mod" || v.奖励[0].type === "Weapon") {
-        walnutRewardMap.set(v.奖励[0].id, v)
-    }
-})
-
-export type { Walnut, WalnutReward } from "./walnut.data"
+export { type Walnut, type WalnutReward, walnutMap, walnutRewardMap } from "./walnut.data"
 
 import { type Fish, type FishingSpot, fishingSpots, fishs } from "./fish.data"
 export const fishMap = new Map<number, Fish>()

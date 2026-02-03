@@ -11,9 +11,9 @@ const dungeon = computed(() => abyssDungeonMap.get(dungeonId.value))
 
 <template>
     <div class="h-full flex flex-col bg-base-300">
-        <template v-if="dungeon">
-            <DBAbyssDungeonDetailItem :dungeon="dungeon" class="flex-1" />
-        </template>
+        <ScrollArea v-if="dungeon" class="flex-1">
+            <DBAbyssDungeonDetailItem :dungeon="dungeon" />
+        </ScrollArea>
 
         <div v-else class="flex-1 flex items-center justify-center">
             <div class="text-base-content/70">未找到深渊副本</div>

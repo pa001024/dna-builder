@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { computed, ref, watch } from "vue"
 import type { Shop, ShopItem as ShopItemType } from "@/data/d/shop.data"
 import ShopItem from "./ShopItem.vue"
 
@@ -10,7 +11,16 @@ const props = defineProps<{
 interface ShopItemWithChildren extends ShopItemType {
     children?: ShopItemWithChildren[]
 }
-
+const shopTabs = computed(() => props.shop.mainTabs.map(t => t.name))
+const selectedShop = ref(props.shop.mainTabs[0].name || "")
+watch(
+    () => props.shop.id,
+    (newVal, oldVal) => {
+        if (newVal !== oldVal) {
+            selectedShop.value = props.shop.mainTabs[0].name || ""
+        }
+    }
+)
 // 将商品列表转换为树形结构
 function buildItemTree(items: ShopItemType[]): ShopItemWithChildren[] {
     // 创建商品ID到商品对象的映射
@@ -61,33 +71,42 @@ function buildItemTree(items: ShopItemType[]): ShopItemWithChildren[] {
 </script>
 
 <template>
-    <ScrollArea class="h-full">
-        <div class="p-3 space-y-4">
-            <!-- 商店头部 -->
-            <div class="flex items-center justify-between">
+    <div class="p-3 space-y-4">
+        <!-- 商店头部 -->
+        <div class="flex items-center justify-between">
+            <span>
                 <SRouterLink :to="`/db/shop/${shop.id}`" class="link link-primary">
                     <h2 class="text-lg font-bold">{{ shop.name }}</h2>
                 </SRouterLink>
-                <span class="text-xs px-2 py-1 rounded bg-primary text-white">
-                    {{ shop.id }}
-                </span>
-            </div>
+            </span>
+            <span class="text-xs px-2 py-1 rounded bg-primary text-white">
+                {{ shop.id }}
+            </span>
+        </div>
 
-            <!-- 商店主标签 -->
-            <div v-for="mainTab in shop.mainTabs" :key="mainTab.id" class="card bg-base-100 border border-base-200 rounded-lg p-3">
-                <h3 class="font-bold mb-3">{{ mainTab.name }}</h3>
+        <div class="flex flex-wrap gap-1 pb-1">
+            <span
+                v-for="tab in shopTabs"
+                :key="tab"
+                class="text-sm px-2 py-1 rounded cursor-pointer transition-colors duration-200 hover:bg-base-200"
+                :class="{ 'bg-primary text-white hover:bg-primary': tab === selectedShop }"
+                @click="selectedShop = tab"
+                >{{ tab }}</span
+            >
+        </div>
 
-                <!-- 商店子标签 -->
-                <div v-for="subTab in mainTab.subTabs" :key="subTab.id" class="mb-4">
-                    <h4 class="font-medium mb-2">{{ subTab.name }}</h4>
+        <!-- 商店主标签 -->
+        <div v-for="mainTab in shop.mainTabs.filter(t => t.name === selectedShop)" :key="mainTab.id" class="card">
+            <!-- 商店子标签 -->
+            <div v-for="subTab in mainTab.subTabs" :key="subTab.id" class="mb-4 bg-base-100 border border-base-200 rounded-lg p-3">
+                <h4 class="font-medium mb-2">{{ subTab.name }}</h4>
 
-                    <!-- 商品列表 - 树形结构 -->
-                    <div class="space-y-3">
-                        <!-- 使用 ShopItem 组件递归渲染商品树 -->
-                        <ShopItem v-for="item in buildItemTree(subTab.items)" :key="item.id" :item="item" />
-                    </div>
+                <!-- 商品列表 - 树形结构 -->
+                <div class="space-y-3">
+                    <!-- 使用 ShopItem 组件递归渲染商品树 -->
+                    <ShopItem v-for="item in buildItemTree(subTab.items)" :key="item.id" :item="item" />
                 </div>
             </div>
         </div>
-    </ScrollArea>
+    </div>
 </template>

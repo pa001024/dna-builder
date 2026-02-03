@@ -197,25 +197,7 @@ const expectedValue = computed(() => {
     return totalValue
 })
 
-interface CatchLog {
-    price: number
-    finalFish: Fish
-    mutated: boolean
-    originFish: Fish | null
-    originPrice: number
-    length: number
-}
-
 // 钓鱼模拟相关状态
-const catchHistory = ref<CatchLog[]>([])
-const catchCount = ref(0)
-const selectTime = ref<1 | 2 | 3>(1)
-const lure = ref<0 | 1 | 2>(0)
-const s2bCompare = ref<boolean>(false)
-
-/**
- * 合并同类项的钓鱼记录
- */
 interface ReducedCatchLog {
     price: number
     finalFish: Fish
@@ -226,32 +208,11 @@ interface ReducedCatchLog {
     count: number
 }
 
-const reducedCatchHistory = computed(() => {
-    // 合并同类项
-    const mergedMap = new Map<string, ReducedCatchLog>()
-
-    catchHistory.value.forEach(log => {
-        // 使用鱼名称和长度作为唯一键
-        const key = `${log.finalFish.name}_${log.length}`
-
-        if (mergedMap.has(key)) {
-            // 已存在，增加数量
-            const existing = mergedMap.get(key)!
-            existing.count += 1
-        } else {
-            // 不存在，添加新记录
-            mergedMap.set(key, {
-                ...log,
-                count: 1,
-            })
-        }
-    })
-
-    // 转换为数组并按 level 降序排序
-    return Array.from(mergedMap.values())
-        .sort((a, b) => b.finalFish.level - a.finalFish.level)
-        .slice(0, 50) // 只保留前50条
-})
+const reducedCatchHistory = ref<ReducedCatchLog[]>([])
+const catchCount = ref(0)
+const selectTime = ref<1 | 2 | 3>(1)
+const lure = ref<0 | 1 | 2>(0)
+const s2bCompare = ref<boolean>(false)
 
 watch(
     () => props.spot,
@@ -265,7 +226,7 @@ watch(
  * @param fish 基础鱼
  * @returns 钓鱼结果
  */
-function randomCatch(fish: Fish): CatchLog {
+function randomCatch(fish: Fish): ReducedCatchLog {
     let { fish: finalFish, price, length } = calculateFishPrice(fish)
     let mutated = false
     let originFish = null
@@ -294,7 +255,7 @@ function randomCatch(fish: Fish): CatchLog {
         }
     }
 
-    return { price, finalFish, mutated, originFish, originPrice, length }
+    return { price, finalFish, mutated, originFish, originPrice, length, count: 1 }
 }
 
 /**
@@ -302,7 +263,27 @@ function randomCatch(fish: Fish): CatchLog {
  */
 function fishOnce() {
     const fish = getRandomFish(props.spot, selectTime.value, lure.value)
-    catchHistory.value.unshift(randomCatch(fish.fish))
+    const result = randomCatch(fish.fish)
+
+    // 使用鱼名称和长度作为唯一键
+    const key = `${result.finalFish.name}_${result.length}`
+
+    const existingIndex = reducedCatchHistory.value.findIndex(r => `${r.finalFish.name}_${r.length}` === key)
+
+    if (existingIndex !== -1) {
+        // 已存在，增加数量
+        reducedCatchHistory.value[existingIndex].count += 1
+    } else {
+        // 不存在，添加新记录
+        reducedCatchHistory.value.push(result)
+        // 按 level 降序排序
+        reducedCatchHistory.value.sort((a, b) => b.finalFish.level - a.finalFish.level)
+        // 只保留前50条
+        if (reducedCatchHistory.value.length > 50) {
+            reducedCatchHistory.value = reducedCatchHistory.value.slice(0, 50)
+        }
+    }
+
     catchCount.value++
 }
 
@@ -319,7 +300,7 @@ function fishMultiple(count: number) {
  * 清空钓鱼记录
  */
 function clearHistory() {
-    catchHistory.value = []
+    reducedCatchHistory.value = []
     catchCount.value = 0
 }
 </script>
@@ -338,7 +319,7 @@ function clearHistory() {
                                     <img :src="`/imgs/webp/${spot.icon}.webp`" class="w-full h-full object-cover" />
                                 </div>
                                 <div>
-                                    <SRouterLink :to="`/fish/${spot.id}`" class="font-medium text-lg link link-primary">{{
+                                    <SRouterLink :to="`/db/fishspot/${spot.id}`" class="font-medium text-lg link link-primary">{{
                                         spot.name
                                     }}</SRouterLink>
                                     <div class="text-sm text-base-content/70">ID: {{ spot.id }}</div>
@@ -406,26 +387,25 @@ function clearHistory() {
                         </div>
 
                         <!-- 钓鱼模拟 -->
-                        <div class="p-3 bg-base-200 rounded">
-                            <div class="text-xs text-base-content/70 mb-2">钓鱼模拟</div>
-                            <div class="flex gap-2 mb-2 items-center">
-                                <div class="flex-1 flex justify-between items-center p-2">
-                                    <span class="text-xs text-base-content/70">钓鱼时间</span>
+                        <div class="p-3 bg-base-200 rounded space-y-2">
+                            <div class="text-xs text-base-content/70">钓鱼模拟</div>
+                            <div class="grid grid-cols-1 items-center">
+                                <div class="flex-1 flex gap-2 items-center p-2">
+                                    <span class="text-xs text-base-content/70 w-16">钓鱼时间</span>
                                     <label v-for="time in [1, 2, 3]" :key="time" class="text-xs text-base-content/70">
                                         <input v-model="selectTime" type="radio" :value="time" class="radio radio-sm" />
                                         {{ getAppearName(time) }}
                                     </label>
                                 </div>
-                                <div class="flex-1 flex justify-between items-center p-2">
+                                <div class="flex-1 flex gap-2 items-center p-2">
+                                    <span class="text-xs text-base-content/70 w-16">其他</span>
                                     <label class="text-xs text-base-content/70">
-                                        放弃低价值授渔以鱼
                                         <input v-model="s2bCompare" type="checkbox" class="toggle toggle-sm" />
+                                        放弃低价值授渔以鱼
                                     </label>
                                 </div>
-                            </div>
-                            <div class="flex gap-2 mb-2 items-center">
-                                <div class="flex-1 flex justify-between items-center p-2">
-                                    <span class="text-xs text-base-content/70">鱼饵类型</span>
+                                <div class="flex-1 flex gap-2 items-center p-2">
+                                    <span class="text-xs text-base-content/70 w-16">鱼饵类型</span>
                                     <label v-for="lureType in [0, 1, 2]" :key="lureType" class="text-xs text-base-content/70">
                                         <input v-model="lure" type="radio" :value="lureType" class="radio radio-sm" />
                                         {{ getLureName(lureType) }}
@@ -443,7 +423,7 @@ function clearHistory() {
                         <div class="p-3 bg-base-200 rounded">
                             <div class="text-xs text-base-content/70 mb-2">钓鱼记录 (共 {{ catchCount }} 次)</div>
                             <div class="text-xs text-base-content/70 mb-2">
-                                总价值:{{ +catchHistory.reduce((acc, cur) => acc + cur.price, 0).toFixed(2) }}
+                                总价值:{{ +reducedCatchHistory.reduce((acc, cur) => acc + cur.price * cur.count, 0).toFixed(2) }}
                             </div>
                             <div class="space-y-2">
                                 <div
@@ -472,7 +452,7 @@ function clearHistory() {
                                         </div>
                                     </div>
                                 </div>
-                                <div v-if="catchHistory.length === 0" class="text-center text-sm text-base-content/50 py-4">
+                                <div v-if="reducedCatchHistory.length === 0" class="text-center text-sm text-base-content/50 py-4">
                                     暂无钓鱼记录
                                 </div>
                             </div>
@@ -491,9 +471,9 @@ function clearHistory() {
             </div>
 
             <!-- 右侧：鱼详情 -->
-            <div v-if="selectedFish" class="flex-1 overflow-hidden">
+            <ScrollArea v-if="selectedFish" class="flex-1">
                 <DBFishDetailItem :fish="selectedFish" />
-            </div>
+            </ScrollArea>
         </div>
     </div>
 </template>

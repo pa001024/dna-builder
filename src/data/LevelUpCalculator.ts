@@ -1,7 +1,7 @@
 import { getModDropInfo } from "../utils/reward-utils"
-import { draftDungeonMap, modDraftMap, modDungeonMap, resourceDraftMap, walnutMap, weaponDraftMap } from "./d"
+import { draftDungeonMap, modDraftMap, modDungeonMap, resourceDraftMap, weaponDraftMap } from "./d"
 import modData from "./d/mod.data"
-import shopData from "./d/shop.data"
+import { draftShopSourceMap, modShopSourceMap, weaponShopSourceMap } from "./d/shop.data"
 import type { Char, Mod, Weapon } from "./data-types"
 import type { MergeCalculateData, WorkerMessageData, WorkerMethod, WorkerResponse } from "./LevelUpCalculator.worker"
 import type { ModExt, WeaponExt } from "./LevelUpCalculatorImpl"
@@ -99,9 +99,6 @@ export interface TimeEstimateResult {
     dungeonTimes: Record<number, [number, string]>
 }
 
-export const modShopWalnutMap = new Map<number, 1>()
-export const weaponShopWalnutMap = new Map<number, 1>()
-
 /**
  * 养成计算器
  * 用于计算角色、武器、魔之楔的养成资源消耗
@@ -121,23 +118,6 @@ export class LevelUpCalculator {
         this.worker = null
         this.pendingPromises = new Map()
         this.messageId = 0
-
-        const subTabs = shopData.find(s => s.id === "Shop")?.mainTabs.find(t => t.id === 180)?.subTabs
-        if (subTabs) {
-            subTabs.forEach(t => {
-                t.items.forEach(i => {
-                    const walnut = walnutMap.get(i.typeId)
-                    if (walnut) {
-                        const reward = walnut.奖励[0]
-                        if (reward.type === "Mod") {
-                            modShopWalnutMap.set(reward.id, 1)
-                        } else if (reward.type === "Weapon") {
-                            weaponShopWalnutMap.set(reward.id, 1)
-                        }
-                    }
-                })
-            })
-        }
     }
 
     /**
@@ -222,11 +202,11 @@ export class LevelUpCalculator {
      * @returns 精简后的武器数据
      */
     private extractMinimalWeaponData(weapon: Weapon): WeaponExt {
-        console.log(weapon, weaponShopWalnutMap.get(weapon.id))
+        console.log(weapon, weaponShopSourceMap.get(weapon.id))
         return {
             id: weapon.id,
             突破: weapon.突破,
-            walnut: weaponShopWalnutMap.get(weapon.id) && 1,
+            walnut: weaponShopSourceMap.get(weapon.id) && 1,
             draft: weaponDraftMap.get(weapon.id),
         }
     }
@@ -237,12 +217,21 @@ export class LevelUpCalculator {
      * @returns 精简后的魔之楔数据
      */
     extractMinimalModData(mod: Mod): ModExt {
+        const draft = modDraftMap.get(mod.id)
+        let shop = undefined as { price: string; n: number } | undefined
+        if (draft) {
+            const item = draftShopSourceMap.get(draft.id)
+            if (item) {
+                shop = { price: item.cost, n: item.n }
+            }
+        }
         return {
             id: mod.id,
             品质: mod.品质,
             名称: mod.名称,
-            draft: modDraftMap.get(mod.id),
-            walnut: modShopWalnutMap.get(mod.id) && 1,
+            draft,
+            walnut: modShopSourceMap.get(mod.id) && 1,
+            shop,
             dropInfo: modDungeonMap.get(mod.id)?.map(d => ({
                 id: d.id,
                 name: d.n,

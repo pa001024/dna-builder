@@ -10,14 +10,14 @@ const boss = computed(() => hardBossMap.get(bossId.value))
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-300">
+    <ScrollArea class="h-full">
         <template v-if="boss">
             <!-- 使用 HardbossDetailItem 组件显示Boss详情 -->
-            <DBHardbossDetailItem :boss="boss" class="flex-1" />
+            <DBHardbossDetailItem :boss="boss" />
         </template>
 
         <div v-else class="flex-1 flex items-center justify-center">
             <div class="text-base-content/70">未找到梦魇残声</div>
         </div>
-    </div>
+    </ScrollArea>
 </template>

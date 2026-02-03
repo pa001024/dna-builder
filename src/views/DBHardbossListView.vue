@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue"
 import { monsterMap } from "@/data"
-import { hardBossMap, type HardBoss } from "../data/d/hardboss.data"
+import { type HardBoss, hardBossMap } from "../data/d/hardboss.data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
 const searchKeyword = ref("")
@@ -75,9 +75,7 @@ function selectBoss(boss: HardBoss | null) {
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1 ml-2">
-                                    <span class="text-xs px-2 py-0.5 rounded bg-primary text-white">
-                                        {{ boss.diff.length }} 个难度
-                                    </span>
+                                    <span class="text-xs px-2 py-0.5 rounded bg-primary text-white"> {{ boss.diff.length }} 个难度 </span>
                                     <span class="text-xs opacity-70">ID: {{ boss.id }}</span>
                                 </div>
                             </div>
@@ -102,9 +100,9 @@ function selectBoss(boss: HardBoss | null) {
             </div>
 
             <!-- 右侧详情面板 -->
-            <div v-if="selectedBoss" class="flex-1 overflow-hidden">
+            <ScrollArea v-if="selectedBoss" class="flex-1">
                 <DBHardbossDetailItem :boss="selectedBoss" />
-            </div>
+            </ScrollArea>
         </div>
     </div>
 </template>

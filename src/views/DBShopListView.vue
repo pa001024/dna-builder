@@ -1,10 +1,9 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue"
 import shopData from "../data/d/shop.data"
-import DBShopDetailItem from "@/components/DBShopDetailItem.vue"
 
 const searchKeyword = ref("")
-const selectedShop = ref<typeof shopData[0] | null>(null)
+const selectedShop = ref<(typeof shopData)[0] | null>(null)
 
 // 按关键词筛选商店
 const filteredShops = computed(() => {
@@ -16,23 +15,26 @@ const filteredShops = computed(() => {
             return (
                 shop.id.toLowerCase().includes(q) ||
                 shop.name.toLowerCase().includes(q) ||
-                shop.mainTabs.some(mainTab =>
-                    mainTab.name.toLowerCase().includes(q) ||
-                    mainTab.subTabs.some(subTab =>
-                        subTab.name.toLowerCase().includes(q) ||
-                        subTab.items.some(item =>
-                            item.typeName.toLowerCase().includes(q) ||
-                            item.itemType.toLowerCase().includes(q) ||
-                            item.priceName.toLowerCase().includes(q)
+                shop.mainTabs.some(
+                    mainTab =>
+                        mainTab.name.toLowerCase().includes(q) ||
+                        mainTab.subTabs.some(
+                            subTab =>
+                                subTab.name.toLowerCase().includes(q) ||
+                                subTab.items.some(
+                                    item =>
+                                        item.typeName.toLowerCase().includes(q) ||
+                                        item.itemType.toLowerCase().includes(q) ||
+                                        item.priceName.toLowerCase().includes(q)
+                                )
                         )
-                    )
                 )
             )
         }
     })
 })
 
-function selectShop(shop: typeof shopData[0] | null) {
+function selectShop(shop: (typeof shopData)[0] | null) {
     selectedShop.value = shop
 }
 </script>
@@ -65,19 +67,28 @@ function selectShop(shop: typeof shopData[0] | null) {
                             <div class="flex items-start justify-between">
                                 <div>
                                     <div class="font-medium">{{ shop.name }}</div>
-                                    <div class="text-xs opacity-70 mt-1">
-                                        {{ shop.mainTabs.length }}个主标签
-                                    </div>
+                                    <div class="text-xs opacity-70 mt-1">{{ shop.mainTabs.length }}个主标签</div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">
                                     <span class="text-xs px-2 py-0.5 rounded bg-primary text-white">
                                         {{ shop.id }}
                                     </span>
-                                    <span class="text-xs opacity-70">{{ shop.mainTabs.reduce((total, tab) => total + tab.subTabs.length, 0) }}个子标签</span>
+                                    <span class="text-xs opacity-70"
+                                        >{{ shop.mainTabs.reduce((total, tab) => total + tab.subTabs.length, 0) }}个子标签</span
+                                    >
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 mt-2 text-xs opacity-70">
-                                <span>商品总数: {{ shop.mainTabs.reduce((total, tab) => total + tab.subTabs.reduce((subTotal, subTab) => subTotal + subTab.items.length, 0), 0) }}</span>
+                                <span
+                                    >商品总数:
+                                    {{
+                                        shop.mainTabs.reduce(
+                                            (total, tab) =>
+                                                total + tab.subTabs.reduce((subTotal, subTab) => subTotal + subTab.items.length, 0),
+                                            0
+                                        )
+                                    }}</span
+                                >
                             </div>
                         </div>
                     </div>
@@ -97,9 +108,9 @@ function selectShop(shop: typeof shopData[0] | null) {
             </div>
 
             <!-- 右侧详情面板 -->
-            <div v-if="selectedShop" class="flex-1 overflow-hidden">
+            <ScrollArea v-if="selectedShop" class="flex-1">
                 <DBShopDetailItem :shop="selectedShop" />
-            </div>
+            </ScrollArea>
         </div>
     </div>
 </template>

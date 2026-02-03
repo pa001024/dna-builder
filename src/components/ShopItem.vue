@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { resourceMap } from "@/data"
+import { computed } from "vue"
+import { draftMap, LeveledMod, LeveledWeapon, modMap, resourceMap, walnutMap, weaponMap } from "@/data"
 import type { ShopItem } from "@/data/d/shop.data"
 import { getRewardDetails } from "@/utils/reward-utils"
 
@@ -8,14 +9,78 @@ interface ShopItemWithChildren extends ShopItem {
     children?: ShopItemWithChildren[]
 }
 
-// 定义组件接收的Props
-interface Props {
+const props = defineProps<{
     item: ShopItemWithChildren
-}
+}>()
 
-defineProps<Props>()
-
-function getResourceIcon(name: string) {
+const itemDetail = computed(() => {
+    switch (props.item.itemType) {
+        case "Mod":
+            const mod = modMap.get(props.item.typeId)
+            return {
+                type: "Mod" as const,
+                mod,
+                icon: LeveledMod.url(mod?.icon),
+                link: `/db/mod/${mod?.id}`,
+            }
+        case "Weapon":
+            const weapon = weaponMap.get(props.item.typeId)
+            return {
+                type: "Weapon" as const,
+                weapon,
+                icon: LeveledWeapon.url(weapon?.icon),
+                link: `/db/weapon/${weapon?.id}`,
+            }
+        case "Resource":
+            const res = resourceMap.get(props.item.typeId)
+            return {
+                type: "Resource" as const,
+                res,
+                icon: `/imgs/res/${res?.icon}.webp`,
+            }
+        case "Draft":
+            const draft = draftMap.get(props.item.typeId)
+            let icon = `/imgs/webp/T_Head_Empty.webp`
+            if (draft) {
+                if (draft.t === "Mod" && draft.p) {
+                    icon = LeveledMod.url(modMap.get(draft.p)?.icon)
+                } else if (draft.t === "Weapon" && draft.p) {
+                    icon = LeveledWeapon.url(weaponMap.get(draft.p)?.icon)
+                }
+            }
+            return {
+                type: "Draft" as const,
+                draft,
+                icon,
+                link: `/db/draft/${draft?.id}`,
+            }
+        case "Walnut":
+            const walnut = walnutMap.get(props.item.typeId)
+            const reward = walnut?.奖励?.[0]
+            let icon2 = `/imgs/webp/T_Head_Empty.webp`
+            if (reward) {
+                if (reward.type === "Mod") {
+                    icon2 = LeveledMod.url(modMap.get(reward.id)?.icon)
+                } else if (reward.type === "Weapon") {
+                    icon2 = LeveledWeapon.url(weaponMap.get(reward.id)?.icon)
+                } else if (reward.type === "Resource") {
+                    icon2 = `/imgs/res/${resourceMap.get(reward.id)?.icon}.webp`
+                }
+            }
+            return {
+                type: "Walnut" as const,
+                walnut,
+                icon: icon2,
+                link: `/db/walnut/${walnut?.id}`,
+            }
+        default:
+            return {
+                type: props.item.itemType,
+                icon: `/imgs/webp/T_Head_Empty.webp`,
+            }
+    }
+})
+function getPriceIcon(name: string) {
     const res = resourceMap.get(name)
     return res?.icon ? `/imgs/res/${res.icon}.webp` : `/imgs/webp/T_Head_Empty.webp`
 }
@@ -28,17 +93,20 @@ function getResourceIcon(name: string) {
             <div class="flex justify-between items-center mb-2">
                 <div class="flex items-center gap-2">
                     <div class="w-6 h-6">
-                        <img :src="getResourceIcon(item.typeName)" class="w-full h-full object-cover rounded" :alt="item.typeName" />
+                        <img :src="itemDetail?.icon" class="w-full h-full object-cover rounded" :alt="item.typeName" />
                     </div>
                     <div>
-                        <span class="font-medium">{{ item.typeName }}</span>
+                        <SRouterLink v-if="itemDetail?.link" :to="itemDetail?.link" class="hover:underline">
+                            {{ item.typeName }}
+                        </SRouterLink>
+                        <span v-else>{{ item.typeName }}</span>
                         <span class="ml-1 text-xs text-base-content/70">({{ item.itemType }})</span>
                         <span class="text-xs px-1.5 py-0.5 rounded bg-base-300">x{{ item.num }}</span>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
                     <div class="flex items-center gap-1">
-                        <img :src="getResourceIcon(item.priceName)" class="w-4 h-4 object-cover rounded" :alt="item.priceName" />
+                        <img :src="getPriceIcon(item.priceName)" class="w-4 h-4 object-cover rounded" :alt="item.priceName" />
                         <span class="text-sm font-medium">{{ item.price }}</span>
                     </div>
                 </div>

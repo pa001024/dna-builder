@@ -30,11 +30,7 @@ function getIcon(name: string) {
         :effdesc="mod.效果"
         :link="`/db/mod/${mod.id}`"
     >
-        <div
-            class="flex items-center p-3 rounded-xl hover:bg-base-300 transition-colors duration-200"
-            v-bind="$attrs"
-            @click="$emit('click')"
-        >
+        <div class="flex items-center p-3 rounded bg-base-300 transition-colors duration-200" v-bind="$attrs" @click="$emit('click')">
             <span class="font-medium text-base-content">
                 <img :src="mod.url" :alt="mod.名称" class="w-6 h-6 inline-block mr-2" />
                 {{ $t(name) }}</span
@@ -42,12 +38,7 @@ function getIcon(name: string) {
             <span class="font-bold text-primary ml-auto">{{ value[0] }}</span>
         </div>
     </ShowProps>
-    <div
-        v-else
-        class="flex items-center p-3 rounded-xl hover:bg-base-300 transition-colors duration-200"
-        v-bind="$attrs"
-        @click="$emit('click')"
-    >
+    <div v-else class="flex items-center p-3 rounded bg-base-300 transition-colors duration-200" v-bind="$attrs" @click="$emit('click')">
         <span class="font-medium text-base-content">
             <img :src="getIcon(name)" alt="" class="w-6 h-6 inline-block mr-2" />
             {{ $t(name) }}</span

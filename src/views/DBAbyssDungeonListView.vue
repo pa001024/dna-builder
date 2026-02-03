@@ -141,9 +141,9 @@ function getCharName(charId: number): string {
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 
-            <div v-if="selectedDungeon" class="flex-1 overflow-hidden">
+            <ScrollArea v-if="selectedDungeon" class="flex-1">
                 <DBAbyssDungeonDetailItem :dungeon="selectedDungeon" />
-            </div>
+            </ScrollArea>
         </div>
     </div>
 </template>

@@ -189,7 +189,7 @@ async function loadRoleDetail() {
                 <div class="card bg-base-100 border border-base-200 rounded-lg shadow-sm">
                     <div class="card-body p-6">
                         <h3 class="text-lg font-semibold mb-4">技能</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div
                                 v-for="skill in charDetail.skills"
                                 :key="skill.skillId"
@@ -253,8 +253,8 @@ async function loadRoleDetail() {
                             魔之楔
                             <div class="ml-auto">{{ charDetail.currentVolume }}/{{ charDetail.sumVolume }}</div>
                         </div>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <ModItem v-for="(mode, index) in charDetail.modes" :key="index" :mod="LeveledMod.fromDNA(mode)" />
+                        <div class="flex justify-center items-center gap-2">
+                            <GameStyleModView :mods="charDetail.modes.map(mode => LeveledMod.fromDNA(mode))" />
                         </div>
                     </div>
                 </div>

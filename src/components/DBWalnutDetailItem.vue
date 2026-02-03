@@ -185,6 +185,12 @@ function openOnce() {
     }
 }
 
+function openWalnut(n: number) {
+    for (let i = 0; i < n; i++) {
+        openOnce()
+    }
+}
+
 /**
  * 开始自动开密函
  */
@@ -255,201 +261,194 @@ function getRewardTypeColor(index: number): string {
 </script>
 
 <template>
-    <ScrollArea class="h-full">
-        <div class="p-3 space-y-4">
-            <div class="p-3">
-                <!-- 密函基本信息 -->
-                <div class="flex items-center gap-3 mb-3">
-                    <span class="text-lg font-bold">
-                        {{ props.walnut.名称 }}
-                    </span>
-                    <span class="text-xs text-base-content/70">ID: {{ props.walnut.id }}</span>
-                    <div class="text-sm text-base-content/70 flex items-center gap-2">
-                        <span class="px-1.5 py-0.5 rounded bg-base-200"> {{ props.walnut.稀有度 }}星 </span>
-                        <div class="ml-auto badge badge-sm badge-soft gap-1 text-base-content/80">
-                            {{ props.walnut.类型 === 1 ? "角色" : props.walnut.类型 === 2 ? "武器" : "魔之楔" }}
-                        </div>
-                    </div>
+    <div class="p-3 space-y-3">
+        <!-- 密函基本信息 -->
+        <div class="flex items-center gap-3 mb-3">
+            <span class="text-lg font-bold">
+                {{ props.walnut.名称 }}
+            </span>
+            <span class="text-xs text-base-content/70">ID: {{ props.walnut.id }}</span>
+            <div class="text-sm text-base-content/70 flex items-center gap-2">
+                <span class="px-1.5 py-0.5 rounded bg-base-200"> {{ props.walnut.稀有度 }}星 </span>
+                <div class="ml-auto badge badge-sm badge-soft gap-1 text-base-content/80">
+                    {{ props.walnut.类型 === 1 ? "角色" : props.walnut.类型 === 2 ? "武器" : "魔之楔" }}
                 </div>
+            </div>
+        </div>
 
-                <div class="flex flex-wrap gap-2 text-sm opacity-70 mb-3">
-                    <span>{{ props.walnut.模式 }}</span>
+        <div class="flex flex-wrap gap-2 text-sm opacity-70 mb-3">
+            <span>{{ props.walnut.模式 }}</span>
+        </div>
+
+        <!-- 获取途径 -->
+        <div class="p-3 bg-base-200 rounded mb-3">
+            <div class="text-xs text-base-content/70 mb-1">获取途径</div>
+            <div class="flex flex-wrap gap-2">
+                <span v-for="way in props.walnut.获取途径" :key="way" class="bg-base-300 px-2 py-0.5 rounded-full text-xs">
+                    {{ way }}
+                </span>
+            </div>
+        </div>
+
+        <!-- 奖励列表 -->
+        <div class="p-3 bg-base-200 rounded mb-3">
+            <div class="flex items-center justify-between mb-3">
+                <div class="text-xs text-base-content/70">奖励列表</div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-100">
+                    <thead>
+                        <tr class="border-b border-base-content/20">
+                            <th class="text-left py-2 px-3 text-xs">ID</th>
+                            <th class="text-left py-2 px-3 text-xs">名称</th>
+                            <th class="text-left py-2 px-3 text-xs">数量</th>
+                            <th class="text-left py-2 px-3 text-xs">池随机范围*</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr
+                            v-for="(reward, index) in props.walnut.奖励"
+                            :key="index"
+                            class="border-b border-base-content/10 hover:bg-base-300/50 transition-colors"
+                        >
+                            <td class="py-2 px-3 text-sm">{{ reward.id }}</td>
+                            <td class="py-2 px-3 text-sm">
+                                {{ (reward.d || 0) > 0 ? `图纸: ` : "" }}
+                                {{ $t(reward.name) }}
+                            </td>
+                            <td class="py-2 px-3 text-sm">{{ reward.count }}</td>
+                            <td class="py-2 px-3 text-sm">{{ index > 0 ? `0~${props.walnut.参数[index]}` : 1 }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-xs text-base-content/70 mt-4">
+                * 机制: 从每个奖励的随机范围抽取n个该种奖励后加入到奖励序列, 打乱后在序列结尾放置金奖励, 重复抽取直到抽出金后重置序列
+            </p>
+        </div>
+
+        <div v-if="draft" class="bg-base-200 rounded mb-3">
+            <!-- 图纸 -->
+            <DBDraftDetailItem :draft="draft" />
+        </div>
+
+        <!-- 模拟开函 -->
+        <div class="p-3 bg-base-200 rounded mb-3">
+            <div class="flex items-center justify-between mb-3">
+                <div class="text-xs text-base-content/70">模拟开函</div>
+            </div>
+
+            <!-- 统计信息 -->
+            <div class="grid grid-cols-3 gap-2 mb-3">
+                <div class="bg-base-300 rounded p-2">
+                    <div class="text-xs text-base-content/60 mb-0.5">总开函次数</div>
+                    <div class="text-lg font-bold">{{ totalOpens }}</div>
                 </div>
-
-                <!-- 获取途径 -->
-                <div class="p-3 bg-base-200 rounded mb-3">
-                    <div class="text-xs text-base-content/70 mb-1">获取途径</div>
-                    <div class="flex flex-wrap gap-2">
-                        <span v-for="way in props.walnut.获取途径" :key="way" class="bg-base-300 px-2 py-0.5 rounded-full text-xs">
-                            {{ way }}
-                        </span>
-                    </div>
+                <div class="bg-base-300 rounded p-2">
+                    <div class="text-xs text-base-content/60 mb-0.5">出金次数</div>
+                    <div class="text-lg font-bold text-yellow-500">{{ goldCount }}</div>
                 </div>
+                <div class="bg-base-300 rounded p-2">
+                    <div class="text-xs text-base-content/60 mb-0.5">出金率</div>
+                    <div class="text-lg font-bold">{{ totalOpens > 0 ? ((goldCount / totalOpens) * 100).toFixed(2) : 0 }}%</div>
+                </div>
+            </div>
 
-                <!-- 奖励列表 -->
-                <div class="p-3 bg-base-200 rounded mb-3">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="text-xs text-base-content/70">奖励列表</div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full min-w-100">
-                            <thead>
-                                <tr class="border-b border-base-content/20">
-                                    <th class="text-left py-2 px-3 text-xs">ID</th>
-                                    <th class="text-left py-2 px-3 text-xs">名称</th>
-                                    <th class="text-left py-2 px-3 text-xs">数量</th>
-                                    <th class="text-left py-2 px-3 text-xs">池随机范围*</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr
-                                    v-for="(reward, index) in props.walnut.奖励"
-                                    :key="index"
-                                    class="border-b border-base-content/10 hover:bg-base-300/50 transition-colors"
+            <!-- 操作按钮 -->
+            <div class="flex flex-wrap gap-2 justify-center mb-3">
+                <button class="btn btn-primary btn-sm" :disabled="isAutoOpening" @click="openOnce">开1次</button>
+                <button class="btn btn-primary btn-sm" :disabled="isAutoOpening" @click="openWalnut(65)">开65次</button>
+                <button class="btn btn-secondary btn-sm" @click="isAutoOpening ? stopAutoOpen() : startAutoOpen()">
+                    {{ isAutoOpening ? "停止自动" : "开始自动" }}开
+                </button>
+                <button class="btn btn-error btn-sm" @click="resetSimulation">重置数据</button>
+            </div>
+
+            <!-- 开函结果 -->
+            <div class="mb-3">
+                <div class="text-xs text-base-content/70 mb-2">开函结果（最近200次）</div>
+                <div class="bg-base-300 rounded p-2 max-h-48 overflow-y-auto">
+                    <div v-if="openResults.length === 0" class="text-center text-base-content/60 py-4">暂无开函记录</div>
+                    <div v-else class="grid grid-cols-1 gap-1">
+                        <div
+                            v-for="(result, index) in openResults"
+                            :key="index"
+                            class="flex items-center gap-2 p-1 bg-base-100/50 rounded text-xs"
+                        >
+                            <span class="text-base-content/60 w-8">{{ totalOpens - index }}</span>
+                            <div class="flex-1 flex gap-0.5">
+                                <span
+                                    v-for="(reward, rIndex) in result.map(v => getRewardInfo(v))"
+                                    :key="rIndex"
+                                    class="px-1.5 py-0.5 rounded text-xs font-medium"
+                                    :class="[getRewardTypeColor(reward.index), rIndex === 0 ? 'underline' : '']"
                                 >
-                                    <td class="py-2 px-3 text-sm">{{ reward.id }}</td>
-                                    <td class="py-2 px-3 text-sm">
-                                        {{ (reward.d || 0) > 0 ? `图纸: ` : "" }}
-                                        {{ $t(reward.name) }}
-                                    </td>
-                                    <td class="py-2 px-3 text-sm">{{ reward.count }}</td>
-                                    <td class="py-2 px-3 text-sm">{{ index > 0 ? `0~${props.walnut.参数[index]}` : 1 }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <p class="text-xs text-base-content/70 mt-4">
-                        * 机制: 从每个奖励的随机范围抽取n个该种奖励后加入到奖励序列, 打乱后在序列结尾放置金奖励,
-                        重复抽取直到抽出金后重置序列
-                    </p>
-                </div>
-
-                <div v-if="draft" class="bg-base-200 rounded mb-3">
-                    <!-- 图纸 -->
-                    <DBDraftDetailItem :draft="draft" />
-                </div>
-
-                <!-- 模拟开函 -->
-                <div class="p-3 bg-base-200 rounded mb-3">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="text-xs text-base-content/70">模拟开函</div>
-                    </div>
-
-                    <!-- 统计信息 -->
-                    <div class="grid grid-cols-3 gap-2 mb-3">
-                        <div class="bg-base-300 rounded p-2">
-                            <div class="text-xs text-base-content/60 mb-0.5">总开函次数</div>
-                            <div class="text-lg font-bold">{{ totalOpens }}</div>
-                        </div>
-                        <div class="bg-base-300 rounded p-2">
-                            <div class="text-xs text-base-content/60 mb-0.5">出金次数</div>
-                            <div class="text-lg font-bold text-yellow-500">{{ goldCount }}</div>
-                        </div>
-                        <div class="bg-base-300 rounded p-2">
-                            <div class="text-xs text-base-content/60 mb-0.5">出金率</div>
-                            <div class="text-lg font-bold">{{ totalOpens > 0 ? ((goldCount / totalOpens) * 100).toFixed(2) : 0 }}%</div>
-                        </div>
-                    </div>
-
-                    <!-- 操作按钮 -->
-                    <div class="flex flex-wrap gap-2 justify-center mb-3">
-                        <button class="btn btn-primary btn-sm" :disabled="isAutoOpening" @click="openOnce">手动开一次</button>
-                        <button class="btn btn-secondary btn-sm" @click="isAutoOpening ? stopAutoOpen() : startAutoOpen()">
-                            {{ isAutoOpening ? "停止自动" : "开始自动" }}开
-                        </button>
-                        <button class="btn btn-error btn-sm" @click="resetSimulation">重置数据</button>
-                    </div>
-
-                    <!-- 开函结果 -->
-                    <div class="mb-3">
-                        <div class="text-xs text-base-content/70 mb-2">开函结果（最近200次）</div>
-                        <div class="bg-base-300 rounded p-2 max-h-48 overflow-y-auto">
-                            <div v-if="openResults.length === 0" class="text-center text-base-content/60 py-4">暂无开函记录</div>
-                            <div v-else class="grid grid-cols-1 gap-1">
-                                <div
-                                    v-for="(result, index) in openResults"
-                                    :key="index"
-                                    class="flex items-center gap-2 p-1 bg-base-100/50 rounded text-xs"
-                                >
-                                    <span class="text-base-content/60 w-8">{{ totalOpens - index }}</span>
-                                    <div class="flex-1 flex gap-0.5">
-                                        <span
-                                            v-for="(reward, rIndex) in result.map(v => getRewardInfo(v))"
-                                            :key="rIndex"
-                                            class="px-1.5 py-0.5 rounded text-xs font-medium"
-                                            :class="[getRewardTypeColor(reward.index), rIndex === 0 ? 'underline' : '']"
-                                        >
-                                            {{ reward.d > 0 ? $t(`图纸: `) : "" }}
-                                            {{ $t(reward.name) }}
-                                            {{ reward.count > 1 ? `*${reward.count}` : "" }}
-                                        </span>
-                                    </div>
-                                    <span v-if="result.includes(0)" class="text-xs text-yellow-500 font-bold"> ✨ </span>
-                                </div>
+                                    {{ reward.d > 0 ? $t(`图纸: `) : "" }}
+                                    {{ $t(reward.name) }}
+                                    {{ reward.count > 1 ? `*${reward.count}` : "" }}
+                                </span>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- 奖励数量统计 -->
-                    <div class="mb-3">
-                        <div class="text-xs text-base-content/70 mb-2">奖励数量统计</div>
-                        <div class="bg-base-300 rounded p-2 max-h-40 overflow-y-auto">
-                            <div v-if="Object.keys(rewardCounts).length === 0" class="text-center text-base-content/60 py-4">
-                                暂无统计数据
-                            </div>
-                            <div v-else class="grid grid-cols-2 gap-2">
-                                <div
-                                    v-for="reward in sortedRewardCounts"
-                                    :key="reward.name"
-                                    class="flex items-center justify-between p-2 bg-base-100/50 rounded text-xs"
-                                >
-                                    <div>
-                                        <span :class="getRewardColor(reward.rarity)">
-                                            {{ reward.d > 0 ? $t(`图纸: `) : "" }}
-                                            {{ $t(reward.name) }}</span
-                                        >
-                                    </div>
-                                    <span class="font-medium text-primary">*{{ reward.count }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="text-xs text-base-content/70 mb-2">出金概率期望</div>
-                        <div class="bg-base-300 rounded p-2 overflow-x-auto">
-                            <table class="w-full min-w-100">
-                                <thead>
-                                    <tr class="border-b border-base-content/20">
-                                        <th class="text-left py-2 px-3 text-xs">开函次数(n)</th>
-                                        <th class="text-left py-2 px-3 text-xs">至少一次出金概率</th>
-                                        <th class="text-left py-2 px-3 text-xs">刚好在这次开出金概率</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr
-                                        v-for="(item, index) in probabilityData"
-                                        :key="item.n"
-                                        class="border-b border-base-content/10 hover:bg-base-100/50 transition-colors"
-                                    >
-                                        <td class="py-1.5 px-3 text-xs">{{ item.n }}</td>
-                                        <td class="py-1.5 px-3 text-xs">{{ (item.probability * 100).toFixed(2) }}%</td>
-                                        <td class="py-1.5 px-3 text-xs">
-                                            {{
-                                                +(
-                                                    (index === 0
-                                                        ? item.probability
-                                                        : item.probability - probabilityData[index - 1].probability) * 100
-                                                ).toFixed(2)
-                                            }}%
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <span v-if="result.includes(0)" class="text-xs text-yellow-500 font-bold"> ✨ </span>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- 奖励数量统计 -->
+            <div class="mb-3">
+                <div class="text-xs text-base-content/70 mb-2">奖励数量统计</div>
+                <div class="bg-base-300 rounded p-2 max-h-40 overflow-y-auto">
+                    <div v-if="Object.keys(rewardCounts).length === 0" class="text-center text-base-content/60 py-4">暂无统计数据</div>
+                    <div v-else class="grid grid-cols-2 gap-2">
+                        <div
+                            v-for="reward in sortedRewardCounts"
+                            :key="reward.name"
+                            class="flex items-center justify-between p-2 bg-base-100/50 rounded text-xs"
+                        >
+                            <div>
+                                <span :class="getRewardColor(reward.rarity)">
+                                    {{ reward.d > 0 ? $t(`图纸: `) : "" }}
+                                    {{ $t(reward.name) }}</span
+                                >
+                            </div>
+                            <span class="font-medium text-primary">*{{ reward.count }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-xs text-base-content/70 mb-2">出金概率期望</div>
+                <div class="bg-base-300 rounded p-2 overflow-x-auto">
+                    <table class="w-full min-w-100">
+                        <thead>
+                            <tr class="border-b border-base-content/20">
+                                <th class="text-left py-2 px-3 text-xs">开函次数(n)</th>
+                                <th class="text-left py-2 px-3 text-xs">至少一次出金概率</th>
+                                <th class="text-left py-2 px-3 text-xs">刚好在这次开出金概率</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                v-for="(item, index) in probabilityData"
+                                :key="item.n"
+                                class="border-b border-base-content/10 hover:bg-base-100/50 transition-colors"
+                            >
+                                <td class="py-1.5 px-3 text-xs">{{ item.n }}</td>
+                                <td class="py-1.5 px-3 text-xs">{{ (item.probability * 100).toFixed(2) }}%</td>
+                                <td class="py-1.5 px-3 text-xs">
+                                    {{
+                                        +(
+                                            (index === 0 ? item.probability : item.probability - probabilityData[index - 1].probability) *
+                                            100
+                                        ).toFixed(2)
+                                    }}%
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    </ScrollArea>
+    </div>
 </template>

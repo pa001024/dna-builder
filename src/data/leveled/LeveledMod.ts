@@ -26,7 +26,8 @@ export class LeveledMod implements Mod {
     系列: string
     品质: string
     耐受: number
-    类型: string;
+    类型: string
+    极性?: "D" | "O" | "V" | "A";
     [key: string]: any
     // MOD效果
     buff?: LeveledBuff
@@ -224,7 +225,7 @@ export class LeveledMod implements Mod {
         if (!this.生效?.条件?.length) return undefined
         const poTable = charMods.reduce(
             (acc, mod) => {
-                acc[mod.极性] = (acc[mod.极性] || 0) + 1
+                if (mod.极性) acc[mod.极性] = (acc[mod.极性] || 0) + 1
                 return acc
             },
             {} as Record<string, number>

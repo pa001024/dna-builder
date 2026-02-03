@@ -793,7 +793,7 @@ const handleBatchAddMods = () => {
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2 mt-2 text-xs opacity-70">
-                                    <span>怪物: {{ (dungeon.m || []).length }}个</span>
+                                    <span>怪物: {{ (dungeon.m || []).length }}种</span>
                                     <span v-if="(dungeon.sm || []).length">特殊: {{ (dungeon.sm || []).length }}个</span>
                                     <span v-if="dungeon.r?.length"> 奖励: {{ getDungeonRewardNames(dungeon) }} </span>
                                     <span class="ml-auto">ID: {{ dungeon.id }}</span>
@@ -846,7 +846,7 @@ const handleBatchAddMods = () => {
                                 </div>
                                 <div class="text-xs opacity-70">点击资源可过滤</div>
                             </div>
-                            <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
+                            <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
                                 <ResourceCostItem
                                     v-for="(value, key) in result.totalCost"
                                     :key="key"
@@ -870,7 +870,7 @@ const handleBatchAddMods = () => {
                                     <Icon icon="ri:lightbulb-line" />
                                     <h4 class="font-semibold text-base-content">等级升级消耗</h4>
                                 </div>
-                                <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
+                                <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
                                     <ResourceCostItem
                                         v-for="(value, key) in result.details.levelUp"
                                         :key="key"
@@ -893,7 +893,7 @@ const handleBatchAddMods = () => {
                                     <Icon icon="ri:flashlight-line" />
                                     <h4 class="font-semibold text-base-content">技能升级消耗</h4>
                                 </div>
-                                <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
+                                <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
                                     <ResourceCostItem
                                         v-for="(value, key) in result.details.skills"
                                         :key="key"
@@ -916,7 +916,7 @@ const handleBatchAddMods = () => {
                                     <Icon icon="ri:star-line" />
                                     <h4 class="font-semibold text-base-content">突破消耗</h4>
                                 </div>
-                                <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
+                                <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
                                     <ResourceCostItem
                                         v-for="(value, key) in result.details.breakthrough"
                                         :key="key"
@@ -939,7 +939,7 @@ const handleBatchAddMods = () => {
                                     <Icon icon="ri:hammer-line" />
                                     <h4 class="font-semibold text-base-content">锻造消耗</h4>
                                 </div>
-                                <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
+                                <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
                                     <ResourceCostItem
                                         v-for="(value, key) in result.details.craft"
                                         :key="key"

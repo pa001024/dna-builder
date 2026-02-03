@@ -444,7 +444,6 @@ function calculateWeaponCraft(
     const draft = weapon.draft
     if (weapon.walnut) {
         cost.委托密函线索 = ((cost.委托密函线索 as number) || 0) + 100 * (needRefine + 1)
-        console.log(weapon, cost.委托密函线索)
     }
     function calcDraftCost(d: Draft, n = 1) {
         // 计算锻造材料
@@ -477,6 +476,7 @@ export interface ModExt {
     品质: string
     draft?: Draft
     walnut?: 1
+    shop?: { price: string; n: number }
     dropInfo?: DungeonExt[]
     draftInfo?: DungeonExt[]
 }
@@ -522,11 +522,8 @@ function calculateModLevelUpCost(
         }
     }
     const draft = mod.draft
-    if (mod.walnut) {
-        cost.委托密函线索 = ((cost.委托密函线索 as number) || 0) + 100 * count
-    }
     function calcDraftCost(d: Draft, n = 1, sub: boolean = false) {
-        const name = `图纸: ${mod.名称}`
+        const name = `图纸: ${d.n}`
         let totalGold = 1 * n
         if (mod.品质 === "金" && targetLevel > 5 && !sub) {
             // 计算6-10级增幅消耗（仅金色魔之楔）
@@ -536,8 +533,15 @@ function calculateModLevelUpCost(
             for (let i = ampStart; i < ampEnd; i++) {
                 totalGold += gold[i] * n
             }
+
+            if (mod.walnut) {
+                cost.委托密函线索 = ((cost.委托密函线索 as number) || 0) + 100 * totalGold
+            }
+            if (mod.shop) {
+                cost[mod.shop.price] = ((cost[mod.shop.price] as number) || 0) + mod.shop.n * totalGold
+            }
         }
-        cost[name] = [totalGold, mod.id, "Draft"]
+        if (d.t === "Mod") cost[name] = [totalGold, d.p, "Draft"]
         // 金色魔之楔需要5个同名紫色魔之楔
         cost.铜币 += d.m * totalGold
         for (const costmod of d.x) {
@@ -656,6 +660,10 @@ function getModDropDungeons(totalCost: ResourceCost, modMap: Record<number, ModE
             const key = `${type}-${modId}`
             remainingNeeds.set(key, count)
             const mod = modMap[modId]
+            if (!mod) {
+                console.warn(`未找到 ID ${modId} 的 ${type} 数据`)
+                continue
+            }
 
             // 获取该资源的所有来源副本
             const dungeons = (type === "Draft" ? mod.draftInfo : mod.dropInfo) || []
