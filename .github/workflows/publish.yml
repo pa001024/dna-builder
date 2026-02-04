@@ -32,8 +32,8 @@ jobs:
             OPENCV_VERSION: "4.9.0"
             OPENCV_DIR: C:\opencv\build
             OPENCV_INCLUDE_PATHS: C:\opencv\build\include
-            OPENCV_LIB_PATHS: C:\opencv\build\x64\vc15\lib
-            OPENCV_LINK_LIBS: opencv_world490.lib
+            OPENCV_LIB_PATHS: C:\opencv\build\x64\vc16\lib
+            OPENCV_LINK_LIBS: opencv_world490
             LIBCLANG_PATH: C:\Program Files\LLVM\bin
             OPENCV_BIN_PATHS: C:\opencv\build\x64\vc16\bin
         steps:
@@ -70,6 +70,8 @@ jobs:
                   Invoke-WebRequest -Uri $url -OutFile "opencv.exe"
                   7z x opencv.exe -oC:\ -y
                   Remove-Item opencv.exe
+                  "C:\opencv\build\x64\vc16\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+                  "C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
             - name: Install LLVM
               run: choco install llvm -y

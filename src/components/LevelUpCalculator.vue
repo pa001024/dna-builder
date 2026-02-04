@@ -70,7 +70,7 @@ const enableMods = ref({
 })
 
 // 资源过滤相关
-const excludedResources = ref<Set<string>>(new Set())
+const excludedResources = useLocalStorage<Set<string>>("lvup.excludedResources", new Set())
 
 // 切换资源过滤状态
 const toggleResourceFilter = (resourceName: string) => {
