@@ -225,7 +225,7 @@ async function updateMissionsIngame(server: string, missions: string[][]) {
 const updateMH = async (server: string = "cn", t: number = 10) => {
     console.log(`${new Date().toLocaleString()} 开始同步密函信息 - server: ${server}`)
     let is_success = false
-    await sleep(20000)
+    await sleep(30000)
     for (let i = 0; i < t; i++) {
         await sleep(5000)
         try {
@@ -281,7 +281,9 @@ async function main() {
     if (mode === "cron") {
         // 持续定时执行（每小时）
         const updateTask = async () => {
-            await updateMH(server, 10)
+            await updateMH(server, 1)
+            // 防止API没更新
+            await updateMH(server, 3)
             const next = getNextUpdateTime()
             console.log(`下一次同步: ${new Date(next).toLocaleString()}`)
         }

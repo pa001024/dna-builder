@@ -58,7 +58,7 @@ export class MihanNotify {
         }
         try {
             // 自己服务器
-            const data = await missionsIngameQuery({ server: "cn" })
+            const data = await missionsIngameQuery({ server: "cn" }, { requestPolicy: "network-only" })
             const missions = data?.missions?.map(v => v.map(v => v.replace("勘探/无尽", "勘察/无尽")))
             if (!missions) return false
             if (JSON.stringify(missions) === JSON.stringify(this.mihanData.value)) {

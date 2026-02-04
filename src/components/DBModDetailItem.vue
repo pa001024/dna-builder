@@ -13,8 +13,11 @@ const props = defineProps<{
 }>()
 
 // 当前等级
-const currentLevel = ref(1)
+const currentLevel = ref(LeveledMod.modQualityMaxLevel[props.mod.品质] || 1)
 const buffLv = ref(0)
+const crimsonPearlCosts = [300, 600, 900, 1200, 1500, 3000, 4500, 6000, 7500, 9000] // 1→2, 2→3, 3→4, 4→5
+const goldCosts = [1500, 3000, 4500, 6000, 7500, 15000, 22500, 30000, 37500, 45000] // 1→2, 2→3, 3→4, 4→5
+const modCost = [1, 1, 2, 2, 3]
 
 // 创建LeveledMod实例
 const leveledMod = computed(() => {
@@ -65,11 +68,56 @@ const modDungeons = computed<Dungeon[]>(() => {
 const modShopSources = computed(() => {
     return modShopSourceMap.get(props.mod.id)
 })
+
+/**
+ * 计算从0级升到当前等级的总消耗（深红凝珠）
+ */
+const totalCrimsonPearlCost = computed(() => {
+    if (currentLevel.value <= 0) return 0
+    // crimsonPearlCosts[i] 表示从 (i+1) 级升到 (i+2) 级的消耗
+    // 所以从 0 级升到 n 级，需要求和 crimsonPearlCosts[0] 到 crimsonPearlCosts[n-1]
+    const endIndex = Math.min(currentLevel.value - 1, crimsonPearlCosts.length - 1)
+    let total = 0
+    for (let i = 0; i <= endIndex; i++) {
+        total += crimsonPearlCosts[i]
+    }
+    return total
+})
+
+/**
+ * 计算从0级升到当前等级的总消耗（铜币）
+ */
+const totalGoldCost = computed(() => {
+    if (currentLevel.value <= 0) return 0
+    // goldCosts[i] 表示从 (i+1) 级升到 (i+2) 级的消耗
+    const endIndex = Math.min(currentLevel.value - 1, goldCosts.length - 1)
+    let total = 0
+    for (let i = 0; i <= endIndex; i++) {
+        total += goldCosts[i]
+    }
+    return total
+})
+
+/**
+ * 计算金色MOD消耗（仅金色MOD且等级大于5时）
+ */
+const totalModCost = computed(() => {
+    // 只有金色MOD且等级大于5才计算
+    if (leveledMod.value.品质 !== "金" || currentLevel.value <= 5) return 0
+    // modCost[i] 表示从 (5+i) 级升到 (5+i+1) 级需要的金色MOD数
+    // 所以从 5 级升到 n 级，需要求和 modCost[0] 到 modCost[n-6]
+    const endIndex = Math.min(currentLevel.value - 6, modCost.length - 1)
+    let total = 0
+    for (let i = 0; i <= endIndex; i++) {
+        total += modCost[i]
+    }
+    return total
+})
 </script>
 
 <template>
     <div class="p-3 space-y-4">
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 p-3">
             <SRouterLink :to="`/db/mod/${mod.id}`" class="text-lg font-bold link link-primary">
                 {{ $t(mod.系列) }}{{ $t(mod.名称) }}
             </SRouterLink>
@@ -89,14 +137,14 @@ const modShopSources = computed(() => {
             <img :src="leveledMod.url" class="w-24 object-cover rounded" />
         </div>
 
-        <div class="flex flex-wrap gap-2 text-sm opacity-70">
+        <div class="flex flex-wrap gap-2 text-sm opacity-70 p-3">
             <span>{{ $t(leveledMod.类型) }}</span>
             <span v-if="leveledMod.属性">{{ $t(`${leveledMod.属性}属性`) }}</span>
             <span v-if="leveledMod.限定">{{ $t(leveledMod.限定) }}</span>
         </div>
 
         <!-- 等级调整 -->
-        <div class="mb-3">
+        <div class="mb-3 p-3">
             <div class="flex items-center gap-4">
                 <span class="text-sm min-w-12">Lv. <input v-model.number="currentLevel" type="text" class="w-12 text-center" /> </span>
                 <input
@@ -104,7 +152,7 @@ const modShopSources = computed(() => {
                     v-model.number="currentLevel"
                     type="range"
                     class="range range-primary range-xs grow"
-                    :min="1"
+                    :min="0"
                     :max="leveledMod.maxLevel"
                     step="1"
                 />
@@ -173,6 +221,27 @@ const modShopSources = computed(() => {
                 >
                     <span class="text-base-content/70">{{ key }}</span>
                     <span class="font-medium text-primary">{{ formatProp(key, attr) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 升级消耗 -->
+        <div v-if="currentLevel > 0" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">升级消耗</div>
+            <div class="space-y-2">
+                <!-- 深红凝珠 -->
+                <ResourceCostItem name="深红凝珠" :value="totalCrimsonPearlCost" />
+                <!-- 铜币 -->
+                <ResourceCostItem name="铜币" :value="totalGoldCost" />
+                <!-- 金色MOD消耗（仅金色MOD且等级大于5时） -->
+                <div
+                    v-if="leveledMod.品质 === '金' && currentLevel > 5 && mod.消耗 && mod.消耗.length > 0"
+                    class="flex flex-wrap gap-2 items-center"
+                >
+                    <template v-for="(modId, index) in mod.消耗" :key="modId">
+                        <ResourceCostItem class="flex-1" :name="modId.toString()" :value="[totalModCost, modId, 'Mod']" />
+                        <span v-if="index < mod.消耗.length - 1" class="text-base-content/70">或</span>
+                    </template>
                 </div>
             </div>
         </div>

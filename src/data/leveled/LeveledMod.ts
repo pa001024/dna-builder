@@ -102,6 +102,7 @@ export class LeveledMod implements Mod {
         if (modData.属性) this.属性 = modData.属性
         if (modData.限定) this.限定 = modData.限定
         if (modData.效果) this.效果 = modData.效果
+        if (modData.消耗) this.消耗 = modData.消耗
         if (effectMap.has(this.名称)) {
             const effect = effectMap.get(this.名称)!
             if (!effect.品质 || effect.品质 === this.品质) {
@@ -159,6 +160,10 @@ export class LeveledMod implements Mod {
         // 架势MOD属性耐受等级越高越低
         if (this.id > 100000) {
             this.耐受 = this._originalModData.耐受 + this.maxLevel - this._等级
+            if (this.id > 200000) {
+                this.效果 = this._originalModData.效果?.replace(/200\.0%/g, () => `${+(this._等级 * 10 + 100).toFixed(1)}%`)
+            }
+            return
         } else {
             this.耐受 = this._originalModData.耐受 - this.maxLevel + this._等级
         }
@@ -344,6 +349,7 @@ export class LeveledMod implements Mod {
         "限定",
         "极性",
         "属性",
+        "消耗",
         "_等级",
         "_originalModData",
         "buff",

@@ -28,7 +28,14 @@ on:
 jobs:
     build:
         runs-on: windows-latest
-
+        env:
+            OPENCV_VERSION: "4.9.0"
+            OPENCV_DIR: C:\opencv\build
+            OPENCV_INCLUDE_PATHS: C:\opencv\build\include
+            OPENCV_LIB_PATHS: C:\opencv\build\x64\vc15\lib
+            OPENCV_LINK_LIBS: opencv_world490.lib
+            LIBCLANG_PATH: C:\Program Files\LLVM\bin
+            OPENCV_BIN_PATHS: C:\opencv\build\x64\vc16\bin
         # strategy:
         #   matrix:
         #     node-version: [18.x]
@@ -47,11 +54,27 @@ jobs:
               with:
                   cache: true
 
+            - name: Cache vcpkg
+              uses: actions/cache@v3
+              with:
+                  path: |
+                      ./vcpkg/installed
+                      ./vcpkg/packages
+                      ./vcpkg/vcpkg-binarycache
+                  key: ${{ runner.os }}-vcpkg-${{ hashFiles('./vcpkg/vcpkg.json') }}
+                  restore-keys: |
+                      ${{ runner.os }}-vcpkg-
+
             - name: Set up OpenCV
               run: |
-                  git clone https://github.com/microsoft/vcpkg.git && ./vcpkg/bootstrap-vcpkg.bat
-                  ./vcpkg/vcpkg install opencv4:x64-windows
-                  echo "VCPKG_ROOT=${{ github.workspace }}/vcpkg" >> $GITHUB_ENV
+                  $version = "${{ env.OPENCV_VERSION }}"
+                  $url = "https://github.com/opencv/opencv/releases/download/$version/opencv-$version-windows.exe"
+                  Invoke-WebRequest -Uri $url -OutFile "opencv.exe"
+                  7z x opencv.exe -oC:\ -y
+                  Remove-Item opencv.exe
+
+            - name: Install LLVM
+              run: choco install llvm -y
 
             - name: Build
               env:

@@ -33,8 +33,9 @@ function getIcon(name: string) {
         <div class="flex items-center p-3 rounded bg-base-300 transition-colors duration-200" v-bind="$attrs" @click="$emit('click')">
             <span class="font-medium text-base-content">
                 <img :src="mod.url" :alt="mod.名称" class="w-6 h-6 inline-block mr-2" />
-                {{ $t(name) }}</span
-            >
+                {{ value[2] === "Mod" ? $t(mod.名称) : `图纸: ${mod.名称}` }}
+                <span class="ml-2 text-sm text-base-content/70">{{ mod.品质 }}</span>
+            </span>
             <span class="font-bold text-primary ml-auto">{{ value[0] }}</span>
         </div>
     </ShowProps>

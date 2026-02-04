@@ -474,6 +474,7 @@ export interface ModExt {
     id: number
     名称: string
     品质: string
+    消耗?: number[]
     draft?: Draft
     walnut?: 1
     shop?: { price: string; n: number }
@@ -523,7 +524,7 @@ function calculateModLevelUpCost(
     }
     const draft = mod.draft
     function calcDraftCost(d: Draft, n = 1, sub: boolean = false) {
-        const name = `图纸: ${d.n}`
+        const name = `图纸: ${d.n}-${d.id}`
         let totalGold = 1 * n
         if (mod.品质 === "金" && targetLevel > 5 && !sub) {
             // 计算6-10级增幅消耗（仅金色魔之楔）
@@ -546,7 +547,11 @@ function calculateModLevelUpCost(
         cost.铜币 += d.m * totalGold
         for (const costmod of d.x) {
             if (costmod.t === "Mod") {
-                cost[costmod.n] = [((cost[costmod.n] as number[]) || [0])[0] + costmod.c * totalGold, costmod.id, "Mod"]
+                cost[`${costmod.n}-${costmod.id}`] = [
+                    ((cost[`${costmod.n}-${costmod.id}`] as number[]) || [0])[0] + costmod.c * totalGold,
+                    costmod.id,
+                    "Mod",
+                ]
                 // 递归查询 如羽翼消耗换生灵
                 const sub = modDraftMap.get(costmod.id)
                 if (sub) {
@@ -556,7 +561,7 @@ function calculateModLevelUpCost(
                 cost[costmod.n] = ((cost[costmod.n] as number) || 0) + costmod.c * totalGold
                 const sub = resourceDraftMap.get(costmod.id)
                 if (sub) {
-                    calcDraftCost(sub, totalGold, true)
+                    calcDraftCost(sub, costmod.c * totalGold, true)
                 }
             }
         }

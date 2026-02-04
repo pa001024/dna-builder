@@ -229,6 +229,7 @@ export class LevelUpCalculator {
             id: mod.id,
             品质: mod.品质,
             名称: mod.名称,
+            消耗: mod.消耗,
             draft,
             walnut: modShopSourceMap.get(mod.id) && 1,
             shop,

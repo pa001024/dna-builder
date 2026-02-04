@@ -38,6 +38,7 @@ const currentFileDownloaded = ref("")
 const currentFileTotal = ref("")
 const fileProgress = ref(0)
 const downloadSpeed = ref("")
+const concurrentThreads = ref(5)
 
 // 解压缩进度相关状态
 const extractionCurrentFileCount = ref(0)
@@ -63,12 +64,19 @@ const channels = [
         name: "1.2媒体服",
         value: "PC_OBT12_Media_CN_Pub",
     },
+    {
+        name: "国际服",
+        value: "PC_OBT_Global_Pub",
+    },
 ]
 
 const selectedChannel = useLocalStorage("selectedChannel", channels[0].value)
 const selectedCDN = useLocalStorage("selectedCDN", CDN_LIST[1].url)
 
-watch(selectedChannel, fetchVersionList)
+watch([selectedChannel, selectedCDN], async () => {
+    await fetchVersionList()
+    await checkForUpdates()
+})
 
 // 计算属性
 const gamePath = computed(() => gameStore.path.replace(/\\DNA Game\\EM\.exe/, ""))
@@ -197,7 +205,7 @@ async function checkForUpdates() {
         // 如果本地文件不存在或读取失败，默认为需要更新
         needUpdate.value = true
         updateSize.value = totalSize.value
-        console.error("检查更新失败:", err)
+        // console.error("检查更新失败:", err)
     }
 }
 
@@ -287,13 +295,20 @@ async function downloadAllFiles() {
 
             // 构建完整的文件路径
             const fullFilePath = `${tempDownloadDir.value}${filename}`
+            const progressFilePath = `${fullFilePath}.progress`
 
             // 检查文件是否已存在且大小匹配
             const actualSize = await getFileSize(fullFilePath)
             const expectedSize = assets.ZipSize
 
-            // 如果文件已存在且大小匹配，则跳过下载
-            if (actualSize > 0 && actualSize === expectedSize) {
+            // 检查进度文件是否存在（断点续传）
+            const progressFileSize = await getFileSize(progressFilePath)
+
+            // 判断文件是否完整（大小匹配且没有进度文件）
+            const isFileComplete = actualSize > 0 && actualSize === expectedSize && progressFileSize === 0
+
+            // 如果文件已存在且大小匹配且没有进度文件，则跳过下载
+            if (isFileComplete) {
                 console.debug(`文件 ${filename} 已存在且大小匹配，跳过下载`)
 
                 // 更新整体下载进度
@@ -342,13 +357,14 @@ async function downloadAllFiles() {
                 filename,
                 selectedChannel.value,
                 versionList.value.subVersion,
+                concurrentThreads.value,
                 onProgress,
                 tempDownloadDir.value
             )
             console.debug("下载结果:", result)
 
             // 保存最后下载的文件路径
-            lastDownloadedFile.value = `${tempDownloadDir.value}/${filename}`
+            lastDownloadedFile.value = fullFilePath
         }
 
         // 重置状态
@@ -555,18 +571,29 @@ onMounted(async () => {
                             </div>
                         </div>
                     </div>
-
-                    <button
-                        v-if="gamePath && needUpdate"
-                        @click="downloadAllFiles()"
-                        class="w-full btn btn-lg btn-primary"
-                        :disabled="isDownloading || isExtracting || !gamePath || !needUpdate"
-                    >
-                        <Icon v-if="isDownloading" icon="ri:refresh-line" class="w-5 h-5 mr-2 animate-spin" />
-                        <Icon v-else-if="isExtracting" icon="ri:box-3-line" class="w-5 h-5 mr-2 animate-spin" />
-                        <Icon v-else icon="ri:download-2-line" class="w-5 h-5 mr-2" />
-                        {{ isDownloading ? "下载中..." : isExtracting ? "解压缩中..." : needUpdate ? "更新游戏" : "无需更新" }}
-                    </button>
+                    <div class="flex gap-4" v-if="gamePath && needUpdate">
+                        <div>
+                            <p class="text-gray-400 text-xs">下载线程数</p>
+                            <input
+                                v-model.number="concurrentThreads"
+                                type="number"
+                                class="input input-sm w-20"
+                                min="1"
+                                max="100"
+                                step="1"
+                            />
+                        </div>
+                        <button
+                            @click="downloadAllFiles()"
+                            class="flex-1 btn btn-lg btn-primary"
+                            :disabled="isDownloading || isExtracting || !gamePath || !needUpdate"
+                        >
+                            <Icon v-if="isDownloading" icon="ri:refresh-line" class="w-5 h-5 mr-2 animate-spin" />
+                            <Icon v-else-if="isExtracting" icon="ri:box-3-line" class="w-5 h-5 mr-2 animate-spin" />
+                            <Icon v-else icon="ri:download-2-line" class="w-5 h-5 mr-2" />
+                            {{ isDownloading ? "下载中..." : isExtracting ? "解压缩中..." : needUpdate ? "更新游戏" : "无需更新" }}
+                        </button>
+                    </div>
                 </div>
                 <div v-else>请先选择游戏目录</div>
             </div>
@@ -577,10 +604,6 @@ onMounted(async () => {
                 class="bg-base-100/50 backdrop-blur-sm rounded-xl border border-base-200 p-6 shadow-lg space-y-4"
             >
                 <h2 class="text-2xl font-bold flex items-center">
-                    <span class="w-8 h-8 rounded-full bg-success flex items-center justify-center mr-2">
-                        <Icon v-if="isDownloading" icon="ri:download-2-line" class="w-5 h-5 text-white" />
-                        <Icon v-else icon="ri:box-3-line" class="w-5 h-5 text-white" />
-                    </span>
                     {{ isDownloading ? "下载进度" : "解压缩进度" }}
                 </h2>
 

@@ -210,7 +210,7 @@ export interface EffectAttr {
     fn?: string
     r?: number[] | number // Rate
     v?: number[] | number // Value
-    co?: number
+    co?: number // Condition
     Dilation?: number
     Duration?: number
     t?: BuffAttr[]
@@ -415,6 +415,7 @@ export interface Mod {
     属性?: string
     限定?: string
     效果?: string
+    消耗?: number[]
     buff?: Buff
 
     [key: string]: any

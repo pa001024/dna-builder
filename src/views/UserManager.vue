@@ -33,6 +33,7 @@ const addUser = async (data: { dev_code: string; user: import("dna-api").DNAUser
         name: data.user.userName,
         dev_code: data.dev_code,
         token: data.user.token,
+        server: data.user.mobile ? "cn" : "global",
         kf_token: "",
         refreshToken: data.user.refreshToken,
         pic: data.user.headUrl,
@@ -54,6 +55,7 @@ const addUserByToken = async () => {
         name: rawdata.name || rawdata.userName,
         dev_code: rawdata.dev_code,
         token: rawdata.token,
+        server: rawdata.server || "cn",
         kf_token: rawdata.kf_token || "",
         refreshToken: rawdata.refreshToken,
         pic: rawdata.pic || rawdata.headUrl,
@@ -154,6 +156,7 @@ onBeforeUnmount(() => {
                         <tr class="bg-base-100">
                             <th class="text-left text-base-content font-medium">名称</th>
                             <th class="text-left text-base-content font-medium">UID</th>
+                            <th class="text-left text-base-content font-medium">服务器</th>
                             <th class="text-left text-base-content font-medium">状态</th>
                             <th class="text-right text-base-content font-medium">操作</th>
                         </tr>
@@ -181,6 +184,11 @@ onBeforeUnmount(() => {
                             <!-- 皎皎角账号ID -->
                             <td class="py-3 px-4">
                                 <span class="text-base-content/80 truncate max-w-37.5">{{ user.uid }}</span>
+                            </td>
+
+                            <!-- 服务器 -->
+                            <td class="py-3 px-4">
+                                <span class="badge badge-primary badge-sm">{{ user.server === "global" ? "国际服" : "国服" }}</span>
                             </td>
 
                             <!-- 状态 -->
@@ -249,7 +257,7 @@ onBeforeUnmount(() => {
 
         <!-- 添加皎皎角账号iframe模态框 -->
         <div class="modal" :class="{ 'modal-open': isAddIframeOpen }">
-            <div class="modal-box bg-base-200 shadow-2xl rounded-xl p-0 w-114 h-116">
+            <div class="modal-box bg-base-200 shadow-2xl rounded-xl p-0 w-114 h-130">
                 <iframe ref="iframeRef" src="/login_jjj.html" class="w-full h-full border-0 rounded-lg" />
             </div>
 

@@ -20,6 +20,6 @@
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true
     },
-    "include": ["*.ts", "leveled/*.ts", "tests/CharBuild.test.ts", "tests/leveled.test.ts"],
+    "include": ["*.ts", "leveled/*.ts", "tests/CharBuild.test.ts", "tests/leveled.test.ts", "../utils/game-config.ts"],
     "exclude": ["*.test.ts"]
 }

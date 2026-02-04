@@ -451,55 +451,68 @@ onUnmounted(() => {
                 </div>
             </div>
         </div>
-        <div v-if="tab === 'setting'" class="flex-1 bg-base-100 border-base-300 p-6 h-full overflow-hidden">
-            <div v-for="key in keys" :key="key">
-                <div class="p-2 flex flex-row justify-between items-center flex-wrap">
-                    <label class="label cursor-pointer space-x-2 min-w-32 justify-start">
-                        <input v-model="game[`${key}Enable`]" type="checkbox" class="checkbox checkbox-primary" />
-                        <span class="label-text">{{ $t("game-launcher." + key) }}</span>
-                    </label>
-                    <div v-show="game[`${key}Enable`]" class="flex flex-1 space-x-2">
-                        <input
-                            type="text"
-                            disabled
-                            :value="game[key]"
-                            :placeholder="$t('game-launcher.selectPath')"
-                            class="input input-bordered input-sm w-full min-w-32"
-                        />
-                        <div class="btn btn-primary btn-sm" @click="selectPath(key)">
-                            {{ $t("game-launcher.select") }}
+        <ScrollArea v-if="tab === 'setting'" class="flex-1">
+            <div class="bg-base-100 p-4">
+                <div class="max-w-6xl m-auto">
+                    <div v-for="key in keys" :key="key">
+                        <div class="p-2 flex flex-row justify-between items-center flex-wrap">
+                            <label class="label cursor-pointer space-x-2 min-w-32 justify-start">
+                                <input v-model="game[`${key}Enable`]" type="checkbox" class="checkbox checkbox-primary" />
+                                <span class="label-text">{{ $t("game-launcher." + key) }}</span>
+                            </label>
+                            <div v-show="game[`${key}Enable`]" class="flex flex-1 space-x-2">
+                                <input
+                                    type="text"
+                                    disabled
+                                    :value="game[key]"
+                                    :placeholder="$t('game-launcher.selectPath')"
+                                    class="input input-bordered input-sm w-full min-w-32"
+                                />
+                                <div class="btn btn-primary btn-sm" @click="selectPath(key)">
+                                    {{ $t("game-launcher.select") }}
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="key === 'path' && game[`${key}Enable`]" class="p-2 flex flex-row justify-between items-center flex-wrap">
+                            <label class="label cursor-pointer min-w-32 justify-start">
+                                <span class="label-text ml-12">{{ $t("game-launcher.params") }}</span>
+                            </label>
+                            <div v-show="game.pathEnable" class="flex flex-1 space-x-2">
+                                <input v-model="game.pathParams" type="text" class="input input-bordered input-sm w-full min-w-32" />
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div v-if="key === 'path' && game[`${key}Enable`]" class="p-2 flex flex-row justify-between items-center flex-wrap">
-                    <label class="label cursor-pointer min-w-32 justify-start">
-                        <span class="label-text ml-12">{{ $t("game-launcher.params") }}</span>
-                    </label>
-                    <div v-show="game.pathEnable" class="flex flex-1 space-x-2">
-                        <input v-model="game.pathParams" type="text" class="input input-bordered input-sm w-full min-w-32" />
+                    <div>
+                        <div class="p-2 flex flex-row justify-between items-center flex-wrap">
+                            <label class="label cursor-pointer space-x-2 min-w-32 justify-start">
+                                <input v-model="game.dx11Enable" type="checkbox" class="checkbox checkbox-primary" />
+                                <span class="label-text">{{ $t("game-launcher.dx11Enable") }}</span>
+                            </label>
+                        </div>
+                        <div class="p-2 flex flex-row justify-between items-center flex-wrap">
+                            <label class="label cursor-pointer space-x-2 min-w-32 justify-start">
+                                <input v-model="game.modEnable" type="checkbox" class="checkbox checkbox-primary" />
+                                <span class="label-text">{{ $t("game-launcher.modEnable") }}</span>
+                            </label>
+                        </div>
+                        <div v-if="game.modEnable" class="p-2 flex flex-row justify-between items-center flex-wrap">
+                            <label class="label cursor-pointer min-w-32 justify-start">
+                                <span class="label-text ml-12">{{ $t("game-launcher.modLoader") }}</span>
+                            </label>
+                            <div v-show="game.pathEnable" class="flex flex-1 space-x-2">
+                                <label class="label tooltip" data-tip="启动命令行添加-fileopenlog, 可能导致游戏卡顿">
+                                    <input v-model="game.modLoader" type="radio" value="legacy" class="radio radio-primary" />
+                                    <span class="label-text">{{ $t("game-launcher.legacy") }}</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <GameSetting />
                     </div>
                 </div>
             </div>
-            <div>
-                <div class="p-2 flex flex-row justify-between items-center flex-wrap">
-                    <label class="label cursor-pointer space-x-2 min-w-32 justify-start">
-                        <input v-model="game.modEnable" type="checkbox" class="checkbox checkbox-primary" />
-                        <span class="label-text">{{ $t("game-launcher.modEnable") }}</span>
-                    </label>
-                </div>
-                <div v-if="game.modEnable" class="p-2 flex flex-row justify-between items-center flex-wrap">
-                    <label class="label cursor-pointer min-w-32 justify-start">
-                        <span class="label-text ml-12">{{ $t("game-launcher.modLoader") }}</span>
-                    </label>
-                    <div v-show="game.pathEnable" class="flex flex-1 space-x-2">
-                        <label class="label tooltip" data-tip="启动命令行添加-fileopenlog, 可能导致游戏卡顿">
-                            <input v-model="game.modLoader" type="radio" value="legacy" class="radio radio-primary" />
-                            <span class="label-text">{{ $t("game-launcher.legacy") }}</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </ScrollArea>
         <div v-if="tab === 'update'" class="flex-1 bg-base-100 border-base-300 h-full overflow-hidden">
             <GameUpdate />
         </div>

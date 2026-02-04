@@ -29,8 +29,12 @@ export const CDN_LIST = [
         name: "腾讯",
         url: "http://pan01-1-eo.shyxhy.com",
     },
+    {
+        name: "海外",
+        url: "http://pan01-pack2.dna-panstudio.com",
+    },
 ]
-export const VERSION_URL_PUB = "/Packages/CN/WindowsNoEditor/"
+export const VERSION_URL_PUB = (server: string) => `/Packages/${server}/WindowsNoEditor/`
 
 export interface GameVersionListRes {
     GameVersionList: GameVersionList
@@ -72,16 +76,19 @@ export interface DownloadProgress {
 export type ProgressCallback = (progress: DownloadProgress) => void
 
 export async function getBaseVersion(cdn: string, channel: string) {
-    const subVersion = await tauriFetch(`${cdn}${VERSION_URL_PUB}${channel}/PackageBaseVersion.txt`)
+    const server = channel.match(/([A-Za-z]+)_Pub/)?.[1] || "CN"
+    const versionUrl = VERSION_URL_PUB(server)
+    console.log(versionUrl)
+    const subVersion = await tauriFetch(`${cdn}${versionUrl}${channel}/PackageBaseVersion.txt`)
     const subVersionText = await subVersion.text()
     try {
-        const res = await tauriFetch(`${cdn}${VERSION_URL_PUB}${channel}${subVersionText ? `/${subVersionText}` : ""}/BaseVersion.json`)
+        const res = await tauriFetch(`${cdn}${versionUrl}${channel}${subVersionText ? `/${subVersionText}` : ""}/BaseVersion.json`)
         return {
             subVersion: subVersionText,
             gameVersionList: await res.json(),
         }
     } catch {
-        const res = await tauriFetch(`${cdn}${VERSION_URL_PUB}${channel}/BaseVersion.json`)
+        const res = await tauriFetch(`${cdn}${versionUrl}${channel}/BaseVersion.json`)
         return {
             subVersion: "",
             gameVersionList: await res.json(),
@@ -102,6 +109,7 @@ export async function downloadAssets(
     filename: string,
     channel: string,
     subVersion: string,
+    concurrentThreads = 10,
     onProgress?: ProgressCallback,
     downloadDir: string = "download/"
 ): Promise<string> {
@@ -109,7 +117,7 @@ export async function downloadAssets(
 
     try {
         // 确保下载目录路径以斜杠结尾
-        const normalizedDir = downloadDir.endsWith("/") ? downloadDir : `${downloadDir}/`
+        const normalizedDir = downloadDir.endsWith("\\") ? downloadDir : `${downloadDir}\\`
 
         // 构建完整的文件路径
         const fullFilePath = `${normalizedDir}${filename}`
@@ -117,6 +125,7 @@ export async function downloadAssets(
         // 如果提供了进度回调，则监听下载进度事件
         if (onProgress) {
             unlistenFn = await listen<DownloadProgress>("download_progress", event => {
+                // console.debug(event)
                 // 只处理当前文件的进度事件
                 if (event.payload.filename === fullFilePath) {
                     onProgress({
@@ -127,9 +136,12 @@ export async function downloadAssets(
             })
         }
 
+        const server = channel.match(/([A-Za-z]+)_Pub/)?.[1] || "CN"
+        const versionUrl = VERSION_URL_PUB(server)
         const result = await invoke<string>("download_file", {
-            url: `${cdn}${VERSION_URL_PUB}${channel}/${subVersion ? `${subVersion}/` : ""}${filename}`,
+            url: `${cdn}${versionUrl}${channel}/${subVersion ? `${subVersion}/` : ""}${filename}`,
             filename: fullFilePath,
+            concurrentThreads,
         })
 
         return result

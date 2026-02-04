@@ -15763,7 +15763,7 @@ t.forEach(shop => {
     shop.mainTabs.forEach(mt => {
         mt.subTabs.forEach(t => {
             t.items.forEach(i => {
-                const shop = `${mt.name}-${t.name}`
+                const shop = `${mt.name} - ${t.name}`
                 if (i.itemType === "Walnut") {
                     const walnut = walnutMap.get(i.typeId)
                     if (walnut) {

@@ -49,6 +49,7 @@ if (env.isApp && getCurrentWindow().label === "main") {
 export const useGameStore = defineStore("game", {
     state: () => {
         return {
+            dx11Enable: useLocalStorage("game.dx11_enable", false),
             modEnable: useLocalStorage("game.mod_enable", false),
             modLoader: useLocalStorage("game.mod_loader", "legacy"),
             pathEnable: useLocalStorage("game.path_enable", true),
@@ -93,6 +94,9 @@ export const useGameStore = defineStore("game", {
                 let p = this.pathParams
                 if (this.modEnable && this.modLoader === "legacy") {
                     p += ` -fileopenlog`
+                }
+                if (this.dx11Enable) {
+                    p += ` -dx11`
                 }
                 await launchExe(this.path, p)
                 console.log("game exited")

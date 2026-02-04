@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { DNAAPI } from "dna-api"
-import { computed, onMounted, ref } from "vue"
+import { computed, onMounted, ref, watch } from "vue"
 import { tauriFetch } from "../api/app"
 
 const errorMessage = ref("")
 const successMessage = ref("")
 
+const email = ref("")
 const phone = ref("")
 const code = ref("")
 const captchaId = "a9d7b33f6daf81efea5e3dcea8d92bd7"
 const dev_code = ref(uuid())
+
+const server = ref("cn" as "cn" | "global")
 
 const api = new DNAAPI({
     dev_code: dev_code.value,
@@ -36,6 +39,15 @@ function uuid(): string {
     })
 }
 
+async function getEmailCode() {
+    const response = await api.user.sendEmailVerifyCode(email.value)
+    if (response?.code === 0) {
+        // showSuccessMessage("验证码发送成功")
+    } else {
+        showErrorMessage(`验证码发送失败`)
+    }
+}
+
 async function getSMSCode(validate: any) {
     const response = await api.getSmsCode(phone.value, JSON.stringify(validate))
     if (response.is_success) {
@@ -44,32 +56,63 @@ async function getSMSCode(validate: any) {
         showErrorMessage(`验证码发送失败: ${response.msg}`)
     }
 }
+
 const login = async () => {
-    if (!phone.value) {
-        showErrorMessage("请输入手机号")
-        return
-    }
-    if (!code.value) {
-        showErrorMessage("请输入验证码")
-        return
+    const isCN = server.value === "cn"
+
+    if (isCN) {
+        if (!phone.value) {
+            showErrorMessage("请输入手机号")
+            return
+        }
+        if (!code.value) {
+            showErrorMessage("请输入验证码")
+            return
+        }
+    } else {
+        if (!email.value) {
+            showErrorMessage("请输入邮箱")
+            return
+        }
+        if (!code.value) {
+            showErrorMessage("请输入验证码")
+            return
+        }
     }
 
     try {
-        // 向父窗口发送登录成功消息
         if (window.parent) {
-            const res = await api.login(phone.value, code.value)
-            if (res.is_success && res.data) {
-                window.parent.postMessage(
-                    {
-                        type: "LOGIN_SUCCESS",
-                        dev_code: dev_code.value,
-                        user: { ...res.data },
-                    },
-                    "*"
-                )
+            if (isCN) {
+                const res = await api.login(phone.value, code.value)
+                if (res.is_success && res.data) {
+                    window.parent.postMessage(
+                        {
+                            type: "LOGIN_SUCCESS",
+                            dev_code: dev_code.value,
+                            user: { ...res.data },
+                        },
+                        "*"
+                    )
+                } else {
+                    showErrorMessage(`登录失败: ${res.msg}`)
+                    return
+                }
             } else {
-                showErrorMessage(`登录失败: ${res.msg}`)
-                return
+                const t = await api.user.emailVerify(email.value, code.value)
+                const res = await api.user.loginEmail(email.value, code.value, t.suid, t.accessToken)
+                if (res.is_success && res.data) {
+                    window.parent.postMessage(
+                        {
+                            type: "LOGIN_SUCCESS",
+                            dev_code: dev_code.value,
+                            user: { ...res.data },
+                        },
+                        "*"
+                    )
+                } else {
+                    showErrorMessage(`登录失败: ${res.msg}`)
+                    return
+                }
             }
         }
     } catch (error) {
@@ -77,30 +120,47 @@ const login = async () => {
     }
 }
 
-const canLogin = computed(() => {
-    return phone.value && code.value
+watch(server, (newValue, oldValue) => {
+    if (newValue !== oldValue) {
+        api.server = newValue
+    }
 })
+
+const canLogin = computed(() => {
+    const isCN = server.value === "cn"
+    if (isCN) {
+        return phone.value && code.value
+    } else {
+        return email.value && code.value
+    }
+})
+
 let captcha: Captcha4Instance
 
 function showCaptcha(e: Event) {
-    const elm = e.target as HTMLElement
-    const originalText = elm.textContent
-    let countdown = 60
-    captcha.showCaptcha()
-    const timer = setInterval(() => {
-        countdown--
-        elm.textContent = `${countdown}秒后重试`
-        if (countdown <= 0) {
-            clearInterval(timer)
-            elm.textContent = originalText
-        }
-    }, 1e3)
+    const isCN = server.value === "cn"
+    if (isCN) {
+        const elm = e.target as HTMLElement
+        const originalText = elm.textContent
+        let countdown = 60
+        captcha.showCaptcha()
+        const timer = setInterval(() => {
+            countdown--
+            elm.textContent = `${countdown}秒后重试`
+            if (countdown <= 0) {
+                clearInterval(timer)
+                elm.textContent = originalText
+            }
+        }, 1e3)
+    } else {
+        getEmailCode()
+    }
 }
 
 onMounted(() => {
     window.initAlicom4(
         {
-            captchaId, // ios
+            captchaId,
             https: true,
             product: "bind",
         },
@@ -131,7 +191,6 @@ onMounted(() => {
 })
 
 //#region ts定义
-// 初始化函数
 declare global {
     interface Window {
         initAlicom4: (userConfig: ConfigOptions, callback: (captcha: Captcha4Instance) => void) => void
@@ -175,7 +234,7 @@ interface Captcha4Instance {
 //#endregion
 </script>
 <template>
-    <div class="w-114 h-116 flex items-center justify-center">
+    <div class="w-114 h-130 flex items-center justify-center">
         <!-- 主登录卡片 -->
         <div class="w-full h-full card bg-base-200 shadow-xl overflow-hidden">
             <!-- 卡片头部装饰 -->
@@ -186,8 +245,23 @@ interface Captcha4Instance {
 
             <!-- 卡片主体 -->
             <div class="card-body p-6 gap-4">
-                <!-- 手机号输入 -->
+                <!-- 服务器选择 -->
                 <fieldset class="fieldset">
+                    <legend class="fieldset-legend">服务器</legend>
+                    <select id="server" v-model="server" class="select w-full">
+                        <option value="cn">国服</option>
+                        <option value="global">国际服</option>
+                    </select>
+                </fieldset>
+
+                <!-- 邮箱输入 -->
+                <fieldset v-if="server !== 'cn'" class="fieldset">
+                    <legend class="fieldset-legend">邮箱</legend>
+                    <input id="email" v-model="email" type="email" name="email" required placeholder="请输入邮箱" class="input w-full" />
+                </fieldset>
+
+                <!-- 手机号输入 -->
+                <fieldset v-if="server === 'cn'" class="fieldset">
                     <legend class="fieldset-legend">手机号</legend>
                     <input
                         id="phone"
@@ -206,7 +280,13 @@ interface Captcha4Instance {
                     <legend class="fieldset-legend">验证码</legend>
                     <div class="flex gap-4">
                         <input id="code" v-model="code" type="text" required placeholder="请输入验证码" class="input w-full" />
-                        <button class="btn btn-primary" :disabled="phone.length !== 11" @click="showCaptcha">获取验证码</button>
+                        <button
+                            class="btn btn-primary"
+                            :disabled="server === 'cn' ? phone.length !== 11 : !email || email.length < 5"
+                            @click="showCaptcha"
+                        >
+                            获取验证码
+                        </button>
                     </div>
                 </fieldset>
 
@@ -254,7 +334,6 @@ interface Captcha4Instance {
         </div>
     </div>
 </template>
-
 <style>
 .slide-right-enter-active {
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);

@@ -1,6 +1,6 @@
 use std::{
     fs::{self, File},
-    io::{self, Read, Write},
+    io::{self, Read, Seek, SeekFrom, Write},
     path::{Path, PathBuf},
     sync::Arc,
     time::Duration,
@@ -41,6 +41,34 @@ enum FormDataValue {
         data: Vec<u8>,
         mime: Option<String>,
     },
+}
+
+/// 下载分块进度信息
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct ChunkProgress {
+    /// 分块索引
+    index: usize,
+    /// 分块起始位置
+    start: u64,
+    /// 分块结束位置
+    end: u64,
+    /// 已下载字节数
+    downloaded: u64,
+    /// 是否已完成
+    completed: bool,
+}
+
+/// 下载进度文件
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct DownloadProgress {
+    /// 文件总大小
+    total_size: u64,
+    /// 分块大小
+    chunk_size: u64,
+    /// 分块总数
+    num_chunks: usize,
+    /// 各分块进度
+    chunks: Vec<ChunkProgress>,
 }
 
 // #[macro_use]
@@ -1160,32 +1188,463 @@ fn get_documents_dir() -> String {
     }
 }
 
+/// 获取进度文件路径
+fn get_progress_file_path(file_path: &Path) -> PathBuf {
+    let file_name = file_path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+    let parent = file_path.parent().unwrap_or(Path::new(""));
+    let progress_file_name = format!("{}.progress", file_name);
+    parent.join(progress_file_name)
+}
+
+/// 创建初始进度文件
+fn create_progress_file(
+    file_path: &Path,
+    total_size: u64,
+    chunk_size: u64,
+    num_chunks: usize,
+) -> Result<DownloadProgress, String> {
+    let mut chunks = Vec::with_capacity(num_chunks);
+
+    for i in 0..num_chunks {
+        let start = i as u64 * chunk_size;
+        let end = if i == num_chunks - 1 {
+            total_size - 1
+        } else {
+            start + chunk_size - 1
+        };
+
+        chunks.push(ChunkProgress {
+            index: i,
+            start,
+            end,
+            downloaded: 0,
+            completed: false,
+        });
+    }
+
+    let progress = DownloadProgress {
+        total_size,
+        chunk_size,
+        num_chunks,
+        chunks,
+    };
+
+    // 写入进度文件
+    let progress_path = get_progress_file_path(file_path);
+    let progress_json = serde_json::to_string_pretty(&progress)
+        .map_err(|e| format!("序列化进度文件失败: {}", e))?;
+
+    fs::write(&progress_path, progress_json).map_err(|e| format!("写入进度文件失败: {}", e))?;
+
+    Ok(progress)
+}
+
+/// 读取进度文件
+fn read_progress_file(file_path: &Path) -> Option<DownloadProgress> {
+    let progress_path = get_progress_file_path(file_path);
+
+    if !progress_path.exists() {
+        return None;
+    }
+
+    let content = fs::read_to_string(&progress_path).ok()?;
+    serde_json::from_str(&content).ok()
+}
+
+/// 更新进度文件中的单个分块
+fn update_chunk_progress(
+    file_path: &Path,
+    chunk_index: usize,
+    downloaded: u64,
+    completed: bool,
+) -> Result<(), String> {
+    let mut progress = read_progress_file(file_path).ok_or("进度文件不存在")?;
+
+    if chunk_index >= progress.chunks.len() {
+        return Err("分块索引超出范围".to_string());
+    }
+
+    progress.chunks[chunk_index].downloaded = downloaded;
+    progress.chunks[chunk_index].completed = completed;
+
+    // 写入进度文件
+    let progress_path = get_progress_file_path(file_path);
+    let progress_json = serde_json::to_string_pretty(&progress)
+        .map_err(|e| format!("序列化进度文件失败: {}", e))?;
+
+    fs::write(&progress_path, progress_json).map_err(|e| format!("写入进度文件失败: {}", e))?;
+
+    Ok(())
+}
+
+/// 删除进度文件
+fn delete_progress_file(file_path: &Path) {
+    let progress_path = get_progress_file_path(file_path);
+    let _ = fs::remove_file(progress_path);
+}
+
+/// 多线程下载单个分块，支持断点续传和自动重试
+async fn download_chunk(
+    url: &str,
+    start: u64,
+    end: u64,
+    file_path: &Path,
+    chunk_index: usize,
+    resume_offset: u64, // 断点续传的偏移量
+) -> Result<u64, String> {
+    const MAX_RETRIES: u32 = 3; // 最大重试次数
+    const RETRY_DELAY_MS: u64 = 1000; // 重试延迟（毫秒）
+
+    let client = HTTP_CLIENT.clone();
+
+    // 计算实际下载的起始位置（支持断点续传）
+    let actual_start = start + resume_offset;
+
+    // 如果已经下载完成，直接返回
+    if actual_start > end {
+        return Ok(resume_offset);
+    }
+
+    // 构建Range 请求头
+    let range_header = format!("bytes={}-{}", actual_start, end);
+
+    // 重试循环
+    for retry in 0..MAX_RETRIES {
+        // 发送 Range 请求
+        let response = client
+            .get(url)
+            .header("Range", range_header.clone())
+            .send()
+            .await;
+
+        match response {
+            Ok(resp) => {
+                // 检查响应状态
+                if resp.status().is_success() || resp.status() == 206 {
+                    // 获取响应体流
+                    let mut stream = resp.bytes_stream();
+                    let mut downloaded = 0u64;
+
+                    // 打开文件并定位到指定位置
+                    let mut file = File::options()
+                        .write(true)
+                        .open(file_path)
+                        .map_err(|e| format!("分块 {} 打开文件失败: {}", chunk_index, e))?;
+
+                    file.seek(SeekFrom::Start(actual_start))
+                        .map_err(|e| format!("分块 {} 定位文件位置失败: {}", chunk_index, e))?;
+
+                    // 读取并写入文件
+                    while let Some(chunk) = stream.next().await {
+                        let chunk = chunk
+                            .map_err(|e| format!("分块 {} 读取数据失败: {}", chunk_index, e))?;
+
+                        file.write_all(&chunk)
+                            .map_err(|e| format!("分块 {} 写入文件失败: {}", chunk_index, e))?;
+
+                        downloaded += chunk.len() as u64;
+                    }
+
+                    // 返回总共下载的字节数（包括之前已下载的部分）
+                    return Ok(resume_offset + downloaded);
+                } else {
+                    // 响应状态错误，重试
+                    if retry < MAX_RETRIES - 1 {
+                        eprintln!(
+                            "分块 {} 下载失败 (HTTP {})，{} 秒后重试 ({}/{})",
+                            chunk_index,
+                            resp.status(),
+                            RETRY_DELAY_MS / 1000,
+                            retry + 1,
+                            MAX_RETRIES
+                        );
+                        tokio::time::sleep(tokio::time::Duration::from_millis(RETRY_DELAY_MS))
+                            .await;
+                        continue;
+                    } else {
+                        return Err(format!(
+                            "分块 {} 下载失败: HTTP {} (已重试 {} 次)",
+                            chunk_index,
+                            resp.status(),
+                            MAX_RETRIES
+                        ));
+                    }
+                }
+            }
+            Err(e) => {
+                // 请求错误，重试
+                if retry < MAX_RETRIES - 1 {
+                    eprintln!(
+                        "分块 {} 请求错误: {}，{} 秒后重试 ({}/{})",
+                        chunk_index,
+                        e,
+                        RETRY_DELAY_MS / 1000,
+                        retry + 1,
+                        MAX_RETRIES
+                    );
+                    tokio::time::sleep(tokio::time::Duration::from_millis(RETRY_DELAY_MS)).await;
+                    continue;
+                } else {
+                    return Err(format!(
+                        "分块 {} 请求失败: {} (已重试 {} 次)",
+                        chunk_index, e, MAX_RETRIES
+                    ));
+                }
+            }
+        }
+    }
+
+    // 理论上不会到达这里
+    Err("未知错误".to_string())
+}
+
+/// 使用 Range 多线程下载大文件，支持断点续传
+async fn download_file_multithreaded(
+    app_handle: tauri::AppHandle,
+    url: &str,
+    file_path: &Path,
+    total_size: u64,
+    filename: &str,
+    concurrent_threads: usize,
+) -> Result<String, String> {
+    // 配置参数
+    const CHUNK_SIZE: u64 = 5 * 1024 * 1024; // 每个分块 5MB
+
+    // 计算分块数量
+    let num_chunks = (total_size + CHUNK_SIZE - 1) / CHUNK_SIZE;
+    let num_chunks = num_chunks as usize;
+
+    // 检查是否存在进度文件（断点续传）
+    let progress_info = read_progress_file(file_path);
+    let is_resume = progress_info.is_some();
+
+    let progress_info = if let Some(info) = progress_info {
+        // 验证进度文件是否有效
+        if info.total_size == total_size
+            && info.chunk_size == CHUNK_SIZE
+            && info.num_chunks == num_chunks
+        {
+            info
+        } else {
+            // 进度文件无效，重新创建
+            create_progress_file(file_path, total_size, CHUNK_SIZE, num_chunks)
+                .map_err(|e| format!("创建进度文件失败: {}", e))?
+        }
+    } else {
+        // 创建新的进度文件
+        create_progress_file(file_path, total_size, CHUNK_SIZE, num_chunks)
+            .map_err(|e| format!("创建进度文件失败: {}", e))?
+    };
+
+    // 如果不是断点续传，创建文件并预分配空间
+    if !is_resume {
+        let file = File::create(file_path).map_err(|e| format!("创建文件失败: {}", e))?;
+        file.set_len(total_size)
+            .map_err(|e| format!("预分配文件空间失败: {}", e))?;
+    }
+
+    // 创建并发控制器
+    let semaphore = Arc::new(tokio::sync::Semaphore::new(concurrent_threads));
+    let file_path = file_path.to_path_buf();
+    let url = url.to_string();
+    let filename = filename.to_string();
+    let total_size_clone = total_size; // 克隆 total_size 以便在 async 块中使用
+
+    // 创建进度跟踪（用于发送进度事件）
+    let event_progress = Arc::new(std::sync::atomic::AtomicU64::new(0));
+
+    // 计算已下载的总字节数
+    let initial_downloaded: u64 = progress_info.chunks.iter().map(|c| c.downloaded).sum();
+
+    // 更新事件进度
+    event_progress.store(initial_downloaded, std::sync::atomic::Ordering::Relaxed);
+
+    // 创建任务列表
+    let mut tasks = Vec::with_capacity(num_chunks);
+
+    for i in 0..num_chunks {
+        let chunk_info = &progress_info.chunks[i];
+
+        // 如果分块已完成，跳过
+        if chunk_info.completed {
+            continue;
+        }
+
+        let start = chunk_info.start;
+        let end = chunk_info.end;
+        let resume_offset = chunk_info.downloaded;
+
+        let url_clone = url.clone();
+        let file_path_clone = file_path.clone();
+        let filename_clone = filename.clone();
+        let app_handle_clone = app_handle.clone();
+        let event_progress_clone = event_progress.clone();
+        let semaphore_clone = semaphore.clone();
+        let total_size_for_task = total_size_clone; // 为每个任务创建 total_size 的副本
+
+        let task = tokio::spawn(async move {
+            // 获取信号量许可
+            let _permit = semaphore_clone
+                .acquire()
+                .await
+                .map_err(|e| format!("获取并发许可失败: {}", e))?;
+
+            // 下载分块（传入断点续传偏移量）
+            let downloaded =
+                download_chunk(&url_clone, start, end, &file_path_clone, i, resume_offset).await?;
+
+            // 更新进度文件
+            update_chunk_progress(&file_path_clone, i, downloaded, true)
+                .map_err(|e| format!("更新进度文件失败: {}", e))?;
+
+            // 更新事件进度
+            let old_progress = event_progress_clone.fetch_add(
+                downloaded - resume_offset,
+                std::sync::atomic::Ordering::Relaxed,
+            );
+            let new_progress = old_progress + (downloaded - resume_offset);
+
+            // 计算进度百分比
+            let progress_percent = if total_size_for_task > 0 {
+                (new_progress * 100) / total_size_for_task
+            } else {
+                0
+            };
+
+            // 发送进度事件
+            app_handle_clone
+                .emit(
+                    "download_progress",
+                    serde_json::json!({
+                        "filename": &filename_clone,
+                        "progress": progress_percent,
+                        "downloaded": new_progress,
+                        "total": total_size_for_task,
+                    }),
+                )
+                .map_err(|e| format!("发送进度事件失败: {}", e))?;
+
+            Ok::<u64, String>(downloaded)
+        });
+
+        tasks.push(task);
+    }
+
+    // 等待所有任务完成
+    for task in tasks {
+        match task.await {
+            Ok(Ok(_downloaded)) => {}
+            Ok(Err(e)) => {
+                return Err(format!("下载分块失败: {}", e));
+            }
+            Err(e) => {
+                return Err(format!("任务执行失败: {}", e));
+            }
+        }
+    }
+
+    // 下载完成，删除进度文件
+    delete_progress_file(&file_path);
+
+    Ok(format!("成功下载文件到 {}", file_path.to_string_lossy()))
+}
+
 /// 从指定URL下载文件到本地，并通过事件系统发送进度更新
+/// 对于大于 10MB 的文件使用 Range 多线程下载，否则使用单线程下载
 #[tauri::command]
 async fn download_file(
     app_handle: tauri::AppHandle,
     url: String,
     filename: String,
+    concurrent_threads: usize,
 ) -> Result<String, String> {
     let client = HTTP_CLIENT.clone();
 
-    // 发送GET请求下载文件
-    let response = client
-        .get(&url)
-        .send()
-        .await
-        .map_err(|e| format!("Failed to send request: {}", e))?;
+    // 发送 HEAD 请求获取文件信息和 Range 支持
+    let head_response = client.head(&url).send().await;
 
-    // 检查响应状态
-    if !response.status().is_success() {
-        return Err(format!(
-            "Failed to download file: HTTP {}",
-            response.status()
-        ));
-    }
+    let (total_size, accept_ranges) = match head_response {
+        Ok(response) => {
+            if response.status().is_success() {
+                // 直接从响应头读取 Content-Length
+                let length = response
+                    .headers()
+                    .get("content-length")
+                    .and_then(|v| v.to_str().ok())
+                    .and_then(|s| s.parse::<u64>().ok())
+                    .unwrap_or(0);
 
-    // 获取文件总大小
-    let total_size = response.content_length().unwrap_or(0);
+                let ranges = response
+                    .headers()
+                    .get("Accept-Ranges")
+                    .and_then(|v| v.to_str().ok())
+                    .unwrap_or("")
+                    .to_string();
+                (length, ranges)
+            } else {
+                // HEAD 请求失败，使用 GET 请求
+                let get_response = client
+                    .get(&url)
+                    .send()
+                    .await
+                    .map_err(|e| format!("Failed to send GET request: {}", e))?;
+
+                if !get_response.status().is_success() {
+                    return Err(format!(
+                        "Failed to get file info: HTTP {}",
+                        get_response.status()
+                    ));
+                }
+
+                // 直接从响应头读取 Content-Length
+                let length = get_response
+                    .headers()
+                    .get("content-length")
+                    .and_then(|v| v.to_str().ok())
+                    .and_then(|s| s.parse::<u64>().ok())
+                    .unwrap_or(0);
+
+                let ranges = get_response
+                    .headers()
+                    .get("Accept-Ranges")
+                    .and_then(|v| v.to_str().ok())
+                    .unwrap_or("")
+                    .to_string();
+                (length, ranges)
+            }
+        }
+        Err(_) => {
+            // HEAD 请求失败，使用 GET 请求
+            let get_response = client
+                .get(&url)
+                .send()
+                .await
+                .map_err(|e| format!("Failed to send GET request: {}", e))?;
+
+            if !get_response.status().is_success() {
+                return Err(format!(
+                    "Failed to get file info: HTTP {}",
+                    get_response.status()
+                ));
+            }
+
+            // 直接从响应头读取 Content-Length
+            let length = get_response
+                .headers()
+                .get("content-length")
+                .and_then(|v| v.to_str().ok())
+                .and_then(|s| s.parse::<u64>().ok())
+                .unwrap_or(0);
+
+            let ranges = get_response
+                .headers()
+                .get("Accept-Ranges")
+                .and_then(|v| v.to_str().ok())
+                .unwrap_or("")
+                .to_string();
+            (length, ranges)
+        }
+    };
 
     // 获取当前工作目录
     let current_dir =
@@ -1200,6 +1659,42 @@ async fn download_file(
             fs::create_dir_all(parent_dir)
                 .map_err(|e| format!("Failed to create parent directories: {}", e))?;
         }
+    }
+
+    // 判断是否使用多线程下载（大于 10MB）
+    const MULTITHREAD_THRESHOLD: u64 = 10 * 1024 * 1024; // 10MB
+
+    if total_size > MULTITHREAD_THRESHOLD && accept_ranges == "bytes" && concurrent_threads > 1 {
+        println!(
+            "文件大小: {} bytes ({} MB)，启用多线程下载",
+            total_size,
+            total_size / (1024 * 1024)
+        );
+        // 使用多线程下载
+        return download_file_multithreaded(
+            app_handle.clone(),
+            &url,
+            &file_path,
+            total_size,
+            &filename,
+            concurrent_threads,
+        )
+        .await;
+    }
+
+    // 单线程下载
+    let response = client
+        .get(&url)
+        .send()
+        .await
+        .map_err(|e| format!("Failed to send request: {}", e))?;
+
+    // 检查响应状态
+    if !response.status().is_success() {
+        return Err(format!(
+            "Failed to download file: HTTP {}",
+            response.status()
+        ));
     }
 
     // 创建文件

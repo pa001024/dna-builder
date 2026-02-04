@@ -392,6 +392,7 @@
         "deleteModFailed": "删除MOD失败: {{ error }}",
         "desc": "启动游戏/MOD管理器",
         "dropToImport": "松开鼠标导入MOD或图片",
+        "dx11Enable": "启用DX11",
         "enterCustomTypeName": "请输入自定义类型名称",
         "exec_files": "可执行文件",
         "gameSetting": "游戏设置",

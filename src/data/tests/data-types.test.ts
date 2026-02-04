@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, expect, it } from "vitest"
 import { achievementData, baseData, buffData, charData, modData, monsterMap, weaponData } from ".."
 
 // 测试数据类型的完整性和有效性

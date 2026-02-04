@@ -44,6 +44,14 @@ export function rand_str(length: number = 16): string {
     }
     return result
 }
+export function rand_str2(length: number = 16): string {
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
+    let result = ""
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    return result
+}
 
 export function md5_upper(text: string): string {
     const md = forge.md.md5.create()
@@ -151,7 +159,7 @@ export function xor_encode(text: string, key: string): string {
     return out.join("")
 }
 
-export function build_signature(pk: string, payload: Record<string, any>, token?: string): Record<string, any> {
+export function build_signature120(pk: string, payload: Record<string, any>, token?: string): Record<string, any> {
     const rk = rand_str(16)
     const [raw_sa, shuffled_sa] = generate_sa()
     const str_params: Record<string, any> = {}
@@ -217,4 +225,42 @@ export function aesDecryptImageUrl(encryptedUrl: string, key: string): string {
     decipher.finish()
 
     return decipher.output.getBytes()
+}
+
+function signature_hash(text: string): string {
+    function swap_positions(text: string, positions: number[]): string {
+        const chars = text.split("")
+        for (let i = 1; i < positions.length; i += 2) {
+            const p1 = positions[i - 1]
+            const p2 = positions[i]
+            if (p1 >= 0 && p1 < chars.length && p2 >= 0 && p2 < chars.length) {
+                ;[chars[p1], chars[p2]] = [chars[p2], chars[p1]]
+            }
+        }
+        return chars.join("")
+    }
+    return swap_positions(md5_upper(text), [1, 13, 5, 17, 7, 23])
+}
+
+function sign_fI(data: Record<string, any>, secret: string): string {
+    const pairs: string[] = []
+    const sortedKeys = Object.keys(data).sort()
+    for (const k of sortedKeys) {
+        const v = data[k]
+        if (v !== null && v !== undefined && v !== "") {
+            pairs.push(`${k}=${v}`)
+        }
+    }
+    const qs = pairs.join("&")
+    return signature_hash(`${qs}&${secret}`)
+}
+
+/** 1.1.1版本加密 */
+export function build_signature111(data: Record<string, any>, token?: string): Record<string, any> {
+    const ts = Date.now()
+    const sign_data = { ...data, timestamp: ts, token }
+    const sec = rand_str(16)
+    const sig = sign_fI(sign_data, sec)
+    const enc = xor_encode(sig, sec)
+    return { s: enc, t: ts, k: sec }
 }

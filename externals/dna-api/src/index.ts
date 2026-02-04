@@ -12,7 +12,7 @@ export * from "./modules/utils"
 export { RespCode, TimeBasicResponse } from "./TimeBasicResponse"
 export * from "./type-generated"
 
-import { DNABaseAPI } from "./modules/base"
+import { DNABaseAPI, type DNABaseAPIConfig } from "./modules/base"
 import { GameAPI } from "./modules/game"
 import { H5API } from "./modules/h5"
 import { HomeAPI } from "./modules/home"
@@ -40,18 +40,7 @@ export class DNAAPI extends DNABaseAPI {
     userGrowing: UserGrowingAPI
     h5: H5API
 
-    constructor(
-        options: {
-            dev_code?: string
-            token?: string
-            kf_token?: string
-            fetchFn?: typeof fetch
-            is_h5?: boolean
-            rsa_public_key?: string
-            mode?: "android" | "ios"
-            debug?: boolean
-        } = {}
-    ) {
+    constructor(options: DNABaseAPIConfig = {}) {
         super(options)
 
         this.game = new GameAPI(this)
@@ -470,6 +459,55 @@ export class DNAAPI extends DNABaseAPI {
         return await this.user.getGameHeadCode()
     }
 
+    //#endregion
+    //#region OAuth 模块便捷方法
+    /**
+     * Facebook OAuth 登录
+     * @param accessToken Facebook 访问令牌
+     * @returns 登录结果
+     */
+    async facebookLogin(accessToken: string) {
+        return await this.user.facebookLogin(accessToken)
+    }
+
+    /**
+     * Twitter OAuth 登录
+     * @param accessToken Twitter 访问令牌
+     * @param accessTokenSecret Twitter 访问令牌密钥
+     * @returns 登录结果
+     */
+    async twitterLogin(accessToken: string, accessTokenSecret: string) {
+        return await this.user.twitterLogin(accessToken, accessTokenSecret)
+    }
+
+    /**
+     * 获取 Facebook OAuth 访问令牌
+     * @param code Facebook 授权码
+     * @param redirectUri 重定向 URI
+     * @returns Facebook 访问令牌
+     */
+    async getFacebookAccessToken(code: string, redirectUri: string) {
+        return await this.user.getFacebookAccessToken(code, redirectUri)
+    }
+
+    /**
+     * 获取 Twitter OAuth 访问令牌
+     * @param oauthToken Twitter 请求令牌
+     * @param oauthVerifier Twitter 验证码
+     * @returns Twitter 访问令牌和密钥
+     */
+    async getTwitterAccessToken(oauthToken: string, oauthVerifier: string) {
+        return await this.user.getTwitterAccessToken(oauthToken, oauthVerifier)
+    }
+
+    /**
+     * 获取 Twitter 请求令牌
+     * @param callbackUrl 回调 URL
+     * @returns Twitter 请求令牌和密钥
+     */
+    async getTwitterRequestToken(callbackUrl: string) {
+        return await this.user.getTwitterRequestToken(callbackUrl)
+    }
     //#endregion
     //#region H5 模块便捷方法
     async getMapCategorizeList() {

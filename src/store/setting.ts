@@ -2,6 +2,7 @@ import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI } from "dna-api"
 import i18next from "i18next"
 import { defineStore } from "pinia"
+import { sleep } from "@/util"
 import { applyMaterial, startHeartbeat, stopHeartbeat, tauriFetch } from "../api/app"
 import { executeSignFlow } from "../api/dna-sign"
 import { db } from "./db"
@@ -156,6 +157,7 @@ export const useSettingStore = defineStore("setting", {
             try {
                 // 调用Rust实现的心跳功能
                 const res = await startHeartbeat("wss://dnabbs-api.yingxiong.com:8180/ws-community-websocket", token, userId)
+                await sleep(1000) // 等待1秒，确保API有值
                 if (res.includes("成功")) {
                     console.log("心跳已启动")
                     return true

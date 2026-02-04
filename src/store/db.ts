@@ -93,6 +93,7 @@ export interface DNAUser {
     name: string // userName
     dev_code: string
     token: string
+    server: "cn" | "global"
     kf_token: string
     refreshToken: string
     pic: string
