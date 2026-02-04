@@ -117,6 +117,7 @@ export const useSettingStore = defineStore("setting", {
                         kf_token: user.kf_token,
                         debug: import.meta.env.DEV,
                         mode: "android",
+                        server: user.server || "cn",
                         fetchFn: tauriFetch,
                     })
                     const res = await api.loginLog()
@@ -153,6 +154,7 @@ export const useSettingStore = defineStore("setting", {
                 if (!user) return false
                 userId = user.uid
                 token = user.token
+                if (user.server !== "global") return true
             }
             try {
                 // 调用Rust实现的心跳功能
@@ -173,6 +175,9 @@ export const useSettingStore = defineStore("setting", {
         // 停止心跳计时器
         async stopHeartbeat() {
             try {
+                const user = await this.getCurrentUser()
+                if (!user) return false
+                if (user.server !== "global") return true
                 // 调用Rust实现的停止心跳功能
                 await stopHeartbeat()
                 console.log("心跳已停止")
