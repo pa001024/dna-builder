@@ -6,6 +6,7 @@ import type {
     LevelUpResult,
     ModLevelUpConfig,
     ResourceCost,
+    ResourceTreeNode,
     WeaponLevelUpConfig,
 } from "./LevelUpCalculator"
 
@@ -135,6 +136,188 @@ function calculateSingleWeaponLevelUp(
 }
 
 /**
+ * 生成资源依赖树
+ * @param mod 魔之楔数据
+ * @param modDraftMap 魔之楔图纸映射
+ * @param resourceDraftMap 资源图纸映射
+ * @param config 魔之楔养成配置
+ * @returns 资源依赖树
+ */
+function generateResourceTree(
+    mod: ModExt,
+    modDraftMap: Map<number, Draft>,
+    resourceDraftMap: Map<number, Draft>,
+    config: ModLevelUpConfig
+): ResourceTreeNode {
+    const { currentLevel, targetLevel, count } = config
+    const baseStart = Math.max(0, currentLevel)
+    const baseEnd = Math.min(modQualityMaxLevel[mod.品质], targetLevel)
+
+    // 计算1-5级基础升级消耗
+    const crimsonPearlCosts = [300, 600, 900, 1200, 1500, 3000, 4500, 6000, 7500, 9000]
+    const goldCosts = [1500, 3000, 4500, 6000, 7500, 15000, 22500, 30000, 37500, 45000]
+
+    let crimsonPearlTotal = 0
+    let goldTotal = 0
+
+    if (baseStart < baseEnd) {
+        for (let level = baseStart; level < baseEnd; level++) {
+            crimsonPearlTotal += crimsonPearlCosts[level]
+            goldTotal += goldCosts[level]
+        }
+    }
+
+    // 创建根节点
+    const root: ResourceTreeNode = {
+        id: `mod-${mod.id}`,
+        name: mod.名称,
+        cid: mod.id,
+        type: "Mod",
+        amount: count,
+        children: [],
+    }
+
+    // 添加基础升级消耗
+    if (crimsonPearlTotal > 0) {
+        root.children!.push({
+            id: `mod-${mod.id}-resource-深红凝珠`,
+            name: "深红凝珠",
+            type: "Resource",
+            amount: crimsonPearlTotal * count,
+        })
+    }
+
+    if (goldTotal > 0) {
+        root.children!.push({
+            id: `mod-${mod.id}-resource-铜币`,
+            name: "铜币",
+            type: "Resource",
+            amount: goldTotal * count,
+        })
+    }
+
+    // 处理图纸和材料
+    const draft = mod.draft
+    if (draft) {
+        const processDraft = (d: Draft, multiplier: number, parent: ResourceTreeNode) => {
+            // 添加图纸信息
+            if (d.t === "Mod") {
+                const draftName = `图纸: ${d.n}`
+                parent.children!.push({
+                    id: `mod-${mod.id}-draft-${d.id}`,
+                    name: draftName,
+                    type: "Draft",
+                    amount: multiplier,
+                    cid: d.p,
+                })
+            }
+
+            // 计算锻造材料
+            if (d.m) {
+                const goldCost = d.m * multiplier
+                const existingGold = parent.children?.find(child => child.id === `mod-${mod.id}-resource-铜币`)
+                if (existingGold) {
+                    existingGold.amount += goldCost
+                } else {
+                    parent.children!.push({
+                        id: `mod-${mod.id}-draft-${d.id}`,
+                        name: "铜币",
+                        type: "Resource",
+                        amount: goldCost,
+                    })
+                }
+            }
+
+            if (d.x) {
+                d.x.forEach(item => {
+                    const itemAmount = item.c * multiplier
+
+                    if (item.t === "Mod") {
+                        // 魔之楔材料
+                        const modChild: ResourceTreeNode = {
+                            id: `mod-${mod.id}-draft-${d.id}-mod-${item.id}`,
+                            name: item.n,
+                            cid: item.id,
+                            type: "Mod",
+                            amount: itemAmount,
+                            children: [],
+                        }
+                        parent.children!.push(modChild)
+
+                        // 递归处理魔之楔材料
+                        const subMod = modDraftMap.get(item.id)
+                        if (subMod) {
+                            processDraft(subMod, itemAmount, modChild)
+                        }
+                    } else if (item.t === "Resource" && item.id !== 20029 && item.id !== 20032) {
+                        // 资源材料（排除固定支架和冷却液）
+                        const resourceChild: ResourceTreeNode = {
+                            id: `mod-${mod.id}-draft-${d.id}-resource-${item.id}`,
+                            name: item.n,
+                            type: "Resource",
+                            amount: itemAmount,
+                            children: [],
+                        }
+                        parent.children!.push(resourceChild)
+
+                        // 递归处理资源材料
+                        const subResource = resourceDraftMap.get(item.id)
+                        if (subResource) {
+                            processDraft(subResource, itemAmount, resourceChild)
+                        }
+                    } else {
+                        // 其他材料
+                        parent.children!.push({
+                            id: `mod-${mod.id}-draft-${d.id}-${item.t}-${item.id}`,
+                            name: item.n,
+                            type: "Resource",
+                            amount: itemAmount,
+                        })
+                    }
+                })
+            }
+        }
+
+        // 计算金色魔之楔的增幅消耗
+        let totalGold = 1 * count
+        if (mod.品质 === "金" && targetLevel > 5) {
+            const ampStart = Math.max(5, currentLevel) - 5
+            const ampEnd = Math.min(10, targetLevel) - 5
+            const gold = [1, 1, 2, 2, 3]
+
+            for (let i = ampStart; i < ampEnd; i++) {
+                totalGold += gold[i] * count
+            }
+
+            // 添加委托密函线索消耗
+            if (mod.walnut) {
+                root.children!.push({
+                    id: `mod-${mod.id}-resource-委托密函线索`,
+                    name: "委托密函线索",
+                    type: "Resource",
+                    amount: 100 * totalGold,
+                })
+            }
+
+            // 添加商店材料消耗
+            if (mod.shop) {
+                root.children!.push({
+                    id: `mod-${mod.id}-resource-${mod.shop.price}`,
+                    name: mod.shop.price,
+                    type: "Resource",
+                    amount: mod.shop.n * totalGold,
+                })
+            }
+        }
+
+        // 处理图纸
+        processDraft(draft, totalGold, root)
+    }
+
+    return root
+}
+
+/**
  * 计算单个魔之楔养成资源消耗
  * @param mod 魔之楔数据
  * @param config 魔之楔养成配置
@@ -150,12 +333,15 @@ function calculateSingleModLevelUp(
 
     // 统一计算魔之楔升级消耗
     const totalCost = calculateModLevelUpCost(mod, modDraftMap, resourceDraftMap, currentLevel, targetLevel, count)
+    // 生成资源依赖树
+    const resourceTree = generateResourceTree(mod, modDraftMap, resourceDraftMap, config)
     const details = {
         levelUp: totalCost,
     }
 
     return {
         totalCost,
+        resourceTree,
         details,
     }
 }
@@ -292,8 +478,34 @@ function mergeResults(results: LevelUpResult[]): LevelUpResult {
         } as LevelUpResult["details"]
     )
 
+    // 合并资源依赖树
+    let resourceTree: ResourceTreeNode | undefined
+    if (results.length > 0) {
+        // 创建一个根节点来包含所有结果的资源树
+        resourceTree = {
+            id: "root",
+            name: "总资源依赖",
+            type: "Resource",
+            amount: 1,
+            children: [],
+        }
+
+        // 将每个结果的资源树添加为子节点
+        results.forEach(result => {
+            if (result.resourceTree) {
+                resourceTree!.children!.push(result.resourceTree)
+            }
+        })
+
+        // 如果没有子节点，将 resourceTree 设为 undefined
+        if (resourceTree.children!.length === 0) {
+            resourceTree = undefined
+        }
+    }
+
     return {
         totalCost,
+        resourceTree,
         details,
     }
 }

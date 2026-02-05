@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest"
-import { LeveledMod, LeveledBuff, LeveledChar, LeveledWeapon } from "../leveled"
+import { describe, expect, it } from "vitest"
 import type { CharAttr } from "../CharBuild"
+import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
 
 // 测试LeveledMod类
 describe("LeveledMod类测试", () => {
@@ -89,6 +89,7 @@ describe("DynamicBuff", () => {
             召唤物范围: 1,
             减伤: 1,
             技能倍率赋值: 0,
+            技能倍率乘数: 1,
             有效生命: 1,
         }
         attrs = buff.applyDynamicAttr(char, attrs, [])

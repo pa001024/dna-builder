@@ -45,7 +45,7 @@ export const typeDefs = /* GraphQL */ `
         edited: Int
         createdAt: String
         updateAt: String
-        user: User!
+        user: User
         reactions: [Reaction!]
     }
 

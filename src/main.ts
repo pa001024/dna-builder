@@ -1,4 +1,4 @@
-import { createApp } from "vue"
+import { createApp, render, type VNode } from "vue"
 import "./style.css"
 import { registerSW } from "virtual:pwa-register"
 import i18next from "i18next"
@@ -66,6 +66,13 @@ app.directive("h-resize-for", (el, { value: { el: target, min, max } }) => {
     el.onpointerdown = onPointerDown
 })
 app.mount("#app")
+
+export function renderVueNode(vnode: VNode, container: HTMLElement) {
+    const appInstance = createApp(vnode)
+    appInstance.use(createPinia()).use(I18NextVue, { i18next }).use(router)
+    appInstance.mount(container)
+    return appInstance
+}
 
 // 仅在非应用环境下注册 Service Worker
 if (!env.isApp) {

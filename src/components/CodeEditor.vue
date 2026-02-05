@@ -69,7 +69,6 @@ const filePos = new Map<string, Position>()
 function safeUpdate(value: string) {
     if (!jar.value) return
     filePos.set(lastFile.value, jar.value.save())
-    model.value = value
     jar.value.setContent(value || "")
     if (lastFile.value !== props.file) {
         lastFile.value = props.file
@@ -82,7 +81,6 @@ defineExpose({
     safeUpdate,
     forceUpdate(value: string) {
         if (!jar.value) return
-        model.value = value
         jar.value.setContent(value || "")
     },
 })

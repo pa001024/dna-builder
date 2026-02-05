@@ -12,6 +12,7 @@ import {
 
 export interface DNABaseAPIConfig {
     server?: "cn" | "global"
+    lang?: string //"zh-Hans" | "en"
     dev_code?: string
     token?: string
     kf_token?: string
@@ -61,6 +62,14 @@ export class DNABaseAPI {
         this._mode = value
         this.updateHeaders()
     }
+    private _lang: string = "zh-Hans"
+    public get lang() {
+        return this._lang
+    }
+    public set lang(value: string) {
+        this._lang = value
+        this.updateHeaders()
+    }
 
     constructor(options: DNABaseAPIConfig = {}) {
         if (options.server === "global") {
@@ -69,6 +78,7 @@ export class DNABaseAPI {
             this.server = "cn"
         }
         this.fetchFn = options.fetchFn
+        if (options.lang !== undefined) this.lang = options.lang
         if (options.rsa_public_key !== undefined) this.RSA_PUBLIC_KEY = options.rsa_public_key
         if (options.dev_code !== undefined) this.dev_code = options.dev_code
         if (options.token !== undefined) this.token = options.token
@@ -84,6 +94,7 @@ export class DNABaseAPI {
                 version: this.server === "cn" ? "1.2.0" : "1.1.1",
                 versioncode: this.server === "cn" ? "7" : "5",
                 source: "android",
+                lang: this.lang,
                 "Content-Type": "application/x-www-form-urlencoded",
                 "User-Agent": this.server === "cn" ? "okhttp/3.10.0" : "okhttp/5.3.2",
             }
@@ -94,6 +105,7 @@ export class DNABaseAPI {
                 version: this.server === "cn" ? "1.2.0" : "1.1.1",
                 versioncode: this.server === "cn" ? "7" : "5",
                 source: "ios",
+                lang: this.lang,
                 "Content-Type": "application/x-www-form-urlencoded",
                 "User-Agent":
                     this.server === "cn"

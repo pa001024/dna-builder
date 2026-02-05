@@ -126,14 +126,14 @@ export class LeveledSkill {
             if (attrs?.技能倍率赋值 && field.名称.includes("伤害")) {
                 return {
                     ...field,
-                    值: attrs.技能倍率赋值 + attrs.技能倍率加数,
+                    值: attrs.技能倍率赋值 * attrs.技能倍率乘数 + attrs.技能倍率加数,
                 }
             }
             if (field.影响) {
                 let val = field.值
                 let val2 = field.值2 || 0
                 if (field.名称.includes("伤害")) {
-                    val += attrs?.技能倍率加数 || 0
+                    val = val * (attrs?.技能倍率乘数 || 1) + (attrs?.技能倍率加数 || 0)
                 }
                 const propSet = new Set(field.影响.split(","))
                 if (propSet.has("技能范围")) {

@@ -27,12 +27,12 @@ const endurancePercent = computed(() => {
 function getQualityColor(quality: string): string {
     const colorMap: Record<string, string> = {
         金: "from-yellow-900 to-yellow-100",
-        紫: "from-purple-900 to-purple-300",
-        蓝: "from-blue-900 to-blue-300",
-        绿: "from-green-900 to-green-300",
-        白: "from-gray-900 to-gray-300",
+        紫: "from-purple-900 to-purple-100",
+        蓝: "from-blue-900 to-blue-100",
+        绿: "from-green-900 to-green-100",
+        白: "from-gray-900 to-gray-100",
     }
-    return colorMap[quality] || "from-gray-900 to-gray-300"
+    return colorMap[quality] || "from-gray-900 to-gray-100"
 }
 
 /**

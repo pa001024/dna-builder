@@ -274,6 +274,7 @@ export class LeveledMod implements Mod {
             技能速度: 0,
             失衡易伤: 0,
             技能倍率加数: 0,
+            技能倍率乘数: 1,
             技能倍率赋值: 0,
             召唤物攻击速度: 0,
             召唤物范围: 0,

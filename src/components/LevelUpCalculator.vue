@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI, DNARoleEntity } from "dna-api"
-import { computed, onBeforeUnmount, onMounted, ref } from "vue"
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from "vue"
 import {
     charData,
     charMap,
@@ -237,7 +237,7 @@ async function loadRoleInfo() {
 
 // 结果状态
 const calculating = ref(false)
-const result = ref<ReturnType<typeof LevelUpCalculator.mergeResults> | null>(null)
+const result = shallowRef<ReturnType<typeof LevelUpCalculator.mergeResults> | null>(null)
 // 请求ID，用于解决异步竞态条件
 const latestRequestId = ref(0)
 
@@ -279,9 +279,7 @@ async function calculateResult() {
         const resultsToMerge = [mergeResults.charResult, mergeResults.weaponResult, mergeResults.modResult].filter(
             Boolean
         ) as LevelUpResult[]
-
         let mergedResult = LevelUpCalculator.mergeResults(resultsToMerge)
-
         // 如果有排除的资源，重新计算结果
         if (excludedResources.value.size > 0) {
             // 过滤总消耗
@@ -314,6 +312,7 @@ async function calculateResult() {
             // 返回过滤后的结果
             mergedResult = {
                 totalCost: filteredTotalCost,
+                resourceTree: mergedResult.resourceTree,
                 details: filteredDetails,
             }
         }
@@ -469,14 +468,16 @@ const handleBatchAddMods = () => {
     isBatchAddModalOpen.value = false
     selectedModsForBatch.value.clear()
 }
+
+const isOpenGraph = ref(false)
 </script>
 
 <template>
-    <div class="h-full flex flex-col gap-4 lg:flex-row">
-        <ScrollArea class="md:h-full flex-1">
-            <div class="p-4 space-y-4">
+    <div class="h-full relative">
+        <ScrollArea class="h-full">
+            <div class="p-4 flex flex-col justify-center items-center gap-4">
                 <!-- 角色养成 -->
-                <section>
+                <section class="w-full">
                     <div class="flex items-center justify-between mb-2 p-2">
                         <h3 class="text-xl font-semibold text-base-content flex items-center gap-2">
                             <Icon icon="ri:user-line" />
@@ -588,7 +589,7 @@ const handleBatchAddMods = () => {
                 </section>
 
                 <!-- 武器养成 -->
-                <section>
+                <section class="w-full">
                     <div class="flex items-center justify-between mb-2 p-2">
                         <h3 class="text-xl font-semibold text-base-content flex items-center gap-2">
                             <Icon icon="ri:sword-line" />
@@ -667,7 +668,7 @@ const handleBatchAddMods = () => {
                 </section>
 
                 <!-- 魔之楔养成 -->
-                <section>
+                <section class="w-full">
                     <div class="flex items-center justify-between mb-2 p-2">
                         <h3 class="text-xl font-semibold text-base-content flex items-center gap-2">
                             <Icon icon="po-A" />
@@ -682,7 +683,7 @@ const handleBatchAddMods = () => {
                         </div>
                     </div>
 
-                    <div class="flex flex-col gap-4">
+                    <div class="grid grid-cols-[repeat(auto-fill,minmax(450px,1fr))] gap-4">
                         <div
                             v-for="(mod, index) in mods"
                             :key="index"
@@ -695,14 +696,14 @@ const handleBatchAddMods = () => {
                                         <img
                                             :src="LeveledMod.url(modMap.get(mod.id)?.icon)"
                                             alt="魔之楔图片"
-                                            class="w-16 h-16 object-cover"
+                                            class="size-12 object-cover"
                                         />
                                     </div>
                                     <div class="flex-1">
-                                        <div class="flex justify-between">
-                                            <h4 class="text-md font-semibold">{{ modMap.get(mod.id)?.名称 }}</h4>
-                                        </div>
-                                        <div class="mt-1 grid grid-cols-3 items-center gap-4">
+                                        <div class="mt-1 flex items-center gap-4">
+                                            <div class="flex flex-1 justify-between">
+                                                <h4 class="text-md font-semibold">{{ modMap.get(mod.id)?.名称 }}</h4>
+                                            </div>
                                             <label class="flex flex-col gap-1">
                                                 <span class="text-xs opacity-80">选择等级</span>
                                                 <RangeSelector
@@ -722,7 +723,7 @@ const handleBatchAddMods = () => {
                                             <label class="flex flex-col gap-1">
                                                 <span class="text-xs opacity-80">操作</span>
                                                 <button class="btn btn-error btn-sm" @click="removeMod(index)" aria-label="删除魔之楔">
-                                                    删除
+                                                    <Icon icon="ri:delete-bin-line" />
                                                 </button>
                                             </label>
                                         </div>
@@ -733,14 +734,21 @@ const handleBatchAddMods = () => {
                     </div>
                 </section>
             </div>
-        </ScrollArea>
-        <ScrollArea class="md:h-full flex-1">
-            <div class="p-4">
+            <div class="p-4 flex justify-center">
                 <!-- 结果显示 -->
-                <section class="mb-4" v-if="result">
+                <div v-if="result" class="w-full">
                     <h3 class="text-xl font-bold text-base-content mb-6 flex items-center gap-2">
-                        <Icon icon="ri:bar-chart-line" />
-                        结果
+                        <div class="flex items-center gap-2">
+                            <Icon icon="ri:bar-chart-line" />
+                            结果
+                        </div>
+                        <div
+                            class="ml-auto cursor-pointer text-primary flex items-center gap-2 hover:underline"
+                            @click="isOpenGraph = true"
+                        >
+                            <Icon icon="ri:git-branch-line" />
+                            点击查看关系图
+                        </div>
                     </h3>
 
                     <!-- 时间估算 -->
@@ -954,10 +962,18 @@ const handleBatchAddMods = () => {
                             </div>
                         </div>
                     </div>
-                </section>
-                <div v-else class="loading loading-spinner"></div>
+                </div>
+                <div v-else class="loading loading-spinner mb-4"></div>
             </div>
         </ScrollArea>
+        <div class="inset-0 absolute bg-base-100" v-if="isOpenGraph && result?.resourceTree">
+            <div class="absolute flex justify-center items-center p-2 z-1">
+                <div class="flex items-center gap-1 text-xs bg-base-200 hover:bg-base-300 cursor-pointer p-1 rounded">
+                    <Icon icon="ri:close-line" class="text-2xl text-red-500" @click="isOpenGraph = false" />
+                </div>
+            </div>
+            <ResourceTreeGraph :tree="result.resourceTree" />
+        </div>
     </div>
 
     <!-- 批量添加魔之楔弹窗 -->

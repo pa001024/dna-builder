@@ -31,6 +31,7 @@ export interface CharAttr {
     技能速度: number
     失衡易伤: number
     技能倍率加数: number
+    技能倍率乘数: number
     技能倍率赋值: number
     召唤物攻击速度: number
     召唤物范围: number
@@ -420,6 +421,7 @@ export class CharBuild {
         const independentDamageIncrease = this.getTotalBonusMul("独立增伤")
         const damageReduce = this.getTotalBonusReduce("减伤")
         const skillMultiplierSet = this.getTotalBonus("技能倍率赋值")
+        const skillMultiplier = this.getTotalBonusMul("技能倍率乘数")
 
         // 应用MOD属性加成
         const modAttributeBonus = this.getTotalBonus("MOD属性")
@@ -494,6 +496,7 @@ export class CharBuild {
             技能速度: skillSpeed,
             失衡易伤: imbalanceDamageBonus,
             技能倍率加数: skillAdd,
+            技能倍率乘数: skillMultiplier,
             召唤物攻击速度: summonAttackSpeed,
             召唤物范围: summonRange,
             减伤: damageReduce,

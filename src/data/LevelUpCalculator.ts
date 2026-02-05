@@ -62,10 +62,23 @@ export interface ResourceCost {
 }
 
 /**
+ * 资源依赖树节点
+ */
+export interface ResourceTreeNode {
+    id: string
+    cid?: number
+    name: string
+    type: "Resource" | "Mod" | "Draft"
+    amount: number
+    children?: ResourceTreeNode[]
+}
+
+/**
  * 养成计算器结果
  */
 export interface LevelUpResult {
     totalCost: ResourceCost
+    resourceTree?: ResourceTreeNode
     timeEstimate?: {
         days: number
         hours: number
@@ -473,8 +486,32 @@ export class LevelUpCalculator {
             } as LevelUpResult["details"]
         )
 
+        // 合并资源依赖树
+        let resourceTree: ResourceTreeNode | undefined
+        if (results.length > 0) {
+            // 收集所有结果的资源树
+            const resourceTrees = results.map(result => result.resourceTree).filter((tree): tree is ResourceTreeNode => tree !== undefined)
+
+            if (resourceTrees.length > 0) {
+                if (resourceTrees.length === 1) {
+                    // 如果只有一个资源树，直接使用它
+                    resourceTree = resourceTrees[0]
+                } else {
+                    // 如果有多个资源树，创建一个根节点来包含它们
+                    resourceTree = {
+                        id: "root",
+                        name: "总资源依赖",
+                        type: "Resource",
+                        amount: 1,
+                        children: resourceTrees,
+                    }
+                }
+            }
+        }
+
         return {
             totalCost,
+            resourceTree,
             details,
         }
     }
