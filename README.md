@@ -309,3 +309,7 @@ MIT License
 如有问题或建议，请通过以下方式联系：
 
 - Issue：在 GitHub 仓库提交 Issue
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=pa001024/dna-builder&type=date&legend=top-left)](https://www.star-history.com/#pa001024/dna-builder&type=date&legend=top-left)
