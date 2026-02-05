@@ -154,7 +154,7 @@ export const useSettingStore = defineStore("setting", {
                 if (!user) return false
                 userId = user.uid
                 token = user.token
-                if (user.server !== "global") return true
+                if (user.server === "global") return true
             }
             try {
                 // 调用Rust实现的心跳功能
@@ -177,7 +177,7 @@ export const useSettingStore = defineStore("setting", {
             try {
                 const user = await this.getCurrentUser()
                 if (!user) return false
-                if (user.server !== "global") return true
+                if (user.server === "global") return true
                 // 调用Rust实现的停止心跳功能
                 await stopHeartbeat()
                 console.log("心跳已停止")

@@ -232,7 +232,7 @@ export async function executeSignFlow(api: DNAAPI): Promise<boolean> {
             if (firstUnsignedDay) {
                 const signSuccess = await handleGameSign(api, firstUnsignedDay, calendarData)
                 if (signSuccess) {
-                    ui.showSuccessMessage("游戏签到成功")
+                    // ui.showSuccessMessage("游戏签到成功")
                 }
             }
         }

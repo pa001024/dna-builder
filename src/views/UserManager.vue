@@ -33,7 +33,7 @@ const addUser = async (data: { dev_code: string; user: import("dna-api").DNAUser
         name: data.user.userName,
         dev_code: data.dev_code,
         token: data.user.token,
-        server: data.user.mobile ? "cn" : "global",
+        server: data.user.registerLang ? "global" : "cn",
         kf_token: "",
         refreshToken: data.user.refreshToken,
         pic: data.user.headUrl,

@@ -611,7 +611,7 @@ export interface DNAUserDataBean {
     headUrl: string
     isRegister: number
     is_mute: number
-    mobile: string // 国服专属
+    mobile?: string // 国服专属
     refreshToken: string
     signature: string
     status: number
