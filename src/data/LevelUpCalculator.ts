@@ -231,6 +231,7 @@ export class LevelUpCalculator {
      */
     extractMinimalModData(mod: Mod): ModExt {
         const draft = modDraftMap.get(mod.id)
+        const costDraft = modDraftMap.get(mod.消耗?.[0] || mod.id)
         let shop = undefined as { price: string; n: number } | undefined
         if (draft) {
             const item = draftShopSourceMap.get(draft.id)
@@ -244,6 +245,7 @@ export class LevelUpCalculator {
             名称: mod.名称,
             消耗: mod.消耗,
             draft,
+            costDraft,
             walnut: modShopSourceMap.get(mod.id) && 1,
             shop,
             dropInfo: modDungeonMap.get(mod.id)?.map(d => ({

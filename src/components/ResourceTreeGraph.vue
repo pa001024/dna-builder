@@ -44,7 +44,6 @@ async function renderGraph() {
 
     // 获取图表数据
     const data = buildGraphData(props.tree)
-    console.log(data)
     graph.setData(data)
 
     // 渲染

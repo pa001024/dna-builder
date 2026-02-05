@@ -198,13 +198,14 @@ function generateResourceTree(
 
     // 处理图纸和材料
     const draft = mod.draft
-    if (draft) {
+    const costDraft = mod.costDraft
+    if (costDraft && draft) {
         const processDraft = (d: Draft, multiplier: number, parent: ResourceTreeNode) => {
             // 添加图纸信息
             if (d.t === "Mod") {
                 const draftName = `图纸: ${d.n}`
                 parent.children!.push({
-                    id: `mod-${mod.id}-draft-${d.id}`,
+                    id: `mod-${d.p}-draft-${d.id}`,
                     name: draftName,
                     type: "Draft",
                     amount: multiplier,
@@ -279,7 +280,8 @@ function generateResourceTree(
         }
 
         // 计算金色魔之楔的增幅消耗
-        let totalGold = 1 * count
+        let selfGold = count
+        let totalGold = 0
         if (mod.品质 === "金" && targetLevel > 5) {
             const ampStart = Math.max(5, currentLevel) - 5
             const ampEnd = Math.min(10, targetLevel) - 5
@@ -289,13 +291,26 @@ function generateResourceTree(
                 totalGold += gold[i] * count
             }
 
+            if (costDraft.id !== draft.id) {
+                const draftName = `图纸: ${draft.n}`
+                root.children!.push({
+                    id: `mod-${mod.id}-draft-${draft.id}`,
+                    cid: draft.p,
+                    name: draftName,
+                    type: "Draft",
+                    amount: count,
+                })
+            } else {
+                totalGold = selfGold = totalGold + count
+            }
+
             // 添加委托密函线索消耗
             if (mod.walnut) {
                 root.children!.push({
                     id: `mod-${mod.id}-resource-委托密函线索`,
                     name: "委托密函线索",
                     type: "Resource",
-                    amount: 100 * totalGold,
+                    amount: 100 * selfGold,
                 })
             }
 
@@ -305,13 +320,13 @@ function generateResourceTree(
                     id: `mod-${mod.id}-resource-${mod.shop.price}`,
                     name: mod.shop.price,
                     type: "Resource",
-                    amount: mod.shop.n * totalGold,
+                    amount: mod.shop.n * selfGold,
                 })
             }
         }
 
         // 处理图纸
-        processDraft(draft, totalGold, root)
+        processDraft(costDraft, totalGold, root)
     }
 
     return root
@@ -688,6 +703,7 @@ export interface ModExt {
     品质: string
     消耗?: number[]
     draft?: Draft
+    costDraft?: Draft
     walnut?: 1
     shop?: { price: string; n: number }
     dropInfo?: DungeonExt[]
@@ -735,9 +751,11 @@ function calculateModLevelUpCost(
         }
     }
     const draft = mod.draft
+    const costDraft = mod.costDraft
     function calcDraftCost(d: Draft, n = 1, sub: boolean = false) {
         const name = `图纸: ${d.n}-${d.id}`
-        let totalGold = 1 * n
+        let selfGold = n
+        let totalGold = 0
         if (mod.品质 === "金" && targetLevel > 5 && !sub) {
             // 计算6-10级增幅消耗（仅金色魔之楔）
             const ampStart = Math.max(5, currentLevel) - 5 // 转换为增幅索引 (0-4)
@@ -747,11 +765,18 @@ function calculateModLevelUpCost(
                 totalGold += gold[i] * n
             }
 
+            if (draft && d.id !== draft.id) {
+                const self = `图纸: ${draft.n}-${draft.id}`
+                cost[self] = [n, draft.p, "Draft"]
+            } else {
+                selfGold = totalGold = totalGold + n
+            }
+
             if (mod.walnut) {
-                cost.委托密函线索 = ((cost.委托密函线索 as number) || 0) + 100 * totalGold
+                cost.委托密函线索 = ((cost.委托密函线索 as number) || 0) + 100 * selfGold
             }
             if (mod.shop) {
-                cost[mod.shop.price] = ((cost[mod.shop.price] as number) || 0) + mod.shop.n * totalGold
+                cost[mod.shop.price] = ((cost[mod.shop.price] as number) || 0) + mod.shop.n * selfGold
             }
         }
         if (d.t === "Mod") cost[name] = [totalGold, d.p, "Draft"]
@@ -778,8 +803,8 @@ function calculateModLevelUpCost(
             }
         }
     }
-    if (draft) {
-        calcDraftCost(draft, count)
+    if (costDraft) {
+        calcDraftCost(costDraft, count)
     }
 
     return cost

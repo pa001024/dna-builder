@@ -968,8 +968,11 @@ const isOpenGraph = ref(false)
         </ScrollArea>
         <div class="inset-0 absolute bg-base-100" v-if="isOpenGraph && result?.resourceTree">
             <div class="absolute flex justify-center items-center p-2 z-1">
-                <div class="flex items-center gap-1 text-xs bg-base-200 hover:bg-base-300 cursor-pointer p-1 rounded">
-                    <Icon icon="ri:close-line" class="text-2xl text-red-500" @click="isOpenGraph = false" />
+                <div
+                    class="flex items-center gap-1 text-xs bg-base-200 hover:bg-base-300 cursor-pointer p-1 rounded"
+                    @click="isOpenGraph = false"
+                >
+                    <Icon icon="ri:close-line" class="text-2xl text-red-500" />
                 </div>
             </div>
             <ResourceTreeGraph :tree="result.resourceTree" />
