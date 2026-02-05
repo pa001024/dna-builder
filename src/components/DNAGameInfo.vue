@@ -393,9 +393,7 @@ async function generateScreenshot() {
                     <div v-if="shortNoteInfo.draftInfo" class="mt-6 print:hidden">
                         <!-- 锻造列表 -->
                         <div class="space-y-3">
-                            <div class="text-lg font-semibold mb-3">
-                                锻造 ({{ shortNoteInfo.draftInfo.draftDoingNum }}/{{ shortNoteInfo.draftInfo.draftMaxNum }})
-                            </div>
+                            <div class="text-lg font-semibold mb-3">锻造 ({{ shortNoteInfo.draftInfo.draftDoingNum }})</div>
                             <div
                                 v-if="shortNoteInfo.draftInfo.draftDoingInfo && shortNoteInfo.draftInfo.draftDoingInfo.length > 0"
                                 class="space-y-4"
@@ -419,7 +417,8 @@ async function generateScreenshot() {
                                         <div class="flex justify-between items-start mb-2">
                                             <h4 class="text-lg font-bold">{{ draft.productName }}</h4>
                                             <span class="text-sm bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                                                已完成: {{ calculateCompletedNum(draft, getDraftInfo(draft.productId)) }}
+                                                {{ calculateCompletedNum(draft, getDraftInfo(draft.productId)) }} /
+                                                {{ draft.draftCompleteNum + draft.draftDoingNum }}
                                             </span>
                                         </div>
 

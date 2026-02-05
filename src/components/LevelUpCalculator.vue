@@ -221,7 +221,7 @@ async function syncChars() {
  */
 async function loadRoleInfo() {
     try {
-        await api.getMine()
+        await setting.startHeartbeat()
         const roleRes = await api.defaultRoleForTool()
         if (roleRes.is_success && roleRes.data) {
             roleInfo.value = roleRes.data
@@ -230,6 +230,8 @@ async function loadRoleInfo() {
         }
     } catch (e) {
         ui.showErrorMessage("获取角色信息失败", e)
+    } finally {
+        await setting.stopHeartbeat()
     }
 }
 

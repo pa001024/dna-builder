@@ -687,12 +687,17 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         return
     }
     if (!roleCache) {
-        const res = await dna.defaultRoleForTool()
-        if (!res.success || !res.data?.roleInfo.roleShow.roleChars) {
-            ui.showErrorMessage("获取角色信息失败")
-            return
+        await setting.startHeartbeat()
+        try {
+            const res = await dna.defaultRoleForTool()
+            if (!res.success || !res.data?.roleInfo.roleShow.roleChars) {
+                ui.showErrorMessage("获取角色信息失败")
+                return
+            }
+            roleCache = res.data.roleInfo.roleShow
+        } finally {
+            await setting.stopHeartbeat()
         }
-        roleCache = res.data.roleInfo.roleShow
     }
     const chars = (roleCache.roleChars || []).reduce(
         (prev, cur) => {
@@ -762,6 +767,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         }
     }
     localStorage.setItem(`build.${selectedChar.value}`, JSON.stringify(charSettings.value))
+    ui.showSuccessMessage("同步成功")
 }
 </script>
 

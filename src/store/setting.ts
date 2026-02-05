@@ -159,7 +159,7 @@ export const useSettingStore = defineStore("setting", {
             try {
                 // 调用Rust实现的心跳功能
                 const res = await startHeartbeat("wss://dnabbs-api.yingxiong.com:8180/ws-community-websocket", token, userId)
-                await sleep(1000) // 等待1秒，确保API有值
+                await sleep(500) // 确保API有值
                 if (res.includes("成功")) {
                     console.log("心跳已启动")
                     return true
