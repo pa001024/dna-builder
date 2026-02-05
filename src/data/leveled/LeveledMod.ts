@@ -163,7 +163,6 @@ export class LeveledMod implements Mod {
             if (this.id > 200000) {
                 this.效果 = this._originalModData.效果?.replace(/200\.0%/g, () => `${+(this._等级 * 10 + 100).toFixed(1)}%`)
             }
-            return
         } else {
             this.耐受 = this._originalModData.耐受 - this.maxLevel + this._等级
         }

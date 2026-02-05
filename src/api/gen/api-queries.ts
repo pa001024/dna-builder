@@ -74,6 +74,11 @@ export const todosQuery = typedQuery(
                 endTime
                 type
                 isCompleted
+                user {
+                    id
+                    name
+                    qq
+                }
             }
         }
     ` as const
