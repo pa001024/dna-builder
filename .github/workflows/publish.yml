@@ -32,8 +32,8 @@ jobs:
             OPENCV_VERSION: "4.9.0"
             OPENCV_DIR: C:\opencv\build
             OPENCV_INCLUDE_PATHS: C:\opencv\build\include
-            OPENCV_LIB_PATHS: C:\opencv\build\x64\vc16\lib
             OPENCV_LINK_LIBS: opencv_world490
+            OPENCV_LINK_PATHS: C:\opencv\build\x64\vc16\lib
             LIBCLANG_PATH: C:\Program Files\LLVM\bin
             OPENCV_BIN_PATHS: C:\opencv\build\x64\vc16\bin
         steps:
