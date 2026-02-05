@@ -3,7 +3,7 @@ use boa_engine::job::NativeAsyncJob;
 use boa_engine::object::builtins::{JsFunction, JsPromise};
 use boa_engine::{
     Context, IntoJsFunctionCopied, JsData, JsError, JsNativeError, JsObject, JsResult, JsValue,
-    js_string, js_value,
+    js_string, js_value, object::builtins::JsArray,
 };
 use opencv::prelude::{MatTraitConst, VectorToVec};
 use std::{thread, time::Duration};
@@ -15,6 +15,7 @@ use crate::submodules::{
     fx::draw_border,
     input::*,
     jsmat::{IntoJs, JsMat},
+    route::find_path,
     tpl::{get_template, get_template_b64},
     tpl_match::match_template,
     util::{capture_window, capture_window_wgc, check_size},
@@ -673,6 +674,67 @@ fn _cc(
     )))
 }
 
+/// 寻路函数
+fn _find_path(
+    js_left_image: Option<JsValue>,
+    js_right_image: Option<JsValue>,
+    start_x: Option<JsValue>,
+    start_y: Option<JsValue>,
+    end_x: Option<JsValue>,
+    end_y: Option<JsValue>,
+    num_disp: Option<JsValue>,
+    block_size: Option<JsValue>,
+    strategy: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    // 获取第一个参数 (左图Mat)
+    let js_left_image = js_left_image
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+
+    // 获取第二个参数 (右图Mat)
+    let js_right_image = js_right_image
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+
+    let start_x = start_x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let start_y = start_y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let end_x = end_x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let end_y = end_y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let num_disp = num_disp.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let block_size = block_size.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let strategy = strategy
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string()
+        .map_err(|e| JsError::from_opaque(JsValue::from(js_string!(format!(
+            "无效的策略字符串: {:?}",
+            e
+        )))))?;
+
+    // 执行寻路
+    let path = find_path(
+        &js_left_image.borrow().data().inner,
+        &js_right_image.borrow().data().inner,
+        start_x,
+        start_y,
+        end_x,
+        end_y,
+        num_disp,
+        block_size,
+        &strategy,
+    );
+
+    // 将路径转换为 JavaScript 数组
+    let js_array = JsArray::new(ctx);
+    for point in path {
+        let point_array = js_value!([point[0], point[1]], ctx);
+        js_array.push(point_array, ctx)?;
+    }
+
+    Ok(js_array.into())
+}
+
 /// 边框绘制函数
 fn _draw_border(
     hwnd: Option<JsValue>,
@@ -933,6 +995,10 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     // 设置程序音量函数
     let f = _set_program_volume.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("setProgramVolume"), 2, f)?;
+
+    // 寻路函数
+    let f = _find_path.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("findPath"), 9, f)?;
 
     Ok(())
 }

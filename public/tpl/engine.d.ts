@@ -109,6 +109,65 @@ interface Mat {
     rows(): number
     /** 矩阵列数 */
     cols(): number
+    /**
+     * 获取指定坐标的像素值（BGR格式）
+     * @param row 行索引
+     * @param col 列索引
+     * @returns [b, g, r] 数组或undefined
+     */
+    at_2d(row: number, col: number): [number, number, number] | undefined
+    /**
+     * 获取指定坐标的RGB颜色值
+     * @param x X坐标
+     * @param y Y坐标
+     * @returns RGB颜色值（0xRRGGBB格式）或undefined
+     */
+    get_rgb(x: number, y: number): number | undefined
+    /**
+     * 获取指定坐标的HSL颜色值
+     * @param x X坐标
+     * @param y Y坐标
+     * @returns [hue, saturation, luminance] 数组或undefined
+     */
+    get_hsl(x: number, y: number): [number, number, number] | undefined
+    /**
+     * 按指定方向查找符合条件的颜色
+     * @param x 起始X坐标
+     * @param y 起始Y坐标
+     * @param max_length 最大查找像素数
+     * @param color 目标颜色（0xRRGGBB格式）
+     * @param tolerance 颜色容差（0-255）
+     * @param direction 查找方向（"ltr"|"rtl"|"ttb"|"btt"）
+     * @returns [x, y] 坐标或undefined
+     */
+    find_color(
+        x: number,
+        y: number,
+        max_length: number,
+        color: number,
+        tolerance: number,
+        direction: "ltr" | "rtl" | "ttb" | "btt"
+    ): [number, number] | undefined
+    /**
+     * 按指定方向查找符合条件的亮度
+     * @param x 起始X坐标
+     * @param y 起始Y坐标
+     * @param max_length 最大查找像素数
+     * @param bright 目标亮度值
+     * @param tolerance 亮度容差
+     * @param operator 比较操作符（">"|"<"）
+     * @param direction 查找方向（"ltr"|"rtl"|"ttb"|"btt"）
+     * @returns [x, y] 坐标或undefined
+     */
+    find_bright(
+        x: number,
+        y: number,
+        max_length: number,
+        bright: number,
+        tolerance: number,
+        operator: ">" | "<",
+        direction: "ltr" | "rtl" | "ttb" | "btt"
+    ): [number, number] | undefined
 }
 
 /** 高精度计时器 */
@@ -384,3 +443,28 @@ declare function cc(imgMat: Mat, x: number, y: number, color: number, tolerance:
  * @param volume 音量值（0.0-1.0）
  */
 declare function setProgramVolume(programName: string, volume: number): void
+
+/**
+ * 智能寻路函数（基于双图深度估计）
+ * @param leftImage 左图（第一次截图）
+ * @param rightImage 右图（移动后的第二次截图）
+ * @param startX 起点X坐标
+ * @param startY 起点Y坐标
+ * @param endX 终点X坐标
+ * @param endY 终点Y坐标
+ * @param numDisp 视差搜索范围（必须是16的倍数，如160）
+ * @param blockSize 匹配块大小（3-7）
+ * @param strategy 绕行策略（"left"|"right"|"auto"）
+ * @returns 路径点列表 [[x, y], ...]
+ */
+declare function findPath(
+    leftImage: Mat,
+    rightImage: Mat,
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number,
+    numDisp: number,
+    blockSize: number,
+    strategy: "left" | "right" | "auto"
+): [number, number][]

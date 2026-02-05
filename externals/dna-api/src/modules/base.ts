@@ -65,7 +65,8 @@ export class DNABaseAPI {
     constructor(options: DNABaseAPIConfig = {}) {
         if (options.server === "global") {
             this.server = "global"
-            // this.KF_BASE_URL = "https://kf.yingxiong.com/"
+        } else {
+            this.server = "cn"
         }
         this.fetchFn = options.fetchFn
         if (options.rsa_public_key !== undefined) this.RSA_PUBLIC_KEY = options.rsa_public_key

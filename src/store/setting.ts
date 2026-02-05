@@ -121,7 +121,7 @@ export const useSettingStore = defineStore("setting", {
                         fetchFn: tauriFetch,
                     })
                     const res = await api.loginLog()
-                    if (res.msg.includes("失效")) {
+                    if (res.msg.includes("失效") || res.msg.includes("过期")) {
                         const refreshRes = await api.refreshToken(user.refreshToken)
                         if (refreshRes.is_success && refreshRes.data?.token) {
                             api.token = refreshRes.data.token
