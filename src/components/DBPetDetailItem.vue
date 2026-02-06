@@ -7,7 +7,7 @@ const props = defineProps<{
     pet: Pet
 }>()
 
-const currentLevel = ref(0)
+const currentLevel = ref(props.pet.最大等级 > 1 ? 3 : 0)
 
 const leveledPet = computed(() => {
     return new LeveledPet(props.pet, currentLevel.value)
@@ -16,7 +16,7 @@ const leveledPet = computed(() => {
 watch(
     () => props.pet,
     () => {
-        currentLevel.value = 0
+        currentLevel.value = props.pet.最大等级 > 1 ? 3 : 0
     }
 )
 
@@ -86,7 +86,7 @@ function getTypeName(type: number): string {
                     type="range"
                     class="range range-primary range-xs grow"
                     :min="0"
-                    :max="3"
+                    :max="pet.最大等级 > 1 ? 3 : 0"
                     step="1"
                 />
             </div>

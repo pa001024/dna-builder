@@ -58,15 +58,13 @@ export class LeveledPet implements Pet {
     }
 
     private updateProperties(): void {
-        const baseExp = this._originalPetData.经验
-        const multiplier = 1 + this._等级 / 3
-        this.经验 = Math.floor(baseExp * multiplier)
+        this.经验 = Math.floor(50 * this._等级)
 
         if (this._originalPetData.主动) {
             const activeValues = this.calculateSkillValues(this._originalPetData.主动)
             this.主动 = {
                 描述: this.formatSkillDescription(this._originalPetData.主动.描述, activeValues),
-                值: activeValues,
+                值: this._originalPetData.主动.值,
             }
         }
 
@@ -74,17 +72,14 @@ export class LeveledPet implements Pet {
             const passiveValues = this.calculateSkillValues(this._originalPetData.被动)
             this.被动 = {
                 描述: this.formatSkillDescription(this._originalPetData.被动.描述, passiveValues),
-                值: passiveValues,
+                值: this._originalPetData.被动.值,
             }
         }
     }
 
     private calculateSkillValues(skill: PetSkill): number[] {
-        const multiplier = 1 + this._等级 / 3
-        return skill.值.map((val, i) => {
-            // 对持续时间进行特殊处理，不进行等级提升
-            const isDuration = skill.描述.match(/\{%?\}秒?/g)?.[i]?.endsWith("秒")
-            return isDuration && val > 2 ? val : val * multiplier
+        return skill.值.map(val => {
+            return val[this._等级]
         })
     }
 
