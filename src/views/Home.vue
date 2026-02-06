@@ -127,6 +127,10 @@ async function checkUpdate() {
 
             <!-- 活动日历组件 -->
             <ActivityCalendar />
+
+            <div v-if="!env.isApp" class="flex items-center justify-center p-4">
+                <a class="link center" href="https://beian.miit.gov.cn" target="_blank" one-link-mark="yes">浙ICP备2024097919号</a>
+            </div>
         </ScrollArea>
     </div>
 </template>
