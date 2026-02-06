@@ -25,6 +25,11 @@ export const i18nLanguages = [
         code: "ko",
         alias: ["ko-KR"],
     },
+    {
+        name: "Français",
+        code: "fr",
+        alias: ["fr-FR"],
+    },
 ]
 
 export function changeLanguage(language: string) {

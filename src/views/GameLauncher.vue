@@ -12,7 +12,7 @@ import { useUIStore } from "../store/ui"
 // 状态管理
 const ui = useUIStore()
 const keys = ["path", "beforeGame", "afterGame"] as const
-const tab = ref("mod")
+const tab = ref("update")
 const game = useGameStore()
 //#region 启动
 async function selectPath(key: (typeof keys)[number]) {
@@ -245,9 +245,9 @@ onUnmounted(() => {
 <template>
     <div class="flex flex-col h-full overflow-hidden relative">
         <div class="flex-none tabs tabs-lift tabs-lg items-center">
-            <input v-model="tab" type="radio" name="game_mod" class="tab" value="mod" :aria-label="$t('game-launcher.modManager')" />
-            <input v-model="tab" type="radio" name="game_mod" class="tab" value="setting" :aria-label="$t('game-launcher.gameSetting')" />
             <input v-model="tab" type="radio" name="game_mod" class="tab" value="update" :aria-label="$t('game-launcher.gameUpdate')" />
+            <input v-model="tab" type="radio" name="game_mod" class="tab" value="setting" :aria-label="$t('game-launcher.gameSetting')" />
+            <input v-model="tab" type="radio" name="game_mod" class="tab" value="mod" :aria-label="$t('game-launcher.modManager')" />
             <div
                 class="ml-auto btn btn-square tooltip tooltip-bottom"
                 :data-tip="$t('game-launcher.openGameDir')"

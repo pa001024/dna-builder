@@ -2,6 +2,7 @@
 import { listen } from "@tauri-apps/api/event"
 import * as dialog from "@tauri-apps/plugin-dialog"
 import { useLocalStorage } from "@vueuse/core"
+import { t } from "i18next"
 import { computed, onMounted, onUnmounted, ref, watch } from "vue"
 import { useUIStore } from "@/store/ui"
 import { cleanupTempDir, extractGameAssets, getFileSize, listFiles, readTextFile, renameFile, writeTextFile } from "../api/app"
@@ -36,7 +37,6 @@ const fileProgress = ref(0)
 const downloadSpeed = ref("")
 const concurrentThreads = ref(5)
 
-// 预下载相关状态
 const preTotalSize = ref(0)
 const preTotalFiles = ref(0)
 
@@ -60,15 +60,15 @@ const needPreDownload = ref(false)
 
 const channels = [
     {
-        name: "正式服",
+        name: t("game-update.formal_server"),
         value: "PC_OBT_CN_Pub",
     },
     {
-        name: "1.2媒体服",
+        name: t("game-update.media_server"),
         value: "PC_OBT12_Media_CN_Pub",
     },
     {
-        name: "国际服",
+        name: t("game-update.global_server"),
         value: "PC_OBT_Global_Pub",
     },
 ]
@@ -91,14 +91,12 @@ watch([selectedChannel, selectedCDN], async () => {
     await checkForUpdates()
 })
 
-// 计算属性
 const gamePath = computed(() => gameStore.path.replace(/\\DNA Game\\EM\.exe/, ""))
 const tempDownloadDir = computed(() => {
     if (!gamePath.value) return ""
     return gamePath.value + "\\DNA Game\\TempPath\\"
 })
 
-// 预下载目录
 const tempPreDownloadDir = computed(() => {
     if (!gamePath.value) return ""
     return gamePath.value + "\\DNA Game\\TempPrePath\\"
@@ -112,11 +110,6 @@ const baseVersionPath = computed(() => {
     return gamePath.value + "\\DNA Game\\BaseVersion.json"
 })
 
-/**
- * 格式化文件大小
- * @param bytes 字节数
- * @returns 格式化后的大小字符串
- */
 function formatSize(bytes: number): string {
     if (bytes === 0) return "0 B"
     const k = 1024
@@ -125,77 +118,52 @@ function formatSize(bytes: number): string {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
 }
 
-/**
- * 计算下载速度
- * @param currentBytes 当前已下载字节数
- * @returns 格式化后的下载速度字符串
- */
 function calculateDownloadSpeed(currentBytes: number): string {
     const now = Date.now()
     const timeDiff = now - lastTimestamp
-
     if (timeDiff > 1000) {
-        // 每秒计算一次
         const bytesDiff = currentBytes - lastDownloadedBytes
         const speed = bytesDiff / (timeDiff / 1000)
-
         lastDownloadedBytes = currentBytes
         lastTimestamp = now
-
         return formatSize(speed) + "/s"
     }
-
     return downloadSpeed.value
 }
 
-/**
- * 获取版本列表
- */
 async function fetchVersionList() {
     isLoading.value = true
-
     try {
         versionList.value = await getBaseVersion(selectedCDN.value, selectedChannel.value)
         calculateTotalSize()
-        // 获取版本列表后检查预下载状态
         await checkPreDownloadStatus()
     } catch (err) {
-        ui.showErrorMessage(`获取版本列表失败: ${err instanceof Error ? err.message : String(err)}`)
+        ui.showErrorMessage(t("game-update.get_version_list_failed", { error: err instanceof Error ? err.message : String(err) }))
         console.error("获取版本列表失败:", err)
     } finally {
         isLoading.value = false
     }
 }
 
-/**
- * 计算总文件大小
- */
 function calculateTotalSize() {
     if (!versionList.value) return
-
     let size = 0
     let files = 0
-
     const gameVersionList = versionList.value.gameVersionList.GameVersionList["1"].GameVersionList
     for (const assets of Object.values(gameVersionList)) {
         size += assets.ZipSize
         files++
     }
-
     totalSize.value = size
     totalFiles.value = files
-
-    // 计算预下载文件大小
     if (versionList.value.preVersionList) {
         let preSize = 0
         let preFiles = 0
-
         const preVersionList = versionList.value.preVersionList.GameVersionList["1"].GameVersionList
         for (const assets of Object.values(preVersionList)) {
             preSize += assets.ZipSize
             preFiles++
         }
-
         preTotalSize.value = preSize
         preTotalFiles.value = preFiles
     } else {
@@ -204,109 +172,65 @@ function calculateTotalSize() {
     }
 }
 
-/**
- * 检查预下载状态
- */
 async function checkPreDownloadStatus() {
     if (!gamePath.value || !versionList.value || !versionList.value.preVersionList) {
         needPreDownload.value = false
         return
     }
-
     try {
-        // 读取预下载目录中的文件
         const preFiles = await listFiles(tempPreDownloadDir.value)
-        console.debug("预下载目录中的文件:", preFiles)
-
-        // 获取预下载版本列表中的文件信息
         const preVersionList = versionList.value.preVersionList.GameVersionList["1"].GameVersionList
         const expectedFiles = Object.keys(preVersionList)
-
-        console.debug("预期的预下载文件:", expectedFiles)
-
-        // 检查是否所有预期的文件都已下载完成
         let allFilesComplete = true
-
         for (const filename of expectedFiles) {
-            // 检查文件是否存在
             const fileExists = preFiles.includes(filename)
-            // 检查进度文件是否存在
             const progressFileExists = preFiles.includes(filename + ".progress")
-
-            console.debug(`检查文件: ${filename}, 存在: ${fileExists}, 有进度文件: ${progressFileExists}`)
-
-            // 如果文件不存在或存在进度文件，则认为下载未完成
             if (!fileExists || progressFileExists) {
                 allFilesComplete = false
                 break
             }
         }
-
-        // 如果所有文件都已下载完成，则不需要预下载
         needPreDownload.value = !allFilesComplete
-        console.debug(`预下载状态检查完成，需要预下载: ${needPreDownload.value}`)
     } catch (error) {
         console.error("检查预下载状态时出错:", error)
-        // 出错时默认需要预下载
         needPreDownload.value = true
     }
 }
 
-/**
- * 检查是否需要更新
- */
 async function checkForUpdates() {
     if (!gamePath.value) return
-
     try {
-        // 读取本地 BaseVersion.json
         const localContent = await readTextFile(baseVersionPath.value)
         const localVersionList = JSON.parse(localContent) as GameVersionListLocal
-        // 对比版本信息
         if (versionList.value && localVersionList) {
             const remoteVersions = versionList.value.gameVersionList.GameVersionList["1"].GameVersionList
             const localVersions = localVersionList.gameVersionList["1"].gameVersionList
-
-            // 检查是否需要更新
             let hasUpdate = false
             let updateSizeBytes = 0
-
             for (const [filename, remoteAsset] of Object.entries(remoteVersions)) {
                 if (localVersions[filename]) {
-                    // 对比版本号
                     if (remoteAsset.ZipGameVersion > localVersions[filename].ZipGameVersion) {
                         hasUpdate = true
                         updateSizeBytes += remoteAsset.ZipSize
                     }
                 } else {
-                    // 本地不存在该文件，需要下载
                     hasUpdate = true
                     updateSizeBytes += remoteAsset.ZipSize
                 }
             }
-
             needUpdate.value = hasUpdate
             updateSize.value = updateSizeBytes
         }
     } catch (err) {
-        // 如果本地文件不存在或读取失败，默认为需要更新
         needUpdate.value = true
         updateSize.value = totalSize.value
-        // console.error("检查更新失败:", err)
     }
-
-    // 检查预下载状态
     await checkPreDownloadStatus()
 }
 
-/**
- * 更新完成后更新 BaseVersion.json 文件
- */
 async function updateBaseVersionFile() {
     if (!gamePath.value || !versionList.value) return
-
     try {
-        // 将 GameVersionListRes 转换为 GameVersionListLocal
         const localVersionList: GameVersionListLocal = {
             gameVersionList: {
                 "1": {
@@ -314,164 +238,105 @@ async function updateBaseVersionFile() {
                 },
             },
         }
-
         const content = JSON.stringify(localVersionList, null, 2)
         await writeTextFile(baseVersionPath.value, content)
-        ui.showSuccessMessage("更新成功")
+        ui.showSuccessMessage(t("game-update.update_success"))
     } catch (err) {
-        ui.showErrorMessage(`更新 BaseVersion.json 失败: ${err instanceof Error ? err.message : String(err)}`)
+        ui.showErrorMessage(t("game-update.update_base_version_failed", { error: err instanceof Error ? err.message : String(err) }))
         console.error("更新 BaseVersion.json 失败:", err)
     }
 }
 
-/**
- * 选择游戏目录
- */
 async function selectGameDir() {
     try {
-        // 打开目录选择对话框
         const selected = await dialog.open({
-            title: "选择游戏安装目录",
+            title: t("game-update.select_game_dir_first"),
             multiple: false,
             directory: true,
         })
-
         if (selected) {
-            // 构建 EM.exe 的路径
             const emExePath = `${selected}\\DNA Game\\EM.exe`
-
-            // 直接设置游戏路径
             gameStore.path = emExePath
             ui.showSuccessMessage(`游戏目录设置成功: ${emExePath}`)
-
-            // 检查是否需要更新
             if (versionList.value) {
                 await checkForUpdates()
             }
         }
     } catch (err) {
-        ui.showErrorMessage(`选择目录失败: ${err instanceof Error ? err.message : String(err)}`)
+        ui.showErrorMessage(t("game-update.select_dir_failed", { error: err instanceof Error ? err.message : String(err) }))
         console.error("选择目录失败:", err)
     }
 }
 
-/**
- * 下载所有文件
- */
 async function downloadAllFiles() {
     if (!gamePath.value) {
-        ui.showErrorMessage("请先选择游戏安装目录")
+        ui.showErrorMessage(t("game-update.select_game_dir_first"))
         return
     }
-
     if (!versionList.value) {
-        ui.showErrorMessage("版本列表未加载")
+        ui.showErrorMessage(t("game-update.version_list_not_loaded"))
         return
     }
-
-    // 检查并处理预下载文件
     if (tempPreDownloadDir.value) {
         try {
-            // 读取预下载目录中的文件
             const preFiles = await listFiles(tempPreDownloadDir.value)
-
             if (preFiles.length > 0) {
-                // 移动预下载的文件到 TempPath 目录
                 for (const filename of preFiles) {
                     const preFilePath = tempPreDownloadDir.value + filename
                     const tempFilePath = tempDownloadDir.value + filename
-
                     try {
-                        // 使用 renameFile 函数移动文件
-                        // renameFile 已支持自动创建目标目录的父目录结构
-                        const res = await renameFile(preFilePath, tempFilePath)
-                        if (res.includes("成功")) {
-                            console.debug("文件已移动:", preFilePath, "->", tempFilePath)
-                        }
+                        await renameFile(preFilePath, tempFilePath)
                     } catch (renameError) {
                         console.error("移动文件失败:", renameError)
-                        // 继续处理下一个文件
                     }
                 }
-            } else {
             }
         } catch {}
     }
-
     isDownloading.value = true
     currentDownloaded.value = 0
     overallProgress.value = 0
     downloadSpeed.value = ""
     lastDownloadedBytes = 0
     lastTimestamp = Date.now()
-
     try {
         const gameVersionList = versionList.value.gameVersionList.GameVersionList["1"].GameVersionList
         const files = Object.entries(gameVersionList)
-
         for (const [filename, assets] of files) {
             currentFile.value = filename
-
-            // 构建完整的文件路径
             const fullFilePath = `${tempDownloadDir.value}${filename}`
             const progressFilePath = `${fullFilePath}.progress`
-
-            // 检查文件是否已存在且大小匹配
             const actualSize = await getFileSize(fullFilePath)
             const expectedSize = assets.ZipSize
-
-            // 检查进度文件是否存在（断点续传）
             const progressFileSize = await getFileSize(progressFilePath)
-
-            // 判断文件是否完整（大小匹配且没有进度文件）
             const isFileComplete = actualSize > 0 && actualSize === expectedSize && progressFileSize === 0
-
-            // 如果文件已存在且大小匹配且没有进度文件，则跳过下载
             if (isFileComplete) {
                 console.debug(`文件 ${filename} 已存在且大小匹配，跳过下载`)
-
-                // 更新整体下载进度
                 const fileIndex = files.findIndex(([name]) => name === filename)
                 const previousFilesSize = files.slice(0, fileIndex).reduce((sum, [, asset]) => sum + asset.ZipSize, 0)
                 const totalDownloaded = previousFilesSize + expectedSize
                 currentDownloaded.value = totalDownloaded
                 overallProgress.value = totalDownloaded / totalSize.value
-
-                // 触发一次100%进度回调
                 fileProgress.value = 1
                 currentFileDownloaded.value = formatSize(expectedSize)
                 currentFileTotal.value = formatSize(expectedSize)
-
-                // 保存最后下载的文件路径
                 lastDownloadedFile.value = fullFilePath
-
                 continue
             }
-
-            // 下载进度回调
             const onProgress = (progress: DownloadProgress) => {
-                // 计算当前文件的下载进度
                 fileProgress.value = progress.downloaded / progress.total
                 currentFileDownloaded.value = formatSize(progress.downloaded)
                 currentFileTotal.value = formatSize(progress.total)
-
-                // 更新整体下载进度
                 const fileDownloaded = progress.downloaded
                 const estimatedTotal = totalSize.value
-
-                // 计算已下载的比例
                 const fileIndex = files.findIndex(([name]) => name === filename)
                 const previousFilesSize = files.slice(0, fileIndex).reduce((sum, [, asset]) => sum + asset.ZipSize, 0)
                 const totalDownloaded = previousFilesSize + fileDownloaded
                 currentDownloaded.value = totalDownloaded
                 overallProgress.value = totalDownloaded / estimatedTotal
-
-                // 计算下载速度
                 downloadSpeed.value = calculateDownloadSpeed(totalDownloaded)
             }
-
-            // 执行下载
-            const result = await downloadAssets(
+            await downloadAssets(
                 selectedCDN.value,
                 filename,
                 selectedChannel.value,
@@ -480,126 +345,78 @@ async function downloadAllFiles() {
                 onProgress,
                 tempDownloadDir.value
             )
-            console.debug("下载结果:", result)
-
-            // 保存最后下载的文件路径
             lastDownloadedFile.value = fullFilePath
         }
-
-        // 重置状态
         isDownloading.value = false
         currentFile.value = ""
         downloadSpeed.value = ""
-
-        // 下载完成后自动执行解压缩
         await extractAllFiles()
-
-        // 更新 BaseVersion.json 文件
         await updateBaseVersionFile()
-
-        // 重新检查更新状态
         await checkForUpdates()
     } catch (err) {
-        ui.showErrorMessage(`下载失败: ${err instanceof Error ? err.message : String(err)}`)
+        ui.showErrorMessage(t("game-update.download_failed", { error: err instanceof Error ? err.message : String(err) }))
         console.error("下载失败:", err)
         isDownloading.value = false
         downloadSpeed.value = ""
     }
 }
 
-/**
- * 预下载游戏文件（下载到 TempPrePath 目录，不解压）
- */
 async function preDownloadAllFiles() {
     if (!gamePath.value) {
-        ui.showErrorMessage("请先选择游戏安装目录")
+        ui.showErrorMessage(t("game-update.select_game_dir_first"))
         return
     }
-
     if (!versionList.value || !versionList.value.preVersion || !versionList.value.preVersionList) {
-        ui.showErrorMessage("没有可用的预下载版本")
+        ui.showErrorMessage(t("game-update.no_pre_download_available"))
         return
     }
-
     isDownloading.value = true
     currentDownloaded.value = 0
     overallProgress.value = 0
     downloadSpeed.value = ""
     lastDownloadedBytes = 0
     lastTimestamp = Date.now()
-
     try {
         const preVersionList = versionList.value.preVersionList.GameVersionList["1"].GameVersionList
         const files = Object.entries(preVersionList)
-
-        // 计算预下载文件总大小
-        let preTotalSize = 0
+        let preTotalSizeVal = 0
         for (const [, assets] of files) {
-            preTotalSize += assets.ZipSize
+            preTotalSizeVal += assets.ZipSize
         }
-
         for (const [filename, assets] of files) {
             currentFile.value = filename
-
-            // 构建完整的文件路径
             const fullFilePath = `${tempPreDownloadDir.value}${filename}`
             const progressFilePath = `${fullFilePath}.progress`
-
-            // 检查文件是否已存在且大小匹配
             const actualSize = await getFileSize(fullFilePath)
             const expectedSize = assets.ZipSize
-
-            // 检查进度文件是否存在（断点续传）
             const progressFileSize = await getFileSize(progressFilePath)
-
-            // 判断文件是否完整（大小匹配且没有进度文件）
             const isFileComplete = actualSize > 0 && actualSize === expectedSize && progressFileSize === 0
-
-            // 如果文件已存在且大小匹配且没有进度文件，则跳过下载
             if (isFileComplete) {
                 console.debug(`预下载文件 ${filename} 已存在且大小匹配，跳过下载`)
-
-                // 更新整体下载进度
                 const fileIndex = files.findIndex(([name]) => name === filename)
                 const previousFilesSize = files.slice(0, fileIndex).reduce((sum, [, asset]) => sum + asset.ZipSize, 0)
                 const totalDownloaded = previousFilesSize + expectedSize
                 currentDownloaded.value = totalDownloaded
-                overallProgress.value = totalDownloaded / preTotalSize
-
-                // 触发一次100%进度回调
+                overallProgress.value = totalDownloaded / preTotalSizeVal
                 fileProgress.value = 1
                 currentFileDownloaded.value = formatSize(expectedSize)
                 currentFileTotal.value = formatSize(expectedSize)
-
-                // 保存最后下载的文件路径
                 lastDownloadedFile.value = fullFilePath
-
                 continue
             }
-
-            // 下载进度回调
             const onProgress = (progress: DownloadProgress) => {
-                // 计算当前文件的下载进度
                 fileProgress.value = progress.downloaded / progress.total
                 currentFileDownloaded.value = formatSize(progress.downloaded)
                 currentFileTotal.value = formatSize(progress.total)
-
-                // 更新整体下载进度
                 const fileDownloaded = progress.downloaded
-
-                // 计算已下载的比例
                 const fileIndex = files.findIndex(([name]) => name === filename)
                 const previousFilesSize = files.slice(0, fileIndex).reduce((sum, [, asset]) => sum + asset.ZipSize, 0)
                 const totalDownloaded = previousFilesSize + fileDownloaded
                 currentDownloaded.value = totalDownloaded
-                overallProgress.value = totalDownloaded / preTotalSize
-
-                // 计算下载速度
+                overallProgress.value = totalDownloaded / preTotalSizeVal
                 downloadSpeed.value = calculateDownloadSpeed(totalDownloaded)
             }
-
-            // 执行预下载
-            const result = await downloadAssets(
+            await downloadAssets(
                 selectedCDN.value,
                 filename,
                 selectedChannel.value,
@@ -608,78 +425,50 @@ async function preDownloadAllFiles() {
                 onProgress,
                 tempPreDownloadDir.value
             )
-            console.debug("预下载结果:", result)
-
-            // 保存最后下载的文件路径
             lastDownloadedFile.value = fullFilePath
         }
-
-        // 重置状态
         isDownloading.value = false
         currentFile.value = ""
         downloadSpeed.value = ""
-
-        // 预下载完成后，检查预下载状态
         await checkPreDownloadStatus()
-
-        ui.showSuccessMessage(`预下载完成，总大小: ${formatSize(preTotalSize)}`)
+        ui.showSuccessMessage(t("game-update.pre_download_complete", { size: formatSize(preTotalSizeVal) }))
     } catch (err) {
-        ui.showErrorMessage(`预下载失败: ${err instanceof Error ? err.message : String(err)}`)
+        ui.showErrorMessage(t("game-update.download_failed", { error: err instanceof Error ? err.message : String(err) }))
         console.error("预下载失败:", err)
         isDownloading.value = false
         downloadSpeed.value = ""
     }
 }
 
-/**
- * 解压缩所有下载的文件
- */
 async function extractAllFiles() {
     if (!gamePath.value) {
-        ui.showErrorMessage("请先选择游戏安装目录")
+        ui.showErrorMessage(t("game-update.select_game_dir_first"))
         return
     }
-
     if (!versionList.value) {
-        ui.showErrorMessage("版本列表未加载")
+        ui.showErrorMessage(t("game-update.version_list_not_loaded"))
         return
     }
-
     isExtracting.value = true
     overallProgress.value = 0
-
     try {
         const gameVersionList = versionList.value.gameVersionList.GameVersionList["1"].GameVersionList
         const files = Object.entries(gameVersionList)
         const totalFilesCount = files.length
-
         for (let i = 0; i < files.length; i++) {
             const [filename] = files[i]
             const zipPath = `${tempDownloadDir.value}/${filename}`
             const targetDir = extractDir.value
-
-            // 更新总体进度（基于文件数量）
             overallProgress.value = (i + 1) / totalFilesCount
-
-            console.debug(`开始解压缩: ${filename}, 进度: ${Math.round(overallProgress.value * 100)}%`)
-
-            // 调用后端解压缩命令
-            const result = await extractGameAssets(zipPath, targetDir)
-
-            console.debug("解压缩结果:", result)
+            await extractGameAssets(zipPath, targetDir)
         }
-
-        // 清理临时目录
         if (tempDownloadDir.value) {
             try {
-                const cleanupResult = await cleanupTempDir(tempDownloadDir.value)
-                console.debug("临时目录清理结果:", cleanupResult)
+                await cleanupTempDir(tempDownloadDir.value)
             } catch (err) {
                 console.error("临时目录清理失败:", err)
             }
         }
-
-        // 重置状态
         isExtracting.value = false
         overallProgress.value = 0
         extractionCurrentFileCount.value = 0
@@ -687,21 +476,17 @@ async function extractAllFiles() {
         extractionTotalFiles.value = 0
         extractionTotalSize.value = 0
         extractionCurrentFile.value = ""
-        ui.showSuccessMessage(`所有文件下载和解压缩成功，总大小: ${formatSize(totalSize.value)}`)
+        ui.showSuccessMessage(t("game-update.download_complete", { size: formatSize(totalSize.value) }))
     } catch (err) {
-        ui.showErrorMessage(`解压缩失败: ${err instanceof Error ? err.message : String(err)}`)
+        ui.showErrorMessage(t("game-update.extract_failed", { error: err instanceof Error ? err.message : String(err) }))
         console.error("解压缩失败:", err)
         isExtracting.value = false
     }
 }
 
-// 组件挂载时获取版本列表
 onMounted(async () => {
     await fetchVersionList()
-    // 检查是否需要更新
     await checkForUpdates()
-
-    // 监听解压缩进度事件
     const unlisten = await listen("extract_progress", event => {
         const payload = event.payload as {
             current_file_count: number
@@ -710,230 +495,308 @@ onMounted(async () => {
             total_size: number
             current_file: string
         }
-
         const { current_file_count, current_size, total_files, total_size, current_file } = payload
-
-        // 更新解压缩进度状态（单个压缩包内的进度）
         extractionCurrentFileCount.value = current_file_count
         extractionCurrentSize.value = current_size
         extractionTotalFiles.value = total_files
         extractionTotalSize.value = total_size
         extractionCurrentFile.value = current_file
-
-        // 注意：整体进度由 extractAllFiles 函数通过文件数量来更新
-
-        console.debug("单个压缩包解压缩进度:", payload)
     })
-
-    // 组件卸载时移除监听器
     onUnmounted(() => {
         unlisten()
     })
 })
+const launchGame = async () => {
+    if (!gameStore.path) {
+        ui.showErrorMessage(t("game-launcher.selectGameFileFirst"))
+        return
+    }
+    try {
+        await gameStore.launchGame()
+    } catch (error) {
+        console.error("启动游戏失败:", error)
+        ui.showErrorMessage(t("game-launcher.launchGameFailed", { error: error instanceof Error ? error.message : String(error) }))
+    }
+}
 </script>
+
 <template>
-    <ScrollArea class="h-full p-6">
-        <div class="space-y-4">
-            <!-- 游戏目录设置 -->
-            <div class="bg-base-100/50 backdrop-blur-sm rounded-xl border border-base-200 p-6 shadow-lg space-y-4">
-                <div class="flex flex-col md:flex-row items-start gap-4">
-                    <div>
-                        <p class="text-gray-400 mb-2">服务器</p>
-                        <Select v-model="selectedChannel" class="w-40 input">
-                            <SelectItem v-for="channel in channels" :key="channel.value" :value="channel.value">
-                                {{ channel.name }}
-                            </SelectItem>
-                        </Select>
+    <!-- 主容器：深色背景，全屏 -->
+    <div class="relative w-full h-full overflow-hidden select-none bg-base-100 font-sans">
+        <ScrollArea class="h-full relative z-10">
+            <div class="flex flex-col min-h-full p-8 max-w-7xl mx-auto gap-8">
+                <!-- 顶部 HUD：服务器配置 -->
+                <header
+                    class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-base-300/20 backdrop-blur-md rounded-2xl p-4 border border-base-content/5 shadow-xl transition-all hover:border-base-content/10"
+                >
+                    <div class="flex items-center gap-3">
+                        <img src="/setup-icon.webp" alt="LOGO" class="h-8" />
+                        <h1 class="text-2xl font-semibold">{{ t("game-update.game") }}</h1>
                     </div>
-                    <div>
-                        <p class="text-gray-400 mb-2">CDN</p>
-                        <Select v-model="selectedCDN" class="w-40 input">
-                            <SelectItem v-for="cdn in CDN_LIST" :key="cdn.url" :value="cdn.url">
-                                {{ cdn.name }}
-                            </SelectItem>
-                        </Select>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-gray-400 mb-2">游戏安装目录</p>
-                        <div class="input input-bordered input-primary w-full">
-                            {{ gamePath || "未设置" }}
-                            <button
-                                @click="selectGameDir"
-                                class="ml-auto hover:text-primary transition-colors duration-300 flex gap-2 rounded-md p-2 cursor-pointer"
+
+                    <!-- 配置区域 -->
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="group relative">
+                            <div
+                                class="flex items-center gap-2 bg-base-content/5 hover:bg-base-content/10 px-3 py-1.5 rounded-lg border border-base-content/5 transition-colors cursor-pointer"
                             >
-                                <Icon icon="ri:folder-line" class="w-5 h-5 mr-2" />
-                                选择目录
-                            </button>
-                        </div>
-                        <p class="opacity-60 text-xs mt-2">
-                            {{ gamePath ? `游戏将下载到${gamePath}\\DNA Game文件夹` : `游戏将下载到该文件夹下的DNA Game文件夹` }}
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 资源概览 -->
-            <div v-if="versionList" class="bg-base-100/50 backdrop-blur-sm rounded-xl border border-base-200 p-6 shadow-lg space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-base-200 rounded-lg p-4 border border-base-300">
-                        <p class="text-gray-400 text-sm">文件总数</p>
-                        <p class="text-3xl font-bold text-primary">{{ totalFiles }}</p>
-                    </div>
-                    <div class="bg-base-200 rounded-lg p-4 border border-base-300">
-                        <p class="text-gray-400 text-sm">总文件大小</p>
-                        <p class="text-3xl font-bold text-secondary">{{ formatSize(totalSize) }}</p>
-                    </div>
-                    <div class="bg-base-200 rounded-lg p-4 border border-base-300">
-                        <p class="text-gray-400 text-sm">目标目录</p>
-                        <p class="text-xl font-bold text-success truncate">
-                            {{ extractDir || "未设置" }}
-                        </p>
-                    </div>
-                </div>
-
-                <!-- 预下载信息 -->
-                <div v-if="needPreDownload" class="bg-info/30 border border-info/50 rounded-lg p-4">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <p class="text-gray-400 text-sm">预下载文件总数</p>
-                            <p class="text-xl font-bold text-info">{{ preTotalFiles }}</p>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">预下载文件大小</p>
-                            <p class="text-xl font-bold text-info">{{ formatSize(preTotalSize) }}</p>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">预下载版本</p>
-                            <p class="text-xl font-bold text-info">{{ versionList.preVersion }}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 更新检查和操作按钮 -->
-                <div v-if="gamePath" class="space-y-4">
-                    <div v-if="needUpdate" class="bg-warning/30 border border-warning/50 rounded-lg p-4">
-                        <div class="flex items-start">
-                            <Icon icon="ri:error-warning-line" class="w-6 h-6 text-warning mr-3" />
-                            <div>
-                                <h3 class="font-semibold text-warning mb-1">游戏需要更新</h3>
-                                <p class="text-gray-300">发现新版本，需要更新的大小：{{ formatSize(updateSize) }}</p>
+                                <Icon icon="ri:server-line" class="text-base-content/40 w-4 h-4" />
+                                <Select
+                                    v-model="selectedChannel"
+                                    class="bg-transparent border-none outline-hidden text-sm appearance-none cursor-pointer min-w-20"
+                                >
+                                    <SelectItem v-for="channel in channels" :key="channel.value" :value="channel.value" xs>
+                                        {{ channel.name }}
+                                    </SelectItem>
+                                </Select>
                             </div>
                         </div>
-                    </div>
-                    <div v-else-if="gamePath && !needUpdate" class="bg-success/30 border border-success/50 rounded-lg p-4">
-                        <div class="flex items-start">
-                            <Icon icon="ri:checkbox-circle-line" class="w-6 h-6 text-success mr-3" />
-                            <div>
-                                <h3 class="font-semibold text-success mb-1">游戏已最新</h3>
-                                <p class="text-gray-300">当前版本无需更新</p>
+
+                        <div class="group relative">
+                            <div
+                                class="flex items-center gap-2 bg-base-content/5 hover:bg-base-content/10 px-3 py-1.5 rounded-lg border border-base-content/5 transition-colors cursor-pointer"
+                            >
+                                <Icon icon="ri:cloud-line" class="text-base-content/40 w-4 h-4" />
+                                <Select
+                                    v-model="selectedCDN"
+                                    class="bg-transparent border-none outline-hidden text-sm appearance-none cursor-pointer min-w-20 truncate"
+                                >
+                                    <SelectItem v-for="cdn in CDN_LIST" :key="cdn.url" :value="cdn.url">
+                                        {{ cdn.name }}
+                                    </SelectItem>
+                                </Select>
                             </div>
                         </div>
-                    </div>
-                    <div class="flex gap-4 flex-wrap" v-if="gamePath">
-                        <div>
-                            <p class="text-gray-400 text-xs">下载线程数</p>
+
+                        <div
+                            class="group relative flex items-center gap-2 bg-base-content/5 hover:bg-base-content/10 px-3 py-1.5 rounded-lg border border-base-content/5 transition-colors"
+                            :title="t('game-update.threads')"
+                        >
+                            <Icon icon="ri:speed-line" class="text-base-content/40 w-4 h-4" />
                             <input
                                 v-model.number="concurrentThreads"
                                 type="number"
-                                class="input input-sm w-20"
+                                class="bg-transparent border-none outline-hidden text-sm w-8 text-center"
                                 min="1"
-                                max="100"
-                                step="1"
+                                max="32"
                             />
                         </div>
+                    </div>
+                </header>
+
+                <!-- 核心区域 -->
+                <main class="flex-1 flex flex-col justify-end pb-8 gap-6">
+                    <!-- 状态指示 & 信息卡片 -->
+                    <div v-if="versionList" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <!-- 目录设置卡片 -->
+                        <div
+                            class="md:col-span-2 bg-base-300/40 backdrop-blur-xl border border-base-content/10 rounded-2xl p-5 hover:bg-base-300/50 transition-colors group"
+                        >
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="opacity-60 text-xs font-bold uppercase tracking-wider">{{
+                                    t("game-update.install_path")
+                                }}</span>
+                                <button
+                                    @click="selectGameDir"
+                                    class="text-primary hover:text-base-content text-xs flex items-center gap-1 transition-colors"
+                                >
+                                    <Icon icon="ri:folder-line" /> {{ t("game-update.change") }}
+                                </button>
+                            </div>
+                            <div
+                                class="text-sm font-mono truncate opacity-80 group-hover:text-base-content transition-colors"
+                                :title="gamePath"
+                            >
+                                {{ gamePath || t("game-update.no_path_selected") }}
+                            </div>
+                            <div class="mt-2 h-1 w-full bg-base-content/5 rounded-full overflow-hidden">
+                                <div class="h-full bg-primary/50 w-full" v-if="gamePath"></div>
+                            </div>
+                        </div>
+
+                        <!-- 版本信息 -->
+                        <div
+                            class="bg-base-300/40 backdrop-blur-xl border border-base-content/10 rounded-2xl p-5 flex flex-col justify-between"
+                        >
+                            <span class="text-base-content/40 text-xs font-bold uppercase tracking-wider">{{
+                                t("game-update.version")
+                            }}</span>
+                            <div class="flex items-end gap-2">
+                                <span class="text-2xl font-bold font-mono">{{ versionList.subVersion }}</span>
+                                <span class="text-xs mb-1 px-1.5 py-0.5 rounded bg-base-content/10 opacity-80" v-if="needUpdate">{{
+                                    t("game-update.old_version")
+                                }}</span>
+                                <span class="text-xs mb-1 px-1.5 py-0.5 rounded bg-success/20 text-success" v-else>{{
+                                    t("game-update.latest_version")
+                                }}</span>
+                            </div>
+                        </div>
+
+                        <!-- 大小信息 -->
+                        <div
+                            class="bg-base-300/40 backdrop-blur-xl border border-base-content/10 rounded-2xl p-5 flex flex-col justify-between"
+                        >
+                            <span class="opacity-60 text-xs font-bold uppercase tracking-wider">{{ t("game-update.size") }}</span>
+                            <div class="flex items-end gap-2">
+                                <span class="text-2xl font-bold text-secondary">{{ formatSize(totalSize) }}</span>
+                                <span class="text-xs opacity-80 mb-1.5">{{ totalFiles }} {{ t("game-update.files") }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 预下载通知条 -->
+                    <div
+                        v-if="needPreDownload && versionList"
+                        class="bg-linear-to-r from-info/20 to-transparent border-l-4 border-info backdrop-blur-sm p-4 rounded-r-xl flex items-center justify-between animate-in slide-in-from-left-4 fade-in duration-500"
+                    >
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 rounded-full bg-info/20">
+                                <Icon icon="ri:download-cloud-2-line" class="w-5 h-5 text-info" />
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-base-content text-sm">{{ t("game-update.pre_download_available") }}</h3>
+                                <p class="text-xs text-info/80">
+                                    {{
+                                        t("game-update.pre_download_size", {
+                                            version: versionList.preVersion,
+                                            size: formatSize(preTotalSize),
+                                        })
+                                    }}
+                                </p>
+                            </div>
+                        </div>
                         <button
-                            v-if="needPreDownload"
                             @click="preDownloadAllFiles()"
-                            class="btn btn-lg btn-info"
-                            :disabled="isDownloading || isExtracting || !gamePath"
+                            :disabled="isDownloading || isExtracting"
+                            class="px-4 py-2 bg-info hover:bg-info/80 text-base-content text-xs font-bold uppercase tracking-wide rounded-lg transition-all shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <Icon v-if="isDownloading" icon="ri:refresh-line" class="w-5 h-5 mr-2 animate-spin" />
-                            <Icon v-else icon="ri:download-2-line" class="w-5 h-5 mr-2" />
-                            {{ isDownloading ? "预下载中..." : "预下载游戏" }}
+                            {{ isDownloading ? t("game-update.downloading") : t("game-update.start_pre_download") }}
                         </button>
+                    </div>
+
+                    <!-- 进度面板 (下载/解压时显示) -->
+                    <div
+                        v-if="isDownloading || isExtracting"
+                        class="space-y-3 bg-base-300/60 backdrop-blur-2xl rounded-2xl p-6 border border-base-content/10 shadow-2xl animate-in slide-in-from-bottom-4"
+                    >
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <h2 class="text-xl font-bold text-base-content flex items-center gap-2">
+                                    <Icon v-if="isDownloading" icon="ri:download-2-line" class="animate-bounce" />
+                                    <Icon v-else icon="ri:install-line" class="animate-pulse" />
+                                    {{ isDownloading ? t("game-update.downloading_resources") : t("game-update.extracting_resources") }}
+                                </h2>
+                                <p class="text-xs text-base-content/40 font-mono mt-1">
+                                    {{ isDownloading ? currentFile : extractionCurrentFile }}
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <div
+                                    class="text-3xl font-black font-mono text-transparent bg-clip-text bg-linear-to-r from-white to-gray-400"
+                                >
+                                    {{ Math.round(overallProgress * 100) }}<span class="text-lg">%</span>
+                                </div>
+                                <div class="text-xs font-mono text-primary" v-if="isDownloading">
+                                    {{ downloadSpeed }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 总进度条 -->
+                        <div class="h-4 bg-gray-900 rounded-full overflow-hidden border border-base-content/5 relative">
+                            <!-- 动态条纹背景 -->
+                            <div
+                                class="absolute inset-0 w-full h-full opacity-10 bg-size-[20px_20px] bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#fff_10px,#fff_20px)] animate-[move-bg_1s_linear_infinite]"
+                            ></div>
+                            <div
+                                class="h-full bg-linear-to-r from-primary via-secondary to-primary bg-size-[200%_100%] animate-[shimmer_2s_linear_infinite] shadow-[0_0_20px_rgba(var(--primary),0.5)] transition-all duration-300 ease-out"
+                                :style="{ width: `${overallProgress * 100}%` }"
+                            ></div>
+                        </div>
+
+                        <!-- 详细数据行 -->
+                        <div class="flex justify-between text-xs text-gray-500 font-mono pt-1">
+                            <span>
+                                {{
+                                    isDownloading
+                                        ? `${formatSize(currentDownloaded)} / ${formatSize(totalSize)}`
+                                        : `${extractionCurrentFileCount} / ${extractionTotalFiles} Files`
+                                }}
+                            </span>
+                            <span v-if="isDownloading">
+                                {{ currentFileDownloaded }} / {{ currentFileTotal }} ({{ t("game-update.current_file") }})
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 底部主操作按钮 -->
+                    <div v-else class="flex gap-4 items-center mt-auto">
+                        <div
+                            v-if="!gamePath"
+                            class="w-full text-center py-8 text-gray-500 font-mono border-2 border-dashed border-base-content/10 rounded-2xl"
+                        >
+                            {{ t("game-update.select_game_dir_first") }}
+                        </div>
+
                         <button
-                            @click="downloadAllFiles()"
-                            class="flex-1 btn btn-lg btn-primary"
-                            :disabled="isDownloading || isExtracting || !gamePath || !needUpdate"
+                            v-else
+                            @click="needUpdate ? downloadAllFiles() : launchGame()"
+                            :disabled="!needUpdate && !gamePath"
+                            class="group relative w-full h-20 overflow-hidden rounded-2xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:hover:scale-100 shadow-xl"
+                            :class="
+                                needUpdate
+                                    ? 'bg-primary hover:shadow-[0_0_40px_rgba(var(--primary),0.6)]'
+                                    : 'bg-base-200 border border-base-content/10 cursor-default'
+                            "
                         >
-                            <Icon v-if="isDownloading" icon="ri:refresh-line" class="w-5 h-5 mr-2 animate-spin" />
-                            <Icon v-else-if="isExtracting" icon="ri:box-3-line" class="w-5 h-5 mr-2 animate-spin" />
-                            <Icon v-else icon="ri:download-2-line" class="w-5 h-5 mr-2" />
-                            {{ isDownloading ? "下载中..." : isExtracting ? "解压缩中..." : needUpdate ? "更新游戏" : "无需更新" }}
+                            <!-- 按钮背景特效 -->
+                            <div
+                                v-if="needUpdate"
+                                class="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"
+                            ></div>
+
+                            <div class="relative z-10 flex flex-col items-center justify-center h-full gap-1">
+                                <div class="flex items-center gap-3">
+                                    <Icon
+                                        :icon="needUpdate ? 'ri:download-fill' : 'ri:play-fill'"
+                                        class="w-8 h-8"
+                                        :class="needUpdate ? 'text-base-content' : 'text-base-content/40'"
+                                    />
+                                    <span
+                                        class="text-2xl font-black tracking-widest uppercase"
+                                        :class="needUpdate ? 'text-base-content' : 'text-base-content/40'"
+                                    >
+                                        {{ needUpdate ? t("game-update.update_game") : t("game-update.game_ready") }}
+                                    </span>
+                                </div>
+                                <span v-if="needUpdate" class="text-xs text-base-content/80 bg-base-300/20 px-2 py-0.5 rounded">
+                                    {{ t("game-update.update_size", { size: formatSize(updateSize) }) }}
+                                </span>
+                            </div>
                         </button>
                     </div>
-                </div>
-                <div v-else>请先选择游戏目录</div>
+                </main>
             </div>
-
-            <!-- 下载/解压缩进度 -->
-            <div
-                v-if="isDownloading || isExtracting"
-                class="bg-base-100/50 backdrop-blur-sm rounded-xl border border-base-200 p-6 shadow-lg space-y-4"
-            >
-                <h2 class="text-2xl font-bold flex items-center">
-                    {{ isDownloading ? "下载进度" : "解压缩进度" }}
-                </h2>
-
-                <!-- 整体进度 -->
-                <div>
-                    <div class="flex justify-between mb-2">
-                        <span class="opacity-80">{{ isDownloading ? "整体下载进度" : "解压缩进度" }}</span>
-                        <span class="text-primary font-semibold">{{ Math.round(overallProgress * 100) }}%</span>
-                    </div>
-                    <div class="w-full bg-base-200 rounded-full h-3 border border-base-300 overflow-hidden">
-                        <div
-                            class="bg-linear-to-br from-primary to-secondary h-full transition-all duration-300 ease-out"
-                            :style="{ width: `${overallProgress * 100}%` }"
-                        ></div>
-                    </div>
-                    <div class="flex justify-between mt-2 text-sm">
-                        <span class="opacity-80">
-                            {{
-                                isDownloading
-                                    ? `${formatSize(currentDownloaded)} / ${formatSize(totalSize)}`
-                                    : `${formatSize(extractionCurrentSize)} / ${formatSize(extractionTotalSize)}`
-                            }}
-                        </span>
-                        <span v-if="isDownloading && downloadSpeed" class="text-success">
-                            {{ downloadSpeed }}
-                        </span>
-                        <span v-else-if="isExtracting" class="text-success">
-                            {{ extractionCurrentFile }} : {{ extractionCurrentFileCount }} / {{ extractionTotalFiles }} 文件
-                        </span>
-                    </div>
-                </div>
-
-                <!-- 当前文件进度 -->
-                <div v-if="isDownloading && currentFile" class="bg-base-200/70 rounded-lg p-4 border border-base-300">
-                    <h3 class="text-lg font-semibold mb-3 text-secondary">{{ currentFile }}</h3>
-                    <div class="w-full bg-base-300 rounded-full h-2 overflow-hidden mb-2">
-                        <div
-                            class="bg-linear-to-br from-secondary to-accent h-full transition-all duration-300 ease-out"
-                            :style="{ width: `${fileProgress * 100}%` }"
-                        ></div>
-                    </div>
-                    <div class="flex justify-between text-xs text-gray-400">
-                        <span>{{ currentFileDownloaded }} / {{ currentFileTotal }}</span>
-                        <span>{{ Math.round(fileProgress * 100) }}%</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 加载状态 -->
-            <div v-if="isLoading" class="flex justify-center items-center py-16">
-                <div
-                    class="w-16 h-16 border-4 border-t-primary border-r-secondary border-b-accent border-l-primary rounded-full animate-spin"
-                ></div>
-            </div>
-
-            <!-- 未加载版本列表时的提示 -->
-            <div v-if="!isLoading && !versionList" class="flex justify-center items-center py-16">
-                <div class="text-center">
-                    <Icon icon="ri:refresh-line" class="w-24 h-24 mb-4 animate-spin" />
-                    <p class="text-gray-400 text-lg">正在加载版本列表...</p>
-                </div>
-            </div>
-        </div>
-    </ScrollArea>
+        </ScrollArea>
+    </div>
 </template>
+
+<style>
+/* 自定义动画关键帧 */
+@keyframes shimmer {
+    0% {
+        background-position: 100% 0;
+    }
+    100% {
+        background-position: -100% 0;
+    }
+}
+@keyframes move-bg {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 20px 0;
+    }
+}
+</style>
