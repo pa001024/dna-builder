@@ -697,20 +697,34 @@ fn _find_path(
         .unwrap_or_else(|| JsValue::undefined())
         .get_native::<JsMat>()?;
 
-    let start_x = start_x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
-    let start_y = start_y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
-    let end_x = end_x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
-    let end_y = end_y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
-    let num_disp = num_disp.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
-    let block_size = block_size.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let start_x = start_x
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as i32;
+    let start_y = start_y
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as i32;
+    let end_x = end_x
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as i32;
+    let end_y = end_y
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as i32;
+    let num_disp = num_disp
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as i32;
+    let block_size = block_size
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as i32;
     let strategy = strategy
         .unwrap_or_else(|| JsValue::undefined())
         .to_string(ctx)?
         .to_std_string()
-        .map_err(|e| JsError::from_opaque(JsValue::from(js_string!(format!(
-            "无效的策略字符串: {:?}",
-            e
-        )))))?;
+        .map_err(|e| {
+            JsError::from_opaque(JsValue::from(js_string!(format!(
+                "无效的策略字符串: {:?}",
+                e
+            ))))
+        })?;
 
     // 执行寻路
     let path = find_path(

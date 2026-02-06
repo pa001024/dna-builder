@@ -3111,8 +3111,12 @@
         "mod_desc": "모드 정보와 속성 확인",
         "monster": "몬스터",
         "monster_desc": "몬스터 정보와 속성 확인",
+        "npc": "NPC",
+        "npc_desc": "NPC 정보와 대화 보기",
         "pet": "마령",
         "pet_desc": "마령의 정보와 스킬 확인",
+        "questchain": "퀘스트 체인",
+        "questchain_desc": "퀘스트 체인 정보와 대화 보기",
         "rank": "순위 보상",
         "rank_desc": "랭킹 대회 보상 확인",
         "shop": "상점",
@@ -3192,6 +3196,7 @@
         "deleteModFailed": "MOD 삭제 실패: {{ error }}",
         "desc": "게임/MOD 관리자 시작",
         "dropToImport": "MOD 또는 이미지를 가져오려면 드롭하세요",
+        "dx11Enable": "DX11 활성화",
         "enterCustomTypeName": "사용자 지정 유형 이름을 입력하세요",
         "exec_files": "실행 파일",
         "gameSetting": "게임 설정",
@@ -3383,8 +3388,20 @@
         "back_home": "홈으로 돌아가기",
         "title": "페이지를 찾을 수 없습니다"
     },
+    "npc-detail": {
+        "title": "NPC 상세"
+    },
+    "npc-list": {
+        "title": "NPC 목록"
+    },
     "pet-list": {
         "title": "마령 목록"
+    },
+    "questchain-detail": {
+        "title": "퀘스트 체인 상세"
+    },
+    "questchain-list": {
+        "title": "퀘스트 체인 목록"
     },
     "raid-rank": {
         "title": "순위 보상"

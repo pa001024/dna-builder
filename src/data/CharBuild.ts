@@ -1168,6 +1168,52 @@ export class CharBuild {
             defCache.set(isWeapon, def)
             return def
         }
+        /**
+         * 解析并计算技能表达式，如 "{%}×3+{%}"
+         * @param format 表达式格式字符串
+         * @param value1 第一个值（按出现顺序）
+         * @param value2 第二个值（按出现顺序）
+         * @param baseValue 基础属性值（用于 {%} 占位符的乘法）
+         * @returns 计算结果
+         */
+        function evaluateExpression(format: string, value1: number, value2: number = 0, baseValue: number = 0): number {
+            // 使用统一计数器和单个正则表达式处理所有占位符
+            let count = 0
+
+            // 匹配 {%} 或 {}
+            let expr = format.replace(/\{%\}|\{\}/g, match => {
+                count++
+                const value = count % 2 === 1 ? value1 : value2
+
+                // 根据占位符类型决定是否乘以 baseValue
+                if (match === "{%}") {
+                    return `(${value} * ${baseValue})`
+                } else {
+                    return value.toString()
+                }
+            })
+
+            // 替换 × 为 * 以便计算
+            expr = expr.replace(/×/g, "*")
+
+            try {
+                // 使用 Function 构造函数安全计算表达式
+                // 只允许基本算术运算
+                const safeExpr = expr.replace(/[^0-9+\-*/.()\s]/g, "")
+                const result = new Function(`return ${safeExpr}`)()
+                return Number.isNaN(result) ? value1 * baseValue : result
+            } catch {
+                // 如果解析失败，返回 value1 * baseValue
+                return value1 * baseValue
+            }
+        }
+
+        /**
+         * 计算技能值
+         * @param fieldName 技能字段名
+         * @param ns 命名空间
+         * @returns 计算结果
+         */
         function evaluateSkill(fieldName: string, ns?: string) {
             if (fieldName === "[攻击]") return attrs.攻击 + getWeaponAttr("攻击", ns)
             else if (fieldName === "[防御]") return attrs.防御
@@ -1176,23 +1222,37 @@ export class CharBuild {
 
             if (!field) return 0
             // 计算技能基础伤害
-            const mul = field.值
             if (field.名称.endsWith("伤害") || field.名称.endsWith("治疗")) {
-                let baseDamage = field.值2 || 0
+                let baseDamage = 0
                 const times = field.段数 || 1
+                const value1 = field.值
+                const value2 = field.值2 || 0
+
+                // 计算基础属性值
+                let baseValue = 0
                 if (!field.基础) {
                     const patk = getWeaponAttr("攻击", ns) || 0
-                    baseDamage += mul * (attrs.攻击 + patk)
+                    baseValue = attrs.攻击 + patk
                 } else if (field.基础 === "生命") {
-                    baseDamage += mul * attrs.生命
+                    baseValue = attrs.生命
                 } else if (field.基础 === "防御") {
-                    baseDamage += mul * attrs.防御
+                    baseValue = attrs.防御
                 }
+
+                // 解析并计算表达式
+                if (typeof field.格式 === "string") {
+                    // 使用格式字符串和两个值计算
+                    baseDamage = evaluateExpression(field.格式, value1, value2, baseValue)
+                } else {
+                    // 传统方式计算
+                    baseDamage = value1 * baseValue + value2
+                }
+
                 if (field.名称.endsWith("治疗"))
                     return baseDamage * times // 治疗不考虑防御
                 else return baseDamage * times * getDef(ns)
             }
-            return mul
+            return typeof field.值 === "number" ? field.值 : 0
         }
         function evaluateAttr(fieldName: string) {
             return fieldName in attrs ? attrs[fieldName as keyof CharAttr] : 0

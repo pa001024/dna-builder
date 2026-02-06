@@ -27,6 +27,10 @@ export async function launchNormal(path: string, params: string) {
     return await invoke<string>("launch_normal", { path, params })
 }
 
+export async function runAsAdmin() {
+    return await invoke<string>("run_as_admin", {})
+}
+
 export async function openExplorer(dir: string) {
     return await invoke<string>("launch_normal", { path: "explorer.exe", params: dir })
 }
@@ -101,7 +105,26 @@ export async function writeTextFile(filePath: string, content: string) {
  * @returns 文件名列表
  */
 export async function listScriptFiles(dirPath: string) {
-    return await invoke<string[]>("list_script_files", { dirPath: dirPath })
+    return await invoke<string[]>("list_script_files", { dirPath })
+}
+
+/**
+ * 列出指定目录下的所有文件
+ * @param dirPath 目录路径
+ * @returns 文件名列表
+ */
+export async function listFiles(dirPath: string) {
+    return await invoke<string[]>("list_files", { dirPath })
+}
+
+/**
+ * 提取游戏资产
+ * @param zipPath 压缩包路径
+ * @param targetDir 目标目录
+ * @returns 成功消息
+ */
+export async function extractGameAssets(zipPath: string, targetDir: string) {
+    return await invoke<string>("extract_game_assets", { zipPath, targetDir })
 }
 
 /**

@@ -36,6 +36,7 @@ export const useSettingStore = defineStore("setting", {
             // 自动签到设置
             autoSign: useLocalStorage("setting_auto_sign", false),
             nextSignCheckTime: useLocalStorage("setting_next_sign_check_time", 0),
+            lastHeartbeatTime: 0,
         }
     },
     getters: {},
@@ -159,7 +160,10 @@ export const useSettingStore = defineStore("setting", {
             try {
                 // 调用Rust实现的心跳功能
                 const res = await startHeartbeat("wss://dnabbs-api.yingxiong.com:8180/ws-community-websocket", token, userId)
-                await sleep(500) // 确保API有值
+                if (this.lastHeartbeatTime + 1000 * 10 < Date.now()) {
+                    this.lastHeartbeatTime = Date.now()
+                    await sleep(1000) // 确保API有值
+                }
                 if (res.includes("成功")) {
                     console.log("心跳已启动")
                     return true

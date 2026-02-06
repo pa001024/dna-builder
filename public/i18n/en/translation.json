@@ -3111,8 +3111,12 @@
         "mod_desc": "View mod information and attributes",
         "monster": "Monster",
         "monster_desc": "View monster information and attributes",
+        "npc": "NPC",
+        "npc_desc": "View NPC information and dialogues",
         "pet": "Geniemon",
         "pet_desc": "View Geniemon info and skills",
+        "questchain": "Quest Chain",
+        "questchain_desc": "View quest chain information and dialogues",
         "rank": "Rank Rewards",
         "rank_desc": "View ranking tournament rewards",
         "shop": "Shop",
@@ -3192,6 +3196,7 @@
         "deleteModFailed": "Failed to delete MOD: {{ error }}",
         "desc": "Launch game/MOD manager",
         "dropToImport": "Drop to import MOD or image",
+        "dx11Enable": "Enable DX11",
         "enterCustomTypeName": "Please enter custom type name",
         "exec_files": "Executable Files",
         "gameSetting": "Game Settings",
@@ -3383,8 +3388,20 @@
         "back_home": "Back to Home",
         "title": "Page Not Found"
     },
+    "npc-detail": {
+        "title": "NPC Details"
+    },
+    "npc-list": {
+        "title": "NPC List"
+    },
     "pet-list": {
         "title": "Geniemon List"
+    },
+    "questchain-detail": {
+        "title": "Quest Chain Details"
+    },
+    "questchain-list": {
+        "title": "Quest Chain List"
     },
     "raid-rank": {
         "title": "Ranking rewards"

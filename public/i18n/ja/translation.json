@@ -3111,8 +3111,12 @@
         "mod_desc": "モッド情報と属性を確認",
         "monster": "モンスター",
         "monster_desc": "モンスター情報と属性を確認",
+        "npc": "NPC",
+        "npc_desc": "NPCの情報と会話を確認",
         "pet": "ジェネモン",
         "pet_desc": "ジェネモンの情報とスキルを確認",
+        "questchain": "クエストチェイン",
+        "questchain_desc": "クエストチェインの情報と会話を確認",
         "rank": "ランキング報酬",
         "rank_desc": "ランキング大会の報酬を確認",
         "shop": "ショップ",
@@ -3192,6 +3196,7 @@
         "deleteModFailed": "MODの削除に失敗しました: {{ error }}",
         "desc": "ゲーム/MODマネージャーを起動",
         "dropToImport": "ドロップしてMODまたは画像をインポート",
+        "dx11Enable": "DX11を有効にする",
         "enterCustomTypeName": "カスタムタイプ名を入力してください",
         "exec_files": "実行可能ファイル",
         "gameSetting": "ゲーム設定",
@@ -3383,8 +3388,20 @@
         "back_home": "ホームに戻る",
         "title": "ページが見つかりません"
     },
+    "npc-detail": {
+        "title": "NPC詳細"
+    },
+    "npc-list": {
+        "title": "NPC一覧"
+    },
     "pet-list": {
         "title": "ジェネモン一覧"
+    },
+    "questchain-detail": {
+        "title": "クエストチェイン詳細"
+    },
+    "questchain-list": {
+        "title": "クエストチェイン一覧"
     },
     "raid-rank": {
         "title": "ランキング報酬"

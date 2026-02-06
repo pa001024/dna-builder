@@ -1,28 +1,24 @@
 <script setup lang="ts">
-import { invoke } from "@tauri-apps/api/core"
 import { listen } from "@tauri-apps/api/event"
 import * as dialog from "@tauri-apps/plugin-dialog"
 import { useLocalStorage } from "@vueuse/core"
 import { computed, onMounted, onUnmounted, ref, watch } from "vue"
 import { useUIStore } from "@/store/ui"
-import { cleanupTempDir, getFileSize, readTextFile, writeTextFile } from "../api/app"
+import { cleanupTempDir, extractGameAssets, getFileSize, listFiles, readTextFile, renameFile, writeTextFile } from "../api/app"
 import { useGameStore } from "../store/game"
 import {
     CDN_LIST,
     type DownloadProgress,
     downloadAssets,
     GameVersionListLocal,
-    type GameVersionListRes,
+    type GameVersionListWithPre,
     getBaseVersion,
 } from "../utils/game-download"
 
 // 状态管理
 const gameStore = useGameStore()
 const ui = useUIStore()
-const versionList = ref<{
-    subVersion: string
-    gameVersionList: GameVersionListRes
-} | null>(null)
+const versionList = ref<GameVersionListWithPre | null>(null)
 const isLoading = ref(false)
 const isDownloading = ref(false)
 const isExtracting = ref(false)
@@ -40,6 +36,10 @@ const fileProgress = ref(0)
 const downloadSpeed = ref("")
 const concurrentThreads = ref(5)
 
+// 预下载相关状态
+const preTotalSize = ref(0)
+const preTotalFiles = ref(0)
+
 // 解压缩进度相关状态
 const extractionCurrentFileCount = ref(0)
 const extractionCurrentSize = ref(0)
@@ -54,6 +54,9 @@ let lastTimestamp = 0
 // 版本更新相关状态
 const needUpdate = ref(false)
 const updateSize = ref(0)
+
+// 是否需要预下载
+const needPreDownload = ref(false)
 
 const channels = [
     {
@@ -71,9 +74,19 @@ const channels = [
 ]
 
 const selectedChannel = useLocalStorage("selectedChannel", channels[0].value)
+const availableCDN = computed(() => {
+    if (selectedChannel.value === channels[2].value) {
+        return CDN_LIST.filter(cdn => cdn.url === "http://pan01-pack2.dna-panstudio.com")
+    }
+    return CDN_LIST.filter(cdn => cdn.url !== "http://pan01-pack2.dna-panstudio.com")
+})
+
 const selectedCDN = useLocalStorage("selectedCDN", CDN_LIST[1].url)
 
 watch([selectedChannel, selectedCDN], async () => {
+    if (!availableCDN.value.find(cdn => cdn.url === selectedCDN.value)) {
+        selectedCDN.value = availableCDN.value[0].url
+    }
     await fetchVersionList()
     await checkForUpdates()
 })
@@ -82,15 +95,21 @@ watch([selectedChannel, selectedCDN], async () => {
 const gamePath = computed(() => gameStore.path.replace(/\\DNA Game\\EM\.exe/, ""))
 const tempDownloadDir = computed(() => {
     if (!gamePath.value) return ""
-    return `${gamePath.value}\\DNA Game\\TempPath\\`
+    return gamePath.value + "\\DNA Game\\TempPath\\"
+})
+
+// 预下载目录
+const tempPreDownloadDir = computed(() => {
+    if (!gamePath.value) return ""
+    return gamePath.value + "\\DNA Game\\TempPrePath\\"
 })
 const extractDir = computed(() => {
     if (!gamePath.value) return ""
-    return `${gamePath.value}\\DNA Game\\`
+    return gamePath.value + "\\DNA Game\\"
 })
 const baseVersionPath = computed(() => {
     if (!gamePath.value) return ""
-    return `${gamePath.value}\\DNA Game\\BaseVersion.json`
+    return gamePath.value + "\\DNA Game\\BaseVersion.json"
 })
 
 /**
@@ -138,6 +157,8 @@ async function fetchVersionList() {
     try {
         versionList.value = await getBaseVersion(selectedCDN.value, selectedChannel.value)
         calculateTotalSize()
+        // 获取版本列表后检查预下载状态
+        await checkPreDownloadStatus()
     } catch (err) {
         ui.showErrorMessage(`获取版本列表失败: ${err instanceof Error ? err.message : String(err)}`)
         console.error("获取版本列表失败:", err)
@@ -163,6 +184,72 @@ function calculateTotalSize() {
 
     totalSize.value = size
     totalFiles.value = files
+
+    // 计算预下载文件大小
+    if (versionList.value.preVersionList) {
+        let preSize = 0
+        let preFiles = 0
+
+        const preVersionList = versionList.value.preVersionList.GameVersionList["1"].GameVersionList
+        for (const assets of Object.values(preVersionList)) {
+            preSize += assets.ZipSize
+            preFiles++
+        }
+
+        preTotalSize.value = preSize
+        preTotalFiles.value = preFiles
+    } else {
+        preTotalSize.value = 0
+        preTotalFiles.value = 0
+    }
+}
+
+/**
+ * 检查预下载状态
+ */
+async function checkPreDownloadStatus() {
+    if (!gamePath.value || !versionList.value || !versionList.value.preVersionList) {
+        needPreDownload.value = false
+        return
+    }
+
+    try {
+        // 读取预下载目录中的文件
+        const preFiles = await listFiles(tempPreDownloadDir.value)
+        console.debug("预下载目录中的文件:", preFiles)
+
+        // 获取预下载版本列表中的文件信息
+        const preVersionList = versionList.value.preVersionList.GameVersionList["1"].GameVersionList
+        const expectedFiles = Object.keys(preVersionList)
+
+        console.debug("预期的预下载文件:", expectedFiles)
+
+        // 检查是否所有预期的文件都已下载完成
+        let allFilesComplete = true
+
+        for (const filename of expectedFiles) {
+            // 检查文件是否存在
+            const fileExists = preFiles.includes(filename)
+            // 检查进度文件是否存在
+            const progressFileExists = preFiles.includes(filename + ".progress")
+
+            console.debug(`检查文件: ${filename}, 存在: ${fileExists}, 有进度文件: ${progressFileExists}`)
+
+            // 如果文件不存在或存在进度文件，则认为下载未完成
+            if (!fileExists || progressFileExists) {
+                allFilesComplete = false
+                break
+            }
+        }
+
+        // 如果所有文件都已下载完成，则不需要预下载
+        needPreDownload.value = !allFilesComplete
+        console.debug(`预下载状态检查完成，需要预下载: ${needPreDownload.value}`)
+    } catch (error) {
+        console.error("检查预下载状态时出错:", error)
+        // 出错时默认需要预下载
+        needPreDownload.value = true
+    }
 }
 
 /**
@@ -207,6 +294,9 @@ async function checkForUpdates() {
         updateSize.value = totalSize.value
         // console.error("检查更新失败:", err)
     }
+
+    // 检查预下载状态
+    await checkPreDownloadStatus()
 }
 
 /**
@@ -277,6 +367,35 @@ async function downloadAllFiles() {
     if (!versionList.value) {
         ui.showErrorMessage("版本列表未加载")
         return
+    }
+
+    // 检查并处理预下载文件
+    if (tempPreDownloadDir.value) {
+        try {
+            // 读取预下载目录中的文件
+            const preFiles = await listFiles(tempPreDownloadDir.value)
+
+            if (preFiles.length > 0) {
+                // 移动预下载的文件到 TempPath 目录
+                for (const filename of preFiles) {
+                    const preFilePath = tempPreDownloadDir.value + filename
+                    const tempFilePath = tempDownloadDir.value + filename
+
+                    try {
+                        // 使用 renameFile 函数移动文件
+                        // renameFile 已支持自动创建目标目录的父目录结构
+                        const res = await renameFile(preFilePath, tempFilePath)
+                        if (res.includes("成功")) {
+                            console.debug("文件已移动:", preFilePath, "->", tempFilePath)
+                        }
+                    } catch (renameError) {
+                        console.error("移动文件失败:", renameError)
+                        // 继续处理下一个文件
+                    }
+                }
+            } else {
+            }
+        } catch {}
     }
 
     isDownloading.value = true
@@ -389,6 +508,130 @@ async function downloadAllFiles() {
 }
 
 /**
+ * 预下载游戏文件（下载到 TempPrePath 目录，不解压）
+ */
+async function preDownloadAllFiles() {
+    if (!gamePath.value) {
+        ui.showErrorMessage("请先选择游戏安装目录")
+        return
+    }
+
+    if (!versionList.value || !versionList.value.preVersion || !versionList.value.preVersionList) {
+        ui.showErrorMessage("没有可用的预下载版本")
+        return
+    }
+
+    isDownloading.value = true
+    currentDownloaded.value = 0
+    overallProgress.value = 0
+    downloadSpeed.value = ""
+    lastDownloadedBytes = 0
+    lastTimestamp = Date.now()
+
+    try {
+        const preVersionList = versionList.value.preVersionList.GameVersionList["1"].GameVersionList
+        const files = Object.entries(preVersionList)
+
+        // 计算预下载文件总大小
+        let preTotalSize = 0
+        for (const [, assets] of files) {
+            preTotalSize += assets.ZipSize
+        }
+
+        for (const [filename, assets] of files) {
+            currentFile.value = filename
+
+            // 构建完整的文件路径
+            const fullFilePath = `${tempPreDownloadDir.value}${filename}`
+            const progressFilePath = `${fullFilePath}.progress`
+
+            // 检查文件是否已存在且大小匹配
+            const actualSize = await getFileSize(fullFilePath)
+            const expectedSize = assets.ZipSize
+
+            // 检查进度文件是否存在（断点续传）
+            const progressFileSize = await getFileSize(progressFilePath)
+
+            // 判断文件是否完整（大小匹配且没有进度文件）
+            const isFileComplete = actualSize > 0 && actualSize === expectedSize && progressFileSize === 0
+
+            // 如果文件已存在且大小匹配且没有进度文件，则跳过下载
+            if (isFileComplete) {
+                console.debug(`预下载文件 ${filename} 已存在且大小匹配，跳过下载`)
+
+                // 更新整体下载进度
+                const fileIndex = files.findIndex(([name]) => name === filename)
+                const previousFilesSize = files.slice(0, fileIndex).reduce((sum, [, asset]) => sum + asset.ZipSize, 0)
+                const totalDownloaded = previousFilesSize + expectedSize
+                currentDownloaded.value = totalDownloaded
+                overallProgress.value = totalDownloaded / preTotalSize
+
+                // 触发一次100%进度回调
+                fileProgress.value = 1
+                currentFileDownloaded.value = formatSize(expectedSize)
+                currentFileTotal.value = formatSize(expectedSize)
+
+                // 保存最后下载的文件路径
+                lastDownloadedFile.value = fullFilePath
+
+                continue
+            }
+
+            // 下载进度回调
+            const onProgress = (progress: DownloadProgress) => {
+                // 计算当前文件的下载进度
+                fileProgress.value = progress.downloaded / progress.total
+                currentFileDownloaded.value = formatSize(progress.downloaded)
+                currentFileTotal.value = formatSize(progress.total)
+
+                // 更新整体下载进度
+                const fileDownloaded = progress.downloaded
+
+                // 计算已下载的比例
+                const fileIndex = files.findIndex(([name]) => name === filename)
+                const previousFilesSize = files.slice(0, fileIndex).reduce((sum, [, asset]) => sum + asset.ZipSize, 0)
+                const totalDownloaded = previousFilesSize + fileDownloaded
+                currentDownloaded.value = totalDownloaded
+                overallProgress.value = totalDownloaded / preTotalSize
+
+                // 计算下载速度
+                downloadSpeed.value = calculateDownloadSpeed(totalDownloaded)
+            }
+
+            // 执行预下载
+            const result = await downloadAssets(
+                selectedCDN.value,
+                filename,
+                selectedChannel.value,
+                versionList.value.preVersion!,
+                concurrentThreads.value,
+                onProgress,
+                tempPreDownloadDir.value
+            )
+            console.debug("预下载结果:", result)
+
+            // 保存最后下载的文件路径
+            lastDownloadedFile.value = fullFilePath
+        }
+
+        // 重置状态
+        isDownloading.value = false
+        currentFile.value = ""
+        downloadSpeed.value = ""
+
+        // 预下载完成后，检查预下载状态
+        await checkPreDownloadStatus()
+
+        ui.showSuccessMessage(`预下载完成，总大小: ${formatSize(preTotalSize)}`)
+    } catch (err) {
+        ui.showErrorMessage(`预下载失败: ${err instanceof Error ? err.message : String(err)}`)
+        console.error("预下载失败:", err)
+        isDownloading.value = false
+        downloadSpeed.value = ""
+    }
+}
+
+/**
  * 解压缩所有下载的文件
  */
 async function extractAllFiles() {
@@ -421,10 +664,7 @@ async function extractAllFiles() {
             console.debug(`开始解压缩: ${filename}, 进度: ${Math.round(overallProgress.value * 100)}%`)
 
             // 调用后端解压缩命令
-            const result = await invoke<string>("extract_game_assets", {
-                zipPath,
-                targetDir,
-            })
+            const result = await extractGameAssets(zipPath, targetDir)
 
             console.debug("解压缩结果:", result)
         }
@@ -551,6 +791,24 @@ onMounted(async () => {
                     </div>
                 </div>
 
+                <!-- 预下载信息 -->
+                <div v-if="needPreDownload" class="bg-info/30 border border-info/50 rounded-lg p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <p class="text-gray-400 text-sm">预下载文件总数</p>
+                            <p class="text-xl font-bold text-info">{{ preTotalFiles }}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">预下载文件大小</p>
+                            <p class="text-xl font-bold text-info">{{ formatSize(preTotalSize) }}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">预下载版本</p>
+                            <p class="text-xl font-bold text-info">{{ versionList.preVersion }}</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 更新检查和操作按钮 -->
                 <div v-if="gamePath" class="space-y-4">
                     <div v-if="needUpdate" class="bg-warning/30 border border-warning/50 rounded-lg p-4">
@@ -571,7 +829,7 @@ onMounted(async () => {
                             </div>
                         </div>
                     </div>
-                    <div class="flex gap-4" v-if="gamePath && needUpdate">
+                    <div class="flex gap-4 flex-wrap" v-if="gamePath">
                         <div>
                             <p class="text-gray-400 text-xs">下载线程数</p>
                             <input
@@ -583,6 +841,16 @@ onMounted(async () => {
                                 step="1"
                             />
                         </div>
+                        <button
+                            v-if="needPreDownload"
+                            @click="preDownloadAllFiles()"
+                            class="btn btn-lg btn-info"
+                            :disabled="isDownloading || isExtracting || !gamePath"
+                        >
+                            <Icon v-if="isDownloading" icon="ri:refresh-line" class="w-5 h-5 mr-2 animate-spin" />
+                            <Icon v-else icon="ri:download-2-line" class="w-5 h-5 mr-2" />
+                            {{ isDownloading ? "预下载中..." : "预下载游戏" }}
+                        </button>
                         <button
                             @click="downloadAllFiles()"
                             class="flex-1 btn btn-lg btn-primary"

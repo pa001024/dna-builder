@@ -3088,8 +3088,12 @@
         "mod_desc": "查看魔之楔信息和屬性",
         "monster": "怪物",
         "monster_desc": "查看怪物信息和屬性",
+        "npc": "NPC",
+        "npc_desc": "查看NPC資訊和對話",
         "pet": "魔靈",
         "pet_desc": "查看魔靈信息和技能",
+        "questchain": "任務劇情",
+        "questchain_desc": "查看任務劇情資訊和對話",
         "rank": "排名獎勵",
         "rank_desc": "查看排名賽獎勵",
         "shop": "商店",
@@ -3169,6 +3173,7 @@
         "deleteModFailed": "刪除MOD失敗: {{ error }}",
         "desc": "啟動遊戲/MOD管理器",
         "dropToImport": "鬆開滑鼠匯入MOD或圖片",
+        "dx11Enable": "啟用DX11",
         "enterCustomTypeName": "請輸入自定義類型名稱",
         "exec_files": "可執行檔案",
         "gameSetting": "遊戲設定",
@@ -3360,8 +3365,20 @@
         "back_home": "返回首頁",
         "title": "頁面未找到"
     },
+    "npc-detail": {
+        "title": "NPC詳情"
+    },
+    "npc-list": {
+        "title": "NPC列表"
+    },
     "pet-list": {
         "title": "魔靈列表"
+    },
+    "questchain-detail": {
+        "title": "任務劇情詳情"
+    },
+    "questchain-list": {
+        "title": "任務劇情列表"
     },
     "raid-rank": {
         "title": "排名獎勵"

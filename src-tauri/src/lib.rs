@@ -1829,6 +1829,30 @@ async fn cleanup_temp_dir(temp_dir: String) -> Result<String, String> {
     Ok(format!("临时目录清理完成: {}", temp_dir))
 }
 
+/// 列出指定目录下的所有文件
+#[tauri::command]
+async fn list_files(dir_path: String) -> Result<Vec<String>, String> {
+    let path = Path::new(&dir_path);
+    if !path.exists() {
+        return Ok(vec![]);
+    }
+
+    let mut files = vec![];
+    if let Ok(entries) = fs::read_dir(path) {
+        for entry in entries.flatten() {
+            let entry_path = entry.path();
+            if entry_path.is_file() {
+                if let Some(file_name) = entry_path.file_name() {
+                    if let Some(name_str) = file_name.to_str() {
+                        files.push(name_str.to_string());
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(files)
+}
 /// 列出指定目录下的所有 JS 文件
 #[tauri::command]
 async fn list_script_files(dir_path: String) -> Result<Vec<String>, String> {
@@ -1858,7 +1882,7 @@ async fn list_script_files(dir_path: String) -> Result<Vec<String>, String> {
     Ok(files)
 }
 
-/// 重命名文件
+/// 重命名文件（支持自动创建目标目录的父目录结构）
 #[tauri::command]
 async fn rename_file(old_path: String, new_path: String) -> Result<String, String> {
     let old = Path::new(&old_path);
@@ -1870,6 +1894,13 @@ async fn rename_file(old_path: String, new_path: String) -> Result<String, Strin
 
     if new.exists() {
         return Err(format!("目标文件已存在: {}", new_path));
+    }
+
+    // 自动创建目标目录的父目录结构
+    if let Some(parent) = new.parent() {
+        if !parent.exists() {
+            fs::create_dir_all(parent).map_err(|e| format!("创建目标目录失败: {}", e))?;
+        }
     }
 
     fs::rename(old, new).map_err(|e| format!("重命名文件失败: {}", e))?;
@@ -2039,6 +2070,7 @@ fn unwatch_file(file_path: String) -> Result<String, String> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let mut app = tauri::Builder::default()
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
@@ -2205,7 +2237,8 @@ pub fn run() {
         rename_file,
         delete_file,
         watch_file,
-        unwatch_file
+        unwatch_file,
+        list_files
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

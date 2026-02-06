@@ -1,4 +1,4 @@
-import { createApp, render, type VNode } from "vue"
+import { createApp, type VNode } from "vue"
 import "./style.css"
 import { registerSW } from "virtual:pwa-register"
 import i18next from "i18next"

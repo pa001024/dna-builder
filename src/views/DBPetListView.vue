@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue"
-import petData from "../data/d/pet.data"
+import petData, { petEntrys } from "../data/d/pet.data"
 import type { Pet } from "../data/data-types"
 import { LeveledPet } from "../data/leveled/LeveledPet"
 import { matchPinyin } from "../utils/pinyin-utils"
@@ -15,18 +15,50 @@ const types = computed(() => {
     petData.forEach(p => {
         typeSet.add(p.类型)
     })
+    // 添加潜质类型（使用一个特殊值，比如 999）
+    typeSet.add(999)
     return Array.from(typeSet).sort()
 })
 
 const qualities = computed(() => {
     const qualitySet = new Set<number>()
+    // 添加普通魔灵的品质值
     petData.forEach(p => {
         qualitySet.add(p.品质)
+    })
+    // 添加潜质的品质值（r值）
+    petEntrys.forEach(entry => {
+        qualitySet.add(entry.r)
     })
     return Array.from(qualitySet).sort()
 })
 
 const filteredPets = computed(() => {
+    // 当选择潜质类型时，返回 petEntrys 信息
+    if (selectedType.value === 999) {
+        return petEntrys.filter(entry => {
+            // 搜索筛选
+            let matchKeyword = false
+            if (searchKeyword.value === "") {
+                matchKeyword = true
+            } else {
+                const q = searchKeyword.value
+                // 直接中文匹配
+                if (entry.name.includes(q)) {
+                    matchKeyword = true
+                } else {
+                    // 拼音匹配（全拼/首字母）
+                    matchKeyword = matchPinyin(entry.name, q).match
+                }
+            }
+            
+            // 品质筛选
+            const matchQuality = selectedQuality.value === 0 || entry.r === selectedQuality.value
+            return matchKeyword && matchQuality
+        })
+    }
+
+    // 否则返回普通魔灵数据
     return petData.filter(p => {
         // 搜索筛选
         let matchKeyword = false
@@ -54,6 +86,7 @@ function getTypeName(type: number): string {
         1: "活力魔灵",
         2: "失活魔灵",
         3: "活动魔灵",
+        999: "潜质",
     }
     return typeMap[type] || type.toString()
 }
@@ -154,40 +187,67 @@ function formatSkillDescription(pet: Pet, type: "主动" | "被动"): string {
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
                         <div
-                            v-for="pet in filteredPets"
-                            :key="pet.id"
+                            v-for="item in filteredPets"
+                            :key="item.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedPet?.id === pet.id }"
-                            @click="selectedPet = pet"
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedPet?.id === item.id }"
+                            @click="selectedPet = selectedType === 999 ? null : (item as Pet)"
                         >
                             <div class="flex items-start gap-2">
                                 <div class="w-12 h-12 overflow-hidden rounded-full">
-                                    <img :src="LeveledPet.url(pet.icon)" class="w-full h-full object-cover" />
+                                    <!-- 显示潜质图标 -->
+                                    <template v-if="selectedType === 999 && 'icon' in item">
+                                        <img :src="`/imgs/webp/T_Armory_Pet_Attr_${item.icon}_S.webp`" class="w-full h-full object-cover" />
+                                    </template>
+                                    <!-- 显示普通魔灵图标 -->
+                                    <template v-else-if="'icon' in item && '名称' in item">
+                                        <img :src="LeveledPet.url(item.icon)" class="w-full h-full object-cover" />
+                                    </template>
                                 </div>
                                 <div>
-                                    <div class="font-medium flex gap-2 items-center">
-                                        {{ pet.名称 }}
-                                        <span class="text-xs px-2 py-0.5 rounded" :class="getQualityColor(pet.品质)">
-                                            {{ getQualityName(pet.品质) }}
-                                        </span>
-                                    </div>
-                                    <div class="text-xs opacity-70 mt-1 flex gap-2">
-                                        <span>{{ getTypeName(pet.类型) }}</span>
-                                        <span>最大等级: {{ pet.最大等级 }}</span>
-                                    </div>
+                                    <!-- 潜质信息显示 -->
+                                    <template v-if="selectedType === 999 && 'name' in item">
+                                        <div class="font-medium flex gap-2 items-center">
+                                            {{ item.name }}
+                                            <span class="text-xs px-2 py-0.5 rounded" :class="getQualityColor(item.r)">
+                                                {{ getQualityName(item.r) }}
+                                            </span>
+                                        </div>
+                                        <div class="text-xs opacity-70 mt-1">
+                                            <span>{{ item.desc }}</span>
+                                        </div>
+                                    </template>
+                                    <!-- 普通魔灵信息显示 -->
+                                    <template v-else-if="'名称' in item">
+                                        <div class="font-medium flex gap-2 items-center">
+                                            {{ item.名称 }}
+                                            <span class="text-xs px-2 py-0.5 rounded" :class="getQualityColor(item.品质)">
+                                                {{ getQualityName(item.品质) }}
+                                            </span>
+                                        </div>
+                                        <div class="text-xs opacity-70 mt-1 flex gap-2">
+                                            <span>{{ getTypeName(item.类型) }}</span>
+                                            <span>最大等级: {{ item.最大等级 }}</span>
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
-                            <div v-if="pet.主动" class="mt-2 text-xs opacity-70">
-                                <div>主动: {{ formatSkillDescription(pet, "主动") }}</div>
-                            </div>
-                            <div v-if="pet.被动" class="mt-1 text-xs opacity-70">
-                                <div>被动: {{ formatSkillDescription(pet, "被动") }}</div>
-                            </div>
+                            <!-- 普通魔灵技能显示 -->
+                            <template v-if="selectedType !== 999 && '主动' in item">
+                                <div v-if="item.主动" class="mt-2 text-xs opacity-70">
+                                    <div>主动: {{ formatSkillDescription(item, "主动") }}</div>
+                                </div>
+                                <div v-if="item.被动" class="mt-1 text-xs opacity-70">
+                                    <div>被动: {{ formatSkillDescription(item, "被动") }}</div>
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </ScrollArea>
 
-                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">共 {{ filteredPets.length }} 个魔灵</div>
+                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">
+                    共 {{ filteredPets.length }} {{ selectedType === 999 ? "个潜质" : "个魔灵" }}
+                </div>
             </div>
             <div
                 v-if="selectedPet"

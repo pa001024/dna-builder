@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { listen, type UnlistenFn } from "@tauri-apps/api/event"
+import { register, unregisterAll } from "@tauri-apps/plugin-global-shortcut"
 import { debounce } from "lodash-es"
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
 import {
@@ -9,6 +10,7 @@ import {
     openExplorer,
     readTextFile,
     renameFile,
+    runAsAdmin,
     runScript,
     stopScript,
     unwatchFile,
@@ -745,6 +747,50 @@ function handleTabMiddleClick(e: MouseEvent, tabId: string) {
     }
 }
 
+/**
+ * 以管理员权限重新启动应用
+ */
+async function restartAsAdmin() {
+    try {
+        await runAsAdmin()
+    } catch (error) {
+        console.error("以管理员权限重新启动失败", error)
+        ui.showErrorMessage("以管理员权限重新启动失败")
+    }
+}
+
+/**
+ * 全局快捷键状态
+ */
+const globalShortcutEnabled = ref(false)
+
+/**
+ * 切换全局快捷键状态
+ */
+async function toggleGlobalShortcut() {
+    try {
+        if (globalShortcutEnabled.value) {
+            // 禁用快捷键
+            await unregisterAll()
+            globalShortcutEnabled.value = false
+            ui.showSuccessMessage("全局快捷键已禁用")
+        } else {
+            // 启用快捷键
+            await register("F10", e => {
+                if (e.state === "Pressed") {
+                    // 当按下 F10 时，运行当前脚本
+                    runCurrentTab()
+                }
+            })
+            globalShortcutEnabled.value = true
+            ui.showSuccessMessage("全局快捷键已启用 (F10)")
+        }
+    } catch (error) {
+        console.error("切换全局快捷键失败", error)
+        ui.showErrorMessage("切换全局快捷键失败")
+    }
+}
+
 watch(viewMode, newMode => {
     if (newMode === "local") {
         fetchLocalScripts()
@@ -773,6 +819,8 @@ onUnmounted(async () => {
     // 停止所有文件监听
     const stopPromises = Array.from(watchedFiles.value).map(fileName => stopWatchingFile(fileName))
     await Promise.all(stopPromises)
+    // 注销所有全局快捷键
+    await unregisterAll()
 })
 </script>
 
@@ -989,6 +1037,19 @@ onUnmounted(async () => {
                         >
                             <Icon icon="ri:save-line" class="w-4 h-4" />
                         </button>
+                        <div class="dropdown dropdown-end">
+                            <div tabindex="0" role="button" class="btn btn-sm btn-ghost btn-square" title="更多操作">
+                                <Icon icon="ri:more-line" class="w-4 h-4" />
+                            </div>
+                            <ul tabindex="-1" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+                                <li><a @click="restartAsAdmin">以管理员权限重新启动</a></li>
+                                <li>
+                                    <a @click="toggleGlobalShortcut">{{
+                                        globalShortcutEnabled ? "禁用全局快捷键(F10)" : "启用全局快捷键(F10)"
+                                    }}</a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 

@@ -316,6 +316,30 @@ const routes: readonly RouteRecordRaw[] = [
                 component: () => import("./views/DBDynQuestDetailView.vue"),
                 beforeEnter: () => setMinSize(600, 600),
             },
+            {
+                name: "questchain-list",
+                path: "questchain",
+                component: () => import("./views/DBQuestChainListView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "questchain-detail",
+                path: "questchain/:questChainId",
+                component: () => import("./views/DBQuestDetailView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "npc-list",
+                path: "npc",
+                component: () => import("./views/DBNpcListView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "npc-detail",
+                path: "npc/:npcId",
+                component: () => import("./views/DBNpcDetailView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
         ],
     },
     // DNA routes

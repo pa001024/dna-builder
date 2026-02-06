@@ -7,6 +7,8 @@ import { tauriFetch } from "@/api/app"
  * 正式服
  * http://pan01-1-eo.shyxhy.com/Patches/FinalPatch/CN/Default/WindowsNoEditor/PC_OBT_CN_Pub/VersionList.json
  * http://pan01-cdn-dna-ali.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/BaseVersion.json
+ * http://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/PreDownloadVersion.json
+ * http://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/10/BaseVersion.json
  * 媒体服
  * http://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT12_Media_CN_Pub/PackageBaseVersion.txt
  * http://pan01-1-eo.shyxhy.com/Patches/FinalPatch/CN/Default/WindowsNoEditor/PC_OBT12_Media_CN_Pub/VersionList.json
@@ -70,6 +72,13 @@ export interface DownloadProgress {
     total: number
 }
 
+export interface GameVersionListWithPre {
+    subVersion: string
+    gameVersionList: GameVersionListRes
+    preVersion?: string
+    preVersionList?: GameVersionListRes
+}
+
 /**
  * 下载进度回调函数
  */
@@ -78,15 +87,34 @@ export type ProgressCallback = (progress: DownloadProgress) => void
 export async function getBaseVersion(cdn: string, channel: string) {
     const server = channel.match(/([A-Za-z]+)_Pub/)?.[1] || "CN"
     const versionUrl = VERSION_URL_PUB(server)
-    console.log(versionUrl)
     const subVersion = await tauriFetch(`${cdn}${versionUrl}${channel}/PackageBaseVersion.txt`)
     const subVersionText = await subVersion.text()
+
     try {
         const res = await tauriFetch(`${cdn}${versionUrl}${channel}${subVersionText ? `/${subVersionText}` : ""}/BaseVersion.json`)
-        return {
+        const result = {
             subVersion: subVersionText,
             gameVersionList: await res.json(),
+        } as GameVersionListWithPre
+        const preVersion = await tauriFetch(`${cdn}${versionUrl}${channel}/PreDownloadVersion.json`)
+        if (!preVersion.ok) {
+            return result
         }
+        const preVersionJson = (await preVersion.json()) as {
+            BaseVersion: number
+            bOpen: boolean
+        }
+        const preVersionText = preVersionJson.BaseVersion.toString()
+        if (subVersionText === preVersionText || !preVersionJson.bOpen) {
+            return result
+        }
+        const pre = await tauriFetch(`${cdn}${versionUrl}${channel}${preVersionText ? `/${preVersionText}` : ""}/BaseVersion.json`)
+        if (!pre.ok) {
+            return result
+        }
+        result.preVersion = preVersionText
+        result.preVersionList = await pre.json()
+        return result
     } catch {
         const res = await tauriFetch(`${cdn}${versionUrl}${channel}/BaseVersion.json`)
         return {

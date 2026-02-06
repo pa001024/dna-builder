@@ -316,8 +316,12 @@
         "mod_desc": "查看魔之楔信息和属性",
         "monster": "怪物",
         "monster_desc": "查看怪物信息和属性",
+        "npc": "NPC",
+        "npc_desc": "查看NPC信息和对话",
         "pet": "魔灵",
         "pet_desc": "查看魔灵信息和技能",
+        "questchain": "任务剧情",
+        "questchain_desc": "查看任务剧情信息和对话",
         "rank": "排名奖励",
         "rank_desc": "查看排名赛奖励",
         "shop": "商店",
@@ -583,8 +587,20 @@
         "back_home": "返回首页",
         "title": "页面未找到"
     },
+    "npc-detail": {
+        "title": "NPC详情"
+    },
+    "npc-list": {
+        "title": "NPC列表"
+    },
     "pet-list": {
         "title": "魔灵列表"
+    },
+    "questchain-detail": {
+        "title": "任务剧情详情"
+    },
+    "questchain-list": {
+        "title": "任务剧情列表"
     },
     "raid-rank": {
         "title": "排名奖励"
