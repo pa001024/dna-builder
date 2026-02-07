@@ -4,6 +4,7 @@ import { computed, onMounted, ref } from "vue"
 import { completeTodoMutation, createTodoMutation, deleteTodoMutation, todosQuery, updateTodoMutation } from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
+import { copyText } from "@/util"
 
 const userStore = useUserStore()
 const ui = useUIStore()
@@ -55,9 +56,10 @@ const createForm = ref<EditTodoForm>({
     endTime: "",
 })
 const formSubmitting = ref(false)
+const hideCompleted = useLocalStorage("todo.hide_completed", true)
 
 // 本地存储的完成状态（未登录用户使用）
-const localCompletedTodos = useLocalStorage<Record<string, boolean>>("local_completed_todos", {})
+const localCompletedTodos = useLocalStorage<Record<string, boolean>>("todo.local_completed_todos", {})
 
 // 计算属性：用户 todos（排在前面）
 const userTodos = computed(() => {
@@ -67,6 +69,20 @@ const userTodos = computed(() => {
 // 计算属性：系统 todos
 const systemTodos = computed(() => {
     return todos.value.filter(todo => todo.type === "system")
+})
+
+// 根据隐藏开关过滤已完成的系统待办
+const filteredSystemTodos = computed(() => {
+    if (!hideCompleted.value) {
+        return systemTodos.value
+    }
+
+    return systemTodos.value.filter(todo => !(todo.isCompleted || localCompletedTodos.value[todo.id]))
+})
+
+// 当前可见的待办数量（用于空状态展示）
+const visibleTodosCount = computed(() => {
+    return userTodos.value.length + filteredSystemTodos.value.length
 })
 
 // 获取待办事项列表
@@ -286,10 +302,16 @@ onMounted(() => {
             <div>
                 <h3 class="text-lg font-semibold text-base-content">待办</h3>
             </div>
-            <button class="btn btn-sm btn-primary px-4 flex items-center gap-2" @click="openCreateDialog">
-                <Icon icon="ri:add-line"></Icon>
-                <span>新建</span>
-            </button>
+            <div class="flex items-center gap-3">
+                <label class="label cursor-pointer gap-2 py-0">
+                    <span class="label-text text-sm">隐藏已完成</span>
+                    <input v-model="hideCompleted" type="checkbox" class="toggle toggle-sm toggle-primary" />
+                </label>
+                <button class="btn btn-sm btn-primary px-4 flex items-center gap-2" @click="openCreateDialog">
+                    <Icon icon="ri:add-line"></Icon>
+                    <span>新建</span>
+                </button>
+            </div>
         </div>
 
         <!-- 加载状态 -->
@@ -334,11 +356,11 @@ onMounted(() => {
             </div>
 
             <!-- 系统待办事项 -->
-            <div v-if="systemTodos.length > 0">
+            <div v-if="filteredSystemTodos.length > 0">
                 <h4 class="text-sm font-medium text-base-content/80 mb-2 px-2">系统</h4>
                 <div class="space-y-2">
                     <div
-                        v-for="todo in systemTodos"
+                        v-for="todo in filteredSystemTodos"
                         :key="todo.id"
                         class="card bg-base-100 border border-base-300 p-4 hover:border-primary/50 transition-colors"
                         :class="{ 'opacity-60': todo.isCompleted }"
@@ -358,6 +380,14 @@ onMounted(() => {
                                         :class="{ 'line-through text-base-content/50': todo.isCompleted || localCompletedTodos[todo.id] }"
                                     >
                                         {{ todo.title }}
+
+                                        <span
+                                            class="inline-block cursor-pointer hover:text-primary ml-1"
+                                            @click="copyText(todo.title.replace('兑换码:', '').trim())"
+                                            v-if="todo.title.includes('兑换码')"
+                                        >
+                                            <Icon icon="ri:file-copy-line" />
+                                        </span>
                                     </div>
                                     <div v-if="todo.description" class="text-sm text-base-content/70 mb-2">
                                         {{ todo.description }}
@@ -375,7 +405,7 @@ onMounted(() => {
             </div>
 
             <!-- 空状态 -->
-            <div v-if="todos.length === 0" class="text-center text-base-content/50">
+            <div v-if="visibleTodosCount === 0" class="text-center text-base-content/50">
                 <p>暂无待办事项</p>
             </div>
         </div>

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch } from "vue"
+import { computed, ref, watch } from "vue"
 import type { Dungeon } from "@/data"
 import { Faction, LeveledMonster } from "@/data"
 import { formatBigNumber } from "@/util"
@@ -11,6 +11,61 @@ const props = defineProps<{
 }>()
 
 const currentLevel = ref(props.dungeon.lv)
+
+/**
+ * 格式化奖励组序号区间显示
+ * @param indices 奖励组原始序号（从 0 开始）
+ * @returns 形如 #1~#3、#1,#3~#4 的文本
+ */
+function formatRewardIndexRanges(indices: number[]): string {
+    if (!indices.length) return ""
+
+    const sorted = [...indices].sort((a, b) => a - b)
+    const ranges: string[] = []
+    let start = sorted[0]
+    let prev = sorted[0]
+
+    for (let i = 1; i < sorted.length; i++) {
+        const current = sorted[i]
+        if (current === prev + 1) {
+            prev = current
+            continue
+        }
+
+        ranges.push(start === prev ? `#${start + 1}` : `#${start + 1}~#${prev + 1}`)
+        start = current
+        prev = current
+    }
+
+    ranges.push(start === prev ? `#${start + 1}` : `#${start + 1}~#${prev + 1}`)
+
+    return ranges.join(",")
+}
+
+/**
+ * 合并奖励列表中相同奖励组（按 reward.id）并记录原始索引
+ */
+const mergedDungeonRewards = computed(() => {
+    const groupedRewards = new Map<number, { reward: RewardItemType; indices: number[] }>()
+
+    props.dungeon.r?.forEach((rewardId, index) => {
+        const reward = getRewardDetails(rewardId)
+        if (!reward) return
+
+        const grouped = groupedRewards.get(reward.id)
+        if (grouped) {
+            grouped.indices.push(index)
+            return
+        }
+
+        groupedRewards.set(reward.id, {
+            reward,
+            indices: [index],
+        })
+    })
+
+    return Array.from(groupedRewards.values())
+})
 
 // 获取阵营名称
 function getFactionName(faction: number | undefined): string {
@@ -196,27 +251,27 @@ watch(
             <h3 class="font-bold mb-2">奖励列表</h3>
             <div class="space-y-3">
                 <div
-                    v-for="(reward, index) in dungeon.r.map(id => getRewardDetails(id)).filter((r): r is RewardItemType => !!r)"
-                    :key="reward.id"
+                    v-for="item in mergedDungeonRewards"
+                    :key="`${item.reward.id}-${item.indices.join('-')}`"
                     class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors"
                 >
                     <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium">#{{ index + 1 }} 奖励组 {{ reward.id }}</span>
+                        <span class="text-sm font-medium">{{ formatRewardIndexRanges(item.indices) }} 奖励组 {{ item.reward.id }}</span>
 
                         <span
                             class="text-xs px-1.5 py-0.5 rounded"
                             :class="
-                                getDropModeText(reward.m || '') === '独立'
+                                getDropModeText(item.reward.m || '') === '独立'
                                     ? 'bg-success text-success-content'
                                     : 'bg-warning text-warning-content'
                             "
                         >
-                            {{ getDropModeText(reward.m || "") }}
-                            <span v-if="reward.totalP">总容量 {{ reward.totalP }}</span>
+                            {{ getDropModeText(item.reward.m || "") }}
+                            <span v-if="item.reward.totalP">总容量 {{ item.reward.totalP }}</span>
                         </span>
                     </div>
                     <!-- 使用 RewardItem 组件显示奖励 -->
-                    <RewardItem :reward="reward" />
+                    <RewardItem :reward="item.reward" />
                 </div>
             </div>
         </div>
