@@ -1,14 +1,24 @@
 <script lang="ts" setup>
 import { useSessionStorage } from "@vueuse/core"
 import { computed } from "vue"
-import { FishingSpot, fishMap } from "@/data"
-import { Fish, fishingSpots, fishs } from "@/data/d/fish.data"
+import { fishingSpotMap, fishMap } from "@/data"
+import { fishingSpots, fishs } from "@/data/d/fish.data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
 const searchKeyword = useSessionStorage<string>("fish.searchKeyword", "")
-const selectedSpot = useSessionStorage<FishingSpot | null>("fish.selectedSpot", null)
-const selectedFish = useSessionStorage<Fish | null>("fish.selectedFish", null)
+const selectedSpotId = useSessionStorage<number>("fish.selectedSpot", 0)
+const selectedFishId = useSessionStorage<number>("fish.selectedFish", 0)
 const selectedType = useSessionStorage<number>("fish.selectedType", 0)
+
+// 根据 ID 获取选中的钓鱼点
+const selectedSpot = computed(() => {
+    return selectedSpotId.value ? fishingSpotMap.get(selectedSpotId.value) || null : null
+})
+
+// 根据 ID 获取选中的鱼
+const selectedFish = computed(() => {
+    return selectedFishId.value ? fishMap.get(selectedFishId.value) || null : null
+})
 
 const filteredSpots = computed(() => {
     return fishingSpots.filter(spot => {
@@ -80,8 +90,8 @@ const filteredFish = computed(() => {
                             v-if="selectedType === 0"
                             :key="spot.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedSpot?.id === spot.id }"
-                            @click="((selectedSpot = spot), (selectedFish = null))"
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedSpotId === spot.id }"
+                            @click="((selectedSpotId = spot.id), (selectedFishId = 0))"
                         >
                             <div class="flex items-start gap-2">
                                 <div class="w-12 h-12 overflow-hidden rounded-full">
@@ -101,8 +111,8 @@ const filteredFish = computed(() => {
                             v-else
                             :key="fish.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedFish?.id === fish.id }"
-                            @click="((selectedFish = fish), (selectedSpot = null))"
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedFishId === fish.id }"
+                            @click="((selectedFishId = fish.id), (selectedSpotId = 0))"
                         >
                             <div class="flex items-start gap-2">
                                 <div class="w-12 h-12 overflow-hidden rounded-full">
@@ -128,7 +138,7 @@ const filteredFish = computed(() => {
             <div
                 v-if="selectedSpot"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedSpot = null"
+                @click="selectedSpotId = 0"
             >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>

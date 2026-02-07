@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed } from "vue"
+import { computed, ref } from "vue"
 import { draftShopSourceMap } from "@/data/d/shop.data"
 import { getDungeonName } from "@/utils/dungeon-utils"
 import { getDraftDropInfo } from "@/utils/reward-utils"
@@ -9,6 +9,14 @@ import type { Draft, Dungeon } from "../data/data-types"
 const props = defineProps<{
     draft: Draft
 }>()
+
+// 展开的地下城ID
+const expandedDungeonId = ref<number | null>(null)
+
+// 切换地下城展开状态
+function toggleDungeonExpand(dungeonId: number) {
+    expandedDungeonId.value = expandedDungeonId.value === dungeonId ? null : dungeonId
+}
 
 // 将分钟数转换为00:00格式
 function formatDuration(minutes: number): string {
@@ -161,15 +169,10 @@ const draftShopSource = computed(() => {
         <div v-if="draftDungeons.length > 0" class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-2">掉落来源</div>
             <div class="space-y-2 text-sm">
-                <FullTooltip v-for="dungeon in draftDungeons" :key="dungeon.id" side="bottom">
-                    <template #tooltip>
-                        <ScrollArea class="h-64">
-                            <DBDungeonDetailItem :dungeon="dungeon" />
-                        </ScrollArea>
-                    </template>
-                    <SRouterLink
-                        :to="`/db/dungeon/${dungeon.id}`"
-                        class="flex flex-col gap-1 p-2 bg-base-300 rounded hover:bg-base-content/10 transition-colors"
+                <div v-for="dungeon in draftDungeons" :key="dungeon.id" class="space-y-2">
+                    <div
+                        @click="toggleDungeonExpand(dungeon.id)"
+                        class="flex flex-col gap-1 p-2 bg-base-300 rounded hover:bg-base-content/10 transition-colors cursor-pointer"
                     >
                         <div class="flex justify-between items-center">
                             <div class="flex items-center gap-2">
@@ -182,6 +185,10 @@ const draftShopSource = computed(() => {
                             <div class="flex items-center gap-2 text-base-content/70">
                                 <span v-if="dungeon.lv" class="text-xs">Lv.{{ dungeon.lv }}</span>
                                 <span class="text-xs">{{ dungeon.t }}</span>
+                                <Icon
+                                    :icon="expandedDungeonId === dungeon.id ? 'radix-icons:chevron-up' : 'radix-icons:chevron-down'"
+                                    class="text-xs"
+                                />
                             </div>
                         </div>
                         <!-- 显示掉落概率信息 -->
@@ -193,8 +200,12 @@ const draftShopSource = computed(() => {
                                 期望: {{ +getDraftDropInfo(dungeon, draft.id).times!.toFixed(2) }}次
                             </span>
                         </div>
-                    </SRouterLink>
-                </FullTooltip>
+                    </div>
+                    <!-- 展开的地下城详情 -->
+                    <div v-if="expandedDungeonId === dungeon.id" class="p-3 bg-base-100 rounded border border-base-200">
+                        <DBDungeonDetailItem :dungeon="dungeon" />
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -7,9 +7,14 @@ import { subRegionMap } from "@/data/d/subregion.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
 const searchKeyword = useSessionStorage<string>("dynquest.searchKeyword", "")
-const selectedQuest = useSessionStorage<DynQuest | null>("dynquest.selectedQuest", null)
+const selectedQuestId = useSessionStorage<number>("dynquest.selectedQuest", 0)
 const selectedRegion = useSessionStorage<string>("dynquest.selectedRegion", "")
 const selectedSubRegion = useSessionStorage<string>("dynquest.selectedSubRegion", "")
+
+// 根据 ID 获取选中的委托
+const selectedQuest = computed(() => {
+    return selectedQuestId.value ? dynQuestData.find(quest => quest.id === selectedQuestId.value) || null : null
+})
 
 // 获取区域名称
 const getRegionName = (regionId: number) => {
@@ -68,7 +73,7 @@ const filteredQuests = computed(() => {
 })
 
 function selectQuest(quest: DynQuest | null) {
-    selectedQuest.value = quest
+    selectedQuestId.value = quest?.id || 0
 }
 
 function selectRegion(regionId: string) {
@@ -153,7 +158,7 @@ function selectSubRegion(subRegionId: string) {
                             v-for="quest in filteredQuests"
                             :key="quest.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedQuest?.id === quest.id }"
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedQuestId === quest.id }"
                             @click="selectQuest(quest)"
                         >
                             <div class="flex items-start justify-between">

@@ -3348,6 +3348,13 @@
         "unfinishedFirst": "未完成優先",
         "unnamedAchievement": "未命名成就"
     },
+    "achievement-detail": {
+        "title": "成就詳情"
+    },
+    "achievement-list": {
+        "desc": "遊戲成就解鎖統計",
+        "title": "成就列表"
+    },
     "activity-calendar": {
         "click_to_complete": "點擊標記完成",
         "drag_hint": "可左右拖動查看",
@@ -3554,6 +3561,8 @@
     "database": {
         "abyss_dungeon": "深淵副本",
         "abyss_dungeon_desc": "查看深淵副本信息和BUFF",
+        "achievement": "成就",
+        "achievement_desc": "查看成就資訊和獎勵",
         "char": "角色",
         "char_desc": "查看角色資訊和屬性",
         "desc": "查詢遊戲中的數據",
@@ -3579,7 +3588,7 @@
         "pet_desc": "查看魔靈信息和技能",
         "questchain": "任務劇情",
         "questchain_desc": "查看任務劇情資訊和對話",
-        "rank": "排名獎勵",
+        "rank": "狩月人之階",
         "rank_desc": "查看排名賽獎勵",
         "shop": "商店",
         "shop_desc": "查看商店物品資訊",

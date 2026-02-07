@@ -2,18 +2,23 @@
 import { useLocalStorage, useSessionStorage } from "@vueuse/core"
 import { computed } from "vue"
 import { LeveledMod } from "../data"
+import { modMap } from "../data/d"
 import modData from "../data/d/mod.data"
-import type { Mod } from "../data/data-types"
 import { formatProp } from "../util"
 import { matchPinyin } from "../utils/pinyin-utils"
 
 const searchKeyword = useSessionStorage<string>("mod.searchKeyword", "")
-const selectedMod = useSessionStorage<Mod | null>("mod.selectedMod", null)
+const selectedModId = useSessionStorage<number>("mod.selectedMod", 0)
 const selectedType = useSessionStorage<string>("mod.selectedType", "")
 const selectedSeries = useSessionStorage<string>("mod.selectedSeries", "")
 const selectedQuality = useSessionStorage<string>("mod.selectedQuality", "")
 const selectedElem = useSessionStorage<string>("mod.selectedElem", "")
 const selectedVersion = useSessionStorage<string>("mod.selectedVersion", "")
+
+// 根据 ID 获取选中的魔之楔
+const selectedMod = computed(() => {
+    return selectedModId.value ? modMap.get(selectedModId.value) || null : null
+})
 
 // 过滤选项显示控制
 const showTypeFilter = useLocalStorage("mod.showTypeFilter", false)
@@ -299,8 +304,8 @@ function toggleFilter(filterName: string, show: boolean) {
                             v-for="mod in filteredMods"
                             :key="mod.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedMod?.id === mod.id }"
-                            @click="selectedMod = mod"
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedModId === mod.id }"
+                            @click="selectedModId = mod.id"
                         >
                             <div class="flex items-start justify-between">
                                 <div class="flex items-center gap-2">
@@ -340,7 +345,9 @@ function toggleFilter(filterName: string, show: boolean) {
                                     class="flex justify-between items-center gap-2"
                                 >
                                     <span>{{ $t(key) }}</span>
-                                    <span class="font-medium text-primary">{{ formatProp(key, attr) }}</span>
+                                    <span class="font-medium" :class="{ 'text-primary': selectedMod?.id !== mod.id }">{{
+                                        formatProp(key, attr)
+                                    }}</span>
                                 </div>
                                 <div
                                     v-for="key in Object.keys(mod.生效).filter(key => key !== '条件')"
@@ -349,7 +356,9 @@ function toggleFilter(filterName: string, show: boolean) {
                                     class="flex justify-between items-center gap-2"
                                 >
                                     <span>{{ $t(key) }}</span>
-                                    <span class="font-medium text-primary">{{ formatProp(key, mod.生效[key]) }}</span>
+                                    <span class="font-medium" :class="{ 'text-primary': selectedMod?.id !== mod.id }">{{
+                                        formatProp(key, mod.生效[key])
+                                    }}</span>
                                 </div>
                             </div>
                         </div>
@@ -364,7 +373,7 @@ function toggleFilter(filterName: string, show: boolean) {
             <div
                 v-if="selectedMod"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedMod = null"
+                @click="selectedModId = 0"
             >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>

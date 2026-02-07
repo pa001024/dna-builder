@@ -1,13 +1,19 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { useSessionStorage } from "@vueuse/core"
+import { computed } from "vue"
 import { LeveledChar } from "@/data"
 import type { AbyssDungeon } from "../data/d/abyss.data"
 import { abyssDungeonMap, charMap } from "../data/d/index"
 import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
 
-const searchKeyword = ref("")
-const selectedDungeon = ref<AbyssDungeon | null>(null)
-const selectedDungeonGroup = ref<string>("")
+const searchKeyword = useSessionStorage<string>("abyss.searchKeyword", "")
+const selectedDungeonId = useSessionStorage<number>("abyss.selectedDungeon", 0)
+const selectedDungeonGroup = useSessionStorage<string>("abyss.selectedDungeonGroup", "")
+
+// 获取选中的深渊副本对象
+const selectedDungeon = computed(() => {
+    return selectedDungeonId.value ? abyssDungeonMap.get(selectedDungeonId.value) || null : null
+})
 
 const allDungeons = computed(() => Array.from(abyssDungeonMap.values()))
 
@@ -28,7 +34,7 @@ const filteredDungeons = computed(() => {
 })
 
 function selectDungeon(dungeon: AbyssDungeon | null) {
-    selectedDungeon.value = dungeon
+    selectedDungeonId.value = dungeon?.id || 0
 }
 
 function getCharName(charId: number): string {

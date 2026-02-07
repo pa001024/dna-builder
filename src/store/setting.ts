@@ -111,6 +111,7 @@ export const useSettingStore = defineStore("setting", {
             // 创建新的初始化Promise
             apiInitPromise = (async () => {
                 try {
+                    const lang = this.lang === "zh-CN" ? "zh-Hans" : this.lang === "zh-TW" ? "zh-Hant" : this.lang
                     this.dnaUserUID = user.uid
                     const api = new DNAAPI({
                         dev_code: user.dev_code,
@@ -119,6 +120,7 @@ export const useSettingStore = defineStore("setting", {
                         debug: import.meta.env.DEV,
                         mode: "android",
                         server: user.server || "cn",
+                        lang,
                         fetchFn: tauriFetch,
                     })
                     const res = await api.loginLog()

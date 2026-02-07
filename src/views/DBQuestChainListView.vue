@@ -1,10 +1,16 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { useSessionStorage } from "@vueuse/core"
+import { computed } from "vue"
 import questChainData, { QuestChain } from "@/data/d/questchain.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
-const searchKeyword = ref("")
-const selectedQuestChain = ref<QuestChain | null>(null)
+const searchKeyword = useSessionStorage<string>("questchain.searchKeyword", "")
+const selectedQuestChainId = useSessionStorage<number>("questchain.selectedQuestChain", 0)
+
+// 根据 ID 获取选中的任务剧情
+const selectedQuestChain = computed(() => {
+    return selectedQuestChainId.value ? questChainData.find(questChain => questChain.id === selectedQuestChainId.value) || null : null
+})
 
 // 按关键词筛选任务剧情
 const filteredQuestChains = computed(() => {
@@ -29,7 +35,7 @@ const filteredQuestChains = computed(() => {
 })
 
 function selectQuestChain(questChain: QuestChain | null) {
-    selectedQuestChain.value = questChain
+    selectedQuestChainId.value = questChain?.id || 0
 }
 </script>
 
@@ -55,15 +61,17 @@ function selectQuestChain(questChain: QuestChain | null) {
                             v-for="questChain in filteredQuestChains"
                             :key="questChain.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedQuestChain?.id === questChain.id }"
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedQuestChainId === questChain.id }"
                             @click="selectQuestChain(questChain)"
                         >
                             <div class="flex items-start justify-between">
                                 <div class="flex-1">
                                     <div class="font-medium">{{ questChain.name }}</div>
                                     <div class="text-xs opacity-70 mt-1">
-                                        <span>{{ questChain.chapterName }} {{ questChain.chapterNumber || '' }}</span>
-                                        <span v-if="questChain.main" class="ml-2 px-1.5 py-0.5 rounded bg-info text-info-content">主线</span>
+                                        <span>{{ questChain.chapterName }} {{ questChain.chapterNumber || "" }}</span>
+                                        <span v-if="questChain.main" class="ml-2 px-1.5 py-0.5 rounded bg-info text-info-content"
+                                            >主线</span
+                                        >
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">

@@ -6,7 +6,12 @@ import { type HardBoss, hardBossMap } from "../data/d/hardboss.data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
 const searchKeyword = useSessionStorage<string>("hardboss.searchKeyword", "")
-const selectedBoss = useSessionStorage<HardBoss | null>("hardboss.selectedBoss", null)
+const selectedBossId = useSessionStorage<number>("hardboss.selectedBoss", 0)
+
+// 根据 ID 获取选中的 Boss
+const selectedBoss = computed(() => {
+    return selectedBossId.value ? hardBossMap.get(selectedBossId.value) || null : null
+})
 
 // 按关键词筛选Boss
 const filteredBosses = computed(() => {
@@ -39,7 +44,7 @@ const filteredBosses = computed(() => {
 })
 
 function selectBoss(boss: HardBoss | null) {
-    selectedBoss.value = boss
+    selectedBossId.value = boss?.id || 0
 }
 </script>
 
@@ -65,7 +70,7 @@ function selectBoss(boss: HardBoss | null) {
                             v-for="boss in filteredBosses"
                             :key="boss.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedBoss?.id === boss.id }"
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedBossId === boss.id }"
                             @click="selectBoss(boss)"
                         >
                             <div class="flex items-start justify-between">

@@ -1,11 +1,16 @@
 <script lang="ts" setup>
 import { useSessionStorage } from "@vueuse/core"
 import { computed } from "vue"
-import npcData, { NPC } from "@/data/d/npc.data"
+import npcData, { NPC, npcMap } from "@/data/d/npc.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
 const searchKeyword = useSessionStorage<string>("npc.searchKeyword", "")
-const selectedNpc = useSessionStorage<NPC | null>("npc.selectedNpc", null)
+const selectedNpcId = useSessionStorage<number>("npc.selectedNpc", 0)
+
+// 根据 ID 获取选中的 NPC
+const selectedNpc = computed(() => {
+    return selectedNpcId.value ? npcMap.get(selectedNpcId.value) || null : null
+})
 
 // 按关键词筛选 NPC
 const filteredNpcs = computed(() => {
@@ -30,7 +35,7 @@ const filteredNpcs = computed(() => {
 })
 
 function selectNpc(npc: NPC | null) {
-    selectedNpc.value = npc
+    selectedNpcId.value = npc?.id || 0
 }
 </script>
 
@@ -56,7 +61,7 @@ function selectNpc(npc: NPC | null) {
                             v-for="npc in filteredNpcs"
                             :key="npc.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedNpc?.id === npc.id }"
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedNpcId === npc.id }"
                             @click="selectNpc(npc)"
                         >
                             <div class="flex items-start justify-between">

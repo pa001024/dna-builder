@@ -5,8 +5,13 @@ import walnutData, { Walnut } from "../data/d/walnut.data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
 const searchKeyword = useSessionStorage<string>("walnut.searchKeyword", "")
-const selectedWalnut = useSessionStorage<Walnut | null>("walnut.selectedWalnut", null)
+const selectedWalnutId = useSessionStorage<number>("walnut.selectedWalnut", 0)
 const selectedType = useSessionStorage<number>("walnut.selectedType", 0)
+
+// 根据 ID 获取选中的密函
+const selectedWalnut = computed(() => {
+    return selectedWalnutId.value ? walnutData.find(walnut => walnut.id === selectedWalnutId.value) || null : null
+})
 
 // 所有密函类型
 const allTypes = computed(() => {
@@ -38,7 +43,7 @@ const filteredWalnuts = computed(() => {
 })
 
 function selectWalnut(walnut: Walnut | null) {
-    selectedWalnut.value = walnut
+    selectedWalnutId.value = walnut?.id || 0
 }
 </script>
 
@@ -86,7 +91,7 @@ function selectWalnut(walnut: Walnut | null) {
                             v-for="walnut in filteredWalnuts"
                             :key="walnut.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedWalnut?.id === walnut.id }"
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedWalnutId === walnut.id }"
                             @click="selectWalnut(walnut)"
                         >
                             <div class="flex items-start justify-between">

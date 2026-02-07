@@ -366,25 +366,48 @@ async function generateScreenshot() {
                     <h3 class="card-title mb-4">基本信息</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div class="bg-base-200 p-3 rounded-lg">
-                            <div class="text-sm font-medium">每日任务</div>
+                            <div class="text-sm font-medium">
+                                每日任务
+                                <span
+                                    v-if="shortNoteInfo.currentTaskProgress >= shortNoteInfo.maxDailyTaskProgress"
+                                    class="text-xs text-base-content/70"
+                                    >已完成
+                                </span>
+                            </div>
                             <div class="text-xl font-bold">
                                 {{ shortNoteInfo.currentTaskProgress }} / {{ shortNoteInfo.maxDailyTaskProgress }}
                             </div>
                         </div>
                         <div class="bg-base-200 p-3 rounded-lg">
-                            <div class="text-sm font-medium">迷津奖励</div>
+                            <div class="text-sm font-medium">
+                                迷津奖励
+                                <span
+                                    v-if="shortNoteInfo.rougeLikeRewardCount >= shortNoteInfo.rougeLikeRewardTotal"
+                                    class="text-xs text-base-content/70"
+                                    >已完成</span
+                                >
+                            </div>
                             <div class="text-xl font-bold">
                                 {{ shortNoteInfo.rougeLikeRewardCount }} / {{ shortNoteInfo.rougeLikeRewardTotal }}
                             </div>
                         </div>
                         <div class="bg-base-200 p-3 rounded-lg">
-                            <div class="text-sm font-medium">竞逐次数</div>
-                            <div class="text-xl font-bold">{{ shortNoteInfo.dungeonReward }} / {{ shortNoteInfo.dungeonRewardTotal }}</div>
+                            <div class="text-sm font-medium">
+                                竞逐奖励 <span v-if="shortNoteInfo.dungeonReward == 0" class="text-xs text-base-content/70">已完成</span>
+                            </div>
+                            <div class="text-xl font-bold">
+                                {{ shortNoteInfo.dungeonRewardTotal - shortNoteInfo.dungeonReward }} /
+                                {{ shortNoteInfo.dungeonRewardTotal }}
+                            </div>
                         </div>
                         <div class="bg-base-200 p-3 rounded-lg">
-                            <div class="text-sm font-medium">周本次数</div>
+                            <div class="text-sm font-medium">
+                                周本奖励
+                                <span v-if="shortNoteInfo.hardBossRewardCount == 0" class="text-xs text-base-content/70">已完成</span>
+                            </div>
                             <div class="text-xl font-bold">
-                                {{ shortNoteInfo.hardBossRewardCount }} / {{ shortNoteInfo.hardBossRewardTotal }}
+                                {{ shortNoteInfo.hardBossRewardTotal - shortNoteInfo.hardBossRewardCount }} /
+                                {{ shortNoteInfo.hardBossRewardTotal }}
                             </div>
                         </div>
                     </div>

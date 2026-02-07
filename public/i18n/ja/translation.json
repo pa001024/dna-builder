@@ -3372,6 +3372,13 @@
         "unfinishedFirst": "未完了優先",
         "unnamedAchievement": "名前のない実績"
     },
+    "achievement-detail": {
+        "title": "実績詳細"
+    },
+    "achievement-list": {
+        "desc": "ゲーム実績の進捗を確認",
+        "title": "実績一覧"
+    },
     "activity-calendar": {
         "click_to_complete": "クリックして完了をマーク",
         "drag_hint": "ドラッグして表示",
@@ -3578,6 +3585,8 @@
     "database": {
         "abyss_dungeon": "深淵ダンジョン",
         "abyss_dungeon_desc": "深淵ダンジョン情報とバフを確認",
+        "achievement": "実績",
+        "achievement_desc": "実績情報と報酬を確認",
         "char": "キャラクター",
         "char_desc": "キャラクターの情報と属性を確認",
         "desc": "ゲームデータのクエリ",
@@ -3603,7 +3612,7 @@
         "pet_desc": "ジェネモンの情報とスキルを確認",
         "questchain": "クエストチェイン",
         "questchain_desc": "クエストチェインの情報と会話を確認",
-        "rank": "ランキング報酬",
+        "rank": "月狩り人の階段",
         "rank_desc": "ランキング大会の報酬を確認",
         "shop": "ショップ",
         "shop_desc": "ショップアイテム情報を表示",

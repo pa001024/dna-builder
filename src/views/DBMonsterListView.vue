@@ -1,16 +1,20 @@
 <script lang="ts" setup>
 import { useSessionStorage } from "@vueuse/core"
 import { computed } from "vue"
-import { LeveledMonster } from "@/data"
+import { LeveledMonster, monsterMap } from "@/data"
 import monsterData from "../data/d/monster.data"
-import type { Monster } from "../data/data-types"
 import { Faction } from "../data/data-types"
 import { getMonsterType } from "../utils/monster-utils"
 import { matchPinyin } from "../utils/pinyin-utils"
 
 const searchKeyword = useSessionStorage<string>("monster.searchKeyword", "")
-const selectedMonster = useSessionStorage<Monster | null>("monster.selectedMonster", null)
+const selectedMonsterId = useSessionStorage<number>("monster.selectedMonster", 0)
 const selectedFaction = useSessionStorage<number | "">("monster.selectedFaction", "")
+
+// 根据 ID 获取选中的怪物
+const selectedMonster = computed(() => {
+    return selectedMonsterId.value ? monsterMap.get(selectedMonsterId.value) || null : null
+})
 
 // 获取所有可用阵营
 const factions = computed(() => {
@@ -101,8 +105,8 @@ function getFactionName(faction: number | undefined): string {
                             v-for="monster in filteredMonsters"
                             :key="monster.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedMonster?.id === monster.id }"
-                            @click="selectedMonster = monster"
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedMonsterId === monster.id }"
+                            @click="selectedMonsterId = monster.id"
                         >
                             <div class="flex items-start justify-between">
                                 <div class="flex items-center gap-2">
@@ -141,7 +145,7 @@ function getFactionName(faction: number | undefined): string {
             <div
                 v-if="selectedMonster"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedMonster = null"
+                @click="selectedMonsterId = 0"
             >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>

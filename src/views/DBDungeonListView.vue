@@ -1,13 +1,19 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { useSessionStorage } from "@vueuse/core"
+import { computed } from "vue"
 import { LeveledChar } from "@/data"
 import dungeonData from "../data/d/dungeon.data"
 import { getDungeonName, getDungeonRewardNames, getDungeonType } from "../utils/dungeon-utils"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = ref("")
-const selectedDungeon = ref<(typeof dungeonData)[0] | null>(null)
-const selectedType = ref<string>("")
+const searchKeyword = useSessionStorage<string>("dungeon.searchKeyword", "")
+const selectedDungeonId = useSessionStorage<number>("dungeon.selectedDungeon", 0)
+const selectedType = useSessionStorage<string>("dungeon.selectedType", "")
+
+// 根据 ID 获取选中的副本
+const selectedDungeon = computed(() => {
+    return selectedDungeonId.value ? dungeonData.find(dungeon => dungeon.id === selectedDungeonId.value) || null : null
+})
 
 // 所有副本类型
 const allTypes = computed(() => {
@@ -52,7 +58,7 @@ const filteredDungeons = computed(() => {
 })
 
 function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
-    selectedDungeon.value = dungeon
+    selectedDungeonId.value = dungeon?.id || 0
 }
 </script>
 
@@ -102,7 +108,7 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
                             v-for="dungeon in filteredDungeons"
                             :key="dungeon.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedDungeon?.id === dungeon.id }"
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedDungeonId === dungeon.id }"
                             @click="selectDungeon(dungeon)"
                         >
                             <div class="flex items-start justify-between">

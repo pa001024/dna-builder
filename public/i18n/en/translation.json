@@ -3375,6 +3375,13 @@
         "unfinishedFirst": "Unfinished First",
         "unnamedAchievement": "Unnamed Achievement"
     },
+    "achievement-detail": {
+        "title": "Achievement Details"
+    },
+    "achievement-list": {
+        "desc": "Track game achievement progress",
+        "title": "Achievement List"
+    },
     "activity-calendar": {
         "click_to_complete": "Click to mark as completed",
         "drag_hint": "Drag to view",
@@ -3581,6 +3588,8 @@
     "database": {
         "abyss_dungeon": "Abyss Dungeon",
         "abyss_dungeon_desc": "View abyss dungeon information and buffs",
+        "achievement": "Achievements",
+        "achievement_desc": "View achievement information and rewards",
         "char": "Character",
         "char_desc": "View character information and attributes",
         "desc": "Query game data",
@@ -3606,7 +3615,7 @@
         "pet_desc": "View Geniemon info and skills",
         "questchain": "Quest Chain",
         "questchain_desc": "View quest chain information and dialogues",
-        "rank": "Rank Rewards",
+        "rank": "Phoxhunter Summit",
         "rank_desc": "View ranking tournament rewards",
         "shop": "Shop",
         "shop_desc": "View shop item information",

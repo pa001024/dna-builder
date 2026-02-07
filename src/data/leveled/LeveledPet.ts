@@ -67,8 +67,10 @@ export class LeveledPet implements Pet {
         if (this._originalPetData.主动) {
             const activeValues = this.calculateSkillValues(this._originalPetData.主动)
             this.主动 = {
+                id: this._originalPetData.主动.id,
                 描述: this.formatSkillDescription(this._originalPetData.主动.描述, activeValues),
                 值: this._originalPetData.主动.值,
+                cd: this._originalPetData.主动.cd,
             }
         }
 

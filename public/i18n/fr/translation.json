@@ -3228,6 +3228,13 @@
         "unfinishedFirst": "Non terminé en premier",
         "unnamedAchievement": "Succès sans nom"
     },
+    "achievement-detail": {
+        "title": "Détails des succès"
+    },
+    "achievement-list": {
+        "desc": "Suivi de la progression des succès du jeu",
+        "title": "Liste des succès"
+    },
     "activity-calendar": {
         "click_to_complete": "Cliquez pour marquer comme terminé",
         "drag_hint": "Faites glisser pour voir",
@@ -3468,6 +3475,8 @@
     "database": {
         "abyss_dungeon": "Donjon des Abysses",
         "abyss_dungeon_desc": "Voir les informations et buffs du donjon des Abysses",
+        "achievement": "Succès",
+        "achievement_desc": "Voir les informations des succès et les récompenses",
         "char": "Personnage",
         "char_desc": "Consulter les informations et attributs des personnages",
         "desc": "Rechercher des données de jeu",
@@ -3493,7 +3502,7 @@
         "pet_desc": "Voir les informations et compétences du Géniemon",
         "questchain": "Chaîne de quêtes",
         "questchain_desc": "Voir les informations et dialogues de la chaîne de quêtes",
-        "rank": "Récompenses de rang",
+        "rank": "Sommet du Chasseur de Phoxène",
         "rank_desc": "Voir les récompenses du tournoi de classement",
         "shop": "Boutique",
         "shop_desc": "Voir les informations sur les articles de la boutique",

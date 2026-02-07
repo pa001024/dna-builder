@@ -113,7 +113,10 @@ function getPrmName(id: number): string {
         </div>
 
         <div v-if="leveledPet.主动" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-1">主动技能</div>
+            <div class="text-xs text-base-content/70 mb-1">
+                主动技能
+                <span class="text-xs text-base-content/70">CD: {{ leveledPet.主动.cd }}</span>
+            </div>
             <div class="text-sm whitespace-pre-wrap">
                 {{ leveledPet.主动.描述 }}
             </div>

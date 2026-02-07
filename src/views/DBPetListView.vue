@@ -1,13 +1,20 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { useSessionStorage } from "@vueuse/core"
+import { computed } from "vue"
+import { petMap } from "../data/d"
 import petData, { type Pet, petEntrys } from "../data/d/pet.data"
 import { LeveledPet } from "../data/leveled/LeveledPet"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = ref("")
-const selectedPet = ref<Pet | null>(null)
-const selectedType = ref<number | 0>(0)
-const selectedQuality = ref<number | 0>(0)
+const searchKeyword = useSessionStorage<string>("pet.searchKeyword", "")
+const selectedPetId = useSessionStorage<number>("pet.selectedPetId", 0)
+const selectedType = useSessionStorage<number>("pet.selectedType", 0)
+const selectedQuality = useSessionStorage<number>("pet.selectedQuality", 0)
+
+// 根据 ID 获取选中的魔灵
+const selectedPet = computed(() => {
+    return selectedPetId.value ? petMap.get(selectedPetId.value) || null : null
+})
 
 const types = computed(() => {
     const typeSet = new Set<number>()
@@ -189,8 +196,8 @@ function formatSkillDescription(pet: Pet, type: "主动" | "被动"): string {
                             v-for="item in filteredPets"
                             :key="item.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedPet?.id === item.id }"
-                            @click="selectedPet = selectedType === 999 ? null : (item as Pet)"
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedPetId === item.id }"
+                            @click="selectedPetId = selectedType === 999 ? 0 : (item as Pet).id"
                         >
                             <div class="flex items-start gap-2">
                                 <div class="w-12 h-12 overflow-hidden rounded-full">
@@ -252,7 +259,7 @@ function formatSkillDescription(pet: Pet, type: "主动" | "被动"): string {
             <div
                 v-if="selectedPet"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedPet = null"
+                @click="selectedPetId = 0"
             >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>

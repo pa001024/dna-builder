@@ -2,17 +2,22 @@
 import { useLocalStorage, useSessionStorage } from "@vueuse/core"
 import { computed } from "vue"
 import { LeveledChar } from "../data"
+import { charMap } from "../data/d"
 import charData from "../data/d/char.data"
-import type { Char } from "../data/data-types"
 import { matchPinyin } from "../utils/pinyin-utils"
 
 const searchKeyword = useSessionStorage<string>("char.searchKeyword", "")
-const selectedChar = useSessionStorage<Char | null>("char.selectedChar", null)
+const selectedCharId = useSessionStorage<number>("char.selectedChar", 0)
 const selectedElem = useSessionStorage<string>("char.selectedElem", "")
 const selectedVersion = useSessionStorage<string>("char.selectedVersion", "")
 const selectedTag = useSessionStorage<string>("char.selectedTag", "")
 const selectedProficiency = useSessionStorage<string>("char.selectedProficiency", "")
 const selectedFaction = useSessionStorage<string>("char.selectedFaction", "")
+
+// 根据 ID 获取选中的角色
+const selectedChar = computed(() => {
+    return selectedCharId.value ? charMap.get(selectedCharId.value) || null : null
+})
 
 // 过滤选项显示控制
 const showElemFilter = useLocalStorage("char.showElemFilter", false)
@@ -299,8 +304,8 @@ function toggleFilter(filterName: string, show: boolean) {
                             v-for="char in filteredChars"
                             :key="char.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedChar?.id === char.id }"
-                            @click="selectedChar = char"
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedCharId === char.id }"
+                            @click="selectedCharId = char.id"
                         >
                             <div class="flex items-start justify-between">
                                 <div class="flex items-center gap-2">
@@ -344,7 +349,7 @@ function toggleFilter(filterName: string, show: boolean) {
             <div
                 v-if="selectedChar"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedChar = null"
+                @click="selectedCharId = 0"
             >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>

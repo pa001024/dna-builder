@@ -4,7 +4,12 @@ import { computed } from "vue"
 import shopData from "../data/d/shop.data"
 
 const searchKeyword = useSessionStorage<string>("shop.searchKeyword", "")
-const selectedShop = useSessionStorage<(typeof shopData)[0] | null>("shop.selectedShop", null)
+const selectedShopId = useSessionStorage<string>("shop.selectedShop", "")
+
+// 根据 ID 获取选中的商店
+const selectedShop = computed(() => {
+    return selectedShopId.value ? shopData.find(shop => shop.id === selectedShopId.value) || null : null
+})
 
 // 按关键词筛选商店
 const filteredShops = computed(() => {
@@ -36,7 +41,7 @@ const filteredShops = computed(() => {
 })
 
 function selectShop(shop: (typeof shopData)[0] | null) {
-    selectedShop.value = shop
+    selectedShopId.value = shop?.id || ""
 }
 </script>
 
@@ -62,7 +67,7 @@ function selectShop(shop: (typeof shopData)[0] | null) {
                             v-for="shop in filteredShops"
                             :key="shop.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedShop?.id === shop.id }"
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedShopId === shop.id }"
                             @click="selectShop(shop)"
                         >
                             <div class="flex items-start justify-between">

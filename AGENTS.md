@@ -1,19 +1,19 @@
 # AGENTS.md
 
-This file provides guidelines for agentic coding assistants working on the dna-builder codebase.
+Guidelines for agentic coding assistants working on the dna-builder codebase.
 
 ## Build / Lint / Test Commands
 
 ### Frontend (Vue + TypeScript)
 
 ```bash
-pnpm dev           # Development
-pnpm build         # Build
-pnpm lint          # Type checking with vue-tsc
-pnpm test          # Run all tests
-pnpm test path/to/test.test.ts  # Run single test file
-pnpm coverage      # Run tests with coverage
-pnpm format        # Format code with prettier
+pnpm dev                              # Development server (http://localhost:1420/)
+pnpm build                            # Production build
+pnpm lint                             # Biome lint --fix + vue-tsc type checking
+pnpm test                             # Run all tests (vitest run)
+pnpm test src/data/tests/foo.test.ts  # Run single test file
+pnpm coverage                         # Tests with coverage
+pnpm format                           # Format with Biome
 ```
 
 ### Desktop App (Tauri + Rust)
@@ -26,9 +26,9 @@ pnpm tauri build   # Build desktop app
 ### Server (Bun + Elysia)
 
 ```bash
-cd server && bun run dev        # Start development server
-bun run gen        # Generate database migrations
-bun run migrate    # Run migrations
+cd server && bun run dev   # Start dev server (port 8887)
+bun run gen                # Generate database migrations
+bun run migrate            # Run migrations
 ```
 
 ### Rust (MCP Server)
@@ -37,91 +37,32 @@ bun run migrate    # Run migrations
 cd mcp_server && cargo build --release
 ```
 
-## i18n Workflow
-
-**Tool**: `tools/i18n_tool.ts` - Manage i18n translations
-
-### Export Missing Translations
-
-When zh-CN has translations that are missing in other languages:
-
-```bash
-bun tools/i18n_tool.ts export
-```
-
-This creates `tools/i18n_diff.json` with structure:
-
-```json
-{
-    "key.path": {
-        "zh-CN": "原文",
-        "en": "",
-        "ja": "",
-        "ko": "",
-        "zh-TW": ""
-    }
-}
-```
-
-### Import Completed Translations
-
-Fill in the missing translations in the diff file, then:
-
-```bash
-bun tools/i18n_tool.ts import
-```
-
-This merges translations back to language files and deletes the diff file.
-
-**Important**:
-
-- Only export translations where zh-CN has the value and other languages are missing
-- The tool handles nested JSON structures automatically
-- Always verify translations before importing
-
-## Icon Management Workflow
-
-**Tool**: `tools/icon_tool.ts` - 管理图标
-
-```bash
-bun tools/icon_tool.ts add <icon-name>     # 从 remixicon 添加图标
-bun tools/icon_tool.ts check               # 检查使用情况
-bun tools/icon_tool.ts clean               # 删除未使用的图标
-bun tools/icon_tool.ts ignore <icon>       # 忽略特定图标
-bun tools/icon_tool.ts unignore <icon>     # 取消忽略
-bun tools/icon_tool.ts ignored              # 列出已忽略的图标
-bun tools/icon_tool.ts list [pattern]       # 搜索可用图标
-```
-
-**示例**:
-
-```bash
-bun tools/icon_tool.ts add subtract-line    # 添加 ri:subtract-line
-bun tools/icon_tool.ts list heart         # 搜索包含 heart 的图标
-bun tools/icon_tool.ts ignore po-A         # 忽略 po-A 图标
-```
-
-**说明**:
-
-- 图标存储在 `src/components/Icon.vue` 的 `data` 对象中
-- Remixicon 图标使用 `ri:` 前缀
-- 自动扫描 `.vue`, `.ts`, `.tsx` 文件中的图标使用
-- 支持多种绑定模式（静态/动态/模板字符串/条件/类型注解）
-- 扫描时自动排除 `Icon.vue` 本身
-- clean 前建议先运行 check 确认
-
 ## Code Style Guidelines
 
-### Formatting
+### Formatting (Biome)
 
+- **Formatter**: Biome (`biome.json`) — NOT Prettier
 - **Indentation**: 4 spaces (no tabs)
-- **Semicolons**: Omitted
-- **Print width**: 140 characters
-- **Quotes**: Double quotes preferred
+- **Line width**: 140 characters
+- **Semicolons**: `asNeeded` (omit when possible)
+- **Quotes**: Double quotes
+- **Trailing commas**: ES5 style
+- **Arrow parens**: As needed (omit for single param)
+- **Line endings**: LF
+- **Imports**: Auto-organized by Biome assist
 
-### Vue / TypeScript
+### TypeScript Config
 
-**Imports**: Use named imports, import types with `type` keyword
+- **Strict mode**: Enabled (`strict: true`)
+- **No unused locals/params**: Enforced
+- **Path alias**: `@/*` → `./src/*`
+- **Target**: ESNext, bundler module resolution
+- **JSX**: Preserve with Vue JSX import source
+- **Decorators**: `experimentalDecorators` enabled
+
+### Vue / TypeScript Conventions
+
+**Imports**: Named imports, type-only imports with `type` keyword
 
 ```typescript
 import { ref, computed } from "vue"
@@ -129,15 +70,21 @@ import { defineStore } from "pinia"
 import type { SomeType } from "./types"
 ```
 
-**Naming Conventions**:
+**Naming**:
 
-- Components: PascalCase (e.g., `Icon.vue`, `CharBuildView.vue`)
-- Utilities/Composables: camelCase (e.g., `useCharSettings`, `formatProp`)
-- Stores: camelCase with `use` prefix (e.g., `useGameStore`, `useUIStore`)
-- Constants: UPPER_SNAKE_CASE (e.g., `GAME_PROCESS`)
-- Types/Interfaces: PascalCase (e.g., `CharBuild`, `LeveledWeapon`)
+- Components: PascalCase (`Icon.vue`, `CharBuildView.vue`)
+- Utilities/Composables: camelCase (`useCharSettings`, `formatProp`)
+- Stores: `use` prefix (`useGameStore`, `useUIStore`)
+- Constants: UPPER_SNAKE_CASE (`GAME_PROCESS`)
+- Types/Interfaces: PascalCase (`CharBuild`, `LeveledWeapon`)
 
-**Vue Specifics**: Use `<script setup lang="ts">` for Vue 3 components, prefer Composition API over Options API, use Pinia for state management with `defineStore()`, use `defineProps<>()` and `defineEmits<>()` for type-safe props/emits
+**Vue Specifics**:
+
+- `<script setup lang="ts">` for all components
+- Composition API only (no Options API)
+- Pinia with `defineStore()` for state
+- `defineProps<>()` and `defineEmits<>()` for type-safe props/emits
+- Auto component imports via `unplugin-vue-components/vite`
 
 **Error Handling**:
 
@@ -155,101 +102,79 @@ async function someAsync() {
 
 ### Rust (Tauri / MCP Server)
 
-**Naming Conventions**:
-
-- Functions: snake_case (e.g., `import_mod`, `get_game_install`)
-- Structs: PascalCase (e.g., `Particle`, `AppHandle`)
-- Constants: UPPER_SNAKE_CASE (e.g., `GAME_PROCESS`)
-
-**Commands**: Use `#[tauri::command]` attribute, return `Result<T, String>`
-
-```rust
-#[tauri::command]
-async fn my_command(param: String) -> Result<String, String> {
-    Ok("success".to_string())
-}
-```
-
-**Error Handling**: Use `Result<T, E>` with `?` operator, prefer `eprintln!` for errors
-
-### Server (Bun + Elysia)
-
-**Patterns**: Create Elysia app, use plugins, listen on port (default: 8887)
-
-```typescript
-const app = new Elysia()
-    .get("/", () => Bun.file("../dist/index.html"))
-    .use(cors())
-    .use(yogaPlugin())
-
-app.listen(8887)
-```
+- Functions: snake_case, Structs: PascalCase, Constants: UPPER_SNAKE_CASE
+- Tauri commands: `#[tauri::command]`, return `Result<T, String>`
+- Error handling: `Result<T, E>` with `?` operator
 
 ## Testing Guidelines
 
-**Framework**: Vitest
-
-**Test file location**: `src/data/tests/` or alongside source files
-
-**Naming**: `*.test.ts`
-
-**Basic structure**:
+- **Framework**: Vitest
+- **Location**: `src/data/tests/` or alongside source files
+- **Naming**: `*.test.ts`
+- **Excludes**: `server/**`, `externals/**`
+- **Coverage thresholds**: Lines 80%, Functions 80%, Branches 70%, Statements 80%
 
 ```typescript
 import { describe, it, expect } from "vitest"
 
 describe("Feature", () => {
     it("should do something", () => {
-        const result = functionUnderTest()
-        expect(result).toBe(expected)
+        expect(functionUnderTest()).toBe(expected)
     })
 })
 ```
-
-**Coverage thresholds**: Lines: 80%, Functions: 80%, Branches: 70%, Statements: 80%
 
 ## Project Structure
 
 ```
 src/
 ├── components/      # Vue components
-├── data/           # Game data and calculations (tests in data/tests/)
-├── store/          # Pinia stores
-├── views/          # Page components
-├── api/            # API calls
-└── utils/          # Utility functions
-server/
-└── src/            # Backend code
-src-tauri/
-└── src/            # Rust backend code
-mcp_server/
-└── src/            # MCP server Rust code
+├── data/            # Game data and calculations (tests in data/tests/)
+├── store/           # Pinia stores
+├── views/           # Page components
+├── api/             # API calls
+├── utils/           # Utility functions
+└── router.ts        # Route config
+server/              # Bun + Elysia backend
+src-tauri/           # Tauri Rust backend
+mcp_server/          # MCP server (Rust)
+tools/               # Dev tools (i18n_tool.ts, icon_tool.ts)
+externals/dna-api/   # DNA API package
+public/i18n/         # Translation files
 ```
 
 ## Key Technologies
 
-- **Frontend**: Vue 3, TypeScript, Tailwind CSS, daisyUI, Radix Vue
-- **State**: Pinia
+- **Frontend**: Vue 3, TypeScript, Tailwind CSS v4, daisyUI v5, reka-ui
+- **State**: Pinia v3
 - **Routing**: Vue Router
 - **i18n**: i18next
 - **Desktop**: Tauri 2 (Rust + WebView2)
-- **Server**: Bun + Elysia + Drizzle ORM + GraphQL
+- **Server**: Bun + Elysia + Drizzle ORM + GraphQL (graphql-yoga)
 - **Testing**: Vitest
-- **Build**: Vite
+- **Build**: Vite v7
+- **Linting/Formatting**: Biome
 
-## Important Notes
+## Dev Tools
 
-- It is prohibited to remove functions, skip processing, or simplify processing due to implementation difficulties for any reason. It is prohibited to use functions marked as TODO instead of actual code implementation.
-- **DO NOT RUN DEV/BUILD**: Do not run the dev/build command, directly view the http://localhost:1420/ in the browser.
-- **Maintain consistency**: Check other files in the same directory before writing to maintain a consistent code style.
-- **CHINESE COMMENTS** needs for every function or complex logic, no need for simple code lines
-- **JSDOC**: Use JSDoc for function documentation, including parameters, return values, and exceptions
-- Chinese is acceptable in comments and strings (Chinese project)
-- Use `@ts-ignore` sparingly and with justification
-- Always run `pnpm lint` after changes to ensure type safety
-- Always run `pnpm test` to ensure tests pass
-- Prefer native APIs over libraries when possible
-- Follow existing patterns in the codebase
-- Use `unplugin-vue-components/vite` for automatic component imports
-- Use `bun -e "code"` for inline code execution
-- When you start a complex task, first use git add to add it to the staging area. Then you can use checkout to revert incorrect changes; otherwise, using git checkout or rm to delete unstaged files is not allowed.
+- **i18n**: `bun tools/i18n_tool.ts export|import` — export missing translations, import completed ones
+- **Icons**: `bun tools/icon_tool.ts add|check|clean|list` — manage icons in `src/components/Icon.vue`
+- **API gen**: `pnpm gen` — generate API calls from tools/generateApiCalls.ts
+
+## Git Hooks (Husky)
+
+Pre-commit hook auto-runs: version bump → `biome format` → `git add .`
+
+**Warning**: The pre-commit hook runs `git add .` — all files in working directory get staged.
+
+## Important Rules
+
+1. **DO NOT RUN `pnpm dev` or `pnpm build`** — view http://localhost:1420/ directly in browser
+2. **CHINESE COMMENTS**: Required for every function and complex logic block (JSDoc format)
+3. **JSDoc**: Use for function documentation including params, return values, exceptions
+4. **No shortcuts**: Never remove functions, skip processing, or use TODO placeholders instead of real code
+5. **Consistency**: Check sibling files before writing to match existing patterns
+6. **Always verify**: Run `pnpm lint` and `pnpm test` after changes
+7. **Git workflow**: For complex tasks, `git add` to staging first so you can `git checkout` to revert mistakes
+8. **Prefer native APIs** over adding new library dependencies
+9. **Use `bun -e "code"`** for inline code execution

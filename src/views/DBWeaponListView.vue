@@ -1,15 +1,20 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { useSessionStorage } from "@vueuse/core"
+import { computed } from "vue"
 import { LeveledWeapon } from "@/data"
 import weaponData from "../data/d/weapon.data"
-import type { Weapon } from "../data/data-types"
 import { formatProp } from "../util"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = ref("")
-const selectedWeapon = ref<Weapon | null>(null)
-const selectedCategory = ref<string | "">("")
-const selectedDamageType = ref<string | "">("")
+const searchKeyword = useSessionStorage<string>("weapon.searchKeyword", "")
+const selectedWeaponId = useSessionStorage<number>("weapon.selectedWeapon", 0)
+const selectedCategory = useSessionStorage<string>("weapon.selectedCategory", "")
+const selectedDamageType = useSessionStorage<string>("weapon.selectedDamageType", "")
+
+// 根据 ID 获取选中的武器
+const selectedWeapon = computed(() => {
+    return selectedWeaponId.value ? weaponData.find(weapon => weapon.id === selectedWeaponId.value) || null : null
+})
 
 const categories = computed(() => {
     const categorySet = new Set<string>()
@@ -135,8 +140,8 @@ const filteredWeapons = computed(() => {
                             v-for="weapon in filteredWeapons"
                             :key="weapon.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedWeapon?.id === weapon.id }"
-                            @click="selectedWeapon = weapon"
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedWeaponId === weapon.id }"
+                            @click="selectedWeaponId = weapon.id"
                         >
                             <div class="flex items-start justify-between">
                                 <div class="flex">
@@ -194,7 +199,7 @@ const filteredWeapons = computed(() => {
             <div
                 v-if="selectedWeapon"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedWeapon = null"
+                @click="selectedWeaponId = 0"
             >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>

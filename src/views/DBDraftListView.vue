@@ -1,14 +1,19 @@
 <script lang="ts" setup>
 import { useSessionStorage } from "@vueuse/core"
 import { computed } from "vue"
+import { draftMap } from "../data/d"
 import draftData from "../data/d/draft.data"
-import type { Draft } from "../data/data-types"
 import { matchPinyin } from "../utils/pinyin-utils"
 
 const searchKeyword = useSessionStorage<string>("draft.searchKeyword", "")
-const selectedDraft = useSessionStorage<Draft | null>("draft.selectedDraft", null)
+const selectedDraftId = useSessionStorage<number>("draft.selectedDraft", 0)
 const selectedType = useSessionStorage<string | "">("draft.selectedType", "")
 const selectedRarity = useSessionStorage<number | "">("draft.selectedRarity", "")
+
+// 根据 ID 获取选中的图纸
+const selectedDraft = computed(() => {
+    return selectedDraftId.value ? draftMap.get(selectedDraftId.value) || null : null
+})
 
 // 获取所有可用类型
 const types = computed(() => {
@@ -156,8 +161,8 @@ function getTypeName(type: string): string {
                             v-for="draft in filteredDrafts"
                             :key="draft.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedDraft?.id === draft.id }"
-                            @click="selectedDraft = draft"
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedDraftId === draft.id }"
+                            @click="selectedDraftId = draft.id"
                         >
                             <div class="flex items-start justify-between">
                                 <div>
@@ -197,7 +202,7 @@ function getTypeName(type: string): string {
             <div
                 v-if="selectedDraft"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedDraft = null"
+                @click="selectedDraftId = 0"
             >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>

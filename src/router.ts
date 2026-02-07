@@ -138,7 +138,7 @@ const routes: readonly RouteRecordRaw[] = [
             },
         ],
     },
-    // 数据库路由
+    // 资料库路由
     {
         path: "/db",
         children: [
@@ -338,6 +338,18 @@ const routes: readonly RouteRecordRaw[] = [
                 name: "questchain-detail",
                 path: "questchain/:questChainId",
                 component: () => import("./views/DBQuestDetailView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "achievement-list",
+                path: "achievement",
+                component: () => import("./views/DBAchievementListView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "achievement-detail",
+                path: "achievement/:id",
+                component: () => import("./views/DBAchievementDetailView.vue"),
                 beforeEnter: () => setMinSize(600, 600),
             },
             {

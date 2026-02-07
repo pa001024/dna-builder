@@ -72,7 +72,7 @@ export const gameUserSettingsConfigCategories: ConfigCategory[] = [
                     { label: "中", value: 1 },
                     { label: "高", value: 2 },
                     { label: "超高", value: 3 },
-                    { label: "电影", value: 4 },
+                    { label: "极高", value: 4 },
                 ],
             },
             {
@@ -87,7 +87,7 @@ export const gameUserSettingsConfigCategories: ConfigCategory[] = [
                     { label: "中", value: 1 },
                     { label: "高", value: 2 },
                     { label: "超高", value: 3 },
-                    { label: "电影", value: 4 },
+                    { label: "极高", value: 4 },
                 ],
             },
             {
@@ -102,7 +102,7 @@ export const gameUserSettingsConfigCategories: ConfigCategory[] = [
                     { label: "中", value: 1 },
                     { label: "高", value: 2 },
                     { label: "超高", value: 3 },
-                    { label: "电影", value: 4 },
+                    { label: "极高", value: 4 },
                 ],
             },
             {
@@ -117,7 +117,7 @@ export const gameUserSettingsConfigCategories: ConfigCategory[] = [
                     { label: "中", value: 1 },
                     { label: "高", value: 2 },
                     { label: "超高", value: 3 },
-                    { label: "电影", value: 4 },
+                    { label: "极高", value: 4 },
                 ],
             },
             {
@@ -132,7 +132,7 @@ export const gameUserSettingsConfigCategories: ConfigCategory[] = [
                     { label: "中", value: 1 },
                     { label: "高", value: 2 },
                     { label: "超高", value: 3 },
-                    { label: "电影", value: 4 },
+                    { label: "极高", value: 4 },
                 ],
             },
             {
@@ -147,7 +147,7 @@ export const gameUserSettingsConfigCategories: ConfigCategory[] = [
                     { label: "中", value: 1 },
                     { label: "高", value: 2 },
                     { label: "超高", value: 3 },
-                    { label: "电影", value: 4 },
+                    { label: "极高", value: 4 },
                 ],
             },
             {
@@ -162,7 +162,7 @@ export const gameUserSettingsConfigCategories: ConfigCategory[] = [
                     { label: "中", value: 1 },
                     { label: "高", value: 2 },
                     { label: "超高", value: 3 },
-                    { label: "电影", value: 4 },
+                    { label: "极高", value: 4 },
                 ],
             },
             {
@@ -177,7 +177,7 @@ export const gameUserSettingsConfigCategories: ConfigCategory[] = [
                     { label: "中", value: 1 },
                     { label: "高", value: 2 },
                     { label: "超高", value: 3 },
-                    { label: "电影", value: 4 },
+                    { label: "极高", value: 4 },
                 ],
             },
             {
