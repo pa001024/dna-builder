@@ -79,7 +79,7 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
                             :class="selectedType === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                             @click="selectedType = ''"
                         >
-                            全部
+                            {{ $t("全部") }}
                         </button>
                         <button
                             v-for="type in allTypes.map(t => getDungeonType(t))"

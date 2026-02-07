@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { useSessionStorage } from "@vueuse/core"
+import { computed } from "vue"
 import { LeveledMonster } from "@/data"
 import monsterData from "../data/d/monster.data"
 import type { Monster } from "../data/data-types"
@@ -7,9 +8,9 @@ import { Faction } from "../data/data-types"
 import { getMonsterType } from "../utils/monster-utils"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = ref("")
-const selectedMonster = ref<Monster | null>(null)
-const selectedFaction = ref<number | "">("")
+const searchKeyword = useSessionStorage<string>("monster.searchKeyword", "")
+const selectedMonster = useSessionStorage<Monster | null>("monster.selectedMonster", null)
+const selectedFaction = useSessionStorage<number | "">("monster.selectedFaction", "")
 
 // 获取所有可用阵营
 const factions = computed(() => {

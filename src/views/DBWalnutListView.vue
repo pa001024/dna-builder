@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { useSessionStorage } from "@vueuse/core"
+import { computed } from "vue"
 import walnutData, { Walnut } from "../data/d/walnut.data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = ref("")
-const selectedWalnut = ref<Walnut | null>(null)
-const selectedType = ref<number>(0)
+const searchKeyword = useSessionStorage<string>("walnut.searchKeyword", "")
+const selectedWalnut = useSessionStorage<Walnut | null>("walnut.selectedWalnut", null)
+const selectedType = useSessionStorage<number>("walnut.selectedType", 0)
 
 // 所有密函类型
 const allTypes = computed(() => {

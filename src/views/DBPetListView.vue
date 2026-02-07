@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue"
-import petData, { petEntrys } from "../data/d/pet.data"
-import type { Pet } from "../data/data-types"
+import petData, { type Pet, petEntrys } from "../data/d/pet.data"
 import { LeveledPet } from "../data/leveled/LeveledPet"
 import { matchPinyin } from "../utils/pinyin-utils"
 
@@ -51,7 +50,7 @@ const filteredPets = computed(() => {
                     matchKeyword = matchPinyin(entry.name, q).match
                 }
             }
-            
+
             // 品质筛选
             const matchQuality = selectedQuality.value === 0 || entry.r === selectedQuality.value
             return matchKeyword && matchQuality
@@ -86,7 +85,7 @@ function getTypeName(type: number): string {
         1: "活力魔灵",
         2: "失活魔灵",
         3: "活动魔灵",
-        999: "潜质",
+        999: "魔灵潜质",
     }
     return typeMap[type] || type.toString()
 }
@@ -136,14 +135,14 @@ function formatSkillDescription(pet: Pet, type: "主动" | "被动"): string {
 
                 <div class="p-2 border-b border-base-200 space-y-2">
                     <div>
-                        <div class="text-xs text-base-content/70 mb-1">类型</div>
+                        <div class="text-xs text-base-content/70 mb-1">{{ $t("char-build.enemy_type") }}</div>
                         <div class="flex flex-wrap gap-1 pb-1">
                             <button
                                 class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
                                 :class="selectedType === 0 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                                 @click="selectedType = 0"
                             >
-                                全部
+                                {{ $t("全部") }}
                             </button>
                             <button
                                 v-for="type in types"
@@ -152,20 +151,20 @@ function formatSkillDescription(pet: Pet, type: "主动" | "被动"): string {
                                 :class="selectedType === type ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                                 @click="selectedType = type"
                             >
-                                {{ getTypeName(type) }}
+                                {{ $t(getTypeName(type)) }}
                             </button>
                         </div>
                     </div>
 
                     <div>
-                        <div class="text-xs text-base-content/70 mb-1">品质</div>
+                        <div class="text-xs text-base-content/70 mb-1">{{ $t("char-build.quality") }}</div>
                         <div class="flex flex-wrap gap-1 pb-1">
                             <button
                                 class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
                                 :class="selectedQuality === 0 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                                 @click="selectedQuality = 0"
                             >
-                                全部
+                                {{ $t("全部") }}
                             </button>
                             <button
                                 v-for="quality in qualities"
@@ -178,7 +177,7 @@ function formatSkillDescription(pet: Pet, type: "主动" | "被动"): string {
                                 "
                                 @click="selectedQuality = quality"
                             >
-                                {{ getQualityName(quality) }}
+                                {{ $t(getQualityName(quality)) }}
                             </button>
                         </div>
                     </div>
@@ -208,9 +207,9 @@ function formatSkillDescription(pet: Pet, type: "主动" | "被动"): string {
                                     <!-- 潜质信息显示 -->
                                     <template v-if="selectedType === 999 && 'name' in item">
                                         <div class="font-medium flex gap-2 items-center">
-                                            {{ item.name }}
+                                            {{ $t(item.name) }}
                                             <span class="text-xs px-2 py-0.5 rounded" :class="getQualityColor(item.r)">
-                                                {{ getQualityName(item.r) }}
+                                                {{ $t(getQualityName(item.r)) }}
                                             </span>
                                         </div>
                                         <div class="text-xs opacity-70 mt-1">
@@ -220,14 +219,15 @@ function formatSkillDescription(pet: Pet, type: "主动" | "被动"): string {
                                     <!-- 普通魔灵信息显示 -->
                                     <template v-else-if="'名称' in item">
                                         <div class="font-medium flex gap-2 items-center">
-                                            {{ item.名称 }}
+                                            {{ $t(item.名称) }}
                                             <span class="text-xs px-2 py-0.5 rounded" :class="getQualityColor(item.品质)">
-                                                {{ getQualityName(item.品质) }}
+                                                {{ $t(getQualityName(item.品质)) }}
                                             </span>
                                         </div>
                                         <div class="text-xs opacity-70 mt-1 flex gap-2">
-                                            <span>{{ getTypeName(item.类型) }}</span>
+                                            <span>{{ $t(getTypeName(item.类型)) }}</span>
                                             <span>最大等级: {{ item.最大等级 }}</span>
+                                            <span>捕获经验: {{ item.捕获经验 }}</span>
                                         </div>
                                     </template>
                                 </div>

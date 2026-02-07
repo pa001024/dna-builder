@@ -44,7 +44,7 @@ watch(
                     <span>
                         {{ $t(weapon.伤害类型) }}
                     </span>
-                    <span v-if="weapon.版本">{{ weapon.版本 }}版本</span>
+                    <span v-if="weapon.版本">v{{ weapon.版本 }}</span>
                 </div>
 
                 <div v-if="weapon.描述" class="text-sm text-base-content/70 mb-3">
@@ -86,7 +86,7 @@ watch(
             </div>
 
             <div class="p-3 bg-base-200 rounded mb-3">
-                <div class="text-xs text-base-content/70 mb-2">基础属性</div>
+                <div class="text-xs text-base-content/70 mb-2">{{ $t("char-build.base_attr") }}</div>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
                     <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
                         <span class="text-base-content/70">{{ $t("攻击") }}</span>

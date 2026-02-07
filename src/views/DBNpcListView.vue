@@ -1,10 +1,11 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { useSessionStorage } from "@vueuse/core"
+import { computed } from "vue"
 import npcData, { NPC } from "@/data/d/npc.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
-const searchKeyword = ref("")
-const selectedNpc = ref<NPC | null>(null)
+const searchKeyword = useSessionStorage<string>("npc.searchKeyword", "")
+const selectedNpc = useSessionStorage<NPC | null>("npc.selectedNpc", null)
 
 // 按关键词筛选 NPC
 const filteredNpcs = computed(() => {
@@ -82,9 +83,7 @@ function selectNpc(npc: NPC | null) {
                 </ScrollArea>
 
                 <!-- 底部统计 -->
-                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">
-                    共 {{ filteredNpcs.length }} 个 NPC
-                </div>
+                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">共 {{ filteredNpcs.length }} 个 NPC</div>
             </div>
             <div
                 v-if="selectedNpc"

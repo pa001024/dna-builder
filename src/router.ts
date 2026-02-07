@@ -31,7 +31,7 @@ const routes: readonly RouteRecordRaw[] = [
     {
         path: "/char",
         children: [
-            { name: "char-list", path: "", component: CharListView, beforeEnter: () => setMinSize(600, 600) },
+            { name: "char-build-list", path: "", component: CharListView, beforeEnter: () => setMinSize(600, 600) },
             { name: "char-build", path: ":charId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
             { name: "char-build-code", path: ":charId/:buildId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
         ],
@@ -176,6 +176,18 @@ const routes: readonly RouteRecordRaw[] = [
                 name: "mod-detail",
                 path: "mod/:id",
                 component: () => import("./views/DBModDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "char-list",
+                path: "char",
+                component: () => import("./views/DBCharListView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "char-detail",
+                path: "char/:id",
+                component: () => import("./views/DBCharDetailView.vue"),
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
@@ -333,6 +345,7 @@ const routes: readonly RouteRecordRaw[] = [
                 path: "npc",
                 component: () => import("./views/DBNpcListView.vue"),
                 beforeEnter: () => setMinSize(600, 600),
+                meta: { keepAlive: true },
             },
             {
                 name: "npc-detail",

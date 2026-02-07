@@ -6,6 +6,8 @@ export class LeveledPet implements Pet {
     id: number
     uid: number
     名称: string
+    描述: string
+    异化?: number
     icon: string
     品质: number
     类型: number
@@ -42,6 +44,8 @@ export class LeveledPet implements Pet {
         this.类型 = petData.类型
         this.最大等级 = petData.最大等级
         this.捕获经验 = petData.捕获经验
+        this.异化 = petData.异化
+        this.描述 = petData.描述
 
         this._等级 = level !== undefined ? Math.max(0, Math.min(3, level)) : 0
 

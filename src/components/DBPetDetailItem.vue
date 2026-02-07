@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
+import { petMap } from "@/data"
 import type { Pet } from "../data/data-types"
 import { LeveledPet } from "../data/leveled/LeveledPet"
 
@@ -50,20 +51,24 @@ function getTypeName(type: number): string {
     }
     return typeMap[type] || type.toString()
 }
+
+function getPrmName(id: number): string {
+    return petMap.get(id)?.名称 || id.toString()
+}
 </script>
 
 <template>
     <div class="p-3 space-y-3">
         <div class="flex items-center gap-3">
             <SRouterLink :to="`/db/pet/${pet.id}`" class="text-lg font-bold link link-primary">
-                {{ pet.名称 }}
+                {{ $t(pet.名称) }}
             </SRouterLink>
             <span class="text-xs text-base-content/70">ID: {{ pet.id }}</span>
             <div class="text-sm text-base-content/70 flex items-center gap-2">
                 <span class="px-1.5 py-0.5 rounded" :class="getQualityColor(pet.品质)">
-                    {{ getQualityName(pet.品质) }}
+                    {{ $t(getQualityName(pet.品质)) }}
                 </span>
-                <span class="px-1.5 py-0.5 rounded bg-base-300">{{ getTypeName(pet.类型) }}</span>
+                <span class="px-1.5 py-0.5 rounded bg-base-300">{{ $t(getTypeName(pet.类型)) }}</span>
             </div>
         </div>
 
@@ -75,6 +80,20 @@ function getTypeName(type: number): string {
             <span>最大等级: {{ pet.最大等级 }}</span>
             <span>捕获经验: {{ pet.捕获经验 }}</span>
             <span>经验: {{ leveledPet.经验 }}</span>
+        </div>
+
+        <div v-if="pet.描述" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-1">描述</div>
+            <div class="text-sm">
+                <span>{{ pet.描述 }}</span>
+            </div>
+        </div>
+
+        <div v-if="pet.异化 && pet.异化 !== pet.id" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-1">异化</div>
+            <div class="text-sm">
+                <span>{{ $t(getPrmName(pet.异化)) }}</span>
+            </div>
         </div>
 
         <div>

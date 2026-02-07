@@ -84,7 +84,7 @@ const filteredWeapons = computed(() => {
                                 "
                                 @click="selectedCategory = ''"
                             >
-                                全部
+                                {{ $t("全部") }}
                             </button>
                             <button
                                 v-for="cat in categories"
@@ -110,7 +110,7 @@ const filteredWeapons = computed(() => {
                                 "
                                 @click="selectedDamageType = ''"
                             >
-                                全部
+                                {{ $t("全部") }}
                             </button>
                             <button
                                 v-for="type in damageTypes"

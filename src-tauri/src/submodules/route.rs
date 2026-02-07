@@ -9,6 +9,7 @@ use std::collections::{BinaryHeap, HashMap, HashSet};
 
 /// 深度估计结果
 #[derive(Debug, Clone)]
+#[allow(unused)]
 pub struct DepthMap {
     /// 视差图（0-255，值越大表示越近）
     pub disparity_mat: Mat,
@@ -38,6 +39,7 @@ impl PathPoint {
 
 /// A* 算法节点
 #[derive(Debug, Clone)]
+#[allow(unused)]
 struct AStarNode {
     point: PathPoint,
     g_cost: f64,

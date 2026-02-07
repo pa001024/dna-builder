@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { useSessionStorage } from "@vueuse/core"
+import { computed } from "vue"
 import { monsterMap } from "@/data"
 import { type HardBoss, hardBossMap } from "../data/d/hardboss.data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = ref("")
-const selectedBoss = ref<HardBoss | null>(null)
+const searchKeyword = useSessionStorage<string>("hardboss.searchKeyword", "")
+const selectedBoss = useSessionStorage<HardBoss | null>("hardboss.selectedBoss", null)
 
 // 按关键词筛选Boss
 const filteredBosses = computed(() => {

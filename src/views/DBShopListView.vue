@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { useSessionStorage } from "@vueuse/core"
+import { computed } from "vue"
 import shopData from "../data/d/shop.data"
 
-const searchKeyword = ref("")
-const selectedShop = ref<(typeof shopData)[0] | null>(null)
+const searchKeyword = useSessionStorage<string>("shop.searchKeyword", "")
+const selectedShop = useSessionStorage<(typeof shopData)[0] | null>("shop.selectedShop", null)
 
 // 按关键词筛选商店
 const filteredShops = computed(() => {

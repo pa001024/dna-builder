@@ -1,25 +1,26 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { useLocalStorage, useSessionStorage } from "@vueuse/core"
+import { computed } from "vue"
 import { LeveledMod } from "../data"
 import modData from "../data/d/mod.data"
 import type { Mod } from "../data/data-types"
 import { formatProp } from "../util"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = ref("")
-const selectedMod = ref<Mod | null>(null)
-const selectedType = ref<string | "">("")
-const selectedSeries = ref<string | "">("")
-const selectedQuality = ref<string | "">("")
-const selectedElem = ref<string | "">("")
-const selectedVersion = ref<string | "">("")
+const searchKeyword = useSessionStorage<string>("mod.searchKeyword", "")
+const selectedMod = useSessionStorage<Mod | null>("mod.selectedMod", null)
+const selectedType = useSessionStorage<string>("mod.selectedType", "")
+const selectedSeries = useSessionStorage<string>("mod.selectedSeries", "")
+const selectedQuality = useSessionStorage<string>("mod.selectedQuality", "")
+const selectedElem = useSessionStorage<string>("mod.selectedElem", "")
+const selectedVersion = useSessionStorage<string>("mod.selectedVersion", "")
 
 // 过滤选项显示控制
-const showTypeFilter = ref(false)
-const showSeriesFilter = ref(false)
-const showQualityFilter = ref(false)
-const showElemFilter = ref(false)
-const showVersionFilter = ref(false)
+const showTypeFilter = useLocalStorage("mod.showTypeFilter", false)
+const showSeriesFilter = useLocalStorage("mod.showSeriesFilter", false)
+const showQualityFilter = useLocalStorage("mod.showQualityFilter", false)
+const showElemFilter = useLocalStorage("mod.showElemFilter", false)
+const showVersionFilter = useLocalStorage("mod.showVersionFilter", false)
 
 // 获取所有可用类型
 const types = computed(() => {
@@ -146,7 +147,7 @@ function toggleFilter(filterName: string, show: boolean) {
                                 @change="toggleFilter('type', showTypeFilter)"
                                 class="checkbox checkbox-xs"
                             />
-                            <span class="text-xs text-base-content/70">类型</span>
+                            <span class="text-xs text-base-content/70">{{ $t("char-build.enemy_type") }}</span>
                         </label>
                         <label class="flex items-center gap-1 cursor-pointer">
                             <input
@@ -155,7 +156,7 @@ function toggleFilter(filterName: string, show: boolean) {
                                 @change="toggleFilter('series', showSeriesFilter)"
                                 class="checkbox checkbox-xs"
                             />
-                            <span class="text-xs text-base-content/70">系列</span>
+                            <span class="text-xs text-base-content/70">{{ $t("char-build.series") }}</span>
                         </label>
                         <label class="flex items-center gap-1 cursor-pointer">
                             <input
@@ -164,7 +165,7 @@ function toggleFilter(filterName: string, show: boolean) {
                                 @change="toggleFilter('quality', showQualityFilter)"
                                 class="checkbox checkbox-xs"
                             />
-                            <span class="text-xs text-base-content/70">品质</span>
+                            <span class="text-xs text-base-content/70">{{ $t("char-build.quality") }}</span>
                         </label>
                         <label class="flex items-center gap-1 cursor-pointer">
                             <input
@@ -173,7 +174,7 @@ function toggleFilter(filterName: string, show: boolean) {
                                 @change="toggleFilter('elem', showElemFilter)"
                                 class="checkbox checkbox-xs"
                             />
-                            <span class="text-xs text-base-content/70">元素</span>
+                            <span class="text-xs text-base-content/70">{{ $t("char-build.elem") }}</span>
                         </label>
                         <label class="flex items-center gap-1 cursor-pointer">
                             <input
@@ -182,7 +183,7 @@ function toggleFilter(filterName: string, show: boolean) {
                                 @change="toggleFilter('version', showVersionFilter)"
                                 class="checkbox checkbox-xs"
                             />
-                            <span class="text-xs text-base-content/70">版本</span>
+                            <span class="text-xs text-base-content/70">{{ $t("char-build.version") }}</span>
                         </label>
                     </div>
 
@@ -193,7 +194,7 @@ function toggleFilter(filterName: string, show: boolean) {
                             :class="selectedType === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                             @click="selectedType = ''"
                         >
-                            全部
+                            {{ $t("全部") }}
                         </button>
                         <button
                             v-for="type in types"
@@ -202,7 +203,7 @@ function toggleFilter(filterName: string, show: boolean) {
                             :class="selectedType === type ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                             @click="selectedType = type"
                         >
-                            {{ type }}
+                            {{ $t(type) }}
                         </button>
                     </div>
 
@@ -213,7 +214,7 @@ function toggleFilter(filterName: string, show: boolean) {
                             :class="selectedSeries === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                             @click="selectedSeries = ''"
                         >
-                            全部
+                            {{ $t("全部") }}
                         </button>
                         <button
                             v-for="s in series"
@@ -222,7 +223,7 @@ function toggleFilter(filterName: string, show: boolean) {
                             :class="selectedSeries === s ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                             @click="selectedSeries = s"
                         >
-                            {{ s }}
+                            {{ $t(s) }}
                         </button>
                     </div>
 
@@ -233,7 +234,7 @@ function toggleFilter(filterName: string, show: boolean) {
                             :class="selectedQuality === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                             @click="selectedQuality = ''"
                         >
-                            全部
+                            {{ $t("全部") }}
                         </button>
                         <button
                             v-for="quality in qualities"
@@ -255,7 +256,7 @@ function toggleFilter(filterName: string, show: boolean) {
                             :class="selectedElem === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                             @click="selectedElem = ''"
                         >
-                            全部
+                            {{ $t("全部") }}
                         </button>
                         <button
                             v-for="elem in elems"
@@ -264,7 +265,7 @@ function toggleFilter(filterName: string, show: boolean) {
                             :class="selectedElem === elem ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                             @click="selectedElem = elem"
                         >
-                            {{ $t(elem) }}
+                            {{ $t(`${elem}属性`) }}
                         </button>
                     </div>
 
@@ -275,7 +276,7 @@ function toggleFilter(filterName: string, show: boolean) {
                             :class="selectedVersion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                             @click="selectedVersion = ''"
                         >
-                            全部
+                            {{ $t("全部") }}
                         </button>
                         <button
                             v-for="version in versions"
@@ -318,7 +319,7 @@ function toggleFilter(filterName: string, show: boolean) {
                                             <span>{{ $t(mod.类型) }}</span>
                                             <span v-if="mod.属性">{{ $t(`${mod.属性}属性`) }}</span>
                                             <span v-if="mod.限定">{{ $t(mod.限定) }}</span>
-                                            <span v-if="mod.版本">{{ mod.版本 }}版本</span>
+                                            <span v-if="mod.版本">v{{ mod.版本 }}</span>
                                         </div>
                                     </div>
                                 </div>

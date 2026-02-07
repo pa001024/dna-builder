@@ -1,5 +1,6 @@
 {
     "昂扬": "昂扬",
+    "白": "白",
     "百首": "百首之",
     "暴击": "暴击率",
     "暴击伤害": "暴击伤害",
@@ -31,10 +32,13 @@
     "技能效益": "技能效益",
     "减伤": "减伤",
     "角色": "角色",
+    "金": "金",
     "金乌": "金乌之",
     "近战": "近战武器",
     "巨鲸": "巨鲸之",
+    "蓝": "蓝",
     "连击": "连击",
+    "绿": "绿",
     "每持续神智每秒伤害": "DPS/每秒神智消耗",
     "每持续神智伤害": "DPH/每秒神智消耗",
     "每秒伤害": "DPS",
@@ -81,6 +85,7 @@
     "装填": "子弹装填速度",
     "追加伤害": "追加伤害",
     "子弹爆炸范围": "子弹爆炸范围",
+    "紫": "紫",
     "总伤": "总计伤害",
     "最大弹药": "最大弹药",
     "abyss-dungeon-detail": {
@@ -162,7 +167,9 @@
     "char-build": {
         "actions": "动作序列",
         "auto_build": "自动构筑",
+        "base_attr": "基础属性",
         "basic_settings": "基本设置",
+        "bonus_attr": "加成属性",
         "boss": "首领",
         "buff_list": "BUFF列表",
         "char": "角色",
@@ -179,6 +186,7 @@
         "desc": "角色/武器/技能构筑",
         "description": "描述",
         "dynamic_prop": "动态属性",
+        "elem": "元素",
         "enemy": "敌人",
         "enemy_level": "敌人等级",
         "enemy_resistance": "敌人抗性",
@@ -186,6 +194,7 @@
         "enter_description": "请输入描述",
         "equipment_preview": "装配预览",
         "export_code": "复制代码",
+        "faction": "阵营",
         "general_attributes": "综合属性",
         "hp": "生命",
         "hp_percent": "生命值比例",
@@ -200,6 +209,7 @@
         "melee_weapon_mod_config": "近战武器MOD配置",
         "other": "其他",
         "please_enter_config_name": "请输入配置名称",
+        "quality": "品质",
         "ranged": "远程",
         "ranged_weapon": "远程武器",
         "ranged_weapon_mod_config": "远程武器MOD配置",
@@ -212,6 +222,7 @@
         "select_mod_slot": "选择MOD - 槽位",
         "select_skill_weapon": "选择技能/武器",
         "selected_count": "已选 {{count}} 个",
+        "series": "系列",
         "share": "分享",
         "share_build": "配装分享",
         "shield": "护盾",
@@ -224,14 +235,22 @@
         "special_effect_config": "特殊效果配置",
         "stance": "战姿",
         "sync_game": "导入游戏",
+        "tag": "标签",
         "target_function": "目标函数",
         "team": "协战",
         "timeline": "时间线",
         "title": "构筑",
         "title1": "{{charName}} - 构筑",
         "tour": "新手引导",
+        "version": "版本",
         "weapon": "武器",
         "weapon_attributes": "武器属性"
+    },
+    "char-build-list": {
+        "title": "角色列表"
+    },
+    "char-detail": {
+        "title": "角色详情"
     },
     "char-list": {
         "title": "角色列表"
@@ -299,6 +318,8 @@
     "database": {
         "abyss_dungeon": "深渊副本",
         "abyss_dungeon_desc": "查看深渊副本信息和BUFF",
+        "char": "角色",
+        "char_desc": "查看角色信息和属性",
         "desc": "查询游戏中的数据",
         "draft": "图纸",
         "draft_desc": "查看图纸信息和需求材料",

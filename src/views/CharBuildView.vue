@@ -312,6 +312,7 @@ const loadSharedBuild = async (buildId: string) => {
             const loadedSettings = JSON.parse(build.charSettings)
             // 将加载的设置应用到当前构筑
             Object.assign(charSettings.value, loadedSettings)
+            targetFunction.value = charSettings.value.targetFunction
             ui.showSuccessMessage("已加载分享的构筑")
         }
     } catch (error) {

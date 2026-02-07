@@ -1,13 +1,14 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { useSessionStorage } from "@vueuse/core"
+import { computed } from "vue"
 import { FishingSpot, fishMap } from "@/data"
 import { Fish, fishingSpots, fishs } from "@/data/d/fish.data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = ref("")
-const selectedSpot = ref<FishingSpot | null>(null)
-const selectedFish = ref<Fish | null>(null)
-const selectedType = ref(0)
+const searchKeyword = useSessionStorage<string>("fish.searchKeyword", "")
+const selectedSpot = useSessionStorage<FishingSpot | null>("fish.selectedSpot", null)
+const selectedFish = useSessionStorage<Fish | null>("fish.selectedFish", null)
+const selectedType = useSessionStorage<number>("fish.selectedType", 0)
 
 const filteredSpots = computed(() => {
     return fishingSpots.filter(spot => {

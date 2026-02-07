@@ -1,13 +1,14 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { useSessionStorage } from "@vueuse/core"
+import { computed } from "vue"
 import draftData from "../data/d/draft.data"
 import type { Draft } from "../data/data-types"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = ref("")
-const selectedDraft = ref<Draft | null>(null)
-const selectedType = ref<string | "">("")
-const selectedRarity = ref<number | "">("")
+const searchKeyword = useSessionStorage<string>("draft.searchKeyword", "")
+const selectedDraft = useSessionStorage<Draft | null>("draft.selectedDraft", null)
+const selectedType = useSessionStorage<string | "">("draft.selectedType", "")
+const selectedRarity = useSessionStorage<number | "">("draft.selectedRarity", "")
 
 // 获取所有可用类型
 const types = computed(() => {
@@ -168,7 +169,7 @@ function getTypeName(type: string): string {
                                     </div>
                                     <div class="text-xs opacity-70 mt-1 flex gap-2">
                                         <span>{{ getTypeName(draft.t) }}</span>
-                                        <span v-if="draft.v">{{ draft.v }}版本</span>
+                                        <span v-if="draft.v">v{{ draft.v }}</span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">

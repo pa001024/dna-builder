@@ -1,14 +1,15 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { useSessionStorage } from "@vueuse/core"
+import { computed } from "vue"
 import dynQuestData, { DynQuest } from "@/data/d/dynquest.data"
 import { regionMap } from "@/data/d/region.data"
 import { subRegionMap } from "@/data/d/subregion.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
-const searchKeyword = ref("")
-const selectedQuest = ref<DynQuest | null>(null)
-const selectedRegion = ref<string>("")
-const selectedSubRegion = ref<string>("")
+const searchKeyword = useSessionStorage<string>("dynquest.searchKeyword", "")
+const selectedQuest = useSessionStorage<DynQuest | null>("dynquest.selectedQuest", null)
+const selectedRegion = useSessionStorage<string>("dynquest.selectedRegion", "")
+const selectedSubRegion = useSessionStorage<string>("dynquest.selectedSubRegion", "")
 
 // 获取区域名称
 const getRegionName = (regionId: number) => {
