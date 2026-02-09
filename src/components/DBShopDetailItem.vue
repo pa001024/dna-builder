@@ -1,11 +1,12 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
+import { useRoute } from "vue-router"
 import type { Shop, ShopItem as ShopItemType } from "@/data/d/shop.data"
-import ShopItem from "./ShopItem.vue"
 
 const props = defineProps<{
     shop: Shop
 }>()
+const route = useRoute()
 
 // 定义带有子项的商品类型
 interface ShopItemWithChildren extends ShopItemType {
@@ -13,14 +14,56 @@ interface ShopItemWithChildren extends ShopItemType {
 }
 const shopTabs = computed(() => props.shop.mainTabs.map(t => t.name))
 const selectedShop = ref(props.shop.mainTabs[0].name || "")
+
+/**
+ * 将路由中的子标签 ID 解析为数字。
+ */
+const routeSubTabId = computed(() => {
+    const subTabParam = route.params.subTabId
+    if (typeof subTabParam !== "string") {
+        return 0
+    }
+    const parsedSubTabId = Number.parseInt(subTabParam, 10)
+    return Number.isNaN(parsedSubTabId) ? 0 : parsedSubTabId
+})
+
+/**
+ * 按路由子标签定位主标签。
+ */
+function applyRouteSubTab(): void {
+    if (!routeSubTabId.value) {
+        return
+    }
+
+    const targetMainTab = props.shop.mainTabs.find(mainTab => mainTab.subTabs.some(subTab => subTab.id === routeSubTabId.value))
+    if (targetMainTab) {
+        selectedShop.value = targetMainTab.name
+    }
+}
+
+/**
+ * 判断当前子标签是否为路由高亮目标。
+ * @param subTabId 子标签 ID
+ * @returns 是否高亮
+ */
+function isRouteSubTab(subTabId: number): boolean {
+    return routeSubTabId.value !== 0 && subTabId === routeSubTabId.value
+}
+
 watch(
     () => props.shop.id,
     (newVal, oldVal) => {
         if (newVal !== oldVal) {
             selectedShop.value = props.shop.mainTabs[0].name || ""
+            applyRouteSubTab()
         }
-    }
+    },
+    { immediate: true }
 )
+
+watch(routeSubTabId, () => {
+    applyRouteSubTab()
+})
 // 将商品列表转换为树形结构
 function buildItemTree(items: ShopItemType[]): ShopItemWithChildren[] {
     // 创建商品ID到商品对象的映射
@@ -98,7 +141,12 @@ function buildItemTree(items: ShopItemType[]): ShopItemWithChildren[] {
         <!-- 商店主标签 -->
         <div v-for="mainTab in shop.mainTabs.filter(t => t.name === selectedShop)" :key="mainTab.id" class="card">
             <!-- 商店子标签 -->
-            <div v-for="subTab in mainTab.subTabs" :key="subTab.id" class="mb-4 bg-base-100 border border-base-200 rounded-lg p-3">
+            <div
+                v-for="subTab in mainTab.subTabs"
+                :key="subTab.id"
+                class="mb-4 bg-base-100 border rounded-lg p-3"
+                :class="isRouteSubTab(subTab.id) ? 'border-primary ring-1 ring-primary/30' : 'border-base-200'"
+            >
                 <h4 class="font-medium mb-2">{{ subTab.name }}</h4>
 
                 <!-- 商品列表 - 树形结构 -->

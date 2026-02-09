@@ -187,6 +187,18 @@ const filteredWeapons = computed(() => {
                                     <span>{{ $t("最大弹药") }}</span>
                                     <span class="font-medium">{{ weapon.最大弹药 }}</span>
                                 </div>
+                                <div v-if="weapon.装填" class="flex items-center gap-1">
+                                    <span>{{ $t("装填") }}</span>
+                                    <span class="font-medium">{{ formatProp("基础装填", weapon.装填) }}</span>
+                                </div>
+                                <div v-if="weapon.射击间隔" class="flex items-center gap-1">
+                                    <span>{{ $t("射击间隔") }}</span>
+                                    <span class="font-medium">{{ formatProp("基础装填", weapon.射击间隔) }}</span>
+                                </div>
+                                <div v-if="weapon.射击间隔" class="flex items-center gap-1">
+                                    <span>{{ $t("射速") }}</span>
+                                    <span class="font-medium">{{ +((1 / weapon.射击间隔).toFixed(2)) }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>

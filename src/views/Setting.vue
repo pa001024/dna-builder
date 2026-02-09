@@ -276,6 +276,40 @@ function resetAiSettings() {
             </article>
 
             <article>
+                <h2 class="text-sm font-bold m-2">剧情文本</h2>
+                <div class="bg-base-100 p-2 rounded-lg">
+                    <div class="flex justify-between items-center p-2 gap-4">
+                        <span class="label-text">主角名称1</span>
+                        <input v-model="setting.protagonistName1" type="text" class="input input-bordered input-sm w-64" />
+                    </div>
+                    <div class="flex justify-between items-center p-2 gap-4">
+                        <span class="label-text">主角名称2</span>
+                        <input v-model="setting.protagonistName2" type="text" class="input input-bordered input-sm w-64" />
+                    </div>
+                    <div class="flex justify-between items-center p-2 gap-4">
+                        <span class="label-text">主角性别1</span>
+                        <Select
+                            v-model="setting.protagonistGender"
+                            class="inline-flex items-center justify-between input input-bordered input-sm w-40"
+                        >
+                            <SelectItem value="female">女</SelectItem>
+                            <SelectItem value="male">男</SelectItem>
+                        </Select>
+                    </div>
+                    <div class="flex justify-between items-center p-2 gap-4">
+                        <span class="label-text">主角性别2</span>
+                        <Select
+                            v-model="setting.protagonistGender2"
+                            class="inline-flex items-center justify-between input input-bordered input-sm w-40"
+                        >
+                            <SelectItem value="female">女</SelectItem>
+                            <SelectItem value="male">男</SelectItem>
+                        </Select>
+                    </div>
+                </div>
+            </article>
+
+            <article>
                 <h2 class="text-sm font-bold m-2">
                     {{ $t("setting.ai") }}
                 </h2>

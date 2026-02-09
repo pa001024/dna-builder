@@ -70,7 +70,7 @@ import { groupBy } from "lodash-es"
 import type { RawTimelineData } from "../store/timeline"
 import type { DynamicMonster } from "."
 import { type ASTNode, parseAST } from "./ast"
-import { type AbstractMod, type DmgType, type HpType, type Skill, WeaponSkillType } from "./data-types"
+import type { AbstractMod, DmgType, HpType, Skill, WeaponSkill } from "./data-types"
 export class CharBuildTimeline {
     totalTime: number = 0
     hp: [number, number][] = []
@@ -186,14 +186,84 @@ export class CharBuild {
     get charSkills() {
         return this.skills.slice(0, 3)
     }
+
+    /**
+     * 收集指定模组列表中的技能替换映射
+     * @param mods 模组列表
+     * @returns 技能替换映射（key 为原技能 ID）
+     */
+    private getSkillReplaceMap(mods: (LeveledMod | null)[]) {
+        const replaceMap: Record<number, WeaponSkill> = {}
+        mods.forEach(mod => {
+            if (!mod?.技能替换) return
+            Object.entries(mod.技能替换).forEach(([skillId, skillData]) => {
+                replaceMap[+skillId] = skillData as WeaponSkill
+            })
+        })
+        return replaceMap
+    }
+
+    /**
+     * 将武器技能结构转换为通用技能结构
+     * @param skillData 武器技能数据
+     * @param fallbackSkill 原始技能（用于补齐武器类型与等级）
+     * @returns 可用于 LeveledSkill 的技能数据
+     */
+    private normalizeWeaponSkillToSkill(skillData: WeaponSkill, fallbackSkill: LeveledSkill): Skill {
+        return {
+            id: skillData.id || fallbackSkill.id,
+            名称: skillData.名称 || fallbackSkill.名称,
+            类型: skillData.类型 || fallbackSkill.类型,
+            武器: fallbackSkill.武器,
+            描述: skillData.描述 || fallbackSkill.描述,
+            字段: skillData.字段 || [],
+        }
+    }
+
+    /**
+     * 根据装备的模组将武器技能替换为对应版本
+     * @param weaponSkills 原始武器技能列表
+     * @param mods 生效模组列表
+     * @returns 替换后的武器技能列表
+     */
+    private replaceWeaponSkillsByMods(weaponSkills: LeveledSkill[], mods: (LeveledMod | null)[]) {
+        const replaceMap = this.getSkillReplaceMap(mods)
+        if (Object.keys(replaceMap).length === 0) return weaponSkills
+
+        return weaponSkills.map(skill => {
+            const replacedSkill = replaceMap[skill.id]
+            if (!replacedSkill) return skill
+            const normalizedSkill = this.normalizeWeaponSkillToSkill(replacedSkill, skill)
+            return new LeveledSkill(normalizedSkill, skill.等级, skill.武器名)
+        })
+    }
+
+    /**
+     * 根据技能名称确定其所属武器
+     * @param baseName 技能名称
+     * @returns 对应武器；若不是武器技能则返回 undefined
+     */
+    private getWeaponBySkillName(baseName: string) {
+        if (this.meleeWeaponSkills.some(skill => skill.名称 === baseName)) {
+            return this.meleeWeapon
+        }
+        if (this.rangedWeaponSkills.some(skill => skill.名称 === baseName)) {
+            return this.rangedWeapon
+        }
+        if (this.skillWeaponSkills.some(skill => skill.名称 === baseName) || (this.skillWeapon && this.skillWeapon.名称 === baseName)) {
+            return this.skillWeapon
+        }
+        return undefined
+    }
+
     get meleeWeaponSkills() {
-        return this.meleeWeapon.技能 || []
+        return this.replaceWeaponSkillsByMods(this.meleeWeapon.技能 || [], this.meleeMods)
     }
     get rangedWeaponSkills() {
-        return this.rangedWeapon.技能 || []
+        return this.replaceWeaponSkillsByMods(this.rangedWeapon.技能 || [], this.rangedMods)
     }
     get skillWeaponSkills() {
-        return this.skillWeapon?.技能 || []
+        return this.replaceWeaponSkillsByMods(this.skillWeapon?.技能 || [], this.skillMods)
     }
     get weaponSkills() {
         return [...this.meleeWeaponSkills, ...this.rangedWeaponSkills, ...this.skillWeaponSkills]
@@ -942,21 +1012,7 @@ export class CharBuild {
      * 计算基础属性和伤害 (immutable)
      */
     public calculateByBasename(baseName: string): [attrs: ReturnType<typeof this.calculateWeaponAttributes>, damage: DamageResult] {
-        let weapon: LeveledWeapon | LeveledSkillWeapon | undefined
-        switch (baseName) {
-            case WeaponSkillType.普通攻击:
-            case WeaponSkillType.蓄力攻击:
-            case WeaponSkillType.下落攻击:
-            case WeaponSkillType.滑行攻击:
-                weapon = this.meleeWeapon
-                break
-            case WeaponSkillType.射击:
-                weapon = this.rangedWeapon
-                break
-            default:
-                if (this.skillWeapon && this.skillWeapon.名称 === baseName) weapon = this.skillWeapon
-                break
-        }
+        const weapon = this.getWeaponBySkillName(baseName)
         const attrs = this.calculateWeaponAttributes(weapon)
         const damage: DamageResult = weapon ? this.calculateWeaponDamage(attrs, weapon) : this.calculateSkillDamage(attrs)
         return [attrs, damage]
@@ -1224,7 +1280,6 @@ export class CharBuild {
             // 计算技能基础伤害
             if (field.名称.endsWith("伤害") || field.名称.endsWith("治疗")) {
                 let baseDamage = 0
-                const times = field.段数 || 1
                 const value1 = field.值
                 const value2 = field.值2 || 0
 
@@ -1249,8 +1304,8 @@ export class CharBuild {
                 }
 
                 if (field.名称.endsWith("治疗"))
-                    return baseDamage * times // 治疗不考虑防御
-                else return baseDamage * times * getDef(ns)
+                    return baseDamage // 治疗不考虑防御
+                else return baseDamage * getDef(ns)
             }
             return typeof field.值 === "number" ? field.值 : 0
         }
@@ -1423,15 +1478,16 @@ export class CharBuild {
         return this.selectedSkillType === "角色"
     }
     get isMeleeWeapon() {
-        return [WeaponSkillType.普通攻击, WeaponSkillType.蓄力攻击, WeaponSkillType.下落攻击, WeaponSkillType.滑行攻击].includes(
-            this.baseName as WeaponSkillType
-        )
+        return this.meleeWeaponSkills.some(skill => skill.名称 === this.baseName)
     }
     get isRangedWeapon() {
-        return WeaponSkillType.射击 === (this.baseName as WeaponSkillType)
+        return this.rangedWeaponSkills.some(skill => skill.名称 === this.baseName)
     }
     get isSkillWeapon() {
-        return this.skillWeapon && this.skillWeapon.名称 === this.baseName
+        return (
+            this.skillWeaponSkills.some(skill => skill.名称 === this.baseName) ||
+            !!(this.skillWeapon && this.skillWeapon.名称 === this.baseName)
+        )
     }
     get is_melee() {
         return this.isMeleeWeapon

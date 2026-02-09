@@ -19,7 +19,7 @@ export interface QuestChain {
 
 export interface QuestChainItem {
     id: number
-    next: number
+    next?: Record<string, number>
 }
 
 export const questChainData: QuestChain[] = [
@@ -38,47 +38,66 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 10010101,
-                next: 0,
+                next: {
+                    Success: 10010102,
+                },
             },
             {
                 id: 10010102,
-                next: 0,
+                next: {
+                    Success: 10010103,
+                },
             },
             {
                 id: 10010103,
-                next: 0,
+                next: {
+                    Success: 10010104,
+                },
             },
             {
                 id: 10010104,
-                next: 0,
+                next: {
+                    Success: 10010105,
+                },
             },
             {
                 id: 10010105,
-                next: 0,
+                next: {
+                    Success: 10010106,
+                },
             },
             {
                 id: 10010106,
-                next: 0,
+                next: {
+                    Success: 10010107,
+                },
             },
             {
                 id: 10010107,
-                next: 0,
+                next: {
+                    Success: 10010108,
+                },
             },
             {
                 id: 10010108,
-                next: 0,
+                next: {
+                    Success: 10010109,
+                },
             },
             {
                 id: 10010109,
-                next: 0,
+                next: {
+                    Success: 10010110,
+                },
             },
             {
                 id: 10010110,
-                next: 0,
+                next: {
+                    Success: 10010111,
+                },
             },
             {
                 id: 10010111,
-                next: 0,
             },
         ],
     },
@@ -94,47 +113,66 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 10010201,
-                next: 0,
+                next: {
+                    Success: 10010203,
+                },
             },
             {
                 id: 10010203,
-                next: 0,
+                next: {
+                    Success: 10010204,
+                },
             },
             {
                 id: 10010204,
-                next: 0,
+                next: {
+                    Success: 10010205,
+                },
             },
             {
                 id: 10010205,
-                next: 0,
+                next: {
+                    Success: 10010206,
+                },
             },
             {
                 id: 10010206,
-                next: 0,
+                next: {
+                    Success: 10010207,
+                },
             },
             {
                 id: 10010207,
-                next: 0,
+                next: {
+                    Success: 10010208,
+                },
             },
             {
                 id: 10010208,
-                next: 0,
+                next: {
+                    Success: 10010209,
+                },
             },
             {
                 id: 10010209,
-                next: 0,
+                next: {
+                    Success: 10010210,
+                },
             },
             {
                 id: 10010210,
-                next: 0,
+                next: {
+                    Success: 10010212,
+                },
             },
             {
                 id: 10010212,
-                next: 0,
+                next: {
+                    Success: 10010213,
+                },
             },
             {
                 id: 10010213,
-                next: 0,
             },
         ],
     },
@@ -150,47 +188,66 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 10010301,
-                next: 0,
+                next: {
+                    Success: 10010302,
+                },
             },
             {
                 id: 10010302,
-                next: 0,
+                next: {
+                    Success: 10010303,
+                },
             },
             {
                 id: 10010303,
-                next: 0,
+                next: {
+                    Success: 10010304,
+                },
             },
             {
                 id: 10010304,
-                next: 0,
+                next: {
+                    Success: 10010305,
+                },
             },
             {
                 id: 10010305,
-                next: 0,
+                next: {
+                    Success: 10010306,
+                },
             },
             {
                 id: 10010306,
-                next: 0,
+                next: {
+                    Success: 10010310,
+                },
             },
             {
                 id: 10010307,
-                next: 0,
+                next: {
+                    Success: 10010308,
+                },
             },
             {
                 id: 10010308,
-                next: 0,
             },
             {
                 id: 10010310,
-                next: 0,
+                next: {
+                    Success: 10010307,
+                },
             },
             {
                 id: 10010311,
-                next: 0,
+                next: {
+                    Success: 10010312,
+                },
             },
             {
                 id: 10010312,
-                next: 0,
+                next: {
+                    Success: 10010301,
+                },
             },
         ],
     },
@@ -207,43 +264,60 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 10020101,
-                next: 0,
+                next: {
+                    Success: 10020102,
+                },
             },
             {
                 id: 10020102,
-                next: 0,
+                next: {
+                    Success: 10020103,
+                },
             },
             {
                 id: 10020103,
-                next: 0,
+                next: {
+                    Success: 10020104,
+                },
             },
             {
                 id: 10020104,
-                next: 0,
+                next: {
+                    Success: 10020105,
+                },
             },
             {
                 id: 10020105,
-                next: 0,
+                next: {
+                    Success: 10020106,
+                },
             },
             {
                 id: 10020106,
-                next: 0,
+                next: {
+                    Success: 10020107,
+                },
             },
             {
                 id: 10020107,
-                next: 0,
+                next: {
+                    Success: 10020108,
+                },
             },
             {
                 id: 10020108,
-                next: 0,
+                next: {
+                    Success: 10020111,
+                },
             },
             {
                 id: 10020111,
-                next: 0,
+                next: {
+                    Success: 10020112,
+                },
             },
             {
                 id: 10020112,
-                next: 0,
             },
         ],
     },
@@ -264,63 +338,90 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 10020201,
-                next: 0,
+                next: {
+                    Success: 10020202,
+                },
             },
             {
                 id: 10020202,
-                next: 0,
+                next: {
+                    Success: 10020203,
+                },
             },
             {
                 id: 10020203,
-                next: 0,
+                next: {
+                    Success: 10020204,
+                },
             },
             {
                 id: 10020204,
-                next: 0,
+                next: {
+                    Success: 10020205,
+                },
             },
             {
                 id: 10020205,
-                next: 0,
+                next: {
+                    Success: 10020206,
+                },
             },
             {
                 id: 10020206,
-                next: 0,
+                next: {
+                    Success: 10020207,
+                },
             },
             {
                 id: 10020207,
-                next: 0,
+                next: {
+                    Success: 10020208,
+                },
             },
             {
                 id: 10020208,
-                next: 0,
+                next: {
+                    Success: 10020209,
+                },
             },
             {
                 id: 10020209,
-                next: 0,
+                next: {
+                    Success: 10020210,
+                },
             },
             {
                 id: 10020210,
-                next: 0,
+                next: {
+                    Success: 10020211,
+                },
             },
             {
                 id: 10020211,
-                next: 0,
+                next: {
+                    Success: 10020215,
+                },
             },
             {
                 id: 10020215,
-                next: 0,
+                next: {
+                    Success: 10020221,
+                },
             },
             {
                 id: 10020221,
-                next: 0,
+                next: {
+                    Success: 10020222,
+                },
             },
             {
                 id: 10020222,
-                next: 0,
+                next: {
+                    Success: 10020223,
+                },
             },
             {
                 id: 10020223,
-                next: 0,
             },
         ],
     },
@@ -337,51 +438,72 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 10020301,
-                next: 0,
+                next: {
+                    Success: 10020302,
+                },
             },
             {
                 id: 10020302,
-                next: 0,
+                next: {
+                    Success: 10020303,
+                },
             },
             {
                 id: 10020303,
-                next: 0,
+                next: {
+                    Success: 10020304,
+                },
             },
             {
                 id: 10020304,
-                next: 0,
+                next: {
+                    Success: 10020305,
+                },
             },
             {
                 id: 10020305,
-                next: 0,
+                next: {
+                    Success: 10020308,
+                },
             },
             {
                 id: 10020308,
-                next: 0,
+                next: {
+                    Success: 10020310,
+                },
             },
             {
                 id: 10020310,
-                next: 0,
+                next: {
+                    Success: 10020311,
+                },
             },
             {
                 id: 10020311,
-                next: 0,
+                next: {
+                    Success: 10020312,
+                },
             },
             {
                 id: 10020312,
-                next: 0,
+                next: {
+                    Success: 10020313,
+                },
             },
             {
                 id: 10020313,
-                next: 0,
+                next: {
+                    Success: 10020314,
+                },
             },
             {
                 id: 10020314,
-                next: 0,
+                next: {
+                    Success: 10020316,
+                },
             },
             {
                 id: 10020316,
-                next: 0,
             },
         ],
     },
@@ -401,47 +523,66 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 10020401,
-                next: 0,
+                next: {
+                    Success: 10020402,
+                },
             },
             {
                 id: 10020402,
-                next: 0,
+                next: {
+                    Success: 10020403,
+                },
             },
             {
                 id: 10020403,
-                next: 0,
+                next: {
+                    Success: 10020404,
+                },
             },
             {
                 id: 10020404,
-                next: 0,
+                next: {
+                    Success: 10020405,
+                },
             },
             {
                 id: 10020405,
-                next: 0,
+                next: {
+                    Success: 10020406,
+                },
             },
             {
                 id: 10020406,
-                next: 0,
+                next: {
+                    Success: 10020407,
+                },
             },
             {
                 id: 10020407,
-                next: 0,
+                next: {
+                    Success: 10020408,
+                },
             },
             {
                 id: 10020408,
-                next: 0,
+                next: {
+                    Success: 10020409,
+                },
             },
             {
                 id: 10020409,
-                next: 0,
+                next: {
+                    Success: 10020410,
+                },
             },
             {
                 id: 10020410,
-                next: 0,
+                next: {
+                    Success: 10020412,
+                },
             },
             {
                 id: 10020412,
-                next: 0,
             },
         ],
     },
@@ -461,31 +602,42 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 10020501,
-                next: 0,
+                next: {
+                    Success: 10020502,
+                },
             },
             {
                 id: 10020502,
-                next: 0,
+                next: {
+                    Success: 10020503,
+                },
             },
             {
                 id: 10020503,
-                next: 0,
+                next: {
+                    Success: 10020504,
+                },
             },
             {
                 id: 10020504,
-                next: 0,
+                next: {
+                    Success: 10020505,
+                },
             },
             {
                 id: 10020505,
-                next: 0,
+                next: {
+                    Success: 10020506,
+                },
             },
             {
                 id: 10020506,
-                next: 0,
+                next: {
+                    Success: 10020507,
+                },
             },
             {
                 id: 10020507,
-                next: 0,
             },
         ],
     },
@@ -502,55 +654,78 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 10020602,
-                next: 0,
+                next: {
+                    Success: 10020603,
+                },
             },
             {
                 id: 10020603,
-                next: 0,
+                next: {
+                    Success: 10020604,
+                },
             },
             {
                 id: 10020604,
-                next: 0,
+                next: {
+                    Success: 10020605,
+                },
             },
             {
                 id: 10020605,
-                next: 0,
+                next: {
+                    Success: 10020606,
+                },
             },
             {
                 id: 10020606,
-                next: 0,
+                next: {
+                    Success: 10020607,
+                },
             },
             {
                 id: 10020607,
-                next: 0,
+                next: {
+                    Success: 10020608,
+                },
             },
             {
                 id: 10020608,
-                next: 0,
+                next: {
+                    Success: 10020611,
+                },
             },
             {
                 id: 10020611,
-                next: 0,
+                next: {
+                    Success: 10020612,
+                },
             },
             {
                 id: 10020612,
-                next: 0,
+                next: {
+                    Success: 10020613,
+                },
             },
             {
                 id: 10020613,
-                next: 0,
+                next: {
+                    Success: 10020615,
+                },
             },
             {
                 id: 10020615,
-                next: 0,
             },
             {
                 id: 10020651,
-                next: 0,
+                next: {
+                    Success: 10020652,
+                },
             },
             {
                 id: 10020652,
-                next: 0,
+                next: {
+                    Success: 10020602,
+                },
             },
         ],
     },
@@ -567,43 +742,60 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 10020701,
-                next: 0,
+                next: {
+                    Success: 10020702,
+                },
             },
             {
                 id: 10020702,
-                next: 0,
+                next: {
+                    Success: 10020703,
+                },
             },
             {
                 id: 10020703,
-                next: 0,
+                next: {
+                    Success: 10020704,
+                },
             },
             {
                 id: 10020704,
-                next: 0,
+                next: {
+                    Success: 10020705,
+                },
             },
             {
                 id: 10020705,
-                next: 0,
+                next: {
+                    Success: 10020706,
+                },
             },
             {
                 id: 10020706,
-                next: 0,
+                next: {
+                    Success: 10020707,
+                },
             },
             {
                 id: 10020707,
-                next: 0,
+                next: {
+                    Success: 10020710,
+                },
             },
             {
                 id: 10020708,
-                next: 0,
+                next: {
+                    Success: 10020709,
+                },
             },
             {
                 id: 10020709,
-                next: 0,
             },
             {
                 id: 10020710,
-                next: 0,
+                next: {
+                    Success: 10020708,
+                },
             },
         ],
     },
@@ -620,39 +812,54 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 10020801,
-                next: 0,
+                next: {
+                    Success: 10020802,
+                },
             },
             {
                 id: 10020802,
-                next: 0,
+                next: {
+                    Success: 10020803,
+                },
             },
             {
                 id: 10020803,
-                next: 0,
+                next: {
+                    Success: 10020804,
+                },
             },
             {
                 id: 10020804,
-                next: 0,
+                next: {
+                    Success: 10020806,
+                },
             },
             {
                 id: 10020806,
-                next: 0,
+                next: {
+                    Success: 10020807,
+                },
             },
             {
                 id: 10020807,
-                next: 0,
+                next: {
+                    Success: 10020808,
+                },
             },
             {
                 id: 10020808,
-                next: 0,
+                next: {
+                    Success: 10020809,
+                },
             },
             {
                 id: 10020809,
-                next: 0,
+                next: {
+                    Success: 10020810,
+                },
             },
             {
                 id: 10020810,
-                next: 0,
             },
         ],
     },
@@ -672,71 +879,102 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 10030101,
-                next: 0,
+                next: {
+                    Success: 10030103,
+                },
             },
             {
                 id: 10030103,
-                next: 0,
+                next: {
+                    Success: 10030104,
+                },
             },
             {
                 id: 10030104,
-                next: 0,
+                next: {
+                    Success: 10030105,
+                },
             },
             {
                 id: 10030105,
-                next: 0,
+                next: {
+                    Success: 10030106,
+                },
             },
             {
                 id: 10030106,
-                next: 0,
+                next: {
+                    Success: 10030107,
+                },
             },
             {
                 id: 10030107,
-                next: 0,
+                next: {
+                    Success: 10030198,
+                },
             },
             {
                 id: 10030108,
-                next: 0,
+                next: {
+                    Success: 10030109,
+                },
             },
             {
                 id: 10030109,
-                next: 0,
+                next: {
+                    Success: 10030110,
+                },
             },
             {
                 id: 10030110,
-                next: 0,
+                next: {
+                    Success: 10030111,
+                },
             },
             {
                 id: 10030111,
-                next: 0,
+                next: {
+                    Success: 10030112,
+                },
             },
             {
                 id: 10030112,
-                next: 0,
+                next: {
+                    Success: 10030113,
+                },
             },
             {
                 id: 10030113,
-                next: 0,
+                next: {
+                    Success: 10030114,
+                },
             },
             {
                 id: 10030114,
-                next: 0,
+                next: {
+                    Success: 10030115,
+                },
             },
             {
                 id: 10030115,
-                next: 0,
+                next: {
+                    Success: 10030116,
+                },
             },
             {
                 id: 10030116,
-                next: 0,
             },
             {
                 id: 10030197,
-                next: 0,
+                next: {
+                    Success: 10030108,
+                },
             },
             {
                 id: 10030198,
-                next: 0,
+                next: {
+                    Success: 10030197,
+                },
             },
         ],
     },
@@ -756,43 +994,60 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 10030201,
-                next: 0,
+                next: {
+                    Success: 10030202,
+                },
             },
             {
                 id: 10030202,
-                next: 0,
+                next: {
+                    Success: 10030203,
+                },
             },
             {
                 id: 10030203,
-                next: 0,
+                next: {
+                    Success: 10030205,
+                },
             },
             {
                 id: 10030205,
-                next: 0,
+                next: {
+                    Success: 10030206,
+                },
             },
             {
                 id: 10030206,
-                next: 0,
+                next: {
+                    Success: 10030207,
+                },
             },
             {
                 id: 10030207,
-                next: 0,
+                next: {
+                    Success: 10030208,
+                },
             },
             {
                 id: 10030208,
-                next: 0,
+                next: {
+                    Success: 10030209,
+                },
             },
             {
                 id: 10030209,
-                next: 0,
+                next: {
+                    Success: 10030214,
+                },
             },
             {
                 id: 10030214,
-                next: 0,
             },
             {
                 id: 10030299,
-                next: 0,
+                next: {
+                    Success: 10030201,
+                },
             },
         ],
     },
@@ -809,31 +1064,42 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 10030301,
-                next: 0,
             },
             {
                 id: 10030394,
-                next: 0,
+                next: {
+                    Success: 10030301,
+                },
             },
             {
                 id: 10030395,
-                next: 0,
+                next: {
+                    Success: 10030394,
+                },
             },
             {
                 id: 10030396,
-                next: 0,
+                next: {
+                    Success: 10030395,
+                },
             },
             {
                 id: 10030397,
-                next: 0,
+                next: {
+                    Success: 10030396,
+                },
             },
             {
                 id: 10030398,
-                next: 0,
+                next: {
+                    Success: 10030397,
+                },
             },
             {
                 id: 10030399,
-                next: 0,
+                next: {
+                    Success: 10030398,
+                },
             },
         ],
     },
@@ -853,31 +1119,42 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 10030401,
-                next: 0,
+                next: {
+                    Success: 10030402,
+                },
             },
             {
                 id: 10030402,
-                next: 0,
+                next: {
+                    Success: 10030403,
+                },
             },
             {
                 id: 10030403,
-                next: 0,
+                next: {
+                    Success: 10030404,
+                },
             },
             {
                 id: 10030404,
-                next: 0,
+                next: {
+                    Success: 10030405,
+                },
             },
             {
                 id: 10030405,
-                next: 0,
             },
             {
                 id: 10030498,
-                next: 0,
+                next: {
+                    Success: 10030499,
+                },
             },
             {
                 id: 10030499,
-                next: 0,
+                next: {
+                    Success: 10030401,
+                },
             },
         ],
     },
@@ -894,51 +1171,72 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 10030501,
-                next: 0,
+                next: {
+                    Success: 10030502,
+                },
             },
             {
                 id: 10030502,
-                next: 0,
+                next: {
+                    Success: 10030503,
+                },
             },
             {
                 id: 10030503,
-                next: 0,
+                next: {
+                    Success: 10030504,
+                },
             },
             {
                 id: 10030504,
-                next: 0,
+                next: {
+                    Success: 10030505,
+                },
             },
             {
                 id: 10030505,
-                next: 0,
+                next: {
+                    Success: 10030506,
+                },
             },
             {
                 id: 10030506,
-                next: 0,
+                next: {
+                    Success: 10030507,
+                },
             },
             {
                 id: 10030507,
-                next: 0,
+                next: {
+                    Success: 10030508,
+                },
             },
             {
                 id: 10030508,
-                next: 0,
+                next: {
+                    Success: 10030509,
+                },
             },
             {
                 id: 10030509,
-                next: 0,
+                next: {
+                    Success: 10030510,
+                },
             },
             {
                 id: 10030510,
-                next: 0,
+                next: {
+                    Success: 10030511,
+                },
             },
             {
                 id: 10030511,
-                next: 0,
+                next: {
+                    Success: 10030512,
+                },
             },
             {
                 id: 10030512,
-                next: 0,
             },
         ],
     },
@@ -955,7 +1253,6 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 10030601,
-                next: 0,
             },
         ],
     },
@@ -972,11 +1269,12 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 10030701,
-                next: 0,
+                next: {
+                    Success: 10030702,
+                },
             },
             {
                 id: 10030702,
-                next: 0,
             },
         ],
     },
@@ -993,31 +1291,42 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 11010101,
-                next: 0,
+                next: {
+                    Success: 11010104,
+                },
             },
             {
                 id: 11010103,
-                next: 0,
+                next: {
+                    Success: 11010101,
+                },
             },
             {
                 id: 11010104,
-                next: 0,
+                next: {
+                    Success: 11010106,
+                },
             },
             {
                 id: 11010106,
-                next: 0,
+                next: {
+                    Success: 11010107,
+                },
             },
             {
                 id: 11010107,
-                next: 0,
+                next: {
+                    Success: 11010108,
+                },
             },
             {
                 id: 11010108,
-                next: 0,
+                next: {
+                    Success: 11010109,
+                },
             },
             {
                 id: 11010109,
-                next: 0,
             },
         ],
     },
@@ -1034,47 +1343,66 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 11010301,
-                next: 0,
+                next: {
+                    Success: 11010311,
+                },
             },
             {
                 id: 11010303,
-                next: 0,
+                next: {
+                    Success: 11010312,
+                },
             },
             {
                 id: 11010305,
-                next: 0,
+                next: {
+                    Success: 11010306,
+                },
             },
             {
                 id: 11010306,
-                next: 0,
+                next: {
+                    Success: 11010309,
+                },
             },
             {
                 id: 11010307,
-                next: 0,
+                next: {
+                    Success: 11010303,
+                },
             },
             {
                 id: 11010308,
-                next: 0,
             },
             {
                 id: 11010309,
-                next: 0,
+                next: {
+                    Success: 11010308,
+                },
             },
             {
                 id: 11010311,
-                next: 0,
+                next: {
+                    Success: 11010314,
+                },
             },
             {
                 id: 11010312,
-                next: 0,
+                next: {
+                    Success: 11010313,
+                },
             },
             {
                 id: 11010313,
-                next: 0,
+                next: {
+                    Success: 11010305,
+                },
             },
             {
                 id: 11010314,
-                next: 0,
+                next: {
+                    Success: 11010307,
+                },
             },
         ],
     },
@@ -1091,99 +1419,144 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 11010501,
-                next: 0,
+                next: {
+                    Success: 11010525,
+                },
             },
             {
                 id: 11010502,
-                next: 0,
+                next: {
+                    Success: 11010520,
+                },
             },
             {
                 id: 11010505,
-                next: 0,
+                next: {
+                    Success: 11010518,
+                },
             },
             {
                 id: 11010507,
-                next: 0,
+                next: {
+                    Success: 11010509,
+                },
             },
             {
                 id: 11010509,
-                next: 0,
+                next: {
+                    Success: 11010510,
+                },
             },
             {
                 id: 11010510,
-                next: 0,
+                next: {
+                    Success: 11010521,
+                },
             },
             {
                 id: 11010511,
-                next: 0,
+                next: {
+                    Success: 11010528,
+                },
             },
             {
                 id: 11010512,
-                next: 0,
+                next: {
+                    Success: 11010513,
+                },
             },
             {
                 id: 11010513,
-                next: 0,
+                next: {
+                    Success: 11010514,
+                },
             },
             {
                 id: 11010514,
-                next: 0,
+                next: {
+                    Success: 11010519,
+                },
             },
             {
                 id: 11010515,
-                next: 0,
+                next: {
+                    Success: 11010516,
+                },
             },
             {
                 id: 11010516,
-                next: 0,
             },
             {
                 id: 11010518,
-                next: 0,
+                next: {
+                    Success: 11010524,
+                },
             },
             {
                 id: 11010519,
-                next: 0,
+                next: {
+                    Success: 11010515,
+                },
             },
             {
                 id: 11010520,
-                next: 0,
+                next: {
+                    Success: 11010507,
+                },
             },
             {
                 id: 11010521,
-                next: 0,
+                next: {
+                    Success: 11010522,
+                },
             },
             {
                 id: 11010522,
-                next: 0,
+                next: {
+                    Success: 11010523,
+                },
             },
             {
                 id: 11010523,
-                next: 0,
+                next: {
+                    Success: 11010526,
+                },
             },
             {
                 id: 11010524,
-                next: 0,
+                next: {
+                    Success: 11010502,
+                },
             },
             {
                 id: 11010525,
-                next: 0,
+                next: {
+                    Success: 11010505,
+                },
             },
             {
                 id: 11010526,
-                next: 0,
+                next: {
+                    Success: 11010511,
+                },
             },
             {
                 id: 11010527,
-                next: 0,
+                next: {
+                    Success: 11010529,
+                },
             },
             {
                 id: 11010528,
-                next: 0,
+                next: {
+                    Success: 11010527,
+                },
             },
             {
                 id: 11010529,
-                next: 0,
+                next: {
+                    Success: 11010512,
+                },
             },
         ],
     },
@@ -1203,19 +1576,24 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 11010702,
-                next: 0,
+                next: {
+                    Success: 11010705,
+                },
             },
             {
                 id: 11010704,
-                next: 0,
+                next: {
+                    Success: 11010706,
+                },
             },
             {
                 id: 11010705,
-                next: 0,
+                next: {
+                    Success: 11010704,
+                },
             },
             {
                 id: 11010706,
-                next: 0,
             },
         ],
     },
@@ -1232,47 +1610,66 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 11010801,
-                next: 0,
+                next: {
+                    Success: 11010802,
+                },
             },
             {
                 id: 11010802,
-                next: 0,
+                next: {
+                    Success: 11010804,
+                },
             },
             {
                 id: 11010804,
-                next: 0,
+                next: {
+                    Success: 11010816,
+                },
             },
             {
                 id: 11010808,
-                next: 0,
+                next: {
+                    Success: 11010809,
+                },
             },
             {
                 id: 11010809,
-                next: 0,
+                next: {
+                    Success: 11010815,
+                },
             },
             {
                 id: 11010810,
-                next: 0,
+                next: {
+                    Success: 11010813,
+                },
             },
             {
                 id: 11010812,
-                next: 0,
+                next: {
+                    Success: 11010814,
+                },
             },
             {
                 id: 11010813,
-                next: 0,
+                next: {
+                    Success: 11010812,
+                },
             },
             {
                 id: 11010814,
-                next: 0,
+                next: {
+                    Success: 11010801,
+                },
             },
             {
                 id: 11010815,
-                next: 0,
+                next: {
+                    Success: 11010810,
+                },
             },
             {
                 id: 11010816,
-                next: 0,
             },
         ],
     },
@@ -1289,39 +1686,54 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 11010902,
-                next: 0,
+                next: {
+                    Success: 11010907,
+                },
             },
             {
                 id: 11010903,
-                next: 0,
+                next: {
+                    Success: 11010904,
+                },
             },
             {
                 id: 11010904,
-                next: 0,
+                next: {
+                    Success: 11010910,
+                },
             },
             {
                 id: 11010905,
-                next: 0,
+                next: {
+                    Success: 11010906,
+                },
             },
             {
                 id: 11010906,
-                next: 0,
+                next: {
+                    Success: 11010909,
+                },
             },
             {
                 id: 11010907,
-                next: 0,
+                next: {
+                    Success: 11010908,
+                },
             },
             {
                 id: 11010908,
-                next: 0,
+                next: {
+                    Success: 11010903,
+                },
             },
             {
                 id: 11010909,
-                next: 0,
             },
             {
                 id: 11010910,
-                next: 0,
+                next: {
+                    Success: 11010905,
+                },
             },
         ],
     },
@@ -1339,19 +1751,24 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 12000101,
-                next: 0,
+                next: {
+                    Success: 12000102,
+                },
             },
             {
                 id: 12000102,
-                next: 0,
+                next: {
+                    Success: 12000103,
+                },
             },
             {
                 id: 12000103,
-                next: 0,
+                next: {
+                    Success: 12000104,
+                },
             },
             {
                 id: 12000104,
-                next: 0,
             },
         ],
     },
@@ -1369,39 +1786,54 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 12000201,
-                next: 0,
+                next: {
+                    Success: 12000202,
+                },
             },
             {
                 id: 12000202,
-                next: 0,
+                next: {
+                    Success: 12000203,
+                },
             },
             {
                 id: 12000203,
-                next: 0,
+                next: {
+                    Success: 12000204,
+                },
             },
             {
                 id: 12000204,
-                next: 0,
+                next: {
+                    Success: 12000205,
+                },
             },
             {
                 id: 12000205,
-                next: 0,
+                next: {
+                    Success: 12000206,
+                },
             },
             {
                 id: 12000206,
-                next: 0,
+                next: {
+                    Success: 12000207,
+                },
             },
             {
                 id: 12000207,
-                next: 0,
+                next: {
+                    Success: 12000208,
+                },
             },
             {
                 id: 12000208,
-                next: 0,
+                next: {
+                    Success: 12000209,
+                },
             },
             {
                 id: 12000209,
-                next: 0,
             },
         ],
     },
@@ -1419,35 +1851,48 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 12000301,
-                next: 0,
+                next: {
+                    Success: 12000302,
+                },
             },
             {
                 id: 12000302,
-                next: 0,
+                next: {
+                    Success: 12000303,
+                },
             },
             {
                 id: 12000303,
-                next: 0,
+                next: {
+                    Success: 12000304,
+                },
             },
             {
                 id: 12000304,
-                next: 0,
+                next: {
+                    Success: 12000305,
+                },
             },
             {
                 id: 12000305,
-                next: 0,
+                next: {
+                    Success: 12000306,
+                },
             },
             {
                 id: 12000306,
-                next: 0,
+                next: {
+                    Success: 12000307,
+                },
             },
             {
                 id: 12000307,
-                next: 0,
+                next: {
+                    Success: 12000308,
+                },
             },
             {
                 id: 12000308,
-                next: 0,
             },
         ],
     },
@@ -1463,51 +1908,72 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 12010101,
-                next: 0,
+                next: {
+                    Success: 12010102,
+                },
             },
             {
                 id: 12010102,
-                next: 0,
+                next: {
+                    Success: 12010103,
+                },
             },
             {
                 id: 12010103,
-                next: 0,
+                next: {
+                    Success: 12010104,
+                },
             },
             {
                 id: 12010104,
-                next: 0,
+                next: {
+                    Success: 12010105,
+                },
             },
             {
                 id: 12010105,
-                next: 0,
+                next: {
+                    Success: 12010106,
+                },
             },
             {
                 id: 12010106,
-                next: 0,
+                next: {
+                    Success: 12010107,
+                },
             },
             {
                 id: 12010107,
-                next: 0,
+                next: {
+                    Success: 12010108,
+                },
             },
             {
                 id: 12010108,
-                next: 0,
+                next: {
+                    Success: 12010109,
+                },
             },
             {
                 id: 12010109,
-                next: 0,
+                next: {
+                    Success: 12010110,
+                },
             },
             {
                 id: 12010110,
-                next: 0,
+                next: {
+                    Success: 12010111,
+                },
             },
             {
                 id: 12010111,
-                next: 0,
+                next: {
+                    Success: 12010112,
+                },
             },
             {
                 id: 12010112,
-                next: 0,
             },
         ],
     },
@@ -1523,75 +1989,108 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 12010201,
-                next: 0,
+                next: {
+                    Success: 12010203,
+                },
             },
             {
                 id: 12010203,
-                next: 0,
+                next: {
+                    Success: 12010204,
+                },
             },
             {
                 id: 12010204,
-                next: 0,
+                next: {
+                    Success: 12010205,
+                },
             },
             {
                 id: 12010205,
-                next: 0,
+                next: {
+                    Success: 12010206,
+                },
             },
             {
                 id: 12010206,
-                next: 0,
+                next: {
+                    Success: 12010250,
+                },
             },
             {
                 id: 12010207,
-                next: 0,
+                next: {
+                    Success: 12010208,
+                },
             },
             {
                 id: 12010208,
-                next: 0,
+                next: {
+                    Success: 12010253,
+                },
             },
             {
                 id: 12010209,
-                next: 0,
+                next: {
+                    Success: 12010252,
+                },
             },
             {
                 id: 12010210,
-                next: 0,
+                next: {
+                    Success: 12010211,
+                },
             },
             {
                 id: 12010211,
-                next: 0,
+                next: {
+                    Success: 12010212,
+                },
             },
             {
                 id: 12010212,
-                next: 0,
+                next: {
+                    Success: 12010213,
+                },
             },
             {
                 id: 12010213,
-                next: 0,
+                next: {
+                    Success: 12010214,
+                },
             },
             {
                 id: 12010214,
-                next: 0,
             },
             {
                 id: 12010250,
-                next: 0,
+                next: {
+                    Success: 12010254,
+                },
             },
             {
                 id: 12010251,
-                next: 0,
+                next: {
+                    Success: 12010210,
+                },
             },
             {
                 id: 12010252,
-                next: 0,
+                next: {
+                    Success: 12010251,
+                },
             },
             {
                 id: 12010253,
-                next: 0,
+                next: {
+                    Success: 12010209,
+                },
             },
             {
                 id: 12010254,
-                next: 0,
+                next: {
+                    Success: 12010207,
+                },
             },
         ],
     },
@@ -1610,87 +2109,124 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 12010301,
-                next: 0,
+                next: {
+                    Success: 12010302,
+                },
             },
             {
                 id: 12010302,
-                next: 0,
+                next: {
+                    Success: 12010303,
+                },
             },
             {
                 id: 12010303,
-                next: 0,
+                next: {
+                    Success: 12010304,
+                },
             },
             {
                 id: 12010304,
-                next: 0,
+                next: {
+                    Success: 12010306,
+                },
             },
             {
                 id: 12010306,
-                next: 0,
+                next: {
+                    Success: 12010307,
+                },
             },
             {
                 id: 12010307,
-                next: 0,
+                next: {
+                    Success: 12010308,
+                },
             },
             {
                 id: 12010308,
-                next: 0,
+                next: {
+                    Success: 12010322,
+                },
             },
             {
                 id: 12010309,
-                next: 0,
+                next: {
+                    Success: 12010351,
+                },
             },
             {
                 id: 12010310,
-                next: 0,
+                next: {
+                    Success: 12010311,
+                },
             },
             {
                 id: 12010311,
-                next: 0,
+                next: {
+                    Success: 12010312,
+                },
             },
             {
                 id: 12010312,
-                next: 0,
+                next: {
+                    Success: 12010313,
+                },
             },
             {
                 id: 12010313,
-                next: 0,
+                next: {
+                    Success: 12010314,
+                },
             },
             {
                 id: 12010314,
-                next: 0,
+                next: {
+                    Success: 12010320,
+                },
             },
             {
                 id: 12010315,
-                next: 0,
+                next: {
+                    Success: 12010316,
+                },
             },
             {
                 id: 12010316,
-                next: 0,
+                next: {
+                    扶疏: 12010317,
+                    虬先生: 12010318,
+                },
             },
             {
                 id: 12010317,
-                next: 0,
             },
             {
                 id: 12010318,
-                next: 0,
             },
             {
                 id: 12010320,
-                next: 0,
+                next: {
+                    Success: 12010315,
+                },
             },
             {
                 id: 12010322,
-                next: 0,
+                next: {
+                    Success: 12010309,
+                },
             },
             {
                 id: 12010351,
-                next: 0,
+                next: {
+                    Success: 12010352,
+                },
             },
             {
                 id: 12010352,
-                next: 0,
+                next: {
+                    Success: 12010310,
+                },
             },
         ],
     },
@@ -1706,79 +2242,114 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 12010401,
-                next: 0,
+                next: {
+                    Success: 12010402,
+                },
             },
             {
                 id: 12010402,
-                next: 0,
+                next: {
+                    Success: 12010403,
+                },
             },
             {
                 id: 12010403,
-                next: 0,
+                next: {
+                    Success: 12010404,
+                },
             },
             {
                 id: 12010404,
-                next: 0,
+                next: {
+                    Success: 12010405,
+                },
             },
             {
                 id: 12010405,
-                next: 0,
+                next: {
+                    Success: 12010406,
+                },
             },
             {
                 id: 12010406,
-                next: 0,
+                next: {
+                    Success: 12010407,
+                },
             },
             {
                 id: 12010407,
-                next: 0,
+                next: {
+                    Success: 12010408,
+                },
             },
             {
                 id: 12010408,
-                next: 0,
+                next: {
+                    Success: 12010409,
+                },
             },
             {
                 id: 12010409,
-                next: 0,
+                next: {
+                    Success: 12010411,
+                },
             },
             {
                 id: 12010411,
-                next: 0,
+                next: {
+                    Success: 12010412,
+                },
             },
             {
                 id: 12010412,
-                next: 0,
+                next: {
+                    Success: 12010413,
+                },
             },
             {
                 id: 12010413,
-                next: 0,
+                next: {
+                    Success: 12010414,
+                },
             },
             {
                 id: 12010414,
-                next: 0,
+                next: {
+                    Success: 12010415,
+                },
             },
             {
                 id: 12010415,
-                next: 0,
+                next: {
+                    Success: 12010416,
+                },
             },
             {
                 id: 12010416,
-                next: 0,
+                next: {
+                    Success: 12010417,
+                },
             },
             {
                 id: 12010417,
-                next: 0,
+                next: {
+                    Success: 12010418,
+                },
             },
             {
                 id: 12010418,
-                next: 0,
+                next: {
+                    Success: 12010419,
+                },
             },
             {
                 id: 12010419,
-                next: 0,
+                next: {
+                    Success: 12010420,
+                },
             },
             {
                 id: 12010420,
-                next: 0,
             },
         ],
     },
@@ -1794,47 +2365,66 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 12010501,
-                next: 0,
+                next: {
+                    Success: 12010502,
+                },
             },
             {
                 id: 12010502,
-                next: 0,
+                next: {
+                    Success: 12010503,
+                },
             },
             {
                 id: 12010503,
-                next: 0,
+                next: {
+                    Success: 12010504,
+                },
             },
             {
                 id: 12010504,
-                next: 0,
+                next: {
+                    Success: 12010517,
+                },
             },
             {
                 id: 12010513,
-                next: 0,
+                next: {
+                    Success: 12010514,
+                },
             },
             {
                 id: 12010514,
-                next: 0,
+                next: {
+                    Success: 12010515,
+                },
             },
             {
                 id: 12010515,
-                next: 0,
+                next: {
+                    Success: 12010516,
+                },
             },
             {
                 id: 12010516,
-                next: 0,
             },
             {
                 id: 12010517,
-                next: 0,
+                next: {
+                    Success: 12010518,
+                },
             },
             {
                 id: 12010518,
-                next: 0,
+                next: {
+                    Success: 12010519,
+                },
             },
             {
                 id: 12010519,
-                next: 0,
+                next: {
+                    Success: 12010513,
+                },
             },
         ],
     },
@@ -1850,35 +2440,48 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 12010601,
-                next: 0,
+                next: {
+                    Success: 12010602,
+                },
             },
             {
                 id: 12010602,
-                next: 0,
+                next: {
+                    Success: 12010603,
+                },
             },
             {
                 id: 12010603,
-                next: 0,
+                next: {
+                    Success: 12010604,
+                },
             },
             {
                 id: 12010604,
-                next: 0,
+                next: {
+                    Success: 12010605,
+                },
             },
             {
                 id: 12010605,
-                next: 0,
+                next: {
+                    Success: 12010606,
+                },
             },
             {
                 id: 12010606,
-                next: 0,
+                next: {
+                    Success: 12010607,
+                },
             },
             {
                 id: 12010607,
-                next: 0,
+                next: {
+                    Success: 12010608,
+                },
             },
             {
                 id: 12010608,
-                next: 0,
             },
         ],
     },
@@ -1895,43 +2498,61 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 12011101,
-                next: 0,
+                next: {
+                    Success: 12011102,
+                },
             },
             {
                 id: 12011102,
-                next: 0,
+                next: {
+                    Success: 12011103,
+                },
             },
             {
                 id: 12011103,
-                next: 0,
+                next: {
+                    Success: 12011105,
+                },
             },
             {
                 id: 12011105,
-                next: 0,
+                next: {
+                    Success: 12011106,
+                },
             },
             {
                 id: 12011106,
-                next: 0,
+                next: {
+                    完成副本: 12011107,
+                    未完成副本: 12011110,
+                },
             },
             {
                 id: 12011107,
-                next: 0,
+                next: {
+                    Success: 12011108,
+                },
             },
             {
                 id: 12011108,
-                next: 0,
+                next: {
+                    Success: 12011109,
+                },
             },
             {
                 id: 12011109,
-                next: 0,
             },
             {
                 id: 12011110,
-                next: 0,
+                next: {
+                    Success: 12011107,
+                },
             },
             {
                 id: 12011150,
-                next: 0,
+                next: {
+                    Success: 12011101,
+                },
             },
         ],
     },
@@ -1948,39 +2569,55 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 12011201,
-                next: 0,
+                next: {
+                    Success: 12011202,
+                },
             },
             {
                 id: 12011202,
-                next: 0,
+                next: {
+                    Success: 12011203,
+                },
             },
             {
                 id: 12011203,
-                next: 0,
+                next: {
+                    Success: 12011204,
+                },
             },
             {
                 id: 12011204,
-                next: 0,
+                next: {
+                    完成副本: 12011205,
+                    未完成副本: 12011210,
+                },
             },
             {
                 id: 12011205,
-                next: 0,
+                next: {
+                    Success: 12011206,
+                },
             },
             {
                 id: 12011206,
-                next: 0,
+                next: {
+                    Success: 12011207,
+                },
             },
             {
                 id: 12011207,
-                next: 0,
             },
             {
                 id: 12011210,
-                next: 0,
+                next: {
+                    Success: 12011205,
+                },
             },
             {
                 id: 12011250,
-                next: 0,
+                next: {
+                    Success: 12011201,
+                },
             },
         ],
     },
@@ -1997,35 +2634,49 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 12011301,
-                next: 0,
+                next: {
+                    Success: 12011302,
+                },
             },
             {
                 id: 12011302,
-                next: 0,
+                next: {
+                    Success: 12011303,
+                },
             },
             {
                 id: 12011303,
-                next: 0,
+                next: {
+                    Success: 12011305,
+                },
             },
             {
                 id: 12011305,
-                next: 0,
+                next: {
+                    Success: 12011306,
+                },
             },
             {
                 id: 12011306,
-                next: 0,
+                next: {
+                    完成副本: 12011308,
+                    未完成副本: 12011307,
+                },
             },
             {
                 id: 12011307,
-                next: 0,
+                next: {
+                    Success: 12011308,
+                },
             },
             {
                 id: 12011308,
-                next: 0,
             },
             {
                 id: 12011350,
-                next: 0,
+                next: {
+                    Success: 12011301,
+                },
             },
         ],
     },
@@ -2042,67 +2693,97 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 12011401,
-                next: 0,
+                next: {
+                    Success: 12011403,
+                },
             },
             {
                 id: 12011403,
-                next: 0,
+                next: {
+                    Success: 12011404,
+                },
             },
             {
                 id: 12011404,
-                next: 0,
+                next: {
+                    Success: 12011405,
+                },
             },
             {
                 id: 12011405,
-                next: 0,
+                next: {
+                    Success: 12011406,
+                },
             },
             {
                 id: 12011406,
-                next: 0,
+                next: {
+                    Success: 12011407,
+                },
             },
             {
                 id: 12011407,
-                next: 0,
+                next: {
+                    Success: 12011408,
+                },
             },
             {
                 id: 12011408,
-                next: 0,
+                next: {
+                    Success: 12011409,
+                },
             },
             {
                 id: 12011409,
-                next: 0,
+                next: {
+                    Success: 12011410,
+                },
             },
             {
                 id: 12011410,
-                next: 0,
+                next: {
+                    Success: 12011411,
+                },
             },
             {
                 id: 12011411,
-                next: 0,
+                next: {
+                    Success: 12011415,
+                },
             },
             {
                 id: 12011412,
-                next: 0,
+                next: {
+                    Success: 12011413,
+                },
             },
             {
                 id: 12011413,
-                next: 0,
+                next: {
+                    完成副本: 12011414,
+                    未完成副本: 12011420,
+                },
             },
             {
                 id: 12011414,
-                next: 0,
             },
             {
                 id: 12011415,
-                next: 0,
+                next: {
+                    Success: 12011412,
+                },
             },
             {
                 id: 12011420,
-                next: 0,
+                next: {
+                    Success: 12011414,
+                },
             },
             {
                 id: 12011450,
-                next: 0,
+                next: {
+                    Success: 12011401,
+                },
             },
         ],
     },
@@ -2119,23 +2800,30 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20010101,
-                next: 0,
+                next: {
+                    Success: 20010102,
+                },
             },
             {
                 id: 20010102,
-                next: 0,
+                next: {
+                    Success: 20010103,
+                },
             },
             {
                 id: 20010103,
-                next: 0,
+                next: {
+                    Success: 20010104,
+                },
             },
             {
                 id: 20010104,
-                next: 0,
+                next: {
+                    Success: 20010105,
+                },
             },
             {
                 id: 20010105,
-                next: 0,
             },
         ],
     },
@@ -2150,23 +2838,30 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20010201,
-                next: 0,
+                next: {
+                    Success: 20010202,
+                },
             },
             {
                 id: 20010202,
-                next: 0,
+                next: {
+                    Success: 20010203,
+                },
             },
             {
                 id: 20010203,
-                next: 0,
+                next: {
+                    Success: 20010204,
+                },
             },
             {
                 id: 20010204,
-                next: 0,
+                next: {
+                    Success: 20010205,
+                },
             },
             {
                 id: 20010205,
-                next: 0,
             },
         ],
     },
@@ -2180,27 +2875,36 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20010301,
-                next: 0,
+                next: {
+                    Success: 20010302,
+                },
             },
             {
                 id: 20010302,
-                next: 0,
+                next: {
+                    Success: 20010303,
+                },
             },
             {
                 id: 20010303,
-                next: 0,
+                next: {
+                    Success: 20010304,
+                },
             },
             {
                 id: 20010304,
-                next: 0,
+                next: {
+                    Success: 20010305,
+                },
             },
             {
                 id: 20010305,
-                next: 0,
+                next: {
+                    Success: 20010306,
+                },
             },
             {
                 id: 20010306,
-                next: 0,
             },
         ],
     },
@@ -2214,47 +2918,66 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20010401,
-                next: 0,
+                next: {
+                    Success: 20010409,
+                },
             },
             {
                 id: 20010402,
-                next: 0,
+                next: {
+                    Success: 20010403,
+                },
             },
             {
                 id: 20010403,
-                next: 0,
+                next: {
+                    Success: 20010404,
+                },
             },
             {
                 id: 20010404,
-                next: 0,
+                next: {
+                    Success: 20010405,
+                },
             },
             {
                 id: 20010405,
-                next: 0,
+                next: {
+                    Success: 20010406,
+                },
             },
             {
                 id: 20010406,
-                next: 0,
+                next: {
+                    Success: 20010407,
+                },
             },
             {
                 id: 20010407,
-                next: 0,
+                next: {
+                    Success: 20010410,
+                },
             },
             {
                 id: 20010408,
-                next: 0,
             },
             {
                 id: 20010409,
-                next: 0,
+                next: {
+                    Success: 20010402,
+                },
             },
             {
                 id: 20010410,
-                next: 0,
+                next: {
+                    Success: 20010415,
+                },
             },
             {
                 id: 20010415,
-                next: 0,
+                next: {
+                    Success: 20010408,
+                },
             },
         ],
     },
@@ -2271,27 +2994,34 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20020100,
-                next: 0,
+                next: {
+                    Success: 20020102,
+                },
             },
             {
                 id: 20020102,
-                next: 0,
+                next: {
+                    Success: 20020104,
+                },
             },
             {
                 id: 20020104,
-                next: 0,
+                next: {
+                    Success: 20020105,
+                },
             },
             {
                 id: 20020105,
-                next: 0,
+                next: {
+                    "【分支2.1】（隐瞒在矿坑中得到的日记）": 20020106,
+                    "【分支2.2】（交出在矿坑中得到的日记）": 20020107,
+                },
             },
             {
                 id: 20020106,
-                next: 0,
             },
             {
                 id: 20020107,
-                next: 0,
             },
         ],
     },
@@ -2308,51 +3038,70 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20020300,
-                next: 0,
+                next: {
+                    Success: 20020312,
+                },
             },
             {
                 id: 20020302,
-                next: 0,
+                next: {
+                    Success: 20020314,
+                },
             },
             {
                 id: 20020303,
-                next: 0,
+                next: {
+                    Success: 20020305,
+                },
             },
             {
                 id: 20020305,
-                next: 0,
+                next: {
+                    Success: 20020306,
+                },
             },
             {
                 id: 20020306,
-                next: 0,
+                next: {
+                    "（不展示爱丽丝的日记）222": 20020319,
+                    "（展示爱丽丝的日记）111": 20020320,
+                },
             },
             {
                 id: 20020309,
-                next: 0,
             },
             {
                 id: 20020310,
-                next: 0,
             },
             {
                 id: 20020312,
-                next: 0,
+                next: {
+                    Success: 20020313,
+                },
             },
             {
                 id: 20020313,
-                next: 0,
+                next: {
+                    Success: 20020302,
+                },
             },
             {
                 id: 20020314,
-                next: 0,
+                next: {
+                    Success: 20020303,
+                },
             },
             {
                 id: 20020319,
-                next: 0,
+                next: {
+                    Success: 20020309,
+                },
             },
             {
                 id: 20020320,
-                next: 0,
+                next: {
+                    Success: 20020310,
+                },
             },
         ],
     },
@@ -2369,19 +3118,24 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20020400,
-                next: 0,
+                next: {
+                    Success: 20020403,
+                },
             },
             {
                 id: 20020403,
-                next: 0,
+                next: {
+                    Success: 20020404,
+                },
             },
             {
                 id: 20020404,
-                next: 0,
+                next: {
+                    Success: 20020405,
+                },
             },
             {
                 id: 20020405,
-                next: 0,
             },
         ],
     },
@@ -2398,43 +3152,60 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20020501,
-                next: 0,
+                next: {
+                    Success: 20020503,
+                },
             },
             {
                 id: 20020503,
-                next: 0,
+                next: {
+                    Success: 20020504,
+                },
             },
             {
                 id: 20020504,
-                next: 0,
+                next: {
+                    Success: 20020505,
+                },
             },
             {
                 id: 20020505,
-                next: 0,
+                next: {
+                    Success: 20020507,
+                },
             },
             {
                 id: 20020506,
-                next: 0,
             },
             {
                 id: 20020507,
-                next: 0,
+                next: {
+                    Success: 20020508,
+                },
             },
             {
                 id: 20020508,
-                next: 0,
+                next: {
+                    Success: 20020512,
+                },
             },
             {
                 id: 20020509,
-                next: 0,
+                next: {
+                    Success: 20020510,
+                },
             },
             {
                 id: 20020510,
-                next: 0,
+                next: {
+                    Success: 20020506,
+                },
             },
             {
                 id: 20020512,
-                next: 0,
+                next: {
+                    Success: 20020509,
+                },
             },
         ],
     },
@@ -2451,31 +3222,42 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20020600,
-                next: 0,
+                next: {
+                    Success: 20020603,
+                },
             },
             {
                 id: 20020603,
-                next: 0,
+                next: {
+                    Success: 20020605,
+                },
             },
             {
                 id: 20020605,
-                next: 0,
+                next: {
+                    Success: 20020609,
+                },
             },
             {
                 id: 20020606,
-                next: 0,
+                next: {
+                    Success: 20020607,
+                },
             },
             {
                 id: 20020607,
-                next: 0,
+                next: {
+                    Success: 20020608,
+                },
             },
             {
                 id: 20020608,
-                next: 0,
             },
             {
                 id: 20020609,
-                next: 0,
+                next: {
+                    Success: 20020606,
+                },
             },
         ],
     },
@@ -2492,31 +3274,42 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20020700,
-                next: 0,
+                next: {
+                    Success: 20020702,
+                },
             },
             {
                 id: 20020702,
-                next: 0,
+                next: {
+                    Success: 20020703,
+                },
             },
             {
                 id: 20020703,
-                next: 0,
+                next: {
+                    Success: 20020704,
+                },
             },
             {
                 id: 20020704,
-                next: 0,
+                next: {
+                    Success: 20020705,
+                },
             },
             {
                 id: 20020705,
-                next: 0,
+                next: {
+                    Success: 20020707,
+                },
             },
             {
                 id: 20020706,
-                next: 0,
             },
             {
                 id: 20020707,
-                next: 0,
+                next: {
+                    Success: 20020706,
+                },
             },
         ],
     },
@@ -2530,11 +3323,12 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20020802,
-                next: 0,
+                next: {
+                    Success: 20020803,
+                },
             },
             {
                 id: 20020803,
-                next: 0,
             },
         ],
     },
@@ -2548,27 +3342,37 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20020901,
-                next: 0,
+                next: {
+                    Success: 20020902,
+                },
             },
             {
                 id: 20020902,
-                next: 0,
+                next: {
+                    选项12: 20020903,
+                    选项3: 20020904,
+                },
             },
             {
                 id: 20020903,
-                next: 0,
+                next: {
+                    Success: 20020905,
+                },
             },
             {
                 id: 20020904,
-                next: 0,
+                next: {
+                    Success: 20020905,
+                },
             },
             {
                 id: 20020905,
-                next: 0,
+                next: {
+                    Success: 20020906,
+                },
             },
             {
                 id: 20020906,
-                next: 0,
             },
         ],
     },
@@ -2582,23 +3386,30 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20021001,
-                next: 0,
+                next: {
+                    Success: 20021002,
+                },
             },
             {
                 id: 20021002,
-                next: 0,
+                next: {
+                    Success: 20021003,
+                },
             },
             {
                 id: 20021003,
-                next: 0,
+                next: {
+                    Success: 20021004,
+                },
             },
             {
                 id: 20021004,
-                next: 0,
             },
             {
                 id: 20021007,
-                next: 0,
+                next: {
+                    Success: 20021001,
+                },
             },
         ],
     },
@@ -2615,27 +3426,36 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20021100,
-                next: 0,
+                next: {
+                    Success: 20021101,
+                },
             },
             {
                 id: 20021101,
-                next: 0,
+                next: {
+                    Success: 20021102,
+                },
             },
             {
                 id: 20021102,
-                next: 0,
+                next: {
+                    Success: 20021103,
+                },
             },
             {
                 id: 20021103,
-                next: 0,
+                next: {
+                    Success: 20021104,
+                },
             },
             {
                 id: 20021104,
-                next: 0,
+                next: {
+                    Success: 20021105,
+                },
             },
             {
                 id: 20021105,
-                next: 0,
             },
         ],
     },
@@ -2652,27 +3472,34 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20021200,
-                next: 0,
+                next: {
+                    Success: 20021205,
+                },
             },
             {
                 id: 20021202,
-                next: 0,
+                next: {
+                    Success: 20021203,
+                },
             },
             {
                 id: 20021203,
-                next: 0,
             },
             {
                 id: 20021205,
-                next: 0,
+                next: {
+                    Success: 20021206,
+                },
             },
             {
                 id: 20021206,
-                next: 0,
+                next: {
+                    分支1: 20021207,
+                    分支2: 20021202,
+                },
             },
             {
                 id: 20021207,
-                next: 0,
             },
         ],
     },
@@ -2692,23 +3519,30 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20021300,
-                next: 0,
+                next: {
+                    Success: 20021301,
+                },
             },
             {
                 id: 20021301,
-                next: 0,
+                next: {
+                    Success: 20021302,
+                },
             },
             {
                 id: 20021302,
-                next: 0,
+                next: {
+                    Success: 20021303,
+                },
             },
             {
                 id: 20021303,
-                next: 0,
+                next: {
+                    Success: 20021304,
+                },
             },
             {
                 id: 20021304,
-                next: 0,
             },
         ],
     },
@@ -2728,43 +3562,60 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20021500,
-                next: 0,
+                next: {
+                    Success: 20021501,
+                },
             },
             {
                 id: 20021501,
-                next: 0,
+                next: {
+                    Success: 20021510,
+                },
             },
             {
                 id: 20021502,
-                next: 0,
+                next: {
+                    Success: 20021503,
+                },
             },
             {
                 id: 20021503,
-                next: 0,
+                next: {
+                    Success: 20021504,
+                },
             },
             {
                 id: 20021504,
-                next: 0,
+                next: {
+                    Success: 20021509,
+                },
             },
             {
                 id: 20021506,
-                next: 0,
+                next: {
+                    Success: 20021507,
+                },
             },
             {
                 id: 20021507,
-                next: 0,
+                next: {
+                    Success: 20021508,
+                },
             },
             {
                 id: 20021508,
-                next: 0,
             },
             {
                 id: 20021509,
-                next: 0,
+                next: {
+                    Success: 20021506,
+                },
             },
             {
                 id: 20021510,
-                next: 0,
+                next: {
+                    Success: 20021502,
+                },
             },
         ],
     },
@@ -2778,19 +3629,24 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20021601,
-                next: 0,
+                next: {
+                    Success: 20021602,
+                },
             },
             {
                 id: 20021602,
-                next: 0,
+                next: {
+                    Success: 20021603,
+                },
             },
             {
                 id: 20021603,
-                next: 0,
+                next: {
+                    Success: 20021604,
+                },
             },
             {
                 id: 20021604,
-                next: 0,
             },
         ],
     },
@@ -2804,27 +3660,36 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20021901,
-                next: 0,
+                next: {
+                    Success: 20021902,
+                },
             },
             {
                 id: 20021902,
-                next: 0,
+                next: {
+                    Success: 20021903,
+                },
             },
             {
                 id: 20021903,
-                next: 0,
+                next: {
+                    Success: 20021905,
+                },
             },
             {
                 id: 20021904,
-                next: 0,
+                next: {
+                    Success: 20021901,
+                },
             },
             {
                 id: 20021905,
-                next: 0,
+                next: {
+                    Success: 20021906,
+                },
             },
             {
                 id: 20021906,
-                next: 0,
             },
         ],
     },
@@ -2838,31 +3703,42 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20022002,
-                next: 0,
+                next: {
+                    Success: 20022004,
+                },
             },
             {
                 id: 20022004,
-                next: 0,
+                next: {
+                    Success: 20022005,
+                },
             },
             {
                 id: 20022005,
-                next: 0,
+                next: {
+                    Success: 20022006,
+                },
             },
             {
                 id: 20022006,
-                next: 0,
+                next: {
+                    Success: 20022007,
+                },
             },
             {
                 id: 20022007,
-                next: 0,
+                next: {
+                    Success: 20022008,
+                },
             },
             {
                 id: 20022008,
-                next: 0,
+                next: {
+                    Success: 20022009,
+                },
             },
             {
                 id: 20022009,
-                next: 0,
             },
         ],
     },
@@ -2876,23 +3752,30 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20022101,
-                next: 0,
+                next: {
+                    Success: 20022102,
+                },
             },
             {
                 id: 20022102,
-                next: 0,
+                next: {
+                    Success: 20022103,
+                },
             },
             {
                 id: 20022103,
-                next: 0,
+                next: {
+                    Success: 20022104,
+                },
             },
             {
                 id: 20022104,
-                next: 0,
             },
             {
                 id: 20022105,
-                next: 0,
+                next: {
+                    Success: 20022101,
+                },
             },
         ],
     },
@@ -2909,23 +3792,30 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20022200,
-                next: 0,
+                next: {
+                    Success: 20022202,
+                },
             },
             {
                 id: 20022202,
-                next: 0,
+                next: {
+                    Success: 20022203,
+                },
             },
             {
                 id: 20022203,
-                next: 0,
+                next: {
+                    Success: 20022204,
+                },
             },
             {
                 id: 20022204,
-                next: 0,
+                next: {
+                    Success: 20022205,
+                },
             },
             {
                 id: 20022205,
-                next: 0,
             },
         ],
     },
@@ -2942,11 +3832,12 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20022300,
-                next: 0,
+                next: {
+                    Success: 20022301,
+                },
             },
             {
                 id: 20022301,
-                next: 0,
             },
         ],
     },
@@ -2962,19 +3853,24 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20022401,
-                next: 0,
+                next: {
+                    Success: 20022402,
+                },
             },
             {
                 id: 20022402,
-                next: 0,
+                next: {
+                    Success: 20022403,
+                },
             },
             {
                 id: 20022403,
-                next: 0,
+                next: {
+                    Success: 20022404,
+                },
             },
             {
                 id: 20022404,
-                next: 0,
             },
         ],
     },
@@ -2990,19 +3886,24 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20022501,
-                next: 0,
+                next: {
+                    Success: 20022502,
+                },
             },
             {
                 id: 20022502,
-                next: 0,
+                next: {
+                    Success: 20022503,
+                },
             },
             {
                 id: 20022503,
-                next: 0,
+                next: {
+                    Success: 20022504,
+                },
             },
             {
                 id: 20022504,
-                next: 0,
             },
         ],
     },
@@ -3017,15 +3918,16 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20022701,
-                next: 0,
+                next: {
+                    选项1: 20022703,
+                    选项2: 20022702,
+                },
             },
             {
                 id: 20022702,
-                next: 0,
             },
             {
                 id: 20022703,
-                next: 0,
             },
         ],
     },
@@ -3039,19 +3941,24 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20022801,
-                next: 0,
+                next: {
+                    Success: 20022802,
+                },
             },
             {
                 id: 20022802,
-                next: 0,
+                next: {
+                    Success: 20022803,
+                },
             },
             {
                 id: 20022803,
-                next: 0,
+                next: {
+                    Success: 20022804,
+                },
             },
             {
                 id: 20022804,
-                next: 0,
             },
         ],
     },
@@ -3069,19 +3976,24 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20022901,
-                next: 0,
+                next: {
+                    Success: 20022902,
+                },
             },
             {
                 id: 20022902,
-                next: 0,
+                next: {
+                    Success: 20022903,
+                },
             },
             {
                 id: 20022903,
-                next: 0,
+                next: {
+                    Success: 20022904,
+                },
             },
             {
                 id: 20022904,
-                next: 0,
             },
         ],
     },
@@ -3098,31 +4010,42 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20023000,
-                next: 0,
+                next: {
+                    Success: 20023001,
+                },
             },
             {
                 id: 20023001,
-                next: 0,
+                next: {
+                    Success: 20023002,
+                },
             },
             {
                 id: 20023002,
-                next: 0,
+                next: {
+                    Success: 20023003,
+                },
             },
             {
                 id: 20023003,
-                next: 0,
+                next: {
+                    Success: 20023004,
+                },
             },
             {
                 id: 20023004,
-                next: 0,
+                next: {
+                    Success: 20023006,
+                },
             },
             {
                 id: 20023006,
-                next: 0,
+                next: {
+                    Success: 20023007,
+                },
             },
             {
                 id: 20023007,
-                next: 0,
             },
         ],
     },
@@ -3139,27 +4062,36 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20023100,
-                next: 0,
+                next: {
+                    Success: 20023101,
+                },
             },
             {
                 id: 20023101,
-                next: 0,
+                next: {
+                    Success: 20023102,
+                },
             },
             {
                 id: 20023102,
-                next: 0,
+                next: {
+                    Success: 20023103,
+                },
             },
             {
                 id: 20023103,
-                next: 0,
+                next: {
+                    Success: 20023105,
+                },
             },
             {
                 id: 20023105,
-                next: 0,
+                next: {
+                    Success: 20023108,
+                },
             },
             {
                 id: 20023108,
-                next: 0,
             },
         ],
     },
@@ -3176,23 +4108,30 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20023201,
-                next: 0,
+                next: {
+                    Success: 20023202,
+                },
             },
             {
                 id: 20023202,
-                next: 0,
+                next: {
+                    Success: 20023203,
+                },
             },
             {
                 id: 20023203,
-                next: 0,
+                next: {
+                    Success: 20023204,
+                },
             },
             {
                 id: 20023204,
-                next: 0,
+                next: {
+                    Success: 20023205,
+                },
             },
             {
                 id: 20023205,
-                next: 0,
             },
         ],
     },
@@ -3208,23 +4147,28 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20023301,
-                next: 0,
+                next: {
+                    Success: 20023302,
+                },
             },
             {
                 id: 20023302,
-                next: 0,
+                next: {
+                    Success: 20023304,
+                },
             },
             {
                 id: 20023304,
-                next: 0,
+                next: {
+                    不揭发: 20023305,
+                    揭发: 20023306,
+                },
             },
             {
                 id: 20023305,
-                next: 0,
             },
             {
                 id: 20023306,
-                next: 0,
             },
         ],
     },
@@ -3240,11 +4184,12 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20023401,
-                next: 0,
+                next: {
+                    Success: 20023402,
+                },
             },
             {
                 id: 20023402,
-                next: 0,
             },
         ],
     },
@@ -3260,11 +4205,12 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20023501,
-                next: 0,
+                next: {
+                    Success: 20023502,
+                },
             },
             {
                 id: 20023502,
-                next: 0,
             },
         ],
     },
@@ -3280,19 +4226,22 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20023601,
-                next: 0,
+                next: {
+                    Success: 20023603,
+                },
             },
             {
                 id: 20023602,
-                next: 0,
             },
             {
                 id: 20023603,
-                next: 0,
+                next: {
+                    已合成: 20023604,
+                    未合成: 20023602,
+                },
             },
             {
                 id: 20023604,
-                next: 0,
             },
         ],
     },
@@ -3308,23 +4257,30 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20030100,
-                next: 0,
+                next: {
+                    Success: 20030101,
+                },
             },
             {
                 id: 20030101,
-                next: 0,
+                next: {
+                    Success: 20030104,
+                },
             },
             {
                 id: 20030103,
-                next: 0,
+                next: {
+                    Success: 20030106,
+                },
             },
             {
                 id: 20030104,
-                next: 0,
+                next: {
+                    Success: 20030103,
+                },
             },
             {
                 id: 20030106,
-                next: 0,
             },
         ],
     },
@@ -3341,23 +4297,30 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20030200,
-                next: 0,
+                next: {
+                    Success: 20030201,
+                },
             },
             {
                 id: 20030201,
-                next: 0,
+                next: {
+                    Success: 20030202,
+                },
             },
             {
                 id: 20030202,
-                next: 0,
+                next: {
+                    Success: 20030203,
+                },
             },
             {
                 id: 20030203,
-                next: 0,
+                next: {
+                    Success: 20030204,
+                },
             },
             {
                 id: 20030204,
-                next: 0,
             },
         ],
     },
@@ -3374,23 +4337,30 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20030300,
-                next: 0,
+                next: {
+                    Success: 20030301,
+                },
             },
             {
                 id: 20030301,
-                next: 0,
+                next: {
+                    Success: 20030302,
+                },
             },
             {
                 id: 20030302,
-                next: 0,
+                next: {
+                    Success: 20030303,
+                },
             },
             {
                 id: 20030303,
-                next: 0,
+                next: {
+                    Success: 20030304,
+                },
             },
             {
                 id: 20030304,
-                next: 0,
             },
         ],
     },
@@ -3407,43 +4377,60 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20030400,
-                next: 0,
+                next: {
+                    Success: 20030401,
+                },
             },
             {
                 id: 20030401,
-                next: 0,
+                next: {
+                    Success: 20030402,
+                },
             },
             {
                 id: 20030402,
-                next: 0,
+                next: {
+                    Success: 20030403,
+                },
             },
             {
                 id: 20030403,
-                next: 0,
+                next: {
+                    Success: 20030404,
+                },
             },
             {
                 id: 20030404,
-                next: 0,
+                next: {
+                    Success: 20030405,
+                },
             },
             {
                 id: 20030405,
-                next: 0,
+                next: {
+                    Success: 20030406,
+                },
             },
             {
                 id: 20030406,
-                next: 0,
+                next: {
+                    Success: 20030407,
+                },
             },
             {
                 id: 20030407,
-                next: 0,
+                next: {
+                    Success: 20030408,
+                },
             },
             {
                 id: 20030408,
-                next: 0,
+                next: {
+                    Success: 20030409,
+                },
             },
             {
                 id: 20030409,
-                next: 0,
             },
         ],
     },
@@ -3459,43 +4446,60 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20030500,
-                next: 0,
+                next: {
+                    Success: 20030501,
+                },
             },
             {
                 id: 20030501,
-                next: 0,
+                next: {
+                    Success: 20030509,
+                },
             },
             {
                 id: 20030502,
-                next: 0,
+                next: {
+                    Success: 20030503,
+                },
             },
             {
                 id: 20030503,
-                next: 0,
+                next: {
+                    Success: 20030504,
+                },
             },
             {
                 id: 20030504,
-                next: 0,
+                next: {
+                    Success: 20030505,
+                },
             },
             {
                 id: 20030505,
-                next: 0,
+                next: {
+                    Success: 20030506,
+                },
             },
             {
                 id: 20030506,
-                next: 0,
+                next: {
+                    Success: 20030507,
+                },
             },
             {
                 id: 20030507,
-                next: 0,
+                next: {
+                    Success: 20030508,
+                },
             },
             {
                 id: 20030508,
-                next: 0,
             },
             {
                 id: 20030509,
-                next: 0,
+                next: {
+                    Success: 20030502,
+                },
             },
         ],
     },
@@ -3512,19 +4516,24 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20030600,
-                next: 0,
+                next: {
+                    Success: 20030601,
+                },
             },
             {
                 id: 20030601,
-                next: 0,
+                next: {
+                    Success: 20030602,
+                },
             },
             {
                 id: 20030602,
-                next: 0,
+                next: {
+                    Success: 20030603,
+                },
             },
             {
                 id: 20030603,
-                next: 0,
             },
         ],
     },
@@ -3541,19 +4550,24 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20030700,
-                next: 0,
+                next: {
+                    Success: 20030701,
+                },
             },
             {
                 id: 20030701,
-                next: 0,
+                next: {
+                    Success: 20030702,
+                },
             },
             {
                 id: 20030702,
-                next: 0,
+                next: {
+                    Success: 20030703,
+                },
             },
             {
                 id: 20030703,
-                next: 0,
             },
         ],
     },
@@ -3570,19 +4584,24 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20030800,
-                next: 0,
+                next: {
+                    Success: 20030801,
+                },
             },
             {
                 id: 20030801,
-                next: 0,
+                next: {
+                    Success: 20030802,
+                },
             },
             {
                 id: 20030802,
-                next: 0,
+                next: {
+                    Success: 20030803,
+                },
             },
             {
                 id: 20030803,
-                next: 0,
             },
         ],
     },
@@ -3598,27 +4617,36 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20030901,
-                next: 0,
+                next: {
+                    Success: 20030902,
+                },
             },
             {
                 id: 20030902,
-                next: 0,
+                next: {
+                    Success: 20030903,
+                },
             },
             {
                 id: 20030903,
-                next: 0,
+                next: {
+                    Success: 20030906,
+                },
             },
             {
                 id: 20030904,
-                next: 0,
+                next: {
+                    Success: 20030905,
+                },
             },
             {
                 id: 20030905,
-                next: 0,
             },
             {
                 id: 20030906,
-                next: 0,
+                next: {
+                    Success: 20030904,
+                },
             },
         ],
     },
@@ -3635,23 +4663,30 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20031001,
-                next: 0,
+                next: {
+                    Success: 20031003,
+                },
             },
             {
                 id: 20031003,
-                next: 0,
+                next: {
+                    Success: 20031004,
+                },
             },
             {
                 id: 20031004,
-                next: 0,
+                next: {
+                    Success: 20031005,
+                },
             },
             {
                 id: 20031005,
-                next: 0,
+                next: {
+                    Success: 20031006,
+                },
             },
             {
                 id: 20031006,
-                next: 0,
             },
         ],
     },
@@ -3667,19 +4702,24 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20031100,
-                next: 0,
+                next: {
+                    Success: 20031101,
+                },
             },
             {
                 id: 20031101,
-                next: 0,
+                next: {
+                    Success: 20031103,
+                },
             },
             {
                 id: 20031102,
-                next: 0,
             },
             {
                 id: 20031103,
-                next: 0,
+                next: {
+                    Success: 20031102,
+                },
             },
         ],
     },
@@ -3695,23 +4735,30 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20031200,
-                next: 0,
+                next: {
+                    Success: 20031201,
+                },
             },
             {
                 id: 20031201,
-                next: 0,
+                next: {
+                    Success: 20031204,
+                },
             },
             {
                 id: 20031202,
-                next: 0,
+                next: {
+                    Success: 20031203,
+                },
             },
             {
                 id: 20031203,
-                next: 0,
             },
             {
                 id: 20031204,
-                next: 0,
+                next: {
+                    Success: 20031202,
+                },
             },
         ],
     },
@@ -3728,27 +4775,36 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20031301,
-                next: 0,
+                next: {
+                    Success: 20031302,
+                },
             },
             {
                 id: 20031302,
-                next: 0,
+                next: {
+                    Success: 20031303,
+                },
             },
             {
                 id: 20031303,
-                next: 0,
+                next: {
+                    Success: 20031304,
+                },
             },
             {
                 id: 20031304,
-                next: 0,
+                next: {
+                    Success: 20031305,
+                },
             },
             {
                 id: 20031305,
-                next: 0,
+                next: {
+                    Success: 20031306,
+                },
             },
             {
                 id: 20031306,
-                next: 0,
             },
         ],
     },
@@ -3765,7 +4821,6 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20031401,
-                next: 0,
             },
         ],
     },
@@ -3782,23 +4837,30 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 20031500,
-                next: 0,
+                next: {
+                    Success: 20031502,
+                },
             },
             {
                 id: 20031502,
-                next: 0,
+                next: {
+                    Success: 20031503,
+                },
             },
             {
                 id: 20031503,
-                next: 0,
+                next: {
+                    Success: 20031504,
+                },
             },
             {
                 id: 20031504,
-                next: 0,
+                next: {
+                    Success: 20031505,
+                },
             },
             {
                 id: 20031505,
-                next: 0,
             },
         ],
     },
@@ -3816,7 +4878,6 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 4001011,
-                next: 0,
             },
         ],
     },
@@ -3834,7 +4895,6 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 4001021,
-                next: 0,
             },
         ],
     },
@@ -3852,7 +4912,6 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 4001031,
-                next: 0,
             },
         ],
     },
@@ -3870,7 +4929,6 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 4001041,
-                next: 0,
             },
         ],
     },
@@ -3888,7 +4946,6 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 4001051,
-                next: 0,
             },
         ],
     },
@@ -3906,7 +4963,6 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 4001061,
-                next: 0,
             },
         ],
     },
@@ -3924,7 +4980,6 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 4001071,
-                next: 0,
             },
         ],
     },
@@ -3941,31 +4996,42 @@ export const questChainData: QuestChain[] = [
         quests: [
             {
                 id: 40011101,
-                next: 0,
+                next: {
+                    Success: 40011102,
+                },
             },
             {
                 id: 40011102,
-                next: 0,
+                next: {
+                    Success: 40011103,
+                },
             },
             {
                 id: 40011103,
-                next: 0,
+                next: {
+                    Success: 40011104,
+                },
             },
             {
                 id: 40011104,
-                next: 0,
+                next: {
+                    Success: 40011105,
+                },
             },
             {
                 id: 40011105,
-                next: 0,
+                next: {
+                    Success: 40011106,
+                },
             },
             {
                 id: 40011106,
-                next: 0,
+                next: {
+                    Success: 40011107,
+                },
             },
             {
                 id: 40011107,
-                next: 0,
             },
         ],
     },

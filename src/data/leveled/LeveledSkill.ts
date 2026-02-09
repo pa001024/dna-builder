@@ -8,7 +8,6 @@ export interface LeveledSkillField {
     格式?: string
     基础?: string
     值2?: number
-    段数?: number
     safeName: string
 }
 
@@ -50,6 +49,12 @@ export class LeveledSkill {
         this.描述 = skillData.描述
         if (skillData.武器) this.武器 = skillData.武器
         this.术语解释 = skillData.术语解释
+        /**
+         * 兼容子技能对象结构，优先使用名称，其次使用ID作为展示键
+         */
+        this.子技能 = (skillData.子技能 || [])
+            .map((subSkill, index) => subSkill.名称 || (subSkill.id ? `${subSkill.id}` : `子技能${index + 1}`))
+            .filter(Boolean)
         // 设置技能等级（如果提供），否则设为10
         this.等级 = 等级 || 10
         this.字段 = []
@@ -102,9 +107,6 @@ export class LeveledSkill {
                 } as LeveledSkillField
                 if (obj.值2) {
                     obj.值2 = Array.isArray(fo.值2) ? fo.值2[this._level - 1] : fo.值2
-                }
-                if (obj.段数) {
-                    obj.段数 = Array.isArray(fo.段数) ? fo.段数[this._level - 1] : fo.段数
                 }
                 if (obj.格式) {
                     const m = obj.格式.match(/生命|防御/g)

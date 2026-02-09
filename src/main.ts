@@ -29,6 +29,11 @@ import "@globalhive/vuejs-tour/dist/style.css"
 const app = createApp(App)
 app.use(createPinia()).use(I18NextVue, { i18next }).use(router)
 
+if (env.isApp) {
+    // 桌面端启用 HarmonyOS 字体类名，避免影响 Web 端加载策略。
+    document.documentElement.classList.add("is-app-font")
+}
+
 // Sentry 初始化 - 必须在 app.use 之后
 import * as Sentry from "@sentry/vue"
 

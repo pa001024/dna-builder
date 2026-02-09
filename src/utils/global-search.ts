@@ -2,6 +2,7 @@ import Fuse from "fuse.js"
 import { t } from "i18next"
 import { charMap } from "@/data/d"
 import { abyssDungeons } from "@/data/d/abyss.data"
+import { charAccessoryData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import achievementData from "@/data/d/achievement.data"
 import charData from "@/data/d/char.data"
 import draftData from "@/data/d/draft.data"
@@ -18,6 +19,7 @@ import { RaidDungeon } from "@/data/d/raid.data"
 import { regionMap } from "@/data/d/region.data"
 import shopData from "@/data/d/shop.data"
 import { subRegionMap } from "@/data/d/subregion.data"
+import titleData from "@/data/d/title.data"
 import walnutData from "@/data/d/walnut.data"
 import weaponData from "@/data/d/weapon.data"
 import { getAbyssDungeonGroup, getAbyssDungeonLevel, getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
@@ -104,6 +106,51 @@ export class GlobalSearchService {
      */
     private buildSearchEntries(): DBSearchEntry[] {
         const entries: DBSearchEntry[] = []
+
+        entries.push(
+            ...charAccessoryData.map(accessory =>
+                this.buildSearchEntry(
+                    {
+                        id: `char-accessory:${accessory.id}`,
+                        title: accessory.name,
+                        subtitle: `饰品 ID: ${accessory.id} | 角色饰品`,
+                        typeLabel: t("database.accessory"),
+                        path: `/db/accessory/char/${accessory.id}`,
+                    },
+                    [accessory.id, accessory.name, accessory.desc, accessory.unlock, accessory.rarity, accessory.icon]
+                )
+            )
+        )
+
+        entries.push(
+            ...weaponAccessoryData.map(accessory =>
+                this.buildSearchEntry(
+                    {
+                        id: `weapon-accessory:${accessory.id}`,
+                        title: accessory.name,
+                        subtitle: `饰品 ID: ${accessory.id} | 武器饰品`,
+                        typeLabel: t("database.accessory"),
+                        path: `/db/accessory/weapon/${accessory.id}`,
+                    },
+                    [accessory.id, accessory.name, accessory.desc, accessory.unlock, accessory.rarity, accessory.icon]
+                )
+            )
+        )
+
+        entries.push(
+            ...weaponSkinData.map(accessory =>
+                this.buildSearchEntry(
+                    {
+                        id: `weapon-skin:${accessory.id}`,
+                        title: accessory.name,
+                        subtitle: `饰品 ID: ${accessory.id} | 武器皮肤`,
+                        typeLabel: t("database.accessory"),
+                        path: `/db/accessory/skin/${accessory.id}`,
+                    },
+                    [accessory.id, accessory.name, accessory.desc, accessory.unlock, accessory.rarity, accessory.icon]
+                )
+            )
+        )
 
         entries.push(
             ...charData.map(char =>
@@ -287,6 +334,21 @@ export class GlobalSearchService {
         )
 
         entries.push(
+            ...titleData.map(title =>
+                this.buildSearchEntry(
+                    {
+                        id: `title:${title.id}`,
+                        title: title.name,
+                        subtitle: `称号 ID: ${title.id}`,
+                        typeLabel: t("database.title_data"),
+                        path: `/db/title/${title.id}`,
+                    },
+                    [title.id, title.name, title.src, title.suf ? "后缀" : "前缀"]
+                )
+            )
+        )
+
+        entries.push(
             ...fishs.map(fish =>
                 this.buildSearchEntry(
                     {
@@ -345,7 +407,7 @@ export class GlobalSearchService {
                         id: `dynquest:${quest.id}`,
                         title: quest.name,
                         subtitle: `委托 ID: ${quest.id}`,
-                        typeLabel: t("database.dyn_quest"),
+                        typeLabel: t("database.dynquest"),
                         path: `/db/dynquest/${quest.id}`,
                     },
                     [quest.id, regionName, subRegionName, quest.chance, ...(quest.level || []), quest.completeNum]

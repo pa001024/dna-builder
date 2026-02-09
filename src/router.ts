@@ -161,6 +161,18 @@ const routes: readonly RouteRecordRaw[] = [
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
+                name: "title-list",
+                path: "title",
+                component: () => import("./views/DBTitleListView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "title-detail",
+                path: "title/:id",
+                component: () => import("./views/DBTitleDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
                 name: "raid-rank",
                 path: "rank",
                 component: () => import("./views/DBRaidRank.vue"),
@@ -227,6 +239,18 @@ const routes: readonly RouteRecordRaw[] = [
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
+                name: "accessory-list",
+                path: "accessory",
+                component: () => import("./views/DBAccessoryListView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "accessory-detail",
+                path: "accessory/:accessoryType/:accessoryId",
+                component: () => import("./views/DBAccessoryDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
                 name: "dungeon-list",
                 path: "dungeon",
                 component: () => import("./views/DBDungeonListView.vue"),
@@ -236,6 +260,18 @@ const routes: readonly RouteRecordRaw[] = [
                 name: "dungeon-detail",
                 path: "dungeon/:dungeonId",
                 component: () => import("./views/DBDungeonDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "reputation-list",
+                path: "reputation",
+                component: () => import("./views/DBReputationListView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "reputation-detail",
+                path: "reputation/:reputationId",
+                component: () => import("./views/DBReputationDetailView.vue"),
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
@@ -300,7 +336,7 @@ const routes: readonly RouteRecordRaw[] = [
             },
             {
                 name: "shop-detail",
-                path: "shop/:shopId",
+                path: "shop/:shopId/:subTabId?",
                 component: () => import("./views/DBShopDetailView.vue"),
                 beforeEnter: () => setMinSize(320, 360),
             },

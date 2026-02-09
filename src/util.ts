@@ -24,7 +24,7 @@ export function format1000(n: number, di = 0) {
 export function formatBigNumber(n: number) {
     if (i18next.language.startsWith("zh")) {
         if (n >= 1e8) return `${+(n / 1e8).toFixed(3)}E`
-        if (n >= 1e4) return `${+(n / 1e4).toFixed(3)}W`
+        if (n >= 1e5) return `${+(n / 1e4).toFixed(3)}W`
     } else {
         if (n >= 1e9) return `${+(n / 1e9).toFixed(3)}B`
         if (n >= 1e6) return `${+(n / 1e6).toFixed(3)}M`
@@ -66,9 +66,7 @@ const propRegex = /神智消耗|神智回复$/
 export function formatSkillProp(prop: string, val: LeveledSkillField) {
     const fmt = propRegex.test(prop) ? format1 : format100
     return val.格式
-        ? val.格式.replace(/\{%?\}/g, (v, i) =>
-              v.includes("%") ? format100(i ? (val.值2 || val.段数)! : val.值) : format1(i ? (val.值2 || val.段数)! : val.值)
-          )
+        ? val.格式.replace(/\{%?\}/g, (v, i) => (v.includes("%") ? format100(i ? val.值2! : val.值) : format1(i ? val.值2! : val.值)))
         : fmt(val.值)
 }
 

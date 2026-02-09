@@ -132,7 +132,7 @@ watch(
                 <span class="text-sm min-w-12">Lv. {{ currentLevel }}</span>
                 <input v-model.number="currentLevel" type="range" class="range range-primary range-xs grow" min="1" max="180" step="1" />
             </div>
-            <h3 class="font-bold mb-2">普通怪物 ({{ dungeon.m.length }}个)</h3>
+            <h3 class="font-bold mb-2">普通怪物 ({{ dungeon.m.length }}种)</h3>
             <div class="space-y-3">
                 <div
                     v-for="mon in dungeon.m.map(id => new LeveledMonster(id, currentLevel))"
@@ -190,7 +190,7 @@ watch(
 
         <!-- 特殊怪物 -->
         <div v-if="dungeon.sm?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
-            <h3 class="font-bold mb-2">特殊怪物 ({{ dungeon.sm.length }}个)</h3>
+            <h3 class="font-bold mb-2">特殊怪物 ({{ dungeon.sm.length }}种)</h3>
             <div class="space-y-3">
                 <div
                     v-for="mon in dungeon.sm.map(id => new LeveledMonster(id, currentLevel))"

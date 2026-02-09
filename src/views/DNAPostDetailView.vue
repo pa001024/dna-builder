@@ -227,10 +227,7 @@ async function submitComment() {
                                 </div>
 
                                 <!-- 回复列表 -->
-                                <div
-                                    v-if="comment.replyVos && comment.replyVos.length > 0"
-                                    class="mt-3 space-y-3 pl-4 border-l-2 border-base-300"
-                                >
+                                <div v-if="comment.replyVos && comment.replyVos.length > 0" class="mt-3 space-y-3 pl-4">
                                     <div
                                         v-for="reply in comment.replyVos"
                                         :key="reply.postCommentReplayId"

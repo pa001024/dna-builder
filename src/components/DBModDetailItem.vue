@@ -1,10 +1,11 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
+import { LeveledSkill } from "@/data"
 import { modShopSourceMap } from "@/data/d/shop.data"
 import { getDungeonName } from "@/utils/dungeon-utils"
 import { getModDropInfo } from "@/utils/reward-utils"
 import { modDraftMap, modDungeonMap } from "../data/d/index"
-import type { Draft, Dungeon, Mod } from "../data/data-types"
+import type { Draft, Dungeon, Mod, WeaponSkill } from "../data/data-types"
 import { LeveledMod } from "../data/leveled/LeveledMod"
 import { formatProp } from "../util"
 
@@ -121,6 +122,19 @@ const totalModCost = computed(() => {
     }
     return total
 })
+
+/**
+ * 获取技能替换条目，避免模板中 Object.entries 的 unknown 类型问题
+ */
+const skillReplaceEntries = computed(() => {
+    const skillReplace = leveledMod.value.技能替换 as Record<string, WeaponSkill> | undefined
+    return skillReplace ? Object.entries(skillReplace) : []
+})
+
+const replaceSkills = computed(() => {
+    if (!leveledMod.value.技能替换) return []
+    return Object.values(leveledMod.value.技能替换).map(skill => new LeveledSkill(skill))
+})
 </script>
 
 <template>
@@ -229,6 +243,18 @@ const totalModCost = computed(() => {
                 >
                     <span class="text-base-content/70">{{ key }}</span>
                     <span class="font-medium text-primary">{{ formatProp(key, attr) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="skillReplaceEntries.length" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">技能替换</div>
+            <div class="space-y-3">
+                <div v-for="skill in replaceSkills" :key="skill.名称">
+                    <div class="p-2 font-medium mb-1">
+                        {{ $t(skill.名称) }}
+                    </div>
+                    <SkillFields :skill="skill" />
                 </div>
             </div>
         </div>

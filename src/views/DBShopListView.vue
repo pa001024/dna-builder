@@ -114,7 +114,7 @@ function selectShop(shop: (typeof shopData)[0] | null) {
             </div>
 
             <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedShop" class="flex-1">
+            <ScrollArea v-if="selectedShop" class="flex-1" :key="selectedShopId">
                 <DBShopDetailItem :shop="selectedShop" />
             </ScrollArea>
         </div>

@@ -1,8 +1,10 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { draftMap, LeveledMod, LeveledWeapon, modMap, resourceMap, walnutMap, weaponMap } from "@/data"
+import { charAccessoryData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { headSculptureMap } from "@/data/d/headsculpture.data"
 import type { ShopItem } from "@/data/d/shop.data"
-import { getRewardDetails } from "@/utils/reward-utils"
+import { getRewardDetails, getRewardTypeText } from "@/utils/reward-utils"
 
 // 定义带有子项的商品类型
 interface ShopItemWithChildren extends ShopItem {
@@ -46,6 +48,12 @@ const itemDetail = computed(() => {
                     icon = LeveledMod.url(modMap.get(draft.p)?.icon)
                 } else if (draft.t === "Weapon" && draft.p) {
                     icon = LeveledWeapon.url(weaponMap.get(draft.p)?.icon)
+                } else {
+                    switch (draft.t) {
+                        case "CharAccessory":
+                            let acc = charAccessoryData.find(item => item.id === props.item.typeId)
+                            if (acc) icon = `/imgs/fashion/${acc.icon}.webp`
+                    }
                 }
             }
             return {
@@ -72,6 +80,44 @@ const itemDetail = computed(() => {
                 walnut,
                 icon: icon2,
                 link: `/db/walnut/${walnut?.id}`,
+            }
+        case "HeadSculpture":
+            let head = headSculptureMap.get(props.item.typeId)
+            if (head) {
+                return {
+                    type: props.item.itemType,
+                    icon: `/imgs/head/${head.icon}.webp`,
+                }
+            } else {
+                return {
+                    type: props.item.itemType,
+                    icon: `/imgs/webp/T_Head_Empty.webp`,
+                }
+            }
+        case "Title":
+            return {
+                type: props.item.itemType,
+                icon: `/imgs/webp/T_Icon_Random_Title.webp`,
+            }
+        case "CharAccessory":
+        case "WeaponSkin":
+        case "WeaponAccessory":
+            let acc = weaponAccessoryData.find(item => item.id === props.item.typeId)
+            if (!acc) acc = charAccessoryData.find(item => item.id === props.item.typeId)
+            if (!acc) acc = weaponSkinData.find(item => item.id === props.item.typeId)
+            if (!acc)
+                return {
+                    type: props.item.itemType,
+                    icon: `/imgs/webp/T_Head_Empty.webp`,
+                }
+            return {
+                type: props.item.itemType,
+                icon: `/imgs/fashion/${acc.icon}.webp`,
+            }
+        case "TitleFrame":
+            return {
+                type: props.item.itemType,
+                icon: `/imgs/webp/T_Icon_Random_TitleFrame.webp`,
             }
         default:
             return {
@@ -100,13 +146,14 @@ function getPriceIcon(name: string) {
                             {{ item.typeName }}
                         </SRouterLink>
                         <span v-else>{{ item.typeName }}</span>
-                        <span class="ml-1 text-xs text-base-content/70">({{ item.itemType }})</span>
+                        <span class="ml-1 text-xs text-base-content/70">({{ $t(getRewardTypeText(item.itemType)) }})</span>
                         <span class="text-xs px-1.5 py-0.5 rounded bg-base-300">x{{ item.num }}</span>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
                     <div class="flex items-center gap-1">
                         <img :src="getPriceIcon(item.priceName)" class="w-4 h-4 object-cover rounded" :alt="item.priceName" />
+                        <span class="text-xs text-base-content/70">{{ item.priceName }}</span>
                         <span class="text-sm font-medium">{{ item.price }}</span>
                     </div>
                 </div>
@@ -127,7 +174,7 @@ function getPriceIcon(name: string) {
         </div>
 
         <!-- 递归渲染子项 -->
-        <div v-if="item.children && item.children.length" class="ml-6 pl-3 border-l-2 border-base-300">
+        <div v-if="item.children && item.children.length" class="ml-6 pl-3">
             <ShopItem v-for="child in item.children" :key="child.id" :item="child" />
         </div>
     </div>

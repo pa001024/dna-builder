@@ -1,7 +1,7 @@
 import { t as translate } from "i18next"
 import type { CharAttr } from "../CharBuild"
 import { effectMap, modMap } from "../d"
-import { type Mod, Quality } from "../data-types"
+import { type Mod, Quality, type WeaponSkill } from "../data-types"
 import { LeveledBuff } from "."
 
 /**
@@ -27,11 +27,11 @@ export class LeveledMod implements Mod {
     品质: string
     耐受: number
     类型: string
-    极性?: "D" | "O" | "V" | "A";
-    [key: string]: any
+    极性?: "D" | "O" | "V" | "A"
+    技能替换?: Record<string, WeaponSkill>
     // MOD效果
-    buff?: LeveledBuff
-
+    buff?: LeveledBuff;
+    [key: string]: any
     // 等级属性
     private _等级: number
     // 原始MOD对象
@@ -103,6 +103,7 @@ export class LeveledMod implements Mod {
         if (modData.限定) this.限定 = modData.限定
         if (modData.效果) this.效果 = modData.效果
         if (modData.消耗) this.消耗 = modData.消耗
+        if (modData.技能替换) this.技能替换 = modData.技能替换
         if (effectMap.has(this.名称)) {
             const effect = effectMap.get(this.名称)!
             if (!effect.品质 || effect.品质 === this.品质) {
@@ -168,6 +169,11 @@ export class LeveledMod implements Mod {
         }
         const lv = this._等级
 
+        if (this._originalModData.技能替换) {
+            const ratio = this.getSkillReplaceScaleRatio()
+            this.技能替换 = this.scaleSkillReplaceByRatio(this._originalModData.技能替换, ratio)
+        }
+
         if (this._originalModData.生效) {
             const maxValue = this._originalModData.生效
             const keys = Object.keys(maxValue).filter(v => v !== "条件")
@@ -223,6 +229,53 @@ export class LeveledMod implements Mod {
                 buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(buff.baseValue * 100).toFixed(1)}%`)
             }
         })
+    }
+
+    /**
+     * 获取技能替换的数值缩放比例
+     * 规则：100% 为基准（1.0），200% 时提高 50%（1.5）
+     */
+    private getSkillReplaceScaleRatio() {
+        if (this.id <= 200000) return 1
+        const effectPercent = this._等级 * 10 + 100
+        return 1 + (effectPercent - 100) / 200
+    }
+
+    /**
+     * 对技能替换中的字段数值按比例缩放
+     * @param skillReplace 原始技能替换数据
+     * @param ratio 缩放比例
+     * @returns 缩放后的技能替换数据（深拷贝）
+     */
+    private scaleSkillReplaceByRatio(skillReplace: Record<string, WeaponSkill>, ratio: number) {
+        if (ratio === 1) return skillReplace
+        return Object.fromEntries(
+            Object.entries(skillReplace).map(([skillId, skill]) => [
+                skillId,
+                {
+                    ...skill,
+                    字段: skill.字段?.map(field => ({
+                        ...field,
+                        值: this.scaleFieldValue(field.值, ratio),
+                        值2: this.scaleFieldValue(field.值2, ratio),
+                    })),
+                },
+            ])
+        ) as Record<string, WeaponSkill>
+    }
+
+    /**
+     * 缩放技能字段中的数值类型
+     * @param value 原始值
+     * @param ratio 缩放比例
+     * @returns 缩放后的值
+     */
+    private scaleFieldValue(value: number | number[] | undefined, ratio: number) {
+        if (value === undefined) return undefined
+        if (Array.isArray(value)) {
+            return value.map(v => +((v || 0) * ratio).toFixed(4))
+        }
+        return +((value || 0) * ratio).toFixed(4)
     }
 
     checkCondition(attrs: CharAttr, charMods: LeveledMod[]): { isEffective: boolean; props: Record<string, any> } | undefined {
@@ -350,6 +403,7 @@ export class LeveledMod implements Mod {
         "极性",
         "属性",
         "消耗",
+        "技能替换",
         "_等级",
         "_originalModData",
         "buff",

@@ -184,12 +184,4 @@ fishingSpots.forEach(v =>
 
 export type { Fish, FishingSpot }
 
-import resourceData, { type Resource } from "./resource.data"
-
-export const resourceMap = new Map<number | string, Resource>()
-resourceData.forEach(v => {
-    resourceMap.set(v.id, v)
-    resourceMap.set(v.name, v)
-})
-
-export type { Resource }
+export { type Resource, resourceData, resourceMap } from "./resource.data"

@@ -26,7 +26,6 @@ export class LeveledWeapon {
     射速?: number
     基础装填?: number
     基础弹匣?: number
-    段数?: number
     技能?: LeveledSkill[]
 
     // 等级和精炼属性
@@ -52,6 +51,16 @@ export class LeveledWeapon {
             熔炼: [],
             技能: [],
         })
+    }
+
+    /**
+     * 判断技能字段中是否包含射线伤害字段
+     * @param fields 技能字段（数组）
+     * @returns 是否包含射线伤害
+     */
+    private static hasRayDamageField(fields?: SkillField[]): boolean {
+        if (!fields) return false
+        return fields.some(field => field?.名称 === "射线伤害")
     }
 
     /**
@@ -96,24 +105,12 @@ export class LeveledWeapon {
                     类型: v.类型,
                 }
                 if (v.字段) {
-                    skill.字段 = Object.keys(v.字段).map(key => {
-                        let fstr = v.字段![key] as string | SkillField
-                        if (typeof fstr === "string") {
-                            const str = fstr
-                            fstr = {
-                                名称: key,
-                                格式: str.replace(/\d+\.\d+%/g, "{%}").replace(/×\d+/g, "×{}"),
-                                值: str.match(/\d+\.\d+%/g)?.map(match => parseFloat(match.replace("%", "")) / 100)[0] || 0,
-                            } satisfies SkillField
-                            fstr.段数 = str.match(/×\d+/g)?.map(match => parseFloat(match.replace("×", "")))[0] || 1
-                        }
-                        return fstr as SkillField
-                    })
+                    skill.字段 = v.字段
                 }
                 return skill
             })
             this.技能 = skills.map(skill => new LeveledSkill(skill, undefined, weaponData.名称))
-            this.弹道类型 = weaponData.技能.some(v => "射线伤害" in v.字段!) ? "非弹道" : "弹道"
+            this.弹道类型 = weaponData.技能.some(v => LeveledWeapon.hasRayDamageField(v.字段)) ? "非弹道" : "弹道"
         }
 
         if (effectMap.has(this.名称)) {
@@ -124,9 +121,9 @@ export class LeveledWeapon {
 
         // 初始化倍率相关属性为undefined
         this.弹片数 = undefined
-        this.射速 = undefined
+        this.射速 = weaponData.射击间隔 ? +(1 / weaponData.射击间隔).toFixed(4) : undefined
         this.基础装填 = weaponData.装填 || 0
-        this.段数 = 1
+        this.基础弹匣 = weaponData.弹匣
 
         // 设置精炼等级（如果提供），否则设为5
         this._精炼 = Math.max(0, Math.min(LeveledWeapon._maxRefineLevel, 精炼 ?? 5))
@@ -333,7 +330,7 @@ export class LeveledWeapon {
 
     setEffectLv(lv: number) {
         this.effectLv = lv
-        this.updatePropertiesByLevel()
+        this.updateProperties()
         return this
     }
 

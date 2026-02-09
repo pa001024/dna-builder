@@ -42,6 +42,7 @@ const calculateScore = (baseRaidPoint: number, remainingTime: number, formulaId:
 const selectedSeason = ref<number>(1001)
 const remainingTime = ref(30)
 const selectedDungeon = ref<number>(21013)
+const activeInfoTab = ref<"score" | "dungeon" | "rank">("score")
 
 watch(selectedSeason, newSeason => {
     if (RaidDungeon[selectedDungeon.value].RaidSeason !== newSeason)
@@ -210,8 +211,15 @@ function getDungeonName(dungeonId: number) {
             <span class="text-xl font-bold">{{ currentScore }}</span>
         </div>
 
+        <div class="tabs tabs-border gap-2 mb-4">
+            <div class="tab" :class="{ 'tab-active': activeInfoTab === 'score' }" @click="activeInfoTab = 'score'">分数计算</div>
+            <div class="tab" :class="{ 'tab-active': activeInfoTab === 'dungeon' }" @click="activeInfoTab = 'dungeon'">副本信息</div>
+            <div class="tab" :class="{ 'tab-active': activeInfoTab === 'rank' }" @click="activeInfoTab = 'rank'">排名信息</div>
+        </div>
+
         <!-- 计算说明 -->
-        <div class="mb-4 p-4 bg-base-100 rounded-md">
+        <div v-if="activeInfoTab === 'score'">
+            <div class="mb-4 p-4 bg-base-100 rounded-md">
             <h3 class="font-medium mb-2">Buff:</h3>
             <p class="text-sm mb-2">
                 {{ RaidDungeon[selectedDungeon]?.RaidBuffID.map(id => RaidBuff[id].RaidBuffDes).join("、") }}
@@ -262,10 +270,11 @@ function getDungeonName(dungeonId: number) {
             </div>
         </div>
         <!-- 副本展示 -->
-        <div class="mb-4 bg-base-100 rounded-md" v-if="currentDungeon">
+        </div>
+        <div class="mb-4 bg-base-100 rounded-md" v-if="activeInfoTab === 'dungeon' && currentDungeon">
             <DBDungeonDetailItem :dungeon="currentDungeon" />
         </div>
-        <div class="flex-1 grid grid-cols-1 gap-4">
+        <div class="flex-1 grid grid-cols-1 gap-4" v-if="activeInfoTab === 'rank'">
             <div v-for="item in rankData" :key="item.rank" class="bg-base-100 p-4 rounded-md">
                 <div class="flex items-center gap-2 mb-2">
                     <img class="h-12" :src="`/imgs/rank/T_Activity_GuildWar_Rank_${item.rank}.webp`" :alt="item.rank" />

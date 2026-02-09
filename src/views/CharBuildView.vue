@@ -625,6 +625,60 @@ function toggleSection(section: keyof typeof collapsedSections.value) {
 
 const charTab = ref(charBuild.value.selectedSkillType)
 
+/**
+ * 根据当前页签获取可选技能名列表
+ * @param tab 当前页签
+ * @returns 技能名称列表
+ */
+function getSkillNamesByTab(tab: string) {
+    switch (tab) {
+        case "角色":
+            return charBuild.value.charSkills.map(skill => skill.名称)
+        case "近战":
+            return charBuild.value.meleeWeaponSkills.map(skill => skill.名称)
+        case "远程":
+            return charBuild.value.rangedWeaponSkills.map(skill => skill.名称)
+        case "同律": {
+            const names = charBuild.value.skillWeaponSkills.map(skill => skill.名称)
+            if (charBuild.value.skillWeapon && !names.includes(charBuild.value.skillWeapon.名称)) {
+                names.unshift(charBuild.value.skillWeapon.名称)
+            }
+            return names
+        }
+        default:
+            return []
+    }
+}
+
+/**
+ * 在技能替换或切换页签后，确保当前 baseName 始终有效
+ */
+function normalizeBaseNameForCurrentTab() {
+    if (isTimeline.value) return
+    const currentSkillNames = getSkillNamesByTab(charTab.value)
+    if (!currentSkillNames.length) return
+    if (!currentSkillNames.includes(charSettings.value.baseName)) {
+        charSettings.value.baseName = currentSkillNames[0]
+    }
+}
+
+watch(
+    () => ({
+        tab: charTab.value,
+        timeline: isTimeline.value,
+        baseName: charSettings.value.baseName,
+        charSkills: charBuild.value.charSkills.map(skill => skill.名称).join("|"),
+        meleeSkills: charBuild.value.meleeWeaponSkills.map(skill => skill.名称).join("|"),
+        rangedSkills: charBuild.value.rangedWeaponSkills.map(skill => skill.名称).join("|"),
+        skillSkills: charBuild.value.skillWeaponSkills.map(skill => skill.名称).join("|"),
+        skillWeapon: charBuild.value.skillWeapon?.名称 || "",
+    }),
+    () => {
+        normalizeBaseNameForCurrentTab()
+    },
+    { immediate: true }
+)
+
 function addSkill(skillName: string) {
     targetFunction.value += skillName.replace(/\//g, "_")
 }

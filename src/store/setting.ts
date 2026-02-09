@@ -36,6 +36,11 @@ export const useSettingStore = defineStore("setting", {
             // 自动签到设置
             autoSign: useLocalStorage("setting_auto_sign", false),
             nextSignCheckTime: useLocalStorage("setting_next_sign_check_time", 0),
+            // 剧情文本替换设置
+            protagonistName1: useLocalStorage("story_protagonist_name_1", "维塔"),
+            protagonistName2: useLocalStorage("story_protagonist_name_2", "墨斯"),
+            protagonistGender: useLocalStorage<"male" | "female">("story_protagonist_gender", "female"),
+            protagonistGender2: useLocalStorage<"male" | "female">("story_protagonist_gender_2", "female"),
             lastHeartbeatTime: 0,
         }
     },

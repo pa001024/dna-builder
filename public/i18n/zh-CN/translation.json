@@ -13,7 +13,9 @@
     "弹匣": "弹匣容量",
     "弹药转化率": "弹药转化率",
     "独立增伤": "独立增伤",
+    "段数": "段数",
     "多重": "多重射击",
+    "额外字段": "额外字段",
     "防御": "防御",
     "攻击": "攻击",
     "攻击范围": "攻击范围",
@@ -36,7 +38,10 @@
     "金乌": "金乌之",
     "近战": "近战武器",
     "巨鲸": "巨鲸之",
+    "卡肉": "卡肉",
     "蓝": "蓝",
+    "连段": "连段",
+    "连段总时长": "连段总时长",
     "连击": "连击",
     "绿": "绿",
     "每持续神智每秒伤害": "DPS/每秒神智消耗",
@@ -44,11 +49,13 @@
     "每秒伤害": "DPS",
     "每神智每秒伤害": "DPS/神智消耗",
     "每神智伤害": "DPH/神智消耗",
+    "秒均倍率": "秒均倍率",
     "冥犬": "冥犬之",
     "牧神": "牧神之",
     "歧视": "阵营增伤",
     "契约者": "契约者之",
     "囚狼": "囚狼之",
+    "取消": "取消",
     "全部": "全部",
     "人面狮": "人面狮之",
     "闪避次数": "闪避次数",
@@ -72,6 +79,8 @@
     "下落攻击": "下落攻击",
     "邪龙": "邪龙之",
     "蓄力攻击": "蓄力攻击",
+    "削韧": "削韧",
+    "延迟": "延迟",
     "焰灵": "焰灵之",
     "夜魔": "夜魔之",
     "夜使": "夜使之",
@@ -86,6 +95,7 @@
     "追加伤害": "追加伤害",
     "子弹爆炸范围": "子弹爆炸范围",
     "紫": "紫",
+    "总倍率": "总倍率",
     "总伤": "总计伤害",
     "最大弹药": "最大弹药",
     "abyss-dungeon-detail": {
@@ -93,6 +103,44 @@
     },
     "abyss-dungeon-list": {
         "title": "深渊列表"
+    },
+    "accessory": {
+        "description": "描述",
+        "draftCoinCost": "铜币消耗",
+        "draftDuration": "铸造时间",
+        "draftInfo": "铸造信息",
+        "draftMaterialCount": "材料种类: {{count}}",
+        "info": "饰品信息",
+        "notFound": "未找到饰品数据",
+        "rarity": "稀有度",
+        "searchPlaceholder": "搜索饰品ID/名称/描述/解锁方式（支持拼音）...",
+        "shopLimit": "限购",
+        "shopPrice": "售价",
+        "shopSources": "可购买商店",
+        "shopSourcesEmpty": "暂无对应商店信息",
+        "title": "外观",
+        "totalCount": "共 {{count}} 个饰品",
+        "type": "类型",
+        "typeAll": "全部",
+        "typeChar": "角色饰品",
+        "typeSkin": "武器皮肤",
+        "typeWeapon": "武器饰品",
+        "unlock": "解锁方式",
+        "unlockMethods": {
+            "eggShop": "蛋皎的印象商店",
+            "event": "活动",
+            "giftBox": "礼箱",
+            "prismExchange": "棱镜兑换",
+            "quest": "任务",
+            "shop": "商店",
+            "wanhua": "万华"
+        }
+    },
+    "accessory-detail": {
+        "title": "外观"
+    },
+    "accessory-list": {
+        "title": "外观"
     },
     "achievement": {
         "allVersions": "所有版本",
@@ -325,8 +373,12 @@
     "database": {
         "abyss_dungeon": "深渊副本",
         "abyss_dungeon_desc": "查看深渊副本信息和BUFF",
+        "accessory": "饰品",
+        "accessory_desc": "查看角色与武器饰品信息",
         "achievement": "成就",
         "achievement_desc": "查看成就信息和奖励",
+        "appearance": "外观",
+        "appearance_desc": "查看角色外观、武器皮肤与饰品信息",
         "char": "角色",
         "char_desc": "查看角色信息和属性",
         "desc": "查询游戏中的数据",
@@ -354,9 +406,13 @@
         "questchain_desc": "查看任务剧情信息和对话",
         "rank": "狩月人之阶",
         "rank_desc": "查看排名赛奖励",
+        "reputation": "区域声名",
+        "reputation_desc": "查看区域声名等级与委托信息",
         "shop": "商店",
         "shop_desc": "查看商店物品信息",
         "title": "资料库",
+        "title_data": "称号",
+        "title_data_desc": "查看称号前后缀与来源信息",
         "walnut": "密函",
         "walnut_desc": "查看密函概率信息和模拟抽取",
         "weapon": "武器",
@@ -682,6 +738,30 @@
     },
     "raid-rank": {
         "title": "排名奖励"
+    },
+    "reputation": {
+        "accumulatedExp": "累计经验",
+        "entrust": "委托",
+        "entrustCount": "委托数量",
+        "info": "区域声名信息",
+        "level": "等级",
+        "levelReward": "等级奖励",
+        "levelUpExp": "升级经验",
+        "notFound": "未找到区域声名数据",
+        "refreshCost": "刷新消耗",
+        "rewardNotFound": "未找到奖励数据",
+        "searchPlaceholder": "搜索区域声名ID/名称/委托（支持拼音）...",
+        "totalCount": "共 {{count}} 个区域声名",
+        "totalExp": "总经验",
+        "totalLevel": "总等级",
+        "weeklyExpLimit": "每周经验上限",
+        "weight": "权重"
+    },
+    "reputation-detail": {
+        "title": "区域声名详情"
+    },
+    "reputation-list": {
+        "title": "区域声名"
     },
     "resizeableWindow": {
         "and": "和",

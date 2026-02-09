@@ -360,6 +360,12 @@ function toggleFilter(filterName: string, show: boolean) {
                                         formatProp(key, mod.生效[key])
                                     }}</span>
                                 </div>
+                                <div v-if="mod.技能替换" class="flex justify-between items-center gap-2">
+                                    <span>{{ $t("技能替换") }}</span>
+                                    <span class="font-medium" :class="{ 'text-primary': selectedMod?.id !== mod.id }">{{
+                                        Object.keys(mod.技能替换).length
+                                    }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>

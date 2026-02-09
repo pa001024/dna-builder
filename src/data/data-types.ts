@@ -127,6 +127,7 @@ export interface Weapon {
     最大弹药?: number
     弹药转化率?: number
     最大射程?: number
+    射击间隔?: number
     弹道类型?: keyof typeof BulletType
     装填?: number
     加成?: CommonAttr
@@ -149,7 +150,24 @@ export interface Skill {
     e?: SkillEffect[]
     b?: SkillBuff[]
     p?: SkillPassive[]
-    子技能?: Omit<Skill, "名称">[]
+    子技能?: SubSkill[]
+}
+
+export interface SubSkill {
+    id?: number
+    名称?: string
+    类型: string
+    武器?: string
+    升级?: Record<string, number>[]
+    描述?: string
+    icon?: string
+    字段?: SkillField[]
+    术语解释?: Record<string, string>
+    召唤物?: SkillSummon
+    cd?: number
+    e?: SkillEffect[]
+    b?: SkillBuff[]
+    p?: SkillPassive[]
 }
 
 export interface SkillPassive {
@@ -313,7 +331,7 @@ export interface WeaponSkill {
     类型: string
     武器?: string
     描述?: string
-    字段?: Record<string, string>
+    字段?: SkillField[]
     削韧?: number[]
     延迟?: number[]
     卡肉?: number[]
@@ -339,6 +357,11 @@ export interface SkillField {
     值: number[] | number
     格式?: string
     值2?: number[] | number
+    削韧?: number[] | number
+    延迟?: number[] | number
+    卡肉?: number[] | number
+    取消?: number[] | number
+    连段?: number[] | number
     段数?: number
 }
 
@@ -416,6 +439,7 @@ export interface Mod {
     限定?: string
     效果?: string
     消耗?: number[]
+    技能替换?: Record<string, WeaponSkill>
     buff?: Buff
 
     [key: string]: any

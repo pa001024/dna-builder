@@ -65,11 +65,8 @@ function getQualityIcon(quality: number): string {
 
         <div class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-2">奖励</div>
-            <div class="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2 text-sm">
-                <div v-for="(value, key) in achievement.奖励" :key="key" class="p-2 rounded bg-base-100 border border-base-300">
-                    <div class="text-base-content/70">{{ $t(key) }}</div>
-                    <div class="font-medium">x{{ value }}</div>
-                </div>
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
+                <ResourceCostItem v-for="(value, key) in achievement.奖励" :name="key" :value="value!" :key="key" />
             </div>
         </div>
     </div>
