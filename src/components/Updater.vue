@@ -146,6 +146,21 @@ declare global {
                     {{ $t("home.noupdate") }}
                 </div>
             </div>
+            <div class="text-xs">
+                <div class="flex flex-col gap-2">
+                    <p>本软件是免费软件, 如果您喜欢这个项目，并且想支持作者的工作，请考虑以下方式：</p>
+                    <div>
+                        直接捐赠：<a target="_black" class="link link-primary" href="https://afdian.com/a/pa001024"
+                            >https://afdian.com/a/pa001024</a
+                        >
+                    </div>
+                    <div>
+                        购买应用：<a target="_black" class="link link-primary" href="https://apps.microsoft.com/detail/9nk8zw43shb1"
+                            >https://apps.microsoft.com/detail/9nk8zw43shb1</a
+                        >
+                    </div>
+                </div>
+            </div>
             <div class="modal-action justify-center">
                 <button class="btn btn-primary" @click="closeModal">
                     {{ $t("home.understand") }}
