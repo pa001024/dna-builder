@@ -9,7 +9,7 @@ export function getRewardTypeText(type: string): string {
         HeadFrame: "头像框",
         HeadSculpture: "头像",
         Mod: "魔之楔",
-        Mount: "坐骑",
+        Mount: "载具",
         Draft: "图纸",
         Pet: "魔灵",
         Resource: "资源",
