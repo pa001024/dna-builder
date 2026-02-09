@@ -14,8 +14,9 @@ const nameRef = computed(() => props.charBuild.char.名称)
 const charSettings = useCharSettings(nameRef)
 const weaponAttrs = computed(() => props.charBuild.calculateWeaponAttributes(props.charBuild[`${props.wkey}Weapon`]).weapon!)
 
-defineEmits<{
+const emit = defineEmits<{
     addSkill: [skill: string]
+    openWeaponSelect: []
 }>()
 
 const baseWeapon = computed(() => {
@@ -34,7 +35,12 @@ const baseKey = computed(() => {
     return wkey
 })
 
-defineModel<boolean>("modelShow")
+const model = defineModel<boolean>("modelShow")
+
+function openWeaponSelect() {
+    emit("openWeaponSelect")
+    model.value = true
+}
 </script>
 <template>
     <!-- 武器 -->
@@ -44,7 +50,7 @@ defineModel<boolean>("modelShow")
     >
         <h3 class="flex items-center gap-4 text-lg font-bold text-base-content/90 mb-2">
             <div class="flex flex-1 flex-col" data-tour="weapon-select">
-                <div class="text-lg font-bold cursor-pointer" @click="wkey !== 'skill' && $emit('update:modelShow', true)">
+                <div class="text-lg font-bold cursor-pointer" @click="wkey !== 'skill' && openWeaponSelect()">
                     {{ $t(charBuild[`${wkey}Weapon`]!.名称 || "") }}
                     <Icon v-if="wkey !== 'skill'" icon="ri:exchange-line" class="inline-block w-5 h-5 text-primary" />
                 </div>

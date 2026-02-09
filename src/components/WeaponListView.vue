@@ -9,10 +9,11 @@ const props = defineProps<{
     charBuild?: CharBuild
     melee?: number
     ranged?: number
+    defaultTab?: string
 }>()
 
-const tabs = ["全部", "单手剑", "长柄", "重剑", "双刀", "鞭刃", "太刀", "手枪", "双枪", "榴炮", "霰弹枪", "突击枪", "弓"]
-const activeTab = ref(tabs[0])
+const tabs = ["全部", "近战", "远程", "单手剑", "长柄", "重剑", "双刀", "鞭刃", "太刀", "手枪", "双枪", "榴炮", "霰弹枪", "突击枪", "弓"]
+const activeTab = ref(props.defaultTab || tabs[0])
 const searchQuery = ref("")
 const selectedMelee = ref(props.melee || 0)
 const selectedRanged = ref(props.ranged || 0)

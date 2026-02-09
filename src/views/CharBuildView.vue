@@ -121,7 +121,7 @@ const rangedWeaponOptions = weaponData
     .map(weapon => ({
         value: weapon.名称,
         label: weapon.名称,
-        type: weapon.类型[0],
+        type: weapon.类型[1],
         icon: LeveledWeapon.url(weapon.icon),
     }))
 
@@ -625,60 +625,6 @@ function toggleSection(section: keyof typeof collapsedSections.value) {
 
 const charTab = ref(charBuild.value.selectedSkillType)
 
-/**
- * 根据当前页签获取可选技能名列表
- * @param tab 当前页签
- * @returns 技能名称列表
- */
-function getSkillNamesByTab(tab: string) {
-    switch (tab) {
-        case "角色":
-            return charBuild.value.charSkills.map(skill => skill.名称)
-        case "近战":
-            return charBuild.value.meleeWeaponSkills.map(skill => skill.名称)
-        case "远程":
-            return charBuild.value.rangedWeaponSkills.map(skill => skill.名称)
-        case "同律": {
-            const names = charBuild.value.skillWeaponSkills.map(skill => skill.名称)
-            if (charBuild.value.skillWeapon && !names.includes(charBuild.value.skillWeapon.名称)) {
-                names.unshift(charBuild.value.skillWeapon.名称)
-            }
-            return names
-        }
-        default:
-            return []
-    }
-}
-
-/**
- * 在技能替换或切换页签后，确保当前 baseName 始终有效
- */
-function normalizeBaseNameForCurrentTab() {
-    if (isTimeline.value) return
-    const currentSkillNames = getSkillNamesByTab(charTab.value)
-    if (!currentSkillNames.length) return
-    if (!currentSkillNames.includes(charSettings.value.baseName)) {
-        charSettings.value.baseName = currentSkillNames[0]
-    }
-}
-
-watch(
-    () => ({
-        tab: charTab.value,
-        timeline: isTimeline.value,
-        baseName: charSettings.value.baseName,
-        charSkills: charBuild.value.charSkills.map(skill => skill.名称).join("|"),
-        meleeSkills: charBuild.value.meleeWeaponSkills.map(skill => skill.名称).join("|"),
-        rangedSkills: charBuild.value.rangedWeaponSkills.map(skill => skill.名称).join("|"),
-        skillSkills: charBuild.value.skillWeaponSkills.map(skill => skill.名称).join("|"),
-        skillWeapon: charBuild.value.skillWeapon?.名称 || "",
-    }),
-    () => {
-        normalizeBaseNameForCurrentTab()
-    },
-    { immediate: true }
-)
-
 function addSkill(skillName: string) {
     targetFunction.value += skillName.replace(/\//g, "_")
 }
@@ -696,6 +642,7 @@ watch(
 )
 const charDetailExpend = ref(true)
 const weapon_select_model_show = ref(false)
+const weaponDefaultTab = ref("近战")
 const newWeaponSelection = ref({ melee: 0, ranged: 0 })
 function handleWeaponSelection(melee: number, ranged: number) {
     newWeaponSelection.value = { melee, ranged }
@@ -878,6 +825,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
             <WeaponListView
                 v-if="weapon_select_model_show"
                 :char-build="charBuild"
+                :default-tab="weaponDefaultTab"
                 :melee="charSettings.meleeWeapon"
                 :ranged="charSettings.rangedWeapon"
                 @change="handleWeaponSelection"
@@ -1107,6 +1055,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     <WeaponTab
                         v-if="charTab === '近战'"
                         v-model:model-show="weapon_select_model_show"
+                        @open-weapon-select="weaponDefaultTab = '近战'"
                         wkey="melee"
                         :char-build="charBuild"
                         :attributes="attributes"
@@ -1115,6 +1064,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     <WeaponTab
                         v-if="charTab === '远程'"
                         v-model:model-show="weapon_select_model_show"
+                        @open-weapon-select="weaponDefaultTab = '远程'"
                         wkey="ranged"
                         :char-build="charBuild"
                         :attributes="attributes"
@@ -1207,6 +1157,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         :is-open="!collapsedSections.detail"
                         @toggle="toggleSection('detail')"
                     >
+                        <CharIntronShow :char="charBuild.char" />
                         <CharSkillShow :char="charBuild.char" />
                     </CollapsibleSection>
                     <!-- 基本设置卡片 -->

@@ -2,11 +2,12 @@
 import { ref, watchEffect } from "vue"
 import type { LeveledChar } from "@/data"
 import { LeveledSkill } from "@/data/leveled/LeveledSkill"
-import { formatSkillProp } from "@/util"
 
 const detailTab = ref("溯源")
 const selectedSkill = ref<LeveledSkill | null>(null)
-const selectedSkillLevel = ref(12)
+const selectedSkillLevel = defineModel<number>({
+    default: 12,
+})
 const props = defineProps<{
     char: LeveledChar
 }>()
@@ -20,17 +21,6 @@ watchEffect(() => {
 })
 </script>
 <template>
-    <h2 v-if="char.溯源" class="text-lg font-bold p-2 mt-2">
-        {{ $t("溯源") }}
-    </h2>
-    <div v-if="char.溯源" class="flex flex-col gap-2 p-2">
-        <div v-for="(grade, i) in char.溯源" :key="i" class="font-medium flex text-sm justify-between items-center gap-8">
-            <div class="font-medium whitespace-nowrap opacity-70">
-                {{ $t("第" + ["一", "二", "三", "四", "五", "六"][i] + "根源") }}
-            </div>
-            <div>{{ $t(grade) }}</div>
-        </div>
-    </div>
     <h2 class="text-lg font-bold p-2 flex gap-4 justify-between items-center">
         {{ $t("技能") }}
         <span class="text-base-content/50 text-sm">Lv. {{ selectedSkillLevel }}</span>
@@ -81,33 +71,7 @@ watchEffect(() => {
                 {{ $t(value) }}
             </div>
         </div>
-        <div
-            v-for="(val, index) in selectedSkill!.getFieldsWithAttr()"
-            :key="index"
-            class="flex flex-col group hover:bg-base-200/50 rounded-md p-2"
-        >
-            <div class="flex justify-between items-center gap-4">
-                <div>{{ $t(val.名称) }}</div>
-                <div class="font-medium text-primary">
-                    {{ formatSkillProp(val.名称, val) }}
-                </div>
-            </div>
-            <div
-                v-if="val.影响"
-                class="opacity-0 group-hover:opacity-80 justify-between items-center gap-4 flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
-            >
-                <div>{{ $t("属性影响") }}</div>
-                <div class="ml-auto font-medium">
-                    {{
-                        val.影响
-                            .split(",")
-                            .map(item => $t(item))
-                            .join(",")
-                    }}
-                </div>
-            </div>
-        </div>
-
+        <SkillFields :skill="selectedSkill" />
         <!-- 子技能区域 -->
         <div v-if="selectedSkill.skillData.子技能 && selectedSkill.skillData.子技能.length > 0" class="mt-4 p-2">
             <h3 class="text-base font-semibold mb-2">{{ $t("子技能") }}</h3>
