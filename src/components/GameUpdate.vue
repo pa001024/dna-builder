@@ -64,9 +64,13 @@ const channels = [
         value: "PC_OBT_CN_Pub",
     },
     {
-        name: t("game-update.media_server"),
-        value: "PC_OBT12_Media_CN_Pub",
+        name: "bilibili",
+        value: "PC_OBT_Bili_Pub",
     },
+    // {
+    //     name: t("game-update.media_server"),
+    //     value: "PC_OBT12_Media_CN_Pub",
+    // },
     {
         name: t("game-update.global_server"),
         value: "PC_OBT_Global_Pub",

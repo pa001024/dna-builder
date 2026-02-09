@@ -13,6 +13,8 @@ import { tauriFetch } from "@/api/app"
  * http://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT12_Media_CN_Pub/PackageBaseVersion.txt
  * http://pan01-1-eo.shyxhy.com/Patches/FinalPatch/CN/Default/WindowsNoEditor/PC_OBT12_Media_CN_Pub/VersionList.json
  * http://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT12_Media_CN_Pub/3/BaseVersion.json
+ * B服
+ * http://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT_Bili_Pub/PackageBaseVersion.txt
  *
  * CDN
  * http://pan01-1-hs.shyxhy.com
@@ -85,7 +87,7 @@ export interface GameVersionListWithPre {
 export type ProgressCallback = (progress: DownloadProgress) => void
 
 export async function getBaseVersion(cdn: string, channel: string) {
-    const server = channel.match(/([A-Za-z]+)_Pub/)?.[1] || "CN"
+    const server = channel.match(/(Global)_Pub/)?.[1] || "CN"
     const versionUrl = VERSION_URL_PUB(server)
     const subVersion = await tauriFetch(`${cdn}${versionUrl}${channel}/PackageBaseVersion.txt`)
     const subVersionText = await subVersion.text()
@@ -164,7 +166,7 @@ export async function downloadAssets(
             })
         }
 
-        const server = channel.match(/([A-Za-z]+)_Pub/)?.[1] || "CN"
+        const server = channel.match(/(Global)_Pub/)?.[1] || "CN"
         const versionUrl = VERSION_URL_PUB(server)
         const result = await invoke<string>("download_file", {
             url: `${cdn}${versionUrl}${channel}/${subVersion ? `${subVersion}/` : ""}${filename}`,

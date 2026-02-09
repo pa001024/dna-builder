@@ -41,9 +41,37 @@ const edit_title = ref("")
 const edit_desc = ref("")
 const updatingBuild = ref<string | null>(null)
 const deletingBuild = ref<string | null>(null)
+const expandedBuildIds = ref<Record<string, boolean>>({})
+const DESCRIPTION_COLLAPSE_THRESHOLD = 40
 
 // 当前角色的 charSettings
 const charSettings = useCharSettings(computed(() => props.charName))
+
+/**
+ * 判断描述是否超过折叠阈值，超长时显示展开按钮。
+ * @param desc 构筑描述文本。
+ * @returns 是否需要显示“查看全部”按钮。
+ */
+function shouldShowExpandButton(desc?: string | null): boolean {
+    return Boolean(desc?.trim() && desc.trim().length > DESCRIPTION_COLLAPSE_THRESHOLD)
+}
+
+/**
+ * 判断指定构筑描述是否处于展开状态。
+ * @param buildId 构筑 ID。
+ * @returns 当前描述是否展开。
+ */
+function isDescriptionExpanded(buildId: string): boolean {
+    return Boolean(expandedBuildIds.value[buildId])
+}
+
+/**
+ * 切换指定构筑描述的展开/收起状态。
+ * @param buildId 构筑 ID。
+ */
+function toggleDescriptionExpand(buildId: string) {
+    expandedBuildIds.value[buildId] = !expandedBuildIds.value[buildId]
+}
 
 // 格式化日期
 function formatDate(dateString: string): string {
@@ -68,6 +96,7 @@ async function fetchBuilds(offset = 0) {
         if (result) {
             builds.value = result.builds
             totalCount.value = result.buildsCount
+            expandedBuildIds.value = {}
         }
     } catch (error) {
         ui.showErrorMessage("加载构筑列表失败:", error instanceof Error ? error.message : "未知错误")
@@ -320,7 +349,19 @@ defineExpose({
                                 </div>
                             </div>
                         </div>
-                        <div class="text-sm text-base-content/60 line-clamp-2 flex-1">{{ build.desc || "作者很懒没填任何东西..." }}</div>
+                        <div class="text-sm text-base-content/60 flex-1">
+                            <div :class="{ 'line-clamp-2': !isDescriptionExpanded(build.id) }">
+                                {{ build.desc || "作者很懒没填任何东西..." }}
+                            </div>
+                            <button
+                                v-if="shouldShowExpandButton(build.desc)"
+                                type="button"
+                                class="text-primary cursor-pointer text-xs mt-1"
+                                @click.stop="toggleDescriptionExpand(build.id)"
+                            >
+                                {{ isDescriptionExpanded(build.id) ? $t("收起") : $t("查看全部") }}
+                            </button>
+                        </div>
 
                         <!-- 用户信息 -->
                         <div v-if="build.user" class="flex items-center gap-2 mb-3">

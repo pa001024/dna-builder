@@ -437,7 +437,7 @@ export class GlobalSearchService {
                         id: `questchain:${questChain.id}`,
                         title: questChain.name,
                         subtitle: `任务剧情 ID: ${questChain.id}`,
-                        typeLabel: t("database.quest_chain"),
+                        typeLabel: t("database.questchain"),
                         path: `/db/questchain/${questChain.id}`,
                     },
                     [questChain.id, questChain.chapterName, questChain.chapterNumber, questChain.episode, questChain.type, questChain.main]
