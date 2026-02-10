@@ -510,6 +510,10 @@ export const builds = sqliteTable(
         index("builds_char_id_idx").on(builds.charId),
         index("builds_user_id_idx").on(builds.userId),
         index("builds_is_recommended_idx").on(builds.isRecommended),
+        index("builds_char_id_update_at_idx").on(builds.charId, builds.updateAt),
+        index("builds_char_id_views_idx").on(builds.charId, builds.views),
+        index("builds_update_at_idx").on(builds.updateAt),
+        index("builds_views_idx").on(builds.views),
     ]
 )
 

@@ -27,6 +27,7 @@ const { t } = useTranslation()
 
 // 搜索和筛选
 const searchKeyword = ref("")
+const sortBy = ref<"latest" | "views">("latest")
 const loading = ref(false)
 const loadingBuild = ref<string | null>(null)
 const builds = ref<Build[]>([])
@@ -89,6 +90,7 @@ async function fetchBuilds(offset = 0) {
                 offset,
                 search: searchKeyword.value || undefined,
                 charId: props.charId,
+                sortBy: sortBy.value,
             },
             { requestPolicy: "cache-and-network" }
         )
@@ -107,6 +109,13 @@ async function fetchBuilds(offset = 0) {
 
 // 搜索处理
 function handleSearch() {
+    fetchBuilds(0)
+}
+
+/**
+ * 切换排序方式后重新查询构筑列表。
+ */
+function handleSortChange() {
     fetchBuilds(0)
 }
 
@@ -267,6 +276,7 @@ async function loadMore() {
                     offset,
                     search: searchKeyword.value || undefined,
                     charId: props.charId,
+                    sortBy: sortBy.value,
                 },
                 { requestPolicy: "cache-and-network" }
             )
@@ -303,6 +313,10 @@ defineExpose({
                     class="input input-bordered input-sm flex-1 min-w-50"
                     @keyup.enter="handleSearch"
                 />
+                <select v-model="sortBy" class="select select-bordered select-sm w-36" @change="handleSortChange">
+                    <option value="latest">最新修改</option>
+                    <option value="views">最多浏览</option>
+                </select>
                 <button class="btn btn-primary btn-sm" @click="handleSearch">
                     <Icon icon="ri:search-line" class="w-4 h-4" />
                     {{ t("搜索") }}
@@ -394,7 +408,7 @@ defineExpose({
                                     <span>{{ build.likes }}</span>
                                 </div>
                             </div>
-                            <span>{{ formatDate(build.createdAt) }}</span>
+                            <span>{{ formatDate(build.updateAt) }}</span>
                         </div>
 
                         <!-- 操作按钮 -->

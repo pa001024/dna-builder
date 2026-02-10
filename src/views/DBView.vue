@@ -236,8 +236,8 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
                 </div>
             </div>
 
-            <div class="flex flex-col gap-1 text-sm text-base-content/60">
-                除特别注明的内容外，本站文字内容遵循CC BY-SA 3.0协议，图片等媒体内容则遵循其原有协议。
+            <div class="flex flex-col gap-1 text-sm text-base-content/60 p-6">
+                除特别注明的内容外，本站文字内容遵循CC BY-SA 3.0协议，图片等媒体内容则遵循其原有协议。<br />
                 利用本站内容，您必须在给出适当的署名，并提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。不得以任何方式暗示本站为您或您的使用背书。
             </div>
         </div>

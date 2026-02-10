@@ -83,7 +83,7 @@ watchEffect(() => {
                             class="size-6 rounded-full bg-base-content"
                             :style="{ mask: `url(${LeveledSkill.url(subSkill.icon)}) no-repeat center/contain` }"
                         />
-                        <div class="font-medium text-sm">{{ $t(subSkill.类型) }}</div>
+                        <div class="font-medium text-sm">{{ subSkill.名称 ? $t(subSkill.名称) : "" }} ({{ $t(subSkill.类型) }})</div>
                         <span v-if="subSkill.cd" class="text-xs bg-primary/30 text-primary px-2 py-0.5 rounded-full">
                             CD: {{ subSkill.cd }}s
                         </span>

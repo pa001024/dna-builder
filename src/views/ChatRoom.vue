@@ -148,7 +148,7 @@ useSubscription<{ msgEdited: Msg }>({
 
 async function addMessage(msg: Msg) {
     console.debug("addMessage", msg)
-    if (msg.user.id !== user.id) {
+    if (msg.user!.id !== user.id) {
         sfx.play()
     }
     if (arrivedState.bottom) {
@@ -284,15 +284,15 @@ async function startEdit(msg: Msg) {
                     <!-- 消息列表 -->
                     <div v-for="item in msgs" v-if="msgs" :key="item.id" class="group flex items-start gap-2">
                         <div v-if="!item.content && editId !== item.id" class="text-xs text-base-content/60 m-auto">
-                            {{ $t("chat.retractedAMessage", { name: user.id === item.user.id ? $t("chat.you") : item.user?.name }) }}
+                            {{ $t("chat.retractedAMessage", { name: user.id === item.user!.id ? $t("chat.you") : item.user!.name }) }}
                             <span class="text-xs text-primary underline cursor-pointer" @click="restoreMessage(item)">{{
                                 $t("chat.restore")
                             }}</span>
                         </div>
 
-                        <div v-else class="flex-1 flex items-start gap-2" :class="{ 'flex-row-reverse': user.id === item.user.id }">
+                        <div v-else class="flex-1 flex items-start gap-2" :class="{ 'flex-row-reverse': user.id === item.user!.id }">
                             <ContextMenu>
-                                <QQAvatar class="mt-2 size-8" :qq="item.user.qq" :name="item.user?.name"></QQAvatar>
+                                <QQAvatar class="mt-2 size-8" :qq="item.user!.qq" :name="item.user!.name"></QQAvatar>
 
                                 <template #menu>
                                     <ContextMenuItem
@@ -309,20 +309,20 @@ async function startEdit(msg: Msg) {
                                     </ContextMenuItem>
                                 </template>
                             </ContextMenu>
-                            <ContextMenu class="flex items-start flex-col" :class="{ 'items-end': user.id === item.user.id }">
-                                <div class="text-base-content/60 text-sm min-h-5">{{ item.user.name }}</div>
+                            <ContextMenu class="flex items-start flex-col" :class="{ 'items-end': user.id === item.user!.id }">
+                                <div class="text-base-content/60 text-sm min-h-5">{{ item.user!.name }}</div>
                                 <div
                                     v-if="editId === item.id"
                                     ref="editInput"
                                     contenteditable
                                     class="safe-html rounded-lg bg-base-100 select-text inline-flex flex-col text-sm max-w-80 overflow-hidden gap-2"
-                                    :class="{ 'p-2': !isImage(item.content), 'bg-primary text-base-100': user.id === item.user.id }"
+                                    :class="{ 'p-2': !isImage(item.content), 'bg-primary text-base-100': user.id === item.user!.id }"
                                     v-html="sanitizeHTML(item.content)"
                                 ></div>
                                 <div
                                     v-else
                                     class="safe-html rounded-lg bg-base-100 select-text inline-flex flex-col text-sm max-w-80 overflow-hidden gap-2"
-                                    :class="{ 'p-2': !isImage(item.content), 'bg-primary text-base-100': user.id === item.user.id }"
+                                    :class="{ 'p-2': !isImage(item.content), 'bg-primary text-base-100': user.id === item.user!.id }"
                                     v-html="sanitizeHTML(item.content)"
                                 ></div>
 
@@ -335,7 +335,7 @@ async function startEdit(msg: Msg) {
                                         {{ $t("chat.copy") }}
                                     </ContextMenuItem>
                                     <ContextMenuItem
-                                        v-if="user.id === item.user.id"
+                                        v-if="user.id === item.user?.id"
                                         class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
                                         @click="retractMessage(item)"
                                     >
@@ -343,7 +343,7 @@ async function startEdit(msg: Msg) {
                                         {{ $t("chat.revert") }}
                                     </ContextMenuItem>
                                     <ContextMenuItem
-                                        v-if="user.id === item.user.id"
+                                        v-if="user.id === item.user?.id"
                                         class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
                                         @click="startEdit(item)"
                                     >
