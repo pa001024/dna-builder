@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTranslation } from "i18next-vue"
 import { computed, nextTick, onMounted, ref } from "vue"
-import { getActivityInfo } from "../api/external"
+import { activitiesQuery } from "../api/gen/api-queries"
 import type { AbyssDungeon } from "../data"
 import { charMap } from "../data"
 import { abyssDungeons } from "../data/d/abyss.data"
@@ -241,10 +241,27 @@ const loadActivities = async () => {
             }
         }
 
-        const data = await getActivityInfo()
+        // 使用当前登录账号的服务端标识，未登录时默认国服
+        // const currentUser = await settingStore.getCurrentUser()
+        // const server = currentUser?.server || "cn"
+        // 从自建服务端拉取活动数据，并只获取当前时间之后仍可能展示的活动
+        const rawData = await activitiesQuery(
+            {
+                server: "cn",
+                startTime: Date.now(),
+            },
+            { requestPolicy: "network-only" }
+        )
+        // 转换为组件内部活动结构，保持后续渲染逻辑不变
+        const data = rawData?.map(activity => ({
+            title: activity.name,
+            description: activity.desc,
+            begin_at: ~~(activity.startTime / 1000),
+            end_at: ~~(activity.endTime / 1000),
+        }))
         if (data) {
             // 过滤掉API返回的沉浸式戏剧活动（改为自己计算）
-            const filteredData = data.filter(activity => !activity.title.includes("沉浸式戏剧"))
+            const filteredData = data.filter(activity => !activity.title.includes("委托密函轮换") && !activity.title.includes("兑换码"))
 
             // 保存到localStorage
             const cacheData = {

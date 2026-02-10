@@ -4,6 +4,7 @@
 import "dotenv/config"
 import { fetch } from "bun"
 import { Cron } from "croner"
+import type { DNAActivity } from "dna-api"
 import { WebSocket } from "ws"
 import { getDNAAPI } from "./api/dna"
 
@@ -172,6 +173,47 @@ async function fetchMissionsFromDNA() {
     }
 }
 
+type UploadActivity = {
+    id: number
+    postId: string | null
+    startTime: number
+    endTime: number
+    name: string
+    icon: string
+    desc: string
+}
+
+/**
+ * 将 DNA 活动结构映射为后端存储结构
+ */
+function normalizeActivity(activity: DNAActivity): UploadActivity {
+    return {
+        id: activity.id,
+        postId: activity.postId ?? null,
+        startTime: activity.startTime,
+        endTime: activity.endTime,
+        name: activity.name,
+        icon: activity.icon,
+        desc: activity.description,
+    }
+}
+
+// 从 DNA API 获取活动数据并过滤周期活动
+async function fetchActivitiesFromDNA(): Promise<UploadActivity[]> {
+    try {
+        const dnaAPI = getDNAAPI()
+        const res = await dnaAPI.getActivityList()
+
+        if (!res.is_success || !res.data?.activities) {
+            throw new Error(`DNA API 返回失败: ${res.msg}`)
+        }
+        return res.data.activities.filter(activity => activity.cycleDay === -1).map(normalizeActivity)
+    } catch (error) {
+        console.error("获取 DNA API 活动失败:", error)
+        throw error
+    }
+}
+
 // 通过 GraphQL mutation 更新委托
 async function updateMissionsIngame(server: string, missions: string[][]) {
     const mutation = `
@@ -221,6 +263,50 @@ async function updateMissionsIngame(server: string, missions: string[][]) {
     }
 }
 
+// 通过 GraphQL mutation 更新活动
+async function upsertActivitiesIngame(server: string, activities: UploadActivity[]) {
+    const mutation = `
+        mutation UpsertActivitiesIngame($token: String!, $server: String!, $activities: [ActivityInput!]!) {
+            upsertActivitiesIngame(token: $token, server: $server, activities: $activities) {
+                id
+                postId
+                startTime
+                endTime
+                name
+                icon
+                desc
+            }
+        }
+    `
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/graphql`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                query: mutation,
+                variables: {
+                    token: API_TOKEN,
+                    server,
+                    activities,
+                },
+            }),
+        })
+
+        const result = await response.json()
+        if (result.errors) {
+            throw new Error(result.errors.map((e: any) => e.message).join(", "))
+        }
+        console.log(`${new Date().toLocaleString()} 活动更新成功 - server: ${server}, 活动数量: ${activities.length}`)
+        return result.data.upsertActivitiesIngame
+    } catch (error) {
+        console.error("活动 GraphQL 请求失败:", error)
+        throw error
+    }
+}
+
 // 更新委托信息（带重试机制）
 const updateMH = async (server: string = "cn", t: number = 10) => {
     console.log(`${new Date().toLocaleString()} 开始同步密函信息 - server: ${server}`)
@@ -236,11 +322,13 @@ const updateMH = async (server: string = "cn", t: number = 10) => {
             try {
                 // 执行委托数据同步
                 const missions = await fetchMissionsFromDNA()
-                const result = await updateMissionsIngame(server, missions)
-                if (result !== null) {
+                const activities = await fetchActivitiesFromDNA()
+                const missionResult = await updateMissionsIngame(server, missions)
+                await upsertActivitiesIngame(server, activities)
+                if (missionResult === null) {
+                    // duplicate missions 视为成功
                     is_success = true
                 } else {
-                    // duplicate missions 视为成功
                     is_success = true
                 }
             } finally {

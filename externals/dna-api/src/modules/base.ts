@@ -91,8 +91,8 @@ export class DNABaseAPI {
             this.baseHeaders = {
                 "log-header": "I am the log request header.",
                 countrycode: "CN",
-                version: this.server === "cn" ? "1.2.0" : "1.1.1",
-                versioncode: this.server === "cn" ? "7" : "5",
+                version: this.server === "cn" ? "1.2.2" : "1.1.1",
+                versioncode: this.server === "cn" ? "9" : "5",
                 source: "android",
                 lang: this.lang,
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -102,8 +102,8 @@ export class DNABaseAPI {
             this.baseHeaders = {
                 "log-header": "I am the log request header.",
                 countrycode: "CN",
-                version: this.server === "cn" ? "1.2.0" : "1.1.1",
-                versioncode: this.server === "cn" ? "7" : "5",
+                version: this.server === "cn" ? "1.2.2" : "1.1.1",
+                versioncode: this.server === "cn" ? "9" : "5",
                 source: "ios",
                 lang: this.lang,
                 "Content-Type": "application/x-www-form-urlencoded",

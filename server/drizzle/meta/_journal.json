@@ -78,6 +78,13 @@
             "when": 1769880901667,
             "tag": "0010_daffy_vision",
             "breakpoints": true
+        },
+        {
+            "idx": 11,
+            "version": "6",
+            "when": 1770719330165,
+            "tag": "0011_breezy_spectrum",
+            "breakpoints": true
         }
     ]
 }

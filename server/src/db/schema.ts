@@ -319,6 +319,28 @@ export const missionsIngame = sqliteTable(
 
 export const missionsIngameRelations = relations(missionsIngame, () => ({}))
 
+export const activitiesIngame = sqliteTable(
+    "activities_ingame",
+    {
+        id: integer("id").notNull(),
+        server: text("server").notNull(),
+        postId: text("post_id"),
+        startTime: integer("start_time").notNull(),
+        endTime: integer("end_time").notNull(),
+        name: text("name").notNull(),
+        icon: text("icon").notNull(),
+        desc: text("desc").notNull(),
+        createdAt: text("created_at").$default(now),
+        updateAt: text("update_at").$onUpdate(now),
+    },
+    activitiesIngame => [
+        uniqueIndex("activities_ingame_server_id_idx").on(activitiesIngame.server, activitiesIngame.id),
+        index("activities_ingame_server_start_time_idx").on(activitiesIngame.server, activitiesIngame.startTime),
+    ]
+)
+
+export const activitiesIngameRelations = relations(activitiesIngame, () => ({}))
+
 /** 攻略 */
 export const guides = sqliteTable(
     "guides",

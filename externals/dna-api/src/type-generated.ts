@@ -95,6 +95,38 @@ export interface DNAGameSignInResultBean {
     signinTimeNow: string
 }
 
+export interface DNAActivityListBean {
+    activities: DNAActivity[]
+    timelines: DNAActivityTimeline[]
+}
+
+export interface DNAActivityTimeline {
+    curTime: number
+    ids: (number | null)[]
+}
+
+export interface DNAActivity {
+    color: string
+    cycleDay: number
+    description: string
+    endTime: number
+    icon: string
+    iconShowType: number
+    id: number
+    name: string
+    postId?: string
+    startTime: number
+    timeStrs: {
+        endTime: string
+        startTime: string
+    }[]
+    times: {
+        endTime: number
+        startTime: number
+    }[]
+    type: number
+}
+
 export interface DNADiscussAreaResponse {
     bannerList: DNABannerListBean[]
     hasNext: number

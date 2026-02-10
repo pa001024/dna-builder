@@ -137,6 +137,10 @@ export class DNAAPI extends DNABaseAPI {
         return await this.home.gameSignIn(dayAwardId, period)
     }
 
+    async getActivityList(curTime?: string, startTime?: string, endTime?: string) {
+        return await this.home.getActivityList(curTime, startTime, endTime)
+    }
+
     async bbsSign() {
         return await this.home.bbsSign()
     }

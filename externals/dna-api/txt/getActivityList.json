@@ -1,0 +1,1283 @@
+{
+    "code": 200,
+    "data": {
+        "activities": [
+            {
+                "color": "#66CB6E",
+                "cycleDay": -1,
+                "description": "全新地区华胥上线！",
+                "endTime": 1775577599000,
+                "icon": "",
+                "iconShowType": 5,
+                "id": 6,
+                "name": "华胥香识记",
+                "postId": "783847811312518991",
+                "startTime": 1766419200000,
+                "timeStrs": [
+                    {
+                        "endTime": "2026-04-07 23:59:59",
+                        "startTime": "2025-12-23 00:00:00"
+                    }
+                ],
+                "times": [
+                    {
+                        "endTime": 1775577599000,
+                        "startTime": 1766419200000
+                    }
+                ],
+                "type": 1
+            },
+            {
+                "color": "#FF7C82",
+                "cycleDay": -1,
+                "description": "限时玩法开放",
+                "endTime": 1775231999000,
+                "icon": "",
+                "iconShowType": 3,
+                "id": 22,
+                "name": "狩月人之阶",
+                "startTime": 1774281600000,
+                "timeStrs": [
+                    {
+                        "endTime": "2026-04-03 23:59:59",
+                        "startTime": "2026-03-24 00:00:00"
+                    }
+                ],
+                "times": [
+                    {
+                        "endTime": 1775231999000,
+                        "startTime": 1774281600000
+                    }
+                ],
+                "type": 1
+            },
+            {
+                "color": "#4DA9FF",
+                "cycleDay": -1,
+                "description": "使用方式：游戏内-【设置】-【其他】-【使用兑换码】输入兑换即可；",
+                "endTime": 1774972799000,
+                "icon": "",
+                "iconShowType": 3,
+                "id": 23,
+                "name": "兑换码：2026ECLX ",
+                "startTime": 1770566400000,
+                "timeStrs": [
+                    {
+                        "endTime": "2026-03-31 23:59:59",
+                        "startTime": "2026-02-09 00:00:00"
+                    }
+                ],
+                "times": [
+                    {
+                        "endTime": 1774972799000,
+                        "startTime": 1770566400000
+                    }
+                ],
+                "type": 1
+            },
+            {
+                "color": "#BA84FF",
+                "cycleDay": -1,
+                "description": "限时任务活动",
+                "endTime": 1774713599000,
+                "icon": "",
+                "iconShowType": 3,
+                "id": 21,
+                "name": "文明博弈",
+                "startTime": 1773331200000,
+                "timeStrs": [
+                    {
+                        "endTime": "2026-03-28 23:59:59",
+                        "startTime": "2026-03-13 00:00:00"
+                    }
+                ],
+                "times": [
+                    {
+                        "endTime": 1774713599000,
+                        "startTime": 1773331200000
+                    }
+                ],
+                "type": 1
+            },
+            {
+                "color": "#FF983F",
+                "cycleDay": -1,
+                "description": "魔之楔多倍掉落活动开放",
+                "endTime": 1774627199000,
+                "icon": "https://herobox-img.yingxiong.com/spur/calendar/activity/1770374170160936800.png",
+                "iconShowType": 4,
+                "id": 17,
+                "name": "收获日",
+                "postId": "800895149461734494",
+                "startTime": 1773936000000,
+                "timeStrs": [
+                    {
+                        "endTime": "2026-03-27 23:59:59",
+                        "startTime": "2026-03-20 00:00:00"
+                    }
+                ],
+                "times": [
+                    {
+                        "endTime": 1774627199000,
+                        "startTime": 1773936000000
+                    }
+                ],
+                "type": 1
+            },
+            {
+                "color": "#4DA9FF",
+                "cycleDay": -1,
+                "description": "未竟之念，未了的心愿…伴随着这些无由而来的生灵们，历险悄然苏生。",
+                "endTime": 1773244799000,
+                "icon": "",
+                "iconShowType": 3,
+                "id": 20,
+                "name": "无由履险奇谭",
+                "startTime": 1772121600000,
+                "timeStrs": [
+                    {
+                        "endTime": "2026-03-11 23:59:59",
+                        "startTime": "2026-02-27 00:00:00"
+                    }
+                ],
+                "times": [
+                    {
+                        "endTime": 1773244799000,
+                        "startTime": 1772121600000
+                    }
+                ],
+                "type": 1
+            },
+            {
+                "color": "#FF7C82",
+                "cycleDay": -1,
+                "description": "委托密函轮换（煜明）",
+                "endTime": 1773158399000,
+                "icon": "https://herobox-img.yingxiong.com/spur/calendar/activity/1770373208795998465.png",
+                "iconShowType": 2,
+                "id": 18,
+                "name": "委托密函轮换（煜明）",
+                "postId": "800895149461734494",
+                "startTime": 1773072000000,
+                "timeStrs": [
+                    {
+                        "endTime": "2026-03-10 23:59:59",
+                        "startTime": "2026-03-10 00:00:00"
+                    }
+                ],
+                "times": [
+                    {
+                        "endTime": 1773158399000,
+                        "startTime": 1773072000000
+                    }
+                ],
+                "type": 1
+            },
+            {
+                "color": "#F56EF9",
+                "cycleDay": -1,
+                "description": "活动期间累计区域联机在线时长领取赠礼",
+                "endTime": 1772467199000,
+                "icon": "",
+                "iconShowType": 3,
+                "id": 19,
+                "name": "星耀巡游",
+                "startTime": 1770912000000,
+                "timeStrs": [
+                    {
+                        "endTime": "2026-03-02 23:59:59",
+                        "startTime": "2026-02-13 00:00:00"
+                    }
+                ],
+                "times": [
+                    {
+                        "endTime": 1772467199000,
+                        "startTime": 1770912000000
+                    }
+                ],
+                "type": 1
+            },
+            {
+                "color": "#FF983F",
+                "cycleDay": -1,
+                "description": "魔之楔多倍掉落活动开放",
+                "endTime": 1772207999000,
+                "icon": "https://herobox-img.yingxiong.com/spur/calendar/activity/1770374180532775407.png",
+                "iconShowType": 4,
+                "id": 16,
+                "name": "收获日",
+                "postId": "800895149461734494",
+                "startTime": 1771516800000,
+                "timeStrs": [
+                    {
+                        "endTime": "2026-02-27 23:59:59",
+                        "startTime": "2026-02-20 00:00:00"
+                    }
+                ],
+                "times": [
+                    {
+                        "endTime": 1772207999000,
+                        "startTime": 1771516800000
+                    }
+                ],
+                "type": 1
+            },
+            {
+                "color": "#BA84FF",
+                "cycleDay": -1,
+                "description": "游戏内-【设置】-【其他】-【使用兑换码】输入兑换即可；有效期至2026年02月19日23:59。",
+                "endTime": 1771516799000,
+                "icon": "",
+                "iconShowType": 3,
+                "id": 15,
+                "name": "兑换码：ZPLZYT",
+                "postId": "800411956556071539",
+                "startTime": 1770220800000,
+                "timeStrs": [
+                    {
+                        "endTime": "2026-02-19 23:59:59",
+                        "startTime": "2026-02-05 00:00:00"
+                    }
+                ],
+                "times": [
+                    {
+                        "endTime": 1771516799000,
+                        "startTime": 1770220800000
+                    }
+                ],
+                "type": 1
+            },
+            {
+                "color": "#FF983F",
+                "cycleDay": -1,
+                "description": "✦【落子无悔】全新版本即将开启！✦",
+                "endTime": 1771257599000,
+                "icon": "",
+                "iconShowType": 3,
+                "id": 14,
+                "name": "【落子无悔】",
+                "postId": "800079767683466383",
+                "startTime": 1770220800000,
+                "timeStrs": [
+                    {
+                        "endTime": "2026-02-16 23:59:59",
+                        "startTime": "2026-02-05 00:00:00"
+                    }
+                ],
+                "times": [
+                    {
+                        "endTime": 1771257599000,
+                        "startTime": 1770220800000
+                    }
+                ],
+                "type": 1
+            },
+            {
+                "color": "#FF983F",
+                "cycleDay": -1,
+                "description": "这是对精度的特训，是对炮火的校验。瞄准开炮！达成所有演练目标吧。",
+                "endTime": 1770739199000,
+                "icon": "",
+                "iconShowType": 3,
+                "id": 8,
+                "name": "轰鸣演练",
+                "postId": "794296661340850592",
+                "startTime": 1768838400000,
+                "timeStrs": [
+                    {
+                        "endTime": "2026-02-10 23:59:59",
+                        "startTime": "2026-01-20 00:00:00"
+                    }
+                ],
+                "times": [
+                    {
+                        "endTime": 1770739199000,
+                        "startTime": 1768838400000
+                    }
+                ],
+                "type": 1
+            },
+            {
+                "color": "#FF7C82",
+                "cycleDay": -1,
+                "description": "委托密函轮换（止流）",
+                "endTime": 1770739199000,
+                "icon": "https://herobox-img.yingxiong.com/spur/calendar/activity/1770193926698156543.png",
+                "iconShowType": 2,
+                "id": 13,
+                "name": "委托密函轮换（止流）",
+                "postId": "798992604195718217",
+                "startTime": 1770652800000,
+                "timeStrs": [
+                    {
+                        "endTime": "2026-02-10 23:59:59",
+                        "startTime": "2026-02-10 00:00:00"
+                    }
+                ],
+                "times": [
+                    {
+                        "endTime": 1770739199000,
+                        "startTime": 1770652800000
+                    }
+                ],
+                "type": 1
+            },
+            {
+                "color": "#FF7C82",
+                "cycleDay": -1,
+                "description": "限时玩法开放",
+                "endTime": 1770047999000,
+                "icon": "https://herobox-img.yingxiong.com/spur/calendar/activity/1768551004889765020.png",
+                "iconShowType": 4,
+                "id": 9,
+                "name": "狩月人之阶",
+                "postId": "794997658946112739",
+                "startTime": 1769097600000,
+                "timeStrs": [
+                    {
+                        "endTime": "2026-02-02 23:59:59",
+                        "startTime": "2026-01-23 00:00:00"
+                    }
+                ],
+                "times": [
+                    {
+                        "endTime": 1770047999000,
+                        "startTime": 1769097600000
+                    }
+                ],
+                "type": 1
+            },
+            {
+                "color": "#4DA9FF",
+                "cycleDay": -1,
+                "description": "梦中的灵鸟为你衔来新枝，带来更多挑战。",
+                "endTime": 1769443199000,
+                "icon": "",
+                "iconShowType": 3,
+                "id": 7,
+                "name": "灵鸟之证",
+                "postId": "788845743854059631",
+                "startTime": 1767542400000,
+                "timeStrs": [
+                    {
+                        "endTime": "2026-01-26 23:59:59",
+                        "startTime": "2026-01-05 00:00:00"
+                    }
+                ],
+                "times": [
+                    {
+                        "endTime": 1769443199000,
+                        "startTime": 1767542400000
+                    }
+                ],
+                "type": 1
+            },
+            {
+                "color": "#FF7C82",
+                "cycleDay": -1,
+                "description": "委托密函轮换（刻舟）",
+                "endTime": 1768924799000,
+                "icon": "https://herobox-img.yingxiong.com/spur/calendar/activity/1768550118994486685.png",
+                "iconShowType": 2,
+                "id": 4,
+                "name": "委托密函轮换（刻舟）",
+                "postId": "791457956469148478",
+                "startTime": 1768838400000,
+                "timeStrs": [
+                    {
+                        "endTime": "2026-01-20 23:59:59",
+                        "startTime": "2026-01-20 00:00:00"
+                    }
+                ],
+                "times": [
+                    {
+                        "endTime": 1768924799000,
+                        "startTime": 1768838400000
+                    }
+                ],
+                "type": 1
+            },
+            {
+                "color": "#FF7C82",
+                "cycleDay": 2,
+                "description": "魔灵刷新",
+                "endTime": 1768751999000,
+                "icon": "https://herobox-img.yingxiong.com/spur/calendar/activity/1768552998604940976.png",
+                "iconShowType": 1,
+                "id": 3,
+                "name": "魔灵刷新",
+                "startTime": 1768665600000,
+                "timeStrs": [
+                    {
+                        "endTime": "2026-01-18 23:59:59",
+                        "startTime": "2026-01-18 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-01-21 23:59:59",
+                        "startTime": "2026-01-21 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-01-24 23:59:59",
+                        "startTime": "2026-01-24 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-01-27 23:59:59",
+                        "startTime": "2026-01-27 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-01-30 23:59:59",
+                        "startTime": "2026-01-30 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-02-02 23:59:59",
+                        "startTime": "2026-02-02 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-02-05 23:59:59",
+                        "startTime": "2026-02-05 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-02-08 23:59:59",
+                        "startTime": "2026-02-08 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-02-11 23:59:59",
+                        "startTime": "2026-02-11 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-02-14 23:59:59",
+                        "startTime": "2026-02-14 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-02-17 23:59:59",
+                        "startTime": "2026-02-17 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-02-20 23:59:59",
+                        "startTime": "2026-02-20 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-02-23 23:59:59",
+                        "startTime": "2026-02-23 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-02-26 23:59:59",
+                        "startTime": "2026-02-26 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-03-01 23:59:59",
+                        "startTime": "2026-03-01 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-03-04 23:59:59",
+                        "startTime": "2026-03-04 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-03-07 23:59:59",
+                        "startTime": "2026-03-07 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-03-10 23:59:59",
+                        "startTime": "2026-03-10 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-03-13 23:59:59",
+                        "startTime": "2026-03-13 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-03-16 23:59:59",
+                        "startTime": "2026-03-16 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-03-19 23:59:59",
+                        "startTime": "2026-03-19 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-03-22 23:59:59",
+                        "startTime": "2026-03-22 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-03-25 23:59:59",
+                        "startTime": "2026-03-25 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-03-28 23:59:59",
+                        "startTime": "2026-03-28 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-03-31 23:59:59",
+                        "startTime": "2026-03-31 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-04-03 23:59:59",
+                        "startTime": "2026-04-03 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-04-06 23:59:59",
+                        "startTime": "2026-04-06 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-04-09 23:59:59",
+                        "startTime": "2026-04-09 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-04-12 23:59:59",
+                        "startTime": "2026-04-12 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-04-15 23:59:59",
+                        "startTime": "2026-04-15 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-04-18 23:59:59",
+                        "startTime": "2026-04-18 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-04-21 23:59:59",
+                        "startTime": "2026-04-21 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-04-24 23:59:59",
+                        "startTime": "2026-04-24 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-04-27 23:59:59",
+                        "startTime": "2026-04-27 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-04-30 23:59:59",
+                        "startTime": "2026-04-30 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-05-03 23:59:59",
+                        "startTime": "2026-05-03 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-05-06 23:59:59",
+                        "startTime": "2026-05-06 00:00:00"
+                    },
+                    {
+                        "endTime": "2026-05-09 23:59:59",
+                        "startTime": "2026-05-09 00:00:00"
+                    }
+                ],
+                "times": [
+                    {
+                        "endTime": 1768751999000,
+                        "startTime": 1768665600000
+                    },
+                    {
+                        "endTime": 1769011199000,
+                        "startTime": 1768924800000
+                    },
+                    {
+                        "endTime": 1769270399000,
+                        "startTime": 1769184000000
+                    },
+                    {
+                        "endTime": 1769529599000,
+                        "startTime": 1769443200000
+                    },
+                    {
+                        "endTime": 1769788799000,
+                        "startTime": 1769702400000
+                    },
+                    {
+                        "endTime": 1770047999000,
+                        "startTime": 1769961600000
+                    },
+                    {
+                        "endTime": 1770307199000,
+                        "startTime": 1770220800000
+                    },
+                    {
+                        "endTime": 1770566399000,
+                        "startTime": 1770480000000
+                    },
+                    {
+                        "endTime": 1770825599000,
+                        "startTime": 1770739200000
+                    },
+                    {
+                        "endTime": 1771084799000,
+                        "startTime": 1770998400000
+                    },
+                    {
+                        "endTime": 1771343999000,
+                        "startTime": 1771257600000
+                    },
+                    {
+                        "endTime": 1771603199000,
+                        "startTime": 1771516800000
+                    },
+                    {
+                        "endTime": 1771862399000,
+                        "startTime": 1771776000000
+                    },
+                    {
+                        "endTime": 1772121599000,
+                        "startTime": 1772035200000
+                    },
+                    {
+                        "endTime": 1772380799000,
+                        "startTime": 1772294400000
+                    },
+                    {
+                        "endTime": 1772639999000,
+                        "startTime": 1772553600000
+                    },
+                    {
+                        "endTime": 1772899199000,
+                        "startTime": 1772812800000
+                    },
+                    {
+                        "endTime": 1773158399000,
+                        "startTime": 1773072000000
+                    },
+                    {
+                        "endTime": 1773417599000,
+                        "startTime": 1773331200000
+                    },
+                    {
+                        "endTime": 1773676799000,
+                        "startTime": 1773590400000
+                    },
+                    {
+                        "endTime": 1773935999000,
+                        "startTime": 1773849600000
+                    },
+                    {
+                        "endTime": 1774195199000,
+                        "startTime": 1774108800000
+                    },
+                    {
+                        "endTime": 1774454399000,
+                        "startTime": 1774368000000
+                    },
+                    {
+                        "endTime": 1774713599000,
+                        "startTime": 1774627200000
+                    },
+                    {
+                        "endTime": 1774972799000,
+                        "startTime": 1774886400000
+                    },
+                    {
+                        "endTime": 1775231999000,
+                        "startTime": 1775145600000
+                    },
+                    {
+                        "endTime": 1775491199000,
+                        "startTime": 1775404800000
+                    },
+                    {
+                        "endTime": 1775750399000,
+                        "startTime": 1775664000000
+                    },
+                    {
+                        "endTime": 1776009599000,
+                        "startTime": 1775923200000
+                    },
+                    {
+                        "endTime": 1776268799000,
+                        "startTime": 1776182400000
+                    },
+                    {
+                        "endTime": 1776527999000,
+                        "startTime": 1776441600000
+                    },
+                    {
+                        "endTime": 1776787199000,
+                        "startTime": 1776700800000
+                    },
+                    {
+                        "endTime": 1777046399000,
+                        "startTime": 1776960000000
+                    },
+                    {
+                        "endTime": 1777305599000,
+                        "startTime": 1777219200000
+                    },
+                    {
+                        "endTime": 1777564799000,
+                        "startTime": 1777478400000
+                    },
+                    {
+                        "endTime": 1777823999000,
+                        "startTime": 1777737600000
+                    },
+                    {
+                        "endTime": 1778083199000,
+                        "startTime": 1777996800000
+                    },
+                    {
+                        "endTime": 1778342399000,
+                        "startTime": 1778256000000
+                    }
+                ],
+                "type": 1
+            },
+            {
+                "color": "#FF7C82",
+                "cycleDay": -1,
+                "description": "参与限时委托，获取大量魔之楔奖励。",
+                "endTime": 1768492799000,
+                "icon": "https://herobox-img.yingxiong.com/spur/calendar/activity/1768550187333473891.png",
+                "iconShowType": 4,
+                "id": 5,
+                "name": "收获日",
+                "postId": "790370792784269053",
+                "startTime": 1767888000000,
+                "timeStrs": [
+                    {
+                        "endTime": "2026-01-15 23:59:59",
+                        "startTime": "2026-01-09 00:00:00"
+                    }
+                ],
+                "times": [
+                    {
+                        "endTime": 1768492799000,
+                        "startTime": 1767888000000
+                    }
+                ],
+                "type": 1
+            }
+        ],
+        "timelines": [
+            {
+                "curTime": 1766937600000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1767024000000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1767110400000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1767196800000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1767283200000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1767369600000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1767456000000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1767542400000,
+                "ids": [7, null, null, null]
+            },
+            {
+                "curTime": 1767628800000,
+                "ids": [7, null, null, null]
+            },
+            {
+                "curTime": 1767715200000,
+                "ids": [7, null, null, null]
+            },
+            {
+                "curTime": 1767801600000,
+                "ids": [7, null, null, null]
+            },
+            {
+                "curTime": 1767888000000,
+                "ids": [7, null, null, null]
+            },
+            {
+                "curTime": 1767974400000,
+                "ids": [7, null, null, null]
+            },
+            {
+                "curTime": 1768060800000,
+                "ids": [7, null, null, null]
+            },
+            {
+                "curTime": 1768147200000,
+                "ids": [7, null, null, null]
+            },
+            {
+                "curTime": 1768233600000,
+                "ids": [7, null, null, null]
+            },
+            {
+                "curTime": 1768320000000,
+                "ids": [7, null, null, null]
+            },
+            {
+                "curTime": 1768406400000,
+                "ids": [7, null, null, null]
+            },
+            {
+                "curTime": 1768492800000,
+                "ids": [7, null, null, null]
+            },
+            {
+                "curTime": 1768579200000,
+                "ids": [7, null, null, null]
+            },
+            {
+                "curTime": 1768665600000,
+                "ids": [7, null, null, null]
+            },
+            {
+                "curTime": 1768752000000,
+                "ids": [7, null, null, null]
+            },
+            {
+                "curTime": 1768838400000,
+                "ids": [7, 8, null, null]
+            },
+            {
+                "curTime": 1768924800000,
+                "ids": [7, 8, null, null]
+            },
+            {
+                "curTime": 1769011200000,
+                "ids": [7, 8, null, null]
+            },
+            {
+                "curTime": 1769097600000,
+                "ids": [7, 8, null, null]
+            },
+            {
+                "curTime": 1769184000000,
+                "ids": [7, 8, null, null]
+            },
+            {
+                "curTime": 1769270400000,
+                "ids": [7, 8, null, null]
+            },
+            {
+                "curTime": 1769356800000,
+                "ids": [7, 8, null, null]
+            },
+            {
+                "curTime": 1769443200000,
+                "ids": [null, 8, null, null]
+            },
+            {
+                "curTime": 1769529600000,
+                "ids": [null, 8, null, null]
+            },
+            {
+                "curTime": 1769616000000,
+                "ids": [null, 8, null, null]
+            },
+            {
+                "curTime": 1769702400000,
+                "ids": [null, 8, null, null]
+            },
+            {
+                "curTime": 1769788800000,
+                "ids": [null, 8, null, null]
+            },
+            {
+                "curTime": 1769875200000,
+                "ids": [null, 8, null, null]
+            },
+            {
+                "curTime": 1769961600000,
+                "ids": [null, 8, null, null]
+            },
+            {
+                "curTime": 1770048000000,
+                "ids": [null, 8, null, null]
+            },
+            {
+                "curTime": 1770134400000,
+                "ids": [null, 8, null, null]
+            },
+            {
+                "curTime": 1770220800000,
+                "ids": [15, 8, 14, null]
+            },
+            {
+                "curTime": 1770307200000,
+                "ids": [15, 8, 14, null]
+            },
+            {
+                "curTime": 1770393600000,
+                "ids": [15, 8, 14, null]
+            },
+            {
+                "curTime": 1770480000000,
+                "ids": [15, 8, 14, null]
+            },
+            {
+                "curTime": 1770566400000,
+                "ids": [15, 8, 14, 23]
+            },
+            {
+                "curTime": 1770652800000,
+                "ids": [15, 8, 14, 23]
+            },
+            {
+                "curTime": 1770739200000,
+                "ids": [15, null, 14, 23]
+            },
+            {
+                "curTime": 1770825600000,
+                "ids": [15, null, 14, 23]
+            },
+            {
+                "curTime": 1770912000000,
+                "ids": [15, 19, 14, 23]
+            },
+            {
+                "curTime": 1770998400000,
+                "ids": [15, 19, 14, 23]
+            },
+            {
+                "curTime": 1771084800000,
+                "ids": [15, 19, 14, 23]
+            },
+            {
+                "curTime": 1771171200000,
+                "ids": [15, 19, 14, 23]
+            },
+            {
+                "curTime": 1771257600000,
+                "ids": [15, 19, null, 23]
+            },
+            {
+                "curTime": 1771344000000,
+                "ids": [15, 19, null, 23]
+            },
+            {
+                "curTime": 1771430400000,
+                "ids": [15, 19, null, 23]
+            },
+            {
+                "curTime": 1771516800000,
+                "ids": [null, 19, null, 23]
+            },
+            {
+                "curTime": 1771603200000,
+                "ids": [null, 19, null, 23]
+            },
+            {
+                "curTime": 1771689600000,
+                "ids": [null, 19, null, 23]
+            },
+            {
+                "curTime": 1771776000000,
+                "ids": [null, 19, null, 23]
+            },
+            {
+                "curTime": 1771862400000,
+                "ids": [null, 19, null, 23]
+            },
+            {
+                "curTime": 1771948800000,
+                "ids": [null, 19, null, 23]
+            },
+            {
+                "curTime": 1772035200000,
+                "ids": [null, 19, null, 23]
+            },
+            {
+                "curTime": 1772121600000,
+                "ids": [20, 19, null, 23]
+            },
+            {
+                "curTime": 1772208000000,
+                "ids": [20, 19, null, 23]
+            },
+            {
+                "curTime": 1772294400000,
+                "ids": [20, 19, null, 23]
+            },
+            {
+                "curTime": 1772380800000,
+                "ids": [20, 19, null, 23]
+            },
+            {
+                "curTime": 1772467200000,
+                "ids": [20, null, null, 23]
+            },
+            {
+                "curTime": 1772553600000,
+                "ids": [20, null, null, 23]
+            },
+            {
+                "curTime": 1772640000000,
+                "ids": [20, null, null, 23]
+            },
+            {
+                "curTime": 1772726400000,
+                "ids": [20, null, null, 23]
+            },
+            {
+                "curTime": 1772812800000,
+                "ids": [20, null, null, 23]
+            },
+            {
+                "curTime": 1772899200000,
+                "ids": [20, null, null, 23]
+            },
+            {
+                "curTime": 1772985600000,
+                "ids": [20, null, null, 23]
+            },
+            {
+                "curTime": 1773072000000,
+                "ids": [20, null, null, 23]
+            },
+            {
+                "curTime": 1773158400000,
+                "ids": [20, null, null, 23]
+            },
+            {
+                "curTime": 1773244800000,
+                "ids": [null, null, null, 23]
+            },
+            {
+                "curTime": 1773331200000,
+                "ids": [21, null, null, 23]
+            },
+            {
+                "curTime": 1773417600000,
+                "ids": [21, null, null, 23]
+            },
+            {
+                "curTime": 1773504000000,
+                "ids": [21, null, null, 23]
+            },
+            {
+                "curTime": 1773590400000,
+                "ids": [21, null, null, 23]
+            },
+            {
+                "curTime": 1773676800000,
+                "ids": [21, null, null, 23]
+            },
+            {
+                "curTime": 1773763200000,
+                "ids": [21, null, null, 23]
+            },
+            {
+                "curTime": 1773849600000,
+                "ids": [21, null, null, 23]
+            },
+            {
+                "curTime": 1773936000000,
+                "ids": [21, null, null, 23]
+            },
+            {
+                "curTime": 1774022400000,
+                "ids": [21, null, null, 23]
+            },
+            {
+                "curTime": 1774108800000,
+                "ids": [21, null, null, 23]
+            },
+            {
+                "curTime": 1774195200000,
+                "ids": [21, null, null, 23]
+            },
+            {
+                "curTime": 1774281600000,
+                "ids": [21, 22, null, 23]
+            },
+            {
+                "curTime": 1774368000000,
+                "ids": [21, 22, null, 23]
+            },
+            {
+                "curTime": 1774454400000,
+                "ids": [21, 22, null, 23]
+            },
+            {
+                "curTime": 1774540800000,
+                "ids": [21, 22, null, 23]
+            },
+            {
+                "curTime": 1774627200000,
+                "ids": [21, 22, null, 23]
+            },
+            {
+                "curTime": 1774713600000,
+                "ids": [null, 22, null, 23]
+            },
+            {
+                "curTime": 1774800000000,
+                "ids": [null, 22, null, 23]
+            },
+            {
+                "curTime": 1774886400000,
+                "ids": [null, 22, null, 23]
+            },
+            {
+                "curTime": 1774972800000,
+                "ids": [null, 22, null, null]
+            },
+            {
+                "curTime": 1775059200000,
+                "ids": [null, 22, null, null]
+            },
+            {
+                "curTime": 1775145600000,
+                "ids": [null, 22, null, null]
+            },
+            {
+                "curTime": 1775232000000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1775318400000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1775404800000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1775491200000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1775577600000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1775664000000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1775750400000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1775836800000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1775923200000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1776009600000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1776096000000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1776182400000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1776268800000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1776355200000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1776441600000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1776528000000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1776614400000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1776700800000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1776787200000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1776873600000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1776960000000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1777046400000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1777132800000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1777219200000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1777305600000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1777392000000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1777478400000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1777564800000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1777651200000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1777737600000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1777824000000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1777910400000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1777996800000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1778083200000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1778169600000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1778256000000,
+                "ids": [null, null, null, null]
+            },
+            {
+                "curTime": 1778342400000,
+                "ids": [null, null, null, null]
+            }
+        ]
+    },
+    "msg": "请求成功",
+    "success": true
+}

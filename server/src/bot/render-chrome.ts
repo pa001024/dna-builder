@@ -1,6 +1,5 @@
 import { existsSync } from "node:fs"
 import puppeteer, { type Browser, type ScreenshotOptions } from "puppeteer-core"
-import { renderReactToString } from "./ssr"
 
 export class HtmlToImageRenderer {
     private browser: Browser | null = null
@@ -136,43 +135,6 @@ export class HtmlToImageRenderer {
             html = html.replace(placeholder, String(value))
         }
 
-        return await this.renderHtmlToImage(html, options)
-    }
-
-    /**
-     * 将React组件渲染为图片
-     * @param data React组件渲染数据
-     * @param options 截图选项
-     * @param renderOptions 渲染选项
-     * @returns 图片Buffer
-     */
-    async renderReactToImage(
-        data: Record<string, any>,
-        options?: ScreenshotOptions,
-        renderOptions?: {
-            /**
-             * 布局名称
-             */
-            layout?: string
-            /**
-             * 页面名称
-             */
-            page?: string
-            /**
-             * 页面标题
-             */
-            title?: string
-        }
-    ): Promise<Buffer> {
-        // 使用React SSR生成HTML
-        const html = renderReactToString({
-            data,
-            layout: renderOptions?.layout,
-            page: renderOptions?.page,
-            title: renderOptions?.title,
-        })
-
-        // 渲染为图片
         return await this.renderHtmlToImage(html, options)
     }
 }

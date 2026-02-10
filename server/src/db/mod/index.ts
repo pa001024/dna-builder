@@ -1,4 +1,5 @@
 import { type FieldNode, type GraphQLResolveInfo, Kind } from "graphql"
+import { resolvers as activityResolvers, typeDefs as activitySchema } from "./activity"
 import { resolvers as adminResolvers, typeDefs as adminSchema } from "./admin"
 import { resolvers as buildResolvers, typeDefs as buildSchema } from "./build"
 import { resolvers as dpsResolvers, typeDefs as dpsSchema } from "./dps"
@@ -16,6 +17,7 @@ import { resolvers as userResolvers, typeDefs as userSchema } from "./user"
 export function schemaWith(ctx: any) {
     const typeDefs = [
         userSchema,
+        activitySchema,
         messageSchema,
         roomSchema,
         taskSchema,
@@ -31,6 +33,7 @@ export function schemaWith(ctx: any) {
     ]
     const resolvers = mergeResolvers(
         userResolvers,
+        activityResolvers,
         messageResolvers,
         roomResolvers,
         taskResolvers,

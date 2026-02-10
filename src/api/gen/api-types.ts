@@ -155,7 +155,7 @@ export interface Msg {
     edited?: number
     createdAt?: string
     updateAt?: string
-    user: User
+    user?: User
     reactions?: Reaction[]
 }
 
@@ -235,6 +235,19 @@ export interface RecentActivity {
     time: string
 }
 
+export interface Activity {
+    id: number
+    server: string
+    postId?: string
+    startTime: number
+    endTime: number
+    name: string
+    icon: string
+    desc: string
+    createdAt?: string
+    updateAt?: string
+}
+
 export interface UsersUpdateInput {
     name?: string
     qq?: string
@@ -290,4 +303,23 @@ export interface BuildInput {
     desc?: string
     charId: number
     charSettings: string
+}
+
+export interface ActivityInput {
+    id: number
+    postId?: string
+    startTime: number
+    endTime: number
+    name: string
+    icon: string
+    desc: string
+}
+
+export interface ActivityUpdateInput {
+    postId?: string
+    startTime: number
+    endTime: number
+    name: string
+    icon: string
+    desc: string
 }

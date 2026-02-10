@@ -457,6 +457,19 @@ export const missionsIngameQuery = typedQuery(
     ` as const
 )<Types.MissionsIngame, { server: string }>()
 
+export const missionsIngamesQuery = typedQuery(
+    /* GraphQL */ `
+        query ($server: String!, $limit: Int, $offset: Int) {
+            missionsIngames(server: $server, limit: $limit, offset: $offset) {
+                id
+                server
+                missions
+                createdAt
+            }
+        }
+    ` as const
+)<Types.MissionsIngame[], { server: string; limit?: number; offset?: number }>()
+
 export const msgCountQuery = typedQuery(
     /* GraphQL */ `
         query ($roomId: String!) {
@@ -778,3 +791,41 @@ export const recentActivitiesQuery = typedQuery(
         }
     ` as const
 )<Types.RecentActivity[], { limit?: number }>()
+
+export const activityQuery = typedQuery(
+    /* GraphQL */ `
+        query ($server: String!, $id: Int!) {
+            activity(server: $server, id: $id) {
+                id
+                server
+                postId
+                startTime
+                endTime
+                name
+                icon
+                desc
+                createdAt
+                updateAt
+            }
+        }
+    ` as const
+)<Types.Activity, { server: string; id: number }>()
+
+export const activitiesQuery = typedQuery(
+    /* GraphQL */ `
+        query ($server: String!, $startTime: Float, $endTime: Float) {
+            activities(server: $server, startTime: $startTime, endTime: $endTime) {
+                id
+                server
+                postId
+                startTime
+                endTime
+                name
+                icon
+                desc
+                createdAt
+                updateAt
+            }
+        }
+    ` as const
+)<Types.Activity[], { server: string; startTime?: number; endTime?: number }>()

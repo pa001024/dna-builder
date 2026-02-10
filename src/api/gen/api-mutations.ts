@@ -618,3 +618,65 @@ export const pinBuildMutation = typedMutation<Types.Build, { id: string; pinned:
         }
     }
 `)
+
+export const createActivityMutation = typedMutation<Types.Activity, { server: string; input: Types.ActivityInput }>(/* GraphQL */ `
+    mutation ($server: String!, $input: ActivityInput!) {
+        createActivity(server: $server, input: $input) {
+            id
+            server
+            postId
+            startTime
+            endTime
+            name
+            icon
+            desc
+            createdAt
+            updateAt
+        }
+    }
+`)
+
+export const updateActivityMutation = typedMutation<Types.Activity, { server: string; id: number; input: Types.ActivityUpdateInput }>(
+    /* GraphQL */ `
+        mutation ($server: String!, $id: Int!, $input: ActivityUpdateInput!) {
+            updateActivity(server: $server, id: $id, input: $input) {
+                id
+                server
+                postId
+                startTime
+                endTime
+                name
+                icon
+                desc
+                createdAt
+                updateAt
+            }
+        }
+    `
+)
+
+export const deleteActivityMutation = typedMutation<boolean, { server: string; id: number }>(/* GraphQL */ `
+    mutation ($server: String!, $id: Int!) {
+        deleteActivity(server: $server, id: $id)
+    }
+`)
+
+export const upsertActivitiesIngameMutation = typedMutation<
+    Types.Activity[],
+    { token: string; server: string; activities: Types.ActivityInput[] }
+>(/* GraphQL */ `
+    mutation ($token: String!, $server: String!, $activities: [ActivityInput!]!) {
+        upsertActivitiesIngame(token: $token, server: $server, activities: $activities) {
+            id
+            server
+            postId
+            startTime
+            endTime
+            name
+            icon
+            desc
+            createdAt
+            updateAt
+        }
+    }
+`)
