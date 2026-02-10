@@ -1,5 +1,5 @@
 import type { Draft } from "./data-types"
-import type { LevelUpCalculatorConfig, LevelUpResult, ResourceCost } from "./LevelUpCalculator"
+import type { LevelUpCalculatorConfig, LevelUpResult, ResourceCost, TimeEstimateConfig } from "./LevelUpCalculator"
 import {
     type CharExt,
     calculateCharLevelUp,
@@ -52,6 +52,7 @@ export type CalculateModLevelUpData = {
 export type EstimateTimeData = {
     totalCost: ResourceCost
     modMap: Map<number, ModExt>
+    config?: TimeEstimateConfig
 }
 
 export type WorkerMessageData =
@@ -112,7 +113,7 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
                 }
                 case "estimateTime": {
                     const timeData = data as EstimateTimeData
-                    result = estimateTime(timeData.totalCost, Object.fromEntries(timeData.modMap))
+                    result = estimateTime(timeData.totalCost, Object.fromEntries(timeData.modMap), timeData.config)
                     break
                 }
                 case "mergeCalculate": {

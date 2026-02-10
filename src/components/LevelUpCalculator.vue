@@ -16,7 +16,13 @@ import {
     weaponData,
     weaponMap,
 } from "@/data"
-import { type CharLevelUpConfig, type LevelUpResult, type ModLevelUpConfig, type WeaponLevelUpConfig } from "@/data/LevelUpCalculator"
+import {
+    type CharLevelUpConfig,
+    type LevelUpResult,
+    type ModLevelUpConfig,
+    type TimeEstimateConfig,
+    type WeaponLevelUpConfig,
+} from "@/data/LevelUpCalculator"
 import { getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
 import { LevelUpCalculator } from "../data/LevelUpCalculator"
 import { useSettingStore } from "../store/setting"
@@ -71,6 +77,53 @@ const enableMods = ref({
 
 // 资源过滤相关
 const excludedResources = useLocalStorage<Set<string>>("lvup.excludedResources", new Set())
+
+/**
+ * 时间估算页面配置
+ */
+interface TimeEstimateUIConfig {
+    dungeonDropRateBonusPercent: number
+    dungeonTimeMultiplier: number
+    dungeonTypeTimes: {
+        Defense: number
+        ExtermPro: number
+        SurvivalMiniPro: number
+    }
+}
+
+// 时间估算配置
+const timeEstimateConfig = useLocalStorage<TimeEstimateUIConfig>("lvup.timeEstimateConfig", {
+    dungeonDropRateBonusPercent: 30,
+    dungeonTimeMultiplier: 1,
+    dungeonTypeTimes: {
+        Defense: 1,
+        ExtermPro: 0.5,
+        SurvivalMiniPro: 0.7,
+    },
+})
+
+/**
+ * 获取时间估算请求配置
+ * @returns 传递给计算器的时间估算配置
+ */
+function getTimeEstimateRequestConfig(): TimeEstimateConfig {
+    const dropRateBonusPercent = Number(timeEstimateConfig.value.dungeonDropRateBonusPercent)
+    const dungeonTimeMultiplier = Number(timeEstimateConfig.value.dungeonTimeMultiplier)
+
+    const defenseTime = Number(timeEstimateConfig.value.dungeonTypeTimes.Defense)
+    const extermProTime = Number(timeEstimateConfig.value.dungeonTypeTimes.ExtermPro)
+    const survivalMiniProTime = Number(timeEstimateConfig.value.dungeonTypeTimes.SurvivalMiniPro)
+
+    return {
+        dungeonDropRateBonus: Number.isFinite(dropRateBonusPercent) ? Math.max(-99, dropRateBonusPercent) / 100 : 0,
+        dungeonTimeMultiplier: Number.isFinite(dungeonTimeMultiplier) ? Math.max(0.01, dungeonTimeMultiplier) : 1,
+        dungeonTypeTimes: {
+            Defense: Number.isFinite(defenseTime) ? Math.max(0.01, defenseTime) : 1,
+            ExtermPro: Number.isFinite(extermProTime) ? Math.max(0.01, extermProTime) : 0.5,
+            SurvivalMiniPro: Number.isFinite(survivalMiniProTime) ? Math.max(0.01, survivalMiniProTime) : 0.7,
+        },
+    }
+}
 
 // 切换资源过滤状态
 const toggleResourceFilter = (resourceName: string) => {
@@ -317,7 +370,7 @@ async function calculateResult() {
             }
         }
         // 重新计算时间，基于过滤后的资源
-        mergedResult.timeEstimate = await levelUpCalculator.value.estimateTime(mergedResult.totalCost)
+        mergedResult.timeEstimate = await levelUpCalculator.value.estimateTime(mergedResult.totalCost, getTimeEstimateRequestConfig())
 
         // 检查是否为最新请求，如果不是则终止
         if (requestId !== latestRequestId.value) {
@@ -347,7 +400,7 @@ import { matchPinyin } from "@/utils/pinyin-utils"
 let debounceTimer: number | null = null
 
 watch(
-    [chars, weapons, mods, excludedResources],
+    [chars, weapons, mods, excludedResources, timeEstimateConfig],
     () => {
         if (debounceTimer) {
             clearTimeout(debounceTimer)
@@ -729,6 +782,76 @@ const isOpenGraph = ref(false)
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="w-full">
+                    <div
+                        class="card bg-base-100 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg mb-6"
+                    >
+                        <div class="card-body p-4">
+                            <div class="flex items-center gap-2 mb-4">
+                                <Icon icon="ri:settings-3-line" />
+                                <h3 class="text-lg font-semibold">副本估算配置</h3>
+                            </div>
+                            <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3">
+                                <label class="flex flex-col gap-1">
+                                    <span class="text-xs opacity-80">掉落率加成(%)</span>
+                                    <input
+                                        v-model.number="timeEstimateConfig.dungeonDropRateBonusPercent"
+                                        type="number"
+                                        class="input input-sm w-full"
+                                        min="-100"
+                                        max="1000"
+                                        step="1"
+                                    />
+                                </label>
+                                <label class="flex flex-col gap-1">
+                                    <span class="text-xs opacity-80">副本耗时倍率</span>
+                                    <input
+                                        v-model.number="timeEstimateConfig.dungeonTimeMultiplier"
+                                        type="number"
+                                        class="input input-sm w-full"
+                                        min="0.01"
+                                        max="20"
+                                        step="0.01"
+                                    />
+                                </label>
+                                <label class="flex flex-col gap-1">
+                                    <span class="text-xs opacity-80">扼守单次时间(分钟)</span>
+                                    <input
+                                        v-model.number="timeEstimateConfig.dungeonTypeTimes.Defense"
+                                        type="number"
+                                        class="input input-sm w-full"
+                                        min="0.01"
+                                        max="60"
+                                        step="0.1"
+                                    />
+                                </label>
+                                <label class="flex flex-col gap-1">
+                                    <span class="text-xs opacity-80">驱离单次时间(分钟)</span>
+                                    <input
+                                        v-model.number="timeEstimateConfig.dungeonTypeTimes.ExtermPro"
+                                        type="number"
+                                        class="input input-sm w-full"
+                                        min="0.01"
+                                        max="60"
+                                        step="0.1"
+                                    />
+                                </label>
+                                <label class="flex flex-col gap-1">
+                                    <span class="text-xs opacity-80">避险单次时间(分钟)</span>
+                                    <input
+                                        v-model.number="timeEstimateConfig.dungeonTypeTimes.SurvivalMiniPro"
+                                        type="number"
+                                        class="input input-sm w-full"
+                                        min="0.01"
+                                        max="60"
+                                        step="0.1"
+                                    />
+                                </label>
                             </div>
                         </div>
                     </div>

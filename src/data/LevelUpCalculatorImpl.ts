@@ -7,6 +7,7 @@ import type {
     ModLevelUpConfig,
     ResourceCost,
     ResourceTreeNode,
+    TimeEstimateConfig,
     WeaponLevelUpConfig,
 } from "./LevelUpCalculator"
 
@@ -778,6 +779,8 @@ function calculateModLevelUpCost(
             if (mod.shop) {
                 cost[mod.shop.price] = ((cost[mod.shop.price] as number) || 0) + mod.shop.n * selfGold
             }
+        } else {
+            totalGold = selfGold
         }
         if (d.t === "Mod") cost[name] = [totalGold, d.p, "Draft"]
         // 金色魔之楔需要5个同名紫色魔之楔
@@ -817,7 +820,7 @@ const baseDungeonDropConfig: DungeonWithDrops[] = [
         name: "深红凝珠",
         time: 0.5,
         items: {
-            深红凝珠: 540 * 1.15, // 每次副本获得的深红凝珠
+            深红凝珠: 540, // 每次副本获得的深红凝珠
         },
     },
     {
@@ -825,8 +828,8 @@ const baseDungeonDropConfig: DungeonWithDrops[] = [
         name: "战斗旋律",
         time: 1,
         items: {
-            战斗旋律·二: 8 * 1.15, // 每次副本获得的战斗旋律·二
-            // 战斗旋律·三: 3 * 1.15, // 每次副本获得的战斗旋律·三
+            战斗旋律·二: 8, // 每次副本获得的战斗旋律·二
+            // 战斗旋律·三: 3, // 每次副本获得的战斗旋律·三
         },
     },
     {
@@ -834,8 +837,8 @@ const baseDungeonDropConfig: DungeonWithDrops[] = [
         name: "角色经验",
         time: 1,
         items: {
-            武器说明书·二: 8 * 1.15, // 每次副本获得的武器说明书·二
-            // 武器说明书·三: 3 * 1.15, // 每次副本获得的武器说明书·三
+            武器说明书·二: 8, // 每次副本获得的武器说明书·二
+            // 武器说明书·三: 3, // 每次副本获得的武器说明书·三
         },
     },
     {
@@ -856,10 +859,44 @@ const baseDungeonDropConfig: DungeonWithDrops[] = [
     },
 ]
 // 定义不同类型副本的时间
-const otherDungeonTime: Record<string, number> = {
+const defaultOtherDungeonTime: Record<"Defense" | "ExtermPro" | "SurvivalMiniPro", number> = {
     Defense: 1, // 扼守
     ExtermPro: 0.5, // 驱离
     SurvivalMiniPro: 0.7, // 避险
+}
+
+/**
+ * 时间估算内部配置
+ */
+interface EstimateTimeResolvedConfig {
+    dropRateMultiplier: number
+    dungeonTimeMultiplier: number
+    dungeonTypeTimes: Record<"Defense" | "ExtermPro" | "SurvivalMiniPro", number>
+}
+
+/**
+ * 归一化副本时间和掉率配置
+ * @param config 前端传入配置
+ * @returns 内部可直接使用的配置
+ */
+function resolveTimeEstimateConfig(config?: TimeEstimateConfig): EstimateTimeResolvedConfig {
+    const dropRateBonus = Number(config?.dungeonDropRateBonus ?? 0)
+    const dropRateMultiplier = Number.isFinite(dropRateBonus) ? Math.max(0.01, 1 + dropRateBonus) : 1
+
+    const dungeonTimeMultiplierInput = Number(config?.dungeonTimeMultiplier ?? 1)
+    const dungeonTimeMultiplier = Number.isFinite(dungeonTimeMultiplierInput) ? Math.max(0.01, dungeonTimeMultiplierInput) : 1
+
+    const dungeonTypeTimes = {
+        Defense: Math.max(0.01, Number(config?.dungeonTypeTimes?.Defense ?? defaultOtherDungeonTime.Defense)),
+        ExtermPro: Math.max(0.01, Number(config?.dungeonTypeTimes?.ExtermPro ?? defaultOtherDungeonTime.ExtermPro)),
+        SurvivalMiniPro: Math.max(0.01, Number(config?.dungeonTypeTimes?.SurvivalMiniPro ?? defaultOtherDungeonTime.SurvivalMiniPro)),
+    }
+
+    return {
+        dropRateMultiplier,
+        dungeonTimeMultiplier,
+        dungeonTypeTimes,
+    }
 }
 export interface ModDropInfo {
     dungeonId: number
@@ -873,7 +910,7 @@ export interface ModDropInfo {
  * 3. 计算该最优副本的"瓶颈资源"（最先被刷满的资源），计算刷满所需的次数。
  * 4. 累加次数，扣除资源需求。若某个资源需求归零，则在下一轮计算中不再贡献 DPM，从而触发副本切换。
  */
-function getModDropDungeons(totalCost: ResourceCost, modMap: Record<number, ModExt>) {
+function getModDropDungeons(totalCost: ResourceCost, modMap: Record<number, ModExt>, config?: TimeEstimateConfig) {
     // --- 1. 初始化数据结构 ---
 
     // 记录资源的剩余需求量: "Draft-123" -> 100
@@ -891,7 +928,12 @@ function getModDropDungeons(totalCost: ResourceCost, modMap: Record<number, ModE
     const dungeonLookup = new Map<number, DungeonExt>()
 
     // 辅助函数：获取副本时间 (分钟)
-    const getDungeonTime = (d: DungeonExt) => otherDungeonTime[d.t] || 1
+    const resolvedConfig = resolveTimeEstimateConfig(config)
+
+    const getDungeonTime = (d: DungeonExt) => {
+        const typeTime = resolvedConfig.dungeonTypeTimes[d.t as keyof typeof resolvedConfig.dungeonTypeTimes] || 1
+        return typeTime * resolvedConfig.dungeonTimeMultiplier
+    }
 
     // --- 2. 解析需求并构建缓存 ---
     for (const amount of Object.values(totalCost)) {
@@ -922,7 +964,7 @@ function getModDropDungeons(totalCost: ResourceCost, modMap: Record<number, ModE
 
                 // 2.2 计算掉率效率
                 const dropInfo = dungeon.dropInfo
-                const rawRate = dropInfo?.pp || 0 // pp 是掉落概率 (0-1)
+                const rawRate = (dropInfo?.pp || 0) * resolvedConfig.dropRateMultiplier // pp 是掉落概率 (0-1)
                 if (rawRate <= 0) continue
 
                 const time = getDungeonTime(dungeon)
@@ -1073,9 +1115,12 @@ function getModDropDungeons(totalCost: ResourceCost, modMap: Record<number, ModE
 /**
  * 估算资源获取时间
  * @param totalCost 总消耗
+ * @param config 时间估算配置
  * @returns 时间估算
  */
-export function estimateTime(totalCost: ResourceCost, modMap: Record<number, ModExt>) {
+export function estimateTime(totalCost: ResourceCost, modMap: Record<number, ModExt>, config?: TimeEstimateConfig) {
+    const resolvedConfig = resolveTimeEstimateConfig(config)
+
     // 计算每个资源所需的副本次数和总时间
     let totalMinutes = 0
     const dungeonTimes: Record<number, [times: number, string[]]> = {}
@@ -1084,15 +1129,16 @@ export function estimateTime(totalCost: ResourceCost, modMap: Record<number, Mod
         for (const [resource, amount] of Object.entries(category.items)) {
             if (totalCost[resource]) {
                 const c = Array.isArray(totalCost[resource]) ? totalCost[resource][0] : totalCost[resource] || 0
-                const runsNeeded = Math.ceil(c / amount)
-                const minutesNeeded = runsNeeded * category.time
+                const dropAmount = amount * resolvedConfig.dropRateMultiplier
+                const runsNeeded = Math.ceil(c / dropAmount)
+                const minutesNeeded = runsNeeded * category.time * resolvedConfig.dungeonTimeMultiplier
                 totalMinutes += minutesNeeded
                 dungeonTimes[category.id] = [(dungeonTimes[category.id]?.[0] || 0) + runsNeeded, [category.name]]
             }
         }
     }
     // 计算魔之楔
-    const modDungeonsWithCount = getModDropDungeons(totalCost, modMap)
+    const modDungeonsWithCount = getModDropDungeons(totalCost, modMap, config)
     for (const { id, count, time, items } of modDungeonsWithCount) {
         const minutesNeeded = (count || 0) * time
         totalMinutes += minutesNeeded

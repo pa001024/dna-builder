@@ -113,6 +113,15 @@ export interface TimeEstimateResult {
 }
 
 /**
+ * 副本时间估算配置
+ */
+export interface TimeEstimateConfig {
+    dungeonDropRateBonus?: number
+    dungeonTimeMultiplier?: number
+    dungeonTypeTimes?: Partial<Record<"Defense" | "ExtermPro" | "SurvivalMiniPro", number>>
+}
+
+/**
  * 养成计算器
  * 用于计算角色、武器、魔之楔的养成资源消耗
  * 支持 Web Worker 异步计算
@@ -326,16 +335,17 @@ export class LevelUpCalculator {
     /**
      * 估算资源获取时间
      * @param totalCost 总消耗
+     * @param config 时间估算配置
      * @returns 时间估算
      */
-    async estimateTime(totalCost: ResourceCost): Promise<TimeEstimateResult> {
+    async estimateTime(totalCost: ResourceCost, config?: TimeEstimateConfig): Promise<TimeEstimateResult> {
         const modMap = modData
             .map(mod => this.extractMinimalModData(mod))
             .reduce((acc, mod) => {
                 acc.set(mod.id, mod)
                 return acc
             }, new Map<number, ModExt>())
-        return (await this.sendMessage("estimateTime", { totalCost, modMap })) as TimeEstimateResult
+        return (await this.sendMessage("estimateTime", { totalCost, modMap, config })) as TimeEstimateResult
     }
 
     /**
