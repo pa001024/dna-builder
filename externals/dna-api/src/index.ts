@@ -23,6 +23,7 @@ import { TrendAPI } from "./modules/trend"
 import { DNA_GAME_ID } from "./modules/types"
 import { UserAPI } from "./modules/user"
 import { UserGrowingAPI } from "./modules/usergrowing"
+import { rand_str2 } from "./modules/utils"
 
 export * from "./modules/kf"
 
@@ -52,6 +53,13 @@ export class DNAAPI extends DNABaseAPI {
         this.userGrowing = new UserGrowingAPI(this)
         this.h5 = new H5API(this)
         this.kf = new KFAPI(this)
+    }
+
+    /**
+     * 生成设备码
+     */
+    static generateDeviceCode() {
+        return `2${rand_str2(32)}`
     }
 
     /**

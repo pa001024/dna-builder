@@ -3,6 +3,7 @@ import { useLocalStorage, useSessionStorage } from "@vueuse/core"
 import { computed } from "vue"
 import { LeveledMod } from "../data"
 import { modMap } from "../data/d"
+import { modConvertData } from "../data/d/convert.data"
 import modData from "../data/d/mod.data"
 import { formatProp } from "../util"
 import { matchPinyin } from "../utils/pinyin-utils"
@@ -66,6 +67,16 @@ const versions = computed(() => {
 })
 
 const elems = ["火", "水", "雷", "风", "暗", "光"]
+const modConvertIdSet = new Set<number>(modConvertData.flatMap(pool => pool.ModId))
+
+/**
+ * 判断魔之楔是否可通过同品质转换获得
+ * @param modId 魔之楔ID
+ * @returns 是否可转换
+ */
+function isModConvertible(modId: number): boolean {
+    return modConvertIdSet.has(modId)
+}
 
 // 过滤魔之楔列表
 const filteredMods = computed(() => {
@@ -320,11 +331,17 @@ function toggleFilter(filterName: string, show: boolean) {
                                             </span>
                                             <span class="text-xs opacity-70">ID: {{ mod.id }}</span>
                                         </div>
-                                        <div class="text-xs opacity-70 mt-1 flex gap-2">
+                                        <div class="text-xs opacity-70 mt-1 flex gap-2 items-center">
                                             <span>{{ $t(mod.类型) }}</span>
                                             <span v-if="mod.属性">{{ $t(`${mod.属性}属性`) }}</span>
                                             <span v-if="mod.限定">{{ $t(mod.限定) }}</span>
                                             <span v-if="mod.版本">v{{ mod.版本 }}</span>
+                                            <span
+                                                v-if="isModConvertible(mod.id)"
+                                                class="px-1.5 py-0.5 rounded bg-success/20 text-success font-medium"
+                                            >
+                                                可转换
+                                            </span>
                                         </div>
                                     </div>
                                 </div>

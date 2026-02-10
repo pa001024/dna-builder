@@ -188,6 +188,68 @@ export function build_signature120(pk: string, payload: Record<string, any>, tok
     return { rk, tn, sa: shuffled_sa }
 }
 
+function swap_chars(text: string, i: number, j: number): string {
+    if (i < 0 || j < 0 || i >= text.length || j >= text.length) {
+        return text
+    }
+    const chars = text.split("")
+    ;[chars[i], chars[j]] = [chars[j], chars[i]]
+    return chars.join("")
+}
+
+function build_sa_header122(raw_sa: string, timestamp: number = Date.now()): string {
+    let sa = raw_sa
+    sa = swap_chars(sa, 7, 11)
+    sa = swap_chars(sa, 18, 26)
+    sa = swap_chars(sa, 12, 22)
+    sa = swap_chars(sa, 3, 15)
+
+    const ts = String(timestamp)
+    if (sa.length !== 30 || ts.length < 13) {
+        return sa
+    }
+
+    let timeIndex = 0
+    const out: string[] = []
+    for (let i = 0; i < sa.length; i++) {
+        if (i === 8 || i === 16) {
+            out.push(ts.slice(timeIndex, timeIndex + 5))
+            timeIndex += 5
+        } else if (i === 22) {
+            out.push(ts.slice(timeIndex, timeIndex + 3))
+            timeIndex += 3
+        }
+        out.push(sa[i])
+    }
+
+    return out.join("")
+}
+
+export function build_signature122(pk: string, payload: Record<string, any>, token?: string): Record<string, any> {
+    const rk = rand_str(16)
+
+    const raw_sa = rand_str(30)
+    const sa = build_sa_header122(raw_sa)
+    const str_params: Record<string, any> = {}
+
+    for (const [k, v] of Object.entries(payload)) {
+        str_params[k] = String(v)
+    }
+
+    const sign_params = { ...str_params }
+    if (token) {
+        sign_params.token = token
+    }
+    sign_params.sa = raw_sa
+
+    const sign_val = sign_shuffled(sign_params, rk)
+    const sign_encoded = xor_encode(sign_val, rk)
+    const rk_encrypted = rsa_encrypt(rk, pk)
+    const tn = `${rk_encrypted},${sign_encoded}`
+
+    return { rk, tn, sa }
+}
+
 // 构建上传图片签名（返回签名和密钥）
 export function build_upload_signature(public_key: string): { signature: string; key: string } {
     const key = rand_str(16)

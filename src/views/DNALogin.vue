@@ -10,12 +10,10 @@ const email = ref("")
 const phone = ref("")
 const code = ref("")
 const captchaId = "a9d7b33f6daf81efea5e3dcea8d92bd7"
-const dev_code = ref(uuid())
 
 const server = ref("cn" as "cn" | "global")
 
 const api = new DNAAPI({
-    dev_code: dev_code.value,
     fetchFn: tauriFetch,
 })
 
@@ -30,13 +28,6 @@ function showErrorMessage(message: string) {
     setTimeout(() => {
         errorMessage.value = ""
     }, 3e3)
-}
-function uuid(): string {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-        const r = Math.floor(Math.random() * 16)
-        const v = c === "x" ? r : (r & 0x3) | 0x8
-        return v.toString(16)
-    })
 }
 
 async function getEmailCode() {
@@ -88,7 +79,7 @@ const login = async () => {
                     window.parent.postMessage(
                         {
                             type: "LOGIN_SUCCESS",
-                            dev_code: dev_code.value,
+                            dev_code: api.dev_code,
                             user: { ...res.data },
                         },
                         "*"
@@ -104,7 +95,7 @@ const login = async () => {
                     window.parent.postMessage(
                         {
                             type: "LOGIN_SUCCESS",
-                            dev_code: dev_code.value,
+                            dev_code: api.dev_code,
                             user: { ...res.data },
                         },
                         "*"

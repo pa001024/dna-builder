@@ -7,7 +7,6 @@ import { charMap } from "../data"
 import { abyssDungeons } from "../data/d/abyss.data"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
-import { useGameTimer } from "../util"
 
 const { t, i18next } = useTranslation()
 const settingStore = useSettingStore()
@@ -34,9 +33,6 @@ const error = ref<string | null>(null)
 const currentTimestamp = ref(Date.now() / 1000)
 const timelineRef = ref<HTMLElement | null>(null)
 const currentLineRef = ref<HTMLElement | null>(null)
-
-// 获取魔灵刷新计时器（未使用变量，但需要保持引用以更新计时器）
-const { moling: _moling } = useGameTimer()
 
 /**
  * 获取沉浸式戏剧的开始和结束时间（秒）
@@ -193,7 +189,7 @@ const CACHE_KEY = "activity-calendar-data"
 const CACHE_DURATION = 24 * 60 * 60 * 1000 // 1day
 
 // 每天的像素宽度
-const DAY_WIDTH = 120 // 别改
+const DAY_WIDTH = 120
 
 /**
  * 格式化日期

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
 import { LeveledSkill } from "@/data"
+import { modConvertData } from "@/data/d/convert.data"
 import { modShopSourceMap } from "@/data/d/shop.data"
 import { getDungeonName } from "@/utils/dungeon-utils"
 import { getModDropInfo } from "@/utils/reward-utils"
@@ -78,6 +79,47 @@ const modShopSources = computed(() => {
     return modShopSourceMap.get(props.mod.id)
 })
 
+const modConvertPoolLabels = ["紫色魔之楔转换", "蓝色魔之楔转换"] as const
+const modConvertTotalWeights = modConvertData.map(pool => pool.Weight.reduce((total, weight) => total + weight, 0))
+
+/**
+ * 根据转换池索引返回展示名称
+ * @param poolIndex 转换池索引
+ * @returns 转换池展示名称
+ */
+function getModConvertPoolLabel(poolIndex: number): string {
+    return modConvertPoolLabels[poolIndex] ?? `转换池${poolIndex + 1}`
+}
+
+/**
+ * 计算当前魔之楔在转换池中的概率信息
+ * 规则：若魔之楔存在于 ModId 中，则概率=对应权重/该池总权重
+ */
+const modConvertRates = computed(() => {
+    return modConvertData.flatMap((pool, poolIndex) => {
+        const modIndex = pool.ModId.indexOf(props.mod.id)
+        if (modIndex < 0) {
+            return []
+        }
+
+        const weight = pool.Weight[modIndex]
+        const totalWeight = modConvertTotalWeights[poolIndex] ?? 0
+        if (weight === undefined || totalWeight <= 0) {
+            return []
+        }
+
+        return [
+            {
+                key: `${poolIndex}-${props.mod.id}`,
+                label: getModConvertPoolLabel(poolIndex),
+                weight,
+                totalWeight,
+                probability: weight / totalWeight,
+            },
+        ]
+    })
+})
+
 /**
  * 计算从0级升到当前等级的总消耗（深红凝珠）
  */
@@ -108,12 +150,12 @@ const totalGoldCost = computed(() => {
 })
 
 /**
- * 计算金色MOD消耗（仅金色MOD且等级大于5时）
+ * 计算金色魔之楔消耗（仅金色魔之楔且等级大于5时）
  */
 const totalModCost = computed(() => {
-    // 只有金色MOD且等级大于5才计算
+    // 只有金色魔之楔且等级大于5才计算
     if (leveledMod.value.品质 !== "金" || currentLevel.value <= 5) return 0
-    // modCost[i] 表示从 (5+i) 级升到 (5+i+1) 级需要的金色MOD数
+    // modCost[i] 表示从 (5+i) 级升到 (5+i+1) 级需要的金色魔之楔数
     // 所以从 5 级升到 n 级，需要求和 modCost[0] 到 modCost[n-6]
     const endIndex = Math.min(currentLevel.value - 6, modCost.length - 1)
     let total = 0
@@ -259,6 +301,23 @@ const replaceSkills = computed(() => {
             </div>
         </div>
 
+        <!-- 转换概率 -->
+        <div v-if="modConvertRates.length > 0" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">转换概率</div>
+            <div class="space-y-2 text-sm">
+                <div v-for="rate in modConvertRates" :key="rate.key" class="p-2 bg-base-300 rounded space-y-1">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="font-medium">{{ rate.label }}</span>
+                        <span class="text-primary font-medium">{{ +(rate.probability * 100).toFixed(2) }}%</span>
+                    </div>
+                    <div class="text-xs text-base-content/70 flex justify-between gap-2">
+                        <span>由3个同品质魔之楔转换</span>
+                        <span>权重 {{ rate.weight }}/{{ rate.totalWeight }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- 升级消耗 -->
         <div v-if="currentLevel > 0" class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-2">升级消耗</div>
@@ -267,7 +326,7 @@ const replaceSkills = computed(() => {
                 <ResourceCostItem name="深红凝珠" :value="totalCrimsonPearlCost" />
                 <!-- 铜币 -->
                 <ResourceCostItem name="铜币" :value="totalGoldCost" />
-                <!-- 金色MOD消耗（仅金色MOD且等级大于5时） -->
+                <!-- 金色魔之楔消耗（仅金色魔之楔且等级大于5时） -->
                 <div
                     v-if="leveledMod.品质 === '金' && currentLevel > 5 && mod.消耗 && mod.消耗.length > 0"
                     class="flex flex-wrap gap-2 items-center"

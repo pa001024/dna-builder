@@ -3,10 +3,11 @@ import type { DNACommonConfigEntity } from "../type-generated"
 import {
     aesDecryptImageUrl,
     build_signature111,
-    build_signature120,
+    build_signature122,
     build_upload_signature,
     type HeadersPayload,
     type RequestOptions,
+    rand_str2,
     rsa_encrypt,
 } from "./utils"
 
@@ -78,12 +79,23 @@ export class DNABaseAPI {
             this.server = "cn"
         }
         this.fetchFn = options.fetchFn
+        if (options.mode !== undefined) this.mode = options.mode
         if (options.lang !== undefined) this.lang = options.lang
         if (options.rsa_public_key !== undefined) this.RSA_PUBLIC_KEY = options.rsa_public_key
-        if (options.dev_code !== undefined) this.dev_code = options.dev_code
+        if (options.dev_code !== undefined) {
+            this.dev_code = options.dev_code
+        } else {
+            this.dev_code = DNABaseAPI.generateDeviceCode()
+        }
         if (options.token !== undefined) this.token = options.token
         if (options.kf_token !== undefined) this.kf_token = options.kf_token
         if (options.debug) this.debug = true
+    }
+    /**
+     * 生成设备码
+     */
+    static generateDeviceCode() {
+        return `2${rand_str2(32)}`
     }
 
     updateHeaders() {
@@ -204,10 +216,10 @@ export class DNABaseAPI {
             if (!kf) {
                 const pk = await this.getRsaPublicKey()
                 if (this.server === "cn") {
-                    const { rk, tn, sa } = build_signature120(pk, payload, token)
+                    const { tn, sa } = build_signature122(pk, payload, token)
 
                     // 更新 headers
-                    headers.rk = rk
+                    // headers.rk = rk
                     headers.tn = tn
                     headers.sa = sa
                 }
