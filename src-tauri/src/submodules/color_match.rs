@@ -27,9 +27,10 @@ pub(crate) fn check_color_mat(img_bgr: &Mat, x: i32, y: i32, color: u32, toleran
             let b = pixel[0];
             let g = pixel[1];
             let r = pixel[2];
-            let db = (b as i32 - color as i32).abs() as u8;
-            let dg = (g as i32 - color as i32).abs() as u8;
-            let dr = (r as i32 - color as i32).abs() as u8;
+            let (b_target, g_target, r_target) = rgb_to_bgr(color);
+            let db = (b as i32 - b_target as i32).abs() as u8;
+            let dg = (g as i32 - g_target as i32).abs() as u8;
+            let dr = (r as i32 - r_target as i32).abs() as u8;
             if db <= tolerance && dg <= tolerance && dr <= tolerance {
                 return true;
             }
