@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
 import { calculateFishPrice, getRandomFish } from "@/utils/fish-utils"
+import { getRewardDetails } from "@/utils/reward-utils"
 import type { Fish, FishingSpot } from "../data"
-import { fishMap } from "../data"
+import { fishMap, petMap } from "../data"
 
 const props = defineProps<{
     spot: FishingSpot
@@ -15,6 +16,14 @@ const selectedFish = ref<Fish | null>(null)
  */
 const spotFish = computed(() => {
     return props.spot.fishIds.map(id => fishMap.get(id)).filter((f): f is Fish => f !== undefined)
+})
+
+const extraRewardDetail = computed(() => {
+    return props.spot.extraReward ? getRewardDetails(props.spot.extraReward) : null
+})
+
+const spotPet = computed(() => {
+    return props.spot.petId ? petMap.get(props.spot.petId) || null : null
 })
 
 /**
@@ -313,7 +322,7 @@ function clearHistory() {
                 <ScrollArea class="flex-1">
                     <div class="p-3 space-y-4">
                         <!-- 池子信息 -->
-                        <div class="p-3 bg-base-200 rounded">
+                        <div class="p-3 bg-base-200 rounded space-y-2">
                             <div class="flex items-center gap-3 mb-3">
                                 <div class="w-12 h-12 overflow-hidden rounded-full">
                                     <img :src="`/imgs/webp/${spot.icon}.webp`" class="w-full h-full object-cover" />
@@ -326,6 +335,34 @@ function clearHistory() {
                                 </div>
                             </div>
 
+                            <div class="space-y-2">
+                                <div v-if="extraRewardDetail" class="p-2 bg-base-100 rounded">
+                                    <div class="text-xs text-base-content/70 mb-1">
+                                        额外奖励 (概率:
+                                        {{ spot.extraRewardProb !== undefined ? `${(spot.extraRewardProb * 100).toFixed(2)}%` : "-" }})
+                                    </div>
+                                    <RewardItem :reward="extraRewardDetail" />
+                                </div>
+                                <div v-else-if="spot.extraReward !== undefined" class="p-2 bg-base-100 rounded text-xs text-warning">
+                                    额外奖励数据不存在
+                                </div>
+
+                                <div v-if="spotPet" class="p-2 bg-base-100 rounded">
+                                    <div class="text-xs text-base-content/70 mb-1">
+                                        魔灵奖励 (概率:
+                                        {{ spot.petProb !== undefined ? `${(spot.petProb * 100).toFixed(2)}%` : "-" }})
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <img :src="`/imgs/webp/T_Head_Pet_${spotPet.icon}.webp`" class="w-8 h-8 object-cover rounded" />
+                                        <SRouterLink :to="`/db/pet/${spotPet.id}`" class="text-sm link link-primary">
+                                            {{ $t(spotPet.名称) }}
+                                        </SRouterLink>
+                                    </div>
+                                </div>
+                                <div v-else-if="spot.petId !== undefined" class="p-2 bg-base-100 rounded text-xs text-warning">
+                                    魔灵数据不存在
+                                </div>
+                            </div>
                             <div class="p-3 bg-base-100 rounded">
                                 <div class="text-xs text-base-content/70 mb-1">
                                     100条鱼平均期望(下方可调选项 当前设置: {{ getAppearName(selectTime) }} | {{ getLureName(lure) }} |

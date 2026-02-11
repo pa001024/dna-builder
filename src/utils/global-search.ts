@@ -12,6 +12,7 @@ import { fishingSpots, fishs } from "@/data/d/fish.data"
 import { hardBossMap } from "@/data/d/hardboss.data"
 import modData from "@/data/d/mod.data"
 import monsterData from "@/data/d/monster.data"
+import partyTopicData from "@/data/d/partytopic.data"
 // import npcData from "@/data/d/npc.data"
 import petData, { petEntrys } from "@/data/d/pet.data"
 import questChainData from "@/data/d/questchain.data"
@@ -443,6 +444,38 @@ export class GlobalSearchService {
                     [questChain.id, questChain.chapterName, questChain.chapterNumber, questChain.episode, questChain.type, questChain.main]
                 )
             )
+        )
+
+        entries.push(
+            ...partyTopicData.map(partyTopic => {
+                const charName = charMap.get(partyTopic.charId)?.名称
+                const conditionQuestChain = partyTopic.conditionId
+                    ? questChainData.find(questChain => questChain.id === partyTopic.conditionId)
+                    : undefined
+
+                return this.buildSearchEntry(
+                    {
+                        id: `partytopic:${partyTopic.id}`,
+                        title: partyTopic.name,
+                        subtitle: `光阴集 ID: ${partyTopic.id}${charName ? ` | 角色:${charName}` : ""}`,
+                        typeLabel: t("database.partytopic"),
+                        path: `/db/partytopic/${partyTopic.id}`,
+                    },
+                    [
+                        partyTopic.id,
+                        partyTopic.charId,
+                        partyTopic.name,
+                        partyTopic.desc,
+                        partyTopic.memoryName,
+                        partyTopic.memoryDesc,
+                        partyTopic.reward,
+                        partyTopic.conditionId,
+                        charName,
+                        conditionQuestChain?.name,
+                        ...Object.keys(partyTopic.consume || {}),
+                    ]
+                )
+            })
         )
 
         entries.push(

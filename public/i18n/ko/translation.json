@@ -4230,6 +4230,8 @@
         "monster_desc": "몬스터 정보와 속성 확인",
         "npc": "NPC",
         "npc_desc": "NPC 정보와 대화 보기",
+        "partytopic": "추억집",
+        "partytopic_desc": "추억집 스토리, 소모 자원, 선행 퀘스트 체인 정보 확인",
         "pet": "마령",
         "pet_desc": "마령의 정보와 스킬 확인",
         "questchain": "퀘스트 체인",
@@ -4562,6 +4564,12 @@
     },
     "npc-list": {
         "title": "NPC 목록"
+    },
+    "partytopic-detail": {
+        "title": "추억집 상세"
+    },
+    "partytopic-list": {
+        "title": "추억집 목록"
     },
     "pet-list": {
         "title": "마령 목록"

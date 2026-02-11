@@ -365,6 +365,18 @@ const routes: readonly RouteRecordRaw[] = [
                 beforeEnter: () => setMinSize(600, 600),
             },
             {
+                name: "partytopic-list",
+                path: "partytopic",
+                component: () => import("./views/DBPartyTopicListView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "partytopic-detail",
+                path: "partytopic/:partyTopicId",
+                component: () => import("./views/DBPartyTopicDetailView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
                 name: "questchain-list",
                 path: "questchain",
                 component: () => import("./views/DBQuestChainListView.vue"),

@@ -22,6 +22,10 @@ export interface FishingSpot {
     fishIds: number[] // 可钓鱼id
     showFishIds: number[] // 不显示
     weights: number[] // 鱼权重
+    extraReward?: number // 额外奖励id
+    extraRewardProb?: number // 额外奖励概率
+    petId?: number // 魔灵id
+    petProb?: number // 魔灵概率
 }
 
 export const fishs: Fish[] = [
@@ -1148,6 +1152,10 @@ export const fishingSpots: FishingSpot[] = [
         fishIds: [1101, 1102, 1103, 2101, 2102, 2103, 2104, 2105],
         showFishIds: [2101, 2102, 2103, 2104, 2105],
         weights: [40, 40, 40, 15, 15, 10, 0, 0],
+        extraReward: 301001,
+        extraRewardProb: 0.1,
+        petId: 4931,
+        petProb: 0.5,
     },
     {
         id: 10110301,
@@ -1159,6 +1167,10 @@ export const fishingSpots: FishingSpot[] = [
         fishIds: [1201, 1202, 1203, 2301, 2302, 2303, 2304, 2305],
         showFishIds: [2301, 2302, 2303, 2304, 2305],
         weights: [40, 40, 40, 15, 15, 10, 0, 0],
+        extraReward: 301002,
+        extraRewardProb: 0.1,
+        petId: 4932,
+        petProb: 0.5,
     },
     {
         id: 10170101,
@@ -1170,6 +1182,10 @@ export const fishingSpots: FishingSpot[] = [
         fishIds: [1301, 1302, 1303, 2501, 2502, 2503, 2504, 2505],
         showFishIds: [2501, 2502, 2503, 2504, 2505],
         weights: [40, 40, 40, 15, 15, 10, 0, 0],
+        extraReward: 301003,
+        extraRewardProb: 0.1,
+        petId: 4932,
+        petProb: 0.5,
     },
     {
         id: 10410601,
@@ -1181,6 +1197,10 @@ export const fishingSpots: FishingSpot[] = [
         fishIds: [1201, 1202, 1203, 2701, 2702, 2703, 2704, 2705],
         showFishIds: [2701, 2702, 2703, 2704, 2705],
         weights: [40, 40, 40, 15, 15, 10, 0, 0],
+        extraReward: 301007,
+        extraRewardProb: 0.1,
+        petId: 4941,
+        petProb: 0.5,
     },
     {
         id: 10410701,
@@ -1192,6 +1212,10 @@ export const fishingSpots: FishingSpot[] = [
         fishIds: [1301, 1302, 1303, 2801, 2802, 2803, 2804, 2805],
         showFishIds: [2801, 2802, 2803, 2804, 2805],
         weights: [40, 40, 40, 15, 15, 10, 0, 0],
+        extraReward: 301006,
+        extraRewardProb: 0.1,
+        petId: 4941,
+        petProb: 0.5,
     },
     {
         id: 10410801,
@@ -1203,6 +1227,10 @@ export const fishingSpots: FishingSpot[] = [
         fishIds: [1101, 1102, 1103, 2601, 2602, 2603, 2604, 2605],
         showFishIds: [2601, 2602, 2603, 2604, 2605],
         weights: [40, 40, 40, 15, 15, 10, 0, 0],
+        extraReward: 301004,
+        extraRewardProb: 0.1,
+        petId: 4941,
+        petProb: 0.5,
     },
     {
         id: 10410901,
@@ -1214,6 +1242,10 @@ export const fishingSpots: FishingSpot[] = [
         fishIds: [1101, 1102, 1103, 2202, 2203, 2204, 2201, 2205],
         showFishIds: [2201, 2202, 2203, 2204, 2205],
         weights: [40, 40, 40, 15, 15, 10, 0, 0],
+        extraReward: 301008,
+        extraRewardProb: 0.1,
+        petId: 4941,
+        petProb: 0.5,
     },
     {
         id: 10411001,
@@ -1225,5 +1257,9 @@ export const fishingSpots: FishingSpot[] = [
         fishIds: [1201, 1202, 1203, 2401, 2402, 2403, 2404, 2405],
         showFishIds: [2401, 2402, 2403, 2404, 2405],
         weights: [40, 40, 40, 15, 15, 10, 0, 0],
+        extraReward: 301005,
+        extraRewardProb: 0.1,
+        petId: 4941,
+        petProb: 0.5,
     },
 ]

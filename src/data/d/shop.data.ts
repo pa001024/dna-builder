@@ -38,9 +38,11 @@ export interface ShopItem {
     isSpPopup?: number
     unlock?: [number, string, number]
     imprCheck?: [number, string, number]
+    lv?: number // 解锁等级
+    cond?: string // 解锁条件
 }
 
-export const shopData: Shop[] = [
+const imprShopData: Shop[] = [
     {
         id: "ImpressionShop",
         name: "蛋皎的印象商店",
@@ -2379,6 +2381,9 @@ export const shopData: Shop[] = [
             },
         ],
     },
+]
+
+export const shopData: Shop[] = imprShopData.concat([
     {
         id: "AbyssShop",
         name: "观剧纪念",
@@ -2725,6 +2730,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100001,
                                 sequence: 94,
                                 startTime: 1761512400,
+                                lv: 35,
                             },
                             {
                                 id: 10000501,
@@ -2739,6 +2745,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100001,
                                 sequence: 95,
                                 startTime: 1761512400,
+                                lv: 40,
                             },
                             {
                                 id: 10000502,
@@ -2753,6 +2760,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100001,
                                 sequence: 96,
                                 startTime: 1761512400,
+                                lv: 45,
                             },
                             {
                                 id: 10000503,
@@ -2767,6 +2775,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100001,
                                 sequence: 97,
                                 startTime: 1761512400,
+                                lv: 50,
                             },
                             {
                                 id: 10000601,
@@ -3386,6 +3395,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7010,
                                 sequence: 150,
                                 startTime: 1672545600,
+                                lv: 25,
                             },
                             {
                                 id: 701002,
@@ -3400,6 +3410,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7010,
                                 sequence: 149,
                                 startTime: 1672545600,
+                                lv: 25,
                             },
                             {
                                 id: 701003,
@@ -3414,6 +3425,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7010,
                                 sequence: 98,
                                 startTime: 1672545600,
+                                lv: 25,
                             },
                             {
                                 id: 701004,
@@ -3428,6 +3440,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7010,
                                 sequence: 99,
                                 startTime: 1672545600,
+                                lv: 30,
                             },
                             {
                                 id: 701005,
@@ -3442,6 +3455,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7010,
                                 sequence: 100,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                         ],
                     },
@@ -3468,6 +3482,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7020,
                                 sequence: 100,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 702002,
@@ -3482,6 +3497,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7020,
                                 sequence: 101,
                                 startTime: 1672545600,
+                                lv: 40,
                             },
                             {
                                 id: 702003,
@@ -3524,6 +3540,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7020,
                                 sequence: 150,
                                 startTime: 1672545600,
+                                lv: 25,
                             },
                             {
                                 id: 702006,
@@ -3538,6 +3555,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7020,
                                 sequence: 149,
                                 startTime: 1672545600,
+                                lv: 25,
                             },
                             {
                                 id: 702007,
@@ -3552,6 +3570,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7020,
                                 sequence: 96,
                                 startTime: 1672545600,
+                                lv: 25,
                             },
                             {
                                 id: 702008,
@@ -3566,6 +3585,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7020,
                                 sequence: 97,
                                 startTime: 1672545600,
+                                lv: 30,
                             },
                             {
                                 id: 702009,
@@ -3580,6 +3600,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7020,
                                 sequence: 98,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 702010,
@@ -3594,6 +3615,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7020,
                                 sequence: 99,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                         ],
                     },
@@ -3620,6 +3642,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7030,
                                 sequence: 100,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 703002,
@@ -3634,6 +3657,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7030,
                                 sequence: 150,
                                 startTime: 1672545600,
+                                lv: 25,
                             },
                             {
                                 id: 703003,
@@ -3648,6 +3672,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7030,
                                 sequence: 149,
                                 startTime: 1672545600,
+                                lv: 25,
                             },
                             {
                                 id: 703004,
@@ -3662,6 +3687,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7030,
                                 sequence: 97,
                                 startTime: 1672545600,
+                                lv: 25,
                             },
                             {
                                 id: 703005,
@@ -3676,6 +3702,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7030,
                                 sequence: 98,
                                 startTime: 1672545600,
+                                lv: 30,
                             },
                             {
                                 id: 703006,
@@ -3690,6 +3717,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7030,
                                 sequence: 99,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                         ],
                     },
@@ -3716,6 +3744,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7040,
                                 sequence: 100,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 704002,
@@ -3730,6 +3759,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7040,
                                 sequence: 150,
                                 startTime: 1672545600,
+                                lv: 25,
                             },
                             {
                                 id: 704003,
@@ -3744,6 +3774,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7040,
                                 sequence: 149,
                                 startTime: 1672545600,
+                                lv: 25,
                             },
                             {
                                 id: 704004,
@@ -3758,6 +3789,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7040,
                                 sequence: 148,
                                 startTime: 1672545600,
+                                lv: 25,
                             },
                             {
                                 id: 704005,
@@ -3772,6 +3804,7 @@ export const shopData: Shop[] = [
                                 subTabId: 7040,
                                 sequence: 147,
                                 startTime: 1672545600,
+                                lv: 25,
                             },
                         ],
                     },
@@ -3860,6 +3893,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8010,
                                 sequence: 5,
                                 startTime: 1672545600,
+                                lv: 20,
                             },
                             {
                                 id: 801006,
@@ -3874,6 +3908,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8010,
                                 sequence: 6,
                                 startTime: 1672545600,
+                                lv: 30,
                                 require: 801005,
                             },
                             {
@@ -3889,6 +3924,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8010,
                                 sequence: 7,
                                 startTime: 1672545600,
+                                lv: 45,
                                 require: 801006,
                             },
                             {
@@ -3904,6 +3940,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8010,
                                 sequence: 8,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 801007,
                             },
                         ],
@@ -3925,6 +3962,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 1,
                                 startTime: 1672545600,
+                                lv: 1,
                             },
                             {
                                 id: 801102,
@@ -3939,6 +3977,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 2,
                                 startTime: 1672545600,
+                                lv: 1,
                             },
                             {
                                 id: 801103,
@@ -3953,6 +3992,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 3,
                                 startTime: 1672545600,
+                                lv: 1,
                             },
                             {
                                 id: 801104,
@@ -3967,6 +4007,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 4,
                                 startTime: 1672545600,
+                                lv: 1,
                             },
                             {
                                 id: 801105,
@@ -3981,6 +4022,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 5,
                                 startTime: 1672545600,
+                                lv: 1,
                             },
                             {
                                 id: 801106,
@@ -3995,6 +4037,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 6,
                                 startTime: 1672545600,
+                                lv: 20,
                                 require: 801101,
                             },
                             {
@@ -4010,6 +4053,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 7,
                                 startTime: 1672545600,
+                                lv: 20,
                                 require: 801102,
                             },
                             {
@@ -4025,6 +4069,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 8,
                                 startTime: 1672545600,
+                                lv: 20,
                                 require: 801103,
                             },
                             {
@@ -4040,6 +4085,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 9,
                                 startTime: 1672545600,
+                                lv: 20,
                                 require: 801104,
                             },
                             {
@@ -4055,6 +4101,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 10,
                                 startTime: 1672545600,
+                                lv: 20,
                                 require: 801105,
                             },
                             {
@@ -4070,6 +4117,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 11,
                                 startTime: 1672545600,
+                                lv: 20,
                             },
                             {
                                 id: 801112,
@@ -4084,6 +4132,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 12,
                                 startTime: 1672545600,
+                                lv: 20,
                             },
                             {
                                 id: 801113,
@@ -4098,6 +4147,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 13,
                                 startTime: 1672545600,
+                                lv: 20,
                             },
                             {
                                 id: 801114,
@@ -4112,6 +4162,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 14,
                                 startTime: 1672545600,
+                                lv: 20,
                             },
                             {
                                 id: 801115,
@@ -4126,6 +4177,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 15,
                                 startTime: 1672545600,
+                                lv: 30,
                                 require: 801106,
                             },
                             {
@@ -4141,6 +4193,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 16,
                                 startTime: 1672545600,
+                                lv: 30,
                                 require: 801107,
                             },
                             {
@@ -4156,6 +4209,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 17,
                                 startTime: 1672545600,
+                                lv: 30,
                                 require: 801108,
                             },
                             {
@@ -4171,6 +4225,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 18,
                                 startTime: 1672545600,
+                                lv: 30,
                                 require: 801109,
                             },
                             {
@@ -4186,6 +4241,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 19,
                                 startTime: 1672545600,
+                                lv: 30,
                                 require: 801110,
                             },
                             {
@@ -4201,6 +4257,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 20,
                                 startTime: 1672545600,
+                                lv: 30,
                                 require: 801111,
                             },
                             {
@@ -4216,6 +4273,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 21,
                                 startTime: 1672545600,
+                                lv: 30,
                                 require: 801112,
                             },
                             {
@@ -4231,6 +4289,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 22,
                                 startTime: 1672545600,
+                                lv: 30,
                                 require: 801113,
                             },
                             {
@@ -4246,6 +4305,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 23,
                                 startTime: 1672545600,
+                                lv: 30,
                             },
                             {
                                 id: 801124,
@@ -4260,6 +4320,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 24,
                                 startTime: 1672545600,
+                                lv: 30,
                             },
                             {
                                 id: 801125,
@@ -4274,6 +4335,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 25,
                                 startTime: 1672545600,
+                                lv: 30,
                                 require: 801114,
                             },
                             {
@@ -4289,6 +4351,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 26,
                                 startTime: 1672545600,
+                                lv: 45,
                                 require: 801115,
                             },
                             {
@@ -4304,6 +4367,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 27,
                                 startTime: 1672545600,
+                                lv: 45,
                                 require: 801116,
                             },
                             {
@@ -4319,6 +4383,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 28,
                                 startTime: 1672545600,
+                                lv: 45,
                                 require: 801117,
                             },
                             {
@@ -4334,6 +4399,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 29,
                                 startTime: 1672545600,
+                                lv: 45,
                                 require: 801118,
                             },
                             {
@@ -4349,6 +4415,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 30,
                                 startTime: 1672545600,
+                                lv: 45,
                                 require: 801119,
                             },
                             {
@@ -4364,6 +4431,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 31,
                                 startTime: 1672545600,
+                                lv: 45,
                                 require: 801120,
                             },
                             {
@@ -4379,6 +4447,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 32,
                                 startTime: 1672545600,
+                                lv: 45,
                                 require: 801121,
                             },
                             {
@@ -4394,6 +4463,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 33,
                                 startTime: 1672545600,
+                                lv: 45,
                                 require: 801122,
                             },
                             {
@@ -4409,6 +4479,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 34,
                                 startTime: 1672545600,
+                                lv: 45,
                                 require: 801123,
                             },
                             {
@@ -4424,6 +4495,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 35,
                                 startTime: 1672545600,
+                                lv: 45,
                                 require: 801124,
                             },
                             {
@@ -4439,6 +4511,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 36,
                                 startTime: 1672545600,
+                                lv: 45,
                                 require: 801125,
                             },
                             {
@@ -4454,6 +4527,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 37,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 801126,
                             },
                             {
@@ -4469,6 +4543,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 38,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 801127,
                             },
                             {
@@ -4484,6 +4559,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 39,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 801128,
                             },
                             {
@@ -4499,6 +4575,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 40,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 801129,
                             },
                             {
@@ -4514,6 +4591,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 41,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 801130,
                             },
                             {
@@ -4529,6 +4607,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 42,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 801131,
                             },
                             {
@@ -4544,6 +4623,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 43,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 801132,
                             },
                             {
@@ -4559,6 +4639,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 44,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 801133,
                             },
                             {
@@ -4574,6 +4655,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 45,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 801134,
                             },
                             {
@@ -4589,6 +4671,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 46,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 801135,
                             },
                             {
@@ -4604,6 +4687,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 47,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 801136,
                             },
                             {
@@ -4619,6 +4703,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 48,
                                 startTime: 1672545600,
+                                lv: 30,
                             },
                             {
                                 id: 801201,
@@ -4633,6 +4718,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 49,
                                 startTime: 1672545600,
+                                lv: 45,
                             },
                             {
                                 id: 801202,
@@ -4647,6 +4733,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 50,
                                 startTime: 1672545600,
+                                lv: 45,
                             },
                             {
                                 id: 801203,
@@ -4660,6 +4747,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8011,
                                 sequence: 1,
                                 startTime: 1672545600,
+                                lv: 1,
                             },
                         ],
                     },
@@ -4686,6 +4774,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8020,
                                 sequence: 1,
                                 startTime: 1672545600,
+                                lv: 1,
                             },
                             {
                                 id: 802002,
@@ -4770,6 +4859,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8020,
                                 sequence: 52,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 801007,
                             },
                             {
@@ -4785,6 +4875,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8020,
                                 sequence: 53,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 801007,
                             },
                             {
@@ -4800,6 +4891,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8020,
                                 sequence: 54,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 801007,
                             },
                         ],
@@ -4821,6 +4913,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 11,
                                 startTime: 1672545600,
+                                lv: 1,
                             },
                             {
                                 id: 802102,
@@ -4835,6 +4928,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 12,
                                 startTime: 1672545600,
+                                lv: 1,
                             },
                             {
                                 id: 802103,
@@ -4849,6 +4943,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 13,
                                 startTime: 1672545600,
+                                lv: 1,
                             },
                             {
                                 id: 802104,
@@ -4863,6 +4958,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 14,
                                 startTime: 1672545600,
+                                lv: 1,
                             },
                             {
                                 id: 802105,
@@ -4877,6 +4973,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 15,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 802106,
@@ -4891,6 +4988,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 16,
                                 startTime: 1672545600,
+                                lv: 35,
                                 require: 802101,
                             },
                             {
@@ -4906,6 +5004,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 17,
                                 startTime: 1672545600,
+                                lv: 35,
                                 require: 802102,
                             },
                             {
@@ -4921,6 +5020,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 18,
                                 startTime: 1672545600,
+                                lv: 35,
                                 require: 802103,
                             },
                             {
@@ -4936,6 +5036,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 19,
                                 startTime: 1672545600,
+                                lv: 35,
                                 require: 802104,
                             },
                             {
@@ -4951,6 +5052,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 20,
                                 startTime: 1672545600,
+                                lv: 35,
                                 require: 802105,
                             },
                             {
@@ -4966,6 +5068,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 21,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 802112,
@@ -4980,6 +5083,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 22,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 802113,
@@ -4994,6 +5098,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 23,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 802114,
@@ -5008,6 +5113,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 24,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 802115,
@@ -5022,6 +5128,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 25,
                                 startTime: 1672545600,
+                                lv: 55,
                             },
                             {
                                 id: 802116,
@@ -5036,6 +5143,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 26,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 802106,
                             },
                             {
@@ -5051,6 +5159,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 27,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 802107,
                             },
                             {
@@ -5066,6 +5175,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 28,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 802108,
                             },
                             {
@@ -5081,6 +5191,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 29,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 802109,
                             },
                             {
@@ -5096,6 +5207,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 30,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 802110,
                             },
                             {
@@ -5111,6 +5223,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 31,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 802111,
                             },
                             {
@@ -5126,6 +5239,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 32,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 802112,
                             },
                             {
@@ -5141,6 +5255,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 33,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 802113,
                             },
                             {
@@ -5156,6 +5271,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 34,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 802114,
                             },
                             {
@@ -5171,6 +5287,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 35,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 802115,
                             },
                             {
@@ -5186,6 +5303,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 36,
                                 startTime: 1672545600,
+                                lv: 30,
                             },
                             {
                                 id: 802127,
@@ -5200,6 +5318,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 37,
                                 startTime: 1672545600,
+                                lv: 30,
                             },
                             {
                                 id: 802128,
@@ -5214,6 +5333,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 38,
                                 startTime: 1672545600,
+                                lv: 30,
                             },
                             {
                                 id: 802130,
@@ -5228,6 +5348,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 39,
                                 startTime: 1672545600,
+                                lv: 30,
                             },
                             {
                                 id: 802131,
@@ -5242,6 +5363,7 @@ export const shopData: Shop[] = [
                                 subTabId: 8021,
                                 sequence: 40,
                                 startTime: 1672545600,
+                                lv: 30,
                             },
                         ],
                     },
@@ -6312,6 +6434,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100021,
                                 sequence: 96,
                                 startTime: 1672545600,
+                                lv: 30,
                             },
                             {
                                 id: 10002107,
@@ -6326,6 +6449,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100021,
                                 sequence: 97,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002108,
@@ -6340,6 +6464,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100021,
                                 sequence: 98,
                                 startTime: 1672545600,
+                                lv: 40,
                             },
                             {
                                 id: 10002109,
@@ -6354,6 +6479,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100021,
                                 sequence: 99,
                                 startTime: 1672545600,
+                                lv: 45,
                             },
                             {
                                 id: 10002110,
@@ -6368,6 +6494,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100021,
                                 sequence: 100,
                                 startTime: 1672545600,
+                                lv: 45,
                             },
                             {
                                 id: 10002111,
@@ -6382,6 +6509,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100021,
                                 sequence: 101,
                                 startTime: 1672545600,
+                                lv: 45,
                             },
                             {
                                 id: 10002112,
@@ -6396,6 +6524,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100021,
                                 sequence: 102,
                                 startTime: 1672545600,
+                                lv: 55,
                             },
                             {
                                 id: 10002113,
@@ -6410,6 +6539,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100021,
                                 sequence: 103,
                                 startTime: 1672545600,
+                                lv: 55,
                             },
                             {
                                 id: 10002114,
@@ -6424,6 +6554,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100021,
                                 sequence: 104,
                                 startTime: 1672545600,
+                                lv: 55,
                             },
                         ],
                     },
@@ -6445,6 +6576,7 @@ export const shopData: Shop[] = [
                                 sequence: 100,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002202,
@@ -6460,6 +6592,7 @@ export const shopData: Shop[] = [
                                 sequence: 99,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002203,
@@ -6475,6 +6608,7 @@ export const shopData: Shop[] = [
                                 sequence: 98,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002204,
@@ -6490,6 +6624,7 @@ export const shopData: Shop[] = [
                                 sequence: 97,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002205,
@@ -6505,6 +6640,7 @@ export const shopData: Shop[] = [
                                 sequence: 96,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002206,
@@ -6520,6 +6656,7 @@ export const shopData: Shop[] = [
                                 sequence: 95,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002207,
@@ -6535,6 +6672,7 @@ export const shopData: Shop[] = [
                                 sequence: 94,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002208,
@@ -6550,6 +6688,7 @@ export const shopData: Shop[] = [
                                 sequence: 93,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002209,
@@ -6565,6 +6704,7 @@ export const shopData: Shop[] = [
                                 sequence: 92,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002210,
@@ -6580,6 +6720,7 @@ export const shopData: Shop[] = [
                                 sequence: 91,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002211,
@@ -6595,6 +6736,7 @@ export const shopData: Shop[] = [
                                 sequence: 90,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002212,
@@ -6610,6 +6752,7 @@ export const shopData: Shop[] = [
                                 sequence: 89,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002213,
@@ -6625,6 +6768,7 @@ export const shopData: Shop[] = [
                                 sequence: 88,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002214,
@@ -6640,6 +6784,7 @@ export const shopData: Shop[] = [
                                 sequence: 87,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002215,
@@ -6655,6 +6800,7 @@ export const shopData: Shop[] = [
                                 sequence: 86,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002216,
@@ -6670,6 +6816,7 @@ export const shopData: Shop[] = [
                                 sequence: 85,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002217,
@@ -6685,6 +6832,7 @@ export const shopData: Shop[] = [
                                 sequence: 84,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002218,
@@ -6700,6 +6848,7 @@ export const shopData: Shop[] = [
                                 sequence: 83,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002219,
@@ -6713,6 +6862,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 82,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002220,
@@ -6726,6 +6876,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 81,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002221,
@@ -6739,6 +6890,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 80,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002222,
@@ -6752,6 +6904,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 79,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002223,
@@ -6765,6 +6918,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 78,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002224,
@@ -6778,6 +6932,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 77,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002225,
@@ -6791,6 +6946,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 76,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002226,
@@ -6804,6 +6960,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 75,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002227,
@@ -6817,6 +6974,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 74,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002228,
@@ -6830,6 +6988,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 73,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 10002229,
@@ -6843,6 +7002,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 72,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 10002230,
@@ -6856,6 +7016,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 71,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 10002231,
@@ -6869,6 +7030,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 70,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 10002232,
@@ -6882,6 +7044,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 69,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 10002233,
@@ -6895,6 +7058,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 68,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 10002234,
@@ -6908,6 +7072,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 67,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 10002235,
@@ -6921,6 +7086,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 66,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 10002236,
@@ -6934,6 +7100,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 65,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 10002337,
@@ -6948,6 +7115,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 100,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002338,
@@ -6962,6 +7130,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 99,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002339,
@@ -6976,6 +7145,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 98,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002340,
@@ -6990,6 +7160,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 97,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002341,
@@ -7004,6 +7175,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 96,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002342,
@@ -7018,6 +7190,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 95,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002343,
@@ -7032,6 +7205,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 94,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002344,
@@ -7046,6 +7220,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 93,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002345,
@@ -7060,6 +7235,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 92,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002346,
@@ -7074,6 +7250,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 91,
                                 startTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002347,
@@ -7088,6 +7265,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 90,
                                 startTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002348,
@@ -7102,6 +7280,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 89,
                                 startTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002349,
@@ -7116,6 +7295,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 88,
                                 startTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002350,
@@ -7130,6 +7310,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 87,
                                 startTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002351,
@@ -7144,6 +7325,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 86,
                                 startTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002352,
@@ -7158,6 +7340,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 85,
                                 startTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002353,
@@ -7172,6 +7355,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 84,
                                 startTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002354,
@@ -7186,6 +7370,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 83,
                                 startTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002373,
@@ -7200,6 +7385,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 106,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002374,
@@ -7214,12 +7400,13 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 105,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002375,
                                 itemType: "Draft",
                                 typeId: 154202,
-                                typeName: "异化冥犬之瞬袭·迅捷闪击",
+                                typeName: "异化冥犬之坠击·迅捷坠击",
                                 price: 7500,
                                 priceType: 215,
                                 priceName: "时之纺线",
@@ -7228,12 +7415,13 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 104,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002376,
                                 itemType: "Draft",
                                 typeId: 154203,
-                                typeName: "异化冥犬之坠击·迅捷坠击",
+                                typeName: "异化冥犬之瞬袭·迅捷闪击",
                                 price: 7500,
                                 priceType: 215,
                                 priceName: "时之纺线",
@@ -7242,6 +7430,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 103,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002377,
@@ -7256,6 +7445,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 102,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002378,
@@ -7270,6 +7460,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100022,
                                 sequence: 101,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                         ],
                     },
@@ -7291,6 +7482,7 @@ export const shopData: Shop[] = [
                                 sequence: 100,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002302,
@@ -7306,6 +7498,7 @@ export const shopData: Shop[] = [
                                 sequence: 99,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002303,
@@ -7321,6 +7514,7 @@ export const shopData: Shop[] = [
                                 sequence: 98,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002304,
@@ -7336,6 +7530,7 @@ export const shopData: Shop[] = [
                                 sequence: 97,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002305,
@@ -7351,6 +7546,7 @@ export const shopData: Shop[] = [
                                 sequence: 96,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002306,
@@ -7366,6 +7562,7 @@ export const shopData: Shop[] = [
                                 sequence: 95,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002307,
@@ -7381,6 +7578,7 @@ export const shopData: Shop[] = [
                                 sequence: 94,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002308,
@@ -7396,6 +7594,7 @@ export const shopData: Shop[] = [
                                 sequence: 93,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002309,
@@ -7411,6 +7610,7 @@ export const shopData: Shop[] = [
                                 sequence: 92,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002310,
@@ -7426,6 +7626,7 @@ export const shopData: Shop[] = [
                                 sequence: 91,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002311,
@@ -7441,6 +7642,7 @@ export const shopData: Shop[] = [
                                 sequence: 90,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002312,
@@ -7456,6 +7658,7 @@ export const shopData: Shop[] = [
                                 sequence: 89,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002313,
@@ -7471,6 +7674,7 @@ export const shopData: Shop[] = [
                                 sequence: 88,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002314,
@@ -7486,6 +7690,7 @@ export const shopData: Shop[] = [
                                 sequence: 87,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002315,
@@ -7501,6 +7706,7 @@ export const shopData: Shop[] = [
                                 sequence: 86,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002316,
@@ -7516,6 +7722,7 @@ export const shopData: Shop[] = [
                                 sequence: 85,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002317,
@@ -7531,6 +7738,7 @@ export const shopData: Shop[] = [
                                 sequence: 84,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002318,
@@ -7546,6 +7754,7 @@ export const shopData: Shop[] = [
                                 sequence: 83,
                                 startTime: 1672545600,
                                 endTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002319,
@@ -7559,6 +7768,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 82,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002320,
@@ -7572,6 +7782,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 81,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002321,
@@ -7585,6 +7796,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 80,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002322,
@@ -7598,6 +7810,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 79,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002323,
@@ -7611,6 +7824,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 78,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002324,
@@ -7624,6 +7838,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 77,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002325,
@@ -7637,6 +7852,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 76,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002326,
@@ -7650,6 +7866,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 75,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002327,
@@ -7663,6 +7880,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 74,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 10002328,
@@ -7676,6 +7894,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 73,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 10002329,
@@ -7689,6 +7908,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 72,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 10002330,
@@ -7702,6 +7922,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 71,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 10002331,
@@ -7715,6 +7936,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 70,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 10002332,
@@ -7728,6 +7950,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 69,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 10002333,
@@ -7741,6 +7964,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 68,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 10002334,
@@ -7754,6 +7978,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 67,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 10002335,
@@ -7767,6 +7992,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 66,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 10002336,
@@ -7780,6 +8006,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 65,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 10002355,
@@ -7794,6 +8021,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 100,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002356,
@@ -7808,6 +8036,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 99,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002357,
@@ -7822,6 +8051,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 98,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002358,
@@ -7836,6 +8066,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 97,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002359,
@@ -7850,6 +8081,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 96,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002360,
@@ -7864,6 +8096,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 95,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002361,
@@ -7878,6 +8111,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 94,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002362,
@@ -7892,6 +8126,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 93,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002363,
@@ -7906,6 +8141,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 92,
                                 startTime: 1766350800,
+                                lv: 55,
                             },
                             {
                                 id: 10002364,
@@ -7920,6 +8156,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 91,
                                 startTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002365,
@@ -7934,6 +8171,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 90,
                                 startTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002366,
@@ -7948,6 +8186,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 89,
                                 startTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002367,
@@ -7962,6 +8201,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 88,
                                 startTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002368,
@@ -7976,6 +8216,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 87,
                                 startTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002369,
@@ -7990,6 +8231,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 86,
                                 startTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002370,
@@ -8004,6 +8246,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 85,
                                 startTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002371,
@@ -8018,6 +8261,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 84,
                                 startTime: 1766350800,
+                                lv: 45,
                             },
                             {
                                 id: 10002372,
@@ -8032,6 +8276,7 @@ export const shopData: Shop[] = [
                                 subTabId: 100023,
                                 sequence: 83,
                                 startTime: 1766350800,
+                                lv: 45,
                             },
                         ],
                     },
@@ -9156,6 +9401,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1606,
                                 sequence: 900,
                                 startTime: 1672545600,
+                                lv: 10,
                                 isSpPopup: 1,
                             },
                             {
@@ -9171,6 +9417,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1606,
                                 sequence: 900,
                                 startTime: 1672545600,
+                                lv: 20,
                                 require: 160301,
                                 isSpPopup: 1,
                             },
@@ -9187,6 +9434,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1606,
                                 sequence: 900,
                                 startTime: 1672545600,
+                                lv: 30,
                                 require: 160302,
                                 isSpPopup: 1,
                             },
@@ -9203,6 +9451,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1606,
                                 sequence: 900,
                                 startTime: 1672545600,
+                                lv: 40,
                                 require: 160303,
                                 isSpPopup: 1,
                             },
@@ -9219,6 +9468,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1606,
                                 sequence: 900,
                                 startTime: 1672545600,
+                                lv: 45,
                                 require: 160304,
                                 isSpPopup: 1,
                             },
@@ -9235,6 +9485,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1606,
                                 sequence: 900,
                                 startTime: 1672545600,
+                                lv: 50,
                                 require: 160305,
                                 isSpPopup: 1,
                             },
@@ -9251,6 +9502,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1606,
                                 sequence: 900,
                                 startTime: 1672545600,
+                                lv: 55,
                                 require: 160306,
                                 isSpPopup: 1,
                             },
@@ -9267,6 +9519,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1606,
                                 sequence: 900,
                                 startTime: 1672545600,
+                                lv: 60,
                                 require: 160307,
                                 isSpPopup: 1,
                             },
@@ -10811,6 +11064,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1801,
                                 sequence: 100,
                                 startTime: 1672545600,
+                                lv: 15,
                             },
                             {
                                 id: 151002,
@@ -10824,6 +11078,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1801,
                                 sequence: 98,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 151003,
@@ -10837,6 +11092,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1801,
                                 sequence: 97,
                                 startTime: 1672545600,
+                                lv: 38,
                             },
                             {
                                 id: 151006,
@@ -10850,6 +11106,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1801,
                                 sequence: 94,
                                 startTime: 1672545600,
+                                lv: 29,
                             },
                             {
                                 id: 151007,
@@ -10863,6 +11120,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1801,
                                 sequence: 93,
                                 startTime: 1672545600,
+                                lv: 35,
                             },
                             {
                                 id: 151009,
@@ -10876,6 +11134,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1801,
                                 sequence: 91,
                                 startTime: 1672545600,
+                                lv: 34,
                             },
                             {
                                 id: 151012,
@@ -10889,6 +11148,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1801,
                                 sequence: 88,
                                 startTime: 1770688800,
+                                lv: 35,
                             },
                             {
                                 id: 151014,
@@ -10902,6 +11162,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1801,
                                 sequence: 86,
                                 startTime: 1672545600,
+                                lv: 5,
                             },
                             {
                                 id: 151015,
@@ -10915,6 +11176,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1801,
                                 sequence: 85,
                                 startTime: 1768856400,
+                                lv: 35,
                             },
                             {
                                 id: 151018,
@@ -10928,6 +11190,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1801,
                                 sequence: 82,
                                 startTime: 1672545600,
+                                lv: 20,
                             },
                             {
                                 id: 151019,
@@ -10941,6 +11204,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1801,
                                 sequence: 81,
                                 startTime: 1672545600,
+                                lv: 36,
                             },
                             {
                                 id: 151020,
@@ -10954,6 +11218,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1801,
                                 sequence: 80,
                                 startTime: 1773108000,
+                                lv: 60,
                             },
                             {
                                 id: 151021,
@@ -10967,6 +11232,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1801,
                                 sequence: 79,
                                 startTime: 1672545600,
+                                lv: 18,
                             },
                             {
                                 id: 151023,
@@ -10980,6 +11246,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1801,
                                 sequence: 77,
                                 startTime: 1672545600,
+                                lv: 26,
                             },
                         ],
                     },
@@ -10999,6 +11266,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 100,
                                 startTime: 1672545600,
+                                lv: 16,
                             },
                             {
                                 id: 152002,
@@ -11012,6 +11280,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 99,
                                 startTime: 1672545600,
+                                lv: 28,
                             },
                             {
                                 id: 152003,
@@ -11025,6 +11294,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 98,
                                 startTime: 1672545600,
+                                lv: 37,
                             },
                             {
                                 id: 152004,
@@ -11038,6 +11308,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 97,
                                 startTime: 1672545600,
+                                lv: 23,
                             },
                             {
                                 id: 152005,
@@ -11051,6 +11322,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 96,
                                 startTime: 1672545600,
+                                lv: 30,
                             },
                             {
                                 id: 152006,
@@ -11064,6 +11336,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 95,
                                 startTime: 1672545600,
+                                lv: 32,
                             },
                             {
                                 id: 152007,
@@ -11077,6 +11350,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 94,
                                 startTime: 1672545600,
+                                lv: 40,
                             },
                             {
                                 id: 152008,
@@ -11090,6 +11364,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 93,
                                 startTime: 1672545600,
+                                lv: 24,
                             },
                             {
                                 id: 152009,
@@ -11103,6 +11378,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 92,
                                 startTime: 1672545600,
+                                lv: 57,
                             },
                             {
                                 id: 152010,
@@ -11116,6 +11392,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 91,
                                 startTime: 1672545600,
+                                lv: 17,
                             },
                             {
                                 id: 152011,
@@ -11129,6 +11406,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 90,
                                 startTime: 1672545600,
+                                lv: 51,
                             },
                             {
                                 id: 152012,
@@ -11142,6 +11420,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 89,
                                 startTime: 1672545600,
+                                lv: 42,
                             },
                             {
                                 id: 152013,
@@ -11155,6 +11434,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 88,
                                 startTime: 1672545600,
+                                lv: 10,
                             },
                             {
                                 id: 152014,
@@ -11168,6 +11448,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 87,
                                 startTime: 1672545600,
+                                lv: 39,
                             },
                             {
                                 id: 152015,
@@ -11181,6 +11462,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 86,
                                 startTime: 1672545600,
+                                lv: 19,
                             },
                             {
                                 id: 152016,
@@ -11194,6 +11476,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 85,
                                 startTime: 1672545600,
+                                lv: 51,
                             },
                             {
                                 id: 152017,
@@ -11207,6 +11490,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 84,
                                 startTime: 1672545600,
+                                lv: 43,
                             },
                             {
                                 id: 152018,
@@ -11220,6 +11504,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 83,
                                 startTime: 1672545600,
+                                lv: 27,
                             },
                             {
                                 id: 152019,
@@ -11233,6 +11518,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 82,
                                 startTime: 1672545600,
+                                lv: 22,
                             },
                             {
                                 id: 152020,
@@ -11246,6 +11532,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 81,
                                 startTime: 1672545600,
+                                lv: 59,
                             },
                             {
                                 id: 152021,
@@ -11259,6 +11546,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 80,
                                 startTime: 1672545600,
+                                lv: 53,
                             },
                             {
                                 id: 152022,
@@ -11272,6 +11560,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 79,
                                 startTime: 1672545600,
+                                lv: 48,
                             },
                             {
                                 id: 152023,
@@ -11285,6 +11574,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 78,
                                 startTime: 1672545600,
+                                lv: 8,
                             },
                             {
                                 id: 152024,
@@ -11298,6 +11588,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 77,
                                 startTime: 1672545600,
+                                lv: 12,
                             },
                             {
                                 id: 152025,
@@ -11311,6 +11602,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 76,
                                 startTime: 1672545600,
+                                lv: 62,
                             },
                             {
                                 id: 152026,
@@ -11324,6 +11616,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 75,
                                 startTime: 1672545600,
+                                lv: 25,
                             },
                             {
                                 id: 152028,
@@ -11337,6 +11630,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 73,
                                 startTime: 1768856400,
+                                lv: 25,
                             },
                             {
                                 id: 152030,
@@ -11350,6 +11644,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 71,
                                 startTime: 1770688800,
+                                lv: 35,
                             },
                             {
                                 id: 152031,
@@ -11363,6 +11658,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 70,
                                 startTime: 1770688800,
+                                lv: 45,
                             },
                             {
                                 id: 152040,
@@ -11376,6 +11672,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 61,
                                 startTime: 1768856400,
+                                lv: 55,
                             },
                             {
                                 id: 152041,
@@ -11389,6 +11686,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 60,
                                 startTime: 1773108000,
+                                lv: 55,
                             },
                             {
                                 id: 152042,
@@ -11402,6 +11700,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 59,
                                 startTime: 1672545600,
+                                lv: 60,
                             },
                             {
                                 id: 152043,
@@ -11415,6 +11714,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 58,
                                 startTime: 1773108000,
+                                lv: 60,
                             },
                             {
                                 id: 152044,
@@ -11428,6 +11728,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1802,
                                 sequence: 57,
                                 startTime: 1672545600,
+                                lv: 55,
                             },
                         ],
                     },
@@ -11447,6 +11748,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 1000,
                                 startTime: 1672545600,
+                                lv: 60,
                             },
                             {
                                 id: 651322,
@@ -11460,6 +11762,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 999,
                                 startTime: 1672545600,
+                                lv: 60,
                             },
                             {
                                 id: 651323,
@@ -11473,6 +11776,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 998,
                                 startTime: 1672545600,
+                                lv: 60,
                             },
                             {
                                 id: 651324,
@@ -11486,6 +11790,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 997,
                                 startTime: 1672545600,
+                                lv: 60,
                             },
                             {
                                 id: 651325,
@@ -11499,6 +11804,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 996,
                                 startTime: 1672545600,
+                                lv: 60,
                             },
                             {
                                 id: 651326,
@@ -11512,6 +11818,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 995,
                                 startTime: 1672545600,
+                                lv: 60,
                             },
                             {
                                 id: 651331,
@@ -11525,6 +11832,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 994,
                                 startTime: 1672545600,
+                                lv: 58,
                             },
                             {
                                 id: 651332,
@@ -11538,6 +11846,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 993,
                                 startTime: 1672545600,
+                                lv: 58,
                             },
                             {
                                 id: 651333,
@@ -11551,6 +11860,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 992,
                                 startTime: 1672545600,
+                                lv: 58,
                             },
                             {
                                 id: 651334,
@@ -11564,6 +11874,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 991,
                                 startTime: 1672545600,
+                                lv: 58,
                             },
                             {
                                 id: 651335,
@@ -11577,6 +11888,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 990,
                                 startTime: 1672545600,
+                                lv: 58,
                             },
                             {
                                 id: 651336,
@@ -11590,6 +11902,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 989,
                                 startTime: 1672545600,
+                                lv: 58,
                             },
                             {
                                 id: 651711,
@@ -11603,6 +11916,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 988,
                                 startTime: 1672545600,
+                                lv: 56,
                             },
                             {
                                 id: 651712,
@@ -11616,6 +11930,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 987,
                                 startTime: 1672545600,
+                                lv: 54,
                             },
                             {
                                 id: 651713,
@@ -11629,6 +11944,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 986,
                                 startTime: 1672545600,
+                                lv: 52,
                             },
                             {
                                 id: 651714,
@@ -11642,6 +11958,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 985,
                                 startTime: 1672545600,
+                                lv: 50,
                             },
                             {
                                 id: 651721,
@@ -11655,6 +11972,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 984,
                                 startTime: 1672545600,
+                                lv: 56,
                             },
                             {
                                 id: 651722,
@@ -11668,6 +11986,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 983,
                                 startTime: 1672545600,
+                                lv: 54,
                             },
                             {
                                 id: 651723,
@@ -11681,6 +12000,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 982,
                                 startTime: 1672545600,
+                                lv: 52,
                             },
                             {
                                 id: 651724,
@@ -11694,6 +12014,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 981,
                                 startTime: 1672545600,
+                                lv: 50,
                             },
                             {
                                 id: 651731,
@@ -11707,6 +12028,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 980,
                                 startTime: 1672545600,
+                                lv: 56,
                             },
                             {
                                 id: 651732,
@@ -11720,6 +12042,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 979,
                                 startTime: 1672545600,
+                                lv: 54,
                             },
                             {
                                 id: 651733,
@@ -11733,6 +12056,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 978,
                                 startTime: 1672545600,
+                                lv: 52,
                             },
                             {
                                 id: 651734,
@@ -11746,6 +12070,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 977,
                                 startTime: 1672545600,
+                                lv: 50,
                             },
                             {
                                 id: 651741,
@@ -11759,6 +12084,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 976,
                                 startTime: 1672545600,
+                                lv: 56,
                             },
                             {
                                 id: 651742,
@@ -11772,6 +12098,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 975,
                                 startTime: 1672545600,
+                                lv: 54,
                             },
                             {
                                 id: 651743,
@@ -11785,6 +12112,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 974,
                                 startTime: 1672545600,
+                                lv: 52,
                             },
                             {
                                 id: 651744,
@@ -11798,6 +12126,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 973,
                                 startTime: 1672545600,
+                                lv: 50,
                             },
                             {
                                 id: 651745,
@@ -11811,6 +12140,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 1005,
                                 startTime: 1672545600,
+                                lv: 50,
                             },
                             {
                                 id: 651746,
@@ -11824,6 +12154,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 1006,
                                 startTime: 1672545600,
+                                lv: 50,
                             },
                             {
                                 id: 651751,
@@ -11837,6 +12168,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 972,
                                 startTime: 1672545600,
+                                lv: 56,
                             },
                             {
                                 id: 651752,
@@ -11850,6 +12182,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 971,
                                 startTime: 1672545600,
+                                lv: 54,
                             },
                             {
                                 id: 651753,
@@ -11863,6 +12196,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 970,
                                 startTime: 1672545600,
+                                lv: 52,
                             },
                             {
                                 id: 651754,
@@ -11876,6 +12210,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 969,
                                 startTime: 1672545600,
+                                lv: 50,
                             },
                             {
                                 id: 651755,
@@ -11889,6 +12224,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 1001,
                                 startTime: 1672545600,
+                                lv: 50,
                             },
                             {
                                 id: 651756,
@@ -11902,6 +12238,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 1002,
                                 startTime: 1672545600,
+                                lv: 50,
                             },
                             {
                                 id: 651761,
@@ -11915,6 +12252,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 968,
                                 startTime: 1672545600,
+                                lv: 56,
                             },
                             {
                                 id: 651762,
@@ -11928,6 +12266,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 967,
                                 startTime: 1672545600,
+                                lv: 54,
                             },
                             {
                                 id: 651763,
@@ -11941,6 +12280,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 966,
                                 startTime: 1672545600,
+                                lv: 52,
                             },
                             {
                                 id: 651764,
@@ -11954,6 +12294,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 965,
                                 startTime: 1672545600,
+                                lv: 50,
                             },
                             {
                                 id: 651911,
@@ -11967,6 +12308,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 964,
                                 startTime: 1672545600,
+                                lv: 45,
                             },
                             {
                                 id: 651921,
@@ -11980,6 +12322,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 963,
                                 startTime: 1672545600,
+                                lv: 45,
                             },
                             {
                                 id: 651922,
@@ -11993,6 +12336,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 962,
                                 startTime: 1672545600,
+                                lv: 45,
                             },
                             {
                                 id: 651931,
@@ -12006,6 +12350,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 961,
                                 startTime: 1672545600,
+                                lv: 45,
                             },
                             {
                                 id: 651941,
@@ -12019,6 +12364,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 960,
                                 startTime: 1672545600,
+                                lv: 45,
                             },
                             {
                                 id: 651951,
@@ -12032,6 +12378,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 959,
                                 startTime: 1672545600,
+                                lv: 45,
                             },
                             {
                                 id: 651952,
@@ -12045,6 +12392,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 958,
                                 startTime: 1672545600,
+                                lv: 45,
                             },
                             {
                                 id: 651961,
@@ -12058,6 +12406,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 957,
                                 startTime: 1672545600,
+                                lv: 45,
                             },
                             {
                                 id: 651962,
@@ -12071,6 +12420,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 956,
                                 startTime: 1672545600,
+                                lv: 45,
                             },
                             {
                                 id: 653011,
@@ -12084,6 +12434,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 1003,
                                 startTime: 1672545600,
+                                lv: 45,
                             },
                             {
                                 id: 653013,
@@ -12097,6 +12448,7 @@ export const shopData: Shop[] = [
                                 subTabId: 1803,
                                 sequence: 1004,
                                 startTime: 1672545600,
+                                lv: 45,
                             },
                         ],
                     },
@@ -13190,6 +13542,7 @@ export const shopData: Shop[] = [
                                 sequence: 296,
                                 startTime: 1770602400,
                                 endTime: 1776027600,
+                                cond: "获得携金宴夜解锁",
                                 isSpPopup: 1,
                             },
                             {
@@ -13484,7 +13837,7 @@ export const shopData: Shop[] = [
                                 id: 140291,
                                 itemType: "TitleFrame",
                                 typeId: 10018,
-                                typeName: "龙称号框【待包装】",
+                                typeName: "神君赐福",
                                 price: 0,
                                 priceType: 111,
                                 priceName: "虹色棱镜",
@@ -13494,6 +13847,7 @@ export const shopData: Shop[] = [
                                 sequence: 10001,
                                 startTime: 1770602400,
                                 isSpPopup: 1,
+                                require: 140269,
                             },
                         ],
                     },
@@ -18079,7 +18433,7 @@ export const shopData: Shop[] = [
             },
         ],
     },
-]
+])
 
 export const modShopSourceMap = new Map<number, { shop: string; cost: string; n: number; t: "Walnut" | "Mod" }>()
 export const weaponShopSourceMap = new Map<number, { shop: string; cost: string; n: number; t: "Walnut" | "Mod" }>()

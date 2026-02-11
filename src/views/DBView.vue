@@ -147,6 +147,13 @@ const databaseItems = [
         color: "from-purple-500/20 to-indigo-600/20 text-purple-500",
     },
     {
+        name: "database.partytopic",
+        path: "/db/partytopic",
+        desc: "database.partytopic_desc",
+        icon: "M4 6A2 2 0 0 1 6 4H18A2 2 0 0 1 20 6V18A2 2 0 0 1 18 20H6A2 2 0 0 1 4 18V6ZM7.75 8A.75.75 0 0 0 7 8.75V15.25C7 15.6642 7.33579 16 7.75 16H16.25A.75.75 0 0 0 17 15.25V8.75A.75.75 0 0 0 16.25 8H7.75ZM8.5 18.5A.5.5 0 0 1 9 18H15A.5.5 0 0 1 15 19H9A.5.5 0 0 1 8.5 18.5Z",
+        color: "from-rose-500/20 to-red-600/20 text-rose-500",
+    },
+    {
         name: "database.achievement",
         path: "/db/achievement",
         desc: "database.achievement_desc",

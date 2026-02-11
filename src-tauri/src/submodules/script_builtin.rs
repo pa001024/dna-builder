@@ -5,7 +5,7 @@ use boa_engine::{
     Context, IntoJsFunctionCopied, JsData, JsError, JsNativeError, JsObject, JsResult, JsValue,
     js_string, js_value, object::builtins::JsArray,
 };
-use opencv::prelude::{MatTraitConst, VectorToVec};
+use opencv::prelude::{MatTraitConst, MatTraitConstManual};
 use std::{thread, time::Duration};
 use windows::Win32::Foundation::HWND;
 use windows::Win32::UI::WindowsAndMessaging::{GetForegroundWindow, SetForegroundWindow};
@@ -449,14 +449,52 @@ fn _copy_image(js_img_mat: Option<JsValue>, _ctx: &mut Context) -> JsResult<JsVa
     ) {
         Ok(_) => {
             // 使用 arboard 复制图像到剪贴板
-            let mut clipboard = arboard::Clipboard::new().unwrap();
-            let image_data = arboard::ImageData {
-                bytes: buf.to_vec().into(),
-                width: js_img_mat.borrow().data().inner.cols() as usize,
-                height: js_img_mat.borrow().data().inner.rows() as usize,
+            let (width, height, rgba_bytes) = {
+                let mat_ref = js_img_mat.borrow();
+                let src_mat = &*mat_ref.data().inner;
+                let width = src_mat.cols();
+                let height = src_mat.rows();
+                if width <= 0 || height <= 0 {
+                    return Ok(JsValue::new(false));
+                }
+
+                let mut rgba_mat = opencv::core::Mat::default();
+                let convert_result = match src_mat.channels() {
+                    1 => opencv::imgproc::cvt_color(src_mat, &mut rgba_mat, opencv::imgproc::COLOR_GRAY2RGBA, 0),
+                    3 => opencv::imgproc::cvt_color(src_mat, &mut rgba_mat, opencv::imgproc::COLOR_BGR2RGBA, 0),
+                    4 => opencv::imgproc::cvt_color(src_mat, &mut rgba_mat, opencv::imgproc::COLOR_BGRA2RGBA, 0),
+                    _ => return Ok(JsValue::new(false)),
+                };
+                if convert_result.is_err() {
+                    return Ok(JsValue::new(false));
+                }
+
+                let rgba_bytes = match rgba_mat.data_bytes() {
+                    Ok(bytes) => bytes.to_vec(),
+                    Err(_) => return Ok(JsValue::new(false)),
+                };
+                let expected_len = width as usize * height as usize * 4;
+                if rgba_bytes.len() != expected_len {
+                    return Ok(JsValue::new(false));
+                }
+
+                (width, height, rgba_bytes)
             };
-            let _ = clipboard.set_image(image_data);
-            Ok(JsValue::new(true))
+
+            let mut clipboard = match arboard::Clipboard::new() {
+                Ok(clipboard) => clipboard,
+                Err(_) => return Ok(JsValue::new(false)),
+            };
+            let image_data = arboard::ImageData {
+                bytes: rgba_bytes.into(),
+                width: width as usize,
+                height: height as usize,
+            };
+
+            match clipboard.set_image(image_data) {
+                Ok(_) => Ok(JsValue::new(true)),
+                Err(_) => Ok(JsValue::new(false)),
+            }
         }
         Err(_) => Ok(JsValue::new(false)),
     }

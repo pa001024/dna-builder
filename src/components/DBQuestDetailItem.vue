@@ -14,6 +14,7 @@ import {
     questData,
 } from "@/data/d/quest.data"
 import type { QuestChain } from "@/data/d/questchain.data"
+import { subRegionMap } from "@/data/d/subregion.data"
 import { useSettingStore } from "@/store/setting"
 import { getDropModeText, getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
@@ -35,6 +36,7 @@ interface QuestNextOption {
 
 interface QuestDetailItem {
     id: number
+    sr?: number
     next?: Record<string, number>
     details: QuestItem | null
     nodeChains: QuestNodeWithChain[]
@@ -572,6 +574,12 @@ const questDetails = computed<QuestDetailItem[]>(() => {
         }
     })
 })
+
+// 获取子区域名称
+const getSubRegionName = (subRegionId: number) => {
+    const subRegion = subRegionMap.get(subRegionId)
+    return subRegion ? subRegion.name : `子区域${subRegionId}`
+}
 </script>
 
 <template>
@@ -655,6 +663,7 @@ const questDetails = computed<QuestDetailItem[]>(() => {
                         <span class="font-medium"
                             >任务: {{ formatStoryText(quest.details?.name || "?") }}
                             <span class="text-sm text-base-content/70">ID: {{ quest.id }}</span>
+                            <span class="text-sm text-base-content/70 ml-2" v-if="quest.sr">区域: {{ getSubRegionName(quest.sr) }}</span>
                         </span>
                     </div>
 
@@ -664,7 +673,10 @@ const questDetails = computed<QuestDetailItem[]>(() => {
 
                     <div v-if="shouldShowQuestNextOptions(quest)" class="mb-2 flex flex-wrap items-center gap-1.5 text-xs">
                         <span class="text-base-content/60">任务跳转</span>
-                        <template v-for="nextOption in quest.nextOptions" :key="`${quest.id}-next-${nextOption.condition}-${nextOption.targetId}`">
+                        <template
+                            v-for="nextOption in quest.nextOptions"
+                            :key="`${quest.id}-next-${nextOption.condition}-${nextOption.targetId}`"
+                        >
                             <span class="text-primary">→</span>
                             <button
                                 type="button"
@@ -760,7 +772,10 @@ const questDetails = computed<QuestDetailItem[]>(() => {
                                                         :key="`${option.id}-${impressionCheck.regionId}-${impressionCheck.typeLabel}-impr-check`"
                                                         class="rounded border border-info/40 bg-info/10 px-1.5 py-0.5 text-xs leading-none text-info"
                                                     >
-                                                        印象检定 {{ $t(getRegionType(impressionCheck.regionId)) }}·{{ impressionCheck.typeLabel }} ≥
+                                                        印象检定 {{ $t(getRegionType(impressionCheck.regionId)) }}·{{
+                                                            impressionCheck.typeLabel
+                                                        }}
+                                                        ≥
                                                         {{ impressionCheck.threshold }}
                                                     </span>
                                                 </div>

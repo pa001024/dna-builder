@@ -161,19 +161,20 @@ export const useUIStore = defineStore("ui", {
             const diffHour = Math.floor((diff / (1000 * 60 * 60)) % 24)
             const diffMinute = Math.floor((diff / (1000 * 60)) % 60)
             const diffSecond = Math.floor((diff / 1000) % 60)
+            const pad = (num: number) => (num > 9 ? num : `0${num}`)
             if (diffDay > 0) {
-                return `${diffDay}天${diffHour}:${diffMinute}:${diffSecond}`
+                return `${diffDay}天${pad(diffHour)}:${pad(diffMinute)}:${pad(diffSecond)}`
             }
             if (diffHour > 0) {
-                return `${diffHour > 10 ? diffHour : `0${diffHour}`}:${diffMinute > 10 ? diffMinute : `0${diffMinute}`}:${diffSecond > 10 ? diffSecond : `0${diffSecond}`}`
+                return `${pad(diffHour)}:${pad(diffMinute)}:${pad(diffSecond)}`
             }
             if (diffMinute > 0) {
-                return `${diffMinute > 10 ? diffMinute : `0${diffMinute}`}:${diffSecond > 10 ? diffSecond : `0${diffSecond}`}`
+                return `${pad(diffMinute)}:${pad(diffSecond)}`
             }
             if (diffSecond > 0) {
-                return `${diffSecond > 10 ? `00:${diffSecond}` : `00:0${diffSecond}`}`
+                return `00:${pad(diffSecond)}`
             }
-            return "已过期"
+            return "00:00"
         },
         // 显示确认对话框
         async showDialog(title: string, content: string) {

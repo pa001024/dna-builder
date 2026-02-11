@@ -4200,6 +4200,8 @@
         "monster_desc": "查看怪物信息和屬性",
         "npc": "NPC",
         "npc_desc": "查看NPC資訊和對話",
+        "partytopic": "光陰集",
+        "partytopic_desc": "查看光陰集劇情、消耗資源與前置任務鏈",
         "pet": "魔靈",
         "pet_desc": "查看魔靈信息和技能",
         "questchain": "任務劇情",
@@ -4532,6 +4534,12 @@
     },
     "npc-list": {
         "title": "NPC列表"
+    },
+    "partytopic-detail": {
+        "title": "光陰集詳情"
+    },
+    "partytopic-list": {
+        "title": "光陰集列表"
     },
     "pet-list": {
         "title": "魔靈列表"

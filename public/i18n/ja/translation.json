@@ -4226,6 +4226,8 @@
         "monster_desc": "モンスター情報と属性を確認",
         "npc": "NPC",
         "npc_desc": "NPCの情報と会話を確認",
+        "partytopic": "追憶録",
+        "partytopic_desc": "追憶録の物語、消費リソース、前提クエストチェインを確認",
         "pet": "ジェネモン",
         "pet_desc": "ジェネモンの情報とスキルを確認",
         "questchain": "クエストチェイン",
@@ -4558,6 +4560,12 @@
     },
     "npc-list": {
         "title": "NPC一覧"
+    },
+    "partytopic-detail": {
+        "title": "追憶録詳細"
+    },
+    "partytopic-list": {
+        "title": "追憶録一覧"
     },
     "pet-list": {
         "title": "ジェネモン一覧"

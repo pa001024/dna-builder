@@ -4146,6 +4146,8 @@
         "monster_desc": "Voir les informations et attributs du monstre",
         "npc": "PNJ",
         "npc_desc": "Voir les informations et dialogues du PNJ",
+        "partytopic": "Chroniques",
+        "partytopic_desc": "Voir les histoires des Chroniques, les coûts en ressources et les chaînes de quêtes prérequis",
         "pet": "Géniemon",
         "pet_desc": "Voir les informations et compétences du Géniemon",
         "questchain": "Chaîne de quêtes",
@@ -4478,6 +4480,12 @@
     },
     "npc-list": {
         "title": "Liste des PNJ"
+    },
+    "partytopic-detail": {
+        "title": "Détails des Chroniques"
+    },
+    "partytopic-list": {
+        "title": "Liste des Chroniques"
     },
     "pet-list": {
         "title": "Liste des Géniemon"

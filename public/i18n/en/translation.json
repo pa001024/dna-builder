@@ -4230,6 +4230,8 @@
         "monster_desc": "View monster information and attributes",
         "npc": "NPC",
         "npc_desc": "View NPC information and dialogues",
+        "partytopic": "Party Topic",
+        "partytopic_desc": "View Party Topic stories, resource costs, and prerequisite quest chains",
         "pet": "Geniemon",
         "pet_desc": "View Geniemon info and skills",
         "questchain": "Quest Chain",
@@ -4562,6 +4564,12 @@
     },
     "npc-list": {
         "title": "NPC List"
+    },
+    "partytopic-detail": {
+        "title": "Party Topic Details"
+    },
+    "partytopic-list": {
+        "title": "Party Topic List"
     },
     "pet-list": {
         "title": "Geniemon List"
