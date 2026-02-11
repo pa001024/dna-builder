@@ -6,6 +6,7 @@ export const getDNAAPI = () => {
         dev_code: process.env.DEV_CODE!,
         token: process.env.USER_TOKEN,
         fetchFn: fetch,
+        mode: "android",
     })
     return dnaAPI
 }
