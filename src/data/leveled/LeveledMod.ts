@@ -470,6 +470,7 @@ export class LeveledMod implements Mod {
         this.properties.forEach(prop => {
             r[prop] = -this[prop]
         })
+        r.极性 = ""
         r.isMinus = true
         return r as LeveledMod
     }

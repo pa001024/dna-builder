@@ -148,6 +148,7 @@ export class LeveledChar {
         return icon ? `/imgs/webp/T_Head_${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
     }
     static idToUrl(id?: number) {
+        if (id === 160101) return LeveledChar.url("Nanzhu")
         const icon = charMap.get(id || 0)?.icon || "Empty"
         return LeveledChar.url(icon)
     }

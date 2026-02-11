@@ -181,7 +181,6 @@ function selectSubRegion(subRegionId: string) {
                             <div class="flex items-center gap-2 mt-2 text-xs opacity-70">
                                 <span>{{ getSubRegionName(quest.subRegionId) }}</span>
                                 <span>概率: {{ quest.chance }}%</span>
-                                <span>完成次数: {{ quest.completeNum === -1 ? "无限" : quest.completeNum }}</span>
                             </div>
                         </div>
                     </div>

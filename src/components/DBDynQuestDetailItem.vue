@@ -17,7 +17,15 @@ const getRegionInfo = (regionId: number) => {
 // 获取子区域信息
 const getSubRegionInfo = (subRegionId: number) => {
     const subRegion = subRegionMap.get(subRegionId)
-    return subRegion || { id: subRegionId, name: `子区域${subRegionId}`, description: "", level: "", type: null }
+    return (
+        subRegion || {
+            id: subRegionId,
+            rid: 0,
+            name: `子区域${subRegionId}`,
+            desc: "",
+            map: "",
+        }
+    )
 }
 </script>
 
@@ -91,17 +99,9 @@ const getSubRegionInfo = (subRegionId: number) => {
                     <span class="text-base-content/70">子区域名称</span>
                     <span>{{ getSubRegionInfo(quest.subRegionId).name }}</span>
                 </div>
-                <div v-if="getSubRegionInfo(quest.subRegionId).description" class="flex justify-between">
-                    <span class="text-base-content/70">描述</span>
-                    <span>{{ getSubRegionInfo(quest.subRegionId).description }}</span>
-                </div>
-                <div v-if="getSubRegionInfo(quest.subRegionId).level" class="flex justify-between">
-                    <span class="text-base-content/70">等级</span>
-                    <span>{{ getSubRegionInfo(quest.subRegionId).level }}</span>
-                </div>
-                <div v-if="getSubRegionInfo(quest.subRegionId).type" class="flex justify-between">
-                    <span class="text-base-content/70">类型</span>
-                    <span>{{ getSubRegionInfo(quest.subRegionId).type }}</span>
+                <div v-if="getSubRegionInfo(quest.subRegionId).map" class="flex justify-between">
+                    <span class="text-base-content/70">地图</span>
+                    <span>{{ getSubRegionInfo(quest.subRegionId).map }}</span>
                 </div>
             </div>
         </div>
