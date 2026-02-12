@@ -18,8 +18,8 @@ export function getImprType(type: ImprType): string {
         Any: "任意",
         Empathy: "共情",
         Chaos: "混沌",
-        Morality: "才智",
-        Wisdom: "道德",
+        Morality: "道德",
+        Wisdom: "才智",
         Benefit: "功利",
     }
     return nameMap[type]

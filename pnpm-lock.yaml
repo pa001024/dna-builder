@@ -81,8 +81,8 @@ importers:
         specifier: ^4.2.1
         version: 4.2.1
       dna-api:
-        specifier: ^0.6.0
-        version: 0.6.0
+        specifier: ^0.6.1
+        version: 0.6.1
       dompurify:
         specifier: ^3.3.1
         version: 3.3.1
@@ -2591,8 +2591,8 @@ packages:
   dexie@4.2.1:
     resolution: {integrity: sha512-Ckej0NS6jxQ4Po3OrSQBFddayRhTCic2DoCAG5zacOfOVB9P2Q5Xc5uL/nVa7ZVs+HdMnvUPzLFCB/JwpB6Csg==}
 
-  dna-api@0.6.0:
-    resolution: {integrity: sha512-/0Dq4S6o02sg9Sf7Z762MUhJJIFbKdenWMYSl0N1zlH+pCwPgiXn37vrRu3Rg080AVU3c4g+uiLiM9s9qgosLw==}
+  dna-api@0.6.1:
+    resolution: {integrity: sha512-d9XCnn5wKhIi8tR4fA48Mrjkr5RFkGizESpiAq5qQpsSsaIIv+gseOF/7fygZWZyBqi5AALMm9bvVOBjN33IIw==}
 
   dompurify@3.3.1:
     resolution: {integrity: sha512-qkdCKzLNtrgPFP1Vo+98FRzJnBRGe4ffyCea9IwHB1fyxPOeNTHpLKYGd4Uk9xvNoH0ZoOjwZxNptyMwqrId1Q==}
@@ -7209,7 +7209,7 @@ snapshots:
 
   dexie@4.2.1: {}
 
-  dna-api@0.6.0:
+  dna-api@0.6.1:
     dependencies:
       node-forge: 1.3.3
 

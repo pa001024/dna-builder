@@ -26,7 +26,7 @@
         "canvas": "^3.2.0",
         "croner": "^9.1.0",
         "cross-env": "^10.1.0",
-        "dna-api": "0.6.0",
+        "dna-api": "0.6.1",
         "dompurify": "^3.3.1",
         "dotenv": "^17.2.3",
         "drizzle-graphql": "^0.8.4",
