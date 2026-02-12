@@ -150,7 +150,7 @@ jobs:
 
                       > 夸克网盘链接：https://pan.quark.cn/s/1419bbc8aa2d
 
-                      > 直接下载: [${{ github.ref_name }}](https://cdn.xn--chq26veyq.icu/msi/DNA%20Builder_${{ steps.commit_diff.outputs.version }}_x64_zh-CN.msi)
+                      > 直接下载: [${{ github.ref_name }}](https://cdn.dna-builder.cn/msi/DNA%20Builder_${{ steps.commit_diff.outputs.version }}_x64_zh-CN.msi)
                       "
                   releaseDraft: false
                   prerelease: false

@@ -1,5 +1,9 @@
 [
     {
+        "version": "v0.11.12",
+        "msg": "更新域名 dna-builder.cn"
+    },
+    {
         "version": "v0.11.11",
         "msg": "修复皎皎角登录"
     },

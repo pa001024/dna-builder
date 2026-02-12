@@ -15,7 +15,7 @@
 
 可直接在浏览器中安装为应用，支持离线访问。
 
-- **国内服务器**: [https://xn--chq26veyq.icu/](https://xn--chq26veyq.icu/)
+- **国内服务器**: [https://dna-builder.cn/](https://dna-builder.cn/)
 - **EdgeOne**: [https://dna-builder.edgeone.dev/](https://dna-builder.edgeone.dev/)
 - **Vercel**: [https://dna-builder.vercel.app/](https://dna-builder.vercel.app/)
 
