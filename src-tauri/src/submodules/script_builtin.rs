@@ -1,5 +1,6 @@
 use boa_engine::class::Class;
 use boa_engine::job::NativeAsyncJob;
+use boa_engine::js_error;
 use boa_engine::object::builtins::{JsFunction, JsPromise};
 use boa_engine::{
     Context, IntoJsFunctionCopied, JsData, JsError, JsNativeError, JsObject, JsResult, JsValue,
@@ -340,7 +341,7 @@ fn _capture_window(hwnd: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue
         let js_mat = Box::new(mat).into_js(ctx)?;
         Ok(js_mat)
     } else {
-        Ok(JsValue::undefined())
+        Err(js_error!("capture_window failed"))
     }
 }
 /// 从窗口获取图像Mat对象函数（WGC优化版）
@@ -354,7 +355,7 @@ fn _capture_window_wgc(hwnd: Option<JsValue>, ctx: &mut Context) -> JsResult<JsV
         let js_mat = mat.into_js(ctx)?;
         Ok(js_mat)
     } else {
-        Ok(JsValue::undefined())
+        Err(js_error!("capture_window_wgc failed"))
     }
 }
 
@@ -369,7 +370,7 @@ fn _get_template(path: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> 
         let js_mat = Box::new(mat).into_js(ctx)?;
         Ok(js_mat)
     } else {
-        Ok(JsValue::undefined())
+        Err(js_error!("get_template failed"))
     }
 }
 
@@ -384,7 +385,7 @@ fn _get_template_b64(b64_str: Option<JsValue>, ctx: &mut Context) -> JsResult<Js
         let js_mat = Box::new(mat).into_js(ctx)?;
         Ok(js_mat)
     } else {
-        Ok(JsValue::undefined())
+        Err(js_error!("get_template_b64 failed"))
     }
 }
 
@@ -399,8 +400,21 @@ fn _imread(path: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
         let js_mat = Box::new(mat).into_js(ctx)?;
         Ok(js_mat)
     } else {
-        println!("imread failed: {:?}", path);
-        Ok(JsValue::undefined())
+        Err(js_error!("imread failed"))
+    }
+}
+/// 从文件加载图像Mat对象函数
+fn _imread_rgba(path: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let path = path
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+
+    if let Ok(mat) = opencv::imgcodecs::imread(&path, opencv::imgcodecs::IMREAD_UNCHANGED) {
+        let js_mat = Box::new(mat).into_js(ctx)?;
+        Ok(js_mat)
+    } else {
+        Err(js_error!("imread_rgba failed"))
     }
 }
 
@@ -460,9 +474,24 @@ fn _copy_image(js_img_mat: Option<JsValue>, _ctx: &mut Context) -> JsResult<JsVa
 
                 let mut rgba_mat = opencv::core::Mat::default();
                 let convert_result = match src_mat.channels() {
-                    1 => opencv::imgproc::cvt_color(src_mat, &mut rgba_mat, opencv::imgproc::COLOR_GRAY2RGBA, 0),
-                    3 => opencv::imgproc::cvt_color(src_mat, &mut rgba_mat, opencv::imgproc::COLOR_BGR2RGBA, 0),
-                    4 => opencv::imgproc::cvt_color(src_mat, &mut rgba_mat, opencv::imgproc::COLOR_BGRA2RGBA, 0),
+                    1 => opencv::imgproc::cvt_color(
+                        src_mat,
+                        &mut rgba_mat,
+                        opencv::imgproc::COLOR_GRAY2RGBA,
+                        0,
+                    ),
+                    3 => opencv::imgproc::cvt_color(
+                        src_mat,
+                        &mut rgba_mat,
+                        opencv::imgproc::COLOR_BGR2RGBA,
+                        0,
+                    ),
+                    4 => opencv::imgproc::cvt_color(
+                        src_mat,
+                        &mut rgba_mat,
+                        opencv::imgproc::COLOR_BGRA2RGBA,
+                        0,
+                    ),
                     _ => return Ok(JsValue::new(false)),
                 };
                 if convert_result.is_err() {
@@ -556,10 +585,74 @@ fn _imread_url(
                     Err(_) => Ok(JsValue::undefined()),
                 }
             } else {
-                Ok(JsValue::undefined())
+                Err(js_error!("imread_url failed"))
             }
         }
-        Err(_) => Ok(JsValue::undefined()),
+        Err(_) => Err(js_error!("imread_url failed")),
+    }
+}
+
+/// 从本地或网络加载图像Mat对象函数
+/// 如果 local_path 不为空，先尝试从本地路径加载，失败则从网络下载并保存到本地
+/// 如果 local_path 为空，直接从网络加载不保存到本地
+fn _imread_url_rgba(
+    local_path: Option<JsValue>,
+    url: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let local_path = local_path
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let url = url
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+
+    // 如果 local_path 不为空，先尝试从本地加载
+    if !local_path.is_empty() {
+        if let Ok(mat) = opencv::imgcodecs::imread(&local_path, opencv::imgcodecs::IMREAD_UNCHANGED)
+        {
+            let js_mat = Box::new(mat).into_js(ctx)?;
+            return Ok(js_mat);
+        }
+    }
+
+    // 从网络下载
+    match reqwest::blocking::get(&url) {
+        Ok(response) => {
+            if response.status().is_success() {
+                match response.bytes() {
+                    Ok(bytes) => {
+                        // 将字节数据转换为 Vec<u8>
+                        let byte_vec: Vec<u8> = bytes.to_vec();
+
+                        // 如果 local_path 不为空，保存原始数据到本地
+                        if !local_path.is_empty() {
+                            if let Err(_) = std::fs::write(&local_path, &byte_vec) {
+                                return Ok(JsValue::undefined());
+                            }
+                        }
+
+                        // 将字节数据解码为图像
+                        match opencv::imgcodecs::imdecode(
+                            &opencv::core::Vector::<u8>::from(byte_vec),
+                            opencv::imgcodecs::IMREAD_COLOR,
+                        ) {
+                            Ok(mat) => {
+                                let js_mat = Box::new(mat).into_js(ctx)?;
+                                Ok(js_mat)
+                            }
+                            Err(_) => Ok(JsValue::undefined()),
+                        }
+                    }
+                    Err(_) => Ok(JsValue::undefined()),
+                }
+            } else {
+                Err(js_error!("imread_url_rgba failed"))
+            }
+        }
+        Err(_) => Err(js_error!("imread_url_rgba failed")),
     }
 }
 
@@ -1012,6 +1105,10 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     let f = _imread.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("imread"), 1, f)?;
 
+    // 从文件加载图像Mat对象（RGBA通道）
+    let f = _imread_rgba.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("imreadRgba"), 1, f)?;
+
     // 保存Mat对象到文件
     let f = _imwrite.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("imwrite"), 2, f)?;
@@ -1023,6 +1120,10 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     // 从本地或网络加载图像Mat对象
     let f = _imread_url.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("imreadUrl"), 2, f)?;
+
+    // 从本地或网络加载图像Mat对象，并返回RGBA通道
+    let f = _imread_url_rgba.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("imreadUrlRgba"), 2, f)?;
 
     // 显示图片
     let f = _imshow.into_js_function_copied(context);

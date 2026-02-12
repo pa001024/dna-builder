@@ -110,6 +110,15 @@ interface Mat {
     /** 矩阵列数 */
     cols(): number
     /**
+     * 裁剪图像区域并返回新的 Mat
+     * @param x 起始 X 坐标
+     * @param y 起始 Y 坐标
+     * @param w 裁剪宽度
+     * @param h 裁剪高度
+     * @returns 裁剪后的 Mat
+     */
+    roi(x: number, y: number, w: number, h: number): Mat
+    /**
      * 获取指定坐标的像素值（BGR格式）
      * @param row 行索引
      * @param col 列索引
@@ -332,37 +341,70 @@ declare function getForegroundWindow(): number
 /**
  * 从窗口捕获图像Mat对象
  * @param hwnd 窗口句柄
- * @returns Mat对象或undefined
+ * @returns Mat对象
+ * @throws 捕获窗口失败时抛出错误
  */
-declare function captureWindow(hwnd: number): Mat | undefined
+declare function captureWindow(hwnd: number): Mat
 
 /**
  * 从窗口捕获图像Mat对象（WGC优化版）
  * @param hwnd 窗口句柄
- * @returns Mat对象或undefined
+ * @returns Mat对象
+ * @throws 捕获窗口失败时抛出错误
  */
-declare function captureWindowWGC(hwnd: number): Mat | undefined
+declare function captureWindowWGC(hwnd: number): Mat
 
 /**
  * 从文件加载模板Mat对象(有缓存)
  * @param path 模板路径
- * @returns Mat对象或undefined
+ * @returns Mat对象
+ * @throws 加载模板失败时抛出错误
  */
-declare function getTemplate(path: string): Mat | undefined
+declare function getTemplate(path: string): Mat
 
 /**
- * 从 base64 字符串加载模板Mat对象(有缓存)
+ * 从 base64 字符串加载模板Mat对象
  * @param b64Str base64 编码的图片字符串
- * @returns Mat对象或undefined
+ * @returns Mat对象
+ * @throws 加载模板失败时抛出错误
  */
-declare function getTemplateB64(b64Str: string): Mat | undefined
+declare function getTemplateB64(b64Str: string): Mat
 
 /**
- * 从文件加载模板Mat对象(无缓存)
+ * 从文件加载模板Mat对象
  * @param path 模板路径
- * @returns Mat对象或undefined
+ * @returns Mat对象
+ * @throws 加载模板失败时抛出错误
  */
-declare function imread(path: string): Mat | undefined
+declare function imread(path: string): Mat
+
+/**
+ * 从文件加载模板Mat对象，并返回RGBA通道
+ * @param path 模板路径
+ * @returns Mat对象
+ * @throws 加载模板失败时抛出错误
+ */
+declare function imreadRgba(path: string): Mat
+
+/**
+ * 从本地或网络加载图像Mat对象，并返回RGBA通道
+ * @param localPath 本地保存路径（可选，为空时不保存）
+ * @param url 网络资源URL
+ * @returns Mat对象
+ * @throws 加载模板失败时抛出错误
+ */
+declare function imreadUrlRgba(localPath: string, url: string): Mat
+
+/**
+ * 从本地或网络加载图像Mat对象
+ * 如果 local_path 不为空，先尝试从本地路径加载，失败则从网络下载并保存到本地
+ * 如果 local_path 为空，直接从网络加载不保存到本地
+ * @param localPath 本地保存路径（可选，为空时不保存）
+ * @param url 网络资源URL
+ * @returns Mat对象
+ * @throws 加载模板失败时抛出错误
+ */
+declare function imreadUrl(localPath: string, url: string): Mat
 
 /**
  * 保存Mat对象到文件
@@ -378,16 +420,6 @@ declare function imwrite(imgMat: Mat, path: string): boolean
  * @returns 是否成功
  */
 declare function copyImage(imgMat: Mat): boolean
-
-/**
- * 从本地或网络加载图像Mat对象
- * 如果 local_path 不为空，先尝试从本地路径加载，失败则从网络下载并保存到本地
- * 如果 local_path 为空，直接从网络加载不保存到本地
- * @param localPath 本地保存路径（可选，为空时不保存）
- * @param url 网络资源URL
- * @returns Mat对象或undefined
- */
-declare function imreadUrl(localPath: string, url: string): Mat | undefined
 
 /**
  * 显示图片 (异步)

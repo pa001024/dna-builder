@@ -15,6 +15,7 @@ const server = ref("cn" as "cn" | "global")
 
 const api = new DNAAPI({
     fetchFn: tauriFetch,
+    mode: "android",
 })
 
 function showSuccessMessage(message: string) {

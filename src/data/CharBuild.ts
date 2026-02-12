@@ -1468,10 +1468,7 @@ export class CharBuild {
             return clone.checkModEffective(mod, false)
         }
         const attrs = this.calculateAttributes()
-        return mod.checkCondition(
-            attrs,
-            this.charMods.filter(v => v !== null)
-        )
+        return mod.checkCondition(attrs, this.charModsWithAura)
     }
 
     get isSkill() {
@@ -2009,21 +2006,51 @@ export class CharBuild {
                 else selectedModCount.delete(mod.id)
             }
         }
+
+        /**
+         * 精确计算已装备MOD的边际收益（通过真实移除后重算）
+         * @param key MOD槽位类型
+         * @param index MOD索引
+         * @returns 边际收益
+         */
+        function calcEquippedModIncome(key: ModTypeKey, index: number) {
+            const mod = localBuild[key][index]
+            if (!mod) return 0
+            const baseValue = localBuild.calculate()
+            const copyBuild = localBuild.clone()
+            copyBuild[key].splice(index, 1)
+            const removedValue = copyBuild.calculate()
+            if (!removedValue) return 0
+            return baseValue / removedValue - 1
+        }
+
         function sortByIcome(key: ModTypeKey) {
             const initMods = initBuild[key]
-            const rst = localBuild[key].slice(initMods.length).sort((a, b) => {
-                return localBuild.calcIncome(b!, true) - localBuild.calcIncome(a!, true)
-            })
-            localBuild[key] = [...initMods, ...rst]
-            return rst[0]
+            const scored = localBuild[key]
+                .slice(initMods.length)
+                .map((mod, offset) => ({
+                    mod: mod!,
+                    income: calcEquippedModIncome(key, initMods.length + offset),
+                }))
+                .sort((a, b) => b.income - a.income)
+            localBuild[key] = [...initMods, ...scored.map(v => v.mod)]
+            return scored[0]?.mod
         }
-        function findMaxMod(key: ModTypeKey) {
+
+        /**
+         * 获取指定类型与极性的可选MOD候选（含收益）
+         * @param key MOD槽位类型
+         * @param polarity 可选的极性过滤
+         * @returns 候选MOD与收益列表
+         */
+        function getModCandidates(key: ModTypeKey, polarity?: "D" | "O" | "V" | "A") {
             const type = ModTypeMap[key]
-            const mapped = modOptions
+            return modOptions
                 .filter(
                     v =>
                         v.系列 !== "羽蛇" &&
                         v.类型.startsWith(type) &&
+                        (!polarity || v.极性 === polarity) &&
                         (!v.属性 || v.属性 === localBuild.char.属性) &&
                         (!v.限定 ||
                             (key === "meleeMods" && [localBuild.meleeWeapon.伤害类型, localBuild.meleeWeapon.类别].includes(v.限定)) ||
@@ -2036,6 +2063,16 @@ export class CharBuild {
                         (selectedModCount.get(v.id) || 0) < v.count
                 )
                 .map(v => ({ mod: v, income: localBuild.calcIncome(v) }))
+        }
+
+        /**
+         * 选取当前收益最高的可用MOD
+         * @param key MOD槽位类型
+         * @param polarity 可选的极性过滤
+         * @returns 最高收益MOD与收益值
+         */
+        function findMaxMod(key: ModTypeKey, polarity?: "D" | "O" | "V" | "A") {
+            const mapped = getModCandidates(key, polarity)
             if (mapped.length === 0) return { mod: null, income: 0 }
             mapped.sort((a, b) => b.income - a.income)
             const firstIncome = mapped[0].income
@@ -2043,6 +2080,99 @@ export class CharBuild {
             // 从相同收益中随机选择一个
             return mapped[Math.floor(Math.random() * (lastSameIncome + 1))]
         }
+
+        /**
+         * 解析趋向条件并换算为所需极性数量
+         * @param condition 单条生效条件
+         * @returns 极性与所需数量；若非趋向条件则返回undefined
+         */
+        function parsePolarityCondition(condition: [string, string, number]) {
+            const [attr, op, value] = condition
+            if (!/^[DOVA]趋向$/.test(attr)) return undefined
+            if (op !== ">=" && op !== ">" && op !== "=") return undefined
+            const required = op === ">" ? Math.floor(value) + 1 : Math.ceil(value)
+            return {
+                polarity: attr.slice(0, 1) as "D" | "O" | "V" | "A",
+                required,
+            }
+        }
+
+        /**
+         * 计算单个MOD在条件判断视角下的极性计数
+         * @param polarity 目标极性
+         * @param conditionMods 当前参与条件计算的MOD集合
+         * @param mod 当前正在判断条件的MOD
+         * @returns 极性数量（与LeveledMod.checkCondition保持一致）
+         */
+        function getConditionPolarityCount(polarity: "D" | "O" | "V" | "A", conditionMods: LeveledMod[], mod: LeveledMod) {
+            const baseCount = conditionMods.filter(v => v.极性 === polarity).length
+            if (mod.极性 === polarity && !conditionMods.includes(mod)) {
+                return baseCount + 1
+            }
+            return baseCount
+        }
+
+        /**
+         * 条件预热：当存在趋向条件MOD时，先补齐对应极性再进入常规收益迭代
+         * @param iter 当前迭代轮次
+         * @returns 是否发生变化
+         */
+        function prioritizeConditionMods(iter: number) {
+            if (!includeTypes.includes("charMods")) return false
+            if (localBuild.charMods.length >= ModTypeMaxSlot.charMods) return false
+
+            let changed = false
+            while (localBuild.charMods.length < ModTypeMaxSlot.charMods) {
+                const needs = new Map<"D" | "O" | "V" | "A", number>()
+
+                /**
+                 * 条件来源MOD（显式包含 auraMod）
+                 */
+                const conditionMods = localBuild.charMods.filter((mod): mod is LeveledMod => mod !== null)
+                if (localBuild.auraMod) {
+                    conditionMods.push(localBuild.auraMod)
+                }
+
+                conditionMods.forEach(mod => {
+                    const conditions = (mod.生效?.条件 || []) as [string, string, number][]
+                    conditions.forEach(rawCondition => {
+                        const condition = parsePolarityCondition(rawCondition)
+                        if (!condition) return
+                        const current = getConditionPolarityCount(condition.polarity, conditionMods, mod)
+                        const missing = condition.required - current
+                        if (missing <= 0) return
+                        const exists = needs.get(condition.polarity) || 0
+                        needs.set(condition.polarity, Math.max(exists, missing))
+                    })
+                })
+
+                if (!needs.size) break
+
+                let best: { mod: LeveledMod; income: number; polarity: "D" | "O" | "V" | "A"; missing: number } | null = null
+                for (const [polarity, missing] of needs.entries()) {
+                    const candidate = findMaxMod("charMods", polarity)
+                    if (!candidate.mod) continue
+                    if (!best || missing > best.missing || (missing === best.missing && candidate.income > best.income)) {
+                        best = {
+                            mod: candidate.mod,
+                            income: candidate.income,
+                            polarity,
+                            missing,
+                        }
+                    }
+                }
+
+                if (!best) break
+                addMod("charMods", best.mod)
+                changed = true
+                log(
+                    `第${iter}次迭代: 条件优先添加角色(${localBuild.charMods.length}/${ModTypeMaxSlot.charMods})>>> ${best.mod.名称}(${best.polarity}趋向)`
+                )
+            }
+
+            return changed
+        }
+
         function findMaxMelee() {
             let options = meleeOptions
             // 当计算近战武器伤害时，只考虑相同类别武器
@@ -2099,6 +2229,8 @@ export class CharBuild {
                     }
                 }
             }
+            // 先处理带趋向条件的角色MOD，优先补齐触发条件
+            changed = prioritizeConditionMods(iter) || changed
             // 最大化MOD
             includeTypes.forEach(key => {
                 let { mod: maxed, income: maxedIncome } = findMaxMod(key)
@@ -2119,18 +2251,29 @@ export class CharBuild {
                     if (maxed === null) return
                 }
                 sortByIcome(key)
-                const lastIncome = localBuild.calcIncome(localBuild[key].at(-1)!, true)
+                const removableIndex = localBuild[key].length - 1
+                const removableMod = localBuild[key][removableIndex]
+                if (!removableMod || !maxed) return
+
+                const lastIncome = calcEquippedModIncome(key, removableIndex)
                 const copyBuild = localBuild.clone()
-                copyBuild[key].pop()
+                copyBuild[key].splice(removableIndex, 1)
                 const newIncome = copyBuild.calcIncome(maxed)
+                const oldTotal = localBuild.calculate()
+                const replacedBuild = localBuild.clone()
+                replacedBuild[key][removableIndex] = maxed
+                const newTotal = replacedBuild.calculate()
+
                 log(
-                    `第${iter}次迭代: ${ModTypeMap[key]}>>> ${localBuild[key].at(-1)?.名称}(+${+(lastIncome * 100).toFixed(2)}%) vs ${maxed.名称}(+${+(newIncome * 100).toFixed(2)}%)`
+                    `第${iter}次迭代: ${ModTypeMap[key]}>>> ${removableMod.名称}(+${+(lastIncome * 100).toFixed(2)}%) vs ${maxed.名称}(+${+(newIncome * 100).toFixed(2)}%)`
                 )
-                if (newIncome > lastIncome) {
+
+                // 替换判定以总收益为准，避免条件联动导致的边际收益误判
+                if (newTotal > oldTotal) {
                     log(
-                        `第${iter}次迭代: ${ModTypeMap[key]}>>> ${maxed.名称} 替换 ${localBuild[key].at(-1)?.名称} (${+(lastIncome * 100).toFixed(2)}% -> ${+(newIncome * 100).toFixed(2)}%)`
+                        `第${iter}次迭代: ${ModTypeMap[key]}>>> ${maxed.名称} 替换 ${removableMod.名称} (${+(lastIncome * 100).toFixed(2)}% -> ${+(newIncome * 100).toFixed(2)}%)`
                     )
-                    removeMod(key, localBuild[key].length - 1)
+                    removeMod(key, removableIndex)
                     addMod(key, maxed)
                     changed = true
                 }
@@ -2138,10 +2281,39 @@ export class CharBuild {
             if (!changed) log(`无可替换MOD 结束自动构筑`)
             return changed
         }
+
+        /**
+         * 构筑状态签名（用于检测循环迭代）
+         * @returns 当前构筑的稳定字符串签名
+         */
+        function getBuildSignature() {
+            const toIds = (mods: (LeveledMod | null)[]) =>
+                mods
+                    .filter((mod): mod is LeveledMod => mod !== null)
+                    .map(mod => mod.id)
+                    .sort((a, b) => a - b)
+                    .join(",")
+            return [
+                localBuild.meleeWeapon.id,
+                localBuild.rangedWeapon.id,
+                localBuild.auraMod?.id || 0,
+                toIds(localBuild.charMods),
+                toIds(localBuild.meleeMods),
+                toIds(localBuild.rangedMods),
+                toIds(localBuild.skillMods),
+            ].join("|")
+        }
         // 最大迭代次数
         const MAX_ITER = 20
         // 最大化MOD直到不再有变化
+        const visitedStates = new Set<string>()
         for (let index = 0; index < MAX_ITER; index++) {
+            const signature = getBuildSignature()
+            if (visitedStates.has(signature)) {
+                log(`检测到构筑状态循环，结束自动构筑`)
+                return { newBuild: localBuild, log: logString, iter: index + 1 }
+            }
+            visitedStates.add(signature)
             if (!next(index + 1)) {
                 return { newBuild: localBuild, log: logString, iter: index + 1 }
             }

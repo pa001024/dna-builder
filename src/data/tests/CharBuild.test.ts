@@ -4,6 +4,7 @@ import { LeveledChar } from "../leveled"
 import { LeveledWeapon } from "../leveled"
 import { LeveledMod } from "../leveled"
 import { LeveledBuff } from "../leveled"
+import { LeveledModWithCount } from "../leveled/LeveledMod"
 
 describe("CharBuild类测试", () => {
     // 创建测试用数据
@@ -771,6 +772,95 @@ describe("CharBuild类测试", () => {
             expect(charBuild.hpPercent).toBe(0.8)
             expect(charBuild.enemyId).toBe(130)
             expect(charBuild.targetFunction).toBe("每秒伤害")
+        })
+    })
+
+    // 自动构筑测试
+    describe("自动构筑测试", () => {
+        it("应该优先补齐趋向条件再继续常规迭代", () => {
+            const charBuild = createCharBuild()
+            charBuild.mods = [new LeveledMod(51746)]
+            charBuild.buffs = []
+
+            const modOptions = [
+                new LeveledModWithCount(41001, undefined, undefined, 1),
+                new LeveledModWithCount(41002, undefined, undefined, 1),
+                new LeveledModWithCount(41003, undefined, undefined, 1),
+                new LeveledModWithCount(41007, undefined, undefined, 1),
+            ]
+
+            const result = charBuild.autoBuild({
+                includeTypes: ["charMods"],
+                preserveTypes: ["charMods"],
+                modOptions,
+                enableLog: true,
+            })
+
+            const conditionMod = result.newBuild.charMods.find(mod => mod?.id === 51746)
+            const dCount = result.newBuild.charMods.filter(mod => mod?.极性 === "D").length
+
+            expect(conditionMod).toBeDefined()
+            expect(dCount).toBeGreaterThanOrEqual(3)
+            expect(result.newBuild.checkModEffective(conditionMod!)?.isEffective).toBe(true)
+            expect(result.log).toContain("条件优先添加角色")
+        })
+
+        it("当条件MOD在auraMod时也应优先补齐趋向条件", () => {
+            const charBuild = createCharBuild()
+            charBuild.mods = []
+            charBuild.auraMod = new LeveledMod(51746)
+            charBuild.buffs = []
+
+            const modOptions = [
+                new LeveledModWithCount(41001, undefined, undefined, 1),
+                new LeveledModWithCount(41002, undefined, undefined, 1),
+                new LeveledModWithCount(41003, undefined, undefined, 1),
+                new LeveledModWithCount(41007, undefined, undefined, 1),
+            ]
+
+            const result = charBuild.autoBuild({
+                includeTypes: ["charMods"],
+                modOptions,
+                enableLog: true,
+            })
+
+            const dCount = result.newBuild.charMods.filter(mod => mod?.极性 === "D").length
+
+            expect(result.newBuild.auraMod?.id).toBe(51746)
+            expect(dCount).toBeGreaterThanOrEqual(2)
+            expect(result.newBuild.checkModEffective(result.newBuild.auraMod!)?.isEffective).toBe(true)
+            expect(result.log).toContain("条件优先添加角色")
+        })
+
+        it("替换不应破坏光环条件导致收益误判", () => {
+            const charBuild = createCharBuild()
+            charBuild.mods = [
+                new LeveledMod(51742),
+                new LeveledMod(41002),
+                new LeveledMod(41003),
+                new LeveledMod(51324),
+                new LeveledMod(41324),
+                new LeveledMod(41001),
+                new LeveledMod(51313),
+            ]
+            charBuild.auraMod = new LeveledMod(51746)
+            charBuild.buffs = []
+
+            const modOptions = [51742, 41002, 41003, 51324, 41324, 41001, 51313, 51743, 41007].map(
+                id => new LeveledModWithCount(id, undefined, undefined, 20)
+            )
+
+            const result = charBuild.autoBuild({
+                includeTypes: ["charMods"],
+                preserveTypes: ["charMods"],
+                modOptions,
+                enableLog: true,
+            })
+
+            const dCount = result.newBuild.charMods.filter(mod => mod?.极性 === "D").length
+
+            expect(dCount).toBeGreaterThanOrEqual(3)
+            expect(result.newBuild.checkModEffective(result.newBuild.auraMod!)?.isEffective).toBe(true)
         })
     })
     describe("表达式测试", () => {

@@ -287,7 +287,7 @@ export class LeveledMod implements Mod {
             },
             {} as Record<string, number>
         )
-        if (this.极性) poTable[this.极性] = (poTable[this.极性] || 0) + 1
+        // if (this.极性) poTable[this.极性] = (poTable[this.极性] || 0) + 1
         const isEffective: boolean = this.生效.条件.every(([attr, op, value]: [string, string, number]) => {
             const attrValue = poTable[attr.slice(0, 1)] || attrs[attr as keyof CharAttr]
             if (op === "*") return true

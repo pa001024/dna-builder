@@ -59,6 +59,73 @@ impl Class for JsMat {
             }),
         );
         class.method(
+            js_string!("roi"),
+            4,
+            NativeFunction::from_fn_ptr(|this, args, ctx| {
+                // 参数数量校验
+                if args.len() != 4 {
+                    return Err(JsNativeError::typ()
+                        .with_message("roi expects 4 arguments")
+                        .into());
+                }
+
+                // 获取 Mat 实例
+                let binding = this.as_object().unwrap();
+                let js_mat = binding
+                    .downcast_ref::<JsMat>()
+                    .ok_or_else(|| JsNativeError::typ().with_message("Object is not a Mat"))?;
+
+                // 解析参数：x、y、w、h
+                let x = args[0]
+                    .to_number(ctx)
+                    .map_err(|_e| JsNativeError::typ().with_message("x must be a number"))?
+                    as i32;
+                let y = args[1]
+                    .to_number(ctx)
+                    .map_err(|_e| JsNativeError::typ().with_message("y must be a number"))?
+                    as i32;
+                let width = args[2]
+                    .to_number(ctx)
+                    .map_err(|_e| JsNativeError::typ().with_message("w must be a number"))?
+                    as i32;
+                let height = args[3]
+                    .to_number(ctx)
+                    .map_err(|_e| JsNativeError::typ().with_message("h must be a number"))?
+                    as i32;
+
+                // 参数取值校验
+                if x < 0 || y < 0 || width <= 0 || height <= 0 {
+                    return Err(JsNativeError::typ()
+                        .with_message("Invalid roi. Expected x >= 0, y >= 0, w > 0, h > 0")
+                        .into());
+                }
+
+                // 边界校验，防止 ROI 超出原图
+                let rows = js_mat.inner.rows() as i64;
+                let cols = js_mat.inner.cols() as i64;
+                let roi_right = x as i64 + width as i64;
+                let roi_bottom = y as i64 + height as i64;
+                if roi_right > cols || roi_bottom > rows {
+                    return Err(JsNativeError::typ()
+                        .with_message("ROI is out of image bounds")
+                        .into());
+                }
+
+                // 生成 ROI 并复制为独立 Mat，避免生命周期问题
+                let roi_rect = core::Rect::new(x, y, width, height);
+                let roi_ref = js_mat
+                    .inner
+                    .roi(roi_rect)
+                    .map_err(|_e| JsNativeError::typ().with_message("Failed to create ROI"))?;
+                let mut roi_mat = core::Mat::default();
+                roi_ref
+                    .copy_to(&mut roi_mat)
+                    .map_err(|_e| JsNativeError::typ().with_message("Failed to copy ROI Mat"))?;
+
+                Box::new(roi_mat).into_js(ctx)
+            }),
+        );
+        class.method(
             js_string!("at_2d"),
             2,
             NativeFunction::from_fn_ptr(|this, args, ctx| {
