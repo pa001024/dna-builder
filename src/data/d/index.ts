@@ -1,4 +1,4 @@
-import type { Buff, Char, Draft, Dungeon, Mod, Monster, Reward, RewardChild, Weapon, WeaponBase } from "../data-types"
+import type { Buff, Char, Draft, Dungeon, Mod, Reward, RewardChild, Weapon, WeaponBase } from "../data-types"
 import { type AbyssBuff, type AbyssDungeon, abyssBuffs, abyssDungeons } from "./abyss.data"
 import baseData from "./base.data"
 import buffData from "./buff.data"
@@ -7,7 +7,7 @@ import draftData from "./draft.data"
 import dungeonData from "./dungeon.data"
 import effectData from "./effect.data"
 import modData from "./mod.data"
-import monsterData from "./monster.data"
+import monsterData, { monsterMap } from "./monster.data"
 import rewardData from "./reward.data"
 import weaponData from "./weapon.data"
 
@@ -18,11 +18,7 @@ charData.forEach(char => {
     charMap.set(char.id, char as Char)
 })
 
-// 将mob数据转换为Map
-export const monsterMap = new Map<number, Monster>()
-monsterData.forEach(mob => {
-    monsterMap.set(mob.id, mob as Monster)
-})
+export { monsterData, monsterMap }
 
 // 将mod数据转换为Map
 export const modMap = new Map<number, Mod>()

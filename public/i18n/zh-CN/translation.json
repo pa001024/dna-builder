@@ -399,6 +399,7 @@
         "mod_desc": "查看魔之楔信息和属性",
         "monster": "怪物",
         "monster_desc": "查看怪物信息和属性",
+        "monstertag": "号令者",
         "npc": "NPC",
         "npc_desc": "查看NPC信息和对话",
         "partytopic": "光阴集",
@@ -715,6 +716,9 @@
     },
     "monster-list": {
         "title": "怪物列表"
+    },
+    "monster-tag-detail": {
+        "title": "号令者详情"
     },
     "more": {
         "desc": "更多功能",

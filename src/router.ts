@@ -227,6 +227,12 @@ const routes: readonly RouteRecordRaw[] = [
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
+                name: "monster-tag-detail",
+                path: "monstertag/:monsterTagId",
+                component: () => import("./views/DBMonsterTagDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
                 name: "weapon-list",
                 path: "weapon",
                 component: () => import("./views/DBWeaponListView.vue"),

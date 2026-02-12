@@ -4144,6 +4144,7 @@
         "mod_desc": "Voir les informations et attributs du mod",
         "monster": "Monstre",
         "monster_desc": "Voir les informations et attributs du monstre",
+        "monstertag": "Commandant",
         "npc": "PNJ",
         "npc_desc": "Voir les informations et dialogues du PNJ",
         "partytopic": "Chroniques",
@@ -4466,6 +4467,9 @@
     },
     "monster-list": {
         "title": "Liste des monstres"
+    },
+    "monster-tag-detail": {
+        "title": "Détails du commandant"
     },
     "more": {
         "desc": "Plus de fonctionnalités",

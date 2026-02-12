@@ -1,12 +1,39 @@
-import type { Monster } from "../data-types"
+export interface Monster {
+    id: number
+    n: string
+    t?: "Rescue_Elite_Monster" | "Elite_Monster" | "Boss"
+    f?: Faction
+    atk: number
+    def: number
+    hp: number
+    es?: number
+    tn?: number
+    icon?: string
+}
 
-const mock = [
+export enum Faction {
+    其他 = 0,
+    秽兽 = 1,
+    海伯利亚帝国 = 2,
+    神弃者同盟 = 3,
+    艾利西安传颂会 = 4,
+    华胥 = 5,
+}
+
+export interface DynamicMonster extends Monster {
+    currentHP: number
+    currentShield: number
+    currentWarPose: number
+}
+
+const mock: Monster[] = [
     { id: 0, n: "护盾木桩", f: 1, atk: 10, def: 130, es: 1000000000, hp: 1000000000, tn: 150 },
     { id: 130, n: "生命木桩130", f: 1, atk: 10, def: 130, hp: 1000000000, tn: 150 },
     { id: 200, n: "生命木桩200", f: 1, atk: 10, def: 200, hp: 1000000000, tn: 150 },
     { id: 300, n: "生命木桩300", f: 1, atk: 10, def: 300, hp: 1000000000, tn: 150 },
-] satisfies Monster[]
-const t: Monster[] = [
+]
+
+const monsterData: Monster[] = [
     {
         id: 115,
         n: "巡逻狱卒",
@@ -2187,4 +2214,12 @@ const t: Monster[] = [
     },
 ]
 
-export default [...mock, ...t] as Monster[]
+const allMonsters = [...mock, ...monsterData] as Monster[]
+
+// 将mob数据转换为Map
+export const monsterMap = new Map<number, Monster>()
+allMonsters.forEach(mob => {
+    monsterMap.set(mob.id, mob as Monster)
+})
+
+export default allMonsters

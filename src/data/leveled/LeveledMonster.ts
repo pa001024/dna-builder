@@ -1,5 +1,5 @@
 import { monsterMap } from "../d"
-import { type DynamicMonster, Faction, type Monster } from "../data-types"
+import { type DynamicMonster, Faction, type Monster } from "../d/monster.data"
 
 export const MOB_LEVEL_UP = [
     { atk: 0.1, hp: 0.4, es: 0.4, rhp: 1, res: 1 },

@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue"
 import { formatBigNumber } from "@/util"
-import { abyssDungeonMap } from "../data"
+import { abyssDungeonMap, Faction, Monster } from "../data"
 import dungeonData from "../data/d/dungeon.data"
-import { Faction, Monster } from "../data/data-types"
 import { LeveledMonster } from "../data/leveled/LeveledMonster"
 import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
+import { getMonsterTagGroupByMonsterName } from "../utils/monster-tag-utils"
 
 const props = defineProps<{
     monster: Monster
@@ -66,6 +66,17 @@ const selectedDungeons = computed(() => {
     return dungeonGroups.value[selectedDungeonName.value] || []
 })
 
+/**
+ * 当前怪物关联的号令者信息。
+ */
+const monsterTagGroup = computed(() => {
+    if (!props.monster) {
+        return null
+    }
+
+    return getMonsterTagGroupByMonsterName(props.monster.n)
+})
+
 function getFactionName(faction: number | undefined): string {
     if (faction === undefined) return "其他"
     return Faction[faction] || `阵营${faction}`
@@ -88,6 +99,29 @@ function getFactionName(faction: number | undefined): string {
                 <input v-model="showRougeStats" type="checkbox" class="toggle toggle-sm toggle-primary" />
                 <span>迷津</span>
             </label>
+        </div>
+
+        <div v-if="monsterTagGroup" class="p-3 bg-base-200 rounded space-y-2">
+            <div class="flex items-center justify-between gap-2">
+                <div class="text-xs text-base-content/70">号令者信息</div>
+                <SRouterLink :to="`/db/monstertag/${monsterTagGroup.primaryTag.id}`" class="text-xs link link-primary">
+                    查看详情
+                </SRouterLink>
+            </div>
+            <div class="text-sm font-medium">{{ monsterTagGroup.name }}</div>
+            <div class="text-sm whitespace-pre-line">
+                {{ monsterTagGroup.primaryTag.desc }}
+            </div>
+            <div v-if="monsterTagGroup.tags.length > 1" class="flex flex-wrap gap-2">
+                <SRouterLink
+                    v-for="tag in monsterTagGroup.tags"
+                    :key="tag.id"
+                    :to="`/db/monstertag/${tag.id}`"
+                    class="text-xs px-2 py-1 rounded bg-base-300 hover:bg-base-100 transition-colors"
+                >
+                    {{ tag.id }}
+                </SRouterLink>
+            </div>
         </div>
 
         <div v-if="leveledMonster" class="flex justify-center items-center">

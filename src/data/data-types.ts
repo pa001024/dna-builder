@@ -391,40 +391,6 @@ export enum SkillType {
     防御 = "防御",
 }
 
-export interface Monster {
-    id: number
-    n: string
-    t?: "Rescue_Elite_Monster" | "Elite_Monster" | "Boss"
-    f?: Faction
-    atk: number
-    def: number
-    hp: number
-    es?: number
-    tn?: number
-    icon?: string
-}
-
-export enum Faction {
-    其他 = 0,
-    秽兽 = 1,
-    海伯利亚帝国 = 2,
-    神弃者同盟 = 3,
-    艾利西安传颂会 = 4,
-    华胥 = 5,
-}
-
-export interface DynamicMonster extends Monster {
-    currentHP: number
-    currentShield: number
-    currentWarPose: number
-}
-
-export enum MobType {
-    小型 = "小型",
-    大型 = "大型",
-    首领 = "首领",
-}
-
 export interface Mod {
     id: number
     icon?: string

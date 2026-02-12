@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import { ref } from "vue"
 import type { AbyssDungeon, Char } from "@/data"
-import { charMap, Faction, LeveledChar, LeveledMonster } from "@/data"
-import { formatBigNumber } from "@/util"
+import { charMap, LeveledChar, LeveledMonster } from "@/data"
 import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
 import { getDropModeText, getRewardDetails } from "../utils/reward-utils"
 
@@ -21,11 +20,6 @@ function getChar(charId: number): Char | undefined {
     return charMap.get(charId)
 }
 
-// 获取阵营名称
-function getFactionName(faction: number | undefined): string {
-    if (faction === undefined) return "其他"
-    return Faction[faction] || `${faction}`
-}
 </script>
 
 <template>
@@ -204,58 +198,12 @@ function getFactionName(faction: number | undefined): string {
                 <span class="text-sm min-w-12">Lv. {{ currentLevel }}</span>
                 <input v-model.number="currentLevel" type="range" class="range range-primary range-xs grow" min="1" max="180" step="1" />
             </div>
-            <div class="space-y-3">
-                <div
-                    v-for="mon in dungeon.m.map(id => new LeveledMonster(id, currentLevel, false))"
-                    :key="mon.id"
-                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors"
-                >
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="flex items-center gap-2">
-                            <div class="w-10 h-10">
-                                <img :src="mon.url" class="w-full h-full object-cover rounded" :alt="mon.n" />
-                            </div>
-                            <div>
-                                <SRouterLink
-                                    :to="`/db/monster/${mon.id}`"
-                                    class="px-2 py-1 bg-base-300 rounded text-xs hover:bg-base-400 transition-colors cursor-pointer"
-                                >
-                                    {{ $t(mon.n) }}
-                                </SRouterLink>
-                                <span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-base-300">
-                                    {{ $t(getFactionName(mon.f)) }}
-                                </span>
-                                <span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-base-300"> Lv. {{ mon.等级 }} </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-4 gap-2 text-xs">
-                        <div class="bg-base-300 rounded p-1 text-center">
-                            <div class="text-base-content/70">攻击</div>
-                            <div class="font-bold text-primary">
-                                {{ formatBigNumber(mon.atk) }}
-                            </div>
-                        </div>
-                        <div class="bg-base-300 rounded p-1 text-center">
-                            <div class="text-base-content/70">防御</div>
-                            <div class="font-bold text-success">
-                                {{ formatBigNumber(mon.def) }}
-                            </div>
-                        </div>
-                        <div class="bg-base-300 rounded p-1 text-center">
-                            <div class="text-base-content/70">生命</div>
-                            <div class="font-bold text-error">
-                                {{ formatBigNumber(mon.hp) }}
-                            </div>
-                        </div>
-                        <div v-if="mon.es !== undefined" class="bg-base-300 rounded p-1 text-center">
-                            <div class="text-base-content/70">护盾</div>
-                            <div class="font-bold text-info">
-                                {{ formatBigNumber(mon.es || 0) }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+                <DBMonsterCompactCard
+                    v-for="monsterId in dungeon.m"
+                    :key="monsterId"
+                    :monster="new LeveledMonster(monsterId, currentLevel, false)"
+                />
             </div>
         </div>
     </div>

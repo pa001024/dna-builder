@@ -4228,6 +4228,7 @@
         "mod_desc": "모드 정보와 속성 확인",
         "monster": "몬스터",
         "monster_desc": "몬스터 정보와 속성 확인",
+        "monstertag": "지휘자",
         "npc": "NPC",
         "npc_desc": "NPC 정보와 대화 보기",
         "partytopic": "추억집",
@@ -4550,6 +4551,9 @@
     },
     "monster-list": {
         "title": "몬스터 목록"
+    },
+    "monster-tag-detail": {
+        "title": "지휘자 상세"
     },
     "more": {
         "desc": "기타 기능",

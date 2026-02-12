@@ -14,6 +14,7 @@ export { weaponData }
 
 import monsterData from "./d/monster.data"
 export { monsterData }
+export { type DynamicMonster, Faction, type Monster } from "./d/monster.data"
 
 import baseData from "./d/base.data"
 export { baseData }

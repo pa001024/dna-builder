@@ -12,6 +12,7 @@ import { fishingSpots, fishs } from "@/data/d/fish.data"
 import { hardBossMap } from "@/data/d/hardboss.data"
 import modData from "@/data/d/mod.data"
 import monsterData from "@/data/d/monster.data"
+import { monsterTagData } from "@/data/d/monstertag.data"
 import partyTopicData from "@/data/d/partytopic.data"
 // import npcData from "@/data/d/npc.data"
 import petData, { petEntrys } from "@/data/d/pet.data"
@@ -24,6 +25,7 @@ import titleData from "@/data/d/title.data"
 import walnutData from "@/data/d/walnut.data"
 import weaponData from "@/data/d/weapon.data"
 import { getAbyssDungeonGroup, getAbyssDungeonLevel, getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
+import { getRelatedMonstersByMonsterTagId } from "@/utils/monster-tag-utils"
 import { getPinyin, getPinyinFirst } from "@/utils/pinyin-utils"
 
 interface DBSearchEntry extends DBGlobalSearchOption {
@@ -213,6 +215,32 @@ export class GlobalSearchService {
                         [monster.id, monster.f, monster.t, monster.hp, monster.atk, monster.def, monster.es]
                     )
                 )
+        )
+
+        entries.push(
+            ...monsterTagData.map(monsterTag => {
+                const relatedMonsters = getRelatedMonstersByMonsterTagId(monsterTag.id)
+                const bonusVarKeys = Object.keys(monsterTag.vars.加成 || {})
+
+                return this.buildSearchEntry(
+                    {
+                        id: `monstertag:${monsterTag.id}`,
+                        title: monsterTag.name,
+                        subtitle: `号令者 ID:${monsterTag.id} | 关联怪物:${relatedMonsters.length}种`,
+                        typeLabel: t("database.monstertag"),
+                        path: `/db/monstertag/${monsterTag.id}`,
+                    },
+                    [
+                        monsterTag.id,
+                        monsterTag.name,
+                        monsterTag.desc,
+                        ...Object.keys(monsterTag.vars),
+                        ...bonusVarKeys,
+                        ...relatedMonsters.map(monster => monster.n),
+                        ...relatedMonsters.map(monster => monster.id),
+                    ]
+                )
+            })
         )
 
         entries.push(

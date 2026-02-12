@@ -4228,6 +4228,7 @@
         "mod_desc": "View mod information and attributes",
         "monster": "Monster",
         "monster_desc": "View monster information and attributes",
+        "monstertag": "Commander",
         "npc": "NPC",
         "npc_desc": "View NPC information and dialogues",
         "partytopic": "Party Topic",
@@ -4550,6 +4551,9 @@
     },
     "monster-list": {
         "title": "Monster list"
+    },
+    "monster-tag-detail": {
+        "title": "Commander Details"
     },
     "more": {
         "desc": "More features",

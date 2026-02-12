@@ -4224,6 +4224,7 @@
         "mod_desc": "モッド情報と属性を確認",
         "monster": "モンスター",
         "monster_desc": "モンスター情報と属性を確認",
+        "monstertag": "号令者",
         "npc": "NPC",
         "npc_desc": "NPCの情報と会話を確認",
         "partytopic": "追憶録",
@@ -4546,6 +4547,9 @@
     },
     "monster-list": {
         "title": "モンスター一覧"
+    },
+    "monster-tag-detail": {
+        "title": "号令者詳細"
     },
     "more": {
         "desc": "その他の機能",
