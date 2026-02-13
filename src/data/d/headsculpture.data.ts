@@ -176,7 +176,7 @@ export const headSculptureData: HeadSculpture[] = [
     },
     {
         id: 10030,
-        name: "Portrait : Zhiliu",
+        name: "执棋者的肖像",
         desc: "可将头像更换为止流的形象。",
         icon: "T_Head_Zhiliu",
     },

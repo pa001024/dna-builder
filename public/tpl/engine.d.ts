@@ -437,7 +437,12 @@ declare function imshow(title: string, imgMat: Mat, waitKeyMs?: number): Promise
  * @param tolerance 容差
  * @returns 匹配结果 [x, y] 或 undefined
  */
-declare function findColorAndMatchTemplate(imgMat: Mat, templateMat: Mat, color: number, tolerance: number): [number, number] | undefined
+declare function findColorAndMatchTemplate(
+    imgMat: Mat,
+    templateMat: Mat,
+    color: number,
+    tolerance: number
+): Promise<[number, number] | undefined>
 
 /**
  * 模板匹配（使用两个Mat对象，自动检测是否带透明度）
@@ -446,7 +451,7 @@ declare function findColorAndMatchTemplate(imgMat: Mat, templateMat: Mat, color:
  * @param tolerance 匹配置信度阈值
  * @returns 匹配结果 [x, y] 或 undefined
  */
-declare function matchTemplate(imgMat: Mat, templateMat: Mat, tolerance: number): [number, number] | undefined
+declare function matchTemplate(imgMat: Mat, templateMat: Mat, tolerance: number): Promise<[number, number] | undefined>
 
 /**
  * 绘制边框

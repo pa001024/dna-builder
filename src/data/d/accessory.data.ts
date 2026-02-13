@@ -1266,7 +1266,7 @@ export const charAccessoryData: Accessory[] = [
     },
     {
         id: 20043,
-        name: "龙纹墨镜",
+        name: "龙纹墨镜·墨玉",
         desc: "遮光蔽尘，窥破虚实。",
         icon: "T_Fashion_Face21_02",
         rarity: 5,

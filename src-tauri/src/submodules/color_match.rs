@@ -64,7 +64,14 @@ pub(crate) fn find_color_and_match_template(
             "模板图像尺寸无效".to_string(),
         ));
     }
-
+    let template_bgr = if template.channels() == 4 {
+        let mut bgr = Mat::default();
+        imgproc::cvt_color(template, &mut bgr, imgproc::COLOR_BGRA2BGR, 0)
+            .map_err(|e| ColorMatchError::OpenCV(format!("cvt_color: {e}")))?;
+        Some(bgr)
+    } else {
+        None
+    };
     // 处理图像：创建掩码、二值化、形态学操作
     fn process_image(
         img: &Mat,
@@ -128,7 +135,11 @@ pub(crate) fn find_color_and_match_template(
     let processed = process_image(img_bgr, target_color, tolerance)?;
 
     // 处理模板图像
-    let processed_template = process_image(template, target_color, tolerance)?;
+    let processed_template = if let Some(bgr) = template_bgr {
+        process_image(&bgr, target_color, tolerance)?
+    } else {
+        process_image(template, target_color, tolerance)?
+    };
 
     // 确保模板尺寸小于源图像
     if processed_template.rows() > processed.rows() || processed_template.cols() > processed.cols()

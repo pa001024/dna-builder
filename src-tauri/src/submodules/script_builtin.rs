@@ -720,20 +720,50 @@ fn _find_color_and_match_template(
         .to_number(ctx)? as u8;
     let bgr_color = rgb_to_bgr(color);
 
-    // 执行匹配
-    match find_color_and_match_template(
-        &js_img_mat.borrow().data().inner,
-        &js_tpl_mat.borrow().data().inner,
-        bgr_color,
-        tolerance,
-    ) {
-        Ok(Some((x, y))) => Ok(js_value!([x, y], ctx)),
-        Ok(None) => Ok(JsValue::undefined()),
-        Err(e) => Err(JsError::from_opaque(JsValue::from(js_string!(format!(
-            "颜色匹配失败: {:?}",
-            e
-        ))))),
-    }
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+    let tpl_mat = (*js_tpl_mat.borrow().data().inner).clone();
+    let resolvers_clone = resolvers.clone();
+
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            let async_result = tokio::task::spawn_blocking(move || {
+                find_color_and_match_template(&img_mat, &tpl_mat, bgr_color, tolerance)
+            })
+            .await;
+
+            let context = &mut context.borrow_mut();
+            match async_result {
+                Ok(Ok(Some((x, y)))) => resolvers_clone.resolve.call(
+                    &JsValue::undefined(),
+                    &[js_value!([x, y], context)],
+                    context,
+                ),
+                Ok(Ok(None)) => resolvers_clone
+                    .resolve
+                    .call(&JsValue::undefined(), &[], context),
+                Ok(Err(e)) => {
+                    let msg = format!("findColorAndMatchTemplate 匹配失败: {:?}", e);
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(msg))],
+                        context,
+                    )
+                }
+                Err(e) => {
+                    let msg = format!("findColorAndMatchTemplate 线程执行失败: {e}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(msg))],
+                        context,
+                    )
+                }
+            }
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
 }
 
 /// 模板匹配函数
@@ -758,19 +788,49 @@ fn _match_template(
         .unwrap_or_else(|| JsValue::undefined())
         .to_number(ctx)? as f64;
 
-    // 执行模板匹配（自动检测是否带透明度）
-    match match_template(
-        &js_img_mat.borrow().data().inner,
-        &js_tpl_mat.borrow().data().inner,
-        tolerance,
-    ) {
-        Ok(Some((x, y))) => Ok(js_value!([x, y], ctx)),
-        Ok(None) => Ok(JsValue::undefined()),
-        Err(e) => {
-            let msg = format!("模板匹配失败: {:?}", e);
-            Err(JsError::from_opaque(JsValue::from(js_string!(msg))))
-        }
-    }
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+    let tpl_mat = (*js_tpl_mat.borrow().data().inner).clone();
+    let resolvers_clone = resolvers.clone();
+
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            let async_result =
+                tokio::task::spawn_blocking(move || match_template(&img_mat, &tpl_mat, tolerance))
+                    .await;
+
+            let context = &mut context.borrow_mut();
+            match async_result {
+                Ok(Ok(Some((x, y)))) => resolvers_clone.resolve.call(
+                    &JsValue::undefined(),
+                    &[js_value!([x, y], context)],
+                    context,
+                ),
+                Ok(Ok(None)) => resolvers_clone
+                    .resolve
+                    .call(&JsValue::undefined(), &[], context),
+                Ok(Err(e)) => {
+                    let msg = format!("matchTemplate 匹配失败: {:?}", e);
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(msg))],
+                        context,
+                    )
+                }
+                Err(e) => {
+                    let msg = format!("matchTemplate 线程执行失败: {e}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(msg))],
+                        context,
+                    )
+                }
+            }
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
 }
 
 /// 颜色矩阵检查函数
