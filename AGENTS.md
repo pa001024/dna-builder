@@ -167,6 +167,30 @@ Pre-commit hook auto-runs: version bump → `biome format` → `git add .`
 
 **Warning**: The pre-commit hook runs `git add .` — all files in working directory get staged.
 
+## Serena Toolchain (Tooling Requirements)
+
+**High-level rule:** Use Serena helpers for code navigation and edits when available.
+* **Activate project**: Call `serena__activate_project` at session start to set context.
+* **Search & edit via helpers**: Use `find_symbol`, `search_for_pattern`, `apply_patch`, `replace_symbol_body`, etc.
+* **Thinking guards**: Invoke `think_about_task_adherence` and `think_about_whether_you_are_done` before and after major steps.
+* **Restart LSP**: Run `restart_language_server` if external edits appear or LSP state drifts.
+
+**Typical sequence**:
+
+1. `serena__activate_project`
+2. `search_for_pattern(“pattern”)`
+3. `find_symbol(“Name”)`
+4. `apply_patch(…)`
+5. `summarize_changes` and open PR
+
+**Do not** edit files directly outside of Serena unless absolutely necessary — document reasons and restart the language server afterward.
+
+## Context7 (Library resolution & docs)
+
+* Resolve library identifiers: `context7__resolve-library-id(“”)`.
+* Fetch docs: `context7__get-library-docs()`.
+* Include resolved IDs and versions when justifying API choices in PRs.
+
 ## Important Rules
 
 1. **DO NOT RUN `pnpm dev` or `pnpm build`** — view http://localhost:1420/ directly in browser
