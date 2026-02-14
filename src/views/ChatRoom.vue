@@ -2,7 +2,7 @@
 import { gql, useQuery, useSubscription } from "@urql/vue"
 import { useScroll } from "@vueuse/core"
 import { useSound } from "@vueuse/sound"
-import { computed, onMounted, ref, watchEffect } from "vue"
+import { computed, nextTick, onMounted, ref, watchEffect } from "vue"
 import { onBeforeRouteLeave, useRoute } from "vue-router"
 import { editMessageMutation, Msg, msgsQuery, rtcClientsQuery, rtcJoinMutation, sendMessageMutation } from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
@@ -177,6 +177,7 @@ async function sendMessage(e: Event) {
     input.value.innerHTML = ""
     input.value.focus()
     await sendMessageMutation({ content, roomId: roomId.value })
+    await nextTick()
     el.value?.scrollTo({
         top: el.value.scrollHeight,
         left: 0,
@@ -269,99 +270,85 @@ async function startEdit(msg: Msg) {
         <div v-if="isJoined && !loading" class="flex-1 flex flex-col overflow-hidden">
             <!-- 主内容区 -->
             <div class="flex-1 flex flex-col overflow-hidden relative">
-                <GQAutoPage
-                    v-if="msgCount"
-                    v-slot="{ data: msgs }"
-                    direction="top"
-                    class="flex-1 overflow-hidden"
-                    inner-class="flex w-full h-full flex-col gap-2 p-4"
-                    :limit="20"
-                    :offset="msgCount"
-                    :query="msgsQuery"
-                    :variables="variables"
-                    @loadref="r => (el = r)"
-                >
+                <GQAutoPage v-if="msgCount" v-slot="{ data: msgs }" direction="top" class="flex-1 overflow-hidden"
+                    inner-class="flex w-full h-full flex-col gap-2 p-4" :limit="20" :offset="msgCount"
+                    :query="msgsQuery" :variables="variables" @loadref="r => (el = r)">
                     <!-- 消息列表 -->
                     <div v-for="item in msgs" v-if="msgs" :key="item.id" class="group flex items-start gap-2">
                         <div v-if="!item.content && editId !== item.id" class="text-xs text-base-content/60 m-auto">
-                            {{ $t("chat.retractedAMessage", { name: user.id === item.user!.id ? $t("chat.you") : item.user!.name }) }}
+                            {{ $t("chat.retractedAMessage", {
+                                name: user.id === item.user!.id ? $t("chat.you") :
+                            item.user!.name }) }}
                             <span class="text-xs text-primary underline cursor-pointer" @click="restoreMessage(item)">{{
                                 $t("chat.restore")
-                            }}</span>
+                                }}</span>
                         </div>
 
-                        <div v-else class="flex-1 flex items-start gap-2" :class="{ 'flex-row-reverse': user.id === item.user!.id }">
+                        <div v-else class="flex-1 flex items-start gap-2"
+                            :class="{ 'flex-row-reverse': user.id === item.user!.id }">
                             <ContextMenu>
                                 <QQAvatar class="mt-2 size-8" :qq="item.user!.qq" :name="item.user!.name"></QQAvatar>
 
                                 <template #menu>
                                     <ContextMenuItem
-                                        class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                    >
+                                        class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100">
                                         <Icon class="size-4 mr-2" icon="ri:eye-line" />
                                         {{ $t("chat.block") }}
                                     </ContextMenuItem>
                                     <ContextMenuItem
-                                        class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                    >
+                                        class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100">
                                         <Icon class="size-4 mr-2" icon="ri:glasses-line" />
                                         {{ $t("chat.follow") }}
                                     </ContextMenuItem>
                                 </template>
                             </ContextMenu>
-                            <ContextMenu class="flex items-start flex-col" :class="{ 'items-end': user.id === item.user!.id }">
+                            <ContextMenu class="flex items-start flex-col"
+                                :class="{ 'items-end': user.id === item.user!.id }">
                                 <div class="text-base-content/60 text-sm min-h-5">{{ item.user!.name }}</div>
-                                <div
-                                    v-if="editId === item.id"
-                                    ref="editInput"
-                                    contenteditable
+                                <div v-if="editId === item.id" ref="editInput" contenteditable
                                     class="safe-html rounded-lg bg-base-100 select-text inline-flex flex-col text-sm max-w-80 overflow-hidden gap-2"
                                     :class="{ 'p-2': !isImage(item.content), 'bg-primary text-base-100': user.id === item.user!.id }"
-                                    v-html="sanitizeHTML(item.content)"
-                                ></div>
-                                <div
-                                    v-else
+                                    v-html="sanitizeHTML(item.content)"></div>
+                                <div v-else
                                     class="safe-html rounded-lg bg-base-100 select-text inline-flex flex-col text-sm max-w-80 overflow-hidden gap-2"
                                     :class="{ 'p-2': !isImage(item.content), 'bg-primary text-base-100': user.id === item.user!.id }"
-                                    v-html="sanitizeHTML(item.content)"
-                                ></div>
+                                    v-html="sanitizeHTML(item.content)"></div>
 
                                 <template #menu>
                                     <ContextMenuItem
                                         class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                        @click="copyHtmlContent(item.content)"
-                                    >
+                                        @click="copyHtmlContent(item.content)">
                                         <Icon class="size-4 mr-2" icon="ri:clipboard-line" />
                                         {{ $t("chat.copy") }}
                                     </ContextMenuItem>
-                                    <ContextMenuItem
-                                        v-if="user.id === item.user?.id"
+                                    <ContextMenuItem v-if="user.id === item.user?.id"
                                         class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                        @click="retractMessage(item)"
-                                    >
+                                        @click="retractMessage(item)">
                                         <Icon class="size-4 mr-2" icon="ri:reply-line" />
                                         {{ $t("chat.revert") }}
                                     </ContextMenuItem>
-                                    <ContextMenuItem
-                                        v-if="user.id === item.user?.id"
+                                    <ContextMenuItem v-if="user.id === item.user?.id"
                                         class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                        @click="startEdit(item)"
-                                    >
+                                        @click="startEdit(item)">
                                         <Icon class="size-4 mr-2" icon="ri:edit-line" />
                                         {{ $t("chat.edit") }}
                                     </ContextMenuItem>
                                 </template>
                             </ContextMenu>
-                            <div v-if="item.edited" class="text-xs text-base-content/60 self-end">{{ $t("chat.edited") }}</div>
+                            <div v-if="item.edited" class="text-xs text-base-content/60 self-end">{{ $t("chat.edited")
+                                }}</div>
                             <div class="flex-1"></div>
-                            <div class="hidden group-hover:block p-1 text-xs text-base-content/60">{{ item.createdAt }}</div>
+                            <div class="hidden group-hover:block p-1 text-xs text-base-content/60">{{ item.createdAt }}
+                            </div>
                         </div>
                     </div>
                 </GQAutoPage>
                 <div v-else class="flex-1 flex flex-col items-center justify-center">
                     <div class="flex-1 flex flex-col items-center justify-center">
-                        <div class="flex p-4 font-bold text-lg text-base-content/60">{{ $t("chat.newRoomBanner") }}</div>
-                        <div class="flex btn btn-primary" @click="sendMessageMutation({ content: $t('chat.hello'), roomId })">
+                        <div class="flex p-4 font-bold text-lg text-base-content/60">{{ $t("chat.newRoomBanner") }}
+                        </div>
+                        <div class="flex btn btn-primary"
+                            @click="sendMessageMutation({ content: $t('chat.hello'), roomId })">
                             {{ $t("chat.sayHello") }}
                         </div>
                     </div>
@@ -373,20 +360,15 @@ async function startEdit(msg: Msg) {
                     <div class="flex group bg-primary items-center rounded-full px-1">
                         <QQAvatar class="size-6 my-1" :name="user.name!" :qq="user.qq!" />
                         <div
-                            class="flex text-sm text-base-100 max-w-0 group-hover:max-w-24 group-hover:mx-1 overflow-hidden transition-all duration-500 whitespace-nowrap"
-                        >
+                            class="flex text-sm text-base-100 max-w-0 group-hover:max-w-24 group-hover:mx-1 overflow-hidden transition-all duration-500 whitespace-nowrap">
                             {{ user.name }}
                         </div>
                     </div>
-                    <div
-                        v-for="item in onlines.filter(v => v.user.id !== user.id)"
-                        :key="item.id"
-                        class="flex group bg-primary items-center rounded-full px-1"
-                    >
+                    <div v-for="item in onlines.filter(v => v.user.id !== user.id)" :key="item.id"
+                        class="flex group bg-primary items-center rounded-full px-1">
                         <QQAvatar class="size-6 my-1" :name="item.user.name" :qq="item.user.qq" />
                         <div
-                            class="flex text-sm text-base-100 max-w-0 group-hover:max-w-24 group-hover:mx-1 overflow-hidden transition-all duration-500 whitespace-nowrap"
-                        >
+                            class="flex text-sm text-base-100 max-w-0 group-hover:max-w-24 group-hover:mx-1 overflow-hidden transition-all duration-500 whitespace-nowrap">
                             {{ item.user.name }}
                         </div>
                     </div>
@@ -394,10 +376,8 @@ async function startEdit(msg: Msg) {
             </GQQuery>
             <!-- 分割线 -->
             <div class="flex-none w-full relative">
-                <div
-                    v-h-resize-for="{ el: inputForm, min: 120, max: 400 }"
-                    class="w-full absolute -mt-0.75 h-1.5 cursor-ns-resize z-100"
-                ></div>
+                <div v-h-resize-for="{ el: inputForm, min: 120, max: 400 }"
+                    class="w-full absolute -mt-0.75 h-1.5 cursor-ns-resize z-100"></div>
             </div>
             <!-- 输入 -->
             <form ref="inputForm" class="h-44 flex flex-col relative border-t border-base-300/50" @submit="sendMessage">
@@ -418,24 +398,15 @@ async function startEdit(msg: Msg) {
                         </div>
                     </Tooltip>
                     <Tooltip side="top" :tooltip="$t('chat.sound')">
-                        <div
-                            class="btn btn-ghost btn-sm btn-square text-xl"
-                            :class="{ 'text-primary': newMsgTip }"
-                            @click="newMsgTip = !newMsgTip"
-                        >
+                        <div class="btn btn-ghost btn-sm btn-square text-xl" :class="{ 'text-primary': newMsgTip }"
+                            @click="newMsgTip = !newMsgTip">
                             <Icon icon="ri:volume-up-line" />
                         </div>
                     </Tooltip>
                 </div>
                 <!-- 输入框 -->
-                <RichInput
-                    v-model="newMsgText"
-                    mode="html"
-                    :placeholder="$t('chat.chatPlaceholder')"
-                    class="flex-1 overflow-hidden"
-                    @loadref="r => (input = r)"
-                    @enter="sendMessage"
-                />
+                <RichInput v-model="newMsgText" mode="html" :placeholder="$t('chat.chatPlaceholder')"
+                    class="flex-1 overflow-hidden" @loadref="r => (input = r)" @enter="sendMessage" />
                 <!-- 操作栏 -->
                 <div class="flex p-2">
                     <div class="flex-1"></div>
