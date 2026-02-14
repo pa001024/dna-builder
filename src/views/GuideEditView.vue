@@ -48,9 +48,9 @@ const isDragging = ref(false)
 const fileInputRef = ref<HTMLInputElement>()
 const uploadingImage = ref(false)
 
-let unlistenDragEnter = () => {}
-let unlistenDragLeave = () => {}
-let unlistenDragDrop = () => {}
+let unlistenDragEnter = () => { }
+let unlistenDragLeave = () => { }
+let unlistenDragDrop = () => { }
 
 async function uploadImageToServer(file: File): Promise<string | null> {
     const api = await setting.getDNAAPI()
@@ -69,7 +69,7 @@ async function uploadImageToServer(file: File): Promise<string | null> {
     formData.append("file", file)
 
     try {
-        const response = await fetch(`${env.endpoint}/api/upload/image`, {
+        const response = await fetch(`${env.apiEndpoint}/api/upload/image`, {
             method: "POST",
             body: formData,
         })
@@ -304,12 +304,8 @@ onUnmounted(() => {
                     <div class="card-body p-6 space-y-6">
                         <div class="space-y-2">
                             <label class="block text-sm font-medium mb-2">攻略标题</label>
-                            <input
-                                v-model="title"
-                                type="text"
-                                placeholder="请输入一个吸引人的标题..."
-                                class="w-full px-3 py-2 rounded-md border border-base-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                            />
+                            <input v-model="title" type="text" placeholder="请输入一个吸引人的标题..."
+                                class="w-full px-3 py-2 rounded-md border border-base-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" />
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -318,7 +314,8 @@ onUnmounted(() => {
                                 <Select v-model="type" class="input w-full">
                                     <SelectItem v-for="option in typeOptions" :key="option.value" :value="option.value">
                                         <div class="flex items-center gap-2">
-                                            <Icon :icon="option.value === 'text' ? 'ri:message-2-line' : 'ri:more-line'" class="w-4 h-4" />
+                                            <Icon :icon="option.value === 'text' ? 'ri:message-2-line' : 'ri:more-line'"
+                                                class="w-4 h-4" />
                                             {{ option.label }}
                                         </div>
                                     </SelectItem>
@@ -335,7 +332,8 @@ onUnmounted(() => {
                             </div>
                         </div>
 
-                        <div v-if="selectedCharId && selectedCharId !== -1" class="card bg-base-200 border border-base-300">
+                        <div v-if="selectedCharId && selectedCharId !== -1"
+                            class="card bg-base-200 border border-base-300">
                             <div class="card-body p-4">
                                 <label class="flex items-start gap-3 cursor-pointer">
                                     <div>
@@ -349,8 +347,10 @@ onUnmounted(() => {
                                         <input type="radio" v-model="buildId" value="" class="radio radio-sm" />
                                         <span>不关联</span>
                                     </label>
-                                    <label v-if="builds" v-for="build in builds" :key="build.id" class="flex items-center gap-2">
-                                        <input type="radio" v-model="buildId" :value="build.id" class="radio radio-sm" />
+                                    <label v-if="builds" v-for="build in builds" :key="build.id"
+                                        class="flex items-center gap-2">
+                                        <input type="radio" v-model="buildId" :value="build.id"
+                                            class="radio radio-sm" />
                                         <span>{{ build.title }}</span>
                                     </label>
                                 </GQQuery>
@@ -363,26 +363,17 @@ onUnmounted(() => {
                     <div class="card-body p-6 space-y-6">
                         <div class="space-y-2">
                             <label class="block text-sm font-medium mb-2">攻略内容</label>
-                            <div
-                                :class="['relative', isDragging ? 'ring-2 ring-primary ring-offset-2' : '']"
-                                @dragover="handleWebDragOver"
-                                @dragleave="handleWebDragLeave"
-                                @drop="handleWebDrop"
-                            >
-                                <textarea
-                                    v-model="content"
-                                    placeholder="详细描述你的攻略内容，支持 Markdown 格式..."
-                                    class="w-full px-3 py-2 rounded-md border border-base-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all h-64 leading-relaxed resize-none"
-                                />
-                                <div
-                                    class="absolute bottom-3 right-3 btn btn-ghost btn-sm bg-base-200 hover:bg-base-300"
-                                    title="插入图片"
-                                    @click="triggerFileInput"
-                                >
+                            <div :class="['relative', isDragging ? 'ring-2 ring-primary ring-offset-2' : '']"
+                                @dragover="handleWebDragOver" @dragleave="handleWebDragLeave" @drop="handleWebDrop">
+                                <textarea v-model="content" placeholder="详细描述你的攻略内容，支持 Markdown 格式..."
+                                    class="w-full px-3 py-2 rounded-md border border-base-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all h-64 leading-relaxed resize-none" />
+                                <div class="absolute bottom-3 right-3 btn btn-ghost btn-sm bg-base-200 hover:bg-base-300"
+                                    title="插入图片" @click="triggerFileInput">
                                     <Icon icon="ri:image-add-line" class="w-4 h-4" />
                                 </div>
                             </div>
-                            <input ref="fileInputRef" type="file" accept="image/*" class="hidden" @change="handleImageUpload" />
+                            <input ref="fileInputRef" type="file" accept="image/*" class="hidden"
+                                @change="handleImageUpload" />
                         </div>
 
                         <div v-if="type === 'image'" class="space-y-6">
@@ -391,28 +382,20 @@ onUnmounted(() => {
                                     <label class="block text-sm font-medium">上传图片</label>
                                     <span class="text-xs text-base-content/60">支持拖拽上传或点击选择</span>
                                 </div>
-                                <div
-                                    :class="[
-                                        'border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200',
-                                        isDragging ? 'border-primary bg-primary/5' : 'border-base-content/30 hover:border-primary/50',
-                                    ]"
-                                    @click="triggerFileInput"
-                                    @dragover="handleWebDragOver"
-                                    @dragleave="handleWebDragLeave"
-                                    @drop="handleWebDrop"
-                                >
-                                    <input ref="fileInputRef" type="file" accept="image/*" class="hidden" @change="handleImageUpload" />
+                                <div :class="[
+                                    'border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200',
+                                    isDragging ? 'border-primary bg-primary/5' : 'border-base-content/30 hover:border-primary/50',
+                                ]" @click="triggerFileInput" @dragover="handleWebDragOver"
+                                    @dragleave="handleWebDragLeave" @drop="handleWebDrop">
+                                    <input ref="fileInputRef" type="file" accept="image/*" class="hidden"
+                                        @change="handleImageUpload" />
                                     <div class="flex flex-col items-center gap-3">
-                                        <div
-                                            :class="[
-                                                'rounded-full p-4 transition-colors',
-                                                isDragging ? 'bg-primary' : 'bg-base-content/10',
-                                            ]"
-                                        >
-                                            <Icon
-                                                icon="ri:add-line"
-                                                :class="['w-8 h-8', isDragging ? 'text-primary-content' : 'text-base-content/50']"
-                                            />
+                                        <div :class="[
+                                            'rounded-full p-4 transition-colors',
+                                            isDragging ? 'bg-primary' : 'bg-base-content/10',
+                                        ]">
+                                            <Icon icon="ri:add-line"
+                                                :class="['w-8 h-8', isDragging ? 'text-primary-content' : 'text-base-content/50']" />
                                         </div>
                                         <div>
                                             <p class="font-medium">点击或拖拽上传图片</p>
@@ -427,20 +410,17 @@ onUnmounted(() => {
                                     <span class="text-sm font-medium">已上传图片 ({{ images.length }})</span>
                                 </div>
                                 <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                                    <div v-for="(image, index) in images" :key="index" class="relative group aspect-square">
-                                        <img
-                                            :src="image"
-                                            class="w-full h-full object-cover rounded-xl shadow-sm group-hover:shadow-md transition-shadow"
-                                        />
+                                    <div v-for="(image, index) in images" :key="index"
+                                        class="relative group aspect-square">
+                                        <img :src="image"
+                                            class="w-full h-full object-cover rounded-xl shadow-sm group-hover:shadow-md transition-shadow" />
                                         <button
                                             class="absolute top-2 right-2 btn btn-sm btn-circle btn-error opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                                            @click="removeImage(index)"
-                                        >
+                                            @click="removeImage(index)">
                                             <Icon icon="radix-icons:cross2" class="w-4 h-4" />
                                         </button>
                                         <div
-                                            class="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 to-transparent rounded-b-xl p-3"
-                                        >
+                                            class="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 to-transparent rounded-b-xl p-3">
                                             <span class="text-white text-xs">图片 {{ index + 1 }}</span>
                                         </div>
                                     </div>
@@ -450,8 +430,10 @@ onUnmounted(() => {
                     </div>
                 </div>
 
-                <div v-if="isDragging" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 pointer-events-none">
-                    <div class="bg-base-200 p-8 rounded-lg text-2xl font-bold text-primary shadow-xl pointer-events-auto">
+                <div v-if="isDragging"
+                    class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 pointer-events-none">
+                    <div
+                        class="bg-base-200 p-8 rounded-lg text-2xl font-bold text-primary shadow-xl pointer-events-auto">
                         松开鼠标以插入图片
                     </div>
                 </div>

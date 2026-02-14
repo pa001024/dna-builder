@@ -320,7 +320,7 @@ const cacheExchange = offlineExchange({
 })
 
 export const gqClient = (() => {
-    const url = `${env.endpoint}/graphql`
+    const url = `${env.apiEndpoint}/graphql`
     const ws = createClient({
         url: url.replace("http", "ws"),
         connectionParams: () => {

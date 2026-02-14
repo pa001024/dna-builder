@@ -61,7 +61,7 @@ async function initAgent() {
     // 如果用户没有配置API密钥，尝试使用服务端代理
     try {
         const proxyConfig = {
-            base_url: env.endpoint + "/api/v1",
+            base_url: env.apiEndpoint + "/api/v1",
             api_key: "proxy",
             default_model: settingStore.aiModelName || "glm-4.6v-flash",
             default_temperature: settingStore.aiTemperature || 0.6,
@@ -282,23 +282,19 @@ function clearChat() {
 <template>
     <div>
         <!-- 固定按钮 -->
-        <button v-if="!isOpen" class="fixed bottom-8 right-8 btn btn-circle btn-md btn-primary shadow-xl z-50" @click="openChat">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-                />
+        <button v-if="!isOpen" class="fixed bottom-8 right-8 btn btn-circle btn-md btn-primary shadow-xl z-50"
+            @click="openChat">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
             </svg>
         </button>
 
         <!-- 对话框 -->
-        <div
-            v-if="isOpen"
+        <div v-if="isOpen"
             class="fixed bottom-0 right-0 w-full md:w-96 h-[80vh] bg-base-300 shadow-2xl rounded-t-xl z-50 flex flex-col transition-transform"
-            :class="isOpen ? 'translate-y-0' : 'translate-y-full'"
-        >
+            :class="isOpen ? 'translate-y-0' : 'translate-y-full'">
             <!-- 头部 -->
             <div class="flex items-center justify-between p-4 border-b border-base-content/20 bg-base-200 rounded-t-xl">
                 <div class="flex items-center gap-2">
@@ -306,18 +302,17 @@ function clearChat() {
                 </div>
                 <div class="flex gap-2">
                     <button class="btn btn-ghost btn-sm" :disabled="isLoading" @click="clearChat">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                     </button>
                     <button class="btn btn-ghost btn-sm" :disabled="isLoading" @click="closeChat">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
@@ -325,44 +320,29 @@ function clearChat() {
 
             <!-- 消息区域 -->
             <div ref="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-4">
-                <div
-                    v-for="(message, index) in messages"
-                    :key="index"
-                    class="flex"
-                    :class="message.role === 'user' ? 'justify-end' : 'justify-start'"
-                >
-                    <div
-                        class="max-w-[80%] rounded-2xl px-4 py-2"
-                        :class="
-                            message.role === 'user'
-                                ? 'bg-primary text-primary-content rounded-br-sm'
-                                : 'bg-base-200 text-base-content rounded-bl-sm'
-                        "
-                    >
+                <div v-for="(message, index) in messages" :key="index" class="flex"
+                    :class="message.role === 'user' ? 'justify-end' : 'justify-start'">
+                    <div class="max-w-[80%] rounded-2xl px-4 py-2" :class="message.role === 'user'
+                            ? 'bg-primary text-primary-content rounded-br-sm'
+                            : 'bg-base-200 text-base-content rounded-bl-sm'
+                        ">
                         <div class="whitespace-pre-wrap text-sm wrap-break-word select-text!">
                             <!-- 显示思考过程 -->
                             <template v-if="message.reasoning && message.role === 'assistant'">
                                 <div class="mb-2">
                                     <button
                                         class="btn btn-xs btn-ghost gap-1 items-center text-base-content/70 hover:text-base-content"
-                                        @click="toggleReasoning(index)"
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            class="h-3 w-3 transition-transform"
-                                            :class="{ 'rotate-90': !collapsedReasoning.has(index) }"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        @click="toggleReasoning(index)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 transition-transform"
+                                            :class="{ 'rotate-90': !collapsedReasoning.has(index) }" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 5l7 7-7 7" />
                                         </svg>
                                         <span class="text-xs">思考过程</span>
                                     </button>
-                                    <div
-                                        v-if="!collapsedReasoning.has(index)"
-                                        class="mt-2 p-2 bg-base-300 rounded-lg text-base-content/80 text-xs border-l-2 border-primary"
-                                    >
+                                    <div v-if="!collapsedReasoning.has(index)"
+                                        class="mt-2 p-2 bg-base-300 rounded-lg text-base-content/80 text-xs border-l-2 border-primary">
                                         {{ message.reasoning }}
                                     </div>
                                 </div>
@@ -372,19 +352,10 @@ function clearChat() {
                             <template v-if="message.content.includes('[点击重试]') && message.role === 'assistant'">
                                 <div>{{ message.content.replace("[点击重试]", "") }}</div>
                                 <button class="btn btn-sm btn-primary mt-2" :disabled="isLoading" @click="retryMessage">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="h-4 w-4 mr-1"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                                        />
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                     </svg>
                                     重试
                                 </button>
@@ -394,10 +365,8 @@ function clearChat() {
                                 {{ message.content }}
                             </template>
                             <!-- 加载动画 -->
-                            <span
-                                v-if="isLoading && index === messages.findLastIndex(msg => msg.role === 'assistant')"
-                                class="loading loading-dots loading-sm"
-                            />
+                            <span v-if="isLoading && index === messages.findLastIndex(msg => msg.role === 'assistant')"
+                                class="loading loading-dots loading-sm" />
                         </div>
                     </div>
                 </div>
@@ -406,17 +375,15 @@ function clearChat() {
             <!-- 输入区域 -->
             <div class="p-4 border-t border-base-content/20 bg-base-200">
                 <div class="flex gap-2">
-                    <input
-                        v-model="inputMessage"
-                        type="text"
-                        placeholder="问我任何配装问题..."
-                        class="input input-bordered input-sm flex-1"
-                        :disabled="isLoading"
-                        @keyup.enter="handleKeyPress"
-                    />
-                    <button class="btn btn-primary btn-sm" :disabled="isLoading || !inputMessage.trim()" @click="handleKeyPress">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    <input v-model="inputMessage" type="text" placeholder="问我任何配装问题..."
+                        class="input input-bordered input-sm flex-1" :disabled="isLoading"
+                        @keyup.enter="handleKeyPress" />
+                    <button class="btn btn-primary btn-sm" :disabled="isLoading || !inputMessage.trim()"
+                        @click="handleKeyPress">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                         </svg>
                     </button>
                 </div>
