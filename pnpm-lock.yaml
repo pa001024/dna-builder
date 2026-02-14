@@ -164,15 +164,9 @@ importers:
       three:
         specifier: ^0.182.0
         version: 0.182.0
-      typescript-memoize:
-        specifier: ^1.1.1
-        version: 1.1.1
       vue:
         specifier: ^3.5.28
         version: 3.5.28(typescript@5.9.3)
-      vue-data-ui:
-        specifier: ^3.15.0
-        version: 3.15.0(vue@3.5.28(typescript@5.9.3))
       vue-router:
         specifier: ^4.6.4
         version: 4.6.4(vue@3.5.28(typescript@5.9.3))
@@ -4252,9 +4246,6 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: '>=4.8.4 <6.0.0'
 
-  typescript-memoize@1.1.1:
-    resolution: {integrity: sha512-GQ90TcKpIH4XxYTI2F98yEQYZgjNMOGPpOgdjIBhaLaWji5HPWlRnZ4AeA1hfBxtY7bCGDJsqDDHk/KaHOl5bA==}
-
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
@@ -4435,15 +4426,6 @@ packages:
 
   vscode-uri@3.1.0:
     resolution: {integrity: sha512-/BpdSx+yCQGnCvecbyXdxHDkuk55/G3xwnC0GqY4gmQ3j+A+g8kzzgB4Nk/SINjqn6+waqw3EgbVF2QKExkRxQ==}
-
-  vue-data-ui@3.15.0:
-    resolution: {integrity: sha512-uT500ijPaeFO5Qk/zn7Uv5+DyDdH5cerAK2GB3foyws4jgB6HjBWFcs9lDJkX0AfRT/HSGYo3/sYY83KxqACQQ==}
-    peerDependencies:
-      jspdf: '>=3.0.1'
-      vue: '>=3.3.0'
-    peerDependenciesMeta:
-      jspdf:
-        optional: true
 
   vue-demi@0.14.10:
     resolution: {integrity: sha512-nMZBOwuzabUO0nLgIcc6rycZEebF6eeUfaiQx9+WSk8e29IbLvPU9feI6tqW4kTo3hvoYAJkMh8n8D0fuISphg==}
@@ -8894,8 +8876,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  typescript-memoize@1.1.1: {}
-
   typescript@5.9.3: {}
 
   uc.micro@2.1.0: {}
@@ -9047,10 +9027,6 @@ snapshots:
       - yaml
 
   vscode-uri@3.1.0: {}
-
-  vue-data-ui@3.15.0(vue@3.5.28(typescript@5.9.3)):
-    dependencies:
-      vue: 3.5.28(typescript@5.9.3)
 
   vue-demi@0.14.10(vue@3.5.28(typescript@5.9.3)):
     dependencies:

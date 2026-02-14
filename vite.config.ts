@@ -42,8 +42,8 @@ export default defineConfig(async () => ({
         chunkSplitPlugin({
             strategy: "default",
             customSplitting: {
-                dna: [/src\/views\/DNA/],
-                db: [/src\/views\/DB/],
+                // DNA/DB 两类页面存在交叉依赖，拆成独立 chunk 容易形成循环引用，统一合并到同一块避免闭环
+                dna: [/src\/views\/DNA/, /src\/views\/DB/],
             },
         }),
         graphqlTag({
