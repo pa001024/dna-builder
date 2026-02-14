@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { DNAMapMatterCategorizeOption, DNAMatterCategorizeList } from "dna-api"
 import { computed, onMounted, ref, watch } from "vue"
+import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { getMapAPI } from "../api/app"
 import type { DBMap, DBMapMarker } from "../data/d/map.data"
 
@@ -137,30 +138,26 @@ function handleMarkerDelete(id: number) {
 onMounted(() => {
     loadMapList()
 })
+
+useInitialScrollToSelectedItem()
 </script>
 
 <template>
     <div class="h-full flex flex-col bg-base-100">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
-            <div v-show="showLeftPanel" class="flex flex-col overflow-hidden" :class="selectedMap ? 'flex-1' : 'w-full'">
+            <div v-show="showLeftPanel" class="flex flex-col overflow-hidden"
+                :class="selectedMap ? 'flex-1' : 'w-full'">
                 <div class="p-3 border-b border-base-200">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索地图ID/名称/描述..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
-                    />
+                    <input v-model="searchKeyword" type="text" placeholder="搜索地图ID/名称/描述..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
                 </div>
 
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div
-                            v-for="map in filteredMaps"
-                            :key="map.id"
+                        <div v-for="map in filteredMaps" :key="map.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedMap?.id === map.id }"
-                            @click="selectMap(map)"
-                        >
+                            @click="selectMap(map)">
                             <div class="flex items-start justify-between">
                                 <div>
                                     <div class="font-medium">
@@ -178,36 +175,23 @@ onMounted(() => {
                     </div>
                 </ScrollArea>
 
-                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">共 {{ filteredMaps.length }} 个地图</div>
+                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">共 {{
+                    filteredMaps.length }} 个地图</div>
             </div>
 
             <div v-show="selectedMap" class="relative flex-1 overflow-hidden">
-                <button
-                    v-if="!showLeftPanel"
-                    class="absolute left-4 top-4 z-30 btn btn-circle btn-sm"
-                    title="显示地图列表"
-                    @click="showLeftPanel = true"
-                >
+                <button v-if="!showLeftPanel" class="absolute left-4 top-4 z-30 btn btn-circle btn-sm" title="显示地图列表"
+                    @click="showLeftPanel = true">
                     <Icon icon="tabler:arrow-bar-to-right" />
                 </button>
                 <div v-if="selectedMap && selectedMap.mapUrl" class="h-full">
-                    <MapRenderer
-                        v-if="selectedMap"
-                        :key="selectedMap.mapUrl + selectedMap.currentFloorIndex"
-                        :map-id="selectedMap.id"
-                        :map-url="selectedMap.mapUrl"
-                        :markers="markers.filter(m => m.mapId === selectedMap!.id)"
-                        :categories="categories"
-                        :floors="selectedMap.floors"
-                        :current-floor-index="selectedMap.currentFloorIndex"
-                        :map-width="selectedMap.width"
-                        :map-height="selectedMap.height"
-                        :tile-size="selectedMap.tileSize"
-                        :editable="true"
-                        @marker-add="handleMarkerAdd"
-                        @marker-delete="handleMarkerDelete"
-                        @floor-change="handleFloorChange"
-                    />
+                    <MapRenderer v-if="selectedMap" :key="selectedMap.mapUrl + selectedMap.currentFloorIndex"
+                        :map-id="selectedMap.id" :map-url="selectedMap.mapUrl"
+                        :markers="markers.filter(m => m.mapId === selectedMap!.id)" :categories="categories"
+                        :floors="selectedMap.floors" :current-floor-index="selectedMap.currentFloorIndex"
+                        :map-width="selectedMap.width" :map-height="selectedMap.height"
+                        :tile-size="selectedMap.tileSize" :editable="true" @marker-add="handleMarkerAdd"
+                        @marker-delete="handleMarkerDelete" @floor-change="handleFloorChange" />
                 </div>
             </div>
         </div>

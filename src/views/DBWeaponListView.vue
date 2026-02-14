@@ -1,15 +1,16 @@
 <script lang="ts" setup>
-import { useSessionStorage } from "@vueuse/core"
 import { computed } from "vue"
+import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
+import { useSearchParam } from "@/composables/useSearchParam"
 import { LeveledWeapon } from "@/data"
 import weaponData from "../data/d/weapon.data"
 import { formatProp } from "../util"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = useSessionStorage<string>("weapon.searchKeyword", "")
-const selectedWeaponId = useSessionStorage<number>("weapon.selectedWeapon", 0)
-const selectedCategory = useSessionStorage<string>("weapon.selectedCategory", "")
-const selectedDamageType = useSessionStorage<string>("weapon.selectedDamageType", "")
+const searchKeyword = useSearchParam<string>("weapon.searchKeyword", "")
+const selectedWeaponId = useSearchParam<number>("weapon.selectedWeapon", 0)
+const selectedCategory = useSearchParam<string>("weapon.selectedCategory", "")
+const selectedDamageType = useSearchParam<string>("weapon.selectedDamageType", "")
 
 // 根据 ID 获取选中的武器
 const selectedWeapon = computed(() => {
@@ -63,6 +64,8 @@ const filteredWeapons = computed(() => {
         return matchKeyword && matchCategory && matchDamageType
     })
 })
+
+useInitialScrollToSelectedItem()
 </script>
 
 <template>
@@ -70,36 +73,22 @@ const filteredWeapons = computed(() => {
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedWeapon }">
                 <div class="p-3 border-b border-base-200">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索武器名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
-                    />
+                    <input v-model="searchKeyword" type="text" placeholder="搜索武器名称（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
                 </div>
 
                 <div class="p-2 border-b border-base-200 space-y-2">
                     <div>
                         <div class="text-xs text-base-content/70 mb-1">武器分类</div>
                         <div class="flex flex-wrap gap-1 pb-1">
-                            <button
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
-                                :class="
-                                    selectedCategory === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                "
-                                @click="selectedCategory = ''"
-                            >
+                            <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all" :class="selectedCategory === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                " @click="selectedCategory = ''">
                                 {{ $t("全部") }}
                             </button>
-                            <button
-                                v-for="cat in categories"
-                                :key="cat"
+                            <button v-for="cat in categories" :key="cat"
                                 class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                                :class="
-                                    selectedCategory === cat ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                "
-                                @click="selectedCategory = cat"
-                            >
+                                :class="selectedCategory === cat ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                    " @click="selectedCategory = cat">
                                 {{ $t(cat) }}
                             </button>
                         </div>
@@ -108,26 +97,16 @@ const filteredWeapons = computed(() => {
                     <div>
                         <div class="text-xs text-base-content/70 mb-1">伤害类型</div>
                         <div class="flex flex-wrap gap-1 pb-1">
-                            <button
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
-                                :class="
-                                    selectedDamageType === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                "
-                                @click="selectedDamageType = ''"
-                            >
+                            <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all" :class="selectedDamageType === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                " @click="selectedDamageType = ''">
                                 {{ $t("全部") }}
                             </button>
-                            <button
-                                v-for="type in damageTypes"
-                                :key="type"
+                            <button v-for="type in damageTypes" :key="type"
                                 class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                                :class="
-                                    selectedDamageType === type
-                                        ? 'bg-primary text-white'
-                                        : 'bg-base-200 text-base-content hover:bg-base-300'
-                                "
-                                @click="selectedDamageType = type"
-                            >
+                                :class="selectedDamageType === type
+                                    ? 'bg-primary text-white'
+                                    : 'bg-base-200 text-base-content hover:bg-base-300'
+                                    " @click="selectedDamageType = type">
                                 {{ $t(type) }}
                             </button>
                         </div>
@@ -136,13 +115,10 @@ const filteredWeapons = computed(() => {
 
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div
-                            v-for="weapon in filteredWeapons"
-                            :key="weapon.id"
+                        <div v-for="weapon in filteredWeapons" :key="weapon.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedWeaponId === weapon.id }"
-                            @click="selectedWeaponId = weapon.id"
-                        >
+                            @click="selectedWeaponId = weapon.id">
                             <div class="flex items-start justify-between">
                                 <div class="flex">
                                     <div class="flex items-center gap-2">
@@ -152,7 +128,7 @@ const filteredWeapons = computed(() => {
                                                 {{ $t(weapon.名称) }}
                                             </div>
                                             <div class="text-xs opacity-70 mt-1 flex gap-2">
-                                                <span>{{ weapon.类型.map(t => $t(t)).join(", ") }}</span>
+                                                <span>{{weapon.类型.map(t => $t(t)).join(", ")}}</span>
                                                 <span>{{ $t(weapon.伤害类型) }}</span>
                                             </div>
                                         </div>
@@ -208,17 +184,15 @@ const filteredWeapons = computed(() => {
                     共 {{ filteredWeapons.length }} 个武器
                 </div>
             </div>
-            <div
-                v-if="selectedWeapon"
+            <div v-if="selectedWeapon"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedWeaponId = 0"
-            >
+                @click="selectedWeaponId = 0">
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 
-            <div v-if="selectedWeapon" class="flex-1 overflow-hidden">
+            <ScrollArea v-if="selectedWeapon" class="flex-1 overflow-hidden">
                 <DBWeaponDetailItem :weapon="selectedWeapon" />
-            </div>
+            </ScrollArea>
         </div>
     </div>
 </template>

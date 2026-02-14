@@ -1,14 +1,15 @@
 <script lang="ts" setup>
-import { useSessionStorage } from "@vueuse/core"
 import { computed } from "vue"
+import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
+import { useSearchParam } from "@/composables/useSearchParam"
 import { LeveledChar } from "@/data"
 import type { AbyssDungeon } from "../data/d/abyss.data"
 import { abyssDungeonMap, charMap } from "../data/d/index"
 import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
 
-const searchKeyword = useSessionStorage<string>("abyss.searchKeyword", "")
-const selectedDungeonId = useSessionStorage<number>("abyss.selectedDungeon", 0)
-const selectedDungeonGroup = useSessionStorage<string>("abyss.selectedDungeonGroup", "")
+const searchKeyword = useSearchParam<string>("abyss.searchKeyword", "")
+const selectedDungeonId = useSearchParam<number>("abyss.selectedDungeon", 0)
+const selectedDungeonGroup = useSearchParam<string>("abyss.selectedDungeonGroup", "")
 
 // 获取选中的深渊副本对象
 const selectedDungeon = computed(() => {
@@ -41,6 +42,8 @@ function getCharName(charId: number): string {
     const char = charMap.get(charId)
     return char?.名称 || `ID: ${charId}`
 }
+
+useInitialScrollToSelectedItem()
 </script>
 
 <template>
@@ -48,34 +51,20 @@ function getCharName(charId: number): string {
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedDungeon }">
                 <div class="p-3 border-b border-base-200">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索副本ID或角色名称..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
-                    />
+                    <input v-model="searchKeyword" type="text" placeholder="搜索副本ID或角色名称..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
                 </div>
 
                 <div class="p-2 border-b border-base-200">
                     <div class="flex flex-wrap gap-1 pb-1">
-                        <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
-                            :class="
-                                selectedDungeonGroup === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                            "
-                            @click="selectedDungeonGroup = ''"
-                        >
+                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all" :class="selectedDungeonGroup === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                            " @click="selectedDungeonGroup = ''">
                             全部
                         </button>
-                        <button
-                            v-for="group in allDungeonGroups"
-                            :key="group"
+                        <button v-for="group in allDungeonGroups" :key="group"
                             class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all cursor-pointer"
-                            :class="
-                                selectedDungeonGroup === group ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                            "
-                            @click="selectedDungeonGroup = group"
-                        >
+                            :class="selectedDungeonGroup === group ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                " @click="selectedDungeonGroup = group">
                             {{ $t(group) }}
                         </button>
                     </div>
@@ -83,13 +72,10 @@ function getCharName(charId: number): string {
 
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div
-                            v-for="dungeon in filteredDungeons"
-                            :key="dungeon.id"
+                        <div v-for="dungeon in filteredDungeons" :key="dungeon.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedDungeon?.id === dungeon.id }"
-                            @click="selectDungeon(dungeon)"
-                        >
+                            @click="selectDungeon(dungeon)">
                             <div class="flex items-start justify-between">
                                 <div>
                                     <div class="font-medium flex gap-2">
@@ -106,29 +92,23 @@ function getCharName(charId: number): string {
                                     <div class="text-xs opacity-70 ml-4">ID: {{ dungeon.id }}</div>
                                     <span class="text-xs px-2 py-0.5 rounded bg-warning text-white whitespace-nowrap">{{
                                         $t(getAbyssDungeonGroup(dungeon))
-                                    }}</span>
+                                        }}</span>
                                     <span v-if="dungeon.mb" class="flex items-center gap-2">
-                                        <img
-                                            v-for="key in ['暗', '水', '火', '雷', '风', '光'].filter(k => dungeon.mb![k] > 0)"
-                                            :key="key"
-                                            :src="LeveledChar.elementUrl(key)"
-                                            alt=""
-                                            class="h-8 inline-block"
-                                        />
+                                        <img v-for="key in ['暗', '水', '火', '雷', '风', '光'].filter(k => dungeon.mb![k] > 0)"
+                                            :key="key" :src="LeveledChar.elementUrl(key)" alt=""
+                                            class="h-8 inline-block" />
                                     </span>
                                 </div>
                             </div>
 
                             <div v-if="dungeon.buff?.length" class="mt-2">
                                 <div class="flex flex-wrap gap-1">
-                                    <span
-                                        v-for="buff in dungeon.buff.slice(0, 3)"
-                                        :key="buff.id"
-                                        class="text-xs bg-base-300/20 px-1.5 py-0.5 rounded"
-                                    >
+                                    <span v-for="buff in dungeon.buff.slice(0, 3)" :key="buff.id"
+                                        class="text-xs bg-base-300/20 px-1.5 py-0.5 rounded">
                                         {{ buff.n }}
                                     </span>
-                                    <span v-if="dungeon.buff.length > 3" class="text-xs opacity-70">+{{ dungeon.buff.length - 3 }}</span>
+                                    <span v-if="dungeon.buff.length > 3" class="text-xs opacity-70">+{{
+                                        dungeon.buff.length - 3 }}</span>
                                 </div>
                             </div>
                         </div>
@@ -139,11 +119,9 @@ function getCharName(charId: number): string {
                     共 {{ filteredDungeons.length }} 个深渊
                 </div>
             </div>
-            <div
-                v-if="selectedDungeon"
+            <div v-if="selectedDungeon"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectDungeon(null)"
-            >
+                @click="selectDungeon(null)">
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 

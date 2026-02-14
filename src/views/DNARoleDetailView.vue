@@ -2,8 +2,7 @@
 import { DNAAPI, DNACharDetailBean } from "dna-api"
 import { computed, onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { initEmojiDict } from "@/utils/emoji"
-import { LeveledMod } from "../data"
+import { CharBuild, LeveledChar, LeveledMod, LeveledWeapon } from "../data"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
 
@@ -19,6 +18,35 @@ const loading = ref(true)
 const charId = computed(() => route.params.charId as string)
 const charEid = computed(() => route.params.charEid as string)
 
+/**
+ * 角色详情魔之楔列表（统一转换后复用到展示和生效计算）
+ */
+const roleMods = computed(() => {
+    return charDetail.value?.modes.map(mode => LeveledMod.fromDNA(mode)) || []
+})
+
+/**
+ * 构建角色详情页专用 CharBuild，用于 tooltip 中的生效条件判断
+ */
+const roleCharBuild = computed(() => {
+    if (!charDetail.value) return null
+    try {
+        const leveledChar = new LeveledChar(charDetail.value.charId, Number(charDetail.value.level))
+        return new CharBuild({
+            char: leveledChar,
+            hpPercent: 1,
+            resonanceGain: 3,
+            charMods: roleMods.value,
+            melee: LeveledWeapon.emptyWeapon,
+            ranged: LeveledWeapon.emptyWeapon,
+            baseName: leveledChar.技能[0]?.名称 || "",
+        })
+    } catch (error) {
+        console.error("角色详情 CharBuild 构建失败", error)
+        return null
+    }
+})
+
 onMounted(async () => {
     const p = await setting.getDNAAPI()
     if (!p) {
@@ -27,7 +55,6 @@ onMounted(async () => {
         return
     }
     api = p
-    await initEmojiDict()
     await loadRoleDetail()
 })
 
@@ -52,7 +79,8 @@ async function loadRoleDetail() {
         <!-- 头部 -->
         <div class="flex-none p-4 bg-base-100 border-b border-base-200 flex items-center justify-between">
             <button class="btn btn-ghost" @click="router.back()">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
             </button>
@@ -73,34 +101,26 @@ async function loadRoleDetail() {
                 <!-- 角色立绘 -->
                 <div class="card bg-base-100 border border-base-200 rounded-lg shadow-sm overflow-hidden">
                     <div class="relative h-64 md:h-80">
-                        <img v-if="charDetail.paint" :src="charDetail.paint" alt="角色立绘" class="w-full h-full object-cover" />
+                        <img v-if="charDetail.paint" :src="charDetail.paint" alt="角色立绘"
+                            class="w-full h-full object-cover" />
                         <div v-else class="w-full h-full flex items-center justify-center bg-base-200">
                             <span class="text-base-400">无立绘</span>
                         </div>
                         <!-- 半透明渐变遮罩 -->
-                        <div class="absolute bottom-0 left-0 right-0 bg-linear-to-t from-base-100/90 to-transparent p-4">
+                        <div
+                            class="absolute bottom-0 left-0 right-0 bg-linear-to-t from-base-100/90 to-transparent p-4">
                             <div class="flex items-center gap-3">
-                                <img
-                                    v-if="charDetail.icon"
-                                    :src="charDetail.icon"
-                                    alt="角色头像"
-                                    class="w-16 h-16 rounded-full border-2 border-base-100 shadow-md object-cover"
-                                />
-                                <div
-                                    v-else
-                                    class="w-16 h-16 rounded-full border-2 border-base-100 shadow-md bg-base-200 flex items-center justify-center"
-                                >
+                                <img v-if="charDetail.icon" :src="charDetail.icon" alt="角色头像"
+                                    class="w-16 h-16 rounded-full border-2 border-base-100 shadow-md object-cover" />
+                                <div v-else
+                                    class="w-16 h-16 rounded-full border-2 border-base-100 shadow-md bg-base-200 flex items-center justify-center">
                                     <span class="text-base-400">无头像</span>
                                 </div>
                                 <div>
                                     <h2 class="text-2xl font-bold flex items-center gap-2">
-                                        <img
-                                            v-if="charDetail.elementIcon"
-                                            :src="charDetail.elementIcon"
-                                            :alt="charDetail.elementName"
-                                            class="size-10 object-contain tooltip"
-                                            :data-tip="charDetail.elementName"
-                                        />
+                                        <img v-if="charDetail.elementIcon" :src="charDetail.elementIcon"
+                                            :alt="charDetail.elementName" class="size-10 object-contain tooltip"
+                                            :data-tip="charDetail.elementName" />
                                         <span>{{ charDetail.charName }}</span>
 
                                         <div class="badge badge-neutral badge-lg font-orbitron">
@@ -108,7 +128,8 @@ async function loadRoleDetail() {
                                         </div>
                                     </h2>
                                     <div class="flex items-center gap-2 mt-1">
-                                        <div class="badge badge-secondary bg-secondary/70">Lv.{{ charDetail.level }}</div>
+                                        <div class="badge badge-secondary bg-secondary/70">Lv.{{ charDetail.level }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -122,7 +143,8 @@ async function loadRoleDetail() {
                         <h3 class="text-lg font-semibold mb-4">角色属性</h3>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ charDetail.elementName }}属性攻击</div>
+                                <div class="stat-title text-xs text-base-content/60">{{ charDetail.elementName }}属性攻击
+                                </div>
                                 <div class="stat-value text-xl font-bold">
                                     {{ charDetail.attribute.atk }}
                                 </div>
@@ -190,17 +212,11 @@ async function loadRoleDetail() {
                     <div class="card-body p-6">
                         <h3 class="text-lg font-semibold mb-4">技能</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div
-                                v-for="skill in charDetail.skills"
-                                :key="skill.skillId"
-                                class="bg-base-300 rounded-lg p-4 text-center hover:shadow-md transition-shadow"
-                            >
+                            <div v-for="skill in charDetail.skills" :key="skill.skillId"
+                                class="bg-base-300 rounded-lg p-4 text-center hover:shadow-md transition-shadow">
                                 <div class="flex justify-center items-center gap-2">
-                                    <div
-                                        alt="技能图标"
-                                        class="size-12 rounded-full bg-base-content"
-                                        :style="{ mask: `url(${skill.icon}) no-repeat center/contain` }"
-                                    />
+                                    <div alt="技能图标" class="size-12 rounded-full bg-base-content"
+                                        :style="{ mask: `url(${skill.icon}) no-repeat center/contain` }" />
                                     <div class="text-sm font-medium">
                                         {{ skill.skillName }}
                                     </div>
@@ -216,25 +232,18 @@ async function loadRoleDetail() {
                     <div class="card-body p-6">
                         <h3 class="text-lg font-semibold mb-4">角色溯源</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div
-                                v-for="(trace, index) in charDetail.traces"
-                                :key="index"
-                                class="bg-base-300 rounded-lg p-4 hover:shadow-md transition-shadow"
-                            >
+                            <div v-for="(trace, index) in charDetail.traces" :key="index"
+                                class="bg-base-300 rounded-lg p-4 hover:shadow-md transition-shadow">
                                 <div class="flex items-center gap-2 min-h-15">
                                     <img :src="trace.icon" alt="溯源图标" class="w-10 h-10 object-contain" />
 
                                     <div class="flex-1 space-y-1">
                                         <div class="flex items-center gap-2">
                                             <span> 第{{ ["一", "二", "三", "四", "五", "六"][index] }}根源 </span>
-                                            <span
-                                                class="badge badge-sm"
-                                                :class="{
-                                                    'badge-warning': charDetail.gradeLevel > index,
-                                                    'badge-neutral': charDetail.gradeLevel <= index,
-                                                }"
-                                                >{{ charDetail.gradeLevel > index ? "已解锁" : "未解锁" }}</span
-                                            >
+                                            <span class="badge badge-sm" :class="{
+                                                'badge-warning': charDetail.gradeLevel > index,
+                                                'badge-neutral': charDetail.gradeLevel <= index,
+                                            }">{{ charDetail.gradeLevel > index ? "已解锁" : "未解锁" }}</span>
                                         </div>
                                         <p class="text-xs opacity-60">
                                             {{ trace.description }}
@@ -251,10 +260,11 @@ async function loadRoleDetail() {
                     <div class="card-body p-6">
                         <div class="flex text-lg font-semibold mb-4">
                             魔之楔
-                            <div class="ml-auto">{{ charDetail.currentVolume }}/{{ charDetail.sumVolume }}</div>
                         </div>
                         <div class="flex justify-center items-center gap-2">
-                            <GameStyleModView :mods="charDetail.modes.map(mode => LeveledMod.fromDNA(mode))" />
+                            <GameStyleModView :mods="roleMods" :char-build="roleCharBuild || undefined"
+                                :current-volume="Number(charDetail.currentVolume)"
+                                :sum-volume="Number(charDetail.sumVolume)" />
                         </div>
                     </div>
                 </div>

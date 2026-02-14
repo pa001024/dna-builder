@@ -6,7 +6,8 @@ use boa_engine::{
     native_function::NativeFunction,
 };
 use opencv::{
-    core::{self},
+    core::{self, Size},
+    imgproc,
     prelude::*,
 };
 
@@ -123,6 +124,86 @@ impl Class for JsMat {
                     .map_err(|_e| JsNativeError::typ().with_message("Failed to copy ROI Mat"))?;
 
                 Box::new(roi_mat).into_js(ctx)
+            }),
+        );
+        class.method(
+            js_string!("resize"),
+            3,
+            NativeFunction::from_fn_ptr(|this, args, ctx| {
+                // 参数数量校验（w, h, interpolation?）
+                if args.len() < 2 || args.len() > 3 {
+                    return Err(JsNativeError::typ()
+                        .with_message("resize expects 2 or 3 arguments")
+                        .into());
+                }
+
+                // 获取 Mat 实例
+                let binding = this.as_object().unwrap();
+                let js_mat = binding
+                    .downcast_ref::<JsMat>()
+                    .ok_or_else(|| JsNativeError::typ().with_message("Object is not a Mat"))?;
+
+                // 解析宽高参数
+                let width = args[0]
+                    .to_number(ctx)
+                    .map_err(|_e| JsNativeError::typ().with_message("w must be a number"))?
+                    as i32;
+                let height = args[1]
+                    .to_number(ctx)
+                    .map_err(|_e| JsNativeError::typ().with_message("h must be a number"))?
+                    as i32;
+                if width <= 0 || height <= 0 {
+                    return Err(JsNativeError::typ()
+                        .with_message("Invalid resize size. Expected w > 0, h > 0")
+                        .into());
+                }
+
+                // 解析插值参数：支持字符串别名和 OpenCV 常量值
+                let interpolation = if args.len() == 3 {
+                    let value = &args[2];
+                    if let Some(num) = value.as_number() {
+                        num as i32
+                    } else {
+                        let text = value
+                            .to_string(ctx)
+                            .map_err(|_e| {
+                                JsNativeError::typ()
+                                    .with_message("interpolation must be a string or number")
+                            })?
+                            .to_std_string_lossy()
+                            .to_lowercase();
+                        match text.as_str() {
+                            "nearest" => imgproc::INTER_NEAREST,
+                            "linear" => imgproc::INTER_LINEAR,
+                            "cubic" => imgproc::INTER_CUBIC,
+                            "area" => imgproc::INTER_AREA,
+                            "lanczos4" => imgproc::INTER_LANCZOS4,
+                            _ => {
+                                return Err(JsNativeError::typ()
+                                    .with_message(
+                                        "Invalid interpolation. Use nearest/linear/cubic/area/lanczos4 or OpenCV constant",
+                                    )
+                                    .into());
+                            }
+                        }
+                    }
+                } else {
+                    imgproc::INTER_LINEAR
+                };
+
+                // 执行缩放并返回新 Mat（不修改原对象）
+                let mut dst = core::Mat::default();
+                imgproc::resize(
+                    &*js_mat.inner,
+                    &mut dst,
+                    Size::new(width, height),
+                    0.0,
+                    0.0,
+                    interpolation,
+                )
+                .map_err(|_e| JsNativeError::typ().with_message("Failed to resize Mat"))?;
+
+                Box::new(dst).into_js(ctx)
             }),
         );
         class.method(

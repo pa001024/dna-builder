@@ -119,6 +119,14 @@ interface Mat {
      */
     roi(x: number, y: number, w: number, h: number): Mat
     /**
+     * 缩放图像并返回新的 Mat
+     * @param w 目标宽度
+     * @param h 目标高度
+     * @param interpolation 插值方式（"nearest"|"linear"|"cubic"|"area"|"lanczos4" 或 OpenCV 常量值）
+     * @returns 缩放后的 Mat
+     */
+    resize(w: number, h: number, interpolation?: "nearest" | "linear" | "cubic" | "area" | "lanczos4" | number): Mat
+    /**
      * 获取指定坐标的像素值（BGR格式）
      * @param row 行索引
      * @param col 列索引
@@ -249,12 +257,12 @@ declare function mu(hwnd?: number, x?: number, y?: number): void
 declare function mt(hwnd?: number, x?: number, y?: number): void
 
 /**
- * 按键操作
+ * 按键操作（异步）
  * @param hwnd 窗口句柄 (为0表示前台)
  * @param key 按键名称
  * @param duration 按键持续时间
  */
-declare function kb(hwnd: number, key: KeyEnum, duration?: number): void
+declare function kb(hwnd: number, key: KeyEnum, duration?: number): Promise<void>
 
 /**
  * 按键按下状态
@@ -454,14 +462,123 @@ declare function findColorAndMatchTemplate(
 declare function matchTemplate(imgMat: Mat, templateMat: Mat, tolerance: number): Promise<[number, number] | undefined>
 
 /**
+ * 色键过滤并返回灰度二值图
+ * @param mat 源图像 Mat
+ * @param colors 色键数组（例如 [0xffffff, 0xff0000]）
+ * @param tolerance 颜色容差（0-255）
+ * @returns 灰度二值图 Mat（命中为255，未命中为0）
+ */
+declare function colorFilter(mat: Mat, colors: number[], tolerance: number): Mat
+
+/**
+ * 色键匹配，返回匹配像素 mean 最大的颜色索引
+ * @param mat 源图像 Mat
+ * @param colors 色键数组（例如 [0xffffff, 0xff0000]）
+ * @param minMean 最小 mean 阈值（0-255），低于该值返回 -1，默认 0
+ * @param tolerance 颜色容差（0-255），默认 0
+ * @returns 命中的最佳索引；未命中返回 -1
+ */
+declare function colorKeyMatch(mat: Mat, colors: number[], minMean?: number, tolerance?: number): number
+
+/**
+ * 批量模板匹配（并行）
+ * @param src 源图像 Mat
+ * @param tpls 模板 Mat 数组
+ * @param cap 匹配置信度阈值（0-1）
+ * @returns 首个命中结果 { pos: [x, y], index } 或 undefined
+ */
+declare function batchMatchColor(src: Mat, tpls: Mat[], cap: number): { pos: [number, number]; index: number } | undefined
+
+/**
+ * ORB 特征比较，返回优质匹配数量
+ * @param img1 参考图像 Mat
+ * @param img2 待比较图像 Mat
+ * @returns 优质匹配数量
+ */
+declare function orbMatchCount(img1: Mat, img2: Mat): number
+
+/**
+ * SIFT 匹配定位，返回 img2 在 img1 中的坐标尺寸信息
+ * @param img1 大图/场景图 Mat
+ * @param img2 小图/模板图 Mat
+ * @returns 定位结果或 undefined
+ */
+declare function siftLocate(
+    img1: Mat,
+    img2: Mat
+):
+    | {
+          pos: [number, number]
+          size: [number, number]
+          bbox: [number, number, number, number]
+          goodMatches: number
+          inliers: number
+          corners: [number, number][]
+      }
+    | undefined
+
+/**
+ * 计算图像感知哈希（pHash）
+ * @param imgMat 图像 Mat
+ * @param color 是否启用彩色哈希（true 时按 B/G/R 三通道拼接，false 时灰度哈希），默认 false
+ * @returns 十六进制哈希字符串（灰度 16 字符，彩色 48 字符）
+ */
+declare function perceptualHash(imgMat: Mat, color?: boolean): string
+
+/**
+ * 比较源哈希与模板哈希数组的汉明距离，返回匹配索引
+ * @param sourceHash 源图像哈希（十六进制字符串）
+ * @param templateHashes 模板哈希数组（十六进制字符串数组）
+ * @param maxDistance 最大允许汉明距离（默认 0，表示精确匹配）
+ * @returns 匹配索引；未匹配返回 -1
+ */
+declare function matchHammingHash(sourceHash: string, templateHashes: string[], maxDistance?: number): number
+
+/**
+ * 形态学图像处理
+ * @param imgMat 图像 Mat
+ * @param op 操作类型（"erode"|"dilate"|"open"|"close"|"gradient"|"tophat"|"blackhat"|"hitmiss" 或 OpenCV 常量值）
+ * @param kernelSize 核大小（会自动修正为正奇数），默认 3
+ * @param iterations 迭代次数，默认 1
+ * @param shape 核形状（"rect"|"cross"|"ellipse" 或 OpenCV 常量值），默认 "rect"
+ * @returns 处理后的 Mat
+ */
+declare function morphologyEx(
+    imgMat: Mat,
+    op?: "erode" | "dilate" | "open" | "close" | "gradient" | "tophat" | "blackhat" | "hitmiss" | number,
+    kernelSize?: number,
+    iterations?: number,
+    shape?: "rect" | "cross" | "ellipse" | number
+): Mat
+
+/**
+ * 轮廓提取
+ * @param imgMat 图像Mat对象（建议传入二值图，如 colorFilter 返回结果）
+ * @param minArea 最小面积过滤（默认0）
+ * @param mode 检索模式（"external"|"list"|"ccomp"|"tree"|"floodfill" 或 OpenCV 常量值）
+ * @param method 轮廓逼近（"none"|"simple"|"tc89l1"|"tc89kcos" 或 OpenCV 常量值）
+ * @returns 轮廓列表
+ */
+declare function findContours(
+    imgMat: Mat,
+    minArea?: number,
+    mode?: "external" | "list" | "ccomp" | "tree" | "floodfill" | number,
+    method?: "none" | "simple" | "tc89l1" | "tc89kcos" | number
+): {
+    area: number
+    bbox: [number, number, number, number]
+    center: [number, number]
+}[]
+
+/**
  * 绘制边框
  * @param hwnd 窗口句柄
- * @param left 左边界
- * @param top 上边界
- * @param right 右边界
- * @param bottom 下边界
+ * @param x 左上角X坐标（相对窗口客户区）
+ * @param y 左上角Y坐标（相对窗口客户区）
+ * @param w 边框宽度
+ * @param h 边框高度
  */
-declare function drawBorder(hwnd: number, left: number, top: number, right: number, bottom: number): void
+declare function drawBorder(hwnd: number, x: number, y: number, w: number, h: number): void
 
 /**
  * 检查颜色矩阵（使用Mat对象）

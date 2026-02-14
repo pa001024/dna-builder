@@ -1,15 +1,16 @@
 <script lang="ts" setup>
-import { useSessionStorage } from "@vueuse/core"
 import { computed } from "vue"
+import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
+import { useSearchParam } from "@/composables/useSearchParam"
 import dynQuestData, { DynQuest } from "@/data/d/dynquest.data"
 import { regionMap } from "@/data/d/region.data"
 import { subRegionMap } from "@/data/d/subregion.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
-const searchKeyword = useSessionStorage<string>("dynquest.searchKeyword", "")
-const selectedQuestId = useSessionStorage<number>("dynquest.selectedQuest", 0)
-const selectedRegion = useSessionStorage<string>("dynquest.selectedRegion", "")
-const selectedSubRegion = useSessionStorage<string>("dynquest.selectedSubRegion", "")
+const searchKeyword = useSearchParam<string>("dynquest.searchKeyword", "")
+const selectedQuestId = useSearchParam<number>("dynquest.selectedQuest", 0)
+const selectedRegion = useSearchParam<string>("dynquest.selectedRegion", "")
+const selectedSubRegion = useSearchParam<string>("dynquest.selectedSubRegion", "")
 
 // 根据 ID 获取选中的委托
 const selectedQuest = computed(() => {
@@ -84,6 +85,8 @@ function selectRegion(regionId: string) {
 function selectSubRegion(subRegionId: string) {
     selectedSubRegion.value = subRegionId
 }
+
+useInitialScrollToSelectedItem()
 </script>
 
 <template>
@@ -93,33 +96,21 @@ function selectSubRegion(subRegionId: string) {
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedQuest }">
                 <!-- 搜索栏 -->
                 <div class="p-3 border-b border-base-200">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索委托 ID/名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
-                    />
+                    <input v-model="searchKeyword" type="text" placeholder="搜索委托 ID/名称（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
                 </div>
 
                 <!-- 区域筛选 -->
                 <div class="p-2 border-b border-base-200">
                     <div class="flex flex-wrap gap-1 pb-1">
-                        <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
                             :class="selectedRegion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                            @click="selectRegion('')"
-                        >
+                            @click="selectRegion('')">
                             全部区域
                         </button>
-                        <button
-                            v-for="regionId in allRegions.map(r => String(r))"
-                            :key="regionId"
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
-                            :class="
-                                selectedRegion === regionId ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                            "
-                            @click="selectRegion(regionId)"
-                        >
+                        <button v-for="regionId in allRegions.map(r => String(r))" :key="regionId"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all" :class="selectedRegion === regionId ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                " @click="selectRegion(regionId)">
                             {{ getRegionName(Number(regionId)) }}
                         </button>
                     </div>
@@ -128,24 +119,16 @@ function selectSubRegion(subRegionId: string) {
                 <!-- 子区域筛选 -->
                 <div v-if="selectedRegion" class="p-2 border-b border-base-200">
                     <div class="flex flex-wrap gap-1 pb-1">
-                        <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
                             :class="selectedSubRegion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                            @click="selectSubRegion('')"
-                        >
+                            @click="selectSubRegion('')">
                             全部子区域
                         </button>
-                        <button
-                            v-for="subRegion in subRegions"
-                            :key="subRegion.id"
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
-                            :class="
-                                selectedSubRegion === String(subRegion.id)
-                                    ? 'bg-primary text-white'
-                                    : 'bg-base-200 text-base-content hover:bg-base-300'
-                            "
-                            @click="selectSubRegion(String(subRegion.id))"
-                        >
+                        <button v-for="subRegion in subRegions" :key="subRegion.id"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all" :class="selectedSubRegion === String(subRegion.id)
+                                ? 'bg-primary text-white'
+                                : 'bg-base-200 text-base-content hover:bg-base-300'
+                                " @click="selectSubRegion(String(subRegion.id))">
                             {{ subRegion.name }}
                         </button>
                     </div>
@@ -154,21 +137,17 @@ function selectSubRegion(subRegionId: string) {
                 <!-- 委托列表 -->
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div
-                            v-for="quest in filteredQuests"
-                            :key="quest.id"
+                        <div v-for="quest in filteredQuests" :key="quest.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedQuestId === quest.id }"
-                            @click="selectQuest(quest)"
-                        >
+                            @click="selectQuest(quest)">
                             <div class="flex items-start justify-between">
                                 <div class="flex-1">
                                     <div class="font-medium">{{ quest.name }}</div>
                                     <div class="text-xs opacity-70 mt-1">
                                         <span>等级: {{ quest.level[0] }} - {{ quest.level[1] || "?" }}</span>
-                                        <span v-if="quest.dayLimit" class="ml-2 px-1.5 py-0.5 rounded bg-warning text-warning-content"
-                                            >每日限制</span
-                                        >
+                                        <span v-if="quest.dayLimit"
+                                            class="ml-2 px-1.5 py-0.5 rounded bg-warning text-warning-content">每日限制</span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">
@@ -191,11 +170,9 @@ function selectSubRegion(subRegionId: string) {
                     共 {{ filteredQuests.length }} 个委托
                 </div>
             </div>
-            <div
-                v-if="selectedQuest"
+            <div v-if="selectedQuest"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectQuest(null)"
-            >
+                @click="selectQuest(null)">
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 

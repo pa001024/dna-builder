@@ -10,7 +10,7 @@ import {
     unlikeBuildMutation,
     updateBuildMutation,
 } from "@/api/graphql"
-import { useCharSettings } from "@/composables/useCharSettings"
+import { CharSettings, useCharSettings } from "@/composables/useCharSettings"
 import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
@@ -119,6 +119,10 @@ function handleSortChange() {
     fetchBuilds(0)
 }
 
+const emits = defineEmits<{
+    useBuild: [loadedSettings: CharSettings]
+}>()
+
 // 使用构筑
 async function useBuild(buildId: string) {
     loadingBuild.value = buildId
@@ -127,11 +131,7 @@ async function useBuild(buildId: string) {
 
         if (result?.charSettings) {
             const loadedSettings = JSON.parse(result.charSettings)
-
-            // 应用加载的设置
-            Object.assign(charSettings.value, loadedSettings)
-
-            ui.showSuccessMessage("已应用构筑配置")
+            emits("useBuild", loadedSettings)
         }
     } catch (error) {
         ui.showErrorMessage("加载构筑失败:", error instanceof Error ? error.message : "未知错误")
@@ -306,13 +306,8 @@ defineExpose({
         <!-- 搜索和筛选栏 -->
         <div class="p-3">
             <div class="flex gap-2 flex-wrap">
-                <input
-                    v-model="searchKeyword"
-                    type="text"
-                    :placeholder="t('搜索构筑标题...')"
-                    class="input input-bordered input-sm flex-1 min-w-50"
-                    @keyup.enter="handleSearch"
-                />
+                <input v-model="searchKeyword" type="text" :placeholder="t('搜索构筑标题...')"
+                    class="input input-bordered input-sm flex-1 min-w-50" @keyup.enter="handleSearch" />
                 <select v-model="sortBy" class="select select-bordered select-sm w-36" @change="handleSortChange">
                     <option value="latest">最新修改</option>
                     <option value="views">最多浏览</option>
@@ -330,7 +325,8 @@ defineExpose({
                 <span class="loading loading-spinner loading-lg" />
             </div>
 
-            <div v-else-if="builds.length === 0" class="flex justify-center items-center h-full text-base-content/50 m-4">
+            <div v-else-if="builds.length === 0"
+                class="flex justify-center items-center h-full text-base-content/50 m-4">
                 <div class="text-center">
                     <Icon icon="ri:inbox-line" class="w-16 h-16 mx-auto mb-2 opacity-30" />
                     <div>{{ t("暂无构筑") }}</div>
@@ -338,20 +334,14 @@ defineExpose({
             </div>
 
             <div v-else class="p-2 grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
-                <div
-                    v-for="build in builds"
-                    :key="build.id"
-                    class="card bg-base-100 shadow-lg hover:shadow-xl transition-all border border-base-200"
-                >
+                <div v-for="build in builds" :key="build.id"
+                    class="card bg-base-100 shadow-lg hover:shadow-xl transition-all border border-base-200">
                     <div class="card-body p-4">
                         <!-- 标题和标签 -->
                         <div class="flex items-start justify-between mb-2">
-                            <a
-                                :href="`${env.endpoint}/char/${charId}/${build.id}`"
-                                title="点击复制链接"
+                            <a :href="`${env.endpoint}/char/${charId}/${build.id}`" title="点击复制链接"
                                 @click.prevent="copyLink(`${env.endpoint}/char/${charId}/${build.id}`)"
-                                class="card-title text-base line-clamp-2 flex-1 link"
-                            >
+                                class="card-title text-base line-clamp-2 flex-1 link">
                                 {{ build.title }}
                             </a>
                             <div class="flex gap-1 ml-2">
@@ -367,12 +357,9 @@ defineExpose({
                             <div :class="{ 'line-clamp-2': !isDescriptionExpanded(build.id) }">
                                 {{ build.desc || "作者很懒没填任何东西..." }}
                             </div>
-                            <button
-                                v-if="shouldShowExpandButton(build.desc)"
-                                type="button"
+                            <button v-if="shouldShowExpandButton(build.desc)" type="button"
                                 class="text-primary cursor-pointer text-xs mt-1"
-                                @click.stop="toggleDescriptionExpand(build.id)"
-                            >
+                                @click.stop="toggleDescriptionExpand(build.id)">
                                 {{ isDescriptionExpanded(build.id) ? $t("收起") : $t("查看全部") }}
                             </button>
                         </div>
@@ -381,8 +368,7 @@ defineExpose({
                         <div v-if="build.user" class="flex items-center gap-2 mb-3">
                             <div class="avatar placeholder">
                                 <div
-                                    class="bg-neutral text-neutral-content rounded-full w-6 h-6 inline-flex justify-center items-center text-xs"
-                                >
+                                    class="bg-neutral text-neutral-content rounded-full w-6 h-6 inline-flex justify-center items-center text-xs">
                                     <QQAvatar :qq="build.user.qq || 0" :name="build.user.name" />
                                 </div>
                             </div>
@@ -396,15 +382,10 @@ defineExpose({
                                     <Icon icon="ri:eye-line" class="w-4 h-4" />
                                     <span>{{ build.views }}</span>
                                 </div>
-                                <div
-                                    class="flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity"
-                                    @click="toggleLike(build)"
-                                >
-                                    <Icon
-                                        :icon="build.isLiked ? 'ri:heart-fill' : 'ri:heart-line'"
-                                        class="w-4 h-4"
-                                        :class="build.isLiked ? 'text-secondary' : ''"
-                                    />
+                                <div class="flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity"
+                                    @click="toggleLike(build)">
+                                    <Icon :icon="build.isLiked ? 'ri:heart-fill' : 'ri:heart-line'" class="w-4 h-4"
+                                        :class="build.isLiked ? 'text-secondary' : ''" />
                                     <span>{{ build.likes }}</span>
                                 </div>
                             </div>
@@ -413,21 +394,16 @@ defineExpose({
 
                         <!-- 操作按钮 -->
                         <div class="card-actions justify-end mt-2 flex gap-2">
-                            <button
-                                v-if="userStore.id === build.userId || userStore.isAdmin"
+                            <button v-if="userStore.id === build.userId || userStore.isAdmin"
                                 class="btn btn-secondary btn-sm flex-1"
                                 :class="{ 'btn-disabled': updatingBuild === build.id }"
-                                @click.stop="openEditModal(build)"
-                            >
+                                @click.stop="openEditModal(build)">
                                 <span v-if="updatingBuild === build.id" class="loading loading-spinner loading-sm" />
                                 <Icon v-else icon="ri:edit-line" class="w-4 h-4" />
                                 {{ $t("编辑") }}
                             </button>
-                            <button
-                                class="btn btn-primary btn-sm flex-1"
-                                :class="{ 'btn-disabled': loadingBuild === build.id }"
-                                @click.stop="useBuild(build.id)"
-                            >
+                            <button class="btn btn-primary btn-sm flex-1"
+                                :class="{ 'btn-disabled': loadingBuild === build.id }" @click.stop="useBuild(build.id)">
                                 <span v-if="loadingBuild === build.id" class="loading loading-spinner loading-sm" />
                                 <Icon v-else icon="ri:download-2-line" class="w-4 h-4" />
                                 {{ loadingBuild === build.id ? $t("加载中...") : $t("使用") }}
@@ -439,12 +415,8 @@ defineExpose({
 
             <!-- 加载更多 -->
             <div class="flex justify-center p-4">
-                <button
-                    v-if="builds.length >= LIMIT && builds.length < totalCount"
-                    class="btn btn-sm"
-                    :class="{ 'btn-disabled': loading }"
-                    @click="loadMore"
-                >
+                <button v-if="builds.length >= LIMIT && builds.length < totalCount" class="btn btn-sm"
+                    :class="{ 'btn-disabled': loading }" @click="loadMore">
                     <span v-if="loading" class="loading loading-spinner loading-sm" />
                     <span v-else>{{ $t("加载更多") }}</span>
                 </button>
@@ -465,46 +437,26 @@ defineExpose({
                 <label class="label" for="edit-title">
                     <span class="label-text">{{ $t("标题") }}</span>
                 </label>
-                <input
-                    id="edit-title"
-                    v-model="edit_title"
-                    type="text"
-                    class="input input-bordered w-full"
-                    :placeholder="t('输入标题...')"
-                    maxlength="50"
-                />
+                <input id="edit-title" v-model="edit_title" type="text" class="input input-bordered w-full"
+                    :placeholder="t('输入标题...')" maxlength="50" />
             </div>
             <div>
                 <label class="label" for="edit-desc">
                     <span class="label-text">{{ $t("描述") }}</span>
                 </label>
-                <textarea
-                    id="edit-desc"
-                    v-model="edit_desc"
-                    class="textarea textarea-bordered w-full"
-                    :placeholder="t('输入描述...')"
-                    rows="3"
-                    maxlength="200"
-                ></textarea>
+                <textarea id="edit-desc" v-model="edit_desc" class="textarea textarea-bordered w-full"
+                    :placeholder="t('输入描述...')" rows="3" maxlength="200"></textarea>
             </div>
         </div>
         <template #action>
-            <button
-                type="button"
-                class="btn btn-danger flex-1"
-                @click="deleteBuild"
-                :class="{ 'btn-disabled': deletingBuild === editingBuildId }"
-            >
+            <button type="button" class="btn btn-danger flex-1" @click="deleteBuild"
+                :class="{ 'btn-disabled': deletingBuild === editingBuildId }">
                 <span v-if="deletingBuild === editingBuildId" class="loading loading-spinner loading-sm" />
                 <Icon v-else icon="ri:delete-bin-line" class="w-4 h-4" />
                 {{ $t("game-launcher.delete") }}
             </button>
-            <button
-                type="button"
-                class="btn btn-primary flex-1"
-                @click="confirmEdit"
-                :class="{ 'btn-disabled': updatingBuild === editingBuildId }"
-            >
+            <button type="button" class="btn btn-primary flex-1" @click="confirmEdit"
+                :class="{ 'btn-disabled': updatingBuild === editingBuildId }">
                 <span v-if="updatingBuild === editingBuildId" class="loading loading-spinner loading-sm" />
                 {{ $t("char-build.save") }}
             </button>

@@ -10,6 +10,7 @@ pub mod logger;
 pub mod route;
 pub mod script;
 pub mod script_builtin;
+pub mod script_vision;
 pub mod setvol;
 pub mod tpl;
 pub mod tpl_match;

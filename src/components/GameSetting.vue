@@ -7,7 +7,7 @@ import { useGameStore } from "../store/game"
 import { type ConfigOption, engineConfigCategories, gameUserSettingsConfigCategories } from "../utils/game-config"
 
 const game = useGameStore()
-;(globalThis as any).__chapterCounter = 1
+    ; (globalThis as any).__chapterCounter = 1
 // 配置文件状态
 const engineIni = ref<Record<string, any>>({})
 const gameUserSettingsIni = ref<Record<string, any>>({})
@@ -406,9 +406,191 @@ function resetToDefault() {
  * 应用预设配置
  * @param preset 预设名称
  */
-function applyPreset(preset: "low" | "medium" | "high" | "ultra") {
+async function applyPreset(preset: "low" | "medium" | "high" | "ultra") {
+    const commonOptions = `AudioThread.UseBackgroundThreadPool=1
+MaterialBaking.RenderDocCapture=1
+r.Streaming.PoolSize=0
+r.Streaming.LimitPoolSizeToVRAM=1
+r.Streaming.AmortizeCPUToGPUCopy=1
+r.Streaming.Boost=2
+r.Streaming.FullyLoadUsedTextures=1
+r.Streaming.UseMipsFarAway=1
+r.Streaming.FramesForFullUpdate=1
+r.Streaming.DefragDynamicBounds=1
+r.Streaming.MassiveEnvironmentPoolSizeMB=16000
+r.Streaming.UsePerTextureBias=0
+r.Streaming.MaxHiddenPrimitiveViewBoost=1
+r.Streaming.UseBackgroundThreadPool=1
+r.Streaming.UseAsyncRequestsForDDC=1
+r.Streaming.AllowParallelStreamingRenderAssets=1
+r.Streaming.MaxNumTexturesToStreamPerFrame=12
+r.FastVRam.Tonemap=1
+r.FastVRam.Bloom=1
+r.FastVRam.Distortion=1
+r.FastVRam.HZB=1
+r.FastVRam.Histogram=1
+r.FastVRam.ShadowPointLight=1
+r.FastVRam.Upscale=1
+r.FastVRam.ShadowCSM=1
+r.FastVRam.CustomDepth=1
+r.FastVRam.DBufferA=1
+r.FastVRam.DBufferB=1
+r.FastVRam.DBufferC=1
+r.FastVRam.DBufferMask=1
+r.FastVRam.GBufferA=1
+r.FastVRam.GBufferB=1
+r.FastVRam.GBufferC=1
+r.FastVRam.GBufferD=1
+r.FastVRam.GBufferE=1
+r.FastVRam.GBufferF=1
+r.AllowPrecomputedVisibility=1
+r.AllowDepthBoundsTest=1
+r.AsyncCreateLightPrimitiveInteractions=1
+FX.AllowAsyncTick=1
+fx.AllowFastPathFunctionLibrary=1
+FX.EarlyScheduleAsync=1
+tick.AllowAsyncComponentTicks=1
+tick.AllowAsyncTickCleanup=1
+tick.AllowAsyncTickDispatch=1
+a.ForceParallelAnimUpdate=1
+a.ParallelAnimUpdate=1
+a.ParallelAnimEvaluation=1
+a.ParallelBlendPhysics=1
+r.ParallelTranslucency=1
+r.MultithreadedLightmapEncode=1
+r.MultithreadedShadowmapEncode=1
+r.MeshDrawCommands.ParallelPassSetup=1
+r.AOAsyncBuildQueue=1
+r.AOGlobalDistanceFieldCacheMostlyStaticSeparately=1
+s.AllowLevelRequestsWhileAsyncLoadingInMatch=1
+r.EnableAsyncComputeTranslucencyLightingVolumeClear=1
+r.TSR.AsyncCompute=3
+r.TSR.16BitVALU=1
+r.TSR.16BitVALU.AMD=0
+r.TSR.16BitVALU.Intel=0
+r.TSR.16BitVALU.Nvidia=1
+r.TSR.AlphaChannel=0
+r.TSR.History.ScreenPercentage=185
+r.TSR.History.SampleCount=8
+r.TSR.ShadingRejection.SampleCount=1.8
+r.TSR.ShadingRejection.Flickering.Period=2
+r.TranslucencyLightingVolumeDim=32
+r.Translucency.HeterogeneousVolumes=1
+r.TranslucencyVolumeBlur=0
+r.HZBOcclusion=0
+r.BloomQuality=4
+r.Lumen.Reflections.Allow=0
+r.Lumen.DiffuseIndirect.Allow=0
+r.Lumen.ScreenProbeGather.Allow=0
+r.Lumen.HardwareRayTracing.LightingMode=2
+fx.Niagara.MaxParticles=62914560
+fx.Niagara.AsyncCompute=1
+Niagara.Ribbon.GpuInitMode=2
+Niagara.GPUCulling.CPUToGPUThreshold=-1
+Niagara.GPUSorting.CPUToGPUThreshold=0
+FX.BatchAsync=1
+FX.BatchAsyncBatchSize=8192
+fx.NiagaraGPUDataBufferChunkSize=8192
+FX.MaxCPUParticlesPerEmitter=8000
+FX.MaxParticleTilePreAllocation=8000
+fx.Niagara.Compilation.MaxActiveTaskCount=8192
+fx.NiagaraBatcher.FreeBufferEarly=0
+FX.NiagaraComponentPool.CleanTime=0.02
+FX.NiagaraComponentPool.KillUnusedTime=0.2
+fx.ParticleManagerAsyncBatchSize=8192
+FX.ParticleSystemPool.CleanTime=0.02
+FX.ParticleSystemPool.KillUnusedTime=0.2
+fx.MaxNiagaraCPUParticlesPerEmitter=4000000
+fx.MaxNiagaraGPUParticlesSpawnPerFrame=8000000
+r.LightShaftBlurPasses=0
+r.LightShaftNumSamples=0
+r.LightShaftRenderToSeparateTranslucency=1
+r.GenerateMeshDistanceFields=False
+r.SupportHardwareRayTracing=True
+r.RayTracing=0
+r.ForceAllCoresForShaderCompiling=1
+r.Shaders.Optimize=1
+r.Shaders.ZeroInitialise=1
+r.Shaders.FastMath=1
+r.UseShaderPredraw=1
+r.DFShadowScatterTileCulling=1
+r.Shadow.CacheWholeSceneShadows=1
+r.DistanceFieldShadowing=0
+r.PostProcessing.DownsampleQuality=1
+r.Emitter.FastPoolEnable=1
+r.TriangleOrderOptimization=1
+r.VolumetricFog=0
+r.Fog=0
+r.LocalFogVolume=0
+r.DisableLODFade=1
+r.OneFrameThreadLag=0
+r.DontLimitOnBattery=1
+r.GBufferFormat=5
+r.VirtualTexture=1
+r.StaticMeshLODDistanceScale=0.1
+r.SceneColorFringeQuality=0
+r.MotionBlurQuality=0
+r.DepthOfFieldQuality=0
+r.DepthOfField.FarBlur=0
+r.FastBlurThreshold=0
+r.SkinCaching=1
+r.OptimizeForUAVPerformance=1
+r.SkeletalMeshLODBias=-2
+r.DFFullResolution=0
+r.DFFarTransitionScale=0
+landscape.BrushOptim=1
+r.ForceSceneHasDecals=1
+r.GeometryCollectionTripleBufferUploads=0
+r.HDR.Display.ColorGamut=1
+r.AOGlobalDistanceField=0
+GeometryCache.OffloadUpdate=1
+r.Nanite.MaterialBuffers.Defrag.Force=2
+r.DistanceFieldAO=0
+r.Nanite.ComputeRasterization=0
+r.CustomDepth.Order=0
+foliage.MaxOcclusionQueriesPerComponent=16
+foliage.MinOcclusionQueriesPerComponent=2
+foliage.MinInstancesPerOcclusionQuery=1024
+foliage.ForceLOD=2
+foliage.DitheredLOD=2
+foliage.DiscardDataOnLoad=True
+grass.DisableDynamicShadows=1
+grass.GrassMap.UseAsyncFetch=1
+grass.CullDistanceScale=16000
+grass.CullSubsections=1
+grass.UseHaltonDistribution=1
+rhi.SyncInterval=0
+rhi.UseSubmissionThread=0
+r.Metal.IOSRHIThread=1
+r.RHICmdAsyncRHIThreadDispatch=1
+r.RHICmdFlushRenderThreadTasks=1
+r.Vulkan.AllowAsyncCompute=1
+r.Vulkan.AllowPresentOnComputeQueue=1
+r.Vulkan.PipelineCacheFromShaderPipelineCache=1
+r.Vulkan.PipelineCacheLoad=1
+r.Vulkan.CPURHIThreadFramePacer=1
+r.Vulkan.CPURenderthreadFramePacer=1
+r.Vulkan.ExtensionFramePacer=1
+r.pso.CreateOnRHIThread=1
+r.PSOPrecache.DitheredLODFadingOutMaskPass=1
+r.PSOPrecache.GlobalComputeShaders=1
+r.PSOPrecache.TranslucencyAllPass=1
+s.ForceGCAfterLevelStreamedOut=1
+gc.AllowParallelGC=1
+gc.IncrementalPurgeGarbage=1
+gc.TimeBetweenPurgingMoreObjectsThanTheQuantum=0.004
+gc.CreateGCClusters=1
+gc.TimeBetweenPurgingPendingKillObjects=0.004
+r.ShaderCodeLibrary.MaxShaderGroupSize=31457280
+r.ShaderCodeLibrary.SeparateLoadingCache=1`.split("\n").reduce((acc, line) => {
+        const [key, value] = line.split("=")
+        acc[`SystemSettings|${key.trim()}`] = value
+        return acc
+    }, {} as Record<string, string>)
+
     const presets: Record<string, Record<string, any>> = {
         low: {
+            ...commonOptions,
             "SystemSettings|r.PostProcessQuality": 0,
             "SystemSettings|r.ViewDistanceScale": 0.5,
             "SystemSettings|r.DefaultFeature.Bloom": 0,
@@ -429,10 +611,8 @@ function applyPreset(preset: "low" | "medium" | "high" | "ultra") {
             "SystemSettings|r.Shadow.CSM.MaxCascades": 1,
             "SystemSettings|r.ParticleLightQuality": 0,
             "SystemSettings|r.SkyLightingQuality": 0,
-            "SystemSettings|r.Streaming.PoolSize": 64,
-            "SystemSettings|r.Streaming.MaxTempMemoryAllowed": 64,
             "SystemSettings|fx.Niagara.QualityLevel": 0,
-            "SystemSettings|r.MipMapLODBias": 3,
+            // "SystemSettings|r.MipMapLODBias": 3,
             "SystemSettings|r.Streaming.MipBias": 2,
             "SystemSettings|r.Streaming.AmortizeCPUToGPUCopy": 1,
             "SystemSettings|r.Streaming.MaxNumTexturesToStreamPerFrame": 5,
@@ -443,17 +623,11 @@ function applyPreset(preset: "low" | "medium" | "high" | "ultra") {
             "SystemSettings|r.SkeletalMeshLODBias": 3,
             "SystemSettings|r.StaticMeshLODDistanceScale": 4,
             "SystemSettings|r.SkeletalMesh.MinLodQualityLevel": 0,
-            "SystemSettings|r.Streaming.LimitPoolSizeToVRAM": 1,
-            "SystemSettings|r.Streaming.UseFixedPoolSize": 1,
-            "SystemSettings|r.Streaming.HLODStrategy": 2,
-            "SystemSettings|r.Streaming.PerTextureBiasViewBoostEnabled": 1,
             "SystemSettings|r.SkeletalMesh.StreamLODsEnabled": 0,
             "SystemSettings|r.DistanceFieldShadowing": 0,
             "SystemSettings|r.DistanceFieldAO": 0,
             "SystemSettings|r.DynamicGlobalIlluminationMethod": 0,
             "SystemSettings|r.ReflectionMethod": 0,
-            "SystemSettings|r.GenerateMeshDistanceFields": 0,
-            "SystemSettings|r.RayTracing": 0,
             "SystemSettings|r.Lumen.DiffuseIndirect.Allow": 0,
             "SystemSettings|r.Lumen.Reflections.Allow": 0,
             "SystemSettings|r.Lumen.ScreenProbeGather.Allow": 0,
@@ -470,8 +644,6 @@ function applyPreset(preset: "low" | "medium" | "high" | "ultra") {
             "SystemSettings|r.Shadow.DistanceScale": 0.1,
             "SystemSettings|r.AllowLandscapeShadows": 0,
             "SystemSettings|ContactShadows": 0,
-            "SystemSettings|r.VolumetricFog": 0,
-            "SystemSettings|r.Fog": 0,
             "SystemSettings|r.LightShafts": 0,
             "SystemSettings|r.BloomQuality": 0,
             "SystemSettings|r.EyeAdaptationQuality": 0,
@@ -502,9 +674,6 @@ function applyPreset(preset: "low" | "medium" | "high" | "ultra") {
             "SystemSettings|r.DefaultFeature.LensFlare": "False",
             "SystemSettings|r.DefaultFeature.LightUnits": 1,
             "SystemSettings|r.HZBOcclusion": 0,
-            "SystemSettings|r.FastVRam.Tonemapping": 0,
-            "SystemSettings|r.FastVRam.Bloom": 0,
-            "SystemSettings|r.FastVRam.DistanceFieldAOHZB": 0,
             "SystemSettings|r.SceneColorFormat": 3,
             "SystemSettings|r.SupportSkyAtmosphere": 0,
             "SystemSettings|r.SupportLowQualityLightmaps": 1,
@@ -569,40 +738,30 @@ function applyPreset(preset: "low" | "medium" | "high" | "ultra") {
             "ConsoleVariables|r.DoParallelDepthPrepass": 1,
         },
         medium: {
+            ...commonOptions,
             "SystemSettings|r.PostProcessQuality": 0,
-            "SystemSettings|r.ViewDistanceScale": 0.75,
+            "SystemSettings|r.DefaultFeature.Bloom": 0,
+            "SystemSettings|r.DefaultFeature.AmbientOcclusion": 0,
+            "SystemSettings|r.DefaultFeature.MotionBlur": "False",
             "SystemSettings|r.Tonemapper.Quality": 0,
             "SystemSettings|r.LightShaftQuality": 0,
-            "SystemSettings|r.Filter.SizeScale": 0.6,
             "SystemSettings|r.Tonemapper.GrainQuantization": 0,
             "SystemSettings|r.TranslucencyVolumeBlur": 0,
             "SystemSettings|r.MaterialQualityLevel": 0,
-            "SystemSettings|foliage.DiscardDataOnLoad": 1,
-            "SystemSettings|foliage.MaxTrianglesToRender": 1,
             "SystemSettings|r.Shadow.MaxCSMResolution": 256,
             "SystemSettings|r.Shadow.CSM.MaxCascades": 1,
             "SystemSettings|r.ParticleLightQuality": 0,
             "SystemSettings|r.SkyLightingQuality": 0,
-            "SystemSettings|r.Streaming.PoolSize": 64,
-            "SystemSettings|r.Streaming.MaxTempMemoryAllowed": 64,
             "SystemSettings|fx.Niagara.QualityLevel": 0,
-            "SystemSettings|r.Streaming.MipBias": 2,
-            "SystemSettings|r.Streaming.AmortizeCPUToGPUCopy": 1,
-            "SystemSettings|r.Streaming.MaxNumTexturesToStreamPerFrame": 5,
-            "SystemSettings|r.Streaming.Boost": 1,
             "SystemSettings|r.MaxQualityMode": 0,
             "SystemSettings|r.ViewDistanceScale.ApplySecondaryScale": 1,
-            "SystemSettings|r.ViewDistanceScale.SecondaryScale": 0.5,
             "SystemSettings|r.SkeletalMeshLODBias": 3,
-            "SystemSettings|r.StaticMeshLODDistanceScale": 4,
             "SystemSettings|r.SkeletalMesh.MinLodQualityLevel": 0,
             "SystemSettings|r.SkeletalMesh.StreamLODsEnabled": 0,
             "SystemSettings|r.DistanceFieldShadowing": 0,
             "SystemSettings|r.DistanceFieldAO": 0,
             "SystemSettings|r.DynamicGlobalIlluminationMethod": 0,
             "SystemSettings|r.ReflectionMethod": 0,
-            "SystemSettings|r.GenerateMeshDistanceFields": 0,
-            "SystemSettings|r.RayTracing": 0,
             "SystemSettings|r.Lumen.DiffuseIndirect.Allow": 0,
             "SystemSettings|r.Lumen.Reflections.Allow": 0,
             "SystemSettings|r.Lumen.ScreenProbeGather.Allow": 0,
@@ -618,9 +777,6 @@ function applyPreset(preset: "low" | "medium" | "high" | "ultra") {
             "SystemSettings|r.Shadow.RadiusThreshold": 0.03,
             "SystemSettings|r.Shadow.DistanceScale": 0.1,
             "SystemSettings|r.AllowLandscapeShadows": 0,
-            "SystemSettings|ContactShadows": 0,
-            "SystemSettings|r.VolumetricFog": 0,
-            "SystemSettings|r.Fog": 0,
             "SystemSettings|r.LightShafts": 0,
             "SystemSettings|r.BloomQuality": 0,
             "SystemSettings|r.EyeAdaptationQuality": 0,
@@ -629,13 +785,12 @@ function applyPreset(preset: "low" | "medium" | "high" | "ultra") {
             "SystemSettings|r.LensFlareQuality": 0,
             "SystemSettings|r.SceneColorFringeQuality": 0,
             "SystemSettings|r.DepthOfFieldQuality": 0,
-            "SystemSettings|r.RenderTargetPoolMin": 100,
             "SystemSettings|r.Upscale.Quality": 0,
             "SystemSettings|r.TemporalAA.Upsampling": 0,
             "SystemSettings|r.PostProcessAAQuality": 0,
             "SystemSettings|r.RefractionQuality": 0,
             "SystemSettings|r.ReflectionEnvironment": 0,
-            "SystemSettings|fx.MaxCPUParticlesPerEmitter": 10,
+            "SystemSettings|fx.MaxCPUParticlesPerEmitter": 100000,
             "SystemSettings|r.EmitterSpawnRateScale": 0.1,
             "SystemSettings|r.FastBlurThreshold": 0,
             "SystemSettings|r.TranslucencyLightingVolumeDim": 1,
@@ -647,9 +802,6 @@ function applyPreset(preset: "low" | "medium" | "high" | "ultra") {
             "SystemSettings|r.DefaultFeature.LensFlare": "False",
             "SystemSettings|r.DefaultFeature.LightUnits": 1,
             "SystemSettings|r.HZBOcclusion": 0,
-            "SystemSettings|r.FastVRam.Tonemapping": 0,
-            "SystemSettings|r.FastVRam.Bloom": 0,
-            "SystemSettings|r.FastVRam.DistanceFieldAOHZB": 0,
             "SystemSettings|r.SceneColorFormat": 3,
             "SystemSettings|r.SupportSkyAtmosphere": 0,
             "SystemSettings|r.SupportLowQualityLightmaps": 1,
@@ -662,90 +814,44 @@ function applyPreset(preset: "low" | "medium" | "high" | "ultra") {
             "SystemSettings|r.Tessellation": 0,
             "SystemSettings|r.Occlusion.MaxPixelShaderDiffuseLuminance": 0.01,
             "SystemSettings|r.ForceLOD": 1,
-            "SystemSettings|r.LightmapStreaming": 1,
-            "SystemSettings|r.LightmapStreaming.MaxRequestedMipBias": 2,
             "SystemSettings|r.GTS.Async": 1,
             "SystemSettings|r.CustomDepth": 0,
             "SystemSettings|r.AllowGlobalClipPlane": 0,
             "SystemSettings|r.AllowCompaction": 1,
-            "SystemSettings|r.Streaming.MaxTextureSize": 512,
             "SystemSettings|r.ForceReleaseTextureImmediately": 1,
             "SystemSettings|r.MSAACount": 1,
             "SystemSettings|r.HLOD": 1,
             "SystemSettings|r.HLOD.VisibilityQueryLODOffset": 2,
+            "/Script/Engine.RendererSettings|r.AllowOcclusionQueries": "True",
+            "/Script/Engine.RendererSettings|r.SupportLowQualityLightmaps": "True",
+            "/Script/Engine.RendererSettings|r.SupportStationarySkylight": "False",
+            "/Script/Engine.RendererSettings|r.SupportSkyLighting": "False",
+            "/Script/Engine.RendererSettings|r.SupportPointLightWholeSceneShadows": "False",
+            "/Script/Engine.RendererSettings|r.ReflectionEnvironment": "False",
+            "/Script/Engine.RendererSettings|r.ReflectionCaptureResolution": 16,
+            "/Script/Engine.RendererSettings|r.TranslucentSortPolicy": 0,
+            "/Script/Engine.RendererSettings|r.DistanceFieldAO": "False",
+            "/Script/Engine.RendererSettings|r.DistanceFieldShadowing": "False",
+            "/Script/Engine.RendererSettings|r.RayTracing": "False",
         },
         high: {
+            ...commonOptions,
             "SystemSettings|foliage.DiscardDataOnLoad": 1,
             "SystemSettings|foliage.MaxTrianglesToRender": 1,
             "SystemSettings|r.Shadow.MaxCSMResolution": 256,
             "SystemSettings|r.Shadow.CSM.MaxCascades": 1,
-            "SystemSettings|r.ParticleLightQuality": 0,
-            "SystemSettings|r.SkyLightingQuality": 0,
-            "SystemSettings|fx.Niagara.QualityLevel": 0,
-            "SystemSettings|r.Streaming.MipBias": 2,
-            "SystemSettings|r.Streaming.AmortizeCPUToGPUCopy": 1,
-            "SystemSettings|r.Streaming.MaxNumTexturesToStreamPerFrame": 5,
-            "SystemSettings|r.Streaming.Boost": 1,
-            "SystemSettings|r.MaxQualityMode": 0,
-            "SystemSettings|r.SkeletalMeshLODBias": 3,
-            "SystemSettings|r.StaticMeshLODDistanceScale": 4,
-            "SystemSettings|r.SkeletalMesh.MinLodQualityLevel": 0,
-            "SystemSettings|r.SkeletalMesh.StreamLODsEnabled": 0,
-            "SystemSettings|r.DistanceFieldShadowing": 0,
-            "SystemSettings|r.DistanceFieldAO": 0,
-            "SystemSettings|r.DynamicGlobalIlluminationMethod": 0,
-            "SystemSettings|r.ReflectionMethod": 0,
-            "SystemSettings|r.GenerateMeshDistanceFields": 0,
-            "SystemSettings|r.RayTracing": 0,
+            "SystemSettings|foliage.DensityScale": 0,
+            "SystemSettings|grass.DensityScale": 0,
+            "SystemSettings|r.DetailMode": 0,
+            "SystemSettings|r.Lumen.DiffuseIndirect.Allow": 0,
+            "SystemSettings|r.Lumen.Reflections.Allow": 0,
+            "SystemSettings|r.Lumen.ScreenProbeGather.Allow": 0,
             "SystemSettings|r.FinishCurrentFrame": 0,
             "SystemSettings|r.BasePassForceOutputsVelocity": 0,
             "SystemSettings|r.MotionBlurQuality": 0,
             "SystemSettings|r.AmbientOcclusionLevels": 0,
             "SystemSettings|r.GBufferFormat": 0,
             "SystemSettings|r.VirtualTexture": 0,
-            "SystemSettings|r.LightFunctionQuality": 0,
-            "SystemSettings|r.AllowLandscapeShadows": 0,
-            "SystemSettings|ContactShadows": 0,
-            "SystemSettings|r.VolumetricFog": 0,
-            "SystemSettings|r.Fog": 0,
-            "SystemSettings|r.LightShafts": 0,
-            "SystemSettings|r.BloomQuality": 0,
-            "SystemSettings|r.EyeAdaptationQuality": 0,
-            "SystemSettings|r.TonemapperQuality": 0,
-            "SystemSettings|r.AmbientOcclusionRadiusScale": 0,
-            "SystemSettings|r.LensFlareQuality": 0,
-            "SystemSettings|r.SceneColorFringeQuality": 0,
-            "SystemSettings|r.DepthOfFieldQuality": 0,
-            "SystemSettings|r.RenderTargetPoolMin": 100,
-            "SystemSettings|r.Upscale.Quality": 0,
-            "SystemSettings|r.TemporalAA.Upsampling": 0,
-            "SystemSettings|r.PostProcessAAQuality": 0,
-            "SystemSettings|r.RefractionQuality": 0,
-            "SystemSettings|r.ReflectionEnvironment": 0,
-            "SystemSettings|fx.MaxCPUParticlesPerEmitter": 10,
-            "SystemSettings|r.EmitterSpawnRateScale": 0.5,
-            "SystemSettings|r.FastBlurThreshold": 0,
-            "SystemSettings|r.TranslucencyLightingVolumeDim": 1,
-            "SystemSettings|foliage.DensityScale": 0,
-            "SystemSettings|grass.DensityScale": 0,
-            "SystemSettings|r.LODDistanceFactor": 3,
-            "SystemSettings|r.HZBOcclusion": 0,
-            "SystemSettings|r.FastVRam.Tonemapping": 0,
-            "SystemSettings|r.FastVRam.Bloom": 0,
-            "SystemSettings|r.FastVRam.DistanceFieldAOHZB": 0,
-            "SystemSettings|r.SceneColorFormat": 3,
-            "SystemSettings|r.SupportSkyAtmosphere": 0,
-            "SystemSettings|r.SupportLowQualityLightmaps": 1,
-            "SystemSettings|r.SupportPointLightWholeSceneShadows": 0,
-            "SystemSettings|r.SupportSkyLighting": 0,
-            "SystemSettings|r.SupportStationarySkylight": 0,
-            "SystemSettings|r.MobileHDR": 0,
-            "SystemSettings|r.bForceCPUUpdateBoundingBoxes": 1,
-            "SystemSettings|r.DisableLODFade": 1,
-            "SystemSettings|r.Tessellation": 0,
-            "SystemSettings|r.ForceLOD": 1,
-            "SystemSettings|r.LightmapStreaming": 1,
-            "SystemSettings|r.GTS.Async": 1,
             "SystemSettings|r.CustomDepth": 0,
             "SystemSettings|r.AllowGlobalClipPlane": 0,
             "SystemSettings|r.AllowCompaction": 1,
@@ -753,48 +859,31 @@ function applyPreset(preset: "low" | "medium" | "high" | "ultra") {
             "SystemSettings|r.MSAACount": 1,
             "SystemSettings|r.HLOD": 1,
             "SystemSettings|r.HLOD.VisibilityQueryLODOffset": 2,
+            "/Script/Engine.RendererSettings|r.AllowOcclusionQueries": "True",
+            "/Script/Engine.RendererSettings|r.SupportLowQualityLightmaps": "True",
+            "/Script/Engine.RendererSettings|r.SupportStationarySkylight": "False",
+            "/Script/Engine.RendererSettings|r.SupportSkyLighting": "False",
+            "/Script/Engine.RendererSettings|r.SupportPointLightWholeSceneShadows": "False",
+            "/Script/Engine.RendererSettings|r.ReflectionEnvironment": "False",
+            "/Script/Engine.RendererSettings|r.ReflectionCaptureResolution": 16,
+            "/Script/Engine.RendererSettings|r.TranslucentSortPolicy": 0,
+            "/Script/Engine.RendererSettings|r.DistanceFieldAO": "False",
+            "/Script/Engine.RendererSettings|r.DistanceFieldShadowing": "False",
+            "/Script/Engine.RendererSettings|r.RayTracing": "False",
         },
         ultra: {
-            "SystemSettings|foliage.DiscardDataOnLoad": 1,
-            "SystemSettings|foliage.MaxTrianglesToRender": 1,
-            "SystemSettings|r.RenderTargetPoolMin": 100,
-            "SystemSettings|r.Upscale.Quality": 0,
-            "SystemSettings|r.TemporalAA.Upsampling": 0,
-            "SystemSettings|r.PostProcessAAQuality": 0,
-            "SystemSettings|r.ScreenPercentage": 50,
-            "SystemSettings|r.RefractionQuality": 0,
-            "SystemSettings|r.ReflectionEnvironment": 0,
-            "SystemSettings|fx.MaxCPUParticlesPerEmitter": 10,
-            "SystemSettings|r.EmitterSpawnRateScale": 0.5,
-            "SystemSettings|r.FastBlurThreshold": 0,
-            "SystemSettings|r.TranslucencyLightingVolumeDim": 1,
-            "SystemSettings|foliage.DensityScale": 0,
-            "SystemSettings|grass.DensityScale": 0,
-            "SystemSettings|r.LODDistanceFactor": 3,
-            "SystemSettings|r.HZBOcclusion": 0,
-            "SystemSettings|r.FastVRam.Tonemapping": 0,
-            "SystemSettings|r.FastVRam.Bloom": 0,
-            "SystemSettings|r.FastVRam.DistanceFieldAOHZB": 0,
-            "SystemSettings|r.SceneColorFormat": 3,
-            "SystemSettings|r.SupportSkyAtmosphere": 0,
-            "SystemSettings|r.SupportLowQualityLightmaps": 1,
-            "SystemSettings|r.SupportPointLightWholeSceneShadows": 0,
-            "SystemSettings|r.SupportSkyLighting": 0,
-            "SystemSettings|r.SupportStationarySkylight": 0,
-            "SystemSettings|r.MobileHDR": 0,
-            "SystemSettings|r.bForceCPUUpdateBoundingBoxes": 1,
-            "SystemSettings|r.DisableLODFade": 1,
-            "SystemSettings|r.Tessellation": 0,
-            "SystemSettings|r.ForceLOD": 1,
-            "SystemSettings|r.LightmapStreaming": 1,
-            "SystemSettings|r.GTS.Async": 1,
-            "SystemSettings|r.CustomDepth": 0,
-            "SystemSettings|r.AllowGlobalClipPlane": 0,
-            "SystemSettings|r.AllowCompaction": 1,
-            "SystemSettings|r.ForceReleaseTextureImmediately": 1,
-            "SystemSettings|r.MSAACount": 1,
-            "SystemSettings|r.HLOD": 1,
-            "SystemSettings|r.HLOD.VisibilityQueryLODOffset": 2,
+            ...commonOptions,
+            "/Script/Engine.RendererSettings|r.AllowOcclusionQueries": "True",
+            "/Script/Engine.RendererSettings|r.SupportLowQualityLightmaps": "True",
+            "/Script/Engine.RendererSettings|r.SupportStationarySkylight": "False",
+            "/Script/Engine.RendererSettings|r.SupportSkyLighting": "False",
+            "/Script/Engine.RendererSettings|r.SupportPointLightWholeSceneShadows": "False",
+            "/Script/Engine.RendererSettings|r.ReflectionEnvironment": "False",
+            "/Script/Engine.RendererSettings|r.ReflectionCaptureResolution": 16,
+            "/Script/Engine.RendererSettings|r.TranslucentSortPolicy": 0,
+            "/Script/Engine.RendererSettings|r.DistanceFieldAO": "False",
+            "/Script/Engine.RendererSettings|r.DistanceFieldShadowing": "False",
+            "/Script/Engine.RendererSettings|r.RayTracing": "False",
         },
     }
 
@@ -811,7 +900,7 @@ function applyPreset(preset: "low" | "medium" | "high" | "ultra") {
         }
         iniFile[section][key] = value
     }
-    saveConfigs()
+    await saveConfigs()
 }
 
 // 监听游戏路径变化
@@ -841,19 +930,20 @@ function openConfigDir() {
         <!-- 配置文件路径显示 -->
         <div v-if="game.path" class="bg-base-200 p-2 rounded-lg text-sm">
             <div class="text-base-content/70">配置目录:</div>
-            <div class="font-mono text-xs break-all hover:underline cursor-pointer" @click="openConfigDir">{{ configDir }}</div>
+            <div class="font-mono text-xs break-all hover:underline cursor-pointer" @click="openConfigDir">{{ configDir
+            }}</div>
         </div>
         <div v-else class="bg-warning/10 p-2 rounded-lg text-sm text-warning">请先在游戏设置中配置游戏路径</div>
 
         <!-- 预设配置 -->
         <div v-if="game.path" class="bg-base-100 p-4 rounded-lg">
-            <h3 class="text-sm font-bold mb-3">预设配置</h3>
+            <h3 class="text-sm font-bold mb-3">性能优化预设</h3>
             <div class="flex gap-2">
-                <button class="btn btn-sm btn-outline" @click="resetToDefault">默认</button>
-                <button class="btn btn-sm btn-outline" @click="applyPreset('low')">低</button>
-                <button class="btn btn-sm btn-outline" @click="applyPreset('medium')">中</button>
-                <button class="btn btn-sm btn-outline" @click="applyPreset('high')">高</button>
-                <button class="btn btn-sm btn-outline" @click="applyPreset('ultra')">超高</button>
+                <button class="btn btn-sm btn-outline" @click="resetToDefault">无优化</button>
+                <button class="btn btn-sm btn-outline" @click="applyPreset('low')">极低</button>
+                <button class="btn btn-sm btn-outline" @click="applyPreset('medium')">低</button>
+                <button class="btn btn-sm btn-outline" @click="applyPreset('high')">中</button>
+                <button class="btn btn-sm btn-outline" @click="applyPreset('ultra')">高</button>
             </div>
         </div>
 
@@ -869,60 +959,40 @@ function openConfigDir() {
                     <div class="text-sm font-medium">分辨率</div>
                     <div class="text-xs text-base-content/50">游戏窗口分辨率</div>
                     <div class="flex flex-wrap gap-2 mt-2">
-                        <button
-                            v-for="res in commonResolutions"
-                            :key="res.label"
-                            class="btn btn-sm"
-                            :class="{
-                                'btn-primary':
-                                    !isCustomResolution && currentResolution.width === res.width && currentResolution.height === res.height,
-                                'btn-outline':
-                                    isCustomResolution || currentResolution.width !== res.width || currentResolution.height !== res.height,
-                            }"
-                            @click="selectResolution(res.width, res.height)"
-                        >
+                        <button v-for="res in commonResolutions" :key="res.label" class="btn btn-sm" :class="{
+                            'btn-primary':
+                                !isCustomResolution && currentResolution.width === res.width && currentResolution.height === res.height,
+                            'btn-outline':
+                                isCustomResolution || currentResolution.width !== res.width || currentResolution.height !== res.height,
+                        }" @click="selectResolution(res.width, res.height)">
                             {{ res.label }}
                         </button>
-                        <button
-                            class="btn btn-sm"
-                            :class="{
-                                'btn-primary': isCustomResolution,
-                                'btn-outline': !isCustomResolution,
-                            }"
-                            @click="isCustomResolution = true"
-                        >
+                        <button class="btn btn-sm" :class="{
+                            'btn-primary': isCustomResolution,
+                            'btn-outline': !isCustomResolution,
+                        }" @click="isCustomResolution = true">
                             自定义
                         </button>
                     </div>
                     <!-- 自定义分辨率输入 -->
                     <div v-if="isCustomResolution" class="flex items-center gap-2 mt-2">
-                        <input
-                            v-model.number="customResolution.width"
-                            type="number"
-                            class="input input-bordered input-sm w-24"
-                            placeholder="宽度"
-                        />
+                        <input v-model.number="customResolution.width" type="number"
+                            class="input input-bordered input-sm w-24" placeholder="宽度" />
                         <span class="text-base-content/50">x</span>
-                        <input
-                            v-model.number="customResolution.height"
-                            type="number"
-                            class="input input-bordered input-sm w-24"
-                            placeholder="高度"
-                        />
+                        <input v-model.number="customResolution.height" type="number"
+                            class="input input-bordered input-sm w-24" placeholder="高度" />
                         <button class="btn btn-sm btn-primary" @click="applyCustomResolution">应用</button>
                     </div>
                 </div>
 
                 <!-- 其他游戏设置选项 -->
-                <div
-                    v-for="option in gameSettingsCategory.options.filter(opt => opt.key !== 'ResolutionSize')"
-                    :key="option.key"
-                    class="flex flex-col gap-2 p-3 bg-base-200 rounded"
-                >
+                <div v-for="option in gameSettingsCategory.options.filter(opt => opt.key !== 'ResolutionSize')"
+                    :key="option.key" class="flex flex-col gap-2 p-3 bg-base-200 rounded">
                     <!-- 标题和操作区 -->
                     <div class="flex items-center justify-between gap-2">
                         <span class="text-sm font-medium">{{ option.label }}</span>
-                        <button class="btn btn-ghost btn-xs text-base-content/50" title="重置为默认值" @click="resetOption(option)">
+                        <button class="btn btn-ghost btn-xs text-base-content/50" title="重置为默认值"
+                            @click="resetOption(option)">
                             <Icon icon="ri:refresh-line" />
                         </button>
                     </div>
@@ -936,31 +1006,22 @@ function openConfigDir() {
                     <div class="flex items-center gap-2">
                         <!-- 布尔值开关 -->
                         <div v-if="option.type === 'boolean'" class="flex-1">
-                            <input
-                                :checked="getOptionValue(option)"
-                                type="checkbox"
-                                class="toggle toggle-secondary"
-                                @change="setOptionValue(option, ($event.target as HTMLInputElement).checked)"
-                            />
+                            <input :checked="getOptionValue(option)" type="checkbox" class="toggle toggle-secondary"
+                                @change="setOptionValue(option, ($event.target as HTMLInputElement).checked)" />
                         </div>
 
                         <!-- 数字输入 -->
                         <div v-else-if="option.type === 'number'" class="flex-1">
-                            <input
-                                :value="getOptionValue(option)"
-                                type="number"
+                            <input :value="getOptionValue(option)" type="number"
                                 class="input input-bordered input-sm w-full"
-                                @input="setOptionValue(option, parseFloat(($event.target as HTMLInputElement).value))"
-                            />
+                                @input="setOptionValue(option, parseFloat(($event.target as HTMLInputElement).value))" />
                         </div>
 
                         <!-- 选择器 -->
                         <div v-else-if="option.type === 'select'" class="flex-1">
-                            <Select
-                                :model-value="getOptionValue(option)"
+                            <Select :model-value="getOptionValue(option)"
                                 class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-full"
-                                @update:model-value="setOptionValue(option, $event)"
-                            >
+                                @update:model-value="setOptionValue(option, $event)">
                                 <SelectItem v-for="(opt, idx) in option.options" :key="idx" :value="opt.value">
                                     {{ opt.label }}
                                 </SelectItem>
@@ -976,31 +1037,24 @@ function openConfigDir() {
 
         <!-- 引擎设置分类（放在折叠框中） -->
         <div v-if="game.path" class="space-y-4">
-            <CollapsibleSection
-                v-for="category in engineCategories"
-                :key="category.name"
-                :title="category.label"
-                :is-open="expandedCategories.has(category.name)"
-                @toggle="toggleCategory(category.name)"
-            >
+            <CollapsibleSection v-for="category in engineCategories" :key="category.name" :title="category.label"
+                :is-open="expandedCategories.has(category.name)" @toggle="toggleCategory(category.name)">
                 <div v-if="category.description" class="text-xs text-base-content/50 my-3">
                     {{ category.description }}
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <div v-for="option in category.options" :key="option.key" class="flex flex-col gap-2 p-3 bg-base-200 rounded">
+                    <div v-for="option in category.options" :key="option.key"
+                        class="flex flex-col gap-2 p-3 bg-base-200 rounded">
                         <!-- 标题和操作区 -->
                         <div class="flex items-center justify-between gap-2">
                             <div class="flex items-center gap-2">
                                 <!-- 启用/禁用开关 -->
-                                <input
-                                    :checked="isOptionEnabled(option)"
-                                    type="checkbox"
-                                    class="toggle toggle-primary toggle-sm"
-                                    @change="toggleOptionEnabled(option)"
-                                />
+                                <input :checked="isOptionEnabled(option)" type="checkbox"
+                                    class="toggle toggle-primary toggle-sm" @change="toggleOptionEnabled(option)" />
                                 <span class="text-sm font-medium">{{ option.label }}</span>
                             </div>
-                            <button class="btn btn-ghost btn-xs text-base-content/50" title="重置为默认值" @click="resetOption(option)">
+                            <button class="btn btn-ghost btn-xs text-base-content/50" title="重置为默认值"
+                                @click="resetOption(option)">
                                 <Icon icon="ri:refresh-line" />
                             </button>
                         </div>
@@ -1014,45 +1068,31 @@ function openConfigDir() {
                         <div class="flex items-center gap-2">
                             <!-- 布尔值开关 -->
                             <div v-if="option.type === 'boolean'" class="flex-1">
-                                <input
-                                    :checked="getOptionValue(option)"
-                                    type="checkbox"
-                                    class="toggle toggle-secondary"
+                                <input :checked="getOptionValue(option)" type="checkbox" class="toggle toggle-secondary"
                                     :disabled="!isOptionEnabled(option)"
-                                    @change="setOptionValue(option, ($event.target as HTMLInputElement).checked)"
-                                />
+                                    @change="setOptionValue(option, ($event.target as HTMLInputElement).checked)" />
                             </div>
 
                             <!-- 数字输入 -->
                             <div v-else-if="option.type === 'number'" class="flex-1">
-                                <input
-                                    :value="getOptionValue(option)"
-                                    type="number"
-                                    class="input input-bordered input-sm w-full"
-                                    :disabled="!isOptionEnabled(option)"
-                                    @input="setOptionValue(option, parseFloat(($event.target as HTMLInputElement).value))"
-                                />
+                                <input :value="getOptionValue(option)" type="number"
+                                    class="input input-bordered input-sm w-full" :disabled="!isOptionEnabled(option)"
+                                    @input="setOptionValue(option, parseFloat(($event.target as HTMLInputElement).value))" />
                             </div>
 
                             <!-- 字符串输入 -->
                             <div v-else-if="option.type === 'string'" class="flex-1">
-                                <input
-                                    :value="getOptionValue(option)"
-                                    type="text"
-                                    class="input input-bordered input-sm w-full"
-                                    :disabled="!isOptionEnabled(option)"
-                                    @input="setOptionValue(option, ($event.target as HTMLInputElement).value)"
-                                />
+                                <input :value="getOptionValue(option)" type="text"
+                                    class="input input-bordered input-sm w-full" :disabled="!isOptionEnabled(option)"
+                                    @input="setOptionValue(option, ($event.target as HTMLInputElement).value)" />
                             </div>
 
                             <!-- 选择器 -->
                             <div v-else-if="option.type === 'select'" class="flex-1">
-                                <Select
-                                    :model-value="getOptionValue(option)"
+                                <Select :model-value="getOptionValue(option)"
                                     class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-full"
                                     :disabled="!isOptionEnabled(option)"
-                                    @update:model-value="setOptionValue(option, $event)"
-                                >
+                                    @update:model-value="setOptionValue(option, $event)">
                                     <SelectItem v-for="(opt, idx) in option.options" :key="idx" :value="opt.value">
                                         {{ opt.label }}
                                     </SelectItem>
@@ -1060,7 +1100,8 @@ function openConfigDir() {
                             </div>
 
                             <!-- 默认值显示 -->
-                            <div class="text-xs text-base-content/50 whitespace-nowrap">默认: {{ option.defaultValue }}</div>
+                            <div class="text-xs text-base-content/50 whitespace-nowrap">默认: {{ option.defaultValue }}
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -725,7 +725,8 @@ export interface DNACharDetailBean {
     charName: string
     conWeaponEid?: string
     conWeaponId?: number
-    currentVolume: string
+    sumVolume: number
+    currentVolume: number
     elementIcon: string
     elementName: string
     gradeLevel: number
@@ -734,7 +735,6 @@ export interface DNACharDetailBean {
     modes: DNAModesBean[]
     paint: string
     skills: DNASkillBean[]
-    sumVolume: string
     traces: DNATraceBean[]
 }
 

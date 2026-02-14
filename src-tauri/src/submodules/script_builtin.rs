@@ -1,12 +1,16 @@
 use boa_engine::class::Class;
 use boa_engine::job::NativeAsyncJob;
-use boa_engine::js_error;
-use boa_engine::object::builtins::{JsFunction, JsPromise};
+use boa_engine::object::builtins::{JsArray, JsFunction, JsPromise};
 use boa_engine::{
     Context, IntoJsFunctionCopied, JsData, JsError, JsNativeError, JsObject, JsResult, JsValue,
-    js_string, js_value, object::builtins::JsArray,
+    js_string, js_value,
 };
-use opencv::prelude::{MatTraitConst, MatTraitConstManual};
+use boa_engine::{js_error, js_object};
+use opencv::{
+    core::Mat,
+    imgproc,
+    prelude::{MatTraitConst, MatTraitConstManual},
+};
 use std::{thread, time::Duration};
 use windows::Win32::Foundation::HWND;
 use windows::Win32::UI::WindowsAndMessaging::{GetForegroundWindow, SetForegroundWindow};
@@ -17,6 +21,11 @@ use crate::submodules::{
     input::*,
     jsmat::{IntoJs, JsMat},
     route::find_path,
+    script_vision::{
+        batch_match_color_impl, color_filter_impl, color_key_match_impl, find_contours_impl,
+        hamming_distance_hex, morphology_ex_impl, normalize_hash_hex, orb_match_count_impl,
+        perceptual_hash_impl, sift_locate_impl,
+    },
     tpl::{get_template, get_template_b64},
     tpl_match::match_template,
     util::{capture_window, capture_window_wgc, check_size},
@@ -38,6 +47,173 @@ impl JsArgExt for JsValue {
                 let msg = format!("Argument must be a {}", T::NAME);
                 JsNativeError::typ().with_message(msg).into()
             })
+    }
+}
+
+/// 将 JS `Mat[]` 数组参数解析为 Rust `Vec<Mat>`。
+fn _parse_mat_array(arg: JsValue, ctx: &mut Context) -> JsResult<Vec<Mat>> {
+    let array_obj = arg
+        .as_object()
+        .ok_or_else(|| JsNativeError::typ().with_message("tpls 参数必须是 Mat[]"))?;
+    let array = JsArray::from_object(array_obj.clone())?;
+    let length = array.length(ctx)? as usize;
+    let mut mats = Vec::with_capacity(length);
+
+    for idx in 0..length {
+        let value = array.get(idx as u32, ctx)?;
+        let js_mat = value
+            .get_native::<JsMat>()
+            .map_err(|_| JsNativeError::typ().with_message(format!("tpls[{idx}] 必须是 Mat")))?;
+        mats.push((*js_mat.borrow().data().inner).clone());
+    }
+
+    Ok(mats)
+}
+
+/// 将 JS `number[]` 数组参数解析为 Rust `Vec<u32>`。
+fn _parse_u32_array(arg: JsValue, ctx: &mut Context) -> JsResult<Vec<u32>> {
+    let array_obj = arg
+        .as_object()
+        .ok_or_else(|| JsNativeError::typ().with_message("colors 参数必须是 number[]"))?;
+    let array = JsArray::from_object(array_obj.clone())?;
+    let length = array.length(ctx)? as usize;
+    let mut values = Vec::with_capacity(length);
+
+    for idx in 0..length {
+        let value = array.get(idx as u32, ctx)?;
+        let number = value
+            .to_number(ctx)
+            .map_err(|_| JsNativeError::typ().with_message(format!("colors[{idx}] 必须是数字")))?;
+        values.push(number as u32 & 0x00FF_FFFF);
+    }
+
+    Ok(values)
+}
+
+/// 将 JS `string[]` 数组参数解析为 Rust `Vec<String>`。
+fn _parse_string_array(arg: JsValue, ctx: &mut Context) -> JsResult<Vec<String>> {
+    let array_obj = arg
+        .as_object()
+        .ok_or_else(|| JsNativeError::typ().with_message("hashes 参数必须是 string[]"))?;
+    let array = JsArray::from_object(array_obj.clone())?;
+    let length = array.length(ctx)? as usize;
+    let mut values = Vec::with_capacity(length);
+
+    for idx in 0..length {
+        let value = array.get(idx as u32, ctx)?;
+        let text = value
+            .to_string(ctx)
+            .map_err(|_| JsNativeError::typ().with_message(format!("hashes[{idx}] 必须是字符串")))?
+            .to_std_string_lossy();
+        values.push(text);
+    }
+
+    Ok(values)
+}
+
+/// 解析轮廓检索模式参数，支持字符串别名或 OpenCV 常量值。
+fn _parse_contour_mode(mode: Option<JsValue>, ctx: &mut Context) -> JsResult<i32> {
+    let Some(value) = mode else {
+        return Ok(imgproc::RETR_TREE);
+    };
+    if value.is_undefined() || value.is_null() {
+        return Ok(imgproc::RETR_TREE);
+    }
+
+    if let Some(mode_num) = value.as_number() {
+        return Ok(mode_num as i32);
+    }
+
+    let mode_text = value.to_string(ctx)?.to_std_string_lossy().to_lowercase();
+    match mode_text.as_str() {
+        "external" => Ok(imgproc::RETR_EXTERNAL),
+        "list" => Ok(imgproc::RETR_LIST),
+        "ccomp" => Ok(imgproc::RETR_CCOMP),
+        "tree" => Ok(imgproc::RETR_TREE),
+        "floodfill" => Ok(imgproc::RETR_FLOODFILL),
+        _ => Err(JsNativeError::typ()
+            .with_message(
+                "mode 参数无效，可选: external/list/ccomp/tree/floodfill 或 OpenCV 常量值",
+            )
+            .into()),
+    }
+}
+
+/// 解析轮廓逼近方法参数，支持字符串别名或 OpenCV 常量值。
+fn _parse_contour_method(method: Option<JsValue>, ctx: &mut Context) -> JsResult<i32> {
+    let Some(value) = method else {
+        return Ok(imgproc::CHAIN_APPROX_SIMPLE);
+    };
+    if value.is_undefined() || value.is_null() {
+        return Ok(imgproc::CHAIN_APPROX_SIMPLE);
+    }
+
+    if let Some(method_num) = value.as_number() {
+        return Ok(method_num as i32);
+    }
+
+    let method_text = value.to_string(ctx)?.to_std_string_lossy().to_lowercase();
+    match method_text.as_str() {
+        "none" => Ok(imgproc::CHAIN_APPROX_NONE),
+        "simple" => Ok(imgproc::CHAIN_APPROX_SIMPLE),
+        "tc89l1" => Ok(imgproc::CHAIN_APPROX_TC89_L1),
+        "tc89kcos" => Ok(imgproc::CHAIN_APPROX_TC89_KCOS),
+        _ => Err(JsNativeError::typ()
+            .with_message("method 参数无效，可选: none/simple/tc89l1/tc89kcos 或 OpenCV 常量值")
+            .into()),
+    }
+}
+
+/// 解析形态学操作类型参数，支持字符串别名或 OpenCV 常量值。
+fn _parse_morphology_op(op: Option<JsValue>, ctx: &mut Context) -> JsResult<i32> {
+    let Some(value) = op else {
+        return Ok(imgproc::MORPH_OPEN);
+    };
+    if value.is_undefined() || value.is_null() {
+        return Ok(imgproc::MORPH_OPEN);
+    }
+
+    if let Some(op_num) = value.as_number() {
+        return Ok(op_num as i32);
+    }
+
+    let op_text = value.to_string(ctx)?.to_std_string_lossy().to_lowercase();
+    match op_text.as_str() {
+        "erode" => Ok(imgproc::MORPH_ERODE),
+        "dilate" => Ok(imgproc::MORPH_DILATE),
+        "open" => Ok(imgproc::MORPH_OPEN),
+        "close" => Ok(imgproc::MORPH_CLOSE),
+        "gradient" => Ok(imgproc::MORPH_GRADIENT),
+        "tophat" => Ok(imgproc::MORPH_TOPHAT),
+        "blackhat" => Ok(imgproc::MORPH_BLACKHAT),
+        "hitmiss" => Ok(imgproc::MORPH_HITMISS),
+        _ => Err(JsNativeError::typ()
+            .with_message("op 参数无效，可选: erode/dilate/open/close/gradient/tophat/blackhat/hitmiss 或 OpenCV 常量值")
+            .into()),
+    }
+}
+
+/// 解析形态学核形状参数，支持字符串别名或 OpenCV 常量值。
+fn _parse_morphology_shape(shape: Option<JsValue>, ctx: &mut Context) -> JsResult<i32> {
+    let Some(value) = shape else {
+        return Ok(imgproc::MORPH_RECT);
+    };
+    if value.is_undefined() || value.is_null() {
+        return Ok(imgproc::MORPH_RECT);
+    }
+
+    if let Some(shape_num) = value.as_number() {
+        return Ok(shape_num as i32);
+    }
+
+    let shape_text = value.to_string(ctx)?.to_std_string_lossy().to_lowercase();
+    match shape_text.as_str() {
+        "rect" => Ok(imgproc::MORPH_RECT),
+        "cross" => Ok(imgproc::MORPH_CROSS),
+        "ellipse" => Ok(imgproc::MORPH_ELLIPSE),
+        _ => Err(JsNativeError::typ()
+            .with_message("shape 参数无效，可选: rect/cross/ellipse 或 OpenCV 常量值")
+            .into()),
     }
 }
 
@@ -229,21 +405,48 @@ fn _kb(
     duration: Option<JsValue>,
     ctx: &mut Context,
 ) -> JsResult<JsValue> {
-    let hwnd = HWND(
-        hwnd.unwrap_or_else(|| JsValue::undefined())
-            .to_number(ctx)? as isize as *mut std::ffi::c_void,
-    );
+    let hwnd_raw = hwnd
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as isize;
     let key = key
         .unwrap_or_else(|| JsValue::undefined())
         .to_string(ctx)?
         .to_std_string_lossy();
     let duration = duration.unwrap_or_else(|| js_value!(0)).to_number(ctx)? as u32;
-    if hwnd.is_invalid() {
-        key_press(&key, duration);
-    } else {
-        post_key_press(hwnd, &key, duration);
-    }
-    Ok(JsValue::undefined())
+
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let resolvers_clone = resolvers.clone();
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            let async_result = tokio::task::spawn_blocking(move || {
+                let hwnd = HWND(hwnd_raw as *mut std::ffi::c_void);
+                if hwnd.is_invalid() {
+                    key_press(&key, duration);
+                } else {
+                    post_key_press(hwnd, &key, duration);
+                }
+            })
+            .await;
+
+            let context = &mut context.borrow_mut();
+            match async_result {
+                Ok(_) => resolvers_clone
+                    .resolve
+                    .call(&JsValue::undefined(), &[], context),
+                Err(e) => {
+                    let msg = format!("kb 线程执行失败: {e}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(msg))],
+                        context,
+                    )
+                }
+            }
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
 }
 
 /// 键盘按下函数
@@ -693,6 +896,293 @@ fn _imshow(
     Ok(promise.into())
 }
 
+/// 颜色键过滤函数，返回根据色键过滤后的灰度图像。
+fn _color_filter(
+    js_img_mat: Option<JsValue>,
+    colors: Option<JsValue>,
+    tolerance: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+
+    let colors = _parse_u32_array(colors.unwrap_or_else(|| JsValue::undefined()), ctx)?;
+    let tolerance = tolerance.unwrap_or_else(|| js_value!(0)).to_number(ctx)?;
+    let tolerance = tolerance.clamp(0.0, 255.0) as u8;
+
+    match color_filter_impl(&img_mat, &colors, tolerance) {
+        Ok(mask) => Box::new(mask).into_js(ctx),
+        Err(msg) => Err(JsNativeError::error().with_message(msg).into()),
+    }
+}
+
+/// 色键匹配函数，返回匹配像素均值最大的颜色索引（支持最小 mean 与颜色容差）。
+fn _color_key_match(
+    js_img_mat: Option<JsValue>,
+    colors: Option<JsValue>,
+    min_mean: Option<JsValue>,
+    tolerance: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+
+    let colors = _parse_u32_array(colors.unwrap_or_else(|| JsValue::undefined()), ctx)?;
+    let min_mean = min_mean.unwrap_or_else(|| js_value!(0.0)).to_number(ctx)?;
+    let min_mean = if min_mean.is_finite() {
+        min_mean.max(0.0)
+    } else {
+        0.0
+    };
+    let tolerance = tolerance.unwrap_or_else(|| js_value!(0)).to_number(ctx)?;
+    let tolerance = tolerance.clamp(0.0, 255.0) as u8;
+
+    let index = color_key_match_impl(&img_mat, &colors, min_mean, tolerance)
+        .map_err(|msg| JsNativeError::error().with_message(msg))?;
+    Ok(JsValue::new(index))
+}
+
+/// 批量颜色模板匹配函数，返回首个命中模板的位置和索引。
+fn _batch_match_color(
+    js_src_mat: Option<JsValue>,
+    js_tpl_mats: Option<JsValue>,
+    cap: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_src_mat = js_src_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let src_mat = (*js_src_mat.borrow().data().inner).clone();
+
+    let tpl_mats = _parse_mat_array(js_tpl_mats.unwrap_or_else(|| JsValue::undefined()), ctx)?;
+    let cap = cap.unwrap_or_else(|| js_value!(0.8)).to_number(ctx)?;
+    let cap = cap.clamp(0.0, 1.0);
+
+    match batch_match_color_impl(&src_mat, tpl_mats, cap) {
+        Ok(Some((index, x, y))) => {
+            let pos = js_value!([x, y], ctx);
+            let result = js_object!({
+                pos: pos,
+                index: index,
+            }, ctx);
+
+            Ok(result.into())
+        }
+        Ok(None) => Ok(JsValue::undefined()),
+        Err(msg) => Err(JsNativeError::error().with_message(msg).into()),
+    }
+}
+
+/// ORB 特征比较函数，返回优质匹配数量。
+fn _orb_match_count(
+    js_img1_mat: Option<JsValue>,
+    js_img2_mat: Option<JsValue>,
+    _ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img1_mat = js_img1_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img1_mat = (*js_img1_mat.borrow().data().inner).clone();
+
+    let js_img2_mat = js_img2_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img2_mat = (*js_img2_mat.borrow().data().inner).clone();
+
+    let count = orb_match_count_impl(&img1_mat, &img2_mat)
+        .map_err(|msg| JsNativeError::error().with_message(msg))?;
+    Ok(JsValue::new(count))
+}
+
+/// SIFT 匹配定位函数，返回 img2 在 img1 中的坐标与尺寸信息。
+fn _sift_locate(
+    js_img1_mat: Option<JsValue>,
+    js_img2_mat: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img1_mat = js_img1_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img1_mat = (*js_img1_mat.borrow().data().inner).clone();
+
+    let js_img2_mat = js_img2_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img2_mat = (*js_img2_mat.borrow().data().inner).clone();
+
+    let result = sift_locate_impl(&img1_mat, &img2_mat)
+        .map_err(|msg| JsNativeError::error().with_message(msg))?;
+
+    let Some((x, y, w, h, good_matches, inliers, corners)) = result else {
+        return Ok(JsValue::undefined());
+    };
+
+    let js_corners = JsArray::new(ctx);
+    for point in corners {
+        js_corners.push(js_value!([point.x, point.y], ctx), ctx)?;
+    }
+
+    let result_obj = js_object!(
+        {
+            pos: js_value!([x, y], ctx),
+            size: js_value!([w, h], ctx),
+            bbox: js_value!([x, y, w, h], ctx),
+            goodMatches: good_matches,
+            inliers: inliers,
+            corners: js_corners,
+        },
+        ctx
+    );
+
+    Ok(result_obj.into())
+}
+
+/// 计算输入图像的感知哈希（支持彩色模式）。
+fn _perceptual_hash(
+    js_img_mat: Option<JsValue>,
+    color: Option<JsValue>,
+    _ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+    let color = color.is_some_and(|v| v.to_boolean());
+
+    let hash = perceptual_hash_impl(&img_mat, color)
+        .map_err(|msg| JsNativeError::error().with_message(msg))?;
+    Ok(JsValue::from(js_string!(hash)))
+}
+
+/// 比较源哈希和模板哈希数组的汉明距离，返回最佳匹配索引或 -1。
+fn _match_hamming_hash(
+    source_hash: Option<JsValue>,
+    template_hashes: Option<JsValue>,
+    max_distance: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let source_hash = source_hash
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let source_hash =
+        normalize_hash_hex(&source_hash).map_err(|msg| JsNativeError::error().with_message(msg))?;
+
+    let template_hashes =
+        _parse_string_array(template_hashes.unwrap_or_else(|| JsValue::undefined()), ctx)?;
+    let max_distance = max_distance
+        .unwrap_or_else(|| js_value!(0))
+        .to_number(ctx)?;
+    let max_distance = if max_distance.is_finite() {
+        max_distance.max(0.0) as u32
+    } else {
+        0
+    };
+
+    let mut best_index: i32 = -1;
+    let mut best_distance = u32::MAX;
+    for (index, template_hash) in template_hashes.iter().enumerate() {
+        let normalized = normalize_hash_hex(template_hash)
+            .map_err(|msg| JsNativeError::error().with_message(msg))?;
+        if normalized.len() != source_hash.len() {
+            continue;
+        }
+        let distance = hamming_distance_hex(&source_hash, &normalized)
+            .map_err(|msg| JsNativeError::error().with_message(msg))?;
+        if distance <= max_distance && distance < best_distance {
+            best_distance = distance;
+            best_index = index as i32;
+            if distance == 0 {
+                break;
+            }
+        }
+    }
+
+    Ok(JsValue::new(best_index))
+}
+
+/// 形态学图像处理函数，支持开闭运算、腐蚀、膨胀等操作。
+fn _morphology_ex(
+    js_img_mat: Option<JsValue>,
+    op: Option<JsValue>,
+    kernel_size: Option<JsValue>,
+    iterations: Option<JsValue>,
+    shape: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+
+    let op = _parse_morphology_op(op, ctx)?;
+    let shape = _parse_morphology_shape(shape, ctx)?;
+    let kernel_size = kernel_size.unwrap_or_else(|| js_value!(3)).to_number(ctx)? as i32;
+    let iterations = iterations.unwrap_or_else(|| js_value!(1)).to_number(ctx)? as i32;
+
+    match morphology_ex_impl(&img_mat, op, kernel_size, iterations, shape) {
+        Ok(dst) => Box::new(dst).into_js(ctx),
+        Err(msg) => Err(JsNativeError::error().with_message(msg).into()),
+    }
+}
+
+/// 轮廓提取函数，返回轮廓信息列表（面积、外接矩形、中心点）。
+fn _find_contours(
+    js_img_mat: Option<JsValue>,
+    min_area: Option<JsValue>,
+    mode: Option<JsValue>,
+    method: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+
+    // 兼容旧参数顺序: findContours(img, mode, method, minArea)
+    // 新参数顺序: findContours(img, minArea, mode, method)
+    let (raw_min_area, raw_mode, raw_method) = if min_area.as_ref().is_some_and(JsValue::is_string)
+    {
+        (method, min_area, mode)
+    } else {
+        (min_area, mode, method)
+    };
+
+    let mode = _parse_contour_mode(raw_mode, ctx)?;
+    let method = _parse_contour_method(raw_method, ctx)?;
+    let min_area = raw_min_area
+        .unwrap_or_else(|| js_value!(0.0))
+        .to_number(ctx)?;
+    let min_area = if min_area.is_finite() {
+        min_area.max(0.0)
+    } else {
+        0.0
+    };
+
+    let contours = find_contours_impl(&img_mat, mode, method, min_area)
+        .map_err(|msg| JsNativeError::error().with_message(msg))?;
+
+    let result = JsArray::new(ctx);
+    for (area, rect, center) in contours {
+        let contour_obj = js_object!(
+            {
+                area: area,
+                bbox: js_value!([rect.x, rect.y, rect.width, rect.height], ctx),
+                center: js_value!([center.0, center.1], ctx),
+            },
+            ctx
+        );
+
+        result.push(contour_obj, ctx)?;
+    }
+
+    Ok(result.into())
+}
+
 /// 使用两个Mat对象进行颜色和模板匹配函数
 fn _find_color_and_match_template(
     js_img_mat: Option<JsValue>,
@@ -943,28 +1433,28 @@ fn _find_path(
 /// 边框绘制函数
 fn _draw_border(
     hwnd: Option<JsValue>,
-    left: Option<JsValue>,
-    top: Option<JsValue>,
-    right: Option<JsValue>,
-    bottom: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    w: Option<JsValue>,
+    h: Option<JsValue>,
     ctx: &mut Context,
 ) -> JsResult<JsValue> {
     let hwnd = HWND(
         hwnd.unwrap_or_else(|| JsValue::undefined())
             .to_number(ctx)? as isize as *mut std::ffi::c_void,
     );
-    let left = left
+    let x = x
         .unwrap_or_else(|| JsValue::undefined())
         .to_number(ctx)? as i32;
-    let top = top.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
-    let right = right
+    let y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let w = w
         .unwrap_or_else(|| JsValue::undefined())
         .to_number(ctx)? as i32;
-    let bottom = bottom
+    let h = h
         .unwrap_or_else(|| JsValue::undefined())
         .to_number(ctx)? as i32;
 
-    draw_border(hwnd, left, top, right, bottom, Some(0xFF0000));
+    draw_border(hwnd, x, y, w, h, Some(0xFF0000));
     Ok(JsValue::undefined())
 }
 
@@ -1192,6 +1682,42 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     // 使用两个Mat对象进行颜色和模板匹配
     let f = _find_color_and_match_template.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("findColorAndMatchTemplate"), 4, f)?;
+
+    // 颜色键过滤函数
+    let f = _color_filter.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("colorFilter"), 3, f)?;
+
+    // 色键匹配函数
+    let f = _color_key_match.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("colorKeyMatch"), 4, f)?;
+
+    // 并行批量模板匹配函数
+    let f = _batch_match_color.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("batchMatchColor"), 3, f)?;
+
+    // ORB 优质匹配计数函数
+    let f = _orb_match_count.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("orbMatchCount"), 2, f)?;
+
+    // SIFT 定位函数
+    let f = _sift_locate.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("siftLocate"), 2, f)?;
+
+    // 感知哈希函数（支持彩色）
+    let f = _perceptual_hash.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("perceptualHash"), 2, f)?;
+
+    // 哈希汉明距离匹配函数
+    let f = _match_hamming_hash.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("matchHammingHash"), 3, f)?;
+
+    // 形态学图像处理函数
+    let f = _morphology_ex.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("morphologyEx"), 5, f)?;
+
+    // 轮廓提取函数
+    let f = _find_contours.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("findContours"), 4, f)?;
 
     // 模板匹配函数
     let f = _match_template.into_js_function_copied(context);

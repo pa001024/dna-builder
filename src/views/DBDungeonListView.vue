@@ -1,14 +1,15 @@
 <script lang="ts" setup>
-import { useSessionStorage } from "@vueuse/core"
 import { computed } from "vue"
+import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
+import { useSearchParam } from "@/composables/useSearchParam"
 import { LeveledChar } from "@/data"
 import dungeonData from "../data/d/dungeon.data"
 import { getDungeonName, getDungeonRewardNames, getDungeonType } from "../utils/dungeon-utils"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = useSessionStorage<string>("dungeon.searchKeyword", "")
-const selectedDungeonId = useSessionStorage<number>("dungeon.selectedDungeon", 0)
-const selectedType = useSessionStorage<string>("dungeon.selectedType", "")
+const searchKeyword = useSearchParam<string>("dungeon.searchKeyword", "")
+const selectedDungeonId = useSearchParam<number>("dungeon.selectedDungeon", 0)
+const selectedType = useSearchParam<string>("dungeon.selectedType", "")
 
 // 根据 ID 获取选中的副本
 const selectedDungeon = computed(() => {
@@ -60,6 +61,8 @@ const filteredDungeons = computed(() => {
 function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
     selectedDungeonId.value = dungeon?.id || 0
 }
+
+useInitialScrollToSelectedItem()
 </script>
 
 <template>
@@ -69,33 +72,22 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedDungeon }">
                 <!-- 搜索栏 -->
                 <div class="p-3 border-b border-base-200">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索副本ID/名称/描述/等级/奖励（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
-                    />
+                    <input v-model="searchKeyword" type="text" placeholder="搜索副本ID/名称/描述/等级/奖励（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
                 </div>
 
                 <!-- 类型筛选Tab -->
                 <div class="p-2 border-b border-base-200">
                     <div class="flex flex-wrap gap-1 pb-1">
-                        <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
                             :class="selectedType === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                            @click="selectedType = ''"
-                        >
+                            @click="selectedType = ''">
                             {{ $t("全部") }}
                         </button>
-                        <button
-                            v-for="type in allTypes.map(t => getDungeonType(t))"
-                            :key="type.t"
+                        <button v-for="type in allTypes.map(t => getDungeonType(t))" :key="type.t"
                             class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all cursor-pointer"
-                            :class="
-                                selectedType === type.t ? type.color + ' text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                            "
-                            @click="selectedType = type.t"
-                        >
+                            :class="selectedType === type.t ? type.color + ' text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                " @click="selectedType = type.t">
                             {{ type.label }}
                         </button>
                     </div>
@@ -104,21 +96,15 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
                 <!-- 副本列表 -->
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div
-                            v-for="dungeon in filteredDungeons"
-                            :key="dungeon.id"
+                        <div v-for="dungeon in filteredDungeons" :key="dungeon.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedDungeonId === dungeon.id }"
-                            @click="selectDungeon(dungeon)"
-                        >
+                            @click="selectDungeon(dungeon)">
                             <div class="flex items-start justify-between">
                                 <div>
                                     <div class="font-medium flex gap-2 items-center">
-                                        <img
-                                            v-if="dungeon.e"
-                                            :src="LeveledChar.elementUrl(dungeon.e)"
-                                            class="h-8 w-4 object-cover inline-block rounded"
-                                        />
+                                        <img v-if="dungeon.e" :src="LeveledChar.elementUrl(dungeon.e)"
+                                            class="h-8 w-4 object-cover inline-block rounded" />
                                         {{ getDungeonName(dungeon) }}
                                     </div>
                                     <div class="text-xs opacity-70 mt-1">
@@ -126,7 +112,8 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">
-                                    <span class="text-xs px-2 py-0.5 rounded" :class="getDungeonType(dungeon.t).color + ' text-white'">
+                                    <span class="text-xs px-2 py-0.5 rounded"
+                                        :class="getDungeonType(dungeon.t).color + ' text-white'">
                                         {{ getDungeonType(dungeon.t).label }}
                                     </span>
                                     <span class="text-xs opacity-70">Lv.{{ dungeon.lv }}</span>
@@ -147,11 +134,9 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
                     共 {{ filteredDungeons.length }} 个副本
                 </div>
             </div>
-            <div
-                v-if="selectedDungeon"
+            <div v-if="selectedDungeon"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectDungeon(null)"
-            >
+                @click="selectDungeon(null)">
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 

@@ -649,6 +649,9 @@ export class CharBuild {
                     (1 + independentDamageIncrease) * (1 + this.getTotalBonusMul(`${lowerPrefix}独立增伤`, lowerPrefix)) - 1
             }
 
+            // 攻速上限
+            attackSpeedBonus = Math.min(attackSpeedBonus, 2)
+
             // 计算武器属性
             let attack = weapon.基础攻击 * (1 + attackBonus)
             let critRate = weapon.基础暴击 * (1 + critRateBonus)
@@ -853,7 +856,7 @@ export class CharBuild {
         // 添加MOD加成
         if (prefix === "角色" || !attribute.startsWith(prefix))
             this.mods.forEach(mod => {
-                if (prefix && mod.attrType !== prefix) return
+                if (prefix !== "角色" && mod.attrType !== prefix) return
                 if (typeof mod.addAttr[attribute] === "number") {
                     bonus *= 1 + mod.addAttr[attribute]
                 }
@@ -861,7 +864,7 @@ export class CharBuild {
 
         // 添加BUFF加成
         this.buffs.forEach(buff => {
-            if (prefix && attribute === "独立增伤") return
+            if (prefix !== "角色" && attribute === "独立增伤") return
             if (typeof buff[attribute] === "number") {
                 bonus *= 1 + buff[attribute]
             }

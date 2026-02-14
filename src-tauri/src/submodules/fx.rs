@@ -1,10 +1,12 @@
 use std::sync::{Arc, LazyLock, Mutex};
 use std::thread;
 use std::time::Duration;
-use windows::Win32::Foundation::{COLORREF, HWND, LPARAM, LRESULT, WPARAM};
+use windows::Win32::Foundation::{
+    COLORREF, ERROR_CLASS_ALREADY_EXISTS, GetLastError, HWND, LPARAM, LRESULT, RECT, WPARAM,
+};
 use windows::Win32::Graphics::Gdi::{
-    BeginPaint, CreatePen, DeleteObject, EndPaint, HBRUSH, LineTo, MoveToEx, PAINTSTRUCT, PS_SOLID,
-    ReleaseDC, RestoreDC, SaveDC, SelectObject,
+    BLACKNESS, BeginPaint, CreateSolidBrush, DeleteObject, EndPaint, FillRect, GetDC, HBRUSH, HDC,
+    PAINTSTRUCT, PatBlt, ReleaseDC,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
     CreateWindowExW, HWND_TOPMOST, RegisterClassExW, SW_HIDE, SW_SHOW, SWP_NOACTIVATE,
@@ -12,7 +14,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
     WS_EX_TRANSPARENT, WS_POPUP,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
-    DefWindowProcW, HCURSOR, HICON, WM_DESTROY, WM_PAINT, WNDCLASS_STYLES,
+    DefWindowProcW, HCURSOR, HICON, IsWindow, WM_DESTROY, WM_PAINT, WNDCLASS_STYLES,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
     GWLP_USERDATA, GetWindowLongPtrW, SetWindowLongPtrW,
@@ -79,7 +81,11 @@ impl RectOverlay {
             // 注册窗口类
             let atom = RegisterClassExW(&wnd_class);
             if atom == 0 {
-                return false;
+                // 窗口类已注册时允许继续创建窗口，避免脚本二次运行后无法显示。
+                let last_error = GetLastError();
+                if last_error != ERROR_CLASS_ALREADY_EXISTS {
+                    return false;
+                }
             }
 
             // 创建窗口
@@ -143,6 +149,15 @@ impl RectOverlay {
         self.height = height;
         self.color = color;
 
+        // 句柄失效时重建，避免脚本结束后再次运行时出现空白不显示。
+        if let Some(hwnd) = self.hwnd {
+            unsafe {
+                if !IsWindow(Some(hwnd)).as_bool() {
+                    self.hwnd = None;
+                }
+            }
+        }
+
         // 初始化窗口
         if !self.init() {
             return false;
@@ -188,57 +203,67 @@ impl RectOverlay {
     fn draw_border(&self) {
         if let Some(hwnd) = self.hwnd {
             unsafe {
-                // 规范 WM_PAINT 处理：BeginPaint / EndPaint 配对调用
-                let mut ps = PAINTSTRUCT::default();
-                let hdc = BeginPaint(hwnd, &mut ps);
+                // 主动绘制时使用 GetDC，避免 BeginPaint/EndPaint 与消息流程错配。
+                let hdc = GetDC(Some(hwnd));
                 if hdc.0 == std::ptr::null_mut() {
                     return;
                 }
-
-                // 转换颜色格式：RGB -> BGR (Windows GDI 使用 BGR 格式)
-                let r = (self.color >> 16) & 0xFF;
-                let g = (self.color >> 8) & 0xFF;
-                let b = self.color & 0xFF;
-                let bgr_color = (b << 16) | (g << 8) | r;
-
-                // 创建画笔
-                let pen = CreatePen(PS_SOLID, 2, COLORREF(bgr_color));
-                if pen.0 == std::ptr::null_mut() {
-                    ReleaseDC(Some(hwnd), hdc);
-                    return;
-                }
-
-                // 选择画笔
-                let old_pen = SelectObject(hdc, pen.into());
-
-                // 保存当前设备上下文状态
-                let _ = SaveDC(hdc);
-
-                // 绘制矩形边框（使用四个直线绘制，避免填充）
-                // 上边框
-                let _ = MoveToEx(hdc, 0, 0, None);
-                let _ = LineTo(hdc, self.width, 0);
-                // 右边框
-                let _ = MoveToEx(hdc, self.width, 0, None);
-                let _ = LineTo(hdc, self.width, self.height);
-                // 下边框
-                let _ = MoveToEx(hdc, self.width, self.height, None);
-                let _ = LineTo(hdc, 0, self.height);
-                // 左边框
-                let _ = MoveToEx(hdc, 0, self.height, None);
-                let _ = LineTo(hdc, 0, 0);
-
-                // 恢复设备上下文状态
-                let _ = RestoreDC(hdc, -1);
-
-                // 恢复旧画笔
-                SelectObject(hdc, old_pen);
-
-                // 清理资源
-                let _ = DeleteObject(pen.into());
-                ReleaseDC(Some(hwnd), hdc);
-                let _ = EndPaint(hwnd, &ps);
+                self.draw_border_to_hdc(hdc);
+                let _ = ReleaseDC(Some(hwnd), hdc);
             }
+        }
+    }
+
+    /// 在指定设备上下文绘制边框。
+    fn draw_border_to_hdc(&self, hdc: HDC) {
+        unsafe {
+            // 每次重绘前先将整个窗口刷成黑色（与 LWA_COLORKEY 一致为透明），避免旧边框残留叠加。
+            let _ = PatBlt(hdc, 0, 0, self.width, self.height, BLACKNESS);
+
+            // 转换颜色格式：RGB -> BGR (Windows GDI 使用 BGR 格式)
+            let r = (self.color >> 16) & 0xFF;
+            let g = (self.color >> 8) & 0xFF;
+            let b = self.color & 0xFF;
+            let bgr_color = (b << 16) | (g << 8) | r;
+
+            // 使用实心画刷填充四条边，确保四边视觉等宽。
+            let brush = CreateSolidBrush(COLORREF(bgr_color));
+            if brush.0 == std::ptr::null_mut() {
+                return;
+            }
+
+            let thickness = 1.max(1).min(self.width.min(self.height));
+            let top_rect = RECT {
+                left: 0,
+                top: 0,
+                right: self.width,
+                bottom: thickness,
+            };
+            let bottom_rect = RECT {
+                left: 0,
+                top: (self.height - thickness).max(0),
+                right: self.width,
+                bottom: self.height,
+            };
+            let left_rect = RECT {
+                left: 0,
+                top: 0,
+                right: thickness,
+                bottom: self.height,
+            };
+            let right_rect = RECT {
+                left: (self.width - thickness).max(0),
+                top: 0,
+                right: self.width,
+                bottom: self.height,
+            };
+            let _ = FillRect(hdc, &top_rect, brush);
+            let _ = FillRect(hdc, &bottom_rect, brush);
+            let _ = FillRect(hdc, &left_rect, brush);
+            let _ = FillRect(hdc, &right_rect, brush);
+
+            // 清理资源
+            let _ = DeleteObject(brush.into());
         }
     }
 
@@ -251,14 +276,15 @@ impl RectOverlay {
     ) -> LRESULT {
         match msg {
             WM_PAINT => {
-                // 从窗口用户数据获取实例指针
-
-                // 从窗口用户数据获取实例指针
+                // 使用标准 BeginPaint/EndPaint 流程处理重绘消息。
+                let mut ps = PAINTSTRUCT::default();
+                let hdc = unsafe { BeginPaint(hwnd, &mut ps) };
                 let self_ptr = unsafe { GetWindowLongPtrW(hwnd, GWLP_USERDATA) } as *mut Self;
                 if !self_ptr.is_null() {
                     let this = unsafe { &*self_ptr };
-                    this.draw_border();
+                    this.draw_border_to_hdc(hdc);
                 }
+                let _ = unsafe { EndPaint(hwnd, &ps) };
                 LRESULT(0)
             }
             WM_DESTROY => {
@@ -293,7 +319,7 @@ static OVERLAY_MANAGER: LazyLock<Arc<Mutex<OverlayManager>>> = LazyLock::new(|| 
 
 /// 绘制边框函数
 /// 使用独立的透明窗口来绘制边框
-pub fn draw_border(hwnd: HWND, x1: i32, y1: i32, x2: i32, y2: i32, c: Option<u32>) {
+pub fn draw_border(hwnd: HWND, x: i32, y: i32, width: i32, height: i32, c: Option<u32>) {
     // 检查窗口是否有效
     if hwnd.0 == std::ptr::null_mut() {
         return;
@@ -302,14 +328,11 @@ pub fn draw_border(hwnd: HWND, x1: i32, y1: i32, x2: i32, y2: i32, c: Option<u32
     // 处理颜色参数
     let color = c.unwrap_or(0xFF0000);
 
-    // 获取客户端区域位置
-    let (x, y, _client_width, _client_height) = win_get_client_pos(hwnd).unwrap_or_default();
-
-    // 计算绝对坐标
-    let x = x + x1;
-    let y = y + y1;
-    let width = x2 - x1;
-    let height = y2 - y1;
+    // 获取客户端区域位置并换算为屏幕坐标。
+    let (client_x, client_y, _client_width, _client_height) =
+        win_get_client_pos(hwnd).unwrap_or_default();
+    let abs_x = client_x + x;
+    let abs_y = client_y + y;
 
     // 检查参数有效性
     if width <= 0 || height <= 0 {
@@ -328,7 +351,7 @@ pub fn draw_border(hwnd: HWND, x1: i32, y1: i32, x2: i32, y2: i32, c: Option<u32
             .get_or_insert_with(|| RectOverlay::new());
 
         // 显示边框
-        overlay.show(x, y, width, height, color);
+        overlay.show(abs_x, abs_y, width, height, color);
 
         // 创建独立的标志位
         let flag = Arc::new(AtomicBool::new(false));

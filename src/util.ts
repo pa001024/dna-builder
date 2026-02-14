@@ -47,6 +47,8 @@ const numKeys = new Set([
     "最大耐受",
     "基础装填",
     "基础弹匣",
+    "弹匣",
+    "装填",
     "连击持续时间",
     "子弹爆炸范围",
 ])
@@ -59,7 +61,7 @@ export function formatProp(prop: string, val: any): string {
 export function formatWeaponProp(prop: string, val: any): string {
     // 实现属性格式化的逻辑
     if (typeof val !== "number") return String(val)
-    if (numKeys.has(prop)) return `${val.toFixed(2)}`
+    if (numKeys.has(prop)) return `${+val.toFixed(2)}`
     return format100(val, 1)
 }
 const propRegex = /神智消耗|神智回复$/

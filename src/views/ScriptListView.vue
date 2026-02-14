@@ -464,8 +464,7 @@ async function deleteScript(fileName: string) {
     // 检查是否有打开的标签页
     const tab = openedTabs.value.find(t => t.type === "local" && t.name === fileName)
     if (tab) {
-        ui.showErrorMessage("文件已打开，请先关闭标签页")
-        return
+        await closeTab(tab.id)
     }
 
     try {
@@ -829,33 +828,25 @@ onUnmounted(async () => {
         <div class="flex-1 flex overflow-hidden">
             <div class="w-64 border-r border-base-200 flex flex-col bg-base-100">
                 <div class="px-4 py-1 border-b border-base-200 flex justify-center">
-                    <div class="flex gap-2">
-                        <button
-                            class="p-2 rounded-md text-xs flex gap-2 font-bold cursor-pointer hover:bg-base-300"
-                            :class="{ 'bg-base-300': viewMode === 'local' }"
-                            @click="switchToLocal"
-                        >
+                    <div class="flex gap-2 items-center">
+                        <button class="p-2 rounded-md text-xs flex gap-2 font-bold cursor-pointer hover:bg-base-300"
+                            :class="{ 'bg-base-300': viewMode === 'local' }" @click="switchToLocal">
                             <Icon icon="ri:folder-line" class="w-4 h-4" />
                             本地
                         </button>
-                        <button
-                            class="p-2 rounded-md text-xs flex gap-2 font-bold cursor-pointer hover:bg-base-300"
-                            :class="{ 'bg-base-300': viewMode === 'online' }"
-                            @click="switchToOnline"
-                        >
+                        <button class="p-2 rounded-md text-xs flex gap-2 font-bold cursor-pointer hover:bg-base-300"
+                            :class="{ 'bg-base-300': viewMode === 'online' }" @click="switchToOnline">
                             <Icon icon="ri:cloud-line" class="w-4 h-4" />
                             云端
                         </button>
+                        <div class="p-2 rounded-md cursor-pointer hover:bg-base-300 " @click="fetchLocalScripts">
+                            <Icon icon="ri:refresh-line" class="w-4 h-4" />
+                        </div>
                     </div>
                 </div>
                 <div v-if="viewMode === 'online'" class="p-3 border-b border-base-200 flex flex-col gap-2">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索脚本..."
-                        class="input input-bordered input-sm w-full"
-                        @input="handleSearch"
-                    />
+                    <input v-model="searchKeyword" type="text" placeholder="搜索脚本..."
+                        class="input input-bordered input-sm w-full" @input="handleSearch" />
                     <Select v-model="selectedCategory" class="input input-sm w-full" @change="handleSearch">
                         <SelectItem v-for="option in categoryOptions" :key="option.value" :value="option.value">
                             {{ option.label }}
@@ -866,56 +857,39 @@ onUnmounted(async () => {
                     <div v-if="loading" class="flex justify-center items-center h-full p-4">
                         <span class="loading loading-spinner" />
                     </div>
-                    <div
-                        v-else-if="
-                            (viewMode === 'local' && localScripts.length === 0) || (viewMode === 'online' && onlineScripts.length === 0)
-                        "
-                        class="flex justify-center items-center h-full text-base-content/50 p-4"
-                    >
+                    <div v-else-if="
+                        (viewMode === 'local' && localScripts.length === 0) || (viewMode === 'online' && onlineScripts.length === 0)
+                    " class="flex justify-center items-center h-full text-base-content/50 p-4">
                         {{ viewMode === "local" ? "暂无本地脚本" : "暂无在线脚本" }}
                     </div>
                     <div v-else>
                         <template v-if="viewMode === 'local'">
-                            <ContextMenu
-                                v-for="script in localScripts"
-                                :key="script"
+                            <ContextMenu v-for="script in localScripts" :key="script"
                                 class="px-3 py-2 rounded hover:bg-base-200 cursor-pointer flex items-center gap-2 text-sm group"
-                                :class="{ 'bg-base-200': activeTab?.name === script }"
-                                @click="openLocalScript(script)"
-                            >
+                                :class="{ 'bg-base-200': activeTab?.name === script }" @click="openLocalScript(script)">
                                 <Icon icon="ri:file-line" class="w-4 h-4 shrink-0" />
                                 <span v-if="editingScript !== script" class="flex-1 truncate">
                                     {{ script }}
                                 </span>
-                                <input
-                                    v-else
-                                    id="script-name-input"
-                                    v-model="editingScriptName"
-                                    type="text"
+                                <input v-else id="script-name-input" v-model="editingScriptName" type="text"
                                     class="flex-1 input input-bordered input-xs px-2 py-1 h-6"
-                                    @blur="confirmRenameScript"
-                                    @keydown="handleEditKeyDown"
-                                    @click.stop
-                                />
+                                    @blur="confirmRenameScript" @keydown="handleEditKeyDown" @click.stop />
                                 <template #menu>
                                     <ContextMenuItem
                                         class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                        @click="startEditScript(script)"
-                                    >
+                                        @click="startEditScript(script)">
                                         <Icon icon="ri:edit-line" class="w-4 h-4 mr-2" />
                                         重命名
                                     </ContextMenuItem>
                                     <ContextMenuItem
                                         class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-success data-highlighted:text-base-100"
-                                        @click="publishScript(script)"
-                                    >
+                                        @click="publishScript(script)">
                                         <Icon icon="ri:upload-cloud-line" class="w-4 h-4 mr-2" />
                                         发布/更新
                                     </ContextMenuItem>
                                     <ContextMenuItem
                                         class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-error data-highlighted:text-base-100"
-                                        @click="deleteScript(script)"
-                                    >
+                                        @click="deleteScript(script)">
                                         <Icon icon="ri:delete-bin-line" class="w-4 h-4 mr-2" />
                                         删除
                                     </ContextMenuItem>
@@ -923,31 +897,30 @@ onUnmounted(async () => {
                             </ContextMenu>
                         </template>
                         <template v-else-if="viewMode === 'online'">
-                            <ContextMenu
-                                v-for="script in onlineScripts"
-                                :key="script.id"
-                                class="px-3 py-2 rounded hover:bg-base-200 cursor-pointer flex flex-col gap-1 text-sm"
-                            >
+                            <ContextMenu v-for="script in onlineScripts" :key="script.id"
+                                class="px-3 py-2 rounded hover:bg-base-200 cursor-pointer flex flex-col gap-1 text-sm">
                                 <div class="flex items-center justify-between" @click="openOnlineScript(script)">
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2">
                                             <span class="truncate font-medium">{{ script.title }}</span>
                                         </div>
-                                        <div class="text-xs text-base-content/60 truncate">{{ script.description }}</div>
+                                        <div class="text-xs text-base-content/60 truncate">{{ script.description }}
+                                        </div>
                                         <div class="text-base-content/80 flex items-center gap-1">
-                                            <Icon v-if="script.isRecommended" icon="ri:checkbox-circle-fill" class="w-4 h-4 inline-block" />
+                                            <Icon v-if="script.isRecommended" icon="ri:checkbox-circle-fill"
+                                                class="w-4 h-4 inline-block" />
                                             <span class="text-xs text-base-content/60 truncate">
                                                 {{ script.user?.name }}
                                             </span>
-                                            <button class="ml-auto btn btn-xs" @click.stop="downloadScript(script)">下载</button>
+                                            <button class="ml-auto btn btn-xs"
+                                                @click.stop="downloadScript(script)">下载</button>
                                         </div>
                                     </div>
                                 </div>
                                 <template #menu>
                                     <ContextMenuItem
                                         class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-error data-highlighted:text-base-100"
-                                        @click="deleteOnlineScript(script)"
-                                    >
+                                        @click="deleteOnlineScript(script)">
                                         <Icon icon="ri:delete-bin-line" class="w-4 h-4 mr-2" />
                                         删除
                                     </ContextMenuItem>
@@ -956,53 +929,43 @@ onUnmounted(async () => {
                         </template>
                     </div>
                     <div v-if="viewMode === 'online'" class="flex justify-center p-2">
-                        <button v-if="onlineScripts.length < totalCount" class="btn btn-sm btn-ghost" @click="loadMore">加载更多</button>
+                        <button v-if="onlineScripts.length < totalCount" class="btn btn-sm btn-ghost"
+                            @click="loadMore">加载更多</button>
                     </div>
                 </ScrollArea>
             </div>
 
             <div class="flex-1 flex flex-col min-w-0">
                 <!-- TABS -->
-                <div class="h-10 bg-base-200 border-b border-base-300 flex items-center justify-between">
+                <div class="h-10 bg-base-100 border-b border-base-300 flex items-center justify-between">
                     <!-- files -->
                     <ScrollArea horizontal :vertical="false" class="flex items-center flex-1 h-full">
                         <div class="flex">
-                            <ContextMenu
-                                v-for="tab in openedTabs"
-                                :key="tab.id"
+                            <ContextMenu v-for="tab in openedTabs" :key="tab.id"
                                 class="h-10 flex items-center gap-2 px-3 border-r border-base-300 cursor-pointer min-w-max"
-                                :class="{ 'bg-base-100': activeTabId === tab.id }"
-                                @click="setActiveTab(tab.id)"
-                                @mousedown="handleTabMiddleClick($event, tab.id)"
-                            >
+                                :class="{ 'bg-base-200 border-t border-t-base-content': activeTabId === tab.id }"
+                                @click="setActiveTab(tab.id)" @mousedown="handleTabMiddleClick($event, tab.id)">
                                 <Icon :icon="tab.type === 'local' ? 'ri:file-line' : 'ri:cloud-line'" class="w-4 h-4" />
                                 <span class="text-sm truncate max-w-32">{{ tab.name }}</span>
-                                <button
-                                    v-if="tab.modified"
+                                <button v-if="tab.modified"
                                     class="w-5 h-5 rounded hover:bg-base-300 flex items-center justify-center cursor-pointer"
-                                    @click.stop="saveCurrentTab"
-                                    title="保存"
-                                >
+                                    @click.stop="saveCurrentTab" title="保存">
                                     <span class="w-2 h-2 rounded-full bg-warning" />
                                 </button>
-                                <button
-                                    v-else
+                                <button v-else
                                     class="w-5 h-5 rounded hover:bg-base-300 flex items-center justify-center cursor-pointer"
-                                    @click.stop="closeTab(tab.id)"
-                                >
+                                    @click.stop="closeTab(tab.id)">
                                     <Icon icon="ri:close-line" class="w-3 h-3" />
                                 </button>
                                 <template #menu>
                                     <ContextMenuItem
                                         class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                        @click="closeOtherTabs(tab.id)"
-                                    >
+                                        @click="closeOtherTabs(tab.id)">
                                         关闭其他
                                     </ContextMenuItem>
                                     <ContextMenuItem
                                         class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                        @click="closeAllTabs"
-                                    >
+                                        @click="closeAllTabs">
                                         关闭所有
                                     </ContextMenuItem>
                                 </template>
@@ -1011,15 +974,12 @@ onUnmounted(async () => {
                     </ScrollArea>
                     <!-- actions -->
                     <div class="flex items-center gap-2 ml-2 px-1">
-                        <button class="btn btn-sm btn-ghost btn-square" @click="showConsole = !showConsole" title="切换控制台">
+                        <button class="btn btn-sm btn-ghost btn-square" @click="showConsole = !showConsole"
+                            title="切换控制台">
                             <Icon :icon="showConsole ? 'ri:terminal-box-line' : 'ri:terminal-line'" class="w-4 h-4" />
                         </button>
-                        <button
-                            class="btn btn-sm btn-ghost btn-square"
-                            :class="{ 'btn-error': isRunning }"
-                            @click="runCurrentTab"
-                            :title="isRunning ? '停止脚本' : '运行脚本'"
-                        >
+                        <button class="btn btn-sm btn-ghost btn-square" :class="{ 'btn-error': isRunning }"
+                            @click="runCurrentTab" :title="isRunning ? '停止脚本' : '运行脚本'">
                             <Icon :icon="isRunning ? 'ri:stop-circle-line' : 'ri:play-line'" class="w-4 h-4" />
                         </button>
                         <button class="btn btn-sm btn-ghost btn-square" @click="openNewScriptDialog" title="新建脚本">
@@ -1028,25 +988,21 @@ onUnmounted(async () => {
                         <button class="btn btn-sm btn-ghost btn-square" @click="openScriptDirectory" title="打开目录">
                             <Icon icon="ri:folder-open-line" class="w-4 h-4" />
                         </button>
-                        <button
-                            v-if="activeTab && activeTab.type === 'local'"
-                            class="btn btn-sm btn-primary btn-square"
-                            @click="saveCurrentTab"
-                            :disabled="!activeTab.modified"
-                            title="保存"
-                        >
+                        <button v-if="activeTab && activeTab.type === 'local'" class="btn btn-sm btn-primary btn-square"
+                            @click="saveCurrentTab" :disabled="!activeTab.modified" title="保存">
                             <Icon icon="ri:save-line" class="w-4 h-4" />
                         </button>
                         <div class="dropdown dropdown-end">
                             <div tabindex="0" role="button" class="btn btn-sm btn-ghost btn-square" title="更多操作">
                                 <Icon icon="ri:more-line" class="w-4 h-4" />
                             </div>
-                            <ul tabindex="-1" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+                            <ul tabindex="-1"
+                                class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
                                 <li><a @click="restartAsAdmin">以管理员权限重新启动</a></li>
                                 <li>
                                     <a @click="toggleGlobalShortcut">{{
                                         globalShortcutEnabled ? "禁用全局快捷键(F10)" : "启用全局快捷键(F10)"
-                                    }}</a>
+                                        }}</a>
                                 </li>
                             </ul>
                         </div>
@@ -1056,15 +1012,9 @@ onUnmounted(async () => {
                 <div class="flex-1 flex flex-col min-h-0">
                     <div v-if="activeTab" class="flex-1 flex flex-col min-h-0">
                         <ScrollArea class="flex-1 overflow-hidden">
-                            <CodeEditor
-                                :readonly="activeTab.type !== 'local'"
-                                :file="activeTab.name"
-                                ref="codeEditor"
-                                v-model="activeTab.content"
-                                placeholder="脚本内容..."
-                                class="w-full h-full p-2 font-mono text-sm"
-                                @update:modelValue="onCodeEditorUpdate"
-                            />
+                            <CodeEditor :readonly="activeTab.type !== 'local'" :file="activeTab.name" ref="codeEditor"
+                                v-model="activeTab.content" placeholder="脚本内容..."
+                                class="w-full h-full p-2 font-mono text-sm" @update:modelValue="onCodeEditorUpdate" />
                         </ScrollArea>
                     </div>
                     <div v-else class="flex-1 flex items-center justify-center text-base-content/50">
@@ -1077,7 +1027,8 @@ onUnmounted(async () => {
 
                 <!-- 控制台面板 -->
                 <div v-if="showConsole" class="h-48 border-t border-base-300 flex flex-col bg-base-900">
-                    <div class="h-8 bg-base-800 border-b border-base-700 flex items-center justify-between px-3 shrink-0">
+                    <div
+                        class="h-8 bg-base-800 border-b border-base-700 flex items-center justify-between px-3 shrink-0">
                         <div class="flex items-center gap-2">
                             <Icon icon="ri:terminal-line" class="w-4 h-4 text-base-content/60" />
                             <span class="text-xs text-base-content/60">控制台</span>
@@ -1096,7 +1047,9 @@ onUnmounted(async () => {
                         <div v-if="consoleLogs.length === 0" class="text-base-content/40 text-center py-4">暂无输出</div>
                         <div v-else class="space-y-1">
                             <div v-for="(log, index) in consoleLogs" :key="index" class="flex gap-2">
-                                <span class="text-base-content/40 shrink-0">{{ new Date(log.timestamp).toLocaleTimeString() }}</span>
+                                <span class="text-base-content/40 shrink-0">{{ new
+                                    Date(log.timestamp).toLocaleTimeString()
+                                    }}</span>
                                 <span :class="getLogLevelClass(log.level)" class="break-all">{{ log.message }}</span>
                             </div>
                         </div>
@@ -1111,17 +1064,15 @@ onUnmounted(async () => {
                 <div class="mb-4">
                     <label class="label block">
                         <div class="mb-2 text-sm">脚本名称</div>
-                        <input v-model="newScriptName" type="text" placeholder="请输入脚本名称" class="input input-bordered w-full" />
+                        <input v-model="newScriptName" type="text" placeholder="请输入脚本名称"
+                            class="input input-bordered w-full" />
                     </label>
                 </div>
                 <div class="mb-4">
                     <label class="label block">
                         <div class="mb-2 text-sm">脚本内容</div>
-                        <textarea
-                            v-model="newScriptContent"
-                            placeholder="请输入脚本内容"
-                            class="textarea textarea-bordered w-full h-64 resize-none"
-                        />
+                        <textarea v-model="newScriptContent" placeholder="请输入脚本内容"
+                            class="textarea textarea-bordered w-full h-64 resize-none" />
                     </label>
                 </div>
                 <div class="flex justify-end gap-2">

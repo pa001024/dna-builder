@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import { useSessionStorage } from "@vueuse/core"
 import { computed } from "vue"
+import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
+import { parseNumberOrEmptySearchParam, useSearchParam } from "@/composables/useSearchParam"
 import { LeveledMonster, monsterMap } from "@/data"
 import { monsterTagData } from "@/data/d/monstertag.data"
 import monsterData, { Faction } from "../data/d/monster.data"
@@ -10,11 +11,11 @@ import { matchPinyin } from "../utils/pinyin-utils"
 
 type MonsterListType = "monster" | "monsterTag"
 
-const searchKeyword = useSessionStorage<string>("monster.searchKeyword", "")
-const selectedMonsterId = useSessionStorage<number>("monster.selectedMonster", 0)
-const selectedMonsterTagId = useSessionStorage<string>("monster.selectedMonsterTag", "")
-const selectedType = useSessionStorage<MonsterListType>("monster.selectedType", "monster")
-const selectedFaction = useSessionStorage<number | "">("monster.selectedFaction", "")
+const searchKeyword = useSearchParam<string>("monster.searchKeyword", "")
+const selectedMonsterId = useSearchParam<number>("monster.selectedMonster", 0)
+const selectedMonsterTagId = useSearchParam<string>("monster.selectedMonsterTag", "")
+const selectedType = useSearchParam<MonsterListType>("monster.selectedType", "monster")
+const selectedFaction = useSearchParam<number | "">("monster.selectedFaction", "", { parse: parseNumberOrEmptySearchParam })
 
 // 根据 ID 获取选中的怪物
 const selectedMonster = computed(() => {
@@ -109,71 +110,47 @@ function getFactionName(faction: number | undefined): string {
     if (faction === undefined) return "其他"
     return Faction[faction] || `阵营${faction}`
 }
+
+useInitialScrollToSelectedItem()
 </script>
 
 <template>
     <div class="h-full flex flex-col bg-base-100">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <!-- 左侧列表面板 -->
-            <div
-                class="flex-1 flex flex-col overflow-hidden"
-                :class="{ 'border-r border-base-200': selectedMonster || selectedMonsterTag }"
-            >
+            <div class="flex-1 flex flex-col overflow-hidden"
+                :class="{ 'border-r border-base-200': selectedMonster || selectedMonsterTag }">
                 <!-- 搜索栏 -->
                 <div class="p-3 border-b border-base-200">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索怪物名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
-                    />
+                    <input v-model="searchKeyword" type="text" placeholder="搜索怪物名称（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
                 </div>
 
                 <!-- 资料类型Tab -->
                 <div class="p-2 border-b border-base-200">
                     <div class="flex flex-wrap gap-1 pb-2 border-b border-base-300">
-                        <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
-                            :class="
-                                selectedType === 'monster' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                            "
-                            @click="selectedType = 'monster'"
-                        >
+                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all" :class="selectedType === 'monster' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                            " @click="selectedType = 'monster'">
                             怪物
                         </button>
-                        <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
-                            :class="
-                                selectedType === 'monsterTag' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                            "
-                            @click="selectedType = 'monsterTag'"
-                        >
+                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all" :class="selectedType === 'monsterTag' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                            " @click="selectedType = 'monsterTag'">
                             号令者
                         </button>
                     </div>
 
                     <div class="flex flex-wrap gap-1 pb-1">
                         <template v-if="selectedType === 'monster'">
-                            <button
-                                class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
-                                :class="
-                                    selectedFaction === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                "
-                                @click="selectedFaction = ''"
-                            >
+                            <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all" :class="selectedFaction === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                " @click="selectedFaction = ''">
                                 全部
                             </button>
-                            <button
-                                v-for="faction in factions"
-                                :key="faction"
+                            <button v-for="faction in factions" :key="faction"
                                 class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all cursor-pointer"
-                                :class="
-                                    selectedFaction === faction
-                                        ? 'bg-primary text-white'
-                                        : 'bg-base-200 text-base-content hover:bg-base-300'
-                                "
-                                @click="selectedFaction = faction"
-                            >
+                                :class="selectedFaction === faction
+                                    ? 'bg-primary text-white'
+                                    : 'bg-base-200 text-base-content hover:bg-base-300'
+                                    " @click="selectedFaction = faction">
                                 {{ $t(getFactionName(faction)) }}
                             </button>
                         </template>
@@ -184,16 +161,14 @@ function getFactionName(faction: number | undefined): string {
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
                         <template v-if="selectedType === 'monster'">
-                            <div
-                                v-for="monster in filteredMonsters"
-                                :key="monster.id"
+                            <div v-for="monster in filteredMonsters" :key="monster.id"
                                 class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
                                 :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedMonsterId === monster.id }"
-                                @click="selectMonster(monster.id)"
-                            >
+                                @click="selectMonster(monster.id)">
                                 <div class="flex items-start justify-between">
                                     <div class="flex items-center gap-2">
-                                        <img :src="LeveledMonster.url(monster.icon)" alt="怪物图标" class="w-8 h-8 rounded" />
+                                        <img :src="LeveledMonster.url(monster.icon)" alt="怪物图标"
+                                            class="w-8 h-8 rounded" />
                                         <div>
                                             <div class="font-medium flex gap-2 items-center">
                                                 {{ monster.n }}
@@ -204,7 +179,8 @@ function getFactionName(faction: number | undefined): string {
                                         </div>
                                     </div>
                                     <div v-if="monster.t" class="flex flex-col items-end gap-1">
-                                        <span class="text-xs px-2 py-0.5 rounded" :class="getMonsterType(monster.t).color + ' text-white'">
+                                        <span class="text-xs px-2 py-0.5 rounded"
+                                            :class="getMonsterType(monster.t).color + ' text-white'">
                                             {{ getMonsterType(monster.t).label }}
                                         </span>
                                     </div>
@@ -220,15 +196,11 @@ function getFactionName(faction: number | undefined): string {
                         </template>
 
                         <template v-else>
-                            <div
-                                v-for="monsterTag in filteredMonsterTags"
-                                :key="monsterTag.primaryTag.id"
+                            <div v-for="monsterTag in filteredMonsterTags" :key="monsterTag.primaryTag.id"
                                 class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
                                 :class="{
                                     'bg-primary/90 text-primary-content hover:bg-primary': selectedMonsterTagId === monsterTag.primaryTag.id,
-                                }"
-                                @click="selectMonsterTag(monsterTag.primaryTag.id)"
-                            >
+                                }" @click="selectMonsterTag(monsterTag.primaryTag.id)">
                                 <div class="flex items-start justify-between gap-2">
                                     <div>
                                         <div class="font-medium flex gap-2 items-center">
@@ -238,7 +210,8 @@ function getFactionName(faction: number | undefined): string {
                                             {{ monsterTag.primaryTag.id }}
                                         </div>
                                     </div>
-                                    <span class="text-xs px-2 py-0.5 rounded bg-base-300">{{ monsterTag.tags.length }} 词条</span>
+                                    <span class="text-xs px-2 py-0.5 rounded bg-base-300">{{ monsterTag.tags.length }}
+                                        词条</span>
                                 </div>
                                 <div class="text-xs opacity-70 mt-2 line-clamp-2">
                                     {{ monsterTag.primaryTag.desc }}
@@ -254,11 +227,9 @@ function getFactionName(faction: number | undefined): string {
                     <span v-else>共 {{ filteredMonsterTags.length }} 个号令者</span>
                 </div>
             </div>
-            <div
-                v-if="selectedMonster || selectedMonsterTag"
+            <div v-if="selectedMonster || selectedMonsterTag"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="clearSelection"
-            >
+                @click="clearSelection">
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 

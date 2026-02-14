@@ -1,12 +1,13 @@
 <script lang="ts" setup>
-import { useSessionStorage } from "@vueuse/core"
 import { computed } from "vue"
+import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
+import { useSearchParam } from "@/composables/useSearchParam"
 import { monsterMap } from "@/data"
 import { type HardBoss, hardBossMap } from "../data/d/hardboss.data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = useSessionStorage<string>("hardboss.searchKeyword", "")
-const selectedBossId = useSessionStorage<number>("hardboss.selectedBoss", 0)
+const searchKeyword = useSearchParam<string>("hardboss.searchKeyword", "")
+const selectedBossId = useSearchParam<number>("hardboss.selectedBoss", 0)
 
 // 根据 ID 获取选中的 Boss
 const selectedBoss = computed(() => {
@@ -46,6 +47,8 @@ const filteredBosses = computed(() => {
 function selectBoss(boss: HardBoss | null) {
     selectedBossId.value = boss?.id || 0
 }
+
+useInitialScrollToSelectedItem()
 </script>
 
 <template>
@@ -55,24 +58,17 @@ function selectBoss(boss: HardBoss | null) {
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedBoss }">
                 <!-- 搜索栏 -->
                 <div class="p-3 border-b border-base-200">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索梦魇残声 ID/名称/描述/怪物名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
-                    />
+                    <input v-model="searchKeyword" type="text" placeholder="搜索梦魇残声 ID/名称/描述/怪物名称（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
                 </div>
 
                 <!-- Boss列表 -->
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div
-                            v-for="boss in filteredBosses"
-                            :key="boss.id"
+                        <div v-for="boss in filteredBosses" :key="boss.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedBossId === boss.id }"
-                            @click="selectBoss(boss)"
-                        >
+                            @click="selectBoss(boss)">
                             <div class="flex items-start justify-between">
                                 <div class="flex-1">
                                     <div class="font-medium">{{ boss.name }}</div>
@@ -81,12 +77,14 @@ function selectBoss(boss: HardBoss | null) {
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1 ml-2">
-                                    <span class="text-xs px-2 py-0.5 rounded bg-primary text-white"> {{ boss.diff.length }} 个难度 </span>
+                                    <span class="text-xs px-2 py-0.5 rounded bg-primary text-white"> {{ boss.diff.length
+                                    }} 个难度 </span>
                                     <span class="text-xs opacity-70">ID: {{ boss.id }}</span>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 mt-2 text-xs opacity-70">
-                                <span>等级范围: Lv.{{ boss.diff[0]?.lv }} - Lv.{{ boss.diff[boss.diff.length - 1]?.lv }}</span>
+                                <span>等级范围: Lv.{{ boss.diff[0]?.lv }} - Lv.{{ boss.diff[boss.diff.length - 1]?.lv
+                                }}</span>
                             </div>
                         </div>
                     </div>
@@ -97,11 +95,9 @@ function selectBoss(boss: HardBoss | null) {
                     共 {{ filteredBosses.length }} 个梦魇残声
                 </div>
             </div>
-            <div
-                v-if="selectedBoss"
+            <div v-if="selectedBoss"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectBoss(null)"
-            >
+                @click="selectBoss(null)">
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 

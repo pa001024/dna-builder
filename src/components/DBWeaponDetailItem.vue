@@ -230,224 +230,199 @@ watch(
 </script>
 
 <template>
-    <ScrollArea class="h-full">
-        <div class="p-3 space-y-4">
-            <div class="p-3">
-                <div class="flex items-center gap-3 mb-3">
-                    <SRouterLink :to="`/db/weapon/${weapon.id}`" class="text-lg font-bold link link-primary">
-                        {{ $t(weapon.名称) }}
-                    </SRouterLink>
-                    <span class="text-xs text-base-content/70">ID: {{ weapon.id }}</span>
-                </div>
-
-                <div class="flex justify-center items-center mb-3">
-                    <img :src="leveledWeapon.url" class="w-24 object-cover rounded" />
-                </div>
-
-                <div class="flex flex-wrap gap-2 text-sm opacity-70 mb-3">
-                    <span>{{ weapon.类型.map(t => $t(t)).join(", ") }}</span>
-                    <span>
-                        {{ $t(weapon.伤害类型) }}
-                    </span>
-                    <span v-if="weapon.版本">v{{ weapon.版本 }}</span>
-                </div>
-
-                <div v-if="weapon.描述" class="text-sm text-base-content/70 mb-3">
-                    {{ weapon.描述 }}
-                </div>
+    <div class="p-3 space-y-3">
+        <div class="p-3">
+            <div class="flex items-center gap-3 mb-3">
+                <SRouterLink :to="`/db/weapon/${weapon.id}`" class="text-lg font-bold link link-primary">
+                    {{ $t(weapon.名称) }}
+                </SRouterLink>
+                <span class="text-xs text-base-content/70">ID: {{ weapon.id }}</span>
             </div>
 
-            <div class="mb-3">
-                <div class="flex items-center gap-4 mb-3">
-                    <span class="text-sm min-w-20 flex-none grid grid-cols-2">
-                        <span> Lv. </span>
-                        <span> {{ currentLevel }} </span>
-                    </span>
-                    <input
-                        :key="leveledWeapon.id"
-                        v-model.number="currentLevel"
-                        type="range"
-                        class="range range-primary range-xs grow"
-                        :min="1"
-                        :max="80"
-                        step="1"
-                    />
-                </div>
-                <div class="flex items-center gap-4">
-                    <span class="text-sm min-w-20 flex-none grid grid-cols-2">
-                        <span> 熔炼: </span>
-                        <span> {{ ["0", "I", "II", "III", "IV", "V"][currentRefine] }} </span>
-                    </span>
-                    <input
-                        :key="leveledWeapon.id"
-                        v-model.number="currentRefine"
-                        type="range"
-                        class="range range-primary range-xs grow"
-                        :min="0"
-                        :max="5"
-                        step="1"
-                    />
-                </div>
+            <div class="flex justify-center items-center mb-3">
+                <img :src="leveledWeapon.url" class="w-24 object-cover rounded" />
             </div>
 
-            <div class="p-3 bg-base-200 rounded mb-3">
-                <div class="text-xs text-base-content/70 mb-2">{{ $t("char-build.base_attr") }}</div>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                        <span class="text-base-content/70">{{ $t("攻击") }}</span>
-                        <span class="font-medium text-primary">{{ leveledWeapon.基础攻击 }}</span>
-                    </div>
-                    <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                        <span class="text-base-content/70">{{ $t("暴击") }}</span>
-                        <span class="font-medium text-primary">{{ formatProp("基础暴击", weapon.暴击) }}</span>
-                    </div>
-                    <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                        <span class="text-base-content/70">{{ $t("暴伤") }}</span>
-                        <span class="font-medium text-primary">{{ formatProp("基础暴伤", weapon.暴伤) }}</span>
-                    </div>
-                    <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                        <span class="text-base-content/70">{{ $t("触发") }}</span>
-                        <span class="font-medium text-primary">{{ formatProp("基础触发", weapon.触发) }}</span>
-                    </div>
-                    <div v-if="weapon.弹匣" class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                        <span class="text-base-content/70">{{ $t("弹匣") }}</span>
-                        <span class="font-medium text-primary">{{ weapon.弹匣 }}</span>
-                    </div>
-                    <div v-if="weapon.最大弹药" class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                        <span class="text-base-content/70">{{ $t("最大弹药") }}</span>
-                        <span class="font-medium text-primary">{{ weapon.最大弹药 }}</span>
-                    </div>
-                    <div v-if="weapon.最大射程" class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                        <span class="text-base-content/70">{{ $t("最大射程") }}</span>
-                        <span class="font-medium text-primary">{{ weapon.最大射程 }}</span>
-                    </div>
-                    <div v-if="weapon.装填" class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                        <span class="text-base-content/70">{{ $t("装填") }}</span>
-                        <span class="font-medium text-primary">{{ formatProp("基础装填", weapon.装填) }}</span>
-                    </div>
-                    <div v-if="weapon.射击间隔" class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                        <span class="text-base-content/70">{{ $t("射击间隔") }}</span>
-                        <span class="font-medium text-primary">{{ formatProp("基础装填", weapon.射击间隔) }}</span>
-                    </div>
-                    <div v-if="leveledWeapon.射速" class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                        <span class="text-base-content/70">{{ $t("射速") }}</span>
-                        <span class="font-medium text-primary">{{ formatProp("基础弹匣", leveledWeapon.射速) }}</span>
-                    </div>
-                </div>
+            <div class="flex flex-wrap gap-2 text-sm opacity-70 mb-3">
+                <span>{{weapon.类型.map(t => $t(t)).join(", ")}}</span>
+                <span>
+                    {{ $t(weapon.伤害类型) }}
+                </span>
+                <span v-if="weapon.版本">v{{ weapon.版本 }}</span>
             </div>
 
-            <div v-if="weapon.熔炼 && weapon.熔炼.length > 0" class="p-3 bg-base-200 rounded mb-3">
-                <div class="text-xs text-base-content/70 mb-2">
-                    {{ $t("属性") }}
+            <div v-if="weapon.描述" class="text-sm text-base-content/70 mb-3">
+                {{ weapon.描述 }}
+            </div>
+        </div>
+
+        <div class="p-3">
+            <div class="flex items-center gap-4 mb-3">
+                <span class="text-sm min-w-20 flex-none grid grid-cols-2">
+                    <span> Lv. </span>
+                    <span> {{ currentLevel }} </span>
+                </span>
+                <input :key="leveledWeapon.id" v-model.number="currentLevel" type="range"
+                    class="range range-primary range-xs grow" :min="1" :max="80" step="1" />
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-sm min-w-20 flex-none grid grid-cols-2">
+                    <span> 熔炼: </span>
+                    <span> {{ ["0", "I", "II", "III", "IV", "V"][currentRefine] }} </span>
+                </span>
+                <input :key="leveledWeapon.id" v-model.number="currentRefine" type="range"
+                    class="range range-primary range-xs grow" :min="0" :max="5" step="1" />
+            </div>
+        </div>
+
+        <div class="p-3 bg-base-200 rounded mb-3">
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("char-build.base_attr") }}</div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                    <span class="text-base-content/70">{{ $t("攻击") }}</span>
+                    <span class="font-medium text-primary">{{ leveledWeapon.基础攻击 }}</span>
                 </div>
-                <div class="space-y-1">
-                    {{ weapon.熔炼[currentRefine] }}
+                <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                    <span class="text-base-content/70">{{ $t("暴击") }}</span>
+                    <span class="font-medium text-primary">{{ formatProp("基础暴击", weapon.暴击) }}</span>
+                </div>
+                <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                    <span class="text-base-content/70">{{ $t("暴伤") }}</span>
+                    <span class="font-medium text-primary">{{ formatProp("基础暴伤", weapon.暴伤) }}</span>
+                </div>
+                <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                    <span class="text-base-content/70">{{ $t("触发") }}</span>
+                    <span class="font-medium text-primary">{{ formatProp("基础触发", weapon.触发) }}</span>
+                </div>
+                <div v-if="weapon.弹匣" class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                    <span class="text-base-content/70">{{ $t("弹匣") }}</span>
+                    <span class="font-medium text-primary">{{ weapon.弹匣 }}</span>
+                </div>
+                <div v-if="weapon.最大弹药" class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                    <span class="text-base-content/70">{{ $t("最大弹药") }}</span>
+                    <span class="font-medium text-primary">{{ weapon.最大弹药 }}</span>
+                </div>
+                <div v-if="weapon.最大射程" class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                    <span class="text-base-content/70">{{ $t("最大射程") }}</span>
+                    <span class="font-medium text-primary">{{ weapon.最大射程 }}</span>
+                </div>
+                <div v-if="weapon.装填" class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                    <span class="text-base-content/70">{{ $t("装填") }}</span>
+                    <span class="font-medium text-primary">{{ formatProp("基础装填", weapon.装填) }}</span>
+                </div>
+                <div v-if="weapon.射击间隔" class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                    <span class="text-base-content/70">{{ $t("射击间隔") }}</span>
+                    <span class="font-medium text-primary">{{ formatProp("基础装填", weapon.射击间隔) }}</span>
+                </div>
+                <div v-if="leveledWeapon.射速" class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                    <span class="text-base-content/70">{{ $t("射速") }}</span>
+                    <span class="font-medium text-primary">{{ formatProp("基础弹匣", leveledWeapon.射速) }}</span>
                 </div>
             </div>
+        </div>
 
-            <div v-if="leveledWeapon.技能 && leveledWeapon.技能.length > 0" class="p-3 bg-base-200 rounded">
-                <div class="text-xs text-base-content/70 mb-2">
-                    {{ $t("技能") }}
-                </div>
-                <div class="space-y-3">
-                    <div v-for="skill in leveledWeapon.技能" :key="skill.名称">
-                        <div class="text-sm font-medium text-primary mb-2 px-2">
-                            {{ $t(skill.名称) }}
-                        </div>
-                        <div
-                            v-if="singleSkillComboSummaryByName[skill.名称]"
-                            class="text-xs text-base-content/70 mb-2 px-2 flex flex-wrap gap-x-4 gap-y-1"
-                        >
-                            <span> {{ $t("连段总时长") }}: {{ +singleSkillComboSummaryByName[skill.名称].comboTime.toFixed(4) }}秒 </span>
-                            <span>
-                                {{ $t("秒均倍率") }}:
-                                {{ +(singleSkillComboSummaryByName[skill.名称].multiplierPerSecond * 100).toFixed(1) }}%/s
-                            </span>
-                            <span>
-                                {{ $t("总倍率") }}: {{ +(singleSkillComboSummaryByName[skill.名称].totalMultiplier * 100).toFixed(1) }}%
-                            </span>
-                        </div>
-                        <SkillFields :skill="skill" />
+        <div v-if="weapon.熔炼 && weapon.熔炼.length > 0" class="p-3 bg-base-200 rounded mb-3">
+            <div class="text-xs text-base-content/70 mb-2">
+                {{ $t("属性") }}
+            </div>
+            <div class="space-y-1">
+                {{ weapon.熔炼[currentRefine] }}
+            </div>
+        </div>
+
+        <div v-if="leveledWeapon.技能 && leveledWeapon.技能.length > 0" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">
+                {{ $t("技能") }}
+            </div>
+            <div class="space-y-3">
+                <div v-for="skill in leveledWeapon.技能" :key="skill.名称">
+                    <div class="text-sm font-medium text-primary mb-2 px-2">
+                        {{ $t(skill.名称) }}
                     </div>
+                    <div v-if="singleSkillComboSummaryByName[skill.名称]"
+                        class="text-xs text-base-content/70 mb-2 px-2 flex flex-wrap gap-x-4 gap-y-1">
+                        <span> {{ $t("连段总时长") }}: {{ +singleSkillComboSummaryByName[skill.名称].comboTime.toFixed(4) }}秒
+                        </span>
+                        <span>
+                            {{ $t("秒均倍率") }}:
+                            {{ +(singleSkillComboSummaryByName[skill.名称].multiplierPerSecond * 100).toFixed(1) }}%/s
+                        </span>
+                        <span>
+                            {{ $t("总倍率") }}: {{ +(singleSkillComboSummaryByName[skill.名称].totalMultiplier *
+                                100).toFixed(1) }}%
+                        </span>
+                    </div>
+                    <SkillFields :skill="skill" />
                 </div>
             </div>
+        </div>
 
-            <div v-if="weaponSkillReplaceGroups.length > 0" class="p-3 bg-base-200 rounded">
-                <div class="text-xs text-base-content/70 mb-2">招式魔之楔</div>
-                <div class="space-y-3">
-                    <div v-for="group in weaponSkillReplaceGroups" :key="group.skillId" class="p-2 bg-base-300 rounded">
-                        <div class="text-sm font-medium mb-2">
-                            {{ $t(group.skillName) }}
-                            <span class="text-xs opacity-70">({{ group.skillId }})</span>
-                        </div>
-                        <div class="space-y-2">
-                            <div v-for="item in group.items" :key="item.mod.id" class="p-2 bg-base-100 rounded">
-                                <ShowProps
-                                    :props="item.mod.getProperties()"
-                                    :title="`${$t(item.mod.系列)}${$t(item.mod.名称)}`"
-                                    :rarity="item.mod.品质"
-                                    :polarity="item.mod.极性"
-                                    :cost="item.mod.耐受"
-                                    :type="`${$t(item.mod.类型)}${item.mod.属性 ? `,${$t(item.mod.属性 + '属性')}` : ''}${item.mod.限定 ? `,${$t(item.mod.限定)}` : ''}`"
-                                    :effdesc="item.mod.效果"
-                                    :link="`/db/mod/${item.mod.id}`"
-                                >
-                                    <div class="flex items-center p-2 rounded bg-base-300 transition-colors duration-200 mb-2">
-                                        <img
-                                            :src="item.mod.url"
-                                            :alt="item.mod.名称"
-                                            class="size-8 inline-block mr-2 bg-linear-45 rounded"
-                                            :class="getQualityColor(item.mod.品质)"
-                                        />
-                                        <div class="flex flex-col min-w-0">
-                                            <div class="text-sm font-medium truncate">{{ $t(item.mod.系列) }}{{ $t(item.mod.名称) }}</div>
-                                            <div class="text-xs opacity-70 flex flex-wrap gap-x-3 gap-y-1">
-                                                <span>ID: {{ item.mod.id }}</span>
-                                                <span v-if="item.mod.版本">v{{ item.mod.版本 }}</span>
-                                                <span v-if="item.mod.耐受" class="inline-flex items-center gap-1">
-                                                    {{ $t("耐受") }}
-                                                    <Icon v-if="item.mod.极性" :icon="`po-${item.mod.极性}`" />
-                                                    <span>{{ item.mod.耐受 }}~{{ item.mod.耐受 - (item.mod.品质 === "金" ? 10 : 5) }}</span>
-                                                </span>
-                                                <span class="truncate max-w-full">{{ getModPropertiesText(item.mod) }}</span>
-                                            </div>
+        <div v-if="weaponSkillReplaceGroups.length > 0" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">招式魔之楔</div>
+            <div class="space-y-3">
+                <div v-for="group in weaponSkillReplaceGroups" :key="group.skillId" class="p-2 bg-base-300 rounded">
+                    <div class="text-sm font-medium mb-2">
+                        {{ $t(group.skillName) }}
+                        <span class="text-xs opacity-70">({{ group.skillId }})</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div v-for="item in group.items" :key="item.mod.id" class="p-2 bg-base-100 rounded">
+                            <ShowProps :props="item.mod.getProperties()" :title="`${$t(item.mod.系列)}${$t(item.mod.名称)}`"
+                                :rarity="item.mod.品质" :polarity="item.mod.极性" :cost="item.mod.耐受"
+                                :type="`${$t(item.mod.类型)}${item.mod.属性 ? `,${$t(item.mod.属性 + '属性')}` : ''}${item.mod.限定 ? `,${$t(item.mod.限定)}` : ''}`"
+                                :effdesc="item.mod.效果" :link="`/db/mod/${item.mod.id}`">
+                                <div
+                                    class="flex items-center p-2 rounded bg-base-300 transition-colors duration-200 mb-2">
+                                    <img :src="item.mod.url" :alt="item.mod.名称"
+                                        class="size-8 inline-block mr-2 bg-linear-45 rounded"
+                                        :class="getQualityColor(item.mod.品质)" />
+                                    <div class="flex flex-col min-w-0">
+                                        <div class="text-sm font-medium truncate">{{ $t(item.mod.系列) }}{{
+                                            $t(item.mod.名称) }}</div>
+                                        <div class="text-xs opacity-70 flex flex-wrap gap-x-3 gap-y-1">
+                                            <span>ID: {{ item.mod.id }}</span>
+                                            <span v-if="item.mod.版本">v{{ item.mod.版本 }}</span>
+                                            <span v-if="item.mod.耐受" class="inline-flex items-center gap-1">
+                                                {{ $t("耐受") }}
+                                                <Icon v-if="item.mod.极性" :icon="`po-${item.mod.极性}`" />
+                                                <span>{{ item.mod.耐受 }}~{{ item.mod.耐受 - (item.mod.品质 === "金" ? 10 : 5)
+                                                    }}</span>
+                                            </span>
+                                            <span class="truncate max-w-full">{{ getModPropertiesText(item.mod)
+                                                }}</span>
                                         </div>
                                     </div>
-                                </ShowProps>
-                                <div v-if="item.showLevelControl" class="mb-2">
-                                    <div class="flex items-center gap-4">
-                                        <span class="text-xs min-w-16">Lv. {{ item.mod.等级 }}</span>
-                                        <input
-                                            v-model.number="replaceModLevels[item.mod.id]"
-                                            type="range"
-                                            class="range range-primary range-xs grow"
-                                            :min="0"
-                                            :max="item.mod.maxLevel"
-                                            step="1"
-                                        />
-                                    </div>
                                 </div>
-                                <div v-if="item.mod.效果" class="text-xs text-base-content/70 mb-2">
-                                    {{ item.mod.效果 }}
+                            </ShowProps>
+                            <div v-if="item.showLevelControl" class="mb-2">
+                                <div class="flex items-center gap-4">
+                                    <span class="text-xs min-w-16">Lv. {{ item.mod.等级 }}</span>
+                                    <input v-model.number="replaceModLevels[item.mod.id]" type="range"
+                                        class="range range-primary range-xs grow" :min="0" :max="item.mod.maxLevel"
+                                        step="1" />
                                 </div>
-                                <SkillFields :skill="item.replaceSkill" />
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div v-if="weapon.突破 && weapon.突破.length > 0" class="p-3 bg-base-200 rounded mb-3">
-                <div class="text-xs text-base-content/70 mb-2">突破消耗</div>
-                <div class="space-y-3">
-                    <div v-for="(cost, index) in weapon.突破" :key="index" class="p-2">
-                        <div class="text-sm font-medium mb-2 text-primary">突破 {{ ["I", "II", "III", "IV", "V", "VI"][index] }}</div>
-                        <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
-                            <ResourceCostItem v-for="(value, key) in cost" :key="key" :name="key" :value="value" />
+                            <div v-if="item.mod.效果" class="text-xs text-base-content/70 mb-2">
+                                {{ item.mod.效果 }}
+                            </div>
+                            <SkillFields :skill="item.replaceSkill" />
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </ScrollArea>
+
+        <div v-if="weapon.突破 && weapon.突破.length > 0" class="p-3 bg-base-200 rounded mb-3">
+            <div class="text-xs text-base-content/70 mb-2">突破消耗</div>
+            <div class="space-y-3">
+                <div v-for="(cost, index) in weapon.突破" :key="index" class="p-2">
+                    <div class="text-sm font-medium mb-2 text-primary">突破 {{ ["I", "II", "III", "IV", "V", "VI"][index]
+                        }}</div>
+                    <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
+                        <ResourceCostItem v-for="(value, key) in cost" :key="key" :name="key" :value="value" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>

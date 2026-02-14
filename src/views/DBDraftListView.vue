@@ -1,14 +1,15 @@
 <script lang="ts" setup>
-import { useSessionStorage } from "@vueuse/core"
 import { computed } from "vue"
+import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
+import { parseNumberOrEmptySearchParam, useSearchParam } from "@/composables/useSearchParam"
 import { draftMap } from "../data/d"
 import draftData from "../data/d/draft.data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = useSessionStorage<string>("draft.searchKeyword", "")
-const selectedDraftId = useSessionStorage<number>("draft.selectedDraft", 0)
-const selectedType = useSessionStorage<string | "">("draft.selectedType", "")
-const selectedRarity = useSessionStorage<number | "">("draft.selectedRarity", "")
+const searchKeyword = useSearchParam<string>("draft.searchKeyword", "")
+const selectedDraftId = useSearchParam<number>("draft.selectedDraft", 0)
+const selectedType = useSearchParam<string | "">("draft.selectedType", "")
+const selectedRarity = useSearchParam<number | "">("draft.selectedRarity", "", { parse: parseNumberOrEmptySearchParam })
 
 // 根据 ID 获取选中的图纸
 const selectedDraft = computed(() => {
@@ -86,6 +87,8 @@ function getTypeName(type: string): string {
     }
     return typeMap[type] || type
 }
+
+useInitialScrollToSelectedItem()
 </script>
 
 <template>
@@ -95,12 +98,8 @@ function getTypeName(type: string): string {
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedDraft }">
                 <!-- 搜索栏 -->
                 <div class="p-3 border-b border-base-200">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索图纸名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
-                    />
+                    <input v-model="searchKeyword" type="text" placeholder="搜索图纸名称（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
                 </div>
 
                 <!-- 筛选条件 -->
@@ -109,20 +108,15 @@ function getTypeName(type: string): string {
                     <div>
                         <div class="text-xs text-base-content/70 mb-1">类型</div>
                         <div class="flex flex-wrap gap-1 pb-1">
-                            <button
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                            <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
                                 :class="selectedType === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedType = ''"
-                            >
+                                @click="selectedType = ''">
                                 全部
                             </button>
-                            <button
-                                v-for="type in types"
-                                :key="type"
+                            <button v-for="type in types" :key="type"
                                 class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
                                 :class="selectedType === type ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedType = type"
-                            >
+                                @click="selectedType = type">
                                 {{ getTypeName(type) }}
                             </button>
                         </div>
@@ -132,22 +126,15 @@ function getTypeName(type: string): string {
                     <div>
                         <div class="text-xs text-base-content/70 mb-1">稀有度</div>
                         <div class="flex flex-wrap gap-1 pb-1">
-                            <button
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                            <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
                                 :class="selectedRarity === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedRarity = ''"
-                            >
+                                @click="selectedRarity = ''">
                                 全部
                             </button>
-                            <button
-                                v-for="rarity in rarities"
-                                :key="rarity"
+                            <button v-for="rarity in rarities" :key="rarity"
                                 class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                                :class="
-                                    selectedRarity === rarity ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                "
-                                @click="selectedRarity = rarity"
-                            >
+                                :class="selectedRarity === rarity ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                    " @click="selectedRarity = rarity">
                                 {{ ["", "白", "绿", "蓝", "紫", "金"][rarity] }}
                             </button>
                         </div>
@@ -157,13 +144,10 @@ function getTypeName(type: string): string {
                 <!-- 图纸列表 -->
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div
-                            v-for="draft in filteredDrafts"
-                            :key="draft.id"
+                        <div v-for="draft in filteredDrafts" :key="draft.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedDraftId === draft.id }"
-                            @click="selectedDraftId = draft.id"
-                        >
+                            @click="selectedDraftId = draft.id">
                             <div class="flex items-start justify-between">
                                 <div>
                                     <div class="font-medium flex gap-2 items-center">
@@ -199,11 +183,9 @@ function getTypeName(type: string): string {
                     共 {{ filteredDrafts.length }} 个图纸
                 </div>
             </div>
-            <div
-                v-if="selectedDraft"
+            <div v-if="selectedDraft"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedDraftId = 0"
-            >
+                @click="selectedDraftId = 0">
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 

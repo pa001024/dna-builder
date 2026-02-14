@@ -192,7 +192,10 @@ export class LeveledWeapon {
             if (buff._originalBuffData.描述.includes(`{%}`)) {
                 const vals: number[] = Object.values(props)
                 let i = 0
-                buff.描述 = buff._originalBuffData.描述.replace(/\{%\}/g, () => `${(vals[i++] * 100).toFixed(1)}%`)
+                buff.描述 = buff._originalBuffData.描述.replace(
+                    /\{%\}/g,
+                    () => `${((vals[i++] * 100) / (this.buff?._等级 || 1)).toFixed(1)}%`
+                )
             }
         }
     }
