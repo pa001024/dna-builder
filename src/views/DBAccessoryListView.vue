@@ -251,7 +251,7 @@ useInitialScrollToSelectedItem()
                                         class="size-10 rounded bg-linear-15 object-cover"
                                         :class="getRarityGradientClass(accessory.rarity)" />
                                     <div class="min-w-0">
-                                        <div class="font-medium break-words">{{ $t(accessory.name) }}</div>
+                                        <div class="font-medium wrap-break-word">{{ $t(accessory.name) }}</div>
                                         <div class="text-xs opacity-70 mt-1 line-clamp-1">
                                             {{ $t(accessory.unlock || "") || "-" }}
                                         </div>
