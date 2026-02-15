@@ -1,9 +1,6 @@
-import { describe, it, expect } from "vitest"
+import { describe, expect, it } from "vitest"
 import { CharBuild } from "../CharBuild"
-import { LeveledChar } from "../leveled"
-import { LeveledWeapon } from "../leveled"
-import { LeveledMod } from "../leveled"
-import { LeveledBuff } from "../leveled"
+import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
 import { LeveledModWithCount } from "../leveled/LeveledMod"
 
 describe("CharBuild类测试", () => {
@@ -863,6 +860,62 @@ describe("CharBuild类测试", () => {
             expect(result.newBuild.checkModEffective(result.newBuild.auraMod!)?.isEffective).toBe(true)
         })
     })
+
+    describe("锋芒条件MOD测试", () => {
+        it("应该按队友武器数量叠加紫色锋芒增伤", () => {
+            const baseBuild = createCharBuild()
+            baseBuild.baseName = "普通攻击"
+            baseBuild.mods = [new LeveledMod(41803)]
+            baseBuild.buffs = []
+            const baseDamageIncrease = baseBuild.calculateAttributes().增伤
+
+            const charBuild = createCharBuild()
+            charBuild.baseName = "普通攻击"
+            charBuild.mods = [new LeveledMod(41803)]
+            charBuild.buffs = []
+            charBuild.teamWeaponCategories = ["重剑"]
+            const attrs = charBuild.calculateAttributes()
+
+            expect(attrs.增伤 - baseDamageIncrease).toBeCloseTo(0.06, 5)
+        })
+
+        it("应该在自身与两名队友同类别时封顶金色锋芒增伤", () => {
+            const baseBuild = createCharBuild()
+            baseBuild.baseName = "普通攻击"
+            baseBuild.mods = []
+            baseBuild.buffs = []
+            const baseDamageIncrease = baseBuild.calculateAttributes().增伤
+
+            const charBuild = createCharBuild()
+            charBuild.baseName = "普通攻击"
+            charBuild.mods = [new LeveledMod(51803)]
+            charBuild.buffs = []
+            charBuild.teamWeaponCategories = ["重剑", "重剑"]
+            const attrs = charBuild.calculateAttributes()
+
+            expect(attrs.增伤 - baseDamageIncrease).toBeCloseTo(0.33, 5)
+        })
+
+        it("同类别计数达到4时仍应按3层上限计算", () => {
+            const baseBuild = createCharBuild()
+            baseBuild.char = new LeveledChar("莉兹贝尔")
+            baseBuild.baseName = "普通攻击"
+            baseBuild.mods = []
+            baseBuild.buffs = []
+            const baseDamageIncrease = baseBuild.calculateAttributes().增伤
+
+            const charBuild = createCharBuild()
+            charBuild.char = new LeveledChar("莉兹贝尔")
+            charBuild.baseName = "普通攻击"
+            charBuild.mods = [new LeveledMod(51803)]
+            charBuild.buffs = []
+            charBuild.teamWeaponCategories = ["重剑", "重剑"]
+            const attrs = charBuild.calculateAttributes()
+
+            expect(attrs.增伤 - baseDamageIncrease).toBeCloseTo(0.33, 5)
+        })
+    })
+
     describe("表达式测试", () => {
         it("应该能够计算常数", () => {
             const charBuild = createCharBuild()

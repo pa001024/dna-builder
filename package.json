@@ -28,6 +28,8 @@
         "@antv/g": "^6.3.1",
         "@antv/g6": "^5.0.51",
         "@globalhive/vuejs-tour": "^3.0.0",
+        "@langchain/core": "^1.1.24",
+        "@langchain/openai": "^1.2.7",
         "@modelcontextprotocol/sdk": "^1.26.0",
         "@sentry/vue": "^10.38.0",
         "@tauri-apps/api": "^2.10.1",
@@ -64,6 +66,7 @@
         "i18next-vue": "^5.4.0",
         "js-ini": "^1.6.0",
         "jwt-decode": "^4.0.0",
+        "langchain": "^1.2.24",
         "lodash-es": "^4.17.23",
         "markdown-it": "^14.1.1",
         "markdown-it-highlightjs": "^4.3.0",
@@ -80,7 +83,8 @@
         "vue": "^3.5.28",
         "vue-router": "^4.6.4",
         "workbox-window": "^7.4.0",
-        "xlsx": "^0.18.5"
+        "xlsx": "^0.18.5",
+        "zod": "^4.3.6"
     },
     "devDependencies": {
         "@biomejs/biome": "2.3.15",

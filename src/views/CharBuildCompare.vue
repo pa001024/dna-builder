@@ -213,6 +213,7 @@ const baseCharBuilds = computed(() => {
             enemyResistance: settings.enemyResistance,
             targetFunction: settings.targetFunction,
             timeline: getTimelineByName(settings.baseName),
+            teamWeapons: [settings.team1Weapon, settings.team2Weapon],
         })
     })
 })
@@ -300,6 +301,7 @@ const charBuilds = computed(() => {
             enemyResistance: baseBuild.enemyResistance,
             targetFunction: baseBuild.targetFunction,
             timeline: baseBuild.timeline,
+            teamWeaponCategories: [...baseBuild.teamWeaponCategories],
         })
     })
 })

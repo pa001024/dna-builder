@@ -207,6 +207,7 @@ const charBuild = computed(() => {
             enemyResistance: charSettings.value.enemyResistance,
             targetFunction: charSettings.value.targetFunction,
             timeline: charSettings.value.actions.enable ? getInlineActions() : getTimelineByName(charSettings.value.baseName),
+            teamWeapons: [charSettings.value.team1Weapon, charSettings.value.team2Weapon],
         })
         return b
     } catch {

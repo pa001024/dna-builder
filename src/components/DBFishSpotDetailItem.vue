@@ -29,31 +29,29 @@ const spotPet = computed(() => {
 /**
  * 获取稀有度颜色
  */
-function getRarityColor(level: number): string {
+function getRarityColor(rarity: number): string {
     const colorMap: Record<number, string> = {
         1: "bg-green-200 text-green-800",
         2: "bg-green-200 text-green-800",
         3: "bg-blue-200 text-blue-800",
         4: "bg-purple-200 text-purple-800",
         5: "bg-yellow-200 text-yellow-800",
-        6: "bg-yellow-200 text-yellow-800",
     }
-    return colorMap[level] || "bg-base-200 text-base-content"
+    return colorMap[rarity] || "bg-base-200 text-base-content"
 }
 
 /**
  * 获取稀有度名称
  */
-function getRarityName(level: number): string {
+function getRarityName(rarity: number): string {
     const rarityMap: Record<number, string> = {
-        1: "绿",
+        1: "白",
         2: "绿",
         3: "蓝",
         4: "紫",
         5: "金",
-        6: "金",
     }
-    return rarityMap[level] || level.toString()
+    return rarityMap[rarity] || rarity.toString()
 }
 
 /**
@@ -328,9 +326,10 @@ function clearHistory() {
                                     <img :src="`/imgs/webp/${spot.icon}.webp`" class="w-full h-full object-cover" />
                                 </div>
                                 <div>
-                                    <SRouterLink :to="`/db/fishspot/${spot.id}`" class="font-medium text-lg link link-primary">{{
-                                        spot.name
-                                    }}</SRouterLink>
+                                    <SRouterLink :to="`/db/fishspot/${spot.id}`"
+                                        class="font-medium text-lg link link-primary">{{
+                                            spot.name
+                                        }}</SRouterLink>
                                     <div class="text-sm text-base-content/70">ID: {{ spot.id }}</div>
                                 </div>
                             </div>
@@ -339,11 +338,13 @@ function clearHistory() {
                                 <div v-if="extraRewardDetail" class="p-2 bg-base-100 rounded">
                                     <div class="text-xs text-base-content/70 mb-1">
                                         额外奖励 (概率:
-                                        {{ spot.extraRewardProb !== undefined ? `${(spot.extraRewardProb * 100).toFixed(2)}%` : "-" }})
+                                        {{ spot.extraRewardProb !== undefined ? `${(spot.extraRewardProb *
+                                            100).toFixed(2)}%` : "-" }})
                                     </div>
                                     <RewardItem :reward="extraRewardDetail" />
                                 </div>
-                                <div v-else-if="spot.extraReward !== undefined" class="p-2 bg-base-100 rounded text-xs text-warning">
+                                <div v-else-if="spot.extraReward !== undefined"
+                                    class="p-2 bg-base-100 rounded text-xs text-warning">
                                     额外奖励数据不存在
                                 </div>
 
@@ -353,13 +354,15 @@ function clearHistory() {
                                         {{ spot.petProb !== undefined ? `${(spot.petProb * 100).toFixed(2)}%` : "-" }})
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <img :src="`/imgs/webp/T_Head_Pet_${spotPet.icon}.webp`" class="w-8 h-8 object-cover rounded" />
+                                        <img :src="`/imgs/webp/T_Head_Pet_${spotPet.icon}.webp`"
+                                            class="w-8 h-8 object-cover rounded" />
                                         <SRouterLink :to="`/db/pet/${spotPet.id}`" class="text-sm link link-primary">
                                             {{ $t(spotPet.名称) }}
                                         </SRouterLink>
                                     </div>
                                 </div>
-                                <div v-else-if="spot.petId !== undefined" class="p-2 bg-base-100 rounded text-xs text-warning">
+                                <div v-else-if="spot.petId !== undefined"
+                                    class="p-2 bg-base-100 rounded text-xs text-warning">
                                     魔灵数据不存在
                                 </div>
                             </div>
@@ -368,7 +371,8 @@ function clearHistory() {
                                     100条鱼平均期望(下方可调选项 当前设置: {{ getAppearName(selectTime) }} | {{ getLureName(lure) }} |
                                     {{ s2bCompare ? "放弃低价值授渔以鱼" : "无脑授渔以鱼" }})
                                 </div>
-                                <div class="text-2xl font-bold text-primary">{{ (expectedValue * 100).toFixed(2) }}</div>
+                                <div class="text-2xl font-bold text-primary">{{ (expectedValue * 100).toFixed(2) }}
+                                </div>
                                 <div class="text-sm text-base-content/70">单条期望: {{ expectedValue.toFixed(2) }}</div>
                             </div>
                         </div>
@@ -377,37 +381,37 @@ function clearHistory() {
                         <div class="p-3 bg-base-200 rounded">
                             <div class="text-xs text-base-content/70 mb-2">鱼种列表 (共 {{ spotFish.length }} 种)</div>
                             <div class="space-y-2">
-                                <div
-                                    v-for="(fish, index) in spotFish"
-                                    :key="fish.id"
+                                <div v-for="(fish, index) in spotFish" :key="fish.id"
                                     class="flex items-center gap-2 p-2 bg-base-100 rounded cursor-pointer hover:bg-base-300"
-                                    @click="selectedFish = fish"
-                                >
+                                    @click="selectedFish = fish">
                                     <img :src="getFishIcon(fish)" class="w-8 h-8 object-cover rounded" />
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2">
                                             <span class="font-medium">{{ fish.name }}</span>
-                                            <span class="text-xs px-1.5 py-0.5 rounded" :class="getRarityColor(fish.level)">
-                                                {{ getRarityName(fish.level) }}
+                                            <span class="text-xs text-base-content/70">ID: {{ fish.id }}</span>
+                                            <span class="text-xs px-1.5 py-0.5 rounded"
+                                                :class="getRarityColor(fish.rarity)">
+                                                {{ getRarityName(fish.rarity) }}
                                             </span>
                                         </div>
                                         <div class="text-xs text-base-content/70 flex flex-wrap gap-2">
                                             <div class="badge badge-sm">Lv.{{ fish.level }}</div>
-                                            <div
-                                                v-if="calculateFishPrice(fish, 1).length !== calculateFishPrice(fish, 10000).length"
-                                                class="badge badge-sm"
-                                            >
-                                                长度: {{ calculateFishPrice(fish, 1).length }}~{{ calculateFishPrice(fish, 10000).length }}
+                                            <div v-if="calculateFishPrice(fish, 1).length !== calculateFishPrice(fish, 10000).length"
+                                                class="badge badge-sm">
+                                                长度: {{ calculateFishPrice(fish, 1).length }}~{{ calculateFishPrice(fish,
+                                                    10000).length }}
                                             </div>
-                                            <div v-else class="badge badge-sm">长度: {{ calculateFishPrice(fish, 10000).length }}</div>
-                                            <div
-                                                v-if="calculateFishPrice(fish, 1).price !== calculateFishPrice(fish, 10000).price"
-                                                class="badge badge-sm"
-                                            >
-                                                价格: {{ calculateFishPrice(fish, 1).price }}~{{ calculateFishPrice(fish, 10000).price }}
+                                            <div v-else class="badge badge-sm">长度: {{ calculateFishPrice(fish,
+                                                10000).length }}</div>
+                                            <div v-if="calculateFishPrice(fish, 1).price !== calculateFishPrice(fish, 10000).price"
+                                                class="badge badge-sm">
+                                                价格: {{ calculateFishPrice(fish, 1).price }}~{{ calculateFishPrice(fish,
+                                                    10000).price }}
                                             </div>
-                                            <div v-else class="badge badge-sm">价格: {{ calculateFishPrice(fish, 10000).price }}</div>
-                                            <div v-if="spot.weights[index]" class="badge badge-sm">权重: {{ spot.weights[index] }}</div>
+                                            <div v-else class="badge badge-sm">价格: {{ calculateFishPrice(fish,
+                                                10000).price }}</div>
+                                            <div v-if="spot.weights[index]" class="badge badge-sm">权重: {{
+                                                spot.weights[index] }}</div>
                                             <div class="badge badge-sm">出现时间: {{ getAppearNames(fish.appear) }}</div>
                                             <div v-if="fish.varProb" class="badge badge-sm">
                                                 异种: {{ +(fish.varProb * 100).toFixed(2) }}%
@@ -443,7 +447,8 @@ function clearHistory() {
                                 </div>
                                 <div class="flex-1 flex gap-2 items-center p-2">
                                     <span class="text-xs text-base-content/70 w-16">鱼饵类型</span>
-                                    <label v-for="lureType in [0, 1, 2]" :key="lureType" class="text-xs text-base-content/70">
+                                    <label v-for="lureType in [0, 1, 2]" :key="lureType"
+                                        class="text-xs text-base-content/70">
                                         <input v-model="lure" type="radio" :value="lureType" class="radio radio-sm" />
                                         {{ getLureName(lureType) }}
                                     </label>
@@ -460,36 +465,36 @@ function clearHistory() {
                         <div class="p-3 bg-base-200 rounded">
                             <div class="text-xs text-base-content/70 mb-2">钓鱼记录 (共 {{ catchCount }} 次)</div>
                             <div class="text-xs text-base-content/70 mb-2">
-                                总价值:{{ +reducedCatchHistory.reduce((acc, cur) => acc + cur.price * cur.count, 0).toFixed(2) }}
+                                总价值:{{+reducedCatchHistory.reduce((acc, cur) => acc + cur.price * cur.count,
+                                    0).toFixed(2)}}
                             </div>
                             <div class="space-y-2">
-                                <div
-                                    v-for="(record, index) in reducedCatchHistory"
-                                    :key="index"
-                                    class="flex items-center gap-2 p-2 bg-base-100 rounded"
-                                >
+                                <div v-for="(record, index) in reducedCatchHistory" :key="index"
+                                    class="flex items-center gap-2 p-2 bg-base-100 rounded">
                                     <img :src="getFishIcon(record.finalFish)" class="w-8 h-8 object-cover rounded" />
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2">
                                             <span class="font-medium">{{ record.finalFish.name }}</span>
-                                            <span class="text-xs px-1.5 py-0.5 rounded" :class="getRarityColor(record.finalFish.level)">
-                                                {{ getRarityName(record.finalFish.level) }}
+                                            <span class="text-xs px-1.5 py-0.5 rounded"
+                                                :class="getRarityColor(record.finalFish.rarity)">
+                                                {{ getRarityName(record.finalFish.rarity) }}
                                             </span>
                                             <span class="text-xs px-1.5 py-0.5 rounded bg-gray-200 text-gray-800">
                                                 x{{ record.count }}
                                             </span>
                                         </div>
                                         <div class="text-xs text-base-content/70">
-                                            价格: {{ record.originPrice ? `${record.originPrice} -> ${record.price}` : record.price }}
+                                            价格: {{ record.originPrice ? `${record.originPrice} -> ${record.price}` :
+                                                record.price }}
                                             <span v-if="record.mutated" class="text-green-600 ml-1">变异</span>
-                                            <span v-if="record.originFish" class="text-blue-600 ml-1"
-                                                >授渔以鱼 ({{ record.originFish.name }})</span
-                                            >
+                                            <span v-if="record.originFish" class="text-blue-600 ml-1">授渔以鱼 ({{
+                                                record.originFish.name }})</span>
                                             <span class="ml-1">{{ +record.length.toFixed(2) }}cm</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div v-if="reducedCatchHistory.length === 0" class="text-center text-sm text-base-content/50 py-4">
+                                <div v-if="reducedCatchHistory.length === 0"
+                                    class="text-center text-sm text-base-content/50 py-4">
                                     暂无钓鱼记录
                                 </div>
                             </div>
@@ -499,11 +504,9 @@ function clearHistory() {
             </div>
 
             <!-- 右侧关闭按钮 -->
-            <div
-                v-if="selectedFish"
+            <div v-if="selectedFish"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedFish = null"
-            >
+                @click="selectedFish = null">
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 

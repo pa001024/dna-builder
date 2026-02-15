@@ -27,6 +27,8 @@ export class LeveledWeapon {
     基础装填?: number
     基础弹匣?: number
     技能?: LeveledSkill[]
+    // 武器效果描述
+    效果?: string
 
     // 等级和精炼属性
     _等级: number = 80 // 武器等级，默认80级

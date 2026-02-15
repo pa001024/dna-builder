@@ -130,6 +130,8 @@ export interface CharBuildOptions {
     skillLevel?: number
     timeline?: CharBuildTimeline
     timelineDPS?: boolean
+    teamWeapons?: (number | string)[]
+    teamWeaponCategories?: string[]
 }
 
 export class CharBuild {
@@ -283,6 +285,7 @@ export class CharBuild {
     public dynamicBuffs: LeveledBuff[]
     public meleeWeapon: LeveledWeapon
     public rangedWeapon: LeveledWeapon
+    public teamWeaponCategories: string[] = []
     public baseName = ""
     public imbalance = false
     _enemyId: number = 130
@@ -370,6 +373,18 @@ export class CharBuild {
         this.targetFunction = options.targetFunction || "伤害"
         this.timeline = options.timeline
         this.timelineDPS = options.timelineDPS || false
+        this.teamWeaponCategories =
+            options.teamWeaponCategories ||
+            (options.teamWeapons || [])
+                .map(weapon => {
+                    if (!weapon || weapon === "-") return undefined
+                    try {
+                        return new LeveledWeapon(weapon).类别
+                    } catch {
+                        return undefined
+                    }
+                })
+                .filter((category): category is string => !!category)
     }
 
     static fromCharSetting(
@@ -410,6 +425,7 @@ export class CharBuild {
             targetFunction: charSettings.targetFunction,
             timeline,
             timelineDPS: charSettings.timelineDPS,
+            teamWeapons: [charSettings.team1Weapon, charSettings.team2Weapon],
         })
     }
 
@@ -592,11 +608,28 @@ export class CharBuild {
     }
 
     public applyCondition(attrs: CharAttr, mods: LeveledMod[]) {
+        const conditionValues = this.getConditionValues()
         let changed = false
         mods.forEach(mod => {
-            changed ||= mod.applyCondition(attrs, this.charModsWithAura)
+            changed ||= mod.applyCondition(attrs, this.charModsWithAura, conditionValues)
         })
         return changed
+    }
+
+    /**
+     * 统计“melee + ranged + skill + 队友”武器类别数量，供条件MOD计算动态倍率
+     */
+    private getConditionValues() {
+        const conditionValues: Record<string, number> = {}
+        for (const weapon of [this.meleeWeapon, this.rangedWeapon, this.skillWeapon]) {
+            const category = weapon?.类别
+            if (!category) continue
+            conditionValues[category] = (conditionValues[category] || 0) + 1
+        }
+        for (const category of this.teamWeaponCategories) {
+            conditionValues[category] = (conditionValues[category] || 0) + 1
+        }
+        return conditionValues
     }
 
     // 计算武器属性
@@ -1471,7 +1504,7 @@ export class CharBuild {
             return clone.checkModEffective(mod, false)
         }
         const attrs = this.calculateAttributes()
-        return mod.checkCondition(attrs, this.charModsWithAura)
+        return mod.checkCondition(attrs, this.charModsWithAura, this.getConditionValues())
     }
 
     get isSkill() {
@@ -1804,6 +1837,7 @@ export class CharBuild {
             skillLevel: this.skills[0].等级,
             timeline: this.timeline,
             timelineDPS: this.timelineDPS,
+            teamWeaponCategories: [...this.teamWeaponCategories],
         })
     }
     getMods(charTab: string) {

@@ -75,6 +75,22 @@ export interface Message {
 
 export type UMessage = Omit<Message, "id">
 
+// 配装助手对话持久化接口
+export interface BuildAgentChatMessage {
+    role: "user" | "assistant"
+    content: string
+    reasoning?: string
+}
+
+export interface BuildAgentChat {
+    id: string
+    charName: string
+    messages: BuildAgentChatMessage[]
+    updatedAt: number
+}
+
+export type UBuildAgentChat = BuildAgentChat
+
 // 节点编辑器相关接口
 export interface NodeEditorGraph {
     id: number
@@ -140,6 +156,7 @@ interface DB {
     entityMods: EntityMod
     conversations: Conversation
     messages: Message
+    buildAgentChats: BuildAgentChat
     dnaUsers: DNAUser
     userMapMarkers: UserMapMarker
     nodeEditorGraphs: NodeEditorGraph
@@ -152,6 +169,20 @@ db.version(1).stores({
     entityMods: "++id, entity, modid",
     conversations: "++id, createdAt, updatedAt",
     messages: "++id, conversationId, createdAt",
+    buildAgentChats: "&id, charName, updatedAt",
+    dnaUsers: "++id, uid",
+    userMapMarkers: "++id, mapId, createdAt",
+    nodeEditorGraphs: "++id, name, createdAt, updatedAt",
+    propFlows: "++id, time, prop_name, category_name",
+})
+
+db.version(2).stores({
+    mods: "++id, entity, name",
+    customEntitys: "++id, &name",
+    entityMods: "++id, entity, modid",
+    conversations: "++id, createdAt, updatedAt",
+    messages: "++id, conversationId, createdAt",
+    buildAgentChats: "&id, charName, updatedAt",
     dnaUsers: "++id, uid",
     userMapMarkers: "++id, mapId, createdAt",
     nodeEditorGraphs: "++id, name, createdAt, updatedAt",

@@ -278,7 +278,11 @@ export class LeveledMod implements Mod {
         return +((value || 0) * ratio).toFixed(4)
     }
 
-    checkCondition(attrs: CharAttr, charMods: LeveledMod[]): { isEffective: boolean; props: Record<string, any> } | undefined {
+    checkCondition(
+        attrs: CharAttr,
+        charMods: LeveledMod[],
+        conditionValues?: Record<string, number>
+    ): { isEffective: boolean; props: Record<string, any> } | undefined {
         if (!this.生效?.条件?.length) return undefined
         const poTable = charMods.reduce(
             (acc, mod) => {
@@ -289,7 +293,7 @@ export class LeveledMod implements Mod {
         )
         // if (this.极性) poTable[this.极性] = (poTable[this.极性] || 0) + 1
         const isEffective: boolean = this.生效.条件.every(([attr, op, value]: [string, string, number]) => {
-            const attrValue = poTable[attr.slice(0, 1)] || attrs[attr as keyof CharAttr]
+            const attrValue = poTable[attr.slice(0, 1)] ?? conditionValues?.[attr] ?? attrs[attr as keyof CharAttr]
             if (op === "*") return true
             if (op === "=") return attrValue === value
             if (op === ">") return attrValue > value
@@ -354,16 +358,17 @@ export class LeveledMod implements Mod {
     /**
      * 应用MOD条件 (mutable)
      */
-    applyCondition(attrs: CharAttr, charMods: LeveledMod[]) {
-        const condition = this.checkCondition(attrs, charMods)
+    applyCondition(attrs: CharAttr, charMods: LeveledMod[], conditionValues?: Record<string, number>) {
+        const condition = this.checkCondition(attrs, charMods, conditionValues)
         if (!condition) return false
         let changed = false
         Object.keys(condition.props).forEach(key => {
             if (condition.isEffective) {
                 if (Array.isArray(condition.props[key])) {
                     const [v1, v2] = condition.props[key]
-                    const cond = this.生效!.条件![0][0] as keyof CharAttr
-                    const finalValue = Math.min(attrs[cond] * v1, v2)
+                    const cond = this.生效!.条件![0][0]
+                    const baseValue = conditionValues?.[cond] ?? attrs[cond as keyof CharAttr] ?? 0
+                    const finalValue = Math.min(baseValue * v1, v2)
                     if (this[key] !== finalValue) {
                         this[key] = finalValue
                         changed = true

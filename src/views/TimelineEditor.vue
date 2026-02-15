@@ -1305,6 +1305,7 @@ const charBuild = computed(() => {
         enemyLevel: charSettings.value.enemyLevel,
         enemyResistance: charSettings.value.enemyResistance,
         targetFunction: charSettings.value.targetFunction,
+        teamWeapons: [charSettings.value.team1Weapon, charSettings.value.team2Weapon],
     })
 })
 const buffOptions = computed(() =>
