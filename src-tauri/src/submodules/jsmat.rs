@@ -2,7 +2,7 @@ use crate::submodules::color::rgb_to_hsl;
 use boa_engine::{
     Context, Finalize, JsData, JsNativeError, JsObject, JsResult, JsValue, Trace,
     class::{Class, ClassBuilder},
-    js_string, js_value,
+    js_error, js_string, js_value,
     native_function::NativeFunction,
 };
 use opencv::{
@@ -233,7 +233,7 @@ impl Class for JsMat {
 
                 match js_mat.inner.at_2d::<core::Vec3b>(row, col) {
                     Ok(value) => Ok(js_value!([value[0], value[1], value[2]], ctx)),
-                    Err(_) => Ok(JsValue::undefined()),
+                    Err(err) => Err(js_error!("Failed to get pixel : {}", err)),
                 }
             }),
         );
@@ -267,7 +267,7 @@ impl Class for JsMat {
                         (value[2] as u32) << 16 | (value[1] as u32) << 8 | value[0] as u32,
                         ctx
                     )),
-                    Err(_) => Ok(JsValue::undefined()),
+                    Err(err) => Err(js_error!("Failed to get pixel : {}", err)),
                 }
             }),
         );
@@ -304,7 +304,7 @@ impl Class for JsMat {
                         let (hue, saturation, luminance) = rgb_to_hsl(rgb);
                         Ok(js_value!([hue, saturation, luminance], ctx))
                     }
-                    Err(_) => Ok(JsValue::undefined()),
+                    Err(err) => Err(js_error!("Failed to get pixel : {}", err)),
                 }
             }),
         );

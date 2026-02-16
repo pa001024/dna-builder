@@ -233,6 +233,16 @@ declare function mm(x: number, y: number): void
 declare function moveTo(hwnd: number, x: number, y: number, duration?: number): Promise<void>
 
 /**
+ * 鼠标绝对移动后点击 (带缓动)
+ * @param hwnd 窗口句柄(为0表示屏幕坐标)
+ * @param x 目标X坐标
+ * @param y 目标Y坐标
+ * @param duration 移动持续时间（毫秒），默认0
+ * @returns Promise<void>
+ */
+declare function moveC(hwnd: number, x: number, y: number, duration?: number): Promise<void>
+
+/**
  * 鼠标按下
  * @param hwnd 窗口句柄 (为0表示前台)
  * @param x X坐标
@@ -303,6 +313,18 @@ declare function copyText(text: string): void
 declare function pasteText(): string | undefined
 
 /**
+ * 设置脚本运行状态并推送到前端（按标题维护，可同时存在多条状态）
+ * @param title 状态标题（必填）
+ * @param payload 状态内容（可选）：传 Mat 显示单图，传 Mat[] 显示多图，传其他值显示文本
+ * @param payloadText 附加文本（可选）：仅当 payload 为 Mat / Mat[] 时生效
+ *
+ * 规则：
+ * - 相同 title 会更新已有状态
+ * - 当 payload 为空时，表示删除该 title 对应状态
+ */
+declare function setStatus(title: string, payload?: string | number | boolean | Mat | Mat[], payloadText?: string | number | boolean): void
+
+/**
  * 根据窗口标题查找窗口句柄
  * @param title 窗口标题
  * @returns 窗口句柄或0
@@ -345,6 +367,12 @@ declare function moveWindow(hwnd: number, x: number, y: number, w?: number, h?: 
  * @returns 窗口句柄
  */
 declare function getForegroundWindow(): number
+
+/**
+ * 检查当前进程是否以管理员权限运行
+ * @returns true 表示管理员权限，false 表示非管理员权限
+ */
+declare function isElevated(): boolean
 
 /**
  * 从窗口捕获图像Mat对象
@@ -416,11 +444,11 @@ declare function imreadUrl(localPath: string, url: string): Mat
 
 /**
  * 保存Mat对象到文件
- * @param imgMat 图像Mat对象
  * @param path 保存路径
+ * @param imgMat 图像Mat对象
  * @returns 是否成功
  */
-declare function imwrite(imgMat: Mat, path: string): boolean
+declare function imwrite(path: string, imgMat: Mat): boolean
 
 /**
  * 复制Mat对象到剪贴板
@@ -430,12 +458,33 @@ declare function imwrite(imgMat: Mat, path: string): boolean
 declare function copyImage(imgMat: Mat): boolean
 
 /**
- * 显示图片 (异步)
+ * 显示图片（异步、非阻塞刷新）
  * @param title 窗口标题
  * @param imgMat 图像Mat对象
- * @param waitKeyMs 等待按键时间（毫秒），默认0 无限等待
+ * @param waitKeyMs 可选延迟（毫秒），仅影响 Promise resolve 时间，不阻塞其他窗口刷新
+ *
+ * 说明：
+ * - 相同 title 重复调用会实时更新同一窗口图像
+ * - 不同 title 可同时显示多张图像
  */
 declare function imshow(title: string, imgMat: Mat, waitKeyMs?: number): Promise<void>
+
+/**
+ * 交互式选择图像 ROI（异步）
+ * @param title 窗口标题
+ * @param imgMat 图像Mat对象
+ * @param showCrosshair 是否显示十字光标，默认 true
+ * @param fromCenter 是否从中心开始框选，默认 false
+ * @param printNotice 是否在控制台打印操作提示，默认 true
+ * @returns 选区 [x, y, w, h]，取消选择返回 undefined
+ */
+declare function selectroi(
+    title: string,
+    imgMat: Mat,
+    showCrosshair?: boolean,
+    fromCenter?: boolean,
+    printNotice?: boolean
+): Promise<[number, number, number, number] | undefined>
 
 /**
  * 颜色和模板匹配（使用两个Mat对象）
@@ -469,6 +518,15 @@ declare function matchTemplate(imgMat: Mat, templateMat: Mat, tolerance: number)
  * @returns 灰度二值图 Mat（命中为255，未命中为0）
  */
 declare function colorFilter(mat: Mat, colors: number[], tolerance: number): Mat
+
+/**
+ * 使用 HSL 加权差进行色键过滤并返回灰度二值图
+ * @param mat 源图像 Mat
+ * @param colors 色键数组（例如 [0xffffff, 0xff0000]）
+ * @param tolerance HSL 加权差容差，公式：abs(h1-h2) + abs(s1-s2)*180 + abs(l1-l2)*75
+ * @returns 灰度二值图 Mat（命中为255，未命中为0）
+ */
+declare function colorFilterHSL(mat: Mat, colors: number[], tolerance: number): Mat
 
 /**
  * 色键匹配，返回匹配像素 mean 最大的颜色索引
@@ -526,6 +584,13 @@ declare function siftLocate(
 declare function perceptualHash(imgMat: Mat, color?: boolean): string
 
 /**
+ * 预测图像旋转角度（适用于罗盘/圆盘类方向识别）
+ * @param imgMat 图像 Mat（BGR 三通道）
+ * @returns 角度（0-359）
+ */
+declare function predictRotation(imgMat: Mat): number
+
+/**
  * 比较源哈希与模板哈希数组的汉明距离，返回匹配索引
  * @param sourceHash 源图像哈希（十六进制字符串）
  * @param templateHashes 模板哈希数组（十六进制字符串数组）
@@ -569,6 +634,40 @@ declare function findContours(
     bbox: [number, number, number, number]
     center: [number, number]
 }[]
+
+/**
+ * 轮廓绘制（返回绘制后的 BGR 图像）
+ * @param imgMat 输入图像 Mat
+ * @param bboxes 外接框数组，元素可为 [x,y,w,h] 或 { bbox: [x,y,w,h] }
+ * @param color 轮廓颜色（RGB，默认 0x00FF00）
+ * @param thickness 线宽（默认 1）
+ * @returns 绘制后的 Mat（BGR 三通道）
+ */
+declare function drawContours(
+    imgMat: Mat,
+    bboxes: ([number, number, number, number] | { bbox: [number, number, number, number] })[],
+    color?: number,
+    thickness?: number
+): Mat
+
+/**
+ * 轮廓绘制（内部会先做 findContours 再绘制）
+ * @param imgMat 输入图像 Mat
+ * @param minArea 最小面积过滤（默认0）
+ * @param mode 检索模式（"external"|"list"|"ccomp"|"tree"|"floodfill" 或 OpenCV 常量值）
+ * @param method 轮廓逼近（"none"|"simple"|"tc89l1"|"tc89kcos" 或 OpenCV 常量值）
+ * @param color 轮廓颜色（RGB，默认 0x00FF00）
+ * @param thickness 线宽（默认 1）
+ * @returns 绘制后的 Mat（BGR 三通道）
+ */
+declare function drawContours(
+    imgMat: Mat,
+    minArea?: number,
+    mode?: "external" | "list" | "ccomp" | "tree" | "floodfill" | number,
+    method?: "none" | "simple" | "tc89l1" | "tc89kcos" | number,
+    color?: number,
+    thickness?: number
+): Mat
 
 /**
  * 绘制边框

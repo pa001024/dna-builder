@@ -2006,7 +2006,7 @@ async fn run_script(script_path: String, app_handle: tauri::AppHandle) -> Result
     // 步骤5：执行原有脚本逻辑（此时工作目录已为脚本所在目录，相对路径基于该目录）
     match run_script_with_tauri_console(script_path.clone(), app_handle).await {
         Ok(_) => Ok(format!("脚本执行成功: {}", script_path)),
-        Err(e) => Err(format!("脚本执行失败: {:?}", e)),
+        Err(e) => Err(format!("脚本执行失败: {}", e)),
     }
 }
 

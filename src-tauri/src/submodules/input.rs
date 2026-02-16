@@ -250,9 +250,9 @@ pub fn click_to(x: i32, y: i32) {
 }
 
 #[allow(unused)]
-pub fn click() {
+pub fn click(duration: u32) {
     mouse_down();
-    sleep(1);
+    sleep(duration);
     mouse_up();
 }
 #[allow(unused)]

@@ -1,8 +1,7 @@
 <script setup lang="ts">
-// @ts-expect-error
-import Prism from "prismjs"
 import { onBeforeUnmount, onMounted, ref, watch } from "vue"
-import { CodeJarPro, CodeJarProInstance, Position } from "@/components/codejar"
+import type { CodeJarProInstance, Position } from "@/components/codejar"
+import { CodeJarPro } from "@/components/codejar"
 import { LineNumbers } from "@/components/codejar/plugins/lineNumbers"
 
 const props = defineProps<{
@@ -27,13 +26,131 @@ const emit = defineEmits<{
 
 const editorContainer = ref<HTMLElement | null>(null)
 let jar = ref<CodeJarProInstance>()
+let highlightWorker: Worker | null = null
+const pendingHighlightTasks = new Map<number, { resolve: (value: string) => void; reject: (reason: unknown) => void }>()
+let highlightTaskId = 0
+let highlightRequestVersion = 0
+let prismFallbackModule: Promise<typeof import("prismjs")["default"]> | null = null
+
+interface HighlightRequestMessage {
+    id: number
+    code: string
+}
+
+interface HighlightResponseMessage {
+    id: number
+    html?: string
+    error?: string
+}
+
+/**
+ * 获取高亮 Worker 实例
+ * @returns Worker 实例
+ */
+function getHighlightWorker(): Worker {
+    if (highlightWorker) return highlightWorker
+
+    const worker = new Worker(new URL("./CodeEditor.highlight.worker.ts", import.meta.url), {
+        type: "module",
+    })
+
+    worker.onmessage = (event: MessageEvent<HighlightResponseMessage>) => {
+        const { id, html = "", error } = event.data
+        const task = pendingHighlightTasks.get(id)
+        if (!task) return
+        pendingHighlightTasks.delete(id)
+
+        if (error) {
+            task.reject(new Error(error))
+            return
+        }
+
+        task.resolve(html)
+    }
+
+    worker.onerror = error => {
+        console.error("Code highlight worker error", error)
+        pendingHighlightTasks.forEach(task => {
+            task.reject(new Error("Code highlight worker error"))
+        })
+        pendingHighlightTasks.clear()
+    }
+
+    highlightWorker = worker
+    return worker
+}
+
+/**
+ * 销毁高亮 Worker 并清理挂起任务
+ */
+function disposeHighlightWorker() {
+    if (highlightWorker) {
+        highlightWorker.terminate()
+        highlightWorker = null
+    }
+
+    pendingHighlightTasks.forEach(task => {
+        task.reject(new Error("Code highlight worker destroyed"))
+    })
+    pendingHighlightTasks.clear()
+}
+
+/**
+ * 在 Worker 线程中执行高亮
+ * @param code 待高亮代码
+ * @returns 高亮后的 HTML
+ */
+async function runHighlightInWorker(code: string): Promise<string> {
+    const worker = getHighlightWorker()
+    const id = ++highlightTaskId
+
+    return new Promise((resolve, reject) => {
+        pendingHighlightTasks.set(id, { resolve, reject })
+        const payload: HighlightRequestMessage = { id, code }
+        worker.postMessage(payload)
+    })
+}
+
+/**
+ * 主线程降级高亮
+ * @param code 待高亮代码
+ * @returns 高亮后的 HTML
+ */
+async function runHighlightOnMainThread(code: string): Promise<string> {
+    if (!prismFallbackModule) {
+        prismFallbackModule = import("prismjs").then(module => module.default)
+    }
+
+    const Prism = await prismFallbackModule
+    return Prism.highlight(code, Prism.languages.javascript, "javascript")
+}
+
 /**
  * 初始化编辑器
  */
 async function initEditor() {
     if (!editorContainer.value) return
-    const highlight = (editor: HTMLElement) => {
-        editor.innerHTML = Prism.highlight(editor.textContent, Prism.languages.javascript, "javascript")
+    const highlight = async (editor: HTMLElement, _pos?: Position) => {
+        const code = editor.textContent || ""
+        const requestVersion = ++highlightRequestVersion
+
+        try {
+            const html = await runHighlightInWorker(code)
+            if (requestVersion !== highlightRequestVersion || editor.textContent !== code) return
+            editor.innerHTML = html
+            return
+        } catch (error) {
+            console.error("Code highlight worker failed, fallback to main thread", error)
+        }
+
+        try {
+            const html = await runHighlightOnMainThread(code)
+            if (requestVersion !== highlightRequestVersion || editor.textContent !== code) return
+            editor.innerHTML = html
+        } catch (error) {
+            console.error("Code highlight fallback failed", error)
+            editor.textContent = code
+        }
     }
 
     jar.value = CodeJarPro(editorContainer.value, highlight, options)
@@ -50,6 +167,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+    disposeHighlightWorker()
     if (jar.value) {
         jar.value.destroy()
     }
@@ -148,6 +266,7 @@ pre[class*="language-"] {
     -ms-hyphens: none;
     hyphens: none;
 }
+
 .token.block-comment,
 .token.cdata,
 .token.comment,
@@ -155,29 +274,35 @@ pre[class*="language-"] {
 .token.prolog {
     color: var(--prism-comment);
 }
+
 .token.punctuation {
     color: var(--prism-punctuation);
 }
+
 .token.attr-name,
 .token.deleted,
 .token.namespace,
 .token.tag {
     color: var(--prism-tag);
 }
+
 .token.function-name {
     color: var(--prism-function-name);
 }
+
 .token.boolean,
 .token.function,
 .token.number {
     color: var(--prism-function);
 }
+
 .token.class-name,
 .token.constant,
 .token.property,
 .token.symbol {
     color: var(--prism-class-name);
 }
+
 .token.atrule,
 .token.builtin,
 .token.important,
@@ -185,6 +310,7 @@ pre[class*="language-"] {
 .token.selector {
     color: var(--prism-keyword);
 }
+
 .token.attr-value,
 .token.char,
 .token.regex,
@@ -192,21 +318,26 @@ pre[class*="language-"] {
 .token.variable {
     color: var(--prism-string);
 }
+
 .token.entity,
 .token.operator,
 .token.url {
     color: var(--prism-operator);
 }
+
 .token.bold,
 .token.important {
     font-weight: 700;
 }
+
 .token.italic {
     font-style: italic;
 }
+
 .token.entity {
     cursor: help;
 }
+
 .token.inserted {
     color: var(--prism-inserted);
 }

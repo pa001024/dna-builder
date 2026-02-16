@@ -190,15 +190,6 @@ impl RectOverlay {
         true
     }
 
-    /// 隐藏覆盖层
-    fn hide(&mut self) {
-        if let Some(hwnd) = self.hwnd {
-            unsafe {
-                let _ = ShowWindow(hwnd, SW_HIDE);
-            }
-        }
-    }
-
     /// 绘制边框
     fn draw_border(&self) {
         if let Some(hwnd) = self.hwnd {
@@ -368,11 +359,25 @@ pub fn draw_border(hwnd: HWND, x: i32, y: i32, width: i32, height: i32, c: Optio
                 return;
             }
 
-            // 尝试获取锁，隐藏边框
-            if let Ok(mut manager_guard) = OVERLAY_MANAGER.lock() {
-                // 检查是否是当前活动的标志位
-                if let Some(overlay) = manager_guard.overlay.as_mut() {
-                    overlay.hide();
+            // 仅在锁内做状态校验与句柄读取，避免持锁调用 ShowWindow 导致跨线程互锁。
+            let hwnd_to_hide = if let Ok(manager_guard) = OVERLAY_MANAGER.lock() {
+                // 再次确认当前线程对应的是最新一次 draw_border 的隐藏任务，避免旧任务误隐藏新边框。
+                let is_current_task = manager_guard
+                    .last_flag
+                    .as_ref()
+                    .is_some_and(|current_flag| Arc::ptr_eq(current_flag, &flag));
+                if !is_current_task {
+                    None
+                } else {
+                    manager_guard.overlay.as_ref().and_then(|overlay| overlay.hwnd)
+                }
+            } else {
+                None
+            };
+
+            if let Some(target_hwnd) = hwnd_to_hide {
+                unsafe {
+                    let _ = ShowWindow(target_hwnd, SW_HIDE);
                 }
             }
         });

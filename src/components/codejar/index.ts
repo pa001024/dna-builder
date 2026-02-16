@@ -29,7 +29,7 @@ let globalId = 0
  */
 export function CodeJarPro(
     editor: HTMLElement,
-    highlight?: (e: HTMLElement, pos?: Position) => void,
+    highlight?: (e: HTMLElement, pos?: Position) => void | Promise<void>,
     opt: Partial<Options> = {}
 ): CodeJarProInstance {
     const DEBOUNCE_HIGHLIGHT = 300
@@ -298,12 +298,25 @@ export function CodeJarPro(
         el.style.wordBreak = options.wrap ? "break-all" : "keep-all"
     }
 
-    // 封装一下高亮函数，方便调用
-    const doHighlight = (editor: HTMLElement) => {
-        if (typeof highlight !== "function") return
-        const pos = save() // 保存当前光标位置
-        highlight(editor, pos)
+    /**
+     * 检查返回值是否为 PromiseLike
+     * @param value 任意返回值
+     * @returns 是否可 await
+     */
+    const isPromiseLike = (value: unknown): value is PromiseLike<void> => {
+        return (
+            (typeof value === "object" || typeof value === "function") &&
+            value !== null &&
+            "then" in value &&
+            typeof value.then === "function"
+        )
+    }
 
+    /**
+     * 应用高亮后的公共收尾逻辑
+     * @param pos 光标位置
+     */
+    const applyHighlightEffects = (pos: Position) => {
         /** 更新自动换行 */
         if (editor.children.length > 0) {
             for (let i = 0; i < editor.children.length; i++) {
@@ -312,9 +325,40 @@ export function CodeJarPro(
         }
 
         updateWrap(editor)
-
         hookPlugin("highlight")
-        restore(pos) // 恢复光标位置
+        restore(pos)
+    }
+
+    // 封装一下高亮函数，方便调用（兼容同步/异步高亮）
+    let highlightVersion = 0
+    const doHighlight = (editor: HTMLElement) => {
+        if (typeof highlight !== "function") return
+        const pos = save() // 保存当前光标位置
+        const currentVersion = ++highlightVersion
+        const finalize = () => {
+            if (currentVersion !== highlightVersion) return
+            applyHighlightEffects(pos)
+        }
+
+        try {
+            const highlightResult = highlight(editor, pos)
+            if (isPromiseLike(highlightResult)) {
+                void highlightResult
+                    .then(() => {
+                        finalize()
+                    })
+                    .catch(error => {
+                        if (currentVersion !== highlightVersion) return
+                        warn("highlight async failed", error)
+                        restore(pos)
+                    })
+                return
+            }
+            finalize()
+        } catch (error) {
+            warn("highlight failed", error)
+            restore(pos)
+        }
     }
 
     // --- 防抖（Debounce）函数，避免高频触发 ---

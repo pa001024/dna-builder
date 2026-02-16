@@ -5,11 +5,19 @@ use opencv::{
     prelude::*,
 };
 use scopeguard::guard;
-use std::{cell::RefCell, mem::zeroed, ptr};
+use std::{
+    cell::RefCell,
+    mem::zeroed,
+    ptr,
+    time::{Duration, Instant},
+};
 use thiserror::Error;
 use windows::{
     Graphics::{
-        Capture::{Direct3D11CaptureFramePool, GraphicsCaptureItem, GraphicsCaptureSession},
+        Capture::{
+            Direct3D11CaptureFrame, Direct3D11CaptureFramePool, GraphicsCaptureItem,
+            GraphicsCaptureSession,
+        },
         DirectX::{Direct3D11::IDirect3DDevice, DirectXPixelFormat},
         SizeInt32,
     },
@@ -17,6 +25,7 @@ use windows::{
         Foundation::{HWND, POINT, RECT},
         Graphics::{
             Direct3D11::*,
+            Dwm::{DWMWA_EXTENDED_FRAME_BOUNDS, DwmGetWindowAttribute},
             Gdi::{
                 BITMAP, BITMAPINFO, BITMAPINFOHEADER, BitBlt, ClientToScreen,
                 CreateCompatibleBitmap, CreateCompatibleDC, DIB_RGB_COLORS, DeleteDC, DeleteObject,
@@ -218,6 +227,43 @@ fn get_window_and_client_rect(hwnd: HWND) -> Result<(RECT, RECT, i32, i32), Util
     }
 }
 
+/// 获取 WGC 截图对齐所需的窗口/客户区信息。
+///
+/// 优先使用 DWM 的扩展窗口边界（不含阴影）作为基准矩形；
+/// 若 DWM 调用失败，则退回 GetWindowRect。
+fn get_window_and_client_rect_for_wgc(hwnd: HWND) -> Result<(RECT, RECT, i32, i32), UtilError> {
+    unsafe {
+        let mut base_rect = RECT::default();
+        let mut client_rect = RECT::default();
+
+        // 兜底：先拿到 GetWindowRect，供 DWM 失败时使用
+        GetWindowRect(hwnd, &mut base_rect)
+            .map_err(|e| UtilError::WINAPI(format!("GetWindowRect: {e}")))?;
+
+        // 对齐 WGC：扩展边框矩形不包含阴影区域
+        let mut dwm_rect = RECT::default();
+        let dwm_result = DwmGetWindowAttribute(
+            hwnd,
+            DWMWA_EXTENDED_FRAME_BOUNDS,
+            &mut dwm_rect as *mut _ as *mut _,
+            std::mem::size_of::<RECT>() as u32,
+        );
+        if dwm_result.is_ok() {
+            base_rect = dwm_rect;
+        }
+
+        GetClientRect(hwnd, &mut client_rect)
+            .map_err(|e| UtilError::WINAPI(format!("GetClientRect: {e}")))?;
+
+        let mut client_origin = POINT::default();
+        let _ = ClientToScreen(hwnd, &mut client_origin);
+        let offset_x = client_origin.x - base_rect.left;
+        let offset_y = client_origin.y - base_rect.top;
+
+        Ok((base_rect, client_rect, offset_x, offset_y))
+    }
+}
+
 fn create_capture_item(hwnd: HWND) -> Option<GraphicsCaptureItem> {
     let interop =
         windows::core::factory::<GraphicsCaptureItem, IGraphicsCaptureItemInterop>().ok()?;
@@ -304,8 +350,12 @@ struct WgcContext {
     last_size: SizeInt32,
     target_hwnd: HWND,
 
-    // 关键：缓存上一帧，当 WGC 没有新帧产生时（画面静止），返回这个
+    // 关键：缓存上一帧，当 WGC 没有新帧产生时（画面静止），可以兜底返回
     cached_mat: Option<Box<Mat>>,
+    // 缓存帧生成时间，用于判断缓存是否过旧（避免返回明显滞后的图像）
+    cached_at: Option<Instant>,
+    // 最近一次成功返回的 WGC 帧时间戳（100ns 单位）
+    last_frame_ticks: Option<i64>,
 }
 
 impl WgcContext {
@@ -338,100 +388,206 @@ impl WgcContext {
             last_size: size,
             target_hwnd: hwnd,
             cached_mat: None,
+            cached_at: None,
+            last_frame_ticks: None,
         })
     }
 
-    fn capture(&mut self) -> Option<Box<Mat>> {
-        unsafe {
-            // 1. 检查窗口尺寸是否变化
-            // 获取当前 Item 的实际大小（注意：Size() 获取的是 Item 被创建时的大小，还是实时的？通常是实时的）
-            // 但更稳妥的是检查 Item.Size()
-            let current_size = match self.item.Size() {
-                Ok(s) => s,
-                Err(_) => return self.cached_mat.clone(), // 窗口可能被关闭了
-            };
+    /// 处理单帧数据并更新缓存。
+    fn process_new_frame(&mut self, frame: Direct3D11CaptureFrame) -> Option<Box<Mat>> {
+        // WGC 帧时间戳（100ns 单位），用于跨调用判断是否为“新帧”。
+        let frame_ticks = frame.SystemRelativeTime().ok().map(|ts| ts.Duration);
 
-            // 如果尺寸变了，必须 Recreate，否则捕获流会停止或数据错乱
-            if current_size.Width != self.last_size.Width
-                || current_size.Height != self.last_size.Height
-            {
-                // println!("窗口大小改变，重建 FramePool...");
-                self.last_size = current_size;
-                if let Err(e) = self.frame_pool.Recreate(
-                    &self.winrt_device,
-                    DirectXPixelFormat::B8G8R8A8UIntNormalized,
-                    1,
-                    current_size,
-                ) {
-                    eprintln!("Recreate 失败: {:?}", e);
-                    return None;
-                }
+        // === 成功获取新帧，处理并更新缓存 ===
+        let texture = get_d3d_texture_from_frame(&frame)?;
+
+        // 复制 GPU -> CPU
+        let (tex_w, tex_h, tex_data) =
+            copy_texture_to_cpu(&self.d3d_device, &self.d3d_context, &texture)?;
+
+        // 计算输出尺寸与裁剪起点：
+        // WGC 在不同窗口/系统配置下，可能返回“整窗帧”或“客户区帧”。
+        // 这里通过比较两种假设下的横纵缩放一致性，自动选择更合理的裁剪策略。
+        let (client_w, client_h, crop_x, crop_y) = {
+            let (window_w, window_h, want_w, want_h, offset_x, offset_y) =
+                get_window_and_client_rect_for_wgc(self.target_hwnd)
+                    .map(|(window_rect, client_rect, ox, oy)| {
+                        (
+                            (window_rect.right - window_rect.left).max(1),
+                            (window_rect.bottom - window_rect.top).max(1),
+                            (client_rect.right - client_rect.left).max(1),
+                            (client_rect.bottom - client_rect.top).max(1),
+                            ox.max(0),
+                            oy.max(0),
+                        )
+                    })
+                    .unwrap_or((tex_w as i32, tex_h as i32, tex_w as i32, tex_h as i32, 0, 0));
+
+            let tex_w_f = tex_w as f64;
+            let tex_h_f = tex_h as f64;
+
+            // 假设A：当前帧是“整窗帧”
+            let sx_window = tex_w_f / window_w as f64;
+            let sy_window = tex_h_f / window_h as f64;
+            let anis_window = (sx_window - sy_window).abs();
+
+            // 假设B：当前帧是“客户区帧”
+            let sx_client = tex_w_f / want_w as f64;
+            let sy_client = tex_h_f / want_h as f64;
+            let anis_client = (sx_client - sy_client).abs();
+
+            let use_window_crop = anis_window + 1e-6 < anis_client;
+
+            if use_window_crop {
+                let crop_x = ((offset_x as f64) * sx_window).round() as i32;
+                let crop_y = ((offset_y as f64) * sy_window).round() as i32;
+                let crop_x = crop_x.clamp(0, tex_w as i32 - 1);
+                let crop_y = crop_y.clamp(0, tex_h as i32 - 1);
+
+                let out_w = ((want_w as f64) * sx_window).round() as i32;
+                let out_h = ((want_h as f64) * sy_window).round() as i32;
+                let out_w = out_w.clamp(1, tex_w as i32 - crop_x);
+                let out_h = out_h.clamp(1, tex_h as i32 - crop_y);
+
+                (out_w as u32, out_h as u32, crop_x as u32, crop_y as u32)
+            } else {
+                // 客户区帧无需偏移裁剪，只按目标客户区尺寸截取（避免带到边框）
+                let out_w = want_w.min(tex_w as i32).max(1);
+                let out_h = want_h.min(tex_h as i32).max(1);
+                (out_w as u32, out_h as u32, 0, 0)
             }
+        };
 
-            // 2. 尝试获取下一帧
-            // 注意：如果画面静止，这里大概率返回 Error/None
-            let frame = self.frame_pool.TryGetNextFrame();
+        // 创建 BGRA Mat 并完成客户端区域裁剪复制
+        let mut mat_bgra =
+            unsafe { Mat::new_rows_cols(client_h as i32, client_w as i32, CV_8UC4).ok()? };
 
-            match frame {
-                Ok(frame) => {
-                    // === 成功获取新帧，处理并更新缓存 ===
-                    let texture = get_d3d_texture_from_frame(&frame)?;
+        let src_stride = tex_w as usize * 4;
+        let dst_stride = client_w as usize * 4;
+        let src_ptr = tex_data.as_ptr();
+        let dst_ptr = mat_bgra.data_mut();
 
-                    // 获取客户区裁剪信息
-                    let (_, _, offset_x, offset_y) = get_window_and_client_rect(self.target_hwnd)
-                        .unwrap_or((RECT::default(), RECT::default(), 0, 0));
-                    let client_w = (current_size.Width as i32 - offset_x as i32).max(1) as u32;
-                    let client_h = (current_size.Height as i32 - offset_y as i32).max(1) as u32;
+        for r in 0..client_h {
+            let src_off = (r + crop_y) as usize * src_stride + (crop_x as usize * 4);
+            let dst_off = r as usize * dst_stride;
+            unsafe {
+                std::ptr::copy_nonoverlapping(
+                    src_ptr.add(src_off),
+                    dst_ptr.add(dst_off),
+                    dst_stride,
+                );
+            }
+        }
 
-                    // 复制 GPU -> CPU
-                    let (tex_w, _tex_h, tex_data) =
-                        copy_texture_to_cpu(&self.d3d_device, &self.d3d_context, &texture)?;
+        // WGC 原始帧为 BGRA(4 通道)，为保持脚本侧一致性统一转换为 BGR(3 通道)
+        let mut mat_bgr = Mat::default();
+        imgproc::cvt_color(&mat_bgra, &mut mat_bgr, imgproc::COLOR_BGRA2BGR, 0).ok()?;
 
-                    // 创建新的 Mat 并裁剪
-                    // 这里省略详细的裁剪代码，逻辑同上一个回答
-                    let mut mat =
-                        Mat::new_rows_cols(client_h as i32, client_w as i32, CV_8UC4).ok()?;
+        let boxed_mat = Box::new(mat_bgr);
+        self.cached_mat = Some(boxed_mat.clone());
+        self.cached_at = Some(Instant::now());
+        if let Some(ticks) = frame_ticks {
+            self.last_frame_ticks = Some(ticks);
+        }
+        Some(boxed_mat)
+    }
 
-                    // ... 执行内存复制 (考虑 offset_x/y) ...
-                    // 简单示意：
-                    let src_stride = tex_w as usize * 4;
-                    let dst_stride = client_w as usize * 4;
-                    let src_ptr = tex_data.as_ptr();
-                    let dst_ptr = mat.data_mut();
+    fn capture(&mut self) -> Option<Box<Mat>> {
+        // 1. 检查窗口尺寸是否变化
+        let current_size = match self.item.Size() {
+            Ok(s) => s,
+            Err(_) => return self.cached_mat.clone(), // 窗口可能被关闭了
+        };
 
-                    for r in 0..client_h {
-                        let src_off =
-                            (r + offset_y as u32) as usize * src_stride + (offset_x as usize * 4);
-                        let dst_off = r as usize * dst_stride;
-                        // 边界检查省略...
-                        std::ptr::copy_nonoverlapping(
-                            src_ptr.add(src_off),
-                            dst_ptr.add(dst_off),
-                            dst_stride,
-                        );
-                    }
+        // 如果尺寸变了，必须 Recreate，否则捕获流会停止或数据错乱
+        if current_size.Width != self.last_size.Width
+            || current_size.Height != self.last_size.Height
+        {
+            self.last_size = current_size;
+            if let Err(e) = self.frame_pool.Recreate(
+                &self.winrt_device,
+                DirectXPixelFormat::B8G8R8A8UIntNormalized,
+                1,
+                current_size,
+            ) {
+                eprintln!("Recreate 失败: {:?}", e);
+                return None;
+            }
+        }
 
-                    let boxed_mat = Box::new(mat);
-                    self.cached_mat = Some(boxed_mat.clone()); // 更新缓存
-                    Some(boxed_mat)
-                }
-                Err(_) => {
-                    // === 没有新帧（画面静止），返回缓存 ===
-                    // WGC 的特性：TryGetNextFrame 取走后，如果 GPU 没有渲染新画面，池子是空的。
-                    // 此时我们应该假定画面没变。
-                    if let Some(ref mat) = self.cached_mat {
-                        // OpenCV Mat 的 clone 是深拷贝还是浅拷贝取决于实现，
-                        // 在 rust binding 中通常 clone 是增加引用计数(浅)或深拷贝，
-                        // 为了线程安全，建议 Box::new(mat.clone())
-                        Some(mat.clone())
-                    } else {
-                        // 既没有新帧，也没有缓存（比如第一次启动就失败），尝试等待一下?
-                        // 或者直接返回 None
-                        None
-                    }
+        // 2. 实时优先策略：
+        // - 短间隔调用：直接等待“时间戳更大”的新帧。
+        // - 长间隔调用：先清空已有队列（这些帧可能是历史积压），再等待后续新帧。
+        let long_gap = self
+            .cached_at
+            .map(|ts| ts.elapsed() >= Duration::from_millis(33))
+            .unwrap_or(true);
+
+        let mut baseline_ticks = self.last_frame_ticks.unwrap_or(i64::MIN);
+        if long_gap {
+            // 先把当前积压帧全部取走并丢弃，避免返回“上次调用后积压的第一帧”。
+            while let Ok(frame) = self.frame_pool.TryGetNextFrame() {
+                let ticks = frame
+                    .SystemRelativeTime()
+                    .ok()
+                    .map(|ts| ts.Duration)
+                    .unwrap_or(i64::MIN);
+                if ticks > baseline_ticks {
+                    baseline_ticks = ticks;
                 }
             }
         }
+
+        // 长间隔给更长一点等待窗口，确保等到真正的新帧提交。
+        let wait_ms = if long_gap { 90 } else { 35 };
+        let deadline = Instant::now() + Duration::from_millis(wait_ms);
+        let mut latest_frame: Option<Direct3D11CaptureFrame> = None;
+        let mut latest_ticks = i64::MIN;
+        loop {
+            let mut got_any = false;
+            while let Ok(frame) = self.frame_pool.TryGetNextFrame() {
+                got_any = true;
+                let ticks = frame
+                    .SystemRelativeTime()
+                    .ok()
+                    .map(|ts| ts.Duration)
+                    .unwrap_or(i64::MIN);
+                if ticks >= latest_ticks {
+                    latest_ticks = ticks;
+                    latest_frame = Some(frame);
+                }
+            }
+
+            if latest_frame.is_some() && latest_ticks > baseline_ticks {
+                break;
+            }
+            if Instant::now() >= deadline {
+                break;
+            }
+
+            if got_any {
+                // 有帧但还不够新，短等下一轮提交。
+                std::thread::sleep(Duration::from_millis(1));
+            } else {
+                std::thread::sleep(Duration::from_millis(2));
+            }
+        }
+
+        if latest_frame.is_some() && latest_ticks > baseline_ticks {
+            if let Some(frame) = latest_frame {
+                return self.process_new_frame(frame);
+            }
+        }
+
+        // 3. WGC 未拿到“真正新帧”时，回退到 GDI 强制抓当前帧，避免滞后图像。
+        if let Some(mat) = capture_window(self.target_hwnd) {
+            self.cached_mat = Some(mat.clone());
+            self.cached_at = Some(Instant::now());
+            return Some(mat);
+        }
+
+        // 4. 最后兜底：返回最近缓存
+        self.cached_mat.clone()
     }
 }
 

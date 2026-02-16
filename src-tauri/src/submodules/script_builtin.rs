@@ -6,12 +6,19 @@ use boa_engine::{
     js_string, js_value,
 };
 use boa_engine::{js_error, js_object};
+use base64::{Engine as _, engine::general_purpose};
 use opencv::{
     core::Mat,
     imgproc,
-    prelude::{MatTraitConst, MatTraitConstManual},
+    prelude::{MatTraitConst, MatTraitConstManual, VectorToVec},
 };
-use std::{thread, time::Duration};
+use std::{
+    collections::{HashMap, HashSet},
+    sync::{Arc, OnceLock, mpsc},
+    thread,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
+use tauri::Emitter;
 use windows::Win32::Foundation::HWND;
 use windows::Win32::UI::WindowsAndMessaging::{GetForegroundWindow, SetForegroundWindow};
 
@@ -20,11 +27,12 @@ use crate::submodules::{
     fx::draw_border,
     input::*,
     jsmat::{IntoJs, JsMat},
+    predict_rotation::predict_rotation,
     route::find_path,
     script_vision::{
-        batch_match_color_impl, color_filter_impl, color_key_match_impl, find_contours_impl,
-        hamming_distance_hex, morphology_ex_impl, normalize_hash_hex, orb_match_count_impl,
-        perceptual_hash_impl, sift_locate_impl,
+        batch_match_color_impl, color_filter_hsl_impl, color_filter_impl, color_key_match_impl,
+        draw_bboxes_impl, draw_contours_impl, find_contours_impl, hamming_distance_hex, morphology_ex_impl, normalize_hash_hex,
+        orb_match_count_impl, perceptual_hash_impl, sift_locate_impl,
     },
     tpl::{get_template, get_template_b64},
     tpl_match::match_template,
@@ -36,6 +44,76 @@ use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
 trait JsArgExt {
     // 泛型 T 必须实现 Class (为了获取名字) 和 JsData (为了转换)
     fn get_native<T: Class + JsData>(&self) -> JsResult<JsObject<T>>;
+}
+
+/// imshow 工作线程命令。
+enum ImshowCommand {
+    /// 显示或更新指定标题窗口的图像。
+    Show { title: String, mat: Mat },
+}
+
+/// imshow 全局工作线程状态。
+struct ImshowWorker {
+    sender: mpsc::Sender<ImshowCommand>,
+}
+
+/// 全局 imshow 工作线程单例。
+static IMSHOW_WORKER: OnceLock<ImshowWorker> = OnceLock::new();
+/// 全局脚本事件发送器（用于向前端推送脚本状态等事件）。
+static SCRIPT_EVENT_APP_HANDLE: OnceLock<Arc<tauri::AppHandle>> = OnceLock::new();
+
+/// 设置脚本事件发送器（首次设置生效）。
+pub fn set_script_event_app_handle(app_handle: tauri::AppHandle) {
+    let _ = SCRIPT_EVENT_APP_HANDLE.set(Arc::new(app_handle));
+}
+
+/// 获取 imshow 工作线程发送端；首次调用会自动启动渲染线程。
+fn _get_imshow_sender() -> mpsc::Sender<ImshowCommand> {
+    IMSHOW_WORKER
+        .get_or_init(|| {
+            let (sender, receiver) = mpsc::channel::<ImshowCommand>();
+            thread::spawn(move || _imshow_worker_loop(receiver));
+            ImshowWorker { sender }
+        })
+        .sender
+        .clone()
+}
+
+/// imshow 后台渲染循环。
+///
+/// 特性：
+/// 1. 同标题窗口重复调用会实时更新内容；
+/// 2. 不同标题可并行展示多窗口；
+/// 3. 使用短 wait_key(1) 轮询事件，避免单次调用阻塞后续调用。
+fn _imshow_worker_loop(receiver: mpsc::Receiver<ImshowCommand>) {
+    let mut latest_frames: HashMap<String, Mat> = HashMap::new();
+    let mut dirty_titles: HashSet<String> = HashSet::new();
+
+    loop {
+        match receiver.recv_timeout(Duration::from_millis(8)) {
+            Ok(ImshowCommand::Show { title, mat }) => {
+                latest_frames.insert(title.clone(), mat);
+                dirty_titles.insert(title);
+            }
+            Err(mpsc::RecvTimeoutError::Timeout) => {}
+            Err(mpsc::RecvTimeoutError::Disconnected) => break,
+        }
+
+        while let Ok(ImshowCommand::Show { title, mat }) = receiver.try_recv() {
+            latest_frames.insert(title.clone(), mat);
+            dirty_titles.insert(title);
+        }
+
+        if !dirty_titles.is_empty() {
+            for title in dirty_titles.drain() {
+                if let Some(mat) = latest_frames.get(&title) {
+                    let _ = opencv::highgui::imshow(&title, mat);
+                }
+            }
+        }
+
+        let _ = opencv::highgui::wait_key(1);
+    }
 }
 // 为 JsValue 实现该 Trait
 impl JsArgExt for JsValue {
@@ -106,6 +184,64 @@ fn _parse_string_array(arg: JsValue, ctx: &mut Context) -> JsResult<Vec<String>>
             .map_err(|_| JsNativeError::typ().with_message(format!("hashes[{idx}] 必须是字符串")))?
             .to_std_string_lossy();
         values.push(text);
+    }
+
+    Ok(values)
+}
+
+/// 从 JS 数组对象中解析单个 bbox 元组 `(x, y, w, h)`。
+fn _parse_bbox_tuple(array: &JsArray, index: usize, ctx: &mut Context) -> JsResult<(i32, i32, i32, i32)> {
+    if array.length(ctx)? < 4 {
+        return Err(
+            JsNativeError::typ()
+                .with_message(format!("bboxes[{index}] 长度不足 4，必须为 [x, y, w, h]"))
+                .into(),
+        );
+    }
+
+    let x = array.get(0, ctx)?.to_number(ctx)?.round() as i32;
+    let y = array.get(1, ctx)?.to_number(ctx)?.round() as i32;
+    let w = array.get(2, ctx)?.to_number(ctx)?.round() as i32;
+    let h = array.get(3, ctx)?.to_number(ctx)?.round() as i32;
+    Ok((x, y, w, h))
+}
+
+/// 将 JS bbox 数组解析为 Rust 向量。
+///
+/// 支持两种元素格式：
+/// 1. `[x, y, w, h]`
+/// 2. `{ bbox: [x, y, w, h] }`
+fn _parse_bbox_array(arg: JsValue, ctx: &mut Context) -> JsResult<Vec<(i32, i32, i32, i32)>> {
+    let array_obj = arg
+        .as_object()
+        .ok_or_else(|| JsNativeError::typ().with_message("bboxes 参数必须是数组"))?;
+    let array = JsArray::from_object(array_obj.clone())
+        .map_err(|_| JsNativeError::typ().with_message("bboxes 参数必须是数组"))?;
+    let length = array.length(ctx)? as usize;
+    let mut values = Vec::with_capacity(length);
+
+    for idx in 0..length {
+        let item = array.get(idx as u32, ctx)?;
+        let item_obj = item
+            .as_object()
+            .ok_or_else(|| JsNativeError::typ().with_message(format!("bboxes[{idx}] 必须是数组或对象")))?;
+
+        // 格式1：[x, y, w, h]
+        if let Ok(item_array) = JsArray::from_object(item_obj.clone()) {
+            values.push(_parse_bbox_tuple(&item_array, idx, ctx)?);
+            continue;
+        }
+
+        // 格式2：{ bbox: [x, y, w, h] }
+        let bbox_value = item_obj
+            .get(js_string!("bbox"), ctx)
+            .map_err(|_| JsNativeError::typ().with_message(format!("读取 bboxes[{idx}].bbox 失败")))?;
+        let bbox_obj = bbox_value
+            .as_object()
+            .ok_or_else(|| JsNativeError::typ().with_message(format!("bboxes[{idx}].bbox 必须是数组")))?;
+        let bbox_array = JsArray::from_object(bbox_obj.clone())
+            .map_err(|_| JsNativeError::typ().with_message(format!("bboxes[{idx}].bbox 必须是数组")))?;
+        values.push(_parse_bbox_tuple(&bbox_array, idx, ctx)?);
     }
 
     Ok(values)
@@ -245,6 +381,10 @@ fn _mc(
     let x = x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
     let y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
     if hwnd.is_invalid() {
+        if x <= 0 || y <= 0 {
+            click(10);
+            return Ok(JsValue::undefined());
+        }
         click_to(x, y);
     } else {
         post_mouse_click(hwnd, x, y);
@@ -296,6 +436,75 @@ fn _move_to(
     let duration_ms = duration as u32;
     tokio::spawn(async move {
         mouse_move_to_eased(start_x, start_y, end_x, end_y, duration_ms).await;
+    });
+
+    // 返回在 duration 毫秒后 resolve 的 promise
+    let mut cb: Option<JsFunction> = None;
+    let promise = JsPromise::new(
+        |resolvers, _context| {
+            cb = Some(resolvers.resolve.clone());
+
+            Ok(JsValue::undefined())
+        },
+        ctx,
+    );
+    let job = boa_engine::job::TimeoutJob::new(
+        boa_engine::job::NativeJob::new(move |context| {
+            cb.unwrap()
+                .call(&JsValue::undefined(), &[], context)
+                .unwrap();
+            Ok(JsValue::undefined())
+        }),
+        duration,
+    );
+    ctx.enqueue_job(job.into());
+    Ok(promise.into())
+}
+
+/// 鼠标绝对移动后点击 (带缓动)
+fn _move_c(
+    hwnd: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    duration: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let hwnd = HWND(
+        hwnd.unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let mut end_x = x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let mut end_y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let cx = end_x;
+    let cy = end_y;
+    let duration = duration
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as u64;
+
+    if !hwnd.is_invalid() {
+        let (x, y, _width, _height) = win_get_client_pos(hwnd).unwrap_or((0, 0, 0, 0));
+        end_x += x;
+        end_y += y;
+    }
+
+    // 获取当前鼠标位置
+    let mut current_pos = windows::Win32::Foundation::POINT { x: 0, y: 0 };
+    unsafe {
+        let _ = GetCursorPos(&mut current_pos);
+    }
+
+    // 立即开始移动（在 tokio 任务中）
+    let start_x = current_pos.x;
+    let start_y = current_pos.y;
+    let duration_ms = duration as u32;
+    let hwnd_safe = hwnd.0 as isize;
+    tokio::spawn(async move {
+        mouse_move_to_eased(start_x, start_y, end_x, end_y, duration_ms).await;
+        if hwnd_safe != 0 {
+            post_click(HWND(hwnd_safe as *mut std::ffi::c_void), cx, cy, 1);
+        } else {
+            click(10);
+        }
     });
 
     // 返回在 duration 毫秒后 resolve 的 promise
@@ -623,19 +832,20 @@ fn _imread_rgba(path: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
 
 /// 保存Mat对象到文件函数
 fn _imwrite(
-    js_img_mat: Option<JsValue>,
     path: Option<JsValue>,
+    js_img_mat: Option<JsValue>,
     ctx: &mut Context,
 ) -> JsResult<JsValue> {
-    // 获取第一个参数 (图像Mat)
-    let js_img_mat = js_img_mat
-        .unwrap_or_else(|| JsValue::undefined())
-        .get_native::<JsMat>()?;
-
+    // 获取第一个参数 (文件路径)
     let path = path
         .unwrap_or_else(|| JsValue::undefined())
         .to_string(ctx)?
         .to_std_string_lossy();
+
+    // 获取第二个参数 (图像Mat)
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
 
     // 保存图像到文件
     match opencv::imgcodecs::imwrite(
@@ -877,18 +1087,110 @@ fn _imshow(
     let wait_key_ms = wait_key_ms.unwrap_or_else(|| js_value!(0)).to_number(ctx)? as i32;
 
     let mat_clone = (*js_img_mat.borrow().data().inner).clone();
+    let sender = _get_imshow_sender();
+    let delay_ms = wait_key_ms.max(0) as u64;
 
     ctx.enqueue_job(
         NativeAsyncJob::new(async move |context| {
-            let _ = thread::spawn(move || {
-                let _ = opencv::highgui::imshow(&title, &mat_clone);
-                let _ = opencv::highgui::wait_key(wait_key_ms);
-                // let _ = opencv::highgui::destroy_window(&title);
-            })
-            .join();
+            let _ = sender.send(ImshowCommand::Show {
+                title,
+                mat: mat_clone,
+            });
+            if delay_ms > 0 {
+                thread::sleep(Duration::from_millis(delay_ms));
+            }
 
             let context = &mut context.borrow_mut();
             resolvers.resolve.call(&JsValue::undefined(), &[], context)
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
+}
+
+/// 交互式选择图像 ROI 区域函数（异步）
+///
+/// 在独立线程中弹出窗口，用户按回车/空格确认选区，按 c 取消。
+/// 取消时返回 `undefined`，确认时返回 `[x, y, w, h]`。
+fn _select_roi(
+    title: Option<JsValue>,
+    js_img_mat: Option<JsValue>,
+    show_crosshair: Option<JsValue>,
+    from_center: Option<JsValue>,
+    print_notice: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let js_img_mat = js_img_mat.unwrap_or_else(|| JsValue::undefined());
+    let js_img_mat = js_img_mat.get_native::<JsMat>()?;
+
+    let title = title
+        .unwrap_or_else(|| JsValue::from(js_string!("selectroi")))
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let show_crosshair = show_crosshair
+        .unwrap_or_else(|| JsValue::new(true))
+        .to_boolean();
+    let from_center = from_center
+        .unwrap_or_else(|| JsValue::new(false))
+        .to_boolean();
+    let print_notice = print_notice
+        .unwrap_or_else(|| JsValue::new(true))
+        .to_boolean();
+
+    let mat_clone = (*js_img_mat.borrow().data().inner).clone();
+    let resolvers_clone = resolvers.clone();
+
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            let async_result = tokio::task::spawn_blocking(move || {
+                let roi_result = opencv::highgui::select_roi(
+                    &title,
+                    &mat_clone,
+                    show_crosshair,
+                    from_center,
+                    print_notice,
+                );
+                let _ = opencv::highgui::destroy_window(&title);
+
+                roi_result.map(|rect| {
+                    if rect.width > 0 && rect.height > 0 {
+                        Some((rect.x, rect.y, rect.width, rect.height))
+                    } else {
+                        None
+                    }
+                })
+            })
+            .await;
+
+            let context = &mut context.borrow_mut();
+            match async_result {
+                Ok(Ok(Some((x, y, w, h)))) => resolvers_clone.resolve.call(
+                    &JsValue::undefined(),
+                    &[js_value!([x, y, w, h], context)],
+                    context,
+                ),
+                Ok(Ok(None)) => resolvers_clone
+                    .resolve
+                    .call(&JsValue::undefined(), &[], context),
+                Ok(Err(e)) => {
+                    let msg = format!("selectroi 失败: {e}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(msg))],
+                        context,
+                    )
+                }
+                Err(e) => {
+                    let msg = format!("selectroi 线程执行失败: {e}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(msg))],
+                        context,
+                    )
+                }
+            }
         })
         .into(),
     );
@@ -913,6 +1215,32 @@ fn _color_filter(
     let tolerance = tolerance.clamp(0.0, 255.0) as u8;
 
     match color_filter_impl(&img_mat, &colors, tolerance) {
+        Ok(mask) => Box::new(mask).into_js(ctx),
+        Err(msg) => Err(JsNativeError::error().with_message(msg).into()),
+    }
+}
+
+/// HSL 加权色键过滤函数，返回根据色键过滤后的灰度图像。
+fn _color_filter_hsl(
+    js_img_mat: Option<JsValue>,
+    colors: Option<JsValue>,
+    tolerance: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+
+    let colors = _parse_u32_array(colors.unwrap_or_else(|| JsValue::undefined()), ctx)?;
+    let tolerance = tolerance.unwrap_or_else(|| js_value!(0.0)).to_number(ctx)?;
+    let tolerance = if tolerance.is_finite() {
+        tolerance.max(0.0)
+    } else {
+        0.0
+    };
+
+    match color_filter_hsl_impl(&img_mat, &colors, tolerance) {
         Ok(mask) => Box::new(mask).into_js(ctx),
         Err(msg) => Err(JsNativeError::error().with_message(msg).into()),
     }
@@ -1058,6 +1386,18 @@ fn _perceptual_hash(
     Ok(JsValue::from(js_string!(hash)))
 }
 
+/// 预测罗盘/圆盘类图像朝向角度（单位：度，范围 0-359）。
+fn _predict_rotation(js_img_mat: Option<JsValue>, _ctx: &mut Context) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+
+    let angle = predict_rotation(&img_mat)
+        .map_err(|e| JsNativeError::error().with_message(e.to_string()))?;
+    Ok(JsValue::new(angle))
+}
+
 /// 比较源哈希和模板哈希数组的汉明距离，返回最佳匹配索引或 -1。
 fn _match_hamming_hash(
     source_hash: Option<JsValue>,
@@ -1181,6 +1521,81 @@ fn _find_contours(
     }
 
     Ok(result.into())
+}
+
+/// 轮廓绘制函数，返回绘制后的图像（BGR）。
+fn _draw_contours(
+    js_img_mat: Option<JsValue>,
+    min_area: Option<JsValue>,
+    mode: Option<JsValue>,
+    method: Option<JsValue>,
+    color: Option<JsValue>,
+    thickness: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+
+    // 新增模式：drawContours(img, bboxes, color?, thickness?)
+    // 其中 bboxes 支持 [[x,y,w,h], ...] 或 [{ bbox: [x,y,w,h] }, ...]
+    let is_bbox_mode = min_area
+        .as_ref()
+        .and_then(JsValue::as_object)
+        .is_some_and(|obj| JsArray::from_object(obj.clone()).is_ok());
+    if is_bbox_mode {
+        let bboxes = _parse_bbox_array(min_area.unwrap_or_else(|| JsValue::undefined()), ctx)?;
+        // 在 bbox 模式下，第三、四参数分别映射为 color/thickness
+        let draw_color = color
+            .or(mode)
+            .unwrap_or_else(|| js_value!(0x00FF00))
+            .to_number(ctx)? as u32
+            & 0x00FF_FFFF;
+        let draw_thickness = thickness
+            .or(method)
+            .unwrap_or_else(|| js_value!(1))
+            .to_number(ctx)? as i32;
+
+        return match draw_bboxes_impl(&img_mat, &bboxes, draw_color, draw_thickness.max(1)) {
+            Ok(dst) => Box::new(dst).into_js(ctx),
+            Err(msg) => Err(JsNativeError::error().with_message(msg).into()),
+        };
+    }
+
+    // 兼容旧参数顺序: drawContours(img, mode, method, minArea, color, thickness)
+    // 新参数顺序: drawContours(img, minArea, mode, method, color, thickness)
+    let (raw_min_area, raw_mode, raw_method) = if min_area.as_ref().is_some_and(JsValue::is_string)
+    {
+        (method, min_area, mode)
+    } else {
+        (min_area, mode, method)
+    };
+
+    let mode = _parse_contour_mode(raw_mode, ctx)?;
+    let method = _parse_contour_method(raw_method, ctx)?;
+    let min_area = raw_min_area
+        .unwrap_or_else(|| js_value!(0.0))
+        .to_number(ctx)?;
+    let min_area = if min_area.is_finite() {
+        min_area.max(0.0)
+    } else {
+        0.0
+    };
+
+    let color = color
+        .unwrap_or_else(|| js_value!(0x00FF00))
+        .to_number(ctx)? as u32
+        & 0x00FF_FFFF;
+    let thickness = thickness
+        .unwrap_or_else(|| js_value!(1))
+        .to_number(ctx)? as i32;
+    let thickness = thickness.max(1);
+
+    match draw_contours_impl(&img_mat, mode, method, min_area, color, thickness) {
+        Ok(dst) => Box::new(dst).into_js(ctx),
+        Err(msg) => Err(JsNativeError::error().with_message(msg).into()),
+    }
 }
 
 /// 使用两个Mat对象进行颜色和模板匹配函数
@@ -1443,16 +1858,10 @@ fn _draw_border(
         hwnd.unwrap_or_else(|| JsValue::undefined())
             .to_number(ctx)? as isize as *mut std::ffi::c_void,
     );
-    let x = x
-        .unwrap_or_else(|| JsValue::undefined())
-        .to_number(ctx)? as i32;
+    let x = x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
     let y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
-    let w = w
-        .unwrap_or_else(|| JsValue::undefined())
-        .to_number(ctx)? as i32;
-    let h = h
-        .unwrap_or_else(|| JsValue::undefined())
-        .to_number(ctx)? as i32;
+    let w = w.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let h = h.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
 
     draw_border(hwnd, x, y, w, h, Some(0xFF0000));
     Ok(JsValue::undefined())
@@ -1514,6 +1923,128 @@ fn _paste_text(_ctx: &mut Context) -> JsResult<JsValue> {
     }
 }
 
+/// 将 Mat 编码为 PNG data URL，便于前端直接显示。
+fn _mat_to_png_data_url(mat: &Mat) -> Result<String, String> {
+    let mut buf = opencv::core::Vector::<u8>::new();
+    opencv::imgcodecs::imencode(".png", mat, &mut buf, &opencv::core::Vector::new())
+        .map_err(|e| format!("状态图片编码失败: {e}"))?;
+    let image_b64 = general_purpose::STANDARD.encode(buf.to_vec());
+    Ok(format!("data:image/png;base64,{image_b64}"))
+}
+
+/// 向前端发送脚本状态事件（支持按标题新增/更新/删除）。
+fn _emit_script_status(title: String, text: Option<String>, image: Option<String>, images: Option<Vec<String>>) {
+    if let Some(app_handle) = SCRIPT_EVENT_APP_HANDLE.get() {
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|d| d.as_millis() as u64)
+            .unwrap_or(0);
+        let has_images = images.as_ref().is_some_and(|items| !items.is_empty());
+        let action = if text.is_none() && image.is_none() && !has_images {
+            "remove"
+        } else {
+            "upsert"
+        };
+        let _ = app_handle.emit(
+            "script-status",
+            serde_json::json!({
+                "action": action,
+                "title": title,
+                "text": text,
+                "image": image,
+                "images": images,
+                "timestamp": timestamp,
+            }),
+        );
+    }
+}
+
+/// 设置脚本运行状态（按标题维护，内容参数自动按类型判断）。
+///
+/// 参数：
+/// - `title`: 状态标题（必填，用于区分多条状态）
+/// - `payload`: 状态内容，可选
+///   - Mat: 作为图片状态
+///   - Mat[]: 作为多图状态
+///   - 其他类型: 转为字符串作为文本状态
+/// - `payload_text`: 附加文本，可选，仅在 payload 为 Mat/Mat[] 时生效
+///   - undefined/null: 删除该标题状态
+fn _set_status(
+    title: Option<JsValue>,
+    payload: Option<JsValue>,
+    payload_text: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let title = title
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy()
+        .trim()
+        .to_string();
+    if title.is_empty() {
+        return Err(JsNativeError::typ().with_message("title 不能为空").into());
+    }
+
+    let mut text: Option<String> = None;
+    let mut image: Option<String> = None;
+    let mut images: Option<Vec<String>> = None;
+    let mut has_image_payload = false;
+    if let Some(value) = payload {
+        if !value.is_undefined() && !value.is_null() {
+            if value.as_object().is_some() {
+                if let Ok(js_mat) = value.get_native::<JsMat>() {
+                    let mat = (*js_mat.borrow().data().inner).clone();
+                    let image_data = _mat_to_png_data_url(&mat)
+                        .map_err(|msg| JsNativeError::error().with_message(msg))?;
+                    image = Some(image_data.clone());
+                    images = Some(vec![image_data]);
+                    has_image_payload = true;
+                } else if let Some(array_obj) = value.as_object() {
+                    if let Ok(array) = JsArray::from_object(array_obj.clone()) {
+                        let length = array.length(ctx)? as usize;
+                        let mut next_images = Vec::with_capacity(length);
+
+                        for idx in 0..length {
+                            let item = array.get(idx as u32, ctx)?;
+                            let js_mat = item.get_native::<JsMat>().map_err(|_| {
+                                JsNativeError::typ().with_message(format!(
+                                    "payload[{idx}] 必须是 Mat（数组模式下仅支持 Mat[]）"
+                                ))
+                            })?;
+                            let mat = (*js_mat.borrow().data().inner).clone();
+                            let image_data = _mat_to_png_data_url(&mat)
+                                .map_err(|msg| JsNativeError::error().with_message(msg))?;
+                            next_images.push(image_data);
+                        }
+
+                        if !next_images.is_empty() {
+                            image = next_images.first().cloned();
+                            images = Some(next_images);
+                            has_image_payload = true;
+                        }
+                    } else {
+                        return Err(JsNativeError::typ().with_message("payload 必须是 Mat、Mat[] 或可转字符串值").into());
+                    }
+                } else {
+                    return Err(JsNativeError::typ().with_message("payload 必须是 Mat、Mat[] 或可转字符串值").into());
+                }
+            } else {
+                text = Some(value.to_string(ctx)?.to_std_string_lossy());
+            }
+        }
+    }
+    if has_image_payload {
+        if let Some(value) = payload_text {
+            if !value.is_undefined() && !value.is_null() {
+                text = Some(value.to_string(ctx)?.to_std_string_lossy());
+            }
+        }
+    }
+
+    _emit_script_status(title, text, image, images);
+    Ok(JsValue::undefined())
+}
+
 /// 根据窗口标题查找窗口句柄函数
 fn _find_window(title: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
     let title = title
@@ -1547,6 +2078,19 @@ fn _get_foreground_window(_ctx: &mut Context) -> JsResult<JsValue> {
     Ok(JsValue::new(hwnd.0 as u64 as f64))
 }
 
+/// 检查当前进程是否以管理员权限运行。
+fn _is_elevated(_ctx: &mut Context) -> JsResult<JsValue> {
+    #[cfg(target_os = "windows")]
+    {
+        let elevated = crate::util::is_elevated().unwrap_or(false);
+        Ok(JsValue::new(elevated))
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Ok(JsValue::new(false))
+    }
+}
+
 fn _set_program_volume(
     program_name: Option<JsValue>,
     volume: Option<JsValue>,
@@ -1577,6 +2121,9 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
 
     let f = _move_to.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("moveTo"), 4, f)?;
+
+    let f = _move_c.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("moveC"), 4, f)?;
 
     let f = _md.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("md"), 3, f)?;
@@ -1612,6 +2159,10 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     let f = _paste_text.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("pasteText"), 0, f)?;
 
+    // 脚本状态显示函数（支持文字与图片）
+    let f = _set_status.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("setStatus"), 3, f)?;
+
     // 获取窗口句柄函数
     let f = _find_window.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("findWindow"), 1, f)?;
@@ -1634,6 +2185,10 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     // 获取前台窗口
     let f = _get_foreground_window.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("getForegroundWindow"), 0, f)?;
+
+    // 检查是否以管理员权限运行
+    let f = _is_elevated.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("isElevated"), 0, f)?;
 
     // 从窗口获取图像Mat对象
     let f = _capture_window.into_js_function_copied(context);
@@ -1679,6 +2234,10 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     let f = _imshow.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("imshow"), 3, f)?;
 
+    // 交互式选择图像 ROI
+    let f = _select_roi.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("selectroi"), 5, f)?;
+
     // 使用两个Mat对象进行颜色和模板匹配
     let f = _find_color_and_match_template.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("findColorAndMatchTemplate"), 4, f)?;
@@ -1686,6 +2245,10 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     // 颜色键过滤函数
     let f = _color_filter.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("colorFilter"), 3, f)?;
+
+    // HSL 加权颜色键过滤函数
+    let f = _color_filter_hsl.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("colorFilterHSL"), 3, f)?;
 
     // 色键匹配函数
     let f = _color_key_match.into_js_function_copied(context);
@@ -1707,6 +2270,10 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     let f = _perceptual_hash.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("perceptualHash"), 2, f)?;
 
+    // 图像角度预测函数
+    let f = _predict_rotation.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("predictRotation"), 1, f)?;
+
     // 哈希汉明距离匹配函数
     let f = _match_hamming_hash.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("matchHammingHash"), 3, f)?;
@@ -1718,6 +2285,10 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     // 轮廓提取函数
     let f = _find_contours.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("findContours"), 4, f)?;
+
+    // 轮廓绘制函数
+    let f = _draw_contours.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("drawContours"), 6, f)?;
 
     // 模板匹配函数
     let f = _match_template.into_js_function_copied(context);

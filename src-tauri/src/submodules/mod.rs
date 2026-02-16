@@ -7,6 +7,7 @@ pub mod input;
 pub mod jsmat;
 pub mod jstimer;
 pub mod logger;
+pub mod predict_rotation;
 pub mod route;
 pub mod script;
 pub mod script_builtin;

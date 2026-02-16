@@ -3,6 +3,7 @@ import { listen, type UnlistenFn } from "@tauri-apps/api/event"
 import { register, unregisterAll } from "@tauri-apps/plugin-global-shortcut"
 import { debounce } from "lodash-es"
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
+import { useRouter } from "vue-router"
 import {
     deleteFile,
     getDocumentsDir,
@@ -24,6 +25,7 @@ import { useUIStore } from "@/store/ui"
 import { parseScriptHeader, replaceScriptHeader } from "@/utils/script-header"
 
 const ui = useUIStore()
+const router = useRouter()
 
 const scriptsDir = ref("")
 const viewMode = ref<"local" | "online">("local")
@@ -74,9 +76,19 @@ const activeTab = computed(() => openedTabs.value.find(tab => tab.id === activeT
 
 // 控制台相关
 const showConsole = ref(false)
+const showStatusPanel = ref(false)
 const consoleLogs = ref<Array<{ level: string; message: string; timestamp: number }>>([])
+interface ScriptStatusItem {
+    title: string
+    text?: string
+    image?: string
+    images?: string[]
+    timestamp: number
+}
+const scriptStatuses = ref<ScriptStatusItem[]>([])
 const isRunning = ref(false)
 let unlistenConsoleFn: UnlistenFn | null = null
+let unlistenStatusFn: UnlistenFn | null = null
 let unlistenFileChangedFn: UnlistenFn | null = null
 const watchedFiles = ref<Set<string>>(new Set())
 const codeEditor = ref<any>()
@@ -208,6 +220,13 @@ async function openScriptDirectory() {
     }
 }
 
+/**
+ * 打开图色工具页面。
+ */
+function openColorToolPage() {
+    router.push({ name: "script-color-tool" })
+}
+
 async function saveCurrentTab() {
     if (!activeTab.value) return
     try {
@@ -260,6 +279,8 @@ async function runCurrentTab() {
 
         // 清空控制台日志
         consoleLogs.value = []
+        scriptStatuses.value = []
+        showStatusPanel.value = false
         showConsole.value = true
         isRunning.value = true
         addConsoleLog("info", `开始运行脚本: ${activeTab.value.name}`)
@@ -357,6 +378,82 @@ async function initConsoleListener() {
     } catch (error) {
         console.error("监听控制台事件失败", error)
     }
+}
+
+/**
+ * 监听脚本状态事件（文字/图片）
+ */
+async function initStatusListener() {
+    try {
+        unlistenStatusFn = await listen<{
+            action?: "upsert" | "remove"
+            title?: string
+            text?: string
+            image?: string
+            images?: string[]
+            timestamp?: number
+        }>("script-status", event => {
+            const { action, title, text, image, images, timestamp } = event.payload ?? {}
+            const normalizedTitle = title?.trim()
+            if (!normalizedTitle) return
+
+            const normalizedImages = Array.isArray(images)
+                ? images.filter(item => typeof item === "string" && item.trim().length > 0)
+                : []
+            const normalizedImage = typeof image === "string" && image.trim().length > 0 ? image : undefined
+            if (normalizedImages.length === 0 && normalizedImage) {
+                normalizedImages.push(normalizedImage)
+            }
+
+            const index = scriptStatuses.value.findIndex(item => item.title === normalizedTitle)
+            if (action === "remove" || (!text && normalizedImages.length === 0)) {
+                if (index >= 0) {
+                    scriptStatuses.value.splice(index, 1)
+                }
+                return
+            }
+
+            const nextItem: ScriptStatusItem = {
+                title: normalizedTitle,
+                text,
+                image: normalizedImages[0],
+                images: normalizedImages,
+                timestamp: timestamp ?? Date.now(),
+            }
+            if (index >= 0) {
+                scriptStatuses.value[index] = nextItem
+            } else {
+                scriptStatuses.value.push(nextItem)
+            }
+            showStatusPanel.value = true
+        })
+    } catch (error) {
+        console.error("监听脚本状态事件失败", error)
+    }
+}
+
+/**
+ * 切换右侧状态栏显示
+ */
+function toggleStatusPanel() {
+    showStatusPanel.value = !showStatusPanel.value
+}
+
+/**
+ * 清除指定标题的脚本状态（仅前端显示层）。
+ */
+function clearStatus(title: string) {
+    const index = scriptStatuses.value.findIndex(item => item.title === title)
+    if (index >= 0) {
+        scriptStatuses.value.splice(index, 1)
+    }
+}
+
+/**
+ * 清空全部脚本状态（仅前端显示层）。
+ */
+function clearAllStatus() {
+    scriptStatuses.value = []
 }
 
 /**
@@ -804,6 +901,7 @@ onMounted(async () => {
     fetchLocalScripts()
     document.addEventListener("keydown", handleKeyDown)
     await initConsoleListener()
+    await initStatusListener()
     await initFileChangeListener()
 })
 
@@ -811,6 +909,9 @@ onUnmounted(async () => {
     document.removeEventListener("keydown", handleKeyDown)
     if (unlistenConsoleFn) {
         unlistenConsoleFn()
+    }
+    if (unlistenStatusFn) {
+        unlistenStatusFn()
     }
     if (unlistenFileChangedFn) {
         unlistenFileChangedFn()
@@ -935,124 +1036,184 @@ onUnmounted(async () => {
                 </ScrollArea>
             </div>
 
-            <div class="flex-1 flex flex-col min-w-0">
-                <!-- TABS -->
-                <div class="h-10 bg-base-100 border-b border-base-300 flex items-center justify-between">
-                    <!-- files -->
-                    <ScrollArea horizontal :vertical="false" class="flex items-center flex-1 h-full">
-                        <div class="flex">
-                            <ContextMenu v-for="tab in openedTabs" :key="tab.id"
-                                class="h-10 flex items-center gap-2 px-3 border-r border-base-300 cursor-pointer min-w-max"
-                                :class="{ 'bg-base-200 border-t border-t-base-content': activeTabId === tab.id }"
-                                @click="setActiveTab(tab.id)" @mousedown="handleTabMiddleClick($event, tab.id)">
-                                <Icon :icon="tab.type === 'local' ? 'ri:file-line' : 'ri:cloud-line'" class="w-4 h-4" />
-                                <span class="text-sm truncate max-w-32">{{ tab.name }}</span>
-                                <button v-if="tab.modified"
-                                    class="w-5 h-5 rounded hover:bg-base-300 flex items-center justify-center cursor-pointer"
-                                    @click.stop="saveCurrentTab" title="保存">
-                                    <span class="w-2 h-2 rounded-full bg-warning" />
+            <div class="flex-1 flex min-w-0">
+                <div class="flex-1 flex flex-col min-w-0">
+                    <!-- TABS -->
+                    <div class="h-10 bg-base-100 border-b border-base-300 flex items-center justify-between">
+                        <!-- files -->
+                        <ScrollArea horizontal :vertical="false" class="flex items-center flex-1 h-full">
+                            <div class="flex">
+                                <ContextMenu v-for="tab in openedTabs" :key="tab.id"
+                                    class="h-10 flex items-center gap-2 px-3 border-r border-base-300 cursor-pointer min-w-max"
+                                    :class="{ 'bg-base-200 border-t border-t-base-content': activeTabId === tab.id }"
+                                    @click="setActiveTab(tab.id)" @mousedown="handleTabMiddleClick($event, tab.id)">
+                                    <Icon :icon="tab.type === 'local' ? 'ri:file-line' : 'ri:cloud-line'"
+                                        class="w-4 h-4" />
+                                    <span class="text-sm truncate max-w-32">{{ tab.name }}</span>
+                                    <button v-if="tab.modified"
+                                        class="w-5 h-5 rounded hover:bg-base-300 flex items-center justify-center cursor-pointer"
+                                        @click.stop="saveCurrentTab" title="保存">
+                                        <span class="w-2 h-2 rounded-full bg-warning" />
+                                    </button>
+                                    <button v-else
+                                        class="w-5 h-5 rounded hover:bg-base-300 flex items-center justify-center cursor-pointer"
+                                        @click.stop="closeTab(tab.id)">
+                                        <Icon icon="ri:close-line" class="w-3 h-3" />
+                                    </button>
+                                    <template #menu>
+                                        <ContextMenuItem
+                                            class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
+                                            @click="closeOtherTabs(tab.id)">
+                                            关闭其他
+                                        </ContextMenuItem>
+                                        <ContextMenuItem
+                                            class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
+                                            @click="closeAllTabs">
+                                            关闭所有
+                                        </ContextMenuItem>
+                                    </template>
+                                </ContextMenu>
+                            </div>
+                        </ScrollArea>
+                        <!-- actions -->
+                        <div class="flex items-center gap-2 ml-2 px-1">
+                            <button class="btn btn-sm btn-ghost btn-square" @click="showConsole = !showConsole"
+                                title="切换控制台">
+                                <Icon :icon="showConsole ? 'ri:terminal-box-line' : 'ri:terminal-line'"
+                                    class="w-4 h-4" />
+                            </button>
+                            <button class="btn btn-sm btn-ghost btn-square" @click="toggleStatusPanel" title="切换状态栏">
+                                <Icon :icon="showStatusPanel ? 'ri:menu-fold-line' : 'ri:menu-unfold-line'"
+                                    class="w-4 h-4" />
+                            </button>
+                            <button class="btn btn-sm btn-ghost btn-square" :class="{ 'btn-error': isRunning }"
+                                @click="runCurrentTab" :title="isRunning ? '停止脚本' : '运行脚本'">
+                                <Icon :icon="isRunning ? 'ri:stop-circle-line' : 'ri:play-line'" class="w-4 h-4" />
+                            </button>
+                            <button class="btn btn-sm btn-ghost btn-square" @click="openNewScriptDialog" title="新建脚本">
+                                <Icon icon="ri:add-line" class="w-4 h-4" />
+                            </button>
+                            <button class="btn btn-sm btn-ghost btn-square" @click="openScriptDirectory" title="打开目录">
+                                <Icon icon="ri:folder-open-line" class="w-4 h-4" />
+                            </button>
+                            <button v-if="activeTab && activeTab.type === 'local'"
+                                class="btn btn-sm btn-primary btn-square" @click="saveCurrentTab"
+                                :disabled="!activeTab.modified" title="保存">
+                                <Icon icon="ri:save-line" class="w-4 h-4" />
+                            </button>
+                            <div class="dropdown dropdown-end">
+                                <div tabindex="0" role="button" class="btn btn-sm btn-ghost btn-square" title="更多操作">
+                                    <Icon icon="ri:more-line" class="w-4 h-4" />
+                                </div>
+                                <ul tabindex="-1"
+                                    class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+                                    <li><a @click="openColorToolPage">图色工具</a></li>
+                                    <li><a @click="restartAsAdmin">以管理员权限重新启动</a></li>
+                                    <li>
+                                        <a @click="toggleGlobalShortcut">{{
+                                            globalShortcutEnabled ? "禁用全局快捷键(F10)" : "启用全局快捷键(F10)"
+                                        }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 flex flex-col min-h-0">
+                        <div v-if="activeTab" class="flex-1 flex flex-col min-h-0">
+                            <ScrollArea class="flex-1 overflow-hidden">
+                                <CodeEditor :readonly="activeTab.type !== 'local'" :file="activeTab.name"
+                                    ref="codeEditor" v-model="activeTab.content" placeholder="脚本内容..."
+                                    class="w-full h-full p-2 font-mono text-sm"
+                                    @update:modelValue="onCodeEditorUpdate" />
+                            </ScrollArea>
+                        </div>
+                        <div v-else class="flex-1 flex items-center justify-center text-base-content/50">
+                            <div class="text-center">
+                                <Icon icon="ri:file-line" class="w-16 h-16 mx-auto mb-4" />
+                                <p>从左侧选择一个脚本开始编辑</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 控制台面板 -->
+                    <div v-if="showConsole" class="h-48 border-t border-base-300 flex flex-col bg-base-900">
+                        <div
+                            class="h-8 bg-base-800 border-b border-base-700 flex items-center justify-between px-3 shrink-0">
+                            <div class="flex items-center gap-2">
+                                <Icon icon="ri:terminal-line" class="w-4 h-4 text-base-content/60" />
+                                <span class="text-xs text-base-content/60">控制台</span>
+                                <span v-if="isRunning" class="text-xs text-info">运行中</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="btn btn-xs btn-ghost" @click="clearConsole" title="清空">
+                                    <Icon icon="ri:delete-bin-line" class="w-3 h-3" />
                                 </button>
-                                <button v-else
-                                    class="w-5 h-5 rounded hover:bg-base-300 flex items-center justify-center cursor-pointer"
-                                    @click.stop="closeTab(tab.id)">
+                                <button class="btn btn-xs btn-ghost" @click="showConsole = false" title="关闭">
                                     <Icon icon="ri:close-line" class="w-3 h-3" />
                                 </button>
-                                <template #menu>
-                                    <ContextMenuItem
-                                        class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                        @click="closeOtherTabs(tab.id)">
-                                        关闭其他
-                                    </ContextMenuItem>
-                                    <ContextMenuItem
-                                        class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                        @click="closeAllTabs">
-                                        关闭所有
-                                    </ContextMenuItem>
-                                </template>
-                            </ContextMenu>
-                        </div>
-                    </ScrollArea>
-                    <!-- actions -->
-                    <div class="flex items-center gap-2 ml-2 px-1">
-                        <button class="btn btn-sm btn-ghost btn-square" @click="showConsole = !showConsole"
-                            title="切换控制台">
-                            <Icon :icon="showConsole ? 'ri:terminal-box-line' : 'ri:terminal-line'" class="w-4 h-4" />
-                        </button>
-                        <button class="btn btn-sm btn-ghost btn-square" :class="{ 'btn-error': isRunning }"
-                            @click="runCurrentTab" :title="isRunning ? '停止脚本' : '运行脚本'">
-                            <Icon :icon="isRunning ? 'ri:stop-circle-line' : 'ri:play-line'" class="w-4 h-4" />
-                        </button>
-                        <button class="btn btn-sm btn-ghost btn-square" @click="openNewScriptDialog" title="新建脚本">
-                            <Icon icon="ri:add-line" class="w-4 h-4" />
-                        </button>
-                        <button class="btn btn-sm btn-ghost btn-square" @click="openScriptDirectory" title="打开目录">
-                            <Icon icon="ri:folder-open-line" class="w-4 h-4" />
-                        </button>
-                        <button v-if="activeTab && activeTab.type === 'local'" class="btn btn-sm btn-primary btn-square"
-                            @click="saveCurrentTab" :disabled="!activeTab.modified" title="保存">
-                            <Icon icon="ri:save-line" class="w-4 h-4" />
-                        </button>
-                        <div class="dropdown dropdown-end">
-                            <div tabindex="0" role="button" class="btn btn-sm btn-ghost btn-square" title="更多操作">
-                                <Icon icon="ri:more-line" class="w-4 h-4" />
                             </div>
-                            <ul tabindex="-1"
-                                class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
-                                <li><a @click="restartAsAdmin">以管理员权限重新启动</a></li>
-                                <li>
-                                    <a @click="toggleGlobalShortcut">{{
-                                        globalShortcutEnabled ? "禁用全局快捷键(F10)" : "启用全局快捷键(F10)"
-                                        }}</a>
-                                </li>
-                            </ul>
                         </div>
-                    </div>
-                </div>
-
-                <div class="flex-1 flex flex-col min-h-0">
-                    <div v-if="activeTab" class="flex-1 flex flex-col min-h-0">
-                        <ScrollArea class="flex-1 overflow-hidden">
-                            <CodeEditor :readonly="activeTab.type !== 'local'" :file="activeTab.name" ref="codeEditor"
-                                v-model="activeTab.content" placeholder="脚本内容..."
-                                class="w-full h-full p-2 font-mono text-sm" @update:modelValue="onCodeEditorUpdate" />
-                        </ScrollArea>
-                    </div>
-                    <div v-else class="flex-1 flex items-center justify-center text-base-content/50">
-                        <div class="text-center">
-                            <Icon icon="ri:file-line" class="w-16 h-16 mx-auto mb-4" />
-                            <p>从左侧选择一个脚本开始编辑</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 控制台面板 -->
-                <div v-if="showConsole" class="h-48 border-t border-base-300 flex flex-col bg-base-900">
-                    <div
-                        class="h-8 bg-base-800 border-b border-base-700 flex items-center justify-between px-3 shrink-0">
-                        <div class="flex items-center gap-2">
-                            <Icon icon="ri:terminal-line" class="w-4 h-4 text-base-content/60" />
-                            <span class="text-xs text-base-content/60">控制台</span>
-                            <span v-if="isRunning" class="text-xs text-info">运行中</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button class="btn btn-xs btn-ghost" @click="clearConsole" title="清空">
-                                <Icon icon="ri:delete-bin-line" class="w-3 h-3" />
-                            </button>
-                            <button class="btn btn-xs btn-ghost" @click="showConsole = false" title="关闭">
-                                <Icon icon="ri:close-line" class="w-3 h-3" />
-                            </button>
-                        </div>
-                    </div>
-                    <div id="console-output" class="flex-1 overflow-auto p-3 font-mono text-xs">
-                        <div v-if="consoleLogs.length === 0" class="text-base-content/40 text-center py-4">暂无输出</div>
-                        <div v-else class="space-y-1">
-                            <div v-for="(log, index) in consoleLogs" :key="index" class="flex gap-2">
-                                <span class="text-base-content/40 shrink-0">{{ new
-                                    Date(log.timestamp).toLocaleTimeString()
+                        <div id="console-output" class="flex-1 overflow-auto p-3 font-mono text-xs">
+                            <div v-if="consoleLogs.length === 0" class="text-base-content/40 text-center py-4">暂无输出
+                            </div>
+                            <div v-else class="space-y-1">
+                                <div v-for="(log, index) in consoleLogs" :key="index" class="flex gap-2">
+                                    <span class="text-base-content/40 shrink-0">{{ new
+                                        Date(log.timestamp).toLocaleTimeString()
                                     }}</span>
-                                <span :class="getLogLevelClass(log.level)" class="break-all">{{ log.message }}</span>
+                                    <span :class="getLogLevelClass(log.level)" class="break-all">{{ log.message
+                                        }}</span>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- 右侧状态栏 -->
+                <div v-if="showStatusPanel"
+                    class="w-80 max-w-[40%] min-w-65 border-l border-base-300 bg-base-950/20 flex flex-col">
+                    <div class="h-10 px-3 border-b border-base-300 flex items-center justify-between">
+                        <div class="flex flex-1 items-center gap-2 text-sm">
+                            <Icon icon="ri:cpu-line" class="w-4 h-4 text-info" />
+                            <span>调试状态</span>
+                        </div>
+                        <button class="btn btn-xs btn-ghost" @click="clearAllStatus" title="清空">
+                            <Icon icon="ri:delete-bin-line" class="w-3 h-3" />
+                        </button>
+                        <button class="btn btn-xs btn-ghost" @click="showStatusPanel = false" title="关闭">
+                            <Icon icon="ri:close-line" class="w-3 h-3" />
+                        </button>
+                    </div>
+                    <div v-if="scriptStatuses.length === 0"
+                        class="flex-1 flex items-center justify-center text-base-content/50 text-sm">
+                        暂无状态
+                    </div>
+                    <div v-else class="flex-1 min-h-0">
+                        <ScrollArea class="h-full p-2">
+                            <div class="flex flex-col gap-2">
+                                <div v-for="item in scriptStatuses" :key="item.title"
+                                    class="border border-base-300 rounded bg-base-100/40 p-2 space-y-2">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="text-xs text-base-content/70 truncate">{{ item.title }}</div>
+                                        <button class="btn btn-xs btn-ghost" @click="clearStatus(item.title)">
+                                            <Icon icon="ri:close-line" class="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                    <div class="text-[11px] text-base-content/40">
+                                        {{ new Date(item.timestamp).toLocaleTimeString() }}
+                                    </div>
+                                    <div v-if="item.text" class="text-xs text-base-content/85 break-all">
+                                        {{ item.text }}
+                                    </div>
+                                    <div v-if="item.images && item.images.length > 0" class="space-y-2">
+                                        <img v-for="(statusImage, imageIndex) in item.images" :key="`${item.title}-${imageIndex}`"
+                                            :src="statusImage" class="max-w-full" />
+                                    </div>
+                                    <img v-else-if="item.image" :src="item.image" class="max-w-full" />
+                                </div>
+                            </div>
+                        </ScrollArea>
                     </div>
                 </div>
             </div>

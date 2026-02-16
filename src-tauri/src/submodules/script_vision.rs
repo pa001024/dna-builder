@@ -4,7 +4,7 @@ use opencv::{
     features2d, imgproc,
     prelude::{
         DescriptorMatcherTraitConst, Feature2DTrait, KeyPointTraitConst, MatExprTraitConst,
-        MatTraitConst,
+        MatTraitConst, MatTraitConstManual, MatTraitManual,
     },
 };
 use std::{
@@ -12,7 +12,7 @@ use std::{
     thread,
 };
 
-use crate::submodules::{color_match::rgb_to_bgr, tpl_match::match_template};
+use crate::submodules::{color::rgb_to_hsl, color_match::rgb_to_bgr, tpl_match::match_template};
 
 pub type SiftLocateResult = (f64, f64, f64, f64, i32, i32, Vec<Point2f>);
 pub type ContourResult = (f64, core::Rect, (f64, f64));
@@ -35,6 +35,20 @@ fn _to_gray_mat(mat: &Mat) -> Result<Mat, String> {
         }
         channels => Err(format!("不支持的通道数: {channels}")),
     }
+}
+
+/// 将图像统一转换为 BGR 三通道，便于绘制彩色标注。
+fn _to_bgr_mat(mat: &Mat) -> Result<Mat, String> {
+    let mut bgr_mat = Mat::default();
+    match mat.channels() {
+        1 => imgproc::cvt_color(mat, &mut bgr_mat, imgproc::COLOR_GRAY2BGR, 0)
+            .map_err(|e| format!("灰度图转 BGR 失败: {e}"))?,
+        3 => bgr_mat = mat.clone(),
+        4 => imgproc::cvt_color(mat, &mut bgr_mat, imgproc::COLOR_BGRA2BGR, 0)
+            .map_err(|e| format!("BGRA 转 BGR 失败: {e}"))?,
+        channels => return Err(format!("不支持的通道数: {channels}")),
+    }
+    Ok(bgr_mat)
 }
 
 /// 根据色键集合生成二值灰度图（命中为 255，未命中为 0）。
@@ -85,6 +99,198 @@ pub fn color_filter_impl(mat: &Mat, colors: &[u32], tolerance: u8) -> Result<Mat
         core::bitwise_or(&merged_mask, &single_mask, &mut next_mask, &Mat::default())
             .map_err(|e| format!("掩码合并失败: {e}"))?;
         merged_mask = next_mask;
+    }
+
+    Ok(merged_mask)
+}
+
+/// 使用 HSL 加权差进行颜色过滤并返回灰度二值图（命中为 255，未命中为 0）。
+///
+/// 容差计算公式：
+/// `abs(h1 - h2) + abs(s1 - s2) * 180 + abs(l1 - l2) * 75`
+pub fn color_filter_hsl_impl(mat: &Mat, colors: &[u32], tolerance: f64) -> Result<Mat, String> {
+    if mat.rows() <= 0 || mat.cols() <= 0 {
+        return Err("源图像尺寸无效".to_string());
+    }
+    if colors.is_empty() {
+        return Err("colors 不能为空".to_string());
+    }
+    if !tolerance.is_finite() || tolerance < 0.0 {
+        return Err("tolerance 必须是非负有限数".to_string());
+    }
+
+    let mut bgr_mat = Mat::default();
+    match mat.channels() {
+        1 => imgproc::cvt_color(mat, &mut bgr_mat, imgproc::COLOR_GRAY2BGR, 0)
+            .map_err(|e| format!("灰度图转 BGR 失败: {e}"))?,
+        3 => bgr_mat = mat.clone(),
+        4 => imgproc::cvt_color(mat, &mut bgr_mat, imgproc::COLOR_BGRA2BGR, 0)
+            .map_err(|e| format!("BGRA 转 BGR 失败: {e}"))?,
+        channels => return Err(format!("不支持的通道数: {channels}")),
+    }
+
+    let mask_expr = Mat::zeros(bgr_mat.rows(), bgr_mat.cols(), CV_8UC1)
+        .map_err(|e| format!("创建掩码失败: {e}"))?;
+    let mut merged_mask = mask_expr
+        .to_mat()
+        .map_err(|e| format!("初始化掩码失败: {e}"))?;
+
+    // 先将整图转为 HLS，避免逐像素调用 rgb_to_hsl 的高开销。
+    let mut hls_mat = Mat::default();
+    imgproc::cvt_color(&bgr_mat, &mut hls_mat, imgproc::COLOR_BGR2HLS, 0)
+        .map_err(|e| format!("BGR 转 HLS 失败: {e}"))?;
+
+    let target_hsl = colors
+        .iter()
+        .map(|color| {
+            let (h, s, l) = rgb_to_hsl(*color);
+            (
+                h.round().clamp(0.0, 360.0) as i32,
+                (s * 255.0).round().clamp(0.0, 255.0) as i32,
+                (l * 255.0).round().clamp(0.0, 255.0) as i32,
+            )
+        })
+        .collect::<Vec<_>>();
+
+    let target_hls_u8 = target_hsl
+        .iter()
+        .map(|(h, s, l)| (((h + 1) / 2).clamp(0, 180), *l, *s))
+        .collect::<Vec<_>>();
+
+    let pixel_count = (hls_mat.rows() * hls_mat.cols()) as usize;
+    let tolerance_scaled = (tolerance * 255.0).round().clamp(0.0, i32::MAX as f64) as i32;
+
+    // 先用 HLS 轴向范围做候选粗筛，减少后续精算像素数。
+    let delta_h_deg = (tolerance_scaled + 254) / 255;
+    let delta_h_ch = (delta_h_deg + 1) / 2;
+    let delta_s = (tolerance_scaled + 179) / 180;
+    let delta_l = (tolerance_scaled + 74) / 75;
+    let mut candidate_mask = Mat::zeros(hls_mat.rows(), hls_mat.cols(), CV_8UC1)
+        .map_err(|e| format!("创建候选掩码失败: {e}"))?
+        .to_mat()
+        .map_err(|e| format!("初始化候选掩码失败: {e}"))?;
+    let mut single_mask = Mat::default();
+
+    for (h_ch, l_u8, s_u8) in &target_hls_u8 {
+        let low_h = (h_ch - delta_h_ch).max(0);
+        let high_h = (h_ch + delta_h_ch).min(180);
+        let low_l = (l_u8 - delta_l).max(0);
+        let high_l = (l_u8 + delta_l).min(255);
+        let low_s = (s_u8 - delta_s).max(0);
+        let high_s = (s_u8 + delta_s).min(255);
+
+        // OpenCV HLS 通道顺序为 H, L, S
+        let lower = Scalar::new(low_h as f64, low_l as f64, low_s as f64, 0.0);
+        let upper = Scalar::new(high_h as f64, high_l as f64, high_s as f64, 255.0);
+        core::in_range(&hls_mat, &lower, &upper, &mut single_mask)
+            .map_err(|e| format!("HLS 粗筛 inRange 失败: {e}"))?;
+
+        let mut next_mask = Mat::default();
+        core::bitwise_or(
+            &candidate_mask,
+            &single_mask,
+            &mut next_mask,
+            &Mat::default(),
+        )
+        .map_err(|e| format!("合并候选掩码失败: {e}"))?;
+        candidate_mask = next_mask;
+    }
+
+    let hls_bytes = hls_mat
+        .data_bytes()
+        .map_err(|e| format!("读取 HLS 数据失败: {e}"))?;
+    let candidate_bytes = candidate_mask
+        .data_bytes()
+        .map_err(|e| format!("读取候选掩码失败: {e}"))?;
+    let mask_bytes = merged_mask
+        .data_bytes_mut()
+        .map_err(|e| format!("读取掩码数据失败: {e}"))?;
+
+    if hls_bytes.len() < pixel_count * 3
+        || candidate_bytes.len() < pixel_count
+        || mask_bytes.len() < pixel_count
+    {
+        return Err("图像内存布局异常，无法执行 HSL 过滤".to_string());
+    }
+
+    // 大图使用并行分块，显著降低逐像素 HSL 匹配耗时。
+    let worker_count = if pixel_count >= 200_000 {
+        thread::available_parallelism()
+            .map(|n| n.get())
+            .unwrap_or(1)
+            .min(8)
+    } else {
+        1
+    };
+
+    if worker_count <= 1 {
+        for idx in 0..pixel_count {
+            if candidate_bytes[idx] == 0 {
+                continue;
+            }
+            let base = idx * 3;
+            // OpenCV HLS 8U 通道顺序是 H, L, S；其中 H 范围 0-180，对应角度 0-360。
+            let h_deg = hls_bytes[base] as i32 * 2;
+            let l_u8 = hls_bytes[base + 1] as i32;
+            let s_u8 = hls_bytes[base + 2] as i32;
+
+            let mut is_match = false;
+            for (th, ts, tl) in &target_hsl {
+                // 采用整数缩放后的等价距离：
+                // dist_scaled = abs(h1-h2)*255 + abs(s1-s2)*180 + abs(l1-l2)*75
+                let distance_scaled =
+                    (h_deg - *th).abs() * 255 + (s_u8 - *ts).abs() * 180 + (l_u8 - *tl).abs() * 75;
+                if distance_scaled <= tolerance_scaled {
+                    is_match = true;
+                    break;
+                }
+            }
+
+            if is_match {
+                mask_bytes[idx] = 255;
+            }
+        }
+    } else {
+        let mut out = vec![0u8; pixel_count];
+        let chunk_size = pixel_count.div_ceil(worker_count);
+        let target_hsl_ref = &target_hsl;
+
+        thread::scope(|scope| {
+            for (chunk_idx, out_chunk) in out.chunks_mut(chunk_size).enumerate() {
+                let start = chunk_idx * chunk_size;
+                let end = start + out_chunk.len();
+                let hls_chunk = &hls_bytes[start * 3..end * 3];
+                let candidate_chunk = &candidate_bytes[start..end];
+                scope.spawn(move || {
+                    for (local_idx, out_px) in out_chunk.iter_mut().enumerate() {
+                        if candidate_chunk[local_idx] == 0 {
+                            continue;
+                        }
+                        let base = local_idx * 3;
+                        let h_deg = hls_chunk[base] as i32 * 2;
+                        let l_u8 = hls_chunk[base + 1] as i32;
+                        let s_u8 = hls_chunk[base + 2] as i32;
+
+                        let mut is_match = false;
+                        for (th, ts, tl) in target_hsl_ref {
+                            let distance_scaled = (h_deg - *th).abs() * 255
+                                + (s_u8 - *ts).abs() * 180
+                                + (l_u8 - *tl).abs() * 75;
+                            if distance_scaled <= tolerance_scaled {
+                                is_match = true;
+                                break;
+                            }
+                        }
+
+                        if is_match {
+                            *out_px = 255;
+                        }
+                    }
+                });
+            }
+        });
+
+        mask_bytes[..pixel_count].copy_from_slice(&out);
     }
 
     Ok(merged_mask)
@@ -806,4 +1012,128 @@ pub fn find_contours_impl(
     }
 
     Ok(_suppress_overlapping_contours(results))
+}
+
+/// 绘制轮廓并返回可视化图像。
+///
+/// 说明：
+/// 1. 为了保证输出可见彩色线条，返回图统一为 BGR 三通道；
+/// 2. 轮廓提取流程与 `find_contours_impl` 一致（灰度 + OTSU 二值化）；
+/// 3. 仅绘制面积 >= `min_area` 的轮廓。
+pub fn draw_contours_impl(
+    mat: &Mat,
+    mode: i32,
+    method: i32,
+    min_area: f64,
+    color: u32,
+    thickness: i32,
+) -> Result<Mat, String> {
+    if mat.rows() <= 0 || mat.cols() <= 0 {
+        return Err("源图像尺寸无效".to_string());
+    }
+
+    let gray = _to_gray_mat(mat)?;
+
+    let mut binary = Mat::default();
+    imgproc::threshold(
+        &gray,
+        &mut binary,
+        0.0,
+        255.0,
+        imgproc::THRESH_BINARY | imgproc::THRESH_OTSU,
+    )
+    .map_err(|e| format!("threshold 失败: {e}"))?;
+
+    let mut contours = core::Vector::<core::Vector<Point>>::new();
+    imgproc::find_contours_def(&binary, &mut contours, mode, method)
+        .map_err(|e| format!("find_contours 失败: {e}"))?;
+
+    let mut filtered = core::Vector::<core::Vector<Point>>::new();
+    for idx in 0..contours.len() {
+        let contour = contours
+            .get(idx)
+            .map_err(|e| format!("读取轮廓[{idx}] 失败: {e}"))?;
+        if contour.len() < 3 {
+            continue;
+        }
+        let area = imgproc::contour_area(&contour, false)
+            .map_err(|e| format!("计算轮廓[{idx}] 面积失败: {e}"))?;
+        if area < min_area {
+            continue;
+        }
+        filtered.push(contour);
+    }
+
+    let mut output = _to_bgr_mat(mat)?;
+
+    if filtered.is_empty() {
+        return Ok(output);
+    }
+
+    let (b, g, r) = rgb_to_bgr(color);
+    let draw_color = Scalar::new(b as f64, g as f64, r as f64, 0.0);
+    let draw_thickness = thickness.max(1);
+
+    imgproc::draw_contours(
+        &mut output,
+        &filtered,
+        -1,
+        draw_color,
+        draw_thickness,
+        imgproc::LINE_8,
+        &core::no_array(),
+        i32::MAX,
+        Point::new(0, 0),
+    )
+    .map_err(|e| format!("draw_contours 失败: {e}"))?;
+
+    Ok(output)
+}
+
+/// 按外接框数组直接绘制矩形轮廓并返回可视化图像。
+///
+/// 参数 `bboxes` 元素格式为 `(x, y, w, h)`。
+pub fn draw_bboxes_impl(
+    mat: &Mat,
+    bboxes: &[(i32, i32, i32, i32)],
+    color: u32,
+    thickness: i32,
+) -> Result<Mat, String> {
+    if mat.rows() <= 0 || mat.cols() <= 0 {
+        return Err("源图像尺寸无效".to_string());
+    }
+
+    let mut output = _to_bgr_mat(mat)?;
+    if bboxes.is_empty() {
+        return Ok(output);
+    }
+
+    let (b, g, r) = rgb_to_bgr(color);
+    let draw_color = Scalar::new(b as f64, g as f64, r as f64, 0.0);
+    let draw_thickness = thickness.max(1);
+    let cols = output.cols();
+    let rows = output.rows();
+
+    for (index, &(x, y, w, h)) in bboxes.iter().enumerate() {
+        if w <= 0 || h <= 0 {
+            continue;
+        }
+
+        // 对绘制区域做边界裁剪，避免非法矩形触发 OpenCV 异常。
+        let x0 = x.clamp(0, cols.saturating_sub(1));
+        let y0 = y.clamp(0, rows.saturating_sub(1));
+        let x1 = (x + w).clamp(0, cols);
+        let y1 = (y + h).clamp(0, rows);
+        let cw = x1 - x0;
+        let ch = y1 - y0;
+        if cw <= 0 || ch <= 0 {
+            continue;
+        }
+
+        let rect = core::Rect::new(x0, y0, cw, ch);
+        imgproc::rectangle(&mut output, rect, draw_color, draw_thickness, imgproc::LINE_8, 0)
+            .map_err(|e| format!("绘制 bbox[{index}] 失败: {e}"))?;
+    }
+
+    Ok(output)
 }
