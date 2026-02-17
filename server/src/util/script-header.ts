@@ -13,7 +13,7 @@ export function createScriptHeader(options: {
 // @author ${options.author || "anonymous"}
 // @version ${options.version || "1.0.0"}
 // @category ${options.category || "其他"}
-// @date ${new Date().toLocaleDateString()}
+// @date ${new Date().toLocaleString("zh-CN")}
 // ==/UserScript==
 
 `

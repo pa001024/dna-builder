@@ -231,7 +231,7 @@ export const resolvers = {
 
             return {
                 ...result,
-                content: sanitizeHTML(result.content),
+                content: result.content,
                 description: result.description ?? "",
                 views: result.views ?? 0,
                 likes: result.likes ?? 0,
