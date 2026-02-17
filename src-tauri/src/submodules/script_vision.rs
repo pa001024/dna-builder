@@ -16,6 +16,7 @@ use crate::submodules::{color::rgb_to_hsl, color_match::rgb_to_bgr, tpl_match::m
 
 pub type SiftLocateResult = (f64, f64, f64, f64, i32, i32, Vec<Point2f>);
 pub type ContourResult = (f64, core::Rect, (f64, f64));
+pub type BBoxResult = (i32, i32, i32, i32);
 
 /// 将图像统一转换为灰度图，便于后续匹配计算。
 fn _to_gray_mat(mat: &Mat) -> Result<Mat, String> {
@@ -49,6 +50,181 @@ fn _to_bgr_mat(mat: &Mat) -> Result<Mat, String> {
         channels => return Err(format!("不支持的通道数: {channels}")),
     }
     Ok(bgr_mat)
+}
+
+/// 选择“前景为白色”的二值图，便于后续按投影做字符分割。
+///
+/// 说明：
+/// 1. 同时计算 `THRESH_BINARY` 与 `THRESH_BINARY_INV`；
+/// 2. 优先选择白色像素更少的一侧，假设文本区域通常小于背景区域。
+fn _to_text_foreground_binary(gray: &Mat) -> Result<Mat, String> {
+    let mut binary = Mat::default();
+    imgproc::threshold(
+        gray,
+        &mut binary,
+        0.0,
+        255.0,
+        imgproc::THRESH_BINARY | imgproc::THRESH_OTSU,
+    )
+    .map_err(|e| format!("二值化(THRESH_BINARY)失败: {e}"))?;
+
+    let mut binary_inv = Mat::default();
+    imgproc::threshold(
+        gray,
+        &mut binary_inv,
+        0.0,
+        255.0,
+        imgproc::THRESH_BINARY_INV | imgproc::THRESH_OTSU,
+    )
+    .map_err(|e| format!("二值化(THRESH_BINARY_INV)失败: {e}"))?;
+
+    let white_binary = core::count_non_zero(&binary)
+        .map_err(|e| format!("统计白色像素(THRESH_BINARY)失败: {e}"))?;
+    let white_binary_inv = core::count_non_zero(&binary_inv)
+        .map_err(|e| format!("统计白色像素(THRESH_BINARY_INV)失败: {e}"))?;
+
+    if white_binary_inv <= white_binary {
+        Ok(binary_inv)
+    } else {
+        Ok(binary)
+    }
+}
+
+/// 基于横向空隙（列投影）对单行文本做字符分割，返回从左到右的 bbox 列表。
+///
+/// # 参数
+/// - `mat`: 输入图像（建议灰度图；若非灰度会自动转换）。
+/// - `min_gap_width`: 最小分割空隙宽度（像素列）。
+/// - `min_char_width`: 最小字符宽度（像素）。
+///
+/// # 返回
+/// - `Vec<(x, y, w, h)>`: 字符外接框列表，按 x 升序排列。
+pub fn segment_single_line_chars_impl(
+    mat: &Mat,
+    min_gap_width: i32,
+    min_char_width: i32,
+) -> Result<Vec<BBoxResult>, String> {
+    if mat.rows() <= 0 || mat.cols() <= 0 {
+        return Err("源图像尺寸无效".to_string());
+    }
+
+    let gray = _to_gray_mat(mat)?;
+    let binary = _to_text_foreground_binary(&gray)?;
+
+    let rows = binary.rows();
+    let cols = binary.cols();
+    let mut row_projection = vec![0i32; rows as usize];
+    for y in 0..rows {
+        let mut count = 0i32;
+        for x in 0..cols {
+            let value = *binary
+                .at_2d::<u8>(y, x)
+                .map_err(|e| format!("读取像素失败[{x},{y}]: {e}"))?;
+            if value > 0 {
+                count += 1;
+            }
+        }
+        row_projection[y as usize] = count;
+    }
+
+    let line_top = row_projection
+        .iter()
+        .position(|&v| v > 0)
+        .map(|idx| idx as i32);
+    let line_bottom = row_projection
+        .iter()
+        .rposition(|&v| v > 0)
+        .map(|idx| idx as i32);
+    let (line_top, line_bottom) = match (line_top, line_bottom) {
+        (Some(top), Some(bottom)) if bottom >= top => (top, bottom),
+        _ => return Ok(Vec::new()),
+    };
+
+    let mut col_projection = vec![0i32; cols as usize];
+    for x in 0..cols {
+        let mut count = 0i32;
+        for y in line_top..=line_bottom {
+            let value = *binary
+                .at_2d::<u8>(y, x)
+                .map_err(|e| format!("读取像素失败[{x},{y}]: {e}"))?;
+            if value > 0 {
+                count += 1;
+            }
+        }
+        col_projection[x as usize] = count;
+    }
+
+    // 先提取原始字符段（连续非空列），再按最小空隙宽度做合并。
+    let mut raw_spans: Vec<(i32, i32)> = Vec::new();
+    let mut x = 0i32;
+    while x < cols {
+        while x < cols && col_projection[x as usize] == 0 {
+            x += 1;
+        }
+        if x >= cols {
+            break;
+        }
+        let start = x;
+        while x < cols && col_projection[x as usize] > 0 {
+            x += 1;
+        }
+        raw_spans.push((start, x - 1));
+    }
+
+    if raw_spans.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let min_gap_width = min_gap_width.max(1);
+    let mut merged_spans: Vec<(i32, i32)> = Vec::with_capacity(raw_spans.len());
+    for (start, end) in raw_spans {
+        if let Some(last) = merged_spans.last_mut() {
+            let gap = start - last.1 - 1;
+            if gap < min_gap_width {
+                last.1 = end;
+                continue;
+            }
+        }
+        merged_spans.push((start, end));
+    }
+
+    let min_char_width = min_char_width.max(1);
+    let mut bboxes: Vec<BBoxResult> = Vec::with_capacity(merged_spans.len());
+    for (start_x, end_x) in merged_spans {
+        let width = end_x - start_x + 1;
+        if width < min_char_width {
+            continue;
+        }
+
+        let mut top = line_bottom;
+        let mut bottom = line_top;
+        let mut has_foreground = false;
+        for y in line_top..=line_bottom {
+            let mut row_has_foreground = false;
+            for x in start_x..=end_x {
+                let value = *binary
+                    .at_2d::<u8>(y, x)
+                    .map_err(|e| format!("读取像素失败[{x},{y}]: {e}"))?;
+                if value > 0 {
+                    row_has_foreground = true;
+                    has_foreground = true;
+                    break;
+                }
+            }
+            if row_has_foreground {
+                top = top.min(y);
+                bottom = bottom.max(y);
+            }
+        }
+
+        if !has_foreground || bottom < top {
+            continue;
+        }
+
+        bboxes.push((start_x, top, width, bottom - top + 1));
+    }
+
+    Ok(bboxes)
 }
 
 /// 根据色键集合生成二值灰度图（命中为 255，未命中为 0）。
@@ -603,6 +779,172 @@ pub fn perceptual_hash_impl(mat: &Mat, color: bool) -> Result<String, String> {
         let hash = _phash_gray_64(&gray)?;
         Ok(format!("{hash:016x}"))
     }
+}
+
+/// 计算灰度图像的 ORB 聚合签名（256 bit）。
+///
+/// 签名构造方式：
+/// 1. 提取 ORB 描述子（每个描述子 32 字节，共 256 bit）；
+/// 2. 对每个 bit 位统计所有描述子中 1 的出现次数；
+/// 3. 使用多数投票（`ones > rows/2`）得到最终 bit；
+/// 4. 拼成固定 32 字节签名。
+///
+/// 说明：
+/// - 对于高度较小的图（例如时间条、UI 片段），默认 ORB 可能检测不到关键点；
+/// - 这里会尝试原图、放大图、均衡化图等候选输入，尽量减少“全 0 哈希”。
+fn _detect_orb_descriptors(gray: &Mat) -> Result<Mat, String> {
+    if gray.rows() <= 0 || gray.cols() <= 0 {
+        return Err("源图像尺寸无效".to_string());
+    }
+
+    let mut candidates: Vec<Mat> = vec![gray.clone()];
+    let short_side = gray.rows().min(gray.cols());
+
+    // 小图先放大，避免 ORB 默认参数在短边图像上取不到关键点。
+    if short_side < 96 {
+        let scale = 128.0 / short_side as f64;
+        let target_w = ((gray.cols() as f64) * scale).round().max(1.0) as i32;
+        let target_h = ((gray.rows() as f64) * scale).round().max(1.0) as i32;
+        let mut resized = Mat::default();
+        imgproc::resize(
+            gray,
+            &mut resized,
+            Size::new(target_w, target_h),
+            0.0,
+            0.0,
+            imgproc::INTER_LINEAR,
+        )
+        .map_err(|e| format!("ORB 小图放大失败: {e}"))?;
+        candidates.push(resized);
+    }
+
+    // 加入均衡化候选，提升低对比度图像的可检测性。
+    let mut eq_gray = Mat::default();
+    imgproc::equalize_hist(gray, &mut eq_gray).map_err(|e| format!("ORB 直方图均衡失败: {e}"))?;
+    candidates.push(eq_gray);
+
+    if short_side < 96 {
+        let mut eq_resized = Mat::default();
+        imgproc::equalize_hist(
+            candidates
+                .get(1)
+                .ok_or_else(|| "ORB 候选图像构建失败".to_string())?,
+            &mut eq_resized,
+        )
+        .map_err(|e| format!("ORB 放大图均衡失败: {e}"))?;
+        candidates.push(eq_resized);
+    }
+
+    for candidate in &candidates {
+        let mut orb = features2d::ORB::create_def().map_err(|e| format!("创建 ORB 检测器失败: {e}"))?;
+        let mut keypoints = core::Vector::<core::KeyPoint>::new();
+        let mut descriptors = Mat::default();
+        orb.detect_and_compute(
+            candidate,
+            &Mat::default(),
+            &mut keypoints,
+            &mut descriptors,
+            false,
+        )
+        .map_err(|e| format!("计算 ORB 描述子失败: {e}"))?;
+
+        if !descriptors.empty() {
+            return Ok(descriptors);
+        }
+    }
+
+    Ok(Mat::default())
+}
+
+fn _orb_signature_256(gray: &Mat) -> Result<[u8; 32], String> {
+    let descriptors = _detect_orb_descriptors(gray)?;
+
+    if descriptors.empty() {
+        return Ok([0u8; 32]);
+    }
+
+    if descriptors.cols() != 32 {
+        return Err(format!(
+            "ORB 描述子长度异常，期望 32 字节，实际 {}",
+            descriptors.cols()
+        ));
+    }
+
+    let rows = descriptors.rows();
+    if rows <= 0 {
+        return Ok([0u8; 32]);
+    }
+
+    let mut bit_votes = [0i32; 256];
+    for row in 0..rows {
+        for col in 0..32 {
+            let byte = *descriptors
+                .at_2d::<u8>(row, col)
+                .map_err(|e| format!("读取 ORB 描述子失败[{row},{col}]: {e}"))?;
+            for bit in 0..8 {
+                if ((byte >> bit) & 1) == 1 {
+                    bit_votes[col as usize * 8 + bit as usize] += 1;
+                }
+            }
+        }
+    }
+
+    let mut signature = [0u8; 32];
+    for bit_index in 0..256usize {
+        if bit_votes[bit_index] > rows / 2 {
+            signature[bit_index / 8] |= 1u8 << (bit_index % 8);
+        }
+    }
+    Ok(signature)
+}
+
+/// 计算图像 ORB 特征哈希（固定 64 位十六进制字符串）。
+pub fn orb_feature_hash_impl(mat: &Mat) -> Result<String, String> {
+    if mat.rows() <= 0 || mat.cols() <= 0 {
+        return Err("源图像尺寸无效".to_string());
+    }
+
+    let gray = _to_gray_mat(mat)?;
+    let signature = _orb_signature_256(&gray)?;
+    let mut hash = String::with_capacity(64);
+    for byte in signature {
+        hash.push_str(&format!("{byte:02x}"));
+    }
+    Ok(hash)
+}
+
+/// 比较 ORB 哈希与模板数组，返回最佳匹配索引或 -1。
+pub fn match_orb_hash_impl(
+    source_hash: &str,
+    template_hashes: &[String],
+    max_distance: u32,
+) -> Result<i32, String> {
+    let source_hash = normalize_hash_hex(source_hash)?;
+    if source_hash.len() != 64 {
+        return Err(format!(
+            "ORB 哈希长度必须为 64 个十六进制字符，实际 {}",
+            source_hash.len()
+        ));
+    }
+
+    let mut best_index: i32 = -1;
+    let mut best_distance = u32::MAX;
+    for (index, template_hash) in template_hashes.iter().enumerate() {
+        let normalized = normalize_hash_hex(template_hash)?;
+        if normalized.len() != source_hash.len() {
+            continue;
+        }
+        let distance = hamming_distance_hex(&source_hash, &normalized)?;
+        if distance <= max_distance && distance < best_distance {
+            best_distance = distance;
+            best_index = index as i32;
+            if distance == 0 {
+                break;
+            }
+        }
+    }
+
+    Ok(best_index)
 }
 
 /// 计算 ORB 优质匹配数量（Lowe Ratio Test）。

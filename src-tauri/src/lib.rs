@@ -1970,44 +1970,19 @@ mod submodules;
 
 #[tauri::command]
 async fn run_script(script_path: String, app_handle: tauri::AppHandle) -> Result<String, String> {
-    use std::env;
-    use std::path::PathBuf;
-    use submodules::script::run_script_with_tauri_console;
-
-    // 步骤1：将字符串路径转换为 PathBuf（Rust 推荐的路径类型，支持跨平台）
-    let script_path_buf = PathBuf::from(script_path.clone());
-
-    // 步骤2：从脚本路径中提取其所在的目录（父目录）
-    let script_dir = match script_path_buf.parent() {
-        Some(dir) => dir, // 成功提取父目录（脚本所在目录）
-        None => {
-            // 错误：无法提取父目录（比如 script_path 是根路径、空路径或无效路径）
-            return Err(format!("无法提取脚本所在目录：{}", script_path));
-        }
-    };
-
-    // 步骤3：验证脚本目录是否存在（避免切换到不存在的目录）
-    if !script_dir.exists() || !script_dir.is_dir() {
-        return Err(format!(
-            "脚本所在目录不存在或不是有效目录：{}",
-            script_dir.display()
-        ));
-    }
-
-    // 步骤4：切换工作目录到脚本所在目录
-    if let Err(e) = env::set_current_dir(script_dir) {
-        return Err(format!(
-            "切换工作目录失败：{}，错误信息：{:?}",
-            script_dir.display(),
-            e
-        ));
-    }
-
-    // 步骤5：执行原有脚本逻辑（此时工作目录已为脚本所在目录，相对路径基于该目录）
-    match run_script_with_tauri_console(script_path.clone(), app_handle).await {
-        Ok(_) => Ok(format!("脚本执行成功: {}", script_path)),
+    use submodules::script::run_script_file;
+    match run_script_file(script_path, app_handle).await {
+        Ok(result) => Ok(result),
         Err(e) => Err(format!("脚本执行失败: {}", e)),
     }
+}
+
+/// 响应脚本 readConfig 请求，将前端当前值回传给脚本运行时。
+#[tauri::command]
+fn resolve_script_config_request(request_id: String, value: serde_json::Value) -> Result<String, String> {
+    use submodules::script_builtin::resolve_script_config_request;
+    resolve_script_config_request(request_id, value)?;
+    Ok("配置请求已响应".to_string())
 }
 
 #[tauri::command]
@@ -2017,6 +1992,65 @@ fn stop_script() -> Result<String, String> {
         Ok(_) => Ok("脚本已停止".to_string()),
         Err(e) => Err(format!("停止脚本失败: {:?}", e)),
     }
+}
+
+/// 停止指定脚本路径对应的运行实例。
+#[tauri::command]
+fn stop_script_by_path(script_path: String) -> Result<String, String> {
+    use submodules::script::stop_script_by_path;
+    match stop_script_by_path(script_path) {
+        Ok(_) => Ok("脚本停止请求已发送".to_string()),
+        Err(e) => Err(format!("停止脚本失败: {:?}", e)),
+    }
+}
+
+/// 获取当前脚本运行状态，供前端刷新后恢复停止能力。
+#[tauri::command]
+fn get_script_running_state() -> Result<bool, String> {
+    use submodules::script::is_script_running;
+    Ok(is_script_running())
+}
+
+/// 脚本运行信息。
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ScriptRuntimeInfo {
+    /// 是否存在运行中的脚本
+    running: bool,
+    /// 正在运行的脚本路径列表（去重）
+    script_paths: Vec<String>,
+    /// 运行实例总数（同一路径并行会累计）
+    running_count: usize,
+}
+
+/// 获取当前脚本运行信息（运行状态 + 正在执行脚本列表）。
+#[tauri::command]
+fn get_script_runtime_info() -> Result<ScriptRuntimeInfo, String> {
+    use submodules::script::get_script_runtime_info;
+    let (running, script_paths, running_count) = get_script_runtime_info();
+    Ok(ScriptRuntimeInfo {
+        running,
+        script_paths,
+        running_count,
+    })
+}
+
+/// 同步脚本热键绑定到后端（AHK 风格，如 ^c）。
+#[tauri::command]
+fn sync_script_hotkey_bindings(
+    bindings: Vec<submodules::hotkey::ScriptHotkeyBinding>,
+    app_handle: tauri::AppHandle,
+) -> Result<String, String> {
+    use submodules::hotkey::sync_script_hotkey_bindings;
+    sync_script_hotkey_bindings(app_handle, bindings)?;
+    Ok("热键绑定已同步".to_string())
+}
+
+/// 获取后端当前生效的热键绑定。
+#[tauri::command]
+fn get_script_hotkey_bindings() -> Result<Vec<submodules::hotkey::ScriptHotkeyBinding>, String> {
+    use submodules::hotkey::get_script_hotkey_bindings;
+    Ok(get_script_hotkey_bindings())
 }
 
 /// 监听文件变化
@@ -2232,7 +2266,13 @@ pub fn run() {
         get_file_size,
         cleanup_temp_dir,
         run_script,
+        resolve_script_config_request,
         stop_script,
+        stop_script_by_path,
+        get_script_running_state,
+        get_script_runtime_info,
+        sync_script_hotkey_bindings,
+        get_script_hotkey_bindings,
         get_documents_dir,
         rename_file,
         delete_file,

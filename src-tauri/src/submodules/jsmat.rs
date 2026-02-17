@@ -2,7 +2,7 @@ use crate::submodules::color::rgb_to_hsl;
 use boa_engine::{
     Context, Finalize, JsData, JsNativeError, JsObject, JsResult, JsValue, Trace,
     class::{Class, ClassBuilder},
-    js_error, js_string, js_value,
+    js_string, js_value,
     native_function::NativeFunction,
 };
 use opencv::{
@@ -17,6 +17,42 @@ pub struct JsMat {
     #[unsafe_ignore_trace]
     pub(crate) inner: Box<opencv::core::Mat>,
 }
+
+/// 读取 Mat 中指定位置的 BGR 像素。
+///
+/// 失败场景会直接抛出 JS 异常：
+/// - 坐标越界；
+/// - Mat 不是 3 通道（BGR）；
+/// - OpenCV 底层读取失败。
+fn _read_bgr_pixel(js_mat: &JsMat, row: i32, col: i32) -> JsResult<core::Vec3b> {
+    let rows = js_mat.inner.rows();
+    let cols = js_mat.inner.cols();
+    if row < 0 || col < 0 || row >= rows || col >= cols {
+        return Err(
+            JsNativeError::typ()
+                .with_message(format!(
+                    "Pixel index out of range: row={row}, col={col}, rows={rows}, cols={cols}"
+                ))
+                .into(),
+        );
+    }
+
+    let channels = js_mat.inner.channels();
+    if channels != 3 {
+        return Err(
+            JsNativeError::typ()
+                .with_message(format!("Mat must be 3-channel BGR, but got {channels} channels"))
+                .into(),
+        );
+    }
+
+    js_mat.inner.at_2d::<core::Vec3b>(row, col).map(|v| *v).map_err(|err| {
+        JsNativeError::typ()
+            .with_message(format!("Failed to get pixel at row={row}, col={col}: {err}"))
+            .into()
+    })
+}
+
 impl Class for JsMat {
     // 绑定到 JS 中的类名
     const NAME: &'static str = "Mat";
@@ -231,10 +267,8 @@ impl Class for JsMat {
                     JsNativeError::typ().with_message("Column index must be a number")
                 })? as i32;
 
-                match js_mat.inner.at_2d::<core::Vec3b>(row, col) {
-                    Ok(value) => Ok(js_value!([value[0], value[1], value[2]], ctx)),
-                    Err(err) => Err(js_error!("Failed to get pixel : {}", err)),
-                }
+                let value = _read_bgr_pixel(&js_mat, row, col)?;
+                Ok(js_value!([value[0], value[1], value[2]], ctx))
             }),
         );
         class.method(
@@ -244,7 +278,7 @@ impl Class for JsMat {
                 // 检查参数数量
                 if args.len() != 2 {
                     return Err(JsNativeError::typ()
-                        .with_message("at_2d expects 2 arguments")
+                        .with_message("get_rgb expects 2 arguments")
                         .into());
                 }
 
@@ -262,13 +296,11 @@ impl Class for JsMat {
                     JsNativeError::typ().with_message("Column index must be a number")
                 })? as i32;
 
-                match js_mat.inner.at_2d::<core::Vec3b>(row, col) {
-                    Ok(value) => Ok(js_value!(
-                        (value[2] as u32) << 16 | (value[1] as u32) << 8 | value[0] as u32,
-                        ctx
-                    )),
-                    Err(err) => Err(js_error!("Failed to get pixel : {}", err)),
-                }
+                let value = _read_bgr_pixel(&js_mat, row, col)?;
+                Ok(js_value!(
+                    (value[2] as u32) << 16 | (value[1] as u32) << 8 | value[0] as u32,
+                    ctx
+                ))
             }),
         );
         class.method(
@@ -296,16 +328,41 @@ impl Class for JsMat {
                     JsNativeError::typ().with_message("Column index must be a number")
                 })? as i32;
 
-                match js_mat.inner.at_2d::<core::Vec3b>(row, col) {
-                    Ok(value) => {
-                        // 提取 RGB 值并转换为 HSL
-                        let rgb =
-                            (value[2] as u32) << 16 | (value[1] as u32) << 8 | value[0] as u32;
-                        let (hue, saturation, luminance) = rgb_to_hsl(rgb);
-                        Ok(js_value!([hue, saturation, luminance], ctx))
-                    }
-                    Err(err) => Err(js_error!("Failed to get pixel : {}", err)),
+                let value = _read_bgr_pixel(&js_mat, row, col)?;
+                // 提取 RGB 值并转换为 HSL
+                let rgb = (value[2] as u32) << 16 | (value[1] as u32) << 8 | value[0] as u32;
+                let (hue, saturation, luminance) = rgb_to_hsl(rgb);
+                Ok(js_value!([hue, saturation, luminance], ctx))
+            }),
+        );
+        class.method(
+            js_string!("get_rgb_str"),
+            2,
+            NativeFunction::from_fn_ptr(|this, args, ctx| {
+                // 检查参数数量
+                if args.len() != 2 {
+                    return Err(JsNativeError::typ()
+                        .with_message("get_rgb_str expects 2 arguments")
+                        .into());
                 }
+
+                // 获取 Rust 对象引用
+                let binding = this.as_object().unwrap();
+                let js_mat = binding
+                    .downcast_ref::<JsMat>()
+                    .ok_or_else(|| JsNativeError::typ().with_message("Object is not a Mat"))?;
+                // 提取参数（与 get_rgb 保持一致：args[0]=x(col), args[1]=y(row)）
+                let row = args[1]
+                    .to_number(ctx)
+                    .map_err(|_e| JsNativeError::typ().with_message("Row index must be a number"))?
+                    as i32;
+                let col = args[0].to_number(ctx).map_err(|_e| {
+                    JsNativeError::typ().with_message("Column index must be a number")
+                })? as i32;
+
+                let value = _read_bgr_pixel(&js_mat, row, col)?;
+                let hex = format!("#{:02X}{:02X}{:02X}", value[2], value[1], value[0]);
+                Ok(JsValue::from(js_string!(hex)))
             }),
         );
         class.method(

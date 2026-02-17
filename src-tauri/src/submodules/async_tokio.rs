@@ -98,8 +98,7 @@ impl JobExecutor for TokioJobExecutor {
 
     // ...the async flavor won't, which allows concurrent execution with external async tasks.
     async fn run_jobs_async(self: Rc<Self>, context: &RefCell<&mut Context>) -> JsResult<()> {
-        use crate::submodules::script::SCRIPT_STOPED;
-        use std::sync::atomic::Ordering;
+        use crate::submodules::script::should_stop_current_script;
         let mut group = FutureGroup::new();
         loop {
             for job in std::mem::take(&mut *self.async_jobs.borrow_mut()) {
@@ -110,7 +109,7 @@ impl JobExecutor for TokioJobExecutor {
                 && self.promise_jobs.borrow().is_empty()
                 && self.timeout_jobs.borrow().is_empty()
                 && self.generic_jobs.borrow().is_empty()
-                || SCRIPT_STOPED.load(Ordering::Acquire)
+                || should_stop_current_script()
             {
                 // All queues are empty. We can exit.
                 return Ok(());

@@ -1,6 +1,5 @@
-import type { Buff, Char, Draft, Dungeon, Mod, Reward, RewardChild, Weapon, WeaponBase } from "../data-types"
+import type { Buff, Char, Draft, Dungeon, Mod, Reward, RewardChild, Weapon } from "../data-types"
 import { type AbyssBuff, type AbyssDungeon, abyssBuffs, abyssDungeons } from "./abyss.data"
-import baseData from "./base.data"
 import buffData from "./buff.data"
 import charData from "./char.data"
 import draftData from "./draft.data"
@@ -46,16 +45,6 @@ export const weaponNameMap = new Map<string, Weapon>()
 weaponData.forEach(weapon => {
     weaponMap.set(weapon.id, weapon as Weapon)
     weaponNameMap.set(weapon.名称, weapon as Weapon)
-})
-
-// 将base数据转换为Map，用于快速查找武器倍率信息
-export const baseMap = new Map<string, WeaponBase[]>()
-
-baseData.forEach((base: any) => {
-    if (!baseMap.has(base.武器类型)) {
-        baseMap.set(base.武器类型, [])
-    }
-    baseMap.get(base.武器类型)!.push(base as WeaponBase)
 })
 
 export const rewardMap = new Map<number, Reward>()

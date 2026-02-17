@@ -345,6 +345,45 @@ pnpm test src/data/tests/CharBuild.test.ts
 pnpm coverage
 ```
 
+## MCP 服务（npx 直连 stdio）
+
+`src/data` 子包提供了可直接通过 `npx` 启动的 MCP stdio 服务器，包含两个核心能力：
+
+1. 本地数据查询：在 `d/*.data.ts` 中用 `fuse.js` 执行模糊搜索
+2. 在线数据查询：连接 GraphQL 后端查询实时密函（missionsIngame）
+
+本地数据工具设计参考 Context7 的两步流程：
+
+1. `resolve-data-module`：先解析本地模块（返回 `/local/<dataset>`）
+2. `query-data-module`：再基于 `moduleId` 做单模块查询（支持 `fields` 字段白名单降噪）
+
+密函查询为独立工具：
+
+1. `query-missions`：默认查询 `missionsIngame(server: "cn")`
+2. 返回结果将二维数组转换为结构化字段：`角色` / `武器` / `魔之楔`
+
+### 发布后启动示例
+
+```bash
+npx -y dna-builder-data
+```
+
+### 配置 GraphQL 端点
+
+默认端点：`https://api.dna-builder.cn/graphql`
+
+可通过环境变量覆盖：
+
+```bash
+DNA_MCP_GRAPHQL_ENDPOINT=http://127.0.0.1:8887/graphql npx -y dna-builder-data
+```
+
+也可通过命令行参数覆盖：
+
+```bash
+npx -y dna-builder-data --graphql-endpoint http://127.0.0.1:8887/graphql
+```
+
 ## 注意事项
 
 1. **等级系统**：所有带等级的对象都使用 `CommonLevelUp` 数组计算属性倍率

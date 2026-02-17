@@ -167,10 +167,20 @@ export async function unwatchFile(filePath: string) {
 /**
  * 运行指定的脚本文件
  * @param filePath 脚本文件路径
- * @returns 成功消息
+ * @returns 脚本返回值字符串（无返回值时为空字符串）
  */
 export async function runScript(scriptPath: string) {
     return await invoke<string>("run_script", { scriptPath })
+}
+
+/**
+ * 响应脚本配置读取请求
+ * @param requestId 请求 ID
+ * @param value 配置值（string/number/boolean/string[]）
+ * @returns 成功消息
+ */
+export async function resolveScriptConfigRequest(requestId: string, value: string | number | boolean | string[]) {
+    return await invoke<string>("resolve_script_config_request", { requestId, value })
 }
 
 /**
@@ -179,6 +189,65 @@ export async function runScript(scriptPath: string) {
  */
 export async function stopScript() {
     return await invoke<string>("stop_script")
+}
+
+/**
+ * 停止指定脚本路径对应的运行实例。
+ * @param scriptPath 脚本完整路径
+ * @returns 成功消息
+ */
+export async function stopScriptByPath(scriptPath: string) {
+    return await invoke<string>("stop_script_by_path", { scriptPath })
+}
+
+/**
+ * 获取脚本运行状态（用于页面刷新后恢复运行态显示）。
+ * @returns 是否存在正在运行的脚本
+ */
+export async function getScriptRunningState() {
+    return await invoke<boolean>("get_script_running_state")
+}
+
+/**
+ * 脚本运行信息。
+ */
+export interface ScriptRuntimeInfo {
+    running: boolean
+    scriptPaths: string[]
+    runningCount: number
+}
+
+/**
+ * 脚本热键绑定。
+ */
+export interface ScriptHotkeyBinding {
+    scriptPath: string
+    hotkey: string
+}
+
+/**
+ * 获取脚本运行信息（用于页面刷新后恢复运行脚本上下文）。
+ * @returns 脚本运行信息
+ */
+export async function getScriptRuntimeInfo() {
+    return await invoke<ScriptRuntimeInfo>("get_script_runtime_info")
+}
+
+/**
+ * 同步脚本热键绑定。
+ * @param bindings 完整绑定列表（会覆盖后端当前配置）
+ * @returns 成功消息
+ */
+export async function syncScriptHotkeyBindings(bindings: ScriptHotkeyBinding[]) {
+    return await invoke<string>("sync_script_hotkey_bindings", { bindings })
+}
+
+/**
+ * 读取后端当前已生效的热键绑定。
+ * @returns 热键绑定列表
+ */
+export async function getScriptHotkeyBindings() {
+    return await invoke<ScriptHotkeyBinding[]>("get_script_hotkey_bindings")
 }
 
 /**

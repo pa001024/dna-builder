@@ -1,4 +1,4 @@
-import { modMap } from "."
+import modData from "./mod.data"
 import { walnutMap } from "./walnut.data"
 
 export interface Shop {
@@ -18673,6 +18673,7 @@ export const shopData: Shop[] = imprShopData.concat([
 export const modShopSourceMap = new Map<number, { shop: string; cost: string; n: number; t: "Walnut" | "Mod" }>()
 export const weaponShopSourceMap = new Map<number, { shop: string; cost: string; n: number; t: "Walnut" | "Mod" }>()
 export const draftShopSourceMap = new Map<number, { shop: string; cost: string; n: number; t: "Walnut" | "Draft" }>()
+const modIdSet = new Set(modData.map(mod => mod.id))
 
 shopData.forEach(shop => {
     shop.mainTabs.forEach(mt => {
@@ -18688,7 +18689,7 @@ shopData.forEach(shop => {
                         } else if (reward.type === "Weapon") {
                             weaponShopSourceMap.set(reward.id, { shop, cost: i.priceName, n: i.price, t: "Walnut" })
                         }
-                    } else if (modMap.has(i.typeId)) {
+                    } else if (modIdSet.has(i.typeId)) {
                         modShopSourceMap.set(i.typeId, { shop, cost: i.priceName, n: i.price, t: "Mod" })
                     }
                 } else if (i.itemType === "Draft") {

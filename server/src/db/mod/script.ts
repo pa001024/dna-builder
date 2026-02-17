@@ -1,7 +1,6 @@
 import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
 import { and, desc, eq, like, sql } from "drizzle-orm"
 import { createGraphQLError } from "graphql-yoga"
-import { sanitizeHTML } from "../../util/html"
 import { replaceScriptHeader } from "../../util/script-header"
 import { db, schema } from ".."
 import type { Context } from "../yoga"

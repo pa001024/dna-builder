@@ -147,7 +147,6 @@ describe("模块使用场景测试", () => {
         expect(moduleExports.weaponData).toBeDefined()
         expect(moduleExports.buffData).toBeDefined()
         expect(moduleExports.achievementData).toBeDefined()
-        expect(moduleExports.baseData).toBeDefined()
         expect(moduleExports.monsterData).toBeDefined()
         expect(moduleExports.effectData).toBeDefined()
     })

@@ -3,6 +3,7 @@ pub mod color;
 pub mod color_match;
 pub mod d3d11;
 pub mod fx;
+pub mod hotkey;
 pub mod input;
 pub mod jsmat;
 pub mod jstimer;

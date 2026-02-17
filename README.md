@@ -223,6 +223,33 @@ const cb = new CharBuild(options)
 const damage = cb.calculate()
 ```
 
+### MCP（npx stdio）
+
+`dna-builder-data` 也提供可通过 `npx` 直接启动的 MCP stdio 服务（参考 Context7 的两步查询流程）。
+
+```bash
+npx -y dna-builder-data
+```
+
+可选：覆盖在线查询使用的 GraphQL 端点（默认 `https://api.dna-builder.cn/graphql`）：
+
+```bash
+DNA_MCP_GRAPHQL_ENDPOINT=http://127.0.0.1:8887/graphql npx -y dna-builder-data
+# 或
+npx -y dna-builder-data --graphql-endpoint http://127.0.0.1:8887/graphql
+```
+
+主要工具：
+
+1. `resolve-data-module`：先把关键词解析为本地模块 ID（如 `/local/char`）
+2. `query-data-module`：在本地单模块内查询，支持 `fields`、`exactId`、`threshold` 等参数降噪
+3. `query-missions`：独立查询实时密函，默认请求 `missionsIngame(server: "cn")`
+
+能力范围：
+
+- 本地数据查询：查询 `src/data/d/*.data.ts`，并针对 `reward` / `dungeon` / `abyss` 做业务解压
+- 在线数据查询：连接项目 GraphQL 后端，查询实时密函（`missionsIngame`），并转换为 `角色/武器/魔之楔` 结构化字段
+
 ## 支持作者
 
 如果这个项目对你有帮助，欢迎支持：

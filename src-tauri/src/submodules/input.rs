@@ -1,5 +1,7 @@
 use windows::Win32::{
-    Foundation::{HWND, LPARAM, WPARAM},
+    Foundation::{HWND, LPARAM, POINT, WPARAM},
+    Graphics::Gdi::{ClientToScreen, ScreenToClient},
+    System::Threading::{AttachThreadInput, GetCurrentThreadId},
     UI::{Input::KeyboardAndMouse::*, WindowsAndMessaging::*},
 };
 #[allow(unused)]
@@ -287,6 +289,153 @@ pub fn wheel(delta: i32) {
     sleep(1);
 }
 
+/// 将客户端坐标打包为鼠标消息 `lParam`。
+///
+/// Windows 要求坐标按 16 位有符号数写入低/高位，这里显式按 `i16` 截断，
+/// 以避免直接位运算时的符号扩展影响。
+fn make_mouse_lparam(x: i32, y: i32) -> LPARAM {
+    let x_word = x as i16 as u16 as isize;
+    let y_word = y as i16 as u16 as isize;
+    LPARAM((y_word << 16) | x_word)
+}
+
+/// 根据父窗口与客户端坐标解析实际接收鼠标消息的目标窗口。
+///
+/// 优先尝试命中坐标所在的子窗口（类似 AHK ControlClick 的 control 语义），
+/// 命中后会把坐标从父窗口坐标系转换到子窗口坐标系；失败时回退到原窗口。
+fn resolve_mouse_target_window(hwnd: HWND, x: i32, y: i32) -> (HWND, i32, i32) {
+    let mut point = POINT { x, y };
+    unsafe {
+        let child = ChildWindowFromPointEx(
+            hwnd,
+            point,
+            CWP_SKIPDISABLED | CWP_SKIPINVISIBLE | CWP_SKIPTRANSPARENT,
+        );
+        if !child.is_invalid() && child != hwnd {
+            let _ = ClientToScreen(hwnd, &mut point);
+            let _ = ScreenToClient(child, &mut point);
+            return (child, point.x, point.y);
+        }
+    }
+    (hwnd, x, y)
+}
+
+/// 判断虚拟键是否属于扩展键（用于构造键盘消息 lParam 的扩展位）。
+fn is_extended_vkey(vkey: u16) -> bool {
+    matches!(
+        vkey,
+        0xA5 // VK_RMENU
+            | 0xA3 // VK_RCONTROL
+            | 0x2D // VK_INSERT
+            | 0x2E // VK_DELETE
+            | 0x24 // VK_HOME
+            | 0x23 // VK_END
+            | 0x21 // VK_PRIOR
+            | 0x22 // VK_NEXT
+            | 0x25 // VK_LEFT
+            | 0x27 // VK_RIGHT
+            | 0x26 // VK_UP
+            | 0x28 // VK_DOWN
+            | 0x6F // VK_DIVIDE
+            | 0x90 // VK_NUMLOCK
+            | 0x2C // VK_SNAPSHOT
+    )
+}
+
+/// 构造键盘消息 `lParam`（包含扫描码、扩展位、按下/抬起状态）。
+fn make_key_lparam(vkey: u16, is_key_up: bool) -> LPARAM {
+    let scan_code = unsafe { MapVirtualKeyW(vkey as u32, MAPVK_VK_TO_VSC_EX) } as u32;
+    let mut lparam = 1u32 | ((scan_code & 0xFF) << 16);
+    if is_extended_vkey(vkey) {
+        lparam |= 1 << 24;
+    }
+    if is_key_up {
+        lparam |= 1 << 30;
+        lparam |= 1 << 31;
+    }
+    LPARAM(lparam as isize)
+}
+
+/// 解析更可靠的键盘消息目标窗口。
+///
+/// 对于后台窗口，直接发给顶层窗口常常会被忽略；这里优先取目标线程当前焦点窗口，
+/// 无法获取时再回退到传入窗口句柄。
+fn resolve_keyboard_target_window(hwnd: HWND) -> HWND {
+    let thread_id = unsafe { GetWindowThreadProcessId(hwnd, None) };
+    if thread_id != 0 {
+        let mut info = GUITHREADINFO {
+            cbSize: std::mem::size_of::<GUITHREADINFO>() as u32,
+            ..Default::default()
+        };
+        unsafe {
+            if GetGUIThreadInfo(thread_id, &mut info).is_ok() && !info.hwndFocus.is_invalid() {
+                return info.hwndFocus;
+            }
+        }
+    }
+    hwnd
+}
+
+/// 发送 PostMessage 前临时对齐输入线程并设置目标活动窗口。
+///
+/// 参考 AutoHotkey ControlClick 默认行为：
+/// 1. 尝试 `AttachThreadInput` 到目标窗口线程；
+/// 2. 调用 `SetActiveWindow` 提升后台消息处理可靠性；
+/// 3. 发送 `PostMessage` 后再解除线程附加。
+fn post_message_with_attach(target_hwnd: HWND, msg: u32, wparam: WPARAM, lparam: LPARAM) {
+    if target_hwnd.is_invalid() {
+        return;
+    }
+
+    let active_hwnd = unsafe {
+        let root = GetAncestor(target_hwnd, GA_ROOT);
+        if root.is_invalid() { target_hwnd } else { root }
+    };
+
+    let current_thread = unsafe { GetCurrentThreadId() };
+    let target_thread = unsafe { GetWindowThreadProcessId(active_hwnd, None) };
+    let mut attached = false;
+
+    unsafe {
+        if target_thread != 0
+            && target_thread != current_thread
+            && !IsHungAppWindow(active_hwnd).as_bool()
+        {
+            attached = AttachThreadInput(current_thread, target_thread, true).as_bool();
+        }
+
+        let _ = SetActiveWindow(active_hwnd);
+        let _ = PostMessageW(Some(target_hwnd), msg, wparam, lparam);
+
+        if attached {
+            let _ = AttachThreadInput(current_thread, target_thread, false);
+        }
+    }
+}
+
+/// 通过Windows消息发送鼠标滚轮事件到指定窗口。
+///
+/// 参数说明：
+/// - `x`、`y`：窗口坐标系中的目标位置；
+/// - `delta`：滚轮增量（常用 `120` / `-120`）。
+#[allow(unused)]
+pub fn post_wheel(hwnd: HWND, x: i32, y: i32, delta: i32) {
+    let (target_hwnd, target_x, target_y) = resolve_mouse_target_window(hwnd, x, y);
+    let mut screen_pt = POINT {
+        x: target_x,
+        y: target_y,
+    };
+    unsafe {
+        let _ = ClientToScreen(target_hwnd, &mut screen_pt);
+    }
+
+    // WM_MOUSEWHEEL: HIWORD(wParam)=delta, LOWORD(wParam)=按键状态(此处为0)
+    let wheel_delta_word = ((delta as i16 as u16) as usize) << 16;
+    let wparam = WPARAM(wheel_delta_word);
+    let lparam = make_mouse_lparam(screen_pt.x, screen_pt.y);
+    post_message_with_attach(target_hwnd, WM_MOUSEWHEEL, wparam, lparam);
+}
+
 pub fn sleep(ms: u32) {
     std::thread::sleep(std::time::Duration::from_millis(ms as u64));
 }
@@ -294,17 +443,17 @@ pub fn sleep(ms: u32) {
 /// 通过Windows消息发送键盘按下事件到指定窗口
 #[allow(unused)]
 pub fn post_key_down(hwnd: HWND, key: u16) {
-    unsafe {
-        let _ = PostMessageW(Some(hwnd), WM_KEYDOWN, WPARAM(key as _), LPARAM(0));
-    }
+    let target_hwnd = resolve_keyboard_target_window(hwnd);
+    let lparam = make_key_lparam(key, false);
+    post_message_with_attach(target_hwnd, WM_KEYDOWN, WPARAM(key as _), lparam);
 }
 
 /// 通过Windows消息发送键盘释放事件到指定窗口
 #[allow(unused)]
 pub fn post_key_up(hwnd: HWND, key: u16) {
-    unsafe {
-        let _ = PostMessageW(Some(hwnd), WM_KEYUP, WPARAM(key as _), LPARAM(0));
-    }
+    let target_hwnd = resolve_keyboard_target_window(hwnd);
+    let lparam = make_key_lparam(key, true);
+    post_message_with_attach(target_hwnd, WM_KEYUP, WPARAM(key as _), lparam);
 }
 
 /// 通过Windows消息发送完整按键事件到指定窗口
@@ -324,91 +473,85 @@ pub fn post_key_press(hwnd: HWND, key: &str, duration: u32) {
 /// 通过Windows消息发送鼠标移动事件到指定窗口
 #[allow(unused)]
 pub fn post_mouse_move(hwnd: HWND, x: i32, y: i32) {
-    unsafe {
-        let _ = PostMessageW(
-            Some(hwnd),
-            WM_MOUSEMOVE,
-            WPARAM(0),
-            LPARAM(((y as isize) << 16) | (x as isize & 0xFFFF)),
-        );
-    }
+    let (target_hwnd, target_x, target_y) = resolve_mouse_target_window(hwnd, x, y);
+    post_message_with_attach(
+        target_hwnd,
+        WM_MOUSEMOVE,
+        WPARAM(0),
+        make_mouse_lparam(target_x, target_y),
+    );
 }
 
 /// 通过Windows消息发送鼠标左键按下事件到指定窗口
 #[allow(unused)]
 pub fn post_mouse_down(hwnd: HWND, x: i32, y: i32) {
-    unsafe {
-        let _ = PostMessageW(
-            Some(hwnd),
-            WM_LBUTTONDOWN,
-            WPARAM(1),
-            LPARAM(((y as isize) << 16) | (x as isize & 0xFFFF)),
-        );
-    }
+    let (target_hwnd, target_x, target_y) = resolve_mouse_target_window(hwnd, x, y);
+    post_message_with_attach(
+        target_hwnd,
+        WM_LBUTTONDOWN,
+        WPARAM(0x0001), // MK_LBUTTON
+        make_mouse_lparam(target_x, target_y),
+    );
 }
 
 /// 通过Windows消息发送鼠标左键释放事件到指定窗口
 #[allow(unused)]
 pub fn post_mouse_up(hwnd: HWND, x: i32, y: i32) {
-    unsafe {
-        let _ = PostMessageW(
-            Some(hwnd),
-            WM_LBUTTONUP,
-            WPARAM(0),
-            LPARAM(((y as isize) << 16) | (x as isize & 0xFFFF)),
-        );
-    }
+    let (target_hwnd, target_x, target_y) = resolve_mouse_target_window(hwnd, x, y);
+    post_message_with_attach(
+        target_hwnd,
+        WM_LBUTTONUP,
+        WPARAM(0),
+        make_mouse_lparam(target_x, target_y),
+    );
 }
 
 /// 通过Windows消息发送鼠标点击事件到指定窗口
 #[allow(unused)]
 pub fn post_click(hwnd: HWND, x: i32, y: i32, count: u32) {
     for _ in 0..count {
+        post_mouse_move(hwnd, x, y);
         post_mouse_down(hwnd, x, y);
         sleep(1);
         post_mouse_up(hwnd, x, y);
     }
 }
 pub fn post_mouse_right_down(hwnd: HWND, x: i32, y: i32) {
-    unsafe {
-        let _ = PostMessageW(
-            Some(hwnd),
-            WM_RBUTTONDOWN,
-            WPARAM(1),
-            LPARAM(((y as isize) << 16) | (x as isize & 0xFFFF)),
-        );
-    }
+    let (target_hwnd, target_x, target_y) = resolve_mouse_target_window(hwnd, x, y);
+    post_message_with_attach(
+        target_hwnd,
+        WM_RBUTTONDOWN,
+        WPARAM(0x0002), // MK_RBUTTON
+        make_mouse_lparam(target_x, target_y),
+    );
 }
 pub fn post_mouse_right_up(hwnd: HWND, x: i32, y: i32) {
-    unsafe {
-        let _ = PostMessageW(
-            Some(hwnd),
-            WM_RBUTTONUP,
-            WPARAM(0),
-            LPARAM(((y as isize) << 16) | (x as isize & 0xFFFF)),
-        );
-    }
+    let (target_hwnd, target_x, target_y) = resolve_mouse_target_window(hwnd, x, y);
+    post_message_with_attach(
+        target_hwnd,
+        WM_RBUTTONUP,
+        WPARAM(0),
+        make_mouse_lparam(target_x, target_y),
+    );
 }
 pub fn post_mouse_middle_down(hwnd: HWND, x: i32, y: i32) {
-    unsafe {
-        let _ = PostMessageW(
-            Some(hwnd),
-            WM_MBUTTONDOWN,
-            WPARAM(1),
-            LPARAM(((y as isize) << 16) | (x as isize & 0xFFFF)),
-        );
-    }
+    let (target_hwnd, target_x, target_y) = resolve_mouse_target_window(hwnd, x, y);
+    post_message_with_attach(
+        target_hwnd,
+        WM_MBUTTONDOWN,
+        WPARAM(0x0010), // MK_MBUTTON
+        make_mouse_lparam(target_x, target_y),
+    );
 }
 #[allow(unused)]
 pub fn post_mouse_middle_up(hwnd: HWND, x: i32, y: i32) {
-    unsafe {
-        let _ = PostMessageW(
-            Some(hwnd),
-            WM_MBUTTONUP,
-            WPARAM(0),
-            LPARAM(((y as isize) << 16) | (x as isize & 0xFFFF)),
-        );
-    }
+    let (target_hwnd, target_x, target_y) = resolve_mouse_target_window(hwnd, x, y);
+    post_message_with_attach(
+        target_hwnd,
+        WM_MBUTTONUP,
+        WPARAM(0),
+        make_mouse_lparam(target_x, target_y),
+    );
 }
 #[allow(unused)]
 pub fn post_mouse_middle_click(hwnd: HWND, x: i32, y: i32) {
@@ -426,12 +569,14 @@ pub fn post_mouse_click(hwnd: HWND, x: i32, y: i32) {
 }
 #[allow(unused)]
 pub fn post_right_click(hwnd: HWND, x: i32, y: i32) {
+    post_mouse_move(hwnd, x, y);
     post_mouse_right_down(hwnd, x, y);
     sleep(1);
     post_mouse_right_up(hwnd, x, y);
 }
 #[allow(unused)]
 pub fn post_middle_click(hwnd: HWND, x: i32, y: i32) {
+    post_mouse_move(hwnd, x, y);
     post_mouse_middle_down(hwnd, x, y);
     sleep(1);
     post_mouse_middle_up(hwnd, x, y);
