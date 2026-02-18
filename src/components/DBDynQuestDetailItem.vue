@@ -1,21 +1,60 @@
 <script lang="ts" setup>
+import { computed } from "vue"
+import DBQuestStoryNodes from "@/components/DBQuestStoryNodes.vue"
 import type { DynQuest } from "@/data/d/dynquest.data"
 import { regionMap } from "@/data/d/region.data"
 import { subRegionMap } from "@/data/d/subregion.data"
+import { useSettingStore } from "@/store/setting"
 import { getRewardDetails } from "@/utils/reward-utils"
+import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 
 const props = defineProps<{
     quest: DynQuest
 }>()
 
-// 获取区域信息
-const getRegionInfo = (regionId: number) => {
+const settingStore = useSettingStore()
+
+/**
+ * 获取当前剧情文本替换配置。
+ */
+const storyTextConfig = computed<StoryTextConfig>(() => {
+    return {
+        nickname: settingStore.protagonistName1?.trim() || "维塔",
+        nickname2: settingStore.protagonistName2?.trim() || "墨斯",
+        gender: settingStore.protagonistGender,
+        gender2: settingStore.protagonistGender2,
+    }
+})
+
+/**
+ * 解析剧情文本中的占位符。
+ * @param text 原始文本
+ * @returns 替换后的文本
+ */
+function formatStoryText(text: string | undefined): string {
+    if (!text) {
+        return ""
+    }
+
+    return replaceStoryPlaceholders(text, storyTextConfig.value)
+}
+
+/**
+ * 获取区域信息。
+ * @param regionId 区域 ID
+ * @returns 区域信息
+ */
+function getRegionInfo(regionId: number) {
     const region = regionMap.get(regionId)
     return region || { id: regionId, name: `区域${regionId}`, type: null, mapId: null }
 }
 
-// 获取子区域信息
-const getSubRegionInfo = (subRegionId: number) => {
+/**
+ * 获取子区域信息。
+ * @param subRegionId 子区域 ID
+ * @returns 子区域信息
+ */
+function getSubRegionInfo(subRegionId: number) {
     const subRegion = subRegionMap.get(subRegionId)
     return (
         subRegion || {
@@ -27,6 +66,13 @@ const getSubRegionInfo = (subRegionId: number) => {
         }
     )
 }
+
+/**
+ * 获取动态任务剧情节点列表。
+ */
+const questNodes = computed(() => {
+    return props.quest.nodes ?? []
+})
 </script>
 
 <template>
@@ -35,7 +81,7 @@ const getSubRegionInfo = (subRegionId: number) => {
         <div class="flex items-center justify-between">
             <div>
                 <SRouterLink :to="`/db/dynquest/${quest.id}`" class="text-lg font-bold link link-primary">
-                    {{ quest.name }}
+                    {{ formatStoryText(quest.name) }}
                 </SRouterLink>
                 <div class="text-sm text-base-content/70">ID: {{ quest.id }}</div>
             </div>
@@ -110,6 +156,11 @@ const getSubRegionInfo = (subRegionId: number) => {
         <div class="card bg-base-100 border border-base-200 rounded p-3">
             <h3 class="font-bold mb-2">等级范围</h3>
             <div class="text-sm text-base-content/70">等级范围: {{ quest.level[0] }} - {{ quest.level[1] || "?" }}</div>
+        </div>
+
+        <div v-if="questNodes.length" class="card bg-base-100 border border-base-200 rounded p-3">
+            <h3 class="font-bold mb-2">剧情节点 ({{ questNodes.length }}个)</h3>
+            <DBQuestStoryNodes :quest-id="quest.id" :nodes="questNodes" :start-ids="quest.startIds" />
         </div>
 
         <!-- 奖励列表 -->

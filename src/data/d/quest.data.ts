@@ -8,6 +8,7 @@ export interface QuestItem {
     name: string
     desc?: string
     nodes: QuestNode[]
+    startIds?: string[]
 }
 
 type ImprType = "All" | "Any" | "Empathy" | "Chaos" | "Morality" | "Wisdom" | "Benefit" //"共情" | "混沌" | "才智" | "道德" | "功利"
@@ -3230,6 +3231,7 @@ export const questData: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17181605173357070", "173606465705112504115"],
             },
         ],
     },
@@ -7649,6 +7651,7 @@ export const questData: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["171161438503355909", "171161449399357783", "171161455809659045"],
             },
             {
                 id: 10020706,
@@ -15601,6 +15604,14 @@ export const questData: QuestStory[] = [
                             },
                         ],
                     },
+                ],
+                startIds: [
+                    "1723793345850530559",
+                    "1723793345854530570",
+                    "1723793345855530571",
+                    "1723793345855530572",
+                    "17349400731263658377",
+                    "17349400623893658235",
                 ],
             },
         ],
@@ -41470,7 +41481,6 @@ export const questData: QuestStory[] = [
                                 id: 51007571,
                                 content: "但关于卡戎的来源，他是第一个给我不同回答的人，所以我一直很在意。可惜后来我再也没见到他了。",
                                 npc: 700011,
-                                next: 51007576,
                                 options: [
                                     {
                                         id: 51007572,
@@ -41485,12 +41495,6 @@ export const questData: QuestStory[] = [
                                 ],
                             },
                             {
-                                id: 51007576,
-                                content: "唔……总而言之，大家对问题3的答案都不太一样，看来我还需要收集更多的样本。",
-                                npc: 700011,
-                                next: 51007577,
-                            },
-                            {
                                 id: 51007573,
                                 content: "嗯，既然你也这么说，那应该就是了吧！",
                                 npc: 700011,
@@ -41501,6 +41505,12 @@ export const questData: QuestStory[] = [
                                 content: "原来是这样啊……那就没办法啦。",
                                 npc: 700011,
                                 next: 51007576,
+                            },
+                            {
+                                id: 51007576,
+                                content: "唔……总而言之，大家对问题3的答案都不太一样，看来我还需要收集更多的样本。",
+                                npc: 700011,
+                                next: 51007577,
                             },
                             {
                                 id: 51007577,
@@ -44352,6 +44362,7 @@ export const questData: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17512717337712171", "17512717337712175"],
             },
             {
                 id: 20023101,
@@ -50955,7 +50966,6 @@ export const questData: QuestStory[] = [
                                 id: 51105022,
                                 content: "呜呜……呜哇哇哇！",
                                 npc: 700329,
-                                next: 51105026,
                                 options: [
                                     {
                                         id: 51105023,
@@ -51293,6 +51303,7 @@ export const questData: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["1752744024465962791", "17628428477811001159"],
             },
             {
                 id: 20030506,
