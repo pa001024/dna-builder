@@ -330,55 +330,57 @@ fn get_d3d_texture_from_frame(
     unsafe { access.GetInterface::<ID3D11Texture2D>().ok() }
 }
 
-fn copy_texture_to_cpu(
+/// 可复用的 CPU 可读 Staging 纹理状态。
+///
+/// 复用该纹理可避免“每帧重新创建 Staging 资源”的额外开销，
+/// 对高频截图场景（如 60/120 FPS 轮询）更友好。
+struct CpuStagingSurface {
+    texture: ID3D11Texture2D,
+    width: u32,
+    height: u32,
+    format_code: i32,
+}
+
+/// 确保存在与源纹理匹配的 Staging 纹理，并返回可读纹理对象。
+///
+/// 若尺寸或像素格式变化，则自动重建。
+fn ensure_cpu_staging_surface(
     device: &ID3D11Device,
-    context: &ID3D11DeviceContext,
-    src_texture: &ID3D11Texture2D,
-) -> Option<(u32, u32, Vec<u8>)> {
-    let mut desc = D3D11_TEXTURE2D_DESC::default();
-    unsafe { src_texture.GetDesc(&mut desc) };
+    staging_surface: &mut Option<CpuStagingSurface>,
+    src_desc: &D3D11_TEXTURE2D_DESC,
+) -> Option<ID3D11Texture2D> {
+    let need_recreate = staging_surface
+        .as_ref()
+        .map(|state| {
+            state.width != src_desc.Width
+                || state.height != src_desc.Height
+                || state.format_code != src_desc.Format.0
+        })
+        .unwrap_or(true);
 
-    // 创建 Staging Texture
-    desc.Usage = D3D11_USAGE_STAGING;
-    desc.BindFlags = 0;
-    desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ.0 as u32;
-    desc.MiscFlags = 0;
+    if need_recreate {
+        let mut staging_desc = *src_desc;
+        staging_desc.Usage = D3D11_USAGE_STAGING;
+        staging_desc.BindFlags = 0;
+        staging_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ.0 as u32;
+        staging_desc.MiscFlags = 0;
 
-    let mut staging = None;
-    unsafe {
-        device
-            .CreateTexture2D(&desc, None, Some(&mut staging))
-            .ok()?
-    };
-    let staging = staging.unwrap();
-
-    unsafe { context.CopyResource(&staging, src_texture) };
-
-    // 映射内存
-    let mut mapped = Default::default();
-    unsafe {
-        context
-            .Map(&staging, 0, D3D11_MAP_READ, 0, Some(&mut mapped))
-            .ok()?;
+        let mut staging_tex = None;
+        unsafe {
+            device
+                .CreateTexture2D(&staging_desc, None, Some(&mut staging_tex))
+                .ok()?
+        };
+        let staging_tex = staging_tex?;
+        *staging_surface = Some(CpuStagingSurface {
+            texture: staging_tex.clone(),
+            width: src_desc.Width,
+            height: src_desc.Height,
+            format_code: src_desc.Format.0,
+        });
     }
 
-    // 处理 Padding
-    let width = desc.Width;
-    let height = desc.Height;
-    let src_pitch = mapped.RowPitch as usize;
-    let row_size = (width * 4) as usize;
-    let mut buffer = Vec::with_capacity((width * height * 4) as usize);
-
-    let src_ptr = mapped.pData as *const u8;
-    for y in 0..height {
-        let offset = (y as usize) * src_pitch;
-        let row = unsafe { std::slice::from_raw_parts(src_ptr.add(offset), row_size) };
-        buffer.extend_from_slice(row);
-    }
-
-    unsafe { context.Unmap(&staging, 0) };
-
-    Some((width, height, buffer))
+    staging_surface.as_ref().map(|state| state.texture.clone())
 }
 // 封装捕获上下文
 #[allow(unused)]
@@ -400,6 +402,8 @@ struct WgcContext {
     cached_at: Option<Instant>,
     // 最近一次成功返回的 WGC 帧时间戳（100ns 单位）
     last_frame_ticks: Option<i64>,
+    // 复用 CPU 可读纹理，减少每帧 Staging 资源创建开销
+    staging_surface: Option<CpuStagingSurface>,
 }
 
 impl WgcContext {
@@ -413,7 +417,7 @@ impl WgcContext {
         let frame_pool = Direct3D11CaptureFramePool::CreateFreeThreaded(
             &winrt_device,
             DirectXPixelFormat::B8G8R8A8UIntNormalized,
-            1,
+            2,
             size,
         )
         .unwrap();
@@ -434,6 +438,7 @@ impl WgcContext {
             cached_mat: None,
             cached_at: None,
             last_frame_ticks: None,
+            staging_surface: None,
         })
     }
 
@@ -452,9 +457,22 @@ impl WgcContext {
         // === 成功获取新帧，处理并更新缓存 ===
         let texture = get_d3d_texture_from_frame(&frame)?;
 
-        // 复制 GPU -> CPU
-        let (tex_w, tex_h, tex_data) =
-            copy_texture_to_cpu(&self.d3d_device, &self.d3d_context, &texture)?;
+        // 复制 GPU -> 可复用 Staging（CPU 可读）
+        let mut tex_desc = D3D11_TEXTURE2D_DESC::default();
+        unsafe { texture.GetDesc(&mut tex_desc) };
+        let tex_w = tex_desc.Width;
+        let tex_h = tex_desc.Height;
+        let staging =
+            ensure_cpu_staging_surface(&self.d3d_device, &mut self.staging_surface, &tex_desc)?;
+        unsafe { self.d3d_context.CopyResource(&staging, &texture) };
+
+        let mut mapped = Default::default();
+        unsafe {
+            self.d3d_context
+                .Map(&staging, 0, D3D11_MAP_READ, 0, Some(&mut mapped))
+                .ok()?;
+        }
+        let _unmap_guard = guard((), |_| unsafe { self.d3d_context.Unmap(&staging, 0) });
 
         // 计算输出尺寸与裁剪起点：
         // WGC 在不同窗口/系统配置下，可能返回“整窗帧”或“客户区帧”。
@@ -515,9 +533,9 @@ impl WgcContext {
         // 创建 BGRA Mat 并完成客户端/ROI区域裁剪复制
         let mut mat_bgra = unsafe { Mat::new_rows_cols(roi_h, roi_w, CV_8UC4).ok()? };
 
-        let src_stride = tex_w as usize * 4;
+        let src_stride = mapped.RowPitch as usize;
         let dst_stride = roi_w as usize * 4;
-        let src_ptr = tex_data.as_ptr();
+        let src_ptr = mapped.pData as *const u8;
         let dst_ptr = mat_bgra.data_mut();
 
         for r in 0..roi_h {
@@ -578,7 +596,7 @@ impl WgcContext {
             if let Err(e) = self.frame_pool.Recreate(
                 &self.winrt_device,
                 DirectXPixelFormat::B8G8R8A8UIntNormalized,
-                1,
+                2,
                 current_size,
             ) {
                 eprintln!("Recreate 失败: {:?}", e);
@@ -586,48 +604,44 @@ impl WgcContext {
             }
         }
 
-        // 2. 实时优先策略：
-        // - 短间隔调用：直接等待“时间戳更大”的新帧。
-        // - 长间隔调用：先清空已有队列（这些帧可能是历史积压），再等待后续新帧。
-        let long_gap = self
-            .cached_at
-            .map(|ts| ts.elapsed() >= Duration::from_millis(33))
-            .unwrap_or(true);
-
-        let mut baseline_ticks = self.last_frame_ticks.unwrap_or(i64::MIN);
-        if long_gap {
-            // 先把当前积压帧全部取走并丢弃，避免返回“上次调用后积压的第一帧”。
-            while let Ok(frame) = self.frame_pool.TryGetNextFrame() {
-                if should_stop_current_script() {
-                    return None;
-                }
-                let ticks = frame
-                    .SystemRelativeTime()
-                    .ok()
-                    .map(|ts| ts.Duration)
-                    .unwrap_or(i64::MIN);
-                if ticks > baseline_ticks {
-                    baseline_ticks = ticks;
-                }
-            }
-        }
-
-        // 长间隔给更长一点等待窗口，确保等到真正的新帧提交。
-        let wait_ms = if long_gap { 90 } else { 35 };
-        let deadline = Instant::now() + Duration::from_millis(wait_ms);
+        // 2. 取最新帧
+        // - 先尽可能清空队列并拿到最新帧；
+        // - 若没有真正新帧，再短等待一小段时间（避免长时间阻塞脚本线程）。
+        let baseline_ticks = self.last_frame_ticks.unwrap_or(i64::MIN);
         let mut latest_frame: Option<Direct3D11CaptureFrame> = None;
         let mut latest_ticks = i64::MIN;
-        loop {
+        while let Ok(frame) = self.frame_pool.TryGetNextFrame() {
             if should_stop_current_script() {
                 return None;
             }
+            let ticks = frame
+                .SystemRelativeTime()
+                .ok()
+                .map(|ts| ts.Duration)
+                .unwrap_or(i64::MIN);
+            if ticks >= latest_ticks {
+                latest_ticks = ticks;
+                latest_frame = Some(frame);
+            }
+        }
 
-            let mut got_any = false;
+        let has_new_frame = latest_ticks > baseline_ticks
+            || (self.last_frame_ticks.is_none() && latest_frame.is_some());
+        if has_new_frame {
+            if let Some(frame) = latest_frame.take() {
+                return self.process_new_frame(frame, roi);
+            }
+        }
+
+        let deadline = Instant::now() + Duration::from_millis(8);
+        while Instant::now() < deadline {
+            if should_stop_current_script() {
+                return None;
+            }
             while let Ok(frame) = self.frame_pool.TryGetNextFrame() {
                 if should_stop_current_script() {
                     return None;
                 }
-                got_any = true;
                 let ticks = frame
                     .SystemRelativeTime()
                     .ok()
@@ -639,28 +653,26 @@ impl WgcContext {
                 }
             }
 
-            if latest_frame.is_some() && latest_ticks > baseline_ticks {
-                break;
+            let has_new_frame = latest_ticks > baseline_ticks
+                || (self.last_frame_ticks.is_none() && latest_frame.is_some());
+            if let Some(frame) = latest_frame.take() {
+                if has_new_frame {
+                    return self.process_new_frame(frame, roi);
+                }
             }
-            if Instant::now() >= deadline {
-                break;
-            }
-
-            if got_any {
-                // 有帧但还不够新，短等下一轮提交。
-                std::thread::sleep(Duration::from_millis(1));
-            } else {
-                std::thread::sleep(Duration::from_millis(2));
-            }
+            std::thread::sleep(Duration::from_millis(1));
         }
 
-        if latest_frame.is_some() && latest_ticks > baseline_ticks {
-            if let Some(frame) = latest_frame {
-                return self.process_new_frame(frame, roi);
+        // 3. 没有新帧时优先回退缓存，保持高频调用稳定吞吐。
+        if let Some(roi_rect) = roi {
+            if let Some(cached) = self.cached_mat.as_ref() {
+                return crop_mat_with_roi(cached.as_ref(), roi_rect);
             }
+        } else if let Some(cached) = self.cached_mat.as_ref() {
+            return Some(cached.clone());
         }
 
-        // 3. WGC 未拿到“真正新帧”时，回退到 GDI 强制抓当前帧，避免滞后图像。
+        // 4. 首次无缓存时，才回退到 GDI 强制抓当前帧。
         if should_stop_current_script() {
             return None;
         }
@@ -675,7 +687,7 @@ impl WgcContext {
             return Some(mat);
         }
 
-        // 4. 最后兜底：返回最近缓存
+        // 5. 最后兜底：返回最近缓存
         if let Some(roi_rect) = roi {
             self.cached_mat
                 .as_ref()
@@ -684,7 +696,6 @@ impl WgcContext {
             self.cached_mat.clone()
         }
     }
-
 }
 
 thread_local! {
@@ -769,13 +780,7 @@ pub(crate) fn capture_window(hwnd: HWND) -> Option<Box<Mat>> {
 }
 
 /// 截图并直接按 ROI 裁剪（ROI 相对客户区）。
-pub(crate) fn capture_window_roi(
-    hwnd: HWND,
-    x: i32,
-    y: i32,
-    w: i32,
-    h: i32,
-) -> Option<Box<Mat>> {
+pub(crate) fn capture_window_roi(hwnd: HWND, x: i32, y: i32, w: i32, h: i32) -> Option<Box<Mat>> {
     capture_window_with_roi_internal(hwnd, Some((x, y, w, h)))
 }
 

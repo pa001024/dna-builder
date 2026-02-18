@@ -51,6 +51,7 @@ export async function initI18n(selectedLanguage: string) {
         interpolation: {
             escapeValue: false,
         },
+        showSupportNotice: false,
     })
 }
 

@@ -3,7 +3,7 @@ use boa_engine::class::Class;
 use boa_engine::job::NativeAsyncJob;
 use boa_engine::object::builtins::{JsArray, JsFunction, JsPromise};
 use boa_engine::{
-    Context, IntoJsFunctionCopied, JsData, JsError, JsNativeError, JsObject, JsResult, JsValue,
+    Context, IntoJsFunctionCopied, JsData, JsNativeError, JsObject, JsResult, JsValue,
     js_string, js_value,
 };
 use boa_engine::{js_error, js_object};
@@ -35,7 +35,7 @@ use crate::submodules::{
     jsmat::{IntoJs, JsMat},
     ocr::{self, OcrInitConfig},
     predict_rotation::predict_rotation,
-    route::find_path,
+    route::{find_path_direction_coords, predict_depth},
     script::{SCRIPT_STOP_INTERRUPT_MESSAGE, should_stop_current_script},
     script_vision::{
         batch_match_color_impl, color_filter_hsl_impl, color_filter_impl, color_key_match_impl,
@@ -131,17 +131,6 @@ pub fn set_script_event_app_handle(app_handle: tauri::AppHandle) {
 pub fn set_current_script_path(script_path: String) {
     CURRENT_SCRIPT_PATH.with(|storage| {
         *storage.borrow_mut() = script_path;
-    });
-}
-
-/// 清理脚本线程内的运行期缓存。
-///
-/// 说明：
-/// - 每次脚本启动前调用，避免跨 Context 复用旧 JS 对象；
-/// - 仅清理与脚本执行线程绑定的缓存，不影响全局状态。
-pub fn clear_script_runtime_cache() {
-    WGC_CAPTURE_MAT_CACHE.with(|cache| {
-        cache.borrow_mut().clear();
     });
 }
 
@@ -1488,11 +1477,9 @@ fn _capture_window_wgc(
                     // 尺寸一致时直接写回同一块 Mat 内存；尺寸变化时再替换底层 Mat。
                     if dst_inner.rows() == mat.rows() && dst_inner.cols() == mat.cols() {
                         if let Err(err) = mat.copy_to(&mut **dst_inner) {
-                            return Err(
-                                JsNativeError::error()
-                                    .with_message(format!("复用 WGC Mat 写入失败: {err}"))
-                                    .into(),
-                            );
+                            return Err(JsNativeError::error()
+                                .with_message(format!("复用 WGC Mat 写入失败: {err}"))
+                                .into());
                         }
                     } else {
                         *dst_inner = mat;
@@ -2844,17 +2831,14 @@ fn _read_config(
     _script_config_value_to_js(&result_value, ctx)
 }
 
-/// 寻路函数
-fn _find_path(
+/// 深度预测函数：返回深度图、障碍掩码与路径方向候选点。
+fn _predict_depth(
     js_left_image: Option<JsValue>,
     js_right_image: Option<JsValue>,
-    start_x: Option<JsValue>,
-    start_y: Option<JsValue>,
-    end_x: Option<JsValue>,
-    end_y: Option<JsValue>,
     num_disp: Option<JsValue>,
     block_size: Option<JsValue>,
-    strategy: Option<JsValue>,
+    min_region_area: Option<JsValue>,
+    max_candidates: Option<JsValue>,
     ctx: &mut Context,
 ) -> JsResult<JsValue> {
     // 获取第一个参数 (左图Mat)
@@ -2867,56 +2851,49 @@ fn _find_path(
         .unwrap_or_else(|| JsValue::undefined())
         .get_native::<JsMat>()?;
 
-    let start_x = start_x
-        .unwrap_or_else(|| JsValue::undefined())
-        .to_number(ctx)? as i32;
-    let start_y = start_y
-        .unwrap_or_else(|| JsValue::undefined())
-        .to_number(ctx)? as i32;
-    let end_x = end_x
-        .unwrap_or_else(|| JsValue::undefined())
-        .to_number(ctx)? as i32;
-    let end_y = end_y
-        .unwrap_or_else(|| JsValue::undefined())
-        .to_number(ctx)? as i32;
     let num_disp = num_disp
-        .unwrap_or_else(|| JsValue::undefined())
+        .unwrap_or_else(|| js_value!(160))
         .to_number(ctx)? as i32;
     let block_size = block_size
-        .unwrap_or_else(|| JsValue::undefined())
+        .unwrap_or_else(|| js_value!(5))
         .to_number(ctx)? as i32;
-    let strategy = strategy
-        .unwrap_or_else(|| JsValue::undefined())
-        .to_string(ctx)?
-        .to_std_string()
-        .map_err(|e| {
-            JsError::from_opaque(JsValue::from(js_string!(format!(
-                "无效的策略字符串: {:?}",
-                e
-            ))))
-        })?;
+    let min_region_area = min_region_area
+        .unwrap_or_else(|| js_value!(800))
+        .to_number(ctx)? as i32;
+    let max_candidates = max_candidates
+        .unwrap_or_else(|| js_value!(3))
+        .to_number(ctx)? as usize;
 
-    // 执行寻路
-    let path = find_path(
+    // 执行深度估计
+    let depth_map = predict_depth(
         &js_left_image.borrow().data().inner,
         &js_right_image.borrow().data().inner,
-        start_x,
-        start_y,
-        end_x,
-        end_y,
         num_disp,
         block_size,
-        &strategy,
-    );
+    )
+    .map_err(|msg| JsNativeError::error().with_message(msg))?;
 
-    // 将路径转换为 JavaScript 数组
-    let js_array = JsArray::new(ctx);
-    for point in path {
+    let directions = find_path_direction_coords(&depth_map, min_region_area, max_candidates)
+        .map_err(|msg| JsNativeError::error().with_message(msg))?;
+
+    let js_depth = Box::new(depth_map.disparity_mat).into_js(ctx)?;
+    let js_obstacle_mask = Box::new(depth_map.obstacle_mask).into_js(ctx)?;
+
+    let js_directions = JsArray::new(ctx);
+    for point in directions {
         let point_array = js_value!([point[0], point[1]], ctx);
-        js_array.push(point_array, ctx)?;
+        js_directions.push(point_array, ctx)?;
     }
 
-    Ok(js_array.into())
+    let result = js_object!(
+        {
+            depth: js_depth,
+            obstacleMask: js_obstacle_mask,
+            directions: js_directions,
+        },
+        ctx
+    );
+    Ok(result.into())
 }
 
 /// 边框绘制函数
@@ -3422,9 +3399,9 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     let f = _set_program_volume.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("setProgramVolume"), 2, f)?;
 
-    // 寻路函数
-    let f = _find_path.into_js_function_copied(context);
-    context.register_global_builtin_callable(js_string!("findPath"), 9, f)?;
+    // 深度预测函数（双图深度 + 路径方向候选）
+    let f = _predict_depth.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("predictDepth"), 6, f)?;
 
     Ok(())
 }

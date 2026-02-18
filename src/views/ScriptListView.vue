@@ -47,14 +47,23 @@ const editingScript = ref<string | null>(null)
 const editingScriptName = ref("")
 const publishingScript = ref(false)
 
-const DEFAULT_SCRIPT_CONTENT = `async function main() {
-    console.log("hello world")
-    for (let i = 0; i < 10; i++) {
-        await sleep(1000)
-        console.log(\`hello world after \${i + 1}s\`)
+const DEFAULT_SCRIPT_CONTENT = `const hwnd = getWindowByProcessName("EM-Win64-Shipping.exe")
+if (!hwnd || !isElevated()) throw new Error("未找到窗口或非管理员权限")
+checkSize(hwnd)
+async function main() {
+    let i = 0
+    const timer = new Timer()
+    while (true) {
+        const img = captureWindowWGC(hwnd)
+        imshow("img", img)
+        i++
+        if (timer.elapsed() > 1000) {
+            setStatus("fps", i)
+            i = 0
+            timer.reset()
+        }
     }
 }
-
 main()
 `
 const newScriptContent = ref(DEFAULT_SCRIPT_CONTENT)
@@ -3075,7 +3084,7 @@ onUnmounted(async () => {
                                     <li>
                                         <a @click="toggleGlobalShortcut">{{
                                             globalShortcutEnabled ? "禁用全局快捷键(F10)" : "启用全局快捷键(F10)"
-                                            }}</a>
+                                        }}</a>
                                     </li>
                                 </ul>
                             </div>
@@ -3127,9 +3136,9 @@ onUnmounted(async () => {
                                 <div v-for="(log, index) in consoleLogs" :key="index" class="flex gap-2">
                                     <span class="text-base-content/40 shrink-0">{{ new
                                         Date(log.timestamp).toLocaleTimeString()
-                                        }}</span>
-                                    <span :class="getLogLevelClass(log.level)" class="break-all">{{ log.message
                                     }}</span>
+                                    <span :class="getLogLevelClass(log.level)" class="break-all">{{ log.message
+                                        }}</span>
                                 </div>
                             </div>
                         </div>

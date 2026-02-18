@@ -96,6 +96,33 @@ impl Class for JsMat {
             }),
         );
         class.method(
+            js_string!("clone"),
+            0,
+            NativeFunction::from_fn_ptr(|this, args, ctx| {
+                // 参数数量校验
+                if !args.is_empty() {
+                    return Err(JsNativeError::typ()
+                        .with_message("clone expects 0 arguments")
+                        .into());
+                }
+
+                // 获取 Mat 实例
+                let binding = this.as_object().unwrap();
+                let js_mat = binding
+                    .downcast_ref::<JsMat>()
+                    .ok_or_else(|| JsNativeError::typ().with_message("Object is not a Mat"))?;
+
+                // 显式深拷贝，避免与原 Mat 共享底层数据
+                let mut cloned = core::Mat::default();
+                js_mat
+                    .inner
+                    .copy_to(&mut cloned)
+                    .map_err(|_e| JsNativeError::typ().with_message("Failed to clone Mat"))?;
+
+                Box::new(cloned).into_js(ctx)
+            }),
+        );
+        class.method(
             js_string!("roi"),
             4,
             NativeFunction::from_fn_ptr(|this, args, ctx| {

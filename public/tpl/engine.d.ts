@@ -110,6 +110,11 @@ interface Mat {
     /** 矩阵列数 */
     cols(): number
     /**
+     * 显式克隆当前 Mat（深拷贝）
+     * @returns 克隆后的 Mat
+     */
+    clone(): Mat
+    /**
      * 裁剪图像区域并返回新的 Mat
      * @param x 起始 X 坐标
      * @param y 起始 Y 坐标
@@ -392,6 +397,11 @@ declare function isElevated(): boolean
 
 /**
  * 从窗口捕获图像Mat对象
+ *
+ * 注意：
+ * - `capture*` 系列默认会复用内部 Mat 缓存（固定内存区域），以降低内存占用与 GC 压力；
+ * - 连续调用后，之前返回的 Mat 内容可能被后一次捕获覆盖；
+ * - 若需要同时处理/保留两帧及以上，请先对旧帧执行 `clone()` 再进行下一次捕获。
  * @param hwnd 窗口句柄
  * @param x ROI 左上角 X（可选，相对客户区）
  * @param y ROI 左上角 Y（可选，相对客户区）
@@ -405,6 +415,11 @@ declare function captureWindow(hwnd: number, x?: number, y?: number, w?: number,
 
 /**
  * 从窗口捕获图像Mat对象（WGC优化版）
+ *
+ * 注意：
+ * - 默认会复用内部 Mat 缓存（固定内存区域）；
+ * - 连续调用后，之前返回的 Mat 内容可能被覆盖；
+ * - 若需要同时处理/保留两帧及以上，请先 `clone()`。
  * @param hwnd 窗口句柄
  * @param x ROI 左上角 X（可选，相对客户区）
  * @param y ROI 左上角 Y（可选，相对客户区）
@@ -838,26 +853,32 @@ declare function readConfig<F extends ScriptConfigFormat>(
 declare function setProgramVolume(programName: string, volume: number): void
 
 /**
- * 智能寻路函数（基于双图深度估计）
+ * 双图深度预测结果
+ */
+interface PredictDepthResult {
+    /** 深度图（8位视差图，0 表示不可计算区域） */
+    depth: Mat
+    /** 障碍物掩码（0 表示可通行，255 表示障碍） */
+    obstacleMask: Mat
+    /** 可能的路径方向候选坐标（按“更深 + 面积更大”优先） */
+    directions: [number, number][]
+}
+
+/**
+ * 双图深度预测（并返回路径方向候选）
  * @param leftImage 左图（第一次截图）
  * @param rightImage 右图（移动后的第二次截图）
- * @param startX 起点X坐标
- * @param startY 起点Y坐标
- * @param endX 终点X坐标
- * @param endY 终点Y坐标
- * @param numDisp 视差搜索范围（必须是16的倍数，如160）
- * @param blockSize 匹配块大小（3-7）
- * @param strategy 绕行策略（"left"|"right"|"auto"）
- * @returns 路径点列表 [[x, y], ...]
+ * @param numDisp 视差搜索范围（必须是16的倍数，如160，默认160）
+ * @param blockSize 匹配块大小（3-7，默认5）
+ * @param minRegionArea 有效连通区域最小面积（像素，默认800）
+ * @param maxCandidates 最多返回的方向候选数量（默认3）
+ * @returns 深度图、障碍掩码和方向候选点
  */
-declare function findPath(
+declare function predictDepth(
     leftImage: Mat,
     rightImage: Mat,
-    startX: number,
-    startY: number,
-    endX: number,
-    endY: number,
-    numDisp: number,
-    blockSize: number,
-    strategy: "left" | "right" | "auto"
-): [number, number][]
+    numDisp?: number,
+    blockSize?: number,
+    minRegionArea?: number,
+    maxCandidates?: number
+): PredictDepthResult
