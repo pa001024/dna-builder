@@ -22,6 +22,13 @@ thread_local! {
     static CURRENT_SCRIPT_STOP_SNAPSHOT: RefCell<Option<ScriptStopSnapshot>> = const { RefCell::new(None) };
 }
 
+/// 脚本“主动停止”中断标记。
+///
+/// 说明：
+/// - 由高频内置函数在检测到停止请求时抛出；
+/// - 运行入口识别该标记后按“正常停止”处理，而非脚本错误。
+pub const SCRIPT_STOP_INTERRUPT_MESSAGE: &str = "__SCRIPT_STOP_REQUESTED__";
+
 #[derive(Clone)]
 struct ScriptStopSnapshot {
     global_generation: u64,
@@ -242,6 +249,16 @@ pub async fn run_script_with_tauri_console(
                 Ok::<String, String>(result_text)
             }
             Err(e) => {
+                // 识别“主动停止”中断并按正常停止返回，避免前端误报脚本错误。
+                let opaque = e.to_opaque(context);
+                let detail = opaque
+                    .to_string(context)
+                    .map(|s| s.to_std_string_escaped())
+                    .unwrap_or_else(|_| format!("{:?}", opaque));
+                if detail.contains(SCRIPT_STOP_INTERRUPT_MESSAGE) {
+                    return Ok(String::new());
+                }
+
                 // 解析或运行时异常时，写入终端并同步推送到前端脚本控制台
                 let error_message = format_js_error_message(context, "JavaScript 执行错误", &e);
                 Err(emit_script_error(&app_handle, script_path.as_str(), error_message))

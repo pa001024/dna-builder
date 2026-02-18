@@ -2,57 +2,100 @@ import { isPermissionGranted, requestPermission, sendNotification } from "@tauri
 import { useLocalStorage } from "@vueuse/core"
 import { useSound } from "@vueuse/sound"
 import { t } from "i18next"
-import { watch } from "vue"
+import { ref, watch } from "vue"
 import { getInstanceInfo } from "@/api/external"
 import { missionsIngameQuery } from "@/api/graphql"
 import { env } from "../env"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "./ui"
 
-export class MihanNotify {
-    mihanData = useLocalStorage<string[][] | undefined>("mihanData", [])
-    mihanUpdateTime = useLocalStorage<number>("mihanUpdateTime", 0)
-    mihanEnableNotify = useLocalStorage("mihanNotify", false)
-    mihanNotifyOnce = useLocalStorage("mihanNotifyOnce", true)
-    mihanNotifyTypes = useLocalStorage("mihanNotifyTypes", [] as number[])
-    mihanNotifyMissions = useLocalStorage("mihanNotifyMissions", [] as string[])
-    sfx = useSound("/sfx/notice.mp3")
-    watch = false
-    constructor() {
-        const ui = useUIStore()
-        watch(
-            () => ui.mihanVisible,
-            async val => {
-                if (val) {
-                    await this.updateMihanData(true)
-                }
-            }
-        )
+export const MIHAN_TYPES = ["角色", "武器", "魔之楔"] as const
+export const MIHAN_MISSIONS = [
+    "探险/无尽",
+    "驱离",
+    "拆解",
+    "驱逐",
+    "避险",
+    "扼守/无尽",
+    "护送",
+    "勘察/无尽",
+    "追缉",
+    "调停",
+    "迁移",
+] as const
+const MIHAN_UPDATE_DELAY_MS = 85 * 1000
 
-        watch(this.mihanEnableNotify, val => {
-            if (val) {
-                this.startWatch()
-            }
-        })
+let mihanNotifySingleton: ReturnType<typeof createMihanNotify> | null = null
+
+/**
+ * 获取密函通知组合式全局单例。
+ * @returns 密函通知状态与方法
+ */
+export function useMihanNotify() {
+    if (!mihanNotifySingleton) {
+        mihanNotifySingleton = createMihanNotify()
     }
-    async updateMihanData(force = false) {
-        if (this.mihanData.value && !this.isOutdated() && !force) return true
+    return mihanNotifySingleton
+}
+
+export type MihanNotifyContext = ReturnType<typeof createMihanNotify>
+
+/**
+ * 创建密函通知实例。
+ * @returns 密函通知状态与方法
+ */
+function createMihanNotify() {
+    const mihanData = useLocalStorage<string[][] | undefined>("mihanData", [])
+    const mihanUpdateTime = useLocalStorage<number>("mihanUpdateTime", 0)
+    const mihanEnableNotify = useLocalStorage("mihanNotify", false)
+    const mihanNotifyOnce = useLocalStorage("mihanNotifyOnce", true)
+    const mihanNotifyTypes = useLocalStorage("mihanNotifyTypes", [] as number[])
+    const mihanNotifyMissions = useLocalStorage("mihanNotifyMissions", [] as string[])
+    const sfx = useSound("/sfx/notice.mp3")
+    const watching = ref(false)
+    let watchTimer: ReturnType<typeof setTimeout> | null = null
+    const ui = useUIStore()
+
+    watch(
+        () => ui.mihanVisible,
+        async val => {
+            if (val) {
+                await updateMihanData(true)
+            }
+        }
+    )
+
+    watch(mihanEnableNotify, val => {
+        if (val) {
+            startWatch()
+            return
+        }
+        stopWatch()
+    })
+
+    /**
+     * 更新密函数据。
+     * @param force 是否强制刷新
+     * @returns 是否成功更新到新数据
+     */
+    async function updateMihanData(force = false) {
+        if (mihanData.value && !isOutdated() && !force) return true
         const setting = useSettingStore()
         const api = await setting.getDNAAPI()
         if (api) {
             // 用户登录尝试使用DNAAPI获取密函
             await setting.startHeartbeat()
             const data = await api.defaultRoleForTool()
-            setting.stopHeartbeat()
+            await setting.stopHeartbeat()
             if (data?.data?.instanceInfo) {
                 const missions = data.data.instanceInfo.map(v => v.instances.map(v => v.name.replace("勘探/无尽", "勘察/无尽")))
                 if (!missions) return false
-                if (JSON.stringify(missions) === JSON.stringify(this.mihanData.value)) {
-                    this.mihanUpdateTime.value = Date.now()
+                if (JSON.stringify(missions) === JSON.stringify(mihanData.value)) {
+                    mihanUpdateTime.value = Date.now()
                     return false
                 }
-                this.mihanData.value = missions
-                this.mihanUpdateTime.value = Date.now()
+                mihanData.value = missions
+                mihanUpdateTime.value = Date.now()
                 return true
             }
         }
@@ -61,43 +104,54 @@ export class MihanNotify {
             const data = await missionsIngameQuery({ server: "cn" }, { requestPolicy: "network-only" })
             const missions = data?.missions?.map(v => v.map(v => v.replace("勘探/无尽", "勘察/无尽")))
             if (!missions) return false
-            if (JSON.stringify(missions) === JSON.stringify(this.mihanData.value)) {
-                this.mihanUpdateTime.value = Date.now()
+            if (JSON.stringify(missions) === JSON.stringify(mihanData.value)) {
+                mihanUpdateTime.value = Date.now()
                 return false
             }
-            this.mihanData.value = missions
-            this.mihanUpdateTime.value = new Date(data!.createdAt || "").getTime()
+            mihanData.value = missions
+            mihanUpdateTime.value = new Date(data!.createdAt || "").getTime()
         } catch {}
-        if (this.isOutdated()) {
+        if (isOutdated()) {
             // gamekee
             const instanceInfo = await getInstanceInfo()
             if (instanceInfo) {
-                this.mihanData.value = instanceInfo.map(v => v.map(v => v.replace("勘探/无尽", "勘察/无尽")))
-                this.mihanUpdateTime.value = Date.now()
+                mihanData.value = instanceInfo.map(v => v.map(v => v.replace("勘探/无尽", "勘察/无尽")))
+                mihanUpdateTime.value = Date.now()
             }
         }
         return true
     }
-    show() {
-        const ui = useUIStore()
+
+    /**
+     * 打开密函面板。
+     */
+    function show() {
         ui.mihanVisible = true
     }
-    isOutdated() {
-        return Date.now() > this.getNextUpdateTime(this.mihanUpdateTime.value)
+
+    /**
+     * 判断密函数据是否过期。
+     * @returns 是否过期
+     */
+    function isOutdated() {
+        return Date.now() > getNextUpdateTime(mihanUpdateTime.value)
     }
-    async showMihanNotification() {
-        if (this.mihanNotifyOnce.value) {
-            this.mihanEnableNotify.value = false
+
+    /**
+     * 发送密函通知并打开面板。
+     */
+    async function showMihanNotification() {
+        if (mihanNotifyOnce.value) {
+            mihanEnableNotify.value = false
         }
         if (env.isApp) {
-            const matchedTypes = this.mihanData
-                .value!.filter(
-                    (list, type) => this.mihanNotifyTypes.value.includes(type) && list.some(v => this.mihanNotifyMissions.value.includes(v))
-                )
+            const matchedTypes = (mihanData.value ?? [])
+                .map((list, type) => ({ list, type }))
+                .filter(({ list, type }) => mihanNotifyTypes.value.includes(type) && list.some(v => mihanNotifyMissions.value.includes(v)))
                 .map(
-                    (list, type) =>
-                        `${t(MihanNotify.TYPES[type])}-${list
-                            .filter(v => this.mihanNotifyMissions.value.includes(v))
+                    ({ list, type }) =>
+                        `${t(MIHAN_TYPES[type])}-${list
+                            .filter(v => mihanNotifyMissions.value.includes(v))
                             .map(v => t(v))
                             .join("、")}`
                 )
@@ -113,52 +167,101 @@ export class MihanNotify {
                 })
             }
         }
-        this.sfx.play()
-        this.show()
+        sfx.play()
+        show()
     }
-    getNextUpdateTime(t?: number) {
-        const now = t ?? Date.now()
+
+    /**
+     * 获取下一次整点时间。
+     * @param timestamp 可选的参考时间
+     * @returns 下一次整点的时间戳
+     */
+    function getNextUpdateTime(timestamp?: number) {
+        const now = timestamp ?? Date.now()
         const oneHour = 60 * 60 * 1000
         return Math.ceil(now / oneHour) * oneHour
     }
-    shouldNotify() {
-        if (
-            this.mihanData.value?.some(
-                (list, type) => this.mihanNotifyTypes.value.includes(type) && list.some(v => this.mihanNotifyMissions.value.includes(v))
-            )
-        ) {
-            return true
-        }
-        return false
+
+    /**
+     * 判断当前数据是否命中通知规则。
+     * @returns 是否应通知
+     */
+    function shouldNotify() {
+        return !!mihanData.value?.some(
+            (list, type) => mihanNotifyTypes.value.includes(type) && list.some(v => mihanNotifyMissions.value.includes(v))
+        )
     }
-    async checkNotify() {
-        if (this.shouldNotify()) {
-            await this.showMihanNotification()
+
+    /**
+     * 检查并触发通知。
+     */
+    async function checkNotify() {
+        if (shouldNotify()) {
+            await showMihanNotification()
         }
     }
-    sleep(duration: number) {
+
+    /**
+     * 异步休眠。
+     * @param duration 休眠时长（毫秒）
+     * @returns Promise
+     */
+    function sleep(duration: number) {
         return new Promise(resolve => setTimeout(resolve, duration))
     }
-    startWatch() {
-        if (this.watch) return
-        console.log("start watch")
-        this.watch = true
-        const next = this.getNextUpdateTime()
+
+    /**
+     * 停止当前监控计时器。
+     */
+    function stopWatch() {
+        if (watchTimer) {
+            clearTimeout(watchTimer)
+            watchTimer = null
+        }
+        watching.value = false
+    }
+
+    /**
+     * 启动密函通知轮询。
+     */
+    function startWatch() {
+        if (watching.value) return
+        watching.value = true
+        const next = getNextUpdateTime()
         const duration = next - Date.now()
-        setTimeout(async () => {
-            this.watch = false
-            let ok = await this.updateMihanData()
+        watchTimer = setTimeout(async () => {
+            watching.value = false
+            watchTimer = null
+            let ok = await updateMihanData()
             let c = 0
             while (!ok && c < 3) {
                 c++
                 console.log("update mihan data failed, retry in 3s")
-                ok = await this.updateMihanData()
-                await this.sleep(3e3)
+                ok = await updateMihanData()
+                await sleep(3e3)
             }
-            await this.checkNotify()
-            if (this.mihanEnableNotify.value) this.startWatch()
-        }, duration + 25e3) // 由于服务器往往需要25s左右才能更新数据，所以这里设置25s
+            await checkNotify()
+            if (mihanEnableNotify.value) {
+                startWatch()
+            }
+        }, duration + MIHAN_UPDATE_DELAY_MS) // 整点后延迟85秒（原25秒+新增1分钟），避免拿到上一小时旧数据
     }
-    static TYPES = ["角色", "武器", "魔之楔"]
-    static MISSIONS = ["探险/无尽", "驱离", "拆解", "驱逐", "避险", "扼守/无尽", "护送", "勘察/无尽", "追缉", "调停", "迁移"]
+
+    return {
+        mihanData,
+        mihanUpdateTime,
+        mihanEnableNotify,
+        mihanNotifyOnce,
+        mihanNotifyTypes,
+        mihanNotifyMissions,
+        show,
+        isOutdated,
+        updateMihanData,
+        showMihanNotification,
+        getNextUpdateTime,
+        shouldNotify,
+        checkNotify,
+        startWatch,
+        stopWatch,
+    }
 }

@@ -1,4 +1,5 @@
 use crate::submodules::d3d11::{self, create_d3d_device};
+use crate::submodules::script::should_stop_current_script;
 use opencv::{
     core::{CV_8UC4, Mat},
     imgproc,
@@ -550,6 +551,11 @@ impl WgcContext {
 
     /// 捕获窗口图像，可选 ROI 直接裁剪。
     fn capture_with_roi(&mut self, roi: Option<(i32, i32, i32, i32)>) -> Option<Box<Mat>> {
+        // 收到脚本停止请求时立即退出，避免无意义的采集与转换开销。
+        if should_stop_current_script() {
+            return None;
+        }
+
         // 1. 检查窗口尺寸是否变化
         let current_size = match self.item.Size() {
             Ok(s) => s,
@@ -592,6 +598,9 @@ impl WgcContext {
         if long_gap {
             // 先把当前积压帧全部取走并丢弃，避免返回“上次调用后积压的第一帧”。
             while let Ok(frame) = self.frame_pool.TryGetNextFrame() {
+                if should_stop_current_script() {
+                    return None;
+                }
                 let ticks = frame
                     .SystemRelativeTime()
                     .ok()
@@ -609,8 +618,15 @@ impl WgcContext {
         let mut latest_frame: Option<Direct3D11CaptureFrame> = None;
         let mut latest_ticks = i64::MIN;
         loop {
+            if should_stop_current_script() {
+                return None;
+            }
+
             let mut got_any = false;
             while let Ok(frame) = self.frame_pool.TryGetNextFrame() {
+                if should_stop_current_script() {
+                    return None;
+                }
                 got_any = true;
                 let ticks = frame
                     .SystemRelativeTime()
@@ -645,6 +661,10 @@ impl WgcContext {
         }
 
         // 3. WGC 未拿到“真正新帧”时，回退到 GDI 强制抓当前帧，避免滞后图像。
+        if should_stop_current_script() {
+            return None;
+        }
+
         if let Some(mat) = if let Some((x, y, w, h)) = roi {
             capture_window_roi(self.target_hwnd, x, y, w, h)
         } else {
@@ -692,6 +712,10 @@ fn capture_window_wgc_roi_internal(
     hwnd: HWND,
     roi: Option<(i32, i32, i32, i32)>,
 ) -> Option<Box<Mat>> {
+    if should_stop_current_script() {
+        return None;
+    }
+
     CAPTURER.with(|cell| {
         let mut capturer_opt = cell.borrow_mut();
 
@@ -714,7 +738,9 @@ fn capture_window_wgc_roi_internal(
 
             // 初始化后，通常需要一点时间等待第一帧
             // 可以选择在这里 sleep 一小会，或者让下面的 capture 逻辑处理（通过 cached_mat 为 None 判断）
-            std::thread::sleep(std::time::Duration::from_millis(50));
+            if !should_stop_current_script() {
+                std::thread::sleep(std::time::Duration::from_millis(50));
+            }
         }
 
         // 2. 执行捕获
@@ -724,6 +750,9 @@ fn capture_window_wgc_roi_internal(
             // 如果第一次捕获就因为没有帧而失败（Result None, Cache None）
             // 我们可以尝试再等一下并在内部重试
             if result.is_none() && ctx.cached_mat.is_none() {
+                if should_stop_current_script() {
+                    return None;
+                }
                 std::thread::sleep(std::time::Duration::from_millis(50));
                 return ctx.capture_with_roi(roi);
             }

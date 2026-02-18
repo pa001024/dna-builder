@@ -1,19 +1,40 @@
 <script setup lang="ts">
 import { provideClient } from "@urql/vue"
-import { onMounted, watchEffect } from "vue"
+import { onMounted, watch, watchEffect } from "vue"
+import { useRoute } from "vue-router"
 import { gqClient } from "./api/graphql"
 import Updater from "./components/Updater.vue"
 import { env } from "./env"
+import { useMihanNotify } from "./store/mihan"
 import { useSettingStore } from "./store/setting"
 import { useUIStore } from "./store/ui"
+import { postVisitorCount } from "./vercount"
 
 const setting = useSettingStore()
 const ui = useUIStore()
+const mihanNotify = useMihanNotify()
+const route = useRoute()
+
+/**
+ * 上报页面访问统计，不阻塞主流程。
+ */
+function reportVisitorCount() {
+    void postVisitorCount(window.location.href)
+}
+
 watchEffect(() => {
     document.body.setAttribute("data-theme", setting.theme)
     document.body.style.background = setting.windowTrasnparent ? "transparent" : "var(--color-base-300)"
     document.documentElement.style.setProperty("--uiscale", String(setting.uiScale))
 })
+
+watch(
+    () => route.fullPath,
+    () => {
+        reportVisitorCount()
+    }
+)
+
 provideClient(gqClient)
 if (env.isApp) {
     // 自动签到
@@ -133,22 +154,23 @@ if (env.isApp) {
     })
 }
 
-onMounted(() => {
+onMounted(async () => {
     ui.setLoginState(setting.dnaUserId !== 0)
     ui.startTimer()
+    reportVisitorCount()
+    if (mihanNotify.mihanEnableNotify.value) {
+        await mihanNotify.updateMihanData()
+        mihanNotify.startWatch()
+    }
 })
 </script>
 
 <template>
-    <canvas v-if="setting.windowTrasnparent && !env.isApp" id="background" class="fixed w-full h-full z-0 bg-indigo-300" />
+    <canvas v-if="setting.windowTrasnparent && !env.isApp" id="background"
+        class="fixed w-full h-full z-0 bg-indigo-300" />
     <Updater />
-    <ResizeableWindow
-        id="main-window"
-        :title="ui.title || $t(`${String($route.name)}.title`, '')"
-        darkable
-        pinable
-        :class="{ 'is-app': env.isApp }"
-    >
+    <ResizeableWindow id="main-window" :title="ui.title || $t(`${String($route.name)}.title`, '')" darkable pinable
+        :class="{ 'is-app': env.isApp }">
         <RouterView v-slot="{ Component, route }">
             <transition name="slide-right">
                 <KeepAlive v-if="route.meta.keepAlive">
@@ -178,6 +200,7 @@ onMounted(() => {
 .slide-right-enter-active {
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
 .slide-right-leave-active {
     transition: all 0.2s cubic-bezier(0.6, -0.28, 0.73, 0.04);
 }
@@ -186,6 +209,7 @@ onMounted(() => {
     opacity: 0;
     transform: translateX(-2rem);
 }
+
 .slide-right-leave-to {
     opacity: 0;
     transform: translateX(2rem);

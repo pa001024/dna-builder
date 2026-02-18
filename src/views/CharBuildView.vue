@@ -646,6 +646,21 @@ function handleTourStep(index: number) {
 
 const teamBuffLvs = useLocalStorage("teamBuffLvs", {} as Record<string, number>)
 
+/**
+ * 合并并去重 BUFF 列表，同名 BUFF 仅保留一条记录
+ * @param buffs BUFF 列表
+ * @returns 去重后的 BUFF 列表
+ */
+function dedupeBuffs(buffs: [string, number][]): [string, number][] {
+    const uniqueBuffs = new Map<string, number>()
+    buffs.forEach(([name, level]) => {
+        if (level > 0) {
+            uniqueBuffs.set(name, level)
+        }
+    })
+    return [...uniqueBuffs.entries()]
+}
+
 function updateTeamBuff(newValue: string, oldValue: string) {
     const newBuffs = [...charSettings.value.buffs.filter(v => !v[0].includes(oldValue))]
     if (newValue !== "-") {
@@ -657,7 +672,7 @@ function updateTeamBuff(newValue: string, oldValue: string) {
             newBuffs.push(...buffs)
         }
     }
-    charSettings.value.buffs = newBuffs
+    charSettings.value.buffs = dedupeBuffs(newBuffs)
     localStorage.setItem(`build.${selectedChar.value}`, JSON.stringify(charSettings.value))
 }
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MihanNotify } from "../store/mihan"
+import { MIHAN_TYPES } from "../store/mihan"
 import { timeStr, useGameTimer } from "../util"
 
 const { mihan } = useGameTimer()
@@ -20,7 +20,7 @@ defineProps<{
                     <img
                         class="size-12"
                         :src="`/imgs/webp/T_Walnut_${['Avatar', 'Weapon', 'Mod'][missionId]}.webp`"
-                        :alt="`${MihanNotify.TYPES[missionId]}密函`"
+                        :alt="`${MIHAN_TYPES[missionId]}密函`"
                     />
                     <div
                         class="font-bold text-sm sm:text-lg whitespace-nowrap"
@@ -28,7 +28,7 @@ defineProps<{
                             color: ['#ba9011', '#1171ba', '#ba1111'][missionId],
                         }"
                     >
-                        {{ $t(MihanNotify.TYPES[missionId]) }}
+                        {{ $t(MIHAN_TYPES[missionId]) }}
                     </div>
                 </div>
                 <div class="divider mx-2 my-1" />

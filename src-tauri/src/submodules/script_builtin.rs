@@ -17,8 +17,9 @@ use std::{
     collections::{HashMap, HashSet},
     path::{Path, PathBuf},
     sync::{
-        Arc, Mutex, OnceLock, mpsc,
+        Arc, Mutex, OnceLock,
         atomic::{AtomicU64, Ordering},
+        mpsc,
     },
     thread,
     time::{Duration, SystemTime, UNIX_EPOCH},
@@ -35,6 +36,7 @@ use crate::submodules::{
     ocr::{self, OcrInitConfig},
     predict_rotation::predict_rotation,
     route::find_path,
+    script::{SCRIPT_STOP_INTERRUPT_MESSAGE, should_stop_current_script},
     script_vision::{
         batch_match_color_impl, color_filter_hsl_impl, color_filter_impl, color_key_match_impl,
         draw_bboxes_impl, draw_contours_impl, find_contours_impl, hamming_distance_hex,
@@ -44,7 +46,9 @@ use crate::submodules::{
     },
     tpl::{get_template, get_template_b64},
     tpl_match::match_template,
-    util::{capture_window, capture_window_roi, capture_window_wgc, capture_window_wgc_roi, check_size},
+    util::{
+        capture_window, capture_window_roi, capture_window_wgc, capture_window_wgc_roi, check_size,
+    },
     win::{find_window, get_window_by_process_name, move_window, win_get_client_pos},
 };
 use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
@@ -78,6 +82,8 @@ static SCRIPT_CONFIG_PENDING: OnceLock<Mutex<HashMap<String, mpsc::Sender<serde_
 thread_local! {
     /// 当前执行线程对应的脚本路径（用于 readConfig 作用域与相对路径解析）。
     static CURRENT_SCRIPT_PATH: RefCell<String> = const { RefCell::new(String::new()) };
+    /// WGC 截图返回对象缓存：按 hwnd 复用同一个 JS Mat，降低高频截图的 GC 压力。
+    static WGC_CAPTURE_MAT_CACHE: RefCell<HashMap<isize, JsObject<JsMat>>> = RefCell::new(HashMap::new());
 }
 
 #[derive(Clone, Copy)]
@@ -128,6 +134,17 @@ pub fn set_current_script_path(script_path: String) {
     });
 }
 
+/// 清理脚本线程内的运行期缓存。
+///
+/// 说明：
+/// - 每次脚本启动前调用，避免跨 Context 复用旧 JS 对象；
+/// - 仅清理与脚本执行线程绑定的缓存，不影响全局状态。
+pub fn clear_script_runtime_cache() {
+    WGC_CAPTURE_MAT_CACHE.with(|cache| {
+        cache.borrow_mut().clear();
+    });
+}
+
 /// 获取当前执行脚本路径（完整路径，用于事件 scope）。
 pub fn get_current_script_path() -> Option<String> {
     let script_path = CURRENT_SCRIPT_PATH.with(|storage| storage.borrow().clone());
@@ -140,7 +157,8 @@ pub fn get_current_script_path() -> Option<String> {
 }
 
 /// 获取 readConfig 等待映射表。
-fn _script_config_pending_map() -> &'static Mutex<HashMap<String, mpsc::Sender<serde_json::Value>>> {
+fn _script_config_pending_map() -> &'static Mutex<HashMap<String, mpsc::Sender<serde_json::Value>>>
+{
     SCRIPT_CONFIG_PENDING.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
@@ -160,7 +178,9 @@ fn _current_script_scope_name() -> Option<String> {
     if script_path.trim().is_empty() {
         return None;
     }
-    let file_name = Path::new(script_path.as_str()).file_name()?.to_string_lossy();
+    let file_name = Path::new(script_path.as_str())
+        .file_name()?
+        .to_string_lossy();
     let normalized = file_name.trim().to_string();
     if normalized.is_empty() {
         None
@@ -378,7 +398,10 @@ fn _parse_select_options_from_array(array: &JsArray, ctx: &mut Context) -> JsRes
     let length = array.length(ctx)? as usize;
     let mut options = Vec::with_capacity(length);
     for idx in 0..length {
-        let option = array.get(idx as u32, ctx)?.to_string(ctx)?.to_std_string_lossy();
+        let option = array
+            .get(idx as u32, ctx)?
+            .to_string(ctx)?
+            .to_std_string_lossy();
         options.push(option);
     }
     Ok(_normalize_select_options(options))
@@ -440,7 +463,10 @@ fn _parse_script_config_format(
             }
         };
 
-        let options = if matches!(kind, ScriptConfigKind::Select | ScriptConfigKind::MultiSelect) {
+        let options = if matches!(
+            kind,
+            ScriptConfigKind::Select | ScriptConfigKind::MultiSelect
+        ) {
             let options_value = obj.get(js_string!("options"), ctx)?;
             if options_value.is_undefined() || options_value.is_null() {
                 Vec::new()
@@ -534,9 +560,9 @@ fn _default_script_config_value(spec: &ScriptConfigFormatSpec) -> ScriptConfigVa
         ScriptConfigKind::Number => ScriptConfigValue::Number(0.0),
         ScriptConfigKind::String => ScriptConfigValue::String(String::new()),
         ScriptConfigKind::Boolean => ScriptConfigValue::Boolean(false),
-        ScriptConfigKind::Select => ScriptConfigValue::String(
-            spec.options.first().cloned().unwrap_or_default(),
-        ),
+        ScriptConfigKind::Select => {
+            ScriptConfigValue::String(spec.options.first().cloned().unwrap_or_default())
+        }
         ScriptConfigKind::MultiSelect => ScriptConfigValue::Strings(Vec::new()),
     }
 }
@@ -566,7 +592,11 @@ fn _coerce_js_to_script_config_value(
             if let Some(number) = value.as_number() {
                 return Ok(ScriptConfigValue::Boolean(number != 0.0));
             }
-            let text = value.to_string(ctx)?.to_std_string_lossy().trim().to_lowercase();
+            let text = value
+                .to_string(ctx)?
+                .to_std_string_lossy()
+                .trim()
+                .to_lowercase();
             let bool_value = matches!(text.as_str(), "1" | "true" | "yes" | "y" | "on");
             Ok(ScriptConfigValue::Boolean(bool_value))
         }
@@ -590,7 +620,10 @@ fn _coerce_js_to_script_config_value(
                     let length = array.length(ctx)? as usize;
                     let mut values = Vec::with_capacity(length);
                     for idx in 0..length {
-                        let item_text = array.get(idx as u32, ctx)?.to_string(ctx)?.to_std_string_lossy();
+                        let item_text = array
+                            .get(idx as u32, ctx)?
+                            .to_string(ctx)?
+                            .to_std_string_lossy();
                         values.push(item_text);
                     }
                     values
@@ -702,7 +735,11 @@ fn _coerce_json_to_script_config_value(
             let raw_values = if let Some(array) = value.as_array() {
                 array
                     .iter()
-                    .map(|item| item.as_str().map(|s| s.to_string()).unwrap_or_else(|| item.to_string()))
+                    .map(|item| {
+                        item.as_str()
+                            .map(|s| s.to_string())
+                            .unwrap_or_else(|| item.to_string())
+                    })
                     .collect::<Vec<String>>()
             } else if let Some(text) = value.as_str() {
                 if text.trim().is_empty() {
@@ -1355,6 +1392,19 @@ fn _parse_capture_roi_args(
     }
 }
 
+/// 检查当前脚本是否已收到停止请求。
+///
+/// 若已停止，抛出带统一中断标记的异常，
+/// 由脚本运行入口识别并按“正常停止”处理。
+fn _throw_if_script_stop_requested() -> JsResult<()> {
+    if should_stop_current_script() {
+        return Err(JsNativeError::error()
+            .with_message(SCRIPT_STOP_INTERRUPT_MESSAGE)
+            .into());
+    }
+    Ok(())
+}
+
 /// 从窗口获取图像 Mat 对象函数。
 ///
 /// 参数：
@@ -1370,6 +1420,8 @@ fn _capture_window(
     use_wgc: Option<JsValue>,
     ctx: &mut Context,
 ) -> JsResult<JsValue> {
+    _throw_if_script_stop_requested()?;
+
     let hwnd = HWND(
         hwnd.unwrap_or_else(|| JsValue::undefined())
             .to_number(ctx)? as isize as *mut std::ffi::c_void,
@@ -1392,6 +1444,8 @@ fn _capture_window(
     if let Some(mat) = mat {
         mat.into_js(ctx)
     } else {
+        // 捕获流程可能在调用过程中收到停止请求，这里再次兜底识别。
+        _throw_if_script_stop_requested()?;
         Err(js_error!("capture_window failed"))
     }
 }
@@ -1409,6 +1463,8 @@ fn _capture_window_wgc(
     h: Option<JsValue>,
     ctx: &mut Context,
 ) -> JsResult<JsValue> {
+    _throw_if_script_stop_requested()?;
+
     let hwnd = HWND(
         hwnd.unwrap_or_else(|| JsValue::undefined())
             .to_number(ctx)? as isize as *mut std::ffi::c_void,
@@ -1420,8 +1476,39 @@ fn _capture_window_wgc(
         capture_window_wgc(hwnd)
     };
     if let Some(mat) = mat {
-        mat.into_js(ctx)
+        let cache_key = hwnd.0 as isize;
+        WGC_CAPTURE_MAT_CACHE.with(|cache| {
+            let mut cache_map = cache.borrow_mut();
+            if let Some(js_mat_obj) = cache_map.get(&cache_key).cloned() {
+                // 复用同一个 hwnd 对应的 JS Mat 对象，减少 GC 压力。
+                {
+                    let mut dst_binding = js_mat_obj.borrow_mut();
+                    let dst_inner = &mut dst_binding.data_mut().inner;
+
+                    // 尺寸一致时直接写回同一块 Mat 内存；尺寸变化时再替换底层 Mat。
+                    if dst_inner.rows() == mat.rows() && dst_inner.cols() == mat.cols() {
+                        if let Err(err) = mat.copy_to(&mut **dst_inner) {
+                            return Err(
+                                JsNativeError::error()
+                                    .with_message(format!("复用 WGC Mat 写入失败: {err}"))
+                                    .into(),
+                            );
+                        }
+                    } else {
+                        *dst_inner = mat;
+                    }
+                }
+                Ok(js_mat_obj.upcast().into())
+            } else {
+                let js_value = mat.into_js(ctx)?;
+                let js_mat_obj = js_value.get_native::<JsMat>()?;
+                cache_map.insert(cache_key, js_mat_obj);
+                Ok(js_value)
+            }
+        })
     } else {
+        // WGC 捕获内含等待与重试，结束后需再次判断是否为主动停止。
+        _throw_if_script_stop_requested()?;
         Err(js_error!("capture_window_wgc failed"))
     }
 }
@@ -1622,7 +1709,8 @@ fn _imread_url(
 
     // 如果 local_path 不为空，先尝试从本地加载
     if !local_path.is_empty() {
-        if let Ok(mat) = opencv::imgcodecs::imread(&resolved_local_path, opencv::imgcodecs::IMREAD_COLOR)
+        if let Ok(mat) =
+            opencv::imgcodecs::imread(&resolved_local_path, opencv::imgcodecs::IMREAD_COLOR)
         {
             let js_mat = Box::new(mat).into_js(ctx)?;
             return Ok(js_mat);
@@ -1687,10 +1775,8 @@ fn _imread_url_rgba(
 
     // 如果 local_path 不为空，先尝试从本地加载
     if !local_path.is_empty() {
-        if let Ok(mat) = opencv::imgcodecs::imread(
-            &resolved_local_path,
-            opencv::imgcodecs::IMREAD_UNCHANGED,
-        )
+        if let Ok(mat) =
+            opencv::imgcodecs::imread(&resolved_local_path, opencv::imgcodecs::IMREAD_UNCHANGED)
         {
             let js_mat = Box::new(mat).into_js(ctx)?;
             return Ok(js_mat);
@@ -1752,7 +1838,7 @@ fn _init_ocr(
 ) -> JsResult<JsValue> {
     let local_root_dir = local_root_dir.unwrap_or_else(|| JsValue::undefined());
     let cdn_base_url = cdn_base_url.unwrap_or_else(|| JsValue::undefined());
-    let num_thread = num_thread.unwrap_or_else(|| JsValue::new(2.0));
+    let num_thread = num_thread.unwrap_or_else(|| JsValue::new(4.0));
 
     let local_root_dir = if local_root_dir.is_undefined() || local_root_dir.is_null() {
         None
@@ -1786,7 +1872,9 @@ fn _init_ocr(
     };
     let root_dir = ocr::init_ocr(config)
         .map_err(|e| JsNativeError::error().with_message(format!("initOcr 失败: {e}")))?;
-    Ok(JsValue::from(js_string!(root_dir.to_string_lossy().to_string())))
+    Ok(JsValue::from(js_string!(
+        root_dir.to_string_lossy().to_string()
+    )))
 }
 
 /// OCR 文字识别：输入 Mat，返回识别文本。
@@ -1807,6 +1895,8 @@ fn _imshow(
     wait_key_ms: Option<JsValue>,
     ctx: &mut Context,
 ) -> JsResult<JsValue> {
+    _throw_if_script_stop_requested()?;
+
     let (promise, resolvers) = JsPromise::new_pending(ctx);
     let js_img_mat = js_img_mat.unwrap_or_else(|| JsValue::undefined());
     let js_img_mat = js_img_mat.get_native::<JsMat>()?;
@@ -1821,12 +1911,14 @@ fn _imshow(
     let sender = _get_imshow_sender();
     let delay_ms = wait_key_ms.max(0) as u64;
 
+    // 先同步投递帧到渲染线程，避免脚本未让出执行权时窗口无内容。
+    let _ = sender.send(ImshowCommand::Show {
+        title,
+        mat: mat_clone,
+    });
+
     ctx.enqueue_job(
         NativeAsyncJob::new(async move |context| {
-            let _ = sender.send(ImshowCommand::Show {
-                title,
-                mat: mat_clone,
-            });
             if delay_ms > 0 {
                 thread::sleep(Duration::from_millis(delay_ms));
             }
@@ -2684,7 +2776,9 @@ fn _read_config(
         .trim()
         .to_string();
     if name.is_empty() {
-        return Err(JsNativeError::typ().with_message("readConfig name 不能为空").into());
+        return Err(JsNativeError::typ()
+            .with_message("readConfig name 不能为空")
+            .into());
     }
 
     let desc = desc
@@ -2705,9 +2799,9 @@ fn _read_config(
     let request_id = _next_script_config_request_id();
     let (tx, rx) = mpsc::channel::<serde_json::Value>();
     {
-        let mut pending = _script_config_pending_map()
-            .lock()
-            .map_err(|e| JsNativeError::error().with_message(format!("配置请求映射锁失败: {e:?}")))?;
+        let mut pending = _script_config_pending_map().lock().map_err(|e| {
+            JsNativeError::error().with_message(format!("配置请求映射锁失败: {e:?}"))
+        })?;
         pending.insert(request_id.clone(), tx);
     }
 
@@ -2724,9 +2818,9 @@ fn _read_config(
         }),
     );
     if let Err(e) = emit_result {
-        let mut pending = _script_config_pending_map()
-            .lock()
-            .map_err(|lock_err| JsNativeError::error().with_message(format!("配置请求映射锁失败: {lock_err:?}")))?;
+        let mut pending = _script_config_pending_map().lock().map_err(|lock_err| {
+            JsNativeError::error().with_message(format!("配置请求映射锁失败: {lock_err:?}"))
+        })?;
         pending.remove(&request_id);
         return Err(JsNativeError::error()
             .with_message(format!("发送 script-read-config 事件失败: {e}"))
@@ -2735,9 +2829,9 @@ fn _read_config(
 
     let response = rx.recv_timeout(Duration::from_secs(10)).ok();
     {
-        let mut pending = _script_config_pending_map()
-            .lock()
-            .map_err(|e| JsNativeError::error().with_message(format!("配置请求映射锁失败: {e:?}")))?;
+        let mut pending = _script_config_pending_map().lock().map_err(|e| {
+            JsNativeError::error().with_message(format!("配置请求映射锁失败: {e:?}"))
+        })?;
         pending.remove(&request_id);
     }
 
