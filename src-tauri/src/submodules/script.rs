@@ -2,6 +2,7 @@ use crate::submodules::async_tokio::TokioJobExecutor;
 use crate::submodules::jsmat::JsMat;
 use crate::submodules::jstimer::JsTimer;
 use crate::submodules::logger::TauriLogger;
+use crate::submodules::script_console::Console;
 use crate::submodules::script_builtin::{
     register_builtin_functions, set_current_script_path, set_script_event_app_handle,
 };
@@ -9,7 +10,6 @@ use boa_engine::builtins::error::Error as BoaErrorObject;
 use boa_engine::context::ContextBuilder;
 use boa_engine::job::JobExecutor;
 use boa_engine::{JsError, Script, Source};
-use boa_runtime::extensions::ConsoleExtension;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -33,15 +33,17 @@ struct ScriptStopSnapshot {
 ///
 /// # 参数
 /// - `app_handle`: Tauri 应用句柄
+/// - `scope`: 事件作用域（脚本完整路径）
 /// - `error_message`: 需要输出的错误消息
 ///
 /// # 返回
 /// 返回原始错误消息，便于直接用于 `Err(...)`
-fn emit_script_error(app_handle: &tauri::AppHandle, error_message: String) -> String {
+fn emit_script_error(app_handle: &tauri::AppHandle, scope: &str, error_message: String) -> String {
     eprintln!("{}", error_message);
     let _ = app_handle.emit(
         "script-console",
         serde_json::json!({
+            "scope": scope,
             "level": "error",
             "message": error_message.clone(),
         }),
@@ -191,16 +193,11 @@ pub async fn run_script_with_tauri_console(
             app_handle: logger_app_handle,
         };
 
-        // 使用自定义的 Console Extension
-        boa_runtime::register(
-            (
-                ConsoleExtension(tauri_logger),
-                boa_runtime::extensions::TimeoutExtension,
-            ),
-            None,
-            context,
-        )
-        .map_err(|e| format!("注册 Console Extension 失败: {:?}", e))?;
+        // 注册 timeout 扩展，并挂载自定义 console 实现。
+        boa_runtime::register((boa_runtime::extensions::TimeoutExtension,), None, context)
+            .map_err(|e| format!("注册 Timeout Extension 失败: {:?}", e))?;
+        Console::register_with_logger(tauri_logger, context)
+            .map_err(|e| format!("注册自定义 Console 失败: {:?}", e))?;
 
         // 设置脚本内置函数的事件发送器，供 setStatus 等函数推送到前端。
         set_script_event_app_handle(app_handle.clone());
@@ -224,13 +221,13 @@ pub async fn run_script_with_tauri_console(
                         .map(|s| s.to_std_string_escaped())
                         .unwrap_or_else(|_| format!("{:?}", result));
                     let error_message = format!("JavaScript 返回 Error 对象: {}", error_detail);
-                    return Err(emit_script_error(&app_handle, error_message));
+                    return Err(emit_script_error(&app_handle, script_path.as_str(), error_message));
                 }
 
                 // 使用同步版本的 run_jobs
                 if let Err(e) = job_executor.run_jobs(context) {
                     let error_message = format_js_error_message(context, "运行任务失败", &e);
-                    return Err(emit_script_error(&app_handle, error_message));
+                    return Err(emit_script_error(&app_handle, script_path.as_str(), error_message));
                 }
 
                 // 将脚本返回值转成字符串传回前端，供调度器流控做 case/default 匹配。
@@ -247,7 +244,7 @@ pub async fn run_script_with_tauri_console(
             Err(e) => {
                 // 解析或运行时异常时，写入终端并同步推送到前端脚本控制台
                 let error_message = format_js_error_message(context, "JavaScript 执行错误", &e);
-                Err(emit_script_error(&app_handle, error_message))
+                Err(emit_script_error(&app_handle, script_path.as_str(), error_message))
             }
         }
     })

@@ -1,6 +1,7 @@
 use boa_engine::{Context, JsResult};
 use boa_gc::{Finalize, Trace};
-use boa_runtime::console::{ConsoleState, Logger};
+use crate::submodules::script_builtin::get_current_script_path;
+use crate::submodules::script_console::{ConsoleState, Logger};
 use std::sync::Arc;
 use tauri::Emitter;
 
@@ -14,9 +15,11 @@ pub struct TauriLogger {
 impl Logger for TauriLogger {
     /// 发送控制台输出到 Tauri 事件系统
     fn log(&self, msg: String, _state: &ConsoleState, _context: &mut Context) -> JsResult<()> {
+        let scope = get_current_script_path();
         let _ = self.app_handle.emit(
             "script-console",
             serde_json::json!({
+                "scope": scope,
                 "level": "log",
                 "message": msg,
             }),
@@ -25,9 +28,11 @@ impl Logger for TauriLogger {
     }
 
     fn info(&self, msg: String, _state: &ConsoleState, _context: &mut Context) -> JsResult<()> {
+        let scope = get_current_script_path();
         let _ = self.app_handle.emit(
             "script-console",
             serde_json::json!({
+                "scope": scope,
                 "level": "info",
                 "message": msg,
             }),
@@ -36,9 +41,11 @@ impl Logger for TauriLogger {
     }
 
     fn warn(&self, msg: String, _state: &ConsoleState, _context: &mut Context) -> JsResult<()> {
+        let scope = get_current_script_path();
         let _ = self.app_handle.emit(
             "script-console",
             serde_json::json!({
+                "scope": scope,
                 "level": "warn",
                 "message": msg,
             }),
@@ -47,9 +54,11 @@ impl Logger for TauriLogger {
     }
 
     fn error(&self, msg: String, _state: &ConsoleState, _context: &mut Context) -> JsResult<()> {
+        let scope = get_current_script_path();
         let _ = self.app_handle.emit(
             "script-console",
             serde_json::json!({
+                "scope": scope,
                 "level": "error",
                 "message": msg,
             }),
@@ -58,9 +67,11 @@ impl Logger for TauriLogger {
     }
 
     fn debug(&self, msg: String, _state: &ConsoleState, _context: &mut Context) -> JsResult<()> {
+        let scope = get_current_script_path();
         let _ = self.app_handle.emit(
             "script-console",
             serde_json::json!({
+                "scope": scope,
                 "level": "debug",
                 "message": msg,
             }),

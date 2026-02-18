@@ -393,18 +393,27 @@ declare function isElevated(): boolean
 /**
  * 从窗口捕获图像Mat对象
  * @param hwnd 窗口句柄
+ * @param x ROI 左上角 X（可选，相对客户区）
+ * @param y ROI 左上角 Y（可选，相对客户区）
+ * @param w ROI 宽度（可选）
+ * @param h ROI 高度（可选）
+ * @param useWgc 是否使用 WGC 实现（可选，默认 false）
  * @returns Mat对象
  * @throws 捕获窗口失败时抛出错误
  */
-declare function captureWindow(hwnd: number): Mat
+declare function captureWindow(hwnd: number, x?: number, y?: number, w?: number, h?: number, useWgc?: boolean): Mat
 
 /**
  * 从窗口捕获图像Mat对象（WGC优化版）
  * @param hwnd 窗口句柄
+ * @param x ROI 左上角 X（可选，相对客户区）
+ * @param y ROI 左上角 Y（可选，相对客户区）
+ * @param w ROI 宽度（可选）
+ * @param h ROI 高度（可选）
  * @returns Mat对象
  * @throws 捕获窗口失败时抛出错误
  */
-declare function captureWindowWGC(hwnd: number): Mat
+declare function captureWindowWGC(hwnd: number, x?: number, y?: number, w?: number, h?: number): Mat
 
 /**
  * 从文件加载模板Mat对象(有缓存)
@@ -457,6 +466,24 @@ declare function imreadUrlRgba(localPath: string, url: string): Mat
  * @throws 加载模板失败时抛出错误
  */
 declare function imreadUrl(localPath: string, url: string): Mat
+
+/**
+ * 初始化 OCR 模块（自动下载缺失资源到本地）。
+ * @param localRootDir 本地资源目录（可选，默认使用程序数据目录）
+ * @param cdnBaseUrl CDN 根地址（可选，默认 https://cdn.dna-builder.cn/ocr）
+ * @param numThread 识别线程数（可选，默认 2）
+ * @returns 实际使用的本地资源目录
+ * @throws 初始化失败时抛出错误
+ */
+declare function initOcr(localRootDir?: string, cdnBaseUrl?: string, numThread?: number): string
+
+/**
+ * OCR 文字识别（输入 Mat，返回文本）。
+ * @param imgMat 图像 Mat（支持 1/3/4 通道）
+ * @returns 识别文本（失败或无结果时可能为空字符串）
+ * @throws OCR 未初始化或识别失败时抛出错误
+ */
+declare function ocrText(imgMat: Mat): string
 
 /**
  * 保存Mat对象到文件

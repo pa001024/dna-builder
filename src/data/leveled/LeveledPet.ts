@@ -90,21 +90,23 @@ export class LeveledPet implements Pet {
     }
 
     private formatSkillDescription(description: string, values: number[]): string {
-        let formattedDesc = description
         let valueIndex = 0
 
-        while (formattedDesc.includes("{%}") && valueIndex < values.length) {
-            const val = values[valueIndex]
-            formattedDesc = formattedDesc.replace("{%}", `${+(val * 100).toFixed(2)}%`)
-            valueIndex++
-        }
+        return description.replace(/\{%\}|\{\}/g, placeholder => {
+            if (valueIndex >= values.length) {
+                return placeholder
+            }
 
-        while (formattedDesc.includes("{}") && valueIndex < values.length) {
-            formattedDesc = formattedDesc.replace("{}", `${+values[valueIndex].toFixed(2)}`)
+            const value = values[valueIndex]
             valueIndex++
-        }
 
-        return formattedDesc
+            // 按占位符类型格式化当前顺序对应的数值，确保严格按出现顺序替换。
+            if (placeholder === "{%}") {
+                return `${+(value * 100).toFixed(2)}%`
+            }
+
+            return `${+value.toFixed(2)}`
+        })
     }
 
     getProperties(): Partial<Pet> {

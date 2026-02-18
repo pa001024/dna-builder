@@ -8,8 +8,6 @@ import {
     deleteFile,
     getDocumentsDir,
     getScriptRuntimeInfo,
-    type ScriptRuntimeInfo,
-    type ScriptHotkeyBinding,
     listScriptFiles,
     openExplorer,
     readTextFile,
@@ -17,9 +15,11 @@ import {
     resolveScriptConfigRequest,
     runAsAdmin,
     runScript,
-    syncScriptHotkeyBindings,
+    type ScriptHotkeyBinding,
+    type ScriptRuntimeInfo,
     stopScript,
     stopScriptByPath,
+    syncScriptHotkeyBindings,
     unwatchFile,
     watchFile,
     writeTextFile,
@@ -149,6 +149,12 @@ interface OpenLocalScriptOptions {
     preferConfigPanel?: boolean
 }
 
+interface ScriptHotkeyConfig {
+    hotkey: string
+    hotIfWinActive: string
+    holdToLoop: boolean
+}
+
 const openedTabs = ref<OpenedTab[]>([])
 const activeTabId = ref<string | null>(null)
 
@@ -197,10 +203,12 @@ const schedulerDraftStepOptions = computed(() =>
 const SCRIPT_CONFIG_STORAGE_KEY = "script-runtime-config-v1"
 const SCRIPT_HOTKEY_STORAGE_KEY = "script-hotkey-bindings-v1"
 const scriptConfigStore = ref<Record<string, Record<string, ScriptConfigItem>>>({})
-const scriptHotkeyStore = ref<Record<string, string>>({})
+const scriptHotkeyStore = ref<Record<string, ScriptHotkeyConfig>>({})
 const showScriptHotkeyDialog = ref(false)
 const editingHotkeyScriptName = ref("")
 const editingHotkeyValue = ref("")
+const editingHotkeyWinActive = ref("")
+const editingHotkeyHoldToLoop = ref(false)
 const activeConfigScope = ref("")
 const currentConfigScope = computed(() => {
     if (activeTab.value?.type === "local") {
@@ -590,7 +598,76 @@ function getScriptFileNameFromPath(scriptPath: string): string {
         .pop() ?? ""
 }
 
+/**
+ * 规范化脚本事件作用域（路径），用于跨平台与大小写无关比较。
+ * @param scope 事件携带的 scope
+ * @returns 规范化后的 scope
+ */
+function normalizeScriptEventScope(scope?: string | null): string {
+    return String(scope ?? "")
+        .trim()
+        .replace(/\//g, "\\")
+        .toLowerCase()
+}
+
+/**
+ * 获取当前前端用于接收脚本事件的作用域。
+ * 优先使用当前激活本地标签页，其次退化到唯一运行实例路径。
+ * @returns 当前作用域（为空表示不接收 scoped 事件）
+ */
+function getCurrentScriptEventScope(): string {
+    if (activeTab.value?.type === "local") {
+        return normalizeScriptEventScope(`${scriptsDir.value}\\${activeTab.value.name}`)
+    }
+    if (runningScriptPaths.value.length === 1) {
+        return normalizeScriptEventScope(runningScriptPaths.value[0])
+    }
+    return ""
+}
+
+/**
+ * 判断当前事件 scope 是否应被前端接收。
+ * @param scope 事件 scope
+ * @returns true 表示接收；false 表示忽略
+ */
+function shouldAcceptScopedScriptEvent(scope?: string | null): boolean {
+    const payloadScope = normalizeScriptEventScope(scope)
+    if (!payloadScope) {
+        return true
+    }
+    const currentScope = getCurrentScriptEventScope()
+    if (!currentScope) {
+        return false
+    }
+    if (payloadScope === currentScope) {
+        return true
+    }
+    const payloadFileName = getScriptFileNameFromPath(payloadScope).toLowerCase()
+    const currentFileName = getScriptFileNameFromPath(currentScope).toLowerCase()
+    return Boolean(payloadFileName) && payloadFileName === currentFileName
+}
+
 const runningScriptFileNameSet = computed(() => new Set(runningScriptPaths.value.map(path => getScriptFileNameFromPath(path)).filter(Boolean)))
+const activeLocalScriptName = computed(() => (activeTab.value?.type === "local" ? activeTab.value.name : ""))
+const isActiveLocalScriptRunning = computed(() => {
+    const scriptName = activeLocalScriptName.value
+    return scriptName ? isLocalScriptRunning(scriptName) : false
+})
+const isSchedulerRunning = computed(() => runningMode.value === "scheduler" && isRunning.value)
+const isRunButtonInStopState = computed(() => (viewMode.value === "scheduler" ? isSchedulerRunning.value : isActiveLocalScriptRunning.value))
+const runButtonTitle = computed(() => {
+    if (viewMode.value === "scheduler") {
+        return isSchedulerRunning.value ? "停止调度器" : "运行调度器"
+    }
+    if (activeTab.value?.type === "online") {
+        return "请先下载脚本"
+    }
+    const scriptName = activeLocalScriptName.value
+    if (!scriptName) {
+        return "运行脚本"
+    }
+    return isActiveLocalScriptRunning.value ? `停止脚本: ${scriptName}` : `运行脚本: ${scriptName}`
+})
 
 /**
  * 判断指定本地脚本当前是否在运行。
@@ -614,8 +691,8 @@ function applyBackendRuntimeInfo(
 ) {
     const normalizedPaths = Array.isArray(runtimeInfo.scriptPaths)
         ? runtimeInfo.scriptPaths
-              .map(path => String(path ?? "").trim())
-              .filter(path => path.length > 0)
+            .map(path => String(path ?? "").trim())
+            .filter(path => path.length > 0)
         : []
     runningScriptPaths.value = normalizedPaths
 
@@ -741,6 +818,78 @@ function normalizeScriptHotkeyValue(hotkey: string): string {
 }
 
 /**
+ * 规范化热键生效条件（对应 `#HotIf WinActive("WinTitle")` 的 WinTitle 字符串）。
+ * @param value 用户输入
+ * @returns 去首尾空白后的条件字符串
+ */
+function normalizeScriptHotIfWinActiveValue(value: string): string {
+    return String(value ?? "").trim()
+}
+
+/**
+ * 规范化“按住循环”配置值。
+ * @param value 原始值
+ * @returns 布尔值
+ */
+function normalizeScriptHotkeyHoldToLoopValue(value: unknown): boolean {
+    return Boolean(value)
+}
+
+/**
+ * 构造默认热键配置。
+ * @returns 默认配置对象
+ */
+function createDefaultScriptHotkeyConfig(): ScriptHotkeyConfig {
+    return {
+        hotkey: "",
+        hotIfWinActive: "",
+        holdToLoop: false,
+    }
+}
+
+/**
+ * 规范化热键配置对象（兼容旧版仅字符串热键格式）。
+ * @param raw 原始配置
+ * @returns 规范化后的配置；无效时返回 null
+ */
+function normalizeScriptHotkeyConfig(raw: unknown): ScriptHotkeyConfig | null {
+    if (typeof raw === "string") {
+        const hotkey = normalizeScriptHotkeyValue(raw)
+        if (!hotkey) return null
+        return {
+            hotkey,
+            hotIfWinActive: "",
+            holdToLoop: false,
+        }
+    }
+
+    if (!raw || typeof raw !== "object") return null
+    const maybeConfig = raw as Partial<ScriptHotkeyConfig>
+    const hotkey = normalizeScriptHotkeyValue(maybeConfig.hotkey ?? "")
+    if (!hotkey) return null
+    return {
+        hotkey,
+        hotIfWinActive: normalizeScriptHotIfWinActiveValue(maybeConfig.hotIfWinActive ?? ""),
+        holdToLoop: normalizeScriptHotkeyHoldToLoopValue(maybeConfig.holdToLoop),
+    }
+}
+
+/**
+ * 构造用于列表展示的热键标签文本。
+ * @param config 热键配置
+ * @returns 展示文本
+ */
+function formatScriptHotkeyBadgeText(config?: ScriptHotkeyConfig): string {
+    if (!config) return ""
+    const base = normalizeScriptHotkeyValue(config.hotkey)
+    if (!base) return ""
+    if (config.holdToLoop) {
+        return `${base} [按住循环]`
+    }
+    return base
+}
+
+/**
  * 持久化脚本热键绑定。
  */
 function persistScriptHotkeys() {
@@ -757,13 +906,13 @@ function loadScriptHotkeys() {
         return
     }
     try {
-        const parsed = JSON.parse(stored) as Record<string, string>
-        const normalized: Record<string, string> = {}
-        for (const [scriptName, hotkey] of Object.entries(parsed ?? {})) {
+        const parsed = JSON.parse(stored) as Record<string, unknown>
+        const normalized: Record<string, ScriptHotkeyConfig> = {}
+        for (const [scriptName, rawConfig] of Object.entries(parsed ?? {})) {
             const normalizedScriptName = String(scriptName ?? "").trim()
-            const normalizedHotkey = normalizeScriptHotkeyValue(hotkey)
-            if (!normalizedScriptName || !normalizedHotkey) continue
-            normalized[normalizedScriptName] = normalizedHotkey
+            const normalizedConfig = normalizeScriptHotkeyConfig(rawConfig)
+            if (!normalizedScriptName || !normalizedConfig) continue
+            normalized[normalizedScriptName] = normalizedConfig
         }
         scriptHotkeyStore.value = normalized
     } catch (error) {
@@ -779,13 +928,15 @@ function loadScriptHotkeys() {
 function buildScriptHotkeyBindingsPayload(): ScriptHotkeyBinding[] {
     const payload: ScriptHotkeyBinding[] = []
     const localScriptSet = new Set(localScripts.value)
-    for (const [scriptName, hotkey] of Object.entries(scriptHotkeyStore.value)) {
+    for (const [scriptName, config] of Object.entries(scriptHotkeyStore.value)) {
         if (!localScriptSet.has(scriptName)) continue
-        const normalizedHotkey = normalizeScriptHotkeyValue(hotkey)
+        const normalizedHotkey = normalizeScriptHotkeyValue(config.hotkey)
         if (!normalizedHotkey) continue
         payload.push({
             scriptPath: `${scriptsDir.value}\\${scriptName}`,
             hotkey: normalizedHotkey,
+            hotIfWinActive: normalizeScriptHotIfWinActiveValue(config.hotIfWinActive),
+            holdToLoop: normalizeScriptHotkeyHoldToLoopValue(config.holdToLoop),
         })
     }
     return payload
@@ -815,7 +966,10 @@ async function syncScriptHotkeysWithBackend() {
  */
 function openScriptHotkeyDialog(scriptName: string) {
     editingHotkeyScriptName.value = scriptName
-    editingHotkeyValue.value = scriptHotkeyStore.value[scriptName] ?? ""
+    const existing = scriptHotkeyStore.value[scriptName] ?? createDefaultScriptHotkeyConfig()
+    editingHotkeyValue.value = existing.hotkey
+    editingHotkeyWinActive.value = existing.hotIfWinActive
+    editingHotkeyHoldToLoop.value = existing.holdToLoop
     showScriptHotkeyDialog.value = true
 }
 
@@ -825,22 +979,26 @@ function openScriptHotkeyDialog(scriptName: string) {
 async function saveScriptHotkeyBinding() {
     const scriptName = editingHotkeyScriptName.value
     if (!scriptName) return
-    const previousHotkey = scriptHotkeyStore.value[scriptName]
+    const previousConfig = scriptHotkeyStore.value[scriptName] ? { ...scriptHotkeyStore.value[scriptName] } : null
     const hotkey = normalizeScriptHotkeyValue(editingHotkeyValue.value)
     if (!hotkey) {
-        ui.showErrorMessage("请输入热键，示例：^c")
+        ui.showErrorMessage("请输入热键，示例：^c、CapsLock & c、RButton & XButton1")
         return
     }
 
     try {
-        scriptHotkeyStore.value[scriptName] = hotkey
+        scriptHotkeyStore.value[scriptName] = {
+            hotkey,
+            hotIfWinActive: normalizeScriptHotIfWinActiveValue(editingHotkeyWinActive.value),
+            holdToLoop: normalizeScriptHotkeyHoldToLoopValue(editingHotkeyHoldToLoop.value),
+        }
         await syncScriptHotkeysWithBackend()
         persistScriptHotkeys()
         showScriptHotkeyDialog.value = false
         ui.showSuccessMessage(`已绑定热键: ${scriptName} -> ${hotkey}`)
     } catch (error) {
-        if (previousHotkey) {
-            scriptHotkeyStore.value[scriptName] = previousHotkey
+        if (previousConfig) {
+            scriptHotkeyStore.value[scriptName] = previousConfig
         } else {
             delete scriptHotkeyStore.value[scriptName]
         }
@@ -856,7 +1014,7 @@ async function saveScriptHotkeyBinding() {
  */
 async function clearScriptHotkeyBinding(scriptName: string, silent = false) {
     if (!scriptHotkeyStore.value[scriptName]) return
-    const previousHotkey = scriptHotkeyStore.value[scriptName]
+    const previousConfig = { ...scriptHotkeyStore.value[scriptName] }
     try {
         delete scriptHotkeyStore.value[scriptName]
         await syncScriptHotkeysWithBackend()
@@ -865,9 +1023,7 @@ async function clearScriptHotkeyBinding(scriptName: string, silent = false) {
             ui.showSuccessMessage(`已清除热键: ${scriptName}`)
         }
     } catch (error) {
-        if (previousHotkey) {
-            scriptHotkeyStore.value[scriptName] = previousHotkey
-        }
+        scriptHotkeyStore.value[scriptName] = previousConfig
         console.error("清除脚本热键失败", error)
         ui.showErrorMessage(`清除热键失败: ${error}`)
     }
@@ -1912,23 +2068,18 @@ function setActiveTab(tabId: string) {
 }
 
 async function runCurrentTab() {
-    if (isRunning.value) {
-        try {
-            schedulerStopRequested.value = runningMode.value === "scheduler"
-            await stopScript()
-            if (schedulerStopRequested.value) {
-                addConsoleLog("info", "调度器停止请求已发送")
-            } else {
-                addConsoleLog("info", "停止请求已发送（将停止当前全部运行脚本）")
-            }
-        } catch (error) {
-            console.error("停止脚本失败", error)
-            ui.showErrorMessage("停止脚本失败，请重试")
-        }
-        return
-    }
-
     if (viewMode.value === "scheduler") {
+        if (isSchedulerRunning.value) {
+            try {
+                schedulerStopRequested.value = true
+                await stopScript()
+                addConsoleLog("info", "调度器停止请求已发送")
+            } catch (error) {
+                console.error("停止调度器失败", error)
+                ui.showErrorMessage("停止调度器失败，请重试")
+            }
+            return
+        }
         await runScheduler()
         return
     }
@@ -1936,6 +2087,10 @@ async function runCurrentTab() {
     if (!activeTab.value) return
     if (activeTab.value.type === "online") {
         ui.showErrorMessage("请先下载脚本")
+        return
+    }
+    if (isLocalScriptRunning(activeTab.value.name)) {
+        await stopLocalScriptByName(activeTab.value.name)
         return
     }
 
@@ -2038,8 +2193,9 @@ function getLogLevelClass(level: string): string {
  */
 async function initConsoleListener() {
     try {
-        unlistenConsoleFn = await listen<{ level: string; message: string }>("script-console", event => {
-            const { level, message } = event.payload
+        unlistenConsoleFn = await listen<{ scope?: string; level: string; message: string }>("script-console", event => {
+            const { scope, level, message } = event.payload
+            if (!shouldAcceptScopedScriptEvent(scope)) return
             addConsoleLog(level, message)
         })
     } catch (error) {
@@ -2053,6 +2209,7 @@ async function initConsoleListener() {
 async function initStatusListener() {
     try {
         unlistenStatusFn = await listen<{
+            scope?: string
             action?: "upsert" | "remove"
             title?: string
             text?: string
@@ -2060,7 +2217,8 @@ async function initStatusListener() {
             images?: string[]
             timestamp?: number
         }>("script-status", event => {
-            const { action, title, text, image, images, timestamp } = event.payload ?? {}
+            const { scope, action, title, text, image, images, timestamp } = event.payload ?? {}
+            if (!shouldAcceptScopedScriptEvent(scope)) return
             const normalizedTitle = title?.trim()
             if (!normalizedTitle) return
 
@@ -2722,14 +2880,15 @@ onUnmounted(async () => {
                                         <button v-if="isLocalScriptRunning(script)"
                                             class="w-4 h-4 shrink-0 flex items-center justify-center cursor-pointer hover:opacity-80"
                                             title="停止脚本" @click.stop="stopLocalScriptByName(script)">
-                                            <span class="w-3 h-3 bg-error rounded-[2px]" />
+                                            <span class="w-3 h-3 bg-error rounded-xs" />
                                         </button>
                                         <Icon v-else icon="ri:file-line" class="w-4 h-4 shrink-0" />
-                                        <div v-if="editingScript !== script" class="flex-1 min-w-0 flex items-center gap-2">
+                                        <div v-if="editingScript !== script"
+                                            class="flex-1 min-w-0 flex items-center gap-2">
                                             <span class="truncate">{{ script }}</span>
                                             <span v-if="scriptHotkeyStore[script]"
                                                 class="badge badge-outline badge-xs shrink-0">
-                                                {{ scriptHotkeyStore[script] }}
+                                                {{ formatScriptHotkeyBadgeText(scriptHotkeyStore[script]) }}
                                             </span>
                                         </div>
                                         <input v-else id="script-name-input" v-model="editingScriptName" type="text"
@@ -2892,10 +3051,11 @@ onUnmounted(async () => {
                                 <Icon :icon="showStatusPanel ? 'ri:menu-fold-line' : 'ri:menu-unfold-line'"
                                     class="w-4 h-4" />
                             </button>
-                            <button class="btn btn-sm btn-ghost btn-square" :class="{ 'btn-error': isRunning }"
-                                @click="runCurrentTab"
-                                :title="isRunning ? '停止全部脚本' : viewMode === 'scheduler' ? '运行调度器' : '运行脚本'">
-                                <Icon :icon="isRunning ? 'ri:stop-circle-line' : 'ri:play-line'" class="w-4 h-4" />
+                            <button class="btn btn-sm btn-ghost btn-square"
+                                :class="{ 'btn-error': isRunButtonInStopState }" @click="runCurrentTab"
+                                :title="runButtonTitle">
+                                <Icon :icon="isRunButtonInStopState ? 'ri:stop-circle-line' : 'ri:play-line'"
+                                    class="w-4 h-4" />
                             </button>
                             <button v-if="activeTab && activeTab.type === 'local'"
                                 class="btn btn-sm btn-primary btn-square" @click="saveCurrentTab"
@@ -2915,7 +3075,7 @@ onUnmounted(async () => {
                                     <li>
                                         <a @click="toggleGlobalShortcut">{{
                                             globalShortcutEnabled ? "禁用全局快捷键(F10)" : "启用全局快捷键(F10)"
-                                        }}</a>
+                                            }}</a>
                                     </li>
                                 </ul>
                             </div>
@@ -2967,9 +3127,9 @@ onUnmounted(async () => {
                                 <div v-for="(log, index) in consoleLogs" :key="index" class="flex gap-2">
                                     <span class="text-base-content/40 shrink-0">{{ new
                                         Date(log.timestamp).toLocaleTimeString()
-                                    }}</span>
-                                    <span :class="getLogLevelClass(log.level)" class="break-all">{{ log.message
                                         }}</span>
+                                    <span :class="getLogLevelClass(log.level)" class="break-all">{{ log.message
+                                    }}</span>
                                 </div>
                             </div>
                         </div>
@@ -3160,10 +3320,21 @@ onUnmounted(async () => {
                     <label class="label block">
                         <div class="mb-2 text-sm">AHK 格式热键</div>
                         <input v-model="editingHotkeyValue" type="text" class="input input-bordered w-full"
-                            placeholder="例如：^c / !f / +F2 / #q" />
+                            placeholder="例如：^c / CapsLock & c / RButton / RButton & XButton1" />
+                    </label>
+                    <label class="label block">
+                        <div class="mb-2 text-sm">生效条件（#HotIf WinActive）</div>
+                        <input v-model="editingHotkeyWinActive" type="text" class="input input-bordered w-full"
+                            placeholder='示例：Moonlight / ahk_exe EM-Win64-Shipping.exe / Moonlight ahk_exe EM-Win64-Shipping.exe（留空=全局）' />
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-3">
+                        <input v-model="editingHotkeyHoldToLoop" type="checkbox" class="checkbox checkbox-sm" />
+                        <span class="label-text text-sm">按住循环（按住热键时循环运行脚本）</span>
                     </label>
                     <div class="text-xs text-base-content/60">
-                        支持基础前缀：`^`(Ctrl)、`!`(Alt)、`+`(Shift)、`#`(Win)、`*`(允许额外修饰键)
+                        支持：`^ ! + # *` 前缀、`A & B` 组合键、`Up` 抬起触发，以及鼠标键
+                        `LButton/RButton/MButton/XButton1/XButton2`
+                        ；WinActive 条件中无 `ahk_` 前缀按窗口标题匹配，`ahk_exe/ahk_class/ahk_pid` 按 AHK 语义匹配
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 mt-4">

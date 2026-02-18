@@ -32,6 +32,7 @@ use crate::submodules::{
     fx::draw_border,
     input::*,
     jsmat::{IntoJs, JsMat},
+    ocr::{self, OcrInitConfig},
     predict_rotation::predict_rotation,
     route::find_path,
     script_vision::{
@@ -43,7 +44,7 @@ use crate::submodules::{
     },
     tpl::{get_template, get_template_b64},
     tpl_match::match_template,
-    util::{capture_window, capture_window_wgc, check_size},
+    util::{capture_window, capture_window_roi, capture_window_wgc, capture_window_wgc_roi, check_size},
     win::{find_window, get_window_by_process_name, move_window, win_get_client_pos},
 };
 use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
@@ -125,6 +126,17 @@ pub fn set_current_script_path(script_path: String) {
     CURRENT_SCRIPT_PATH.with(|storage| {
         *storage.borrow_mut() = script_path;
     });
+}
+
+/// 获取当前执行脚本路径（完整路径，用于事件 scope）。
+pub fn get_current_script_path() -> Option<String> {
+    let script_path = CURRENT_SCRIPT_PATH.with(|storage| storage.borrow().clone());
+    let normalized = script_path.trim().to_string();
+    if normalized.is_empty() {
+        None
+    } else {
+        Some(normalized)
+    }
 }
 
 /// 获取 readConfig 等待映射表。
@@ -1310,30 +1322,105 @@ fn _move_window(
     Ok(JsValue::new(result))
 }
 
-/// 从窗口获取图像Mat对象函数
-fn _capture_window(hwnd: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+/// 解析可选 ROI 数值参数。
+///
+/// - 参数为 `undefined` 时返回 `None`；
+/// - 参数为数字时返回对应 `i32`。
+fn _parse_optional_i32_arg(value: Option<JsValue>, ctx: &mut Context) -> JsResult<Option<i32>> {
+    if let Some(value) = value {
+        if value.is_undefined() || value.is_null() {
+            return Ok(None);
+        }
+        return Ok(Some(value.to_number(ctx)? as i32));
+    }
+    Ok(None)
+}
+
+/// 统一解析 ROI 参数，要求 x/y/w/h 要么全部缺省，要么全部提供。
+fn _parse_capture_roi_args(
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    w: Option<JsValue>,
+    h: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<Option<(i32, i32, i32, i32)>> {
+    let x = _parse_optional_i32_arg(x, ctx)?;
+    let y = _parse_optional_i32_arg(y, ctx)?;
+    let w = _parse_optional_i32_arg(w, ctx)?;
+    let h = _parse_optional_i32_arg(h, ctx)?;
+    match (x, y, w, h) {
+        (None, None, None, None) => Ok(None),
+        (Some(x), Some(y), Some(w), Some(h)) => Ok(Some((x, y, w, h))),
+        _ => Err(js_error!("ROI 参数必须同时提供 x、y、w、h")),
+    }
+}
+
+/// 从窗口获取图像 Mat 对象函数。
+///
+/// 参数：
+/// - `hwnd`: 窗口句柄
+/// - `x/y/w/h`（可选）: ROI 参数（相对客户区）
+/// - `useWgc`（可选）: 是否启用 WGC 实现（默认 false）
+fn _capture_window(
+    hwnd: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    w: Option<JsValue>,
+    h: Option<JsValue>,
+    use_wgc: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
     let hwnd = HWND(
         hwnd.unwrap_or_else(|| JsValue::undefined())
             .to_number(ctx)? as isize as *mut std::ffi::c_void,
     );
+    let roi = _parse_capture_roi_args(x, y, w, h, ctx)?;
+    let use_wgc = use_wgc.unwrap_or_else(|| JsValue::new(false)).to_boolean();
 
-    if let Some(mat) = capture_window(hwnd) {
-        let js_mat = Box::new(mat).into_js(ctx)?;
-        Ok(js_mat)
+    let mat = if use_wgc {
+        if let Some((x, y, w, h)) = roi {
+            capture_window_wgc_roi(hwnd, x, y, w, h)
+        } else {
+            capture_window_wgc(hwnd)
+        }
+    } else if let Some((x, y, w, h)) = roi {
+        capture_window_roi(hwnd, x, y, w, h)
+    } else {
+        capture_window(hwnd)
+    };
+
+    if let Some(mat) = mat {
+        mat.into_js(ctx)
     } else {
         Err(js_error!("capture_window failed"))
     }
 }
-/// 从窗口获取图像Mat对象函数（WGC优化版）
-fn _capture_window_wgc(hwnd: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+
+/// 从窗口获取图像 Mat 对象函数（WGC 优化版，兼容旧接口）。
+///
+/// 参数：
+/// - `hwnd`: 窗口句柄
+/// - `x/y/w/h`（可选）: ROI 参数（相对客户区）
+fn _capture_window_wgc(
+    hwnd: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    w: Option<JsValue>,
+    h: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
     let hwnd = HWND(
         hwnd.unwrap_or_else(|| JsValue::undefined())
             .to_number(ctx)? as isize as *mut std::ffi::c_void,
     );
-
-    if let Some(mat) = capture_window_wgc(hwnd) {
-        let js_mat = mat.into_js(ctx)?;
-        Ok(js_mat)
+    let roi = _parse_capture_roi_args(x, y, w, h, ctx)?;
+    let mat = if let Some((x, y, w, h)) = roi {
+        capture_window_wgc_roi(hwnd, x, y, w, h)
+    } else {
+        capture_window_wgc(hwnd)
+    };
+    if let Some(mat) = mat {
+        mat.into_js(ctx)
     } else {
         Err(js_error!("capture_window_wgc failed"))
     }
@@ -1646,6 +1733,71 @@ fn _imread_url_rgba(
         }
         Err(_) => Err(js_error!("imread_url_rgba failed")),
     }
+}
+
+/// 初始化 OCR 模块（自动下载缺失资源）。
+///
+/// 参数：
+/// - `local_root_dir`：可选，本地资源目录（为空时使用默认目录）；
+/// - `cdn_base_url`：可选，CDN 根地址（默认 `https://cdn.dna-builder.cn/ocr`）；
+/// - `num_thread`：可选，OCR 线程数（默认 2）。
+///
+/// 返回：
+/// - 实际使用的本地资源目录绝对路径。
+fn _init_ocr(
+    local_root_dir: Option<JsValue>,
+    cdn_base_url: Option<JsValue>,
+    num_thread: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let local_root_dir = local_root_dir.unwrap_or_else(|| JsValue::undefined());
+    let cdn_base_url = cdn_base_url.unwrap_or_else(|| JsValue::undefined());
+    let num_thread = num_thread.unwrap_or_else(|| JsValue::new(2.0));
+
+    let local_root_dir = if local_root_dir.is_undefined() || local_root_dir.is_null() {
+        None
+    } else {
+        let raw = local_root_dir.to_string(ctx)?.to_std_string_lossy();
+        let normalized = raw.trim().to_string();
+        if normalized.is_empty() {
+            None
+        } else {
+            Some(PathBuf::from(_resolve_script_resource_path(&normalized)))
+        }
+    };
+
+    let cdn_base_url = if cdn_base_url.is_undefined() || cdn_base_url.is_null() {
+        None
+    } else {
+        let raw = cdn_base_url.to_string(ctx)?.to_std_string_lossy();
+        let normalized = raw.trim().to_string();
+        if normalized.is_empty() {
+            None
+        } else {
+            Some(normalized)
+        }
+    };
+
+    let num_thread = num_thread.to_number(ctx)? as i32;
+    let config = OcrInitConfig {
+        local_root_dir,
+        cdn_base_url,
+        num_thread,
+    };
+    let root_dir = ocr::init_ocr(config)
+        .map_err(|e| JsNativeError::error().with_message(format!("initOcr 失败: {e}")))?;
+    Ok(JsValue::from(js_string!(root_dir.to_string_lossy().to_string())))
+}
+
+/// OCR 文字识别：输入 Mat，返回识别文本。
+fn _ocr_text(js_img_mat: Option<JsValue>, _ctx: &mut Context) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let mat = (*js_img_mat.borrow().data().inner).clone();
+    let text = ocr::ocr_text_from_mat(&mat)
+        .map_err(|e| JsNativeError::error().with_message(format!("ocrText 失败: {e}")))?;
+    Ok(JsValue::from(js_string!(text)))
 }
 
 /// 显示图片函数 (异步)
@@ -2768,6 +2920,7 @@ fn _emit_script_status(
     images: Option<Vec<String>>,
 ) {
     if let Some(app_handle) = SCRIPT_EVENT_APP_HANDLE.get() {
+        let scope = get_current_script_path();
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map(|d| d.as_millis() as u64)
@@ -2781,6 +2934,7 @@ fn _emit_script_status(
         let _ = app_handle.emit(
             "script-status",
             serde_json::json!({
+                "scope": scope,
                 "action": action,
                 "title": title,
                 "text": text,
@@ -3032,11 +3186,11 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
 
     // 从窗口获取图像Mat对象
     let f = _capture_window.into_js_function_copied(context);
-    context.register_global_builtin_callable(js_string!("captureWindow"), 1, f)?;
+    context.register_global_builtin_callable(js_string!("captureWindow"), 6, f)?;
 
     // 从窗口获取图像Mat对象（WGC优化版）
     let f = _capture_window_wgc.into_js_function_copied(context);
-    context.register_global_builtin_callable(js_string!("captureWindowWGC"), 1, f)?;
+    context.register_global_builtin_callable(js_string!("captureWindowWGC"), 5, f)?;
 
     // 从文件加载模板Mat对象
     let f = _get_template.into_js_function_copied(context);
@@ -3069,6 +3223,14 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     // 从本地或网络加载图像Mat对象，并返回RGBA通道
     let f = _imread_url_rgba.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("imreadUrlRgba"), 2, f)?;
+
+    // OCR 初始化（自动下载资源）
+    let f = _init_ocr.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("initOcr"), 3, f)?;
+
+    // OCR 文字识别
+    let f = _ocr_text.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("ocrText"), 1, f)?;
 
     // 显示图片
     let f = _imshow.into_js_function_copied(context);

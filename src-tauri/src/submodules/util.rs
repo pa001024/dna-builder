@@ -264,6 +264,49 @@ fn get_window_and_client_rect_for_wgc(hwnd: HWND) -> Result<(RECT, RECT, i32, i3
     }
 }
 
+/// 将 ROI 约束到给定边界内，返回 `(x, y, w, h)`。
+///
+/// 参数说明：
+/// - `bound_w/bound_h`: 边界尺寸
+/// - `roi`: 可选 `(x, y, w, h)`，坐标相对边界左上角
+/// - 当 ROI 无效（宽高<=0 或与边界无交集）时返回 `None`。
+fn normalize_roi_in_bounds(
+    bound_w: i32,
+    bound_h: i32,
+    roi: Option<(i32, i32, i32, i32)>,
+) -> Option<(i32, i32, i32, i32)> {
+    if bound_w <= 0 || bound_h <= 0 {
+        return None;
+    }
+    let Some((x, y, w, h)) = roi else {
+        return Some((0, 0, bound_w, bound_h));
+    };
+    if w <= 0 || h <= 0 {
+        return None;
+    }
+
+    let start_x = x.clamp(0, bound_w);
+    let start_y = y.clamp(0, bound_h);
+    let end_x = (x as i64 + w as i64).clamp(0, bound_w as i64) as i32;
+    let end_y = (y as i64 + h as i64).clamp(0, bound_h as i64) as i32;
+    let out_w = end_x - start_x;
+    let out_h = end_y - start_y;
+    if out_w <= 0 || out_h <= 0 {
+        return None;
+    }
+    Some((start_x, start_y, out_w, out_h))
+}
+
+/// 对已有 Mat 按 ROI 裁剪并返回新图像。
+fn crop_mat_with_roi(mat: &Mat, roi: (i32, i32, i32, i32)) -> Option<Box<Mat>> {
+    let (x, y, w, h) = normalize_roi_in_bounds(mat.cols(), mat.rows(), Some(roi))?;
+    let roi_rect = opencv::core::Rect::new(x, y, w, h);
+    let roi_view = mat.roi(roi_rect).ok()?;
+    let mut out = Mat::default();
+    roi_view.copy_to(&mut out).ok()?;
+    Some(Box::new(out))
+}
+
 fn create_capture_item(hwnd: HWND) -> Option<GraphicsCaptureItem> {
     let interop =
         windows::core::factory::<GraphicsCaptureItem, IGraphicsCaptureItemInterop>().ok()?;
@@ -394,7 +437,14 @@ impl WgcContext {
     }
 
     /// 处理单帧数据并更新缓存。
-    fn process_new_frame(&mut self, frame: Direct3D11CaptureFrame) -> Option<Box<Mat>> {
+    ///
+    /// - `roi` 为 `None` 时返回完整客户区图像；
+    /// - `roi` 为 `Some(x,y,w,h)` 时，直接在拷贝阶段输出 ROI 小图。
+    fn process_new_frame(
+        &mut self,
+        frame: Direct3D11CaptureFrame,
+        roi: Option<(i32, i32, i32, i32)>,
+    ) -> Option<Box<Mat>> {
         // WGC 帧时间戳（100ns 单位），用于跨调用判断是否为“新帧”。
         let frame_ticks = frame.SystemRelativeTime().ok().map(|ts| ts.Duration);
 
@@ -449,26 +499,29 @@ impl WgcContext {
                 let out_w = out_w.clamp(1, tex_w as i32 - crop_x);
                 let out_h = out_h.clamp(1, tex_h as i32 - crop_y);
 
-                (out_w as u32, out_h as u32, crop_x as u32, crop_y as u32)
+                (out_w, out_h, crop_x, crop_y)
             } else {
                 // 客户区帧无需偏移裁剪，只按目标客户区尺寸截取（避免带到边框）
                 let out_w = want_w.min(tex_w as i32).max(1);
                 let out_h = want_h.min(tex_h as i32).max(1);
-                (out_w as u32, out_h as u32, 0, 0)
+                (out_w, out_h, 0, 0)
             }
         };
 
-        // 创建 BGRA Mat 并完成客户端区域裁剪复制
-        let mut mat_bgra =
-            unsafe { Mat::new_rows_cols(client_h as i32, client_w as i32, CV_8UC4).ok()? };
+        // 计算最终输出 ROI（相对客户区），并在拷贝阶段直接输出小图，避免二次裁剪。
+        let (roi_x, roi_y, roi_w, roi_h) = normalize_roi_in_bounds(client_w, client_h, roi)?;
+
+        // 创建 BGRA Mat 并完成客户端/ROI区域裁剪复制
+        let mut mat_bgra = unsafe { Mat::new_rows_cols(roi_h, roi_w, CV_8UC4).ok()? };
 
         let src_stride = tex_w as usize * 4;
-        let dst_stride = client_w as usize * 4;
+        let dst_stride = roi_w as usize * 4;
         let src_ptr = tex_data.as_ptr();
         let dst_ptr = mat_bgra.data_mut();
 
-        for r in 0..client_h {
-            let src_off = (r + crop_y) as usize * src_stride + (crop_x as usize * 4);
+        for r in 0..roi_h {
+            let src_off =
+                (r + crop_y + roi_y) as usize * src_stride + ((crop_x + roi_x) as usize * 4);
             let dst_off = r as usize * dst_stride;
             unsafe {
                 std::ptr::copy_nonoverlapping(
@@ -484,19 +537,31 @@ impl WgcContext {
         imgproc::cvt_color(&mat_bgra, &mut mat_bgr, imgproc::COLOR_BGRA2BGR, 0).ok()?;
 
         let boxed_mat = Box::new(mat_bgr);
-        self.cached_mat = Some(boxed_mat.clone());
-        self.cached_at = Some(Instant::now());
+        // 仅完整客户区截图更新缓存，避免 ROI 小图污染缓存。
+        if roi.is_none() {
+            self.cached_mat = Some(boxed_mat.clone());
+            self.cached_at = Some(Instant::now());
+        }
         if let Some(ticks) = frame_ticks {
             self.last_frame_ticks = Some(ticks);
         }
         Some(boxed_mat)
     }
 
-    fn capture(&mut self) -> Option<Box<Mat>> {
+    /// 捕获窗口图像，可选 ROI 直接裁剪。
+    fn capture_with_roi(&mut self, roi: Option<(i32, i32, i32, i32)>) -> Option<Box<Mat>> {
         // 1. 检查窗口尺寸是否变化
         let current_size = match self.item.Size() {
             Ok(s) => s,
-            Err(_) => return self.cached_mat.clone(), // 窗口可能被关闭了
+            Err(_) => {
+                return if let Some(roi_rect) = roi {
+                    self.cached_mat
+                        .as_ref()
+                        .and_then(|cached| crop_mat_with_roi(cached.as_ref(), roi_rect))
+                } else {
+                    self.cached_mat.clone()
+                };
+            } // 窗口可能被关闭了
         };
 
         // 如果尺寸变了，必须 Recreate，否则捕获流会停止或数据错乱
@@ -575,20 +640,31 @@ impl WgcContext {
 
         if latest_frame.is_some() && latest_ticks > baseline_ticks {
             if let Some(frame) = latest_frame {
-                return self.process_new_frame(frame);
+                return self.process_new_frame(frame, roi);
             }
         }
 
         // 3. WGC 未拿到“真正新帧”时，回退到 GDI 强制抓当前帧，避免滞后图像。
-        if let Some(mat) = capture_window(self.target_hwnd) {
+        if let Some(mat) = if let Some((x, y, w, h)) = roi {
+            capture_window_roi(self.target_hwnd, x, y, w, h)
+        } else {
+            capture_window(self.target_hwnd)
+        } {
             self.cached_mat = Some(mat.clone());
             self.cached_at = Some(Instant::now());
             return Some(mat);
         }
 
         // 4. 最后兜底：返回最近缓存
-        self.cached_mat.clone()
+        if let Some(roi_rect) = roi {
+            self.cached_mat
+                .as_ref()
+                .and_then(|cached| crop_mat_with_roi(cached.as_ref(), roi_rect))
+        } else {
+            self.cached_mat.clone()
+        }
     }
+
 }
 
 thread_local! {
@@ -597,6 +673,25 @@ thread_local! {
 
 /// 使用 Windows Graphics Capture (WGC) API 截图（更快的截图方式）
 pub(crate) fn capture_window_wgc(hwnd: HWND) -> Option<Box<Mat>> {
+    capture_window_wgc_roi_internal(hwnd, None)
+}
+
+/// 使用 Windows Graphics Capture (WGC) API 截图并直接按 ROI 裁剪。
+pub(crate) fn capture_window_wgc_roi(
+    hwnd: HWND,
+    x: i32,
+    y: i32,
+    w: i32,
+    h: i32,
+) -> Option<Box<Mat>> {
+    capture_window_wgc_roi_internal(hwnd, Some((x, y, w, h)))
+}
+
+/// WGC 截图内部入口：支持可选 ROI。
+fn capture_window_wgc_roi_internal(
+    hwnd: HWND,
+    roi: Option<(i32, i32, i32, i32)>,
+) -> Option<Box<Mat>> {
     CAPTURER.with(|cell| {
         let mut capturer_opt = cell.borrow_mut();
 
@@ -624,13 +719,13 @@ pub(crate) fn capture_window_wgc(hwnd: HWND) -> Option<Box<Mat>> {
 
         // 2. 执行捕获
         if let Some(ctx) = capturer_opt.as_mut() {
-            let result = ctx.capture();
+            let result = ctx.capture_with_roi(roi);
 
             // 如果第一次捕获就因为没有帧而失败（Result None, Cache None）
             // 我们可以尝试再等一下并在内部重试
             if result.is_none() && ctx.cached_mat.is_none() {
                 std::thread::sleep(std::time::Duration::from_millis(50));
-                return ctx.capture();
+                return ctx.capture_with_roi(roi);
             }
             return result;
         }
@@ -639,8 +734,27 @@ pub(crate) fn capture_window_wgc(hwnd: HWND) -> Option<Box<Mat>> {
     })
 }
 
-// 截图
+// 截图（完整客户区）
 pub(crate) fn capture_window(hwnd: HWND) -> Option<Box<Mat>> {
+    capture_window_with_roi_internal(hwnd, None)
+}
+
+/// 截图并直接按 ROI 裁剪（ROI 相对客户区）。
+pub(crate) fn capture_window_roi(
+    hwnd: HWND,
+    x: i32,
+    y: i32,
+    w: i32,
+    h: i32,
+) -> Option<Box<Mat>> {
+    capture_window_with_roi_internal(hwnd, Some((x, y, w, h)))
+}
+
+/// GDI 截图内部入口：支持可选 ROI，并在一次 ROI 取图阶段直接返回结果。
+fn capture_window_with_roi_internal(
+    hwnd: HWND,
+    roi: Option<(i32, i32, i32, i32)>,
+) -> Option<Box<Mat>> {
     unsafe {
         // 获取窗口矩形
         let (window_rect, client_rect, offset_x, offset_y) = match get_window_and_client_rect(hwnd)
@@ -711,12 +825,13 @@ pub(crate) fn capture_window(hwnd: HWND) -> Option<Box<Mat>> {
         SelectObject(*hdc_mem, old_bitmap);
         // 转换为OpenCV Mat
         let full_mat = hbitmap_to_bgr_mat(*hbitmap).expect("转换位图失败");
-        let client_roi = opencv::core::Rect::new(offset_x, offset_y, width, height);
-        let client_mat = full_mat.roi(client_roi);
+        let (roi_x, roi_y, roi_w, roi_h) = normalize_roi_in_bounds(width, height, roi)?;
+        let capture_roi = opencv::core::Rect::new(offset_x + roi_x, offset_y + roi_y, roi_w, roi_h);
+        let client_mat = full_mat.roi(capture_roi);
         // 检查Mat是否创建成功
         match client_mat {
             Ok(boxed_ref) => {
-                let mut mat_bgra = Mat::new_rows_cols(height, width, CV_8UC4).expect("内存不足");
+                let mut mat_bgra = Mat::new_rows_cols(roi_h, roi_w, CV_8UC4).expect("内存不足");
 
                 boxed_ref.copy_to(&mut mat_bgra).expect("内存不足");
 

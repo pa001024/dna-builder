@@ -223,6 +223,8 @@ export interface ScriptRuntimeInfo {
 export interface ScriptHotkeyBinding {
     scriptPath: string
     hotkey: string
+    hotIfWinActive?: string
+    holdToLoop?: boolean
 }
 
 /**
