@@ -13,6 +13,7 @@ pub struct TauriLogger {
 }
 
 /// 终端 Logger：将 console 输出映射到标准输出/标准错误。
+#[cfg(feature = "dob-script-cli")]
 #[derive(Debug, Trace, Finalize)]
 pub struct StdioLogger;
 
@@ -84,6 +85,7 @@ impl Logger for TauriLogger {
     }
 }
 
+#[cfg(feature = "dob-script-cli")]
 impl Logger for StdioLogger {
     /// 普通日志输出到 stdout。
     fn log(&self, msg: String, _state: &ConsoleState, _context: &mut Context) -> JsResult<()> {

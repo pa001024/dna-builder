@@ -1977,6 +1977,19 @@ async fn run_script(script_path: String, app_handle: tauri::AppHandle) -> Result
     }
 }
 
+/// CLI 入口：执行指定脚本文件。
+///
+/// # 参数
+/// - `script_path`: 脚本路径（可相对或绝对）
+///
+/// # 返回
+/// 返回脚本执行结果字符串；失败时返回错误信息
+#[cfg(feature = "dob-script-cli")]
+pub async fn run_script_cli(script_path: String) -> Result<String, String> {
+    use submodules::script::run_script_file_cli;
+    run_script_file_cli(script_path).await
+}
+
 /// 响应脚本 readConfig 请求，将前端当前值回传给脚本运行时。
 #[tauri::command]
 fn resolve_script_config_request(request_id: String, value: serde_json::Value) -> Result<String, String> {

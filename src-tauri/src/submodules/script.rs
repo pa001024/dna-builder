@@ -2,7 +2,9 @@ use crate::submodules::async_tokio::TokioJobExecutor;
 use crate::submodules::jsdnn::JsDnnNet;
 use crate::submodules::jsmat::JsMat;
 use crate::submodules::jstimer::JsTimer;
-use crate::submodules::logger::{StdioLogger, TauriLogger};
+#[cfg(feature = "dob-script-cli")]
+use crate::submodules::logger::StdioLogger;
+use crate::submodules::logger::TauriLogger;
 use crate::submodules::script_console::Console;
 use crate::submodules::script_builtin::{
     register_builtin_functions, set_current_script_path, set_script_event_app_handle,
@@ -67,6 +69,7 @@ fn emit_script_error(app_handle: &tauri::AppHandle, scope: &str, error_message: 
 ///
 /// # 返回
 /// 返回原始错误消息，便于直接用于 `Err(...)`
+#[cfg(feature = "dob-script-cli")]
 fn emit_script_error_cli(scope: &str, error_message: String) -> String {
     eprintln!("[{scope}] {error_message}");
     error_message
@@ -293,6 +296,7 @@ pub async fn run_script_with_tauri_console(
 ///
 /// # 返回
 /// 返回执行结果字符串，如果成功则返回 Ok(String)，否则返回错误信息
+#[cfg(feature = "dob-script-cli")]
 pub async fn run_script_with_stdio_console(script_path: String) -> Result<String, String> {
     // 使用 spawn_blocking 在阻塞线程中执行脚本，避免 Context 的 Send 约束问题
     tokio::task::spawn_blocking(move || {
@@ -386,6 +390,7 @@ pub async fn run_script_file(script_path: String, app_handle: tauri::AppHandle) 
 }
 
 /// CLI 对外入口：先做路径规范化，再执行脚本。
+#[cfg(feature = "dob-script-cli")]
 pub async fn run_script_file_cli(script_path: String) -> Result<String, String> {
     let normalized_path = normalize_script_path(script_path)?;
     run_script_with_stdio_console(normalized_path).await
