@@ -1,3 +1,4 @@
+use base64::{Engine as _, engine::general_purpose};
 use opencv::{
     calib3d,
     core::{self, CV_8UC1, Mat, Point, Point2f, Scalar, Size},
@@ -8,15 +9,84 @@ use opencv::{
     },
 };
 use std::{
+    io::{Cursor, Read, Write},
     sync::atomic::{AtomicUsize, Ordering},
     thread,
 };
+use zip::{CompressionMethod, ZipArchive, ZipWriter, write::FileOptions};
 
 use crate::submodules::{color::rgb_to_hsl, color_match::rgb_to_bgr, tpl_match::match_template};
 
 pub type SiftLocateResult = (f64, f64, f64, f64, i32, i32, Vec<Point2f>);
 pub type ContourResult = (f64, core::Rect, (f64, f64));
 pub type BBoxResult = (i32, i32, i32, i32);
+
+const ORB_DESCRIPTOR_COLS: i32 = 32;
+const ORB_MATCH_RATIO_THRESHOLD: f32 = 0.75;
+const ORB_MATCH_MIN_GOOD_COUNT: i32 = 4;
+
+/// 使用 ZIP(Deflate) 压缩字节数组。
+fn _compress_bytes_zip_deflate(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let cursor = Cursor::new(Vec::<u8>::new());
+    let mut zip_writer = ZipWriter::new(cursor);
+    let options = FileOptions::default().compression_method(CompressionMethod::Deflated);
+
+    zip_writer
+        .start_file("d", options)
+        .map_err(|e| format!("ORB 特征 ZIP 创建失败: {e}"))?;
+    zip_writer
+        .write_all(raw)
+        .map_err(|e| format!("ORB 特征 ZIP 写入失败: {e}"))?;
+
+    let cursor = zip_writer
+        .finish()
+        .map_err(|e| format!("ORB 特征 ZIP 结束失败: {e}"))?;
+    Ok(cursor.into_inner())
+}
+
+/// 使用 ZIP(Deflate) 解压字节数组。
+fn _decompress_bytes_zip_deflate(compressed: &[u8]) -> Result<Vec<u8>, String> {
+    let cursor = Cursor::new(compressed);
+    let mut archive =
+        ZipArchive::new(cursor).map_err(|e| format!("ORB 特征 ZIP 打开失败: {e}"))?;
+    if archive.is_empty() {
+        return Err("ORB 特征 ZIP 文件为空".to_string());
+    }
+
+    let mut file = archive
+        .by_index(0)
+        .map_err(|e| format!("ORB 特征 ZIP 读取条目失败: {e}"))?;
+    let mut raw = Vec::<u8>::new();
+    file.read_to_end(&mut raw)
+        .map_err(|e| format!("ORB 特征 ZIP 解压失败: {e}"))?;
+    Ok(raw)
+}
+
+/// 打包 ORB 特征字节流：`[rows:u16][cols:u16][descriptor bytes...]`。
+fn _pack_orb_feature_bytes(rows: i32, cols: i32, raw: &[u8]) -> Result<Vec<u8>, String> {
+    if rows < 0 || rows > u16::MAX as i32 {
+        return Err(format!("ORB rows 超出 16 位范围: {rows}"));
+    }
+    if cols < 0 || cols > u16::MAX as i32 {
+        return Err(format!("ORB cols 超出 16 位范围: {cols}"));
+    }
+
+    let mut payload = Vec::<u8>::with_capacity(4 + raw.len());
+    payload.extend_from_slice(&(rows as u16).to_le_bytes());
+    payload.extend_from_slice(&(cols as u16).to_le_bytes());
+    payload.extend_from_slice(raw);
+    Ok(payload)
+}
+
+/// 解包 ORB 特征字节流：`[rows:u16][cols:u16][descriptor bytes...]`。
+fn _unpack_orb_feature_bytes(packed: &[u8]) -> Result<(i32, i32, &[u8]), String> {
+    if packed.len() < 4 {
+        return Err("ORB 特征字节流长度不足（至少 4 字节）".to_string());
+    }
+    let rows = u16::from_le_bytes([packed[0], packed[1]]) as i32;
+    let cols = u16::from_le_bytes([packed[2], packed[3]]) as i32;
+    Ok((rows, cols, &packed[4..]))
+}
 
 /// 将图像统一转换为灰度图，便于后续匹配计算。
 fn _to_gray_mat(mat: &Mat) -> Result<Mat, String> {
@@ -283,8 +353,18 @@ pub fn color_filter_impl(mat: &Mat, colors: &[u32], tolerance: u8) -> Result<Mat
 /// 使用 HSL 加权差进行颜色过滤并返回灰度二值图（命中为 255，未命中为 0）。
 ///
 /// 容差计算公式：
-/// `abs(h1 - h2) + abs(s1 - s2) * 180 + abs(l1 - l2) * 75`
-pub fn color_filter_hsl_impl(mat: &Mat, colors: &[u32], tolerance: f64) -> Result<Mat, String> {
+/// `abs(h1 - h2) * wh + abs(s1 - s2) * ws + abs(l1 - l2) * wl`
+///
+/// 说明：
+/// - `weights` 为可选参数，格式 `[wh, ws, wl]`；
+/// - 默认权重为 `[255, 180, 75]`，与历史行为保持一致；
+/// - 例如 `[0, 0, 1]` 表示仅按 L 通道差值匹配。
+pub fn color_filter_hsl_impl(
+    mat: &Mat,
+    colors: &[u32],
+    tolerance: f64,
+    weights: Option<[f64; 3]>,
+) -> Result<Mat, String> {
     if mat.rows() <= 0 || mat.cols() <= 0 {
         return Err("源图像尺寸无效".to_string());
     }
@@ -293,6 +373,20 @@ pub fn color_filter_hsl_impl(mat: &Mat, colors: &[u32], tolerance: f64) -> Resul
     }
     if !tolerance.is_finite() || tolerance < 0.0 {
         return Err("tolerance 必须是非负有限数".to_string());
+    }
+    let weights = weights.unwrap_or([255.0, 180.0, 75.0]);
+    let [weight_h, weight_s, weight_l] = weights;
+    if !weight_h.is_finite()
+        || !weight_s.is_finite()
+        || !weight_l.is_finite()
+        || weight_h < 0.0
+        || weight_s < 0.0
+        || weight_l < 0.0
+    {
+        return Err("weights 必须是非负有限数数组 [h, s, l]".to_string());
+    }
+    if weight_h <= 0.0 && weight_s <= 0.0 && weight_l <= 0.0 {
+        return Err("weights 不能全为 0".to_string());
     }
 
     let mut bgr_mat = Mat::default();
@@ -334,13 +428,25 @@ pub fn color_filter_hsl_impl(mat: &Mat, colors: &[u32], tolerance: f64) -> Resul
         .collect::<Vec<_>>();
 
     let pixel_count = (hls_mat.rows() * hls_mat.cols()) as usize;
-    let tolerance_scaled = (tolerance * 255.0).round().clamp(0.0, i32::MAX as f64) as i32;
+    let tolerance_scaled = (tolerance * 255.0).max(0.0);
 
     // 先用 HLS 轴向范围做候选粗筛，减少后续精算像素数。
-    let delta_h_deg = (tolerance_scaled + 254) / 255;
+    let delta_h_deg = if weight_h > 0.0 {
+        (tolerance_scaled / weight_h).ceil().clamp(0.0, 360.0) as i32
+    } else {
+        360
+    };
     let delta_h_ch = (delta_h_deg + 1) / 2;
-    let delta_s = (tolerance_scaled + 179) / 180;
-    let delta_l = (tolerance_scaled + 74) / 75;
+    let delta_s = if weight_s > 0.0 {
+        (tolerance_scaled / weight_s).ceil().clamp(0.0, 255.0) as i32
+    } else {
+        255
+    };
+    let delta_l = if weight_l > 0.0 {
+        (tolerance_scaled / weight_l).ceil().clamp(0.0, 255.0) as i32
+    } else {
+        255
+    };
     let mut candidate_mask = Mat::zeros(hls_mat.rows(), hls_mat.cols(), CV_8UC1)
         .map_err(|e| format!("创建候选掩码失败: {e}"))?
         .to_mat()
@@ -413,9 +519,10 @@ pub fn color_filter_hsl_impl(mat: &Mat, colors: &[u32], tolerance: f64) -> Resul
             let mut is_match = false;
             for (th, ts, tl) in &target_hsl {
                 // 采用整数缩放后的等价距离：
-                // dist_scaled = abs(h1-h2)*255 + abs(s1-s2)*180 + abs(l1-l2)*75
-                let distance_scaled =
-                    (h_deg - *th).abs() * 255 + (s_u8 - *ts).abs() * 180 + (l_u8 - *tl).abs() * 75;
+                // dist_scaled = abs(h1-h2)*wh + abs(s1-s2)*ws + abs(l1-l2)*wl
+                let distance_scaled = (h_deg - *th).abs() as f64 * weight_h
+                    + (s_u8 - *ts).abs() as f64 * weight_s
+                    + (l_u8 - *tl).abs() as f64 * weight_l;
                 if distance_scaled <= tolerance_scaled {
                     is_match = true;
                     break;
@@ -449,9 +556,9 @@ pub fn color_filter_hsl_impl(mat: &Mat, colors: &[u32], tolerance: f64) -> Resul
 
                         let mut is_match = false;
                         for (th, ts, tl) in target_hsl_ref {
-                            let distance_scaled = (h_deg - *th).abs() * 255
-                                + (s_u8 - *ts).abs() * 180
-                                + (l_u8 - *tl).abs() * 75;
+                            let distance_scaled = (h_deg - *th).abs() as f64 * weight_h
+                                + (s_u8 - *ts).abs() as f64 * weight_s
+                                + (l_u8 - *tl).abs() as f64 * weight_l;
                             if distance_scaled <= tolerance_scaled {
                                 is_match = true;
                                 break;
@@ -781,17 +888,11 @@ pub fn perceptual_hash_impl(mat: &Mat, color: bool) -> Result<String, String> {
     }
 }
 
-/// 计算灰度图像的 ORB 聚合签名（256 bit）。
-///
-/// 签名构造方式：
-/// 1. 提取 ORB 描述子（每个描述子 32 字节，共 256 bit）；
-/// 2. 对每个 bit 位统计所有描述子中 1 的出现次数；
-/// 3. 使用多数投票（`ones > rows/2`）得到最终 bit；
-/// 4. 拼成固定 32 字节签名。
+/// 提取灰度图像 ORB 描述子。
 ///
 /// 说明：
-/// - 对于高度较小的图（例如时间条、UI 片段），默认 ORB 可能检测不到关键点；
-/// - 这里会尝试原图、放大图、均衡化图等候选输入，尽量减少“全 0 哈希”。
+/// - 对于高度较小的图（例如小地图局部），默认 ORB 可能检测不到关键点；
+/// - 这里会尝试原图、放大图、均衡化图等候选输入，尽量减少“空描述子”。
 fn _detect_orb_descriptors(gray: &Mat) -> Result<Mat, String> {
     if gray.rows() <= 0 || gray.cols() <= 0 {
         return Err("源图像尺寸无效".to_string());
@@ -856,127 +957,97 @@ fn _detect_orb_descriptors(gray: &Mat) -> Result<Mat, String> {
     Ok(Mat::default())
 }
 
-fn _orb_signature_256(gray: &Mat) -> Result<[u8; 32], String> {
-    let descriptors = _detect_orb_descriptors(gray)?;
+/// 将 ORB 描述子矩阵编码为字符串（`base64`）。
+///
+/// 说明：
+/// - 压缩前字节流格式为 `[rows:u16][cols:u16][descriptor bytes...]`；
+/// - 对整段字节流做 ZIP(Deflate) 压缩后，再做 Base64（无填充）编码。
+fn _encode_orb_descriptors(descriptors: &Mat) -> Result<String, String> {
+    let rows = if descriptors.empty() { 0 } else { descriptors.rows() };
+    let cols = if descriptors.empty() {
+        ORB_DESCRIPTOR_COLS
+    } else {
+        descriptors.cols()
+    };
 
-    if descriptors.empty() {
-        return Ok([0u8; 32]);
-    }
-
-    if descriptors.cols() != 32 {
+    if cols != ORB_DESCRIPTOR_COLS {
         return Err(format!(
-            "ORB 描述子长度异常，期望 32 字节，实际 {}",
-            descriptors.cols()
+            "ORB 描述子长度异常，期望 {ORB_DESCRIPTOR_COLS} 字节，实际 {}",
+            cols
         ));
     }
 
-    let rows = descriptors.rows();
-    if rows <= 0 {
-        return Ok([0u8; 32]);
-    }
-
-    let mut bit_votes = [0i32; 256];
-    for row in 0..rows {
-        for col in 0..32 {
-            let byte = *descriptors
-                .at_2d::<u8>(row, col)
-                .map_err(|e| format!("读取 ORB 描述子失败[{row},{col}]: {e}"))?;
-            for bit in 0..8 {
-                if ((byte >> bit) & 1) == 1 {
-                    bit_votes[col as usize * 8 + bit as usize] += 1;
-                }
+    let mut raw = Vec::<u8>::new();
+    if rows > 0 {
+        raw.reserve((rows as usize) * (ORB_DESCRIPTOR_COLS as usize));
+        for row in 0..rows {
+            for col in 0..ORB_DESCRIPTOR_COLS {
+                let value = *descriptors
+                    .at_2d::<u8>(row, col)
+                    .map_err(|e| format!("读取 ORB 描述子失败[{row},{col}]: {e}"))?;
+                raw.push(value);
             }
         }
     }
 
-    let mut signature = [0u8; 32];
-    for bit_index in 0..256usize {
-        if bit_votes[bit_index] > rows / 2 {
-            signature[bit_index / 8] |= 1u8 << (bit_index % 8);
-        }
-    }
-    Ok(signature)
+    let packed = _pack_orb_feature_bytes(rows, ORB_DESCRIPTOR_COLS, &raw)?;
+    let compressed = _compress_bytes_zip_deflate(&packed)?;
+    let encoded = general_purpose::STANDARD_NO_PAD.encode(compressed);
+    Ok(encoded)
 }
 
-/// 计算图像 ORB 特征哈希（固定 64 位十六进制字符串）。
-pub fn orb_feature_hash_impl(mat: &Mat) -> Result<String, String> {
-    if mat.rows() <= 0 || mat.cols() <= 0 {
-        return Err("源图像尺寸无效".to_string());
-    }
+/// 从字符串解码 ORB 描述子矩阵（`base64`）。
+fn _decode_orb_descriptors(feature: &str) -> Result<Mat, String> {
+    let compressed = general_purpose::STANDARD_NO_PAD
+        .decode(feature.trim())
+        .or_else(|_| general_purpose::STANDARD.decode(feature.trim()))
+        .map_err(|e| format!("ORB 特征 payload 解码失败: {e}"))?;
+    let packed = _decompress_bytes_zip_deflate(&compressed)?;
+    let (rows, cols, raw) = _unpack_orb_feature_bytes(&packed)?;
 
-    let gray = _to_gray_mat(mat)?;
-    let signature = _orb_signature_256(&gray)?;
-    let mut hash = String::with_capacity(64);
-    for byte in signature {
-        hash.push_str(&format!("{byte:02x}"));
+    if cols <= 0 {
+        return Err("ORB 特征尺寸非法".to_string());
     }
-    Ok(hash)
-}
-
-/// 比较 ORB 哈希与模板数组，返回最佳匹配索引或 -1。
-pub fn match_orb_hash_impl(
-    source_hash: &str,
-    template_hashes: &[String],
-    max_distance: u32,
-) -> Result<i32, String> {
-    let source_hash = normalize_hash_hex(source_hash)?;
-    if source_hash.len() != 64 {
+    if cols != ORB_DESCRIPTOR_COLS {
         return Err(format!(
-            "ORB 哈希长度必须为 64 个十六进制字符，实际 {}",
-            source_hash.len()
+            "ORB 特征列数非法，期望 {ORB_DESCRIPTOR_COLS}，实际 {cols}"
+        ));
+    }
+    if rows == 0 {
+        if raw.is_empty() {
+            return Ok(Mat::default());
+        }
+        return Err("ORB 特征 rows=0 时 descriptor 数据必须为空".to_string());
+    }
+    let expected_len = (rows as usize) * (cols as usize);
+    if raw.len() != expected_len {
+        return Err(format!(
+            "ORB 特征 payload 长度不匹配，期望 {expected_len}，实际 {}",
+            raw.len()
         ));
     }
 
-    let mut best_index: i32 = -1;
-    let mut best_distance = u32::MAX;
-    for (index, template_hash) in template_hashes.iter().enumerate() {
-        let normalized = normalize_hash_hex(template_hash)?;
-        if normalized.len() != source_hash.len() {
-            continue;
-        }
-        let distance = hamming_distance_hex(&source_hash, &normalized)?;
-        if distance <= max_distance && distance < best_distance {
-            best_distance = distance;
-            best_index = index as i32;
-            if distance == 0 {
-                break;
-            }
-        }
+    let mut descriptors = Mat::zeros(rows, cols, CV_8UC1)
+        .map_err(|e| format!("创建 ORB 描述子 Mat 失败: {e}"))?
+        .to_mat()
+        .map_err(|e| format!("初始化 ORB 描述子 Mat 失败: {e}"))?;
+    let dst = descriptors
+        .data_bytes_mut()
+        .map_err(|e| format!("写入 ORB 描述子失败: {e}"))?;
+    if dst.len() != expected_len {
+        return Err(format!(
+            "ORB 描述子 Mat 大小异常，期望 {expected_len}，实际 {}",
+            dst.len()
+        ));
     }
+    dst.copy_from_slice(&raw);
 
-    Ok(best_index)
+    Ok(descriptors)
 }
 
-/// 计算 ORB 优质匹配数量（Lowe Ratio Test）。
-pub fn orb_match_count_impl(img1: &Mat, img2: &Mat) -> Result<i32, String> {
-    let gray1 = _to_gray_mat(img1)?;
-    let gray2 = _to_gray_mat(img2)?;
-
-    let mut orb = features2d::ORB::create_def().map_err(|e| format!("创建 ORB 检测器失败: {e}"))?;
-
-    let mut keypoints1 = core::Vector::<core::KeyPoint>::new();
-    let mut descriptors1 = Mat::default();
-    orb.detect_and_compute(
-        &gray1,
-        &Mat::default(),
-        &mut keypoints1,
-        &mut descriptors1,
-        false,
-    )
-    .map_err(|e| format!("计算 img1 ORB 特征失败: {e}"))?;
-
-    let mut keypoints2 = core::Vector::<core::KeyPoint>::new();
-    let mut descriptors2 = Mat::default();
-    orb.detect_and_compute(
-        &gray2,
-        &Mat::default(),
-        &mut keypoints2,
-        &mut descriptors2,
-        false,
-    )
-    .map_err(|e| format!("计算 img2 ORB 特征失败: {e}"))?;
-
-    if descriptors1.empty() || descriptors2.empty() {
+/// 计算 ORB 描述子的优质匹配数量（Lowe Ratio Test）。
+fn _orb_good_match_count_from_descriptors(query: &Mat, train: &Mat) -> Result<i32, String> {
+    if query.empty() || train.empty() {
         return Ok(0);
     }
 
@@ -984,7 +1055,7 @@ pub fn orb_match_count_impl(img1: &Mat, img2: &Mat) -> Result<i32, String> {
         .map_err(|e| format!("创建 ORB 匹配器失败: {e}"))?;
     let mut knn_matches = core::Vector::<core::Vector<core::DMatch>>::new();
     matcher
-        .knn_train_match_def(&descriptors1, &descriptors2, &mut knn_matches, 2)
+        .knn_train_match_def(query, train, &mut knn_matches, 2)
         .map_err(|e| format!("ORB knn 匹配失败: {e}"))?;
 
     let mut good_count = 0i32;
@@ -1001,14 +1072,93 @@ pub fn orb_match_count_impl(img1: &Mat, img2: &Mat) -> Result<i32, String> {
         let second = pair
             .get(1)
             .map_err(|e| format!("读取 ORB 匹配 second[{idx}]失败: {e}"))?;
-
-        // 使用 Lowe Ratio Test 过滤出质量更高的匹配。
-        if first.distance < second.distance * 0.75 {
+        if first.distance < second.distance * ORB_MATCH_RATIO_THRESHOLD {
             good_count += 1;
         }
     }
 
     Ok(good_count)
+}
+
+/// 基于 ORB 描述子计算匹配置信度（0-1，越大越像）。
+fn _orb_match_confidence_from_descriptors(source: &Mat, template: &Mat) -> Result<f64, String> {
+    if source.empty() || template.empty() {
+        return Ok(0.0);
+    }
+
+    let good_count = _orb_good_match_count_from_descriptors(source, template)?;
+    if good_count < ORB_MATCH_MIN_GOOD_COUNT {
+        return Ok(0.0);
+    }
+
+    let denom = source.rows().min(template.rows()).max(1) as f64;
+    Ok((good_count as f64 / denom).clamp(0.0, 1.0))
+}
+
+/// 解析 ORB 匹配阈值：
+/// - `0.0..=1.0` 视为最小置信度；
+/// - `1.0..=100.0` 视为百分比并换算到 `0.0..=1.0`。
+fn _parse_orb_min_confidence(threshold: f64) -> f64 {
+    if !threshold.is_finite() {
+        return 0.0;
+    }
+    if threshold <= 1.0 {
+        threshold.max(0.0)
+    } else {
+        (threshold / 100.0).clamp(0.0, 1.0)
+    }
+}
+
+/// 计算图像 ORB 特征字符串（压缩后的原始描述子）。
+pub fn orb_feature_impl(mat: &Mat) -> Result<String, String> {
+    if mat.rows() <= 0 || mat.cols() <= 0 {
+        return Err("源图像尺寸无效".to_string());
+    }
+
+    let gray = _to_gray_mat(mat)?;
+    let descriptors = _detect_orb_descriptors(&gray)?;
+    _encode_orb_descriptors(&descriptors)
+}
+
+/// 比较 ORB 特征字符串数组，返回最佳匹配索引或 -1。
+///
+/// 输入字符串必须为 ORB 压缩特征 `base64` 格式。
+/// 参数 `threshold` 表示最小置信度（支持 0-1 或 0-100）。
+pub fn match_orb_feature_impl(
+    source_feature: &str,
+    template_features: &[String],
+    threshold: f64,
+) -> Result<i32, String> {
+    let source_descriptors = _decode_orb_descriptors(source_feature)?;
+    let min_confidence = _parse_orb_min_confidence(threshold);
+
+    let mut best_index: i32 = -1;
+    let mut best_confidence = 0.0f64;
+    for (index, template_feature) in template_features.iter().enumerate() {
+        let template_descriptors = _decode_orb_descriptors(template_feature)
+            .map_err(|e| format!("templateFeatures[{index}] 解析失败: {e}"))?;
+        let confidence =
+            _orb_match_confidence_from_descriptors(&source_descriptors, &template_descriptors)?;
+        if confidence >= min_confidence && confidence > best_confidence {
+            best_confidence = confidence;
+            best_index = index as i32;
+            if confidence >= 0.999 {
+                break;
+            }
+        }
+    }
+
+    Ok(best_index)
+}
+
+/// 计算 ORB 优质匹配数量（Lowe Ratio Test）。
+pub fn orb_match_count_impl(img1: &Mat, img2: &Mat) -> Result<i32, String> {
+    let gray1 = _to_gray_mat(img1)?;
+    let gray2 = _to_gray_mat(img2)?;
+
+    let descriptors1 = _detect_orb_descriptors(&gray1)?;
+    let descriptors2 = _detect_orb_descriptors(&gray2)?;
+    _orb_good_match_count_from_descriptors(&descriptors1, &descriptors2)
 }
 
 /// 使用 SIFT + 单应性估计定位 img2 在 img1 中的位置与尺寸。

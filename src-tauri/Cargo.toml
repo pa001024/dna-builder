@@ -1,9 +1,10 @@
 [package]
 name = "dna-builder"
-version = "0.12.3"
+version = "0.12.4"
 description = "A DNA Builder"
 authors = ["pa001024"]
 edition = "2024"
+default-run = "dna-builder"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -16,6 +17,19 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
+
+[features]
+default = []
+dob-script-cli = []
+
+[[bin]]
+name = "dna-builder"
+path = "src/main.rs"
+
+[[bin]]
+name = "dob-script"
+path = "src/bin/dob-script.rs"
+required-features = ["dob-script-cli"]
 
 [dependencies]
 tauri = { version = "2", features = ["tray-icon", "image-ico", "unstable"] }
@@ -113,5 +127,6 @@ opencv = { version = "0.98.1" }
 boa_engine = "0.21.0"
 boa_gc = "0.21.0"
 boa_runtime = "0.21.0"
+libffi = "5.1.0"
 hotwatch = "0.5.0"
 tauri-plugin-global-shortcut = "2"

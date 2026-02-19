@@ -3,7 +3,6 @@ import { provideClient } from "@urql/vue"
 import { onMounted, watch, watchEffect } from "vue"
 import { useRoute } from "vue-router"
 import { gqClient } from "./api/graphql"
-import Updater from "./components/Updater.vue"
 import { env } from "./env"
 import { useMihanNotify } from "./store/mihan"
 import { useSettingStore } from "./store/setting"
@@ -194,6 +193,7 @@ onMounted(async () => {
             <Sidebar />
         </template>
     </ResizeableWindow>
+    <ScriptRuntimeFloatingBar />
 </template>
 
 <style>

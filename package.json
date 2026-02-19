@@ -1,7 +1,7 @@
 {
     "name": "dna-builder",
     "private": true,
-    "version": "0.12.3",
+    "version": "0.12.4",
     "type": "module",
     "packageManager": "pnpm@10.28.1+sha512.7d7dbbca9e99447b7c3bf7a73286afaaf6be99251eb9498baefa7d406892f67b879adb3a1d7e687fc4ccc1a388c7175fbaae567a26ab44d1067b54fcb0d6a316",
     "scripts": {
@@ -9,6 +9,7 @@
         "lint": "biome lint --fix && vue-tsc --noEmit",
         "build": "vite build",
         "build:mcp": "cd mcp_server && cargo build --release --bin dna_mcp_server && node build.mjs",
+        "build:dob-script": "cargo build --manifest-path src-tauri/Cargo.toml --release --features dob-script-cli --bin dob-script && node tools/prepare-dob-script.mjs",
         "build:all": "pnpm build",
         "build:api": "cd externals/dna-api && bun run build && cd ../.. && pnpm install",
         "preview": "vite preview",
@@ -22,7 +23,8 @@
         "ver": "node .husky/update-version.js",
         "deploy": "bun server/deploy.ts",
         "icon": "bun run tools/icon_tool.ts",
-        "gen": "bun run tools/generateApiCalls.ts"
+        "gen": "bun run tools/generateApiCalls.ts",
+        "publish:dob-script": "pnpm run build:dob-script && cd packages/dob-script && npm publish --access public --registry https://registry.npmjs.org/"
     },
     "dependencies": {
         "@antv/g": "^6.3.1",

@@ -163,20 +163,8 @@ interface DB {
     propFlows: PropFlow
 }
 
+// 加表不需要改version!
 db.version(1).stores({
-    mods: "++id, entity, name",
-    customEntitys: "++id, &name",
-    entityMods: "++id, entity, modid",
-    conversations: "++id, createdAt, updatedAt",
-    messages: "++id, conversationId, createdAt",
-    buildAgentChats: "&id, charName, updatedAt",
-    dnaUsers: "++id, uid",
-    userMapMarkers: "++id, mapId, createdAt",
-    nodeEditorGraphs: "++id, name, createdAt, updatedAt",
-    propFlows: "++id, time, prop_name, category_name",
-})
-
-db.version(2).stores({
     mods: "++id, entity, name",
     customEntitys: "++id, &name",
     entityMods: "++id, entity, modid",

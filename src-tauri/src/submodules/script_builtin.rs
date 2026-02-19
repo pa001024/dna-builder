@@ -1,6 +1,7 @@
 use base64::{Engine as _, engine::general_purpose};
 use boa_engine::class::Class;
 use boa_engine::job::NativeAsyncJob;
+use boa_engine::native_function::NativeFunction;
 use boa_engine::object::builtins::{JsArray, JsFunction, JsPromise};
 use boa_engine::{
     Context, IntoJsFunctionCopied, JsData, JsNativeError, JsObject, JsResult, JsValue,
@@ -30,8 +31,10 @@ use windows::Win32::UI::WindowsAndMessaging::{GetForegroundWindow, SetForeground
 
 use crate::submodules::{
     color_match::{check_color_mat, find_color_and_match_template, rgb_to_bgr},
+    dll_call::dll_call_js,
     fx::draw_border,
     input::*,
+    jsdnn::register_cv_dnn_namespace,
     jsmat::{IntoJs, JsMat},
     ocr::{self, OcrInitConfig},
     predict_rotation::predict_rotation,
@@ -40,7 +43,7 @@ use crate::submodules::{
     script_vision::{
         batch_match_color_impl, color_filter_hsl_impl, color_filter_impl, color_key_match_impl,
         draw_bboxes_impl, draw_contours_impl, find_contours_impl, hamming_distance_hex,
-        match_orb_hash_impl, morphology_ex_impl, normalize_hash_hex, orb_feature_hash_impl,
+        match_orb_feature_impl, morphology_ex_impl, normalize_hash_hex, orb_feature_impl,
         orb_match_count_impl, perceptual_hash_impl, segment_single_line_chars_impl,
         sift_locate_impl,
     },
@@ -344,6 +347,41 @@ fn _parse_string_array(arg: JsValue, ctx: &mut Context) -> JsResult<Vec<String>>
     }
 
     Ok(values)
+}
+
+/// 解析 colorFilterHSL 的可选权重参数 `[h, s, l]`。
+fn _parse_hsl_weights(arg: JsValue, ctx: &mut Context) -> JsResult<Option<[f64; 3]>> {
+    if arg.is_undefined() || arg.is_null() {
+        return Ok(None);
+    }
+
+    let array_obj = arg
+        .as_object()
+        .ok_or_else(|| JsNativeError::typ().with_message("weights 参数必须是 [number, number, number]"))?;
+    let array = JsArray::from_object(array_obj.clone())
+        .map_err(|_| JsNativeError::typ().with_message("weights 参数必须是 [number, number, number]"))?;
+    let length = array.length(ctx)? as usize;
+    if length != 3 {
+        return Err(JsNativeError::typ()
+            .with_message("weights 长度必须为 3，格式为 [h, s, l]")
+            .into());
+    }
+
+    let mut values = [0.0f64; 3];
+    for (idx, item) in values.iter_mut().enumerate() {
+        let number = array
+            .get(idx as u32, ctx)?
+            .to_number(ctx)
+            .map_err(|_| JsNativeError::typ().with_message(format!("weights[{idx}] 必须是数字")))?;
+        if !number.is_finite() || number < 0.0 {
+            return Err(JsNativeError::typ()
+                .with_message(format!("weights[{idx}] 必须是非负有限数"))
+                .into());
+        }
+        *item = number;
+    }
+
+    Ok(Some(values))
 }
 
 /// 规范化 select 选项：去除空白、去重并保留原顺序。
@@ -1679,6 +1717,102 @@ fn _copy_image(js_img_mat: Option<JsValue>, _ctx: &mut Context) -> JsResult<JsVa
 /// 从本地或网络加载图像Mat对象函数
 /// 如果 local_path 不为空，先尝试从本地路径加载，失败则从网络下载并保存到本地
 /// 如果 local_path 为空，直接从网络加载不保存到本地
+fn _download_file(
+    url: Option<JsValue>,
+    filename: Option<JsValue>,
+    force: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let url = url
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy()
+        .trim()
+        .to_string();
+    let filename = filename
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy()
+        .trim()
+        .to_string();
+    let force = force.unwrap_or_else(|| JsValue::new(false)).to_boolean();
+
+    if url.is_empty() {
+        return Err(JsNativeError::typ()
+            .with_message("downloadFile url 不能为空")
+            .into());
+    }
+    if filename.is_empty() {
+        return Err(JsNativeError::typ()
+            .with_message("downloadFile filename 不能为空")
+            .into());
+    }
+
+    let resolved_filename = _resolve_script_resource_path(&filename);
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let resolvers_clone = resolvers.clone();
+
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            let async_result = tokio::task::spawn_blocking(move || -> Result<(), String> {
+                let target_path = Path::new(resolved_filename.as_str());
+
+                // force=false 且文件已存在时直接返回成功，不重复下载。
+                if !force && target_path.exists() {
+                    return Ok(());
+                }
+
+                if let Some(parent) = target_path.parent()
+                    && !parent.as_os_str().is_empty()
+                {
+                    std::fs::create_dir_all(parent)
+                        .map_err(|e| format!("创建下载目录失败: {}, {e}", parent.to_string_lossy()))?;
+                }
+
+                let response =
+                    reqwest::blocking::get(url.as_str()).map_err(|e| format!("请求下载地址失败: {e}"))?;
+                if !response.status().is_success() {
+                    return Err(format!("下载失败，HTTP 状态码: {}", response.status()));
+                }
+
+                let bytes = response.bytes().map_err(|e| format!("读取下载内容失败: {e}"))?;
+                std::fs::write(target_path, &bytes).map_err(|e| {
+                    format!("写入下载文件失败: {}, {e}", target_path.to_string_lossy())
+                })?;
+
+                Ok(())
+            })
+            .await;
+
+            let context = &mut context.borrow_mut();
+            match async_result {
+                Ok(Ok(())) => resolvers_clone
+                    .resolve
+                    .call(&JsValue::undefined(), &[], context),
+                Ok(Err(message)) => resolvers_clone.reject.call(
+                    &JsValue::undefined(),
+                    &[JsValue::from(js_string!(message))],
+                    context,
+                ),
+                Err(e) => {
+                    let message = format!("downloadFile 线程执行失败: {e}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(message))],
+                        context,
+                    )
+                }
+            }
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
+}
+
+/// 从本地或网络加载图像Mat对象函数
+/// 如果 local_path 不为空，先尝试从本地路径加载，失败则从网络下载并保存到本地
+/// 如果 local_path 为空，直接从网络加载不保存到本地
 fn _imread_url(
     local_path: Option<JsValue>,
     url: Option<JsValue>,
@@ -2035,6 +2169,7 @@ fn _color_filter_hsl(
     js_img_mat: Option<JsValue>,
     colors: Option<JsValue>,
     tolerance: Option<JsValue>,
+    weights: Option<JsValue>,
     ctx: &mut Context,
 ) -> JsResult<JsValue> {
     let js_img_mat = js_img_mat
@@ -2049,8 +2184,9 @@ fn _color_filter_hsl(
     } else {
         0.0
     };
+    let weights = _parse_hsl_weights(weights.unwrap_or_else(|| JsValue::undefined()), ctx)?;
 
-    match color_filter_hsl_impl(&img_mat, &colors, tolerance) {
+    match color_filter_hsl_impl(&img_mat, &colors, tolerance, weights) {
         Ok(mask) => Box::new(mask).into_js(ctx),
         Err(msg) => Err(JsNativeError::error().with_message(msg).into()),
     }
@@ -2196,16 +2332,16 @@ fn _perceptual_hash(
     Ok(JsValue::from(js_string!(hash)))
 }
 
-/// 计算输入图像的 ORB 特征哈希（固定 64 位十六进制字符串）。
-fn _orb_feature_hash(js_img_mat: Option<JsValue>, _ctx: &mut Context) -> JsResult<JsValue> {
+/// 计算输入图像的 ORB 特征字符串（压缩后的原始 ORB 描述子）。
+fn _orb_feature(js_img_mat: Option<JsValue>, _ctx: &mut Context) -> JsResult<JsValue> {
     let js_img_mat = js_img_mat
         .unwrap_or_else(|| JsValue::undefined())
         .get_native::<JsMat>()?;
     let img_mat = (*js_img_mat.borrow().data().inner).clone();
 
-    let hash =
-        orb_feature_hash_impl(&img_mat).map_err(|msg| JsNativeError::error().with_message(msg))?;
-    Ok(JsValue::from(js_string!(hash)))
+    let feature =
+        orb_feature_impl(&img_mat).map_err(|msg| JsNativeError::error().with_message(msg))?;
+    Ok(JsValue::from(js_string!(feature)))
 }
 
 /// 预测罗盘/圆盘类图像朝向角度（单位：度，范围 0-359）。
@@ -2267,30 +2403,28 @@ fn _match_hamming_hash(
     Ok(JsValue::new(best_index))
 }
 
-/// 比较 ORB 哈希和模板哈希数组，返回最佳匹配索引或 -1。
-fn _match_orb_hash(
-    source_hash: Option<JsValue>,
-    template_hashes: Option<JsValue>,
-    max_distance: Option<JsValue>,
+/// 比较 ORB 特征字符串和模板数组，返回最佳匹配索引或 -1。
+///
+/// 参数 `threshold` 表示最小置信度（0-1 或 0-100）。
+fn _match_orb_feature(
+    source_feature: Option<JsValue>,
+    template_features: Option<JsValue>,
+    threshold: Option<JsValue>,
     ctx: &mut Context,
 ) -> JsResult<JsValue> {
-    let source_hash = source_hash
+    let source_feature = source_feature
         .unwrap_or_else(|| JsValue::undefined())
         .to_string(ctx)?
         .to_std_string_lossy();
 
-    let template_hashes =
-        _parse_string_array(template_hashes.unwrap_or_else(|| JsValue::undefined()), ctx)?;
-    let max_distance = max_distance
+    let template_features =
+        _parse_string_array(template_features.unwrap_or_else(|| JsValue::undefined()), ctx)?;
+    let threshold = threshold
         .unwrap_or_else(|| js_value!(0))
         .to_number(ctx)?;
-    let max_distance = if max_distance.is_finite() {
-        max_distance.max(0.0) as u32
-    } else {
-        0
-    };
+    let threshold = if threshold.is_finite() { threshold } else { 0.0 };
 
-    let best_index = match_orb_hash_impl(&source_hash, &template_hashes, max_distance)
+    let best_index = match_orb_feature_impl(&source_feature, &template_features, threshold)
         .map_err(|msg| JsNativeError::error().with_message(msg))?;
     Ok(JsValue::new(best_index))
 }
@@ -3295,6 +3429,10 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     let f = _imread_url_rgba.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("imreadUrlRgba"), 2, f)?;
 
+    // 下载文件（异步）
+    let f = _download_file.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("downloadFile"), 3, f)?;
+
     // OCR 初始化（自动下载资源）
     let f = _init_ocr.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("initOcr"), 3, f)?;
@@ -3321,7 +3459,7 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
 
     // HSL 加权颜色键过滤函数
     let f = _color_filter_hsl.into_js_function_copied(context);
-    context.register_global_builtin_callable(js_string!("colorFilterHSL"), 3, f)?;
+    context.register_global_builtin_callable(js_string!("colorFilterHSL"), 4, f)?;
 
     // 色键匹配函数
     let f = _color_key_match.into_js_function_copied(context);
@@ -3343,9 +3481,13 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     let f = _perceptual_hash.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("perceptualHash"), 2, f)?;
 
-    // ORB 特征哈希函数
-    let f = _orb_feature_hash.into_js_function_copied(context);
-    context.register_global_builtin_callable(js_string!("orbFeatureHash"), 1, f)?;
+    // AHK 风格动态 DLL 调用函数（可变参数）
+    let f = NativeFunction::from_fn_ptr(dll_call_js);
+    context.register_global_builtin_callable(js_string!("dllCall"), 1, f)?;
+
+    // ORB 特征函数
+    let f = _orb_feature.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("orbFeature"), 1, f)?;
 
     // 图像角度预测函数
     let f = _predict_rotation.into_js_function_copied(context);
@@ -3355,9 +3497,9 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     let f = _match_hamming_hash.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("matchHammingHash"), 3, f)?;
 
-    // ORB 哈希匹配函数
-    let f = _match_orb_hash.into_js_function_copied(context);
-    context.register_global_builtin_callable(js_string!("matchOrbHash"), 3, f)?;
+    // ORB 特征匹配函数
+    let f = _match_orb_feature.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("matchOrbFeature"), 3, f)?;
 
     // 形态学图像处理函数
     let f = _morphology_ex.into_js_function_copied(context);
@@ -3402,6 +3544,9 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     // 深度预测函数（双图深度 + 路径方向候选）
     let f = _predict_depth.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("predictDepth"), 6, f)?;
+
+    // OpenCV DNN 命名空间（cv.dnn.*）
+    register_cv_dnn_namespace(context)?;
 
     Ok(())
 }

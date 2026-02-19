@@ -64,11 +64,6 @@
 - SQLite + Drizzle ORM
 - GraphQL Yoga
 
-### MCP Server（可选）
-
-- Rust + Tokio
-- Model Context Protocol SDK
-
 ## 多语言
 
 目前支持（含部分数据翻译）：
@@ -87,7 +82,7 @@
 - Node.js（建议 20+）
 - `pnpm`（项目使用 `pnpm`）
 - `bun`（用于 server 与工具脚本）
-- Rust 工具链（开发 Tauri / MCP Server 时需要）
+- Rust 工具链（开发 Tauri 时需要）
 
 ### 前端
 
@@ -132,18 +127,6 @@ bun run gen
 
 # 执行迁移
 bun run mig
-```
-
-### MCP Server（Rust）
-
-```bash
-# 仅构建 MCP Server
-cd mcp_server
-cargo build --release
-
-# 在仓库根目录构建 mcp_server 并打包到前端输出
-cd ..
-pnpm build:mcp
 ```
 
 ### 常用工具命令
@@ -222,6 +205,47 @@ const options = {
 const cb = new CharBuild(options)
 const damage = cb.calculate()
 ```
+
+### dob-script（CLI，面向 Agent 脚本测试）
+
+`dob-script` 是 DNA Builder 脚本引擎的命令行入口，主要用于让 AI Agent 快速生成、执行、迭代 `.js` 脚本，不需要先打开桌面 UI。
+
+安装（全局）：
+
+```bash
+npm i -g dob-script
+```
+
+执行脚本：
+
+```bash
+dob-script ./example.js
+```
+
+AI Agent 提示词模板（可直接复用）：
+
+1. 生成脚本（首轮）
+
+```text
+你现在是 DNA Builder 脚本助手，请输出一个可直接运行的完整 JS 脚本（不要解释，只输出代码）。
+目标：<这里写自动化目标，例如“每隔 200ms 检测窗口并点击按钮”>。
+约束：
+- 脚本文件需可通过 `dob-script xxx.js` 直接执行
+- 必须包含必要的日志输出（console.log / console.error）
+- 异常要可见，避免静默失败
+```
+
+2. 迭代修复（拿到运行日志后）
+
+```text
+下面是我通过 `dob-script test.js` 得到的报错日志，请根据日志修复脚本并输出完整可运行代码（不要解释）：
+<粘贴日志>
+```
+
+说明：
+
+- 推荐流程：`Agent 生成脚本 -> dob-script 本地运行 -> 根据日志继续让 Agent 修复`
+- 该 CLI 当前主要面向 Windows 环境
 
 ### MCP（npx stdio）
 

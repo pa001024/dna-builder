@@ -6,6 +6,7 @@ import { db, schema } from ".."
 import { hasUser, waitForUser } from "../kv/room"
 import type { Context } from "../yoga"
 import { getSubSelection } from "."
+import { processMessageImageContent } from "./messageImage"
 
 export const typeDefs = /* GraphQL */ `
     type Query {
@@ -57,6 +58,22 @@ export const typeDefs = /* GraphQL */ `
         createdAt: String
     }
 `
+
+/**
+ * @description 预处理消息内容：将可能导致消息过长的内联图片转为 OSS 地址后再做安全清洗。
+ * @param content 原始消息 HTML。
+ * @returns 可安全入库的消息 HTML。
+ * @throws GraphQLError 当图片转存失败时抛出业务错误。
+ */
+async function preprocessMessageContent(content: string): Promise<string> {
+    try {
+        const imageProcessed = await processMessageImageContent(content)
+        return sanitizeHTML(imageProcessed)
+    } catch (error) {
+        console.error("消息图片预处理失败:", error)
+        throw createGraphQLError(error instanceof Error ? error.message : "image process failed")
+    }
+}
 
 export const resolvers = {
     Query: {
@@ -115,7 +132,7 @@ export const resolvers = {
         sendMessage: async (_parent, { roomId, content }, { user, pubsub }) => {
             if (!user) throw createGraphQLError("need login")
             const userId = user.id
-            const parsedContent = sanitizeHTML(content)
+            const parsedContent = await preprocessMessageContent(content)
             if (!parsedContent) throw createGraphQLError("invalid content")
             const rst = (
                 await db
@@ -190,7 +207,7 @@ export const resolvers = {
             })
             if (!msg || msg.userId !== user.id) return null
 
-            const content_sanitized = sanitizeHTML(content)
+            const content_sanitized = await preprocessMessageContent(content)
             const updated_msg = (
                 await db
                     .update(schema.msgs)

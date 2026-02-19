@@ -494,18 +494,4 @@ export interface RewardChild {
     n?: string
 }
 
-export interface Dungeon {
-    id: number
-    n: string
-    t: string
-    e?: string
-    ts?: string
-    lv: number
-    rd: number
-    desc?: string
-    m: number[]
-    r: number[]
-    win: number
-    sm?: number[]
-    sr?: number[]
-}
+export type { Dungeon } from "./d/dungeon.data"

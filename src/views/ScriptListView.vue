@@ -7,7 +7,6 @@ import { useRouter } from "vue-router"
 import {
     deleteFile,
     getDocumentsDir,
-    getScriptRuntimeInfo,
     listScriptFiles,
     openExplorer,
     readTextFile,
@@ -16,9 +15,6 @@ import {
     runAsAdmin,
     runScript,
     type ScriptHotkeyBinding,
-    type ScriptRuntimeInfo,
-    stopScript,
-    stopScriptByPath,
     syncScriptHotkeyBindings,
     unwatchFile,
     watchFile,
@@ -27,10 +23,12 @@ import {
 import { createScriptMutation, deleteScriptMutation, updateScriptMutation } from "@/api/gen/api-mutations"
 import { Script, scriptQuery, scriptsCountQuery, scriptsQuery } from "@/api/graphql"
 import ContextMenu, { ContextMenuItem } from "@/components/contextmenu"
+import { useScriptRuntimeStore } from "@/store/scriptRuntime"
 import { useUIStore } from "@/store/ui"
 import { parseScriptHeader, replaceScriptHeader } from "@/utils/script-header"
 
 const ui = useUIStore()
+const scriptRuntime = useScriptRuntimeStore()
 const router = useRouter()
 
 const scriptsDir = ref("")
@@ -182,20 +180,49 @@ interface ScriptStatusItem {
     timestamp: number
 }
 const scriptStatuses = ref<ScriptStatusItem[]>([])
-const isRunning = ref(false)
-const runningMode = ref<"single" | "scheduler" | null>(null)
-const runningScriptName = ref("")
-const runningScriptCount = ref(0)
-const runningScriptPaths = ref<string[]>([])
+const isRunning = computed({
+    get: () => scriptRuntime.isRunning,
+    set: value => {
+        scriptRuntime.isRunning = value
+    },
+})
+const runningMode = computed({
+    get: () => scriptRuntime.runningMode,
+    set: value => {
+        scriptRuntime.runningMode = value
+    },
+})
+const runningScriptName = computed({
+    get: () => scriptRuntime.runningScriptName,
+    set: value => {
+        scriptRuntime.runningScriptName = value
+    },
+})
+const runningScriptCount = computed({
+    get: () => scriptRuntime.runningScriptCount,
+    set: value => {
+        scriptRuntime.runningScriptCount = value
+    },
+})
+const runningScriptPaths = computed({
+    get: () => scriptRuntime.runningScriptPaths,
+    set: value => {
+        scriptRuntime.runningScriptPaths = value
+    },
+})
 let unlistenConsoleFn: UnlistenFn | null = null
 let unlistenStatusFn: UnlistenFn | null = null
 let unlistenFileChangedFn: UnlistenFn | null = null
 let unlistenScriptConfigFn: UnlistenFn | null = null
-let unlistenRuntimeFn: UnlistenFn | null = null
 const watchedFiles = ref<Set<string>>(new Set())
 const codeEditor = ref<any>()
 const showSchedulerDialog = ref(false)
-const schedulerStopRequested = ref(false)
+const schedulerStopRequested = computed({
+    get: () => scriptRuntime.schedulerStopRequested,
+    set: value => {
+        scriptRuntime.schedulerStopRequested = value
+    },
+})
 const SCHEDULER_STORAGE_KEY = "script-scheduler-config-v1"
 const schedulerConfig = ref<SchedulerConfig>({
     steps: [],
@@ -581,13 +608,18 @@ function saveSchedulerConfig() {
 /**
  * 打开并运行指定本地脚本。
  * @param fileName 本地脚本文件名
+ * @param options 运行附加选项
  * @returns 脚本返回结果字符串
  */
-async function runLocalScriptByName(fileName: string): Promise<string> {
+async function runLocalScriptByName(
+    fileName: string,
+    options: {
+        keepSchedulerMode?: boolean
+    } = {}
+): Promise<string> {
     await openLocalScript(fileName, { preferConfigPanel: false })
     const filePath = `${scriptsDir.value}\\${fileName}`
-    runningScriptName.value = fileName
-    runningScriptCount.value = 1
+    scriptRuntime.markRunningScript(fileName, { keepSchedulerMode: options.keepSchedulerMode })
     addConsoleLog("info", `开始运行脚本: ${fileName}`)
     const result = await runScript(filePath)
     const normalizedResult = normalizeSchedulerResult(result)
@@ -688,52 +720,6 @@ function isLocalScriptRunning(scriptName: string): boolean {
 }
 
 /**
- * 将后端运行态应用到前端状态，用于热键并发运行态展示与手动停止。
- * @param runtimeInfo 后端运行信息
- * @param options 附加选项
- */
-function applyBackendRuntimeInfo(
-    runtimeInfo: ScriptRuntimeInfo,
-    options: {
-        appendDetectedLog?: boolean
-    } = {}
-) {
-    const normalizedPaths = Array.isArray(runtimeInfo.scriptPaths)
-        ? runtimeInfo.scriptPaths
-            .map(path => String(path ?? "").trim())
-            .filter(path => path.length > 0)
-        : []
-    runningScriptPaths.value = normalizedPaths
-
-    const normalizedCount = Number(runtimeInfo.runningCount ?? 0)
-    const hasRunningScripts = Boolean(runtimeInfo.running) && normalizedPaths.length > 0 && normalizedCount > 0
-    if (hasRunningScripts) {
-        isRunning.value = true
-        if (runningMode.value !== "scheduler") {
-            runningMode.value = "single"
-        }
-        showConsole.value = true
-        runningScriptCount.value = normalizedCount
-        runningScriptName.value = getScriptFileNameFromPath(normalizedPaths[0] ?? "")
-        if (options.appendDetectedLog) {
-            const runningLabel = normalizedPaths.map(path => getScriptFileNameFromPath(path) || path).join(", ")
-            const suffix = normalizedCount > 1 ? `（共 ${normalizedCount} 个运行实例）` : ""
-            addConsoleLog("info", `检测到后端仍有脚本在运行: ${runningLabel}${suffix}，可点击停止按钮中断`)
-        }
-        return
-    }
-
-    if (runningMode.value === "single") {
-        runningMode.value = null
-    }
-    if (runningMode.value !== "scheduler") {
-        isRunning.value = false
-        runningScriptName.value = ""
-        runningScriptCount.value = 0
-    }
-}
-
-/**
  * 停止指定本地脚本对应的运行实例。
  * @param fileName 本地脚本文件名
  */
@@ -741,7 +727,7 @@ async function stopLocalScriptByName(fileName: string) {
     const scriptName = String(fileName ?? "").trim()
     if (!scriptName) return
     try {
-        await stopScriptByPath(`${scriptsDir.value}\\${scriptName}`)
+        await scriptRuntime.stopScriptByFilePath(`${scriptsDir.value}\\${scriptName}`)
         addConsoleLog("info", `已发送停止请求: ${scriptName}`)
     } catch (error) {
         console.error("停止指定脚本失败", error)
@@ -763,10 +749,8 @@ async function runScheduler() {
     sidePanelTab.value = "status"
     showStatusPanel.value = true
     showConsole.value = true
-    isRunning.value = true
-    runningMode.value = "scheduler"
-    runningScriptCount.value = 1
-    schedulerStopRequested.value = false
+    scriptRuntime.markSchedulerRunning()
+    scriptRuntime.clearSchedulerStopRequest()
     addConsoleLog("info", "开始执行调度器")
 
     const MAX_SCHEDULER_EXECUTIONS = 500
@@ -789,7 +773,7 @@ async function runScheduler() {
             }
 
             addConsoleLog("info", `调度器执行步骤 #${stepIndex + 1}: ${step.scriptName}`)
-            const result = await runLocalScriptByName(step.scriptName)
+            const result = await runLocalScriptByName(step.scriptName, { keepSchedulerMode: true })
             nextStepId = resolveSchedulerNextStepId(step, result, stepIndex)
 
             executionCount += 1
@@ -812,8 +796,8 @@ async function runScheduler() {
         if (runningMode.value === "scheduler") {
             runningMode.value = null
         }
-        schedulerStopRequested.value = false
-        await syncRunningStateFromBackend(false)
+        scriptRuntime.clearSchedulerStopRequest()
+        await syncRunningStateFromBackend()
     }
 }
 
@@ -1980,29 +1964,35 @@ async function initScriptConfigListener() {
 }
 
 /**
- * 监听脚本运行态变化事件（包含热键触发并发脚本）。
- */
-async function initScriptRuntimeListener() {
-    try {
-        unlistenRuntimeFn = await listen<ScriptRuntimeInfo>("script-runtime-updated", event => {
-            if (!event?.payload) return
-            applyBackendRuntimeInfo(event.payload)
-        })
-    } catch (error) {
-        console.error("监听脚本运行状态事件失败", error)
-    }
-}
-
-/**
  * 从后端同步脚本运行状态，确保页面刷新后仍可停止脚本。
  */
 async function syncRunningStateFromBackend(appendDetectedLog = true) {
     try {
-        const runtimeInfo = await getScriptRuntimeInfo()
-        applyBackendRuntimeInfo(runtimeInfo, { appendDetectedLog })
+        const wasRunning = scriptRuntime.isRunning
+        await scriptRuntime.syncRunningStateFromBackend()
+        if (scriptRuntime.isRunning) {
+            showConsole.value = true
+        }
+        if (!appendDetectedLog || wasRunning || !scriptRuntime.isRunning) {
+            return
+        }
+
+        const runningLabel = scriptRuntime.runningScriptPaths.map(path => getScriptFileNameFromPath(path) || path).join(", ")
+        const suffix = scriptRuntime.runningScriptCount > 1 ? `（共 ${scriptRuntime.runningScriptCount} 个运行实例）` : ""
+        addConsoleLog("info", `检测到后端仍有脚本在运行: ${runningLabel}${suffix}，可点击停止按钮中断`)
     } catch (error) {
         console.error("同步脚本运行状态失败", error)
     }
+}
+
+/**
+ * 检测脚本源码是否包含高风险函数调用。
+ * @param source 脚本源码
+ * @returns 是否命中 eval / dllCall 调用
+ */
+function hasHighRiskScriptOperation(source: string): boolean {
+    const highRiskCallPatterns = [/\beval\s*\(/, /\bdllCall\s*\(/]
+    return highRiskCallPatterns.some(pattern => pattern.test(source))
 }
 
 async function downloadScript(script: Script) {
@@ -2015,6 +2005,12 @@ async function downloadScript(script: Script) {
         })
         if (!result) {
             throw new Error("获取脚本内容失败")
+        }
+        if (hasHighRiskScriptOperation(result.content)) {
+            const confirmed = await ui.showDialog("高风险操作警告", "此脚本包含高风险操作 请在信任脚本作者的情况下使用")
+            if (!confirmed) {
+                return
+            }
         }
         await writeTextFile(filePath, result.content)
         await syncOpenedLocalTabAfterCloudUpdate(fileName, result.content)
@@ -2080,8 +2076,8 @@ async function runCurrentTab() {
     if (viewMode.value === "scheduler") {
         if (isSchedulerRunning.value) {
             try {
-                schedulerStopRequested.value = true
-                await stopScript()
+                scriptRuntime.requestSchedulerStop()
+                await scriptRuntime.stopAllScripts()
                 addConsoleLog("info", "调度器停止请求已发送")
             } catch (error) {
                 console.error("停止调度器失败", error)
@@ -2109,20 +2105,13 @@ async function runCurrentTab() {
         sidePanelTab.value = "status"
         showStatusPanel.value = true
         showConsole.value = true
-        isRunning.value = true
-        runningMode.value = "single"
         await runLocalScriptByName(activeTab.value.name)
-        isRunning.value = false
     } catch (error) {
         console.error("运行脚本失败", error)
         ui.showErrorMessage("运行脚本失败，请重试")
         addConsoleLog("error", `运行脚本失败: ${error}`)
-        isRunning.value = false
     } finally {
-        if (runningMode.value === "single") {
-            runningMode.value = null
-        }
-        schedulerStopRequested.value = false
+        scriptRuntime.clearSchedulerStopRequest()
         await syncRunningStateFromBackend(false)
     }
 }
@@ -2770,6 +2759,11 @@ watch(viewMode, newMode => {
 })
 
 onMounted(async () => {
+    try {
+        await scriptRuntime.initRuntimeTracking()
+    } catch (error) {
+        console.error("初始化脚本运行态监听失败", error)
+    }
     await initScriptsDir()
     await initEngineDts()
     loadSchedulerConfig()
@@ -2781,7 +2775,6 @@ onMounted(async () => {
     await initStatusListener()
     await initFileChangeListener()
     await initScriptConfigListener()
-    await initScriptRuntimeListener()
     await syncRunningStateFromBackend()
 })
 
@@ -2798,9 +2791,6 @@ onUnmounted(async () => {
     }
     if (unlistenScriptConfigFn) {
         unlistenScriptConfigFn()
-    }
-    if (unlistenRuntimeFn) {
-        unlistenRuntimeFn()
     }
     // 停止所有文件监听
     const stopPromises = Array.from(watchedFiles.value).map(fileName => stopWatchingFile(fileName))
@@ -3084,7 +3074,7 @@ onUnmounted(async () => {
                                     <li>
                                         <a @click="toggleGlobalShortcut">{{
                                             globalShortcutEnabled ? "禁用全局快捷键(F10)" : "启用全局快捷键(F10)"
-                                        }}</a>
+                                            }}</a>
                                     </li>
                                 </ul>
                             </div>
@@ -3136,9 +3126,9 @@ onUnmounted(async () => {
                                 <div v-for="(log, index) in consoleLogs" :key="index" class="flex gap-2">
                                     <span class="text-base-content/40 shrink-0">{{ new
                                         Date(log.timestamp).toLocaleTimeString()
-                                    }}</span>
-                                    <span :class="getLogLevelClass(log.level)" class="break-all">{{ log.message
                                         }}</span>
+                                    <span :class="getLogLevelClass(log.level)" class="break-all">{{ log.message
+                                    }}</span>
                                 </div>
                             </div>
                         </div>

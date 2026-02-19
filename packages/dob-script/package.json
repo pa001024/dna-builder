@@ -1,0 +1,20 @@
+{
+    "name": "dob-script",
+    "version": "0.1.0",
+    "description": "Run DNA Builder script files from command line",
+    "license": "MIT",
+    "type": "module",
+    "bin": {
+        "dob-script": "bin/dob-script.js"
+    },
+    "scripts": {
+        "release": "npm publish --registry https://registry.npmjs.org/"
+    },
+    "files": ["bin/dob-script.js", "bin/dob-script.exe", "bin/opencv_world490.dll", "README.md"],
+    "os": ["win32"],
+    "cpu": ["x64", "arm64"],
+    "publishConfig": {
+        "access": "public"
+    },
+    "keywords": ["dna-builder", "script", "cli", "dob-script"]
+}

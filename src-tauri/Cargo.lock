@@ -1152,7 +1152,7 @@ dependencies = [
 
 [[package]]
 name = "dna-builder"
-version = "0.12.3"
+version = "0.12.4"
 dependencies = [
  "arboard",
  "base64 0.22.1",
@@ -1165,6 +1165,7 @@ dependencies = [
  "hotwatch",
  "http",
  "lazy_static",
+ "libffi",
  "opencv",
  "reqwest 0.12.28",
  "scopeguard",
@@ -2719,6 +2720,25 @@ name = "libc"
 version = "0.2.182"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6800badb6cb2082ffd7b6a67e6125bb39f18782f793520caee8cb8846be06112"
+
+[[package]]
+name = "libffi"
+version = "5.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0498fe5655f857803e156523e644dcdcdc3b3c7edda42ea2afdae2e09b2db87b"
+dependencies = [
+ "libc",
+ "libffi-sys",
+]
+
+[[package]]
+name = "libffi-sys"
+version = "4.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "71d4f1d4ce15091955144350b75db16a96d4a63728500122706fb4d29a26afbb"
+dependencies = [
+ "cc",
+]
 
 [[package]]
 name = "libloading"

@@ -1,7 +1,8 @@
 use crate::submodules::async_tokio::TokioJobExecutor;
+use crate::submodules::jsdnn::JsDnnNet;
 use crate::submodules::jsmat::JsMat;
 use crate::submodules::jstimer::JsTimer;
-use crate::submodules::logger::TauriLogger;
+use crate::submodules::logger::{StdioLogger, TauriLogger};
 use crate::submodules::script_console::Console;
 use crate::submodules::script_builtin::{
     register_builtin_functions, set_current_script_path, set_script_event_app_handle,
@@ -55,6 +56,19 @@ fn emit_script_error(app_handle: &tauri::AppHandle, scope: &str, error_message: 
             "message": error_message.clone(),
         }),
     );
+    error_message
+}
+
+/// 统一处理 CLI 模式下的脚本执行错误输出。
+///
+/// # 参数
+/// - `scope`: 事件作用域（脚本完整路径）
+/// - `error_message`: 需要输出的错误消息
+///
+/// # 返回
+/// 返回原始错误消息，便于直接用于 `Err(...)`
+fn emit_script_error_cli(scope: &str, error_message: String) -> String {
+    eprintln!("[{scope}] {error_message}");
     error_message
 }
 
@@ -192,6 +206,9 @@ pub async fn run_script_with_tauri_console(
             .register_global_class::<JsMat>()
             .map_err(|e| format!("注册 JsMat 失败: {:?}", e))?;
         context
+            .register_global_class::<JsDnnNet>()
+            .map_err(|e| format!("注册 JsDnnNet 失败: {:?}", e))?;
+        context
             .register_global_class::<JsTimer>()
             .map_err(|e| format!("注册 JsTimer 失败: {:?}", e))?;
 
@@ -269,10 +286,109 @@ pub async fn run_script_with_tauri_console(
     .map_err(|e| format!("任务执行失败: {}", e))?
 }
 
+/// 运行脚本并将控制台输出写入当前进程标准输出/标准错误（CLI 模式）。
+///
+/// # 参数
+/// - `script_path`: 脚本文件路径（建议为规范化绝对路径）
+///
+/// # 返回
+/// 返回执行结果字符串，如果成功则返回 Ok(String)，否则返回错误信息
+pub async fn run_script_with_stdio_console(script_path: String) -> Result<String, String> {
+    // 使用 spawn_blocking 在阻塞线程中执行脚本，避免 Context 的 Send 约束问题
+    tokio::task::spawn_blocking(move || {
+        let job_executor = std::rc::Rc::new(TokioJobExecutor::new());
+        let context = &mut ContextBuilder::new()
+            .job_executor(job_executor.clone())
+            .build()
+            .unwrap();
+
+        context
+            .register_global_class::<JsMat>()
+            .map_err(|e| format!("注册 JsMat 失败: {:?}", e))?;
+        context
+            .register_global_class::<JsDnnNet>()
+            .map_err(|e| format!("注册 JsDnnNet 失败: {:?}", e))?;
+        context
+            .register_global_class::<JsTimer>()
+            .map_err(|e| format!("注册 JsTimer 失败: {:?}", e))?;
+
+        // 注册 timeout 扩展，并挂载终端 console 实现。
+        boa_runtime::register((boa_runtime::extensions::TimeoutExtension,), None, context)
+            .map_err(|e| format!("注册 Timeout Extension 失败: {:?}", e))?;
+        Console::register_with_logger(StdioLogger, context)
+            .map_err(|e| format!("注册终端 Console 失败: {:?}", e))?;
+
+        // CLI 模式下不绑定 Tauri 事件发送器，但保持脚本路径上下文可用。
+        set_current_script_path(script_path.clone());
+        register_builtin_functions(context).map_err(|e| format!("注册内置函数失败: {:?}", e))?;
+        let source = Source::from_filepath(Path::new(&script_path))
+            .map_err(|e| format!("无法读取文件 {:?}: {}", script_path, e))?;
+        let script =
+            Script::parse(source, None, context).map_err(|e| format!("解析脚本失败: {:?}", e))?;
+        match script.evaluate(context) {
+            Ok(result) => {
+                // 某些脚本会“返回 Error 对象”而不是直接 throw，
+                // 这类场景也视为异常退出，避免 CLI 误判为执行成功。
+                if result
+                    .as_object()
+                    .is_some_and(|obj| obj.downcast_ref::<BoaErrorObject>().is_some())
+                {
+                    let error_detail = result
+                        .to_string(context)
+                        .map(|s| s.to_std_string_escaped())
+                        .unwrap_or_else(|_| format!("{:?}", result));
+                    let error_message = format!("JavaScript 返回 Error 对象: {}", error_detail);
+                    return Err(emit_script_error_cli(script_path.as_str(), error_message));
+                }
+
+                // 使用同步版本的 run_jobs
+                if let Err(e) = job_executor.run_jobs(context) {
+                    let error_message = format_js_error_message(context, "运行任务失败", &e);
+                    return Err(emit_script_error_cli(script_path.as_str(), error_message));
+                }
+
+                // 将脚本返回值转成字符串供 CLI 主程序按需输出。
+                let result_text = if result.is_undefined() || result.is_null() {
+                    String::new()
+                } else {
+                    result
+                        .to_string(context)
+                        .map(|s| s.to_std_string_escaped())
+                        .unwrap_or_else(|_| format!("{:?}", result))
+                };
+                Ok::<String, String>(result_text)
+            }
+            Err(e) => {
+                // 识别“主动停止”中断并按正常停止返回。
+                let opaque = e.to_opaque(context);
+                let detail = opaque
+                    .to_string(context)
+                    .map(|s| s.to_std_string_escaped())
+                    .unwrap_or_else(|_| format!("{:?}", opaque));
+                if detail.contains(SCRIPT_STOP_INTERRUPT_MESSAGE) {
+                    return Ok(String::new());
+                }
+
+                // 解析或运行时异常时，输出到标准错误。
+                let error_message = format_js_error_message(context, "JavaScript 执行错误", &e);
+                Err(emit_script_error_cli(script_path.as_str(), error_message))
+            }
+        }
+    })
+    .await
+    .map_err(|e| format!("任务执行失败: {}", e))?
+}
+
 /// 运行脚本（对外入口）：先做路径规范化，再执行脚本。
 pub async fn run_script_file(script_path: String, app_handle: tauri::AppHandle) -> Result<String, String> {
     let normalized_path = normalize_script_path(script_path)?;
     run_script_with_tauri_console(normalized_path, app_handle).await
+}
+
+/// CLI 对外入口：先做路径规范化，再执行脚本。
+pub async fn run_script_file_cli(script_path: String) -> Result<String, String> {
+    let normalized_path = normalize_script_path(script_path)?;
+    run_script_with_stdio_console(normalized_path).await
 }
 
 pub static SCRIPT_RUNNING: LazyLock<Arc<AtomicBool>> =
