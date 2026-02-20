@@ -9,6 +9,7 @@ import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { sleep } from "@/util"
 import { copyHtmlContent, isImage, sanitizeHTML } from "@/utils/html"
+import { fileToDataUrlWithRealMime, normalizeInlineImageDataUrlMime } from "@/utils/image-data-url"
 
 const route = useRoute()
 const roomId = computed(() => route.params.room as string)
@@ -106,13 +107,26 @@ useSubscription<{ newMessage: Msg }>(
             subscription ($roomId: String!) {
                 newMessage(roomId: $roomId) {
                     id
+                    roomId
+                    userId
                     edited
                     content
                     createdAt
+                    replyToMsgId
+                    replyToUserId
                     user {
                         id
                         name
                         qq
+                    }
+                    replyTo {
+                        id
+                        content
+                        user {
+                            id
+                            name
+                            qq
+                        }
                     }
                 }
             }
@@ -132,13 +146,26 @@ useSubscription<{ msgEdited: Msg }>({
         subscription ($roomId: String!) {
             msgEdited(roomId: $roomId) {
                 id
+                roomId
+                userId
                 edited
                 content
                 createdAt
+                replyToMsgId
+                replyToUserId
                 user {
                     id
                     name
                     qq
+                }
+                replyTo {
+                    id
+                    content
+                    user {
+                        id
+                        name
+                        qq
+                    }
                 }
             }
         }
@@ -164,6 +191,7 @@ async function addMessage(msg: Msg) {
 const input = ref<HTMLDivElement>(null as any)
 const inputForm = ref<HTMLDivElement>(null as any)
 const newMsgText = ref("")
+const replyingTo = ref<Msg | null>(null)
 
 async function sendMessage(e: Event) {
     if ((e as KeyboardEvent)?.shiftKey) {
@@ -172,11 +200,17 @@ async function sendMessage(e: Event) {
     e.preventDefault()
     const html = input.value?.innerHTML
     if (!html) return
-    const content = sanitizeHTML(html)
+    const content = sanitizeHTML(normalizeInlineImageDataUrlMime(html))
     if (!content) return
     input.value.innerHTML = ""
+    newMsgText.value = ""
     input.value.focus()
-    await sendMessageMutation({ content, roomId: roomId.value })
+    await sendMessageMutation({
+        content,
+        roomId: roomId.value,
+        replyToMsgId: replyingTo.value?.id,
+    })
+    replyingTo.value = null
     await nextTick()
     el.value?.scrollTo({
         top: el.value.scrollHeight,
@@ -202,26 +236,23 @@ function insertEmoji(text: string) {
 async function insertImage() {
     const fi = document.createElement("input")
     fi.type = "file"
+    fi.accept = "image/png,image/jpeg,image/gif,image/webp"
     fi.click()
     fi.onchange = async e => {
         const file = (e.target as HTMLInputElement).files?.[0]
         if (!file) return
-        const reader = new FileReader()
-        reader.readAsDataURL(file)
-        reader.onload = async e => {
-            const data = e.target!.result as string
-            const el = input.value
-            el.focus()
-            const sel = window.getSelection()!
-            const range = sel.getRangeAt(0)
-            const node = document.createElement("div")
-            node.innerHTML = `<img src="${data}" />`
-            let frag = document.createDocumentFragment()
-            while (node.firstChild) frag.appendChild(node.firstChild)
-            range.deleteContents()
-            range.insertNode(frag)
-            range.collapse(false)
-        }
+        const data = await fileToDataUrlWithRealMime(file)
+        const el = input.value
+        el.focus()
+        const sel = window.getSelection()!
+        const range = sel.getRangeAt(0)
+        const node = document.createElement("div")
+        node.innerHTML = `<img src="${data}" />`
+        let frag = document.createDocumentFragment()
+        while (node.firstChild) frag.appendChild(node.firstChild)
+        range.deleteContents()
+        range.insertNode(frag)
+        range.collapse(false)
     }
 }
 
@@ -245,7 +276,7 @@ async function startEdit(msg: Msg) {
         let el = editInput.value[0]
         el.focus()
         el.onblur = async () => {
-            const newVal = sanitizeHTML(el.innerHTML || "")
+            const newVal = sanitizeHTML(normalizeInlineImageDataUrlMime(el.innerHTML || ""))
             if (msg.content === newVal) return
             await editMessageMutation({ content: newVal, msgId: editId.value })
             msg.content = newVal
@@ -262,6 +293,38 @@ async function startEdit(msg: Msg) {
         }
     }
 }
+
+/**
+ * @description 从消息 HTML 提取简短预览文本，优先保留可读文本；纯图片消息返回占位。
+ * @param content 消息 HTML 内容。
+ * @returns 预览文本。
+ */
+function getMessagePreview(content: string) {
+    const wrapper = document.createElement("div")
+    wrapper.innerHTML = content
+    const text = (wrapper.textContent || "").replace(/\s+/g, " ").trim()
+    if (text) {
+        return text.length > 60 ? `${text.slice(0, 60)}...` : text
+    }
+    if (wrapper.querySelector("img")) return "[图片]"
+    return "[消息]"
+}
+
+/**
+ * @description 设置当前正在回复的消息，并聚焦输入框。
+ * @param msg 目标消息。
+ */
+function startReply(msg: Msg) {
+    replyingTo.value = msg
+    input.value?.focus()
+}
+
+/**
+ * @description 取消当前回复状态。
+ */
+function cancelReply() {
+    replyingTo.value = null
+}
 </script>
 
 <template>
@@ -270,85 +333,118 @@ async function startEdit(msg: Msg) {
         <div v-if="isJoined && !loading" class="flex-1 flex flex-col overflow-hidden">
             <!-- 主内容区 -->
             <div class="flex-1 flex flex-col overflow-hidden relative">
-                <GQAutoPage v-if="msgCount" v-slot="{ data: msgs }" direction="top" class="flex-1 overflow-hidden"
-                    inner-class="flex w-full h-full flex-col gap-2 p-4" :limit="20" :offset="msgCount"
-                    :query="msgsQuery" :variables="variables" @loadref="r => (el = r)">
+                <GQAutoPage
+                    v-if="msgCount"
+                    v-slot="{ data: msgs }"
+                    direction="top"
+                    class="flex-1 overflow-hidden"
+                    inner-class="flex w-full h-full flex-col gap-2 p-4"
+                    :limit="20"
+                    :offset="msgCount"
+                    :query="msgsQuery"
+                    :variables="variables"
+                    @loadref="r => (el = r)"
+                >
                     <!-- 消息列表 -->
                     <div v-for="item in msgs" v-if="msgs" :key="item.id" class="group flex items-start gap-2">
                         <div v-if="!item.content && editId !== item.id" class="text-xs text-base-content/60 m-auto">
-                            {{ $t("chat.retractedAMessage", {
-                                name: user.id === item.user!.id ? $t("chat.you") :
-                            item.user!.name }) }}
+                            {{
+                                $t("chat.retractedAMessage", {
+                                    name: user.id === item.user!.id ? $t("chat.you") : item.user!.name,
+                                })
+                            }}
                             <span class="text-xs text-primary underline cursor-pointer" @click="restoreMessage(item)">{{
                                 $t("chat.restore")
-                                }}</span>
+                            }}</span>
                         </div>
 
-                        <div v-else class="flex-1 flex items-start gap-2"
-                            :class="{ 'flex-row-reverse': user.id === item.user!.id }">
+                        <div v-else class="flex-1 flex items-start gap-2" :class="{ 'flex-row-reverse': user.id === item.user!.id }">
                             <ContextMenu>
                                 <QQAvatar class="mt-2 size-8" :qq="item.user!.qq" :name="item.user!.name"></QQAvatar>
 
                                 <template #menu>
                                     <ContextMenuItem
-                                        class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100">
+                                        class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
+                                    >
                                         <Icon class="size-4 mr-2" icon="ri:eye-line" />
                                         {{ $t("chat.block") }}
                                     </ContextMenuItem>
                                     <ContextMenuItem
-                                        class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100">
+                                        class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
+                                    >
                                         <Icon class="size-4 mr-2" icon="ri:glasses-line" />
                                         {{ $t("chat.follow") }}
                                     </ContextMenuItem>
                                 </template>
                             </ContextMenu>
-                            <ContextMenu class="flex items-start flex-col"
-                                :class="{ 'items-end': user.id === item.user!.id }">
+                            <ContextMenu class="flex items-start flex-col" :class="{ 'items-end': user.id === item.user!.id }">
                                 <div class="text-base-content/60 text-sm min-h-5">{{ item.user!.name }}</div>
-                                <div v-if="editId === item.id" ref="editInput" contenteditable
+                                <div
+                                    v-if="item.replyTo"
+                                    class="rounded-t-lg border-b border-base-300/40 bg-base-300/50 px-2 py-1 text-xs text-base-content/70 max-w-80"
+                                >
+                                    <span class="font-medium">{{ item.replyTo.user?.name || $t("chat.you") }}</span>
+                                    <span class="mx-1">:</span>
+                                    <span>{{ getMessagePreview(item.replyTo.content || "") }}</span>
+                                </div>
+                                <div
+                                    v-if="editId === item.id"
+                                    ref="editInput"
+                                    contenteditable
                                     class="safe-html rounded-lg bg-base-100 select-text inline-flex flex-col text-sm max-w-80 overflow-hidden gap-2"
                                     :class="{ 'p-2': !isImage(item.content), 'bg-primary text-base-100': user.id === item.user!.id }"
-                                    v-html="sanitizeHTML(item.content)"></div>
-                                <div v-else
+                                    v-html="sanitizeHTML(item.content)"
+                                ></div>
+                                <div
+                                    v-else
                                     class="safe-html rounded-lg bg-base-100 select-text inline-flex flex-col text-sm max-w-80 overflow-hidden gap-2"
                                     :class="{ 'p-2': !isImage(item.content), 'bg-primary text-base-100': user.id === item.user!.id }"
-                                    v-html="sanitizeHTML(item.content)"></div>
+                                    v-html="sanitizeHTML(item.content)"
+                                ></div>
 
                                 <template #menu>
                                     <ContextMenuItem
                                         class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                        @click="copyHtmlContent(item.content)">
+                                        @click="startReply(item)"
+                                    >
+                                        <Icon class="size-4 mr-2" icon="ri:reply-line" />
+                                        {{ $t("chat.reply") }}
+                                    </ContextMenuItem>
+                                    <ContextMenuItem
+                                        class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
+                                        @click="copyHtmlContent(item.content)"
+                                    >
                                         <Icon class="size-4 mr-2" icon="ri:clipboard-line" />
                                         {{ $t("chat.copy") }}
                                     </ContextMenuItem>
-                                    <ContextMenuItem v-if="user.id === item.user?.id"
+                                    <ContextMenuItem
+                                        v-if="user.id === item.user?.id"
                                         class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                        @click="retractMessage(item)">
+                                        @click="retractMessage(item)"
+                                    >
                                         <Icon class="size-4 mr-2" icon="ri:reply-line" />
                                         {{ $t("chat.revert") }}
                                     </ContextMenuItem>
-                                    <ContextMenuItem v-if="user.id === item.user?.id"
+                                    <ContextMenuItem
+                                        v-if="user.id === item.user?.id"
                                         class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                        @click="startEdit(item)">
+                                        @click="startEdit(item)"
+                                    >
                                         <Icon class="size-4 mr-2" icon="ri:edit-line" />
                                         {{ $t("chat.edit") }}
                                     </ContextMenuItem>
                                 </template>
                             </ContextMenu>
-                            <div v-if="item.edited" class="text-xs text-base-content/60 self-end">{{ $t("chat.edited")
-                                }}</div>
+                            <div v-if="item.edited" class="text-xs text-base-content/60 self-end">{{ $t("chat.edited") }}</div>
                             <div class="flex-1"></div>
-                            <div class="hidden group-hover:block p-1 text-xs text-base-content/60">{{ item.createdAt }}
-                            </div>
+                            <div class="hidden group-hover:block p-1 text-xs text-base-content/60">{{ item.createdAt }}</div>
                         </div>
                     </div>
                 </GQAutoPage>
                 <div v-else class="flex-1 flex flex-col items-center justify-center">
                     <div class="flex-1 flex flex-col items-center justify-center">
-                        <div class="flex p-4 font-bold text-lg text-base-content/60">{{ $t("chat.newRoomBanner") }}
-                        </div>
-                        <div class="flex btn btn-primary"
-                            @click="sendMessageMutation({ content: $t('chat.hello'), roomId })">
+                        <div class="flex p-4 font-bold text-lg text-base-content/60">{{ $t("chat.newRoomBanner") }}</div>
+                        <div class="flex btn btn-primary" @click="sendMessageMutation({ content: $t('chat.hello'), roomId })">
                             {{ $t("chat.sayHello") }}
                         </div>
                     </div>
@@ -360,15 +456,20 @@ async function startEdit(msg: Msg) {
                     <div class="flex group bg-primary items-center rounded-full px-1">
                         <QQAvatar class="size-6 my-1" :name="user.name!" :qq="user.qq!" />
                         <div
-                            class="flex text-sm text-base-100 max-w-0 group-hover:max-w-24 group-hover:mx-1 overflow-hidden transition-all duration-500 whitespace-nowrap">
+                            class="flex text-sm text-base-100 max-w-0 group-hover:max-w-24 group-hover:mx-1 overflow-hidden transition-all duration-500 whitespace-nowrap"
+                        >
                             {{ user.name }}
                         </div>
                     </div>
-                    <div v-for="item in onlines.filter(v => v.user.id !== user.id)" :key="item.id"
-                        class="flex group bg-primary items-center rounded-full px-1">
+                    <div
+                        v-for="item in onlines.filter(v => v.user.id !== user.id)"
+                        :key="item.id"
+                        class="flex group bg-primary items-center rounded-full px-1"
+                    >
                         <QQAvatar class="size-6 my-1" :name="item.user.name" :qq="item.user.qq" />
                         <div
-                            class="flex text-sm text-base-100 max-w-0 group-hover:max-w-24 group-hover:mx-1 overflow-hidden transition-all duration-500 whitespace-nowrap">
+                            class="flex text-sm text-base-100 max-w-0 group-hover:max-w-24 group-hover:mx-1 overflow-hidden transition-all duration-500 whitespace-nowrap"
+                        >
                             {{ item.user.name }}
                         </div>
                     </div>
@@ -376,11 +477,24 @@ async function startEdit(msg: Msg) {
             </GQQuery>
             <!-- 分割线 -->
             <div class="flex-none w-full relative">
-                <div v-h-resize-for="{ el: inputForm, min: 120, max: 400 }"
-                    class="w-full absolute -mt-0.75 h-1.5 cursor-ns-resize z-100"></div>
+                <div
+                    v-h-resize-for="{ el: inputForm, min: 120, max: 400 }"
+                    class="w-full absolute -mt-0.75 h-1.5 cursor-ns-resize z-100"
+                ></div>
             </div>
             <!-- 输入 -->
             <form ref="inputForm" class="h-44 flex flex-col relative border-t border-base-300/50" @submit="sendMessage">
+                <div v-if="replyingTo" class="flex-none px-3 pt-2">
+                    <div class="flex items-center gap-2 rounded-lg bg-base-300/60 px-2 py-1.5 text-xs text-base-content/80">
+                        <Icon icon="ri:reply-line" class="text-base-content/60" />
+                        <div class="min-w-0 flex-1 truncate">
+                            <span class="font-medium">{{ replyingTo.user?.name || $t("chat.you") }}</span>
+                            <span class="mx-1">:</span>
+                            <span>{{ getMessagePreview(replyingTo.content || "") }}</span>
+                        </div>
+                        <button type="button" class="btn btn-ghost btn-xs" @click="cancelReply">{{ $t("chat.cancelReply") }}</button>
+                    </div>
+                </div>
                 <!-- 工具栏 -->
                 <div class="flex-none p-1 px-2 border-t border-base-300/50 flex items-center gap-2">
                     <!-- 表情 -->
@@ -398,15 +512,24 @@ async function startEdit(msg: Msg) {
                         </div>
                     </Tooltip>
                     <Tooltip side="top" :tooltip="$t('chat.sound')">
-                        <div class="btn btn-ghost btn-sm btn-square text-xl" :class="{ 'text-primary': newMsgTip }"
-                            @click="newMsgTip = !newMsgTip">
+                        <div
+                            class="btn btn-ghost btn-sm btn-square text-xl"
+                            :class="{ 'text-primary': newMsgTip }"
+                            @click="newMsgTip = !newMsgTip"
+                        >
                             <Icon icon="ri:volume-up-line" />
                         </div>
                     </Tooltip>
                 </div>
                 <!-- 输入框 -->
-                <RichInput v-model="newMsgText" mode="html" :placeholder="$t('chat.chatPlaceholder')"
-                    class="flex-1 overflow-hidden" @loadref="r => (input = r)" @enter="sendMessage" />
+                <RichInput
+                    v-model="newMsgText"
+                    mode="html"
+                    :placeholder="$t('chat.chatPlaceholder')"
+                    class="flex-1 overflow-hidden"
+                    @loadref="r => (input = r)"
+                    @enter="sendMessage"
+                />
                 <!-- 操作栏 -->
                 <div class="flex p-2">
                     <div class="flex-1"></div>

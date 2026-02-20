@@ -131,6 +131,33 @@ describe("CharBuild类测试", () => {
         expect(meleeWeaponAttrs2!.暴击).toBeCloseTo(基础暴击 * 3, 1)
     })
 
+    it("应该将近战武器普通攻击替换为技能替换MOD中的字段", () => {
+        const charBuild = new CharBuild({
+            char: new LeveledChar("黎瑟"),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 2,
+            meleeMods: [new LeveledMod(203001)],
+            buffs: [],
+            melee: new LeveledWeapon("万古的诀别"),
+            ranged: new LeveledWeapon(20601),
+            baseName: "普通攻击",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0.5,
+            targetFunction: "伤害",
+        })
+
+        const normalAttackSkill = charBuild.meleeWeaponSkills.find(skill => skill.名称 === "普通攻击")
+        const replaceSkill = charBuild.meleeMods[0]?.技能替换?.["1030101"]
+        const replaceFirstHit = replaceSkill?.字段?.find(field => field.名称 === "一段伤害")?.值
+
+        expect(normalAttackSkill).toBeDefined()
+        expect(normalAttackSkill?.id).toBe(1030201)
+        expect(normalAttackSkill?.字段.some(field => field.名称 === "路径伤害")).toBe(true)
+        expect(normalAttackSkill?.字段.find(field => field.名称 === "一段伤害")?.值).toBe(replaceFirstHit)
+    })
+
     // 测试总加成计算
     it("应该能够正确计算总加成", () => {
         const charBuild = createCharBuild()

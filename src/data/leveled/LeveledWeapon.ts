@@ -102,9 +102,11 @@ export class LeveledWeapon {
         if (weaponData.技能) {
             const skills = weaponData.技能.map(v => {
                 const skill: Skill = {
+                    id: v.id,
                     名称: v.名称,
                     武器: this.类型,
                     类型: v.类型,
+                    描述: v.描述,
                 }
                 if (v.字段) {
                     skill.字段 = v.字段

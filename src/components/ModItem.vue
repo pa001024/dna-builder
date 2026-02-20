@@ -174,6 +174,7 @@ function handleMouseUp(event: MouseEvent) {
         <div class="relative w-full h-full flex items-center justify-center">
             <ShowProps
                 v-if="mod"
+                :link="`/db/mod/${mod.id}`"
                 :props="mod.getProperties()"
                 :title="`${$t(mod.系列)}${$t(mod.名称)}`"
                 :rarity="mod.品质"

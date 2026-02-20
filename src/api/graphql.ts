@@ -245,10 +245,21 @@ const cacheExchange = offlineExchange({
                             lastMsg {
                                 id
                                 content
+                                replyToMsgId
+                                replyToUserId
                                 user {
                                     id
                                     name
                                     qq
+                                }
+                                replyTo {
+                                    id
+                                    content
+                                    user {
+                                        id
+                                        name
+                                        qq
+                                    }
                                 }
                             }
                         }
@@ -259,13 +270,26 @@ const cacheExchange = offlineExchange({
                         lastMsg: {
                             __typename: "Msg",
                             id: msg.id,
-                            content: args.content,
+                            content: msg.content,
+                            replyToMsgId: msg.replyToMsgId,
+                            replyToUserId: msg.replyToUserId,
                             createdAt: msg.createdAt,
                             user: {
                                 __typename: "User",
                                 id: msg.user.id,
                                 name: msg.user.name,
                                 qq: msg.user.qq,
+                            },
+                            replyTo: msg.replyTo && {
+                                __typename: "Msg",
+                                id: msg.replyTo.id,
+                                content: msg.replyTo.content,
+                                user: msg.replyTo.user && {
+                                    __typename: "User",
+                                    id: msg.replyTo.user.id,
+                                    name: msg.replyTo.user.name,
+                                    qq: msg.replyTo.user.qq,
+                                },
                             },
                         },
                     }
@@ -277,13 +301,26 @@ const cacheExchange = offlineExchange({
                             query ($roomId: String!, $limit: Int, $offset: Int) {
                                 msgs(roomId: $roomId, limit: $limit, offset: $offset) {
                                     id
+                                    roomId
+                                    userId
                                     edited
                                     content
                                     createdAt
+                                    replyToMsgId
+                                    replyToUserId
                                     user {
                                         id
                                         name
                                         qq
+                                    }
+                                    replyTo {
+                                        id
+                                        content
+                                        user {
+                                            id
+                                            name
+                                            qq
+                                        }
                                     }
                                 }
                             }

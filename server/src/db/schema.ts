@@ -1,7 +1,16 @@
 // for `bun gen`
 
 import { relations, sql } from "drizzle-orm"
-import { index, integer, SQLiteColumn, type SQLiteTableWithColumns, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
+import {
+    index,
+    integer,
+    type AnySQLiteColumn,
+    SQLiteColumn,
+    type SQLiteTableWithColumns,
+    sqliteTable,
+    text,
+    uniqueIndex,
+} from "drizzle-orm/sqlite-core"
 import { nanoid } from "nanoid"
 
 export function now() {
@@ -196,6 +205,8 @@ export const msgs = sqliteTable(
         userId: text("user_id")
             .notNull()
             .references(() => users.id, { onDelete: "cascade" }),
+        replyToMsgId: text("reply_to_msg_id").references((): AnySQLiteColumn => msgs.id, { onDelete: "set null" }),
+        replyToUserId: text("reply_to_user_id").references(() => users.id, { onDelete: "set null" }),
         content: text("content").notNull(),
         edited: integer("edited").$default(() => 0),
         createdAt: text("created_at").$default(now),
@@ -207,6 +218,9 @@ export const msgs = sqliteTable(
 export const msgsRelations = relations(msgs, ({ one, many }) => ({
     room: one(rooms, { fields: [msgs.roomId], references: [rooms.id], relationName: "room" }),
     user: one(users, { fields: [msgs.userId], references: [users.id], relationName: "user" }),
+    replyTo: one(msgs, { fields: [msgs.replyToMsgId], references: [msgs.id], relationName: "reply" }),
+    replyToUser: one(users, { fields: [msgs.replyToUserId], references: [users.id], relationName: "replyToUser" }),
+    repliedMessages: many(msgs, { relationName: "reply" }),
     reactions: many(reactions),
 }))
 

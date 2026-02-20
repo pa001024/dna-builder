@@ -45,7 +45,7 @@ function getQualityColor(quality: string): string {
         <template #tooltip>
             <div class="flex flex-col gap-2 max-w-75 min-w-28">
                 <div v-if="title" class="text-sm font-bold">
-                    <SRouterLink v-if="link" :to="link" class="link">{{ title }}</SRouterLink>
+                    <SRouterLink v-if="link" :to="link" class="cursor-pointer hover:underline">{{ title }}</SRouterLink>
                     <span v-else>{{ title }}</span>
                     <span v-if="rarity" class="text-xs p-1 rounded-sm ml-1" :class="getQualityColor(rarity)">{{ rarity }}</span>
                 </div>

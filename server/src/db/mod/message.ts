@@ -1,5 +1,5 @@
 import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
-import { and, count, eq } from "drizzle-orm"
+import { and, count, eq, or } from "drizzle-orm"
 import { createGraphQLError } from "graphql-yoga"
 import { sanitizeHTML } from "../../util/html"
 import { db, schema } from ".."
@@ -7,6 +7,7 @@ import { hasUser, waitForUser } from "../kv/room"
 import type { Context } from "../yoga"
 import { getSubSelection } from "."
 import { processMessageImageContent } from "./messageImage"
+import { canViewMessageInRoom, getPrivateRoomMessageTopic, isPrivateRoomType } from "./roomVisibility"
 
 export const typeDefs = /* GraphQL */ `
     type Query {
@@ -19,7 +20,7 @@ export const typeDefs = /* GraphQL */ `
     }
     type Mutation {
         "发送消息"
-        sendMessage(roomId: String!, content: String!): Msg
+        sendMessage(roomId: String!, content: String!, replyToMsgId: String): Msg
         "编辑消息"
         editMessage(msgId: String!, content: String!): Msg
         "添加表情"
@@ -46,7 +47,10 @@ export const typeDefs = /* GraphQL */ `
         edited: Int
         createdAt: String
         updateAt: String
+        replyToMsgId: String
+        replyToUserId: String
         user: User
+        replyTo: Msg
         reactions: [Reaction!]
     }
 
@@ -75,17 +79,114 @@ async function preprocessMessageContent(content: string): Promise<string> {
     }
 }
 
+type RoomVisibilityInfo = {
+    id: string
+    type: string | null
+    ownerId: string
+}
+
+/**
+ * @description 加载房间可见性判断所需的最小字段。
+ * @param roomId 房间 ID。
+ * @returns 房间信息，不存在时返回 null。
+ */
+async function getRoomVisibilityInfo(roomId: string): Promise<RoomVisibilityInfo | null> {
+    const room = await db.query.rooms.findFirst({
+        where: eq(schema.rooms.id, roomId),
+        columns: {
+            id: true,
+            type: true,
+            ownerId: true,
+        },
+    })
+    return room ?? null
+}
+
+/**
+ * @description 构造“当前用户可见消息”过滤条件。
+ * @param room 房间信息。
+ * @param viewerUserId 当前查看者用户 ID。
+ * @returns Drizzle where 条件。
+ */
+function createVisibleMessageWhere(room: RoomVisibilityInfo, viewerUserId: string) {
+    if (!isPrivateRoomType(room.type) || room.ownerId === viewerUserId) {
+        return eq(schema.msgs.roomId, room.id)
+    }
+    return and(eq(schema.msgs.roomId, room.id), or(eq(schema.msgs.userId, viewerUserId), eq(schema.msgs.replyToUserId, viewerUserId)))
+}
+
+/**
+ * @description 解析回复目标消息，确保回复目标存在且属于同一房间。
+ * @param room 当前房间信息。
+ * @param senderUserId 发送者用户 ID。
+ * @param replyToMsgId 被回复消息 ID。
+ * @returns 可写入消息表的回复信息。
+ * @throws GraphQLError 当回复目标不存在、跨房间或发送者不可见时抛出。
+ */
+async function resolveReplyMessage(
+    room: RoomVisibilityInfo,
+    senderUserId: string,
+    replyToMsgId: string | null | undefined
+): Promise<{ replyToMsgId: string | null; replyToUserId: string | null }> {
+    if (!replyToMsgId) {
+        return {
+            replyToMsgId: null,
+            replyToUserId: null,
+        }
+    }
+
+    const replyMsg = await db.query.msgs.findFirst({
+        where: eq(schema.msgs.id, replyToMsgId),
+        columns: {
+            id: true,
+            roomId: true,
+            userId: true,
+            replyToUserId: true,
+        },
+    })
+
+    if (!replyMsg || replyMsg.roomId !== room.id) {
+        throw createGraphQLError("reply message not found")
+    }
+
+    if (!canViewMessageInRoom(room.type, room.ownerId, senderUserId, replyMsg.userId, replyMsg.replyToUserId)) {
+        throw createGraphQLError("cannot reply to invisible message")
+    }
+
+    return {
+        replyToMsgId: replyMsg.id,
+        replyToUserId: replyMsg.userId,
+    }
+}
+
+/**
+ * @description 计算私密房间消息事件的推送目标用户。
+ * @param room 房间信息。
+ * @param senderUserId 消息发送者 ID。
+ * @param replyToUserId 被回复者用户 ID。
+ * @returns 推送目标用户 ID 列表。
+ */
+function getPrivateRoomTargets(room: RoomVisibilityInfo, senderUserId: string, replyToUserId: string | null | undefined): string[] {
+    const users = new Set<string>([room.ownerId, senderUserId])
+    if (replyToUserId) users.add(replyToUserId)
+    return [...users]
+}
+
 export const resolvers = {
     Query: {
         msgCount: async (_parent, { roomId }, { user }, _info) => {
             if (!user) throw createGraphQLError("need login")
             if (!hasUser(roomId, user.id)) throw createGraphQLError("need room join")
+            const room = await getRoomVisibilityInfo(roomId)
+            if (!room) throw createGraphQLError("room not found")
 
-            const rst = await db.select({ value: count() }).from(schema.msgs).where(eq(schema.msgs.roomId, roomId))
+            const rst = await db.select({ value: count() }).from(schema.msgs).where(createVisibleMessageWhere(room, user.id))
             return rst[0].value
         },
         msgs: async (_parent, { roomId, limit, offset }, context, _info) => {
             if (!context.user) throw createGraphQLError("need login")
+            const room = await getRoomVisibilityInfo(roomId)
+            if (!room) throw createGraphQLError("room not found")
             if (!hasUser(roomId, context.user.id)) {
                 try {
                     await waitForUser(roomId, context.user.id)
@@ -98,12 +199,21 @@ export const resolvers = {
 
             const user = getSubSelection(_info, "user")
             const reactions = getSubSelection(_info, "reactions")
+            const replyTo = getSubSelection(_info, "replyTo")
+            const replyToUser = getSubSelection(_info, "replyTo.user")
             const msgs = await db.query.msgs.findMany({
                 with: {
                     user: user && true,
                     reactions: reactions && true,
+                    replyTo:
+                        replyTo &&
+                        ({
+                            with: {
+                                user: replyToUser && true,
+                            },
+                        } as const),
                 },
-                where: eq(schema.msgs.roomId, roomId),
+                where: createVisibleMessageWhere(room, context.user.id),
                 limit,
                 offset,
             })
@@ -112,15 +222,26 @@ export const resolvers = {
         lastMsgs: async (_parent, { roomId, limit, offset }, context, info) => {
             if (!context.user) throw createGraphQLError("need login")
             if (!hasUser(roomId, context.user.id)) throw createGraphQLError("need room join")
+            const room = await getRoomVisibilityInfo(roomId)
+            if (!room) throw createGraphQLError("room not found")
 
             const user = getSubSelection(info, "user")
             const reactions = getSubSelection(info, "reactions")
+            const replyTo = getSubSelection(info, "replyTo")
+            const replyToUser = getSubSelection(info, "replyTo.user")
             const last = await db.query.msgs.findMany({
                 with: {
                     user: user && true,
                     reactions: reactions && true,
+                    replyTo:
+                        replyTo &&
+                        ({
+                            with: {
+                                user: replyToUser && true,
+                            },
+                        } as const),
                 },
-                where: eq(schema.msgs.roomId, roomId),
+                where: createVisibleMessageWhere(room, context.user.id),
                 limit,
                 offset,
                 orderBy: (_t, { desc, sql }) => desc(sql`rowid`),
@@ -129,9 +250,12 @@ export const resolvers = {
         },
     },
     Mutation: {
-        sendMessage: async (_parent, { roomId, content }, { user, pubsub }) => {
+        sendMessage: async (_parent, { roomId, content, replyToMsgId }, { user, pubsub }) => {
             if (!user) throw createGraphQLError("need login")
+            const room = await getRoomVisibilityInfo(roomId)
+            if (!room) throw createGraphQLError("room not found")
             const userId = user.id
+            const replyTarget = await resolveReplyMessage(room, userId, replyToMsgId)
             const parsedContent = await preprocessMessageContent(content)
             if (!parsedContent) throw createGraphQLError("invalid content")
             const rst = (
@@ -141,18 +265,34 @@ export const resolvers = {
                         roomId,
                         userId,
                         content: parsedContent,
+                        replyToMsgId: replyTarget.replyToMsgId,
+                        replyToUserId: replyTarget.replyToUserId,
                     })
                     .onConflictDoNothing()
                     .returning()
             )[0]
             if (rst) {
                 const msg = await db.query.msgs.findFirst({
-                    with: { user: true },
+                    with: {
+                        user: true,
+                        replyTo: {
+                            with: {
+                                user: true,
+                            },
+                        },
+                    },
                     where: eq(schema.msgs.id, rst.id),
                 })
                 if (msg) {
                     await db.update(schema.rooms).set({ updateAt: schema.now() }).where(eq(schema.rooms.id, roomId))
-                    pubsub.publish("newMessage", msg.roomId, { newMessage: msg })
+                    if (isPrivateRoomType(room.type)) {
+                        const targets = getPrivateRoomTargets(room, userId, msg.replyToUserId)
+                        for (const targetUserId of targets) {
+                            pubsub.publish("newMessage", getPrivateRoomMessageTopic(room.id, targetUserId), { newMessage: msg })
+                        }
+                    } else {
+                        pubsub.publish("newMessage", msg.roomId, { newMessage: msg })
+                    }
                 }
                 return rst
             }
@@ -202,7 +342,14 @@ export const resolvers = {
         editMessage: async (_parent, { msgId, content }, { user, pubsub }, _info) => {
             if (!user) return null
             const msg = await db.query.msgs.findFirst({
-                with: { user: true },
+                with: {
+                    user: true,
+                    replyTo: {
+                        with: {
+                            user: true,
+                        },
+                    },
+                },
                 where: eq(schema.msgs.id, msgId),
             })
             if (!msg || msg.userId !== user.id) return null
@@ -216,7 +363,20 @@ export const resolvers = {
                     .returning()
             )[0]
             if (updated_msg) {
-                pubsub.publish("msgEdited", msg.roomId, { msgEdited: { ...msg, content: content_sanitized } })
+                const room = await getRoomVisibilityInfo(msg.roomId)
+                const msgEdited = {
+                    ...msg,
+                    content: content_sanitized,
+                    edited: updated_msg.edited,
+                }
+                if (room && isPrivateRoomType(room.type)) {
+                    const targets = getPrivateRoomTargets(room, msg.userId, msg.replyToUserId)
+                    for (const targetUserId of targets) {
+                        pubsub.publish("msgEdited", getPrivateRoomMessageTopic(room.id, targetUserId), { msgEdited })
+                    }
+                } else {
+                    pubsub.publish("msgEdited", msg.roomId, { msgEdited })
+                }
             }
 
             return updated_msg
@@ -225,6 +385,11 @@ export const resolvers = {
     Subscription: {
         newMessage: async (_parent, { roomId }, { user, pubsub }, _info) => {
             if (!user) throw createGraphQLError("need login")
+            const room = await getRoomVisibilityInfo(roomId)
+            if (!room) throw createGraphQLError("room not found")
+            if (isPrivateRoomType(room.type)) {
+                return pubsub.subscribe("newMessage", getPrivateRoomMessageTopic(room.id, user.id))
+            }
             return pubsub.subscribe("newMessage", roomId)
         },
         newReaction: async (_parent, { roomId }, { user, pubsub }, _info) => {
@@ -233,6 +398,11 @@ export const resolvers = {
         },
         msgEdited: async (_parent, { roomId }, { user, pubsub }, _info) => {
             if (!user) throw createGraphQLError("need login")
+            const room = await getRoomVisibilityInfo(roomId)
+            if (!room) throw createGraphQLError("room not found")
+            if (isPrivateRoomType(room.type)) {
+                return pubsub.subscribe("msgEdited", getPrivateRoomMessageTopic(room.id, user.id))
+            }
             return pubsub.subscribe("msgEdited", roomId)
         },
         userJoined: async (_parent, { roomId }, { user, pubsub }, _info) => {

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from "vue"
+import { fileToDataUrlWithRealMime } from "@/utils/image-data-url"
 
 const props = defineProps<{
     mode: "text" | "html"
@@ -136,32 +137,42 @@ watch(model, (newVal, oldVal) => {
     }
 })
 
+/**
+ * @description 处理粘贴事件，支持文本与图片粘贴。
+ * @param e 粘贴事件对象。
+ */
 function onPaste(e: ClipboardEvent) {
     e.preventDefault()
     if (e.clipboardData?.types.includes("Files")) {
         if (props.mode === "text") return
-        imgLoading.value = true
         const files = e.clipboardData.files
         const file = files[0]
-        if (["image/png", "image/jpeg", "image/gif"].includes(file.type)) {
-            const reader = new FileReader()
-            reader.readAsDataURL(file)
-            const clt = setTimeout(() => {
-                imgLoading.value = false
-            }, 3e3)
-            reader.onload = e => {
-                const url = e.target?.result
+        if (!file || !file.type.startsWith("image/")) return
+        imgLoading.value = true
+        const clt = setTimeout(() => {
+            imgLoading.value = false
+        }, 3e3)
+        void (async () => {
+            try {
+                const url = await fileToDataUrlWithRealMime(file)
                 const img = new Image()
-                img.src = url as string
-                const sel = window.getSelection()!
+                img.src = url
+                const sel = window.getSelection()
+                if (!sel || sel.rangeCount === 0) return
                 const range = sel.getRangeAt(0)
                 range.deleteContents()
                 range.insertNode(img)
                 range.collapse(false)
+                if (input.value) {
+                    model.value = props.mode === "text" ? input.value.innerText : input.value.innerHTML
+                }
+            } catch (error) {
+                console.error("粘贴图片处理失败", error)
+            } finally {
                 imgLoading.value = false
                 clearTimeout(clt)
             }
-        }
+        })()
         return
     }
     const text = e.clipboardData?.getData("text/plain")

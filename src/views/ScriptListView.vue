@@ -248,9 +248,9 @@ const editingHotkeyHoldToLoop = ref(false)
 const activeConfigScope = ref("")
 const currentConfigScope = computed(() => {
     if (activeTab.value?.type === "local") {
-        return activeTab.value.name
+        return resolveStoredScriptConfigScope(activeTab.value.name)
     }
-    const explicitScope = activeConfigScope.value.trim()
+    const explicitScope = resolveStoredScriptConfigScope(activeConfigScope.value)
     if (explicitScope) return explicitScope
     return ""
 })
@@ -507,8 +507,7 @@ function loadSchedulerConfig() {
                     flowControl: {
                         enabled: Boolean(flowControl?.enabled),
                         cases,
-                        defaultTargetStepId:
-                            typeof flowControl?.defaultTargetStepId === "string" ? flowControl.defaultTargetStepId : null,
+                        defaultTargetStepId: typeof flowControl?.defaultTargetStepId === "string" ? flowControl.defaultTargetStepId : null,
                     },
                 } satisfies SchedulerStep
             })
@@ -633,10 +632,37 @@ async function runLocalScriptByName(
  * @returns 文件名（提取失败返回空字符串）
  */
 function getScriptFileNameFromPath(scriptPath: string): string {
-    return String(scriptPath ?? "")
-        .split(/[\\/]/)
-        .filter(Boolean)
-        .pop() ?? ""
+    return (
+        String(scriptPath ?? "")
+            .split(/[\\/]/)
+            .filter(Boolean)
+            .pop() ?? ""
+    )
+}
+
+/**
+ * 规范化脚本配置作用域键（统一使用文件名）。
+ * @param scope 原始作用域（可能是文件名或完整路径）
+ * @returns 规范化后的作用域键
+ */
+function normalizeScriptConfigScope(scope?: string | null): string {
+    const normalized = String(scope ?? "").trim()
+    if (!normalized) return ""
+    const fileName = getScriptFileNameFromPath(normalized).trim()
+    return fileName || normalized
+}
+
+/**
+ * 解析脚本配置作用域到存储中的实际键（不区分大小写，兼容历史路径键）。
+ * @param scope 原始作用域
+ * @returns 可直接用于 scriptConfigStore 的键
+ */
+function resolveStoredScriptConfigScope(scope?: string | null): string {
+    const normalizedScope = normalizeScriptConfigScope(scope)
+    if (!normalizedScope) return ""
+    const lowerScope = normalizedScope.toLowerCase()
+    const matchedScope = Object.keys(scriptConfigStore.value).find(key => normalizeScriptConfigScope(key).toLowerCase() === lowerScope)
+    return matchedScope ?? normalizedScope
 }
 
 /**
@@ -688,14 +714,18 @@ function shouldAcceptScopedScriptEvent(scope?: string | null): boolean {
     return Boolean(payloadFileName) && payloadFileName === currentFileName
 }
 
-const runningScriptFileNameSet = computed(() => new Set(runningScriptPaths.value.map(path => getScriptFileNameFromPath(path)).filter(Boolean)))
+const runningScriptFileNameSet = computed(
+    () => new Set(runningScriptPaths.value.map(path => getScriptFileNameFromPath(path)).filter(Boolean))
+)
 const activeLocalScriptName = computed(() => (activeTab.value?.type === "local" ? activeTab.value.name : ""))
 const isActiveLocalScriptRunning = computed(() => {
     const scriptName = activeLocalScriptName.value
     return scriptName ? isLocalScriptRunning(scriptName) : false
 })
 const isSchedulerRunning = computed(() => runningMode.value === "scheduler" && isRunning.value)
-const isRunButtonInStopState = computed(() => (viewMode.value === "scheduler" ? isSchedulerRunning.value : isActiveLocalScriptRunning.value))
+const isRunButtonInStopState = computed(() =>
+    viewMode.value === "scheduler" ? isSchedulerRunning.value : isActiveLocalScriptRunning.value
+)
 const runButtonTitle = computed(() => {
     if (viewMode.value === "scheduler") {
         return isSchedulerRunning.value ? "停止调度器" : "运行调度器"
@@ -1301,12 +1331,7 @@ function parseScriptLiteral(text: string): ScriptLiteralParseResult {
         const end = findStringLiteralEnd(source, index)
         if (end < 0) return undefined
         const raw = source.slice(index + 1, end)
-        const escaped = raw
-            .replace(/\\/g, "\\\\")
-            .replace(/"/g, '\\"')
-            .replace(/\r/g, "\\r")
-            .replace(/\n/g, "\\n")
-            .replace(/\t/g, "\\t")
+        const escaped = raw.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r/g, "\\r").replace(/\n/g, "\\n").replace(/\t/g, "\\t")
         let value = raw
         try {
             value = JSON.parse(`"${escaped}"`) as string
@@ -1520,8 +1545,8 @@ function parseReadConfigFormat(formatArg?: string): ParsedScriptConfigFormat {
                     normalizedPrefix === "select"
                         ? "select"
                         : normalizedPrefix === "multi-select" || normalizedPrefix === "multiselect"
-                            ? "multi-select"
-                            : "string",
+                          ? "multi-select"
+                          : "string",
                 options,
             }
         }
@@ -1560,11 +1585,7 @@ function normalizeScriptConfigValue(
 ): ScriptConfigValue {
     if (kind === "multi-select") {
         const fallback = Array.isArray(defaultValue) ? defaultValue : []
-        const candidates = Array.isArray(rawValue)
-            ? rawValue
-            : rawValue === undefined || rawValue === null
-                ? fallback
-                : [rawValue]
+        const candidates = Array.isArray(rawValue) ? rawValue : rawValue === undefined || rawValue === null ? fallback : [rawValue]
         const seen = new Set<string>()
         const normalized: string[] = []
         for (const candidate of candidates) {
@@ -1656,16 +1677,18 @@ function loadScriptConfigItems() {
         const parsed = JSON.parse(stored) as Record<string, Record<string, Partial<ScriptConfigItem>>>
         const normalizedStore: Record<string, Record<string, ScriptConfigItem>> = {}
         for (const [scope, items] of Object.entries(parsed ?? {})) {
-            const normalizedScope = String(scope ?? "").trim()
+            const normalizedScope = normalizeScriptConfigScope(scope)
             if (!normalizedScope || !items || typeof items !== "object") continue
-            const scopeItems: Record<string, ScriptConfigItem> = {}
+            const scopeKey =
+                Object.keys(normalizedStore).find(key => key.toLowerCase() === normalizedScope.toLowerCase()) ?? normalizedScope
+            const scopeItems: Record<string, ScriptConfigItem> = {
+                ...(normalizedStore[scopeKey] ?? {}),
+            }
             for (const [name, item] of Object.entries(items as Record<string, Partial<ScriptConfigItem>>)) {
                 if (!item || typeof item !== "object") continue
                 const normalizedName = String(name ?? "").trim()
                 if (!normalizedName) continue
-                const kind: ScriptConfigKind = ["number", "string", "select", "multi-select", "boolean"].includes(
-                    String(item.kind)
-                )
+                const kind: ScriptConfigKind = ["number", "string", "select", "multi-select", "boolean"].includes(String(item.kind))
                     ? (item.kind as ScriptConfigKind)
                     : "string"
                 const options = normalizeScriptConfigOptions(item.options)
@@ -1683,7 +1706,7 @@ function loadScriptConfigItems() {
                     updatedAt: typeof item.updatedAt === "number" ? item.updatedAt : Date.now(),
                 }
             }
-            normalizedStore[normalizedScope] = scopeItems
+            normalizedStore[scopeKey] = scopeItems
         }
         scriptConfigStore.value = normalizedStore
     } catch (error) {
@@ -1698,16 +1721,13 @@ function loadScriptConfigItems() {
  * @returns 当前配置值
  */
 function upsertScriptConfigFromRequest(payload: ScriptReadConfigPayload): ScriptConfigValue {
-    const scope = String(payload.scope ?? activeTab.value?.name ?? "").trim()
+    const scope = resolveStoredScriptConfigScope(payload.scope ?? activeTab.value?.name ?? activeConfigScope.value)
     const normalizedName = String(payload.name ?? "").trim()
-    const kind: ScriptConfigKind = ["number", "string", "select", "multi-select", "boolean"].includes(
-        String(payload.kind)
-    )
+    const kind: ScriptConfigKind = ["number", "string", "select", "multi-select", "boolean"].includes(String(payload.kind))
         ? payload.kind
         : "string"
     const options = normalizeScriptConfigOptions(payload.options)
-    const fallbackDefaultValue: ScriptConfigValue =
-        kind === "number" ? 0 : kind === "boolean" ? false : kind === "multi-select" ? [] : ""
+    const fallbackDefaultValue: ScriptConfigValue = kind === "number" ? 0 : kind === "boolean" ? false : kind === "multi-select" ? [] : ""
     const defaultValue = normalizeScriptConfigValue(kind, payload.defaultValue, fallbackDefaultValue, options)
     if (!scope || !normalizedName) {
         return defaultValue
@@ -1784,7 +1804,7 @@ function moveScriptConfigMultiSelectOption(name: string, option: string, directi
     if (targetIndex < 0 || targetIndex >= currentValues.length) return
 
     const nextValues = [...currentValues]
-        ;[nextValues[index], nextValues[targetIndex]] = [nextValues[targetIndex], nextValues[index]]
+    ;[nextValues[index], nextValues[targetIndex]] = [nextValues[targetIndex], nextValues[index]]
     updateScriptConfigValue(name, nextValues)
 }
 
@@ -1811,11 +1831,16 @@ function deleteScriptConfigItem(name: string) {
  * @param scope 配置作用域（本地脚本文件名）
  */
 function removeScriptConfigScope(scope: string) {
-    const normalizedScope = String(scope ?? "").trim()
+    const normalizedScope = normalizeScriptConfigScope(scope)
     if (!normalizedScope) return
-    if (!scriptConfigStore.value[normalizedScope] || Object.keys(scriptConfigStore.value[normalizedScope]).length === 0) return
-    delete scriptConfigStore.value[normalizedScope]
-    if (activeConfigScope.value === normalizedScope) {
+    const matchedScopes = Object.keys(scriptConfigStore.value).filter(
+        key => normalizeScriptConfigScope(key).toLowerCase() === normalizedScope.toLowerCase()
+    )
+    if (matchedScopes.length === 0) return
+    for (const matchedScope of matchedScopes) {
+        delete scriptConfigStore.value[matchedScope]
+    }
+    if (normalizeScriptConfigScope(activeConfigScope.value).toLowerCase() === normalizedScope.toLowerCase()) {
         activeConfigScope.value = ""
     }
     persistScriptConfigItems()
@@ -1846,7 +1871,7 @@ function openSidePanel(tab: "status" | "config") {
  * @param fileName 本地脚本文件名（配置作用域）
  */
 function showConfigPanelIfScriptHasConfig(fileName: string) {
-    const scope = String(fileName ?? "").trim()
+    const scope = resolveStoredScriptConfigScope(fileName)
     if (!scope) return
     const hasConfig = Object.keys(scriptConfigStore.value[scope] ?? {}).length > 0
     if (!hasConfig) return
@@ -1862,7 +1887,7 @@ function showConfigPanelIfScriptHasConfig(fileName: string) {
  * @returns 预解析结果统计
  */
 function preparseScriptConfigFromSource(scope: string, source: string): ScriptConfigPreparseSummary {
-    const normalizedScope = String(scope ?? "").trim()
+    const normalizedScope = resolveStoredScriptConfigScope(scope)
     if (!normalizedScope) {
         return { createdCount: 0, skippedCount: 0 }
     }
@@ -2220,9 +2245,7 @@ async function initStatusListener() {
             const normalizedTitle = title?.trim()
             if (!normalizedTitle) return
 
-            const normalizedImages = Array.isArray(images)
-                ? images.filter(item => typeof item === "string" && item.trim().length > 0)
-                : []
+            const normalizedImages = Array.isArray(images) ? images.filter(item => typeof item === "string" && item.trim().length > 0) : []
             const normalizedImage = typeof image === "string" && image.trim().length > 0 ? image : undefined
             if (normalizedImages.length === 0 && normalizedImage) {
                 normalizedImages.push(normalizedImage)
@@ -2806,29 +2829,46 @@ onUnmounted(async () => {
             <div class="w-64 border-r border-base-200 flex flex-col bg-base-100">
                 <div class="px-4 py-1 border-b border-base-200 flex justify-center">
                     <div class="flex gap-2 items-center">
-                        <button class="p-2 rounded-md text-xs font-bold cursor-pointer hover:bg-base-300"
-                            :class="{ 'bg-base-300': viewMode === 'scheduler' }" @click="switchToScheduler" title="调度器">
+                        <button
+                            class="p-2 rounded-md text-xs font-bold cursor-pointer hover:bg-base-300"
+                            :class="{ 'bg-base-300': viewMode === 'scheduler' }"
+                            @click="switchToScheduler"
+                            title="调度器"
+                        >
                             <Icon icon="ri:git-branch-line" class="w-4 h-4" />
                         </button>
-                        <button class="p-2 rounded-md text-xs flex gap-2 font-bold cursor-pointer hover:bg-base-300"
-                            :class="{ 'bg-base-300': viewMode === 'local' }" @click="switchToLocal">
+                        <button
+                            class="p-2 rounded-md text-xs flex gap-2 font-bold cursor-pointer hover:bg-base-300"
+                            :class="{ 'bg-base-300': viewMode === 'local' }"
+                            @click="switchToLocal"
+                        >
                             <Icon icon="ri:folder-line" class="w-4 h-4" />
                             本地
                         </button>
-                        <button class="p-2 rounded-md text-xs flex gap-2 font-bold cursor-pointer hover:bg-base-300"
-                            :class="{ 'bg-base-300': viewMode === 'online' }" @click="switchToOnline">
+                        <button
+                            class="p-2 rounded-md text-xs flex gap-2 font-bold cursor-pointer hover:bg-base-300"
+                            :class="{ 'bg-base-300': viewMode === 'online' }"
+                            @click="switchToOnline"
+                        >
                             <Icon icon="ri:cloud-line" class="w-4 h-4" />
                             云端
                         </button>
-                        <div class="p-2 rounded-md cursor-pointer hover:bg-base-300 "
-                            @click="viewMode === 'online' ? fetchOnlineScripts() : fetchLocalScripts()">
+                        <div
+                            class="p-2 rounded-md cursor-pointer hover:bg-base-300"
+                            @click="viewMode === 'online' ? fetchOnlineScripts() : fetchLocalScripts()"
+                        >
                             <Icon icon="ri:refresh-line" class="w-4 h-4" />
                         </div>
                     </div>
                 </div>
                 <div v-if="viewMode === 'online'" class="p-3 border-b border-base-200 flex flex-col gap-2">
-                    <input v-model="searchKeyword" type="text" placeholder="搜索脚本..."
-                        class="input input-bordered input-sm w-full" @input="handleSearch" />
+                    <input
+                        v-model="searchKeyword"
+                        type="text"
+                        placeholder="搜索脚本..."
+                        class="input input-bordered input-sm w-full"
+                        @input="handleSearch"
+                    />
                     <Select v-model="selectedCategory" class="input input-sm w-full" @change="handleSearch">
                         <SelectItem v-for="option in categoryOptions" :key="option.value" :value="option.value">
                             {{ option.label }}
@@ -2840,99 +2880,125 @@ onUnmounted(async () => {
                         <div v-if="loading" class="flex justify-center items-center h-full p-4">
                             <span class="loading loading-spinner" />
                         </div>
-                        <div v-else-if="viewMode === 'local' && localScripts.length === 0"
-                            class="flex justify-center items-center h-full text-base-content/50 p-4">
+                        <div
+                            v-else-if="viewMode === 'local' && localScripts.length === 0"
+                            class="flex justify-center items-center h-full text-base-content/50 p-4"
+                        >
                             暂无本地脚本
                         </div>
-                        <div v-else-if="
-                            (viewMode === 'online' && onlineScripts.length === 0) ||
-                            (viewMode === 'scheduler' && schedulerConfig.steps.length === 0)
-                        " class="flex justify-center items-center h-full text-base-content/50 p-4">
-                            {{
-                                viewMode === "scheduler"
-                                    ? "暂无调度脚本，请在更多操作中配置调度器"
-                                    : "暂无在线脚本"
-                            }}
+                        <div
+                            v-else-if="
+                                (viewMode === 'online' && onlineScripts.length === 0) ||
+                                (viewMode === 'scheduler' && schedulerConfig.steps.length === 0)
+                            "
+                            class="flex justify-center items-center h-full text-base-content/50 p-4"
+                        >
+                            {{ viewMode === "scheduler" ? "暂无调度脚本，请在更多操作中配置调度器" : "暂无在线脚本" }}
                         </div>
                         <div v-else>
                             <template v-if="viewMode === 'scheduler'">
                                 <div class="px-3 py-2 text-xs text-base-content/60 border-b border-base-200">
                                     调度脚本列表（按执行顺序）
                                 </div>
-                                <div v-for="(step, index) in schedulerConfig.steps" :key="step.id"
+                                <div
+                                    v-for="(step, index) in schedulerConfig.steps"
+                                    :key="step.id"
                                     class="px-3 py-2 rounded hover:bg-base-200 cursor-pointer flex items-center gap-2 text-sm"
-                                    @click="openLocalScript(step.scriptName)">
-                                    <div class="text-xs font-mono text-base-content/60 w-7 shrink-0">#{{ index + 1 }}
-                                    </div>
+                                    @click="openLocalScript(step.scriptName)"
+                                >
+                                    <div class="text-xs font-mono text-base-content/60 w-7 shrink-0">#{{ index + 1 }}</div>
                                     <Icon icon="ri:file-line" class="w-4 h-4 shrink-0" />
                                     <div class="flex-1 truncate">{{ step.scriptName || "未选择脚本" }}</div>
-                                    <Icon v-if="step.flowControl.enabled" icon="ri:git-branch-line"
-                                        class="w-4 h-4 text-warning shrink-0" title="流控已开启" />
+                                    <Icon
+                                        v-if="step.flowControl.enabled"
+                                        icon="ri:git-branch-line"
+                                        class="w-4 h-4 text-warning shrink-0"
+                                        title="流控已开启"
+                                    />
                                 </div>
                             </template>
                             <template v-else-if="viewMode === 'local'">
                                 <div class="min-h-full">
-                                    <ContextMenu v-for="script in localScripts" :key="script"
+                                    <ContextMenu
+                                        v-for="script in localScripts"
+                                        :key="script"
                                         class="px-3 py-2 rounded hover:bg-base-200 cursor-pointer flex items-center gap-2 text-sm group"
                                         :class="{ 'bg-base-200': activeTab?.name === script }"
-                                        @click="openLocalScript(script)">
-                                        <button v-if="isLocalScriptRunning(script)"
+                                        @click="openLocalScript(script)"
+                                    >
+                                        <button
+                                            v-if="isLocalScriptRunning(script)"
                                             class="w-4 h-4 shrink-0 flex items-center justify-center cursor-pointer hover:opacity-80"
-                                            title="停止脚本" @click.stop="stopLocalScriptByName(script)">
+                                            title="停止脚本"
+                                            @click.stop="stopLocalScriptByName(script)"
+                                        >
                                             <span class="w-3 h-3 bg-error rounded-xs" />
                                         </button>
                                         <Icon v-else icon="ri:file-line" class="w-4 h-4 shrink-0" />
-                                        <div v-if="editingScript !== script"
-                                            class="flex-1 min-w-0 flex items-center gap-2">
+                                        <div v-if="editingScript !== script" class="flex-1 min-w-0 flex items-center gap-2">
                                             <span class="truncate">{{ script }}</span>
-                                            <span v-if="scriptHotkeyStore[script]"
-                                                class="badge badge-outline badge-xs shrink-0">
+                                            <span v-if="scriptHotkeyStore[script]" class="badge badge-outline badge-xs shrink-0">
                                                 {{ formatScriptHotkeyBadgeText(scriptHotkeyStore[script]) }}
                                             </span>
                                         </div>
-                                        <input v-else id="script-name-input" v-model="editingScriptName" type="text"
+                                        <input
+                                            v-else
+                                            id="script-name-input"
+                                            v-model="editingScriptName"
+                                            type="text"
                                             class="flex-1 input input-bordered input-xs px-2 py-1 h-6"
-                                            @blur="confirmRenameScript" @keydown="handleEditKeyDown" @click.stop />
+                                            @blur="confirmRenameScript"
+                                            @keydown="handleEditKeyDown"
+                                            @click.stop
+                                        />
                                         <template #menu>
                                             <ContextMenuItem
                                                 class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                                @click="openNewScriptDialog">
+                                                @click="openNewScriptDialog"
+                                            >
                                                 <Icon icon="ri:add-line" class="w-4 h-4 mr-2" />
                                                 新建脚本
                                             </ContextMenuItem>
                                             <ContextMenuItem
                                                 class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                                @click="openScriptDirectory">
+                                                @click="openScriptDirectory"
+                                            >
                                                 <Icon icon="ri:folder-open-line" class="w-4 h-4 mr-2" />
                                                 打开目录
                                             </ContextMenuItem>
                                             <ContextMenuItem
                                                 class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                                @click="startEditScript(script)">
+                                                @click="startEditScript(script)"
+                                            >
                                                 <Icon icon="ri:edit-line" class="w-4 h-4 mr-2" />
                                                 重命名
                                             </ContextMenuItem>
                                             <ContextMenuItem
                                                 class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                                @click="openScriptHotkeyDialog(script)">
+                                                @click="openScriptHotkeyDialog(script)"
+                                            >
                                                 <Icon icon="ri:edit-line" class="w-4 h-4 mr-2" />
                                                 {{ scriptHotkeyStore[script] ? "修改热键" : "设置热键" }}
                                             </ContextMenuItem>
-                                            <ContextMenuItem v-if="scriptHotkeyStore[script]"
+                                            <ContextMenuItem
+                                                v-if="scriptHotkeyStore[script]"
                                                 class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-warning data-highlighted:text-base-100"
-                                                @click="clearScriptHotkeyBinding(script)">
+                                                @click="clearScriptHotkeyBinding(script)"
+                                            >
                                                 <Icon icon="ri:close-circle-line" class="w-4 h-4 mr-2" />
                                                 清除热键
                                             </ContextMenuItem>
                                             <ContextMenuItem
                                                 class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-success data-highlighted:text-base-100"
-                                                @click="publishScript(script)">
+                                                @click="publishScript(script)"
+                                            >
                                                 <Icon icon="ri:upload-cloud-line" class="w-4 h-4 mr-2" />
                                                 发布/更新
                                             </ContextMenuItem>
                                             <ContextMenuItem
                                                 class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-error data-highlighted:text-base-100"
-                                                @click="deleteScript(script)">
+                                                @click="deleteScript(script)"
+                                            >
                                                 <Icon icon="ri:delete-bin-line" class="w-4 h-4 mr-2" />
                                                 删除
                                             </ContextMenuItem>
@@ -2941,23 +3007,27 @@ onUnmounted(async () => {
                                 </div>
                             </template>
                             <template v-else-if="viewMode === 'online'">
-                                <ContextMenu v-for="script in onlineScripts" :key="script.id"
-                                    class="px-3 py-2 rounded hover:bg-base-200 cursor-pointer flex flex-col gap-1 text-sm">
+                                <ContextMenu
+                                    v-for="script in onlineScripts"
+                                    :key="script.id"
+                                    class="px-3 py-2 rounded hover:bg-base-200 cursor-pointer flex flex-col gap-1 text-sm"
+                                >
                                     <div class="flex items-center justify-between" @click="openOnlineScript(script)">
                                         <div class="flex-1">
                                             <div class="flex justify-between items-center gap-2">
                                                 <span class="truncate font-medium">{{ script.title }}</span>
-                                                <span
-                                                    class="truncate text-xs opacity-80 inline-flex items-center gap-1">
+                                                <span class="truncate text-xs opacity-80 inline-flex items-center gap-1">
                                                     <Icon icon="ri:eye-line" />
                                                     {{ script.views }}
                                                 </span>
                                             </div>
-                                            <div class="text-xs text-base-content/60 truncate">{{ script.description }}
-                                            </div>
+                                            <div class="text-xs text-base-content/60 truncate">{{ script.description }}</div>
                                             <div class="text-base-content/80 flex items-center gap-1">
-                                                <Icon v-if="script.isRecommended" icon="ri:checkbox-circle-fill"
-                                                    class="w-4 h-4 inline-block" />
+                                                <Icon
+                                                    v-if="script.isRecommended"
+                                                    icon="ri:checkbox-circle-fill"
+                                                    class="w-4 h-4 inline-block"
+                                                />
                                                 <span class="text-xs text-base-content/60 truncate">
                                                     {{ script.user?.name }}
                                                 </span>
@@ -2970,7 +3040,8 @@ onUnmounted(async () => {
                                     <template #menu>
                                         <ContextMenuItem
                                             class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-error data-highlighted:text-base-100"
-                                            @click="deleteOnlineScript(script)">
+                                            @click="deleteOnlineScript(script)"
+                                        >
                                             <Icon icon="ri:delete-bin-line" class="w-4 h-4 mr-2" />
                                             删除
                                         </ContextMenuItem>
@@ -2979,20 +3050,23 @@ onUnmounted(async () => {
                             </template>
                         </div>
                         <div v-if="viewMode === 'online'" class="flex justify-center p-2">
-                            <button v-if="onlineScripts.length < totalCount" class="btn btn-sm btn-ghost"
-                                @click="loadMore">加载更多</button>
+                            <button v-if="onlineScripts.length < totalCount" class="btn btn-sm btn-ghost" @click="loadMore">
+                                加载更多
+                            </button>
                         </div>
                     </ScrollArea>
                     <template v-if="viewMode === 'local'" #menu>
                         <ContextMenuItem
                             class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                            @click="openNewScriptDialog">
+                            @click="openNewScriptDialog"
+                        >
                             <Icon icon="ri:add-line" class="w-4 h-4 mr-2" />
                             新建脚本
                         </ContextMenuItem>
                         <ContextMenuItem
                             class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                            @click="openScriptDirectory">
+                            @click="openScriptDirectory"
+                        >
                             <Icon icon="ri:folder-open-line" class="w-4 h-4 mr-2" />
                             打开目录
                         </ContextMenuItem>
@@ -3007,32 +3081,42 @@ onUnmounted(async () => {
                         <!-- files -->
                         <ScrollArea horizontal :vertical="false" class="flex items-center flex-1 h-full">
                             <div class="flex">
-                                <ContextMenu v-for="tab in openedTabs" :key="tab.id"
+                                <ContextMenu
+                                    v-for="tab in openedTabs"
+                                    :key="tab.id"
                                     class="h-10 flex items-center gap-2 px-3 border-r border-base-300 cursor-pointer min-w-max"
                                     :class="{ 'bg-base-200 border-t border-t-base-content': activeTabId === tab.id }"
-                                    @click="setActiveTab(tab.id)" @mousedown="handleTabMiddleClick($event, tab.id)">
-                                    <Icon :icon="tab.type === 'local' ? 'ri:file-line' : 'ri:cloud-line'"
-                                        class="w-4 h-4" />
+                                    @click="setActiveTab(tab.id)"
+                                    @mousedown="handleTabMiddleClick($event, tab.id)"
+                                >
+                                    <Icon :icon="tab.type === 'local' ? 'ri:file-line' : 'ri:cloud-line'" class="w-4 h-4" />
                                     <span class="text-sm truncate max-w-32">{{ tab.name }}</span>
-                                    <button v-if="tab.modified"
+                                    <button
+                                        v-if="tab.modified"
                                         class="w-5 h-5 rounded hover:bg-base-300 flex items-center justify-center cursor-pointer"
-                                        @click.stop="saveCurrentTab" title="保存">
+                                        @click.stop="saveCurrentTab"
+                                        title="保存"
+                                    >
                                         <span class="w-2 h-2 rounded-full bg-warning" />
                                     </button>
-                                    <button v-else
+                                    <button
+                                        v-else
                                         class="w-5 h-5 rounded hover:bg-base-300 flex items-center justify-center cursor-pointer"
-                                        @click.stop="closeTab(tab.id)">
+                                        @click.stop="closeTab(tab.id)"
+                                    >
                                         <Icon icon="ri:close-line" class="w-3 h-3" />
                                     </button>
                                     <template #menu>
                                         <ContextMenuItem
                                             class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                            @click="closeOtherTabs(tab.id)">
+                                            @click="closeOtherTabs(tab.id)"
+                                        >
                                             关闭其他
                                         </ContextMenuItem>
                                         <ContextMenuItem
                                             class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                            @click="closeAllTabs">
+                                            @click="closeAllTabs"
+                                        >
                                             关闭所有
                                         </ContextMenuItem>
                                     </template>
@@ -3041,32 +3125,34 @@ onUnmounted(async () => {
                         </ScrollArea>
                         <!-- actions -->
                         <div class="flex items-center gap-2 ml-2 px-1">
-                            <button class="btn btn-sm btn-ghost btn-square" @click="showConsole = !showConsole"
-                                title="切换控制台">
-                                <Icon :icon="showConsole ? 'ri:terminal-box-line' : 'ri:terminal-line'"
-                                    class="w-4 h-4" />
+                            <button class="btn btn-sm btn-ghost btn-square" @click="showConsole = !showConsole" title="切换控制台">
+                                <Icon :icon="showConsole ? 'ri:terminal-box-line' : 'ri:terminal-line'" class="w-4 h-4" />
                             </button>
                             <button class="btn btn-sm btn-ghost btn-square" @click="toggleStatusPanel" title="切换状态栏">
-                                <Icon :icon="showStatusPanel ? 'ri:menu-fold-line' : 'ri:menu-unfold-line'"
-                                    class="w-4 h-4" />
+                                <Icon :icon="showStatusPanel ? 'ri:menu-fold-line' : 'ri:menu-unfold-line'" class="w-4 h-4" />
                             </button>
-                            <button class="btn btn-sm btn-ghost btn-square"
-                                :class="{ 'btn-error': isRunButtonInStopState }" @click="runCurrentTab"
-                                :title="runButtonTitle">
-                                <Icon :icon="isRunButtonInStopState ? 'ri:stop-circle-line' : 'ri:play-line'"
-                                    class="w-4 h-4" />
+                            <button
+                                class="btn btn-sm btn-ghost btn-square"
+                                :class="{ 'btn-error': isRunButtonInStopState }"
+                                @click="runCurrentTab"
+                                :title="runButtonTitle"
+                            >
+                                <Icon :icon="isRunButtonInStopState ? 'ri:stop-circle-line' : 'ri:play-line'" class="w-4 h-4" />
                             </button>
-                            <button v-if="activeTab && activeTab.type === 'local'"
-                                class="btn btn-sm btn-primary btn-square" @click="saveCurrentTab"
-                                :disabled="!activeTab.modified" title="保存">
+                            <button
+                                v-if="activeTab && activeTab.type === 'local'"
+                                class="btn btn-sm btn-primary btn-square"
+                                @click="saveCurrentTab"
+                                :disabled="!activeTab.modified"
+                                title="保存"
+                            >
                                 <Icon icon="ri:save-line" class="w-4 h-4" />
                             </button>
                             <div class="dropdown dropdown-end">
                                 <div tabindex="0" role="button" class="btn btn-sm btn-ghost btn-square" title="更多操作">
                                     <Icon icon="ri:more-line" class="w-4 h-4" />
                                 </div>
-                                <ul tabindex="-1"
-                                    class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+                                <ul tabindex="-1" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
                                     <li><a @click="openSchedulerDialog">调度器配置</a></li>
                                     <li><a @click="openSidePanel('config')">脚本配置</a></li>
                                     <li><a @click="openColorToolPage">图色工具</a></li>
@@ -3074,7 +3160,7 @@ onUnmounted(async () => {
                                     <li>
                                         <a @click="toggleGlobalShortcut">{{
                                             globalShortcutEnabled ? "禁用全局快捷键(F10)" : "启用全局快捷键(F10)"
-                                            }}</a>
+                                        }}</a>
                                     </li>
                                 </ul>
                             </div>
@@ -3084,10 +3170,15 @@ onUnmounted(async () => {
                     <div class="flex-1 flex flex-col min-h-0">
                         <div v-if="activeTab" class="flex-1 flex flex-col min-h-0">
                             <ScrollArea class="flex-1 overflow-hidden">
-                                <CodeEditor :readonly="activeTab.type !== 'local'" :file="activeTab.name"
-                                    ref="codeEditor" v-model="activeTab.content" placeholder="脚本内容..."
+                                <CodeEditor
+                                    :readonly="activeTab.type !== 'local'"
+                                    :file="activeTab.name"
+                                    ref="codeEditor"
+                                    v-model="activeTab.content"
+                                    placeholder="脚本内容..."
                                     class="w-full h-full p-2 font-mono text-sm"
-                                    @update:modelValue="onCodeEditorUpdate" />
+                                    @update:modelValue="onCodeEditorUpdate"
+                                />
                             </ScrollArea>
                         </div>
                         <div v-else class="flex-1 flex items-center justify-center text-base-content/50">
@@ -3100,8 +3191,7 @@ onUnmounted(async () => {
 
                     <!-- 控制台面板 -->
                     <div v-if="showConsole" class="h-48 border-t border-base-300 flex flex-col bg-base-900">
-                        <div
-                            class="h-8 bg-base-800 border-b border-base-700 flex items-center justify-between px-3 shrink-0">
+                        <div class="h-8 bg-base-800 border-b border-base-700 flex items-center justify-between px-3 shrink-0">
                             <div class="flex items-center gap-2">
                                 <Icon icon="ri:terminal-line" class="w-4 h-4 text-base-content/60" />
                                 <span class="text-xs text-base-content/60">控制台</span>
@@ -3120,15 +3210,11 @@ onUnmounted(async () => {
                             </div>
                         </div>
                         <div id="console-output" class="flex-1 overflow-auto p-3 font-mono text-xs user-select">
-                            <div v-if="consoleLogs.length === 0" class="text-base-content/40 text-center py-4">暂无输出
-                            </div>
+                            <div v-if="consoleLogs.length === 0" class="text-base-content/40 text-center py-4">暂无输出</div>
                             <div v-else class="space-y-1">
                                 <div v-for="(log, index) in consoleLogs" :key="index" class="flex gap-2">
-                                    <span class="text-base-content/40 shrink-0">{{ new
-                                        Date(log.timestamp).toLocaleTimeString()
-                                        }}</span>
-                                    <span :class="getLogLevelClass(log.level)" class="break-all">{{ log.message
-                                    }}</span>
+                                    <span class="text-base-content/40 shrink-0">{{ new Date(log.timestamp).toLocaleTimeString() }}</span>
+                                    <span :class="getLogLevelClass(log.level)" class="break-all">{{ log.message }}</span>
                                 </div>
                             </div>
                         </div>
@@ -3136,24 +3222,23 @@ onUnmounted(async () => {
                 </div>
 
                 <!-- 右侧面板（调试状态 + 脚本配置） -->
-                <div v-if="showStatusPanel"
-                    class="w-88 max-w-[45%] min-w-70 border-l border-base-300 bg-base-950/20 flex flex-col">
+                <div v-if="showStatusPanel" class="w-88 max-w-[45%] min-w-70 border-l border-base-300 bg-base-950/20 flex flex-col">
                     <div class="h-10 px-3 border-b border-base-300 flex items-center justify-between gap-2">
                         <div class="tabs tabs-box tabs-xs">
-                            <button class="tab" :class="{ 'tab-active': sidePanelTab === 'status' }"
-                                @click="sidePanelTab = 'status'">
+                            <button class="tab" :class="{ 'tab-active': sidePanelTab === 'status' }" @click="sidePanelTab = 'status'">
                                 调试状态
                             </button>
-                            <button class="tab" :class="{ 'tab-active': sidePanelTab === 'config' }"
-                                @click="sidePanelTab = 'config'">
+                            <button class="tab" :class="{ 'tab-active': sidePanelTab === 'config' }" @click="sidePanelTab = 'config'">
                                 脚本配置
                             </button>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button class="btn btn-xs btn-ghost"
+                            <button
+                                class="btn btn-xs btn-ghost"
                                 :disabled="sidePanelTab === 'status' ? scriptStatuses.length === 0 : sortedScriptConfigItems.length === 0"
                                 @click="sidePanelTab === 'status' ? clearAllStatus() : clearAllScriptConfigItems()"
-                                title="清空">
+                                title="清空"
+                            >
                                 <Icon icon="ri:delete-bin-line" class="w-3 h-3" />
                             </button>
                             <button class="btn btn-xs btn-ghost" @click="showStatusPanel = false" title="关闭">
@@ -3163,71 +3248,105 @@ onUnmounted(async () => {
                     </div>
 
                     <template v-if="sidePanelTab === 'config'">
-                        <div v-if="!currentConfigScope"
-                            class="flex-1 flex items-center justify-center text-base-content/50 text-sm p-3">
+                        <div v-if="!currentConfigScope" class="flex-1 flex items-center justify-center text-base-content/50 text-sm p-3">
                             请先打开并运行本地脚本
                         </div>
-                        <div v-else-if="sortedScriptConfigItems.length === 0"
-                            class="flex-1 flex items-center justify-center text-base-content/50 text-sm p-3">
+                        <div
+                            v-else-if="sortedScriptConfigItems.length === 0"
+                            class="flex-1 flex items-center justify-center text-base-content/50 text-sm p-3"
+                        >
                             暂无配置，脚本调用 readConfig 后会自动创建
                         </div>
                         <div v-else class="flex-1 min-h-0">
                             <ScrollArea class="h-full p-2">
                                 <div class="flex flex-col gap-2">
-                                    <div v-for="item in sortedScriptConfigItems" :key="item.name"
-                                        class="border border-base-300 rounded bg-base-100/40 p-2 space-y-2">
+                                    <div
+                                        v-for="item in sortedScriptConfigItems"
+                                        :key="item.name"
+                                        class="border border-base-300 rounded bg-base-100/40 p-2 space-y-2"
+                                    >
                                         <div class="flex items-center justify-between gap-2">
                                             <div class="text-sm font-medium truncate">{{ item.name }}</div>
-                                            <button class="btn btn-xs btn-ghost"
-                                                @click="deleteScriptConfigItem(item.name)" title="删除配置">
+                                            <button
+                                                class="btn btn-xs btn-ghost"
+                                                @click="deleteScriptConfigItem(item.name)"
+                                                title="删除配置"
+                                            >
                                                 <Icon icon="ri:delete-bin-line" class="w-3 h-3" />
                                             </button>
                                         </div>
-                                        <div v-if="item.desc" class="text-xs text-base-content/70 break-all">{{
-                                            item.desc }}</div>
+                                        <div v-if="item.desc" class="text-xs text-base-content/70 break-all">{{ item.desc }}</div>
                                         <div class="text-[11px] text-base-content/50">类型: {{ item.kind }}</div>
 
-                                        <input v-if="item.kind === 'string'" :value="String(item.value)" type="text"
+                                        <input
+                                            v-if="item.kind === 'string'"
+                                            :value="String(item.value)"
+                                            type="text"
                                             class="input input-bordered input-sm w-full"
-                                            @input="updateScriptConfigValue(item.name, ($event.target as HTMLInputElement).value)" />
+                                            @input="updateScriptConfigValue(item.name, ($event.target as HTMLInputElement).value)"
+                                        />
 
-                                        <input v-else-if="item.kind === 'number'" :value="Number(item.value)"
-                                            type="number" class="input input-bordered input-sm w-full"
-                                            @input="updateScriptConfigValue(item.name, ($event.target as HTMLInputElement).value)" />
+                                        <input
+                                            v-else-if="item.kind === 'number'"
+                                            :value="Number(item.value)"
+                                            type="number"
+                                            class="input input-bordered input-sm w-full"
+                                            @input="updateScriptConfigValue(item.name, ($event.target as HTMLInputElement).value)"
+                                        />
 
-                                        <select v-else-if="item.kind === 'select'" :value="String(item.value)"
+                                        <select
+                                            v-else-if="item.kind === 'select'"
+                                            :value="String(item.value)"
                                             class="select select-bordered select-sm w-full"
-                                            @change="updateScriptConfigValue(item.name, ($event.target as HTMLSelectElement).value)">
-                                            <option v-for="option in item.options" :key="option" :value="option">{{
-                                                option }}</option>
+                                            @change="updateScriptConfigValue(item.name, ($event.target as HTMLSelectElement).value)"
+                                        >
+                                            <option v-for="option in item.options" :key="option" :value="option">{{ option }}</option>
                                         </select>
 
                                         <div v-else-if="item.kind === 'multi-select'" class="space-y-2">
-                                            <div v-if="item.options.length === 0" class="text-xs text-base-content/60">
-                                                暂无可选项
-                                            </div>
+                                            <div v-if="item.options.length === 0" class="text-xs text-base-content/60">暂无可选项</div>
                                             <div v-else class="space-y-1">
-                                                <div v-for="option in item.options" :key="option"
-                                                    class="flex items-center justify-between gap-2">
+                                                <div
+                                                    v-for="option in item.options"
+                                                    :key="option"
+                                                    class="flex items-center justify-between gap-2"
+                                                >
                                                     <label class="label cursor-pointer justify-start gap-2 py-1 flex-1">
-                                                        <input type="checkbox" class="checkbox checkbox-sm"
+                                                        <input
+                                                            type="checkbox"
+                                                            class="checkbox checkbox-sm"
                                                             :checked="isScriptConfigMultiSelectOptionChecked(item, option)"
-                                                            @change="toggleScriptConfigMultiSelectOption(item.name, option, ($event.target as HTMLInputElement).checked)" />
+                                                            @change="
+                                                                toggleScriptConfigMultiSelectOption(
+                                                                    item.name,
+                                                                    option,
+                                                                    ($event.target as HTMLInputElement).checked
+                                                                )
+                                                            "
+                                                        />
                                                         <span class="text-sm break-all">{{ option }}</span>
                                                     </label>
-                                                    <div v-if="isScriptConfigMultiSelectOptionChecked(item, option)"
-                                                        class="flex items-center gap-1">
-                                                        <button class="btn btn-xs btn-ghost"
+                                                    <div
+                                                        v-if="isScriptConfigMultiSelectOptionChecked(item, option)"
+                                                        class="flex items-center gap-1"
+                                                    >
+                                                        <button
+                                                            class="btn btn-xs btn-ghost"
                                                             :disabled="getScriptConfigMultiSelectOptionIndex(item, option) <= 0"
                                                             @click="moveScriptConfigMultiSelectOption(item.name, option, -1)"
-                                                            title="上移">
-                                                            <Icon icon="ri:arrow-down-line"
-                                                                class="w-3 h-3 rotate-180" />
+                                                            title="上移"
+                                                        >
+                                                            <Icon icon="ri:arrow-down-line" class="w-3 h-3 rotate-180" />
                                                         </button>
-                                                        <button class="btn btn-xs btn-ghost"
-                                                            :disabled="getScriptConfigMultiSelectOptionIndex(item, option) >= getScriptConfigMultiSelectValues(item).length - 1"
+                                                        <button
+                                                            class="btn btn-xs btn-ghost"
+                                                            :disabled="
+                                                                getScriptConfigMultiSelectOptionIndex(item, option) >=
+                                                                getScriptConfigMultiSelectValues(item).length - 1
+                                                            "
                                                             @click="moveScriptConfigMultiSelectOption(item.name, option, 1)"
-                                                            title="下移">
+                                                            title="下移"
+                                                        >
                                                             <Icon icon="ri:arrow-down-line" class="w-3 h-3" />
                                                         </button>
                                                     </div>
@@ -3236,9 +3355,12 @@ onUnmounted(async () => {
                                         </div>
 
                                         <label v-else class="label cursor-pointer justify-start gap-2">
-                                            <input type="checkbox" class="toggle toggle-sm"
+                                            <input
+                                                type="checkbox"
+                                                class="toggle toggle-sm"
                                                 :checked="Boolean(item.value)"
-                                                @change="updateScriptConfigValue(item.name, ($event.target as HTMLInputElement).checked)" />
+                                                @change="updateScriptConfigValue(item.name, ($event.target as HTMLInputElement).checked)"
+                                            />
                                             <span class="text-sm">启用</span>
                                         </label>
                                     </div>
@@ -3248,15 +3370,20 @@ onUnmounted(async () => {
                     </template>
 
                     <template v-else>
-                        <div v-if="scriptStatuses.length === 0"
-                            class="flex-1 flex items-center justify-center text-base-content/50 text-sm">
+                        <div
+                            v-if="scriptStatuses.length === 0"
+                            class="flex-1 flex items-center justify-center text-base-content/50 text-sm"
+                        >
                             暂无状态
                         </div>
                         <div v-else class="flex-1 min-h-0">
                             <ScrollArea class="h-full p-2">
                                 <div class="flex flex-col gap-2 user-select">
-                                    <div v-for="item in scriptStatuses" :key="item.title"
-                                        class="border border-base-300 rounded bg-base-100/40 p-2 space-y-2">
+                                    <div
+                                        v-for="item in scriptStatuses"
+                                        :key="item.title"
+                                        class="border border-base-300 rounded bg-base-100/40 p-2 space-y-2"
+                                    >
                                         <div class="flex items-center justify-between gap-2">
                                             <div class="text-xs text-base-content/70 truncate">{{ item.title }}</div>
                                             <button class="btn btn-xs btn-ghost" @click="clearStatus(item.title)">
@@ -3270,9 +3397,12 @@ onUnmounted(async () => {
                                             {{ item.text }}
                                         </div>
                                         <div v-if="item.images && item.images.length > 0" class="space-y-2">
-                                            <img v-for="(statusImage, imageIndex) in item.images"
-                                                :key="`${item.title}-${imageIndex}`" :src="statusImage"
-                                                class="max-w-full" />
+                                            <img
+                                                v-for="(statusImage, imageIndex) in item.images"
+                                                :key="`${item.title}-${imageIndex}`"
+                                                :src="statusImage"
+                                                class="max-w-full"
+                                            />
                                         </div>
                                         <img v-else-if="item.image" :src="item.image" class="max-w-full" />
                                     </div>
@@ -3290,15 +3420,17 @@ onUnmounted(async () => {
                 <div class="mb-4">
                     <label class="label block">
                         <div class="mb-2 text-sm">脚本名称</div>
-                        <input v-model="newScriptName" type="text" placeholder="请输入脚本名称"
-                            class="input input-bordered w-full" />
+                        <input v-model="newScriptName" type="text" placeholder="请输入脚本名称" class="input input-bordered w-full" />
                     </label>
                 </div>
                 <div class="mb-4">
                     <label class="label block">
                         <div class="mb-2 text-sm">脚本内容</div>
-                        <textarea v-model="newScriptContent" placeholder="请输入脚本内容"
-                            class="textarea textarea-bordered w-full h-64 resize-none" />
+                        <textarea
+                            v-model="newScriptContent"
+                            placeholder="请输入脚本内容"
+                            class="textarea textarea-bordered w-full h-64 resize-none"
+                        />
                     </label>
                 </div>
                 <div class="flex justify-end gap-2">
@@ -3318,28 +3450,41 @@ onUnmounted(async () => {
                     </div>
                     <label class="label block">
                         <div class="mb-2 text-sm">AHK 格式热键</div>
-                        <input v-model="editingHotkeyValue" type="text" class="input input-bordered w-full"
-                            placeholder="例如：^c / CapsLock & c / RButton / RButton & XButton1" />
+                        <input
+                            v-model="editingHotkeyValue"
+                            type="text"
+                            class="input input-bordered w-full"
+                            placeholder="例如：^c / CapsLock & c / RButton / RButton & XButton1"
+                        />
                     </label>
                     <label class="label block">
                         <div class="mb-2 text-sm">生效条件（#HotIf WinActive）</div>
-                        <input v-model="editingHotkeyWinActive" type="text" class="input input-bordered w-full"
-                            placeholder='示例：Moonlight / ahk_exe EM-Win64-Shipping.exe / Moonlight ahk_exe EM-Win64-Shipping.exe（留空=全局）' />
+                        <input
+                            v-model="editingHotkeyWinActive"
+                            type="text"
+                            class="input input-bordered w-full"
+                            placeholder="示例：Moonlight / ahk_exe EM-Win64-Shipping.exe / Moonlight ahk_exe EM-Win64-Shipping.exe（留空=全局）"
+                        />
                     </label>
                     <label class="label cursor-pointer justify-start gap-3">
                         <input v-model="editingHotkeyHoldToLoop" type="checkbox" class="checkbox checkbox-sm" />
                         <span class="label-text text-sm">按住循环（按住热键时循环运行脚本）</span>
                     </label>
                     <div class="text-xs text-base-content/60">
-                        支持：`^ ! + # *` 前缀、`A & B` 组合键、`Up` 抬起触发，以及鼠标键
-                        `LButton/RButton/MButton/XButton1/XButton2`
+                        支持：`^ ! + # *` 前缀、`A & B` 组合键、`Up` 抬起触发，以及鼠标键 `LButton/RButton/MButton/XButton1/XButton2`
                         ；WinActive 条件中无 `ahk_` 前缀按窗口标题匹配，`ahk_exe/ahk_class/ahk_pid` 按 AHK 语义匹配
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 mt-4">
                     <button class="btn btn-ghost" @click="showScriptHotkeyDialog = false">取消</button>
-                    <button v-if="scriptHotkeyStore[editingHotkeyScriptName]" class="btn btn-warning"
-                        @click="clearScriptHotkeyBinding(editingHotkeyScriptName); showScriptHotkeyDialog = false">
+                    <button
+                        v-if="scriptHotkeyStore[editingHotkeyScriptName]"
+                        class="btn btn-warning"
+                        @click="
+                            clearScriptHotkeyBinding(editingHotkeyScriptName)
+                            showScriptHotkeyDialog = false
+                        "
+                    >
                         清除绑定
                     </button>
                     <button class="btn btn-primary" @click="saveScriptHotkeyBinding">保存</button>
@@ -3352,62 +3497,70 @@ onUnmounted(async () => {
                 <h3 class="font-bold text-lg mb-4">调度器配置</h3>
                 <div class="mb-3 flex items-center gap-2">
                     <button class="btn btn-sm btn-primary" @click="addSchedulerStep">添加本地脚本</button>
-                    <span class="text-xs text-base-content/70">
-                        默认按顺序执行；启用流控后可按返回值使用 case/default 跳转
-                    </span>
+                    <span class="text-xs text-base-content/70"> 默认按顺序执行；启用流控后可按返回值使用 case/default 跳转 </span>
                 </div>
                 <div class="space-y-3 max-h-[60vh] overflow-auto pr-1">
-                    <div v-if="schedulerDraftConfig.steps.length === 0"
-                        class="border border-dashed border-base-300 rounded p-4 text-center text-base-content/60 text-sm">
+                    <div
+                        v-if="schedulerDraftConfig.steps.length === 0"
+                        class="border border-dashed border-base-300 rounded p-4 text-center text-base-content/60 text-sm"
+                    >
                         暂无步骤，点击“添加本地脚本”开始配置
                     </div>
-                    <div v-for="(step, stepIndex) in schedulerDraftConfig.steps" :key="step.id"
-                        class="border border-base-300 rounded-lg p-3 bg-base-100/60 space-y-3">
+                    <div
+                        v-for="(step, stepIndex) in schedulerDraftConfig.steps"
+                        :key="step.id"
+                        class="border border-base-300 rounded-lg p-3 bg-base-100/60 space-y-3"
+                    >
                         <div class="flex flex-wrap items-center gap-2">
                             <div class="text-xs font-mono text-base-content/70 shrink-0">#{{ stepIndex + 1 }}</div>
                             <select v-model="step.scriptName" class="select select-bordered select-sm min-w-52">
                                 <option value="">选择本地脚本</option>
-                                <option v-for="script in localScripts" :key="script" :value="script">{{ script }}
-                                </option>
+                                <option v-for="script in localScripts" :key="script" :value="script">{{ script }}</option>
                             </select>
                             <select v-model="step.flowControl.enabled" class="select select-bordered select-sm">
                                 <option :value="false">顺序执行（默认）</option>
                                 <option :value="true">启用流控</option>
                             </select>
-                            <button class="btn btn-xs" :disabled="stepIndex === 0"
-                                @click="moveSchedulerStep(stepIndex, -1)">上移</button>
-                            <button class="btn btn-xs" :disabled="stepIndex === schedulerDraftConfig.steps.length - 1"
-                                @click="moveSchedulerStep(stepIndex, 1)">下移</button>
+                            <button class="btn btn-xs" :disabled="stepIndex === 0" @click="moveSchedulerStep(stepIndex, -1)">上移</button>
+                            <button
+                                class="btn btn-xs"
+                                :disabled="stepIndex === schedulerDraftConfig.steps.length - 1"
+                                @click="moveSchedulerStep(stepIndex, 1)"
+                            >
+                                下移
+                            </button>
                             <button class="btn btn-xs btn-error" @click="removeSchedulerStep(stepIndex)">删除</button>
                         </div>
 
                         <div v-if="step.flowControl.enabled" class="space-y-2 rounded border border-warning/40 p-2">
                             <div class="text-xs font-medium text-warning-content">流程控制（switch 风格）</div>
-                            <div v-for="(rule, caseIndex) in step.flowControl.cases" :key="rule.id"
-                                class="flex flex-wrap items-center gap-2">
+                            <div
+                                v-for="(rule, caseIndex) in step.flowControl.cases"
+                                :key="rule.id"
+                                class="flex flex-wrap items-center gap-2"
+                            >
                                 <span class="text-xs">case</span>
-                                <input v-model="rule.matchValue" type="text" class="input input-bordered input-sm w-40"
-                                    placeholder="返回值" />
+                                <input
+                                    v-model="rule.matchValue"
+                                    type="text"
+                                    class="input input-bordered input-sm w-40"
+                                    placeholder="返回值"
+                                />
                                 <span class="text-xs">=></span>
                                 <select v-model="rule.targetStepId" class="select select-bordered select-sm min-w-52">
                                     <option :value="null">不跳转</option>
-                                    <option v-for="option in schedulerDraftStepOptions" :key="option.id"
-                                        :value="option.id">
+                                    <option v-for="option in schedulerDraftStepOptions" :key="option.id" :value="option.id">
                                         {{ option.label }}
                                     </option>
                                 </select>
-                                <button class="btn btn-xs btn-ghost" @click="removeSchedulerCase(stepIndex, caseIndex)">
-                                    删除 case
-                                </button>
+                                <button class="btn btn-xs btn-ghost" @click="removeSchedulerCase(stepIndex, caseIndex)">删除 case</button>
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
                                 <span class="text-xs">default</span>
                                 <span class="text-xs">=></span>
-                                <select v-model="step.flowControl.defaultTargetStepId"
-                                    class="select select-bordered select-sm min-w-52">
+                                <select v-model="step.flowControl.defaultTargetStepId" class="select select-bordered select-sm min-w-52">
                                     <option :value="null">顺序下一步</option>
-                                    <option v-for="option in schedulerDraftStepOptions" :key="option.id"
-                                        :value="option.id">
+                                    <option v-for="option in schedulerDraftStepOptions" :key="option.id" :value="option.id">
                                         {{ option.label }}
                                     </option>
                                 </select>

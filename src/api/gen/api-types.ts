@@ -155,7 +155,10 @@ export interface Msg {
     edited?: number
     createdAt?: string
     updateAt?: string
+    replyToMsgId?: string
+    replyToUserId?: string
     user?: User
+    replyTo?: Msg
     reactions?: Reaction[]
 }
 

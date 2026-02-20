@@ -489,10 +489,21 @@ export const msgsQuery = typedQuery(
                 edited
                 createdAt
                 updateAt
+                replyToMsgId
+                replyToUserId
                 user {
                     id
                     name
                     qq
+                }
+                replyTo {
+                    id
+                    content
+                    user {
+                        id
+                        name
+                        qq
+                    }
                 }
                 reactions {
                     id
@@ -520,10 +531,21 @@ export const lastMsgsQuery = typedQuery(
                 edited
                 createdAt
                 updateAt
+                replyToMsgId
+                replyToUserId
                 user {
                     id
                     name
                     qq
+                }
+                replyTo {
+                    id
+                    content
+                    user {
+                        id
+                        name
+                        qq
+                    }
                 }
                 reactions {
                     id

@@ -412,9 +412,9 @@ export const addMissionsIngameMutation = typedMutation<Types.MissionsIngame, { t
     `
 )
 
-export const sendMessageMutation = typedMutation<Types.Msg, { roomId: string; content: string }>(/* GraphQL */ `
-    mutation ($roomId: String!, $content: String!) {
-        sendMessage(roomId: $roomId, content: $content) {
+export const sendMessageMutation = typedMutation<Types.Msg, { roomId: string; content: string; replyToMsgId?: string }>(/* GraphQL */ `
+    mutation ($roomId: String!, $content: String!, $replyToMsgId: String) {
+        sendMessage(roomId: $roomId, content: $content, replyToMsgId: $replyToMsgId) {
             id
         }
     }

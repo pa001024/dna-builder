@@ -648,10 +648,6 @@ export class CharBuild {
             const prefix = weapon.类型
             // 计算各种加成
             let attackBonus = this.getTotalBonus(`${prefix}攻击`, prefix) + this.getTotalBonus(`攻击`, prefix)
-            // 角色精通
-            if (this.char.精通.includes(weapon.类别) || this.char.精通.includes("全部类型")) {
-                attackBonus += 0.2
-            }
             const physicalBonus = this.getTotalBonus("物理", prefix)
             let critRateBonus = this.getTotalBonus(`${prefix}暴击`, prefix) + this.getTotalBonus(`暴击`, prefix)
             let critDamageBonus = this.getTotalBonus(`${prefix}暴伤`, prefix) + this.getTotalBonus(`暴伤`, prefix)
@@ -685,8 +681,13 @@ export class CharBuild {
             // 攻速上限
             attackSpeedBonus = Math.min(attackSpeedBonus, 2)
 
+            let atkRatio = 1
+            // 角色精通
+            if (this.char.精通.includes(weapon.类别) || this.char.精通.includes("全部类型")) {
+                atkRatio = 1.2
+            }
             // 计算武器属性
-            let attack = weapon.基础攻击 * (1 + attackBonus)
+            let attack = weapon.基础攻击 * (1 + attackBonus) * atkRatio
             let critRate = weapon.基础暴击 * (1 + critRateBonus)
             let critDamage = weapon.基础暴伤 * (1 + critDamageBonus)
             let triggerRate = weapon.基础触发 * (1 + triggerRateBonus)
