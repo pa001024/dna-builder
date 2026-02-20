@@ -3471,9 +3471,9 @@ onUnmounted(async () => {
                         <input v-model="editingHotkeyHoldToLoop" type="checkbox" class="checkbox checkbox-sm" />
                         <span class="label-text text-sm">按住循环（按住热键时循环运行脚本）</span>
                     </label>
-                    <div class="text-xs text-base-content/60">
+                    <div class="text-xs text-base-content/60 select-text">
                         支持：`^ ! + # *` 前缀、`A & B` 组合键、`Up` 抬起触发，以及鼠标键 `LButton/RButton/MButton/XButton1/XButton2`
-                        ；WinActive 条件中无 `ahk_` 前缀按窗口标题匹配，`ahk_exe/ahk_class/ahk_pid` 按 AHK 语义匹配
+                        ；WinActive 条件按窗口标题，支持`ahk_exe/ahk_class/ahk_pid` 示例: ahk_exe EM-Win64-Shipping.exe
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 mt-4">

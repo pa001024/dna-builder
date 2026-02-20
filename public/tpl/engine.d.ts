@@ -316,11 +316,18 @@ declare class Timer {
 
 /**
  * 鼠标点击操作
+ * @param button 按键类型（重载简写）：left/right/middle/x1/x2
+ */
+declare function mc(button: "left" | "right" | "middle" | "x1" | "x2" | "l" | "r" | "m"): void
+
+/**
+ * 鼠标点击操作
  * @param hwnd 窗口句柄 (为0表示前台)
  * @param x X坐标
  * @param y Y坐标
+ * @param button 按键类型（可选，默认 left）：left/right/middle/x1/x2
  */
-declare function mc(hwnd?: number, x?: number, y?: number): void
+declare function mc(hwnd?: number, x?: number, y?: number, button?: "left" | "right" | "middle" | "x1" | "x2" | "l" | "r" | "m"): void
 
 /**
  * 鼠标相对移动
@@ -351,19 +358,33 @@ declare function moveC(hwnd: number, x: number, y: number, duration?: number): P
 
 /**
  * 鼠标按下
+ * @param button 按键类型（重载简写）：left/right/middle/x1/x2
+ */
+declare function md(button: "left" | "right" | "middle" | "x1" | "x2" | "l" | "r" | "m"): void
+
+/**
+ * 鼠标按下
  * @param hwnd 窗口句柄 (为0表示前台)
  * @param x X坐标
  * @param y Y坐标
+ * @param button 按键类型（可选，默认 left）：left/right/middle/x1/x2
  */
-declare function md(hwnd?: number, x?: number, y?: number): void
+declare function md(hwnd?: number, x?: number, y?: number, button?: "left" | "right" | "middle" | "x1" | "x2" | "l" | "r" | "m"): void
+
+/**
+ * 鼠标抬起
+ * @param button 按键类型（重载简写）：left/right/middle/x1/x2
+ */
+declare function mu(button: "left" | "right" | "middle" | "x1" | "x2" | "l" | "r" | "m"): void
 
 /**
  * 鼠标抬起
  * @param hwnd 窗口句柄 (为0表示前台)
  * @param x X坐标
  * @param y Y坐标
+ * @param button 按键类型（可选，默认 left）：left/right/middle/x1/x2
  */
-declare function mu(hwnd?: number, x?: number, y?: number): void
+declare function mu(hwnd?: number, x?: number, y?: number, button?: "left" | "right" | "middle" | "x1" | "x2" | "l" | "r" | "m"): void
 
 /**
  * 鼠标中键点击

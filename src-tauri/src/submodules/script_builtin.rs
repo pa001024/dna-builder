@@ -966,6 +966,41 @@ fn _parse_morphology_shape(shape: Option<JsValue>, ctx: &mut Context) -> JsResul
     }
 }
 
+/// 解析鼠标按键参数，支持 left/right/middle/x1/x2（或同义写法）。
+fn _parse_mouse_button(button: Option<JsValue>, ctx: &mut Context) -> JsResult<MouseButtonKind> {
+    let Some(value) = button else {
+        return Ok(MouseButtonKind::Left);
+    };
+    if value.is_undefined() || value.is_null() {
+        return Ok(MouseButtonKind::Left);
+    }
+
+    if let Some(num) = value.as_number() {
+        return match num as i32 {
+            0 | 1 => Ok(MouseButtonKind::Left),
+            2 => Ok(MouseButtonKind::Right),
+            3 => Ok(MouseButtonKind::Middle),
+            4 => Ok(MouseButtonKind::X1),
+            5 => Ok(MouseButtonKind::X2),
+            _ => Err(JsNativeError::typ()
+                .with_message("button 参数无效，可选: left/right/middle/x1/x2（或 1/2/3/4/5）")
+                .into()),
+        };
+    }
+
+    let text = value.to_string(ctx)?.to_std_string_lossy().to_lowercase();
+    match text.as_str() {
+        "left" | "l" | "primary" => Ok(MouseButtonKind::Left),
+        "right" | "r" | "secondary" => Ok(MouseButtonKind::Right),
+        "middle" | "m" | "mid" | "wheel" => Ok(MouseButtonKind::Middle),
+        "x1" | "xbutton1" | "xb1" | "back" => Ok(MouseButtonKind::X1),
+        "x2" | "xbutton2" | "xb2" | "forward" => Ok(MouseButtonKind::X2),
+        _ => Err(JsNativeError::typ()
+            .with_message("button 参数无效，可选: left/right/middle/x1/x2")
+            .into()),
+    }
+}
+
 fn _win_get_client_pos(hwnd: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
     let hwnd = HWND(
         hwnd.unwrap_or_else(|| JsValue::undefined())
@@ -985,22 +1020,34 @@ fn _mc(
     hwnd: Option<JsValue>,
     x: Option<JsValue>,
     y: Option<JsValue>,
+    button: Option<JsValue>,
     ctx: &mut Context,
 ) -> JsResult<JsValue> {
+    // 兼容重载：mc("right") / mc("x1")
+    // 当首参是字符串时，将其视为 button，并忽略 hwnd。
+    let (hwnd_arg, x_arg, y_arg, button_arg) = match hwnd {
+        Some(first) if first.is_string() => {
+            let merged_button = if button.is_some() { button } else { Some(first) };
+            (None, x, y, merged_button)
+        }
+        other => (other, x, y, button),
+    };
+
     let hwnd = HWND(
-        hwnd.unwrap_or_else(|| JsValue::undefined())
+        hwnd_arg.unwrap_or_else(|| JsValue::undefined())
             .to_number(ctx)? as isize as *mut std::ffi::c_void,
     );
-    let x = x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
-    let y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let x = x_arg.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let y = y_arg.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let button = _parse_mouse_button(button_arg, ctx)?;
     if hwnd.is_invalid() {
         if x <= 0 || y <= 0 {
-            click(10);
+            mouse_click_by_button(button, 10);
             return Ok(JsValue::undefined());
         }
-        click_to(x, y);
+        mouse_click_to_by_button(x, y, button);
     } else {
-        post_mouse_click(hwnd, x, y);
+        post_mouse_click_by_button(hwnd, x, y, button);
     }
     Ok(JsValue::undefined())
 }
@@ -1148,23 +1195,35 @@ fn _md(
     hwnd: Option<JsValue>,
     x: Option<JsValue>,
     y: Option<JsValue>,
+    button: Option<JsValue>,
     ctx: &mut Context,
 ) -> JsResult<JsValue> {
+    // 兼容重载：md("right") / md("x1")
+    // 当首参是字符串时，将其视为 button，并忽略 hwnd。
+    let (hwnd_arg, x_arg, y_arg, button_arg) = match hwnd {
+        Some(first) if first.is_string() => {
+            let merged_button = if button.is_some() { button } else { Some(first) };
+            (None, x, y, merged_button)
+        }
+        other => (other, x, y, button),
+    };
+
     let hwnd = HWND(
-        hwnd.unwrap_or_else(|| JsValue::undefined())
+        hwnd_arg.unwrap_or_else(|| JsValue::undefined())
             .to_number(ctx)? as isize as *mut std::ffi::c_void,
     );
-    let x = x.unwrap_or_else(|| js_value!(-1)).to_number(ctx)? as i32;
-    let y = y.unwrap_or_else(|| js_value!(-1)).to_number(ctx)? as i32;
+    let x = x_arg.unwrap_or_else(|| js_value!(-1)).to_number(ctx)? as i32;
+    let y = y_arg.unwrap_or_else(|| js_value!(-1)).to_number(ctx)? as i32;
+    let button = _parse_mouse_button(button_arg, ctx)?;
     if hwnd.is_invalid() {
         if x == -1 || y == -1 {
-            mouse_down();
+            mouse_down_by_button(button);
         } else {
             mouse_move_to(x, y);
-            mouse_down();
+            mouse_down_by_button(button);
         }
     } else {
-        post_mouse_down(hwnd, x, y);
+        post_mouse_down_by_button(hwnd, x, y, button);
     }
     Ok(JsValue::undefined())
 }
@@ -1174,23 +1233,35 @@ fn _mu(
     hwnd: Option<JsValue>,
     x: Option<JsValue>,
     y: Option<JsValue>,
+    button: Option<JsValue>,
     ctx: &mut Context,
 ) -> JsResult<JsValue> {
+    // 兼容重载：mu("right") / mu("x1")
+    // 当首参是字符串时，将其视为 button，并忽略 hwnd。
+    let (hwnd_arg, x_arg, y_arg, button_arg) = match hwnd {
+        Some(first) if first.is_string() => {
+            let merged_button = if button.is_some() { button } else { Some(first) };
+            (None, x, y, merged_button)
+        }
+        other => (other, x, y, button),
+    };
+
     let hwnd = HWND(
-        hwnd.unwrap_or_else(|| JsValue::undefined())
+        hwnd_arg.unwrap_or_else(|| JsValue::undefined())
             .to_number(ctx)? as isize as *mut std::ffi::c_void,
     );
-    let x = x.unwrap_or_else(|| js_value!(-1)).to_number(ctx)? as i32;
-    let y = y.unwrap_or_else(|| js_value!(-1)).to_number(ctx)? as i32;
+    let x = x_arg.unwrap_or_else(|| js_value!(-1)).to_number(ctx)? as i32;
+    let y = y_arg.unwrap_or_else(|| js_value!(-1)).to_number(ctx)? as i32;
+    let button = _parse_mouse_button(button_arg, ctx)?;
     if hwnd.is_invalid() {
         if x == -1 || y == -1 {
-            mouse_up();
+            mouse_up_by_button(button);
         } else {
             mouse_move_to(x, y);
-            mouse_up();
+            mouse_up_by_button(button);
         }
     } else {
-        post_mouse_up(hwnd, x, y);
+        post_mouse_up_by_button(hwnd, x, y, button);
     }
     Ok(JsValue::undefined())
 }
@@ -3301,7 +3372,7 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     context.register_global_builtin_callable(js_string!("winGetClientPos"), 1, f)?;
     // 鼠标操作函数
     let f = _mc.into_js_function_copied(context);
-    context.register_global_builtin_callable(js_string!("mc"), 3, f)?;
+    context.register_global_builtin_callable(js_string!("mc"), 4, f)?;
 
     let f = _mm.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("mm"), 2, f)?;
@@ -3313,10 +3384,10 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     context.register_global_builtin_callable(js_string!("moveC"), 4, f)?;
 
     let f = _md.into_js_function_copied(context);
-    context.register_global_builtin_callable(js_string!("md"), 3, f)?;
+    context.register_global_builtin_callable(js_string!("md"), 4, f)?;
 
     let f = _mu.into_js_function_copied(context);
-    context.register_global_builtin_callable(js_string!("mu"), 3, f)?;
+    context.register_global_builtin_callable(js_string!("mu"), 4, f)?;
 
     let f = _mt.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("mt"), 3, f)?;

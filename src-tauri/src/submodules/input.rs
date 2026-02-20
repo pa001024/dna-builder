@@ -4,6 +4,25 @@ use windows::Win32::{
     System::Threading::{AttachThreadInput, GetCurrentThreadId},
     UI::{Input::KeyboardAndMouse::*, WindowsAndMessaging::*},
 };
+
+/// 鼠标按键类型。
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MouseButtonKind {
+    Left,
+    Right,
+    Middle,
+    X1,
+    X2,
+}
+
+/// 将扩展按键类型转换为 Win32 XBUTTON 常量。
+fn xbutton_flag(button: MouseButtonKind) -> u16 {
+    match button {
+        MouseButtonKind::X1 => XBUTTON1,
+        MouseButtonKind::X2 => XBUTTON2,
+        _ => 0,
+    }
+}
 #[allow(unused)]
 pub fn key_to_vkey(key: &str) -> u16 {
     match key.to_lowercase().as_str() {
@@ -240,6 +259,45 @@ pub fn mouse_right_down() {
 }
 pub fn mouse_right_up() {
     unsafe { mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0) }
+}
+
+/// 按指定鼠标键执行按下。
+pub fn mouse_down_by_button(button: MouseButtonKind) {
+    match button {
+        MouseButtonKind::Left => mouse_down(),
+        MouseButtonKind::Right => mouse_right_down(),
+        MouseButtonKind::Middle => mouse_middle_down(),
+        MouseButtonKind::X1 | MouseButtonKind::X2 => unsafe {
+            mouse_event(MOUSEEVENTF_XDOWN, 0, 0, xbutton_flag(button) as i32, 0)
+        },
+    }
+}
+
+/// 按指定鼠标键执行抬起。
+pub fn mouse_up_by_button(button: MouseButtonKind) {
+    match button {
+        MouseButtonKind::Left => mouse_up(),
+        MouseButtonKind::Right => mouse_right_up(),
+        MouseButtonKind::Middle => mouse_middle_up(),
+        MouseButtonKind::X1 | MouseButtonKind::X2 => unsafe {
+            mouse_event(MOUSEEVENTF_XUP, 0, 0, xbutton_flag(button) as i32, 0)
+        },
+    }
+}
+
+/// 按指定鼠标键点击（可指定按下时长）。
+pub fn mouse_click_by_button(button: MouseButtonKind, duration: u32) {
+    mouse_down_by_button(button);
+    sleep(duration);
+    mouse_up_by_button(button);
+}
+
+/// 移动到坐标后按指定鼠标键点击。
+pub fn mouse_click_to_by_button(x: i32, y: i32, button: MouseButtonKind) {
+    mouse_move_to(x, y);
+    mouse_down_by_button(button);
+    sleep(1);
+    mouse_up_by_button(button);
 }
 
 /// 左键单击
@@ -504,6 +562,60 @@ pub fn post_mouse_up(hwnd: HWND, x: i32, y: i32) {
         WPARAM(0),
         make_mouse_lparam(target_x, target_y),
     );
+}
+
+/// 通过 Windows 消息发送指定鼠标键按下事件到指定窗口。
+pub fn post_mouse_down_by_button(hwnd: HWND, x: i32, y: i32, button: MouseButtonKind) {
+    match button {
+        MouseButtonKind::Left => post_mouse_down(hwnd, x, y),
+        MouseButtonKind::Right => post_mouse_right_down(hwnd, x, y),
+        MouseButtonKind::Middle => post_mouse_middle_down(hwnd, x, y),
+        MouseButtonKind::X1 | MouseButtonKind::X2 => {
+            let (target_hwnd, target_x, target_y) = resolve_mouse_target_window(hwnd, x, y);
+            let xbtn = xbutton_flag(button) as usize;
+            // HIWORD(wParam)=XBUTTON1/2, LOWORD(wParam)=按键状态（此处同步设置对应 MK_XBUTTON 位）
+            let mk_state = if matches!(button, MouseButtonKind::X1) {
+                0x0020usize
+            } else {
+                0x0040usize
+            };
+            let wparam = WPARAM((xbtn << 16) | mk_state);
+            post_message_with_attach(
+                target_hwnd,
+                WM_XBUTTONDOWN,
+                wparam,
+                make_mouse_lparam(target_x, target_y),
+            );
+        }
+    }
+}
+
+/// 通过 Windows 消息发送指定鼠标键抬起事件到指定窗口。
+pub fn post_mouse_up_by_button(hwnd: HWND, x: i32, y: i32, button: MouseButtonKind) {
+    match button {
+        MouseButtonKind::Left => post_mouse_up(hwnd, x, y),
+        MouseButtonKind::Right => post_mouse_right_up(hwnd, x, y),
+        MouseButtonKind::Middle => post_mouse_middle_up(hwnd, x, y),
+        MouseButtonKind::X1 | MouseButtonKind::X2 => {
+            let (target_hwnd, target_x, target_y) = resolve_mouse_target_window(hwnd, x, y);
+            let xbtn = xbutton_flag(button) as usize;
+            let wparam = WPARAM(xbtn << 16);
+            post_message_with_attach(
+                target_hwnd,
+                WM_XBUTTONUP,
+                wparam,
+                make_mouse_lparam(target_x, target_y),
+            );
+        }
+    }
+}
+
+/// 通过 Windows 消息发送指定鼠标键点击事件到指定窗口。
+pub fn post_mouse_click_by_button(hwnd: HWND, x: i32, y: i32, button: MouseButtonKind) {
+    post_mouse_move(hwnd, x, y);
+    post_mouse_down_by_button(hwnd, x, y, button);
+    sleep(1);
+    post_mouse_up_by_button(hwnd, x, y, button);
 }
 
 /// 通过Windows消息发送鼠标点击事件到指定窗口
