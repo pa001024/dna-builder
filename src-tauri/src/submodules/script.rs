@@ -7,9 +7,10 @@ use crate::submodules::logger::StdioLogger;
 use crate::submodules::logger::TauriLogger;
 use crate::submodules::script_console::Console;
 use crate::submodules::script_builtin::{
-    register_builtin_functions, set_current_script_path, set_script_cli_config,
-    set_script_event_app_handle,
+    register_builtin_functions, set_current_script_path, set_script_event_app_handle,
 };
+#[cfg(feature = "dob-script-cli")]
+use crate::submodules::script_builtin::set_script_cli_config;
 use boa_engine::builtins::error::Error as BoaErrorObject;
 use boa_engine::context::ContextBuilder;
 use boa_engine::job::JobExecutor;

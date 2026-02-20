@@ -82,6 +82,7 @@ static SCRIPT_CONFIG_REQ_SEQ: AtomicU64 = AtomicU64::new(1);
 static SCRIPT_CONFIG_PENDING: OnceLock<Mutex<HashMap<String, mpsc::Sender<serde_json::Value>>>> =
     OnceLock::new();
 /// CLI 模式 readConfig 的可选外部配置（JSON 值）。
+#[cfg(feature = "dob-script-cli")]
 static SCRIPT_CLI_CONFIG: OnceLock<Mutex<Option<serde_json::Value>>> = OnceLock::new();
 
 thread_local! {
@@ -157,11 +158,13 @@ fn _script_config_pending_map() -> &'static Mutex<HashMap<String, mpsc::Sender<s
 }
 
 /// 获取 CLI 配置存储槽。
+#[cfg(feature = "dob-script-cli")]
 fn _script_cli_config_slot() -> &'static Mutex<Option<serde_json::Value>> {
     SCRIPT_CLI_CONFIG.get_or_init(|| Mutex::new(None))
 }
 
 /// 设置 CLI 模式 readConfig 配置。
+#[cfg(feature = "dob-script-cli")]
 pub fn set_script_cli_config(config: Option<serde_json::Value>) -> Result<(), String> {
     let mut guard = _script_cli_config_slot()
         .lock()
@@ -171,6 +174,7 @@ pub fn set_script_cli_config(config: Option<serde_json::Value>) -> Result<(), St
 }
 
 /// 从 JSON 对象按 key（大小写不敏感）获取字段值。
+#[cfg(feature = "dob-script-cli")]
 fn _json_object_get_case_insensitive<'a>(
     value: &'a serde_json::Value,
     key: &str,
@@ -190,6 +194,7 @@ fn _json_object_get_case_insensitive<'a>(
 /// 1. `<当前脚本文件名>.<name>`（即 `config[scope][name]`）
 /// 2. `<当前脚本完整路径>.<name>`（即 `config[script_path][name]`）
 /// 3. `<name>`（即 `config[name]`）
+#[cfg(feature = "dob-script-cli")]
 fn _lookup_cli_script_config_raw_value(
     config: &serde_json::Value,
     name: &str,
@@ -214,6 +219,7 @@ fn _lookup_cli_script_config_raw_value(
 }
 
 /// 解析 CLI 传入配置并转换成 readConfig 目标类型。
+#[cfg(feature = "dob-script-cli")]
 fn _resolve_cli_script_config_value(
     name: &str,
     format_spec: &ScriptConfigFormatSpec,
@@ -3062,6 +3068,7 @@ fn _read_config(
         ctx,
     )?;
 
+    #[cfg(feature = "dob-script-cli")]
     if SCRIPT_EVENT_APP_HANDLE.get().is_none() {
         if let Some(cli_value) =
             _resolve_cli_script_config_value(name.as_str(), &format_spec, &default_value)
