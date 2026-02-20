@@ -1,6 +1,6 @@
 {
     "name": "dob-script",
-    "version": "0.1.0",
+    "version": "0.12.5",
     "description": "Run DNA Builder script files from command line",
     "license": "MIT",
     "type": "module",

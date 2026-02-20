@@ -81,6 +81,8 @@ static SCRIPT_CONFIG_REQ_SEQ: AtomicU64 = AtomicU64::new(1);
 /// readConfig 等待中的请求映射：request_id -> 回传通道。
 static SCRIPT_CONFIG_PENDING: OnceLock<Mutex<HashMap<String, mpsc::Sender<serde_json::Value>>>> =
     OnceLock::new();
+/// CLI 模式 readConfig 的可选外部配置（JSON 值）。
+static SCRIPT_CLI_CONFIG: OnceLock<Mutex<Option<serde_json::Value>>> = OnceLock::new();
 
 thread_local! {
     /// 当前执行线程对应的脚本路径（用于 readConfig 作用域与相对路径解析）。
@@ -152,6 +154,90 @@ pub fn get_current_script_path() -> Option<String> {
 fn _script_config_pending_map() -> &'static Mutex<HashMap<String, mpsc::Sender<serde_json::Value>>>
 {
     SCRIPT_CONFIG_PENDING.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+/// 获取 CLI 配置存储槽。
+fn _script_cli_config_slot() -> &'static Mutex<Option<serde_json::Value>> {
+    SCRIPT_CLI_CONFIG.get_or_init(|| Mutex::new(None))
+}
+
+/// 设置 CLI 模式 readConfig 配置。
+pub fn set_script_cli_config(config: Option<serde_json::Value>) -> Result<(), String> {
+    let mut guard = _script_cli_config_slot()
+        .lock()
+        .map_err(|e| format!("获取 CLI 配置锁失败: {e:?}"))?;
+    *guard = config;
+    Ok(())
+}
+
+/// 从 JSON 对象按 key（大小写不敏感）获取字段值。
+fn _json_object_get_case_insensitive<'a>(
+    value: &'a serde_json::Value,
+    key: &str,
+) -> Option<&'a serde_json::Value> {
+    let object = value.as_object()?;
+    object.get(key).or_else(|| {
+        object
+            .iter()
+            .find(|(candidate_key, _)| candidate_key.eq_ignore_ascii_case(key))
+            .map(|(_, candidate_value)| candidate_value)
+    })
+}
+
+/// 在 CLI 传入配置中按“作用域 + 配置名”查找配置原始值。
+///
+/// 查找优先级：
+/// 1. `<当前脚本文件名>.<name>`（即 `config[scope][name]`）
+/// 2. `<当前脚本完整路径>.<name>`（即 `config[script_path][name]`）
+/// 3. `<name>`（即 `config[name]`）
+fn _lookup_cli_script_config_raw_value(
+    config: &serde_json::Value,
+    name: &str,
+) -> Option<serde_json::Value> {
+    if let Some(scope) = _current_script_scope_name() {
+        if let Some(scoped_config) = _json_object_get_case_insensitive(config, scope.as_str()) {
+            if let Some(value) = _json_object_get_case_insensitive(scoped_config, name) {
+                return Some(value.clone());
+            }
+        }
+    }
+
+    if let Some(script_path) = get_current_script_path() {
+        if let Some(scoped_config) = _json_object_get_case_insensitive(config, script_path.as_str()) {
+            if let Some(value) = _json_object_get_case_insensitive(scoped_config, name) {
+                return Some(value.clone());
+            }
+        }
+    }
+
+    _json_object_get_case_insensitive(config, name).cloned()
+}
+
+/// 解析 CLI 传入配置并转换成 readConfig 目标类型。
+fn _resolve_cli_script_config_value(
+    name: &str,
+    format_spec: &ScriptConfigFormatSpec,
+    default_value: &ScriptConfigValue,
+) -> Result<Option<ScriptConfigValue>, String> {
+    let config = {
+        let guard = _script_cli_config_slot()
+            .lock()
+            .map_err(|e| format!("获取 CLI 配置锁失败: {e:?}"))?;
+        guard.clone()
+    };
+    let Some(config) = config else {
+        return Ok(None);
+    };
+
+    let Some(raw_value) = _lookup_cli_script_config_raw_value(&config, name) else {
+        return Ok(None);
+    };
+
+    Ok(Some(_coerce_json_to_script_config_value(
+        &raw_value,
+        format_spec,
+        default_value,
+    )))
 }
 
 /// 生成 readConfig 的唯一请求 ID。
@@ -2942,9 +3028,10 @@ fn _wait_color(
 /// 读取脚本配置项并返回当前值。
 ///
 /// 行为说明：
-/// 1. 每次调用都会向前端发送事件，请求创建/更新配置 UI；
+/// 1. GUI 模式会向前端发送事件，请求创建/更新配置 UI；
 /// 2. 前端持久化配置并回传当前值；
-/// 3. 若回传超时或异常，则返回默认值。
+/// 3. CLI 模式优先读取外部传入配置；
+/// 4. 若回传超时、未命中配置或出现异常，则返回默认值。
 fn _read_config(
     name: Option<JsValue>,
     desc: Option<JsValue>,
@@ -2974,6 +3061,15 @@ fn _read_config(
         &format_spec,
         ctx,
     )?;
+
+    if SCRIPT_EVENT_APP_HANDLE.get().is_none() {
+        if let Some(cli_value) =
+            _resolve_cli_script_config_value(name.as_str(), &format_spec, &default_value)
+                .map_err(|e| JsNativeError::error().with_message(e))?
+        {
+            return _script_config_value_to_js(&cli_value, ctx);
+        }
+    }
 
     let Some(app_handle) = SCRIPT_EVENT_APP_HANDLE.get() else {
         return _script_config_value_to_js(&default_value, ctx);
