@@ -10,10 +10,12 @@ use std::{
     cell::RefCell,
     mem::zeroed,
     ptr,
+    sync::{Arc, Condvar, Mutex},
     time::{Duration, Instant},
 };
 use thiserror::Error;
 use windows::{
+    Foundation::TypedEventHandler,
     Graphics::{
         Capture::{
             Direct3D11CaptureFrame, Direct3D11CaptureFramePool, GraphicsCaptureItem,
@@ -404,6 +406,17 @@ struct WgcContext {
     last_frame_ticks: Option<i64>,
     // 复用 CPU 可读纹理，减少每帧 Staging 资源创建开销
     staging_surface: Option<CpuStagingSurface>,
+    // WGC 到帧事件通知（序号 + 条件变量），用于事件驱动等待，降低轮询 CPU 占用。
+    frame_arrived_signal: Arc<(Mutex<u64>, Condvar)>,
+    // 已消费的到帧事件序号。
+    frame_arrived_seen: u64,
+    // 到帧事件订阅 token（用于释放时解绑）。
+    frame_arrived_token: Option<i64>,
+    // 缓存 WGC 对齐计算所需的窗口/客户区参数，降低高频调用下的 WinAPI 开销。
+    // (window_w, window_h, client_w, client_h, offset_x, offset_y)
+    alignment_cache: Option<(i32, i32, i32, i32, i32, i32)>,
+    // 对齐参数缓存时间戳。
+    alignment_cached_at: Option<Instant>,
 }
 
 impl WgcContext {
@@ -417,10 +430,25 @@ impl WgcContext {
         let frame_pool = Direct3D11CaptureFramePool::CreateFreeThreaded(
             &winrt_device,
             DirectXPixelFormat::B8G8R8A8UIntNormalized,
-            2,
+            1,
             size,
         )
         .unwrap();
+
+        // 事件驱动到帧通知：捕获线程收到新帧时只做“计数 + 唤醒”，避免在回调里做重活。
+        let frame_arrived_signal = Arc::new((Mutex::new(0_u64), Condvar::new()));
+        let frame_arrived_signal_for_handler = frame_arrived_signal.clone();
+        let frame_arrived_handler = TypedEventHandler::new(move |_, _| {
+            let (lock, condvar) = &*frame_arrived_signal_for_handler;
+            if let Ok(mut seq) = lock.lock() {
+                *seq = seq.wrapping_add(1);
+                condvar.notify_all();
+            }
+            Ok(())
+        });
+        let frame_arrived_token = frame_pool
+            .FrameArrived(&frame_arrived_handler)
+            .ok();
 
         let session = frame_pool.CreateCaptureSession(&item).unwrap();
         let _ = session.SetIsBorderRequired(false);
@@ -439,7 +467,52 @@ impl WgcContext {
             cached_at: None,
             last_frame_ticks: None,
             staging_surface: None,
+            frame_arrived_signal,
+            frame_arrived_seen: 0,
+            frame_arrived_token,
+            alignment_cache: None,
+            alignment_cached_at: None,
         })
+    }
+
+    /// 等待下一次到帧事件。
+    ///
+    /// 返回：
+    /// - `true`：在超时前收到新事件；
+    /// - `false`：超时或事件通道不可用。
+    fn wait_for_frame_arrived(&mut self, timeout: Duration) -> bool {
+        // 事件订阅失败时退化到非事件模式，调用方会走已有兜底流程。
+        if self.frame_arrived_token.is_none() {
+            return false;
+        }
+
+        let (lock, condvar) = &*self.frame_arrived_signal;
+        let mut guard = match lock.lock() {
+            Ok(v) => v,
+            Err(_) => return false,
+        };
+
+        // 若已有未消费的事件，直接消费并返回。
+        if *guard > self.frame_arrived_seen {
+            self.frame_arrived_seen = *guard;
+            return true;
+        }
+
+        let waited = condvar.wait_timeout_while(guard, timeout, |seq| {
+            *seq <= self.frame_arrived_seen
+        });
+        match waited {
+            Ok((new_guard, _)) => {
+                guard = new_guard;
+                if *guard > self.frame_arrived_seen {
+                    self.frame_arrived_seen = *guard;
+                    true
+                } else {
+                    false
+                }
+            }
+            Err(_) => false,
+        }
     }
 
     /// 处理单帧数据并更新缓存。
@@ -477,9 +550,16 @@ impl WgcContext {
         // 计算输出尺寸与裁剪起点：
         // WGC 在不同窗口/系统配置下，可能返回“整窗帧”或“客户区帧”。
         // 这里通过比较两种假设下的横纵缩放一致性，自动选择更合理的裁剪策略。
+        //
+        // 性能优化：窗口/客户区几何参数使用短期缓存，避免每帧调用 WinAPI。
         let (client_w, client_h, crop_x, crop_y) = {
-            let (window_w, window_h, want_w, want_h, offset_x, offset_y) =
-                get_window_and_client_rect_for_wgc(self.target_hwnd)
+            let should_refresh_alignment = self
+                .alignment_cached_at
+                .map(|ts| ts.elapsed() >= Duration::from_millis(250))
+                .unwrap_or(true);
+            if should_refresh_alignment {
+                self.alignment_cache = get_window_and_client_rect_for_wgc(self.target_hwnd)
+                    .ok()
                     .map(|(window_rect, client_rect, ox, oy)| {
                         (
                             (window_rect.right - window_rect.left).max(1),
@@ -489,8 +569,13 @@ impl WgcContext {
                             ox.max(0),
                             oy.max(0),
                         )
-                    })
-                    .unwrap_or((tex_w as i32, tex_h as i32, tex_w as i32, tex_h as i32, 0, 0));
+                    });
+                self.alignment_cached_at = Some(Instant::now());
+            }
+
+            let (window_w, window_h, want_w, want_h, offset_x, offset_y) = self
+                .alignment_cache
+                .unwrap_or((tex_w as i32, tex_h as i32, tex_w as i32, tex_h as i32, 0, 0));
 
             let tex_w_f = tex_w as f64;
             let tex_h_f = tex_h as f64;
@@ -538,16 +623,24 @@ impl WgcContext {
         let src_ptr = mapped.pData as *const u8;
         let dst_ptr = mat_bgra.data_mut();
 
-        for r in 0..roi_h {
-            let src_off =
-                (r + crop_y + roi_y) as usize * src_stride + ((crop_x + roi_x) as usize * 4);
-            let dst_off = r as usize * dst_stride;
+        // 性能优化：当源/目标连续且无偏移时，走一次性整块拷贝，减少逐行循环开销。
+        let src_x = crop_x + roi_x;
+        let src_y = crop_y + roi_y;
+        if src_x == 0 && src_y == 0 && src_stride == dst_stride {
             unsafe {
-                std::ptr::copy_nonoverlapping(
-                    src_ptr.add(src_off),
-                    dst_ptr.add(dst_off),
-                    dst_stride,
-                );
+                std::ptr::copy_nonoverlapping(src_ptr, dst_ptr, dst_stride * roi_h as usize);
+            }
+        } else {
+            for r in 0..roi_h {
+                let src_off = (r + src_y) as usize * src_stride + (src_x as usize * 4);
+                let dst_off = r as usize * dst_stride;
+                unsafe {
+                    std::ptr::copy_nonoverlapping(
+                        src_ptr.add(src_off),
+                        dst_ptr.add(dst_off),
+                        dst_stride,
+                    );
+                }
             }
         }
 
@@ -593,10 +686,13 @@ impl WgcContext {
             || current_size.Height != self.last_size.Height
         {
             self.last_size = current_size;
+            // 尺寸变化后强制刷新一次对齐参数缓存，避免继续使用旧几何信息。
+            self.alignment_cache = None;
+            self.alignment_cached_at = None;
             if let Err(e) = self.frame_pool.Recreate(
                 &self.winrt_device,
                 DirectXPixelFormat::B8G8R8A8UIntNormalized,
-                2,
+                1,
                 current_size,
             ) {
                 eprintln!("Recreate 失败: {:?}", e);
@@ -604,40 +700,42 @@ impl WgcContext {
             }
         }
 
-        // 2. 取最新帧
-        // - 先尽可能清空队列并拿到最新帧；
-        // - 若没有真正新帧，再短等待一小段时间（避免长时间阻塞脚本线程）。
-        let baseline_ticks = self.last_frame_ticks.unwrap_or(i64::MIN);
+        // 2. 实时优先策略：
+        // - 短间隔调用：直接等待“时间戳更大”的新帧。
+        // - 长间隔调用：先清空已有队列（这些帧可能是历史积压），再等待后续新帧。
+        let long_gap = self
+            .cached_at
+            .map(|ts| ts.elapsed() >= Duration::from_millis(33))
+            .unwrap_or(true);
+
+        let mut baseline_ticks = self.last_frame_ticks.unwrap_or(i64::MIN);
+        if long_gap {
+            // 先把当前积压帧全部取走并丢弃，避免返回“上次调用后积压的第一帧”。
+            while let Ok(frame) = self.frame_pool.TryGetNextFrame() {
+                if should_stop_current_script() {
+                    return None;
+                }
+                let ticks = frame
+                    .SystemRelativeTime()
+                    .ok()
+                    .map(|ts| ts.Duration)
+                    .unwrap_or(i64::MIN);
+                if ticks > baseline_ticks {
+                    baseline_ticks = ticks;
+                }
+            }
+        }
+
+        // 长间隔给更长等待窗口保证实时性；短间隔仅短等待以保障高频吞吐。
+        let wait_ms = if long_gap { 90 } else { 5 };
+        let deadline = Instant::now() + Duration::from_millis(wait_ms);
         let mut latest_frame: Option<Direct3D11CaptureFrame> = None;
         let mut latest_ticks = i64::MIN;
-        while let Ok(frame) = self.frame_pool.TryGetNextFrame() {
+        loop {
             if should_stop_current_script() {
                 return None;
             }
-            let ticks = frame
-                .SystemRelativeTime()
-                .ok()
-                .map(|ts| ts.Duration)
-                .unwrap_or(i64::MIN);
-            if ticks >= latest_ticks {
-                latest_ticks = ticks;
-                latest_frame = Some(frame);
-            }
-        }
 
-        let has_new_frame = latest_ticks > baseline_ticks
-            || (self.last_frame_ticks.is_none() && latest_frame.is_some());
-        if has_new_frame {
-            if let Some(frame) = latest_frame.take() {
-                return self.process_new_frame(frame, roi);
-            }
-        }
-
-        let deadline = Instant::now() + Duration::from_millis(8);
-        while Instant::now() < deadline {
-            if should_stop_current_script() {
-                return None;
-            }
             while let Ok(frame) = self.frame_pool.TryGetNextFrame() {
                 if should_stop_current_script() {
                     return None;
@@ -653,26 +751,39 @@ impl WgcContext {
                 }
             }
 
-            let has_new_frame = latest_ticks > baseline_ticks
-                || (self.last_frame_ticks.is_none() && latest_frame.is_some());
-            if let Some(frame) = latest_frame.take() {
-                if has_new_frame {
-                    return self.process_new_frame(frame, roi);
+            if latest_frame.is_some() && latest_ticks > baseline_ticks {
+                break;
+            }
+            if Instant::now() >= deadline {
+                break;
+            }
+
+            // 事件驱动等待：尽量睡到下一帧到达，避免高频轮询占用 CPU。
+            let now = Instant::now();
+            let remain = deadline.saturating_duration_since(now);
+            if remain.is_zero() || !self.wait_for_frame_arrived(remain) {
+                break;
+            }
+        }
+
+        if latest_frame.is_some() && latest_ticks > baseline_ticks {
+            if let Some(frame) = latest_frame {
+                return self.process_new_frame(frame, roi);
+            }
+        }
+
+        // 3. 短间隔优先吞吐：未拿到新帧时直接回退缓存，避免每轮都走 GDI 导致 FPS 降低。
+        if !long_gap {
+            if let Some(roi_rect) = roi {
+                if let Some(cached) = self.cached_mat.as_ref() {
+                    return crop_mat_with_roi(cached.as_ref(), roi_rect);
                 }
+            } else if let Some(cached) = self.cached_mat.as_ref() {
+                return Some(cached.clone());
             }
-            std::thread::sleep(Duration::from_millis(1));
         }
 
-        // 3. 没有新帧时优先回退缓存，保持高频调用稳定吞吐。
-        if let Some(roi_rect) = roi {
-            if let Some(cached) = self.cached_mat.as_ref() {
-                return crop_mat_with_roi(cached.as_ref(), roi_rect);
-            }
-        } else if let Some(cached) = self.cached_mat.as_ref() {
-            return Some(cached.clone());
-        }
-
-        // 4. 首次无缓存时，才回退到 GDI 强制抓当前帧。
+        // 4. 长间隔或无缓存时，回退到 GDI 强制抓当前帧，避免滞后图像。
         if should_stop_current_script() {
             return None;
         }
@@ -694,6 +805,14 @@ impl WgcContext {
                 .and_then(|cached| crop_mat_with_roi(cached.as_ref(), roi_rect))
         } else {
             self.cached_mat.clone()
+        }
+    }
+}
+
+impl Drop for WgcContext {
+    fn drop(&mut self) {
+        if let Some(token) = self.frame_arrived_token.take() {
+            let _ = self.frame_pool.RemoveFrameArrived(token);
         }
     }
 }

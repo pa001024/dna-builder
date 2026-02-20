@@ -1511,17 +1511,8 @@ fn _capture_window_wgc(
                 {
                     let mut dst_binding = js_mat_obj.borrow_mut();
                     let dst_inner = &mut dst_binding.data_mut().inner;
-
-                    // 尺寸一致时直接写回同一块 Mat 内存；尺寸变化时再替换底层 Mat。
-                    if dst_inner.rows() == mat.rows() && dst_inner.cols() == mat.cols() {
-                        if let Err(err) = mat.copy_to(&mut **dst_inner) {
-                            return Err(JsNativeError::error()
-                                .with_message(format!("复用 WGC Mat 写入失败: {err}"))
-                                .into());
-                        }
-                    } else {
-                        *dst_inner = mat;
-                    }
+                    // 性能优化：直接替换底层 Mat 句柄，避免每帧 copy_to 的整图内存拷贝。
+                    *dst_inner = mat;
                 }
                 Ok(js_mat_obj.upcast().into())
             } else {

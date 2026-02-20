@@ -3132,6 +3132,7 @@ onUnmounted(async () => {
                                 <Icon :icon="showStatusPanel ? 'ri:menu-fold-line' : 'ri:menu-unfold-line'" class="w-4 h-4" />
                             </button>
                             <button
+                                v-if="activeTab && activeTab.type === 'local'"
                                 class="btn btn-sm btn-ghost btn-square"
                                 :class="{ 'btn-error': isRunButtonInStopState }"
                                 @click="runCurrentTab"
@@ -3480,10 +3481,7 @@ onUnmounted(async () => {
                     <button
                         v-if="scriptHotkeyStore[editingHotkeyScriptName]"
                         class="btn btn-warning"
-                        @click="
-                            clearScriptHotkeyBinding(editingHotkeyScriptName)
-                            showScriptHotkeyDialog = false
-                        "
+                        @click="(clearScriptHotkeyBinding(editingHotkeyScriptName), (showScriptHotkeyDialog = false))"
                     >
                         清除绑定
                     </button>
