@@ -44,6 +44,8 @@ const newScriptName = ref("")
 const editingScript = ref<string | null>(null)
 const editingScriptName = ref("")
 const publishingScript = ref(false)
+const renamingScriptInFlight = ref(false)
+let startEditScriptTimer: ReturnType<typeof setTimeout> | null = null
 
 const DEFAULT_SCRIPT_CONTENT = `const hwnd = getWindowByProcessName("EM-Win64-Shipping.exe")
 if (!hwnd || !isElevated()) throw new Error("未找到窗口或非管理员权限")
@@ -2381,20 +2383,29 @@ async function initFileChangeListener() {
  * @param fileName 当前文件名
  */
 function startEditScript(fileName: string) {
-    editingScript.value = fileName
+    if (startEditScriptTimer) {
+        clearTimeout(startEditScriptTimer)
+        startEditScriptTimer = null
+    }
+    // 先隐藏输入框，等待右键菜单关闭后再进入编辑态，避免瞬时 blur。
+    editingScript.value = null
     editingScriptName.value = fileName.replace(/\.js$/, "")
-    nextTick(() => {
-        const elm = document.getElementById("script-name-input") as HTMLInputElement
-        elm?.focus()
-        elm?.select()
-    })
+    startEditScriptTimer = setTimeout(() => {
+        editingScript.value = fileName
+        nextTick(() => {
+            const elm = document.getElementById("script-name-input") as HTMLInputElement
+            elm?.focus()
+            elm?.select()
+        })
+        startEditScriptTimer = null
+    }, 120)
 }
 
 /**
  * 确认重命名脚本
  */
 async function confirmRenameScript() {
-    if (!editingScript.value) return
+    if (!editingScript.value || renamingScriptInFlight.value) return
 
     const newName = editingScriptName.value.trim()
     if (!newName) {
@@ -2409,6 +2420,10 @@ async function confirmRenameScript() {
         editingScript.value = null
         return
     }
+
+    // 先退出编辑态并锁定重命名流程，避免 Enter + blur 导致重复提交。
+    editingScript.value = null
+    renamingScriptInFlight.value = true
 
     try {
         const oldPath = `${scriptsDir.value}\\${oldFileName}`
@@ -2441,7 +2456,7 @@ async function confirmRenameScript() {
         console.error("重命名失败", error)
         ui.showErrorMessage("重命名失败，请重试")
     } finally {
-        editingScript.value = null
+        renamingScriptInFlight.value = false
     }
 }
 
@@ -2449,6 +2464,10 @@ async function confirmRenameScript() {
  * 取消编辑脚本名称
  */
 function cancelEditScript() {
+    if (startEditScriptTimer) {
+        clearTimeout(startEditScriptTimer)
+        startEditScriptTimer = null
+    }
     editingScript.value = null
     editingScriptName.value = ""
 }
@@ -2861,6 +2880,10 @@ onMounted(async () => {
 })
 
 onUnmounted(async () => {
+    if (startEditScriptTimer) {
+        clearTimeout(startEditScriptTimer)
+        startEditScriptTimer = null
+    }
     document.removeEventListener("keydown", handleKeyDown)
     if (unlistenConsoleFn) {
         unlistenConsoleFn()
@@ -3030,7 +3053,7 @@ onUnmounted(async () => {
                                             </ContextMenuItem>
                                             <ContextMenuItem
                                                 class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
-                                                @click="startEditScript(script)"
+                                                @click.stop="startEditScript(script)"
                                             >
                                                 <Icon icon="ri:edit-line" class="w-4 h-4 mr-2" />
                                                 重命名
@@ -3456,7 +3479,7 @@ onUnmounted(async () => {
                                         <div class="text-[11px] text-base-content/40">
                                             {{ new Date(item.timestamp).toLocaleTimeString() }}
                                         </div>
-                                        <div v-if="item.text" class="text-xs text-base-content/85 break-all">
+                                        <div v-if="item.text" class="text-xs text-base-content/85 whitespace-pre-wrap break-all">
                                             {{ item.text }}
                                         </div>
                                         <div v-if="item.images && item.images.length > 0" class="space-y-2">
