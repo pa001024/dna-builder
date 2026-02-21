@@ -2,6 +2,8 @@
  * 自动化脚本类型定义
  */
 
+declare type ROI = [number, number, number, number]
+
 type KeyEnum =
     | "a"
     | "b"
@@ -599,6 +601,14 @@ declare function imreadUrlRgba(localPath: string, url: string): Mat
 declare function imreadUrl(localPath: string, url: string): Mat
 
 /**
+ * 读取文本内容（优先本地，其次网络）。
+ * @param path 本地文件路径（可为空；相对路径按脚本目录解析）
+ * @param url 网络文本地址（可选，本地读取失败时回退）
+ * @returns 读取到的文本；本地与网络均失败时返回 undefined
+ */
+declare function readText(path: string, url?: string): string | undefined
+
+/**
  * 下载文件（异步）
  * @param url 下载地址
  * @param filename 保存文件名或路径（相对路径会按脚本目录解析）
@@ -982,6 +992,14 @@ declare function readConfig<F extends ScriptConfigFormat>(
     format: F,
     defaultValue?: ScriptConfigValueByFormat<F>
 ): ScriptConfigValueByFormat<F>
+
+/**
+ * 写入脚本配置项当前值（仅允许写入已通过 readConfig 定义的键）。
+ * @param name 配置名（需与 readConfig 中的 name 一致）
+ * @param value 配置值（会按 readConfig 的格式自动规整）
+ * @returns 是否写入成功
+ */
+declare function setConfig(name: string, value: string | number | boolean | string[]): boolean
 
 /**
  * 设置程序音量

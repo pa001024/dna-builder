@@ -137,6 +137,12 @@ interface ScriptReadConfigPayload {
     defaultValue?: ScriptConfigValue
 }
 
+interface ScriptSetConfigPayload {
+    scope?: string
+    name: string
+    value: unknown
+}
+
 interface ScriptLiteralParseResult {
     ok: boolean
     value?: unknown
@@ -214,6 +220,7 @@ let unlistenConsoleFn: UnlistenFn | null = null
 let unlistenStatusFn: UnlistenFn | null = null
 let unlistenFileChangedFn: UnlistenFn | null = null
 let unlistenScriptConfigFn: UnlistenFn | null = null
+let unlistenScriptSetConfigFn: UnlistenFn | null = null
 const watchedFiles = ref<Set<string>>(new Set())
 const codeEditor = ref<any>()
 const showSchedulerDialog = ref(false)
@@ -315,9 +322,12 @@ async function fetchOnlineScripts(offset = 0) {
             }
         }
 
-        const count = await scriptsCountQuery({
-            category: selectedCategory.value === "all" ? undefined : selectedCategory.value,
-        })
+        const count = await scriptsCountQuery(
+            {
+                category: selectedCategory.value === "all" ? undefined : selectedCategory.value,
+            },
+            { requestPolicy: "network-only" }
+        )
         totalCount.value = count ?? 0
     } finally {
         loading.value = false
@@ -1754,6 +1764,35 @@ function upsertScriptConfigFromRequest(payload: ScriptReadConfigPayload): Script
 }
 
 /**
+ * 处理脚本 setConfig 事件并更新已存在的配置项。
+ * @param payload setConfig 事件负载
+ * @returns 是否成功更新
+ */
+function applyScriptSetConfigFromEvent(payload: ScriptSetConfigPayload): boolean {
+    const scope = resolveStoredScriptConfigScope(payload.scope ?? activeTab.value?.name ?? activeConfigScope.value)
+    const normalizedName = String(payload.name ?? "").trim()
+    if (!scope || !normalizedName) {
+        return false
+    }
+
+    const scopedItems = scriptConfigStore.value[scope]
+    if (!scopedItems) {
+        return false
+    }
+    const matchedName = Object.keys(scopedItems).find(key => key.toLowerCase() === normalizedName.toLowerCase()) ?? normalizedName
+    const item = scopedItems[matchedName]
+    if (!item) {
+        return false
+    }
+
+    item.value = normalizeScriptConfigValue(item.kind, payload.value, item.defaultValue, item.options)
+    item.updatedAt = Date.now()
+    activeConfigScope.value = scope
+    persistScriptConfigItems()
+    return true
+}
+
+/**
  * 更新配置值并持久化。
  * @param name 配置名
  * @param value 新值
@@ -1989,6 +2028,22 @@ async function initScriptConfigListener() {
 }
 
 /**
+ * 监听脚本 setConfig 事件并更新前端配置存储。
+ */
+async function initScriptSetConfigListener() {
+    try {
+        unlistenScriptSetConfigFn = await listen<ScriptSetConfigPayload>("script-set-config", event => {
+            const payload = event.payload
+            if (!payload?.name) return
+            if (!shouldAcceptScopedScriptEvent(payload.scope)) return
+            applyScriptSetConfigFromEvent(payload)
+        })
+    } catch (error) {
+        console.error("监听脚本 setConfig 事件失败", error)
+    }
+}
+
+/**
  * 从后端同步脚本运行状态，确保页面刷新后仍可停止脚本。
  */
 async function syncRunningStateFromBackend(appendDetectedLog = true) {
@@ -2025,9 +2080,12 @@ async function downloadScript(script: Script) {
         const fileName = getScriptFileNameByTitle(script.title)
         const filePath = `${scriptsDir.value}\\${fileName}`
         const isUpdate = localScripts.value.includes(fileName)
-        const result = await scriptQuery({
-            id: script.id,
-        })
+        const result = await scriptQuery(
+            {
+                id: script.id,
+            },
+            { requestPolicy: "network-only" }
+        )
         if (!result) {
             throw new Error("获取脚本内容失败")
         }
@@ -2798,6 +2856,7 @@ onMounted(async () => {
     await initStatusListener()
     await initFileChangeListener()
     await initScriptConfigListener()
+    await initScriptSetConfigListener()
     await syncRunningStateFromBackend()
 })
 
@@ -2814,6 +2873,9 @@ onUnmounted(async () => {
     }
     if (unlistenScriptConfigFn) {
         unlistenScriptConfigFn()
+    }
+    if (unlistenScriptSetConfigFn) {
+        unlistenScriptSetConfigFn()
     }
     // 停止所有文件监听
     const stopPromises = Array.from(watchedFiles.value).map(fileName => stopWatchingFile(fileName))

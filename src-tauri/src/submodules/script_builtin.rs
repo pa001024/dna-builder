@@ -81,13 +81,15 @@ static SCRIPT_CONFIG_REQ_SEQ: AtomicU64 = AtomicU64::new(1);
 /// readConfig 等待中的请求映射：request_id -> 回传通道。
 static SCRIPT_CONFIG_PENDING: OnceLock<Mutex<HashMap<String, mpsc::Sender<serde_json::Value>>>> =
     OnceLock::new();
-/// CLI 模式 readConfig 的可选外部配置（JSON 值）。
+/// CLI 模式 readConfig/setConfig 的可选外部配置（JSON 值 + 可选文件路径）。
 #[cfg(feature = "dob-script-cli")]
-static SCRIPT_CLI_CONFIG: OnceLock<Mutex<Option<serde_json::Value>>> = OnceLock::new();
+static SCRIPT_CLI_CONFIG: OnceLock<Mutex<Option<ScriptCliConfigState>>> = OnceLock::new();
 
 thread_local! {
     /// 当前执行线程对应的脚本路径（用于 readConfig 作用域与相对路径解析）。
     static CURRENT_SCRIPT_PATH: RefCell<String> = const { RefCell::new(String::new()) };
+    /// 当前执行线程内 readConfig 注册的配置格式（name -> format）。
+    static CURRENT_SCRIPT_CONFIG_FORMATS: RefCell<HashMap<String, ScriptConfigFormatSpec>> = RefCell::new(HashMap::new());
     /// WGC 截图返回对象缓存：按 hwnd 复用同一个 JS Mat，降低高频截图的 GC 压力。
     static WGC_CAPTURE_MAT_CACHE: RefCell<HashMap<isize, JsObject<JsMat>>> = RefCell::new(HashMap::new());
 }
@@ -128,6 +130,14 @@ enum ScriptConfigValue {
     Boolean(bool),
 }
 
+/// CLI 模式脚本配置状态（支持 setConfig 写回文件）。
+#[cfg(feature = "dob-script-cli")]
+#[derive(Clone)]
+struct ScriptCliConfigState {
+    value: serde_json::Value,
+    file_path: Option<String>,
+}
+
 /// 设置脚本事件发送器（首次设置生效）。
 pub fn set_script_event_app_handle(app_handle: tauri::AppHandle) {
     let _ = SCRIPT_EVENT_APP_HANDLE.set(Arc::new(app_handle));
@@ -137,6 +147,9 @@ pub fn set_script_event_app_handle(app_handle: tauri::AppHandle) {
 pub fn set_current_script_path(script_path: String) {
     CURRENT_SCRIPT_PATH.with(|storage| {
         *storage.borrow_mut() = script_path;
+    });
+    CURRENT_SCRIPT_CONFIG_FORMATS.with(|formats| {
+        formats.borrow_mut().clear();
     });
 }
 
@@ -159,18 +172,97 @@ fn _script_config_pending_map() -> &'static Mutex<HashMap<String, mpsc::Sender<s
 
 /// 获取 CLI 配置存储槽。
 #[cfg(feature = "dob-script-cli")]
-fn _script_cli_config_slot() -> &'static Mutex<Option<serde_json::Value>> {
+fn _script_cli_config_slot() -> &'static Mutex<Option<ScriptCliConfigState>> {
     SCRIPT_CLI_CONFIG.get_or_init(|| Mutex::new(None))
 }
 
 /// 设置 CLI 模式 readConfig 配置。
 #[cfg(feature = "dob-script-cli")]
-pub fn set_script_cli_config(config: Option<serde_json::Value>) -> Result<(), String> {
+pub fn set_script_cli_config(
+    config: Option<serde_json::Value>,
+    config_file_path: Option<String>,
+) -> Result<(), String> {
+    let normalized_file_path = config_file_path.and_then(|raw| {
+        let normalized = raw.trim().to_string();
+        if normalized.is_empty() {
+            None
+        } else {
+            Some(normalized)
+        }
+    });
     let mut guard = _script_cli_config_slot()
         .lock()
         .map_err(|e| format!("获取 CLI 配置锁失败: {e:?}"))?;
-    *guard = config;
+    *guard = config.map(|value| ScriptCliConfigState {
+        value,
+        file_path: normalized_file_path,
+    });
     Ok(())
+}
+
+/// 将 CLI 配置写回到文件（仅在传入了配置路径时执行）。
+#[cfg(feature = "dob-script-cli")]
+fn _persist_cli_script_config_file(state: &ScriptCliConfigState) -> Result<(), String> {
+    let Some(config_file_path) = state.file_path.as_deref() else {
+        return Ok(());
+    };
+    let config_path = Path::new(config_file_path);
+    if let Some(parent_dir) = config_path.parent()
+        && !parent_dir.as_os_str().is_empty()
+    {
+        std::fs::create_dir_all(parent_dir).map_err(|e| {
+            format!(
+                "创建 CLI 配置目录失败: {}, {e}",
+                parent_dir.to_string_lossy()
+            )
+        })?;
+    }
+    let pretty_json = serde_json::to_string_pretty(&state.value)
+        .map_err(|e| format!("序列化 CLI 配置失败: {e}"))?;
+    std::fs::write(config_path, format!("{pretty_json}\n")).map_err(|e| {
+        format!(
+            "写入 CLI 配置文件失败: {}, {e}",
+            config_path.to_string_lossy()
+        )
+    })?;
+    Ok(())
+}
+
+/// 在 CLI 配置中更新指定键值（优先写入当前脚本作用域）。
+#[cfg(feature = "dob-script-cli")]
+fn _set_cli_script_config_value(name: &str, value: serde_json::Value) -> Result<(), String> {
+    let mut guard = _script_cli_config_slot()
+        .lock()
+        .map_err(|e| format!("获取 CLI 配置锁失败: {e:?}"))?;
+    let state = guard.get_or_insert_with(|| ScriptCliConfigState {
+        value: serde_json::json!({}),
+        file_path: None,
+    });
+
+    if !state.value.is_object() {
+        state.value = serde_json::json!({});
+    }
+    let root_object = state
+        .value
+        .as_object_mut()
+        .ok_or_else(|| "CLI 配置不是有效对象".to_string())?;
+
+    if let Some(scope) = _current_script_scope_name() {
+        let scoped_entry = root_object
+            .entry(scope)
+            .or_insert_with(|| serde_json::json!({}));
+        if !scoped_entry.is_object() {
+            *scoped_entry = serde_json::json!({});
+        }
+        let scoped_object = scoped_entry
+            .as_object_mut()
+            .ok_or_else(|| "CLI 作用域配置不是对象".to_string())?;
+        scoped_object.insert(name.to_string(), value);
+    } else {
+        root_object.insert(name.to_string(), value);
+    }
+
+    _persist_cli_script_config_file(state)
 }
 
 /// 从 JSON 对象按 key（大小写不敏感）获取字段值。
@@ -229,7 +321,7 @@ fn _resolve_cli_script_config_value(
         let guard = _script_cli_config_slot()
             .lock()
             .map_err(|e| format!("获取 CLI 配置锁失败: {e:?}"))?;
-        guard.clone()
+        guard.as_ref().map(|state| state.value.clone())
     };
     let Some(config) = config else {
         return Ok(None);
@@ -297,6 +389,29 @@ fn _resolve_script_resource_path(path: &str) -> String {
         return script_dir.join(raw_path).to_string_lossy().to_string();
     }
     normalized
+}
+
+/// 记录 readConfig 注册的配置格式，供 setConfig 做类型规整与校验。
+fn _remember_script_config_format(name: &str, spec: &ScriptConfigFormatSpec) {
+    CURRENT_SCRIPT_CONFIG_FORMATS.with(|formats| {
+        formats.borrow_mut().insert(name.to_string(), spec.clone());
+    });
+}
+
+/// 获取已注册的配置格式（兼容大小写差异）。
+fn _find_script_config_format(name: &str) -> Option<ScriptConfigFormatSpec> {
+    CURRENT_SCRIPT_CONFIG_FORMATS.with(|formats| {
+        let borrowed = formats.borrow();
+        borrowed
+            .get(name)
+            .cloned()
+            .or_else(|| {
+                borrowed
+                    .iter()
+                    .find(|(candidate_name, _)| candidate_name.eq_ignore_ascii_case(name))
+                    .map(|(_, spec)| spec.clone())
+            })
+    })
 }
 
 /// 由前端回传 readConfig 请求结果。
@@ -1767,6 +1882,16 @@ fn _imwrite(
         .to_string(ctx)?
         .to_std_string_lossy();
     let resolved_path = _resolve_script_resource_path(&path);
+    let resolved_file_path = Path::new(&resolved_path);
+
+    // 在保存图片前自动创建父目录，避免目标路径不存在导致写入失败
+    if let Some(parent_dir) = resolved_file_path.parent() {
+        if !parent_dir.as_os_str().is_empty() && !parent_dir.exists() {
+            if std::fs::create_dir_all(parent_dir).is_err() {
+                return Ok(JsValue::new(false));
+            }
+        }
+    }
 
     // 获取第二个参数 (图像Mat)
     let js_img_mat = js_img_mat
@@ -1866,6 +1991,73 @@ fn _copy_image(js_img_mat: Option<JsValue>, _ctx: &mut Context) -> JsResult<JsVa
         }
         Err(_) => Ok(JsValue::new(false)),
     }
+}
+
+/// 读取文本内容（优先本地，其次网络）。
+/// - `path` 不为空时优先读取本地文件；
+/// - 本地不存在/读取失败且提供 `url` 时回退网络；
+/// - 提供 `path` 且网络读取成功时会写入本地缓存。
+fn _read_text(path: Option<JsValue>, url: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let path = path
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy()
+        .trim()
+        .to_string();
+    let url = url
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy()
+        .trim()
+        .to_string();
+    let resolved_path = _resolve_script_resource_path(&path);
+
+    // path 不为空时优先读取本地文本。
+    if !path.is_empty() && let Ok(content) = std::fs::read_to_string(&resolved_path) {
+        return Ok(JsValue::from(js_string!(content)));
+    }
+
+    // 本地未命中且无 url 时，保持与 imreadUrl 一致，返回 undefined。
+    if url.is_empty() {
+        return Ok(JsValue::undefined());
+    }
+
+    // 回退到网络读取；若提供 path 则同步写入本地缓存。
+    let response = reqwest::blocking::get(url.as_str()).map_err(|e| {
+        JsNativeError::error().with_message(format!("readText 请求失败: {e}"))
+    })?;
+    if !response.status().is_success() {
+        return Err(
+            JsNativeError::error()
+                .with_message(format!("readText 请求失败，HTTP 状态码: {}", response.status()))
+                .into(),
+        );
+    }
+    let content = response
+        .text()
+        .map_err(|e| JsNativeError::error().with_message(format!("readText 读取响应文本失败: {e}")))?;
+
+    if !path.is_empty() {
+        let target_path = Path::new(resolved_path.as_str());
+        if let Some(parent_dir) = target_path.parent()
+            && !parent_dir.as_os_str().is_empty()
+        {
+            std::fs::create_dir_all(parent_dir).map_err(|e| {
+                JsNativeError::error().with_message(format!(
+                    "readText 创建目录失败: {}, {e}",
+                    parent_dir.to_string_lossy()
+                ))
+            })?;
+        }
+        std::fs::write(target_path, content.as_bytes()).map_err(|e| {
+            JsNativeError::error().with_message(format!(
+                "readText 写入文件失败: {}, {e}",
+                target_path.to_string_lossy()
+            ))
+        })?;
+    }
+
+    Ok(JsValue::from(js_string!(content)))
 }
 
 /// 从本地或网络加载图像Mat对象函数
@@ -3067,6 +3259,7 @@ fn _read_config(
         &format_spec,
         ctx,
     )?;
+    _remember_script_config_format(name.as_str(), &format_spec);
 
     #[cfg(feature = "dob-script-cli")]
     if SCRIPT_EVENT_APP_HANDLE.get().is_none() {
@@ -3128,6 +3321,57 @@ fn _read_config(
     };
 
     _script_config_value_to_js(&result_value, ctx)
+}
+
+/// 写入脚本配置项当前值（仅允许写入 readConfig 已定义键）。
+fn _set_config(name: Option<JsValue>, value: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let name = name
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy()
+        .trim()
+        .to_string();
+    if name.is_empty() {
+        return Err(JsNativeError::typ()
+            .with_message("setConfig name 不能为空")
+            .into());
+    }
+
+    let format_spec = _find_script_config_format(name.as_str()).ok_or_else(|| {
+        JsNativeError::typ()
+            .with_message("setConfig 只能写入已通过 readConfig 定义的配置键")
+    })?;
+    let normalized_value = _coerce_js_to_script_config_value(
+        value.unwrap_or_else(|| JsValue::undefined()),
+        &format_spec,
+        ctx,
+    )?;
+    let value_json = _script_config_value_to_json(&normalized_value);
+
+    #[cfg(feature = "dob-script-cli")]
+    if SCRIPT_EVENT_APP_HANDLE.get().is_none() {
+        _set_cli_script_config_value(name.as_str(), value_json.clone())
+            .map_err(|e| JsNativeError::error().with_message(e))?;
+        return Ok(JsValue::new(true));
+    }
+
+    let Some(app_handle) = SCRIPT_EVENT_APP_HANDLE.get() else {
+        return Ok(JsValue::new(false));
+    };
+    app_handle
+        .emit(
+            "script-set-config",
+            serde_json::json!({
+                "scope": _current_script_scope_name(),
+                "name": name,
+                "value": value_json,
+            }),
+        )
+        .map_err(|e| {
+            JsNativeError::error().with_message(format!("发送 script-set-config 事件失败: {e}"))
+        })?;
+
+    Ok(JsValue::new(true))
 }
 
 /// 深度预测函数：返回深度图、障碍掩码与路径方向候选点。
@@ -3590,6 +3834,10 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     let f = _imread_url.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("imreadUrl"), 2, f)?;
 
+    // 读取本地/网络文本内容
+    let f = _read_text.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("readText"), 2, f)?;
+
     // 从本地或网络加载图像Mat对象，并返回RGBA通道
     let f = _imread_url_rgba.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("imreadUrlRgba"), 2, f)?;
@@ -3701,6 +3949,10 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     // 脚本配置读取函数
     let f = _read_config.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("readConfig"), 4, f)?;
+
+    // 脚本配置写入函数
+    let f = _set_config.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("setConfig"), 2, f)?;
 
     // 设置程序音量函数
     let f = _set_program_volume.into_js_function_copied(context);

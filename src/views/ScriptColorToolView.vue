@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CSSProperties } from "vue"
-import { computed, onMounted, onUnmounted, ref } from "vue"
+import { computed, nextTick, onMounted, onUnmounted, ref } from "vue"
 import { useRouter } from "vue-router"
 import { importPic } from "@/api/app"
 import { env } from "@/env"
@@ -41,6 +41,12 @@ interface PointColorRow {
     point: PointItem
     pointIndex: number
     referenceColor: PixelColorInfo | null
+    checkColor: PixelColorInfo | null
+    checkColorDisplay: string
+    checkColorInput: string
+    checkColorCustom: boolean
+    checkColorInputInvalid: boolean
+    checkColorEditing: boolean
     colors: PointColorEntry[]
 }
 
@@ -52,16 +58,20 @@ const fileInputRef = ref<HTMLInputElement | null>(null)
 const referenceImageRef = ref<HTMLImageElement | null>(null)
 const loadedImages = ref<LoadedImageItem[]>([])
 const points = ref<PointItem[]>([])
+const activeImageIndex = ref(0)
+const pointInitialCheckColors = ref<Record<number, string>>({})
+const pointCheckColorInputs = ref<Record<number, string>>({})
+const pointCheckColorEditing = ref<Record<number, boolean>>({})
 const loading = ref(false)
 const isDragging = ref(false)
 const zoomScale = ref(4)
 const colorTolerance = ref(10)
 let pointIdSeed = 1
-let unlistenDragEnter = () => { }
-let unlistenDragLeave = () => { }
-let unlistenDragDrop = () => { }
+let unlistenDragEnter = () => {}
+let unlistenDragLeave = () => {}
+let unlistenDragDrop = () => {}
 
-const referenceImage = computed(() => loadedImages.value[0] ?? null)
+const referenceImage = computed(() => loadedImages.value[activeImageIndex.value] ?? null)
 const referenceImageStyle = computed<CSSProperties>(() => {
     const image = referenceImage.value
     if (!image) {
@@ -126,6 +136,10 @@ function resetImageState() {
     revokeLoadedImageUrls()
     loadedImages.value = []
     points.value = []
+    activeImageIndex.value = 0
+    pointInitialCheckColors.value = {}
+    pointCheckColorInputs.value = {}
+    pointCheckColorEditing.value = {}
     pointIdSeed = 1
 }
 
@@ -228,6 +242,7 @@ async function loadImages(files: File[]) {
             items.push(await loadImageFile(file, index))
         }
         loadedImages.value = items
+        activeImageIndex.value = 0
     } catch (error) {
         ui.showErrorMessage(`图片加载失败: ${String(error)}`)
         resetImageState()
@@ -255,6 +270,7 @@ async function loadImagesFromPaths(paths: string[]) {
             items.push(await loadImagePath(path, index))
         }
         loadedImages.value = items
+        activeImageIndex.value = 0
     } catch (error) {
         ui.showErrorMessage(`图片加载失败: ${String(error)}`)
         resetImageState()
@@ -279,6 +295,27 @@ async function handleFileSelection(event: Event) {
  */
 function openFilePicker() {
     fileInputRef.value?.click()
+}
+
+/**
+ * 设置当前展示图片索引。
+ * @param index 目标索引
+ */
+function setActiveImageIndex(index: number) {
+    if (loadedImages.value.length === 0) {
+        activeImageIndex.value = 0
+        return
+    }
+    activeImageIndex.value = Math.max(0, Math.min(loadedImages.value.length - 1, index))
+}
+
+/**
+ * 处理图片切换下拉框输入。
+ * @param event 输入事件
+ */
+function handleActiveImageChange(event: Event) {
+    const input = event.target as HTMLSelectElement
+    setActiveImageIndex(Number(input.value))
 }
 
 /**
@@ -354,11 +391,20 @@ function addPointOnReferenceImage(event: MouseEvent) {
     const x = Math.max(0, Math.min(base.width - 1, Math.floor(rawX)))
     const y = Math.max(0, Math.min(base.height - 1, Math.floor(rawY)))
 
+    const pointId = pointIdSeed++
     points.value.push({
-        id: pointIdSeed++,
+        id: pointId,
         x,
         y,
     })
+
+    const baseColor = getPixelColor(base, x, y)
+    if (baseColor) {
+        pointInitialCheckColors.value = {
+            ...pointInitialCheckColors.value,
+            [pointId]: baseColor.hex,
+        }
+    }
 }
 
 /**
@@ -440,6 +486,15 @@ function getPointBubbleTailStyle(point: PointItem): CSSProperties {
  */
 function removePoint(pointId: number) {
     points.value = points.value.filter(point => point.id !== pointId)
+    const nextInitialColors = { ...pointInitialCheckColors.value }
+    delete nextInitialColors[pointId]
+    pointInitialCheckColors.value = nextInitialColors
+    const nextInputs = { ...pointCheckColorInputs.value }
+    delete nextInputs[pointId]
+    pointCheckColorInputs.value = nextInputs
+    const nextEditing = { ...pointCheckColorEditing.value }
+    delete nextEditing[pointId]
+    pointCheckColorEditing.value = nextEditing
 }
 
 /**
@@ -447,6 +502,9 @@ function removePoint(pointId: number) {
  */
 function clearPoints() {
     points.value = []
+    pointInitialCheckColors.value = {}
+    pointCheckColorInputs.value = {}
+    pointCheckColorEditing.value = {}
 }
 
 /**
@@ -482,9 +540,11 @@ function getPixelColor(image: LoadedImageItem, x: number, y: number): PixelColor
  * @returns 是否匹配
  */
 function isRgbMatch(expected: PixelColorInfo, actual: PixelColorInfo, tolerance: number): boolean {
-    return Math.abs(expected.r - actual.r) <= tolerance
-        && Math.abs(expected.g - actual.g) <= tolerance
-        && Math.abs(expected.b - actual.b) <= tolerance
+    return (
+        Math.abs(expected.r - actual.r) <= tolerance &&
+        Math.abs(expected.g - actual.g) <= tolerance &&
+        Math.abs(expected.b - actual.b) <= tolerance
+    )
 }
 
 /**
@@ -497,16 +557,95 @@ function toScriptHex(color: PixelColorInfo): string {
 }
 
 /**
+ * 解析输入的 HEX 检查颜色。
+ * @param input 颜色输入文本
+ * @returns 颜色信息；无效输入返回 null
+ */
+function parseCheckHexColor(input: string): PixelColorInfo | null {
+    const normalized = input.trim().replace(/^0x/i, "").replace(/^#/, "")
+    if (!/^[0-9a-fA-F]{6}$/.test(normalized)) {
+        return null
+    }
+
+    const r = Number.parseInt(normalized.slice(0, 2), 16)
+    const g = Number.parseInt(normalized.slice(2, 4), 16)
+    const b = Number.parseInt(normalized.slice(4, 6), 16)
+    return {
+        r,
+        g,
+        b,
+        a: 255,
+        hex: `#${normalized.toUpperCase()}`,
+    }
+}
+
+/**
+ * 更新指定点位的检查颜色输入值。
+ * @param pointId 点位 ID
+ * @param event 输入事件
+ */
+function updatePointCheckColorInput(pointId: number, event: Event) {
+    const input = event.target as HTMLInputElement
+    const value = input.value
+    const nextInputs = { ...pointCheckColorInputs.value }
+    if (value.trim().length === 0) {
+        delete nextInputs[pointId]
+    } else {
+        nextInputs[pointId] = value
+    }
+    pointCheckColorInputs.value = nextInputs
+}
+
+/**
+ * 进入指定点位的检查颜色编辑态，并聚焦输入框。
+ * @param pointId 点位 ID
+ */
+function beginEditPointCheckColor(pointId: number) {
+    pointCheckColorEditing.value = {
+        ...pointCheckColorEditing.value,
+        [pointId]: true,
+    }
+
+    nextTick(() => {
+        const input = document.querySelector(`[data-check-color-input-id="${pointId}"]`) as HTMLInputElement | null
+        input?.focus()
+        input?.select()
+    })
+}
+
+/**
+ * 结束指定点位的检查颜色编辑态。
+ * @param pointId 点位 ID
+ */
+function endEditPointCheckColor(pointId: number) {
+    const nextEditing = { ...pointCheckColorEditing.value }
+    delete nextEditing[pointId]
+    pointCheckColorEditing.value = nextEditing
+}
+
+/**
+ * 将颜色设置为指定点位的检查颜色。
+ * @param pointId 点位 ID
+ * @param color 颜色信息
+ */
+function applyPointCheckColor(pointId: number, color: PixelColorInfo) {
+    pointCheckColorInputs.value = {
+        ...pointCheckColorInputs.value,
+        [pointId]: color.hex,
+    }
+}
+
+/**
  * 复制坐标检测脚本片段：cc(frame,x,y,0xRRGGBB,tolerance)。
  * @param row 颜色行
  */
 async function copyCoordinateCommand(row: PointColorRow) {
-    if (!row.referenceColor) {
-        ui.showErrorMessage(`点 #${row.pointIndex} 在参考图中没有有效颜色`)
+    if (!row.checkColor) {
+        ui.showErrorMessage(`点 #${row.pointIndex} 在当前图中没有有效检查颜色`)
         return
     }
 
-    const command = `cc(frame,${row.point.x},${row.point.y},${toScriptHex(row.referenceColor)},${colorTolerance.value})`
+    const command = `cc(frame,${row.point.x},${row.point.y},${toScriptHex(row.checkColor)},${colorTolerance.value})`
     try {
         await copyText(command)
         ui.showSuccessMessage(`已复制: ${command}`)
@@ -524,16 +663,32 @@ const pointColorRows = computed<PointColorRow[]>(() =>
             imageId: image.id,
             color: getPixelColor(image, point.x, point.y),
         }))
-        const referenceColor = rawColors[0]?.color ?? null
+        const referenceColor = rawColors[activeImageIndex.value]?.color ?? null
+        const initialInput = pointInitialCheckColors.value[point.id] ?? ""
+        const customInput = pointCheckColorInputs.value[point.id]
+        const trimmedInput = customInput?.trim() ?? ""
+        const hasCustomInput = trimmedInput.length > 0
+        const effectiveInput = hasCustomInput ? (customInput ?? "") : initialInput
+        const parsedCheckColor = parseCheckHexColor(effectiveInput)
+        const parsedInputColor = trimmedInput.length > 0 ? parseCheckHexColor(trimmedInput) : null
+        const checkColor = parsedCheckColor ?? null
+        const checkColorDisplay = checkColor?.hex ?? (hasCustomInput ? (customInput ?? "") : initialInput)
+        const checkColorEditing = pointCheckColorEditing.value[point.id] === true
 
         return {
             point,
             pointIndex: pointIndex + 1,
             referenceColor,
+            checkColor,
+            checkColorDisplay,
+            checkColorInput: hasCustomInput ? (customInput ?? "") : initialInput,
+            checkColorCustom: hasCustomInput,
+            checkColorInputInvalid: hasCustomInput && trimmedInput.length > 0 && !parsedInputColor,
+            checkColorEditing,
             colors: rawColors.map(entry => ({
                 imageId: entry.imageId,
                 color: entry.color,
-                match: referenceColor && entry.color ? isRgbMatch(referenceColor, entry.color, colorTolerance.value) : false,
+                match: checkColor && entry.color ? isRgbMatch(checkColor, entry.color, colorTolerance.value) : false,
             })),
         }
     })
@@ -600,62 +755,104 @@ onUnmounted(() => {
                 {{ loading ? "加载中..." : "加载图片" }}
             </button>
             <button class="btn btn-sm btn-ghost" @click="clearPoints" :disabled="points.length === 0">清空点位</button>
+            <div v-if="loadedImages.length > 0" class="flex items-center gap-1">
+                <button
+                    class="btn btn-sm btn-ghost btn-square"
+                    @click="setActiveImageIndex(activeImageIndex - 1)"
+                    :disabled="activeImageIndex <= 0"
+                >
+                    &lt;
+                </button>
+                <select class="select select-sm select-bordered w-64" :value="activeImageIndex" @change="handleActiveImageChange">
+                    <option v-for="(image, index) in loadedImages" :key="image.id" :value="index">{{ index + 1 }}. {{ image.name }}</option>
+                </select>
+                <button
+                    class="btn btn-sm btn-ghost btn-square"
+                    @click="setActiveImageIndex(activeImageIndex + 1)"
+                    :disabled="activeImageIndex >= loadedImages.length - 1"
+                >
+                    &gt;
+                </button>
+                <span class="text-xs text-base-content/70">当前图 {{ activeImageIndex + 1 }}/{{ loadedImages.length }}</span>
+            </div>
             <div class="flex items-center gap-1">
                 <button class="btn btn-sm btn-ghost btn-square" @click="zoomOut" :disabled="zoomScale <= 1">-</button>
-                <input type="number" class="input input-sm input-bordered w-20 text-center" :value="zoomScale" min="1"
-                    max="32" step="1" @change="handleZoomInput" />
+                <input
+                    type="number"
+                    class="input input-sm input-bordered w-20 text-center"
+                    :value="zoomScale"
+                    min="1"
+                    max="32"
+                    step="1"
+                    @change="handleZoomInput"
+                />
                 <button class="btn btn-sm btn-ghost btn-square" @click="zoomIn" :disabled="zoomScale >= 32">+</button>
                 <span class="text-xs text-base-content/70">缩放 {{ zoomScale }}x（1:N 像素）</span>
             </div>
             <div class="flex items-center gap-1">
                 <span class="text-xs text-base-content/70">容差</span>
-                <input type="number" class="input input-sm input-bordered w-20 text-center" :value="colorTolerance"
-                    min="0" max="255" step="1" @change="handleToleranceInput" />
+                <input
+                    type="number"
+                    class="input input-sm input-bordered w-20 text-center"
+                    :value="colorTolerance"
+                    min="0"
+                    max="255"
+                    step="1"
+                    @change="handleToleranceInput"
+                />
                 <span class="text-xs text-base-content/70">RGB 单通道</span>
             </div>
-            <input ref="fileInputRef" type="file" multiple accept="image/*" class="hidden"
-                @change="handleFileSelection" />
+            <input ref="fileInputRef" type="file" multiple accept="image/*" class="hidden" @change="handleFileSelection" />
             <div class="text-xs text-base-content/70">
-                请先加载多张图片，然后在第一张图上点击添加坐标点（坐标可点击复制 cc，桌面端支持拖拽导入）
+                请先加载多张图片，然后在当前图上点击添加坐标点（坐标可点击复制 cc，桌面端支持拖拽导入）
             </div>
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 min-h-0 flex-1">
             <div class="card bg-base-100 border border-base-300 min-h-0">
                 <div class="card-body min-h-0 p-3 gap-3">
-                    <div class="text-sm font-medium">参考图（第 1 张，点击打点）</div>
+                    <div class="text-sm font-medium">当前图（支持切换，点击打点）</div>
                     <div v-if="referenceImageInfo" class="text-xs text-base-content/60">
                         {{ referenceImageInfo }}
                     </div>
                     <div class="flex-1 overflow-auto border border-base-300 rounded bg-base-200/30 p-2">
-                        <div v-if="!referenceImage"
-                            class="h-full min-h-60 flex items-center justify-center text-base-content/50 text-sm">
+                        <div v-if="!referenceImage" class="h-full min-h-60 flex items-center justify-center text-base-content/50 text-sm">
                             暂无图片
                         </div>
                         <div v-else class="relative" :style="referenceLayerStyle">
-                            <img ref="referenceImageRef" :src="referenceImage.url" :alt="referenceImage.name"
-                                class="select-none cursor-crosshair" :style="referenceImageStyle"
-                                @click="addPointOnReferenceImage" />
-                            <div v-for="(point, index) in points" :key="point.id" class="absolute pointer-events-none"
-                                :style="getPointAnchorStyle(point)">
+                            <img
+                                ref="referenceImageRef"
+                                :src="referenceImage.url"
+                                :alt="referenceImage.name"
+                                class="select-none cursor-crosshair"
+                                :style="referenceImageStyle"
+                                @click="addPointOnReferenceImage"
+                            />
+                            <div
+                                v-for="(point, index) in points"
+                                :key="point.id"
+                                class="absolute pointer-events-none"
+                                :style="getPointAnchorStyle(point)"
+                            >
                                 <div
-                                    class="absolute left-0 top-0 w-2 h-2 rounded-full bg-error border border-white shadow -translate-x-1/2 -translate-y-1/2">
-                                </div>
+                                    class="absolute left-0 top-0 w-2 h-2 rounded-full bg-error border border-white shadow -translate-x-1/2 -translate-y-1/2"
+                                ></div>
                                 <div class="absolute left-0 top-0" :style="getPointBubbleContainerStyle(point)">
                                     <div
-                                        class="relative rounded-md bg-base-100 border border-base-300 shadow px-2 py-1 text-[10px] leading-tight whitespace-nowrap">
+                                        class="relative rounded-md bg-base-100 border border-base-300 shadow px-2 py-1 text-[10px] leading-tight whitespace-nowrap"
+                                    >
                                         <div class="font-semibold text-error">#{{ index + 1 }}</div>
                                         <div class="text-base-content/80">{{ point.x }}, {{ point.y }}</div>
-                                        <span class="absolute w-2 h-2 bg-base-100 border-l border-b border-base-300"
-                                            :style="getPointBubbleTailStyle(point)" />
+                                        <span
+                                            class="absolute w-2 h-2 bg-base-100 border-l border-b border-base-300"
+                                            :style="getPointBubbleTailStyle(point)"
+                                        />
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="text-xs text-base-content/60">
-                        已加载 {{ loadedImages.length }} 张图片，已打点 {{ points.length }} 个
-                    </div>
+                    <div class="text-xs text-base-content/60">已加载 {{ loadedImages.length }} 张图片，已打点 {{ points.length }} 个</div>
                 </div>
             </div>
 
@@ -663,19 +860,27 @@ onUnmounted(() => {
                 <div class="card-body min-h-0 p-3 gap-3">
                     <div class="text-sm font-medium">同坐标颜色信息</div>
                     <div class="flex-1 overflow-auto border border-base-300 rounded">
-                        <div v-if="points.length === 0 || loadedImages.length === 0"
-                            class="h-full min-h-60 flex items-center justify-center text-base-content/50 text-sm">
-                            请先加载图片并在参考图上点击添加点位
+                        <div
+                            v-if="points.length === 0 || loadedImages.length === 0"
+                            class="h-full min-h-60 flex items-center justify-center text-base-content/50 text-sm"
+                        >
+                            请先加载图片并在当前图上点击添加点位
                         </div>
                         <table v-else class="table table-xs">
                             <thead>
                                 <tr>
                                     <th>#</th>
                                     <th>坐标</th>
-                                    <th v-for="image in loadedImages" :key="image.id" class="min-w-48">
+                                    <th>检查颜色</th>
+                                    <th
+                                        v-for="(image, imageIndex) in loadedImages"
+                                        :key="image.id"
+                                        class="min-w-48"
+                                        :class="{ 'bg-primary/10': imageIndex === activeImageIndex }"
+                                    >
                                         <div class="truncate" :title="image.name">{{ image.name }}</div>
-                                        <div class="text-[10px] text-base-content/60">{{ image.width }}x{{ image.height
-                                            }}</div>
+                                        <div class="text-[10px] text-base-content/60">{{ image.width }}x{{ image.height }}</div>
+                                        <div v-if="imageIndex === activeImageIndex" class="text-[10px] text-primary">当前图</div>
                                     </th>
                                     <th>操作</th>
                                 </tr>
@@ -684,35 +889,73 @@ onUnmounted(() => {
                                 <tr v-for="row in pointColorRows" :key="row.point.id">
                                     <td>{{ row.pointIndex }}</td>
                                     <td>
-                                        <button class="link link-hover text-info text-xs"
-                                            @click="copyCoordinateCommand(row)">
+                                        <button class="link link-hover text-info text-xs" @click="copyCoordinateCommand(row)">
                                             ({{ row.point.x }}, {{ row.point.y }})
                                         </button>
                                     </td>
-                                    <td v-for="entry in row.colors" :key="`${row.point.id}-${entry.imageId}`">
+                                    <td>
+                                        <div class="flex flex-col gap-1">
+                                            <div v-if="row.checkColorEditing" class="flex items-center gap-2">
+                                                <input
+                                                    :data-check-color-input-id="row.point.id"
+                                                    type="text"
+                                                    class="input input-xs w-28 font-mono"
+                                                    :class="row.checkColorInputInvalid ? 'input-error' : 'input-bordered'"
+                                                    :value="row.checkColorInput"
+                                                    placeholder="#RRGGBB 或 0xRRGGBB"
+                                                    @input="updatePointCheckColorInput(row.point.id, $event)"
+                                                    @blur="endEditPointCheckColor(row.point.id)"
+                                                    @keydown.enter.prevent="endEditPointCheckColor(row.point.id)"
+                                                    @keydown.esc.prevent="endEditPointCheckColor(row.point.id)"
+                                                />
+                                            </div>
+                                            <button
+                                                v-else
+                                                class="w-fit flex items-center gap-2 text-[10px] text-base-content/75 hover:text-base-content"
+                                                @click="beginEditPointCheckColor(row.point.id)"
+                                            >
+                                                <span
+                                                    class="inline-block w-3 h-3 rounded border border-base-300"
+                                                    :style="{ backgroundColor: row.checkColor ? row.checkColor.hex : 'transparent' }"
+                                                />
+                                                <span class="font-mono">{{ row.checkColorDisplay }}</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td
+                                        v-for="(entry, entryIndex) in row.colors"
+                                        :key="`${row.point.id}-${entry.imageId}`"
+                                        :class="{ 'bg-primary/5': entryIndex === activeImageIndex }"
+                                    >
                                         <div v-if="entry.color" class="flex items-center gap-2">
-                                            <span class="inline-block w-4 h-4 rounded border border-base-300"
-                                                :style="{ backgroundColor: `rgba(${entry.color.r}, ${entry.color.g}, ${entry.color.b}, ${entry.color.a / 255})` }" />
+                                            <span
+                                                class="inline-block w-4 h-4 rounded border border-base-300"
+                                                :style="{
+                                                    backgroundColor: `rgba(${entry.color.r}, ${entry.color.g}, ${entry.color.b}, ${entry.color.a / 255})`,
+                                                }"
+                                            />
                                             <div class="leading-tight">
                                                 <div>{{ entry.color.hex }}</div>
-                                                <div class="text-[10px] text-base-content/65">
-                                                    {{ entry.color.r }}, {{ entry.color.g }}, {{ entry.color.b }}, {{
-                                                        entry.color.a }}
-                                                </div>
                                                 <div class="text-[10px]">
                                                     <span class="text-base-content/60">匹配:</span>
-                                                    <span class="ml-1 font-semibold"
-                                                        :class="entry.match ? 'text-success' : 'text-error'">
+                                                    <span class="ml-1 font-semibold" :class="entry.match ? 'text-success' : 'text-error'">
                                                         {{ entry.match ? 1 : 0 }}
                                                     </span>
+                                                </div>
+                                                <div class="text-[10px]">
+                                                    <button
+                                                        class="link link-hover text-info"
+                                                        @click="applyPointCheckColor(row.point.id, entry.color)"
+                                                    >
+                                                        设为检查色
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
                                         <div v-else class="text-base-content/50">超出范围</div>
                                     </td>
                                     <td>
-                                        <button class="btn btn-xs btn-ghost"
-                                            @click="removePoint(row.point.id)">删除</button>
+                                        <button class="btn btn-xs btn-ghost" @click="removePoint(row.point.id)">删除</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -722,8 +965,10 @@ onUnmounted(() => {
             </div>
         </div>
 
-        <div v-if="isDragging"
-            class="absolute inset-0 z-50 bg-base-100/70 backdrop-blur-sm border-2 border-dashed border-primary rounded-lg flex items-center justify-center pointer-events-none">
+        <div
+            v-if="isDragging"
+            class="absolute inset-0 z-50 bg-base-100/70 backdrop-blur-sm border-2 border-dashed border-primary rounded-lg flex items-center justify-center pointer-events-none"
+        >
             <div class="text-center">
                 <div class="text-lg font-medium text-primary">拖拽图片到此处导入</div>
                 <div class="text-xs text-base-content/70 mt-1">支持 png / jpg / jpeg / webp / bmp / gif / tiff / ico</div>

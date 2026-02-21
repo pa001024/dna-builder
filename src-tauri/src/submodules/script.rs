@@ -296,6 +296,7 @@ pub async fn run_script_with_tauri_console(
 /// # 参数
 /// - `script_path`: 脚本文件路径（建议为规范化绝对路径）
 /// - `script_config`: 可选脚本配置（用于 readConfig）
+/// - `script_config_file_path`: 可选配置文件路径（用于 setConfig 回写文件）
 ///
 /// # 返回
 /// 返回执行结果字符串，如果成功则返回 Ok(String)，否则返回错误信息
@@ -303,6 +304,7 @@ pub async fn run_script_with_tauri_console(
 pub async fn run_script_with_stdio_console(
     script_path: String,
     script_config: Option<serde_json::Value>,
+    script_config_file_path: Option<String>,
 ) -> Result<String, String> {
     // 使用 spawn_blocking 在阻塞线程中执行脚本，避免 Context 的 Send 约束问题
     tokio::task::spawn_blocking(move || {
@@ -329,7 +331,8 @@ pub async fn run_script_with_stdio_console(
             .map_err(|e| format!("注册终端 Console 失败: {:?}", e))?;
 
         // CLI 模式下不绑定 Tauri 事件发送器，但保持脚本路径上下文可用。
-        set_script_cli_config(script_config).map_err(|e| format!("设置 CLI 脚本配置失败: {e}"))?;
+        set_script_cli_config(script_config, script_config_file_path)
+            .map_err(|e| format!("设置 CLI 脚本配置失败: {e}"))?;
         set_current_script_path(script_path.clone());
         register_builtin_functions(context).map_err(|e| format!("注册内置函数失败: {:?}", e))?;
         let source = Source::from_filepath(Path::new(&script_path))
@@ -401,9 +404,10 @@ pub async fn run_script_file(script_path: String, app_handle: tauri::AppHandle) 
 pub async fn run_script_file_cli(
     script_path: String,
     script_config: Option<serde_json::Value>,
+    script_config_file_path: Option<String>,
 ) -> Result<String, String> {
     let normalized_path = normalize_script_path(script_path)?;
-    run_script_with_stdio_console(normalized_path, script_config).await
+    run_script_with_stdio_console(normalized_path, script_config, script_config_file_path).await
 }
 
 pub static SCRIPT_RUNNING: LazyLock<Arc<AtomicBool>> =
