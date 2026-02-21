@@ -100,108 +100,104 @@ function getFishIcon(fish: Fish): string {
     return `/imgs/webp/T_Fish_${fish.icon}.webp`
 }
 
+const APPEAR_TIMES = [1, 2, 3] as const
+type AppearTime = (typeof APPEAR_TIMES)[number]
+
 /**
- * 计算池子期望值
+ * 计算单条鱼在当前配置下的期望价格
+ * @param fish 鱼数据
+ * @param currentTime 当前时间段
+ * @param addVariationProb 鱼饵提供的额外变异概率
+ * @returns 单条鱼的期望价格
  */
-const expectedValue = computed(() => {
-    // 获取当前选择的鱼饵
-    const currentLure = lure.value
+function calculateExpectedFishPrice(fish: Fish, currentTime: AppearTime, addVariationProb: number): number {
+    /**
+     * 计算鱼在默认长度采样下的价格
+     * @param targetFish 目标鱼
+     * @returns 价格
+     */
+    function calculateBasePrice(targetFish: Fish) {
+        return calculateFishPrice(targetFish, targetFish.length[0] + (targetFish.length[1] - targetFish.length[0]) / 1.3)
+    }
 
-    // 计算不同鱼饵对权重和变异概率的影响
-    const AddVariationProb = currentLure === 1 ? 0.3 : 0
-    const AddRareFishProb = currentLure === 2 ? 1 : 0
+    /**
+     * 计算鱼在包含变异时的期望价格
+     * @param targetFish 目标鱼
+     * @returns 期望价格
+     */
+    function calculateMutationExpectedPrice(targetFish: Fish): number {
+        const adjustedMutationProb = (targetFish.varProb || 0) * (1 + addVariationProb)
+        const { price: basePrice } = calculateBasePrice(targetFish)
+        if (!targetFish.var || adjustedMutationProb <= 0 || targetFish.var.length === 0) return basePrice
 
-    // 计算调整后的权重和总权重
-    const adjustedWeights = spotFish.value.map((fish, index) => {
-        const baseWeight = props.spot.weights[index] || 0
-        if (!fish.appear.includes(selectTime.value)) return 0
-        // 稀有鱼（level > 3）的权重受鱼饵影响
-        return fish.level > 3 ? baseWeight * (1 + AddRareFishProb) : baseWeight
-    })
+        const mutatedExpectedPrice =
+            targetFish.var.reduce((sum, varFishId) => {
+                const varFish = fishMap.get(varFishId)
+                if (!varFish) return sum
+                const { price: varPrice } = calculateBasePrice(varFish)
+                return sum + varPrice
+            }, 0) / targetFish.var.length
 
-    const totalWeight = adjustedWeights.reduce((sum, w) => sum + w, 0)
-    let totalValue = 0
+        return basePrice * (1 - adjustedMutationProb) + mutatedExpectedPrice * adjustedMutationProb
+    }
 
-    spotFish.value.forEach((fish, index) => {
-        const weight = adjustedWeights[index]
-        const probability = weight / totalWeight
+    let finalPrice = calculateMutationExpectedPrice(fish)
 
-        // 计算调整后的变异概率
-        const adjustedMutationProb = (fish.varProb || 0) * (1 + AddVariationProb)
-
-        // 计算基础鱼价格和变异后的期望价格
-        let finalPrice = 0
-
-        function calculate(fish: Fish) {
-            return calculateFishPrice(fish, fish.length[0] + (fish.length[1] - fish.length[0]) / 1.3)
-        }
-
-        // 计算基础鱼的变异期望
-        if (fish.var && adjustedMutationProb > 0 && fish.var.length > 0) {
-            // 基础鱼价格
-            const { price: basePrice } = calculate(fish)
-            // 计算变异后的期望价格
-            const mutatedExpectedPrice =
-                fish.var.reduce((sum, varFishId) => {
-                    const varFish = fishMap.get(varFishId)
-                    if (varFish) {
-                        const { price: varPrice } = calculate(varFish)
-                        return sum + varPrice
-                    }
-                    return sum
-                }, 0) / fish.var.length
-
-            // 加权平均基础价格和变异后的期望价格
-            finalPrice = basePrice * (1 - adjustedMutationProb) + mutatedExpectedPrice * adjustedMutationProb
-        } else {
-            // 没有变异，直接使用基础价格
-            const { price: basePrice } = calculate(fish)
-            finalPrice = basePrice
-        }
-
-        // 考虑授渔以鱼机制
-        if (fish.s2b && fish.s2b > 0) {
-            const s2bFish = fishMap.get(fish.s2b)
-            if (s2bFish) {
-                let s2bFinalPrice = 0
-
-                // 计算授渔以鱼的调整后变异概率
-                const s2bAdjustedMutationProb = (s2bFish.varProb || 0) * (1 + AddVariationProb)
-
-                // 计算授渔以鱼的变异期望
-                if (s2bFish.var && s2bAdjustedMutationProb > 0 && s2bFish.var.length > 0) {
-                    // 授渔以鱼基础价格
-                    const { price: s2bBasePrice } = calculate(s2bFish)
-                    // 计算授渔以鱼变异后的期望价格
-                    const s2bMutatedExpectedPrice =
-                        s2bFish.var.reduce((sum, varFishId) => {
-                            const varFish = fishMap.get(varFishId)
-                            if (varFish) {
-                                const { price: varPrice } = calculate(varFish)
-                                return sum + varPrice
-                            }
-                            return sum
-                        }, 0) / s2bFish.var.length
-
-                    // 加权平均授渔以鱼基础价格和变异后的期望价格
-                    s2bFinalPrice = s2bBasePrice * (1 - s2bAdjustedMutationProb) + s2bMutatedExpectedPrice * s2bAdjustedMutationProb
-                } else {
-                    // 授渔以鱼没有变异，直接使用基础价格
-                    const { price: s2bBasePrice } = calculate(s2bFish)
-                    s2bFinalPrice = s2bBasePrice
-                }
-
-                // 根据s2bCompare选项决定是否使用授渔以鱼的价格
-                if (s2bCompare.value ? s2bFinalPrice > finalPrice : true) {
-                    finalPrice = s2bFinalPrice
-                }
+    // 授渔以鱼需要可在当前时间段钓到，才参与期望替换
+    if (fish.s2b && fish.s2b > 0) {
+        const s2bFish = fishMap.get(fish.s2b)
+        if (s2bFish && s2bFish.appear.includes(currentTime)) {
+            const s2bFinalPrice = calculateMutationExpectedPrice(s2bFish)
+            if (!s2bCompare.value || s2bFinalPrice > finalPrice) {
+                finalPrice = s2bFinalPrice
             }
         }
+    }
 
+    return finalPrice
+}
+
+/**
+ * 计算指定时间段的池子单条期望值
+ * @param currentTime 时间段
+ * @returns 单条期望值
+ */
+function calculateSpotExpectedValue(currentTime: AppearTime): number {
+    const currentLure = lure.value
+    const addVariationProb = currentLure === 1 ? 0.3 : 0
+    const addRareFishProb = currentLure === 2 ? 1 : 0
+
+    const adjustedWeights = spotFish.value.map((fish, index) => {
+        const baseWeight = props.spot.weights[index] || 0
+        if (!fish.appear.includes(currentTime)) return 0
+        // 稀有鱼（level > 3）的权重受鱼饵影响
+        return fish.level > 3 ? baseWeight * (1 + addRareFishProb) : baseWeight
+    })
+
+    const totalWeight = adjustedWeights.reduce((sum, weight) => sum + weight, 0)
+    if (totalWeight <= 0) return 0
+
+    let totalValue = 0
+    spotFish.value.forEach((fish, index) => {
+        const weight = adjustedWeights[index]
+        if (weight <= 0) return
+
+        const probability = weight / totalWeight
+        const finalPrice = calculateExpectedFishPrice(fish, currentTime, addVariationProb)
         totalValue += finalPrice * probability
     })
 
     return totalValue
+}
+
+/**
+ * 三个时间段的期望值
+ */
+const expectedValueByTime = computed(() => {
+    return APPEAR_TIMES.map(time => ({
+        time,
+        value: calculateSpotExpectedValue(time),
+    }))
 })
 
 // 钓鱼模拟相关状态
@@ -217,7 +213,7 @@ interface ReducedCatchLog {
 
 const reducedCatchHistory = ref<ReducedCatchLog[]>([])
 const catchCount = ref(0)
-const selectTime = ref<1 | 2 | 3>(1)
+const selectTime = ref<AppearTime>(1)
 const lure = ref<0 | 1 | 2>(0)
 const s2bCompare = ref<boolean>(false)
 
@@ -231,9 +227,10 @@ watch(
 /**
  * 模拟一次钓鱼
  * @param fish 基础鱼
+ * @param currentTime 当前时间段
  * @returns 钓鱼结果
  */
-function randomCatch(fish: Fish): ReducedCatchLog {
+function randomCatch(fish: Fish, currentTime: AppearTime): ReducedCatchLog {
     let { fish: finalFish, price, length } = calculateFishPrice(fish)
     let mutated = false
     let originFish = null
@@ -253,12 +250,15 @@ function randomCatch(fish: Fish): ReducedCatchLog {
 
     // 授渔以鱼逻辑：查看s2b，如果s2b鱼价值大于当前鱼则替换
     if (finalFish.s2b && finalFish.s2b > 0) {
-        const s2bFish = calculateFishPrice(fishMap.get(finalFish.s2b)!)
-        if (s2bFish && (!s2bCompare.value || s2bFish.price > price)) {
-            finalFish = s2bFish.fish
-            originPrice = price
-            price = s2bFish.price
-            originFish = fish
+        const s2bFishData = fishMap.get(finalFish.s2b)
+        if (s2bFishData && s2bFishData.appear.includes(currentTime)) {
+            const s2bFish = calculateFishPrice(s2bFishData)
+            if (!s2bCompare.value || s2bFish.price > price) {
+                finalFish = s2bFish.fish
+                originPrice = price
+                price = s2bFish.price
+                originFish = fish
+            }
         }
     }
 
@@ -270,7 +270,7 @@ function randomCatch(fish: Fish): ReducedCatchLog {
  */
 function fishOnce() {
     const fish = getRandomFish(props.spot, selectTime.value, lure.value)
-    const result = randomCatch(fish.fish)
+    const result = randomCatch(fish.fish, selectTime.value)
 
     // 使用鱼名称和长度作为唯一键
     const key = `${result.finalFish.name}_${result.length}`
@@ -326,10 +326,9 @@ function clearHistory() {
                                     <img :src="`/imgs/webp/${spot.icon}.webp`" class="w-full h-full object-cover" />
                                 </div>
                                 <div>
-                                    <SRouterLink :to="`/db/fishspot/${spot.id}`"
-                                        class="font-medium text-lg link link-primary">{{
-                                            spot.name
-                                        }}</SRouterLink>
+                                    <SRouterLink :to="`/db/fishspot/${spot.id}`" class="font-medium text-lg link link-primary">{{
+                                        spot.name
+                                    }}</SRouterLink>
                                     <div class="text-sm text-base-content/70">ID: {{ spot.id }}</div>
                                 </div>
                             </div>
@@ -338,13 +337,11 @@ function clearHistory() {
                                 <div v-if="extraRewardDetail" class="p-2 bg-base-100 rounded">
                                     <div class="text-xs text-base-content/70 mb-1">
                                         额外奖励 (概率:
-                                        {{ spot.extraRewardProb !== undefined ? `${(spot.extraRewardProb *
-                                            100).toFixed(2)}%` : "-" }})
+                                        {{ spot.extraRewardProb !== undefined ? `${(spot.extraRewardProb * 100).toFixed(2)}%` : "-" }})
                                     </div>
                                     <RewardItem :reward="extraRewardDetail" />
                                 </div>
-                                <div v-else-if="spot.extraReward !== undefined"
-                                    class="p-2 bg-base-100 rounded text-xs text-warning">
+                                <div v-else-if="spot.extraReward !== undefined" class="p-2 bg-base-100 rounded text-xs text-warning">
                                     额外奖励数据不存在
                                 </div>
 
@@ -354,26 +351,32 @@ function clearHistory() {
                                         {{ spot.petProb !== undefined ? `${(spot.petProb * 100).toFixed(2)}%` : "-" }})
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <img :src="`/imgs/webp/T_Head_Pet_${spotPet.icon}.webp`"
-                                            class="w-8 h-8 object-cover rounded" />
+                                        <img :src="`/imgs/webp/T_Head_Pet_${spotPet.icon}.webp`" class="w-8 h-8 object-cover rounded" />
                                         <SRouterLink :to="`/db/pet/${spotPet.id}`" class="text-sm link link-primary">
                                             {{ $t(spotPet.名称) }}
                                         </SRouterLink>
                                     </div>
                                 </div>
-                                <div v-else-if="spot.petId !== undefined"
-                                    class="p-2 bg-base-100 rounded text-xs text-warning">
+                                <div v-else-if="spot.petId !== undefined" class="p-2 bg-base-100 rounded text-xs text-warning">
                                     魔灵数据不存在
                                 </div>
                             </div>
                             <div class="p-3 bg-base-100 rounded">
                                 <div class="text-xs text-base-content/70 mb-1">
-                                    100条鱼平均期望(下方可调选项 当前设置: {{ getAppearName(selectTime) }} | {{ getLureName(lure) }} |
+                                    100条鱼平均期望(下方可调选项 当前设置: {{ getLureName(lure) }} |
                                     {{ s2bCompare ? "放弃低价值授渔以鱼" : "无脑授渔以鱼" }})
                                 </div>
-                                <div class="text-2xl font-bold text-primary">{{ (expectedValue * 100).toFixed(2) }}
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                    <div
+                                        v-for="timeExpected in expectedValueByTime"
+                                        :key="timeExpected.time"
+                                        class="p-2 bg-base-200 rounded"
+                                    >
+                                        <div class="text-xs text-base-content/70">{{ getAppearName(timeExpected.time) }}</div>
+                                        <div class="text-lg font-bold text-primary">{{ (timeExpected.value * 100).toFixed(2) }}</div>
+                                        <div class="text-xs text-base-content/70">单条期望: {{ timeExpected.value.toFixed(2) }}</div>
+                                    </div>
                                 </div>
-                                <div class="text-sm text-base-content/70">单条期望: {{ expectedValue.toFixed(2) }}</div>
                             </div>
                         </div>
 
@@ -381,37 +384,38 @@ function clearHistory() {
                         <div class="p-3 bg-base-200 rounded">
                             <div class="text-xs text-base-content/70 mb-2">鱼种列表 (共 {{ spotFish.length }} 种)</div>
                             <div class="space-y-2">
-                                <div v-for="(fish, index) in spotFish" :key="fish.id"
+                                <div
+                                    v-for="(fish, index) in spotFish"
+                                    :key="fish.id"
                                     class="flex items-center gap-2 p-2 bg-base-100 rounded cursor-pointer hover:bg-base-300"
-                                    @click="selectedFish = fish">
+                                    @click="selectedFish = fish"
+                                >
                                     <img :src="getFishIcon(fish)" class="w-8 h-8 object-cover rounded" />
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2">
                                             <span class="font-medium">{{ fish.name }}</span>
                                             <span class="text-xs text-base-content/70">ID: {{ fish.id }}</span>
-                                            <span class="text-xs px-1.5 py-0.5 rounded"
-                                                :class="getRarityColor(fish.rarity)">
+                                            <span class="text-xs px-1.5 py-0.5 rounded" :class="getRarityColor(fish.rarity)">
                                                 {{ getRarityName(fish.rarity) }}
                                             </span>
                                         </div>
                                         <div class="text-xs text-base-content/70 flex flex-wrap gap-2">
                                             <div class="badge badge-sm">Lv.{{ fish.level }}</div>
-                                            <div v-if="calculateFishPrice(fish, 1).length !== calculateFishPrice(fish, 10000).length"
-                                                class="badge badge-sm">
-                                                长度: {{ calculateFishPrice(fish, 1).length }}~{{ calculateFishPrice(fish,
-                                                    10000).length }}
+                                            <div
+                                                v-if="calculateFishPrice(fish, 1).length !== calculateFishPrice(fish, 10000).length"
+                                                class="badge badge-sm"
+                                            >
+                                                长度: {{ calculateFishPrice(fish, 1).length }}~{{ calculateFishPrice(fish, 10000).length }}
                                             </div>
-                                            <div v-else class="badge badge-sm">长度: {{ calculateFishPrice(fish,
-                                                10000).length }}</div>
-                                            <div v-if="calculateFishPrice(fish, 1).price !== calculateFishPrice(fish, 10000).price"
-                                                class="badge badge-sm">
-                                                价格: {{ calculateFishPrice(fish, 1).price }}~{{ calculateFishPrice(fish,
-                                                    10000).price }}
+                                            <div v-else class="badge badge-sm">长度: {{ calculateFishPrice(fish, 10000).length }}</div>
+                                            <div
+                                                v-if="calculateFishPrice(fish, 1).price !== calculateFishPrice(fish, 10000).price"
+                                                class="badge badge-sm"
+                                            >
+                                                价格: {{ calculateFishPrice(fish, 1).price }}~{{ calculateFishPrice(fish, 10000).price }}
                                             </div>
-                                            <div v-else class="badge badge-sm">价格: {{ calculateFishPrice(fish,
-                                                10000).price }}</div>
-                                            <div v-if="spot.weights[index]" class="badge badge-sm">权重: {{
-                                                spot.weights[index] }}</div>
+                                            <div v-else class="badge badge-sm">价格: {{ calculateFishPrice(fish, 10000).price }}</div>
+                                            <div v-if="spot.weights[index]" class="badge badge-sm">权重: {{ spot.weights[index] }}</div>
                                             <div class="badge badge-sm">出现时间: {{ getAppearNames(fish.appear) }}</div>
                                             <div v-if="fish.varProb" class="badge badge-sm">
                                                 异种: {{ +(fish.varProb * 100).toFixed(2) }}%
@@ -447,8 +451,7 @@ function clearHistory() {
                                 </div>
                                 <div class="flex-1 flex gap-2 items-center p-2">
                                     <span class="text-xs text-base-content/70 w-16">鱼饵类型</span>
-                                    <label v-for="lureType in [0, 1, 2]" :key="lureType"
-                                        class="text-xs text-base-content/70">
+                                    <label v-for="lureType in [0, 1, 2]" :key="lureType" class="text-xs text-base-content/70">
                                         <input v-model="lure" type="radio" :value="lureType" class="radio radio-sm" />
                                         {{ getLureName(lureType) }}
                                     </label>
@@ -465,18 +468,19 @@ function clearHistory() {
                         <div class="p-3 bg-base-200 rounded">
                             <div class="text-xs text-base-content/70 mb-2">钓鱼记录 (共 {{ catchCount }} 次)</div>
                             <div class="text-xs text-base-content/70 mb-2">
-                                总价值:{{+reducedCatchHistory.reduce((acc, cur) => acc + cur.price * cur.count,
-                                    0).toFixed(2)}}
+                                总价值:{{ +reducedCatchHistory.reduce((acc, cur) => acc + cur.price * cur.count, 0).toFixed(2) }}
                             </div>
                             <div class="space-y-2">
-                                <div v-for="(record, index) in reducedCatchHistory" :key="index"
-                                    class="flex items-center gap-2 p-2 bg-base-100 rounded">
+                                <div
+                                    v-for="(record, index) in reducedCatchHistory"
+                                    :key="index"
+                                    class="flex items-center gap-2 p-2 bg-base-100 rounded"
+                                >
                                     <img :src="getFishIcon(record.finalFish)" class="w-8 h-8 object-cover rounded" />
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2">
                                             <span class="font-medium">{{ record.finalFish.name }}</span>
-                                            <span class="text-xs px-1.5 py-0.5 rounded"
-                                                :class="getRarityColor(record.finalFish.rarity)">
+                                            <span class="text-xs px-1.5 py-0.5 rounded" :class="getRarityColor(record.finalFish.rarity)">
                                                 {{ getRarityName(record.finalFish.rarity) }}
                                             </span>
                                             <span class="text-xs px-1.5 py-0.5 rounded bg-gray-200 text-gray-800">
@@ -484,17 +488,16 @@ function clearHistory() {
                                             </span>
                                         </div>
                                         <div class="text-xs text-base-content/70">
-                                            价格: {{ record.originPrice ? `${record.originPrice} -> ${record.price}` :
-                                                record.price }}
+                                            价格: {{ record.originPrice ? `${record.originPrice} -> ${record.price}` : record.price }}
                                             <span v-if="record.mutated" class="text-green-600 ml-1">变异</span>
-                                            <span v-if="record.originFish" class="text-blue-600 ml-1">授渔以鱼 ({{
-                                                record.originFish.name }})</span>
+                                            <span v-if="record.originFish" class="text-blue-600 ml-1"
+                                                >授渔以鱼 ({{ record.originFish.name }})</span
+                                            >
                                             <span class="ml-1">{{ +record.length.toFixed(2) }}cm</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div v-if="reducedCatchHistory.length === 0"
-                                    class="text-center text-sm text-base-content/50 py-4">
+                                <div v-if="reducedCatchHistory.length === 0" class="text-center text-sm text-base-content/50 py-4">
                                     暂无钓鱼记录
                                 </div>
                             </div>
@@ -504,9 +507,11 @@ function clearHistory() {
             </div>
 
             <!-- 右侧关闭按钮 -->
-            <div v-if="selectedFish"
+            <div
+                v-if="selectedFish"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedFish = null">
+                @click="selectedFish = null"
+            >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 

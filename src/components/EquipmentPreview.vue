@@ -72,8 +72,13 @@ const summonAttributes = computed(() => {
                         {{ charBuild.selectedSkill?.召唤物?.名称 ? `[${charBuild.selectedSkill?.召唤物?.名称}]` : ""
                         }}{{ charSettings.targetFunction || $t("伤害") }}
                     </div>
-                    <div class="text-primary font-bold text-lg font-orbitron">
-                        {{ Math.round(totalDamage) }}
+                    <div class="text-primary font-bold text-lg font-orbitron group">
+                        <span class="group-hover:hidden">
+                            {{ Math.round(totalDamage) }}
+                        </span>
+                        <span class="hidden group-hover:inline">
+                            {{ Math.round(totalDamage * 0.95) }} ~ {{ Math.round(totalDamage * 1.05) }}
+                        </span>
                     </div>
                 </div>
                 <div

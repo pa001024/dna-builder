@@ -80,6 +80,41 @@ const channels = [
 ]
 
 const selectedChannel = useLocalStorage("selectedChannel", channels[0].value)
+const channelGamePathMap = useLocalStorage<Record<string, string>>("game.path_by_channel", {})
+
+/**
+ * 兼容旧版全局路径存储，首次迁移到当前服务器专属配置。
+ */
+function migrateLegacyGamePath() {
+    if (!gameStore.path || channelGamePathMap.value[selectedChannel.value]) return
+    channelGamePathMap.value = {
+        ...channelGamePathMap.value,
+        [selectedChannel.value]: gameStore.path,
+    }
+}
+
+/**
+ * 切换服务器时同步对应的游戏路径到共享状态。
+ */
+function syncGamePathByChannel() {
+    const channelPath = channelGamePathMap.value[selectedChannel.value] ?? ""
+    if (gameStore.path !== channelPath) {
+        gameStore.path = channelPath
+    }
+}
+
+/**
+ * 将当前服务器的游戏路径写入独立存储。
+ */
+function saveChannelGamePath(path: string) {
+    if (channelGamePathMap.value[selectedChannel.value] === path) return
+    channelGamePathMap.value = {
+        ...channelGamePathMap.value,
+        [selectedChannel.value]: path,
+    }
+}
+
+migrateLegacyGamePath()
 const availableCDN = computed(() => {
     if (selectedChannel.value === channels[2].value) {
         return CDN_LIST.filter(cdn => cdn.name === '海外')
@@ -89,7 +124,16 @@ const availableCDN = computed(() => {
 
 const selectedCDN = useLocalStorage("selectedCDN", CDN_LIST[1].url)
 
+watch(selectedChannel, () => {
+    syncGamePathByChannel()
+}, { immediate: true })
+
+watch(() => gameStore.path, path => {
+    saveChannelGamePath(path)
+})
+
 watch([selectedChannel, selectedCDN], async () => {
+    syncGamePathByChannel()
     if (!availableCDN.value.find(cdn => cdn.url === selectedCDN.value)) {
         selectedCDN.value = availableCDN.value[0].url
     }
@@ -275,6 +319,7 @@ async function selectGameDir() {
         if (selected) {
             const emExePath = `${selected}\\DNA Game\\EM.exe`
             gameStore.path = emExePath
+            saveChannelGamePath(emExePath)
             ui.showSuccessMessage(`游戏目录设置成功: ${emExePath}`)
             if (versionList.value) {
                 await checkForUpdates()
