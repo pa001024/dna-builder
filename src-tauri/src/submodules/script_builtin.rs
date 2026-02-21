@@ -4,8 +4,8 @@ use boa_engine::job::NativeAsyncJob;
 use boa_engine::native_function::NativeFunction;
 use boa_engine::object::builtins::{JsArray, JsFunction, JsPromise};
 use boa_engine::{
-    Context, IntoJsFunctionCopied, JsData, JsNativeError, JsObject, JsResult, JsValue,
-    js_string, js_value,
+    Context, IntoJsFunctionCopied, JsData, JsNativeError, JsObject, JsResult, JsValue, js_string,
+    js_value,
 };
 use boa_engine::{js_error, js_object};
 use opencv::{
@@ -300,7 +300,8 @@ fn _lookup_cli_script_config_raw_value(
     }
 
     if let Some(script_path) = get_current_script_path() {
-        if let Some(scoped_config) = _json_object_get_case_insensitive(config, script_path.as_str()) {
+        if let Some(scoped_config) = _json_object_get_case_insensitive(config, script_path.as_str())
+        {
             if let Some(value) = _json_object_get_case_insensitive(scoped_config, name) {
                 return Some(value.clone());
             }
@@ -402,15 +403,12 @@ fn _remember_script_config_format(name: &str, spec: &ScriptConfigFormatSpec) {
 fn _find_script_config_format(name: &str) -> Option<ScriptConfigFormatSpec> {
     CURRENT_SCRIPT_CONFIG_FORMATS.with(|formats| {
         let borrowed = formats.borrow();
-        borrowed
-            .get(name)
-            .cloned()
-            .or_else(|| {
-                borrowed
-                    .iter()
-                    .find(|(candidate_name, _)| candidate_name.eq_ignore_ascii_case(name))
-                    .map(|(_, spec)| spec.clone())
-            })
+        borrowed.get(name).cloned().or_else(|| {
+            borrowed
+                .iter()
+                .find(|(candidate_name, _)| candidate_name.eq_ignore_ascii_case(name))
+                .map(|(_, spec)| spec.clone())
+        })
     })
 }
 
@@ -562,11 +560,12 @@ fn _parse_hsl_weights(arg: JsValue, ctx: &mut Context) -> JsResult<Option<[f64; 
         return Ok(None);
     }
 
-    let array_obj = arg
-        .as_object()
-        .ok_or_else(|| JsNativeError::typ().with_message("weights 参数必须是 [number, number, number]"))?;
-    let array = JsArray::from_object(array_obj.clone())
-        .map_err(|_| JsNativeError::typ().with_message("weights 参数必须是 [number, number, number]"))?;
+    let array_obj = arg.as_object().ok_or_else(|| {
+        JsNativeError::typ().with_message("weights 参数必须是 [number, number, number]")
+    })?;
+    let array = JsArray::from_object(array_obj.clone()).map_err(|_| {
+        JsNativeError::typ().with_message("weights 参数必须是 [number, number, number]")
+    })?;
     let length = array.length(ctx)? as usize;
     if length != 3 {
         return Err(JsNativeError::typ()
@@ -1234,18 +1233,27 @@ fn _mc(
     // 当首参是字符串时，将其视为 button，并忽略 hwnd。
     let (hwnd_arg, x_arg, y_arg, button_arg) = match hwnd {
         Some(first) if first.is_string() => {
-            let merged_button = if button.is_some() { button } else { Some(first) };
+            let merged_button = if button.is_some() {
+                button
+            } else {
+                Some(first)
+            };
             (None, x, y, merged_button)
         }
         other => (other, x, y, button),
     };
 
     let hwnd = HWND(
-        hwnd_arg.unwrap_or_else(|| JsValue::undefined())
+        hwnd_arg
+            .unwrap_or_else(|| JsValue::undefined())
             .to_number(ctx)? as isize as *mut std::ffi::c_void,
     );
-    let x = x_arg.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
-    let y = y_arg.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let x = x_arg
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as i32;
+    let y = y_arg
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as i32;
     let button = _parse_mouse_button(button_arg, ctx)?;
     if hwnd.is_invalid() {
         if x <= 0 || y <= 0 {
@@ -1409,14 +1417,19 @@ fn _md(
     // 当首参是字符串时，将其视为 button，并忽略 hwnd。
     let (hwnd_arg, x_arg, y_arg, button_arg) = match hwnd {
         Some(first) if first.is_string() => {
-            let merged_button = if button.is_some() { button } else { Some(first) };
+            let merged_button = if button.is_some() {
+                button
+            } else {
+                Some(first)
+            };
             (None, x, y, merged_button)
         }
         other => (other, x, y, button),
     };
 
     let hwnd = HWND(
-        hwnd_arg.unwrap_or_else(|| JsValue::undefined())
+        hwnd_arg
+            .unwrap_or_else(|| JsValue::undefined())
             .to_number(ctx)? as isize as *mut std::ffi::c_void,
     );
     let x = x_arg.unwrap_or_else(|| js_value!(-1)).to_number(ctx)? as i32;
@@ -1447,14 +1460,19 @@ fn _mu(
     // 当首参是字符串时，将其视为 button，并忽略 hwnd。
     let (hwnd_arg, x_arg, y_arg, button_arg) = match hwnd {
         Some(first) if first.is_string() => {
-            let merged_button = if button.is_some() { button } else { Some(first) };
+            let merged_button = if button.is_some() {
+                button
+            } else {
+                Some(first)
+            };
             (None, x, y, merged_button)
         }
         other => (other, x, y, button),
     };
 
     let hwnd = HWND(
-        hwnd_arg.unwrap_or_else(|| JsValue::undefined())
+        hwnd_arg
+            .unwrap_or_else(|| JsValue::undefined())
             .to_number(ctx)? as isize as *mut std::ffi::c_void,
     );
     let x = x_arg.unwrap_or_else(|| js_value!(-1)).to_number(ctx)? as i32;
@@ -2013,7 +2031,9 @@ fn _read_text(path: Option<JsValue>, url: Option<JsValue>, ctx: &mut Context) ->
     let resolved_path = _resolve_script_resource_path(&path);
 
     // path 不为空时优先读取本地文本。
-    if !path.is_empty() && let Ok(content) = std::fs::read_to_string(&resolved_path) {
+    if !path.is_empty()
+        && let Ok(content) = std::fs::read_to_string(&resolved_path)
+    {
         return Ok(JsValue::from(js_string!(content)));
     }
 
@@ -2023,19 +2043,19 @@ fn _read_text(path: Option<JsValue>, url: Option<JsValue>, ctx: &mut Context) ->
     }
 
     // 回退到网络读取；若提供 path 则同步写入本地缓存。
-    let response = reqwest::blocking::get(url.as_str()).map_err(|e| {
-        JsNativeError::error().with_message(format!("readText 请求失败: {e}"))
-    })?;
+    let response = reqwest::blocking::get(url.as_str())
+        .map_err(|e| JsNativeError::error().with_message(format!("readText 请求失败: {e}")))?;
     if !response.status().is_success() {
-        return Err(
-            JsNativeError::error()
-                .with_message(format!("readText 请求失败，HTTP 状态码: {}", response.status()))
-                .into(),
-        );
+        return Err(JsNativeError::error()
+            .with_message(format!(
+                "readText 请求失败，HTTP 状态码: {}",
+                response.status()
+            ))
+            .into());
     }
-    let content = response
-        .text()
-        .map_err(|e| JsNativeError::error().with_message(format!("readText 读取响应文本失败: {e}")))?;
+    let content = response.text().map_err(|e| {
+        JsNativeError::error().with_message(format!("readText 读取响应文本失败: {e}"))
+    })?;
 
     if !path.is_empty() {
         let target_path = Path::new(resolved_path.as_str());
@@ -2111,17 +2131,20 @@ fn _download_file(
                 if let Some(parent) = target_path.parent()
                     && !parent.as_os_str().is_empty()
                 {
-                    std::fs::create_dir_all(parent)
-                        .map_err(|e| format!("创建下载目录失败: {}, {e}", parent.to_string_lossy()))?;
+                    std::fs::create_dir_all(parent).map_err(|e| {
+                        format!("创建下载目录失败: {}, {e}", parent.to_string_lossy())
+                    })?;
                 }
 
-                let response =
-                    reqwest::blocking::get(url.as_str()).map_err(|e| format!("请求下载地址失败: {e}"))?;
+                let response = reqwest::blocking::get(url.as_str())
+                    .map_err(|e| format!("请求下载地址失败: {e}"))?;
                 if !response.status().is_success() {
                     return Err(format!("下载失败，HTTP 状态码: {}", response.status()));
                 }
 
-                let bytes = response.bytes().map_err(|e| format!("读取下载内容失败: {e}"))?;
+                let bytes = response
+                    .bytes()
+                    .map_err(|e| format!("读取下载内容失败: {e}"))?;
                 std::fs::write(target_path, &bytes).map_err(|e| {
                     format!("写入下载文件失败: {}, {e}", target_path.to_string_lossy())
                 })?;
@@ -2763,12 +2786,16 @@ fn _match_orb_feature(
         .to_string(ctx)?
         .to_std_string_lossy();
 
-    let template_features =
-        _parse_string_array(template_features.unwrap_or_else(|| JsValue::undefined()), ctx)?;
-    let threshold = threshold
-        .unwrap_or_else(|| js_value!(0))
-        .to_number(ctx)?;
-    let threshold = if threshold.is_finite() { threshold } else { 0.0 };
+    let template_features = _parse_string_array(
+        template_features.unwrap_or_else(|| JsValue::undefined()),
+        ctx,
+    )?;
+    let threshold = threshold.unwrap_or_else(|| js_value!(0)).to_number(ctx)?;
+    let threshold = if threshold.is_finite() {
+        threshold
+    } else {
+        0.0
+    };
 
     let best_index = match_orb_feature_impl(&source_feature, &template_features, threshold)
         .map_err(|msg| JsNativeError::error().with_message(msg))?;
@@ -3324,7 +3351,11 @@ fn _read_config(
 }
 
 /// 写入脚本配置项当前值（仅允许写入 readConfig 已定义键）。
-fn _set_config(name: Option<JsValue>, value: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+fn _set_config(
+    name: Option<JsValue>,
+    value: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
     let name = name
         .unwrap_or_else(|| JsValue::undefined())
         .to_string(ctx)?
@@ -3338,8 +3369,9 @@ fn _set_config(name: Option<JsValue>, value: Option<JsValue>, ctx: &mut Context)
     }
 
     let format_spec = _find_script_config_format(name.as_str()).ok_or_else(|| {
-        JsNativeError::typ()
-            .with_message("setConfig 只能写入已通过 readConfig 定义的配置键")
+        JsNativeError::typ().with_message(format!(
+            "setConfig '{name}' 只能写入已通过 readConfig 定义的配置键"
+        ))
     })?;
     let normalized_value = _coerce_js_to_script_config_value(
         value.unwrap_or_else(|| JsValue::undefined()),
@@ -3394,12 +3426,8 @@ fn _predict_depth(
         .unwrap_or_else(|| JsValue::undefined())
         .get_native::<JsMat>()?;
 
-    let num_disp = num_disp
-        .unwrap_or_else(|| js_value!(160))
-        .to_number(ctx)? as i32;
-    let block_size = block_size
-        .unwrap_or_else(|| js_value!(5))
-        .to_number(ctx)? as i32;
+    let num_disp = num_disp.unwrap_or_else(|| js_value!(160)).to_number(ctx)? as i32;
+    let block_size = block_size.unwrap_or_else(|| js_value!(5)).to_number(ctx)? as i32;
     let min_region_area = min_region_area
         .unwrap_or_else(|| js_value!(800))
         .to_number(ctx)? as i32;

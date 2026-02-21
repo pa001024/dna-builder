@@ -150,6 +150,34 @@ export interface PropFlow {
 
 export type UPropFlow = Omit<PropFlow, "id">
 
+export interface ScriptColorToolPoint {
+    id: number
+    x: number
+    y: number
+}
+
+export interface ScriptColorToolImage {
+    id: string
+    name: string
+    sourceDataUrl: string
+}
+
+export interface ScriptColorToolState {
+    id: string
+    images: ScriptColorToolImage[]
+    imageLabels: Record<string, string>
+    points: ScriptColorToolPoint[]
+    pointTolerances: Record<number, number>
+    pointInitialCheckColors: Record<number, string>
+    pointCheckColorInputs: Record<number, string>
+    activeImageIndex: number
+    zoomScale: number
+    defaultTolerance: number
+    updatedAt: number
+}
+
+export type UScriptColorToolState = ScriptColorToolState
+
 interface DB {
     mods: Mod
     customEntitys: CustomEntity
@@ -161,6 +189,7 @@ interface DB {
     userMapMarkers: UserMapMarker
     nodeEditorGraphs: NodeEditorGraph
     propFlows: PropFlow
+    scriptColorToolStates: ScriptColorToolState
 }
 
 // 加表不需要改version!
@@ -175,4 +204,5 @@ db.version(1).stores({
     userMapMarkers: "++id, mapId, createdAt",
     nodeEditorGraphs: "++id, name, createdAt, updatedAt",
     propFlows: "++id, time, prop_name, category_name",
+    scriptColorToolStates: "&id, updatedAt",
 })
