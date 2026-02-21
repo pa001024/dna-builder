@@ -634,6 +634,19 @@ function removeImage(imageId: string) {
 }
 
 /**
+ * 清空已加载的所有图片（保留点位与点位配置）。
+ */
+function clearImages() {
+    revokeLoadedImageUrls()
+    loadedImages.value = []
+    activeImageIndex.value = 0
+    imageLabels.value = {}
+    imageLabelEditing.value = {}
+    classificationTestResults.value = {}
+    schedulePersistScriptColorToolState()
+}
+
+/**
  * 将脚本中的颜色参数解析为 RGB 颜色。
  * @param color 脚本颜色值（number 或 string）
  * @returns 颜色信息；无法解析返回 null
@@ -1504,6 +1517,7 @@ onUnmounted(() => {
             <button class="btn btn-sm btn-primary" @click="openFilePicker" :disabled="loading">
                 {{ loading ? "加载中..." : "加载图片" }}
             </button>
+            <button class="btn btn-sm btn-ghost" @click="clearImages" :disabled="loadedImages.length === 0">清空图片</button>
             <button class="btn btn-sm btn-ghost" @click="clearPoints" :disabled="points.length === 0">清空点位</button>
             <button
                 class="btn btn-sm btn-secondary"

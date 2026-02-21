@@ -2887,8 +2887,8 @@ onUnmounted(async () => {
 
 <template>
     <div class="h-full flex flex-col overflow-hidden">
-        <div class="flex-1 flex overflow-hidden">
-            <div class="w-64 border-r border-base-200 flex flex-col bg-base-100">
+        <div class="flex-1 flex overflow-hidden min-h-0">
+            <div class="w-64 border-r border-base-200 flex flex-col bg-base-100 min-h-0">
                 <div class="px-4 py-1 border-b border-base-200 flex justify-center">
                     <div class="flex gap-2 items-center">
                         <button
@@ -2937,8 +2937,8 @@ onUnmounted(async () => {
                         </SelectItem>
                     </Select>
                 </div>
-                <ContextMenu class="flex-1">
-                    <ScrollArea class="h-full">
+                <ContextMenu class="flex-1 min-h-0">
+                    <ScrollArea class="h-full min-h-0">
                         <div v-if="loading" class="flex justify-center items-center h-full p-4">
                             <span class="loading loading-spinner" />
                         </div>
