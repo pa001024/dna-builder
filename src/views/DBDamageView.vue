@@ -717,20 +717,6 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
                 `${formatNumber(get("charAttack"))} + ${formatNumber(get("weaponAttack"))} = ${formatNumber(value)}`,
         },
         {
-            id: "weaponDamagePhysical",
-            title: "武器伤害数值",
-            formula: "武器伤害数值 = 武器攻击",
-            compute: ({ get }) => get("weaponAttack"),
-            explain: ({ get }, value) => `${formatNumber(get("weaponAttack"))} = ${formatNumber(value)}`,
-        },
-        {
-            id: "weaponDamageElemental",
-            title: "角色伤害数值",
-            formula: "角色伤害数值 = 角色攻击",
-            compute: ({ get }) => get("charAttack"),
-            explain: ({ get }, value) => `${formatNumber(get("charAttack"))} = ${formatNumber(value)}`,
-        },
-        {
             id: "triggerDamageMultiplier",
             title: "触发倍率",
             formula: "触发倍率 = 伤害类型匹配时(1 + 生命类型系数 + 触发倍率加成)，否则为 1",
@@ -889,100 +875,99 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
         {
             id: "elementalPart",
             title: "属性部分(含抗性)",
-            formula: "属性部分(含抗性) = 角色伤害数值 * 抗性乘区",
-            compute: ({ get }) => get("weaponDamageElemental") * get("resistance"),
-            explain: ({ get }, value) =>
-                `${formatNumber(get("weaponDamageElemental"))} * ${formatNumber(get("resistance"))} = ${formatNumber(value)}`,
+            formula: "属性部分(含抗性) = 角色攻击 * 抗性乘区",
+            compute: ({ get }) => get("charAttack") * get("resistance"),
+            explain: ({ get }, value) => `${formatNumber(get("charAttack"))} * ${formatNumber(get("resistance"))} = ${formatNumber(value)}`,
         },
         {
             id: "lowerCritNoTrigger",
             title: "未触发低暴击",
-            formula: "未触发低暴击 = (武器伤害数值 + 属性部分(含抗性)) * 低暴击倍率 * 总乘区",
-            compute: ({ get }) => (get("weaponDamagePhysical") + get("elementalPart")) * get("lowerCritDamage") * get("commonMore"),
+            formula: "未触发低暴击 = (武器攻击 + 属性部分(含抗性)) * 低暴击倍率 * 总乘区",
+            compute: ({ get }) => (get("weaponAttack") + get("elementalPart")) * get("lowerCritDamage") * get("commonMore"),
             explain: ({ get }, value) =>
-                `(${formatNumber(get("weaponDamagePhysical"))} + ${formatNumber(get("elementalPart"))}) * ${formatNumber(get("lowerCritDamage"))} * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
+                `(${formatNumber(get("weaponAttack"))} + ${formatNumber(get("elementalPart"))}) * ${formatNumber(get("lowerCritDamage"))} * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
         },
         {
             id: "higherCritNoTrigger",
             title: "未触发高暴击",
-            formula: "未触发高暴击 = (武器伤害数值 + 属性部分(含抗性)) * 高暴击倍率 * 总乘区",
-            compute: ({ get }) => (get("weaponDamagePhysical") + get("elementalPart")) * get("higherCritDamage") * get("commonMore"),
+            formula: "未触发高暴击 = (武器攻击 + 属性部分(含抗性)) * 高暴击倍率 * 总乘区",
+            compute: ({ get }) => (get("weaponAttack") + get("elementalPart")) * get("higherCritDamage") * get("commonMore"),
             explain: ({ get }, value) =>
-                `(${formatNumber(get("weaponDamagePhysical"))} + ${formatNumber(get("elementalPart"))}) * ${formatNumber(get("higherCritDamage"))} * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
+                `(${formatNumber(get("weaponAttack"))} + ${formatNumber(get("elementalPart"))}) * ${formatNumber(get("higherCritDamage"))} * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
         },
         {
             id: "lowerCritTrigger",
             title: "触发低暴击",
-            formula: "触发低暴击 = (武器伤害数值 * (低暴击倍率 + 触发倍率 - 1) + 属性部分(含抗性) * 低暴击倍率) * 总乘区",
+            formula: "触发低暴击 = (武器攻击 * (低暴击倍率 + 触发倍率 - 1) + 属性部分(含抗性) * 低暴击倍率) * 总乘区",
             compute: ({ get }) =>
-                (get("weaponDamagePhysical") * (get("lowerCritDamage") + get("triggerDamageMultiplier") - 1) +
+                (get("weaponAttack") * (get("lowerCritDamage") + get("triggerDamageMultiplier") - 1) +
                     get("elementalPart") * get("lowerCritDamage")) *
                 get("commonMore"),
             explain: ({ get }, value) =>
-                `(${formatNumber(get("weaponDamagePhysical"))} * (${formatNumber(get("lowerCritDamage"))} + ${formatNumber(get("triggerDamageMultiplier"))} - 1) + ${formatNumber(get("elementalPart"))} * ${formatNumber(get("lowerCritDamage"))}) * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
+                `(${formatNumber(get("weaponAttack"))} * (${formatNumber(get("lowerCritDamage"))} + ${formatNumber(get("triggerDamageMultiplier"))} - 1) + ${formatNumber(get("elementalPart"))} * ${formatNumber(get("lowerCritDamage"))}) * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
         },
         {
             id: "higherCritTrigger",
             title: "触发高暴击",
-            formula: "触发高暴击 = (武器伤害数值 * (高暴击倍率 + 触发倍率 - 1) + 属性部分(含抗性) * 高暴击倍率) * 总乘区",
+            formula: "触发高暴击 = (武器攻击 * (高暴击倍率 + 触发倍率 - 1) + 属性部分(含抗性) * 高暴击倍率) * 总乘区",
             compute: ({ get }) =>
-                (get("weaponDamagePhysical") * (get("higherCritDamage") + get("triggerDamageMultiplier") - 1) +
+                (get("weaponAttack") * (get("higherCritDamage") + get("triggerDamageMultiplier") - 1) +
                     get("elementalPart") * get("higherCritDamage")) *
                 get("commonMore"),
             explain: ({ get }, value) =>
-                `(${formatNumber(get("weaponDamagePhysical"))} * (${formatNumber(get("higherCritDamage"))} + ${formatNumber(get("triggerDamageMultiplier"))} - 1) + ${formatNumber(get("elementalPart"))} * ${formatNumber(get("higherCritDamage"))}) * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
+                `(${formatNumber(get("weaponAttack"))} * (${formatNumber(get("higherCritDamage"))} + ${formatNumber(get("triggerDamageMultiplier"))} - 1) + ${formatNumber(get("elementalPart"))} * ${formatNumber(get("higherCritDamage"))}) * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
         },
         {
             id: "lowerCritExpectedTrigger",
             title: "期望触发低暴击",
-            formula: "期望触发低暴击 = (武器伤害数值 * (低暴击倍率 + 触发期望倍率 - 1) + 属性部分(含抗性) * 低暴击倍率) * 总乘区",
+            formula: "期望触发低暴击 = (武器攻击 * (低暴击倍率 + 触发期望倍率 - 1) + 属性部分(含抗性) * 低暴击倍率) * 总乘区",
             compute: ({ get }) =>
-                (get("weaponDamagePhysical") * (get("lowerCritDamage") + get("triggerExpectedDamageAdd") - 1) +
+                (get("weaponAttack") * (get("lowerCritDamage") + get("triggerExpectedDamageAdd") - 1) +
                     get("elementalPart") * get("lowerCritDamage")) *
                 get("commonMore"),
             explain: ({ get }, value) =>
-                `(${formatNumber(get("weaponDamagePhysical"))} * (${formatNumber(get("lowerCritDamage"))} + ${formatNumber(get("triggerExpectedDamageAdd"))} - 1) + ${formatNumber(get("elementalPart"))} * ${formatNumber(get("lowerCritDamage"))}) * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
+                `(${formatNumber(get("weaponAttack"))} * (${formatNumber(get("lowerCritDamage"))} + ${formatNumber(get("triggerExpectedDamageAdd"))} - 1) + ${formatNumber(get("elementalPart"))} * ${formatNumber(get("lowerCritDamage"))}) * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
         },
         {
             id: "higherCritExpectedTrigger",
             title: "期望触发高暴击",
-            formula: "期望触发高暴击 = (武器伤害数值 * (高暴击倍率 + 触发期望倍率 - 1) + 属性部分(含抗性) * 高暴击倍率) * 总乘区",
+            formula: "期望触发高暴击 = (武器攻击 * (高暴击倍率 + 触发期望倍率 - 1) + 属性部分(含抗性) * 高暴击倍率) * 总乘区",
             compute: ({ get }) =>
-                (get("weaponDamagePhysical") * (get("higherCritDamage") + get("triggerExpectedDamageAdd") - 1) +
+                (get("weaponAttack") * (get("higherCritDamage") + get("triggerExpectedDamageAdd") - 1) +
                     get("elementalPart") * get("higherCritDamage")) *
                 get("commonMore"),
             explain: ({ get }, value) =>
-                `(${formatNumber(get("weaponDamagePhysical"))} * (${formatNumber(get("higherCritDamage"))} + ${formatNumber(get("triggerExpectedDamageAdd"))} - 1) + ${formatNumber(get("elementalPart"))} * ${formatNumber(get("higherCritDamage"))}) * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
+                `(${formatNumber(get("weaponAttack"))} * (${formatNumber(get("higherCritDamage"))} + ${formatNumber(get("triggerExpectedDamageAdd"))} - 1) + ${formatNumber(get("elementalPart"))} * ${formatNumber(get("higherCritDamage"))}) * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
         },
         {
             id: "expectedCritTrigger",
             title: "触发期望暴击",
-            formula: "触发期望暴击 = (武器伤害数值 + 属性部分(含抗性)) * 暴击期望倍率 * 总乘区",
-            compute: ({ get }) => (get("weaponDamagePhysical") + get("elementalPart")) * get("critExpectedDamage") * get("commonMore"),
+            formula: "触发期望暴击 = (武器攻击 + 属性部分(含抗性)) * 暴击期望倍率 * 总乘区",
+            compute: ({ get }) => (get("weaponAttack") + get("elementalPart")) * get("critExpectedDamage") * get("commonMore"),
             explain: ({ get }, value) =>
-                `(${formatNumber(get("weaponDamagePhysical"))} + ${formatNumber(get("elementalPart"))}) * ${formatNumber(get("critExpectedDamage"))} * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
+                `(${formatNumber(get("weaponAttack"))} + ${formatNumber(get("elementalPart"))}) * ${formatNumber(get("critExpectedDamage"))} * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
         },
         {
             id: "expectedCritNoTrigger",
             title: "未触发期望暴击",
-            formula: "未触发期望暴击 = (武器伤害数值 * (暴击期望倍率 + 触发倍率 - 1) + 属性部分(含抗性) * 暴击期望倍率) * 总乘区",
+            formula: "未触发期望暴击 = (武器攻击 * (暴击期望倍率 + 触发倍率 - 1) + 属性部分(含抗性) * 暴击期望倍率) * 总乘区",
             compute: ({ get }) =>
-                (get("weaponDamagePhysical") * (get("critExpectedDamage") + get("triggerDamageMultiplier") - 1) +
+                (get("weaponAttack") * (get("critExpectedDamage") + get("triggerDamageMultiplier") - 1) +
                     get("elementalPart") * get("critExpectedDamage")) *
                 get("commonMore"),
             explain: ({ get }, value) =>
-                `(${formatNumber(get("weaponDamagePhysical"))} * (${formatNumber(get("critExpectedDamage"))} + ${formatNumber(get("triggerDamageMultiplier"))} - 1) + ${formatNumber(get("elementalPart"))} * ${formatNumber(get("critExpectedDamage"))}) * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
+                `(${formatNumber(get("weaponAttack"))} * (${formatNumber(get("critExpectedDamage"))} + ${formatNumber(get("triggerDamageMultiplier"))} - 1) + ${formatNumber(get("elementalPart"))} * ${formatNumber(get("critExpectedDamage"))}) * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
         },
         {
             id: "expectedDamage",
             title: "最终期望伤害",
-            formula: "最终期望伤害 = (武器伤害数值 * (暴击期望倍率 + 触发期望倍率 - 1) + 属性部分(含抗性) * 暴击期望倍率) * 总乘区",
+            formula: "最终期望伤害 = (武器攻击 * (暴击期望倍率 + 触发期望倍率 - 1) + 属性部分(含抗性) * 暴击期望倍率) * 总乘区",
             compute: ({ get }) =>
-                (get("weaponDamagePhysical") * (get("critExpectedDamage") + get("triggerExpectedDamageAdd") - 1) +
+                (get("weaponAttack") * (get("critExpectedDamage") + get("triggerExpectedDamageAdd") - 1) +
                     get("elementalPart") * get("critExpectedDamage")) *
                 get("commonMore"),
             explain: ({ get }, value) =>
-                `(${formatNumber(get("weaponDamagePhysical"))} * (${formatNumber(get("critExpectedDamage"))} + ${formatNumber(get("triggerExpectedDamageAdd"))} - 1) + ${formatNumber(get("elementalPart"))} * ${formatNumber(get("critExpectedDamage"))}) * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
+                `(${formatNumber(get("weaponAttack"))} * (${formatNumber(get("critExpectedDamage"))} + ${formatNumber(get("triggerExpectedDamageAdd"))} - 1) + ${formatNumber(get("elementalPart"))} * ${formatNumber(get("critExpectedDamage"))}) * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
         },
         {
             id: "skillRawDamage",
@@ -2033,9 +2018,9 @@ onBeforeUnmount(() => {
                         <button class="btn btn-sm btn-outline" @click="resetCurrentMode">重置当前模式</button>
                     </div>
                 </div>
-                <div class="mt-4 tabs tabs-box gap-2 bg-base-100 p-1">
-                    <button class="tab grow" :class="{ 'tab-active': mode === 'weapon' }" @click="mode = 'weapon'">武器伤害</button>
+                <div class="mt-4 tabs tabs-box gap-2 p-1">
                     <button class="tab grow" :class="{ 'tab-active': mode === 'skill' }" @click="mode = 'skill'">技能伤害</button>
+                    <button class="tab grow" :class="{ 'tab-active': mode === 'weapon' }" @click="mode = 'weapon'">武器伤害</button>
                 </div>
             </div>
 

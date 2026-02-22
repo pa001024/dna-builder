@@ -141,7 +141,7 @@ async function deployWeb() {
         const distPath = path.resolve(CONFIG.local.distDir)
 
         // 使用 PowerShell 的 Compress-Archive 命令创建zip文件
-        await $`powershell -Command "Compress-Archive -Path ${distPath}\* -DestinationPath ${zipPath} -Force"`
+        await $`pwsh -Command "Compress-Archive -Path ${distPath}\* -DestinationPath ${zipPath} -Force"`
 
         // 检查zip文件是否创建成功
         if (!fs.existsSync(zipPath)) {
