@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const projectRoot = resolve(__dirname, "..")
-const sourceExecutablePath = resolve(projectRoot, "src-tauri", "target", "release", "dob-script.exe")
+const sourceExecutablePath = resolve(projectRoot, "src-tauri", "target", "release", "examples", "dob-script.exe")
 const targetExecutablePath = resolve(projectRoot, "packages", "dob-script", "bin", "dob-script.exe")
 const sourceOpenCvDllPath = resolve(projectRoot, "src-tauri", "opencv_world490.dll")
 const targetOpenCvDllPath = resolve(projectRoot, "packages", "dob-script", "bin", "opencv_world490.dll")

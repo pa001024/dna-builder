@@ -4084,6 +4084,7 @@
         "enemy_resistance": "Enemy Resistance",
         "enemy_type": "Type",
         "enter_description": "Please enter description",
+        "enter_title": "Please enter title",
         "equipment_preview": "Equipment Preview",
         "export_code": "Copy code",
         "faction": "Faction",
@@ -4169,6 +4170,7 @@
         "micOn": "Turn on Microphone",
         "needLogin": "Login required for chat function",
         "newRoomBanner": "No one has spoken yet, be the first!",
+        "private": "Private",
         "reachedTop": "Already at the top",
         "refresh": "Refresh",
         "reply": "Reply",
@@ -4220,6 +4222,8 @@
         "appearance_desc": "View character appearance, weapon skins, and accessory info",
         "char": "Character",
         "char_desc": "View character information and attributes",
+        "damage": "Damage",
+        "damage_desc": "Step-by-step breakdown of damage formulas",
         "desc": "Query game data",
         "draft": "Blueprint",
         "draft_desc": "View blueprint information and required materials",
@@ -4259,6 +4263,10 @@
         "walnut_desc": "View walnut probability information and simulate draws",
         "weapon": "Weapon",
         "weapon_desc": "View weapon information and attributes"
+    },
+    "db-damage": {
+        "desc": "Break down CharBuild damage formulas step by step with manual overrides",
+        "title": "Damage Breakdown"
     },
     "dna-home": {
         "desc": "Game Information/Check-in/Browse Posts",

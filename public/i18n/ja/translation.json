@@ -4080,6 +4080,7 @@
         "enemy_resistance": "敵耐性",
         "enemy_type": "タイプ",
         "enter_description": "説明を入力してください",
+        "enter_title": "タイトルを入力してください",
         "equipment_preview": "装備プレビュー",
         "export_code": "コードをコピーする",
         "faction": "陣営",
@@ -4165,6 +4166,7 @@
         "micOn": "マイクをオン",
         "needLogin": "チャット機能はログインが必要です",
         "newRoomBanner": "まだ誰も発言していません、最初になってみませんか！",
+        "private": "非公開",
         "reachedTop": "すでにトップに到達しています",
         "refresh": "リフレッシュ",
         "reply": "返信",
@@ -4216,6 +4218,8 @@
         "appearance_desc": "キャラクター外観・武器スキン・アクセサリー情報を表示",
         "char": "キャラクター",
         "char_desc": "キャラクターの情報と属性を確認",
+        "damage": "ダメージ",
+        "damage_desc": "ダメージ計算式を段階的に分解",
         "desc": "ゲームデータのクエリ",
         "draft": "設計図",
         "draft_desc": "設計図情報と必要材料を確認",
@@ -4255,6 +4259,10 @@
         "walnut_desc": "クルミの確率情報を表示し、模擬抽選",
         "weapon": "武器",
         "weapon_desc": "武器情報と属性を確認"
+    },
+    "db-damage": {
+        "desc": "CharBuild のダメージ式を段階的に分解し、手動上書きに対応",
+        "title": "ダメージ分解"
     },
     "dna-home": {
         "desc": "ゲーム情報/チェックイン/投稿閲覧",

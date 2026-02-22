@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { SelectRootProps } from "reka-ui"
+import type { VNode } from "vue"
 import {
     SelectContent,
     SelectPortal,
@@ -11,7 +12,7 @@ import {
     SelectViewport,
     useForwardPropsEmits,
 } from "reka-ui"
-import { watch } from "vue"
+import { computed, nextTick, onMounted, ref, useSlots, watch } from "vue"
 import Icon from "../Icon.vue"
 
 export interface SelectOption {
@@ -51,6 +52,28 @@ const emits = defineEmits<{
     "update:open": [value: boolean]
     change: [value: any, oldValue: any]
 }>()
+const slots = useSlots()
+const selectRootKey = ref(0)
+
+/**
+ * 递归提取插槽VNode签名，用于感知SelectItem结构变化。
+ * @param nodes 需要提取签名的VNode列表
+ * @returns 稳定的结构签名字符串
+ */
+function buildSlotSignature(nodes: VNode[]): string {
+    return nodes
+        .map(node => {
+            const nodeType = typeof node.type === "symbol" ? node.type.toString() : String(node.type)
+            const nodeValue = (node.props as Record<string, unknown> | null)?.value
+            const childNodes = Array.isArray(node.children)
+                ? node.children.filter((child): child is VNode => typeof child === "object" && child !== null && "type" in child)
+                : []
+            return `${nodeType}:${String(node.key ?? "")}:${String(nodeValue ?? "")}[${buildSlotSignature(childNodes)}]`
+        })
+        .join("|")
+}
+
+const slotSignature = computed(() => buildSlotSignature(slots.default?.() ?? []))
 watch(
     () => props.modelValue,
     (newValue, oldValue) => {
@@ -59,12 +82,33 @@ watch(
         }
     }
 )
+watch(
+    slotSignature,
+    async (newSignature, oldSignature) => {
+        if (newSignature === oldSignature) {
+            return
+        }
+        if (props.modelValue === undefined || props.modelValue === null) {
+            return
+        }
+        await nextTick()
+        selectRootKey.value += 1
+    },
+    { flush: "post" }
+)
+onMounted(async () => {
+    if (props.modelValue === undefined || props.modelValue === null) {
+        return
+    }
+    await nextTick()
+    selectRootKey.value += 1
+})
 
 const forward = useForwardPropsEmits(props, emits)
 </script>
 
 <template>
-    <SelectRoot v-bind="forward">
+    <SelectRoot :key="selectRootKey" v-bind="forward">
         <slot name="trigger">
             <SelectTrigger class="inline-flex items-center justify-between" v-bind="$attrs">
                 <SelectValue :placeholder="placeholder" />

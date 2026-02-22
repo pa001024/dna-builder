@@ -149,6 +149,12 @@ const routes: readonly RouteRecordRaw[] = [
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
+                name: "db-damage",
+                path: "damage",
+                component: () => import("./views/DBDamageView.vue"),
+                beforeEnter: () => setMinSize(800, 700),
+            },
+            {
                 name: "walnut-list",
                 path: "walnut",
                 component: () => import("./views/DBWalnutListView.vue"),

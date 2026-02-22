@@ -333,6 +333,7 @@
         "micOn": "开启麦克风",
         "needLogin": "聊天功能需要登录",
         "newRoomBanner": "还没有人发言，快来做第一个吧！",
+        "private": "私密",
         "reachedTop": "已经到顶了",
         "refresh": "刷新",
         "reply": "回复",
@@ -384,6 +385,8 @@
         "appearance_desc": "查看角色外观、武器皮肤与饰品信息",
         "char": "角色",
         "char_desc": "查看角色信息和属性",
+        "damage": "伤害",
+        "damage_desc": "伤害公式分步骤拆解",
         "desc": "查询游戏中的数据",
         "draft": "图纸",
         "draft_desc": "查看图纸信息和需求材料",
@@ -423,6 +426,10 @@
         "walnut_desc": "查看密函概率信息和模拟抽取",
         "weapon": "武器",
         "weapon_desc": "查看武器信息和属性"
+    },
+    "db-damage": {
+        "desc": "逐步拆解 CharBuild 伤害公式并支持手动覆盖",
+        "title": "伤害拆解"
     },
     "dna-home": {
         "desc": "游戏信息/签到/浏览帖子",

@@ -3971,6 +3971,7 @@
         "enemy_resistance": "Résistance ennemie",
         "enemy_type": "Type",
         "enter_description": "Veuillez entrer une description",
+        "enter_title": "Veuillez saisir un titre",
         "equipment_preview": "Aperçu de l'équipement",
         "exclude_default_buff": "Exclure les BUFF par défaut",
         "export_build": "Exporter la construction",
@@ -4085,6 +4086,7 @@
         "micOn": "Activer le microphone",
         "needLogin": "Connexion requise pour la fonction de chat",
         "newRoomBanner": "Personne n'a encore parlé, soyez le premier !",
+        "private": "Privé",
         "reachedTop": "Déjà au sommet",
         "refresh": "Rafraîchir",
         "reply": "Répondre",
@@ -4136,6 +4138,8 @@
         "appearance_desc": "Voir les apparences de personnage, skins d'arme et accessoires",
         "char": "Personnage",
         "char_desc": "Consulter les informations et attributs des personnages",
+        "damage": "Dégâts",
+        "damage_desc": "Décomposition étape par étape des formules de dégâts",
         "desc": "Rechercher des données de jeu",
         "draft": "Plan",
         "draft_desc": "Voir les informations sur le plan et les matériaux requis",
@@ -4175,6 +4179,10 @@
         "walnut_desc": "Voir les informations de probabilité de noix et simuler les tirages",
         "weapon": "Arme",
         "weapon_desc": "Voir les informations et attributs de l'arme"
+    },
+    "db-damage": {
+        "desc": "Décomposer les formules de dégâts de CharBuild étape par étape avec surcharge manuelle",
+        "title": "Décomposition des dégâts"
     },
     "dna-home": {
         "desc": "Informations sur le jeu/Check-in/Parcourir les posts",

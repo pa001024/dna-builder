@@ -4084,6 +4084,7 @@
         "enemy_resistance": "적 저항력",
         "enemy_type": "타입",
         "enter_description": "설명을 입력해주세요",
+        "enter_title": "제목을 입력해주세요",
         "equipment_preview": "장비 미리보기",
         "export_code": "코드 복사",
         "faction": "진영",
@@ -4169,6 +4170,7 @@
         "micOn": "마이크 켜기",
         "needLogin": "채팅 기능은 로그인이 필요합니다",
         "newRoomBanner": "아직 아무도 말하지 않았어요, 첫 번째로 해보세요!",
+        "private": "비공개",
         "reachedTop": "이미 맨 위에 도달했습니다",
         "refresh": "새로고침",
         "reply": "답장",
@@ -4220,6 +4222,8 @@
         "appearance_desc": "캐릭터 외형, 무기 스킨 및 장식품 정보 보기",
         "char": "캐릭터",
         "char_desc": "캐릭터 정보와 속성을 확인",
+        "damage": "대미지",
+        "damage_desc": "대미지 공식을 단계별로 분해",
         "desc": "게임 데이터 쿼리",
         "draft": "도면",
         "draft_desc": "도면 정보와 필요 재료 확인",
@@ -4259,6 +4263,10 @@
         "walnut_desc": "호두 확률 정보 보기 및 시뮬레이션 추첨",
         "weapon": "무기",
         "weapon_desc": "무기 정보와 속성 확인"
+    },
+    "db-damage": {
+        "desc": "CharBuild 대미지 공식을 단계별로 분해하고 수동 덮어쓰기를 지원",
+        "title": "대미지 분해"
     },
     "dna-home": {
         "desc": "게임 정보/출석/게시물 브라우징",

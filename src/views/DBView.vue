@@ -34,6 +34,13 @@ const databaseItems = [
         color: "from-indigo-500/20 to-blue-600/20 text-indigo-500",
     },
     {
+        name: "database.damage",
+        path: "/db/damage",
+        desc: "database.damage_desc",
+        icon: "M4 3C2.89543 3 2 3.89543 2 5V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19V5C22 3.89543 21.1046 3 20 3H4ZM4 5H20V19H4V5ZM6 7H8V9H6V7ZM10 7H16V9H10V7ZM6 11H8V13H6V11ZM10 11H18V13H10V11ZM6 15H8V17H6V15ZM10 15H14V17H10V15Z",
+        color: "from-lime-500/20 to-emerald-600/20 text-lime-500",
+    },
+    {
         name: "database.draft",
         path: "/db/draft",
         desc: "database.draft_desc",

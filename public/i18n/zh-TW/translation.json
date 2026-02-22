@@ -4054,6 +4054,7 @@
         "enemy_resistance": "敵人抗性",
         "enemy_type": "類型",
         "enter_description": "請輸入描述",
+        "enter_title": "請輸入標題",
         "equipment_preview": "裝配預覽",
         "export_code": "複製代碼",
         "faction": "陣營",
@@ -4139,6 +4140,7 @@
         "micOn": "開啟麥克風",
         "needLogin": "聊天功能需要登錄",
         "newRoomBanner": "還沒有人發言，快來做第一個吧！",
+        "private": "私密",
         "reachedTop": "已經到頂了",
         "refresh": "刷新",
         "reply": "回覆",
@@ -4190,6 +4192,8 @@
         "appearance_desc": "查看角色外觀、武器造型與飾品資訊",
         "char": "角色",
         "char_desc": "查看角色資訊和屬性",
+        "damage": "傷害",
+        "damage_desc": "傷害公式分步驟拆解",
         "desc": "查詢遊戲中的數據",
         "draft": "圖紙",
         "draft_desc": "查看圖紙信息和需求材料",
@@ -4229,6 +4233,10 @@
         "walnut_desc": "查看密函機率資訊和模擬抽取",
         "weapon": "武器",
         "weapon_desc": "查看武器信息和屬性"
+    },
+    "db-damage": {
+        "desc": "逐步拆解 CharBuild 傷害公式並支援手動覆蓋",
+        "title": "傷害拆解"
     },
     "dna-home": {
         "desc": "遊戲資訊/簽到/瀏覽帖子",
