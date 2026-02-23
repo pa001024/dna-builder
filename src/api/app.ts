@@ -253,6 +253,56 @@ export async function getScriptHotkeyBindings() {
 }
 
 /**
+ * 录制动作类型。
+ */
+export type ScriptInputRecorderActionType = "key_down" | "key_up" | "mouse_down" | "mouse_up"
+
+/**
+ * 脚本输入录制动作。
+ */
+export interface ScriptInputRecorderAction {
+    type: ScriptInputRecorderActionType
+    key?: string
+    button?: string
+    time: number
+}
+
+/**
+ * 脚本输入录制快照。
+ */
+export interface ScriptInputRecorderSnapshot {
+    hotkeyEnabled: boolean
+    recording: boolean
+    totalTime: number
+    actionCount: number
+    actions: ScriptInputRecorderAction[]
+}
+
+/**
+ * 启用或禁用 F10 录制热键监听。
+ * @param enabled 是否启用
+ */
+export async function setScriptInputRecorderHotkeyEnabled(enabled: boolean) {
+    return await invoke<string>("set_script_input_recorder_hotkey_enabled", { enabled })
+}
+
+/**
+ * 获取脚本输入录制快照。
+ * @returns 录制器当前状态与动作列表
+ */
+export async function getScriptInputRecorderSnapshot() {
+    return await invoke<ScriptInputRecorderSnapshot>("get_script_input_recorder_snapshot")
+}
+
+/**
+ * 清空脚本输入录制动作。
+ * @returns 成功消息
+ */
+export async function clearScriptInputRecorderActions() {
+    return await invoke<string>("clear_script_input_recorder_actions")
+}
+
+/**
  * 获取文档目录路径
  * @returns 文档目录路径
  */

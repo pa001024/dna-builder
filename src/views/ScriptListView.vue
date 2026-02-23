@@ -2130,6 +2130,13 @@ function openColorToolPage() {
     router.push({ name: "script-color-tool" })
 }
 
+/**
+ * 打开录制工具页面。
+ */
+function openRecordToolPage() {
+    router.push({ name: "script-record-tool" })
+}
+
 async function saveCurrentTab() {
     if (!activeTab.value) return
     try {
@@ -3242,6 +3249,7 @@ onUnmounted(async () => {
                                     <li><a @click="openSchedulerDialog">调度器配置</a></li>
                                     <li><a @click="openSidePanel('config')">脚本配置</a></li>
                                     <li><a @click="openColorToolPage">图色工具</a></li>
+                                    <li><a @click="openRecordToolPage">录制工具</a></li>
                                     <li><a @click="restartAsAdmin">以管理员权限重新启动</a></li>
                                     <li>
                                         <a @click="toggleGlobalShortcut">{{

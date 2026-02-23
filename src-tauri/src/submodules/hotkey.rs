@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, LazyLock, Mutex, RwLock};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use tauri::Emitter;
 
 #[cfg(target_os = "windows")]
@@ -38,6 +38,36 @@ pub struct ScriptHotkeyBinding {
     pub hot_if_win_active: String,
     #[serde(default)]
     pub hold_to_loop: bool,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScriptInputRecorderAction {
+    #[serde(rename = "type")]
+    pub action_type: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub button: Option<String>,
+    pub time: f64,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScriptInputRecorderSnapshot {
+    pub hotkey_enabled: bool,
+    pub recording: bool,
+    pub total_time: f64,
+    pub action_count: usize,
+    pub actions: Vec<ScriptInputRecorderAction>,
+}
+
+struct InputRecorderState {
+    hotkey_enabled: AtomicBool,
+    recording: AtomicBool,
+    started_at: Mutex<Option<Instant>>,
+    actions: Mutex<Vec<ScriptInputRecorderAction>>,
+    suppress_hotkey_keyup: AtomicBool,
 }
 
 #[derive(Clone, Debug)]
@@ -88,6 +118,7 @@ struct HotkeyState {
     pressed_keys: Mutex<HashSet<u32>>,
     hold_loop_flags: Mutex<HashMap<String, Arc<AtomicBool>>>,
     hook_started: AtomicBool,
+    input_recorder: InputRecorderState,
 }
 
 static HOTKEY_STATE: LazyLock<Arc<HotkeyState>> = LazyLock::new(|| {
@@ -97,11 +128,22 @@ static HOTKEY_STATE: LazyLock<Arc<HotkeyState>> = LazyLock::new(|| {
         pressed_keys: Mutex::new(HashSet::new()),
         hold_loop_flags: Mutex::new(HashMap::new()),
         hook_started: AtomicBool::new(false),
+        input_recorder: InputRecorderState {
+            hotkey_enabled: AtomicBool::new(false),
+            recording: AtomicBool::new(false),
+            started_at: Mutex::new(None),
+            actions: Mutex::new(Vec::new()),
+            suppress_hotkey_keyup: AtomicBool::new(false),
+        },
     })
 });
 
 fn _hotkey_state() -> &'static Arc<HotkeyState> {
     &HOTKEY_STATE
+}
+
+fn _input_recorder_state() -> &'static InputRecorderState {
+    &_hotkey_state().input_recorder
 }
 
 /// 解析 AHK 风格热键（支持 `^ ! + #` 与基础按键名）。
@@ -353,6 +395,154 @@ fn _set_app_handle(app_handle: tauri::AppHandle) {
     if let Ok(mut guard) = _hotkey_state().app_handle.lock() {
         *guard = Some(app_handle);
     }
+}
+
+fn _build_script_input_recorder_snapshot() -> ScriptInputRecorderSnapshot {
+    let recorder = _input_recorder_state();
+    let hotkey_enabled = recorder.hotkey_enabled.load(Ordering::Acquire);
+    let recording = recorder.recording.load(Ordering::Acquire);
+    let actions = if let Ok(guard) = recorder.actions.lock() {
+        guard.clone()
+    } else {
+        Vec::new()
+    };
+    let action_count = actions.len();
+    let total_time = if recording {
+        if let Ok(guard) = recorder.started_at.lock() {
+            if let Some(started_at) = *guard {
+                started_at.elapsed().as_secs_f64()
+            } else {
+                0.0
+            }
+        } else {
+            actions.last().map(|item| item.time).unwrap_or(0.0)
+        }
+    } else {
+        actions.last().map(|item| item.time).unwrap_or(0.0)
+    };
+    ScriptInputRecorderSnapshot {
+        hotkey_enabled,
+        recording,
+        total_time,
+        action_count,
+        actions,
+    }
+}
+
+fn _emit_script_input_recorder_snapshot() {
+    let app_handle = if let Ok(guard) = _hotkey_state().app_handle.lock() {
+        guard.clone()
+    } else {
+        None
+    };
+    let Some(app_handle) = app_handle else {
+        return;
+    };
+    let snapshot = _build_script_input_recorder_snapshot();
+    let _ = app_handle.emit("script-input-recorder-updated", snapshot);
+}
+
+fn _start_script_input_recording() {
+    let recorder = _input_recorder_state();
+    if let Ok(mut actions) = recorder.actions.lock() {
+        actions.clear();
+    }
+    if let Ok(mut started_at) = recorder.started_at.lock() {
+        *started_at = None;
+    }
+    recorder.recording.store(true, Ordering::Release);
+    _emit_script_input_recorder_snapshot();
+}
+
+fn _stop_script_input_recording() {
+    let recorder = _input_recorder_state();
+    recorder.recording.store(false, Ordering::Release);
+    if let Ok(mut started_at) = recorder.started_at.lock() {
+        *started_at = None;
+    }
+    _emit_script_input_recorder_snapshot();
+}
+
+#[cfg(target_os = "windows")]
+fn _vk_to_script_key(vk: u32) -> Option<String> {
+    if (0x41..=0x5A).contains(&vk) {
+        return char::from_u32(vk).map(|ch| ch.to_ascii_lowercase().to_string());
+    }
+    if (0x30..=0x39).contains(&vk) {
+        return char::from_u32(vk).map(|ch| ch.to_string());
+    }
+    if (VK_F1.0 as u32..=VK_F24.0 as u32).contains(&vk) {
+        return Some(format!("f{}", vk - VK_F1.0 as u32 + 1));
+    }
+    match vk {
+        x if x == VK_SPACE.0 as u32 => Some("space".to_string()),
+        x if x == VK_RETURN.0 as u32 => Some("enter".to_string()),
+        x if x == VK_BACK.0 as u32 => Some("backspace".to_string()),
+        x if x == VK_ESCAPE.0 as u32 => Some("esc".to_string()),
+        x if x == VK_TAB.0 as u32 => Some("tab".to_string()),
+        x if x == VK_UP.0 as u32 => Some("up".to_string()),
+        x if x == VK_DOWN.0 as u32 => Some("down".to_string()),
+        x if x == VK_LEFT.0 as u32 => Some("left".to_string()),
+        x if x == VK_RIGHT.0 as u32 => Some("right".to_string()),
+        x if x == VK_SHIFT.0 as u32 || x == VK_LSHIFT.0 as u32 || x == VK_RSHIFT.0 as u32 => Some("shift".to_string()),
+        x if x == VK_CONTROL.0 as u32 || x == VK_LCONTROL.0 as u32 || x == VK_RCONTROL.0 as u32 => Some("ctrl".to_string()),
+        x if x == VK_MENU.0 as u32 || x == VK_LMENU.0 as u32 || x == VK_RMENU.0 as u32 => Some("alt".to_string()),
+        x if x == VK_LWIN.0 as u32 => Some("lwin".to_string()),
+        x if x == VK_RWIN.0 as u32 => Some("rwin".to_string()),
+        x if x == VK_HOME.0 as u32 => Some("home".to_string()),
+        x if x == VK_END.0 as u32 => Some("end".to_string()),
+        x if x == VK_PRIOR.0 as u32 => Some("pageup".to_string()),
+        x if x == VK_NEXT.0 as u32 => Some("pagedown".to_string()),
+        x if x == VK_INSERT.0 as u32 => Some("insert".to_string()),
+        x if x == VK_DELETE.0 as u32 => Some("delete".to_string()),
+        x if x == VK_CAPITAL.0 as u32 => Some("capslock".to_string()),
+        x if x == VK_NUMLOCK.0 as u32 => Some("numlock".to_string()),
+        x if x == VK_SCROLL.0 as u32 => Some("scrolllock".to_string()),
+        x if x == VK_SNAPSHOT.0 as u32 => Some("printscreen".to_string()),
+        _ => None,
+    }
+}
+
+fn _record_script_input_action(action_type: &str, key: Option<String>, button: Option<String>) {
+    let recorder = _input_recorder_state();
+    if !recorder.recording.load(Ordering::Acquire) {
+        return;
+    }
+
+    let now = Instant::now();
+    let elapsed_seconds = if let Ok(mut started_at) = recorder.started_at.lock() {
+        let start = started_at.get_or_insert(now);
+        now.duration_since(*start).as_secs_f64()
+    } else {
+        return;
+    };
+
+    if let Ok(mut actions) = recorder.actions.lock() {
+        actions.push(ScriptInputRecorderAction {
+            action_type: action_type.to_string(),
+            key,
+            button,
+            time: elapsed_seconds,
+        });
+    } else {
+        return;
+    }
+
+    _emit_script_input_recorder_snapshot();
+}
+
+#[cfg(target_os = "windows")]
+fn _record_keyboard_input(vk: u32, is_key_down: bool) {
+    let Some(key) = _vk_to_script_key(vk) else {
+        return;
+    };
+    let action_type = if is_key_down { "key_down" } else { "key_up" };
+    _record_script_input_action(action_type, Some(key), None);
+}
+
+fn _record_mouse_input(button: &str, is_key_down: bool) {
+    let action_type = if is_key_down { "mouse_down" } else { "mouse_up" };
+    _record_script_input_action(action_type, None, Some(button.to_string()));
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -886,20 +1076,55 @@ fn _trigger_hotkey_scripts(vk: u32, is_key_down: bool, pressed: &HashSet<u32>) {
 }
 
 #[cfg(target_os = "windows")]
-fn _process_hotkey_event(vk: u32, is_key_down: bool) {
+fn _handle_script_input_recorder_hotkey(vk: u32, is_key_down: bool) -> bool {
+    const RECORDER_TOGGLE_VK: u32 = 0x79;
+    let recorder = _input_recorder_state();
+    if !recorder.hotkey_enabled.load(Ordering::Acquire) {
+        return false;
+    }
+    if vk != RECORDER_TOGGLE_VK {
+        return false;
+    }
+
+    if is_key_down {
+        if recorder.recording.load(Ordering::Acquire) {
+            _stop_script_input_recording();
+        } else {
+            _start_script_input_recording();
+        }
+        recorder.suppress_hotkey_keyup.store(true, Ordering::Release);
+        return true;
+    }
+    if recorder.suppress_hotkey_keyup.swap(false, Ordering::AcqRel) {
+        return true;
+    }
+    true
+}
+
+#[cfg(not(target_os = "windows"))]
+fn _handle_script_input_recorder_hotkey(_vk: u32, _is_key_down: bool) -> bool {
+    false
+}
+
+#[cfg(target_os = "windows")]
+fn _process_hotkey_event(vk: u32, is_key_down: bool) -> bool {
     if let Ok(mut pressed_keys) = _hotkey_state().pressed_keys.lock() {
         if is_key_down {
             let inserted = pressed_keys.insert(vk);
             if inserted {
                 _trigger_hotkey_scripts(vk, true, &pressed_keys);
             }
+            return inserted;
         } else {
-            if pressed_keys.contains(&vk) {
+            let existed = pressed_keys.contains(&vk);
+            if existed {
                 _trigger_hotkey_scripts(vk, false, &pressed_keys);
             }
             pressed_keys.remove(&vk);
+            return existed;
         }
     }
+    false
 }
 
 #[cfg(target_os = "windows")]
@@ -912,7 +1137,14 @@ unsafe extern "system" fn _low_level_keyboard_proc(code: i32, wparam: WPARAM, lp
         let is_key_up = message == WM_KEYUP || message == WM_SYSKEYUP;
 
         if is_key_down || is_key_up {
-            _process_hotkey_event(vk, is_key_down);
+            if _handle_script_input_recorder_hotkey(vk, is_key_down) {
+                return unsafe { CallNextHookEx(None, code, wparam, lparam) };
+            }
+
+            let should_record = _process_hotkey_event(vk, is_key_down);
+            if should_record {
+                _record_keyboard_input(vk, is_key_down);
+            }
         }
     }
 
@@ -925,37 +1157,38 @@ unsafe extern "system" fn _low_level_mouse_proc(code: i32, wparam: WPARAM, lpara
         let event = unsafe { *(lparam.0 as *const MSLLHOOKSTRUCT) };
         let message = wparam.0 as u32;
 
-        let (vk, is_key_down, is_key_up) = match message {
-            WM_LBUTTONDOWN => (Some(VK_LBUTTON.0 as u32), true, false),
-            WM_LBUTTONUP => (Some(VK_LBUTTON.0 as u32), false, true),
-            WM_RBUTTONDOWN => (Some(VK_RBUTTON.0 as u32), true, false),
-            WM_RBUTTONUP => (Some(VK_RBUTTON.0 as u32), false, true),
-            WM_MBUTTONDOWN => (Some(VK_MBUTTON.0 as u32), true, false),
-            WM_MBUTTONUP => (Some(VK_MBUTTON.0 as u32), false, true),
+        let (vk, button, is_key_down) = match message {
+            WM_LBUTTONDOWN => (Some(VK_LBUTTON.0 as u32), Some("left"), true),
+            WM_LBUTTONUP => (Some(VK_LBUTTON.0 as u32), Some("left"), false),
+            WM_RBUTTONDOWN => (Some(VK_RBUTTON.0 as u32), Some("right"), true),
+            WM_RBUTTONUP => (Some(VK_RBUTTON.0 as u32), Some("right"), false),
+            WM_MBUTTONDOWN => (Some(VK_MBUTTON.0 as u32), Some("middle"), true),
+            WM_MBUTTONUP => (Some(VK_MBUTTON.0 as u32), Some("middle"), false),
             WM_XBUTTONDOWN => {
                 let xbutton = ((event.mouseData >> 16) & 0xFFFF) as u16;
-                let vk = if xbutton == XBUTTON1 as u16 {
-                    VK_XBUTTON1.0 as u32
+                if xbutton == XBUTTON1 as u16 {
+                    (Some(VK_XBUTTON1.0 as u32), Some("x1"), true)
                 } else {
-                    VK_XBUTTON2.0 as u32
-                };
-                (Some(vk), true, false)
+                    (Some(VK_XBUTTON2.0 as u32), Some("x2"), true)
+                }
             }
             WM_XBUTTONUP => {
                 let xbutton = ((event.mouseData >> 16) & 0xFFFF) as u16;
-                let vk = if xbutton == XBUTTON1 as u16 {
-                    VK_XBUTTON1.0 as u32
+                if xbutton == XBUTTON1 as u16 {
+                    (Some(VK_XBUTTON1.0 as u32), Some("x1"), false)
                 } else {
-                    VK_XBUTTON2.0 as u32
-                };
-                (Some(vk), false, true)
+                    (Some(VK_XBUTTON2.0 as u32), Some("x2"), false)
+                }
             }
-            _ => (None, false, false),
+            _ => (None, None, false),
         };
 
         if let Some(vk) = vk {
-            if is_key_down || is_key_up {
-                _process_hotkey_event(vk, is_key_down);
+            let should_record = _process_hotkey_event(vk, is_key_down);
+            if should_record {
+                if let Some(button) = button {
+                    _record_mouse_input(button, is_key_down);
+                }
             }
         }
     }
@@ -1106,6 +1339,51 @@ pub fn get_script_hotkey_bindings() -> Vec<ScriptHotkeyBinding> {
             .collect();
     }
     Vec::new()
+}
+
+/// 设置脚本输入录制器是否启用 F10 热键监听。
+pub fn set_script_input_recorder_hotkey_enabled(
+    app_handle: tauri::AppHandle,
+    enabled: bool,
+) -> Result<(), String> {
+    _set_app_handle(app_handle);
+    if enabled {
+        _ensure_hook_thread_started()?;
+    }
+
+    let recorder = _input_recorder_state();
+    recorder.hotkey_enabled.store(enabled, Ordering::Release);
+
+    if !enabled {
+        recorder.suppress_hotkey_keyup.store(false, Ordering::Release);
+        _stop_script_input_recording();
+    } else {
+        _emit_script_input_recorder_snapshot();
+    }
+
+    Ok(())
+}
+
+/// 获取当前脚本输入录制器快照。
+pub fn get_script_input_recorder_snapshot() -> ScriptInputRecorderSnapshot {
+    _build_script_input_recorder_snapshot()
+}
+
+/// 清空已录制动作，并重置起始时间基准。
+pub fn clear_script_input_recorder_actions() -> Result<(), String> {
+    let recorder = _input_recorder_state();
+    if let Ok(mut actions) = recorder.actions.lock() {
+        actions.clear();
+    } else {
+        return Err("清空录制动作失败：无法获取动作锁".to_string());
+    }
+    if let Ok(mut started_at) = recorder.started_at.lock() {
+        *started_at = None;
+    } else {
+        return Err("清空录制动作失败：无法获取时间锁".to_string());
+    }
+    _emit_script_input_recorder_snapshot();
+    Ok(())
 }
 
 #[cfg(all(test, target_os = "windows"))]

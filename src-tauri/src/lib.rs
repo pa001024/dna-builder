@@ -2072,6 +2072,36 @@ fn get_script_hotkey_bindings() -> Result<Vec<submodules::hotkey::ScriptHotkeyBi
     Ok(get_script_hotkey_bindings())
 }
 
+/// 设置脚本输入录制器是否启用 F10 热键监听。
+#[tauri::command]
+fn set_script_input_recorder_hotkey_enabled(
+    enabled: bool,
+    app_handle: tauri::AppHandle,
+) -> Result<String, String> {
+    use submodules::hotkey::set_script_input_recorder_hotkey_enabled;
+    set_script_input_recorder_hotkey_enabled(app_handle, enabled)?;
+    Ok(if enabled {
+        "录制热键监听已启用".to_string()
+    } else {
+        "录制热键监听已禁用".to_string()
+    })
+}
+
+/// 获取脚本输入录制器快照。
+#[tauri::command]
+fn get_script_input_recorder_snapshot() -> Result<submodules::hotkey::ScriptInputRecorderSnapshot, String> {
+    use submodules::hotkey::get_script_input_recorder_snapshot;
+    Ok(get_script_input_recorder_snapshot())
+}
+
+/// 清空脚本输入录制器动作列表。
+#[tauri::command]
+fn clear_script_input_recorder_actions() -> Result<String, String> {
+    use submodules::hotkey::clear_script_input_recorder_actions;
+    clear_script_input_recorder_actions()?;
+    Ok("录制动作已清空".to_string())
+}
+
 /// 监听文件变化
 #[tauri::command]
 fn watch_file(file_path: String, app_handle: tauri::AppHandle) -> Result<String, String> {
@@ -2292,6 +2322,9 @@ pub fn run() {
         get_script_runtime_info,
         sync_script_hotkey_bindings,
         get_script_hotkey_bindings,
+        set_script_input_recorder_hotkey_enabled,
+        get_script_input_recorder_snapshot,
+        clear_script_input_recorder_actions,
         get_documents_dir,
         rename_file,
         delete_file,

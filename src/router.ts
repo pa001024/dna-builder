@@ -496,6 +496,12 @@ const routes: readonly RouteRecordRaw[] = [
         component: () => import("./views/ScriptColorToolView.vue"),
         beforeEnter: () => setMinSize(1000, 700),
     },
+    {
+        name: "script-record-tool",
+        path: "/scripts/record-tool",
+        component: () => import("./views/ScriptRecordToolView.vue"),
+        beforeEnter: () => setMinSize(1000, 700),
+    },
 
     // 404 页面 - 必须放在最后作为捕获所有未匹配路由
     { path: "/:pathMatch(.*)*", name: "notfound", component: NotFound, beforeEnter: () => setMinSize(360, 430) },
