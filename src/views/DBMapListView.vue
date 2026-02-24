@@ -2,8 +2,7 @@
 import type { DNAMapMatterCategorizeOption, DNAMatterCategorizeList } from "dna-api"
 import { computed, onMounted, ref, watch } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
-import { getMapAPI } from "../api/app"
-import type { DBMap, DBMapMarker } from "../data/d/map.data"
+import { mapCache, mapLocalData, type DBMap, type DBMapMarker } from "../data/d/map.data"
 
 const searchKeyword = ref("")
 const selectedMap = ref<DBMap | null>(null)
@@ -13,34 +12,30 @@ const maps = ref<DBMap[]>([])
 const markers = ref<DBMapMarker[]>([])
 const categories = ref<DNAMapMatterCategorizeOption[]>([])
 const loading = ref(false)
-const dnaApi = getMapAPI()
 
-async function loadMapList() {
+function loadMapList() {
     loading.value = true
     try {
-        const res = await dnaApi.getMapCategorizeList()
-        if (res.is_success && res.data) {
-            const MAP_SIZE = 4096
-            const TILE_SIZE = 256
+        const MAP_SIZE = 4096
+        const TILE_SIZE = 256
 
-            const allMaps: DBMap[] = []
-            res.data.list.forEach((category: DNAMatterCategorizeList) => {
-                category.maps.forEach((map: any) => {
-                    allMaps.push({
-                        id: map.id,
-                        n: map.name,
-                        name: map.name,
-                        desc: category.name,
-                        mapUrl: "", // 需要从 getMatterDetail 获取
-                        width: MAP_SIZE,
-                        height: MAP_SIZE,
-                        tileSize: TILE_SIZE,
-                    })
+        const allMaps: DBMap[] = []
+        mapLocalData.forEach((category: DNAMatterCategorizeList) => {
+            category.maps.forEach(map => {
+                allMaps.push({
+                    id: map.id,
+                    n: map.name,
+                    name: map.name,
+                    desc: category.name,
+                    mapUrl: "", // 需要从地图详情中获取
+                    width: MAP_SIZE,
+                    height: MAP_SIZE,
+                    tileSize: TILE_SIZE,
                 })
             })
+        })
 
-            maps.value = allMaps
-        }
+        maps.value = allMaps
     } catch (error) {
         console.error("加载地图列表失败:", error)
     } finally {
@@ -68,44 +63,54 @@ function selectMap(map: DBMap | null) {
     }
 }
 
-async function loadMapData() {
+function loadMapData() {
     if (!selectedMap.value) return
 
     try {
-        const res = await dnaApi.getMapDetail(selectedMap.value.id)
-        if (res.is_success && res.data) {
-            const { matterCategorizes, floors } = res.data
-
-            categories.value = matterCategorizes
-
-            // 更新地图URL和floors
-            if (floors.length > 0) {
-                selectedMap.value.mapUrl = floors[0].pic
-                selectedMap.value.floors = floors
-                selectedMap.value.currentFloorIndex = 0
-            }
-
+        const mapDetail = mapCache[selectedMap.value.id]
+        if (!mapDetail) {
+            categories.value = []
             markers.value = []
-            matterCategorizes.forEach(category => {
-                category.matters.forEach(matter => {
-                    matter.sites.forEach((site: any) => {
-                        if (site.mapId === selectedMap.value!.id) {
-                            markers.value.push({
-                                id: site.id,
-                                mapId: site.mapId,
-                                x: site.x,
-                                y: site.y,
-                                name: matter.name,
-                                desc: site.isHide ? "隐藏点" : undefined,
-                                icon: matter.icon,
-                                categoryId: category.id,
-                                isUserMarker: false,
-                            })
-                        }
-                    })
+            selectedMap.value.mapUrl = ""
+            selectedMap.value.floors = []
+            selectedMap.value.currentFloorIndex = 0
+            return
+        }
+
+        const { matterCategorizes, floors } = mapDetail
+        categories.value = matterCategorizes
+
+        // 更新地图URL和floors
+        if (floors.length > 0) {
+            selectedMap.value.mapUrl = floors[0].pic
+            selectedMap.value.floors = floors
+            selectedMap.value.currentFloorIndex = 0
+        } else {
+            selectedMap.value.mapUrl = ""
+            selectedMap.value.floors = []
+            selectedMap.value.currentFloorIndex = 0
+        }
+
+        markers.value = []
+        matterCategorizes.forEach(category => {
+            category.matters.forEach(matter => {
+                matter.sites.forEach((site: any) => {
+                    if (site.mapId === selectedMap.value!.id) {
+                        markers.value.push({
+                            id: site.id,
+                            mapId: site.mapId,
+                            x: site.x,
+                            y: site.y,
+                            name: matter.name,
+                            desc: site.isHide ? "隐藏点" : undefined,
+                            icon: matter.icon,
+                            categoryId: category.id,
+                            isUserMarker: false,
+                        })
+                    }
                 })
             })
-        }
+        })
     } catch (error) {
         console.error("加载地图数据失败:", error)
     }

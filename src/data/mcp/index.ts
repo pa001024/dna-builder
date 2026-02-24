@@ -8,6 +8,16 @@ import * as achievementModule from "../d/achievement.data"
 import * as autochessModule from "../d/autochess.data"
 import * as buffModule from "../d/buff.data"
 import * as charModule from "../d/char.data"
+import * as charextEnModule from "../d/charext.en.data"
+import * as charextFrModule from "../d/charext.fr.data"
+import * as charextJpModule from "../d/charext.jp.data"
+import * as charextKrModule from "../d/charext.kr.data"
+import * as charextTcModule from "../d/charext.tc.data"
+import * as charextModule from "../d/charext.data"
+import * as charvoiceEnModule from "../d/charvoice.en.data"
+import * as charvoiceJpModule from "../d/charvoice.jp.data"
+import * as charvoiceKrModule from "../d/charvoice.kr.data"
+import * as charvoiceModule from "../d/charvoice.data"
 import * as convertModule from "../d/convert.data"
 import * as draftModule from "../d/draft.data"
 import * as dungeonModule from "../d/dungeon.data"
@@ -16,15 +26,27 @@ import * as effectModule from "../d/effect.data"
 import * as fishModule from "../d/fish.data"
 import * as hardbossModule from "../d/hardboss.data"
 import * as headsculptureModule from "../d/headsculpture.data"
+import * as jargonModule from "../d/jargon.data"
 import * as levelupModule from "../d/levelup.data"
+import * as mapModule from "../d/map.data"
 import * as modModule from "../d/mod.data"
 import * as monsterModule from "../d/monster.data"
 import * as monstertagModule from "../d/monstertag.data"
 import * as mountModule from "../d/mount.data"
 import * as npcModule from "../d/npc.data"
+import * as partytopicEnModule from "../d/partytopic.en.data"
+import * as partytopicFrModule from "../d/partytopic.fr.data"
+import * as partytopicJpModule from "../d/partytopic.jp.data"
+import * as partytopicKrModule from "../d/partytopic.kr.data"
+import * as partytopicTcModule from "../d/partytopic.tc.data"
 import * as partytopicModule from "../d/partytopic.data"
 import * as petModule from "../d/pet.data"
 import * as playerModule from "../d/player.data"
+import * as questEnModule from "../d/quest.en.data"
+import * as questFrModule from "../d/quest.fr.data"
+import * as questJpModule from "../d/quest.jp.data"
+import * as questKrModule from "../d/quest.kr.data"
+import * as questTcModule from "../d/quest.tc.data"
 import * as questModule from "../d/quest.data"
 import * as questchainModule from "../d/questchain.data"
 import * as raidModule from "../d/raid.data"
@@ -33,14 +55,69 @@ import * as reputationModule from "../d/reputation.data"
 import * as resourceModule from "../d/resource.data"
 import * as rewardModule from "../d/reward.data"
 import * as shopModule from "../d/shop.data"
+import * as storyLocaleModule from "../d/story-locale"
 import * as subregionModule from "../d/subregion.data"
 import * as titleModule from "../d/title.data"
 import * as walnutModule from "../d/walnut.data"
 import * as weaponModule from "../d/weapon.data"
+import { DATA_TYPE_INTERFACE_DEFINITION_MAP } from "./type-definition-map"
 
 const SERVER_VERSION = "0.2.0"
 const DEFAULT_GRAPHQL_ENDPOINT = "https://api.dna-builder.cn/graphql"
 const MISSION_GROUP_LABELS = ["角色", "武器", "魔之楔"] as const
+const STORY_LOCALE_SAMPLES = ["zh-CN", "en-US", "ja-JP", "ko-KR", "fr-FR", "zh-TW"] as const
+const DATA_TYPE_ENUM_VALUES = [
+    "AbyssDungeon",
+    "Buff",
+    "Char",
+    "CharExt",
+    "CharVoice",
+    "DBMap",
+    "Draft",
+    "Dungeon",
+    "HardBoss",
+    "Jargon",
+    "Mod",
+    "NPC",
+    "PartyTopic",
+    "Pet",
+    "QuestStory",
+    "Reward",
+    "SubRegion",
+    "Weapon",
+] as const
+const WHAT_IS_THIS_NAME_FIELDS = ["名称", "name", "title", "n"] as const
+const WHAT_IS_THIS_DATASET_FIELD_CONFIG: Record<string, readonly string[]> = {
+    mod: ["名称", "系列"],
+    jargon: ["name", "alias", "desc", "type", "ref"],
+}
+const WHAT_IS_THIS_ALIAS_LIBRARY = {
+    角色: { moduleIds: ["/local/char"], typeNames: ["Char"] },
+    人物: { moduleIds: ["/local/char"], typeNames: ["Char"] },
+    角色档案: { moduleIds: ["/local/charext"], typeNames: ["CharExt"] },
+    角色语音: { moduleIds: ["/local/charvoice"], typeNames: ["CharVoice"] },
+    武器: { moduleIds: ["/local/weapon"], typeNames: ["Weapon"] },
+    魔之楔: { moduleIds: ["/local/mod"], typeNames: ["Mod"] },
+    模组: { moduleIds: ["/local/mod"], typeNames: ["Mod"] },
+    副本: { moduleIds: ["/local/dungeon"], typeNames: ["Dungeon"] },
+    深渊: { moduleIds: ["/local/abyss"], typeNames: ["AbyssDungeon"] },
+    任务: { moduleIds: ["/local/quest"], typeNames: ["QuestStory"] },
+    光阴集: { moduleIds: ["/local/partytopic"], typeNames: ["PartyTopic"] },
+    npc: { moduleIds: ["/local/npc"], typeNames: ["NPC"] },
+    地图: { moduleIds: ["/local/map"], typeNames: ["DBMap"] },
+    魔灵: { moduleIds: ["/local/pet"], typeNames: ["Pet"] },
+    奖励: { moduleIds: ["/local/reward"], typeNames: ["Reward"] },
+    buff: { moduleIds: ["/local/buff"], typeNames: ["Buff"] },
+} as const
+const WHAT_IS_THIS_VALUE_ALIAS_LIBRARY = {
+    魔之楔: ["mod", "mods", "模组"],
+    角色: ["角"],
+    角色档案: ["档案"],
+    角色语音: ["语音"],
+    地图: ["地图点位"],
+    丽蓓卡: ["水母"],
+    琳恩: ["女枪"],
+} as const
 
 /**
  * 将数组导出转换为标准记录数组，并打上来源标签。
@@ -105,6 +182,16 @@ const LOCAL_DATASETS = {
     autochess: fromArrayExport(autochessModule.robotEquips, "autochess.robotEquips"),
     buff: fromArrayExport(buffModule.default, "buff.default"),
     char: fromArrayExport(charModule.default, "char.default"),
+    charext: fromArrayExport(charextModule.charExtData, "charext.charExtData"),
+    charext_en: fromArrayExport(charextEnModule.charExtData_en, "charext.en"),
+    charext_fr: fromArrayExport(charextFrModule.charExtData_fr, "charext.fr"),
+    charext_jp: fromArrayExport(charextJpModule.charExtData_jp, "charext.jp"),
+    charext_kr: fromArrayExport(charextKrModule.charExtData_kr, "charext.kr"),
+    charext_tc: fromArrayExport(charextTcModule.charExtData_tc, "charext.tc"),
+    charvoice: fromArrayExport(charvoiceModule.charVoiceData, "charvoice.charVoiceData"),
+    charvoice_en: fromArrayExport(charvoiceEnModule.charVoiceData_en, "charvoice.en"),
+    charvoice_jp: fromArrayExport(charvoiceJpModule.charVoiceData_jp, "charvoice.jp"),
+    charvoice_kr: fromArrayExport(charvoiceKrModule.charVoiceData_kr, "charvoice.kr"),
     convert: fromArrayExport(convertModule.modConvertData, "convert.modConvertData"),
     draft: fromArrayExport(draftModule.default, "draft.default"),
     dungeon: fromArrayExport(dungeonModule.default, "dungeon.default"),
@@ -116,19 +203,25 @@ const LOCAL_DATASETS = {
         ...fromObjectExport(hardbossModule.dynamicRewardMap, "hardboss.dynamicRewardMap"),
     ],
     headsculpture: fromArrayExport(headsculptureModule.headSculptureData, "headsculpture.headSculptureData"),
+    jargon: fromArrayExport(jargonModule.jargonData, "jargon.jargonData"),
     levelup: [
         ...fromObjectExport(levelupModule.levelUpResource, "levelup.levelUpResource"),
         ...fromArrayExport(levelupModule.weaponLevelUpExpCost, "levelup.weaponLevelUpExpCost"),
         ...fromArrayExport(levelupModule.charLevelUpExpCost, "levelup.charLevelUpExpCost"),
         { __sourceTag: "levelup.CashToExpRate", value: levelupModule.CashToExpRate },
     ],
-    map: [],
+    map: [...fromArrayExport(mapModule.mapLocalData, "map.mapLocalData"), ...fromObjectExport(mapModule.mapCache, "map.mapCache")],
     mod: fromArrayExport(modModule.default, "mod.default"),
     monster: fromArrayExport(monsterModule.default, "monster.default"),
     monstertag: fromArrayExport(monstertagModule.monsterTagData, "monstertag.monsterTagData"),
     mount: fromArrayExport(mountModule.mountData, "mount.mountData"),
     npc: fromArrayExport(npcModule.npcData, "npc.npcData"),
     partytopic: fromArrayExport(partytopicModule.partyTopicData, "partytopic.partyTopicData"),
+    partytopic_en: fromArrayExport(partytopicEnModule.partyTopicData_en, "partytopic.en"),
+    partytopic_fr: fromArrayExport(partytopicFrModule.partyTopicData_fr, "partytopic.fr"),
+    partytopic_jp: fromArrayExport(partytopicJpModule.partyTopicData_jp, "partytopic.jp"),
+    partytopic_kr: fromArrayExport(partytopicKrModule.partyTopicData_kr, "partytopic.kr"),
+    partytopic_tc: fromArrayExport(partytopicTcModule.partyTopicData_tc, "partytopic.tc"),
     pet: [...fromArrayExport(petModule.default, "pet.default"), ...fromArrayExport(petModule.petEntrys, "pet.petEntrys")],
     player: [
         ...fromArrayExport(playerModule.PlayerLevelMaxExp, "player.PlayerLevelMaxExp"),
@@ -136,6 +229,11 @@ const LOCAL_DATASETS = {
         ...fromObjectExport(playerModule.ExtraExpInputMax, "player.ExtraExpInputMax"),
     ],
     quest: fromArrayExport(questModule.questData, "quest.questData"),
+    quest_en: fromArrayExport(questEnModule.questData_en, "quest.en"),
+    quest_fr: fromArrayExport(questFrModule.questData_fr, "quest.fr"),
+    quest_jp: fromArrayExport(questJpModule.questData_jp, "quest.jp"),
+    quest_kr: fromArrayExport(questKrModule.questData_kr, "quest.kr"),
+    quest_tc: fromArrayExport(questTcModule.questData_tc, "quest.tc"),
     questchain: fromArrayExport(questchainModule.questChainData, "questchain.questChainData"),
     raid: [
         ...fromArrayExport(raidModule.RaidCalculation, "raid.RaidCalculation"),
@@ -154,6 +252,19 @@ const LOCAL_DATASETS = {
         ...fromMapExport(shopModule.weaponShopSourceMap, "shop.weaponShopSourceMap"),
         ...fromMapExport(shopModule.draftShopSourceMap, "shop.draftShopSourceMap"),
     ],
+    story_locale: fromArrayExport(
+        STORY_LOCALE_SAMPLES.map(language => {
+            const locale = storyLocaleModule.resolveStoryLocaleBySetting(language)
+            const suffix = locale === "zh" ? "" : `_${locale}`
+            return {
+                language,
+                locale,
+                partytopicModuleId: `/local/partytopic${suffix}`,
+                questModuleId: `/local/quest${suffix}`,
+            }
+        }),
+        "story-locale.mapping"
+    ),
     subregion: fromArrayExport(subregionModule.subRegionData, "subregion.subRegionData"),
     title: fromArrayExport(titleModule.titleData, "title.titleData"),
     walnut: [
@@ -209,6 +320,58 @@ type ModuleSelection = {
     dataset: DatasetName
 }
 
+type QueryResultItem = {
+    dataset: DatasetName
+    index: number
+    id: string
+    name: string
+    score: number | null
+    preview: Record<string, unknown>
+    record: Record<string, unknown>
+    rawRecord?: Record<string, unknown>
+}
+
+type AllModuleQueryResultItem = QueryResultItem & {
+    moduleId: string
+}
+
+type AllModuleSearchDocument = SearchDocument & {
+    scopedText: string
+}
+
+type DataTypeName = (typeof DATA_TYPE_ENUM_VALUES)[number]
+
+type DataTypeDefinitionMeta = {
+    filePath: string
+    interfaceName: string
+    moduleIds: string[]
+    description: string
+}
+
+type WhatIsThisAliasEntry = {
+    moduleIds: readonly string[]
+    typeNames?: readonly DataTypeName[]
+}
+
+type WhatIsThisDocument = {
+    dataset: DatasetName
+    moduleId: string
+    typeNames: DataTypeName[]
+    keyword: string
+    searchText: string
+    source: "alias" | "name" | "module"
+}
+
+type WhatIsThisCandidate = {
+    moduleId: string
+    dataset: DatasetName
+    typeNames: DataTypeName[]
+    score: number | null
+    hitCount: number
+    sources: Array<WhatIsThisDocument["source"]>
+    matchedKeywords: string[]
+}
+
 type GraphQLMissionRecord = {
     id: number
     server: string
@@ -226,6 +389,131 @@ type StructuredMissions = {
     魔之楔: string[]
 }
 
+const DATA_TYPE_DEFINITION_META: Record<DataTypeName, DataTypeDefinitionMeta> = {
+    AbyssDungeon: {
+        filePath: "src/data/d/abyss.data.ts",
+        interfaceName: "AbyssDungeon",
+        moduleIds: ["/local/abyss"],
+        description: "深渊副本结构定义",
+    },
+    Buff: {
+        filePath: "src/data/data-types.ts",
+        interfaceName: "Buff",
+        moduleIds: ["/local/buff"],
+        description: "Buff 数据结构定义",
+    },
+    Char: {
+        filePath: "src/data/data-types.ts",
+        interfaceName: "Char",
+        moduleIds: ["/local/char"],
+        description: "角色基础数据结构定义",
+    },
+    CharExt: {
+        filePath: "src/data/d/charext.data.ts",
+        interfaceName: "CharExt",
+        moduleIds: [
+            "/local/charext",
+            "/local/charext_en",
+            "/local/charext_fr",
+            "/local/charext_jp",
+            "/local/charext_kr",
+            "/local/charext_tc",
+        ],
+        description: "角色档案数据结构定义",
+    },
+    CharVoice: {
+        filePath: "src/data/d/charvoice.data.ts",
+        interfaceName: "CharVoice",
+        moduleIds: ["/local/charvoice", "/local/charvoice_en", "/local/charvoice_jp", "/local/charvoice_kr"],
+        description: "角色语音数据结构定义",
+    },
+    DBMap: {
+        filePath: "src/data/d/map.data.ts",
+        interfaceName: "DBMap",
+        moduleIds: ["/local/map"],
+        description: "地图结构定义",
+    },
+    Draft: {
+        filePath: "src/data/d/draft.data.ts",
+        interfaceName: "Draft",
+        moduleIds: ["/local/draft"],
+        description: "图纸数据结构定义",
+    },
+    Dungeon: {
+        filePath: "src/data/d/dungeon.data.ts",
+        interfaceName: "Dungeon",
+        moduleIds: ["/local/dungeon", "/local/raid"],
+        description: "副本数据结构定义",
+    },
+    HardBoss: {
+        filePath: "src/data/d/hardboss.data.ts",
+        interfaceName: "HardBoss",
+        moduleIds: ["/local/hardboss"],
+        description: "梦魇残声（周本）结构定义",
+    },
+    Jargon: {
+        filePath: "src/data/d/jargon.data.ts",
+        interfaceName: "Jargon",
+        moduleIds: ["/local/jargon"],
+        description: "术语词条结构定义",
+    },
+    Mod: {
+        filePath: "src/data/data-types.ts",
+        interfaceName: "Mod",
+        moduleIds: ["/local/mod"],
+        description: "魔之楔数据结构定义",
+    },
+    NPC: {
+        filePath: "src/data/d/npc.data.ts",
+        interfaceName: "NPC",
+        moduleIds: ["/local/npc"],
+        description: "NPC 数据结构定义",
+    },
+    PartyTopic: {
+        filePath: "src/data/d/partytopic.data.ts",
+        interfaceName: "PartyTopic",
+        moduleIds: [
+            "/local/partytopic",
+            "/local/partytopic_en",
+            "/local/partytopic_fr",
+            "/local/partytopic_jp",
+            "/local/partytopic_kr",
+            "/local/partytopic_tc",
+        ],
+        description: "光阴集数据结构定义",
+    },
+    Pet: {
+        filePath: "src/data/d/pet.data.ts",
+        interfaceName: "Pet",
+        moduleIds: ["/local/pet"],
+        description: "魔灵数据结构定义",
+    },
+    QuestStory: {
+        filePath: "src/data/d/quest.data.ts",
+        interfaceName: "QuestStory",
+        moduleIds: ["/local/quest", "/local/quest_en", "/local/quest_fr", "/local/quest_jp", "/local/quest_kr", "/local/quest_tc"],
+        description: "任务剧情结构定义",
+    },
+    Reward: {
+        filePath: "src/data/data-types.ts",
+        interfaceName: "Reward",
+        moduleIds: ["/local/reward"],
+        description: "奖励组结构定义",
+    },
+    SubRegion: {
+        filePath: "src/data/d/subregion.data.ts",
+        interfaceName: "SubRegion",
+        moduleIds: ["/local/subregion"],
+        description: "子区域结构定义",
+    },
+    Weapon: {
+        filePath: "src/data/data-types.ts",
+        interfaceName: "Weapon",
+        moduleIds: ["/local/weapon"],
+        description: "武器结构定义",
+    },
+}
+
 const datasetDocumentCache = new Map<DatasetName, SearchDocument[]>()
 let moduleResolverFuseCache: Fuse<ModuleResolveDocument> | null = null
 let rewardGroupMapCache: Map<number, Record<string, unknown>> | null = null
@@ -234,6 +522,8 @@ let monsterNameMapCache: Map<number, string> | null = null
 let charNameMapCache: Map<number, string> | null = null
 let abyssBuffMapCache: Map<number, Record<string, unknown>> | null = null
 let abyssPairBaseSetCache: Set<number> | null = null
+let whatIsThisFuseCache: Fuse<WhatIsThisDocument> | null = null
+let whatIsThisDocumentsCache: WhatIsThisDocument[] | null = null
 
 /**
  * 获取 Node.js 进程对象（避免依赖 Node 类型定义）。
@@ -359,6 +649,79 @@ function getDropModeText(mode: string): string {
         Sequence: "序列",
     }
     return modeMap[mode] || mode
+}
+
+/**
+ * 获取动态奖励状态文本（对齐 DB 页面逻辑）。
+ * @param startTime 开始时间（秒级时间戳）
+ * @param endTime 结束时间（秒级时间戳）
+ * @returns 状态文本
+ */
+function getRewardStatusText(startTime: number, endTime: number): string {
+    const now = Math.floor(Date.now() / 1000)
+    if (now < startTime) return "未开始"
+    if (now > endTime) return "已结束"
+    return "进行中"
+}
+
+/**
+ * 判断对象是否为周本动态奖励项。
+ * @param value 待判断值
+ * @returns 是否为动态奖励项
+ */
+function isHardbossDynamicRewardItem(value: unknown): value is Record<string, unknown> {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return false
+    const item = value as Record<string, unknown>
+    return (
+        Number.isFinite(Number(item.DynamicRewardId)) &&
+        Number.isFinite(Number(item.RewardView)) &&
+        Number.isFinite(Number(item.StartTime)) &&
+        Number.isFinite(Number(item.EndTime))
+    )
+}
+
+/**
+ * 合并周本动态奖励时间段（相同 RewardId 连续项合并）。
+ * @param rewards 动态奖励列表
+ * @returns 合并后的奖励列表
+ */
+function mergeHardbossDynamicRewards(rewards: Array<Record<string, unknown>>): Array<Record<string, unknown>> {
+    if (rewards.length === 0) return []
+
+    const sortedRewards = [...rewards].sort((a, b) => Number(a.Index) - Number(b.Index))
+    const merged: Array<Record<string, unknown>> = []
+    let current: Record<string, unknown> = { ...sortedRewards[0] }
+
+    for (let i = 1; i < sortedRewards.length; i++) {
+        const next = sortedRewards[i]
+        if (Number(next.RewardId) === Number(current.RewardId)) {
+            current.EndTime = next.EndTime
+        } else {
+            merged.push(current)
+            current = { ...next }
+        }
+    }
+    merged.push(current)
+
+    return merged
+}
+
+/**
+ * 根据周本动态奖励组 ID 提取并合并动态奖励列表。
+ * @param dynamicRewardId 动态奖励组 ID
+ * @returns 合并后的动态奖励列表
+ */
+function getHardbossMergedDynamicRewards(dynamicRewardId: number): Array<Record<string, unknown>> {
+    const dynamicRewardMapRaw = hardbossModule.dynamicRewardMap as unknown
+    if (!dynamicRewardMapRaw || typeof dynamicRewardMapRaw !== "object") return []
+
+    const group = (dynamicRewardMapRaw as Record<string, unknown>)[String(dynamicRewardId)]
+    if (!group || typeof group !== "object" || Array.isArray(group)) return []
+
+    const rewards = Object.values(group)
+        .filter(isHardbossDynamicRewardItem)
+        .map(item => ({ ...item }))
+    return mergeHardbossDynamicRewards(rewards)
 }
 
 /**
@@ -758,6 +1121,68 @@ function normalizeAbyssRecord(record: Record<string, unknown>): Record<string, u
 }
 
 /**
+ * 解压并补充 HardBoss（周本）记录。
+ * @param record 原始记录
+ * @returns 解析后记录
+ */
+function normalizeHardbossRecord(record: Record<string, unknown>): Record<string, unknown> {
+    const sourceTag = toSimpleString(record.__sourceTag)
+    const monsterMap = getMonsterNameMap()
+
+    /**
+     * 将动态奖励列表补充奖励树展开、掉落模式与状态文本。
+     * @param rewards 动态奖励列表
+     * @returns 补充后的动态奖励列表
+     */
+    function enrichDynamicRewards(rewards: Array<Record<string, unknown>>): Array<Record<string, unknown>> {
+        return rewards.map(item => {
+            const rewardView = Number(item.RewardView)
+            const rewardDetails = Number.isFinite(rewardView) ? getRewardDetails(rewardView) : null
+            return {
+                ...item,
+                rewardDetails,
+                dropModeText: getDropModeText(toSimpleString(rewardDetails?.m)),
+                rewardStatus: getRewardStatusText(Number(item.StartTime), Number(item.EndTime)),
+            }
+        })
+    }
+
+    // Boss 主记录：展开每个难度的动态奖励。
+    if (sourceTag === "hardboss.hardBossMap" || Array.isArray(record.diff)) {
+        const diff = Array.isArray(record.diff) ? (record.diff as Array<Record<string, unknown>>) : []
+        const diffResolved = diff.map(item => {
+            const dynamicRewardId = Number(item.r)
+            const dynamicRewards = Number.isFinite(dynamicRewardId) ? getHardbossMergedDynamicRewards(dynamicRewardId) : []
+            return {
+                ...item,
+                dynamicRewards: enrichDynamicRewards(dynamicRewards),
+            }
+        })
+
+        const mid = Number(record.mid)
+        return {
+            ...record,
+            monsterName: Number.isFinite(mid) ? monsterMap.get(mid) || `ID:${mid}` : null,
+            diffResolved,
+        }
+    }
+
+    // 动态奖励组记录：将对象值还原为奖励列表并展开。
+    if (sourceTag === "hardboss.dynamicRewardMap") {
+        const dynamicRewards = Object.values(record)
+            .filter(isHardbossDynamicRewardItem)
+            .map(item => ({ ...item }))
+        const mergedDynamicRewards = mergeHardbossDynamicRewards(dynamicRewards)
+        return {
+            ...record,
+            dynamicRewards: enrichDynamicRewards(mergedDynamicRewards),
+        }
+    }
+
+    return record
+}
+
+/**
  * 按数据集类型对记录做业务解压。
  * @param dataset 数据集名
  * @param record 原始记录
@@ -775,6 +1200,9 @@ function normalizeLocalRecordByDataset(dataset: DatasetName, record: Record<stri
     }
     if (dataset === "raid") {
         return normalizeDungeonRecord(record)
+    }
+    if (dataset === "hardboss") {
+        return normalizeHardbossRecord(record)
     }
     return record
 }
@@ -1037,6 +1465,307 @@ function parseModuleId(moduleId: string): ModuleSelection {
 }
 
 /**
+ * 根据数据集推导对应的数据类型枚举列表。
+ * @param dataset 数据集名
+ * @returns 类型枚举列表
+ */
+function getDatasetTypeNames(dataset: DatasetName): DataTypeName[] {
+    const moduleId = `/local/${dataset}`
+    return [...DATA_TYPE_ENUM_VALUES].filter(typeName => DATA_TYPE_DEFINITION_META[typeName].moduleIds.includes(moduleId))
+}
+
+/**
+ * 读取并标准化 what-is-this 的别名库配置。
+ * @returns 标准化别名条目列表
+ */
+function getWhatIsThisAliasEntries(): Array<{ alias: string; entry: WhatIsThisAliasEntry }> {
+    const entries = Object.entries(WHAT_IS_THIS_ALIAS_LIBRARY) as Array<[string, WhatIsThisAliasEntry]>
+    return entries
+        .map(([alias, entry]) => ({
+            alias: alias.trim(),
+            entry: {
+                moduleIds: entry.moduleIds.map(item => item.trim()).filter(Boolean),
+                typeNames: entry.typeNames,
+            },
+        }))
+        .filter(item => item.alias && item.entry.moduleIds.length > 0)
+}
+
+/**
+ * 获取 what-is-this 的数据集字段配置。
+ * @param dataset 数据集名
+ * @returns 字段列表
+ */
+function getWhatIsThisFieldsByDataset(dataset: DatasetName): string[] {
+    const configured = WHAT_IS_THIS_DATASET_FIELD_CONFIG[dataset]
+    if (configured && configured.length > 0) {
+        return [...configured]
+    }
+    return [...WHAT_IS_THIS_NAME_FIELDS]
+}
+
+/**
+ * 展开 what-is-this 的值别名（配置格式：标准名 -> 别名列表）。
+ * @param keyword 原始关键词
+ * @returns 展开后的关键词列表（包含原词）
+ */
+function expandWhatIsThisKeywords(keyword: string): string[] {
+    const raw = keyword.trim()
+    if (!raw) return []
+
+    const results: string[] = []
+    const queue: string[] = [raw]
+    const visited = new Set<string>()
+
+    while (queue.length > 0 && results.length < 20) {
+        const current = queue.shift()
+        if (!current) continue
+
+        const normalized = current.toLowerCase()
+        if (visited.has(normalized)) continue
+        visited.add(normalized)
+        results.push(current)
+
+        Object.entries(WHAT_IS_THIS_VALUE_ALIAS_LIBRARY).forEach(([canonical, aliasList]) => {
+            const canonicalText = canonical.trim()
+            const canonicalNormalized = canonicalText.toLowerCase()
+            const aliases = aliasList.map(item => item.trim()).filter(Boolean)
+
+            // 命中标准名时，扩展到它的别名。
+            if (normalized === canonicalNormalized) {
+                aliases.forEach(alias => {
+                    const aliasNormalized = alias.toLowerCase()
+                    if (!visited.has(aliasNormalized)) {
+                        queue.push(alias)
+                    }
+                })
+                return
+            }
+
+            // 命中别名时，回推到标准名（满足“搜 A 出 B”）。
+            if (aliases.some(alias => alias.toLowerCase() === normalized) && !visited.has(canonicalNormalized)) {
+                queue.push(canonicalText)
+            }
+        })
+    }
+
+    return results
+}
+
+/**
+ * 构建 what-is-this 检索文档（别名 + 模块 + 名称全文）。
+ * @returns 检索文档列表
+ */
+function getWhatIsThisDocuments(): WhatIsThisDocument[] {
+    if (whatIsThisDocumentsCache) return whatIsThisDocumentsCache
+
+    const docs: WhatIsThisDocument[] = []
+
+    getWhatIsThisAliasEntries().forEach(({ alias, entry }) => {
+        entry.moduleIds.forEach(moduleId => {
+            try {
+                const parsed = parseModuleId(moduleId)
+                const dataset = parsed.dataset
+                docs.push({
+                    dataset,
+                    moduleId: `/local/${dataset}`,
+                    typeNames: entry.typeNames?.length ? [...entry.typeNames] : getDatasetTypeNames(dataset),
+                    keyword: alias,
+                    searchText: alias,
+                    source: "alias",
+                })
+            } catch (_error) {
+                // 忽略别名库中的非法模块配置，避免影响主流程。
+            }
+        })
+    })
+
+    getAllModules().forEach(moduleMeta => {
+        const parsed = parseModuleId(moduleMeta.moduleId)
+        const dataset = parsed.dataset
+        docs.push({
+            dataset,
+            moduleId: `/local/${dataset}`,
+            typeNames: getDatasetTypeNames(dataset),
+            keyword: moduleMeta.name,
+            searchText: `${moduleMeta.name} ${moduleMeta.description} ${moduleMeta.tags.join(" ")}`.trim(),
+            source: "module",
+        })
+    })
+    ;(Object.keys(LOCAL_DATASETS) as DatasetName[]).forEach(dataset => {
+        const moduleId = `/local/${dataset}`
+        const defaultTypeNames = getDatasetTypeNames(dataset)
+        const fields = getWhatIsThisFieldsByDataset(dataset)
+        getDatasetDocuments(dataset).forEach(doc => {
+            const refDataset = toSimpleString(doc.record.ref).trim().toLowerCase()
+            const resolvedDataset =
+                dataset === "jargon" && refDataset && Object.hasOwn(LOCAL_DATASETS, refDataset as DatasetName)
+                    ? (refDataset as DatasetName)
+                    : dataset
+            const resolvedModuleId = `/local/${resolvedDataset}`
+            const typeNames = getDatasetTypeNames(resolvedDataset)
+            const nameText = buildScopedSearchText(doc.record, fields)
+            const searchText = [doc.primaryName, nameText].filter(Boolean).join(" ")
+            if (!searchText.trim()) return
+
+            docs.push({
+                dataset: resolvedDataset,
+                moduleId: resolvedModuleId || moduleId,
+                typeNames: typeNames.length > 0 ? typeNames : defaultTypeNames,
+                keyword: doc.primaryName,
+                searchText,
+                source: "name",
+            })
+        })
+    })
+
+    whatIsThisDocumentsCache = docs
+    return docs
+}
+
+/**
+ * 获取 what-is-this 的 Fuse 检索实例。
+ * @returns Fuse 实例
+ */
+function getWhatIsThisFuse(): Fuse<WhatIsThisDocument> {
+    if (whatIsThisFuseCache) return whatIsThisFuseCache
+
+    whatIsThisFuseCache = new Fuse(getWhatIsThisDocuments(), {
+        includeScore: true,
+        ignoreLocation: true,
+        threshold: 1,
+        keys: ["keyword", "searchText", "moduleId", "typeNames"],
+    })
+    return whatIsThisFuseCache
+}
+
+/**
+ * 识别关键词所属模块与数据类型。
+ * @param keyword 关键词
+ * @param moduleIds 可选模块路径过滤
+ * @param limit 返回条数
+ * @param threshold 模糊匹配阈值
+ * @returns 识别结果
+ */
+function whatIsThis(
+    keyword: string,
+    moduleIds: string[] | undefined,
+    limit: number,
+    threshold: number
+): {
+    keyword: string
+    expandedKeywords: string[]
+    selected: WhatIsThisCandidate | null
+    candidates: WhatIsThisCandidate[]
+    scopedModuleIds: string[]
+    nextTools: { moduleSearch: string; typeDefinition: string }
+} {
+    const trimmedKeyword = keyword.trim()
+    const safeLimit = clampNumber(limit, 1, 30)
+    const safeThreshold = clampNumber(threshold, 0, 1)
+    const datasets = resolveDatasetList(moduleIds)
+    const scopedModuleIds = datasets.map(dataset => `/local/${dataset}`)
+    const scopedModuleSet = new Set(scopedModuleIds)
+    const expandedKeywords = trimmedKeyword ? expandWhatIsThisKeywords(trimmedKeyword) : []
+
+    const docs = getWhatIsThisDocuments().filter(doc => scopedModuleSet.has(doc.moduleId))
+    const hits = expandedKeywords.length
+        ? expandedKeywords
+              .flatMap(searchKeyword =>
+                  getWhatIsThisFuse()
+                      .search(searchKeyword, { limit: safeLimit * 16 })
+                      .map(hit => ({ ...hit, searchKeyword }))
+              )
+              .filter(hit => scopedModuleSet.has(hit.item.moduleId) && (hit.score ?? 0) <= safeThreshold)
+        : docs.slice(0, safeLimit * 8).map(item => ({ item, score: null }))
+
+    const candidateMap = new Map<string, WhatIsThisCandidate>()
+    hits.forEach(hit => {
+        const moduleKey = hit.item.moduleId
+        const existing = candidateMap.get(moduleKey)
+        const score = hit.score ?? null
+        const mergedTypeNames = [...new Set(hit.item.typeNames)]
+        if (!existing) {
+            candidateMap.set(moduleKey, {
+                moduleId: hit.item.moduleId,
+                dataset: hit.item.dataset,
+                typeNames: mergedTypeNames,
+                score,
+                hitCount: 1,
+                sources: [hit.item.source],
+                matchedKeywords: [hit.item.keyword],
+            })
+            return
+        }
+
+        existing.hitCount += 1
+        existing.typeNames = [...new Set([...existing.typeNames, ...mergedTypeNames])]
+        if (score !== null && (existing.score === null || score < existing.score)) {
+            existing.score = score
+        }
+        if (!existing.sources.includes(hit.item.source)) {
+            existing.sources.push(hit.item.source)
+        }
+        if (hit.item.keyword && !existing.matchedKeywords.includes(hit.item.keyword) && existing.matchedKeywords.length < 8) {
+            existing.matchedKeywords.push(hit.item.keyword)
+        }
+    })
+
+    const candidates = [...candidateMap.values()]
+        .sort((a, b) => {
+            const scoreA = a.score ?? Number.MAX_SAFE_INTEGER
+            const scoreB = b.score ?? Number.MAX_SAFE_INTEGER
+            if (scoreA !== scoreB) return scoreA - scoreB
+            return b.hitCount - a.hitCount
+        })
+        .slice(0, safeLimit)
+
+    return {
+        keyword: trimmedKeyword,
+        expandedKeywords,
+        selected: candidates[0] || null,
+        candidates,
+        scopedModuleIds,
+        nextTools: {
+            moduleSearch: "query-all-data-modules",
+            typeDefinition: "query-data-type-definition",
+        },
+    }
+}
+
+/**
+ * 将文档转换为标准查询结果项。
+ * @param doc 文档记录
+ * @param score 相似度分数
+ * @param includeRaw 是否包含原始记录
+ * @returns 标准结果项
+ */
+function toQueryResultItem(doc: SearchDocument, score: number | null, includeRaw: boolean): QueryResultItem {
+    return {
+        dataset: doc.dataset,
+        index: doc.index,
+        id: doc.primaryId,
+        name: doc.primaryName,
+        score,
+        preview: createRecordPreview(doc.record),
+        record: doc.record,
+        rawRecord: includeRaw ? doc.rawRecord : undefined,
+    }
+}
+
+/**
+ * 解析模块 ID 列表，转换为数据集集合。
+ * @param moduleIds 模块 ID 列表
+ * @returns 去重后的数据集列表
+ */
+function resolveDatasetList(moduleIds: string[] | undefined): DatasetName[] {
+    if (!moduleIds || moduleIds.length === 0) {
+        return Object.keys(LOCAL_DATASETS) as DatasetName[]
+    }
+    return [...new Set(moduleIds.map(moduleId => parseModuleId(moduleId).dataset))]
+}
+
+/**
  * 查询本地模块数据。
  * @param dataset 数据集名
  * @param query 查询关键词
@@ -1066,16 +1795,7 @@ function queryLocalModule(
     }
 
     if (!keyword) {
-        const rawResults = docs.slice(0, safeLimit).map(doc => ({
-            dataset: doc.dataset,
-            index: doc.index,
-            id: doc.primaryId,
-            name: doc.primaryName,
-            score: null,
-            preview: createRecordPreview(doc.record),
-            record: doc.record,
-            rawRecord: includeRaw ? doc.rawRecord : undefined,
-        }))
+        const rawResults = docs.slice(0, safeLimit).map(doc => toQueryResultItem(doc, null, includeRaw))
         return {
             moduleId: `/local/${dataset}`,
             totalCandidates: docs.length,
@@ -1100,16 +1820,177 @@ function queryLocalModule(
         moduleId: `/local/${dataset}`,
         totalCandidates: docs.length,
         fields: fields.length ? fields : "all",
-        results: hits.map(hit => ({
-            dataset: hit.item.dataset,
-            index: hit.item.index,
-            id: hit.item.primaryId,
-            name: hit.item.primaryName,
-            score: hit.score ?? null,
-            preview: createRecordPreview(hit.item.record),
-            record: hit.item.record,
-            rawRecord: includeRaw ? hit.item.rawRecord : undefined,
-        })),
+        results: hits.map(hit => toQueryResultItem(hit.item, hit.score ?? null, includeRaw)),
+    }
+}
+
+/**
+ * 在全部模块中执行统一模糊检索。
+ * @param query 查询关键词
+ * @param exactId 精确 ID
+ * @param moduleIds 可选模块 ID 列表（用于范围过滤）
+ * @param fields 字段白名单
+ * @param limit 返回条数
+ * @param threshold Fuse 阈值
+ * @param includeRaw 是否包含完整记录
+ * @returns 全模块查询结果
+ */
+function queryAllLocalModules(
+    query: string | undefined,
+    exactId: string | undefined,
+    moduleIds: string[] | undefined,
+    fields: string[],
+    limit: number,
+    threshold: number,
+    includeRaw: boolean
+) {
+    const safeLimit = clampNumber(limit, 1, 200)
+    const safeThreshold = clampNumber(threshold, 0, 1)
+    const keyword = query?.trim() || ""
+    const datasets = resolveDatasetList(moduleIds)
+    if (datasets.length === 1) {
+        const payload = queryLocalModule(datasets[0], query, exactId, fields, safeLimit, safeThreshold, includeRaw)
+        return {
+            moduleIds: [`/local/${datasets[0]}`],
+            totalCandidates: payload.totalCandidates,
+            fields: payload.fields,
+            results: payload.results.map(item => ({
+                ...item,
+                moduleId: payload.moduleId,
+            })),
+        }
+    }
+
+    let docs = datasets.flatMap(dataset => getDatasetDocuments(dataset))
+    if (exactId?.trim()) {
+        docs = docs.filter(doc => matchExactId(doc, exactId))
+    }
+
+    if (!keyword) {
+        const results: AllModuleQueryResultItem[] = docs.slice(0, safeLimit).map(doc => ({
+            ...toQueryResultItem(doc, null, includeRaw),
+            moduleId: `/local/${doc.dataset}`,
+        }))
+        return {
+            moduleIds: datasets.map(dataset => `/local/${dataset}`),
+            totalCandidates: docs.length,
+            fields: fields.length ? fields : "all",
+            results,
+        }
+    }
+
+    const scopedDocs: AllModuleSearchDocument[] = docs.map(doc => ({
+        ...doc,
+        scopedText: buildScopedSearchText(doc.record, fields),
+    }))
+    const fuse = new Fuse(scopedDocs, {
+        includeScore: true,
+        ignoreLocation: true,
+        threshold: safeThreshold,
+        keys: ["scopedText", "primaryName", "primaryId", "dataset"],
+    })
+    const hits = fuse.search(keyword, { limit: safeLimit })
+    const results: AllModuleQueryResultItem[] = hits.map(hit => ({
+        ...toQueryResultItem(hit.item, hit.score ?? null, includeRaw),
+        moduleId: `/local/${hit.item.dataset}`,
+    }))
+
+    return {
+        moduleIds: datasets.map(dataset => `/local/${dataset}`),
+        totalCandidates: docs.length,
+        fields: fields.length ? fields : "all",
+        results,
+    }
+}
+
+/**
+ * 获取指定数据类型的 interface 定义。
+ * @param typeName 类型枚举名
+ * @returns interface 定义；若快照中不存在则返回 null
+ */
+function getDataTypeInterfaceDefinition(typeName: DataTypeName): string | null {
+    return DATA_TYPE_INTERFACE_DEFINITION_MAP[typeName] ?? null
+}
+
+/**
+ * 将模块路径标准化为 /local/<dataset> 形式。
+ * @param moduleId 模块路径
+ * @returns 标准化模块路径
+ */
+function normalizeLocalModuleId(moduleId: string): string {
+    const parsed = parseModuleId(moduleId)
+    return `/local/${parsed.dataset}`
+}
+
+/**
+ * 根据模块路径筛选数据类型枚举。
+ * @param moduleId 可选模块路径
+ * @returns 归一化模块路径与类型枚举列表
+ */
+function getTypeNamesByModuleId(moduleId: string | undefined): { normalizedModuleId: string | null; typeNames: DataTypeName[] } {
+    if (!moduleId?.trim()) {
+        return {
+            normalizedModuleId: null,
+            typeNames: [...DATA_TYPE_ENUM_VALUES],
+        }
+    }
+
+    const normalizedModuleId = normalizeLocalModuleId(moduleId.trim())
+    const typeNames = [...DATA_TYPE_ENUM_VALUES].filter(typeName =>
+        DATA_TYPE_DEFINITION_META[typeName].moduleIds.includes(normalizedModuleId)
+    )
+    return {
+        normalizedModuleId,
+        typeNames,
+    }
+}
+
+/**
+ * 构建数据类型定义响应。
+ * @param typeName 可选类型名
+ * @param moduleId 可选模块路径
+ * @returns 类型定义响应对象
+ */
+function queryDataTypeDefinitions(typeName: DataTypeName | undefined, moduleId: string | undefined) {
+    const { normalizedModuleId, typeNames } = getTypeNamesByModuleId(moduleId)
+
+    if (!typeName) {
+        return {
+            moduleId: normalizedModuleId,
+            typeNames,
+            definitions: typeNames.map(name => {
+                const meta = DATA_TYPE_DEFINITION_META[name]
+                return {
+                    typeName: name,
+                    interfaceName: meta.interfaceName,
+                    moduleIds: meta.moduleIds,
+                    description: meta.description,
+                    hasDefinition: Boolean(getDataTypeInterfaceDefinition(name)),
+                }
+            }),
+        }
+    }
+
+    if (normalizedModuleId && !typeNames.includes(typeName)) {
+        return {
+            moduleId: normalizedModuleId,
+            typeName,
+            hasDefinition: false,
+            message: `模块 ${normalizedModuleId} 不包含类型 ${typeName}`,
+            availableTypeNames: typeNames,
+        }
+    }
+
+    const meta = DATA_TYPE_DEFINITION_META[typeName]
+    const definition = getDataTypeInterfaceDefinition(typeName)
+    return {
+        moduleId: normalizedModuleId,
+        typeName,
+        interfaceName: meta.interfaceName,
+        moduleIds: meta.moduleIds,
+        description: meta.description,
+        hasDefinition: Boolean(definition),
+        interfaceDefinition: definition,
     }
 }
 
@@ -1250,7 +2131,7 @@ const server = new McpServer(
     },
     {
         instructions:
-            "本地数据使用两步流程：先调用 resolve-data-module 解析模块，再调用 query-data-module 在单模块内检索；密函请使用独立工具 query-missions。",
+            "本地数据建议先用 what-is-this 识别关键词所属模块和类型，再调用 query-all-data-modules 检索数据。类型定义用 query-data-type-definition，实时密函用 query-missions。",
     }
 )
 
@@ -1259,8 +2140,6 @@ server.registerTool(
     {
         title: "解析数据模块",
         description: `将模块名称解析为可查询模块 ID（类似 Context7 的 resolve-library-id）。
-
-你应先调用此工具，再调用 query-data-module。
 
 模块格式：
 - 本地模块：/local/<dataset>`,
@@ -1285,40 +2164,74 @@ server.registerTool(
 )
 
 server.registerTool(
-    "query-data-module",
+    "what-is-this",
     {
-        title: "查询数据模块",
-        description: `在指定 moduleId 内执行查询（类似 Context7 的 query-docs）。
+        title: "识别关键词所属模块与类型",
+        description: `通过“可配置别名库 + 值别名扩展 + 名称全文模糊搜索”识别关键词归属的模块与数据类型，供下一步查询使用。
 
-必须先通过 resolve-data-module 获取 moduleId，除非你已明确知道模块 ID。`,
+建议后续结合 query-all-data-modules 与 query-data-type-definition 使用。`,
         inputSchema: {
-            moduleId: z.string().describe("模块 ID，例如 /local/char、/local/weapon。"),
-            query: z.string().optional().describe("模糊查询关键词。"),
-            exactId: z.string().optional().describe("可选精确 ID 匹配（先过滤后搜索）。"),
-            fields: z.array(z.string()).optional().describe('本地模块字段白名单（如 ["名称", "技能.名称"]），用于降噪。'),
-            limit: z.number().int().min(1).max(50).optional().describe("返回条数，默认 10。"),
-            threshold: z.number().min(0).max(1).optional().describe("本地模块 Fuse 阈值，默认 0.3。"),
-            includeRaw: z.boolean().optional().describe("本地模块是否额外返回原始压缩记录（rawRecord）。默认 false。"),
+            keyword: z.string().describe("要识别的关键词（角色名、别名、模块名等）。"),
+            moduleIds: z.array(z.string()).optional().describe("可选模块路径范围（例如 /local/char、/local/weapon）。"),
+            limit: z.number().int().min(1).max(30).optional().describe("返回候选数量，默认 10。"),
+            threshold: z.number().min(0).max(1).optional().describe("模糊匹配阈值，默认 0.35。"),
         },
         annotations: {
             readOnlyHint: true,
         },
     },
-    async ({ moduleId, query, exactId, fields, limit, threshold, includeRaw }) => {
-        const selected = parseModuleId(moduleId)
-        const safeLimit = limit ?? 10
+    async ({ keyword, moduleIds, limit, threshold }) =>
+        toMcpText(whatIsThis(keyword, (moduleIds || []).map(item => item.trim()).filter(Boolean), limit ?? 10, threshold ?? 0.35))
+)
 
-        const payload = queryLocalModule(
-            selected.dataset,
+server.registerTool(
+    "query-all-data-modules",
+    {
+        title: "全模块模糊搜索",
+        description: `在多个本地模块（默认全模块）中执行统一模糊搜索。
+
+支持关键词检索、精确 ID 过滤与字段白名单降噪。`,
+        inputSchema: {
+            query: z.string().optional().describe("可选模糊查询关键词。"),
+            exactId: z.string().optional().describe("可选精确 ID 匹配（先过滤后搜索）。"),
+            moduleIds: z.array(z.string()).optional().describe("可选模块 ID 列表（例如 /local/char、/local/weapon）。不传则搜索全部模块。"),
+            fields: z.array(z.string()).optional().describe('字段白名单（如 ["名称", "技能.名称"]），用于降噪。'),
+            limit: z.number().int().min(1).max(200).optional().describe("返回条数，默认 20，最大 200。"),
+            threshold: z.number().min(0).max(1).optional().describe("Fuse 阈值，默认 0.35。"),
+            includeRaw: z.boolean().optional().describe("是否额外返回原始压缩记录（rawRecord）。默认 false。"),
+        },
+        annotations: {
+            readOnlyHint: true,
+        },
+    },
+    async ({ query, exactId, moduleIds, fields, limit, threshold, includeRaw }) => {
+        const payload = queryAllLocalModules(
             query,
             exactId,
+            (moduleIds || []).map(item => item.trim()).filter(Boolean),
             (fields || []).map(item => item.trim()).filter(Boolean),
-            safeLimit,
-            threshold ?? 0.3,
+            limit ?? 20,
+            threshold ?? 0.35,
             includeRaw ?? false
         )
         return toMcpText(payload)
     }
+)
+
+server.registerTool(
+    "query-data-type-definition",
+    {
+        title: "查询数据类型定义",
+        description: "返回数据类型的 interface 定义；支持传入 moduleId（模块路径）筛选可用类型。",
+        inputSchema: {
+            moduleId: z.string().optional().describe("可选模块路径，例如 /local/char。"),
+            typeName: z.enum(DATA_TYPE_ENUM_VALUES).optional().describe("数据类型枚举名；不传时返回全部类型。"),
+        },
+        annotations: {
+            readOnlyHint: true,
+        },
+    },
+    async ({ typeName, moduleId }) => toMcpText(queryDataTypeDefinitions(typeName, moduleId))
 )
 
 server.registerTool(

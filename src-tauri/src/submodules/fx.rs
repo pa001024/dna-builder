@@ -1,6 +1,6 @@
 use std::sync::{Arc, LazyLock, Mutex};
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use windows::Win32::Foundation::{
     COLORREF, ERROR_CLASS_ALREADY_EXISTS, GetLastError, HWND, LPARAM, LRESULT, RECT, WPARAM,
 };
@@ -9,9 +9,9 @@ use windows::Win32::Graphics::Gdi::{
     PAINTSTRUCT, PatBlt, ReleaseDC,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
-    CreateWindowExW, HWND_TOPMOST, RegisterClassExW, SW_HIDE, SW_SHOW, SWP_NOACTIVATE,
-    SWP_NOOWNERZORDER, SetWindowPos, ShowWindow, WNDCLASSEXW, WS_EX_LAYERED, WS_EX_TOOLWINDOW,
-    WS_EX_TRANSPARENT, WS_POPUP,
+    CreateWindowExW, HWND_TOPMOST, RegisterClassExW, SW_HIDE, SW_SHOW, SWP_HIDEWINDOW, SWP_NOACTIVATE,
+    SWP_NOMOVE, SWP_NOSIZE, SWP_NOOWNERZORDER, SetWindowPos, ShowWindow, ShowWindowAsync, WNDCLASSEXW,
+    WS_EX_LAYERED, WS_EX_TOOLWINDOW, WS_EX_TRANSPARENT, WS_POPUP,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
     DefWindowProcW, HCURSOR, HICON, IsWindow, WM_DESTROY, WM_PAINT, WNDCLASS_STYLES,
@@ -20,6 +20,9 @@ use windows::Win32::UI::WindowsAndMessaging::{
     GWLP_USERDATA, GetWindowLongPtrW, SetWindowLongPtrW,
 };
 use windows::core::{HSTRING, PCWSTR};
+
+/// drawBorder 默认显示时长（毫秒）。
+const DEFAULT_BORDER_TIMEOUT_MS: u64 = 2_000;
 
 /// 矩形覆盖层结构体，用于绘制边框
 struct RectOverlay {
@@ -290,27 +293,120 @@ impl RectOverlay {
     }
 }
 
-use std::sync::atomic::{AtomicBool, Ordering};
-
 use crate::submodules::win::win_get_client_pos;
 
-/// 覆盖层管理器结构体，包含覆盖层实例和上一次的标志位
+/// 覆盖层管理器结构体，包含覆盖层实例和隐藏任务序号。
 struct OverlayManager {
     overlay: Option<RectOverlay>,
-    last_flag: Option<Arc<std::sync::atomic::AtomicBool>>,
+    hide_deadline_at: Option<Instant>,
+    hide_worker_running: bool,
 }
 
 /// 全局覆盖层管理器实例
 static OVERLAY_MANAGER: LazyLock<Arc<Mutex<OverlayManager>>> = LazyLock::new(|| {
     Arc::new(Mutex::new(OverlayManager {
         overlay: None,
-        last_flag: None,
+        hide_deadline_at: None,
+        hide_worker_running: false,
     }))
 });
 
+/// 隐藏边框窗口（跨线程调用时优先使用异步隐藏）。
+fn hide_overlay_window(target_hwnd: HWND) {
+    unsafe {
+        if !IsWindow(Some(target_hwnd)).as_bool() {
+            return;
+        }
+        let _ = ShowWindowAsync(target_hwnd, SW_HIDE);
+        let _ = SetWindowPos(
+            target_hwnd,
+            None,
+            0,
+            0,
+            0,
+            0,
+            SWP_HIDEWINDOW | SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER,
+        );
+    }
+}
+
+/// 确保边框隐藏后台线程只启动一次，避免高频 drawBorder 导致线程爆炸。
+fn ensure_overlay_hide_worker_running() {
+    let should_spawn = if let Ok(mut manager_guard) = OVERLAY_MANAGER.lock() {
+        if manager_guard.hide_worker_running {
+            false
+        } else {
+            manager_guard.hide_worker_running = true;
+            true
+        }
+    } else {
+        false
+    };
+    if !should_spawn {
+        return;
+    }
+
+    thread::spawn(move || {
+        loop {
+            let mut hwnd_to_hide: Option<HWND> = None;
+            let mut should_exit = false;
+
+            if let Ok(mut manager_guard) = OVERLAY_MANAGER.lock() {
+                match manager_guard.hide_deadline_at {
+                    Some(deadline) => {
+                        if Instant::now() >= deadline {
+                            manager_guard.hide_deadline_at = None;
+                            hwnd_to_hide = manager_guard.overlay.as_ref().and_then(|overlay| overlay.hwnd);
+                        }
+                    }
+                    None => {
+                        manager_guard.hide_worker_running = false;
+                        should_exit = true;
+                    }
+                }
+            }
+
+            if let Some(target_hwnd) = hwnd_to_hide {
+                hide_overlay_window(target_hwnd);
+            }
+            if should_exit {
+                break;
+            }
+
+            thread::sleep(Duration::from_millis(30));
+        }
+    });
+}
+
+/// 立即隐藏 drawBorder 覆盖层。
+///
+/// 设计说明：
+/// 1. 先清理隐藏截止时间，停止当前显示；
+/// 2. 再执行窗口隐藏，确保脚本终止后边框可立即消失。
+pub fn hide_border_immediately() {
+    let hwnd_to_hide = if let Ok(mut manager_guard) = OVERLAY_MANAGER.lock() {
+        manager_guard.hide_deadline_at = None;
+        manager_guard.overlay.as_ref().and_then(|overlay| overlay.hwnd)
+    } else {
+        None
+    };
+
+    if let Some(target_hwnd) = hwnd_to_hide {
+        hide_overlay_window(target_hwnd);
+    }
+}
+
 /// 绘制边框函数
 /// 使用独立的透明窗口来绘制边框
-pub fn draw_border(hwnd: HWND, x: i32, y: i32, width: i32, height: i32, c: Option<u32>) {
+pub fn draw_border(
+    hwnd: HWND,
+    x: i32,
+    y: i32,
+    width: i32,
+    height: i32,
+    c: Option<u32>,
+    timeout_ms: Option<u64>,
+) {
     // 检查窗口是否有效
     if hwnd.0 == std::ptr::null_mut() {
         return;
@@ -330,13 +426,12 @@ pub fn draw_border(hwnd: HWND, x: i32, y: i32, width: i32, height: i32, c: Optio
         return;
     }
 
-    // 获取或创建覆盖层实例
-    if let Ok(mut manager_guard) = OVERLAY_MANAGER.lock() {
-        // 设置上一次的标志位为 true，让之前的隐藏线程退出
-        if let Some(last_flag) = manager_guard.last_flag.take() {
-            last_flag.store(true, Ordering::SeqCst);
-        }
+    // 归一化显示时长。非正值按 0 处理，表示尽快隐藏。
+    let hide_delay_ms = timeout_ms.unwrap_or(DEFAULT_BORDER_TIMEOUT_MS);
 
+    // 获取或创建覆盖层实例
+    let mut should_ensure_worker = false;
+    if let Ok(mut manager_guard) = OVERLAY_MANAGER.lock() {
         let overlay = manager_guard
             .overlay
             .get_or_insert_with(|| RectOverlay::new());
@@ -344,42 +439,10 @@ pub fn draw_border(hwnd: HWND, x: i32, y: i32, width: i32, height: i32, c: Optio
         // 显示边框
         overlay.show(abs_x, abs_y, width, height, color);
 
-        // 创建独立的标志位
-        let flag = Arc::new(AtomicBool::new(false));
-        // 保存当前标志位供下次使用
-        manager_guard.last_flag = Some(flag.clone());
-
-        // 2秒后隐藏
-        thread::spawn(move || {
-            // 等待2秒
-            thread::sleep(Duration::from_millis(2000));
-
-            // 检查标志位，如果为 true 则退出
-            if flag.load(Ordering::SeqCst) {
-                return;
-            }
-
-            // 仅在锁内做状态校验与句柄读取，避免持锁调用 ShowWindow 导致跨线程互锁。
-            let hwnd_to_hide = if let Ok(manager_guard) = OVERLAY_MANAGER.lock() {
-                // 再次确认当前线程对应的是最新一次 draw_border 的隐藏任务，避免旧任务误隐藏新边框。
-                let is_current_task = manager_guard
-                    .last_flag
-                    .as_ref()
-                    .is_some_and(|current_flag| Arc::ptr_eq(current_flag, &flag));
-                if !is_current_task {
-                    None
-                } else {
-                    manager_guard.overlay.as_ref().and_then(|overlay| overlay.hwnd)
-                }
-            } else {
-                None
-            };
-
-            if let Some(target_hwnd) = hwnd_to_hide {
-                unsafe {
-                    let _ = ShowWindow(target_hwnd, SW_HIDE);
-                }
-            }
-        });
+        manager_guard.hide_deadline_at = Some(Instant::now() + Duration::from_millis(hide_delay_ms));
+        should_ensure_worker = true;
+    }
+    if should_ensure_worker {
+        ensure_overlay_hide_worker_running();
     }
 }

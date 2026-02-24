@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, reactive } from "vue"
+import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue"
 import TypewriterText from "@/components/TypewriterText.vue"
 import { charMap, LeveledChar } from "@/data"
 import { npcMap } from "@/data/d/npc.data"
@@ -8,6 +8,7 @@ import { type Dialogue, type DialogueOption, getImprType, getRegionType } from "
 import { questChainMap } from "@/data/d/questchain.data"
 import { resourceMap } from "@/data/d/resource.data"
 import { useSettingStore } from "@/store/setting"
+import { buildDialogueVoiceUrl } from "@/utils/dialogue-voice"
 import { getRewardDetails } from "@/utils/reward-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 
@@ -28,6 +29,17 @@ const props = defineProps<{
 
 const settingStore = useSettingStore()
 const selectedOptionMap = reactive<Record<string, number>>({})
+const currentVoiceKey = ref<string | null>(null)
+const isVoicePlaying = ref(false)
+const dialogueAudioRef = ref<HTMLAudioElement | null>(null)
+const autoPlayEnabled = ref(false)
+const autoPlayCurrentIndex = ref(-1)
+const dialogueElementMap = new Map<number, HTMLElement>()
+const preloadedDialogueAudioMap = new Map<string, HTMLAudioElement>()
+const AUTO_PLAY_PRELOAD_AHEAD_COUNT = 2
+const lastManualPlayedDialogueId = ref<number | null>(null)
+const isRecoveringAutoPlayFromAudioError = ref(false)
+const nicknameNpcIds = [...npcMap.entries()].filter(([, npc]) => npc.name === "{nickname}").map(([npcId]) => npcId)
 
 /**
  * 获取当前剧情文本替换配置。
@@ -77,6 +89,11 @@ const consumeEntries = computed<ConsumeEntry[]>(() => {
  */
 const dialogueChain = computed(() => {
     return buildDialogueChain(props.partyTopic.dialogues ?? [], getPartyTopicScopeKey(props.partyTopic.id))
+})
+const hasPlayableDialogue = computed(() => {
+    return dialogueChain.value.some(item => {
+        return !!getDialogueVoiceUrl(item.dialogue)
+    })
 })
 
 /**
@@ -273,6 +290,406 @@ function getSpeakerAvatar(npcId: number | undefined): string {
 }
 
 /**
+ * 生成对话语音状态键，用于识别当前播放条目。
+ * @param dialogue 对话条目
+ * @returns 播放状态键
+ */
+function getDialogueVoiceKey(dialogue: Dialogue): string {
+    return `${dialogue.id}-${dialogue.voice || ""}`
+}
+
+/**
+ * 构建对话语音播放地址。
+ * @param dialogue 对话条目
+ * @returns 语音 URL
+ */
+function getDialogueVoiceUrl(dialogue: Dialogue): string {
+    return buildDialogueVoiceUrl({
+        voice: dialogue.voice,
+        text: dialogue.content,
+        npcId: dialogue.npc,
+        forceGenderNpcIds: nicknameNpcIds,
+        language: settingStore.lang,
+        gender: settingStore.protagonistGender,
+        gender2: settingStore.protagonistGender2,
+    })
+}
+
+/**
+ * 注册对话卡片 DOM 引用，供自动播放滚动定位使用。
+ * @param dialogueId 对话 ID
+ * @param element 对话卡片元素
+ */
+function setDialogueElement(dialogueId: number, element: Element | ComponentPublicInstance | null) {
+    if (!element) {
+        dialogueElementMap.delete(dialogueId)
+        return
+    }
+
+    const targetElement = element instanceof Element ? element : (element.$el as Element | null)
+    if (!targetElement) {
+        dialogueElementMap.delete(dialogueId)
+        return
+    }
+
+    dialogueElementMap.set(dialogueId, targetElement as HTMLElement)
+}
+
+/**
+ * 滚动到目标对话卡片。
+ * @param dialogueId 对话 ID
+ */
+function scrollToDialogue(dialogueId: number): void {
+    const targetElement = dialogueElementMap.get(dialogueId)
+    if (!targetElement) {
+        return
+    }
+
+    nextTick(() => {
+        targetElement.scrollIntoView({ behavior: "smooth", block: "center" })
+    })
+}
+
+/**
+ * 从指定索引开始查找下一个可播放对话。
+ * @param startIndex 起始索引
+ * @returns 可播放索引，找不到返回 -1
+ */
+function findNextPlayableDialogueIndex(startIndex: number): number {
+    for (let index = Math.max(0, startIndex); index < dialogueChain.value.length; index += 1) {
+        const targetDialogue = dialogueChain.value[index].dialogue
+        if (getDialogueVoiceUrl(targetDialogue)) {
+            return index
+        }
+    }
+
+    return -1
+}
+
+/**
+ * 根据当前语音状态键反查对话索引。
+ * @returns 对话索引，找不到返回 -1
+ */
+function getCurrentDialogueIndexByVoiceKey(): number {
+    if (!currentVoiceKey.value) {
+        return -1
+    }
+
+    return dialogueChain.value.findIndex(item => getDialogueVoiceKey(item.dialogue) === currentVoiceKey.value)
+}
+
+/**
+ * 记录用户手动播放的对话 ID，用于自动播放起点定位。
+ * @param dialogueId 对话 ID
+ */
+function markManualPlayedDialogue(dialogueId: number): void {
+    lastManualPlayedDialogueId.value = dialogueId
+}
+
+/**
+ * 根据对话 ID 查找当前链路中的索引。
+ * @param dialogueId 对话 ID
+ * @returns 索引，找不到返回 -1
+ */
+function getDialogueIndexById(dialogueId: number | null): number {
+    if (dialogueId === null) {
+        return -1
+    }
+
+    return dialogueChain.value.findIndex(item => item.dialogue.id === dialogueId)
+}
+
+/**
+ * 清理自动播放预加载缓存，释放音频对象引用。
+ */
+function clearPreloadedDialogueVoices(): void {
+    for (const preloadAudio of preloadedDialogueAudioMap.values()) {
+        preloadAudio.pause()
+        preloadAudio.removeAttribute("src")
+        preloadAudio.load()
+    }
+    preloadedDialogueAudioMap.clear()
+}
+
+/**
+ * 预加载指定索引的对话语音。
+ * @param index 对话索引
+ */
+function preloadDialogueVoiceByIndex(index: number): void {
+    if (!autoPlayEnabled.value) {
+        return
+    }
+
+    const targetItem = dialogueChain.value[index]
+    if (!targetItem) {
+        return
+    }
+
+    const voiceUrl = getDialogueVoiceUrl(targetItem.dialogue)
+    if (!voiceUrl || preloadedDialogueAudioMap.has(voiceUrl)) {
+        return
+    }
+
+    const preloadAudio = new Audio()
+    preloadAudio.preload = "auto"
+    preloadAudio.src = voiceUrl
+    preloadAudio.load()
+    preloadedDialogueAudioMap.set(voiceUrl, preloadAudio)
+}
+
+/**
+ * 预加载当前索引后续的可播放语音，降低自动连播切换卡顿。
+ * @param currentIndex 当前对话索引
+ * @param preloadCount 预加载数量
+ */
+function preloadUpcomingDialogueVoices(currentIndex: number, preloadCount = AUTO_PLAY_PRELOAD_AHEAD_COUNT): void {
+    if (!autoPlayEnabled.value) {
+        return
+    }
+
+    let loadedCount = 0
+    for (let index = currentIndex + 1; index < dialogueChain.value.length; index += 1) {
+        const targetDialogue = dialogueChain.value[index].dialogue
+        if (!getDialogueVoiceUrl(targetDialogue)) {
+            continue
+        }
+
+        preloadDialogueVoiceByIndex(index)
+        loadedCount += 1
+        if (loadedCount >= preloadCount) {
+            break
+        }
+    }
+}
+
+/**
+ * 自动播放失败恢复：从指定索引开始尝试后续可播放条目，直到成功或耗尽。
+ * @param startIndex 起始索引
+ */
+async function recoverAutoPlayAfterFailure(startIndex: number): Promise<void> {
+    if (!autoPlayEnabled.value || isRecoveringAutoPlayFromAudioError.value) {
+        return
+    }
+
+    isRecoveringAutoPlayFromAudioError.value = true
+    try {
+        let nextPlayableIndex = findNextPlayableDialogueIndex(startIndex)
+        while (nextPlayableIndex !== -1 && autoPlayEnabled.value) {
+            const played = await playDialogueByIndex(nextPlayableIndex, true)
+            if (played) {
+                return
+            }
+
+            nextPlayableIndex = findNextPlayableDialogueIndex(nextPlayableIndex + 1)
+        }
+
+        stopAutoPlay()
+    } finally {
+        isRecoveringAutoPlayFromAudioError.value = false
+    }
+}
+
+/**
+ * 播放指定索引的对话语音。
+ * @param index 对话索引
+ * @param skipRecovery 是否跳过自动失败恢复（供恢复流程内部调用）
+ * @returns 是否成功触发播放
+ */
+async function playDialogueByIndex(index: number, skipRecovery = false): Promise<boolean> {
+    const audio = dialogueAudioRef.value
+    const targetItem = dialogueChain.value[index]
+    if (!audio || !targetItem) {
+        return false
+    }
+
+    const targetDialogue = targetItem.dialogue
+    const voiceUrl = getDialogueVoiceUrl(targetDialogue)
+    if (!voiceUrl) {
+        return false
+    }
+
+    autoPlayCurrentIndex.value = index
+    currentVoiceKey.value = getDialogueVoiceKey(targetDialogue)
+    scrollToDialogue(targetDialogue.id)
+
+    audio.pause()
+    audio.currentTime = 0
+    audio.src = voiceUrl
+    preloadUpcomingDialogueVoices(index)
+
+    try {
+        await audio.play()
+        return true
+    } catch (error) {
+        currentVoiceKey.value = null
+        isVoicePlaying.value = false
+        console.error("光阴集语音播放失败:", error)
+
+        if (autoPlayEnabled.value && !skipRecovery) {
+            void recoverAutoPlayAfterFailure(index + 1)
+        }
+        return false
+    }
+}
+
+/**
+ * 启动自动播放。
+ */
+async function startAutoPlay(): Promise<void> {
+    if (!hasPlayableDialogue.value) {
+        autoPlayEnabled.value = false
+        return
+    }
+
+    const currentIndex = getCurrentDialogueIndexByVoiceKey()
+    if (currentIndex !== -1 && isVoicePlaying.value) {
+        autoPlayCurrentIndex.value = currentIndex
+        scrollToDialogue(dialogueChain.value[currentIndex].dialogue.id)
+        preloadUpcomingDialogueVoices(currentIndex)
+        return
+    }
+
+    const manualAnchorIndex = getDialogueIndexById(lastManualPlayedDialogueId.value)
+    const startFromIndex = manualAnchorIndex !== -1 ? manualAnchorIndex + 1 : 0
+    const startIndex = findNextPlayableDialogueIndex(startFromIndex)
+    if (startIndex === -1) {
+        autoPlayEnabled.value = false
+        return
+    }
+
+    await playDialogueByIndex(startIndex)
+}
+
+/**
+ * 停止自动播放并清空自动播放进度。
+ */
+function stopAutoPlay(): void {
+    autoPlayEnabled.value = false
+    autoPlayCurrentIndex.value = -1
+    clearPreloadedDialogueVoices()
+}
+
+/**
+ * 自动播放开关变更处理。
+ */
+function handleAutoPlaySwitchChange(): void {
+    if (!autoPlayEnabled.value) {
+        stopAutoPlay()
+        return
+    }
+
+    void startAutoPlay()
+}
+
+/**
+ * 停止当前对话语音播放并重置状态。
+ */
+function stopDialogueVoicePlayback(): void {
+    const audio = dialogueAudioRef.value
+    if (!audio) {
+        return
+    }
+    audio.pause()
+    audio.removeAttribute("src")
+    audio.load()
+    currentVoiceKey.value = null
+    isVoicePlaying.value = false
+    autoPlayCurrentIndex.value = -1
+}
+
+/**
+ * 切换对话语音播放状态（懒加载，点击时才加载音频）。
+ * @param dialogue 对话条目
+ */
+async function toggleDialogueVoicePlayback(dialogue: Dialogue): Promise<void> {
+    markManualPlayedDialogue(dialogue.id)
+
+    const audio = dialogueAudioRef.value
+    if (!audio) {
+        return
+    }
+
+    const voiceUrl = getDialogueVoiceUrl(dialogue)
+    if (!voiceUrl) {
+        return
+    }
+
+    const voiceKey = getDialogueVoiceKey(dialogue)
+    if (currentVoiceKey.value === voiceKey) {
+        const currentIndex = getCurrentDialogueIndexByVoiceKey()
+        if (currentIndex !== -1) {
+            autoPlayCurrentIndex.value = currentIndex
+            scrollToDialogue(dialogue.id)
+        }
+
+        if (audio.paused) {
+            try {
+                await audio.play()
+            } catch (error) {
+                console.error("光阴集语音播放失败:", error)
+            }
+        } else {
+            audio.pause()
+        }
+        return
+    }
+
+    const targetIndex = dialogueChain.value.findIndex(item => item.dialogue.id === dialogue.id)
+    if (targetIndex === -1) {
+        return
+    }
+    await playDialogueByIndex(targetIndex)
+}
+
+/**
+ * 播放器播放事件回调。
+ */
+function handleDialogueVoicePlay(): void {
+    isVoicePlaying.value = true
+}
+
+/**
+ * 播放器暂停事件回调。
+ */
+function handleDialogueVoicePause(): void {
+    isVoicePlaying.value = false
+}
+
+/**
+ * 播放器结束事件回调。
+ */
+function handleDialogueVoiceEnded(): void {
+    isVoicePlaying.value = false
+    currentVoiceKey.value = null
+
+    if (!autoPlayEnabled.value) {
+        return
+    }
+
+    const nextPlayableIndex = findNextPlayableDialogueIndex(autoPlayCurrentIndex.value + 1)
+    if (nextPlayableIndex === -1) {
+        stopAutoPlay()
+        return
+    }
+
+    void playDialogueByIndex(nextPlayableIndex)
+}
+
+/**
+ * 播放器加载失败事件回调。
+ */
+function handleDialogueVoiceError(): void {
+    currentVoiceKey.value = null
+    isVoicePlaying.value = false
+
+    if (!autoPlayEnabled.value) {
+        return
+    }
+
+    void recoverAutoPlayAfterFailure(autoPlayCurrentIndex.value + 1)
+}
+
+/**
  * 提取选项中的印象变化条目。
  * @param option 对话选项
  * @returns 印象条目列表
@@ -321,6 +738,31 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
 }
 
 const partyTopicReward = computed(() => getRewardDetails(props.partyTopic.reward))
+
+watch(
+    () => [settingStore.lang, settingStore.protagonistGender, settingStore.protagonistGender2],
+    () => {
+        stopAutoPlay()
+        stopDialogueVoicePlayback()
+    }
+)
+
+watch(dialogueChain, () => {
+    clearPreloadedDialogueVoices()
+
+    if (!autoPlayEnabled.value) {
+        return
+    }
+
+    void startAutoPlay()
+})
+
+onBeforeUnmount(() => {
+    stopAutoPlay()
+    stopDialogueVoicePlayback()
+    dialogueElementMap.clear()
+    clearPreloadedDialogueVoices()
+})
 </script>
 
 <template>
@@ -402,10 +844,28 @@ const partyTopicReward = computed(() => getRewardDetails(props.partyTopic.reward
         </div>
 
         <div v-if="partyTopic.dialogues?.length" class="card bg-base-100 border border-base-200 rounded p-3">
-            <h3 class="font-bold mb-2">剧情对话 ({{ partyTopic.dialogues.length }} 条)</h3>
+            <div class="mb-2 flex items-center justify-between gap-3">
+                <h3 class="font-bold">剧情对话 ({{ partyTopic.dialogues.length }} 条)</h3>
+                <label class="flex items-center gap-2 text-xs text-base-content/80 select-none">
+                    <span>自动播放</span>
+                    <input
+                        v-model="autoPlayEnabled"
+                        type="checkbox"
+                        class="toggle toggle-primary toggle-sm"
+                        :disabled="!hasPlayableDialogue"
+                        @change="handleAutoPlaySwitchChange"
+                    />
+                </label>
+            </div>
 
             <TransitionGroup v-if="dialogueChain.length" name="dialogue-list" tag="div" class="space-y-2">
-                <div v-for="item in dialogueChain" :key="item.dialogue.id" class="dialogue-card p-2 bg-base-200 rounded space-y-2">
+                <div
+                    v-for="item in dialogueChain"
+                    :key="item.dialogue.id"
+                    :ref="element => setDialogueElement(item.dialogue.id, element)"
+                    class="dialogue-card p-2 bg-base-200 rounded space-y-2"
+                    :class="{ 'dialogue-card-playing': isVoicePlaying && currentVoiceKey === getDialogueVoiceKey(item.dialogue) }"
+                >
                     <div class="flex items-start gap-2">
                         <img
                             v-if="item.dialogue.npc"
@@ -416,8 +876,24 @@ const partyTopicReward = computed(() => getRewardDetails(props.partyTopic.reward
                         />
 
                         <div class="min-w-0 flex-1 text-xs">
-                            <div class="font-medium text-primary mb-1" v-if="item.dialogue.npc">
-                                {{ getSpeakerName(item.dialogue.npc) }}
+                            <div class="mb-1 flex items-center gap-2">
+                                <div class="font-medium text-primary min-w-0 truncate" v-if="item.dialogue.npc">
+                                    {{ getSpeakerName(item.dialogue.npc) }}
+                                </div>
+                                <button
+                                    v-if="item.dialogue.voice"
+                                    type="button"
+                                    class="btn btn-ghost btn-xs shrink-0 ml-auto"
+                                    @click="toggleDialogueVoicePlayback(item.dialogue)"
+                                >
+                                    <Icon
+                                        :icon="
+                                            currentVoiceKey === getDialogueVoiceKey(item.dialogue) && isVoicePlaying
+                                                ? 'ri:pause-circle-line'
+                                                : 'ri:play-circle-line'
+                                        "
+                                    />
+                                </button>
                             </div>
                             <TypewriterText
                                 :text="formatStoryText(item.dialogue.content)"
@@ -489,6 +965,15 @@ const partyTopicReward = computed(() => getRewardDetails(props.partyTopic.reward
             </TransitionGroup>
 
             <div v-else class="text-sm text-base-content/70">暂无可展示的对话链</div>
+            <audio
+                ref="dialogueAudioRef"
+                class="hidden"
+                :preload="autoPlayEnabled ? 'auto' : 'none'"
+                @ended="handleDialogueVoiceEnded"
+                @error="handleDialogueVoiceError"
+                @pause="handleDialogueVoicePause"
+                @play="handleDialogueVoicePlay"
+            />
         </div>
     </div>
 </template>
@@ -504,7 +989,15 @@ const partyTopicReward = computed(() => getRewardDetails(props.partyTopic.reward
 
 .dialogue-card:hover {
     transform: translateY(-1px);
-    box-shadow: 0 8px 24px hsl(var(--b3) / 0.25);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--color-base-content) 16%, transparent);
+}
+
+.dialogue-card-playing {
+    border: 1px solid color-mix(in srgb, var(--color-primary) 60%, transparent);
+    background: color-mix(in srgb, var(--color-primary) 8%, var(--color-base-100));
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--color-primary) 24%, transparent),
+        0 10px 24px color-mix(in srgb, var(--color-primary) 18%, transparent);
 }
 
 .dialogue-list-enter-active,

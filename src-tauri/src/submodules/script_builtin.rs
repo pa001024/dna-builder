@@ -23,7 +23,7 @@ use std::{
         mpsc,
     },
     thread,
-    time::{Duration, SystemTime, UNIX_EPOCH},
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 use tauri::Emitter;
 use windows::Win32::Foundation::HWND;
@@ -39,13 +39,16 @@ use crate::submodules::{
     ocr::{self, OcrInitConfig},
     predict_rotation::predict_rotation,
     route::{find_path_direction_coords, predict_depth},
-    script::{SCRIPT_STOP_INTERRUPT_MESSAGE, should_stop_current_script},
+    script::{
+        SCRIPT_STOP_INTERRUPT_MESSAGE, capture_current_script_stop_snapshot,
+        run_with_script_stop_snapshot, should_stop_current_script,
+    },
     script_vision::{
         batch_match_color_impl, color_filter_hsl_impl, color_filter_impl, color_key_match_impl,
         draw_bboxes_impl, draw_contours_impl, find_contours_impl, hamming_distance_hex,
         match_orb_feature_impl, morphology_ex_impl, normalize_hash_hex, orb_feature_impl,
-        orb_match_count_impl, perceptual_hash_impl, segment_single_line_chars_impl,
-        sift_locate_impl,
+        orb_match_count_impl, perceptual_hash_impl, preprocess_minimap_for_sift_impl,
+        segment_single_line_chars_impl, sift_locate_impl, sift_stitch_impl,
     },
     tpl::{get_template, get_template_b64},
     tpl_match::match_template,
@@ -1229,18 +1232,21 @@ fn _mc(
     button: Option<JsValue>,
     ctx: &mut Context,
 ) -> JsResult<JsValue> {
-    // 兼容重载：mc("right") / mc("x1")
-    // 当首参是字符串时，将其视为 button，并忽略 hwnd。
-    let (hwnd_arg, x_arg, y_arg, button_arg) = match hwnd {
-        Some(first) if first.is_string() => {
-            let merged_button = if button.is_some() {
-                button
+    // 兼容重载：
+    // 1) mc("right") / mc("x1")
+    // 2) mc(hwnd, "middle")
+    // 通过参数类型自动判断 button 所在位置。
+    let (hwnd_arg, x_arg, y_arg, button_arg) = match (hwnd, x, y, button) {
+        (Some(first), x_arg, y_arg, button_arg) if first.is_string() => {
+            let merged_button = if button_arg.is_some() {
+                button_arg
             } else {
                 Some(first)
             };
-            (None, x, y, merged_button)
+            (None, x_arg, y_arg, merged_button)
         }
-        other => (other, x, y, button),
+        (hwnd_arg, Some(second), None, None) if second.is_string() => (hwnd_arg, None, None, Some(second)),
+        (hwnd_arg, x_arg, y_arg, button_arg) => (hwnd_arg, x_arg, y_arg, button_arg),
     };
 
     let hwnd = HWND(
@@ -1567,7 +1573,7 @@ fn _kb(
     let resolvers_clone = resolvers.clone();
     ctx.enqueue_job(
         NativeAsyncJob::new(async move |context| {
-            let async_result = tokio::task::spawn_blocking(move || {
+            let async_result = _spawn_blocking_with_script_stop_snapshot(move || {
                 let hwnd = HWND(hwnd_raw as *mut std::ffi::c_void);
                 if hwnd.is_invalid() {
                     key_press(&key, duration);
@@ -1726,6 +1732,16 @@ fn _throw_if_script_stop_requested() -> JsResult<()> {
             .into());
     }
     Ok(())
+}
+
+/// 在阻塞线程中执行任务，并继承当前脚本线程的停止快照。
+fn _spawn_blocking_with_script_stop_snapshot<F, R>(task: F) -> tokio::task::JoinHandle<R>
+where
+    F: FnOnce() -> R + Send + 'static,
+    R: Send + 'static,
+{
+    let snapshot = capture_current_script_stop_snapshot();
+    tokio::task::spawn_blocking(move || run_with_script_stop_snapshot(snapshot, task))
 }
 
 /// 从窗口获取图像 Mat 对象函数。
@@ -2120,7 +2136,7 @@ fn _download_file(
 
     ctx.enqueue_job(
         NativeAsyncJob::new(async move |context| {
-            let async_result = tokio::task::spawn_blocking(move || -> Result<(), String> {
+            let async_result = _spawn_blocking_with_script_stop_snapshot(move || -> Result<(), String> {
                 let target_path = Path::new(resolved_filename.as_str());
 
                 // force=false 且文件已存在时直接返回成功，不重复下载。
@@ -2136,7 +2152,14 @@ fn _download_file(
                     })?;
                 }
 
-                let response = reqwest::blocking::get(url.as_str())
+                let client = reqwest::blocking::Client::builder()
+                    .connect_timeout(Duration::from_secs(8))
+                    .timeout(Duration::from_secs(30))
+                    .build()
+                    .map_err(|e| format!("初始化下载客户端失败: {e}"))?;
+                let response = client
+                    .get(url.as_str())
+                    .send()
                     .map_err(|e| format!("请求下载地址失败: {e}"))?;
                 if !response.status().is_success() {
                     return Err(format!("下载失败，HTTP 状态码: {}", response.status()));
@@ -2457,7 +2480,7 @@ fn _select_roi(
 
     ctx.enqueue_job(
         NativeAsyncJob::new(async move |context| {
-            let async_result = tokio::task::spawn_blocking(move || {
+            let async_result = _spawn_blocking_with_script_stop_snapshot(move || {
                 let roi_result = opencv::highgui::select_roi(
                     &title,
                     &mat_clone,
@@ -2681,6 +2704,132 @@ fn _sift_locate(
         ctx
     );
 
+    Ok(result_obj.into())
+}
+
+/// 小地图预处理函数：遮蔽圆盘外区域、中心角色区域与朝向高亮锥形区域。
+///
+/// 参数：
+/// - `img`: 输入 Mat
+/// - `centerX/centerY`: 圆心坐标（默认图像中心）
+/// - `radius`: 小地图半径（默认 min(w,h)/2 - 1）
+/// - `coneAngleDeg`: 视角锥形角度（默认 70，<=0 表示不遮蔽锥形）
+/// - `innerRadius`: 中心遮罩半径（默认 radius*0.22，<=0 表示不遮蔽中心）
+/// - `headingDeg`: 锥形方向角（默认 -90，即向上）
+fn _preprocess_minimap_for_sift(
+    js_img_mat: Option<JsValue>,
+    center_x: Option<JsValue>,
+    center_y: Option<JsValue>,
+    radius: Option<JsValue>,
+    cone_angle_deg: Option<JsValue>,
+    inner_radius: Option<JsValue>,
+    heading_deg: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+    if img_mat.rows() <= 0 || img_mat.cols() <= 0 {
+        return Err(JsNativeError::typ().with_message("输入 Mat 尺寸无效").into());
+    }
+
+    let cols = img_mat.cols();
+    let rows = img_mat.rows();
+    let default_center_x = cols / 2;
+    let default_center_y = rows / 2;
+    let default_radius = (cols.min(rows) / 2 - 1).max(1);
+    let default_inner_radius = ((default_radius as f64) * 0.22).round() as i32;
+
+    let center_x = center_x
+        .unwrap_or_else(|| js_value!(default_center_x))
+        .to_number(ctx)? as i32;
+    let center_y = center_y
+        .unwrap_or_else(|| js_value!(default_center_y))
+        .to_number(ctx)? as i32;
+    let radius = radius
+        .unwrap_or_else(|| js_value!(default_radius))
+        .to_number(ctx)? as i32;
+    let cone_angle_deg = cone_angle_deg
+        .unwrap_or_else(|| js_value!(70.0))
+        .to_number(ctx)?;
+    let inner_radius = inner_radius
+        .unwrap_or_else(|| js_value!(default_inner_radius))
+        .to_number(ctx)? as i32;
+    let heading_deg = heading_deg
+        .unwrap_or_else(|| js_value!(-90.0))
+        .to_number(ctx)?;
+
+    let out = preprocess_minimap_for_sift_impl(
+        &img_mat,
+        center_x,
+        center_y,
+        radius,
+        cone_angle_deg,
+        inner_radius,
+        heading_deg,
+    )
+    .map_err(|msg| JsNativeError::error().with_message(msg))?;
+    Box::new(out).into_js(ctx)
+}
+
+/// SIFT 拼接函数：将 patch 对齐并融合到 base，必要时自动扩展画布。
+fn _sift_stitch(
+    js_base_mat: Option<JsValue>,
+    js_patch_mat: Option<JsValue>,
+    min_good_matches: Option<JsValue>,
+    min_inliers: Option<JsValue>,
+    ransac_reproj_threshold: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_base_mat = js_base_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let base_mat = (*js_base_mat.borrow().data().inner).clone();
+    let js_patch_mat = js_patch_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let patch_mat = (*js_patch_mat.borrow().data().inner).clone();
+
+    let min_good_matches = min_good_matches
+        .unwrap_or_else(|| js_value!(10))
+        .to_number(ctx)? as i32;
+    let min_inliers = min_inliers.unwrap_or_else(|| js_value!(8)).to_number(ctx)? as i32;
+    let ransac_reproj_threshold = ransac_reproj_threshold
+        .unwrap_or_else(|| js_value!(3.0))
+        .to_number(ctx)?;
+
+    let result = sift_stitch_impl(
+        &base_mat,
+        &patch_mat,
+        min_good_matches,
+        min_inliers,
+        ransac_reproj_threshold,
+    )
+    .map_err(|msg| JsNativeError::error().with_message(msg))?;
+
+    let Some((stitched, x, y, w, h, good_matches, inliers, corners)) = result else {
+        return Ok(JsValue::undefined());
+    };
+
+    let js_image = Box::new(stitched).into_js(ctx)?;
+    let js_corners = JsArray::new(ctx);
+    for point in corners {
+        js_corners.push(js_value!([point.x, point.y], ctx), ctx)?;
+    }
+
+    let result_obj = js_object!(
+        {
+            image: js_image,
+            pos: js_value!([x, y], ctx),
+            size: js_value!([w, h], ctx),
+            bbox: js_value!([x, y, w, h], ctx),
+            goodMatches: good_matches,
+            inliers: inliers,
+            corners: js_corners,
+        },
+        ctx
+    );
     Ok(result_obj.into())
 }
 
@@ -3025,7 +3174,7 @@ fn _find_color_and_match_template(
 
     ctx.enqueue_job(
         NativeAsyncJob::new(async move |context| {
-            let async_result = tokio::task::spawn_blocking(move || {
+            let async_result = _spawn_blocking_with_script_stop_snapshot(move || {
                 find_color_and_match_template(&img_mat, &tpl_mat, bgr_color, tolerance)
             })
             .await;
@@ -3093,9 +3242,10 @@ fn _match_template(
 
     ctx.enqueue_job(
         NativeAsyncJob::new(async move |context| {
-            let async_result =
-                tokio::task::spawn_blocking(move || match_template(&img_mat, &tpl_mat, tolerance))
-                    .await;
+            let async_result = _spawn_blocking_with_script_stop_snapshot(move || {
+                match_template(&img_mat, &tpl_mat, tolerance)
+            })
+            .await;
 
             let context = &mut context.borrow_mut();
             match async_result {
@@ -3204,13 +3354,16 @@ fn _wait_color(
     let resolvers_clone = resolvers.clone();
     ctx.enqueue_job(
         NativeAsyncJob::new(async move |context| {
-            let async_result = tokio::task::spawn_blocking(move || {
+            let async_result = _spawn_blocking_with_script_stop_snapshot(move || {
                 let hwnd = HWND(hwnd_raw as *mut std::ffi::c_void);
                 let deadline = Duration::from_millis(timeout_ms);
                 let start = std::time::Instant::now();
                 let poll_interval = Duration::from_millis(30);
 
                 loop {
+                    if should_stop_current_script() {
+                        return false;
+                    }
                     if let Some(img_mat) = capture_window_wgc(hwnd) {
                         let matched = check_color_mat(&img_mat, x, y, color, tolerance_abs);
                         let condition_met = if wait_for_match { matched } else { !matched };
@@ -3264,6 +3417,8 @@ fn _read_config(
     default_value: Option<JsValue>,
     ctx: &mut Context,
 ) -> JsResult<JsValue> {
+    _throw_if_script_stop_requested()?;
+
     let name = name
         .unwrap_or_else(|| JsValue::undefined())
         .to_string(ctx)?
@@ -3333,13 +3488,30 @@ fn _read_config(
             .into());
     }
 
-    let response = rx.recv_timeout(Duration::from_secs(10)).ok();
+    let wait_deadline = Instant::now() + Duration::from_secs(10);
+    let response = loop {
+        if should_stop_current_script() {
+            break None;
+        }
+        let now = Instant::now();
+        if now >= wait_deadline {
+            break None;
+        }
+        let wait_for = (wait_deadline - now).min(Duration::from_millis(100));
+        match rx.recv_timeout(wait_for) {
+            Ok(value) => break Some(value),
+            Err(mpsc::RecvTimeoutError::Timeout) => continue,
+            Err(mpsc::RecvTimeoutError::Disconnected) => break None,
+        }
+    };
     {
         let mut pending = _script_config_pending_map().lock().map_err(|e| {
             JsNativeError::error().with_message(format!("配置请求映射锁失败: {e:?}"))
         })?;
         pending.remove(&request_id);
     }
+
+    _throw_if_script_stop_requested()?;
 
     let result_value = if let Some(response_value) = response {
         _coerce_json_to_script_config_value(&response_value, &format_spec, &default_value)
@@ -3474,6 +3646,7 @@ fn _draw_border(
     y: Option<JsValue>,
     w: Option<JsValue>,
     h: Option<JsValue>,
+    timeout: Option<JsValue>,
     ctx: &mut Context,
 ) -> JsResult<JsValue> {
     let hwnd = HWND(
@@ -3484,15 +3657,30 @@ fn _draw_border(
     let y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
     let w = w.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
     let h = h.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let timeout_ms = timeout
+        .map(|value| value.to_number(ctx))
+        .transpose()?
+        .map(|ms| ms.max(0.0) as u64);
 
-    draw_border(hwnd, x, y, w, h, Some(0xFF0000));
+    draw_border(hwnd, x, y, w, h, Some(0xFF0000), timeout_ms);
     Ok(JsValue::undefined())
 }
 
 /// 延迟函数
 fn _s(ms: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
     let ms = ms.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as u64;
-    thread::sleep(Duration::from_millis(ms));
+    let total = Duration::from_millis(ms);
+    let started_at = Instant::now();
+    let poll_step = Duration::from_millis(20);
+    loop {
+        _throw_if_script_stop_requested()?;
+        let elapsed = started_at.elapsed();
+        if elapsed >= total {
+            break;
+        }
+        let remain = total - elapsed;
+        thread::sleep(remain.min(poll_step));
+    }
     Ok(JsValue::undefined())
 }
 
@@ -3918,6 +4106,14 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     let f = _sift_locate.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("siftLocate"), 2, f)?;
 
+    // 小地图 SIFT 预处理函数（遮蔽圆盘外、中心与视角锥形）
+    let f = _preprocess_minimap_for_sift.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("preprocessMinimapForSift"), 7, f)?;
+
+    // SIFT 自动拼接函数（对齐 patch 到 base 并融合）
+    let f = _sift_stitch.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("siftStitch"), 5, f)?;
+
     // 感知哈希函数（支持彩色）
     let f = _perceptual_hash.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("perceptualHash"), 2, f)?;
@@ -3964,7 +4160,7 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
 
     // 边框绘制函数
     let f = _draw_border.into_js_function_copied(context);
-    context.register_global_builtin_callable(js_string!("drawBorder"), 5, f)?;
+    context.register_global_builtin_callable(js_string!("drawBorder"), 6, f)?;
 
     // 颜色矩阵检查函数
     let f = _cc.into_js_function_copied(context);

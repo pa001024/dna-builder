@@ -3,19 +3,29 @@ import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { charMap } from "@/data"
-import partyTopicData, { type PartyTopic } from "@/data/d/partytopic.data"
+import type { PartyTopic } from "@/data/d/partytopic.data"
+import { getLocalizedPartyTopicDataByLanguage } from "@/data/d/story-locale"
 import { questChainMap } from "@/data/d/questchain.data"
+import { useSettingStore } from "@/store/setting"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
 const searchKeyword = useSearchParam<string>("partytopic.searchKeyword", "")
 const selectedPartyTopicId = useSearchParam<number>("partytopic.selectedTopic", 0)
 const selectedCharacterId = useSearchParam<string>("partytopic.selectedCharacter", "-")
+const settingStore = useSettingStore()
+
+/**
+ * 按当前设置语言返回对应的光阴集数据。
+ */
+const localizedPartyTopicData = computed<PartyTopic[]>(() => {
+    return getLocalizedPartyTopicDataByLanguage(settingStore.lang)
+})
 
 /**
  * 获取当前选中的光阴集。
  */
 const selectedPartyTopic = computed(() => {
-    return selectedPartyTopicId.value ? partyTopicData.find(topic => topic.id === selectedPartyTopicId.value) || null : null
+    return selectedPartyTopicId.value ? localizedPartyTopicData.value.find(topic => topic.id === selectedPartyTopicId.value) || null : null
 })
 
 /**
@@ -23,7 +33,7 @@ const selectedPartyTopic = computed(() => {
  */
 const characterOptions = computed(() => {
     const uniqueCharacterIds = new Set<number>()
-    for (const partyTopic of partyTopicData) {
+    for (const partyTopic of localizedPartyTopicData.value) {
         uniqueCharacterIds.add(partyTopic.charId)
     }
 
@@ -39,7 +49,7 @@ const characterOptions = computed(() => {
  * 关键词和角色联合过滤后的光阴集列表。
  */
 const filteredPartyTopics = computed(() => {
-    return partyTopicData.filter(partyTopic => {
+    return localizedPartyTopicData.value.filter(partyTopic => {
         if (selectedCharacterId.value && selectedCharacterId.value !== "-" && partyTopic.charId !== Number(selectedCharacterId.value)) {
             return false
         }

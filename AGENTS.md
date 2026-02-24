@@ -170,10 +170,11 @@ Pre-commit hook auto-runs: version bump → `biome format` → `git add .`
 ## Serena Toolchain (Tooling Requirements)
 
 **High-level rule:** Use Serena helpers for code navigation and edits when available.
-* **Activate project**: Call `serena__activate_project` at session start to set context.
-* **Search & edit via helpers**: Use `find_symbol`, `search_for_pattern`, `apply_patch`, `replace_symbol_body`, etc.
-* **Thinking guards**: Invoke `think_about_task_adherence` and `think_about_whether_you_are_done` before and after major steps.
-* **Restart LSP**: Run `restart_language_server` if external edits appear or LSP state drifts.
+
+- **Activate project**: Call `serena__activate_project` at session start to set context.
+- **Search & edit via helpers**: Use `find_symbol`, `search_for_pattern`, `apply_patch`, `replace_symbol_body`, etc.
+- **Thinking guards**: Invoke `think_about_task_adherence` and `think_about_whether_you_are_done` before and after major steps.
+- **Restart LSP**: Run `restart_language_server` if external edits appear or LSP state drifts.
 
 **Typical sequence**:
 
@@ -187,9 +188,9 @@ Pre-commit hook auto-runs: version bump → `biome format` → `git add .`
 
 ## Context7 (Library resolution & docs)
 
-* Resolve library identifiers: `context7__resolve-library-id(“”)`.
-* Fetch docs: `context7__get-library-docs()`.
-* Include resolved IDs and versions when justifying API choices in PRs.
+- Resolve library identifiers: `context7__resolve-library-id(“”)`.
+- Fetch docs: `context7__get-library-docs()`.
+- Include resolved IDs and versions when justifying API choices in PRs.
 
 ## Important Rules
 
@@ -198,7 +199,7 @@ Pre-commit hook auto-runs: version bump → `biome format` → `git add .`
 3. **JSDoc**: Use for function documentation including params, return values, exceptions
 4. **No shortcuts**: Never remove functions, skip processing, or use TODO placeholders instead of real code
 5. **Consistency**: Check sibling files before writing to match existing patterns
-6. **Always verify**: Run `pnpm lint` and `pnpm test` after changes
+6. **Always verify**: Run `pnpm lint` and `pnpm test` after frontend changes / `cargo check` after backend changes
 7. **Git workflow**: For complex tasks, `git add` to staging first so you can `git checkout` to revert mistakes
 8. **Prefer native APIs** over adding new library dependencies
 9. **Use `bun -e "code"`** for inline code execution

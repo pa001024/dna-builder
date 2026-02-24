@@ -303,6 +303,29 @@ export async function clearScriptInputRecorderActions() {
 }
 
 /**
+ * 切换脚本输入录制状态。
+ * @returns 切换后的录制状态（true=录制中）
+ */
+export async function toggleScriptInputRecording() {
+    return await invoke<boolean>("toggle_script_input_recording")
+}
+
+/**
+ * 向录制器追加一条动作（窗口内输入兜底）。
+ * @param actionType 动作类型
+ * @param key 键盘按键
+ * @param button 鼠标按键
+ * @returns 成功消息
+ */
+export async function appendScriptInputRecorderAction(actionType: ScriptInputRecorderActionType, key?: string, button?: string) {
+    return await invoke<string>("append_script_input_recorder_action", {
+        actionType,
+        key,
+        button,
+    })
+}
+
+/**
  * 获取文档目录路径
  * @returns 文档目录路径
  */

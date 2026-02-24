@@ -247,6 +247,9 @@ const schedulerDraftStepOptions = computed(() =>
 )
 const SCRIPT_CONFIG_STORAGE_KEY = "script-runtime-config-v1"
 const SCRIPT_HOTKEY_STORAGE_KEY = "script-hotkey-bindings-v1"
+const SCRIPT_RUNTIME_TIMEOUT_DEFAULT_SECONDS = 30
+const SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_NAME = "运行超时"
+const SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_DESC = "运行超时秒数，脚本运行中长时间未检测到事件时自动重启，0 表示关闭。"
 const scriptConfigStore = ref<Record<string, Record<string, ScriptConfigItem>>>({})
 const scriptHotkeyStore = ref<Record<string, ScriptHotkeyConfig>>({})
 const showScriptHotkeyDialog = ref(false)
@@ -254,6 +257,9 @@ const editingHotkeyScriptName = ref("")
 const editingHotkeyValue = ref("")
 const editingHotkeyWinActive = ref("")
 const editingHotkeyHoldToLoop = ref(false)
+let scriptRuntimeWatchdogTimer: ReturnType<typeof setInterval> | null = null
+let lastScriptEventAt = 0
+let scriptRuntimeRestartingByTimeout = false
 const activeConfigScope = ref("")
 const currentConfigScope = computed(() => {
     if (activeTab.value?.type === "local") {
@@ -263,10 +269,47 @@ const currentConfigScope = computed(() => {
     if (explicitScope) return explicitScope
     return ""
 })
+
+/**
+ * 构造脚本运行超时配置项（用于复用既有脚本配置 UI）。
+ * @param timeoutSeconds 超时秒数
+ * @returns 配置项
+ */
+function createRuntimeTimeoutConfigItem(timeoutSeconds: number): ScriptConfigItem {
+    return {
+        name: SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_NAME,
+        desc: SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_DESC,
+        kind: "number",
+        options: [],
+        value: normalizeScriptRuntimeTimeoutSeconds(timeoutSeconds),
+        defaultValue: SCRIPT_RUNTIME_TIMEOUT_DEFAULT_SECONDS,
+        updatedAt: Date.now(),
+    }
+}
+
+/**
+ * 确保指定作用域存在“运行超时”配置项。
+ * @param scope 配置作用域
+ * @param persist 是否立即持久化
+ */
+function ensureRuntimeTimeoutConfigItem(scope: string, persist = false) {
+    const resolvedScope = resolveStoredScriptConfigScope(scope)
+    if (!resolvedScope) return
+    const scopedItems = scriptConfigStore.value[resolvedScope] ?? {}
+    if (scopedItems[SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_NAME]) return
+    scriptConfigStore.value[resolvedScope] = {
+        ...scopedItems,
+        [SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_NAME]: createRuntimeTimeoutConfigItem(SCRIPT_RUNTIME_TIMEOUT_DEFAULT_SECONDS),
+    }
+    if (persist) {
+        persistScriptConfigItems()
+    }
+}
+
 const sortedScriptConfigItems = computed(() => {
     const scope = currentConfigScope.value
     if (!scope) return []
-    return Object.values(scriptConfigStore.value[scope] ?? {}).sort((a, b) => a.name.localeCompare(b.name))
+    return Object.values(scriptConfigStore.value[scope] ?? {})
 })
 
 async function initScriptsDir() {
@@ -631,6 +674,7 @@ async function runLocalScriptByName(
     await openLocalScript(fileName, { preferConfigPanel: false })
     const filePath = `${scriptsDir.value}\\${fileName}`
     scriptRuntime.markRunningScript(fileName, { keepSchedulerMode: options.keepSchedulerMode })
+    touchScriptRuntimeEvent()
     addConsoleLog("info", `开始运行脚本: ${fileName}`)
     const result = await runScript(filePath)
     const normalizedResult = normalizeSchedulerResult(result)
@@ -922,6 +966,130 @@ function formatScriptHotkeyBadgeText(config?: ScriptHotkeyConfig): string {
         return `${base} [按住循环]`
     }
     return base
+}
+
+/**
+ * 规范化脚本运行超时秒数（0 表示关闭自动重启）。
+ * @param value 原始值
+ * @returns 非负整数秒
+ */
+function normalizeScriptRuntimeTimeoutSeconds(value: unknown): number {
+    const numeric = Number(value)
+    if (!Number.isFinite(numeric)) {
+        return SCRIPT_RUNTIME_TIMEOUT_DEFAULT_SECONDS
+    }
+    return Math.max(0, Math.floor(numeric))
+}
+
+/**
+ * 更新最近一次脚本事件时间戳。
+ */
+function touchScriptRuntimeEvent() {
+    lastScriptEventAt = Date.now()
+}
+
+/**
+ * 获取脚本 scope 对应的超时重启秒数（未配置时使用默认值）。
+ * @param scope 脚本配置作用域
+ * @returns 超时秒数（0 表示关闭）
+ */
+function getRuntimeTimeoutSecondsByScope(scope: string): number {
+    const resolvedScope = resolveStoredScriptConfigScope(scope)
+    if (!resolvedScope) return SCRIPT_RUNTIME_TIMEOUT_DEFAULT_SECONDS
+    const timeoutItem = scriptConfigStore.value[resolvedScope]?.[SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_NAME]
+    if (!timeoutItem) return SCRIPT_RUNTIME_TIMEOUT_DEFAULT_SECONDS
+    return normalizeScriptRuntimeTimeoutSeconds(timeoutItem.value)
+}
+
+/**
+ * 解析当前运行脚本对应的配置作用域。
+ * @returns 脚本配置作用域；无法确定时返回空字符串
+ */
+function resolveRuntimeWatchdogScope(): string {
+    const runningPathScope = resolveStoredScriptConfigScope(runningScriptPaths.value[0] ?? "")
+    if (runningPathScope) return runningPathScope
+    return resolveStoredScriptConfigScope(runningScriptName.value)
+}
+
+/**
+ * 解析当前可用于自动重启的脚本文件名。
+ * @returns 本地脚本文件名；不可重启时返回空字符串
+ */
+function resolveRuntimeWatchdogScriptName(): string {
+    if (!isRunning.value || runningMode.value !== "single") return ""
+    if (runningScriptCount.value > 1 || runningScriptPaths.value.length > 1) return ""
+    const pathFileName = getScriptFileNameFromPath(runningScriptPaths.value[0] ?? "")
+    const fallbackName = String(runningScriptName.value ?? "").trim()
+    return pathFileName || fallbackName
+}
+
+/**
+ * 在脚本超时未上报事件时自动重启当前脚本。
+ * @param timeoutSeconds 超时阈值（秒）
+ */
+async function restartRunningScriptByTimeout(timeoutSeconds: number) {
+    if (scriptRuntimeRestartingByTimeout) return
+    const scriptName = resolveRuntimeWatchdogScriptName()
+    if (!scriptName) return
+    scriptRuntimeRestartingByTimeout = true
+
+    try {
+        addConsoleLog("warn", `超过 ${timeoutSeconds} 秒未检测到脚本事件，正在自动重启: ${scriptName}`)
+        const runningPath = runningScriptPaths.value[0]
+        const scriptPath = runningPath || (scriptsDir.value ? `${scriptsDir.value}\\${scriptName}` : "")
+        if (!scriptPath) {
+            addConsoleLog("warn", `自动重启已跳过：无法解析脚本路径 (${scriptName})`)
+            return
+        }
+        await scriptRuntime.stopScriptByFilePath(scriptPath)
+        touchScriptRuntimeEvent()
+        await runLocalScriptByName(scriptName)
+        addConsoleLog("info", `脚本自动重启完成: ${scriptName}`)
+    } catch (error) {
+        console.error("脚本超时自动重启失败", error)
+        addConsoleLog("error", `脚本超时自动重启失败: ${error}`)
+    } finally {
+        scriptRuntimeRestartingByTimeout = false
+        touchScriptRuntimeEvent()
+        await syncRunningStateFromBackend(false)
+    }
+}
+
+/**
+ * 检查脚本事件是否超时，若超时则自动重启。
+ */
+async function checkScriptRuntimeWatchdog() {
+    const scope = resolveRuntimeWatchdogScope()
+    if (!scope) return
+    const timeoutSeconds = getRuntimeTimeoutSecondsByScope(scope)
+    if (timeoutSeconds <= 0) return
+    if (scriptRuntimeRestartingByTimeout) return
+    if (!resolveRuntimeWatchdogScriptName()) return
+    if (!lastScriptEventAt) {
+        touchScriptRuntimeEvent()
+        return
+    }
+    if (Date.now() - lastScriptEventAt < timeoutSeconds * 1000) return
+    await restartRunningScriptByTimeout(timeoutSeconds)
+}
+
+/**
+ * 启动脚本运行超时看门狗。
+ */
+function startScriptRuntimeWatchdog() {
+    if (scriptRuntimeWatchdogTimer) return
+    scriptRuntimeWatchdogTimer = setInterval(() => {
+        void checkScriptRuntimeWatchdog()
+    }, 1000)
+}
+
+/**
+ * 停止脚本运行超时看门狗。
+ */
+function stopScriptRuntimeWatchdog() {
+    if (!scriptRuntimeWatchdogTimer) return
+    clearInterval(scriptRuntimeWatchdogTimer)
+    scriptRuntimeWatchdogTimer = null
 }
 
 /**
@@ -1721,6 +1889,9 @@ function loadScriptConfigItems() {
             normalizedStore[scopeKey] = scopeItems
         }
         scriptConfigStore.value = normalizedStore
+        for (const scope of Object.keys(scriptConfigStore.value)) {
+            ensureRuntimeTimeoutConfigItem(scope)
+        }
     } catch (error) {
         console.error("加载脚本配置失败", error)
         scriptConfigStore.value = {}
@@ -1800,9 +1971,13 @@ function applyScriptSetConfigFromEvent(payload: ScriptSetConfigPayload): boolean
  * @param value 新值
  */
 function updateScriptConfigValue(name: string, value: unknown) {
+    const normalizedName = String(name ?? "").trim()
+    if (!normalizedName) return
+
     const scope = currentConfigScope.value
     if (!scope) return
-    const item = scriptConfigStore.value[scope]?.[name]
+
+    const item = scriptConfigStore.value[scope]?.[normalizedName]
     if (!item) return
     item.value = normalizeScriptConfigValue(item.kind, value, item.defaultValue, item.options)
     item.updatedAt = Date.now()
@@ -1854,10 +2029,12 @@ function moveScriptConfigMultiSelectOption(name: string, option: string, directi
  * @param name 配置名
  */
 function deleteScriptConfigItem(name: string) {
+    const normalizedName = String(name ?? "").trim()
+    if (!normalizedName) return
     const scope = currentConfigScope.value
     if (!scope) return
-    if (!scriptConfigStore.value[scope]?.[name]) return
-    delete scriptConfigStore.value[scope][name]
+    if (!scriptConfigStore.value[scope]?.[normalizedName]) return
+    delete scriptConfigStore.value[scope][normalizedName]
     if (Object.keys(scriptConfigStore.value[scope]).length === 0) {
         delete scriptConfigStore.value[scope]
         if (activeConfigScope.value === scope) {
@@ -1865,6 +2042,7 @@ function deleteScriptConfigItem(name: string) {
         }
     }
     persistScriptConfigItems()
+    ensureRuntimeTimeoutConfigItem(scope, true)
 }
 
 /**
@@ -1891,7 +2069,9 @@ function removeScriptConfigScope(scope: string) {
  * 清空当前作用域下的全部脚本配置项。
  */
 function clearAllScriptConfigItems() {
-    removeScriptConfigScope(currentConfigScope.value)
+    const scope = currentConfigScope.value
+    removeScriptConfigScope(scope)
+    ensureRuntimeTimeoutConfigItem(scope, true)
 }
 
 /**
@@ -2017,6 +2197,9 @@ async function initScriptConfigListener() {
         unlistenScriptConfigFn = await listen<ScriptReadConfigPayload>("script-read-config", async event => {
             const payload = event.payload
             if (!payload?.requestId || !payload?.name) return
+            if (shouldAcceptScopedScriptEvent(payload.scope)) {
+                touchScriptRuntimeEvent()
+            }
             const value = upsertScriptConfigFromRequest(payload)
             try {
                 await resolveScriptConfigRequest(payload.requestId, value)
@@ -2037,7 +2220,9 @@ async function initScriptSetConfigListener() {
         unlistenScriptSetConfigFn = await listen<ScriptSetConfigPayload>("script-set-config", event => {
             const payload = event.payload
             if (!payload?.name) return
-            if (!shouldAcceptScopedScriptEvent(payload.scope)) return
+            if (shouldAcceptScopedScriptEvent(payload.scope)) {
+                touchScriptRuntimeEvent()
+            }
             applyScriptSetConfigFromEvent(payload)
         })
     } catch (error) {
@@ -2053,6 +2238,7 @@ async function syncRunningStateFromBackend(appendDetectedLog = true) {
         const wasRunning = scriptRuntime.isRunning
         await scriptRuntime.syncRunningStateFromBackend()
         if (scriptRuntime.isRunning) {
+            touchScriptRuntimeEvent()
             showConsole.value = true
         }
         if (!appendDetectedLog || wasRunning || !scriptRuntime.isRunning) {
@@ -2286,6 +2472,7 @@ async function initConsoleListener() {
         unlistenConsoleFn = await listen<{ scope?: string; level: string; message: string }>("script-console", event => {
             const { scope, level, message } = event.payload
             if (!shouldAcceptScopedScriptEvent(scope)) return
+            touchScriptRuntimeEvent()
             addConsoleLog(level, message)
         })
     } catch (error) {
@@ -2311,6 +2498,7 @@ async function initStatusListener() {
             if (!shouldAcceptScopedScriptEvent(scope)) return
             const normalizedTitle = title?.trim()
             if (!normalizedTitle) return
+            touchScriptRuntimeEvent()
 
             const normalizedImages = Array.isArray(images) ? images.filter(item => typeof item === "string" && item.trim().length > 0) : []
             const normalizedImage = typeof image === "string" && image.trim().length > 0 ? image : undefined
@@ -2865,7 +3053,26 @@ watch(viewMode, newMode => {
     }
 })
 
+watch(
+    currentConfigScope,
+    scope => {
+        if (!scope) return
+        ensureRuntimeTimeoutConfigItem(scope, true)
+    },
+    { immediate: true }
+)
+
+watch(isRunning, running => {
+    if (running) {
+        touchScriptRuntimeEvent()
+        return
+    }
+    lastScriptEventAt = 0
+    scriptRuntimeRestartingByTimeout = false
+})
+
 onMounted(async () => {
+    startScriptRuntimeWatchdog()
     try {
         await scriptRuntime.initRuntimeTracking()
     } catch (error) {
@@ -2887,6 +3094,9 @@ onMounted(async () => {
 })
 
 onUnmounted(async () => {
+    stopScriptRuntimeWatchdog()
+    lastScriptEventAt = 0
+    scriptRuntimeRestartingByTimeout = false
     if (startEditScriptTimer) {
         clearTimeout(startEditScriptTimer)
         startEditScriptTimer = null
@@ -3307,7 +3517,11 @@ onUnmounted(async () => {
                             <div v-if="consoleLogs.length === 0" class="text-base-content/40 text-center py-4">暂无输出</div>
                             <div v-else class="space-y-1">
                                 <div v-for="(log, index) in consoleLogs" :key="index" class="flex gap-2">
-                                    <span class="text-base-content/40 shrink-0">{{ new Date(log.timestamp).toLocaleTimeString() }}</span>
+                                    <span class="text-base-content/40 shrink-0">{{
+                                        new Date(log.timestamp).toLocaleTimeString("zh-CN", {
+                                            hour12: false,
+                                        })
+                                    }}</span>
                                     <span :class="getLogLevelClass(log.level)" class="break-all">{{ log.message }}</span>
                                 </div>
                             </div>

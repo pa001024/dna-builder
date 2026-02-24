@@ -33,7 +33,7 @@ export function replaceStoryPlaceholders(input: string, config: StoryTextConfig)
     return input
         .replace(/\{nickname2\}/g, config.nickname2)
         .replace(/\{nickname\}/g, config.nickname)
-        .replace(/\{(性别2?)：([^|{}]*)\|([^{}]*)\}/g, (_, key: string, maleText: string, femaleText: string) => {
+        .replace(/\{(性别2?)[:：]([^|{}]*)\|([^{}]*)\}/g, (_, key: string, maleText: string, femaleText: string) => {
             const selectedGender = key === "性别2" ? config.gender2 : config.gender
             return selectedGender === "male" ? maleText : femaleText
         })

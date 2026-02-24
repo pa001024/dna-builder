@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reactive } from "vue"
+import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue"
 import TypewriterText from "@/components/TypewriterText.vue"
 import { npcMap } from "@/data/d/npc.data"
 import {
@@ -12,6 +12,7 @@ import {
     type QuestNode,
 } from "@/data/d/quest.data"
 import { useSettingStore } from "@/store/setting"
+import { buildDialogueVoiceUrl } from "@/utils/dialogue-voice"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 
 interface DialogueChainItem {
@@ -21,6 +22,11 @@ interface DialogueChainItem {
 
 interface QuestNodeWithChain extends QuestNode {
     chain: DialogueChainItem[]
+}
+
+interface FlattenedQuestDialogueItem {
+    dialogue: Dialogue
+    nodeId: string
 }
 
 const props = defineProps<{
@@ -33,6 +39,17 @@ const settingStore = useSettingStore()
 
 const selectedOptionMap = reactive<Record<string, number>>({})
 const highlightedQuestNodeMap = reactive<Record<string, boolean>>({})
+const currentVoiceKey = ref<string | null>(null)
+const isVoicePlaying = ref(false)
+const dialogueAudioRef = ref<HTMLAudioElement | null>(null)
+const autoPlayEnabled = ref(false)
+const autoPlayCurrentIndex = ref(-1)
+const lastManualPlayedDialogueKey = ref<string | null>(null)
+const preloadedDialogueAudioMap = new Map<string, HTMLAudioElement>()
+const dialogueElementMap = new Map<string, HTMLElement>()
+const AUTO_PLAY_PRELOAD_AHEAD_COUNT = 2
+const isRecoveringAutoPlayFromAudioError = ref(false)
+const nicknameNpcIds = [...npcMap.entries()].filter(([, npc]) => npc.name === "{nickname}").map(([npcId]) => npcId)
 
 const questNodeElementMap = new Map<string, HTMLElement>()
 const nodeHighlightTimerMap = new Map<string, ReturnType<typeof setTimeout>>()
@@ -100,6 +117,51 @@ function setQuestNodeElement(nodeKey: string, element: Element | ComponentPublic
     }
 
     questNodeElementMap.set(nodeKey, targetElement as HTMLElement)
+}
+
+/**
+ * 生成任务对话唯一键。
+ * @param nodeId 节点 ID
+ * @param dialogue 对话条目
+ * @returns 对话唯一键
+ */
+function getQuestDialogueKey(nodeId: string, dialogue: Dialogue): string {
+    return `${nodeId}-${dialogue.id}-${dialogue.voice || ""}`
+}
+
+/**
+ * 注册对话卡片 DOM 引用，供自动播放滚动定位使用。
+ * @param dialogueKey 对话唯一键
+ * @param element 对话卡片元素
+ */
+function setDialogueElement(dialogueKey: string, element: Element | ComponentPublicInstance | null) {
+    if (!element) {
+        dialogueElementMap.delete(dialogueKey)
+        return
+    }
+
+    const targetElement = element instanceof Element ? element : (element.$el as Element | null)
+    if (!targetElement) {
+        dialogueElementMap.delete(dialogueKey)
+        return
+    }
+
+    dialogueElementMap.set(dialogueKey, targetElement as HTMLElement)
+}
+
+/**
+ * 滚动到目标对话卡片。
+ * @param dialogueKey 对话唯一键
+ */
+function scrollToDialogue(dialogueKey: string): void {
+    const targetElement = dialogueElementMap.get(dialogueKey)
+    if (!targetElement) {
+        return
+    }
+
+    nextTick(() => {
+        targetElement.scrollIntoView({ behavior: "smooth", block: "center" })
+    })
 }
 
 /**
@@ -229,6 +291,10 @@ onBeforeUnmount(() => {
     }
     nodeHighlightTimerMap.clear()
     questNodeElementMap.clear()
+    dialogueElementMap.clear()
+    stopAutoPlay()
+    stopDialogueVoicePlayback()
+    clearPreloadedDialogueVoices()
 })
 
 /**
@@ -375,7 +441,11 @@ function buildQuestNodeChains(questId: number, nodes: QuestNode[], startIds?: st
 
     const explicitStartNodeIds = (startIds ?? []).filter(startId => nodeMap.has(startId))
     const fallbackStartNodeIds = nodes.filter(node => !incomingNodeIdSet.has(node.id)).map(node => node.id)
-    const initialNodeIds = explicitStartNodeIds.length ? explicitStartNodeIds : fallbackStartNodeIds.length ? fallbackStartNodeIds : nodes.map(node => node.id)
+    const initialNodeIds = explicitStartNodeIds.length
+        ? explicitStartNodeIds
+        : fallbackStartNodeIds.length
+          ? fallbackStartNodeIds
+          : nodes.map(node => node.id)
 
     for (const startNodeId of initialNodeIds) {
         visitNodeByNext(startNodeId)
@@ -496,10 +566,405 @@ function getNPCName(npcId: number | undefined): string {
 }
 
 /**
+ * 生成对话语音状态键，用于识别当前播放条目。
+ * @param dialogue 对话条目
+ * @param nodeId 节点 ID
+ * @returns 播放状态键
+ */
+function getDialogueVoiceKey(dialogue: Dialogue, nodeId: string): string {
+    return getQuestDialogueKey(nodeId, dialogue)
+}
+
+/**
+ * 构建对话语音播放地址。
+ * @param dialogue 对话条目
+ * @returns 语音 URL
+ */
+function getDialogueVoiceUrl(dialogue: Dialogue): string {
+    return buildDialogueVoiceUrl({
+        voice: dialogue.voice,
+        text: dialogue.content,
+        npcId: dialogue.npc,
+        forceGenderNpcIds: nicknameNpcIds,
+        language: settingStore.lang,
+        gender: settingStore.protagonistGender,
+        gender2: settingStore.protagonistGender2,
+    })
+}
+
+/**
+ * 记录用户手动播放的对话键，用于自动播放起点定位。
+ * @param dialogueKey 对话唯一键
+ */
+function markManualPlayedDialogue(dialogueKey: string): void {
+    lastManualPlayedDialogueKey.value = dialogueKey
+}
+
+/**
+ * 根据对话键查找当前链路中的索引。
+ * @param dialogueKey 对话唯一键
+ * @returns 索引，找不到返回 -1
+ */
+function getDialogueIndexByKey(dialogueKey: string | null): number {
+    if (!dialogueKey) {
+        return -1
+    }
+
+    return flattenedDialogueChain.value.findIndex(item => getQuestDialogueKey(item.nodeId, item.dialogue) === dialogueKey)
+}
+
+/**
+ * 根据当前语音状态键反查对话索引。
+ * @returns 对话索引，找不到返回 -1
+ */
+function getCurrentDialogueIndexByVoiceKey(): number {
+    if (!currentVoiceKey.value) {
+        return -1
+    }
+
+    return flattenedDialogueChain.value.findIndex(item => getQuestDialogueKey(item.nodeId, item.dialogue) === currentVoiceKey.value)
+}
+
+/**
+ * 从指定索引开始查找下一个可播放对话。
+ * @param startIndex 起始索引
+ * @returns 可播放索引，找不到返回 -1
+ */
+function findNextPlayableDialogueIndex(startIndex: number): number {
+    for (let index = Math.max(0, startIndex); index < flattenedDialogueChain.value.length; index += 1) {
+        const targetDialogue = flattenedDialogueChain.value[index].dialogue
+        if (getDialogueVoiceUrl(targetDialogue)) {
+            return index
+        }
+    }
+
+    return -1
+}
+
+/**
+ * 清理自动播放预加载缓存，释放音频对象引用。
+ */
+function clearPreloadedDialogueVoices(): void {
+    for (const preloadAudio of preloadedDialogueAudioMap.values()) {
+        preloadAudio.pause()
+        preloadAudio.removeAttribute("src")
+        preloadAudio.load()
+    }
+    preloadedDialogueAudioMap.clear()
+}
+
+/**
+ * 预加载指定索引的对话语音。
+ * @param index 对话索引
+ */
+function preloadDialogueVoiceByIndex(index: number): void {
+    if (!autoPlayEnabled.value) {
+        return
+    }
+
+    const targetItem = flattenedDialogueChain.value[index]
+    if (!targetItem) {
+        return
+    }
+
+    const voiceUrl = getDialogueVoiceUrl(targetItem.dialogue)
+    if (!voiceUrl || preloadedDialogueAudioMap.has(voiceUrl)) {
+        return
+    }
+
+    const preloadAudio = new Audio()
+    preloadAudio.preload = "auto"
+    preloadAudio.src = voiceUrl
+    preloadAudio.load()
+    preloadedDialogueAudioMap.set(voiceUrl, preloadAudio)
+}
+
+/**
+ * 预加载当前索引后续的可播放语音，降低自动连播切换卡顿。
+ * @param currentIndex 当前对话索引
+ * @param preloadCount 预加载数量
+ */
+function preloadUpcomingDialogueVoices(currentIndex: number, preloadCount = AUTO_PLAY_PRELOAD_AHEAD_COUNT): void {
+    if (!autoPlayEnabled.value) {
+        return
+    }
+
+    let loadedCount = 0
+    for (let index = currentIndex + 1; index < flattenedDialogueChain.value.length; index += 1) {
+        const targetDialogue = flattenedDialogueChain.value[index].dialogue
+        if (!getDialogueVoiceUrl(targetDialogue)) {
+            continue
+        }
+
+        preloadDialogueVoiceByIndex(index)
+        loadedCount += 1
+        if (loadedCount >= preloadCount) {
+            break
+        }
+    }
+}
+
+/**
+ * 自动播放失败恢复：从指定索引开始尝试后续可播放条目，直到成功或耗尽。
+ * @param startIndex 起始索引
+ */
+async function recoverAutoPlayAfterFailure(startIndex: number): Promise<void> {
+    if (!autoPlayEnabled.value || isRecoveringAutoPlayFromAudioError.value) {
+        return
+    }
+
+    isRecoveringAutoPlayFromAudioError.value = true
+    try {
+        let nextPlayableIndex = findNextPlayableDialogueIndex(startIndex)
+        while (nextPlayableIndex !== -1 && autoPlayEnabled.value) {
+            const played = await playDialogueByIndex(nextPlayableIndex, true)
+            if (played) {
+                return
+            }
+
+            nextPlayableIndex = findNextPlayableDialogueIndex(nextPlayableIndex + 1)
+        }
+
+        stopAutoPlay()
+    } finally {
+        isRecoveringAutoPlayFromAudioError.value = false
+    }
+}
+
+/**
+ * 播放指定索引的对话语音。
+ * @param index 对话索引
+ * @param skipRecovery 是否跳过自动失败恢复（供恢复流程内部调用）
+ * @returns 是否成功触发播放
+ */
+async function playDialogueByIndex(index: number, skipRecovery = false): Promise<boolean> {
+    const audio = dialogueAudioRef.value
+    const targetItem = flattenedDialogueChain.value[index]
+    if (!audio || !targetItem) {
+        return false
+    }
+
+    const voiceUrl = getDialogueVoiceUrl(targetItem.dialogue)
+    if (!voiceUrl) {
+        return false
+    }
+
+    const voiceKey = getQuestDialogueKey(targetItem.nodeId, targetItem.dialogue)
+    autoPlayCurrentIndex.value = index
+    currentVoiceKey.value = voiceKey
+    scrollToDialogue(voiceKey)
+    preloadUpcomingDialogueVoices(index)
+
+    audio.pause()
+    audio.currentTime = 0
+    audio.src = voiceUrl
+
+    try {
+        await audio.play()
+        return true
+    } catch (error) {
+        currentVoiceKey.value = null
+        isVoicePlaying.value = false
+        console.error("任务剧情语音播放失败:", error)
+
+        if (autoPlayEnabled.value && !skipRecovery) {
+            void recoverAutoPlayAfterFailure(index + 1)
+        }
+        return false
+    }
+}
+
+/**
+ * 启动自动播放。
+ */
+async function startAutoPlay(): Promise<void> {
+    if (!hasPlayableDialogue.value) {
+        autoPlayEnabled.value = false
+        return
+    }
+
+    const currentIndex = getCurrentDialogueIndexByVoiceKey()
+    if (currentIndex !== -1 && isVoicePlaying.value) {
+        autoPlayCurrentIndex.value = currentIndex
+        scrollToDialogue(flattenedDialogueChain.value[currentIndex].key)
+        preloadUpcomingDialogueVoices(currentIndex)
+        return
+    }
+
+    const manualAnchorIndex = getDialogueIndexByKey(lastManualPlayedDialogueKey.value)
+    const startFromIndex = manualAnchorIndex !== -1 ? manualAnchorIndex + 1 : 0
+    const startIndex = findNextPlayableDialogueIndex(startFromIndex)
+    if (startIndex === -1) {
+        autoPlayEnabled.value = false
+        return
+    }
+
+    await playDialogueByIndex(startIndex)
+}
+
+/**
+ * 停止自动播放并清空自动播放进度。
+ */
+function stopAutoPlay(): void {
+    autoPlayEnabled.value = false
+    autoPlayCurrentIndex.value = -1
+    clearPreloadedDialogueVoices()
+}
+
+/**
+ * 自动播放开关变更处理。
+ */
+function handleAutoPlaySwitchChange(): void {
+    if (!autoPlayEnabled.value) {
+        stopAutoPlay()
+        return
+    }
+
+    void startAutoPlay()
+}
+
+/**
+ * 停止当前对话语音播放并重置状态。
+ */
+function stopDialogueVoicePlayback(): void {
+    const audio = dialogueAudioRef.value
+    if (!audio) {
+        return
+    }
+    audio.pause()
+    audio.removeAttribute("src")
+    audio.load()
+    currentVoiceKey.value = null
+    isVoicePlaying.value = false
+    autoPlayCurrentIndex.value = -1
+}
+
+/**
+ * 切换对话语音播放状态（懒加载，点击时才加载音频）。
+ * @param dialogue 对话条目
+ * @param nodeId 节点 ID
+ */
+async function toggleDialogueVoicePlayback(dialogue: Dialogue, nodeId: string): Promise<void> {
+    const voiceKey = getQuestDialogueKey(nodeId, dialogue)
+    markManualPlayedDialogue(voiceKey)
+
+    const audio = dialogueAudioRef.value
+    if (!audio) {
+        return
+    }
+
+    const voiceUrl = getDialogueVoiceUrl(dialogue)
+    if (!voiceUrl) {
+        return
+    }
+
+    if (currentVoiceKey.value === voiceKey) {
+        const currentIndex = getCurrentDialogueIndexByVoiceKey()
+        if (currentIndex !== -1) {
+            autoPlayCurrentIndex.value = currentIndex
+            scrollToDialogue(voiceKey)
+        }
+
+        if (audio.paused) {
+            try {
+                await audio.play()
+            } catch (error) {
+                console.error("任务剧情语音播放失败:", error)
+            }
+        } else {
+            audio.pause()
+        }
+        return
+    }
+
+    const targetIndex = flattenedDialogueChain.value.findIndex(item => {
+        return getQuestDialogueKey(item.nodeId, item.dialogue) === voiceKey
+    })
+    if (targetIndex === -1) {
+        return
+    }
+
+    await playDialogueByIndex(targetIndex)
+}
+
+/**
+ * 播放器播放事件回调。
+ */
+function handleDialogueVoicePlay(): void {
+    isVoicePlaying.value = true
+}
+
+/**
+ * 播放器暂停事件回调。
+ */
+function handleDialogueVoicePause(): void {
+    isVoicePlaying.value = false
+}
+
+/**
+ * 播放器结束事件回调。
+ */
+function handleDialogueVoiceEnded(): void {
+    isVoicePlaying.value = false
+    currentVoiceKey.value = null
+
+    if (!autoPlayEnabled.value) {
+        return
+    }
+
+    const nextPlayableIndex = findNextPlayableDialogueIndex(autoPlayCurrentIndex.value + 1)
+    if (nextPlayableIndex === -1) {
+        stopAutoPlay()
+        return
+    }
+
+    void playDialogueByIndex(nextPlayableIndex)
+}
+
+/**
+ * 播放器加载失败事件回调。
+ */
+function handleDialogueVoiceError(): void {
+    currentVoiceKey.value = null
+    isVoicePlaying.value = false
+
+    if (!autoPlayEnabled.value) {
+        return
+    }
+
+    void recoverAutoPlayAfterFailure(autoPlayCurrentIndex.value + 1)
+}
+
+/**
  * 计算节点分支链。
  */
 const questNodeChains = computed<QuestNodeWithChain[]>(() => {
     return buildQuestNodeChains(props.questId, props.nodes, props.startIds)
+})
+
+/**
+ * 扁平化任务节点中的对话链，便于跨节点顺序自动播放。
+ */
+const flattenedDialogueChain = computed<Array<FlattenedQuestDialogueItem & { key: string }>>(() => {
+    const result: Array<FlattenedQuestDialogueItem & { key: string }> = []
+    for (const node of questNodeChains.value) {
+        for (const item of node.chain) {
+            result.push({
+                key: getQuestDialogueKey(node.id, item.dialogue),
+                dialogue: item.dialogue,
+                nodeId: node.id,
+            })
+        }
+    }
+
+    return result
+})
+
+/**
+ * 是否存在可播放语音对话。
+ */
+const hasPlayableDialogue = computed(() => {
+    return flattenedDialogueChain.value.some(item => !!getDialogueVoiceUrl(item.dialogue))
 })
 
 /**
@@ -525,10 +990,41 @@ const nodeDisplayLabelMap = computed(() => {
 
     return labelMap
 })
+
+watch(
+    () => [settingStore.lang, settingStore.protagonistGender, settingStore.protagonistGender2],
+    () => {
+        stopAutoPlay()
+        stopDialogueVoicePlayback()
+    }
+)
+
+watch(flattenedDialogueChain, () => {
+    clearPreloadedDialogueVoices()
+
+    if (!autoPlayEnabled.value) {
+        return
+    }
+
+    void startAutoPlay()
+})
 </script>
 
 <template>
     <div class="text-sm space-y-2">
+        <div class="flex items-center justify-end">
+            <label class="flex items-center gap-2 text-xs text-base-content/80 select-none">
+                <span>自动播放</span>
+                <input
+                    v-model="autoPlayEnabled"
+                    type="checkbox"
+                    class="toggle toggle-primary toggle-sm"
+                    :disabled="!hasPlayableDialogue"
+                    @change="handleAutoPlaySwitchChange"
+                />
+            </label>
+        </div>
+
         <div
             v-for="node in questNodeChains"
             :key="node.id"
@@ -541,11 +1037,37 @@ const nodeDisplayLabelMap = computed(() => {
             <div class="text-sm text-base-content/70">{{ getNodeLabel(node.id) }} · {{ node.id }}</div>
 
             <TransitionGroup name="dialogue-list" tag="div" v-if="node.chain.length" class="space-y-2">
-                <div v-for="item in node.chain" :key="item.dialogue.id" class="dialogue-card p-2 rounded bg-base-200/80 space-y-1">
-                    <div>
-                        <span class="font-medium text-primary mr-1" :title="`ID: ${item.dialogue.npc}`" v-if="item.dialogue.npc">
-                            {{ getNPCName(item.dialogue.npc) }}:
-                        </span>
+                <div
+                    v-for="item in node.chain"
+                    :key="getQuestDialogueKey(node.id, item.dialogue)"
+                    :ref="element => setDialogueElement(getQuestDialogueKey(node.id, item.dialogue), element)"
+                    class="dialogue-card p-2 rounded bg-base-200/80 space-y-1"
+                    :class="{ 'dialogue-card-playing': isVoicePlaying && currentVoiceKey === getDialogueVoiceKey(item.dialogue, node.id) }"
+                >
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="font-medium text-primary mr-1 min-w-0 truncate"
+                                :title="`ID: ${item.dialogue.npc}`"
+                                v-if="item.dialogue.npc"
+                            >
+                                {{ getNPCName(item.dialogue.npc) }}:
+                            </span>
+                            <button
+                                v-if="item.dialogue.voice"
+                                type="button"
+                                class="btn btn-ghost btn-xs shrink-0 ml-auto"
+                                @click="toggleDialogueVoicePlayback(item.dialogue, node.id)"
+                            >
+                                <Icon
+                                    :icon="
+                                        currentVoiceKey === getDialogueVoiceKey(item.dialogue, node.id) && isVoicePlaying
+                                            ? 'ri:pause-circle-line'
+                                            : 'ri:play-circle-line'
+                                    "
+                                />
+                            </button>
+                        </div>
                         <TypewriterText :text="item.dialogue.content" :trigger-key="`${questId}-${node.id}-${item.dialogue.id}`" />
                     </div>
 
@@ -612,7 +1134,11 @@ const nodeDisplayLabelMap = computed(() => {
             <div v-if="node.questions?.length" class="rounded bg-base-200/60 p-2 space-y-2">
                 <div class="text-sm font-semibold text-accent">侦探问答</div>
 
-                <div v-for="question in node.questions" :key="question.id" class="rounded border border-base-300 bg-base-100/70 p-2 space-y-1.5">
+                <div
+                    v-for="question in node.questions"
+                    :key="question.id"
+                    class="rounded border border-base-300 bg-base-100/70 p-2 space-y-1.5"
+                >
                     <div class="text-sm font-medium">Q{{ question.id }} · {{ question.name }}</div>
                     <div v-if="question.tips" class="text-xs text-base-content/70">提示：{{ question.tips }}</div>
 
@@ -655,10 +1181,17 @@ const nodeDisplayLabelMap = computed(() => {
                 </template>
             </div>
 
-            <div v-if="!node.chain.length && !node.questions?.length" class="text-base-content/70">
-                该节点暂无可展示内容
-            </div>
+            <div v-if="!node.chain.length && !node.questions?.length" class="text-base-content/70">该节点暂无可展示内容</div>
         </div>
+        <audio
+            ref="dialogueAudioRef"
+            class="hidden"
+            :preload="autoPlayEnabled ? 'auto' : 'none'"
+            @ended="handleDialogueVoiceEnded"
+            @error="handleDialogueVoiceError"
+            @pause="handleDialogueVoicePause"
+            @play="handleDialogueVoicePlay"
+        />
     </div>
 </template>
 
@@ -673,7 +1206,15 @@ const nodeDisplayLabelMap = computed(() => {
 
 .dialogue-card:hover {
     transform: translateY(-1px);
-    box-shadow: 0 8px 24px hsl(var(--b3) / 0.25);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--color-base-content) 16%, transparent);
+}
+
+.dialogue-card-playing {
+    border: 1px solid color-mix(in srgb, var(--color-primary) 60%, transparent);
+    background: color-mix(in srgb, var(--color-primary) 8%, var(--color-base-100));
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--color-primary) 24%, transparent),
+        0 10px 24px color-mix(in srgb, var(--color-primary) 18%, transparent);
 }
 
 .dialogue-list-enter-active,
@@ -693,10 +1234,10 @@ const nodeDisplayLabelMap = computed(() => {
 }
 
 .quest-node-highlight {
-    border-color: hsl(var(--p));
+    border-color: color-mix(in srgb, var(--color-primary) 70%, transparent);
     box-shadow:
-        0 0 0 1px hsl(var(--p) / 0.35),
-        0 0 0 8px hsl(var(--p) / 0.12);
+        0 0 0 1px color-mix(in srgb, var(--color-primary) 35%, transparent),
+        0 0 0 8px color-mix(in srgb, var(--color-primary) 12%, transparent);
     animation: quest-node-pulse 1.05s ease;
 }
 

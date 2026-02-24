@@ -5,7 +5,7 @@ use opencv::{
     features2d, imgproc,
     prelude::{
         DescriptorMatcherTraitConst, Feature2DTrait, KeyPointTraitConst, MatExprTraitConst,
-        MatTraitConst, MatTraitConstManual, MatTraitManual,
+        MatTrait, MatTraitConst, MatTraitConstManual, MatTraitManual,
     },
 };
 use std::{
@@ -18,6 +18,7 @@ use zip::{CompressionMethod, ZipArchive, ZipWriter, write::FileOptions};
 use crate::submodules::{color::rgb_to_hsl, color_match::rgb_to_bgr, tpl_match::match_template};
 
 pub type SiftLocateResult = (f64, f64, f64, f64, i32, i32, Vec<Point2f>);
+pub type SiftStitchResult = (Mat, f64, f64, f64, f64, i32, i32, Vec<Point2f>);
 pub type ContourResult = (f64, core::Rect, (f64, f64));
 pub type BBoxResult = (i32, i32, i32, i32);
 
@@ -120,6 +121,356 @@ fn _to_bgr_mat(mat: &Mat) -> Result<Mat, String> {
         channels => return Err(format!("不支持的通道数: {channels}")),
     }
     Ok(bgr_mat)
+}
+
+/// 小地图 SIFT 预处理：保留圆盘并遮蔽中心角色与朝向高亮锥形区域。
+///
+/// # 参数
+/// - `mat`: 输入图像（支持灰度/BGR/BGRA）
+/// - `center_x/center_y`: 圆盘中心坐标
+/// - `radius`: 圆盘半径
+/// - `cone_angle_deg`: 视角锥形角度（度，<=0 表示不遮蔽锥形）
+/// - `inner_radius`: 中心遮罩半径（<=0 表示不遮蔽中心）
+/// - `heading_deg`: 视角方向角（度，0=向右，90=向下，-90=向上）
+///
+/// # 返回
+/// 返回与输入同尺寸的 BGR 黑白图：
+/// - 小地图“黑色结构”区域为黑色；
+/// - 其余区域（含圆盘外、锥形遮罩、中心遮罩）均为白色。
+pub fn preprocess_minimap_for_sift_impl(
+    mat: &Mat,
+    center_x: i32,
+    center_y: i32,
+    radius: i32,
+    cone_angle_deg: f64,
+    inner_radius: i32,
+    heading_deg: f64,
+) -> Result<Mat, String> {
+    if mat.rows() <= 0 || mat.cols() <= 0 {
+        return Err("源图像尺寸无效".to_string());
+    }
+
+    let bgr = _to_bgr_mat(mat)?;
+    let rows = bgr.rows();
+    let cols = bgr.cols();
+    let safe_radius = radius.max(1);
+
+    let mut mask = Mat::zeros(rows, cols, CV_8UC1)
+        .map_err(|e| format!("创建小地图掩码失败: {e}"))?
+        .to_mat()
+        .map_err(|e| format!("初始化小地图掩码失败: {e}"))?;
+
+    imgproc::circle(
+        &mut mask,
+        Point::new(center_x, center_y),
+        safe_radius,
+        Scalar::all(255.0),
+        -1,
+        imgproc::LINE_AA,
+        0,
+    )
+    .map_err(|e| format!("绘制小地图圆形掩码失败: {e}"))?;
+
+    if inner_radius > 0 {
+        imgproc::circle(
+            &mut mask,
+            Point::new(center_x, center_y),
+            inner_radius,
+            Scalar::all(0.0),
+            -1,
+            imgproc::LINE_AA,
+            0,
+        )
+        .map_err(|e| format!("绘制中心遮罩失败: {e}"))?;
+    }
+
+    if cone_angle_deg > 0.0 {
+        let half_angle_rad = (cone_angle_deg * 0.5).to_radians();
+        let heading_rad = heading_deg.to_radians();
+        let edge_radius = safe_radius as f64 * 1.05;
+        let left_point = Point::new(
+            (center_x as f64 + edge_radius * (heading_rad - half_angle_rad).cos()).round() as i32,
+            (center_y as f64 + edge_radius * (heading_rad - half_angle_rad).sin()).round() as i32,
+        );
+        let right_point = Point::new(
+            (center_x as f64 + edge_radius * (heading_rad + half_angle_rad).cos()).round() as i32,
+            (center_y as f64 + edge_radius * (heading_rad + half_angle_rad).sin()).round() as i32,
+        );
+        let mut cone_points = core::Vector::<Point>::new();
+        cone_points.push(Point::new(center_x, center_y));
+        cone_points.push(left_point);
+        cone_points.push(right_point);
+        imgproc::fill_convex_poly(
+            &mut mask,
+            &cone_points,
+            Scalar::all(0.0),
+            imgproc::LINE_AA,
+            0,
+        )
+        .map_err(|e| format!("绘制视角锥形遮罩失败: {e}"))?;
+    }
+
+    // 新策略：暗色固定色域(#080908±10) + 白边约束，只保留与白边邻近的暗色连通域。
+    let mut hsv = Mat::default();
+    imgproc::cvt_color(&bgr, &mut hsv, imgproc::COLOR_BGR2HSV, 0)
+        .map_err(|e| format!("BGR 转 HSV 失败: {e}"))?;
+
+    let mut dark_color_mask = Mat::default();
+    core::in_range(
+        &bgr,
+        &Scalar::new(0.0, 0.0, 0.0, 0.0),
+        &Scalar::new(18.0, 19.0, 18.0, 0.0),
+        &mut dark_color_mask,
+    )
+    .map_err(|e| format!("固定暗色筛选失败: {e}"))?;
+
+    let mut dark_hsv_mask = Mat::default();
+    core::in_range(
+        &hsv,
+        &Scalar::new(0.0, 0.0, 0.0, 0.0),
+        &Scalar::new(180.0, 120.0, 45.0, 0.0),
+        &mut dark_hsv_mask,
+    )
+    .map_err(|e| format!("低亮暗色筛选失败: {e}"))?;
+
+    let mut dark_candidate = Mat::default();
+    core::bitwise_or(
+        &dark_color_mask,
+        &dark_hsv_mask,
+        &mut dark_candidate,
+        &Mat::default(),
+    )
+    .map_err(|e| format!("合并暗色候选失败: {e}"))?;
+
+    let mut dark_candidate_in_minimap = Mat::default();
+    core::bitwise_and(
+        &dark_candidate,
+        &mask,
+        &mut dark_candidate_in_minimap,
+        &Mat::default(),
+    )
+    .map_err(|e| format!("应用小地图暗色掩码失败: {e}"))?;
+
+    let mut white_border_mask = Mat::default();
+    core::in_range(
+        &hsv,
+        &Scalar::new(0.0, 0.0, 170.0, 0.0),
+        &Scalar::new(180.0, 50.0, 255.0, 0.0),
+        &mut white_border_mask,
+    )
+    .map_err(|e| format!("白边筛选失败: {e}"))?;
+
+    let mut white_border_in_minimap = Mat::default();
+    core::bitwise_and(
+        &white_border_mask,
+        &mask,
+        &mut white_border_in_minimap,
+        &Mat::default(),
+    )
+    .map_err(|e| format!("应用白边掩码失败: {e}"))?;
+
+    let seed_kernel = imgproc::get_structuring_element(
+        imgproc::MORPH_ELLIPSE,
+        Size::new(7, 7),
+        Point::new(-1, -1),
+    )
+    .map_err(|e| format!("创建白边邻域核失败: {e}"))?;
+    let mut white_near = Mat::default();
+    imgproc::dilate(
+        &white_border_in_minimap,
+        &mut white_near,
+        &seed_kernel,
+        Point::new(-1, -1),
+        1,
+        core::BORDER_CONSTANT,
+        Scalar::all(0.0),
+    )
+    .map_err(|e| format!("白边邻域扩张失败: {e}"))?;
+
+    let mut seed_mask = Mat::default();
+    core::bitwise_and(
+        &dark_candidate_in_minimap,
+        &white_near,
+        &mut seed_mask,
+        &Mat::default(),
+    )
+    .map_err(|e| format!("构建白边暗色种子失败: {e}"))?;
+
+    let mut labels = Mat::default();
+    let mut stats = Mat::default();
+    let mut centroids = Mat::default();
+    let label_count = imgproc::connected_components_with_stats(
+        &dark_candidate_in_minimap,
+        &mut labels,
+        &mut stats,
+        &mut centroids,
+        8,
+        core::CV_32S,
+    )
+    .map_err(|e| format!("暗色连通域分析失败: {e}"))?;
+
+    let labels_contiguous = if labels.is_continuous() {
+        labels
+    } else {
+        let mut copied = Mat::default();
+        labels
+            .copy_to(&mut copied)
+            .map_err(|e| format!("复制标签图失败: {e}"))?;
+        copied
+    };
+    let seed_contiguous = if seed_mask.is_continuous() {
+        seed_mask
+    } else {
+        let mut copied = Mat::default();
+        seed_mask
+            .copy_to(&mut copied)
+            .map_err(|e| format!("复制种子图失败: {e}"))?;
+        copied
+    };
+    let labels_data = labels_contiguous
+        .data_typed::<i32>()
+        .map_err(|e| format!("读取标签图数据失败: {e}"))?;
+    let seed_data = seed_contiguous
+        .data_typed::<u8>()
+        .map_err(|e| format!("读取种子图数据失败: {e}"))?;
+
+    let mut area_by_label = vec![0i32; label_count as usize];
+    for label in 1..label_count {
+        area_by_label[label as usize] = *stats
+            .at_2d::<i32>(label, imgproc::CC_STAT_AREA)
+            .map_err(|e| format!("读取连通域面积失败: {e}"))?;
+    }
+    let mut seed_count_by_label = vec![0i32; label_count as usize];
+    for (index, label) in labels_data.iter().enumerate() {
+        if *label > 0 && seed_data[index] > 0 {
+            seed_count_by_label[*label as usize] += 1;
+        }
+    }
+
+    const MIN_COMPONENT_AREA: i32 = 24;
+    const MIN_SEED_PIXELS: i32 = 3;
+    let mut cleaned_mask = Mat::zeros(rows, cols, CV_8UC1)
+        .map_err(|e| format!("创建输出掩码失败: {e}"))?
+        .to_mat()
+        .map_err(|e| format!("初始化输出掩码失败: {e}"))?;
+    let cleaned_data = cleaned_mask
+        .data_typed_mut::<u8>()
+        .map_err(|e| format!("读取输出掩码数据失败: {e}"))?;
+    for (index, label) in labels_data.iter().enumerate() {
+        if *label <= 0 {
+            continue;
+        }
+        let li = *label as usize;
+        if li < area_by_label.len()
+            && area_by_label[li] >= MIN_COMPONENT_AREA
+            && seed_count_by_label[li] >= MIN_SEED_PIXELS
+        {
+            cleaned_data[index] = 255;
+        }
+    }
+
+    // 稀疏场景（仅看到一小块地图）时，优先保留离圆心最近的连通域，进一步抑制背景噪声。
+    let minimap_area =
+        core::count_non_zero(&mask).map_err(|e| format!("统计小地图区域像素失败: {e}"))?;
+    let cleaned_area = core::count_non_zero(&cleaned_mask)
+        .map_err(|e| format!("统计预处理前景像素失败: {e}"))?;
+    if minimap_area > 0 && (cleaned_area as f64) / (minimap_area as f64) < 0.05 {
+        let mut sparse_labels = Mat::default();
+        let mut sparse_stats = Mat::default();
+        let mut sparse_centroids = Mat::default();
+        let sparse_label_count = imgproc::connected_components_with_stats(
+            &cleaned_mask,
+            &mut sparse_labels,
+            &mut sparse_stats,
+            &mut sparse_centroids,
+            8,
+            core::CV_32S,
+        )
+        .map_err(|e| format!("稀疏前景连通域分析失败: {e}"))?;
+
+        if sparse_label_count > 1 {
+            let mut best_label = 0i32;
+            let mut best_dist_sq = f64::INFINITY;
+            for label in 1..sparse_label_count {
+                let area = *sparse_stats
+                    .at_2d::<i32>(label, imgproc::CC_STAT_AREA)
+                    .map_err(|e| format!("读取稀疏连通域面积失败: {e}"))?;
+                if area <= 0 {
+                    continue;
+                }
+                let cx = *sparse_centroids
+                    .at_2d::<f64>(label, 0)
+                    .map_err(|e| format!("读取稀疏连通域中心 X 失败: {e}"))?;
+                let cy = *sparse_centroids
+                    .at_2d::<f64>(label, 1)
+                    .map_err(|e| format!("读取稀疏连通域中心 Y 失败: {e}"))?;
+                let dx = cx - center_x as f64;
+                let dy = cy - center_y as f64;
+                let dist_sq = dx * dx + dy * dy;
+                if dist_sq < best_dist_sq {
+                    best_dist_sq = dist_sq;
+                    best_label = label;
+                }
+            }
+
+            if best_label > 0 {
+                let sparse_labels_contiguous = if sparse_labels.is_continuous() {
+                    sparse_labels
+                } else {
+                    let mut copied = Mat::default();
+                    sparse_labels
+                        .copy_to(&mut copied)
+                        .map_err(|e| format!("复制稀疏标签图失败: {e}"))?;
+                    copied
+                };
+                let sparse_label_data = sparse_labels_contiguous
+                    .data_typed::<i32>()
+                    .map_err(|e| format!("读取稀疏标签图数据失败: {e}"))?;
+
+                let mut center_filtered = Mat::zeros(rows, cols, CV_8UC1)
+                    .map_err(|e| format!("创建中心筛选掩码失败: {e}"))?
+                    .to_mat()
+                    .map_err(|e| format!("初始化中心筛选掩码失败: {e}"))?;
+                let center_filtered_data = center_filtered
+                    .data_typed_mut::<u8>()
+                    .map_err(|e| format!("读取中心筛选掩码数据失败: {e}"))?;
+                for (index, label) in sparse_label_data.iter().enumerate() {
+                    if *label == best_label {
+                        center_filtered_data[index] = 255;
+                    }
+                }
+                cleaned_mask = center_filtered;
+            }
+        }
+    }
+
+    // 开运算去除零散噪点，避免拼接时把背景点带入大图。
+    let open_kernel = imgproc::get_structuring_element(
+        imgproc::MORPH_ELLIPSE,
+        Size::new(3, 3),
+        Point::new(-1, -1),
+    )
+    .map_err(|e| format!("创建形态学核失败: {e}"))?;
+    let mut opened = Mat::default();
+    imgproc::morphology_ex(
+        &cleaned_mask,
+        &mut opened,
+        imgproc::MORPH_OPEN,
+        &open_kernel,
+        Point::new(-1, -1),
+        1,
+        core::BORDER_CONSTANT,
+        Scalar::all(0.0),
+    )
+    .map_err(|e| format!("暗色掩码开运算失败: {e}"))?;
+    cleaned_mask = opened;
+
+    // 输出统一为“白底黑图”，避免半透明背景被带入拼接大图。
+    let mut out = Mat::new_rows_cols_with_default(rows, cols, bgr.typ(), Scalar::all(255.0))
+        .map_err(|e| format!("创建白底输出图失败: {e}"))?;
+    out.set_to(&Scalar::all(0.0), &cleaned_mask)
+        .map_err(|e| format!("写入黑色前景失败: {e}"))?;
+    Ok(out)
 }
 
 /// 选择“前景为白色”的二值图，便于后续按投影做字符分割。
@@ -1318,6 +1669,324 @@ pub fn sift_locate_impl(img1: &Mat, img2: &Mat) -> Result<Option<SiftLocateResul
         good_matches,
         inliers,
         transformed_points,
+    )))
+}
+
+/// 使用 SIFT + 单应性将 patch 拼接到 base，必要时自动扩展画布。
+///
+/// # 参数
+/// - `base`: 当前大图（作为 train）
+/// - `patch`: 新帧小图（作为 query）
+/// - `min_good_matches`: 最小优质匹配数量，<=0 表示不限制
+/// - `min_inliers`: 最小内点数量，<=0 表示不限制
+/// - `ransac_reproj_threshold`: RANSAC 重投影阈值（像素，非有限值时回退为 3.0）
+///
+/// # 返回
+/// - `None`: 匹配不足，无法可靠拼接
+/// - `Some`: 返回拼接后图像、bbox、匹配统计与变换角点
+pub fn sift_stitch_impl(
+    base: &Mat,
+    patch: &Mat,
+    min_good_matches: i32,
+    min_inliers: i32,
+    ransac_reproj_threshold: f64,
+) -> Result<Option<SiftStitchResult>, String> {
+    if base.rows() <= 0 || base.cols() <= 0 {
+        return Err("base 图像尺寸无效".to_string());
+    }
+    if patch.rows() <= 0 || patch.cols() <= 0 {
+        return Err("patch 图像尺寸无效".to_string());
+    }
+
+    let base_bgr = _to_bgr_mat(base)?;
+    let patch_bgr = _to_bgr_mat(patch)?;
+    let gray_base = _to_gray_mat(&base_bgr)?;
+    let gray_patch = _to_gray_mat(&patch_bgr)?;
+
+    let mut sift =
+        features2d::SIFT::create_def().map_err(|e| format!("创建 SIFT 检测器失败: {e}"))?;
+
+    let mut keypoints_base = core::Vector::<core::KeyPoint>::new();
+    let mut descriptors_base = Mat::default();
+    sift.detect_and_compute(
+        &gray_base,
+        &Mat::default(),
+        &mut keypoints_base,
+        &mut descriptors_base,
+        false,
+    )
+    .map_err(|e| format!("计算 base SIFT 特征失败: {e}"))?;
+
+    let mut keypoints_patch = core::Vector::<core::KeyPoint>::new();
+    let mut descriptors_patch = Mat::default();
+    sift.detect_and_compute(
+        &gray_patch,
+        &Mat::default(),
+        &mut keypoints_patch,
+        &mut descriptors_patch,
+        false,
+    )
+    .map_err(|e| format!("计算 patch SIFT 特征失败: {e}"))?;
+
+    if descriptors_base.empty() || descriptors_patch.empty() {
+        return Ok(None);
+    }
+
+    let matcher = features2d::BFMatcher::create(core::NORM_L2, false)
+        .map_err(|e| format!("创建 SIFT 匹配器失败: {e}"))?;
+    let mut knn_matches = core::Vector::<core::Vector<core::DMatch>>::new();
+    matcher
+        .knn_train_match_def(&descriptors_patch, &descriptors_base, &mut knn_matches, 2)
+        .map_err(|e| format!("SIFT knn 匹配失败: {e}"))?;
+
+    let mut src_points = core::Vector::<Point2f>::new();
+    let mut dst_points = core::Vector::<Point2f>::new();
+    let mut good_matches = 0i32;
+    for idx in 0..knn_matches.len() {
+        let pair = knn_matches
+            .get(idx)
+            .map_err(|e| format!("读取 SIFT 匹配对[{idx}]失败: {e}"))?;
+        if pair.len() < 2 {
+            continue;
+        }
+
+        let first = pair
+            .get(0)
+            .map_err(|e| format!("读取 SIFT 匹配 first[{idx}]失败: {e}"))?;
+        let second = pair
+            .get(1)
+            .map_err(|e| format!("读取 SIFT 匹配 second[{idx}]失败: {e}"))?;
+        if first.distance >= second.distance * 0.75 {
+            continue;
+        }
+        if first.query_idx < 0 || first.train_idx < 0 {
+            continue;
+        }
+
+        let kp_patch = keypoints_patch
+            .get(first.query_idx as usize)
+            .map_err(|e| format!("读取 patch 关键点失败: {e}"))?;
+        let kp_base = keypoints_base
+            .get(first.train_idx as usize)
+            .map_err(|e| format!("读取 base 关键点失败: {e}"))?;
+        src_points.push(kp_patch.pt());
+        dst_points.push(kp_base.pt());
+        good_matches += 1;
+    }
+
+    if src_points.len() < 4 || dst_points.len() < 4 {
+        return Ok(None);
+    }
+
+    let mut inlier_mask = Mat::default();
+    let ransac_threshold = if ransac_reproj_threshold.is_finite() {
+        ransac_reproj_threshold.max(0.5)
+    } else {
+        3.0
+    };
+    let homography = calib3d::find_homography(
+        &src_points,
+        &dst_points,
+        &mut inlier_mask,
+        calib3d::RANSAC,
+        ransac_threshold,
+    )
+    .map_err(|e| format!("估计单应矩阵失败: {e}"))?;
+    if homography.empty() {
+        return Ok(None);
+    }
+
+    let inliers =
+        core::count_non_zero(&inlier_mask).map_err(|e| format!("统计内点数量失败: {e}"))?;
+    if min_good_matches > 0 && good_matches < min_good_matches {
+        return Ok(None);
+    }
+    if min_inliers > 0 && inliers < min_inliers {
+        return Ok(None);
+    }
+
+    let patch_w = patch_bgr.cols() as f32;
+    let patch_h = patch_bgr.rows() as f32;
+    if patch_w <= 0.0 || patch_h <= 0.0 {
+        return Ok(None);
+    }
+
+    let mut patch_corners = core::Vector::<Point2f>::new();
+    patch_corners.push(Point2f::new(0.0, 0.0));
+    patch_corners.push(Point2f::new(patch_w, 0.0));
+    patch_corners.push(Point2f::new(patch_w, patch_h));
+    patch_corners.push(Point2f::new(0.0, patch_h));
+
+    let mut transformed_on_base = core::Vector::<Point2f>::new();
+    core::perspective_transform(&patch_corners, &mut transformed_on_base, &homography)
+        .map_err(|e| format!("透视变换失败: {e}"))?;
+    if transformed_on_base.len() != 4 {
+        return Ok(None);
+    }
+
+    let mut min_x = f32::INFINITY;
+    let mut min_y = f32::INFINITY;
+    let mut max_x = f32::NEG_INFINITY;
+    let mut max_y = f32::NEG_INFINITY;
+    for idx in 0..transformed_on_base.len() {
+        let p = transformed_on_base
+            .get(idx)
+            .map_err(|e| format!("读取变换角点[{idx}]失败: {e}"))?;
+        min_x = min_x.min(p.x);
+        min_y = min_y.min(p.y);
+        max_x = max_x.max(p.x);
+        max_y = max_y.max(p.y);
+    }
+
+    let base_w = base_bgr.cols();
+    let base_h = base_bgr.rows();
+    let pad_left = if min_x < 0.0 { (-min_x).ceil() as i32 } else { 0 };
+    let pad_top = if min_y < 0.0 { (-min_y).ceil() as i32 } else { 0 };
+    let pad_right = if max_x > base_w as f32 {
+        (max_x.ceil() as i32 - base_w).max(0)
+    } else {
+        0
+    };
+    let pad_bottom = if max_y > base_h as f32 {
+        (max_y.ceil() as i32 - base_h).max(0)
+    } else {
+        0
+    };
+
+    let canvas_w = base_w + pad_left + pad_right;
+    let canvas_h = base_h + pad_top + pad_bottom;
+    if canvas_w <= 0 || canvas_h <= 0 {
+        return Err("拼接后画布尺寸无效".to_string());
+    }
+
+    let mut stitched = Mat::zeros(canvas_h, canvas_w, base_bgr.typ())
+        .map_err(|e| format!("创建拼接画布失败: {e}"))?
+        .to_mat()
+        .map_err(|e| format!("初始化拼接画布失败: {e}"))?;
+    {
+        let roi = core::Rect::new(pad_left, pad_top, base_w, base_h);
+        let mut base_roi =
+            Mat::roi_mut(&mut stitched, roi).map_err(|e| format!("获取大图 ROI 失败: {e}"))?;
+        base_bgr
+            .copy_to(&mut base_roi)
+            .map_err(|e| format!("复制 base 到画布失败: {e}"))?;
+    }
+
+    let translate = Mat::from_slice_2d(&[
+        [1.0f64, 0.0, pad_left as f64],
+        [0.0, 1.0, pad_top as f64],
+        [0.0, 0.0, 1.0],
+    ])
+    .map_err(|e| format!("创建平移矩阵失败: {e}"))?;
+    let mut homography_on_canvas = Mat::default();
+    core::gemm(
+        &translate,
+        &homography,
+        1.0,
+        &Mat::default(),
+        0.0,
+        &mut homography_on_canvas,
+        0,
+    )
+    .map_err(|e| format!("计算画布单应矩阵失败: {e}"))?;
+
+    let mut warped_patch = Mat::zeros(canvas_h, canvas_w, base_bgr.typ())
+        .map_err(|e| format!("创建变换图失败: {e}"))?
+        .to_mat()
+        .map_err(|e| format!("初始化变换图失败: {e}"))?;
+    imgproc::warp_perspective(
+        &patch_bgr,
+        &mut warped_patch,
+        &homography_on_canvas,
+        Size::new(canvas_w, canvas_h),
+        imgproc::INTER_LINEAR,
+        core::BORDER_CONSTANT,
+        Scalar::all(0.0),
+    )
+    .map_err(|e| format!("patch 透视变换失败: {e}"))?;
+
+    // 仅将 patch 的非零区域覆盖到画布，避免背景黑边污染已有大图。
+    let mut patch_mask = Mat::default();
+    imgproc::threshold(
+        &gray_patch,
+        &mut patch_mask,
+        1.0,
+        255.0,
+        imgproc::THRESH_BINARY,
+    )
+    .map_err(|e| format!("构建 patch 有效区域掩码失败: {e}"))?;
+    let mut warped_mask = Mat::zeros(canvas_h, canvas_w, CV_8UC1)
+        .map_err(|e| format!("创建变换掩码失败: {e}"))?
+        .to_mat()
+        .map_err(|e| format!("初始化变换掩码失败: {e}"))?;
+    imgproc::warp_perspective(
+        &patch_mask,
+        &mut warped_mask,
+        &homography_on_canvas,
+        Size::new(canvas_w, canvas_h),
+        imgproc::INTER_NEAREST,
+        core::BORDER_CONSTANT,
+        Scalar::all(0.0),
+    )
+    .map_err(|e| format!("patch 掩码透视变换失败: {e}"))?;
+
+    let mut foreground = Mat::default();
+    core::bitwise_and(&warped_patch, &warped_patch, &mut foreground, &warped_mask)
+        .map_err(|e| format!("提取前景失败: {e}"))?;
+    let mut inverse_mask = Mat::default();
+    core::bitwise_not(&warped_mask, &mut inverse_mask, &Mat::default())
+        .map_err(|e| format!("反转掩码失败: {e}"))?;
+    let mut background = Mat::default();
+    core::bitwise_and(&stitched, &stitched, &mut background, &inverse_mask)
+        .map_err(|e| format!("提取背景失败: {e}"))?;
+    let mut merged = Mat::default();
+    core::add(&background, &foreground, &mut merged, &Mat::default(), -1)
+        .map_err(|e| format!("融合拼接图失败: {e}"))?;
+
+    let mut transformed_on_canvas = core::Vector::<Point2f>::new();
+    core::perspective_transform(&patch_corners, &mut transformed_on_canvas, &homography_on_canvas)
+        .map_err(|e| format!("计算画布角点失败: {e}"))?;
+    if transformed_on_canvas.len() != 4 {
+        return Ok(None);
+    }
+
+    let mut out_corners = Vec::with_capacity(4);
+    let mut out_min_x = f32::INFINITY;
+    let mut out_min_y = f32::INFINITY;
+    let mut out_max_x = f32::NEG_INFINITY;
+    let mut out_max_y = f32::NEG_INFINITY;
+    for idx in 0..transformed_on_canvas.len() {
+        let p = transformed_on_canvas
+            .get(idx)
+            .map_err(|e| format!("读取画布角点[{idx}]失败: {e}"))?;
+        out_corners.push(p);
+        out_min_x = out_min_x.min(p.x);
+        out_min_y = out_min_y.min(p.y);
+        out_max_x = out_max_x.max(p.x);
+        out_max_y = out_max_y.max(p.y);
+    }
+
+    let out_w = out_max_x - out_min_x;
+    let out_h = out_max_y - out_min_y;
+    if !out_min_x.is_finite()
+        || !out_min_y.is_finite()
+        || !out_w.is_finite()
+        || !out_h.is_finite()
+        || out_w <= 0.0
+        || out_h <= 0.0
+    {
+        return Ok(None);
+    }
+
+    Ok(Some((
+        merged,
+        out_min_x as f64,
+        out_min_y as f64,
+        out_w as f64,
+        out_h as f64,
+        good_matches,
+        inliers,
+        out_corners,
     )))
 }
 

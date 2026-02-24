@@ -1,4 +1,5 @@
 use crate::submodules::async_tokio::TokioJobExecutor;
+use crate::submodules::fx::hide_border_immediately;
 use crate::submodules::jsdnn::JsDnnNet;
 use crate::submodules::jsmat::JsMat;
 use crate::submodules::jstimer::JsTimer;
@@ -35,7 +36,7 @@ thread_local! {
 pub const SCRIPT_STOP_INTERRUPT_MESSAGE: &str = "__SCRIPT_STOP_REQUESTED__";
 
 #[derive(Clone)]
-struct ScriptStopSnapshot {
+pub(crate) struct ScriptStopSnapshot {
     global_generation: u64,
     path_generation: u64,
     script_path: String,
@@ -137,6 +138,7 @@ impl ScriptRunningGuard {
 
 impl Drop for ScriptRunningGuard {
     fn drop(&mut self) {
+        let mut should_hide_border = false;
         if let Ok(mut guard) = SCRIPT_RUNNING_PATH_COUNTS.lock() {
             if let Some(counter) = guard.get_mut(&self.script_path) {
                 if *counter > 1 {
@@ -145,11 +147,17 @@ impl Drop for ScriptRunningGuard {
                     guard.remove(&self.script_path);
                 }
             }
-            SCRIPT_RUNNING.store(!guard.is_empty(), Ordering::Release);
+            let has_running = !guard.is_empty();
+            SCRIPT_RUNNING.store(has_running, Ordering::Release);
+            should_hide_border = !has_running;
         }
         CURRENT_SCRIPT_STOP_SNAPSHOT.with(|storage| {
             *storage.borrow_mut() = None;
         });
+        if should_hide_border {
+            // 最后一个脚本退出时立即清除边框，避免残留到延时隐藏线程触发。
+            hide_border_immediately();
+        }
         emit_script_runtime_updated(&self.app_handle);
     }
 }
@@ -448,6 +456,27 @@ pub fn get_script_runtime_info() -> (bool, Vec<String>, usize) {
     } else {
         (true, script_paths, running_count)
     }
+}
+
+/// 捕获当前线程绑定的脚本停止快照（用于跨线程传播停止语义）。
+pub(crate) fn capture_current_script_stop_snapshot() -> Option<ScriptStopSnapshot> {
+    CURRENT_SCRIPT_STOP_SNAPSHOT.with(|storage| storage.borrow().clone())
+}
+
+/// 在当前线程临时安装指定停止快照并执行任务，任务完成后恢复原快照。
+pub(crate) fn run_with_script_stop_snapshot<T>(
+    snapshot: Option<ScriptStopSnapshot>,
+    task: impl FnOnce() -> T,
+) -> T {
+    CURRENT_SCRIPT_STOP_SNAPSHOT.with(|storage| {
+        let previous = storage.replace(snapshot);
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(task));
+        storage.replace(previous);
+        match result {
+            Ok(value) => value,
+            Err(payload) => std::panic::resume_unwind(payload),
+        }
+    })
 }
 
 /// 判断当前脚本线程是否已收到停止请求。

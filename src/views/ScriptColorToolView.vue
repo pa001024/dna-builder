@@ -96,6 +96,7 @@ interface ClassificationTreeBranch {
 }
 
 type BubbleQuadrant = "ru" | "rd" | "lu" | "ld"
+const CLASSIFICATION_UNKNOWN_LABEL = "unknown"
 
 const router = useRouter()
 const ui = useUIStore()
@@ -191,42 +192,39 @@ function resetImageState() {
 }
 
 /**
- * 从文件名推导默认分类标签。
- * @param name 图片名称
- * @param index 图片索引
+ * 获取默认分类标签。
  * @returns 默认标签
  */
-function inferDefaultImageLabel(name: string, index: number): string {
-    const raw = name.replace(/\.[^/.]+$/, "").trim()
-    return raw.length > 0 ? raw : `state_${index + 1}`
+function inferDefaultImageLabel(): string {
+    return CLASSIFICATION_UNKNOWN_LABEL
 }
 
 /**
  * 初始化每张图片的分类标签。
  * @param items 已加载图片列表
  */
-function appendImageLabels(items: LoadedImageItem[], startIndex: number) {
+function appendImageLabels(items: LoadedImageItem[]) {
     const nextLabels: Record<string, string> = { ...imageLabels.value }
-    for (const [offset, image] of items.entries()) {
+    for (const image of items) {
         if (!(image.id in nextLabels)) {
-            nextLabels[image.id] = inferDefaultImageLabel(image.name, startIndex + offset)
+            nextLabels[image.id] = inferDefaultImageLabel()
         }
     }
     imageLabels.value = nextLabels
 }
 
 /**
- * 获取指定索引图片的有效分类标签（空值回退默认标签）。
+ * 获取指定索引图片的有效分类标签（空值回退 unknown）。
  * @param index 图片索引
  * @returns 有效标签
  */
 function getImageLabelByIndex(index: number): string {
     const image = loadedImages.value[index]
     if (!image) {
-        return `state_${index + 1}`
+        return inferDefaultImageLabel()
     }
     const inputValue = imageLabels.value[image.id]?.trim() ?? ""
-    return inputValue.length > 0 ? inputValue : inferDefaultImageLabel(image.name, index)
+    return inputValue.length > 0 ? inputValue : inferDefaultImageLabel()
 }
 
 /**
@@ -366,7 +364,7 @@ async function loadImages(files: File[]) {
             items.push(await loadImageFile(file, baseIndex + offset))
         }
         loadedImages.value = [...loadedImages.value, ...items]
-        appendImageLabels(items, baseIndex)
+        appendImageLabels(items)
         if (loadedImages.value.length > 0 && baseIndex === 0) {
             activeImageIndex.value = 0
         }
@@ -396,7 +394,7 @@ async function loadImagesFromPaths(paths: string[]) {
             items.push(await loadImagePath(path, baseIndex + offset))
         }
         loadedImages.value = [...loadedImages.value, ...items]
-        appendImageLabels(items, baseIndex)
+        appendImageLabels(items)
         if (loadedImages.value.length > 0 && baseIndex === 0) {
             activeImageIndex.value = 0
         }
@@ -1209,7 +1207,7 @@ function getMajorityLabel(indices: number[], labels: string[]): string {
         const label = labels[index]
         counts.set(label, (counts.get(label) ?? 0) + 1)
     }
-    let bestLabel = labels[indices[0]] ?? "unknown"
+    let bestLabel = labels[indices[0]] ?? CLASSIFICATION_UNKNOWN_LABEL
     let bestCount = -1
     for (const [label, count] of counts.entries()) {
         if (count > bestCount) {
@@ -1237,7 +1235,7 @@ function buildClassificationTree(
     if (imageIndices.length === 0) {
         return {
             type: "leaf",
-            label: "unknown",
+            label: CLASSIFICATION_UNKNOWN_LABEL,
             ambiguous: true,
         }
     }
@@ -1246,7 +1244,7 @@ function buildClassificationTree(
     if (labelSet.size <= 1) {
         return {
             type: "leaf",
-            label: labels[imageIndices[0]] ?? "unknown",
+            label: labels[imageIndices[0]] ?? CLASSIFICATION_UNKNOWN_LABEL,
             ambiguous: false,
         }
     }
@@ -1301,29 +1299,126 @@ function buildClassificationTree(
 }
 
 /**
- * 将分类树渲染为可执行的 JavaScript 条件代码。
+ * 判断分类子树是否存在可输出的非 unknown 返回分支。
+ * @param node 分类树节点
+ * @param pointItems 点位条件数组
+ * @returns 是否存在有效返回分支
+ */
+function hasRenderableClassificationReturn(node: ClassificationTreeNode, pointItems: ClassificationPointItem[]): boolean {
+    if (node.type === "leaf") {
+        const normalizedLabel = node.label.trim() || CLASSIFICATION_UNKNOWN_LABEL
+        return normalizedLabel !== CLASSIFICATION_UNKNOWN_LABEL
+    }
+
+    const condition = pointItems[node.pointItemIndex]?.condition.trim()
+    if (!condition) {
+        return false
+    }
+
+    return (
+        hasRenderableClassificationReturn(node.trueNode, pointItems) ||
+        hasRenderableClassificationReturn(node.falseNode, pointItems)
+    )
+}
+
+/**
+ * 将条件数组合并为 && 表达式。
+ * @param conditions 条件数组
+ * @returns 合并后的表达式；无条件时返回 null
+ */
+function buildCombinedConditionExpression(conditions: string[]): string | null {
+    const validConditions = conditions.map(condition => condition.trim()).filter(condition => condition.length > 0)
+    if (validConditions.length === 0) {
+        return null
+    }
+    if (validConditions.length === 1) {
+        return validConditions[0]
+    }
+    return validConditions.join(" && ")
+}
+
+/**
+ * 将分类树渲染为分支型 JavaScript 条件代码。
+ * 对单分支链路合并为 && 条件；unknown 在函数底部统一兜底。
  * @param node 分类树节点
  * @param pointItems 点位条件数组
  * @param indentLevel 缩进层级
+ * @param prefixConditions 前置条件数组
  * @returns 代码行数组
  */
-function renderClassificationTree(node: ClassificationTreeNode, pointItems: ClassificationPointItem[], indentLevel: number): string[] {
+function renderClassificationTreeBranches(
+    node: ClassificationTreeNode,
+    pointItems: ClassificationPointItem[],
+    indentLevel: number,
+    prefixConditions: string[] = []
+): string[] {
     const indent = "    ".repeat(indentLevel)
+
     if (node.type === "leaf") {
-        const labelLiteral = JSON.stringify(node.label)
-        if (node.ambiguous) {
-            return [`${indent}return ${labelLiteral} // 存在重叠样本，回退为多数标签`]
+        const normalizedLabel = node.label.trim() || CLASSIFICATION_UNKNOWN_LABEL
+        if (normalizedLabel === CLASSIFICATION_UNKNOWN_LABEL) {
+            return []
         }
-        return [`${indent}return ${labelLiteral}`]
+        const labelLiteral = JSON.stringify(normalizedLabel)
+        const mergedCondition = buildCombinedConditionExpression(prefixConditions)
+        const returnLine =
+            node.ambiguous
+                ? `return ${labelLiteral} // 存在重叠样本，回退为多数标签`
+                : `return ${labelLiteral}`
+        if (!mergedCondition) {
+            return [`${indent}${returnLine}`]
+        }
+        return [
+            `${indent}if (${mergedCondition}) {`,
+            `${indent}    ${returnLine}`,
+            `${indent}}`,
+        ]
     }
 
-    const condition = pointItems[node.pointItemIndex].condition
-    const lines: string[] = [`${indent}if (${condition}) {`]
-    lines.push(...renderClassificationTree(node.trueNode, pointItems, indentLevel + 1))
-    lines.push(`${indent}}`)
-    lines.push(`${indent} else {`)
-    lines.push(...renderClassificationTree(node.falseNode, pointItems, indentLevel + 1))
-    lines.push(`${indent}}`)
+    const condition = pointItems[node.pointItemIndex]?.condition.trim()
+    if (!condition) {
+        return []
+    }
+
+    const trueHasRenderableReturn = hasRenderableClassificationReturn(node.trueNode, pointItems)
+    const falseHasRenderableReturn = hasRenderableClassificationReturn(node.falseNode, pointItems)
+    if (!trueHasRenderableReturn && !falseHasRenderableReturn) {
+        return []
+    }
+    if (trueHasRenderableReturn && !falseHasRenderableReturn) {
+        return renderClassificationTreeBranches(
+            node.trueNode,
+            pointItems,
+            indentLevel,
+            [...prefixConditions, condition]
+        )
+    }
+    if (!trueHasRenderableReturn && falseHasRenderableReturn) {
+        return renderClassificationTreeBranches(
+            node.falseNode,
+            pointItems,
+            indentLevel,
+            [...prefixConditions, `!(${condition})`]
+        )
+    }
+
+    const mergedPrefixCondition = buildCombinedConditionExpression(prefixConditions)
+    const innerIndentLevel = mergedPrefixCondition ? indentLevel + 1 : indentLevel
+    const innerIndent = "    ".repeat(innerIndentLevel)
+    const lines: string[] = []
+    if (mergedPrefixCondition) {
+        lines.push(`${indent}if (${mergedPrefixCondition}) {`)
+    }
+
+    lines.push(`${innerIndent}if (${condition}) {`)
+    lines.push(...renderClassificationTreeBranches(node.trueNode, pointItems, innerIndentLevel + 1))
+    lines.push(`${innerIndent}} else {`)
+    lines.push(...renderClassificationTreeBranches(node.falseNode, pointItems, innerIndentLevel + 1))
+    lines.push(`${innerIndent}}`)
+
+    if (mergedPrefixCondition) {
+        lines.push(`${indent}}`)
+    }
     return lines
 }
 
@@ -1352,7 +1447,9 @@ function generateClassificationCode(): string | null {
     const pointItemIndices = pointItems.map((_, index) => index)
     const tree = buildClassificationTree(imageIndices, pointItemIndices, labels, pointItems)
 
-    const lines = ["function checkState(frame) {", ...renderClassificationTree(tree, pointItems, 1), "}"]
+    const lines = ["function checkState(frame) {", ...renderClassificationTreeBranches(tree, pointItems, 1)]
+    lines.push(`    return ${JSON.stringify(CLASSIFICATION_UNKNOWN_LABEL)}`)
+    lines.push("}")
     return lines.join("\n")
 }
 
@@ -1529,26 +1626,6 @@ onUnmounted(() => {
             <button class="btn btn-sm btn-accent" @click="runClassificationTestFromClipboard" :disabled="loadedImages.length === 0">
                 剪贴板测试分类
             </button>
-            <div v-if="loadedImages.length > 0" class="flex items-center gap-1">
-                <button
-                    class="btn btn-sm btn-ghost btn-square"
-                    @click="setActiveImageIndex(activeImageIndex - 1)"
-                    :disabled="activeImageIndex <= 0"
-                >
-                    &lt;
-                </button>
-                <select class="select select-sm select-bordered w-64" :value="activeImageIndex" @change="handleActiveImageChange">
-                    <option v-for="(image, index) in loadedImages" :key="image.id" :value="index">{{ index + 1 }}. {{ image.name }}</option>
-                </select>
-                <button
-                    class="btn btn-sm btn-ghost btn-square"
-                    @click="setActiveImageIndex(activeImageIndex + 1)"
-                    :disabled="activeImageIndex >= loadedImages.length - 1"
-                >
-                    &gt;
-                </button>
-                <span class="text-xs text-base-content/70">当前图 {{ activeImageIndex + 1 }}/{{ loadedImages.length }}</span>
-            </div>
             <div class="flex items-center gap-1">
                 <button class="btn btn-sm btn-ghost btn-square" @click="zoomOut" :disabled="zoomScale <= 1">-</button>
                 <input
@@ -1585,7 +1662,36 @@ onUnmounted(() => {
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 min-h-0 flex-1">
             <div class="card bg-base-100 border border-base-300 min-h-0">
                 <div class="card-body min-h-0 p-3 gap-3">
-                    <div class="text-sm font-medium">当前图（支持切换，点击打点）</div>
+                    <div class="text-sm font-medium flex items-center">
+                        <div>当前图（点击打点）</div>
+
+                        <div v-if="loadedImages.length > 0" class="flex items-center gap-1">
+                            <button
+                                class="btn btn-xs btn-ghost btn-square"
+                                @click="setActiveImageIndex(activeImageIndex - 1)"
+                                :disabled="activeImageIndex <= 0"
+                            >
+                                &lt;
+                            </button>
+                            <select
+                                class="select select-xs select-bordered w-64"
+                                :value="activeImageIndex"
+                                @change="handleActiveImageChange"
+                            >
+                                <option v-for="(image, index) in loadedImages" :key="image.id" :value="index">
+                                    {{ index + 1 }}. {{ image.name }}
+                                </option>
+                            </select>
+                            <button
+                                class="btn btn-xs btn-ghost btn-square"
+                                @click="setActiveImageIndex(activeImageIndex + 1)"
+                                :disabled="activeImageIndex >= loadedImages.length - 1"
+                            >
+                                &gt;
+                            </button>
+                            <span class="text-xs text-base-content/70">当前图 {{ activeImageIndex + 1 }}/{{ loadedImages.length }}</span>
+                        </div>
+                    </div>
                     <div class="flex-1 overflow-auto border border-base-300 rounded bg-base-200/30 p-2">
                         <div v-if="!referenceImage" class="h-full min-h-60 flex items-center justify-center text-base-content/50 text-sm">
                             暂无图片

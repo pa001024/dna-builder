@@ -2102,6 +2102,25 @@ fn clear_script_input_recorder_actions() -> Result<String, String> {
     Ok("录制动作已清空".to_string())
 }
 
+/// 切换脚本输入录制状态（用于前端 F10 兜底）。
+#[tauri::command]
+fn toggle_script_input_recording() -> Result<bool, String> {
+    use submodules::hotkey::toggle_script_input_recording;
+    Ok(toggle_script_input_recording())
+}
+
+/// 回填录制动作（用于前端窗口内输入兜底）。
+#[tauri::command]
+fn append_script_input_recorder_action(
+    action_type: String,
+    key: Option<String>,
+    button: Option<String>,
+) -> Result<String, String> {
+    use submodules::hotkey::append_script_input_recorder_action;
+    append_script_input_recorder_action(action_type, key, button)?;
+    Ok("录制动作已追加".to_string())
+}
+
 /// 监听文件变化
 #[tauri::command]
 fn watch_file(file_path: String, app_handle: tauri::AppHandle) -> Result<String, String> {
@@ -2325,6 +2344,8 @@ pub fn run() {
         set_script_input_recorder_hotkey_enabled,
         get_script_input_recorder_snapshot,
         clear_script_input_recorder_actions,
+        toggle_script_input_recording,
+        append_script_input_recorder_action,
         get_documents_dir,
         rename_file,
         delete_file,

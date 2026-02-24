@@ -92,12 +92,12 @@ watchEffect(() => {
             </div>
         </div>
 
-        <div class="collapse p-2">
+        <!-- <div class="collapse p-2">
             <input type="checkbox" />
             <div class="collapse-title font-semibold p-0">底层数据(点击展开)</div>
             <div class="collapse-content p-0">
                 <SkillDetails :skill="selectedSkill.skillData" :lv="selectedSkillLevel" />
             </div>
-        </div>
+        </div> -->
     </div>
 </template>

@@ -55,7 +55,14 @@ export interface Char {
     版本?: string
     别名?: string
     阵营?: string
+    势力?: string
     属性: string
+    出生地?: string
+    生日?: string
+    中文CV?: string
+    日文CV?: string
+    英文CV?: string
+    韩文CV?: string
     突破?: Record<string, number>[]
     精通: string[]
     标签?: string[]

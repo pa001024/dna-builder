@@ -22,6 +22,8 @@ use windows::Win32::System::Diagnostics::ToolHelp::{
     CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W, TH32CS_SNAPPROCESS,
 };
 #[cfg(target_os = "windows")]
+use windows::Win32::System::LibraryLoader::GetModuleHandleW;
+#[cfg(target_os = "windows")]
 use windows::Win32::UI::WindowsAndMessaging::{
     CallNextHookEx, DispatchMessageW, GetMessageW, HC_ACTION, KBDLLHOOKSTRUCT, MSLLHOOKSTRUCT, MSG, SetWindowsHookExW, TranslateMessage,
     UnhookWindowsHookEx, WH_KEYBOARD_LL, WH_MOUSE_LL, WM_KEYDOWN, WM_KEYUP, WM_LBUTTONDOWN, WM_LBUTTONUP, WM_MBUTTONDOWN, WM_MBUTTONUP,
@@ -447,6 +449,9 @@ fn _start_script_input_recording() {
     if let Ok(mut actions) = recorder.actions.lock() {
         actions.clear();
     }
+    if let Ok(mut pressed_keys) = _hotkey_state().pressed_keys.lock() {
+        pressed_keys.clear();
+    }
     if let Ok(mut started_at) = recorder.started_at.lock() {
         *started_at = None;
     }
@@ -518,6 +523,14 @@ fn _record_script_input_action(action_type: &str, key: Option<String>, button: O
     };
 
     if let Ok(mut actions) = recorder.actions.lock() {
+        if let Some(last) = actions.last() {
+            // 兜底去重：前端回填与 LLHook 同时命中时，短时间内完全相同动作只保留一次。
+            let same_action =
+                last.action_type == action_type && last.key == key && last.button == button && (elapsed_seconds - last.time).abs() <= 0.03;
+            if same_action {
+                return;
+            }
+        }
         actions.push(ScriptInputRecorderAction {
             action_type: action_type.to_string(),
             key,
@@ -1206,7 +1219,20 @@ fn _ensure_hook_thread_started() -> Result<(), String> {
     std::thread::Builder::new()
         .name("script-hotkey-hook".to_string())
         .spawn(move || unsafe {
-            let keyboard_hook = match SetWindowsHookExW(WH_KEYBOARD_LL, Some(_low_level_keyboard_proc), None, 0) {
+            let module_handle = match GetModuleHandleW(None) {
+                Ok(handle) => handle,
+                Err(error) => {
+                    let _ = ready_tx.send(Err(format!("获取模块句柄失败: {error}")));
+                    return;
+                }
+            };
+
+            let keyboard_hook = match SetWindowsHookExW(
+                WH_KEYBOARD_LL,
+                Some(_low_level_keyboard_proc),
+                Some(windows::Win32::Foundation::HINSTANCE(module_handle.0)),
+                0,
+            ) {
                 Ok(hook) => hook,
                 Err(error) => {
                     let _ = ready_tx.send(Err(format!("安装低级键盘钩子失败: {error}")));
@@ -1218,7 +1244,12 @@ fn _ensure_hook_thread_started() -> Result<(), String> {
                 return;
             }
 
-            let mouse_hook = match SetWindowsHookExW(WH_MOUSE_LL, Some(_low_level_mouse_proc), None, 0) {
+            let mouse_hook = match SetWindowsHookExW(
+                WH_MOUSE_LL,
+                Some(_low_level_mouse_proc),
+                Some(windows::Win32::Foundation::HINSTANCE(module_handle.0)),
+                0,
+            ) {
                 Ok(hook) => hook,
                 Err(error) => {
                     let _ = ready_tx.send(Err(format!("安装低级鼠标钩子失败: {error}")));
@@ -1383,6 +1414,62 @@ pub fn clear_script_input_recorder_actions() -> Result<(), String> {
         return Err("清空录制动作失败：无法获取时间锁".to_string());
     }
     _emit_script_input_recorder_snapshot();
+    Ok(())
+}
+
+/// 设置脚本输入录制状态。
+/// - `true`：开始新一轮录制（会清空旧动作）；
+/// - `false`：停止录制并保留已录制动作。
+pub fn set_script_input_recording(recording: bool) -> bool {
+    let recorder = _input_recorder_state();
+    let current = recorder.recording.load(Ordering::Acquire);
+    if recording {
+        if !current {
+            _start_script_input_recording();
+        }
+        return true;
+    }
+    if current {
+        _stop_script_input_recording();
+    }
+    false
+}
+
+/// 切换脚本输入录制状态并返回切换后的状态。
+pub fn toggle_script_input_recording() -> bool {
+    let recorder = _input_recorder_state();
+    let current = recorder.recording.load(Ordering::Acquire);
+    set_script_input_recording(!current)
+}
+
+/// 由前端窗口内事件回填一条录制动作（用于 LLHook 在当前窗口失效时的兜底）。
+pub fn append_script_input_recorder_action(
+    action_type: String,
+    key: Option<String>,
+    button: Option<String>,
+) -> Result<(), String> {
+    let normalized_type = action_type.trim().to_ascii_lowercase();
+    if normalized_type != "key_down"
+        && normalized_type != "key_up"
+        && normalized_type != "mouse_down"
+        && normalized_type != "mouse_up"
+    {
+        return Err(format!("不支持的录制动作类型: {action_type}"));
+    }
+
+    let normalized_key = key.map(|value| value.trim().to_ascii_lowercase()).filter(|value| !value.is_empty());
+    let normalized_button = button
+        .map(|value| value.trim().to_ascii_lowercase())
+        .filter(|value| !value.is_empty());
+
+    if (normalized_type == "key_down" || normalized_type == "key_up") && normalized_key.is_none() {
+        return Err("键盘动作缺少 key 字段".to_string());
+    }
+    if (normalized_type == "mouse_down" || normalized_type == "mouse_up") && normalized_button.is_none() {
+        return Err("鼠标动作缺少 button 字段".to_string());
+    }
+
+    _record_script_input_action(&normalized_type, normalized_key, normalized_button);
     Ok(())
 }
 

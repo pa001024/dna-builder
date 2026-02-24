@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reactive } from "vue"
 import DBQuestStoryNodes from "@/components/DBQuestStoryNodes.vue"
-import { type QuestItem, questData } from "@/data/d/quest.data"
+import { getLocalizedQuestDataByLanguage } from "@/data/d/story-locale"
+import type { QuestItem } from "@/data/d/quest.data"
 import type { QuestChain } from "@/data/d/questchain.data"
 import { subRegionMap } from "@/data/d/subregion.data"
 import { useSettingStore } from "@/store/setting"
@@ -35,12 +36,21 @@ const highlightedQuestMap = reactive<Record<number, boolean>>({})
 const questElementMap = new Map<number, HTMLElement>()
 const questHighlightTimerMap = new Map<number, ReturnType<typeof setTimeout>>()
 
-const questItemMap = new Map<number, QuestItem>()
-for (const questList of questData) {
-    for (const questItem of questList.quests) {
-        questItemMap.set(questItem.id, questItem)
+/**
+ * 按当前设置语言构建任务详情映射，便于按任务 ID 快速读取任务文本。
+ */
+const questItemMap = computed(() => {
+    const localizedQuestData = getLocalizedQuestDataByLanguage(settingStore.lang)
+    const map = new Map<number, QuestItem>()
+
+    for (const questList of localizedQuestData) {
+        for (const questItem of questList.quests) {
+            map.set(questItem.id, questItem)
+        }
     }
-}
+
+    return map
+})
 
 /**
  * 获取当前剧情文本替换配置。
@@ -139,7 +149,7 @@ onBeforeUnmount(() => {
  * @returns 任务标签
  */
 function getQuestLabel(questId: number): string {
-    const targetQuest = questItemMap.get(questId)
+    const targetQuest = questItemMap.value.get(questId)
     if (!targetQuest) {
         return `未知任务 ${questId}`
     }
@@ -171,7 +181,7 @@ const questDetails = computed<QuestDetailItem[]>(() => {
     const questIndexMap = new Map<number, number>(props.questChain.quests.map((quest, index) => [quest.id, index]))
 
     return props.questChain.quests.map((quest, index) => {
-        const details = questItemMap.get(quest.id) ?? null
+        const details = questItemMap.value.get(quest.id) ?? null
         const rewardId = props.questChain.questReward?.[quest.id]
         const reward = rewardId ? getRewardDetails(rewardId) : null
 

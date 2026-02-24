@@ -325,6 +325,13 @@ declare function mc(button: "left" | "right" | "middle" | "x1" | "x2" | "l" | "r
 /**
  * 鼠标点击操作
  * @param hwnd 窗口句柄 (为0表示前台)
+ * @param button 按键类型：left/right/middle/x1/x2
+ */
+declare function mc(hwnd: number, button: "left" | "right" | "middle" | "x1" | "x2" | "l" | "r" | "m"): void
+
+/**
+ * 鼠标点击操作
+ * @param hwnd 窗口句柄 (为0表示前台)
  * @param x X坐标
  * @param y Y坐标
  * @param button 按键类型（可选，默认 left）：left/right/middle/x1/x2
@@ -782,6 +789,54 @@ declare function siftLocate(
     | undefined
 
 /**
+ * 小地图 SIFT 预处理（圆盘保留 + 中心遮罩 + 视角锥形遮罩）。
+ * @param imgMat 输入图像 Mat
+ * @param centerX 圆盘中心 X（默认图像中心）
+ * @param centerY 圆盘中心 Y（默认图像中心）
+ * @param radius 圆盘半径（默认 min(w,h)/2 - 1）
+ * @param coneAngleDeg 视角锥形角度（度，<=0 表示不遮蔽锥形）
+ * @param innerRadius 中心遮罩半径（<=0 表示不遮蔽中心）
+ * @param headingDeg 视角方向角（0=右，90=下，-90=上）
+ * @returns 预处理后的 Mat（白底黑图，BGR）
+ */
+declare function preprocessMinimapForSift(
+    imgMat: Mat,
+    centerX?: number,
+    centerY?: number,
+    radius?: number,
+    coneAngleDeg?: number,
+    innerRadius?: number,
+    headingDeg?: number
+): Mat
+
+/**
+ * SIFT 自动拼接：将 patch 对齐并融合到 base，必要时自动扩展画布。
+ * @param base 当前大图 Mat
+ * @param patch 待拼接小图 Mat
+ * @param minGoodMatches 最小优质匹配数量（默认 10）
+ * @param minInliers 最小内点数量（默认 8）
+ * @param ransacReprojThreshold RANSAC 重投影阈值（像素，默认 3.0）
+ * @returns 拼接结果（含新图像与匹配统计）或 undefined
+ */
+declare function siftStitch(
+    base: Mat,
+    patch: Mat,
+    minGoodMatches?: number,
+    minInliers?: number,
+    ransacReprojThreshold?: number
+):
+    | {
+          image: Mat
+          pos: [number, number]
+          size: [number, number]
+          bbox: [number, number, number, number]
+          goodMatches: number
+          inliers: number
+          corners: [number, number][]
+      }
+    | undefined
+
+/**
  * 计算图像感知哈希（pHash）
  * @param imgMat 图像 Mat
  * @param color 是否启用彩色哈希（true 时按 B/G/R 三通道拼接，false 时灰度哈希），默认 false
@@ -907,8 +962,9 @@ declare function drawContours(
  * @param y 左上角Y坐标（相对窗口客户区）
  * @param w 边框宽度
  * @param h 边框高度
+ * @param timeout 边框显示时长（毫秒，默认 2000）
  */
-declare function drawBorder(hwnd: number, x: number, y: number, w: number, h: number): void
+declare function drawBorder(hwnd: number, x: number, y: number, w: number, h: number, timeout?: number): void
 
 /**
  * 检查颜色矩阵（使用Mat对象）

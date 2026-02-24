@@ -46,6 +46,7 @@ export const npcData: NPC[] = [
             {
                 id: 90030001,
                 content: "你回来了。今天打算做什么？还是在家休息？",
+                voice: "char/Heitao/vo_welcome",
                 npc: 81101,
                 options: [
                     {
@@ -83,6 +84,7 @@ export const npcData: NPC[] = [
             {
                 id: 90030101,
                 content: "愿望？我……没有什么特别的愿望。每个早上都看见你笑着，就足够了。",
+                voice: "char/Heitao/vo_topic_02_1",
                 npc: 81101,
                 next: 90030103,
             },
@@ -90,30 +92,35 @@ export const npcData: NPC[] = [
                 id: 90030301,
                 content:
                     "和净界岛不一样，这座城的每一天都在下雪。不过，还好你有这么一个温暖的住处。和我们在净界岛上的破房子相比，这个地方算得上奢侈了。",
+                voice: "char/Heitao/vo_topic_03_1",
                 npc: 81101,
                 next: 90030303,
             },
             {
                 id: 90030401,
                 content: "为什么呢……我也不知道。不妨就认为这是一个美好的梦吧——就当作我还在你身边，像从前一样。",
+                voice: "char/Heitao/vo_topic_01_1",
                 npc: 81101,
                 next: 90030403,
             },
             {
                 id: 90030501,
                 content: "应该怎么说呢，那个地方像一座钢铁做的城市……不对，应该说更像牢狱吧。很小的时候，我是在那儿度过的。",
+                voice: "char/Heitao/vo_topic_04_1",
                 npc: 81101,
                 next: 90030503,
             },
             {
                 id: 90030601,
                 content: "是有些吵闹，不过，我并不讨厌。你结识了许多新的朋友，这是好事，我为你高兴。",
+                voice: "char/Heitao/vo_topic_05_1",
                 npc: 81101,
                 next: 90030603,
             },
             {
                 id: 90030801,
                 content: "那就枕在我身上歇息一会儿吧，像从前那样。",
+                voice: "char/Heitao/vo_topic_06_1",
                 npc: 81101,
                 options: [
                     {
@@ -148,12 +155,14 @@ export const npcData: NPC[] = [
             {
                 id: 90030503,
                 content: "后来一个人带着我逃走了。被她一同带到净界岛的，还有你。只是关于她的事，我不能说更多了……抱歉。我答应过她不说。",
+                voice: "char/Heitao/vo_topic_04_2",
                 npc: 81101,
                 next: 90030504,
             },
             {
                 id: 90030603,
                 content: "这样一来，就算我不在你身边，你也不会觉得孤单了。",
+                voice: "char/Heitao/vo_topic_05_2",
                 npc: 81101,
                 options: [
                     {
@@ -170,6 +179,7 @@ export const npcData: NPC[] = [
             {
                 id: 90030104,
                 content: "也不用勉强自己。如果你觉得不开心，就来靠着我说会儿话吧。或者，如果你不想说的话，我们就一起安静地待一会儿。",
+                voice: "char/Heitao/vo_topic_02_2",
                 npc: 81101,
                 options: [
                     {
@@ -186,6 +196,7 @@ export const npcData: NPC[] = [
             {
                 id: 90030304,
                 content: "以前每到冬天，你的手都会变得很凉……来，手给我，我帮你暖一暖。",
+                voice: "char/Heitao/vo_topic_03_2",
                 npc: 81101,
                 options: [
                     {
@@ -202,6 +213,7 @@ export const npcData: NPC[] = [
             {
                 id: 90030404,
                 content: "嗯，我也想，非常想……但愿有一天，我们能够真正重逢。",
+                voice: "char/Heitao/vo_topic_01_2",
                 npc: 81101,
                 options: [
                     {
@@ -219,6 +231,7 @@ export const npcData: NPC[] = [
                 id: 90030504,
                 content:
                     "……在净界岛的日子是那么平静，我差点以为我们会一辈子这样生活下去。但那天，他们再次出现的时候，我才发觉我从未真正逃离那个牢狱。",
+                voice: "char/Heitao/vo_topic_04_3",
                 npc: 81101,
                 options: [
                     {
@@ -245,6 +258,7 @@ export const npcData: NPC[] = [
             {
                 id: 90200001,
                 content: "如今我扮演破碎的囚徒，而你是为我执掌枷锁的典狱长。",
+                voice: "char/Tuosi/vo_welcome",
                 npc: 81103,
                 options: [
                     {
@@ -277,30 +291,35 @@ export const npcData: NPC[] = [
             {
                 id: 90200101,
                 content: "他是被摔碎的玻璃灯，是洒在污水沟里的星星。",
+                voice: "char/Tuosi/vo_topic_01_1",
                 npc: 81103,
                 next: 90200102,
             },
             {
                 id: 90200201,
                 content: "为什么？“帕西法尔”的人生早已落幕。那个名字太遥远了，远到我怀疑自己是否曾真的拥有它。",
+                voice: "char/Tuosi/vo_topic_02_1",
                 npc: 81103,
                 next: 90200202,
             },
             {
                 id: 90200301,
                 content: "多谢你的慷慨。但我的承诺都已兑现，我已经不再有什么值得眷念的事。",
+                voice: "char/Tuosi/vo_topic_03_1",
                 npc: 81103,
                 next: 90200302,
             },
             {
                 id: 90200401,
                 content: "为什么想学表演？你不需要变成任何人。",
+                voice: "char/Tuosi/vo_topic_04_1",
                 npc: 81103,
                 next: 90200402,
             },
             {
                 id: 90200501,
                 content: "它站在那儿，经历远比我的生命悠长的岁月。在它外墙的这一边，是巍峨的内城。和乌云一样高，比乌云更冷。",
+                voice: "char/Tuosi/vo_topic_05_1",
                 npc: 81103,
                 next: 90200502,
             },
@@ -319,6 +338,7 @@ export const npcData: NPC[] = [
             {
                 id: 90200302,
                 content: "…………",
+                voice: "char/Tuosi/vo_topic_03_2",
                 npc: 81103,
                 next: 90200303,
             },
@@ -332,24 +352,28 @@ export const npcData: NPC[] = [
                 id: 90200502,
                 content:
                     "人们从裹着丝绸的马车走来，谈论总不放晴的天气，谈论诗歌与绘画，谈论舞会与婚事，抱怨外城污浊的雪水弄脏了漂亮的皮靴。",
+                voice: "char/Tuosi/vo_topic_05_2",
                 npc: 81103,
                 next: 90200503,
             },
             {
                 id: 90200103,
                 content: "和那些东西一样，荒诞得惹人发笑，却又闪闪发亮。",
+                voice: "char/Tuosi/vo_topic_01_2",
                 npc: 81103,
                 next: 90200104,
             },
             {
                 id: 90200203,
                 content: "……是吗？",
+                voice: "char/Tuosi/vo_topic_02_2",
                 npc: 81103,
                 next: 90200204,
             },
             {
                 id: 90200303,
                 content: "若有一天你在盖雷亚剧院遇到我的恩师薇奥莱塔女士，请转告她，我已在伊瑟尔定居。现在过得很好，请不要担忧。",
+                voice: "char/Tuosi/vo_topic_03_3",
                 npc: 81103,
                 next: 90200304,
             },
@@ -357,6 +381,7 @@ export const npcData: NPC[] = [
                 id: 90200403,
                 content:
                     "只要站在舞台上，把你的每一寸骨骼，每一缕气息奉献给演出，你就可以彻底变成另一个人、忘记带给你痛苦的一切，走向你前所未见的世界。",
+                voice: "char/Tuosi/vo_topic_04_2",
                 npc: 81103,
                 next: 90200404,
             },
@@ -364,6 +389,7 @@ export const npcData: NPC[] = [
                 id: 90200503,
                 content:
                     "外墙的另一侧，是嘈杂的雾区。在那儿，小贩扯尖嗓子叫卖，母亲抱着自己的孩子，乞求一片黑面包果腹。好事者一边躲着卫兵，一边在墙上涂鸦。",
+                voice: "char/Tuosi/vo_topic_05_3",
                 npc: 81103,
                 next: 90200504,
             },
@@ -371,24 +397,28 @@ export const npcData: NPC[] = [
                 id: 90200104,
                 content:
                     "我们的牢房只隔着一道墙，隔音差得让人绝望。他就在我看不见的一米之外，一会儿回忆家人，一会儿憧憬未来，一会儿又五音不全地哼起歌。",
+                voice: "char/Tuosi/vo_topic_01_3",
                 npc: 81103,
                 next: 90200105,
             },
             {
                 id: 90200204,
                 content: "好吧。既然如此，我会把这最后一场戏一直演下去——为了我最后的、唯一的观众。",
+                voice: "char/Tuosi/vo_topic_02_3",
                 npc: 81103,
                 next: 90200205,
             },
             {
                 id: 90200304,
                 content: "“那是音乐与诗的国度，那里的每一颗卵石都敲击着节拍，每一泓泉水都歌唱着旋律。”",
+                voice: "char/Tuosi/vo_topic_03_4",
                 npc: 81103,
                 next: 90200305,
             },
             {
                 id: 90200404,
                 content: "但你生而就是一位冒险故事里被祝福的主人公，拥有所有角色的瞩目和信赖。你无需舞台，便足以熠熠生辉。",
+                voice: "char/Tuosi/vo_topic_04_3",
                 npc: 81103,
                 options: [
                     {
@@ -405,6 +435,7 @@ export const npcData: NPC[] = [
             {
                 id: 90200504,
                 content: "这就是我们的盖雷亚剧院。它站在那儿，听着这些声音，但又听不懂这些声音。",
+                voice: "char/Tuosi/vo_topic_05_4",
                 npc: 81103,
                 next: 90200505,
             },
@@ -412,12 +443,14 @@ export const npcData: NPC[] = [
                 id: 90200105,
                 content:
                     "有时我甚至恍惚觉得，我不是被关在笼子里的困兽，而是一个无忧无虑的普通学生，在午后打盹时做了个噩梦，被邻座聒噪的同学吵醒了。",
+                voice: "char/Tuosi/vo_topic_01_4",
                 npc: 81103,
                 next: 90200106,
             },
             {
                 id: 90200205,
                 content: "谢谢你，让我停驻在你的舞台上。",
+                voice: "char/Tuosi/vo_topic_02_4",
                 npc: 81103,
                 options: [
                     {
@@ -434,6 +467,7 @@ export const npcData: NPC[] = [
             {
                 id: 90200305,
                 content: "这样一来，或许她就不会再打听我的下落了。我曾是她欣赏的学生……我不希望她因我蒙羞。",
+                voice: "char/Tuosi/vo_topic_03_5",
                 npc: 81103,
                 next: 90200306,
             },
@@ -458,18 +492,21 @@ export const npcData: NPC[] = [
             {
                 id: 90200506,
                 content: "……不知为什么，我第一个想起的不是各种剧本，不是花哨的戏服和首饰，甚至不是每天打扫的小道具间。",
+                voice: "char/Tuosi/vo_topic_05_5",
                 npc: 81103,
                 next: 90200507,
             },
             {
                 id: 90200107,
                 content: "……呵，也许吧。",
+                voice: "char/Tuosi/vo_topic_01_5",
                 npc: 81103,
                 next: 90200108,
             },
             {
                 id: 90200307,
                 content: "嗯，一无所知总会是更加幸福的。",
+                voice: "char/Tuosi/vo_topic_03_6",
                 npc: 81103,
                 options: [
                     {
@@ -487,12 +524,14 @@ export const npcData: NPC[] = [
                 id: 90200507,
                 content:
                     "我想起的是演出落幕后，舞台上那袭薄绒毯。小时候，记忆里的第一场演出结束后，我和母亲在那儿重复着剧里的唱词，跳了整夜的舞。",
+                voice: "char/Tuosi/vo_topic_05_6",
                 npc: 81103,
                 next: 90200508,
             },
             {
                 id: 90200108,
                 content: "但“朋友”是一个过于耀眼的词语，我不配拥有它。或许更应该算是，干枯河床里搁浅的两条鱼吧。",
+                voice: "char/Tuosi/vo_topic_01_6",
                 npc: 81103,
                 options: [
                     {
@@ -509,6 +548,7 @@ export const npcData: NPC[] = [
             {
                 id: 90200508,
                 content: "日出时分我累了，就躺在那袭绒毯上，枕着她的两膝，做了一个长长的梦。",
+                voice: "char/Tuosi/vo_topic_05_7",
                 npc: 81103,
                 options: [
                     {
@@ -535,6 +575,7 @@ export const npcData: NPC[] = [
             {
                 id: 90250001,
                 content: "你好啊，我在带着萨麦尔呼吸新鲜空气，熟悉这里的氛围和阳光，你要和它打招呼吗？它会很高兴的，嗯嗯，应该会的！",
+                voice: "char/Baonu/vo_welcome",
                 npc: 81501,
                 options: [
                     {
@@ -562,24 +603,28 @@ export const npcData: NPC[] = [
             {
                 id: 90250101,
                 content: "萨麦尔可不是什么普通兵器，它是我最好的朋友！",
+                voice: "char/Baonu/vo_topic_01_1",
                 npc: 81501,
                 next: 90250102,
             },
             {
                 id: 90250201,
                 content: "闭嘴闭嘴！别和我提那群老顽固！啊啊，真是的，好好的心情都被你……啊，我不能生气，不能生气……\n",
+                voice: "char/Baonu/vo_topic_02_1",
                 npc: 81501,
                 next: 90250202,
             },
             {
                 id: 90250301,
                 content: "就是字面意思啊，“坚忍”就是要坚定、要忍耐，无论遇到什么事都不能生气！",
+                voice: "char/Baonu/vo_topic_03_1",
                 npc: 81501,
                 next: 90250302,
             },
             {
                 id: 90250401,
                 content: "“七美德”是艾利西安最威风，最高贵，最强大帅气的七个人。当然，顾名思义，也是美德最丰沛的七个人啦。",
+                voice: "char/Baonu/vo_topic_04_1",
                 npc: 81501,
                 next: 90250402,
             },
@@ -611,6 +656,7 @@ export const npcData: NPC[] = [
                 id: 90250103,
                 content:
                     "在传颂会，只有被七件圣器选中的人才能成为“七美德”。当时有那么多那么多大力士，但只有我能拔出萨麦尔——既然它选择了我，我也一定会好好对待它的！",
+                voice: "char/Baonu/vo_topic_01_2",
                 npc: 81501,
                 next: 90250104,
             },
@@ -618,6 +664,7 @@ export const npcData: NPC[] = [
                 id: 90250203,
                 content:
                     "咳咳，才没有呢！司祭们人都好棒的，一个个都特别和蔼可亲的。背错的经文只需要抄三十遍，喂萨麦尔吃奶油被发现也只要面壁思过两天就行了，超喜欢大家的。",
+                voice: "char/Baonu/vo_topic_02_2",
                 npc: 81501,
                 options: [
                     {
@@ -635,12 +682,14 @@ export const npcData: NPC[] = [
                 id: 90250303,
                 content:
                     "可不是嘛……因为这个称号，我总是被教导要用忍耐去对抗愤怒。可这就像是打哈欠打到一半被人搭话，又或是举剑后被告知眼前的敌人并非敌人而是同伴一样。总之就是，反而会让人更加生……",
+                voice: "char/Baonu/vo_topic_03_2",
                 npc: 81501,
                 next: 90250304,
             },
             {
                 id: 90250403,
                 content: "你那是什么表情……真是放肆！竟然敢质疑本大人，我要罚你抄写戒律三十……不，一百遍！",
+                voice: "char/Baonu/vo_topic_04_2",
                 npc: 81501,
                 options: [
                     {
@@ -657,12 +706,14 @@ export const npcData: NPC[] = [
             {
                 id: 90250104,
                 content: "只是，虽然我拔出了它，但从那天开始，它就再也没有回应过我的呼唤了……等等，这是秘密，绝对不要说出去！",
+                voice: "char/Baonu/vo_topic_01_3",
                 npc: 81501,
                 next: 90250105,
             },
             {
                 id: 90250304,
                 content: "唔，他们说愤怒是很大的罪恶，我不能生气，不能生气……",
+                voice: "char/Baonu/vo_topic_03_3",
                 npc: 81501,
                 next: 90250305,
             },
@@ -681,6 +732,7 @@ export const npcData: NPC[] = [
             {
                 id: 90250106,
                 content: "啊？难道它不喜欢冰淇淋？！那……土豆泥怎么样？沙拉酱呢？",
+                voice: "char/Baonu/vo_topic_01_4",
                 npc: 81501,
                 options: [
                     {
@@ -697,6 +749,7 @@ export const npcData: NPC[] = [
             {
                 id: 90250306,
                 content: "哼哼，谁叫我是“坚忍”大人呢！",
+                voice: "char/Baonu/vo_topic_03_4",
                 npc: 81501,
                 options: [
                     {
@@ -723,6 +776,7 @@ export const npcData: NPC[] = [
             {
                 id: 90220001,
                 content: "是你呀，亲爱的孩子。日安，有什么事想要讲给我听吗？",
+                voice: "char/Nifu/vo_welcome",
                 npc: 81502,
                 options: [
                     {
@@ -751,24 +805,28 @@ export const npcData: NPC[] = [
                 id: 90220101,
                 content:
                     "是的，在漫长的时间中，我在阿特拉西亚的各处旅行——或者流浪。我用双足丈量过这片土地的每一寸刻度，也用手指摩挲过它的每一缕纹理。",
+                voice: "char/Nifu/vo_topic_01_1",
                 npc: 81502,
                 next: 90220102,
             },
             {
                 id: 90220201,
                 content: "雾海是一切生者的来处与归途。万物归于雾海，雾海又孕育新的万物……就像死去的云滴落泥土，鲜花又自泥土中盛开。",
+                voice: "char/Nifu/vo_topic_02_1",
                 npc: 81502,
                 next: 90220202,
             },
             {
                 id: 90220301,
                 content: "怎么，这很让你惊讶吗？实不相瞒，在昔日“大迁徙”时，我还曾是一位在前线冲锋陷阵的战士，一位格斗的好手。",
+                voice: "char/Nifu/vo_topic_03_1",
                 npc: 81502,
                 next: 90220302,
             },
             {
                 id: 90220401,
                 content: "“朋友”……以人们对这二字的通常定义来看，我有过很多朋友。",
+                voice: "char/Nifu/vo_topic_04_1",
                 npc: 81502,
                 next: 90220402,
             },
@@ -787,12 +845,14 @@ export const npcData: NPC[] = [
             {
                 id: 90220302,
                 content: "虽说那是十分遥远的过去，但基本的战斗技巧，我大体都还记得。",
+                voice: "char/Nifu/vo_topic_03_2",
                 npc: 81502,
                 next: 90220303,
             },
             {
                 id: 90220402,
                 content: "不过，提起这个词，我最先想到的还是莱克西斯和艾瑞卡——就是带我离开艾利西安的那两位朋友。",
+                voice: "char/Nifu/vo_topic_04_2",
                 npc: 81502,
                 next: 90220403,
             },
@@ -800,18 +860,21 @@ export const npcData: NPC[] = [
                 id: 90220103,
                 content:
                     "如果你走过足够多的地方，会觉得各处的风景并无太多差别。北境的飞雪，赫墨的砂砾，或者华胥的炊烟，无非也是另一种林间的薄雾而已。",
+                voice: "char/Nifu/vo_topic_01_2",
                 npc: 81502,
                 next: 90220104,
             },
             {
                 id: 90220203,
                 content: "我想是的。终有一天，你会前往雾海，前往茵布拉女神的怀抱。",
+                voice: "char/Nifu/vo_topic_02_2",
                 npc: 81502,
                 next: 90220204,
             },
             {
                 id: 90220303,
                 content: "在旅途中，我也会时不时要与盘桓的兽群搏斗，它们也曾带给我爪痕，淤伤，甚至理当的死亡。",
+                voice: "char/Nifu/vo_topic_03_3",
                 npc: 81502,
                 next: 90220304,
             },
@@ -824,6 +887,7 @@ export const npcData: NPC[] = [
             {
                 id: 90220104,
                 content: "如果一定要说个地方的话……那便是伊瑟尔的群山和林地。那里的气息最让我感到安心。",
+                voice: "char/Nifu/vo_topic_01_3",
                 npc: 81502,
                 next: 90220105,
             },
@@ -843,6 +907,7 @@ export const npcData: NPC[] = [
                 id: 90220404,
                 content:
                     "在后世的史书和英雄故事里，他们通常被描述成揭下神明蒙昧的纱幕、将真理带给人们的“智者”，以及为了智者崇奉的真理而牺牲的“英雄”……",
+                voice: "char/Nifu/vo_topic_04_3",
                 npc: 81502,
                 next: 90220405,
             },
@@ -855,30 +920,35 @@ export const npcData: NPC[] = [
             {
                 id: 90220205,
                 content: "孩子，请你爱着生的一切，亦不要畏惧消亡。消亡并非苦痛，只是生命必经的终点。",
+                voice: "char/Nifu/vo_topic_02_3",
                 npc: 81502,
                 next: 90220206,
             },
             {
                 id: 90220305,
                 content: "亘古的月亮尚且每天都在变幻，人类当然更加复杂。更何况如我一般，经历过数倍于常人岁月的人呢？",
+                voice: "char/Nifu/vo_topic_03_4",
                 npc: 81502,
                 next: 90220306,
             },
             {
                 id: 90220405,
                 content: "但我常常回忆起他们还仅仅是“莱克西斯”和“艾瑞卡”的时候。",
+                voice: "char/Nifu/vo_topic_04_4",
                 npc: 81502,
                 next: 90220406,
             },
             {
                 id: 90220106,
                 content: "好啊。",
+                voice: "char/Nifu/vo_topic_01_4",
                 npc: 81502,
                 next: 90220107,
             },
             {
                 id: 90220206,
                 content: "若你累了，就在我的臂弯中安歇片刻吧……别害怕，这不会是永眠。现在的你，还有太多未竟之事。",
+                voice: "char/Nifu/vo_topic_02_4",
                 npc: 81502,
                 options: [
                     {
@@ -895,6 +965,7 @@ export const npcData: NPC[] = [
             {
                 id: 90220306,
                 content: "若是你对这段过往有兴趣，改日我细细说与你听吧。",
+                voice: "char/Nifu/vo_topic_03_5",
                 npc: 81502,
                 options: [
                     {
@@ -912,12 +983,14 @@ export const npcData: NPC[] = [
                 id: 90220406,
                 content:
                     "那时艾瑞卡是个勇敢活泼的姑娘，大家都很喜欢她。莱克西斯虽然头脑很聪明，但有时候太较真，经常突然陷入沉思，所以反而会显得有些迟钝。",
+                voice: "char/Nifu/vo_topic_04_5",
                 npc: 81502,
                 next: 90220407,
             },
             {
                 id: 90220107,
                 content: "若有一天你去翡翠森林，请帮我带一束白堇致候吧。在那里长眠的啊，是我的友人、我的孩子、以及少时的我。",
+                voice: "char/Nifu/vo_topic_01_5",
                 npc: 81502,
                 options: [
                     {
@@ -940,18 +1013,21 @@ export const npcData: NPC[] = [
             {
                 id: 90220408,
                 content: "嗯……有一次，莱克西斯为了某件事去给艾瑞卡道歉，艾瑞卡便随口指着士兵们用来练箭的靶子说，他要是能射中红心就原谅他……",
+                voice: "char/Nifu/vo_topic_04_6",
                 npc: 81502,
                 next: 90220409,
             },
             {
                 id: 90220409,
                 content: "当然，这是一句气话。连士兵都不是每个人都做得到，更何况莱克西斯的双手并不是用来握剑，而是用来书写灵智与真理的。",
+                voice: "char/Nifu/vo_topic_04_7",
                 npc: 81502,
                 next: 90220410,
             },
             {
                 id: 90220410,
                 content: "但他却把这话当真了，趁士兵们歇息之后，一个人练习了一晚上。",
+                voice: "char/Nifu/vo_topic_04_8",
                 npc: 81502,
                 next: 90220411,
             },
@@ -959,6 +1035,7 @@ export const npcData: NPC[] = [
                 id: 90220411,
                 content:
                     "当然，历史不是英雄传说。即使是聪慧如莱克西斯，也有学不会的事。他一直练习到手心被磨出血，艾瑞卡为他包上麻布，也没能射中靶心。",
+                voice: "char/Nifu/vo_topic_04_9",
                 npc: 81502,
                 next: 90220412,
             },
@@ -966,6 +1043,7 @@ export const npcData: NPC[] = [
                 id: 90220412,
                 content:
                     "呵呵……最开始他们到底是为了什么吵架，我反而记不起来了。真是奇怪……现在回忆起有关他们的事，最先浮现的总是这些微不足道的细节。",
+                voice: "char/Nifu/vo_topic_04_10",
                 npc: 81502,
                 next: 90220413,
             },
@@ -978,6 +1056,7 @@ export const npcData: NPC[] = [
             {
                 id: 90220414,
                 content: "嗯，是啊。那确实是……非常、非常快乐的日子。只是，已经是很久很久以前的事了。",
+                voice: "char/Nifu/vo_topic_04_11",
                 npc: 81502,
                 options: [
                     {
@@ -1005,6 +1084,7 @@ export const npcData: NPC[] = [
                 id: 90240001,
                 content:
                     "今日宜饮酒纵歌，来来，待我饮完这杯，一起去诛尽那些应杀之人。什么？你说昨天我也是这样说的？那当然，一年三百六十日，日日都宜如此过活。",
+                voice: "char/Kezhou/vo_welcome",
                 npc: 81503,
                 options: [
                     {
@@ -1032,18 +1112,21 @@ export const npcData: NPC[] = [
             {
                 id: 90240101,
                 content: "怎么，你也对剑法感兴趣吗？是了，我看你也带着一把好剑，想必是有家传的功夫。比一比就知道啦。",
+                voice: "char/Kezhou/vo_topic_01_1",
                 npc: 81503,
                 next: 90240102,
             },
             {
                 id: 90240201,
                 content: "理由可以举出无数个，但是归根结底无非三个字：我不愿。",
+                voice: "char/Kezhou/vo_topic_02_1",
                 npc: 81503,
                 next: 90240202,
             },
             {
                 id: 90240301,
                 content: "当然了，剑客的意思是擅长用剑，不是只会用剑。否则的话，华胥还有人能拿笔和筷子当做武器，那剑客岂不是不能写字吃饭？",
+                voice: "char/Kezhou/vo_topic_03_1",
                 npc: 81503,
                 next: 90240302,
             },
@@ -1051,12 +1134,14 @@ export const npcData: NPC[] = [
                 id: 90240401,
                 content:
                     "确实，你这么一问我能想到不少。啥啥一哥，什么王，某仙之类，用动物来做外号的尤其多，龙虎狮鹤，飞禽走兽都有，非常热闹。",
+                voice: "char/Kezhou/vo_topic_04_1",
                 npc: 81503,
                 next: 90240402,
             },
             {
                 id: 90240102,
                 content: "老实说，我已经很久没有遇到过势均力敌的对手了。但是按照我师父的说法，我个性太直，不会演戏，还需要继续磨练。",
+                voice: "char/Kezhou/vo_topic_01_2",
                 npc: 81503,
                 next: 90240103,
             },
@@ -1064,6 +1149,7 @@ export const npcData: NPC[] = [
                 id: 90240202,
                 content:
                     "从小逍遥自在惯了，只知道路见不平拔刀相助。师父和师兄的话我都只听爱听的，大半当作秋风过耳。又怎么会受什么律法的羁绊。",
+                voice: "char/Kezhou/vo_topic_02_2",
                 npc: 81503,
                 next: 90240203,
             },
@@ -1077,6 +1163,7 @@ export const npcData: NPC[] = [
                 id: 90240402,
                 content:
                     "然后这些外号啊，往往字数越长，功夫越差。四个字的一看就是刚入门，三个字的有头有脸，两个字，高手。至于没有外号的，那都是大宗师了。",
+                voice: "char/Kezhou/vo_topic_04_2",
                 npc: 81503,
                 next: 90240403,
             },
@@ -1095,6 +1182,7 @@ export const npcData: NPC[] = [
             {
                 id: 90240303,
                 content: "我能啊，但能这样做不代表必须这么做，躲开可要比硬接容易多了。山里的野猪都知道能吃萝卜的时候决不去啃树皮呢。",
+                voice: "char/Kezhou/vo_topic_03_2",
                 npc: 81503,
                 next: 90240304,
             },
@@ -1107,18 +1195,21 @@ export const npcData: NPC[] = [
             {
                 id: 90240104,
                 content: "其实我觉得不是，但是师父有说用剑需要会演：“能而示之不能”，和“不战而屈人之兵”、“以众击寡”一样，都是上等的剑法。",
+                voice: "char/Kezhou/vo_topic_01_3",
                 npc: 81503,
                 next: 90240105,
             },
             {
                 id: 90240204,
                 content: "身为剑客的担忧吧：打个比方，习剑的基础是熟记图谱上的一招一式，面对一般的敌人时可以不用多加思索，顷刻间拔剑迎敌。",
+                voice: "char/Kezhou/vo_topic_02_3",
                 npc: 81503,
                 next: 90240205,
             },
             {
                 id: 90240304,
                 content: "当然，如果碰见能痛快打上一场的对手，我肯定会拔出剑来，全力以赴。",
+                voice: "char/Kezhou/vo_topic_03_3",
                 npc: 81503,
                 options: [
                     {
@@ -1135,6 +1226,7 @@ export const npcData: NPC[] = [
             {
                 id: 90240404,
                 content: "行不更名坐不改姓，是真名。我知道你想说这个听起来像是外号。师父也这么说过，说是容易小小年纪就被当做高手，会吃亏。",
+                voice: "char/Kezhou/vo_topic_04_3",
                 npc: 81503,
                 next: 90240405,
             },
@@ -1142,12 +1234,14 @@ export const npcData: NPC[] = [
                 id: 90240105,
                 content:
                     "我小的时候他就是这样对待我的，说自己本领稀松平常，只要把他打倒在地就可以不用练习之类的话。我试了一年，从没碰到过他的衣袖。",
+                voice: "char/Kezhou/vo_topic_01_4",
                 npc: 81503,
                 next: 90240106,
             },
             {
                 id: 90240205,
                 content: "但太过依赖图谱，不会随机应变，那手中的剑就会变成死剑、呆剑、傻瓜剑。面对未曾谋面的敌人就会方寸大乱，如同呆头鹅。",
+                voice: "char/Kezhou/vo_topic_02_4",
                 npc: 81503,
                 next: 90240206,
             },
@@ -1155,6 +1249,7 @@ export const npcData: NPC[] = [
                 id: 90240405,
                 content:
                     "可毕竟这个名字是老爹给我起的，可能也是希望我成为一个侠客吧。他留下的东西不多，但只要这个名字还在，就总归证明他在世上还留有剑痕一道。",
+                voice: "char/Kezhou/vo_topic_04_4",
                 npc: 81503,
                 options: [
                     {
@@ -1171,6 +1266,7 @@ export const npcData: NPC[] = [
             {
                 id: 90240106,
                 content: "直到有一天累到趴在地上，看他脚底下连一滴汗都没有。才确信他那副颠颠又倒倒的样子都是演的。",
+                voice: "char/Kezhou/vo_topic_01_5",
                 npc: 81503,
                 options: [
                     {
@@ -1187,6 +1283,7 @@ export const npcData: NPC[] = [
             {
                 id: 90240206,
                 content: "在我看来，现在的华胥就是把《大风九章》翻烂的拙剑客，连像我这样的飘零人都斩不尽，要是遇到真正的强敌，是会败的。",
+                voice: "char/Kezhou/vo_topic_02_5",
                 npc: 81503,
                 options: [
                     {
@@ -1213,6 +1310,7 @@ export const npcData: NPC[] = [
             {
                 id: 90150001,
                 content: "……唔……是你。你好，你好呀。",
+                voice: "char/Feina/vo_welcome",
                 npc: 81801,
                 options: [
                     {
@@ -1245,6 +1343,7 @@ export const npcData: NPC[] = [
             {
                 id: 90150101,
                 content: "唔，我想吃掉可以让人变得很大很大的糖果……",
+                voice: "char/Feina/vo_topic_01_1",
                 npc: 81801,
                 next: 90150103,
             },
@@ -1252,6 +1351,7 @@ export const npcData: NPC[] = [
                 id: 90150201,
                 content:
                     "我有一个很大很大的玻璃盒子，盒子里面装着窗户外软绵绵的雪，装着雪一样白白的棉花糖。我还想装进去棉花糖一样轻飘飘的云朵，云朵一样暖乎乎的风……",
+                voice: "char/Feina/vo_topic_02_1",
                 npc: 81801,
                 next: 90150203,
             },
@@ -1259,30 +1359,35 @@ export const npcData: NPC[] = [
                 id: 90150301,
                 content:
                     "嗯……！在梦里，我看到了一只纯白羽毛的夜莺，它一会儿落在我的手上，一会儿绕着屋子和我捉迷藏……唔……到底是我梦见了它，还是它梦见了我呢……",
+                voice: "char/Feina/vo_topic_03_1",
                 npc: 81801,
                 next: 90150303,
             },
             {
                 id: 90150401,
                 content: "菲娜曾经有一个妈妈，两个爸爸。不过，他们都不在了……",
+                voice: "char/Feina/vo_topic_04_1",
                 npc: 81801,
                 next: 90150402,
             },
             {
                 id: 90150501,
                 content: "他是最伟大的魔法师，是说话最好听的人，是全世界最温柔最温柔的人……",
+                voice: "char/Feina/vo_topic_05_1",
                 npc: 81801,
                 next: 90150503,
             },
             {
                 id: 90150103,
                 content: "吃下那样的糖果，我就会长得比云还高，可以摸一摸天上的星星了吧？",
+                voice: "char/Feina/vo_topic_01_2",
                 npc: 81801,
                 next: 90150104,
             },
             {
                 id: 90150203,
                 content: "连同你们的笑声一起，全～都装进盒子。",
+                voice: "char/Feina/vo_topic_02_2",
                 npc: 81801,
                 next: 90150204,
             },
@@ -1295,6 +1400,7 @@ export const npcData: NPC[] = [
             {
                 id: 90150402,
                 content: "第一个爸爸，和妈妈一起，去了很远很远的国度。第二个爸爸，也去了很远很远的国度……是我带他去的哦。",
+                voice: "char/Feina/vo_topic_04_2",
                 npc: 81801,
                 options: [
                     {
@@ -1330,6 +1436,7 @@ export const npcData: NPC[] = [
                 id: 90150304,
                 content:
                     "你说得对！也许那是一个仙境，所有睡着的孩子和小动物都可以在那里一起玩。嗯……下次的梦里会遇到谁呢？猫头鹰爷爷、金丝雀小姐，还是白兔先生？",
+                voice: "char/Feina/vo_topic_03_2",
                 npc: 81801,
                 options: [
                     {
@@ -1346,12 +1453,14 @@ export const npcData: NPC[] = [
             {
                 id: 90150504,
                 content: "唔，你看起来有很多很多问题，我哪里说的不对吗？",
+                voice: "char/Feina/vo_topic_05_2",
                 npc: 81801,
                 next: 90150505,
             },
             {
                 id: 90150105,
                 content: "不会的，我会很小心的！嗯……如果你实在害怕的话，就坐在我的手心里，我带你出去兜风，怎么样？",
+                voice: "char/Feina/vo_topic_01_3",
                 npc: 81801,
                 options: [
                     {
@@ -1369,6 +1478,7 @@ export const npcData: NPC[] = [
                 id: 90150205,
                 content:
                     "嗯……如果你能吃下让人变得很小很小的糖果，就可以进去玩啦。不过，这个盒子里到处都是白色的，你要小心，别在里面迷路哦。",
+                voice: "char/Feina/vo_topic_02_3",
                 npc: 81801,
                 next: 90150206,
             },
@@ -1387,6 +1497,7 @@ export const npcData: NPC[] = [
             {
                 id: 90150506,
                 content: "咦……？他对你说话不好听、不温柔吗？真对不起……我会敲敲他的脑袋，要他改正的！",
+                voice: "char/Feina/vo_topic_05_3",
                 npc: 81801,
                 options: [
                     {
@@ -1403,6 +1514,7 @@ export const npcData: NPC[] = [
             {
                 id: 90150207,
                 content: "让我想想……如果你迷路了，菲娜就把面包掰成一小块一小块，连成一条路……这样，你只要沿着面包屑向前走，就能找到出口啦！",
+                voice: "char/Feina/vo_topic_02_4",
                 npc: 81801,
                 options: [
                     {
@@ -1430,6 +1542,7 @@ export const npcData: NPC[] = [
                 id: 90040001,
                 content:
                     "我从睡醒就一直在这里等着，体内的毒液都快干涸了……不过还好你来了，现在它们又开始因为兴奋而跳动。你……可以再靠近一些吗？",
+                voice: "char/Shuimu/vo_welcome",
                 npc: 82101,
                 options: [
                     {
@@ -1462,30 +1575,35 @@ export const npcData: NPC[] = [
             {
                 id: 90040101,
                 content: "是的，我喜欢雨天，我读了许多遍的小说里，爱的邂逅总是在下雨天自然发生。",
+                voice: "char/Shuimu/vo_topic_01_1",
                 npc: 82101,
                 next: 90040103,
             },
             {
                 id: 90040201,
                 content: "啊呀，难得你居然会和我主动谈论“爱”。",
+                voice: "char/Shuimu/vo_topic_02_1",
                 npc: 82101,
                 next: 90040203,
             },
             {
                 id: 90040301,
                 content: "特别？啊，是的……从小到大，身边可有不少人视我为“怪物”呢。",
+                voice: "char/Shuimu/vo_topic_03_1",
                 npc: 82101,
                 next: 90040303,
             },
             {
                 id: 90040401,
                 content: "不，不会的，这份毒与生俱来，像是爱之神赐给我的礼物，不会伤害我，只会帮助我找到命定的恋人。",
+                voice: "char/Shuimu/vo_topic_04_1",
                 npc: 82101,
                 next: 90040403,
             },
             {
                 id: 90040501,
                 content: "是我自制的香薰哦，前调如同初遇一般浓烈，中调则是用来定香的甜言蜜语，最后的尾调，是散不去的回味再加一点苦涩。",
+                voice: "char/Shuimu/vo_topic_05_1",
                 npc: 82101,
                 next: 90040503,
             },
@@ -1498,12 +1616,14 @@ export const npcData: NPC[] = [
             {
                 id: 90040203,
                 content: "应该如何描述呢……嗯，就像这香薰中的水：亲吻拥抱每一剂原料，吞噬汲取它们的气味，并最终在长久的馥郁中合为一体。",
+                voice: "char/Shuimu/vo_topic_02_2",
                 npc: 82101,
                 next: 90040204,
             },
             {
                 id: 90040303,
                 content: "他们每次看到我都会露出厌恶的表情，不过那样的表情可不好看，得想办法纠正一下呢……",
+                voice: "char/Shuimu/vo_topic_03_2",
                 npc: 82101,
                 next: 90040304,
             },
@@ -1522,6 +1642,7 @@ export const npcData: NPC[] = [
             {
                 id: 90040104,
                 content: "你留心观察过那些躲雨的人吗？他们在屋檐下不期而遇，潮湿的气息让草木的芳香更加馥郁，小心的试探使爱意缓缓流动……",
+                voice: "char/Shuimu/vo_topic_01_2",
                 npc: 82101,
                 next: 90040105,
             },
@@ -1534,6 +1655,7 @@ export const npcData: NPC[] = [
             {
                 id: 90040304,
                 content: "若是刺痛他们的脸，让毒素渗透进他们的肌肤，那张嫌恶的脸，也一定会变得温柔起来吧……呵呵。",
+                voice: "char/Shuimu/vo_topic_03_3",
                 npc: 82101,
                 next: 90040305,
             },
@@ -1541,6 +1663,7 @@ export const npcData: NPC[] = [
                 id: 90040404,
                 content:
                     "是啊，虽然容易失控的毒液总让我被当做怪物，但也让我和其他人不同。所以我坚信，一个怪物的命定之人，也一定很特别，你说对吗？",
+                voice: "char/Shuimu/vo_topic_04_2",
                 npc: 82101,
                 options: [
                     {
@@ -1557,6 +1680,7 @@ export const npcData: NPC[] = [
             {
                 id: 90040504,
                 content: "秘密哟，当然，我也可以亲手教你如何调制，从始至终，一步一步。",
+                voice: "char/Shuimu/vo_topic_05_2",
                 npc: 82101,
                 options: [
                     {
@@ -1573,6 +1697,7 @@ export const npcData: NPC[] = [
             {
                 id: 90040105,
                 content: "呵呵……等到下个雨天，您同我一起出去瞧瞧，就会明白的。",
+                voice: "char/Shuimu/vo_topic_01_3",
                 npc: 82101,
                 options: [
                     {
@@ -1590,6 +1715,7 @@ export const npcData: NPC[] = [
                 id: 90040205,
                 content:
                     "不止哦。我想要的爱情，是彻底的交融，没有彼此之分……即使一方生命终结了，也会成为香料园中的花泥；从中绽放的花朵将变成香薰，永远萦绕着另一个。",
+                voice: "char/Shuimu/vo_topic_02_3",
                 npc: 82101,
                 options: [
                     {
@@ -1606,6 +1732,7 @@ export const npcData: NPC[] = [
             {
                 id: 90040305,
                 content: "那么话说回来，你说的“特别”指的又是哪种“特别”？“特别”像个怪物……还是，“特别”令人倾心？",
+                voice: "char/Shuimu/vo_topic_03_4",
                 npc: 82101,
                 options: [
                     {
@@ -1632,6 +1759,7 @@ export const npcData: NPC[] = [
             {
                 id: 90050001,
                 content: "嗯，这个时间最适合动手了，要赶紧出门，不然就……哇！你什么时候来的！",
+                voice: "char/Zhangyu/vo_welcome",
                 npc: 82301,
                 options: [
                     {
@@ -1659,24 +1787,28 @@ export const npcData: NPC[] = [
             {
                 id: 90050101,
                 content: "贝蕾，我……",
+                voice: "char/Zhangyu/vo_topic_01_1",
                 npc: 82301,
                 next: 90050103,
             },
             {
                 id: 90050201,
                 content: "因为我会变呀，嘻嘻，我能变成任何形状，任何颜色，完美地伪装自己，一般人绝对发现不了我！",
+                voice: "char/Zhangyu/vo_topic_02_1",
                 npc: 82301,
                 next: 90050203,
             },
             {
                 id: 90050301,
                 content: "喂喂喂——我可和那些什么都偷还一肚子坏水的家伙不一样！",
+                voice: "char/Zhangyu/vo_topic_03_1",
                 npc: 82301,
                 next: 90050303,
             },
             {
                 id: 90050401,
                 content: "那当然了，你要是被人皱着眉头一脸嫌弃地叫着“恶魔”，你也不会喜欢的。",
+                voice: "char/Zhangyu/vo_topic_04_1",
                 npc: 82301,
                 next: 90050403,
             },
@@ -1689,6 +1821,7 @@ export const npcData: NPC[] = [
             {
                 id: 90050203,
                 content: "有一天我还偷偷假扮成了木桶，等着吓唬你呢，没想到你根本不靠近……",
+                voice: "char/Zhangyu/vo_topic_02_2",
                 npc: 82301,
                 next: 90050204,
             },
@@ -1707,6 +1840,7 @@ export const npcData: NPC[] = [
             {
                 id: 90050104,
                 content: "每个早上都看见你笑着，就足够了。从今以后的每一天，我都会一直保护你的。嘻嘻，我学得像不像？",
+                voice: "char/Zhangyu/vo_topic_01_2",
                 npc: 82301,
                 next: 90050105,
             },
@@ -1719,12 +1853,14 @@ export const npcData: NPC[] = [
             {
                 id: 90050304,
                 content: "我专门偷小偷的东西——伪装成他们认不出来的样子，慢慢靠近，从他们的口袋里挑出最顺眼的赃物，统统带走！",
+                voice: "char/Zhangyu/vo_topic_03_2",
                 npc: 82301,
                 next: 90050305,
             },
             {
                 id: 90050404,
                 content: "那当然是想要让“恶魔”这个词变得帅气起来，现在的小偷啊，听到“恶魔大盗”的名头就会魂不附体。",
+                voice: "char/Zhangyu/vo_topic_04_2",
                 npc: 82301,
                 next: 90050405,
             },
@@ -1737,6 +1873,7 @@ export const npcData: NPC[] = [
             {
                 id: 90050205,
                 content: "什么？！所以原来你是故意无视我的！你这家伙！",
+                voice: "char/Zhangyu/vo_topic_02_3",
                 npc: 82301,
                 options: [
                     {
@@ -1753,6 +1890,7 @@ export const npcData: NPC[] = [
             {
                 id: 90050305,
                 content: "等他们发现的时候，总是震惊得眼珠都快掉出来！嘻嘻嘻……我这是伸张正义，怎么能算坏人！",
+                voice: "char/Zhangyu/vo_topic_03_3",
                 npc: 82301,
                 options: [
                     {
@@ -1769,6 +1907,7 @@ export const npcData: NPC[] = [
             {
                 id: 90050405,
                 content: "迟早有一天，人们提到“恶魔”，就只会想到厉害的我，怎么样，是很伟大的梦想吧！",
+                voice: "char/Zhangyu/vo_topic_04_3",
                 npc: 82301,
                 options: [
                     {
@@ -1785,6 +1924,7 @@ export const npcData: NPC[] = [
             {
                 id: 90050106,
                 content: "生气啦？嘻嘻嘻，你生气的样子让人更想学了！",
+                voice: "char/Zhangyu/vo_topic_01_3",
                 npc: 82301,
                 options: [
                     {
@@ -1811,6 +1951,7 @@ export const npcData: NPC[] = [
             {
                 id: 90110001,
                 content: "居移气，养移体，不妨趁天气晴朗出去走走，想必对身体会有所裨益。",
+                voice: "char/Baiheng/vo_welcome",
                 npc: 82401,
                 options: [
                     {
@@ -1838,18 +1979,21 @@ export const npcData: NPC[] = [
             {
                 id: 90110101,
                 content: "确然。只是书中的内容晦涩难懂，药石之间的差异，在我看来也难以辨别。或许，我在此道上确实没什么天赋。",
+                voice: "char/Baiheng/vo_topic_01_1",
                 npc: 82401,
                 next: 90110103,
             },
             {
                 id: 90110201,
                 content: "愿世间再无“无药可医”的顽疾。",
+                voice: "char/Baiheng/vo_topic_04_1",
                 npc: 82401,
                 next: 90110203,
             },
             {
                 id: 90110301,
                 content: "一个治病救人的地方。",
+                voice: "char/Baiheng/vo_topic_03_1",
                 npc: 82401,
                 next: 90110303,
             },
@@ -1857,6 +2001,7 @@ export const npcData: NPC[] = [
                 id: 90110401,
                 content:
                     "人死如灯灭，一切痕迹湮没，一切声息断绝。那种与世隔绝的寂静会吞没一切希望与可能，如果可以，我不希望任何一个病人落入那种境地。",
+                voice: "char/Baiheng/vo_topic_02_1",
                 npc: 82401,
                 next: 90110403,
             },
@@ -1887,6 +2032,7 @@ export const npcData: NPC[] = [
             {
                 id: 90110104,
                 content: "在我的时代……药物并不是医治疾病的主流方式，人们通常依靠一种名为“祝由术”的奇迹驱退病魔。",
+                voice: "char/Baiheng/vo_topic_01_2",
                 npc: 82401,
                 next: 90110105,
             },
@@ -1894,6 +2040,7 @@ export const npcData: NPC[] = [
                 id: 90110204,
                 content:
                     "听起来与空想无异吧？但即使没有术法带来的奇迹，医师所要做的事也从未改变。这样的话由我这个医书都未读通的人说出口，实在贻笑大方。",
+                voice: "char/Baiheng/vo_topic_04_2",
                 npc: 82401,
                 next: 90110205,
             },
@@ -1901,12 +2048,14 @@ export const npcData: NPC[] = [
                 id: 90110304,
                 content:
                     "枯荣阁的使命，仅此而已。若说其他……每位入枯荣阁修行的医师，都要手植杏树一株，只是岁月流逝，风雨摧折，留存至今的已不足半数。",
+                voice: "char/Baiheng/vo_topic_03_2",
                 npc: 82401,
                 next: 90110305,
             },
             {
                 id: 90110404,
                 content: "的确如你所说，我……曾经从一场重病中逃出生天。假使让我再次面对这样的考验，我也不知道自己是否还会坚持当初的选择。",
+                voice: "char/Baiheng/vo_topic_02_2",
                 npc: 82401,
                 options: [
                     {
@@ -1924,12 +2073,14 @@ export const npcData: NPC[] = [
                 id: 90110105,
                 content:
                     "然而，这种治疗方式虽然会带来“治愈”与“平安”，但也代表着“交换”与“牺牲”。从没有寿终正寝的医者，透支生命直至亡故才是我们唯一的选择。",
+                voice: "char/Baiheng/vo_topic_01_3",
                 npc: 82401,
                 next: 90110106,
             },
             {
                 id: 90110205,
                 content: "但……我会继续在这条路上走下去，不止是为了黎民百姓，为了枯荣阁，也是为了我自己。",
+                voice: "char/Baiheng/vo_topic_04_3",
                 npc: 82401,
                 options: [
                     {
@@ -1946,6 +2097,7 @@ export const npcData: NPC[] = [
             {
                 id: 90110305,
                 content: "从长眠中苏醒后，我也曾去寻找回忆里那株属于我的杏树，但天不垂怜，花树已成枯木，今春虽暖，也未曾发出新芽来。",
+                voice: "char/Baiheng/vo_topic_03_3",
                 npc: 82401,
                 next: 90110306,
             },
@@ -1958,6 +2110,7 @@ export const npcData: NPC[] = [
             {
                 id: 90110306,
                 content: "叹隙中驹，石中火，梦中身，几时归去，空作闲人。过去的已无法挽留，就算想要弥补，也再无可能了。",
+                voice: "char/Baiheng/vo_topic_03_4",
                 npc: 82401,
                 options: [
                     {
@@ -1975,6 +2128,7 @@ export const npcData: NPC[] = [
                 id: 90110107,
                 content:
                     "枯荣阁虽然已是岁月的一件遗物，但在治病救人的道路上，永远不缺后继者。即便使命沉重，总有人会肩负起这份责任，矢志不渝地走下去。",
+                voice: "char/Baiheng/vo_topic_01_4",
                 npc: 82401,
                 options: [
                     {
@@ -2001,6 +2155,7 @@ export const npcData: NPC[] = [
             {
                 id: 90130001,
                 content: "有事快说，没有我就出任务去。",
+                voice: "char/Linen/vo_welcome",
                 npc: 83101,
                 options: [
                     {
@@ -2028,24 +2183,28 @@ export const npcData: NPC[] = [
             {
                 id: 90130101,
                 content: "西比尔长官？她是十三军团的军团长。",
+                voice: "char/Linen/vo_topic_01_1",
                 npc: 83101,
                 next: 90130103,
             },
             {
                 id: 90130201,
                 content: "经验？什么经验，我的经验就是没有拳头解决不了的问题，如果有，那就再来一拳。",
+                voice: "char/Linen/vo_topic_02_1",
                 npc: 83101,
                 next: 90130203,
             },
             {
                 id: 90130301,
                 content: "前几天看到的那把枪真不错……算了，不能因为买它饿肚子，反正旧的用着更顺手些。",
+                voice: "char/Linen/vo_topic_03_1",
                 npc: 83101,
                 next: 90130303,
             },
             {
                 id: 90130401,
                 content: "不工作就没饭吃，这个道理不懂吗？",
+                voice: "char/Linen/vo_topic_04_1",
                 npc: 83101,
                 next: 90130403,
             },
@@ -2076,6 +2235,7 @@ export const npcData: NPC[] = [
             {
                 id: 90130104,
                 content: "啧，我上哪知道那么多，她是上司，她下命令，我办事，就行了。",
+                voice: "char/Linen/vo_topic_01_2",
                 npc: 83101,
                 options: [
                     {
@@ -2092,12 +2252,14 @@ export const npcData: NPC[] = [
             {
                 id: 90130204,
                 content: "那就再补上一枪。",
+                voice: "char/Linen/vo_topic_02_2",
                 npc: 83101,
                 next: 90130205,
             },
             {
                 id: 90130304,
                 content: "真的假……不对，你看着也不比我有钱……算了，我不怀疑你的好意，但你用不着破费，我不想欠无谓的人情。",
+                voice: "char/Linen/vo_topic_03_2",
                 npc: 83101,
                 options: [
                     {
@@ -2115,6 +2277,7 @@ export const npcData: NPC[] = [
                 id: 90130404,
                 content:
                     "我倒是想，但是那些雇主们可不这么想，隔三差五就问我委托做完没有，快点做之类，催催催，要不是我还有一家子人要养活，真想给他们来上几发。",
+                voice: "char/Linen/vo_topic_04_2",
                 npc: 83101,
                 options: [
                     {
@@ -2137,6 +2300,7 @@ export const npcData: NPC[] = [
             {
                 id: 90130206,
                 content: "哎，我这就是打比方，只要拳头够硬枪够准，比什么都好使，你要是再抬杠，我先给你两拳。",
+                voice: "char/Linen/vo_topic_02_3",
                 npc: 83101,
                 options: [
                     {
@@ -2171,6 +2335,7 @@ export const npcData: NPC[] = [
             {
                 id: 90180001,
                 content: "耶尔：你来啦……天气真好……很适合做爆炸实验……唔，天气真好。",
+                voice: "char/Yeer/vo_welcome",
                 npc: 83103,
                 options: [
                     {
@@ -2198,30 +2363,35 @@ export const npcData: NPC[] = [
             {
                 id: 90180101,
                 content: "耶尔：奥利弗不是会说话的炸弹……可能听起来有些不可思议，但……他其实是……",
+                voice: "char/Yeer/vo_topic_01_1",
                 npc: 83103,
                 next: 90180103,
             },
             {
                 id: 90180201,
                 content: "耶尔：我……可能派不上什么用场。唯一擅长的……可能就只有制作“小可爱”了吧？",
+                voice: "char/Yeer/vo_topic_02_1",
                 npc: 83103,
                 next: 90180203,
             },
             {
                 id: 90180301,
                 content: "耶尔：啊，抱歉！但、但是要是说得快了，我的舌头就就就容易打结。",
+                voice: "char/Yeer/vo_topic_03_1",
                 npc: 83103,
                 next: 90180303,
             },
             {
                 id: 90180401,
                 content: "耶尔：我没有“小时候”……我从记事的时候，就在这个大孩子的身体里了。奥利弗也许有吧。",
+                voice: "char/Yeer/vo_topic_04_1",
                 npc: 83103,
                 next: 90180403,
             },
             {
                 id: 90180103,
                 content: "奥利弗：闭嘴，被你急死了！我就是耶尔，耶尔就是我。听明白了吗？不明白也无所谓，也没指望你木屑一样的脑子能搞懂。",
+                voice: "char/Yeer/vo_topic_01_2",
                 npc: 83103,
                 next: 90180104,
             },
@@ -2252,12 +2422,14 @@ export const npcData: NPC[] = [
             {
                 id: 90180204,
                 content: "耶尔：“小可爱”……是“劈里啪啦”玩具店中……最受欢迎的商品，制作它们，要花费不少时间。",
+                voice: "char/Yeer/vo_topic_02_2",
                 npc: 83103,
                 next: 90180205,
             },
             {
                 id: 90180304,
                 content: "耶尔：还、还好，有时候奥利弗会帮我说......而且，旁边没有人的时候，奥利弗总会把我想说的话听完的。",
+                voice: "char/Yeer/vo_topic_03_2",
                 npc: 83103,
                 options: [
                     {
@@ -2275,18 +2447,21 @@ export const npcData: NPC[] = [
                 id: 90180404,
                 content:
                     "耶尔：我也想过如果能有“童年”，应该会是……怎样的呢？每晚睡觉前……琼斯先生会不会像普通的爸爸一样，坐在我的床头……给我讲故事……",
+                voice: "char/Yeer/vo_topic_04_2",
                 npc: 83103,
                 next: 90180405,
             },
             {
                 id: 90180105,
                 content: "耶尔：奥利弗他、他他是个好孩子！虽然看看上去脾气不好，说话有点凶，还总总总是突然冒出来，但……",
+                voice: "char/Yeer/vo_topic_01_3",
                 npc: 83103,
                 next: 90180106,
             },
             {
                 id: 90180205,
                 content: "耶尔：但，不是因为我的技艺……有多好，只是因为，奥利弗他很熟悉。",
+                voice: "char/Yeer/vo_topic_02_3",
                 npc: 83103,
                 options: [
                     {
@@ -2303,12 +2478,14 @@ export const npcData: NPC[] = [
             {
                 id: 90180405,
                 content: "奥利弗：琼斯那混蛋讲故事？你脑子进胶水了吗？",
+                voice: "char/Yeer/vo_topic_04_3",
                 npc: 83103,
                 next: 90180406,
             },
             {
                 id: 90180106,
                 content: "奥利弗：喂，有你这么夸奖人的吗？",
+                voice: "char/Yeer/vo_topic_01_4",
                 npc: 83103,
                 options: [
                     {
@@ -2325,6 +2502,7 @@ export const npcData: NPC[] = [
             {
                 id: 90180406,
                 content: "耶尔：对对对不起！我我知道的，他只关心实验，不会做这些……",
+                voice: "char/Yeer/vo_topic_04_4",
                 npc: 83103,
                 options: [
                     {
@@ -2351,6 +2529,7 @@ export const npcData: NPC[] = [
             {
                 id: 90060001,
                 content: "今天准备好接受拷问了吗？！",
+                voice: "char/Haier/vo_welcome",
                 npc: 83201,
                 options: [
                     {
@@ -2383,36 +2562,42 @@ export const npcData: NPC[] = [
             {
                 id: 90060101,
                 content: "如果你熟读历史的话，就会知道，皇家军事监狱的初代典狱长也有着熔岩一般的皮肤，再凶恶的罪徒也会畏惧她的拷问。",
+                voice: "char/Haier/vo_topic_01_1",
                 npc: 83201,
                 next: 90060102,
             },
             {
                 id: 90060201,
                 content: "从帝国诞生起，我的家族就世代执掌着关押罪大恶极的犯人们的牢狱，理清冤罪，或是斩除祸患。",
+                voice: "char/Haier/vo_topic_02_1",
                 npc: 83201,
                 next: 90060202,
             },
             {
                 id: 90060301,
                 content: "那当然，帝国监狱里多的是难缠的犯人，审讯案件、查阅卷宗、防止那些狡猾的老鼠设法逃走都是典狱长的职责所在。",
+                voice: "char/Haier/vo_topic_03_1",
                 npc: 83201,
                 next: 90060302,
             },
             {
                 id: 90060401,
                 content: "正义？正义就是权力约束欲望，力量桎梏罪孽，强者鞭挞恶徒。",
+                voice: "char/Haier/vo_topic_04_1",
                 npc: 83201,
                 next: 90060402,
             },
             {
                 id: 90060501,
                 content: "帝国的罪犯还在满大街地跑，身为典狱长哪有什么闲暇时间。只能在忙里偷闲的时候，喝几杯烈酒。",
+                voice: "char/Haier/vo_topic_05_1",
                 npc: 83201,
                 next: 90060502,
             },
             {
                 id: 90060102,
                 content: "而我，作为她的后代，继承了她的名号，同样会用炼火将一切罪行烧成炉灰。",
+                voice: "char/Haier/vo_topic_01_2",
                 npc: 83201,
                 next: 90060103,
             },
@@ -2420,12 +2605,14 @@ export const npcData: NPC[] = [
                 id: 90060202,
                 content:
                     "而我与生俱来和先祖同样的火红肤色，就注定了我要拿起她留下的铁铸法典。所以并非是我选择成为典狱长，而是典狱长的头衔选择了我。",
+                voice: "char/Haier/vo_topic_02_2",
                 npc: 83201,
                 next: 90060203,
             },
             {
                 id: 90060302,
                 content: "每休息一分，都会让正义迟到一分——而当正义迟迟不来时，混乱与弱肉强食就会代替法条成为新的规则。",
+                voice: "char/Haier/vo_topic_03_2",
                 npc: 83201,
                 next: 90060303,
             },
@@ -2462,6 +2649,7 @@ export const npcData: NPC[] = [
             {
                 id: 90060403,
                 content: "哼，绝对？不然呢，天真的小朋友，难道指望人人都手拉手过家家？绝对的力量、绝对的秩序，这就是我的正义！",
+                voice: "char/Haier/vo_topic_04_2",
                 npc: 83201,
                 options: [
                     {
@@ -2479,6 +2667,7 @@ export const npcData: NPC[] = [
                 id: 90060503,
                 content:
                     "怎么，很惊讶？消遣而已：审讯时总会听到各种酒的名字，就开始好奇，这到底是什么邪恶药水，总是和犯罪沾边，于是偶尔会来上一些。",
+                voice: "char/Haier/vo_topic_05_2",
                 npc: 83201,
                 next: 90060504,
             },
@@ -2486,6 +2675,7 @@ export const npcData: NPC[] = [
                 id: 90060104,
                 content:
                     "有一些影响，我只能睡在铁制的床上，也不能在木头屋子里待上太久。但与之相对的，我能在火场里把罪犯带出来让他们直面法律，也从不怕冷。",
+                voice: "char/Haier/vo_topic_01_3",
                 npc: 83201,
                 next: 90060105,
             },
@@ -2493,6 +2683,7 @@ export const npcData: NPC[] = [
                 id: 90060204,
                 content:
                     "成为典狱长并非愿望的终点，相反，这只是一个开始，它意味着我需要时刻保持戒备和警醒一一斩除帝国土地上孳生的任何不义，直到死亡将我熄灭。",
+                voice: "char/Haier/vo_topic_02_3",
                 npc: 83201,
                 options: [
                     {
@@ -2510,6 +2701,7 @@ export const npcData: NPC[] = [
                 id: 90060304,
                 content:
                     "确实有学者设想过没有罪犯的世界。如果真的有那天，我也将不复存在，因为正是罪恶造就了典狱长。但是在那之前，我会尽力维护好现存的秩序。",
+                voice: "char/Haier/vo_topic_03_3",
                 npc: 83201,
                 options: [
                     {
@@ -2526,6 +2718,7 @@ export const npcData: NPC[] = [
             {
                 id: 90060504,
                 content: "喝得越多，我越是确信，邪恶的并不是酒。",
+                voice: "char/Haier/vo_topic_05_3",
                 npc: 83201,
                 options: [
                     {
@@ -2543,6 +2736,7 @@ export const npcData: NPC[] = [
                 id: 90060105,
                 content:
                     "异于常人的外表于我而言，更像是一份馈赠，非要说有什么不方便的……我一直想尝一尝那种叫做冰激凌的甜品，但它总是在我手上就化掉了……",
+                voice: "char/Haier/vo_topic_01_4",
                 npc: 83201,
                 options: [
                     {
@@ -2569,6 +2763,7 @@ export const npcData: NPC[] = [
             {
                 id: 90170001,
                 content: "我来的时候顺手把你家门口的雪给铲了！是不是特别感动，特别想请我喝一杯热可可呀~",
+                voice: "char/Maer/vo_welcome",
                 npc: 83301,
                 options: [
                     {
@@ -2601,18 +2796,21 @@ export const npcData: NPC[] = [
             {
                 id: 90170101,
                 content: "嗯……大概是为那些被舍弃的物品找到合适的主人的营生，唔，也能让那些遭受物资匮乏之苦的人，得到更好的生活。",
+                voice: "char/Maer/vo_topic_01_1",
                 npc: 83301,
                 next: 90170103,
             },
             {
                 id: 90170201,
                 content: "嘘嘘嘘，这可是拾荒者的最高机密！要不是你帮我抓过贼，才不会轻易透露给你呢！",
+                voice: "char/Maer/vo_topic_02_1",
                 npc: 83301,
                 next: 90170203,
             },
             {
                 id: 90170301,
                 content: "不，你说反啦！我非常喜欢冰湖城。只是我常常回想起和爸爸一起在雪原上流浪的日子，我的整个童年都是在那里度过的。",
+                voice: "char/Maer/vo_topic_03_1",
                 npc: 83301,
                 next: 90170303,
             },
@@ -2620,12 +2818,14 @@ export const npcData: NPC[] = [
                 id: 90170401,
                 content:
                     "是小时候和我在雪原上一起流浪的大猫！它叫“胖尾巴”，平时得用肉干贿赂才愿意给我摸摸，但那个手感——嘿嘿嘿嘿，一个字，绝啦！",
+                voice: "char/Maer/vo_topic_04_1",
                 npc: 83301,
                 next: 90170403,
             },
             {
                 id: 90170501,
                 content: "我没有，我不是，别瞎说！我都这么大了，怎么还用这种哄小孩的称呼！算我求你了，别再提这个了！",
+                voice: "char/Maer/vo_topic_05_1",
                 npc: 83301,
                 next: 90170503,
             },
@@ -2639,6 +2839,7 @@ export const npcData: NPC[] = [
                 id: 90170203,
                 content:
                     "这张图标明了冰湖城所有垃圾桶的位置，我在上面标了好东西最多的几个，不仅把那边的垃圾桶换成了大号，就连什么时候去进货都经过我严密的计算！",
+                voice: "char/Maer/vo_topic_02_2",
                 npc: 83301,
                 next: 90170204,
             },
@@ -2664,12 +2865,14 @@ export const npcData: NPC[] = [
                 id: 90170104,
                 content:
                     "比如，把贵族老爷淘汰下来的丝绒窗帘换成冬衣，让老人们暖暖过冬；把被丢弃的玩偶小人带给那些只能抛石头玩的孩子，他们能高兴很久。",
+                voice: "char/Maer/vo_topic_01_2",
                 npc: 83301,
                 next: 90170105,
             },
             {
                 id: 90170204,
                 content: "不过我们这行旱涝不保收，能有多少进账，大部分时候还得靠运气……",
+                voice: "char/Maer/vo_topic_02_3",
                 npc: 83301,
                 next: 90170205,
             },
@@ -2677,18 +2880,21 @@ export const npcData: NPC[] = [
                 id: 90170304,
                 content:
                     "从这里看向雪原，美得像童话里的冰国雪国。可一步一步走进去，又会觉得自己好小好小。在齐膝的雪地里迈着腿，不管走了多久，看到的景色都不会改变。",
+                voice: "char/Maer/vo_topic_03_2",
                 npc: 83301,
                 next: 90170305,
             },
             {
                 id: 90170404,
                 content: "嗯……反正不是喵喵喵，大概是，嗷呜——嗷呜——嗷呜——的声音！",
+                voice: "char/Maer/vo_topic_04_2",
                 npc: 83301,
                 next: 90170405,
             },
             {
                 id: 90170504,
                 content: "那当然是——咳咳，于城市背面孤独行走，缄默的侦探——玛尔洁小姐！今天，也为你揭示冰湖城不为人知的隐秘！",
+                voice: "char/Maer/vo_topic_05_2",
                 npc: 83301,
                 next: 90170505,
             },
@@ -2696,6 +2902,7 @@ export const npcData: NPC[] = [
                 id: 90170105,
                 content:
                     "还有一次，我把不知道哪家丢掉的破烂书架搬了回来，累得半死，但没过多久，就有一群猫妈妈猫小孩过来上蹿下跳，从太阳上山玩到月亮落山。",
+                voice: "char/Maer/vo_topic_01_3",
                 npc: 83301,
                 next: 90170106,
             },
@@ -2708,6 +2915,7 @@ export const npcData: NPC[] = [
             {
                 id: 90170305,
                 content: "我不讨厌那段时光，但我最喜欢的，果然还是热热闹闹，充满烟火味的冰湖城！",
+                voice: "char/Maer/vo_topic_03_3",
                 npc: 83301,
                 options: [
                     {
@@ -2730,6 +2938,7 @@ export const npcData: NPC[] = [
             {
                 id: 90170505,
                 content: "嘿嘿，这才是与我相称的外号嘛~",
+                voice: "char/Maer/vo_topic_05_3",
                 npc: 83301,
                 options: [
                     {
@@ -2746,6 +2955,7 @@ export const npcData: NPC[] = [
             {
                 id: 90170106,
                 content: "拾荒者的工作就是这样啦！大多是一些鸡毛蒜皮的小事，但永远不会无聊，怎么样，想不想加入我们！",
+                voice: "char/Maer/vo_topic_01_4",
                 npc: 83301,
                 options: [
                     {
@@ -2762,6 +2972,7 @@ export const npcData: NPC[] = [
             {
                 id: 90170206,
                 content: "可不是嘛，嘿，我就说你是个明眼人！",
+                voice: "char/Maer/vo_topic_02_4",
                 npc: 83301,
                 options: [
                     {
@@ -2779,6 +2990,7 @@ export const npcData: NPC[] = [
                 id: 90170406,
                 content:
                     "胖尾巴毕竟是生活在雪原的野兽，它不愿意靠近城市，等待我们的只有分道扬镳。但它会一直留在我的记忆里，和那片雪原一起。",
+                voice: "char/Maer/vo_topic_04_3",
                 npc: 83301,
                 options: [
                     {
@@ -2805,6 +3017,7 @@ export const npcData: NPC[] = [
             {
                 id: 90210001,
                 content: "今日据点巡逻结束。未发现危险生物，未发现墙壁开裂，未发现可疑记号，潜在威胁排除，可照例进行日常生活，报告完毕。",
+                voice: "char/Lise/vo_welcome",
                 npc: 84101,
                 options: [
                     {
@@ -2848,6 +3061,7 @@ export const npcData: NPC[] = [
                 id: 90210101,
                 content:
                     "呃……你注意到了啊，我是有一把亲人留下的口琴。好好地锁了起来，但又总担心它会突然消失不见，所以会时不时，忍不住地去确认一下。",
+                voice: "char/Lise/vo_topic_01_1",
                 npc: 84101,
                 next: 90210102,
             },
@@ -2855,24 +3069,28 @@ export const npcData: NPC[] = [
                 id: 90210201,
                 content:
                     "还不错，军团是一个只要努力就能获得回报的地方。我现在受到了认可，拥有几名部下，我还可以命令他们一定要平等对待卡戎之民和索拉之民。",
+                voice: "char/Lise/vo_topic_02_1",
                 npc: 84101,
                 next: 90210202,
             },
             {
                 id: 90210301,
                 content: "谈不上负责，我只是严格遵守了卫戍部队规章的所有内容而已。",
+                voice: "char/Lise/vo_topic_03_1",
                 npc: 84101,
                 next: 90210302,
             },
             {
                 id: 90210401,
                 content: "不用了……抱歉，我不太喜欢照镜子。毕竟一眼就能看到头上的角，总觉得有些难受……",
+                voice: "char/Lise/vo_topic_04_1",
                 npc: 84101,
                 next: 90210402,
             },
             {
                 id: 90210501,
                 content: "还在，只是它现在变得好沉重，太沉重了……我不知道自己是否还有力气再次握起它，吹奏下去。",
+                voice: "char/Lise/vo_topic_05_1",
                 npc: 84101,
                 next: 90210502,
             },
@@ -2880,6 +3098,7 @@ export const npcData: NPC[] = [
                 id: 90210601,
                 content:
                     "我每天都会接到一些零工，够我一个人日常开销和吃穿用度。不过，对现在的我来说，工作与其说是为了糊口，不如说是为了工作本身。",
+                voice: "char/Lise/vo_topic_06_1",
                 npc: 84101,
                 next: 90210602,
             },
@@ -2887,6 +3106,7 @@ export const npcData: NPC[] = [
                 id: 90210701,
                 content:
                     "至少比待在里面要好。军团曾是我安身的庇护所，是我的梦想所在。但是现在梦想成了谎言，我以为的庇护所是让家人万劫不复的地狱……",
+                voice: "char/Lise/vo_topic_07_1",
                 npc: 84101,
                 next: 90210702,
             },
@@ -2900,6 +3120,7 @@ export const npcData: NPC[] = [
                 id: 90210202,
                 content:
                     "我听过许多人抱怨甚至谩骂军团对于卡戎之民过度严苛，而我能尽可能去缓和这些声音……我希望日子久了，可以让大家眼里的军团变得有那么一点点不一样。",
+                voice: "char/Lise/vo_topic_02_2",
                 npc: 84101,
                 next: 90210203,
             },
@@ -2918,6 +3139,7 @@ export const npcData: NPC[] = [
             {
                 id: 90210502,
                 content: "毕竟，这把口琴曾装载了我全部的期待和梦想。",
+                voice: "char/Lise/vo_topic_05_2",
                 npc: 84101,
                 next: 90210503,
             },
@@ -2930,12 +3152,14 @@ export const npcData: NPC[] = [
             {
                 id: 90210702,
                 content: "我无法释怀家人的仇，可是我也无法对昔日同僚拔枪相向。我真的不知道……告诉我，我应该怎么办才好？",
+                voice: "char/Lise/vo_topic_07_2",
                 npc: 84101,
                 next: 90210703,
             },
             {
                 id: 90210103,
                 content: "其实只会一首，还是亲人教给我的。我学得也不是很快，因为实在不擅长音乐这样需要情绪起伏的东西……",
+                voice: "char/Lise/vo_topic_01_2",
                 npc: 84101,
                 next: 90210104,
             },
@@ -2948,6 +3172,7 @@ export const npcData: NPC[] = [
             {
                 id: 90210303,
                 content: "规章规定不允许随意讨论同僚的言行，否则会被视为违背军纪。",
+                voice: "char/Lise/vo_topic_03_2",
                 npc: 84101,
                 next: 90210304,
             },
@@ -2955,6 +3180,7 @@ export const npcData: NPC[] = [
                 id: 90210403,
                 content:
                     "不，我并非对我们一族的外表自轻自贱。我只是觉得，如果它能长得更规则、更对称一些，也许会看起来舒服很多。啊，不是，我也没有在说你的角……",
+                voice: "char/Lise/vo_topic_04_2",
                 npc: 84101,
                 options: [
                     {
@@ -2977,6 +3203,7 @@ export const npcData: NPC[] = [
             {
                 id: 90210603,
                 content: "工作让我的生活充实无比，工作让我的心情更加快乐，有工作的日子，太阳都会更暖和一点。",
+                voice: "char/Lise/vo_topic_06_2",
                 npc: 84101,
                 options: [
                     {
@@ -2999,6 +3226,7 @@ export const npcData: NPC[] = [
             {
                 id: 90210104,
                 content: "不过，每当我太过紧张或者太过开心的时候，总会暗暗握住它，这能让我想到很多我确信的事，反而能够让我冷静一些。",
+                voice: "char/Lise/vo_topic_01_3",
                 npc: 84101,
                 next: 90210105,
             },
@@ -3006,18 +3234,21 @@ export const npcData: NPC[] = [
                 id: 90210204,
                 content:
                     "会慢慢多起来的，在更早之前军团里连一个卡戎都没有呢。我虽然能做的不多，但是只要我坚持这样教导部下，那么卡戎之民和索拉之民的矛盾就会变少。",
+                voice: "char/Lise/vo_topic_02_3",
                 npc: 84101,
                 next: 90210205,
             },
             {
                 id: 90210304,
                 content: "不过实话说，我不理解他们是怎么想的，可能觉得卫戍部队就只是一份普通的工作，只要不被上司发现，怎么胡闹都无所谓。",
+                voice: "char/Lise/vo_topic_03_3",
                 npc: 84101,
                 next: 90210305,
             },
             {
                 id: 90210504,
                 content: "……我明白了。我答应你，等将来有一天，我能够再次拿起这把口琴，去学习新曲子的时候……一定第一个吹奏给你听。",
+                voice: "char/Lise/vo_topic_05_3",
                 npc: 84101,
                 options: [
                     {
@@ -3034,6 +3265,7 @@ export const npcData: NPC[] = [
             {
                 id: 90210704,
                 content: "……抱歉，刚才是我失态了。你说得没错，我应该自己找出答案，而不是把问题推给你。虽然，这可能还要花上很长的时间吧……",
+                voice: "char/Lise/vo_topic_07_3",
                 npc: 84101,
                 options: [
                     {
@@ -3051,6 +3283,7 @@ export const npcData: NPC[] = [
                 id: 90210105,
                 content:
                     "我的许多同僚会因为压力而去找医生，需要镇定或者兴奋。我不需要那些，心跳快一拍也好慢一拍也罢，口琴会帮找回正常的节拍。",
+                voice: "char/Lise/vo_topic_01_4",
                 npc: 84101,
                 options: [
                     {
@@ -3068,6 +3301,7 @@ export const npcData: NPC[] = [
                 id: 90210205,
                 content:
                     "是的，平等对待所有人，努力保护大家远离秽兽和秽蚀的威胁，就一定能让卡戎们的境遇好上一些，冰湖城里的叹气声也能少一些。",
+                voice: "char/Lise/vo_topic_02_4",
                 npc: 84101,
                 options: [
                     {
@@ -3085,6 +3319,7 @@ export const npcData: NPC[] = [
                 id: 90210305,
                 content:
                     "我觉得，不应该这样，人应该遵循着固定的规则而活着，否则的话，就会不断放低对自己的要求，过一天算一天，最后只能和下水道里的老鼠混在一起。",
+                voice: "char/Lise/vo_topic_03_4",
                 npc: 84101,
                 options: [
                     {
@@ -3111,6 +3346,7 @@ export const npcData: NPC[] = [
             {
                 id: 90230001,
                 content: "你愿意来见我了……你还在生气吗？困惑吗？还是说，你已经对我漠然无动于衷？无妨，现在我们有大把的时间可以一一探讨。",
+                voice: "char/Zhiliu/vo_welcome",
                 npc: 84102,
                 options: [
                     {
@@ -3138,24 +3374,28 @@ export const npcData: NPC[] = [
             {
                 id: 90230101,
                 content: "没有什么是不能作为筹码的。区别仅仅在于，你所付出的，能够撬动怎样的回报。",
+                voice: "char/Zhiliu/vo_topic_01_1",
                 npc: 84102,
                 next: 90230102,
             },
             {
                 id: 90230201,
                 content: "让我想想……不必计较一时得失，多多让利。学会观人、用人，施以恩惠。让他们敬你、重你，但也畏惧于你。",
+                voice: "char/Zhiliu/vo_topic_02_1",
                 npc: 84102,
                 next: 90230202,
             },
             {
                 id: 90230301,
                 content: "我平素多有琐事缠身，很少能真正得空。闲暇二字，于我倒是有些许奢侈。",
+                voice: "char/Zhiliu/vo_topic_03_1",
                 npc: 84102,
                 next: 90230302,
             },
             {
                 id: 90230401,
                 content: "嗯？这也被你注意到了。只是有些老毛病罢了。",
+                voice: "char/Zhiliu/vo_topic_04_1",
                 npc: 84102,
                 next: 90230402,
             },
@@ -3175,24 +3415,28 @@ export const npcData: NPC[] = [
                 id: 90230302,
                 content:
                     "若是侥幸得了浮生半日闲……我大约会去观戏吧。无论是华胥的说书、评弹，帝国的歌剧、话剧，抑或是远洋新近流行的照影，我都有几分兴致。",
+                voice: "char/Zhiliu/vo_topic_03_2",
                 npc: 84102,
                 next: 90230303,
             },
             {
                 id: 90230402,
                 content: "我年幼时，曾因一起意外，受困于山洞涧谷中，三天三夜不见天日。大约是从那时起落下的陋习。",
+                voice: "char/Zhiliu/vo_topic_04_2",
                 npc: 84102,
                 next: 90230403,
             },
             {
                 id: 90230103,
                 content: "没错。你的性命、我的性命，乃至于芸芸众生，在更高的利益层面上，都只是一枚筹码罢了。",
+                voice: "char/Zhiliu/vo_topic_01_2",
                 npc: 84102,
                 next: 90230104,
             },
             {
                 id: 90230203,
                 content: "呵呵。货物有价，人情无价。锱铢必较者，只能经营足下一隅。学会借助人情的东风，才能飞向更加广阔的天地。",
+                voice: "char/Zhiliu/vo_topic_02_2",
                 npc: 84102,
                 options: [
                     {
@@ -3215,18 +3459,21 @@ export const npcData: NPC[] = [
             {
                 id: 90230403,
                 content: "在这世间，为人皆有恐惧之物，我也不能幸免……看你的表情，这让你很惊讶吗？",
+                voice: "char/Zhiliu/vo_topic_04_3",
                 npc: 84102,
                 next: 90230404,
             },
             {
                 id: 90230104,
                 content: "对于渺小的人类而言，能够用自己仅有的筹码，去偿换欲求之物，未尝不是一件幸事。",
+                voice: "char/Zhiliu/vo_topic_01_3",
                 npc: 84102,
                 next: 90230105,
             },
             {
                 id: 90230304,
                 content: "呵呵……是啊。戏剧撷取吉光片羽，却能讲尽人性幽微。人心这东西，说不清，道不明，总是带来意外，又永远教人看不厌。",
+                voice: "char/Zhiliu/vo_topic_03_3",
                 npc: 84102,
                 next: 90230305,
             },
@@ -3239,6 +3486,7 @@ export const npcData: NPC[] = [
             {
                 id: 90230105,
                 content: "讨厌这个答案吗？那就向我证明，我所言非实吧。",
+                voice: "char/Zhiliu/vo_topic_01_4",
                 npc: 84102,
                 options: [
                     {
@@ -3255,6 +3503,7 @@ export const npcData: NPC[] = [
             {
                 id: 90230305,
                 content: "今后的日子里，你又会给我带来怎样的意外？我可是拭目以待呢。",
+                voice: "char/Zhiliu/vo_topic_03_4",
                 npc: 84102,
                 options: [
                     {
@@ -3271,6 +3520,7 @@ export const npcData: NPC[] = [
             {
                 id: 90230405,
                 content: "呵呵……没错。弱点只会成为商人的绊脚石。",
+                voice: "char/Zhiliu/vo_topic_04_4",
                 npc: 84102,
                 next: 90230406,
             },
@@ -3278,6 +3528,7 @@ export const npcData: NPC[] = [
                 id: 90230406,
                 content:
                     "我后来针对这点进行了严格的特训。若对面是谈判的对手，我可以随时将这份恐惧抛之脑后。只是在你面前，没有强装的必要罢了。",
+                voice: "char/Zhiliu/vo_topic_04_5",
                 npc: 84102,
                 options: [
                     {
@@ -3304,6 +3555,7 @@ export const npcData: NPC[] = [
             {
                 id: 90070001,
                 content: "趁着你还没有被各种律法束缚，想做什么事情，就去做吧。",
+                voice: "char/Yuming/vo_welcome",
                 npc: 84201,
                 options: [
                     {
@@ -3331,18 +3583,21 @@ export const npcData: NPC[] = [
             {
                 id: 90070101,
                 content: "……这等闲聊，有更适合的人选吧。找那些贩卖货物的织星客吧，或者看看书也好。",
+                voice: "char/Yuming/vo_topic_01_1",
                 npc: 84201,
                 next: 90070102,
             },
             {
                 id: 90070201,
                 content: "《大风九章》是华胥的律法，谁都不能违抗。但倘若真要有人倒反天命，那自然要有人去收拾乱局。",
+                voice: "char/Yuming/vo_topic_02_1",
                 npc: 84201,
                 next: 90070202,
             },
             {
                 id: 90070301,
                 content: "无事可乐，自然如此。",
+                voice: "char/Yuming/vo_topic_03_1",
                 npc: 84201,
                 next: 90070302,
             },
@@ -3350,6 +3605,7 @@ export const npcData: NPC[] = [
                 id: 90070401,
                 content:
                     "是啊，月亮很好，很好。无论前一天发生过什么，杯盘狼籍还是血溅五步，月光都能洗净一切。不管过去多久，天边的一角总是会为你留下一弯月亮。",
+                voice: "char/Yuming/vo_topic_04_1",
                 npc: 84201,
                 next: 90070402,
             },
@@ -3380,6 +3636,7 @@ export const npcData: NPC[] = [
             {
                 id: 90070103,
                 content: "我平素繁忙，所以眼见多有偏狭。你若是真的好奇，与其假他人言语，不如亲自踏足那里，如何？",
+                voice: "char/Yuming/vo_topic_01_2",
                 npc: 84201,
                 options: [
                     {
@@ -3396,6 +3653,7 @@ export const npcData: NPC[] = [
             {
                 id: 90070203,
                 content: "……也许吧，我不常与人们闲谈，毕竟但凡需要我出手的地方，总有伤逝。大部华胥之民，是并不乐见我的。",
+                voice: "char/Yuming/vo_topic_02_2",
                 npc: 84201,
                 options: [
                     {
@@ -3412,6 +3670,7 @@ export const npcData: NPC[] = [
             {
                 id: 90070303,
                 content: "谢了，但是说与你听，也不过是徒然让这世上又多了一个烦恼之人，何必。",
+                voice: "char/Yuming/vo_topic_03_2",
                 npc: 84201,
                 options: [
                     {
@@ -3428,6 +3687,7 @@ export const npcData: NPC[] = [
             {
                 id: 90070403,
                 content: "不，我是与过去诀别之人，没有过去，只是今天多喝了半杯酒而已。",
+                voice: "char/Yuming/vo_topic_04_2",
                 npc: 84201,
                 options: [
                     {
@@ -3454,6 +3714,7 @@ export const npcData: NPC[] = [
             {
                 id: 90080001,
                 content: "呼~刚睡醒的感觉好舒爽啊，你呀，也不要每天太紧绷了，任务是永远也做不完的，要懂得休息。",
+                voice: "char/Landi/vo_welcome",
                 npc: 84202,
                 options: [
                     {
@@ -3481,6 +3742,7 @@ export const npcData: NPC[] = [
             {
                 id: 90080101,
                 content: "家里人？我爸妈都好多年没管过我了，也就两位姐姐偶尔会对我指手画脚，不过啊我现在进了军团，她们进不来。",
+                voice: "char/Landi/vo_topic_01_1",
                 npc: 84202,
                 next: 90080103,
             },
@@ -3488,12 +3750,14 @@ export const npcData: NPC[] = [
                 id: 90080201,
                 content:
                     "呵，你们这些不懂休息好的人有难了！听我说：床是抚慰心灵的港湾，屋顶是洗涤灵魂的圣地，午后的花园是光明降临的方向，小憩的时刻是甜蜜的交响诗……",
+                voice: "char/Landi/vo_topic_02_1",
                 npc: 84202,
                 next: 90080203,
             },
             {
                 id: 90080301,
                 content: "她可太能使唤人了，一个人劈三份都不够用……咳，我是说，西比尔大人作为长官，对下属一向严格。",
+                voice: "char/Landi/vo_topic_03_1",
                 npc: 84202,
                 next: 90080303,
             },
@@ -3501,6 +3765,7 @@ export const npcData: NPC[] = [
                 id: 90080401,
                 content:
                     "我给你设计了一个好东西，一个小型机器人偶！战斗的时候它可以跟在你后面一边摇小旗，一边大喊“加油！”“你揍人的样子真的很酷！”",
+                voice: "char/Landi/vo_topic_04_1",
                 npc: 84202,
                 next: 90080403,
             },
@@ -3525,12 +3790,14 @@ export const npcData: NPC[] = [
             {
                 id: 90080403,
                 content: "怎么样，是不是感觉浑身充满力量？等我把它做出来……",
+                voice: "char/Landi/vo_topic_04_2",
                 npc: 84202,
                 next: 90080404,
             },
             {
                 id: 90080104,
                 content: "不，不是的，她们都是泼可爱动人聪明贤惠温柔乐观善良积极天真烂漫落落大方的美人！不过，如果能端庄一点就更好了……",
+                voice: "char/Landi/vo_topic_01_2",
                 npc: 84202,
                 options: [
                     {
@@ -3547,6 +3814,7 @@ export const npcData: NPC[] = [
             {
                 id: 90080204,
                 content: "……诶！你等我念完啊！",
+                voice: "char/Landi/vo_topic_02_2",
                 npc: 84202,
                 options: [
                     {
@@ -3563,6 +3831,7 @@ export const npcData: NPC[] = [
             {
                 id: 90080304,
                 content: "哎呀，这可怎么办才好呢……要不，我请你一份下午茶，你就当什么都没有听见，怎么样？别担心，里面没有下药。",
+                voice: "char/Landi/vo_topic_03_2",
                 npc: 84202,
                 options: [
                     {
@@ -3585,6 +3854,7 @@ export const npcData: NPC[] = [
             {
                 id: 90080405,
                 content: "喂喂，别走啊，图纸可是我瞒着西比尔长官，用宝贵的休息时间画的——",
+                voice: "char/Landi/vo_topic_04_3",
                 npc: 84202,
                 options: [
                     {
@@ -3611,6 +3881,7 @@ export const npcData: NPC[] = [
             {
                 id: 90090001,
                 content: "看到你日复一日这样奔波努力，我就忍不住开始想象，想象你再次挑战我的那一天，让人期待。",
+                voice: "char/Xibi/vo_welcome",
                 npc: 84301,
                 options: [
                     {
@@ -3638,24 +3909,28 @@ export const npcData: NPC[] = [
             {
                 id: 90090101,
                 content: "直属于皇帝的特殊军团，执行机密的任务，以及作为战场上随时击出的铁锤。",
+                voice: "char/Xibi/vo_topic_01_1",
                 npc: 84301,
                 next: 90090103,
             },
             {
                 id: 90090201,
                 content: "呵，我并非忠于帝国，只是忠于理想罢了。曾有一个人为了这个理想付出了他的一切，而我要铭记与践行他的意志。",
+                voice: "char/Xibi/vo_topic_02_1",
                 npc: 84301,
                 next: 90090203,
             },
             {
                 id: 90090301,
                 content: "没关系，我的家人很早就不在了。",
+                voice: "char/Xibi/vo_topic_03_1",
                 npc: 84301,
                 next: 90090303,
             },
             {
                 id: 90090401,
                 content: "当然，当面的咒骂和揶揄我已经听过不少，阴沟里的硕鼠们的抱怨只会更多。",
+                voice: "char/Xibi/vo_topic_04_1",
                 npc: 84301,
                 next: 90090403,
             },
@@ -3680,12 +3955,14 @@ export const npcData: NPC[] = [
             {
                 id: 90090403,
                 content: "所幸，尽管这个世界有万般不公，但只要坐拥众人之上的力量，就能获得最起码的善意。",
+                voice: "char/Xibi/vo_topic_04_2",
                 npc: 84301,
                 next: 90090404,
             },
             {
                 id: 90090104,
                 content: "你误会了。没有皇帝，军团依旧是军团，但没有军团，皇冠可就要落地了。",
+                voice: "char/Xibi/vo_topic_01_2",
                 npc: 84301,
                 next: 90090105,
             },
@@ -3693,6 +3970,7 @@ export const npcData: NPC[] = [
                 id: 90090204,
                 content:
                     "我不否认，不过为了我想要的，我会抓紧能利用的一切，不择手段地往上爬。但我每爬一步，都离我的理想更近一步。而你，又走到了哪一步呢？",
+                voice: "char/Xibi/vo_topic_02_2",
                 npc: 84301,
                 options: [
                     {
@@ -3709,6 +3987,7 @@ export const npcData: NPC[] = [
             {
                 id: 90090304,
                 content: "我甚至为此庆幸，这样一来我就没有了后顾之忧，只需要专心和正面与背面的敌人们厮杀。",
+                voice: "char/Xibi/vo_topic_03_2",
                 npc: 84301,
                 next: 90090305,
             },
@@ -3727,6 +4006,7 @@ export const npcData: NPC[] = [
             {
                 id: 90090305,
                 content: "情感，对于每一个踏入军团的人来说，都是破绽罢了。",
+                voice: "char/Xibi/vo_topic_03_3",
                 npc: 84301,
                 options: [
                     {
@@ -3743,6 +4023,7 @@ export const npcData: NPC[] = [
             {
                 id: 90090405,
                 content: "那是自然，所以我永远不会对他们卑躬屈膝，否则，他们会立刻变成闻到血腥味的狼群。",
+                voice: "char/Xibi/vo_topic_04_3",
                 npc: 84301,
                 options: [
                     {
@@ -3759,6 +4040,7 @@ export const npcData: NPC[] = [
             {
                 id: 90090106,
                 content: "你大可以这么做，毕竟谋逆可是重罪，然后你的状告书会立刻被逐级上报，最后呈到我的书桌上。",
+                voice: "char/Xibi/vo_topic_01_3",
                 npc: 84301,
                 options: [
                     {
@@ -3785,6 +4067,7 @@ export const npcData: NPC[] = [
             {
                 id: 90120001,
                 content: "太阳热气腾腾，云朵松软蓬蓬，早起的鸟儿吃个饱饱。你的肚子有没有像鸟儿一样咕咕叫呢？",
+                voice: "char/Songlu/vo_welcome",
                 npc: 85101,
                 options: [
                     {
@@ -3817,12 +4100,14 @@ export const npcData: NPC[] = [
             {
                 id: 90120101,
                 content: "咦？你不知道吗？粮秣专员就是负责填饱大家肚子的人哦，每天都要和各种食物打交道。",
+                voice: "char/Songlu/vo_topic_01_1",
                 npc: 85101,
                 next: 90120103,
             },
             {
                 id: 90120201,
                 content: "诶？会吧……没太想过，不过反正榛子撞飞的一定都是那些喜欢哇哇乱叫，打来打去的坏家伙！是他们活该！",
+                voice: "char/Songlu/vo_topic_02_1",
                 npc: 85101,
                 next: 90120203,
             },
@@ -3830,6 +4115,7 @@ export const npcData: NPC[] = [
                 id: 90120301,
                 content:
                     "是不少啦，不过其实不用特别为她准备吃的，她会自己找的。哪怕隔着几条小溪，榛子也能闻到熟透浆果的味道，然后驮着我飞奔过去，可能干啦。",
+                voice: "char/Songlu/vo_topic_03_1",
                 npc: 85101,
                 next: 90120303,
             },
@@ -3837,24 +4123,28 @@ export const npcData: NPC[] = [
                 id: 90120401,
                 content:
                     "谢谢夸奖，不过我要纠正一下，这其实是裤子。一开始倒的确是裙子，白色的，长长的，可好看啦。是裁缝店的婆婆帮我改成了裤子。",
+                voice: "char/Songlu/vo_topic_04_1",
                 npc: 85101,
                 next: 90120403,
             },
             {
                 id: 90120501,
                 content: "才不是发呆，是在冥想。不管怎么说我都是传颂会的一员，所以偶尔也会像这样用力想事情的。",
+                voice: "char/Songlu/vo_topic_05_1",
                 npc: 85101,
                 next: 90120503,
             },
             {
                 id: 90120103,
                 content: "比如我的话，就会去野外收集各种各样的食物，让榛子驮回城里，然后再去委托面包店的胡子叔叔做成吃的，分给大家。",
+                voice: "char/Songlu/vo_topic_01_2",
                 npc: 85101,
                 next: 90120104,
             },
             {
                 id: 90120203,
                 content: "这些家伙，打打杀杀后又会叫饿连天。有挥武器的劲头不如多垦一会儿地啦，这样才会有更多人吃饱。",
+                voice: "char/Songlu/vo_topic_02_2",
                 npc: 85101,
                 next: 90120204,
             },
@@ -3879,6 +4169,7 @@ export const npcData: NPC[] = [
             {
                 id: 90120104,
                 content: "顺带一说，和那位胡子叔叔讨价还价，也是我的工作！哼哼。",
+                voice: "char/Songlu/vo_topic_01_3",
                 npc: 85101,
                 next: 90120105,
             },
@@ -3891,6 +4182,7 @@ export const npcData: NPC[] = [
             {
                 id: 90120304,
                 content: "别担心别担心，榛子只会带来食物，不会吃垮这里的！所以，一定一定不要拿榛子开玩笑哦，她听到的话会伤心的，我也会。",
+                voice: "char/Songlu/vo_topic_03_2",
                 npc: 85101,
                 options: [
                     {
@@ -3907,12 +4199,14 @@ export const npcData: NPC[] = [
             {
                 id: 90120404,
                 content: "因为穿着裙子到处跑太不方便啦，有一次我跑得快了，都被裙摆绊倒，手里的面包都撒了。",
+                voice: "char/Songlu/vo_topic_04_2",
                 npc: 85101,
                 next: 90120405,
             },
             {
                 id: 90120504,
                 content: "之前想过，不过修士们说，想这种事情是什么读……神？所以我就不想这些了。",
+                voice: "char/Songlu/vo_topic_05_2",
                 npc: 85101,
                 next: 90120505,
             },
@@ -3925,12 +4219,14 @@ export const npcData: NPC[] = [
             {
                 id: 90120205,
                 content: "那是当然！战斗是饥饿之母，是坏家伙！听说一旦遇到战争，那么大家都会饿肚子，非常讨厌！希望我不要遇上就是了。",
+                voice: "char/Songlu/vo_topic_02_3",
                 npc: 85101,
                 next: 90120206,
             },
             {
                 id: 90120405,
                 content: "所以，哎……要是哪天，没有人挨饿了，我就拜托婆婆再把这条裤子改回去！",
+                voice: "char/Songlu/vo_topic_04_3",
                 npc: 85101,
                 options: [
                     {
@@ -3948,6 +4244,7 @@ export const npcData: NPC[] = [
                 id: 90120505,
                 content:
                     "唉，修士们的话我总是听得半懂不懂的，比如他们总是说贪吃是非常非常严重的罪过……可是好像越是大吃大喝的人，地位就越高哦。",
+                voice: "char/Songlu/vo_topic_05_3",
                 npc: 85101,
                 options: [
                     {
@@ -3965,6 +4262,7 @@ export const npcData: NPC[] = [
                 id: 90120106,
                 content:
                     "那当然不是啦，其他的粮秣官好像都是一些脑子很好的家伙，写什么手续呀文书呀申请呀，然后就会有火车头拖着小山一样的吃的过来。",
+                voice: "char/Songlu/vo_topic_01_4",
                 npc: 85101,
                 next: 90120107,
             },
@@ -3977,6 +4275,7 @@ export const npcData: NPC[] = [
             {
                 id: 90120107,
                 content: "不过，我住的镇子上人不是很多，有我和榛子就够啦！否则可能我就也得去学怎么写那些什么申请书之类的，唉，谁懂那些啊。",
+                voice: "char/Songlu/vo_topic_01_5",
                 npc: 85101,
                 options: [
                     {
@@ -3993,6 +4292,7 @@ export const npcData: NPC[] = [
             {
                 id: 90120207,
                 content: "没错，谁让人饿肚子，谁就迟早会被榛子撞飞！",
+                voice: "char/Songlu/vo_topic_02_4",
                 npc: 85101,
                 options: [
                     {
@@ -4019,6 +4319,7 @@ export const npcData: NPC[] = [
             {
                 id: 90160001,
                 content: "你可来了，我把之前剩的杂活清了一下，钱没赚多少还差点把自己累死，唉，为了这个家我真是付出了太多啊。",
+                voice: "char/Aote/vo_welcome",
                 npc: 85102,
                 options: [
                     {
@@ -4052,30 +4353,35 @@ export const npcData: NPC[] = [
                 id: 90160101,
                 content:
                     "手册？没有，干这行的可大部分没看书的耐性，但是口诀倒是不少，比如我自创的打人口诀：“两下腰子一下头，皇帝看了说没救”。",
+                voice: "char/Aote/vo_topic_01_1",
                 npc: 85102,
                 next: 90160103,
             },
             {
                 id: 90160201,
                 content: "他们是一团未熄灭的野火，稍不留神就会烧成满山烈焰。为你个人考虑，还是少与他们接触为好……",
+                voice: "char/Aote/vo_topic_02_1",
                 npc: 85102,
                 next: 90160203,
             },
             {
                 id: 90160301,
                 content: "嗯，能帮我拿一下那边的纱布吗？可不能被菲娜发现，不然她又要唠叨了。",
+                voice: "char/Aote/vo_topic_03_1",
                 npc: 85102,
                 next: 90160303,
             },
             {
                 id: 90160401,
                 content: "噢，你要不要也试试这些小家伙？别看它们长得丑，去掉头就跟小饼干一样脆脆的，甚至能在嘴巴里留下一丝肉类的回甘……",
+                voice: "char/Aote/vo_topic_04_1",
                 npc: 85102,
                 next: 90160403,
             },
             {
                 id: 90160501,
                 content: "嗯……等等，你手上怎么才这么几个钱，是不是又把你那份报酬随便分给其他人了？",
+                voice: "char/Aote/vo_topic_05_1",
                 npc: 85102,
                 next: 90160503,
             },
@@ -4112,6 +4418,7 @@ export const npcData: NPC[] = [
             {
                 id: 90160104,
                 content: "别贪多，饭一口一口吃，干这行的，最大的敌人永远是贪婪，有时候来自别人，但更多时候来自自己。",
+                voice: "char/Aote/vo_topic_01_2",
                 npc: 85102,
                 options: [
                     {
@@ -4128,6 +4435,7 @@ export const npcData: NPC[] = [
             {
                 id: 90160204,
                 content: "那当然是因为……有过一些小过节，要是哪天你和他们打上交道，可千万记得别报我名字。",
+                voice: "char/Aote/vo_topic_02_2",
                 npc: 85102,
                 options: [
                     {
@@ -4145,6 +4453,7 @@ export const npcData: NPC[] = [
                 id: 90160304,
                 content:
                     "我知道，但干咱们这一行总免不了受点伤，我也不想让她一直担心嘛。她要是真的问起来，你记得帮我打个圆场啊，回头请你吃饭。",
+                voice: "char/Aote/vo_topic_03_2",
                 npc: 85102,
                 options: [
                     {
@@ -4161,6 +4470,7 @@ export const npcData: NPC[] = [
             {
                 id: 90160404,
                 content: "你别跑啊，这可是很有用的生存智慧……等你迷失在野外，干粮吃完的时候，它们就是最宝贵的能量来源。",
+                voice: "char/Aote/vo_topic_04_2",
                 npc: 85102,
                 options: [
                     {
@@ -4177,6 +4487,7 @@ export const npcData: NPC[] = [
             {
                 id: 90160504,
                 content: "你……哎，算了，这大概就是你的优点吧。手头紧的时候记得跟我说。",
+                voice: "char/Aote/vo_topic_05_2",
                 npc: 85102,
                 next: 90160505,
             },
@@ -4189,6 +4500,7 @@ export const npcData: NPC[] = [
             {
                 id: 90160506,
                 content: "……我这是身为朋友在关心你，你别得寸进尺耍无赖啊！",
+                voice: "char/Aote/vo_topic_05_3",
                 npc: 85102,
                 options: [
                     {
@@ -4215,6 +4527,7 @@ export const npcData: NPC[] = [
             {
                 id: 90100001,
                 content: "太好了，今天我还在这儿。而且，你也在这儿……",
+                voice: "char/Saiqi/vo_welcome",
                 npc: 85301,
                 options: [
                     {
@@ -4247,12 +4560,14 @@ export const npcData: NPC[] = [
             {
                 id: 90100101,
                 content: "谢谢，着凉的话不用担心啦，卡戎之民是不怎么怕冷的，正好也不用再去买又厚又贵的大衣。",
+                voice: "char/Saiqi/vo_topic_01_1",
                 npc: 85301,
                 next: 90100103,
             },
             {
                 id: 90100201,
                 content: "是的，据说几百年来一直都是这个样子。人们看到我们总像看到老鼠一样，我自己也被人追着骂过很难听的话。",
+                voice: "char/Saiqi/vo_topic_02_1",
                 npc: 85301,
                 next: 90100203,
             },
@@ -4260,6 +4575,7 @@ export const npcData: NPC[] = [
                 id: 90100301,
                 content:
                     "啊，大概是因为我在试着培育新的花朵。修普诺斯之家前面的庭院只有几棵树，总觉得有点儿光秃秃的。所以，我想在那里种满白色的花……",
+                voice: "char/Saiqi/vo_topic_03_1",
                 npc: 85301,
                 next: 90100303,
             },
@@ -4267,12 +4583,14 @@ export const npcData: NPC[] = [
                 id: 90100401,
                 content:
                     "嗯，我从出生起就一直住在这里，虽然每天都能听到列车的声音，但从来没去过其他地方。如果有机会的话，真想去外面看一看。",
+                voice: "char/Saiqi/vo_topic_04_1",
                 npc: 85301,
                 next: 90100403,
             },
             {
                 id: 90100501,
                 content: "没什么，我只是想……再多看几眼，这样我就可以把你们的样子记得更清楚了。",
+                voice: "char/Saiqi/vo_topic_05_1",
                 npc: 85301,
                 next: 90100502,
             },
@@ -4280,6 +4598,7 @@ export const npcData: NPC[] = [
                 id: 90100103,
                 content:
                     "现在的衣服是妈妈帮我裁的，不过颜色是我自己选的，嫩绿色，这些蝴蝶形状的装饰也是我自己挑的，如果在暖和的南方的话，这一身应该就不奇怪了。",
+                voice: "char/Saiqi/vo_topic_01_2",
                 npc: 85301,
                 next: 90100104,
             },
@@ -4292,6 +4611,7 @@ export const npcData: NPC[] = [
             {
                 id: 90100303,
                 content: "在这里也种一点吧，铃兰，银莲，仙女木……哪种更合适呢？",
+                voice: "char/Saiqi/vo_topic_03_2",
                 npc: 85301,
                 next: 90100304,
             },
@@ -4304,6 +4624,7 @@ export const npcData: NPC[] = [
             {
                 id: 90100502,
                 content: "如果可以，你可以也多看我几眼吗？我也想让你记住我的样子……我现在的样子。",
+                voice: "char/Saiqi/vo_topic_05_2",
                 npc: 85301,
                 options: [
                     {
@@ -4327,6 +4648,7 @@ export const npcData: NPC[] = [
                 id: 90100204,
                 content:
                     "或许吧。“魔法是最邪恶的东西”，大家总是这么说。历史书上也写着，卡戎之民的先祖在一千多年前，曾经凭借魔法支配索拉之民，做出了很多恶事。",
+                voice: "char/Saiqi/vo_topic_02_2",
                 npc: 85301,
                 next: 90100205,
             },
@@ -4340,6 +4662,7 @@ export const npcData: NPC[] = [
                 id: 90100404,
                 content:
                     "唔，我想想，皇都总是要去的，恩里克叔叔说过丹流城的落日也很好看。对了，还想去你说的净界岛，在南方的海岛上，闻一闻海风是不是真的是咸的！",
+                voice: "char/Saiqi/vo_topic_04_2",
                 npc: 85301,
                 options: [
                     {
@@ -4356,6 +4679,7 @@ export const npcData: NPC[] = [
             {
                 id: 90100105,
                 content: "真的吗？太好了。其实我只见过冰湖城附近的蝴蝶，都是蓝色的。要是能去其他地方，看一看不同颜色的蝴蝶就好了。",
+                voice: "char/Saiqi/vo_topic_01_3",
                 npc: 85301,
                 options: [
                     {
@@ -4373,12 +4697,14 @@ export const npcData: NPC[] = [
                 id: 90100205,
                 content:
                     "说实话我有点难想象……因为我看到的卡戎们都很害怕索拉之民，不太敢和他们说话，在他们面前总是小心翼翼的，更不敢使用魔法。",
+                voice: "char/Saiqi/vo_topic_02_3",
                 npc: 85301,
                 next: 90100206,
             },
             {
                 id: 90100305,
                 content: "你说得对，应该让大家一起决定……我会去问问看的！啊，对了，这些花里有你喜欢的品种吗？等花开了，我摘一些送给你吧。",
+                voice: "char/Saiqi/vo_topic_03_3",
                 npc: 85301,
                 options: [
                     {
@@ -4395,6 +4721,7 @@ export const npcData: NPC[] = [
             {
                 id: 90100206,
                 content: "而且其实大多数卡戎魔法都很寻常，也就是能用来点点壁炉，冰冻一下食物之类的。",
+                voice: "char/Saiqi/vo_topic_02_4",
                 npc: 85301,
                 next: 90100207,
             },
@@ -4407,12 +4734,14 @@ export const npcData: NPC[] = [
             {
                 id: 90100208,
                 content: "不，一点也不。为什么卡戎之民和索拉之民之间，一定要一个支配另一个，一个畏惧另一个呢？",
+                voice: "char/Saiqi/vo_topic_02_5",
                 npc: 85301,
                 next: 90100209,
             },
             {
                 id: 90100209,
                 content: "我希望的只是……到了春天，所有人都能一起肩并着肩，一起去原野上看各种各样的花。只要这样就够了。",
+                voice: "char/Saiqi/vo_topic_02_6",
                 npc: 85301,
                 options: [
                     {
@@ -4439,6 +4768,7 @@ export const npcData: NPC[] = [
             {
                 id: 90190001,
                 content: "很高兴看到您今天健康平安。请多加珍重……为了终有一天会到来的和平。",
+                voice: "char/Dafu/vo_welcome",
                 npc: 85401,
                 options: [
                     {
@@ -4471,36 +4801,42 @@ export const npcData: NPC[] = [
             {
                 id: 90190101,
                 content: "我……没有什么特别的爱好。也许读书算一个吧？",
+                voice: "char/Dafu/vo_topic_01_1",
                 npc: 85401,
                 next: 90190102,
             },
             {
                 id: 90190201,
                 content: "嗯，当然可以！它是海伯利亚的基石，是学者们口中“原初的奇迹”！",
+                voice: "char/Dafu/vo_topic_02_1",
                 npc: 85401,
                 next: 90190202,
             },
             {
                 id: 90190301,
                 content: "一些应急的器械和药品。绷带，消毒剂，麻醉剂，还有处理外伤的刀片和缝线。",
+                voice: "char/Dafu/vo_topic_03_1",
                 npc: 85401,
                 next: 90190302,
             },
             {
                 id: 90190401,
                 content: "我没关系，不辛苦的！……呃，其实还是有点……急救和护理知识的学习还好，但体能测试确实令人苦恼。",
+                voice: "char/Dafu/vo_topic_04_1",
                 npc: 85401,
                 next: 90190402,
             },
             {
                 id: 90190501,
                 content: "……我最后一次和爸爸说话，就是在对讲机里。那时还在龙莎要塞危机四伏的战场，他却对我说，“你放心。”",
+                voice: "char/Dafu/vo_topic_05_1",
                 npc: 85401,
                 next: 90190502,
             },
             {
                 id: 90190102,
                 content: "虽然妈妈总是唠叨，说我一直把自己关在家里，错过了那些舞会和沙龙，会失去很多跻身更上一层的机会……",
+                voice: "char/Dafu/vo_topic_01_2",
                 npc: 85401,
                 next: 90190103,
             },
@@ -4508,36 +4844,42 @@ export const npcData: NPC[] = [
                 id: 90190202,
                 content:
                     "最一开始，人们试图从月石中分离出黄金，但后来，人们发现这枚小小的石头还有更多用途——转动机械的齿轮，释放电的火花……它就是索拉之民的“魔法”。",
+                voice: "char/Dafu/vo_topic_02_2",
                 npc: 85401,
                 next: 90190203,
             },
             {
                 id: 90190302,
                 content: "此外，还有一张手帕和一把梳子。",
+                voice: "char/Dafu/vo_topic_03_2",
                 npc: 85401,
                 next: 90190303,
             },
             {
                 id: 90190402,
                 content: "就算每天比大家起得更早独自加练，还是只能拿勉强及格的分数……唉，不要笑话我，锻炼体力真是比读书难太多了。",
+                voice: "char/Dafu/vo_topic_04_2",
                 npc: 85401,
                 next: 90190403,
             },
             {
                 id: 90190502,
                 content: "后来我还是会常常在深夜打开自己的对讲机，调到爸爸的频段，按下呼叫按钮，期待着他的声音从对讲机那头传来……",
+                voice: "char/Dafu/vo_topic_05_2",
                 npc: 85401,
                 next: 90190503,
             },
             {
                 id: 90190103,
                 content: "但我还是觉得，这样就很好。",
+                voice: "char/Dafu/vo_topic_01_3",
                 npc: 85401,
                 next: 90190104,
             },
             {
                 id: 90190203,
                 content: "……只是后来，炼金院……",
+                voice: "char/Dafu/vo_topic_02_3",
                 npc: 85401,
                 next: 90190204,
             },
@@ -4556,6 +4898,7 @@ export const npcData: NPC[] = [
             {
                 id: 90190503,
                 content: "直到我对着听筒等了十几分钟，我才突然发现，他是真的回不来了。",
+                voice: "char/Dafu/vo_topic_05_3",
                 npc: 85401,
                 next: 90190504,
             },
@@ -4574,6 +4917,7 @@ export const npcData: NPC[] = [
             {
                 id: 90190304,
                 content: "啊，这个……不是我自己用的。如果救护的伤员不幸离世，我会帮他们简单整理一下仪容。",
+                voice: "char/Dafu/vo_topic_03_3",
                 npc: 85401,
                 next: 90190305,
             },
@@ -4581,6 +4925,7 @@ export const npcData: NPC[] = [
                 id: 90190404,
                 content:
                     "嗯，的确很累。不过当我把注意力从脚下移开，去看城郊的麦田，地平线尽头的小屋，去听风车的每一声转动和牧牛人的每一声哨笛，就觉得平静许多。",
+                voice: "char/Dafu/vo_topic_04_3",
                 npc: 85401,
                 next: 90190405,
             },
@@ -4593,24 +4938,28 @@ export const npcData: NPC[] = [
             {
                 id: 90190105,
                 content: "主要是战伤救治相关的书籍，《战地应急救援策略》、《常规外伤处理》、《野战医院的临时搭建》……",
+                voice: "char/Dafu/vo_topic_01_4",
                 npc: 85401,
                 next: 90190106,
             },
             {
                 id: 90190205,
                 content: "……是的。不过，那已经是过去的事了。",
+                voice: "char/Dafu/vo_topic_02_4",
                 npc: 85401,
                 next: 90190206,
             },
             {
                 id: 90190305,
                 content: "伤痛是很残忍的东西，它从人们那里夺走的，除了生命，还有生而为人的全部尊严。",
+                voice: "char/Dafu/vo_topic_03_4",
                 npc: 85401,
                 next: 90190306,
             },
             {
                 id: 90190405,
                 content: "因为……也许我奔跑在这条路上，就是为了保护这些最普通、最寻常的东西不被毁掉吧。",
+                voice: "char/Dafu/vo_topic_04_4",
                 npc: 85401,
                 options: [
                     {
@@ -4627,6 +4976,7 @@ export const npcData: NPC[] = [
             {
                 id: 90190505,
                 content: "谢谢，我明白的。我会好好活下去，在为父亲、为龙莎战役的死难者洗刷冤屈之前，我不会停下脚步。",
+                voice: "char/Dafu/vo_topic_05_4",
                 npc: 85401,
                 options: [
                     {
@@ -4643,6 +4993,7 @@ export const npcData: NPC[] = [
             {
                 id: 90190106,
                 content: "您也许知道，我过去学习的方向并非救护相关，尽管我已经获得了军团随行医务员的资格，但仍然时常感到沉重与惶恐。",
+                voice: "char/Dafu/vo_topic_01_5",
                 npc: 85401,
                 next: 90190107,
             },
@@ -4656,6 +5007,7 @@ export const npcData: NPC[] = [
                 id: 90190306,
                 content:
                     "我希望……他们的家人看到的他们，可以干净一些、安详一些……久别重逢，父母应该看到孩子们安然睡去的脸，而不是被疼痛扭曲五官的凄惨面容。",
+                voice: "char/Dafu/vo_topic_03_5",
                 npc: 85401,
                 options: [
                     {
@@ -4679,6 +5031,7 @@ export const npcData: NPC[] = [
                 id: 90190207,
                 content:
                     "因为后来的佩剑炼金院偏离了轨道，走在了一条错误的路上。它是海伯利亚这座战车最炽热的炉芯，但燃料却是太多人的痛苦和不幸。",
+                voice: "char/Dafu/vo_topic_02_5",
                 npc: 85401,
                 next: 90190208,
             },
@@ -4686,6 +5039,7 @@ export const npcData: NPC[] = [
                 id: 90190108,
                 content:
                     "嗯，最近我也在看一本叫做《玻璃鞋》的书。是关于……呃，公主和骑士……我、我并不是非常喜欢看浪漫小说！只是，随便……翻一下……",
+                voice: "char/Dafu/vo_topic_01_6",
                 npc: 85401,
                 options: [
                     {
@@ -4702,6 +5056,7 @@ export const npcData: NPC[] = [
             {
                 id: 90190208,
                 content: "我想，我远比自己想象中更软弱。我无法说服自己接受它，也没有勇气和力量阻止它。所以，我只能选择逃避它。",
+                voice: "char/Dafu/vo_topic_02_6",
                 npc: 85401,
                 options: [
                     {
@@ -5113,6 +5468,7 @@ export const npcData: NPC[] = [
             {
                 id: 10037995,
                 content: "无论他们让我们做什么，都别忘了，我们，不是怪物。",
+                voice: "story/1003/100379/19210B11",
                 npc: 100328,
             },
         ],
@@ -5282,6 +5638,7 @@ export const npcData: NPC[] = [
             {
                 id: 10037997,
                 content: "纸笔我来拜托医生帮忙，印章就麻烦你们去取一趟了。抱歉……这身伤还是拖累大家了。",
+                voice: "story/1003/100379/19210B0G",
                 npc: 100304,
             },
         ],
@@ -5463,41 +5820,48 @@ export const npcData: NPC[] = [
             {
                 id: 11010416,
                 content: "请您务必小心，我在这里等您回来。",
+                voice: "story/1002/110104/1B903C37",
                 npc: 110005,
             },
             {
                 id: 11011133,
                 content: "你也受伤了，什么时候的事？",
+                voice: "story/1002/110111/1B90B202",
                 npc: 110022,
                 next: 11011134,
             },
             {
                 id: 11011134,
                 content: "我们几个被那只巨型秽兽袭击的时候。我不是有意向您隐瞒，只是……",
+                voice: "story/1002/110111/1B90B22C",
                 npc: 110005,
                 next: 11011135,
             },
             {
                 id: 11011135,
                 content: "……好好休息。听老师的话，去休整点吧。",
+                voice: "story/1002/110111/1B90B256",
                 npc: 110022,
                 next: 11011136,
             },
             {
                 id: 11011136,
                 content: "等回皇都，我会去看你。",
+                voice: "story/1002/110111/1B90B280",
                 npc: 110022,
                 next: 11011137,
             },
             {
                 id: 11011137,
                 content: "嗯。长官都那么说了，我也没有别的选择。但是，我总担心……",
+                voice: "story/1002/110111/1B90B2AA",
                 npc: 110005,
                 next: 11011138,
             },
             {
                 id: 11011138,
                 content: "算了，没关系，有他在，应该不会有问题的。",
+                voice: "story/1002/110111/1B90B2D4",
                 npc: 110005,
             },
         ],
@@ -5529,81 +5893,96 @@ export const npcData: NPC[] = [
             {
                 id: 11012501,
                 content: "<W>没错，就是这样……把剑柄握得紧紧的。是的，你做得很好。你只需要对准它的喉咙——</>",
+                voice: "story/1002/110125/1B919272",
             },
             {
                 id: 11012505,
                 content: "{nickname2}……天啊，你做了什么！",
+                voice: "story/1002/110125/1B91931A",
                 npc: 110010,
             },
             {
                 id: 11012509,
                 content: "<W>对！抛去那无意义的理性吧，遵从我的指引……</>",
+                voice: "story/1002/110125/1B9193C2",
             },
             {
                 id: 11012603,
                 content: "这是时间流泻的沙沙声。是生命的嘶吼声。是胚胎在羊水里的心跳声。是封存于我心中的古老回声。",
+                voice: "story/1002/110126/1B91A32E",
                 next: 11012604,
             },
             {
                 id: 11012604,
                 content: "我想，我已与这亘古的声音交融。",
+                voice: "story/1002/110126/1B91A358",
                 next: 11012605,
             },
             {
                 id: 11012605,
                 content: "滴答、滴答。",
+                voice: "story/1002/110126/1B91A382",
             },
             {
                 id: 11012607,
                 content: "啊……！",
+                voice: "story/1002/110126/1B91A3D6",
                 npc: 110022,
                 next: 11012608,
             },
             {
                 id: 11012608,
                 content: "喂，你突然鬼叫什么，吓人一跳！",
+                voice: "story/1002/110126/1B91A400",
                 npc: 110009,
                 next: 11012609,
             },
             {
                 id: 11012609,
                 content: "（刚才那些……是幻觉吗……）",
+                voice: "story/1002/110126/1B91A42A",
                 npc: 110022,
                 next: 11012453,
             },
             {
                 id: 11012453,
                 content: "……莱昂，看好她。把她完好无损地带回去，别让她自尽。必要的话，用弗兰克的命来威胁。",
+                voice: "story/1002/110124/1B918A92",
                 npc: 110022,
                 next: 11012454,
             },
             {
                 id: 11012454,
                 content: "是！",
+                voice: "story/1002/110124/1B918ABC",
                 npc: 110015,
                 next: 11012455,
             },
             {
                 id: 11012455,
                 content: "等一下！",
+                voice: "story/1002/110124/1B918AE6",
                 npc: 110009,
                 next: 11012456,
             },
             {
                 id: 11012456,
                 content: "你还记得，在去炮台的路上，我对你说过的吗？“你会因为自己的善良得到报答”。",
+                voice: "story/1002/110124/1B918B10",
                 npc: 110009,
                 next: 11012457,
             },
             {
                 id: 11012457,
                 content: "耳朵凑过来。我还有句悄悄话，只对你一个人讲——放心吧，刚才你们搜过我身了，这次真的什么凶器都没藏啦。",
+                voice: "story/1002/110124/1B918B3A",
                 npc: 110009,
                 next: 11012458,
             },
             {
                 id: 11012458,
                 content: "这句话可能对你很重要哦，确定不听？",
+                voice: "story/1002/110124/1B918B64",
                 npc: 110009,
                 options: [
                     {
@@ -5621,40 +6000,47 @@ export const npcData: NPC[] = [
             {
                 id: 11012464,
                 content: "<W>还有人想要你的命，那家伙就藏在你们军团的人之中。</>",
+                voice: "story/1002/110124/1B918C36",
                 npc: 110009,
                 next: 11012465,
             },
             {
                 id: 11012460,
                 content: "莱昂，让她闭嘴。",
+                voice: "story/1002/110124/1B918BB8",
                 npc: 110022,
                 next: 11012461,
             },
             {
                 id: 11012465,
                 content: "你说什么？",
+                voice: "story/1002/110124/1B918C60",
                 npc: 110022,
                 next: 11012466,
             },
             {
                 id: 11012461,
                 content: "嘻嘻，好的，好的。祝愿你不会为你的选择后悔。",
+                voice: "story/1002/110124/1B918BE2",
                 npc: 110009,
             },
             {
                 id: 11012466,
                 content: "我说了，悄悄话只有一句。呵呵……一路顺风，我的长官。",
+                voice: "story/1002/110124/1B918C8A",
                 npc: 110009,
             },
             {
                 id: 11012401,
                 content: "你这疯女人！笑什么笑，你对队长恩将仇报，就一点都不忏悔吗？",
+                voice: "story/1002/110124/1B91820A",
                 npc: 110015,
                 next: 11012402,
             },
             {
                 id: 11012402,
                 content: "忏悔……？哈，小弟弟，你是不是吃多了你们炼金院的药，脑子吃出毛病了啊？",
+                voice: "story/1002/110124/1B918234",
                 npc: 110009,
                 next: 11012403,
             },
@@ -5662,24 +6048,28 @@ export const npcData: NPC[] = [
                 id: 11012403,
                 content:
                     "哦，有一件事确实要忏悔。刚才为了哄骗你那个笨笨的小长官，我把帝国对我们做的好事全都说成了同盟干的。唉，我对不起同盟的兄弟姐妹，忏悔忏悔！",
+                voice: "story/1002/110124/1B91825E",
                 npc: 110009,
                 next: 11012404,
             },
             {
                 id: 11012404,
                 content: "你——！",
+                voice: "story/1002/110124/1B918288",
                 npc: 110015,
                 next: 11012405,
             },
             {
                 id: 11012405,
                 content: "瞧这是谁——哦，我最亲爱的长官大人！",
+                voice: "story/1002/110124/1B9182B2",
                 npc: 110009,
                 next: 11012406,
             },
             {
                 id: 11012406,
                 content: "我和她聊聊。",
+                voice: "story/1002/110124/1B9182DC",
                 npc: 110022,
                 next: 11012407,
             },
@@ -5687,18 +6077,21 @@ export const npcData: NPC[] = [
                 id: 11012407,
                 content:
                     "找我干什么？向我展示海伯利亚军官老爷不计前嫌的大度？还是假惺惺地惋惜一下我这个“误入歧途”的可怜小姑娘，想要“拯救”我啊？",
+                voice: "story/1002/110124/1B918306",
                 npc: 110009,
                 next: 11012408,
             },
             {
                 id: 11012408,
                 content: "哦！我知道了，你一定是想加入神弃者同盟，让我帮忙介绍！",
+                voice: "story/1002/110124/1B918330",
                 npc: 110009,
                 next: 11012409,
             },
             {
                 id: 11012409,
                 content: "喂——你们听见了吗——这位军官大人想要加入神弃者同盟——",
+                voice: "story/1002/110124/1B91835A",
                 npc: 110009,
                 options: [
                     {
@@ -5730,6 +6123,7 @@ export const npcData: NPC[] = [
             {
                 id: 11012411,
                 content: "呜呜呜，这可真是太令人悲伤了，呜呜呜。",
+                voice: "story/1002/110124/1B9183AE",
                 npc: 110009,
                 next: 11012419,
             },
@@ -5737,6 +6131,7 @@ export const npcData: NPC[] = [
                 id: 11012413,
                 content:
                     "亲爱的，你套话的手段真烂。省省吧，别想着能从我嘴里得到什么情报。背叛战友，把情报卖给敌人的败类，只有你们军团才会有。",
+                voice: "story/1002/110124/1B918402",
                 npc: 110009,
                 next: 11012419,
             },
@@ -5744,84 +6139,98 @@ export const npcData: NPC[] = [
                 id: 11012415,
                 content:
                     "谁让你警惕心那么重呢？即使是独处的时候，我也挑不出什么机会下手。我只能慢慢等着，甚至多帮你几次，等你最终卸下戒备。",
+                voice: "story/1002/110124/1B918456",
                 npc: 110009,
                 next: 11012416,
             },
             {
                 id: 11012418,
                 content: "好疼！！谁来管管啊！！有人在殴打手无寸铁的柔弱小姑娘啊！！",
+                voice: "story/1002/110124/1B9184D4",
                 npc: 110009,
                 next: 11012419,
             },
             {
                 id: 11012419,
                 content: "你……",
+                voice: "story/1002/110124/1B9184FE",
                 npc: 110022,
                 next: 11012420,
             },
             {
                 id: 11012416,
                 content: "而且，这样更好玩呀！被信任的人背叛，不是比被陌生人捅一刀好玩多了？",
+                voice: "story/1002/110124/1B918480",
                 npc: 110009,
                 next: 11012419,
             },
             {
                 id: 11012420,
                 content: "怎么了，眼睛瞪得像头牛？哦，抱歉，长官！我忘了，您还是比较喜欢我这样说话。",
+                voice: "story/1002/110124/1B918528",
                 npc: 110009,
                 next: 11012421,
             },
             {
                 id: 11012421,
                 content: "……行了。收起你无聊的表演，回答我一个问题。",
+                voice: "story/1002/110124/1B918552",
                 npc: 110022,
                 next: 11012422,
             },
             {
                 id: 11012422,
                 content: "嗯嗯！长官你尽管问，当然，回不回答看我心情！",
+                voice: "story/1002/110124/1B91857C",
                 npc: 110009,
                 next: 11012423,
             },
             {
                 id: 11012423,
                 content: "被你摆了这么一遭，总得告诉我是为什么吧？这是针对海伯利亚士兵的袭击，还是针对我个人的刺杀？",
+                voice: "story/1002/110124/1B9185A6",
                 npc: 110022,
                 next: 11012424,
             },
             {
                 id: 11012424,
                 content: "这个啊……行，告诉你——看在你让我寻了个开心的份上，就当做额外奖励吧。",
+                voice: "story/1002/110124/1B9185D0",
                 npc: 110009,
                 next: 11012425,
             },
             {
                 id: 11012425,
                 content: "同盟就是想要海伯利亚的走狗们都死在这里，而且最好是死在自己造出来的杀人机器里——喜欢吗？我们准备的大礼？",
+                voice: "story/1002/110124/1B9185FA",
                 npc: 110009,
                 next: 11012426,
             },
             {
                 id: 11012426,
                 content: "至于我本人……我呀，当然是为了<H>你</>而来的！",
+                voice: "story/1002/110124/1B918624",
                 npc: 110009,
                 next: 11012427,
             },
             {
                 id: 11012427,
                 content: "听闻皇家军事学院去年最优秀的毕业生，人称“苍白死神”的你也来到了龙莎要塞，我怎么能忍心不来见一见呢？是吧，亲爱的？",
+                voice: "story/1002/110124/1B91864E",
                 npc: 110009,
                 next: 11012428,
             },
             {
                 id: 11012428,
                 content: "你以前认识我？我们有过过节？",
+                voice: "story/1002/110124/1B918678",
                 npc: 110022,
                 next: 11012429,
             },
             {
                 id: 11012429,
                 content: "嘻嘻，你猜？",
+                voice: "story/1002/110124/1B9186A2",
                 npc: 110009,
                 next: 11012430,
             },
@@ -5829,52 +6238,61 @@ export const npcData: NPC[] = [
                 id: 11012430,
                 content:
                     "我都听线人说啦，我们伟大的苍白死神{性别2：先生|女士}只有寥寥几年的记忆。你一丁点也不了解你的过去，连自己到底是从哪里冒出来的都不知道。",
+                voice: "story/1002/110124/1B9186CC",
                 npc: 110009,
                 next: 11012431,
             },
             {
                 id: 11012431,
                 content: "…………",
+                voice: "story/1002/110124/1B9186F6",
                 npc: 110022,
                 next: 11012432,
             },
             {
                 id: 11012432,
                 content: "那我们来玩个游戏吧！你来猜——猜猜我到底是你隔壁邻居呢，是你的老仇家呢，还是说——",
+                voice: "story/1002/110124/1B918720",
                 npc: 110009,
                 next: 11012433,
             },
             {
                 id: 11012433,
                 content: "还是说，我根本不认识你，海伯利亚喜欢你，我就讨厌你，海伯利亚人拥护你，我就要干掉你？",
+                voice: "story/1002/110124/1B91874A",
                 npc: 110009,
                 next: 11012434,
             },
             {
                 id: 11012434,
                 content: "…………",
+                voice: "story/1002/110124/1B918774",
                 npc: 110022,
                 next: 11012435,
             },
             {
                 id: 11012435,
                 content: "<W>你的头很痛，对吗？你听，这个疯女人的喋喋不休的话语就像一群嗜血的蚂蟥，啃噬你的颅骨，吸吮你的脑汁。</>",
+                voice: "story/1002/110124/1B91879E",
                 next: 11012436,
             },
             {
                 id: 11012436,
                 content:
                     "<W>看，你手里有一把剑——没错，你惯用的那一把。它的剑柄上还残留着你的体温，你是如此熟悉利刃切开血肉那一刻，那不易察觉的细弱迟滞感。</>",
+                voice: "story/1002/110124/1B9187C8",
                 next: 11012437,
             },
             {
                 id: 11012437,
                 content: "<W>你可以轻松地割破它的咽喉，让那张令人生厌的嘴只能发出痛苦的哀鸣。</>",
+                voice: "story/1002/110124/1B9187F2",
                 next: 11012438,
             },
             {
                 id: 11012438,
                 content: "（又是……这个声音！为什么这个时候……）",
+                voice: "story/1002/110124/1B91881C",
                 npc: 110022,
                 options: [
                     {
@@ -5892,18 +6310,21 @@ export const npcData: NPC[] = [
             {
                 id: 11012451,
                 content: "闭嘴！！别再说了！！",
+                voice: "story/1002/110124/1B918A3E",
                 npc: 110022,
                 next: 11012452,
             },
             {
                 id: 11012441,
                 content: "你怎么不说话？刚才不是还装模作样地教训我吗，哑巴啦？",
+                voice: "story/1002/110124/1B91889A",
                 npc: 110009,
                 next: 11012442,
             },
             {
                 id: 11012452,
                 content: "……闭嘴就闭嘴，这么凶干嘛！",
+                voice: "story/1002/110124/1B918A68",
                 npc: 110009,
                 next: 11012453,
             },
@@ -5911,11 +6332,13 @@ export const npcData: NPC[] = [
                 id: 11012442,
                 content:
                     "<W>不要如此残酷，我是你最古老的灵魂，是你内心深处的冲动。不要拒绝我——看，正是我给了力量，令你在战斗中所向披靡。</>",
+                voice: "story/1002/110124/1B9188C4",
                 next: 11012443,
             },
             {
                 id: 11012443,
                 content: "<W>拔出你的剑吧。那把锋利的剑。</>",
+                voice: "story/1002/110124/1B9188EE",
                 options: [
                     {
                         id: 11012444,
@@ -5932,17 +6355,20 @@ export const npcData: NPC[] = [
             {
                 id: 11012446,
                 content: "快猜呀——猜呀猜呀！当然，就算猜出来，我也不会告诉你的！",
+                voice: "story/1002/110124/1B91896C",
                 npc: 110009,
                 next: 11012447,
             },
             {
                 id: 11012447,
                 content: "<W>不要再犹豫了！快用你的剑！它在呼唤着你，它在等待着血肉赐予的甜蜜与欢愉！</>",
+                voice: "story/1002/110124/1B918996",
                 next: 11012448,
             },
             {
                 id: 11012448,
                 content: "<W>快啊！让那个疯女人闭嘴！</>",
+                voice: "story/1002/110124/1B9189C0",
                 options: [
                     {
                         id: 11012449,
@@ -5966,6 +6392,7 @@ export const npcData: NPC[] = [
             {
                 id: 11017901,
                 content: "去吧，保持联络，听我指示。",
+                voice: "story/1002/110179/1B950862",
                 npc: 110010,
             },
         ],
@@ -6033,41 +6460,48 @@ export const npcData: NPC[] = [
             {
                 id: 11017902,
                 content: "维克……",
+                voice: "story/1002/110179/1B95088C",
                 npc: 110020,
             },
             {
                 id: 11018502,
                 content: "对了，这个是维克留下来的。你……帮他收着吧。",
+                voice: "story/1002/110185/1B956AFC",
                 npc: 110022,
                 next: 11018503,
             },
             {
                 id: 11018503,
                 content: "是……他的铭牌……",
+                voice: "story/1002/110185/1B956B26",
                 npc: 110020,
                 next: 11018504,
             },
             {
                 id: 11018504,
                 content: "“莫妮卡，下次射击比赛我一定会赢你”……哈，哈哈……混账，这算什么……",
+                voice: "story/1002/110185/1B956B50",
                 npc: 110022,
                 next: 11018505,
             },
             {
                 id: 11018505,
                 content: "早知道这么记仇……上次就让着他了……",
+                voice: "story/1002/110185/1B956B7A",
                 npc: 110020,
                 next: 11018506,
             },
             {
                 id: 11018506,
                 content: "……莫妮卡，接下来恐怕又是一场恶战，别分心。",
+                voice: "story/1002/110185/1B956BA4",
                 npc: 110022,
                 next: 11018507,
             },
             {
                 id: 11018507,
                 content: "……我……明白。谢谢你给我这个。",
+                voice: "story/1002/110185/1B956BCE",
                 npc: 110020,
             },
         ],
@@ -6319,6 +6753,7 @@ export const npcData: NPC[] = [
             {
                 id: 11010401,
                 content: "*的……这帮畜生！",
+                voice: "story/1002/110104/1B9039EA",
                 npc: 110044,
                 options: [
                     {
@@ -6344,60 +6779,70 @@ export const npcData: NPC[] = [
             {
                 id: 11010403,
                 content: "队长！我没事，还能动弹……嘶——",
+                voice: "story/1002/110104/1B903A3E",
                 npc: 110044,
                 next: 11010408,
             },
             {
                 id: 11010405,
                 content: "别，队长，你可别这么说。",
+                voice: "story/1002/110104/1B903A92",
                 npc: 110044,
                 next: 11010408,
             },
             {
                 id: 11010407,
                 content: "除了神弃者那帮畜生，还能有谁？",
+                voice: "story/1002/110104/1B903AE6",
                 npc: 110044,
                 next: 11010408,
             },
             {
                 id: 11010408,
                 content: "那帮丧尽天良的东西，竟然把秽兽当兵器用……<W>神弃者同盟</>的人简直和秽兽一样，都是怪物！",
+                voice: "story/1002/110104/1B903B10",
                 npc: 110044,
                 next: 11010409,
             },
             {
                 id: 11010409,
                 content: "还有上头那些混蛋也是，一点儿他*的脑子都没有，这么多秽兽，给我们先遣队的作战手册里硬是一个字都没提到！",
+                voice: "story/1002/110104/1B903B3A",
                 npc: 110044,
                 next: 11010410,
             },
             {
                 id: 11010410,
                 content: "……对不住啊，你不太爱出声，还按着你听了这么多牢骚。",
+                voice: "story/1002/110104/1B903B64",
                 npc: 110044,
                 next: 11010411,
             },
             {
                 id: 11010411,
                 content: "没事。发这么多牢骚，总比说不出话好。",
+                voice: "story/1002/110104/1B903B8E",
                 npc: 110022,
                 next: 11010412,
             },
             {
                 id: 11010412,
                 content: "哈哈，队长啊，你还是这么会安慰人。",
+                voice: "story/1002/110104/1B903BB8",
                 npc: 110044,
                 next: 11010413,
             },
             {
                 id: 11010413,
                 content: "不过幸好有你在，否则我们剩下这几条命也得扔这儿。",
+                voice: "story/1002/110104/1B903BE2",
                 npc: 110044,
                 next: 11010414,
             },
             {
                 id: 11010414,
                 content: "只可惜咱们还是太年轻了，如果<H>阿瓦尔长官</>在……他是咱们中作战经验最丰富的，肯定能指条明路……",
+                voice: "story/1002/110104/1B903C0C",
                 npc: 110044,
             },
         ],
@@ -6411,6 +6856,7 @@ export const npcData: NPC[] = [
             {
                 id: 11010501,
                 content: "医生……达芙涅医生……唉，咱们现在被困在这里，多半是完了。要是真死在这个鬼地方，能不能你来埋我啊……达芙涅医生……",
+                voice: "story/1002/110105/1B904A52",
                 npc: 110045,
                 options: [
                     {
@@ -6430,42 +6876,49 @@ export const npcData: NPC[] = [
             {
                 id: 11010503,
                 content: "又没有止疼药，只能哼哼两声让自己好受点儿了。",
+                voice: "story/1002/110105/1B904AA6",
                 npc: 110045,
                 next: 11010506,
             },
             {
                 id: 11010505,
                 content: "不说了，队长你别动气。没有止疼药，只能哼哼两声让自己好受点儿了。",
+                voice: "story/1002/110105/1B904AFA",
                 npc: 110045,
                 next: 11010506,
             },
             {
                 id: 11010506,
                 content: "刚才达芙涅医生和你一起断后的，她怎么样了？",
+                voice: "story/1002/110105/1B904B24",
                 npc: 110045,
                 next: 11010507,
             },
             {
                 id: 11010507,
                 content: "她没事，就是她让我来看望你们的。",
+                voice: "story/1002/110105/1B904B4E",
                 npc: 110022,
                 next: 11010508,
             },
             {
                 id: 11010508,
                 content: "那就好。唉，她也是，一个大小姐，原本在炼金院待着好好的，偏要自请调来十三军团遭这个罪，也不知道她到底在想什么。",
+                voice: "story/1002/110105/1B904B78",
                 npc: 110045,
                 next: 11010509,
             },
             {
                 id: 11010509,
                 content: "……“为陛下献上荣耀与忠诚”？那群贵族嘴上总挂着这些，也不知道他们现在真的到了这鬼地方，会不会后悔当初不该头脑发热。",
+                voice: "story/1002/110105/1B904BA2",
                 npc: 110045,
                 next: 11010510,
             },
             {
                 id: 11010510,
                 content: "不过她医术真不错，说话又好听。队长，你可得护着她点，别让她死在这儿了。",
+                voice: "story/1002/110105/1B904BCC",
                 npc: 110045,
             },
         ],
@@ -6479,81 +6932,96 @@ export const npcData: NPC[] = [
             {
                 id: 11012501,
                 content: "<W>没错，就是这样……把剑柄握得紧紧的。是的，你做得很好。你只需要对准它的喉咙——</>",
+                voice: "story/1002/110125/1B919272",
             },
             {
                 id: 11012505,
                 content: "{nickname2}……天啊，你做了什么！",
+                voice: "story/1002/110125/1B91931A",
                 npc: 110010,
             },
             {
                 id: 11012509,
                 content: "<W>对！抛去那无意义的理性吧，遵从我的指引……</>",
+                voice: "story/1002/110125/1B9193C2",
             },
             {
                 id: 11012603,
                 content: "这是时间流泻的沙沙声。是生命的嘶吼声。是胚胎在羊水里的心跳声。是封存于我心中的古老回声。",
+                voice: "story/1002/110126/1B91A32E",
                 next: 11012604,
             },
             {
                 id: 11012604,
                 content: "我想，我已与这亘古的声音交融。",
+                voice: "story/1002/110126/1B91A358",
                 next: 11012605,
             },
             {
                 id: 11012605,
                 content: "滴答、滴答。",
+                voice: "story/1002/110126/1B91A382",
             },
             {
                 id: 11012607,
                 content: "啊……！",
+                voice: "story/1002/110126/1B91A3D6",
                 npc: 110022,
                 next: 11012608,
             },
             {
                 id: 11012608,
                 content: "喂，你突然鬼叫什么，吓人一跳！",
+                voice: "story/1002/110126/1B91A400",
                 npc: 110009,
                 next: 11012609,
             },
             {
                 id: 11012609,
                 content: "（刚才那些……是幻觉吗……）",
+                voice: "story/1002/110126/1B91A42A",
                 npc: 110022,
                 next: 11012453,
             },
             {
                 id: 11012453,
                 content: "……莱昂，看好她。把她完好无损地带回去，别让她自尽。必要的话，用弗兰克的命来威胁。",
+                voice: "story/1002/110124/1B918A92",
                 npc: 110022,
                 next: 11012454,
             },
             {
                 id: 11012454,
                 content: "是！",
+                voice: "story/1002/110124/1B918ABC",
                 npc: 110015,
                 next: 11012455,
             },
             {
                 id: 11012455,
                 content: "等一下！",
+                voice: "story/1002/110124/1B918AE6",
                 npc: 110009,
                 next: 11012456,
             },
             {
                 id: 11012456,
                 content: "你还记得，在去炮台的路上，我对你说过的吗？“你会因为自己的善良得到报答”。",
+                voice: "story/1002/110124/1B918B10",
                 npc: 110009,
                 next: 11012457,
             },
             {
                 id: 11012457,
                 content: "耳朵凑过来。我还有句悄悄话，只对你一个人讲——放心吧，刚才你们搜过我身了，这次真的什么凶器都没藏啦。",
+                voice: "story/1002/110124/1B918B3A",
                 npc: 110009,
                 next: 11012458,
             },
             {
                 id: 11012458,
                 content: "这句话可能对你很重要哦，确定不听？",
+                voice: "story/1002/110124/1B918B64",
                 npc: 110009,
                 options: [
                     {
@@ -6571,40 +7039,47 @@ export const npcData: NPC[] = [
             {
                 id: 11012464,
                 content: "<W>还有人想要你的命，那家伙就藏在你们军团的人之中。</>",
+                voice: "story/1002/110124/1B918C36",
                 npc: 110009,
                 next: 11012465,
             },
             {
                 id: 11012460,
                 content: "莱昂，让她闭嘴。",
+                voice: "story/1002/110124/1B918BB8",
                 npc: 110022,
                 next: 11012461,
             },
             {
                 id: 11012465,
                 content: "你说什么？",
+                voice: "story/1002/110124/1B918C60",
                 npc: 110022,
                 next: 11012466,
             },
             {
                 id: 11012461,
                 content: "嘻嘻，好的，好的。祝愿你不会为你的选择后悔。",
+                voice: "story/1002/110124/1B918BE2",
                 npc: 110009,
             },
             {
                 id: 11012466,
                 content: "我说了，悄悄话只有一句。呵呵……一路顺风，我的长官。",
+                voice: "story/1002/110124/1B918C8A",
                 npc: 110009,
             },
             {
                 id: 11012401,
                 content: "你这疯女人！笑什么笑，你对队长恩将仇报，就一点都不忏悔吗？",
+                voice: "story/1002/110124/1B91820A",
                 npc: 110015,
                 next: 11012402,
             },
             {
                 id: 11012402,
                 content: "忏悔……？哈，小弟弟，你是不是吃多了你们炼金院的药，脑子吃出毛病了啊？",
+                voice: "story/1002/110124/1B918234",
                 npc: 110009,
                 next: 11012403,
             },
@@ -6612,24 +7087,28 @@ export const npcData: NPC[] = [
                 id: 11012403,
                 content:
                     "哦，有一件事确实要忏悔。刚才为了哄骗你那个笨笨的小长官，我把帝国对我们做的好事全都说成了同盟干的。唉，我对不起同盟的兄弟姐妹，忏悔忏悔！",
+                voice: "story/1002/110124/1B91825E",
                 npc: 110009,
                 next: 11012404,
             },
             {
                 id: 11012404,
                 content: "你——！",
+                voice: "story/1002/110124/1B918288",
                 npc: 110015,
                 next: 11012405,
             },
             {
                 id: 11012405,
                 content: "瞧这是谁——哦，我最亲爱的长官大人！",
+                voice: "story/1002/110124/1B9182B2",
                 npc: 110009,
                 next: 11012406,
             },
             {
                 id: 11012406,
                 content: "我和她聊聊。",
+                voice: "story/1002/110124/1B9182DC",
                 npc: 110022,
                 next: 11012407,
             },
@@ -6637,18 +7116,21 @@ export const npcData: NPC[] = [
                 id: 11012407,
                 content:
                     "找我干什么？向我展示海伯利亚军官老爷不计前嫌的大度？还是假惺惺地惋惜一下我这个“误入歧途”的可怜小姑娘，想要“拯救”我啊？",
+                voice: "story/1002/110124/1B918306",
                 npc: 110009,
                 next: 11012408,
             },
             {
                 id: 11012408,
                 content: "哦！我知道了，你一定是想加入神弃者同盟，让我帮忙介绍！",
+                voice: "story/1002/110124/1B918330",
                 npc: 110009,
                 next: 11012409,
             },
             {
                 id: 11012409,
                 content: "喂——你们听见了吗——这位军官大人想要加入神弃者同盟——",
+                voice: "story/1002/110124/1B91835A",
                 npc: 110009,
                 options: [
                     {
@@ -6680,6 +7162,7 @@ export const npcData: NPC[] = [
             {
                 id: 11012411,
                 content: "呜呜呜，这可真是太令人悲伤了，呜呜呜。",
+                voice: "story/1002/110124/1B9183AE",
                 npc: 110009,
                 next: 11012419,
             },
@@ -6687,6 +7170,7 @@ export const npcData: NPC[] = [
                 id: 11012413,
                 content:
                     "亲爱的，你套话的手段真烂。省省吧，别想着能从我嘴里得到什么情报。背叛战友，把情报卖给敌人的败类，只有你们军团才会有。",
+                voice: "story/1002/110124/1B918402",
                 npc: 110009,
                 next: 11012419,
             },
@@ -6694,84 +7178,98 @@ export const npcData: NPC[] = [
                 id: 11012415,
                 content:
                     "谁让你警惕心那么重呢？即使是独处的时候，我也挑不出什么机会下手。我只能慢慢等着，甚至多帮你几次，等你最终卸下戒备。",
+                voice: "story/1002/110124/1B918456",
                 npc: 110009,
                 next: 11012416,
             },
             {
                 id: 11012418,
                 content: "好疼！！谁来管管啊！！有人在殴打手无寸铁的柔弱小姑娘啊！！",
+                voice: "story/1002/110124/1B9184D4",
                 npc: 110009,
                 next: 11012419,
             },
             {
                 id: 11012419,
                 content: "你……",
+                voice: "story/1002/110124/1B9184FE",
                 npc: 110022,
                 next: 11012420,
             },
             {
                 id: 11012416,
                 content: "而且，这样更好玩呀！被信任的人背叛，不是比被陌生人捅一刀好玩多了？",
+                voice: "story/1002/110124/1B918480",
                 npc: 110009,
                 next: 11012419,
             },
             {
                 id: 11012420,
                 content: "怎么了，眼睛瞪得像头牛？哦，抱歉，长官！我忘了，您还是比较喜欢我这样说话。",
+                voice: "story/1002/110124/1B918528",
                 npc: 110009,
                 next: 11012421,
             },
             {
                 id: 11012421,
                 content: "……行了。收起你无聊的表演，回答我一个问题。",
+                voice: "story/1002/110124/1B918552",
                 npc: 110022,
                 next: 11012422,
             },
             {
                 id: 11012422,
                 content: "嗯嗯！长官你尽管问，当然，回不回答看我心情！",
+                voice: "story/1002/110124/1B91857C",
                 npc: 110009,
                 next: 11012423,
             },
             {
                 id: 11012423,
                 content: "被你摆了这么一遭，总得告诉我是为什么吧？这是针对海伯利亚士兵的袭击，还是针对我个人的刺杀？",
+                voice: "story/1002/110124/1B9185A6",
                 npc: 110022,
                 next: 11012424,
             },
             {
                 id: 11012424,
                 content: "这个啊……行，告诉你——看在你让我寻了个开心的份上，就当做额外奖励吧。",
+                voice: "story/1002/110124/1B9185D0",
                 npc: 110009,
                 next: 11012425,
             },
             {
                 id: 11012425,
                 content: "同盟就是想要海伯利亚的走狗们都死在这里，而且最好是死在自己造出来的杀人机器里——喜欢吗？我们准备的大礼？",
+                voice: "story/1002/110124/1B9185FA",
                 npc: 110009,
                 next: 11012426,
             },
             {
                 id: 11012426,
                 content: "至于我本人……我呀，当然是为了<H>你</>而来的！",
+                voice: "story/1002/110124/1B918624",
                 npc: 110009,
                 next: 11012427,
             },
             {
                 id: 11012427,
                 content: "听闻皇家军事学院去年最优秀的毕业生，人称“苍白死神”的你也来到了龙莎要塞，我怎么能忍心不来见一见呢？是吧，亲爱的？",
+                voice: "story/1002/110124/1B91864E",
                 npc: 110009,
                 next: 11012428,
             },
             {
                 id: 11012428,
                 content: "你以前认识我？我们有过过节？",
+                voice: "story/1002/110124/1B918678",
                 npc: 110022,
                 next: 11012429,
             },
             {
                 id: 11012429,
                 content: "嘻嘻，你猜？",
+                voice: "story/1002/110124/1B9186A2",
                 npc: 110009,
                 next: 11012430,
             },
@@ -6779,52 +7277,61 @@ export const npcData: NPC[] = [
                 id: 11012430,
                 content:
                     "我都听线人说啦，我们伟大的苍白死神{性别2：先生|女士}只有寥寥几年的记忆。你一丁点也不了解你的过去，连自己到底是从哪里冒出来的都不知道。",
+                voice: "story/1002/110124/1B9186CC",
                 npc: 110009,
                 next: 11012431,
             },
             {
                 id: 11012431,
                 content: "…………",
+                voice: "story/1002/110124/1B9186F6",
                 npc: 110022,
                 next: 11012432,
             },
             {
                 id: 11012432,
                 content: "那我们来玩个游戏吧！你来猜——猜猜我到底是你隔壁邻居呢，是你的老仇家呢，还是说——",
+                voice: "story/1002/110124/1B918720",
                 npc: 110009,
                 next: 11012433,
             },
             {
                 id: 11012433,
                 content: "还是说，我根本不认识你，海伯利亚喜欢你，我就讨厌你，海伯利亚人拥护你，我就要干掉你？",
+                voice: "story/1002/110124/1B91874A",
                 npc: 110009,
                 next: 11012434,
             },
             {
                 id: 11012434,
                 content: "…………",
+                voice: "story/1002/110124/1B918774",
                 npc: 110022,
                 next: 11012435,
             },
             {
                 id: 11012435,
                 content: "<W>你的头很痛，对吗？你听，这个疯女人的喋喋不休的话语就像一群嗜血的蚂蟥，啃噬你的颅骨，吸吮你的脑汁。</>",
+                voice: "story/1002/110124/1B91879E",
                 next: 11012436,
             },
             {
                 id: 11012436,
                 content:
                     "<W>看，你手里有一把剑——没错，你惯用的那一把。它的剑柄上还残留着你的体温，你是如此熟悉利刃切开血肉那一刻，那不易察觉的细弱迟滞感。</>",
+                voice: "story/1002/110124/1B9187C8",
                 next: 11012437,
             },
             {
                 id: 11012437,
                 content: "<W>你可以轻松地割破它的咽喉，让那张令人生厌的嘴只能发出痛苦的哀鸣。</>",
+                voice: "story/1002/110124/1B9187F2",
                 next: 11012438,
             },
             {
                 id: 11012438,
                 content: "（又是……这个声音！为什么这个时候……）",
+                voice: "story/1002/110124/1B91881C",
                 npc: 110022,
                 options: [
                     {
@@ -6842,18 +7349,21 @@ export const npcData: NPC[] = [
             {
                 id: 11012451,
                 content: "闭嘴！！别再说了！！",
+                voice: "story/1002/110124/1B918A3E",
                 npc: 110022,
                 next: 11012452,
             },
             {
                 id: 11012441,
                 content: "你怎么不说话？刚才不是还装模作样地教训我吗，哑巴啦？",
+                voice: "story/1002/110124/1B91889A",
                 npc: 110009,
                 next: 11012442,
             },
             {
                 id: 11012452,
                 content: "……闭嘴就闭嘴，这么凶干嘛！",
+                voice: "story/1002/110124/1B918A68",
                 npc: 110009,
                 next: 11012453,
             },
@@ -6861,11 +7371,13 @@ export const npcData: NPC[] = [
                 id: 11012442,
                 content:
                     "<W>不要如此残酷，我是你最古老的灵魂，是你内心深处的冲动。不要拒绝我——看，正是我给了力量，令你在战斗中所向披靡。</>",
+                voice: "story/1002/110124/1B9188C4",
                 next: 11012443,
             },
             {
                 id: 11012443,
                 content: "<W>拔出你的剑吧。那把锋利的剑。</>",
+                voice: "story/1002/110124/1B9188EE",
                 options: [
                     {
                         id: 11012444,
@@ -6882,17 +7394,20 @@ export const npcData: NPC[] = [
             {
                 id: 11012446,
                 content: "快猜呀——猜呀猜呀！当然，就算猜出来，我也不会告诉你的！",
+                voice: "story/1002/110124/1B91896C",
                 npc: 110009,
                 next: 11012447,
             },
             {
                 id: 11012447,
                 content: "<W>不要再犹豫了！快用你的剑！它在呼唤着你，它在等待着血肉赐予的甜蜜与欢愉！</>",
+                voice: "story/1002/110124/1B918996",
                 next: 11012448,
             },
             {
                 id: 11012448,
                 content: "<W>快啊！让那个疯女人闭嘴！</>",
+                voice: "story/1002/110124/1B9189C0",
                 options: [
                     {
                         id: 11012449,
@@ -7187,6 +7702,7 @@ export const npcData: NPC[] = [
             {
                 id: 10104301,
                 content: "水仙平原能买到的除了酒，还有很多、很多……当然，前提是你能支付足够的价码。",
+                voice: "char/Kami/vo_npc_02",
                 npc: 200003,
                 options: [
                     {
@@ -7213,6 +7729,7 @@ export const npcData: NPC[] = [
             {
                 id: 10104302,
                 content: "从哪儿聊起呢……呃，历史很长，八百年前的“大迁徙”之后，由帝国的初代皇帝建立，是帝国最早的几座城市之一。",
+                voice: "story/1002/101043/194B890C",
                 npc: 200003,
                 next: 10104303,
             },
@@ -7220,30 +7737,35 @@ export const npcData: NPC[] = [
                 id: 10104306,
                 content:
                     "一群热衷于说大话又斤斤计较的吵闹家伙。他们有的为生计所迫，有的只是单纯喜欢闹事与冒险——共同点是，他们经常把自己闹出一身伤。",
+                voice: "story/1002/101043/194B89B4",
                 npc: 200003,
                 next: 10104307,
             },
             {
                 id: 10104310,
                 content: "没有人告诉过你，无端打听一位女士的秘密是很没礼貌的？",
+                voice: "story/1002/101043/194B8A5C",
                 npc: 200003,
                 next: 10104311,
             },
             {
                 id: 10104303,
                 content: "这里也是帝国最北的大城市。再往北一百多公里，过了维德弗尼尔山脉，就到了埃斯加特的地界。",
+                voice: "story/1002/101043/194B8936",
                 npc: 200003,
                 next: 10104304,
             },
             {
                 id: 10104307,
                 content: "说实话很多时候我想把他们统统赶走，让他们在门口吃脏雪喝北风。",
+                voice: "story/1002/101043/194B89DE",
                 npc: 200003,
                 next: 10104308,
             },
             {
                 id: 10104311,
                 content: "想听也可以——只要你支付得起足够的价码……呵呵。",
+                voice: "story/1002/101043/194B8A86",
                 npc: 200003,
                 next: 10104301,
             },
@@ -7251,12 +7773,14 @@ export const npcData: NPC[] = [
                 id: 10104304,
                 content:
                     "冰湖城曾经以出产月石闻名，比如几十年前格雷姆矿坑就是海伯利亚最大的月石矿场之一，但现在矿脉枯竭，只有当年的工厂勉强运行。",
+                voice: "story/1002/101043/194B8960",
                 npc: 200003,
                 next: 10104305,
             },
             {
                 id: 10104308,
                 content: "不过嘛，他们确实干了许多本应该是治安署干的活，没有他们，可能这座城里就没几个人有心思到水仙平原坐着来上一杯。",
+                voice: "story/1002/101043/194B8A08",
                 npc: 200003,
                 next: 10104309,
             },
@@ -7264,12 +7788,14 @@ export const npcData: NPC[] = [
                 id: 10104305,
                 content:
                     "不过嘛，这些都是你能够在书上看到，每个人都能说给你听的事情。我建议你还是自己用眼睛去看，用心去听，这座城市的冰雪之下到底覆盖着什么。",
+                voice: "story/1002/101043/194B898A",
                 npc: 200003,
                 next: 10104301,
             },
             {
                 id: 10104309,
                 content: "所以嘛，我也允许他们在这边集聚谈天，互惠互利罢了。虽然我还是希望他们有时候说话小点声，少打几架。",
+                voice: "story/1002/101043/194B8A32",
                 npc: 200003,
                 next: 10104301,
             },
@@ -7290,6 +7816,7 @@ export const npcData: NPC[] = [
             {
                 id: 10114401,
                 content: "放老实点，别管与你无关的事。",
+                voice: "story/1002/101144/195201EA",
                 npc: 200005,
             },
         ],
@@ -7614,6 +8141,7 @@ export const npcData: NPC[] = [
             {
                 id: 10114001,
                 content: "这么快就回来了？不是去跟踪恩里克了吗？",
+                voice: "story/1002/101140/1951C04A",
                 npc: 200021,
             },
         ],
@@ -7787,18 +8315,21 @@ export const npcData: NPC[] = [
             {
                 id: 20001301,
                 content: "{nickname}，你找到那种土壤了吗？",
+                voice: "story/2001/200013/32123772",
                 npc: 200027,
                 next: 20001302,
             },
             {
                 id: 20001302,
                 content: "还没有。",
+                voice: "story/2001/200013/3212379C",
                 npc: 100001,
                 next: 20001303,
             },
             {
                 id: 20001303,
                 content: "找不到也没关系的，不要勉强……",
+                voice: "story/2001/200013/321237C6",
                 npc: 200027,
             },
         ],
@@ -7812,24 +8343,28 @@ export const npcData: NPC[] = [
             {
                 id: 20001401,
                 content: "对了对了，我还有几件事要问你。",
+                voice: "story/2001/200014/321247DA",
                 npc: 200027,
                 next: 20001402,
             },
             {
                 id: 20001402,
                 content: "你有没有亲自到天之树脚下去过呀，它是不是真的有传说中那——么大，大到遮天蔽日？从下往上看，会不会像……满天都是水晶？",
+                voice: "story/2001/200014/32124804",
                 npc: 200027,
                 next: 20001403,
             },
             {
                 id: 20001403,
                 content: "还有还有……海边的沙子是不是都是软绵绵的，踩上去像面粉一样，一点儿也不硌脚？",
+                voice: "story/2001/200014/3212482E",
                 npc: 200027,
                 next: 20001404,
             },
             {
                 id: 20001404,
                 content: "问题可能会有点多！是帮大家问的……嘿嘿，不要嫌我烦哦！",
+                voice: "story/2001/200014/32124858",
                 npc: 200027,
             },
         ],
@@ -8202,6 +8737,7 @@ export const npcData: NPC[] = [
             {
                 id: 20005501,
                 content: "{性别：大哥哥|大姐姐}你放心回冰湖城，有榛子陪着我，不会有什么事的哦。",
+                voice: "story/2001/200055/3214E882",
                 npc: 200074,
                 options: [
                     {
@@ -8223,23 +8759,27 @@ export const npcData: NPC[] = [
             {
                 id: 20005502,
                 content: "嘿嘿，每一个人都这么说，不过你可不要害怕哦，榛子很温柔的，还能找到很多吃的，可能干啦。",
+                voice: "story/2001/200055/3214E8AC",
                 npc: 200074,
                 next: 20005503,
             },
             {
                 id: 20005504,
                 content: "我没有亲人哦，和他们分开的时候年纪太小了，不记得他们。现在唯一称得上亲人的就是榛子，榛子应该不担心我！",
+                voice: "story/2001/200055/3214E900",
                 npc: 200074,
                 next: 20005505,
             },
             {
                 id: 20005503,
                 content: "可惜这附近太冷啦，应该长不了红蕈，否则我可以现场表演怎么和榛子一起，花半天就能找到小山那样多的红蕈。",
+                voice: "story/2001/200055/3214E8D6",
                 npc: 200074,
             },
             {
                 id: 20005505,
                 content: "哼哼！",
+                voice: "story/2001/200055/3214E92A",
                 npc: 200086,
             },
         ],
@@ -8573,6 +9113,7 @@ export const npcData: NPC[] = [
             {
                 id: 12010616,
                 content: "愿你善根常驻。",
+                voice: "story/1201/120106/1E113BB0",
                 npc: 210034,
             },
         ],
@@ -16280,6 +16821,7 @@ export const npcData: NPC[] = [
             {
                 id: 20007101,
                 content: "我乃——冰湖城第一魔灵学者！有什么魔灵疑问，都可以问我——啊，是你啊……有……有什么事吗？",
+                voice: "story/2001/200071/3215EF02",
                 npc: 200075,
                 options: [
                     {
@@ -16301,29 +16843,34 @@ export const npcData: NPC[] = [
             {
                 id: 20007102,
                 content: "你是说那个很聪明的魔灵吗？",
+                voice: "story/2001/200071/3215EF2C",
                 npc: 200075,
                 next: 20007103,
             },
             {
                 id: 20007105,
                 content: "比做魔灵猎人要好多了，每天都有许多人来问我魔灵问题，好像我真的是什么大学者一样。",
+                voice: "story/2001/200071/3215EFAA",
                 npc: 200075,
                 next: 20007106,
             },
             {
                 id: 20007103,
                 content: "关于它的记录非常少，我也只见过那一次，听说只有受到它们的认可，才能找到他们。",
+                voice: "story/2001/200071/3215EF56",
                 npc: 200075,
                 next: 20007104,
             },
             {
                 id: 20007106,
                 content: "多谢你和松露手下留情，多谢多谢。",
+                voice: "story/2001/200071/3215EFD4",
                 npc: 200075,
             },
             {
                 id: 20007104,
                 content: "不过，你应该可以顺着它们留下来的痕迹找到藏身的地方。",
+                voice: "story/2001/200071/3215EF80",
                 npc: 200075,
             },
         ],
@@ -17203,17 +17750,20 @@ export const npcData: NPC[] = [
             {
                 id: 51010426,
                 content: "♪白雪是她的羊水 晨昏线是她的脐带\n她娩出伟大与苦难 汇入白山下的黑铁摇篮……",
+                voice: "story/1002/510104/7FB30204",
                 npc: 700342,
             },
             {
                 id: 51010402,
                 content: "又见面了，如白沙上石榴石一般的{性别：先生|小姐}。你很喜欢到这儿来呢，我也是。",
+                voice: "story/1002/510104/7FB2FE14",
                 npc: 700342,
                 next: 51010403,
             },
             {
                 id: 51010403,
                 content: "你去过盖雷亚剧院吗？",
+                voice: "story/1002/510104/7FB2FE3E",
                 npc: 700342,
                 options: [
                     {
@@ -17236,36 +17786,42 @@ export const npcData: NPC[] = [
             {
                 id: 51010404,
                 content: "噢！真让人羡慕，你一定很富有。",
+                voice: "story/1002/510104/7FB2FE68",
                 npc: 700342,
                 next: 51010407,
             },
             {
                 id: 51010405,
                 content: "嗯……你也是吗。",
+                voice: "story/1002/510104/7FB2FE92",
                 npc: 700342,
                 next: 51010407,
             },
             {
                 id: 51010406,
                 content: "和军团？不可思议。看来你身上也有很多很多故事。",
+                voice: "story/1002/510104/7FB2FEBC",
                 npc: 700342,
                 next: 51010407,
             },
             {
                 id: 51010407,
                 content: "我在卢卡去过大大小小的歌剧院，但总被海伯利亚的剧院关在门外。",
+                voice: "story/1002/510104/7FB2FEE6",
                 npc: 700342,
                 next: 51010408,
             },
             {
                 id: 51010408,
                 content: "虽然知道卡戎之民在这儿过得不算好，但公共设施收的监护金比我想象中还要昂贵。",
+                voice: "story/1002/510104/7FB2FF10",
                 npc: 700342,
                 next: 51010409,
             },
             {
                 id: 51010409,
                 content: "虽然幸运地赶上这座城市一年一度不需要门票的狂欢日，但又不幸地听说那儿发生了械战……简直糟透了。",
+                voice: "story/1002/510104/7FB2FF3A",
                 npc: 700342,
                 next: 51010410,
             },
@@ -17273,6 +17829,7 @@ export const npcData: NPC[] = [
                 id: 51010410,
                 content:
                     "不过还好——我收集了很多乐谱！书店的价格还算公道，很多人也同意让我用歌声交换乐谱，还有一位神秘的好心朋友教过我一首有名的歌！",
+                voice: "story/1002/510104/7FB2FF64",
                 npc: 700342,
                 options: [
                     {
@@ -17286,6 +17843,7 @@ export const npcData: NPC[] = [
                 id: 51010411,
                 content:
                     "前阵子的一个晚上，我靠着一堵墙，就着月光，随意弹唱一首从淘来的乐谱里学的歌。那首歌的旋律并不复杂，很容易便能记住。",
+                voice: "story/1002/510104/7FB2FF8E",
                 npc: 700342,
                 next: 51010412,
             },
@@ -17293,12 +17851,14 @@ export const npcData: NPC[] = [
                 id: 51010412,
                 content:
                     "但我唱完后，墙的那边突然传来奇怪的敲击声……我能听出来，那些敲击声遵循着某种规律。你知道的，吟游诗人总是对节奏格外敏感。",
+                voice: "story/1002/510104/7FB2FFB8",
                 npc: 700342,
                 next: 51010413,
             },
             {
                 id: 51010413,
                 content: "我试着拆解了那些节奏。那是一种很常见的古老密码，用两种不同的敲击声就可以传递讯号。",
+                voice: "story/1002/510104/7FB2FFE2",
                 npc: 700342,
                 next: 51010414,
             },
@@ -17306,18 +17866,21 @@ export const npcData: NPC[] = [
                 id: 51010414,
                 content:
                     "墙那边的人告诉我，我唱错了。那是一首歌剧的唱段，在这儿很有名——因为没读过剧本的缘故，我未能准确理解那首歌所传递给观众的情感。",
+                voice: "story/1002/510104/7FB3000C",
                 npc: 700342,
                 next: 51010415,
             },
             {
                 id: 51010415,
                 content: "他则是因为某种原因没有办法开口说话和演唱。但他可以用这种讯号教给我如何演唱。",
+                voice: "story/1002/510104/7FB30036",
                 npc: 700342,
                 next: 51010416,
             },
             {
                 id: 51010416,
                 content: "但当我终于在他的教导下学会了那首歌，跑到对面那条街打算当面道谢时，那位好心人已经不在那里了。",
+                voice: "story/1002/510104/7FB30060",
                 npc: 700342,
                 options: [
                     {
@@ -17335,12 +17898,14 @@ export const npcData: NPC[] = [
             {
                 id: 51010417,
                 content: "噢，真是太巧了！",
+                voice: "story/1002/510104/7FB3008A",
                 npc: 700342,
                 next: 51010418,
             },
             {
                 id: 51010420,
                 content: "是呢……也藏着很多故事。",
+                voice: "story/1002/510104/7FB30108",
                 npc: 700342,
                 next: 51010421,
             },
@@ -17348,58 +17913,68 @@ export const npcData: NPC[] = [
                 id: 51010418,
                 content:
                     "如果方便，还请你代我向那位先生或女士致谢——还有祝福！虽然不知道他为什么无法开口，但还是祝愿他早日好起来。我能感受到，他喜欢唱歌，非常喜欢。",
+                voice: "story/1002/510104/7FB300B4",
                 npc: 700342,
                 next: 51010419,
             },
             {
                 id: 51010421,
                 content: "说来，这里的歌剧和卢卡的很不一样……",
+                voice: "story/1002/510104/7FB30132",
                 npc: 700342,
                 next: 51010422,
             },
             {
                 id: 51010419,
                 content: "……好，我会的。",
+                voice: "story/1002/510104/7FB300DE",
                 npc: 100001,
                 next: 51010421,
             },
             {
                 id: 51010422,
                 content: "卢卡的歌剧是焰火，伊瑟尔的歌剧是风。",
+                voice: "story/1002/510104/7FB3015C",
                 npc: 700342,
                 next: 51010423,
             },
             {
                 id: 51010423,
                 content: "而这里的歌剧是大地。广阔的，苦痛的大地……",
+                voice: "story/1002/510104/7FB30186",
                 npc: 700342,
                 next: 51010424,
             },
             {
                 id: 51010424,
                 content: "我和朋友就快要离开这儿了，在那之前，我还想为这里写一首歌。",
+                voice: "story/1002/510104/7FB301B0",
                 npc: 700342,
             },
             {
                 id: 51010330,
                 content: "是什么让我们得以成为“我们”？",
+                voice: "story/1002/510103/7FB2F244",
                 npc: 700342,
             },
             {
                 id: 51010302,
                 content: "……最有趣的就是这一篇，它说雾海中的万物都在生和死的循环中，你觉得呢？伊——",
+                voice: "story/1002/510103/7FB2EDAC",
                 npc: 700342,
                 next: 51010303,
             },
             {
                 id: 51010303,
                 content: "啊，是你！我记得你的，我们上次就在这儿说过话。",
+                voice: "story/1002/510103/7FB2EDD6",
                 npc: 700342,
                 next: 51010304,
             },
             {
                 id: 51010304,
                 content: "你有看到我的朋友吗？一个红发的女孩子，刚才应该就在这儿……",
+                voice: "story/1002/510103/7FB2EE00",
                 npc: 700342,
                 options: [
                     {
@@ -17412,12 +17987,14 @@ export const npcData: NPC[] = [
             {
                 id: 51010306,
                 content: "谢谢！那我继续等一会儿。她常常突然离开，又突然回来。",
+                voice: "story/1002/510103/7FB2EE54",
                 npc: 700342,
                 next: 51010307,
             },
             {
                 id: 51010307,
                 content: "这几天，我们在这儿收集了许多卡戎之民的古老神话。我很惊讶，这里的人竟然不避讳讲这些。",
+                voice: "story/1002/510103/7FB2EE7E",
                 npc: 700342,
                 next: 51010308,
             },
@@ -17425,12 +18002,14 @@ export const npcData: NPC[] = [
                 id: 51010308,
                 content:
                     "在我们的故乡艾利西安，那里的卡戎之民地位比这里崇高得多。他们坐在高台上，与神问答，执掌权柄。但在那儿，讨论古老的神话是一件危险的事。",
+                voice: "story/1002/510103/7FB2EEA8",
                 npc: 700342,
                 next: 51010309,
             },
             {
                 id: 51010309,
                 content: "对了，你知道卡戎之民的神话吗？",
+                voice: "story/1002/510103/7FB2EED2",
                 npc: 700342,
                 options: [
                     {
@@ -17448,36 +18027,42 @@ export const npcData: NPC[] = [
             {
                 id: 51010312,
                 content: "“卡戎”，这个词的意思是“来自雾海之人”……",
+                voice: "story/1002/510103/7FB2EF50",
                 npc: 700342,
                 next: 51010313,
             },
             {
                 id: 51010313,
                 content: "雾海是一切的原点。圣树自雾海生长，天之树是它庞大的枝叶，世界则立于圣树之上。",
+                voice: "story/1002/510103/7FB2EF7A",
                 npc: 700342,
                 next: 51010314,
             },
             {
                 id: 51010314,
                 content: "圣树绽放纯白的花，从中走出母神茵布拉。她创造万物，其中就有父神埃斯刻。母神与父神诞育出卡戎之民共同的先祖。",
+                voice: "story/1002/510103/7FB2EFA4",
                 npc: 700342,
                 next: 51010315,
             },
             {
                 id: 51010315,
                 content: "但执掌<W>死之权能</>的埃斯刻却成为灾厄的化身，并最终带来叫做“日蚀”的末日。",
+                voice: "story/1002/510103/7FB2EFCE",
                 npc: 700342,
                 next: 51010316,
             },
             {
                 id: 51010316,
                 content: "在末日中，执掌<H>生之权能</>的母神庇护了她的子民，她散碎的灵魂飘向海洋，最终归于雾海——",
+                voice: "story/1002/510103/7FB2EFF8",
                 npc: 700342,
                 next: 51010317,
             },
             {
                 id: 51010317,
                 content: "父神的身躯则化为大地，他高高举起的手臂化为山岳，永远伸向不知何时归来的神明。",
+                voice: "story/1002/510103/7FB2F022",
                 npc: 700342,
                 options: [
                     {
@@ -17490,24 +18075,28 @@ export const npcData: NPC[] = [
             {
                 id: 51010319,
                 content: "嗯，不过在这些古老的神话里，还有另一个有趣的故事。",
+                voice: "story/1002/510103/7FB2F076",
                 npc: 700342,
                 next: 51010320,
             },
             {
                 id: 51010320,
                 content: "有个故事说，埃斯刻和茵布拉已经在末日后的新世界，以新生的样貌出现。",
+                voice: "story/1002/510103/7FB2F0A0",
                 npc: 700342,
                 next: 51010321,
             },
             {
                 id: 51010321,
                 content: "而新生的他们则会带来新的一轮末日，以及再一度毁灭，再一度新生。",
+                voice: "story/1002/510103/7FB2F0CA",
                 npc: 700342,
                 next: 51010322,
             },
             {
                 id: 51010322,
                 content: "世界在无尽的循环之中，万物都在新生与死亡间轮回往复。",
+                voice: "story/1002/510103/7FB2F0F4",
                 npc: 700342,
                 options: [
                     {
@@ -17521,12 +18110,14 @@ export const npcData: NPC[] = [
                 id: 51010324,
                 content:
                     "不过……我有些在意的是，为什么这个故事的作者坚信父神和母神得到了新生？或者说，是什么“定义”了茵布拉和埃斯刻的本质呢？",
+                voice: "story/1002/510103/7FB2F148",
                 npc: 700342,
                 next: 51010325,
             },
             {
                 id: 51010325,
                 content: "是他们的肉体，他们的灵魂？……还是其他？",
+                voice: "story/1002/510103/7FB2F172",
                 npc: 700342,
                 next: 51010326,
             },
@@ -17534,6 +18125,7 @@ export const npcData: NPC[] = [
                 id: 51010326,
                 content:
                     "假设——我是说假设，一位伟大的魔法师把我们脚下的大地重新变成了埃斯刻的模样——那么这个埃斯刻，和新生的埃斯刻，哪个才是我们的父神大人呢？",
+                voice: "story/1002/510103/7FB2F19C",
                 npc: 700342,
                 options: [
                     {
@@ -17565,34 +18157,40 @@ export const npcData: NPC[] = [
             {
                 id: 51010327,
                 content: "原来你是这样认为的……谢谢！你的观点启发了我很多。",
+                voice: "story/1002/510103/7FB2F1C6",
                 npc: 700342,
                 next: 51010329,
             },
             {
                 id: 51010328,
                 content: "很多创作都是从一个无聊的问题开始的，不是吗？",
+                voice: "story/1002/510103/7FB2F1F0",
                 npc: 700342,
                 next: 51010329,
             },
             {
                 id: 51010329,
                 content: "谢谢你，如蜡烛上火焰一般的{性别：先生|小姐}。我很喜欢这些神话，现在我已经有了关于它们的歌。",
+                voice: "story/1002/510103/7FB2F21A",
                 npc: 700342,
             },
             {
                 id: 51010221,
                 content: "谢谢你的建议，如冰原上玫瑰一般的{性别：先生|小姐}。",
+                voice: "story/1002/510102/7FB2E062",
                 npc: 700342,
             },
             {
                 id: 51010202,
                 content: "♪熔炉焚烧黎明 倾倒出白雪与铁的城塞\n齿轮高歌 吞没晨星 赞颂北地的伟大时代——",
+                voice: "story/1002/510102/7FB2DD44",
                 npc: 700342,
                 next: 51010203,
             },
             {
                 id: 51010203,
                 content: "嗯？你叫我……",
+                voice: "story/1002/510102/7FB2DD6E",
                 npc: 700342,
                 options: [
                     {
@@ -17612,36 +18210,42 @@ export const npcData: NPC[] = [
             {
                 id: 51010204,
                 content: "谢谢你，陌生的旅人！不过这首歌还没有完成，或许你可以和我一起来创作它。",
+                voice: "story/1002/510102/7FB2DD98",
                 npc: 700342,
                 next: 51010206,
             },
             {
                 id: 51010205,
                 content: "很抱歉打扰到你！不过我问过那边的士兵，这座城市的广场并没有张贴律令，禁止一位吟游诗人在这里唱歌。",
+                voice: "story/1002/510102/7FB2DDC2",
                 npc: 700342,
                 next: 51010206,
             },
             {
                 id: 51010206,
                 content: "后一句应该是什么呢……",
+                voice: "story/1002/510102/7FB2DDEC",
                 npc: 700342,
                 next: 51010207,
             },
             {
                 id: 51010207,
                 content: "我想我应该写“风”……每个地方的风都是不同的……",
+                voice: "story/1002/510102/7FB2DE16",
                 npc: 700342,
                 next: 51010208,
             },
             {
                 id: 51010208,
                 content: "艾利西安的风是融化在晚祷里的乳香，卢卡的风是画室的松节油和咖啡店的焦糖，伊瑟尔的风是混着野薄荷的油墨……",
+                voice: "story/1002/510102/7FB2DE40",
                 npc: 700342,
                 next: 51010209,
             },
             {
                 id: 51010209,
                 content: "那么海伯利亚的“风”是什么呢？",
+                voice: "story/1002/510102/7FB2DE6A",
                 npc: 700342,
                 options: [
                     {
@@ -17664,54 +18268,63 @@ export const npcData: NPC[] = [
             {
                 id: 51010210,
                 content: "嗯……你说的有道理。这里有很多钢铁的森林，就像这座城市一样。",
+                voice: "story/1002/510102/7FB2DE94",
                 npc: 700342,
                 next: 51010211,
             },
             {
                 id: 51010213,
                 content: "嗯！这座城市的四分之三是由雪组成的。因为这里的人说，冰湖城总是在下雪，融雪季只有短短的三个月~",
+                voice: "story/1002/510102/7FB2DF12",
                 npc: 700342,
                 next: 51010214,
             },
             {
                 id: 51010215,
                 content: "“眼泪”吗……是这首歌前面没有用过的意象呢……",
+                voice: "story/1002/510102/7FB2DF66",
                 npc: 700342,
                 next: 51010216,
             },
             {
                 id: 51010211,
                 content: "虽然吹起来有些冷，但风会捎来那些齿轮和引擎的声音，它们摸起来总是滚烫的。",
+                voice: "story/1002/510102/7FB2DEBE",
                 npc: 700342,
                 next: 51010212,
             },
             {
                 id: 51010214,
                 content: "而且风和雪总是在一起的，这是大自然给我们的经典搭配！",
+                voice: "story/1002/510102/7FB2DF3C",
                 npc: 700342,
                 next: 51010220,
             },
             {
                 id: 51010216,
                 content: "…………",
+                voice: "story/1002/510102/7FB2DF90",
                 npc: 700342,
                 next: 51010217,
             },
             {
                 id: 51010212,
                 content: "士兵的枪管或许也是滚烫的，虽然他们的表情是冷的……",
+                voice: "story/1002/510102/7FB2DEE8",
                 npc: 700342,
                 next: 51010220,
             },
             {
                 id: 51010220,
                 content: "谢谢你的建议，如冰原上玫瑰一般的{性别：先生|小姐}……我想，我很快就可以完成这首歌了。",
+                voice: "story/1002/510102/7FB2E038",
                 npc: 700342,
             },
             {
                 id: 51010217,
                 content:
                     "第一天来到这座广场时，我看到一位目盲的小丑在广场表演，他说他的眼是多年前被锅炉熏坏的。一个孩子被表演逗得狂笑不止，他的仆人便抛下银币。",
+                voice: "story/1002/510102/7FB2DFBA",
                 npc: 700342,
                 next: 51010218,
             },
@@ -17719,12 +18332,14 @@ export const npcData: NPC[] = [
                 id: 51010218,
                 content:
                     "我现在坐的这条长椅上，一个退伍老兵叫喊着，兜售自己最后一枚勋章。旁边的长椅上，一个消瘦的母亲从干瘪的乳房挤出奶水喂给她重病的孩子。",
+                voice: "story/1002/510102/7FB2DFE4",
                 npc: 700342,
                 next: 51010219,
             },
             {
                 id: 51010219,
                 content: "……我想那时，吹过这座广场的风，捎来的就是“眼泪”吧。",
+                voice: "story/1002/510102/7FB2E00E",
                 npc: 700342,
                 next: 51010220,
             },
@@ -17751,17 +18366,20 @@ export const npcData: NPC[] = [
             {
                 id: 51010426,
                 content: "♪白雪是她的羊水 晨昏线是她的脐带\n她娩出伟大与苦难 汇入白山下的黑铁摇篮……",
+                voice: "story/1002/510104/7FB30204",
                 npc: 700342,
             },
             {
                 id: 51010402,
                 content: "又见面了，如白沙上石榴石一般的{性别：先生|小姐}。你很喜欢到这儿来呢，我也是。",
+                voice: "story/1002/510104/7FB2FE14",
                 npc: 700342,
                 next: 51010403,
             },
             {
                 id: 51010403,
                 content: "你去过盖雷亚剧院吗？",
+                voice: "story/1002/510104/7FB2FE3E",
                 npc: 700342,
                 options: [
                     {
@@ -17784,36 +18402,42 @@ export const npcData: NPC[] = [
             {
                 id: 51010404,
                 content: "噢！真让人羡慕，你一定很富有。",
+                voice: "story/1002/510104/7FB2FE68",
                 npc: 700342,
                 next: 51010407,
             },
             {
                 id: 51010405,
                 content: "嗯……你也是吗。",
+                voice: "story/1002/510104/7FB2FE92",
                 npc: 700342,
                 next: 51010407,
             },
             {
                 id: 51010406,
                 content: "和军团？不可思议。看来你身上也有很多很多故事。",
+                voice: "story/1002/510104/7FB2FEBC",
                 npc: 700342,
                 next: 51010407,
             },
             {
                 id: 51010407,
                 content: "我在卢卡去过大大小小的歌剧院，但总被海伯利亚的剧院关在门外。",
+                voice: "story/1002/510104/7FB2FEE6",
                 npc: 700342,
                 next: 51010408,
             },
             {
                 id: 51010408,
                 content: "虽然知道卡戎之民在这儿过得不算好，但公共设施收的监护金比我想象中还要昂贵。",
+                voice: "story/1002/510104/7FB2FF10",
                 npc: 700342,
                 next: 51010409,
             },
             {
                 id: 51010409,
                 content: "虽然幸运地赶上这座城市一年一度不需要门票的狂欢日，但又不幸地听说那儿发生了械战……简直糟透了。",
+                voice: "story/1002/510104/7FB2FF3A",
                 npc: 700342,
                 next: 51010410,
             },
@@ -17821,6 +18445,7 @@ export const npcData: NPC[] = [
                 id: 51010410,
                 content:
                     "不过还好——我收集了很多乐谱！书店的价格还算公道，很多人也同意让我用歌声交换乐谱，还有一位神秘的好心朋友教过我一首有名的歌！",
+                voice: "story/1002/510104/7FB2FF64",
                 npc: 700342,
                 options: [
                     {
@@ -17834,6 +18459,7 @@ export const npcData: NPC[] = [
                 id: 51010411,
                 content:
                     "前阵子的一个晚上，我靠着一堵墙，就着月光，随意弹唱一首从淘来的乐谱里学的歌。那首歌的旋律并不复杂，很容易便能记住。",
+                voice: "story/1002/510104/7FB2FF8E",
                 npc: 700342,
                 next: 51010412,
             },
@@ -17841,12 +18467,14 @@ export const npcData: NPC[] = [
                 id: 51010412,
                 content:
                     "但我唱完后，墙的那边突然传来奇怪的敲击声……我能听出来，那些敲击声遵循着某种规律。你知道的，吟游诗人总是对节奏格外敏感。",
+                voice: "story/1002/510104/7FB2FFB8",
                 npc: 700342,
                 next: 51010413,
             },
             {
                 id: 51010413,
                 content: "我试着拆解了那些节奏。那是一种很常见的古老密码，用两种不同的敲击声就可以传递讯号。",
+                voice: "story/1002/510104/7FB2FFE2",
                 npc: 700342,
                 next: 51010414,
             },
@@ -17854,18 +18482,21 @@ export const npcData: NPC[] = [
                 id: 51010414,
                 content:
                     "墙那边的人告诉我，我唱错了。那是一首歌剧的唱段，在这儿很有名——因为没读过剧本的缘故，我未能准确理解那首歌所传递给观众的情感。",
+                voice: "story/1002/510104/7FB3000C",
                 npc: 700342,
                 next: 51010415,
             },
             {
                 id: 51010415,
                 content: "他则是因为某种原因没有办法开口说话和演唱。但他可以用这种讯号教给我如何演唱。",
+                voice: "story/1002/510104/7FB30036",
                 npc: 700342,
                 next: 51010416,
             },
             {
                 id: 51010416,
                 content: "但当我终于在他的教导下学会了那首歌，跑到对面那条街打算当面道谢时，那位好心人已经不在那里了。",
+                voice: "story/1002/510104/7FB30060",
                 npc: 700342,
                 options: [
                     {
@@ -17883,12 +18514,14 @@ export const npcData: NPC[] = [
             {
                 id: 51010417,
                 content: "噢，真是太巧了！",
+                voice: "story/1002/510104/7FB3008A",
                 npc: 700342,
                 next: 51010418,
             },
             {
                 id: 51010420,
                 content: "是呢……也藏着很多故事。",
+                voice: "story/1002/510104/7FB30108",
                 npc: 700342,
                 next: 51010421,
             },
@@ -17896,58 +18529,68 @@ export const npcData: NPC[] = [
                 id: 51010418,
                 content:
                     "如果方便，还请你代我向那位先生或女士致谢——还有祝福！虽然不知道他为什么无法开口，但还是祝愿他早日好起来。我能感受到，他喜欢唱歌，非常喜欢。",
+                voice: "story/1002/510104/7FB300B4",
                 npc: 700342,
                 next: 51010419,
             },
             {
                 id: 51010421,
                 content: "说来，这里的歌剧和卢卡的很不一样……",
+                voice: "story/1002/510104/7FB30132",
                 npc: 700342,
                 next: 51010422,
             },
             {
                 id: 51010419,
                 content: "……好，我会的。",
+                voice: "story/1002/510104/7FB300DE",
                 npc: 100001,
                 next: 51010421,
             },
             {
                 id: 51010422,
                 content: "卢卡的歌剧是焰火，伊瑟尔的歌剧是风。",
+                voice: "story/1002/510104/7FB3015C",
                 npc: 700342,
                 next: 51010423,
             },
             {
                 id: 51010423,
                 content: "而这里的歌剧是大地。广阔的，苦痛的大地……",
+                voice: "story/1002/510104/7FB30186",
                 npc: 700342,
                 next: 51010424,
             },
             {
                 id: 51010424,
                 content: "我和朋友就快要离开这儿了，在那之前，我还想为这里写一首歌。",
+                voice: "story/1002/510104/7FB301B0",
                 npc: 700342,
             },
             {
                 id: 51010330,
                 content: "是什么让我们得以成为“我们”？",
+                voice: "story/1002/510103/7FB2F244",
                 npc: 700342,
             },
             {
                 id: 51010302,
                 content: "……最有趣的就是这一篇，它说雾海中的万物都在生和死的循环中，你觉得呢？伊——",
+                voice: "story/1002/510103/7FB2EDAC",
                 npc: 700342,
                 next: 51010303,
             },
             {
                 id: 51010303,
                 content: "啊，是你！我记得你的，我们上次就在这儿说过话。",
+                voice: "story/1002/510103/7FB2EDD6",
                 npc: 700342,
                 next: 51010304,
             },
             {
                 id: 51010304,
                 content: "你有看到我的朋友吗？一个红发的女孩子，刚才应该就在这儿……",
+                voice: "story/1002/510103/7FB2EE00",
                 npc: 700342,
                 options: [
                     {
@@ -17960,12 +18603,14 @@ export const npcData: NPC[] = [
             {
                 id: 51010306,
                 content: "谢谢！那我继续等一会儿。她常常突然离开，又突然回来。",
+                voice: "story/1002/510103/7FB2EE54",
                 npc: 700342,
                 next: 51010307,
             },
             {
                 id: 51010307,
                 content: "这几天，我们在这儿收集了许多卡戎之民的古老神话。我很惊讶，这里的人竟然不避讳讲这些。",
+                voice: "story/1002/510103/7FB2EE7E",
                 npc: 700342,
                 next: 51010308,
             },
@@ -17973,12 +18618,14 @@ export const npcData: NPC[] = [
                 id: 51010308,
                 content:
                     "在我们的故乡艾利西安，那里的卡戎之民地位比这里崇高得多。他们坐在高台上，与神问答，执掌权柄。但在那儿，讨论古老的神话是一件危险的事。",
+                voice: "story/1002/510103/7FB2EEA8",
                 npc: 700342,
                 next: 51010309,
             },
             {
                 id: 51010309,
                 content: "对了，你知道卡戎之民的神话吗？",
+                voice: "story/1002/510103/7FB2EED2",
                 npc: 700342,
                 options: [
                     {
@@ -17996,36 +18643,42 @@ export const npcData: NPC[] = [
             {
                 id: 51010312,
                 content: "“卡戎”，这个词的意思是“来自雾海之人”……",
+                voice: "story/1002/510103/7FB2EF50",
                 npc: 700342,
                 next: 51010313,
             },
             {
                 id: 51010313,
                 content: "雾海是一切的原点。圣树自雾海生长，天之树是它庞大的枝叶，世界则立于圣树之上。",
+                voice: "story/1002/510103/7FB2EF7A",
                 npc: 700342,
                 next: 51010314,
             },
             {
                 id: 51010314,
                 content: "圣树绽放纯白的花，从中走出母神茵布拉。她创造万物，其中就有父神埃斯刻。母神与父神诞育出卡戎之民共同的先祖。",
+                voice: "story/1002/510103/7FB2EFA4",
                 npc: 700342,
                 next: 51010315,
             },
             {
                 id: 51010315,
                 content: "但执掌<W>死之权能</>的埃斯刻却成为灾厄的化身，并最终带来叫做“日蚀”的末日。",
+                voice: "story/1002/510103/7FB2EFCE",
                 npc: 700342,
                 next: 51010316,
             },
             {
                 id: 51010316,
                 content: "在末日中，执掌<H>生之权能</>的母神庇护了她的子民，她散碎的灵魂飘向海洋，最终归于雾海——",
+                voice: "story/1002/510103/7FB2EFF8",
                 npc: 700342,
                 next: 51010317,
             },
             {
                 id: 51010317,
                 content: "父神的身躯则化为大地，他高高举起的手臂化为山岳，永远伸向不知何时归来的神明。",
+                voice: "story/1002/510103/7FB2F022",
                 npc: 700342,
                 options: [
                     {
@@ -18038,24 +18691,28 @@ export const npcData: NPC[] = [
             {
                 id: 51010319,
                 content: "嗯，不过在这些古老的神话里，还有另一个有趣的故事。",
+                voice: "story/1002/510103/7FB2F076",
                 npc: 700342,
                 next: 51010320,
             },
             {
                 id: 51010320,
                 content: "有个故事说，埃斯刻和茵布拉已经在末日后的新世界，以新生的样貌出现。",
+                voice: "story/1002/510103/7FB2F0A0",
                 npc: 700342,
                 next: 51010321,
             },
             {
                 id: 51010321,
                 content: "而新生的他们则会带来新的一轮末日，以及再一度毁灭，再一度新生。",
+                voice: "story/1002/510103/7FB2F0CA",
                 npc: 700342,
                 next: 51010322,
             },
             {
                 id: 51010322,
                 content: "世界在无尽的循环之中，万物都在新生与死亡间轮回往复。",
+                voice: "story/1002/510103/7FB2F0F4",
                 npc: 700342,
                 options: [
                     {
@@ -18069,12 +18726,14 @@ export const npcData: NPC[] = [
                 id: 51010324,
                 content:
                     "不过……我有些在意的是，为什么这个故事的作者坚信父神和母神得到了新生？或者说，是什么“定义”了茵布拉和埃斯刻的本质呢？",
+                voice: "story/1002/510103/7FB2F148",
                 npc: 700342,
                 next: 51010325,
             },
             {
                 id: 51010325,
                 content: "是他们的肉体，他们的灵魂？……还是其他？",
+                voice: "story/1002/510103/7FB2F172",
                 npc: 700342,
                 next: 51010326,
             },
@@ -18082,6 +18741,7 @@ export const npcData: NPC[] = [
                 id: 51010326,
                 content:
                     "假设——我是说假设，一位伟大的魔法师把我们脚下的大地重新变成了埃斯刻的模样——那么这个埃斯刻，和新生的埃斯刻，哪个才是我们的父神大人呢？",
+                voice: "story/1002/510103/7FB2F19C",
                 npc: 700342,
                 options: [
                     {
@@ -18113,18 +18773,21 @@ export const npcData: NPC[] = [
             {
                 id: 51010327,
                 content: "原来你是这样认为的……谢谢！你的观点启发了我很多。",
+                voice: "story/1002/510103/7FB2F1C6",
                 npc: 700342,
                 next: 51010329,
             },
             {
                 id: 51010328,
                 content: "很多创作都是从一个无聊的问题开始的，不是吗？",
+                voice: "story/1002/510103/7FB2F1F0",
                 npc: 700342,
                 next: 51010329,
             },
             {
                 id: 51010329,
                 content: "谢谢你，如蜡烛上火焰一般的{性别：先生|小姐}。我很喜欢这些神话，现在我已经有了关于它们的歌。",
+                voice: "story/1002/510103/7FB2F21A",
                 npc: 700342,
             },
         ],
@@ -21816,7 +22479,6 @@ export const npcData: NPC[] = [
                 id: 51122002,
                 content: "对咯，叫你呢娃娃，快过来呀！",
                 npc: 701031,
-                next: 51122003,
                 options: [
                     {
                         id: 51122003,
@@ -27271,6 +27933,7 @@ export const npcData: NPC[] = [
             {
                 id: 90010201,
                 content: "最近有没有找到什么好东西？给老朽看看，说不定能锻造出一把很特别的武器！",
+                voice: "char/Bai/vo_forge_r02",
                 npc: 900001,
             },
             {
@@ -27289,6 +27952,7 @@ export const npcData: NPC[] = [
             {
                 id: 90020201,
                 content: "啊！我、我才没有偷懒……咳！有什么想买的吗？",
+                voice: "char/Bai/vo_shop_r01",
                 npc: 900002,
             },
         ],
@@ -28046,11 +28710,13 @@ export const npcData: NPC[] = [
             {
                 id: 10010116,
                 content: "别逞强。不要还没遇到秽兽，先用光了力气。",
+                voice: "story/1001/100101/190F2BB2",
                 npc: 100003,
             },
             {
                 id: 11010207,
                 content: "处理干净了……唔！",
+                voice: "story/1002/110102/1B901A16",
                 npc: 110022,
                 next: 11010208,
             },
@@ -28058,6 +28724,7 @@ export const npcData: NPC[] = [
                 id: 11010208,
                 content:
                     "<W>湿滑黏腻的污物沾满了你的双手，你分不清那是秽兽的黏液还是内脏。你唯一知道的是，它们令你欣悦，连灵魂都为之震颤。</>",
+                voice: "story/1002/110102/1B901A40",
                 options: [
                     {
                         id: 11010209,
@@ -28069,6 +28736,7 @@ export const npcData: NPC[] = [
             {
                 id: 11010210,
                 content: "<W>不要抗拒。因为我是真正的你，是你的死之本能。终有一日你会遵从我的指引，遵从亘古的意志……</>",
+                voice: "story/1002/110102/1B901A94",
                 options: [
                     {
                         id: 11010211,
@@ -28080,6 +28748,7 @@ export const npcData: NPC[] = [
             {
                 id: 11010212,
                 content: "…………",
+                voice: "story/1002/110102/1B901AE8",
                 npc: 110022,
             },
             {
@@ -32587,47 +33256,55 @@ export const npcData: NPC[] = [
             {
                 id: 20000509,
                 content: "你……哼！",
+                voice: "story/2001/200005/3211B582",
                 npc: 200024,
                 next: 20000510,
             },
             {
                 id: 20000510,
                 content: "算了，老朽不和小孩子计较。",
+                voice: "story/2001/200005/3211B5AC",
                 npc: 200024,
                 next: 20000511,
             },
             {
                 id: 20000511,
                 content: "其实呢，刚刚你们路过的时候啊，老朽嗅到了了不得的东西。",
+                voice: "story/2001/200005/3211B5D6",
                 npc: 200024,
                 next: 20000512,
             },
             {
                 id: 20000512,
                 content: "没错，就是<H>稀世神兵</>的味道！年轻人，你是不是藏着什么了不得的武器?",
+                voice: "story/2001/200005/3211B600",
                 npc: 200024,
                 next: 20000513,
             },
             {
                 id: 20000513,
                 content: "武器？我只有这把剑……",
+                voice: "story/2001/200005/3211B62A",
                 npc: 100001,
                 next: 20000514,
             },
             {
                 id: 20000514,
                 content: "……！",
+                voice: "story/2001/200005/3211B654",
                 npc: 200024,
                 next: 20000515,
             },
             {
                 id: 20000515,
                 content: "（她仔细打量着这把剑，仿佛想要从它的纹路里读出什么。）",
+                voice: "story/2001/200005/3211B67E",
                 next: 20000516,
             },
             {
                 id: 20000516,
                 content: "好剑、好剑呀！这剑无论是看材质还是手法，都不是海伯利亚这群庸才的手笔。你年纪轻轻，怎么弄到这种宝贝的？",
+                voice: "story/2001/200005/3211B6A8",
                 npc: 200024,
                 next: 20000517,
             },
@@ -32635,47 +33312,55 @@ export const npcData: NPC[] = [
                 id: 20000517,
                 content:
                     "（在这位皎皎铁匠的眼中，这把剑似乎并不同寻常。于是几天前的回忆再次苏醒：这把剑曾是一把打开遗迹大门的钥匙。然而，它究竟从何而来——这依旧是个谜。）",
+                voice: "story/2001/200005/3211B6FC",
                 next: 20000519,
             },
             {
                 id: 20000519,
                 content: "我不知道……",
+                voice: "story/2001/200005/3211B750",
                 npc: 100001,
                 next: 20000520,
             },
             {
                 id: 20000520,
                 content: "从我记事起，这把剑就在我身边了。也许是我父母留下的?",
+                voice: "story/2001/200005/3211B77A",
                 npc: 100001,
                 next: 20000522,
             },
             {
                 id: 20000522,
                 content: "有趣，有趣。老朽当了一辈子铁匠，也要甘拜下风啦。",
+                voice: "story/2001/200005/3211B7CE",
                 npc: 200024,
                 next: 20000523,
             },
             {
                 id: 20000523,
                 content: "年轻人啊，老朽常年漂泊在外，居无定所。要不，就让老朽跟随你—阵子?",
+                voice: "story/2001/200005/3211B7F8",
                 npc: 200024,
                 next: 20000524,
             },
             {
                 id: 20000524,
                 content: "从海伯利亚到艾利西安，老朽见过、锻造过的武器可多啦！如果你想锻造什么兵器，就包在我身上吧。",
+                voice: "story/2001/200005/3211B822",
                 npc: 200024,
                 next: 20000525,
             },
             {
                 id: 20000525,
                 content: "哇，原来是铁匠前辈啊！",
+                voice: "story/2001/200005/3211B84C",
                 npc: 200025,
                 next: 20000526,
             },
             {
                 id: 20000526,
                 content: "价钱肯定比外面的铁匠便宜！你只要让我得空研究研究你那把剑就好了，哈哈。",
+                voice: "story/2001/200005/3211B876",
                 npc: 200024,
             },
             {
@@ -32694,6 +33379,7 @@ export const npcData: NPC[] = [
             {
                 id: 20000820,
                 content: "你能再仔细地看一看吗？为了将花朵照料好，观察是很重要的。",
+                voice: "story/2001/200008/3211E888",
                 npc: 200027,
                 next: 20000848,
             },

@@ -166,7 +166,7 @@ async function submitComment() {
 
                 <!-- 帖子内容 -->
                 <div class="card bg-base-100 shadow-xl">
-                    <div class="card-body">
+                    <div class="card-body select-text">
                         <div class="space-y-6">
                             <DNAPostContent :contents="postRes.postDetail.postContent" />
                         </div>

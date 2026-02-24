@@ -1,6 +1,6 @@
 {
     "name": "dna-builder-data",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "description": "DNA Builder game data models and utilities",
     "type": "module",
     "bin": "./dist/mcp/index.js",
@@ -8,6 +8,7 @@
     "types": "./index.ts",
     "scripts": {
         "build": "tsc --noEmit",
+        "prebuild:mcp": "node ./scripts/gen-mcp-type-definition-map.mjs",
         "build:mcp": "node ./scripts/build-mcp.mjs",
         "prepack": "pnpm run build:mcp",
         "release": "npm run build && npm publish --access public --registry https://registry.npmjs.org/",

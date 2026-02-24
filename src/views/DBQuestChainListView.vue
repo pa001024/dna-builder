@@ -3,8 +3,10 @@ import Fuse, { type FuseResultMatch } from "fuse.js"
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
-import { type QuestItem, questData } from "@/data/d/quest.data"
+import { getLocalizedQuestDataByLanguage } from "@/data/d/story-locale"
+import type { QuestItem, QuestStory } from "@/data/d/quest.data"
 import questChainData, { type QuestChain } from "@/data/d/questchain.data"
+import { useSettingStore } from "@/store/setting"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
 interface QuestChainSnippetSegment {
@@ -38,19 +40,24 @@ const selectedQuestChainId = useSearchParam<number>("questchain.selectedQuestCha
 const showImprCheckOnly = useSearchParam<boolean>("questchain.showImprCheckOnly", false)
 const showImprIncreaseOnly = useSearchParam<boolean>("questchain.showImprIncreaseOnly", false)
 const showFullTextSearch = useSearchParam<boolean>("questchain.showFullTextSearch", false)
+const settingStore = useSettingStore()
 
-const questItemMap = buildQuestItemMap()
-const questChainFullTextEntries = buildQuestChainFullTextEntries(questItemMap)
-const questChainFullTextFuse = createQuestChainFullTextFuse(questChainFullTextEntries)
+/**
+ * 按当前设置语言返回对应的任务剧情数据。
+ */
+const localizedQuestData = computed<QuestStory[]>(() => {
+    return getLocalizedQuestDataByLanguage(settingStore.lang)
+})
 
 /**
  * 构建任务详情映射，便于按任务 ID 快速读取对话数据。
+ * @param questStories 任务剧情集合
  * @returns 任务详情映射
  */
-function buildQuestItemMap(): Map<number, QuestItem> {
+function buildQuestItemMap(questStories: QuestStory[]): Map<number, QuestItem> {
     const map = new Map<number, QuestItem>()
 
-    for (const questStory of questData) {
+    for (const questStory of questStories) {
         for (const questItem of questStory.quests) {
             map.set(questItem.id, questItem)
         }
@@ -161,12 +168,13 @@ function createQuestChainFullTextFuse(entries: QuestChainFullTextEntry[]): Fuse<
 
 /**
  * 构建包含印象检定选项的任务 ID 集合。
+ * @param questStories 任务剧情集合
  * @returns 任务 ID 集合
  */
-function buildQuestImprCheckIdSet(): Set<number> {
+function buildQuestImprCheckIdSet(questStories: QuestStory[]): Set<number> {
     const questIdSet = new Set<number>()
 
-    for (const questStory of questData) {
+    for (const questStory of questStories) {
         for (const questItem of questStory.quests) {
             const hasImprCheck = questItem.nodes.some(node => {
                 return node.dialogues?.some(dialogue => dialogue.options?.some(option => !!option.imprCheck))
@@ -183,12 +191,13 @@ function buildQuestImprCheckIdSet(): Set<number> {
 
 /**
  * 构建包含印象增加选项的任务 ID 集合。
+ * @param questStories 任务剧情集合
  * @returns 任务 ID 集合
  */
-function buildQuestImprIncreaseIdSet(): Set<number> {
+function buildQuestImprIncreaseIdSet(questStories: QuestStory[]): Set<number> {
     const questIdSet = new Set<number>()
 
-    for (const questStory of questData) {
+    for (const questStory of questStories) {
         for (const questItem of questStory.quests) {
             const hasImprIncrease = questItem.nodes.some(node => {
                 return node.dialogues?.some(dialogue => {
@@ -225,10 +234,54 @@ function buildQuestChainIdSetByQuestIds(questIdSet: Set<number>): Set<number> {
     return questChainIdSet
 }
 
-const questImprCheckIdSet = buildQuestImprCheckIdSet()
-const questImprIncreaseIdSet = buildQuestImprIncreaseIdSet()
-const questChainImprCheckIdSet = buildQuestChainIdSetByQuestIds(questImprCheckIdSet)
-const questChainImprIncreaseIdSet = buildQuestChainIdSetByQuestIds(questImprIncreaseIdSet)
+/**
+ * 当前语言对应的任务详情映射。
+ */
+const questItemMap = computed(() => {
+    return buildQuestItemMap(localizedQuestData.value)
+})
+
+/**
+ * 当前语言的任务链全文搜索索引。
+ */
+const questChainFullTextEntries = computed(() => {
+    return buildQuestChainFullTextEntries(questItemMap.value)
+})
+
+/**
+ * 当前语言的任务链全文搜索引擎。
+ */
+const questChainFullTextFuse = computed(() => {
+    return createQuestChainFullTextFuse(questChainFullTextEntries.value)
+})
+
+/**
+ * 当前语言包含印象检定的任务 ID 集合。
+ */
+const questImprCheckIdSet = computed(() => {
+    return buildQuestImprCheckIdSet(localizedQuestData.value)
+})
+
+/**
+ * 当前语言包含印象增加的任务 ID 集合。
+ */
+const questImprIncreaseIdSet = computed(() => {
+    return buildQuestImprIncreaseIdSet(localizedQuestData.value)
+})
+
+/**
+ * 当前语言包含印象检定的任务链 ID 集合。
+ */
+const questChainImprCheckIdSet = computed(() => {
+    return buildQuestChainIdSetByQuestIds(questImprCheckIdSet.value)
+})
+
+/**
+ * 当前语言包含印象增加的任务链 ID 集合。
+ */
+const questChainImprIncreaseIdSet = computed(() => {
+    return buildQuestChainIdSetByQuestIds(questImprIncreaseIdSet.value)
+})
 
 /**
  * 根据 ID 获取选中的任务链。
@@ -243,7 +296,7 @@ const selectedQuestChain = computed(() => {
  * @returns 是否包含印象检定
  */
 function hasQuestChainImprCheck(questChainId: number): boolean {
-    return questChainImprCheckIdSet.has(questChainId)
+    return questChainImprCheckIdSet.value.has(questChainId)
 }
 
 /**
@@ -252,7 +305,7 @@ function hasQuestChainImprCheck(questChainId: number): boolean {
  * @returns 是否包含印象增加
  */
 function hasQuestChainImprIncrease(questChainId: number): boolean {
-    return questChainImprIncreaseIdSet.has(questChainId)
+    return questChainImprIncreaseIdSet.value.has(questChainId)
 }
 
 /**
@@ -393,7 +446,7 @@ const filteredQuestChains = computed<QuestChainSearchResult[]>(() => {
             }))
         }
 
-        return questChainFullTextFuse
+        return questChainFullTextFuse.value
             .search(keyword, { limit: 300 })
             .filter(result => passesQuestChainSwitchFilters(result.item.questChain))
             .map(result => ({
@@ -439,12 +492,14 @@ useInitialScrollToSelectedItem()
 <template>
     <div class="h-full flex flex-col bg-base-100">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
-            <div class="flex-1 flex flex-col overflow-hidden"
-                :class="{ 'border-r border-base-200': selectedQuestChain }">
+            <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedQuestChain }">
                 <div class="p-3 border-b border-base-200">
-                    <input v-model="searchKeyword" type="text"
+                    <input
+                        v-model="searchKeyword"
+                        type="text"
                         :placeholder="showFullTextSearch ? '全文搜索任务/对话内容（不支持拼音）...' : '搜索任务 ID/名称（支持拼音）...'"
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
+                    />
 
                     <div class="mt-2 flex items-center gap-4 text-xs text-base-content/80 flex-wrap">
                         <label class="flex items-center gap-2 select-none cursor-pointer">
@@ -466,25 +521,40 @@ useInitialScrollToSelectedItem()
 
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div v-for="questChainResult in filteredQuestChains" :key="questChainResult.questChain.id"
+                        <div
+                            v-for="questChainResult in filteredQuestChains"
+                            :key="questChainResult.questChain.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedQuestChainId === questChainResult.questChain.id }"
-                            @click="selectQuestChain(questChainResult.questChain)">
+                            :class="{
+                                'bg-primary/90 text-primary-content hover:bg-primary':
+                                    selectedQuestChainId === questChainResult.questChain.id,
+                            }"
+                            @click="selectQuestChain(questChainResult.questChain)"
+                        >
                             <div class="flex items-start justify-between">
                                 <div class="flex-1">
-                                    <div class="font-medium">{{ questChainResult.questChain.name }}</div>
+                                    <div class="font-medium">{{ $t(questChainResult.questChain.name) }}</div>
 
                                     <div class="text-xs opacity-70 mt-1 flex flex-wrap items-center gap-2">
-                                        <span>{{ questChainResult.questChain.chapterName }} {{
-                                            questChainResult.questChain.chapterNumber || "" }}</span>
-                                        <span v-if="questChainResult.questChain.main"
-                                            class="px-1.5 py-0.5 rounded bg-info text-info-content">主线</span>
-                                        <span v-if="hasQuestChainImprCheck(questChainResult.questChain.id)"
-                                            class="px-1.5 py-0.5 rounded bg-secondary text-secondary-content">
+                                        <span
+                                            >{{ $t(questChainResult.questChain.chapterName) }}
+                                            {{ $t(questChainResult.questChain.chapterNumber || "") }}</span
+                                        >
+                                        <span
+                                            v-if="questChainResult.questChain.main"
+                                            class="px-1.5 py-0.5 rounded bg-info text-info-content"
+                                            >主线</span
+                                        >
+                                        <span
+                                            v-if="hasQuestChainImprCheck(questChainResult.questChain.id)"
+                                            class="px-1.5 py-0.5 rounded bg-secondary text-secondary-content"
+                                        >
                                             印象检定
                                         </span>
-                                        <span v-if="hasQuestChainImprIncrease(questChainResult.questChain.id)"
-                                            class="px-1.5 py-0.5 rounded bg-success text-success-content">
+                                        <span
+                                            v-if="hasQuestChainImprIncrease(questChainResult.questChain.id)"
+                                            class="px-1.5 py-0.5 rounded bg-success text-success-content"
+                                        >
                                             印象增加
                                         </span>
                                     </div>
@@ -496,23 +566,29 @@ useInitialScrollToSelectedItem()
                             </div>
 
                             <div class="flex items-center gap-2 mt-2 text-xs opacity-70">
-                                <span>{{ questChainResult.questChain.episode }}</span>
-                                <span v-if="questChainResult.questChain.type">类型: {{ questChainResult.questChain.type
-                                    }}</span>
+                                <span>{{ $t(questChainResult.questChain.episode) }}</span>
+                                <span v-if="questChainResult.questChain.type">类型: {{ questChainResult.questChain.type }}</span>
                             </div>
 
-                            <div v-if="showFullTextSearch && searchKeyword.trim() && questChainResult.snippet"
-                                class="mt-2 text-xs leading-relaxed opacity-85">
+                            <div
+                                v-if="showFullTextSearch && searchKeyword.trim() && questChainResult.snippet"
+                                class="mt-2 text-xs leading-relaxed opacity-85"
+                            >
                                 <span class="opacity-65">匹配：</span>
                                 <span v-if="questChainResult.snippet.prefixEllipsis">...</span>
-                                <template v-for="(segment, index) in questChainResult.snippet.segments"
-                                    :key="`${questChainResult.questChain.id}-${index}`">
-                                    <span :class="segment.highlighted
-                                        ? selectedQuestChainId === questChainResult.questChain.id
-                                            ? 'bg-base-100/45 text-primary-content font-semibold px-0.5 rounded underline decoration-primary-content/80 decoration-2 underline-offset-2'
-                                            : 'bg-primary/20 text-base-content font-semibold px-0.5 rounded underline decoration-primary/80 decoration-2 underline-offset-2'
-                                        : ''
-                                        ">
+                                <template
+                                    v-for="(segment, index) in questChainResult.snippet.segments"
+                                    :key="`${questChainResult.questChain.id}-${index}`"
+                                >
+                                    <span
+                                        :class="
+                                            segment.highlighted
+                                                ? selectedQuestChainId === questChainResult.questChain.id
+                                                    ? 'bg-base-100/45 text-primary-content font-semibold px-0.5 rounded underline decoration-primary-content/80 decoration-2 underline-offset-2'
+                                                    : 'bg-primary/20 text-base-content font-semibold px-0.5 rounded underline decoration-primary/80 decoration-2 underline-offset-2'
+                                                : ''
+                                        "
+                                    >
                                         {{ segment.text }}
                                     </span>
                                 </template>
@@ -522,14 +598,16 @@ useInitialScrollToSelectedItem()
                     </div>
                 </ScrollArea>
 
-                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">共 {{
-                    filteredQuestChains.length }}
-                    个任务</div>
+                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">
+                    共 {{ filteredQuestChains.length }} 个任务
+                </div>
             </div>
 
-            <div v-if="selectedQuestChain"
+            <div
+                v-if="selectedQuestChain"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectQuestChain(null)">
+                @click="selectQuestChain(null)"
+            >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 

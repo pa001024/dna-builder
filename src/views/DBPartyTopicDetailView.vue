@@ -1,12 +1,17 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useRoute } from "vue-router"
-import { partyTopicMap } from "@/data/d/partytopic.data"
+import { getLocalizedPartyTopicDataByLanguage } from "@/data/d/story-locale"
+import { useSettingStore } from "@/store/setting"
 
 const route = useRoute()
+const settingStore = useSettingStore()
 
 const partyTopicId = computed(() => Number(route.params.partyTopicId))
-const partyTopic = computed(() => partyTopicMap.get(partyTopicId.value))
+const partyTopic = computed(() => {
+    const localizedPartyTopicData = getLocalizedPartyTopicDataByLanguage(settingStore.lang)
+    return localizedPartyTopicData.find(item => item.id === partyTopicId.value)
+})
 </script>
 
 <template>

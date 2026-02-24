@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { listen, type UnlistenFn } from "@tauri-apps/api/event"
 import { computed, onMounted, onUnmounted, ref } from "vue"
-import { useRouter } from "vue-router"
 import {
+    appendScriptInputRecorderAction,
     clearScriptInputRecorderActions,
     getScriptInputRecorderSnapshot,
-    setScriptInputRecorderHotkeyEnabled,
     type ScriptInputRecorderAction,
     type ScriptInputRecorderSnapshot,
+    setScriptInputRecorderHotkeyEnabled,
+    toggleScriptInputRecording,
 } from "@/api/app"
 import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
@@ -26,7 +27,6 @@ interface RecorderImportPayload {
     actions?: unknown
 }
 
-const router = useRouter()
 const ui = useUIStore()
 const recorderSnapshot = ref<ScriptInputRecorderSnapshot>({
     hotkeyEnabled: false,
@@ -40,19 +40,16 @@ const importJsonText = ref("")
 const importFileRef = ref<HTMLInputElement | null>(null)
 const recorderUnavailable = ref(false)
 let unlistenRecorderUpdate: UnlistenFn | null = null
+let windowKeydownListener: ((event: KeyboardEvent) => void) | null = null
+let windowKeyupListener: ((event: KeyboardEvent) => void) | null = null
+let windowMousedownListener: ((event: MouseEvent) => void) | null = null
+let windowMouseupListener: ((event: MouseEvent) => void) | null = null
 
 const usingImportedActions = computed(() => importedActions.value !== null)
 const currentActions = computed(() => importedActions.value ?? recorderSnapshot.value.actions)
 const currentActionCount = computed(() => currentActions.value.length)
 const currentTotalTime = computed(() => currentActions.value.at(-1)?.time ?? 0)
 const generatedCode = computed(() => buildRecordedCode(currentActions.value))
-
-/**
- * 返回脚本列表页。
- */
-function backToScriptPage() {
-    router.push({ name: "script-list" })
-}
 
 /**
  * 将秒值格式化为带三位小数的文本。
@@ -73,7 +70,9 @@ function normalizeRecordedAction(action: unknown): ScriptInputRecorderAction | n
         return null
     }
     const candidate = action as Record<string, unknown>
-    const type = String(candidate.type ?? "").trim().toLowerCase()
+    const type = String(candidate.type ?? "")
+        .trim()
+        .toLowerCase()
     const timeRaw = Number(candidate.time)
     if (!Number.isFinite(timeRaw) || timeRaw < 0) {
         return null
@@ -83,7 +82,9 @@ function normalizeRecordedAction(action: unknown): ScriptInputRecorderAction | n
         time: timeRaw,
     }
     if (type === "key_down" || type === "key_up") {
-        const key = String(candidate.key ?? "").trim().toLowerCase()
+        const key = String(candidate.key ?? "")
+            .trim()
+            .toLowerCase()
         if (!key) {
             return null
         }
@@ -92,7 +93,10 @@ function normalizeRecordedAction(action: unknown): ScriptInputRecorderAction | n
         return base
     }
     if (type === "mouse_down" || type === "mouse_up") {
-        const button = String(candidate.button ?? "left").trim().toLowerCase() || "left"
+        const button =
+            String(candidate.button ?? "left")
+                .trim()
+                .toLowerCase() || "left"
         base.type = type
         base.button = button
         return base
@@ -128,12 +132,7 @@ function compressMouseActions(actions: ScriptInputRecorderAction[]): GeneratedAc
     while (index < actions.length) {
         const current = actions[index]
         const next = actions[index + 1]
-        if (
-            current.type === "mouse_down" &&
-            next &&
-            next.type === "mouse_up" &&
-            (current.button ?? "left") === (next.button ?? "left")
-        ) {
+        if (current.type === "mouse_down" && next && next.type === "mouse_up" && (current.button ?? "left") === (next.button ?? "left")) {
             result.push({
                 type: "mouse_click",
                 button: next.button ?? "left",
@@ -355,8 +354,179 @@ function useRecordedActions() {
     importedActions.value = null
 }
 
+/**
+ * 将 KeyboardEvent.key 规范化为脚本按键名。
+ * @param event 键盘事件
+ * @returns 规范化按键名；无法识别时返回 null
+ */
+function normalizeKeyboardEventKey(event: KeyboardEvent): string | null {
+    const key = String(event.key ?? "").trim()
+    if (!key) {
+        return null
+    }
+
+    if (/^[a-zA-Z]$/.test(key)) {
+        return key.toLowerCase()
+    }
+    if (/^[0-9]$/.test(key)) {
+        return key
+    }
+
+    const lower = key.toLowerCase()
+    if (/^f([1-9]|1[0-9]|2[0-4])$/.test(lower)) {
+        return lower
+    }
+
+    const keyMap: Record<string, string> = {
+        " ": "space",
+        enter: "enter",
+        tab: "tab",
+        escape: "esc",
+        esc: "esc",
+        backspace: "backspace",
+        arrowup: "up",
+        arrowdown: "down",
+        arrowleft: "left",
+        arrowright: "right",
+        shift: "shift",
+        control: "ctrl",
+        alt: "alt",
+        meta: "lwin",
+        home: "home",
+        end: "end",
+        pageup: "pageup",
+        pagedown: "pagedown",
+        insert: "insert",
+        delete: "delete",
+        capslock: "capslock",
+        numlock: "numlock",
+        scrolllock: "scrolllock",
+        printscreen: "printscreen",
+    }
+    return keyMap[lower] ?? null
+}
+
+/**
+ * 将鼠标按键编号映射为脚本按键名。
+ * @param button 鼠标按键编号
+ * @returns 规范化鼠标按键；无法识别时返回 null
+ */
+function mapMouseButton(button: number): string | null {
+    if (button === 0) return "left"
+    if (button === 1) return "middle"
+    if (button === 2) return "right"
+    if (button === 3) return "x1"
+    if (button === 4) return "x2"
+    return null
+}
+
+/**
+ * 判断当前是否应回填窗口内输入动作。
+ * @returns true 表示应回填
+ */
+function shouldAppendForegroundAction(): boolean {
+    return env.isApp && recorderSnapshot.value.recording && !usingImportedActions.value
+}
+
+/**
+ * 处理前台窗口内 F10 切换录制（不依赖 LLHook）。
+ * @param actionType 键盘动作类型
+ * @param event 键盘事件
+ */
+function handleForegroundF10Toggle(actionType: "key_down" | "key_up", event: KeyboardEvent) {
+    if (!env.isApp) {
+        return
+    }
+    if (actionType !== "key_down") {
+        return
+    }
+    const key = normalizeKeyboardEventKey(event)
+    if (key !== "f10" || event.repeat) {
+        return
+    }
+    event.preventDefault()
+    event.stopPropagation()
+    void toggleScriptInputRecording().catch(error => {
+        console.error("窗口内 F10 切换录制失败", error)
+    })
+}
+
+/**
+ * 回填键盘动作到后端录制器。
+ * @param actionType 键盘动作类型
+ * @param event 键盘事件
+ */
+function appendForegroundKeyboardAction(actionType: "key_down" | "key_up", event: KeyboardEvent) {
+    handleForegroundF10Toggle(actionType, event)
+    if (!shouldAppendForegroundAction()) {
+        return
+    }
+    const key = normalizeKeyboardEventKey(event)
+    if (!key || key === "f10") {
+        return
+    }
+    void appendScriptInputRecorderAction(actionType, key, undefined).catch(error => {
+        console.error("回填窗口键盘动作失败", error)
+    })
+}
+
+/**
+ * 回填鼠标动作到后端录制器。
+ * @param actionType 鼠标动作类型
+ * @param event 鼠标事件
+ */
+function appendForegroundMouseAction(actionType: "mouse_down" | "mouse_up", event: MouseEvent) {
+    if (!shouldAppendForegroundAction()) {
+        return
+    }
+    const button = mapMouseButton(event.button)
+    if (!button) {
+        return
+    }
+    void appendScriptInputRecorderAction(actionType, undefined, button).catch(error => {
+        console.error("回填窗口鼠标动作失败", error)
+    })
+}
+
+/**
+ * 初始化窗口内输入监听，用于前台窗口录制兜底。
+ */
+function initForegroundInputFallbackListeners() {
+    windowKeydownListener = event => appendForegroundKeyboardAction("key_down", event)
+    windowKeyupListener = event => appendForegroundKeyboardAction("key_up", event)
+    windowMousedownListener = event => appendForegroundMouseAction("mouse_down", event)
+    windowMouseupListener = event => appendForegroundMouseAction("mouse_up", event)
+    window.addEventListener("keydown", windowKeydownListener, true)
+    window.addEventListener("keyup", windowKeyupListener, true)
+    window.addEventListener("mousedown", windowMousedownListener, true)
+    window.addEventListener("mouseup", windowMouseupListener, true)
+}
+
+/**
+ * 卸载窗口内输入监听。
+ */
+function disposeForegroundInputFallbackListeners() {
+    if (windowKeydownListener) {
+        window.removeEventListener("keydown", windowKeydownListener, true)
+        windowKeydownListener = null
+    }
+    if (windowKeyupListener) {
+        window.removeEventListener("keyup", windowKeyupListener, true)
+        windowKeyupListener = null
+    }
+    if (windowMousedownListener) {
+        window.removeEventListener("mousedown", windowMousedownListener, true)
+        windowMousedownListener = null
+    }
+    if (windowMouseupListener) {
+        window.removeEventListener("mouseup", windowMouseupListener, true)
+        windowMouseupListener = null
+    }
+}
+
 onMounted(async () => {
     try {
+        initForegroundInputFallbackListeners()
         await initRecorderListener()
         await enableRecorderHotkey()
         await refreshRecorderSnapshot()
@@ -368,6 +538,7 @@ onMounted(async () => {
 })
 
 onUnmounted(async () => {
+    disposeForegroundInputFallbackListeners()
     if (unlistenRecorderUpdate) {
         unlistenRecorderUpdate()
         unlistenRecorderUpdate = null
@@ -382,18 +553,7 @@ onUnmounted(async () => {
 
 <template>
     <div class="h-full flex flex-col p-4 gap-4 overflow-hidden">
-        <div class="flex items-center justify-between gap-3">
-            <div>
-                <h1 class="text-xl font-bold">脚本录制工具</h1>
-                <p class="text-sm opacity-70">按 F10 开始/停止录制，时间轴按第一次输入归零并生成绝对时序代码。</p>
-            </div>
-            <button class="btn btn-sm btn-ghost" @click="backToScriptPage">
-                <Icon icon="ri:arrow-left-line" class="w-4 h-4" />
-                返回脚本页
-            </button>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <div class="grid grid-cols-3 gap-3">
             <div class="card bg-base-200 shadow-sm">
                 <div class="card-body p-4">
                     <div class="text-xs opacity-70">当前状态</div>
@@ -429,27 +589,33 @@ onUnmounted(async () => {
             <button v-if="usingImportedActions" class="btn btn-sm btn-ghost" @click="useRecordedActions">切回实时录制数据</button>
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 min-h-0 flex-1">
+        <div class="grid grid-cols-2 gap-4 min-h-0 flex-1">
             <div class="card bg-base-100 border border-base-300 shadow-sm min-h-0">
                 <div class="card-body p-4 min-h-0 flex flex-col gap-3">
-                    <h2 class="card-title text-base">导入 JSON（绝对时间制）</h2>
-                    <textarea
-                        v-model="importJsonText"
-                        class="textarea textarea-bordered w-full flex-1 min-h-40 font-mono text-xs"
-                        placeholder='{"actions":[{"type":"key_down","key":"w","time":0}]}'
-                    />
-                    <input ref="importFileRef" type="file" class="hidden" accept=".json,application/json" @change="handleImportFileChange" />
-                    <div class="flex flex-wrap items-center gap-2">
+                    <h2 class="card-title text-base">
+                        导入 JSON（绝对时间制）
                         <button class="btn btn-sm btn-primary" @click="handleImportJson">导入文本</button>
                         <button class="btn btn-sm btn-outline" @click="openImportFilePicker">导入 JSON 文件</button>
-                    </div>
+                    </h2>
+                    <textarea
+                        v-model="importJsonText"
+                        class="textarea textarea-bordered w-full flex-1 font-mono text-xs"
+                        placeholder='{"actions":[{"type":"key_down","key":"w","time":0}]}'
+                    />
+                    <input
+                        ref="importFileRef"
+                        type="file"
+                        class="hidden"
+                        accept=".json,application/json"
+                        @change="handleImportFileChange"
+                    />
                 </div>
             </div>
 
             <div class="card bg-base-100 border border-base-300 shadow-sm min-h-0">
                 <div class="card-body p-4 min-h-0 flex flex-col gap-3">
                     <h2 class="card-title text-base">生成代码</h2>
-                    <textarea class="textarea textarea-bordered w-full flex-1 min-h-40 font-mono text-xs" readonly :value="generatedCode" />
+                    <textarea class="textarea textarea-bordered w-full flex-1 font-mono text-xs" readonly :value="generatedCode" />
                 </div>
             </div>
         </div>
