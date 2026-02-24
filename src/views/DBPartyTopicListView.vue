@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { computed } from "vue"
+import { computed, ref, watch } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { charMap } from "@/data"
 import type { PartyTopic } from "@/data/d/partytopic.data"
-import { getLocalizedPartyTopicDataByLanguage } from "@/data/d/story-locale"
 import { questChainMap } from "@/data/d/questchain.data"
+import { getLocalizedPartyTopicDataByLanguage } from "@/data/d/story-locale"
 import { useSettingStore } from "@/store/setting"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
@@ -13,13 +13,27 @@ const searchKeyword = useSearchParam<string>("partytopic.searchKeyword", "")
 const selectedPartyTopicId = useSearchParam<number>("partytopic.selectedTopic", 0)
 const selectedCharacterId = useSearchParam<string>("partytopic.selectedCharacter", "-")
 const settingStore = useSettingStore()
+const localizedPartyTopicData = ref<PartyTopic[]>([])
 
 /**
- * 按当前设置语言返回对应的光阴集数据。
+ * 异步加载当前语言光阴集数据，并忽略过期请求结果。
+ * @param language 设置语言代码
  */
-const localizedPartyTopicData = computed<PartyTopic[]>(() => {
-    return getLocalizedPartyTopicDataByLanguage(settingStore.lang)
-})
+async function loadLocalizedPartyTopicData(language: string): Promise<void> {
+    const data = await getLocalizedPartyTopicDataByLanguage(language)
+    if (settingStore.lang !== language) {
+        return
+    }
+    localizedPartyTopicData.value = data
+}
+
+watch(
+    () => settingStore.lang,
+    async language => {
+        await loadLocalizedPartyTopicData(language)
+    },
+    { immediate: true }
+)
 
 /**
  * 获取当前选中的光阴集。
@@ -126,19 +140,27 @@ useInitialScrollToSelectedItem()
 <template>
     <div class="h-full flex flex-col bg-base-100">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
-            <div class="flex-1 flex flex-col overflow-hidden"
-                :class="{ 'border-r border-base-200': selectedPartyTopic }">
+            <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedPartyTopic }">
                 <div class="p-3 border-b border-base-200 space-y-2">
-                    <input v-model="searchKeyword" type="text" placeholder="搜索光阴集 ID/名称/角色（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
+                    <input
+                        v-model="searchKeyword"
+                        type="text"
+                        placeholder="搜索光阴集 ID/名称/角色（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
+                    />
 
                     <div class="flex items-center gap-2 text-xs">
                         <span class="text-base-content/70 shrink-0">角色筛选</span>
-                        <Select v-model="selectedCharacterId"
-                            class="w-full px-2 py-1 rounded bg-base-200 text-base-content outline-none focus:ring-1 focus:ring-primary">
+                        <Select
+                            v-model="selectedCharacterId"
+                            class="w-full px-2 py-1 rounded bg-base-200 text-base-content outline-none focus:ring-1 focus:ring-primary"
+                        >
                             <SelectItem value="-">全部角色</SelectItem>
-                            <SelectItem v-for="characterOption in characterOptions" :key="characterOption.charId"
-                                :value="characterOption.charId">
+                            <SelectItem
+                                v-for="characterOption in characterOptions"
+                                :key="characterOption.charId"
+                                :value="characterOption.charId"
+                            >
                                 {{ characterOption.charName }}
                             </SelectItem>
                         </Select>
@@ -147,10 +169,13 @@ useInitialScrollToSelectedItem()
 
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div v-for="partyTopic in filteredPartyTopics" :key="partyTopic.id"
+                        <div
+                            v-for="partyTopic in filteredPartyTopics"
+                            :key="partyTopic.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedPartyTopicId === partyTopic.id }"
-                            @click="selectPartyTopic(partyTopic)">
+                            @click="selectPartyTopic(partyTopic)"
+                        >
                             <div class="flex items-start justify-between gap-2">
                                 <div class="min-w-0 flex-1">
                                     <div class="font-medium line-clamp-1">{{ partyTopic.name }}</div>
@@ -177,9 +202,11 @@ useInitialScrollToSelectedItem()
                 </div>
             </div>
 
-            <div v-if="selectedPartyTopic"
+            <div
+                v-if="selectedPartyTopic"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectPartyTopic(null)">
+                @click="selectPartyTopic(null)"
+            >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 

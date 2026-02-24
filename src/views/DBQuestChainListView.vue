@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import Fuse, { type FuseResultMatch } from "fuse.js"
-import { computed } from "vue"
+import { computed, ref, watch } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
-import { getLocalizedQuestDataByLanguage } from "@/data/d/story-locale"
 import type { QuestItem, QuestStory } from "@/data/d/quest.data"
 import questChainData, { type QuestChain } from "@/data/d/questchain.data"
+import { getLocalizedQuestDataByLanguage } from "@/data/d/story-locale"
 import { useSettingStore } from "@/store/setting"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
@@ -41,13 +41,27 @@ const showImprCheckOnly = useSearchParam<boolean>("questchain.showImprCheckOnly"
 const showImprIncreaseOnly = useSearchParam<boolean>("questchain.showImprIncreaseOnly", false)
 const showFullTextSearch = useSearchParam<boolean>("questchain.showFullTextSearch", false)
 const settingStore = useSettingStore()
+const localizedQuestData = ref<QuestStory[]>([])
 
 /**
- * 按当前设置语言返回对应的任务剧情数据。
+ * 异步加载当前语言任务剧情数据，并忽略过期结果。
+ * @param language 设置语言代码
  */
-const localizedQuestData = computed<QuestStory[]>(() => {
-    return getLocalizedQuestDataByLanguage(settingStore.lang)
-})
+async function loadLocalizedQuestData(language: string): Promise<void> {
+    const data = await getLocalizedQuestDataByLanguage(language)
+    if (settingStore.lang !== language) {
+        return
+    }
+    localizedQuestData.value = data
+}
+
+watch(
+    () => settingStore.lang,
+    async language => {
+        await loadLocalizedQuestData(language)
+    },
+    { immediate: true }
+)
 
 /**
  * 构建任务详情映射，便于按任务 ID 快速读取对话数据。

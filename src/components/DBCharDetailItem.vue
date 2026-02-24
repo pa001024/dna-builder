@@ -3,17 +3,9 @@ import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { useSettingStore } from "@/store/setting"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 import { LeveledChar, LeveledSkillWeapon } from "../data"
+import { type CharExt, charExtData } from "../data/d/charext.data"
+import { type CharVoice, charVoiceData } from "../data/d/charvoice.data"
 import type { Char } from "../data/data-types"
-import { charExtData, type CharExt } from "../data/d/charext.data"
-import { charExtData_en } from "../data/d/charext.en.data"
-import { charExtData_fr } from "../data/d/charext.fr.data"
-import { charExtData_jp } from "../data/d/charext.jp.data"
-import { charExtData_kr } from "../data/d/charext.kr.data"
-import { charExtData_tc } from "../data/d/charext.tc.data"
-import { charVoiceData, type CharVoice } from "../data/d/charvoice.data"
-import { charVoiceData_en } from "../data/d/charvoice.en.data"
-import { charVoiceData_jp } from "../data/d/charvoice.jp.data"
-import { charVoiceData_kr } from "../data/d/charvoice.kr.data"
 import { formatProp } from "../util"
 
 const props = defineProps<{
@@ -39,6 +31,28 @@ const voiceLocaleOptions: { key: VoiceLocale; label: string; cvLabel: string }[]
 ]
 
 const VOICE_DATASET_BASE_URL = "https://modelscope.cn/datasets/pa001024/dna-voice-dataset/resolve/master"
+type CharExtLocale = "zh" | "en" | "jp" | "kr" | "fr" | "tc"
+type CharExtExtendedLocale = Exclude<CharExtLocale, "zh">
+type VoiceExtendedLocale = Exclude<VoiceLocale, "zh">
+
+const charExtDataCache: Partial<Record<CharExtLocale, CharExt[]>> = {
+    zh: charExtData,
+}
+const charVoiceDataCache: Partial<Record<VoiceLocale, CharVoice[]>> = {
+    zh: charVoiceData,
+}
+const charExtLoaderMap: Record<CharExtExtendedLocale, () => Promise<CharExt[]>> = {
+    en: async () => (await import("../data/d/charext.en.data")).charExtData_en,
+    jp: async () => (await import("../data/d/charext.jp.data")).charExtData_jp,
+    kr: async () => (await import("../data/d/charext.kr.data")).charExtData_kr,
+    fr: async () => (await import("../data/d/charext.fr.data")).charExtData_fr,
+    tc: async () => (await import("../data/d/charext.tc.data")).charExtData_tc,
+}
+const charVoiceLoaderMap: Record<VoiceExtendedLocale, () => Promise<CharVoice[]>> = {
+    en: async () => (await import("../data/d/charvoice.en.data")).charVoiceData_en,
+    jp: async () => (await import("../data/d/charvoice.jp.data")).charVoiceData_jp,
+    kr: async () => (await import("../data/d/charvoice.kr.data")).charVoiceData_kr,
+}
 
 // 创建LeveledChar实例
 const leveledChar = computed(() => {
@@ -69,8 +83,8 @@ const leveledWeapons = computed(() => {
         ? props.char.同律武器.map(weapon => new LeveledSkillWeapon(weapon, currentSkillLevel.value, currentLevel.value))
         : null
 })
-
-type CharExtLocale = "zh" | "en" | "jp" | "kr" | "fr" | "tc"
+const localizedCharExtData = ref<CharExt[]>(charExtData)
+const localizedCharVoiceData = ref<CharVoice[]>(charVoiceData)
 
 /**
  * 将设置语言代码映射为角色档案文本语言。
@@ -85,30 +99,6 @@ function resolveCharExtLocaleBySetting(language: string): CharExtLocale {
     if (language === "zh-TW" || language.startsWith("zh-Hant")) return "tc"
     return "zh"
 }
-
-/**
- * 根据当前设置语言选择角色档案数据源（无对应语言时回退简中）。
- * @returns 当前语言对应的角色档案数组
- */
-const localizedCharExtData = computed<CharExt[]>(() => {
-    const locale = resolveCharExtLocaleBySetting(setting.lang)
-    if (locale === "en") {
-        return charExtData_en
-    }
-    if (locale === "jp") {
-        return charExtData_jp
-    }
-    if (locale === "kr") {
-        return charExtData_kr
-    }
-    if (locale === "fr") {
-        return charExtData_fr
-    }
-    if (locale === "tc") {
-        return charExtData_tc
-    }
-    return charExtData
-})
 
 const charExtList = computed(() => localizedCharExtData.value.filter(item => item.charId === props.char.id))
 const storyTextConfig = computed<StoryTextConfig>(() => {
@@ -158,21 +148,47 @@ function resolveVoiceDatasetLanguage(locale: VoiceLocale): string {
 const voiceLanguage = computed(() => resolveVoiceDatasetLanguage(selectedVoiceLocale.value))
 
 /**
- * 根据当前语言选择角色语音文本数据源（无对应语言时回退中文）。
- * @returns 当前语言对应的语音数据数组
+ * 加载当前语言的角色档案数据，并缓存已加载模块。
+ * @param language 设置语言代码
  */
-const localizedCharVoiceData = computed<CharVoice[]>(() => {
-    if (selectedVoiceLocale.value === "en") {
-        return charVoiceData_en
+async function loadLocalizedCharExtData(language: string): Promise<void> {
+    const locale = resolveCharExtLocaleBySetting(language)
+    const cachedData = charExtDataCache[locale]
+    if (cachedData) {
+        if (setting.lang === language) {
+            localizedCharExtData.value = cachedData
+        }
+        return
     }
-    if (selectedVoiceLocale.value === "jp") {
-        return charVoiceData_jp
+
+    const data = await charExtLoaderMap[locale as CharExtExtendedLocale]()
+    charExtDataCache[locale] = data
+    if (setting.lang !== language) {
+        return
     }
-    if (selectedVoiceLocale.value === "kr") {
-        return charVoiceData_kr
+    localizedCharExtData.value = data
+}
+
+/**
+ * 加载当前语音语言的角色语音数据，并缓存已加载模块。
+ * @param locale 语音语言
+ */
+async function loadLocalizedCharVoiceData(locale: VoiceLocale): Promise<void> {
+    const cachedData = charVoiceDataCache[locale]
+    if (cachedData) {
+        if (selectedVoiceLocale.value === locale) {
+            localizedCharVoiceData.value = cachedData
+        }
+        return
     }
-    return charVoiceData
-})
+
+    const data = await charVoiceLoaderMap[locale as VoiceExtendedLocale]()
+    charVoiceDataCache[locale] = data
+    if (selectedVoiceLocale.value !== locale) {
+        return
+    }
+    localizedCharVoiceData.value = data
+}
 
 const charVoiceList = computed(() => localizedCharVoiceData.value.filter(item => item.charId === props.char.id))
 
@@ -331,15 +347,35 @@ watch(
 
 watch(
     () => setting.lang,
-    language => {
+    async language => {
         selectedVoiceLocale.value = resolveVoiceLocaleBySetting(language)
+        await loadLocalizedCharExtData(language)
     },
     { immediate: true }
 )
 
-watch(selectedVoiceLocale, () => {
-    stopVoicePlayback()
-})
+watch(
+    selectedVoiceLocale,
+    async locale => {
+        await loadLocalizedCharVoiceData(locale)
+        stopVoicePlayback()
+    },
+    { immediate: true }
+)
+
+watch(
+    () => [setting.protagonistGender, setting.protagonistGender2] as const,
+    () => {
+        stopVoicePlayback()
+    }
+)
+
+watch(
+    () => props.char.icon,
+    () => {
+        stopVoicePlayback()
+    }
+)
 
 onBeforeUnmount(() => {
     stopVoicePlayback()

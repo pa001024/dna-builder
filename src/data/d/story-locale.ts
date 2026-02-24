@@ -1,19 +1,33 @@
 import type { PartyTopic } from "./partytopic.data"
 import { partyTopicData } from "./partytopic.data"
-import { partyTopicData_en } from "./partytopic.en.data"
-import { partyTopicData_fr } from "./partytopic.fr.data"
-import { partyTopicData_jp } from "./partytopic.jp.data"
-import { partyTopicData_kr } from "./partytopic.kr.data"
-import { partyTopicData_tc } from "./partytopic.tc.data"
 import type { QuestStory } from "./quest.data"
 import { questData } from "./quest.data"
-import { questData_en } from "./quest.en.data"
-import { questData_fr } from "./quest.fr.data"
-import { questData_jp } from "./quest.jp.data"
-import { questData_kr } from "./quest.kr.data"
-import { questData_tc } from "./quest.tc.data"
 
 export type StoryLocale = "zh" | "en" | "jp" | "kr" | "fr" | "tc"
+type StoryExtendedLocale = Exclude<StoryLocale, "zh">
+
+const partyTopicDataCache: Partial<Record<StoryLocale, PartyTopic[]>> = {
+    zh: partyTopicData,
+}
+const questDataCache: Partial<Record<StoryLocale, QuestStory[]>> = {
+    zh: questData,
+}
+
+const partyTopicLoaderMap: Record<StoryExtendedLocale, () => Promise<PartyTopic[]>> = {
+    en: async () => (await import("./partytopic.en.data")).partyTopicData_en,
+    jp: async () => (await import("./partytopic.jp.data")).partyTopicData_jp,
+    kr: async () => (await import("./partytopic.kr.data")).partyTopicData_kr,
+    fr: async () => (await import("./partytopic.fr.data")).partyTopicData_fr,
+    tc: async () => (await import("./partytopic.tc.data")).partyTopicData_tc,
+}
+
+const questLoaderMap: Record<StoryExtendedLocale, () => Promise<QuestStory[]>> = {
+    en: async () => (await import("./quest.en.data")).questData_en,
+    jp: async () => (await import("./quest.jp.data")).questData_jp,
+    kr: async () => (await import("./quest.kr.data")).questData_kr,
+    fr: async () => (await import("./quest.fr.data")).questData_fr,
+    tc: async () => (await import("./quest.tc.data")).questData_tc,
+}
 
 /**
  * 将设置语言代码映射为剧情数据语言。
@@ -40,51 +54,53 @@ export function resolveStoryLocaleBySetting(language: string): StoryLocale {
 }
 
 /**
- * 根据设置语言返回对应的光阴集数据。
- * @param language 设置语言代码
+ * 根据剧情语言加载对应的光阴集数据，并在模块内缓存结果。
+ * @param locale 剧情语言
  * @returns 光阴集数据
  */
-export function getLocalizedPartyTopicDataByLanguage(language: string): PartyTopic[] {
-    const locale = resolveStoryLocaleBySetting(language)
-    if (locale === "en") {
-        return partyTopicData_en
+async function loadPartyTopicDataByLocale(locale: StoryLocale): Promise<PartyTopic[]> {
+    const cachedData = partyTopicDataCache[locale]
+    if (cachedData) {
+        return cachedData
     }
-    if (locale === "jp") {
-        return partyTopicData_jp
-    }
-    if (locale === "kr") {
-        return partyTopicData_kr
-    }
-    if (locale === "fr") {
-        return partyTopicData_fr
-    }
-    if (locale === "tc") {
-        return partyTopicData_tc
-    }
-    return partyTopicData
+
+    const data = await partyTopicLoaderMap[locale as StoryExtendedLocale]()
+    partyTopicDataCache[locale] = data
+    return data
 }
 
 /**
- * 根据设置语言返回对应的任务剧情数据。
+ * 根据剧情语言加载对应的任务剧情数据，并在模块内缓存结果。
+ * @param locale 剧情语言
+ * @returns 任务剧情数据
+ */
+async function loadQuestDataByLocale(locale: StoryLocale): Promise<QuestStory[]> {
+    const cachedData = questDataCache[locale]
+    if (cachedData) {
+        return cachedData
+    }
+
+    const data = await questLoaderMap[locale as StoryExtendedLocale]()
+    questDataCache[locale] = data
+    return data
+}
+
+/**
+ * 根据设置语言异步返回对应的光阴集数据。
+ * @param language 设置语言代码
+ * @returns 光阴集数据
+ */
+export function getLocalizedPartyTopicDataByLanguage(language: string): Promise<PartyTopic[]> {
+    const locale = resolveStoryLocaleBySetting(language)
+    return loadPartyTopicDataByLocale(locale)
+}
+
+/**
+ * 根据设置语言异步返回对应的任务剧情数据。
  * @param language 设置语言代码
  * @returns 任务剧情数据
  */
-export function getLocalizedQuestDataByLanguage(language: string): QuestStory[] {
+export function getLocalizedQuestDataByLanguage(language: string): Promise<QuestStory[]> {
     const locale = resolveStoryLocaleBySetting(language)
-    if (locale === "en") {
-        return questData_en
-    }
-    if (locale === "jp") {
-        return questData_jp
-    }
-    if (locale === "kr") {
-        return questData_kr
-    }
-    if (locale === "fr") {
-        return questData_fr
-    }
-    if (locale === "tc") {
-        return questData_tc
-    }
-    return questData
+    return loadQuestDataByLocale(locale)
 }

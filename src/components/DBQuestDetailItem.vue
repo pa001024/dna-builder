@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reactive } from "vue"
+import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue"
 import DBQuestStoryNodes from "@/components/DBQuestStoryNodes.vue"
-import { getLocalizedQuestDataByLanguage } from "@/data/d/story-locale"
-import type { QuestItem } from "@/data/d/quest.data"
+import type { QuestItem, QuestStory } from "@/data/d/quest.data"
 import type { QuestChain } from "@/data/d/questchain.data"
+import { getLocalizedQuestDataByLanguage } from "@/data/d/story-locale"
 import { subRegionMap } from "@/data/d/subregion.data"
 import { useSettingStore } from "@/store/setting"
 import { getDropModeText, getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
@@ -30,6 +30,7 @@ const props = defineProps<{
 }>()
 
 const settingStore = useSettingStore()
+const localizedQuestData = ref<QuestStory[]>([])
 
 const highlightedQuestMap = reactive<Record<number, boolean>>({})
 
@@ -37,13 +38,32 @@ const questElementMap = new Map<number, HTMLElement>()
 const questHighlightTimerMap = new Map<number, ReturnType<typeof setTimeout>>()
 
 /**
+ * 异步加载当前语言的任务剧情数据，并避免过期请求覆盖最新状态。
+ * @param language 设置语言代码
+ */
+async function loadLocalizedQuestData(language: string): Promise<void> {
+    const data = await getLocalizedQuestDataByLanguage(language)
+    if (settingStore.lang !== language) {
+        return
+    }
+    localizedQuestData.value = data
+}
+
+watch(
+    () => settingStore.lang,
+    async language => {
+        await loadLocalizedQuestData(language)
+    },
+    { immediate: true }
+)
+
+/**
  * 按当前设置语言构建任务详情映射，便于按任务 ID 快速读取任务文本。
  */
 const questItemMap = computed(() => {
-    const localizedQuestData = getLocalizedQuestDataByLanguage(settingStore.lang)
     const map = new Map<number, QuestItem>()
 
-    for (const questList of localizedQuestData) {
+    for (const questList of localizedQuestData.value) {
         for (const questItem of questList.quests) {
             map.set(questItem.id, questItem)
         }

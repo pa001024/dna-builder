@@ -1,16 +1,38 @@
 <script lang="ts" setup>
-import { computed } from "vue"
+import { computed, ref, watch } from "vue"
 import { useRoute } from "vue-router"
+import type { PartyTopic } from "@/data/d/partytopic.data"
 import { getLocalizedPartyTopicDataByLanguage } from "@/data/d/story-locale"
 import { useSettingStore } from "@/store/setting"
 
 const route = useRoute()
 const settingStore = useSettingStore()
+const localizedPartyTopicData = ref<PartyTopic[]>([])
 
 const partyTopicId = computed(() => Number(route.params.partyTopicId))
+
+/**
+ * 异步加载当前语言光阴集数据，并忽略过期请求结果。
+ * @param language 设置语言代码
+ */
+async function loadLocalizedPartyTopicData(language: string): Promise<void> {
+    const data = await getLocalizedPartyTopicDataByLanguage(language)
+    if (settingStore.lang !== language) {
+        return
+    }
+    localizedPartyTopicData.value = data
+}
+
+watch(
+    () => settingStore.lang,
+    async language => {
+        await loadLocalizedPartyTopicData(language)
+    },
+    { immediate: true }
+)
+
 const partyTopic = computed(() => {
-    const localizedPartyTopicData = getLocalizedPartyTopicDataByLanguage(settingStore.lang)
-    return localizedPartyTopicData.find(item => item.id === partyTopicId.value)
+    return localizedPartyTopicData.value.find(item => item.id === partyTopicId.value)
 })
 </script>
 
