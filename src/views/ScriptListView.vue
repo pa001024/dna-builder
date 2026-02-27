@@ -168,6 +168,7 @@ interface ScriptHotkeyConfig {
     hotkey: string
     hotIfWinActive: string
     holdToLoop: boolean
+    enabled: boolean
 }
 
 const openedTabs = ref<OpenedTab[]>([])
@@ -920,6 +921,16 @@ function normalizeScriptHotkeyHoldToLoopValue(value: unknown): boolean {
 }
 
 /**
+ * 规范化热键启用状态。
+ * @param value 原始值
+ * @returns 布尔值（默认启用）
+ */
+function normalizeScriptHotkeyEnabledValue(value: unknown): boolean {
+    if (typeof value === "boolean") return value
+    return true
+}
+
+/**
  * 构造默认热键配置。
  * @returns 默认配置对象
  */
@@ -928,6 +939,7 @@ function createDefaultScriptHotkeyConfig(): ScriptHotkeyConfig {
         hotkey: "",
         hotIfWinActive: "",
         holdToLoop: false,
+        enabled: true,
     }
 }
 
@@ -944,6 +956,7 @@ function normalizeScriptHotkeyConfig(raw: unknown): ScriptHotkeyConfig | null {
             hotkey,
             hotIfWinActive: "",
             holdToLoop: false,
+            enabled: true,
         }
     }
 
@@ -955,6 +968,7 @@ function normalizeScriptHotkeyConfig(raw: unknown): ScriptHotkeyConfig | null {
         hotkey,
         hotIfWinActive: normalizeScriptHotIfWinActiveValue(maybeConfig.hotIfWinActive ?? ""),
         holdToLoop: normalizeScriptHotkeyHoldToLoopValue(maybeConfig.holdToLoop),
+        enabled: normalizeScriptHotkeyEnabledValue((maybeConfig as { enabled?: unknown }).enabled),
     }
 }
 
@@ -967,6 +981,9 @@ function formatScriptHotkeyBadgeText(config?: ScriptHotkeyConfig): string {
     if (!config) return ""
     const base = normalizeScriptHotkeyValue(config.hotkey)
     if (!base) return ""
+    if (!config.enabled) {
+        return `${base} [已禁用]`
+    }
     if (config.holdToLoop) {
         return `${base} [按住循环]`
     }
@@ -1153,6 +1170,7 @@ function buildScriptHotkeyBindingsPayload(): ScriptHotkeyBinding[] {
     const localScriptSet = new Set(localScripts.value)
     for (const [scriptName, config] of Object.entries(scriptHotkeyStore.value)) {
         if (!localScriptSet.has(scriptName)) continue
+        if (!config.enabled) continue
         const normalizedHotkey = normalizeScriptHotkeyValue(config.hotkey)
         if (!normalizedHotkey) continue
         payload.push({
@@ -1184,6 +1202,29 @@ async function syncScriptHotkeysWithBackend() {
 }
 
 /**
+ * 切换单个脚本热键启用状态。
+ * @param scriptName 本地脚本名
+ */
+async function toggleScriptHotkeyEnabled(scriptName: string) {
+    const previousConfig = scriptHotkeyStore.value[scriptName]
+    if (!previousConfig) return
+    const nextConfig: ScriptHotkeyConfig = {
+        ...previousConfig,
+        enabled: !previousConfig.enabled,
+    }
+    scriptHotkeyStore.value[scriptName] = nextConfig
+    try {
+        await syncScriptHotkeysWithBackend()
+        persistScriptHotkeys()
+        ui.showSuccessMessage(nextConfig.enabled ? `已启用热键: ${scriptName}` : `已禁用热键: ${scriptName}`)
+    } catch (error) {
+        scriptHotkeyStore.value[scriptName] = previousConfig
+        console.error("切换脚本热键状态失败", error)
+        ui.showErrorMessage(`切换脚本热键状态失败: ${error}`)
+    }
+}
+
+/**
  * 打开热键绑定弹窗。
  * @param scriptName 本地脚本名
  */
@@ -1210,10 +1251,12 @@ async function saveScriptHotkeyBinding() {
     }
 
     try {
+        const enabled = previousConfig?.enabled ?? true
         scriptHotkeyStore.value[scriptName] = {
             hotkey,
             hotIfWinActive: normalizeScriptHotIfWinActiveValue(editingHotkeyWinActive.value),
             holdToLoop: normalizeScriptHotkeyHoldToLoopValue(editingHotkeyHoldToLoop.value),
+            enabled,
         }
         await syncScriptHotkeysWithBackend()
         persistScriptHotkeys()
@@ -3321,6 +3364,14 @@ onUnmounted(async () => {
                                                 清除热键
                                             </ContextMenuItem>
                                             <ContextMenuItem
+                                                v-if="scriptHotkeyStore[script]"
+                                                class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
+                                                @click="toggleScriptHotkeyEnabled(script)"
+                                            >
+                                                <Icon icon="ri:stop-circle-line" class="w-4 h-4 mr-2" />
+                                                {{ scriptHotkeyStore[script].enabled ? "禁用热键" : "启用热键" }}
+                                            </ContextMenuItem>
+                                            <ContextMenuItem
                                                 class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-success data-highlighted:text-base-100"
                                                 @click="publishScript(script)"
                                             >
@@ -3644,7 +3695,11 @@ onUnmounted(async () => {
                                         <div v-else-if="item.kind === 'multi-select'" class="space-y-2">
                                             <div v-if="item.options.length === 0" class="text-xs text-base-content/60">暂无可选项</div>
                                             <div v-else class="space-y-1">
-                                                <div v-for="option in getScriptConfigMultiSelectDisplayOptions(item)" :key="option" class="flex items-center justify-between gap-2">
+                                                <div
+                                                    v-for="option in getScriptConfigMultiSelectDisplayOptions(item)"
+                                                    :key="option"
+                                                    class="flex items-center justify-between gap-2"
+                                                >
                                                     <label class="label cursor-pointer justify-start gap-2 py-1 flex-1">
                                                         <input
                                                             type="checkbox"
