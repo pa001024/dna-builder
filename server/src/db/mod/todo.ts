@@ -5,6 +5,22 @@ import { db, schema } from ".."
 import type { Context } from "../yoga"
 import { getSubSelection } from "."
 
+/**
+ * 生成“未过期 todo”过滤条件
+ * - endTime 为空：视为长期有效
+ * - endTime 可解析且 >= 当前本地时间：视为未过期
+ * - endTime 无法解析：保守放行，避免误过滤历史数据
+ */
+function buildUnexpiredTodoCondition() {
+    const parsedEndTime = sql`datetime(replace(${schema.todos.endTime}, 'T', ' '))`
+    return sql`(
+        ${schema.todos.endTime} IS NULL
+        OR ${schema.todos.endTime} = ''
+        OR ${parsedEndTime} IS NULL
+        OR ${parsedEndTime} >= datetime('now', 'localtime')
+    )`
+}
+
 export const typeDefs = /* GraphQL */ `
     type Todo {
         id: String!
@@ -49,6 +65,7 @@ export const resolvers = {
         todos: async (_parent, args, context, info) => {
             const { type, limit = 20, offset = 0 } = args || {}
             const conditions: any[] = []
+            conditions.push(buildUnexpiredTodoCondition())
 
             if (context.user) {
                 // 已登录：返回用户的个人待办事项 AND 系统待办事项
@@ -142,6 +159,7 @@ export const resolvers = {
         todosCount: async (_parent, args, context) => {
             const { type } = args || {}
             const conditions: any[] = []
+            conditions.push(buildUnexpiredTodoCondition())
 
             if (context.user) {
                 // 已登录：统计用户的个人待办事项 AND 系统待办事项
