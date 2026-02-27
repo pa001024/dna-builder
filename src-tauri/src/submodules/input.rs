@@ -503,6 +503,7 @@ pub fn sleep(ms: u32) {
 pub fn post_key_down(hwnd: HWND, key: u16) {
     let target_hwnd = resolve_keyboard_target_window(hwnd);
     let lparam = make_key_lparam(key, false);
+    post_message_with_attach(target_hwnd, WM_KEYUP, WPARAM(key as _), lparam);
     post_message_with_attach(target_hwnd, WM_KEYDOWN, WPARAM(key as _), lparam);
 }
 

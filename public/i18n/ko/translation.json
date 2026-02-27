@@ -4777,6 +4777,12 @@
         "rangedMods": "원거리 MOD",
         "skillWeaponMods": "동률 MOD"
     },
+    "book-detail": {
+        "title": "서적 상세"
+    },
+    "book-list": {
+        "title": "서적 목록"
+    },
     "build-compare": {
         "additional_buff_list": "추가 BUFF 목록",
         "additional_mod_list": "추가 MOD 목록",
@@ -4959,6 +4965,8 @@
         "achievement_desc": "업적 정보와 보상 보기",
         "appearance": "외형",
         "appearance_desc": "캐릭터 외형, 무기 스킨 및 장식품 정보 보기",
+        "book": "서적",
+        "book_desc": "서적 항목, 단서 본문, 관련 지역 정보를 확인",
         "char": "캐릭터",
         "char_desc": "캐릭터 정보와 속성을 확인",
         "damage": "대미지",

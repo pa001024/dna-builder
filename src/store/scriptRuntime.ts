@@ -3,6 +3,27 @@ import { defineStore } from "pinia"
 import { getScriptRuntimeInfo, type ScriptRuntimeInfo, stopScript, stopScriptByPath } from "@/api/app"
 
 type ScriptRunningMode = "single" | "scheduler" | null
+export type ScriptRuntimeSidePanelTab = "status" | "config"
+
+/**
+ * 脚本控制台日志项。
+ */
+export interface ScriptConsoleLog {
+    level: string
+    message: string
+    timestamp: number
+}
+
+/**
+ * 脚本状态项（文本/图片）。
+ */
+export interface ScriptStatusItem {
+    title: string
+    text?: string
+    image?: string
+    images?: string[]
+    timestamp: number
+}
 
 let runtimeUnlistenFn: UnlistenFn | null = null
 let runtimeListenerReady = false
@@ -30,6 +51,11 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
         runningScriptPaths: [] as string[],
         runningStartedAt: 0,
         schedulerStopRequested: false,
+        showConsole: false,
+        showStatusPanel: false,
+        sidePanelTab: "status" as ScriptRuntimeSidePanelTab,
+        consoleLogs: [] as ScriptConsoleLog[],
+        scriptStatuses: [] as ScriptStatusItem[],
     }),
     actions: {
         /**
@@ -72,6 +98,65 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
          */
         requestSchedulerStop() {
             this.schedulerStopRequested = true
+        },
+
+        /**
+         * 追加一条控制台日志。
+         * @param level 日志级别
+         * @param message 日志内容
+         */
+        appendConsoleLog(level: string, message: string) {
+            this.consoleLogs.push({
+                level,
+                message,
+                timestamp: Date.now(),
+            })
+        },
+
+        /**
+         * 清空控制台日志。
+         */
+        clearConsoleLogs() {
+            this.consoleLogs = []
+        },
+
+        /**
+         * 按标题移除指定脚本状态。
+         * @param title 状态标题
+         */
+        removeScriptStatus(title: string) {
+            const normalizedTitle = String(title ?? "").trim()
+            if (!normalizedTitle) return
+            const index = this.scriptStatuses.findIndex(item => item.title === normalizedTitle)
+            if (index >= 0) {
+                this.scriptStatuses.splice(index, 1)
+            }
+        },
+
+        /**
+         * 新增或更新脚本状态。
+         * @param status 脚本状态
+         */
+        upsertScriptStatus(status: ScriptStatusItem) {
+            const normalizedTitle = String(status.title ?? "").trim()
+            if (!normalizedTitle) return
+            const nextStatus: ScriptStatusItem = {
+                ...status,
+                title: normalizedTitle,
+            }
+            const index = this.scriptStatuses.findIndex(item => item.title === normalizedTitle)
+            if (index >= 0) {
+                this.scriptStatuses[index] = nextStatus
+                return
+            }
+            this.scriptStatuses.push(nextStatus)
+        },
+
+        /**
+         * 清空全部脚本状态。
+         */
+        clearScriptStatuses() {
+            this.scriptStatuses = []
         },
 
         /**

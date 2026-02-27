@@ -4777,6 +4777,12 @@
         "rangedMods": "Remote MOD",
         "skillWeaponMods": "Tonglu MOD"
     },
+    "book-detail": {
+        "title": "Book Details"
+    },
+    "book-list": {
+        "title": "Book List"
+    },
     "build-compare": {
         "additional_buff_list": "Additional BUFF List",
         "additional_mod_list": "Additional MOD List",
@@ -4959,6 +4965,8 @@
         "achievement_desc": "View achievement information and rewards",
         "appearance": "Appearance",
         "appearance_desc": "View character appearance, weapon skins, and accessory info",
+        "book": "Books",
+        "book_desc": "Browse books, clue texts and related locations",
         "char": "Character",
         "char_desc": "View character information and attributes",
         "damage": "Damage",

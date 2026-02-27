@@ -1245,7 +1245,9 @@ fn _mc(
             };
             (None, x_arg, y_arg, merged_button)
         }
-        (hwnd_arg, Some(second), None, None) if second.is_string() => (hwnd_arg, None, None, Some(second)),
+        (hwnd_arg, Some(second), None, None) if second.is_string() => {
+            (hwnd_arg, None, None, Some(second))
+        }
         (hwnd_arg, x_arg, y_arg, button_arg) => (hwnd_arg, x_arg, y_arg, button_arg),
     };
 
@@ -2136,45 +2138,46 @@ fn _download_file(
 
     ctx.enqueue_job(
         NativeAsyncJob::new(async move |context| {
-            let async_result = _spawn_blocking_with_script_stop_snapshot(move || -> Result<(), String> {
-                let target_path = Path::new(resolved_filename.as_str());
+            let async_result =
+                _spawn_blocking_with_script_stop_snapshot(move || -> Result<(), String> {
+                    let target_path = Path::new(resolved_filename.as_str());
 
-                // force=false 且文件已存在时直接返回成功，不重复下载。
-                if !force && target_path.exists() {
-                    return Ok(());
-                }
+                    // force=false 且文件已存在时直接返回成功，不重复下载。
+                    if !force && target_path.exists() {
+                        return Ok(());
+                    }
 
-                if let Some(parent) = target_path.parent()
-                    && !parent.as_os_str().is_empty()
-                {
-                    std::fs::create_dir_all(parent).map_err(|e| {
-                        format!("创建下载目录失败: {}, {e}", parent.to_string_lossy())
+                    if let Some(parent) = target_path.parent()
+                        && !parent.as_os_str().is_empty()
+                    {
+                        std::fs::create_dir_all(parent).map_err(|e| {
+                            format!("创建下载目录失败: {}, {e}", parent.to_string_lossy())
+                        })?;
+                    }
+
+                    let client = reqwest::blocking::Client::builder()
+                        .connect_timeout(Duration::from_secs(8))
+                        .timeout(Duration::from_secs(30))
+                        .build()
+                        .map_err(|e| format!("初始化下载客户端失败: {e}"))?;
+                    let response = client
+                        .get(url.as_str())
+                        .send()
+                        .map_err(|e| format!("请求下载地址失败: {e}"))?;
+                    if !response.status().is_success() {
+                        return Err(format!("下载失败，HTTP 状态码: {}", response.status()));
+                    }
+
+                    let bytes = response
+                        .bytes()
+                        .map_err(|e| format!("读取下载内容失败: {e}"))?;
+                    std::fs::write(target_path, &bytes).map_err(|e| {
+                        format!("写入下载文件失败: {}, {e}", target_path.to_string_lossy())
                     })?;
-                }
 
-                let client = reqwest::blocking::Client::builder()
-                    .connect_timeout(Duration::from_secs(8))
-                    .timeout(Duration::from_secs(30))
-                    .build()
-                    .map_err(|e| format!("初始化下载客户端失败: {e}"))?;
-                let response = client
-                    .get(url.as_str())
-                    .send()
-                    .map_err(|e| format!("请求下载地址失败: {e}"))?;
-                if !response.status().is_success() {
-                    return Err(format!("下载失败，HTTP 状态码: {}", response.status()));
-                }
-
-                let bytes = response
-                    .bytes()
-                    .map_err(|e| format!("读取下载内容失败: {e}"))?;
-                std::fs::write(target_path, &bytes).map_err(|e| {
-                    format!("写入下载文件失败: {}, {e}", target_path.to_string_lossy())
-                })?;
-
-                Ok(())
-            })
-            .await;
+                    Ok(())
+                })
+                .await;
 
             let context = &mut context.borrow_mut();
             match async_result {
@@ -2731,7 +2734,9 @@ fn _preprocess_minimap_for_sift(
         .get_native::<JsMat>()?;
     let img_mat = (*js_img_mat.borrow().data().inner).clone();
     if img_mat.rows() <= 0 || img_mat.cols() <= 0 {
-        return Err(JsNativeError::typ().with_message("输入 Mat 尺寸无效").into());
+        return Err(JsNativeError::typ()
+            .with_message("输入 Mat 尺寸无效")
+            .into());
     }
 
     let cols = img_mat.cols();

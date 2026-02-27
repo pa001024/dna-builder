@@ -4,6 +4,7 @@ import { charMap } from "@/data/d"
 import { abyssDungeons } from "@/data/d/abyss.data"
 import { charAccessoryData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import achievementData from "@/data/d/achievement.data"
+import { booksData } from "@/data/d/book.data"
 import charData from "@/data/d/char.data"
 import draftData from "@/data/d/draft.data"
 import dungeonData from "@/data/d/dungeon.data"
@@ -87,6 +88,18 @@ export class GlobalSearchService {
      */
     private cleanParts(parts: Array<string | number | undefined | null>): string[] {
         return parts.filter(v => v !== undefined && v !== null && String(v).trim() !== "").map(v => String(v))
+    }
+
+    /**
+     * 为长文本生成可索引摘要，避免索引体积过大。
+     */
+    private createSearchSnippet(text: string | undefined, maxLength = 200): string {
+        if (!text) {
+            return ""
+        }
+
+        const normalizedText = text.replace(/\s+/g, " ").trim()
+        return normalizedText.length > maxLength ? normalizedText.slice(0, maxLength) : normalizedText
     }
 
     /**
@@ -374,6 +387,74 @@ export class GlobalSearchService {
                     },
                     [title.id, title.name, title.src, title.suf ? "后缀" : "前缀"]
                 )
+            )
+        )
+
+        entries.push(
+            ...booksData.map(book => {
+                const regionIds = Array.from(
+                    new Set(
+                        book.res
+                            .map(resource => subRegionMap.get(resource.srId)?.rid)
+                            .filter((regionId): regionId is number => regionId !== undefined)
+                    )
+                )
+                const regionNames = regionIds.map(regionId => regionMap.get(regionId)?.name).filter(Boolean)
+
+                return this.buildSearchEntry(
+                    {
+                        id: `book:${book.id}`,
+                        title: book.name,
+                        subtitle: `读物 ID: ${book.id} | 条目数: ${book.res.length}`,
+                        typeLabel: t("database.book"),
+                        path: `/db/book/${book.id}`,
+                    },
+                    [
+                        book.id,
+                        book.name,
+                        book.desc,
+                        book.icon,
+                        ...regionIds,
+                        ...regionNames,
+                        ...book.res.map(resource => resource.id),
+                        ...book.res.map(resource => resource.name),
+                    ]
+                )
+            })
+        )
+
+        entries.push(
+            ...booksData.flatMap(book =>
+                book.res.map(resource => {
+                    const subRegion = subRegionMap.get(resource.srId)
+                    const region = subRegion ? regionMap.get(subRegion.rid) : undefined
+                    const displayName = resource.name || book.name
+                    const displayDesc = resource.desc || book.desc
+
+                    return this.buildSearchEntry(
+                        {
+                            id: `book-resource:${book.id}:${resource.id}`,
+                            title: displayName,
+                            subtitle: `读物条目 ID: ${resource.id} | 所属读物: ${book.name}`,
+                            typeLabel: t("database.book"),
+                            path: `/db/book/${book.id}?resId=${resource.id}`,
+                        },
+                        [
+                            book.id,
+                            book.name,
+                            resource.id,
+                            resource.type,
+                            displayName,
+                            displayDesc,
+                            resource.srId,
+                            subRegion?.name,
+                            subRegion?.rid,
+                            region?.name,
+                            resource.mId,
+                            this.createSearchSnippet(resource.text),
+                        ]
+                    )
+                })
             )
         )
 

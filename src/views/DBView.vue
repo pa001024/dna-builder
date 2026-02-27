@@ -118,6 +118,13 @@ const databaseItems = [
         color: "from-fuchsia-500/20 to-purple-600/20 text-fuchsia-500",
     },
     {
+        name: "database.book",
+        path: "/db/book",
+        desc: "database.book_desc",
+        icon: "M3 4.5C3 3.11929 4.11929 2 5.5 2H20V20.75C20 21.4404 19.4404 22 18.75 22H5.5C4.11929 22 3 20.8807 3 19.5V4.5ZM5.5 4C5.22386 4 5 4.22386 5 4.5V19.5C5 19.7761 5.22386 20 5.5 20H18V4H5.5ZM7 7H16V9H7V7ZM7 11H16V13H7V11ZM7 15H13V17H7V15Z",
+        color: "from-orange-500/20 to-amber-600/20 text-orange-500",
+    },
+    {
         name: "database.fish",
         path: "/db/fish",
         desc: "database.fish_desc",

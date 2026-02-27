@@ -23,7 +23,7 @@ import {
 import { createScriptMutation, deleteScriptMutation, updateScriptMutation } from "@/api/gen/api-mutations"
 import { Script, scriptQuery, scriptsCountQuery, scriptsQuery } from "@/api/graphql"
 import ContextMenu, { ContextMenuItem } from "@/components/contextmenu"
-import { useScriptRuntimeStore } from "@/store/scriptRuntime"
+import { type ScriptRuntimeSidePanelTab, type ScriptStatusItem, useScriptRuntimeStore } from "@/store/scriptRuntime"
 import { useUIStore } from "@/store/ui"
 import { parseScriptHeader, replaceScriptHeader } from "@/utils/script-header"
 
@@ -176,18 +176,26 @@ const activeTabId = ref<string | null>(null)
 const activeTab = computed(() => openedTabs.value.find(tab => tab.id === activeTabId.value))
 
 // 控制台相关
-const showConsole = ref(false)
-const showStatusPanel = ref(false)
-const sidePanelTab = ref<"status" | "config">("status")
-const consoleLogs = ref<Array<{ level: string; message: string; timestamp: number }>>([])
-interface ScriptStatusItem {
-    title: string
-    text?: string
-    image?: string
-    images?: string[]
-    timestamp: number
-}
-const scriptStatuses = ref<ScriptStatusItem[]>([])
+const showConsole = computed({
+    get: () => scriptRuntime.showConsole,
+    set: value => {
+        scriptRuntime.showConsole = value
+    },
+})
+const showStatusPanel = computed({
+    get: () => scriptRuntime.showStatusPanel,
+    set: value => {
+        scriptRuntime.showStatusPanel = value
+    },
+})
+const sidePanelTab = computed({
+    get: () => scriptRuntime.sidePanelTab,
+    set: value => {
+        scriptRuntime.sidePanelTab = value
+    },
+})
+const consoleLogs = computed(() => scriptRuntime.consoleLogs)
+const scriptStatuses = computed(() => scriptRuntime.scriptStatuses)
 const isRunning = computed({
     get: () => scriptRuntime.isRunning,
     set: value => {
@@ -830,11 +838,8 @@ async function runScheduler() {
         return
     }
 
-    consoleLogs.value = []
-    scriptStatuses.value = []
-    sidePanelTab.value = "status"
-    showStatusPanel.value = true
-    showConsole.value = true
+    scriptRuntime.clearScriptStatuses()
+    activateRuntimeDebugPanelOnStart()
     scriptRuntime.markSchedulerRunning()
     scriptRuntime.clearSchedulerStopRequest()
     addConsoleLog("info", "开始执行调度器")
@@ -1024,6 +1029,21 @@ function resolveRuntimeWatchdogScriptName(): string {
 }
 
 /**
+ * 后台启动本地脚本，并在脚本结束后回收运行态。
+ * @param scriptName 本地脚本文件名
+ */
+function launchLocalScriptInBackground(scriptName: string) {
+    void runLocalScriptByName(scriptName)
+        .catch(error => {
+            console.error("脚本自动重启后再次运行失败", error)
+            addConsoleLog("error", `脚本自动重启后运行失败: ${error}`)
+        })
+        .finally(() => {
+            void syncRunningStateFromBackend(false)
+        })
+}
+
+/**
  * 在脚本超时未上报事件时自动重启当前脚本。
  * @param timeoutSeconds 超时阈值（秒）
  */
@@ -1043,8 +1063,8 @@ async function restartRunningScriptByTimeout(timeoutSeconds: number) {
         }
         await scriptRuntime.stopScriptByFilePath(scriptPath)
         touchScriptRuntimeEvent()
-        await runLocalScriptByName(scriptName)
-        addConsoleLog("info", `脚本自动重启完成: ${scriptName}`)
+        launchLocalScriptInBackground(scriptName)
+        addConsoleLog("info", `脚本自动重启已触发: ${scriptName}`)
     } catch (error) {
         console.error("脚本超时自动重启失败", error)
         addConsoleLog("error", `脚本超时自动重启失败: ${error}`)
@@ -1837,6 +1857,26 @@ function getScriptConfigMultiSelectOptionIndex(item: ScriptConfigItem, option: s
 }
 
 /**
+ * 获取 multi-select 渲染顺序（已选项按当前值顺序排列，未选项保留在后方）。
+ * @param item 配置项
+ * @returns 用于界面渲染的选项顺序
+ */
+function getScriptConfigMultiSelectDisplayOptions(item: ScriptConfigItem): string[] {
+    const normalizedOptions = normalizeScriptConfigOptions(item.options)
+    if (normalizedOptions.length === 0) return []
+
+    const selectedValues = getScriptConfigMultiSelectValues(item)
+    if (selectedValues.length === 0) return normalizedOptions
+
+    const availableOptionSet = new Set(normalizedOptions)
+    const selectedOrdered = selectedValues.filter(option => availableOptionSet.has(option))
+    const selectedSet = new Set(selectedOrdered)
+    const unselected = normalizedOptions.filter(option => !selectedSet.has(option))
+
+    return [...selectedOrdered, ...unselected]
+}
+
+/**
  * 持久化脚本配置项。
  */
 function persistScriptConfigItems() {
@@ -2078,13 +2118,22 @@ function clearAllScriptConfigItems() {
  * 打开右侧面板并切换到指定标签页。
  * @param tab 目标标签
  */
-function openSidePanel(tab: "status" | "config") {
+function openSidePanel(tab: ScriptRuntimeSidePanelTab) {
     if (showStatusPanel.value && sidePanelTab.value === tab) {
         showStatusPanel.value = false
         return
     }
     sidePanelTab.value = tab
     showStatusPanel.value = true
+}
+
+/**
+ * 在脚本启动时展示运行调试面板（仅启动时切换一次）。
+ */
+function activateRuntimeDebugPanelOnStart() {
+    sidePanelTab.value = "status"
+    showStatusPanel.value = true
+    showConsole.value = true
 }
 
 /**
@@ -2378,11 +2427,8 @@ async function runCurrentTab() {
     }
 
     try {
-        consoleLogs.value = []
-        scriptStatuses.value = []
-        sidePanelTab.value = "status"
-        showStatusPanel.value = true
-        showConsole.value = true
+        scriptRuntime.clearScriptStatuses()
+        activateRuntimeDebugPanelOnStart()
         await runLocalScriptByName(activeTab.value.name)
     } catch (error) {
         console.error("运行脚本失败", error)
@@ -2425,11 +2471,7 @@ async function createNewScript() {
  * 添加控制台日志
  */
 function addConsoleLog(level: string, message: string) {
-    consoleLogs.value.push({
-        level,
-        message,
-        timestamp: Date.now(),
-    })
+    scriptRuntime.appendConsoleLog(level, message)
     // 自动滚动到底部
     nextTick(() => {
         const consoleContainer = document.getElementById("console-output")
@@ -2443,7 +2485,7 @@ function addConsoleLog(level: string, message: string) {
  * 清空控制台
  */
 function clearConsole() {
-    consoleLogs.value = []
+    scriptRuntime.clearConsoleLogs()
 }
 
 /**
@@ -2506,11 +2548,8 @@ async function initStatusListener() {
                 normalizedImages.push(normalizedImage)
             }
 
-            const index = scriptStatuses.value.findIndex(item => item.title === normalizedTitle)
             if (action === "remove" || (!text && normalizedImages.length === 0)) {
-                if (index >= 0) {
-                    scriptStatuses.value.splice(index, 1)
-                }
+                scriptRuntime.removeScriptStatus(normalizedTitle)
                 return
             }
 
@@ -2521,13 +2560,7 @@ async function initStatusListener() {
                 images: normalizedImages,
                 timestamp: timestamp ?? Date.now(),
             }
-            if (index >= 0) {
-                scriptStatuses.value[index] = nextItem
-            } else {
-                scriptStatuses.value.push(nextItem)
-            }
-            sidePanelTab.value = "status"
-            showStatusPanel.value = true
+            scriptRuntime.upsertScriptStatus(nextItem)
         })
     } catch (error) {
         console.error("监听脚本状态事件失败", error)
@@ -2545,17 +2578,14 @@ function toggleStatusPanel() {
  * 清除指定标题的脚本状态（仅前端显示层）。
  */
 function clearStatus(title: string) {
-    const index = scriptStatuses.value.findIndex(item => item.title === title)
-    if (index >= 0) {
-        scriptStatuses.value.splice(index, 1)
-    }
+    scriptRuntime.removeScriptStatus(title)
 }
 
 /**
  * 清空全部脚本状态（仅前端显示层）。
  */
 function clearAllStatus() {
-    scriptStatuses.value = []
+    scriptRuntime.clearScriptStatuses()
 }
 
 /**
@@ -3614,11 +3644,7 @@ onUnmounted(async () => {
                                         <div v-else-if="item.kind === 'multi-select'" class="space-y-2">
                                             <div v-if="item.options.length === 0" class="text-xs text-base-content/60">暂无可选项</div>
                                             <div v-else class="space-y-1">
-                                                <div
-                                                    v-for="option in item.options"
-                                                    :key="option"
-                                                    class="flex items-center justify-between gap-2"
-                                                >
+                                                <div v-for="option in getScriptConfigMultiSelectDisplayOptions(item)" :key="option" class="flex items-center justify-between gap-2">
                                                     <label class="label cursor-pointer justify-start gap-2 py-1 flex-1">
                                                         <input
                                                             type="checkbox"

@@ -85,10 +85,11 @@ function rememberHashUploadUrl(hash: string, url: string): void {
  * @returns 追加 `x-oss-process=image/format,auto` 后的地址。
  */
 export function appendOssAutoFormat(url: string): string {
-    if (!url) return url
-    if (/(?:\?|&)x-oss-process=/.test(url)) return url
-    const separator = url.includes("?") ? "&" : "?"
-    return `${url}${separator}x-oss-process=image/format,auto`
+    return url
+    // if (!url) return url
+    // if (/(?:\?|&)x-oss-process=/.test(url)) return url
+    // const separator = url.includes("?") ? "&" : "?"
+    // return `${url}${separator}x-oss-process=image/format,auto`
 }
 
 /**

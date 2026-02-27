@@ -4773,6 +4773,12 @@
         "rangedMods": "遠隔MOD",
         "skillWeaponMods": "同律MOD"
     },
+    "book-detail": {
+        "title": "読物詳細"
+    },
+    "book-list": {
+        "title": "読物一覧"
+    },
     "build-compare": {
         "additional_buff_list": "追加BUFFリスト",
         "additional_mod_list": "追加MODリスト",
@@ -4955,6 +4961,8 @@
         "achievement_desc": "実績情報と報酬を確認",
         "appearance": "外観",
         "appearance_desc": "キャラクター外観・武器スキン・アクセサリー情報を表示",
+        "book": "読物",
+        "book_desc": "読物の条目、手がかり本文、関連エリアを確認",
         "char": "キャラクター",
         "char_desc": "キャラクターの情報と属性を確認",
         "damage": "ダメージ",

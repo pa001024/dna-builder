@@ -4667,6 +4667,12 @@
         "rangedMods": "MOD à distance",
         "skillWeaponMods": "MOD d'arme de compétence"
     },
+    "book-detail": {
+        "title": "Détail du livre"
+    },
+    "book-list": {
+        "title": "Liste des livres"
+    },
     "build-compare": {
         "additional_buff_list": "Liste de BUFF supplémentaires",
         "additional_mod_list": "Liste de MOD supplémentaires",
@@ -4883,6 +4889,8 @@
         "achievement_desc": "Voir les informations des succès et les récompenses",
         "appearance": "Apparence",
         "appearance_desc": "Voir les apparences de personnage, skins d'arme et accessoires",
+        "book": "Livres",
+        "book_desc": "Consulter les livres, textes d'indices et zones associées",
         "char": "Personnage",
         "char_desc": "Consulter les informations et attributs des personnages",
         "damage": "Dégâts",

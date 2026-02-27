@@ -179,6 +179,18 @@ const routes: readonly RouteRecordRaw[] = [
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
+                name: "book-list",
+                path: "book",
+                component: () => import("./views/DBBookListView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "book-detail",
+                path: "book/:id",
+                component: () => import("./views/DBBookDetailView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
                 name: "raid-rank",
                 path: "rank",
                 component: () => import("./views/DBRaidRank.vue"),

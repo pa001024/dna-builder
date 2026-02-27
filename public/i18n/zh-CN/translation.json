@@ -201,6 +201,12 @@
         "rangedMods": "远程MOD",
         "skillWeaponMods": "同律MOD"
     },
+    "book-detail": {
+        "title": "读物详情"
+    },
+    "book-list": {
+        "title": "读物列表"
+    },
     "build-compare": {
         "additional_buff_list": "额外BUFF列表",
         "additional_mod_list": "额外MOD列表",
@@ -383,6 +389,8 @@
         "achievement_desc": "查看成就信息和奖励",
         "appearance": "外观",
         "appearance_desc": "查看角色外观、武器皮肤与饰品信息",
+        "book": "读物",
+        "book_desc": "查看读物条目、线索文本与区域位置",
         "char": "角色",
         "char_desc": "查看角色信息和属性",
         "damage": "伤害",
