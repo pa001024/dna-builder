@@ -84,20 +84,20 @@ export const resolvers = {
                                     const userData = data[7]
                                     return {
                                         id: data[0],
-                                        room_id: data[1],
-                                        user_id: data[2],
+                                        roomId: data[1],
+                                        userId: data[2],
                                         content: data[3],
                                         edited: data[4],
-                                        created_at: data[5],
-                                        update_at: data[6],
+                                        createdAt: data[5],
+                                        updateAt: data[6],
                                         user: {
                                             id: userData[0],
                                             email: userData[1],
                                             name: userData[2],
                                             qq: userData[3],
                                             roles: userData[4],
-                                            created_at: userData[5],
-                                            update_at: userData[6],
+                                            createdAt: userData[5],
+                                            updateAt: userData[6],
                                         },
                                     }
                                 })
@@ -141,20 +141,20 @@ export const resolvers = {
                                     const userData = data[7]
                                     return {
                                         id: data[0],
-                                        room_id: data[1],
-                                        user_id: data[2],
+                                        roomId: data[1],
+                                        userId: data[2],
                                         content: data[3],
                                         edited: data[4],
-                                        created_at: data[5],
-                                        update_at: data[6],
+                                        createdAt: data[5],
+                                        updateAt: data[6],
                                         user: {
                                             id: userData[0],
                                             email: userData[1],
                                             name: userData[2],
                                             qq: userData[3],
                                             roles: userData[4],
-                                            created_at: userData[5],
-                                            update_at: userData[6],
+                                            createdAt: userData[5],
+                                            updateAt: userData[6],
                                         },
                                     }
                                 })

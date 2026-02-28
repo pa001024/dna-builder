@@ -2,12 +2,11 @@
 import { gql, useQuery, useSubscription } from "@urql/vue"
 import { useScroll } from "@vueuse/core"
 import { useSound } from "@vueuse/sound"
-import { computed, nextTick, onMounted, ref, watchEffect } from "vue"
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watchEffect } from "vue"
 import { onBeforeRouteLeave, useRoute } from "vue-router"
-import { editMessageMutation, Msg, msgsQuery, rtcClientsQuery, rtcJoinMutation, sendMessageMutation } from "@/api/graphql"
+import { editMessageMutation, Msg, msgsQuery, roomQuery, rtcClientsQuery, rtcJoinMutation, sendMessageMutation } from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
-import { sleep } from "@/util"
 import { copyHtmlContent, isImage, sanitizeHTML } from "@/utils/html"
 import { fileToDataUrlWithRealMime, normalizeInlineImageDataUrlMime } from "@/utils/image-data-url"
 
@@ -101,6 +100,84 @@ onMounted(async () => {
     if (msgCount.value > 0) user.setRoomReadedCount(roomId.value, msgCount.value)
 })
 
+const isSyncingLatestMessages = ref(false)
+
+/**
+ * @description 计算消息分页中“最新页”的偏移量。
+ * @param total 总消息数。
+ * @param limit 每页条数。
+ * @returns 最新页 offset。
+ */
+function getLatestPageOffset(total: number, limit = 20) {
+    if (total <= 0) return 0
+    return total - (total % limit || limit)
+}
+
+/**
+ * @description 在网络恢复或页面回到前台时，强制从服务端同步最新消息页，补齐断线期间可能漏掉的数据。
+ */
+async function syncLatestMessagesFromServer() {
+    if (!roomId.value) return
+    if (!navigator.onLine) return
+    if (isSyncingLatestMessages.value) return
+
+    isSyncingLatestMessages.value = true
+    try {
+        const room = await roomQuery(
+            {
+                id: roomId.value,
+            },
+            {
+                requestPolicy: "network-only",
+            }
+        )
+        const latestCount = room?.msgCount || 0
+        if (!latestCount) return
+
+        await msgsQuery(
+            {
+                roomId: roomId.value,
+                limit: 20,
+                offset: getLatestPageOffset(latestCount, 20),
+            },
+            {
+                requestPolicy: "network-only",
+            }
+        )
+    } catch (error) {
+        console.error("同步最新消息失败", error)
+    } finally {
+        isSyncingLatestMessages.value = false
+    }
+}
+
+/**
+ * @description 浏览器网络恢复时触发服务端补同步。
+ */
+function handleOnline() {
+    void syncLatestMessagesFromServer()
+}
+
+/**
+ * @description 页面重新可见时触发服务端补同步，兜底处理后台恢复场景。
+ */
+function handleVisibilityChange() {
+    if (document.visibilityState === "visible") {
+        void syncLatestMessagesFromServer()
+    }
+}
+
+onMounted(() => {
+    window.addEventListener("online", handleOnline)
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    void syncLatestMessagesFromServer()
+})
+
+onBeforeUnmount(() => {
+    window.removeEventListener("online", handleOnline)
+    document.removeEventListener("visibilitychange", handleVisibilityChange)
+})
+
 useSubscription<{ newMessage: Msg }>(
     {
         query: gql`
@@ -112,6 +189,7 @@ useSubscription<{ newMessage: Msg }>(
                     edited
                     content
                     createdAt
+                    updateAt
                     replyToMsgId
                     replyToUserId
                     user {
@@ -127,6 +205,16 @@ useSubscription<{ newMessage: Msg }>(
                             name
                             qq
                         }
+                    }
+                    reactions {
+                        id
+                        count
+                        users {
+                            id
+                            name
+                            qq
+                        }
+                        createdAt
                     }
                 }
             }
@@ -179,7 +267,7 @@ async function addMessage(msg: Msg) {
         sfx.play()
     }
     if (arrivedState.bottom) {
-        await sleep(50)
+        await nextTick()
         el.value?.scrollTo({
             top: el.value.scrollHeight,
             left: 0,
@@ -330,7 +418,7 @@ function cancelReply() {
 <template>
     <div class="w-full h-full bg-base-200/50 flex">
         <!-- 聊天窗口 -->
-        <div v-if="isJoined && !loading" class="flex-1 flex flex-col overflow-hidden">
+        <div v-if="isJoined && !loading" class="flex-1 flex flex-col">
             <!-- 主内容区 -->
             <div class="flex-1 flex flex-col overflow-hidden relative">
                 <GQAutoPage
@@ -343,6 +431,7 @@ function cancelReply() {
                     :offset="msgCount"
                     :query="msgsQuery"
                     :variables="variables"
+                    request-policy="cache-first"
                     @loadref="r => (el = r)"
                 >
                     <!-- 消息列表 -->
@@ -449,32 +538,33 @@ function cancelReply() {
                         </div>
                     </div>
                 </div>
+
+                <!-- 在线用户 -->
+                <GQQuery v-slot="{ data: onlines }" :query="rtcClientsQuery" :variables="variables">
+                    <div v-if="onlines" class="flex items-center p-1 gap-1 absolute bottom-0">
+                        <div class="flex group bg-primary items-center rounded-full px-1">
+                            <QQAvatar class="size-6 my-1" :name="user.name!" :qq="user.qq!" />
+                            <div
+                                class="flex text-sm text-base-100 max-w-0 group-hover:max-w-24 group-hover:mx-1 overflow-hidden transition-all duration-500 whitespace-nowrap"
+                            >
+                                {{ user.name }}
+                            </div>
+                        </div>
+                        <div
+                            v-for="item in onlines.filter(v => v.user.id !== user.id)"
+                            :key="item.id"
+                            class="flex group bg-primary items-center rounded-full px-1"
+                        >
+                            <QQAvatar class="size-6 my-1" :name="item.user.name" :qq="item.user.qq" />
+                            <div
+                                class="flex text-sm text-base-100 max-w-0 group-hover:max-w-24 group-hover:mx-1 overflow-hidden transition-all duration-500 whitespace-nowrap"
+                            >
+                                {{ item.user.name }}
+                            </div>
+                        </div>
+                    </div>
+                </GQQuery>
             </div>
-            <!-- 在线用户 -->
-            <GQQuery v-slot="{ data: onlines }" :query="rtcClientsQuery" :variables="variables">
-                <div v-if="onlines" class="flex items-center p-1 gap-1">
-                    <div class="flex group bg-primary items-center rounded-full px-1">
-                        <QQAvatar class="size-6 my-1" :name="user.name!" :qq="user.qq!" />
-                        <div
-                            class="flex text-sm text-base-100 max-w-0 group-hover:max-w-24 group-hover:mx-1 overflow-hidden transition-all duration-500 whitespace-nowrap"
-                        >
-                            {{ user.name }}
-                        </div>
-                    </div>
-                    <div
-                        v-for="item in onlines.filter(v => v.user.id !== user.id)"
-                        :key="item.id"
-                        class="flex group bg-primary items-center rounded-full px-1"
-                    >
-                        <QQAvatar class="size-6 my-1" :name="item.user.name" :qq="item.user.qq" />
-                        <div
-                            class="flex text-sm text-base-100 max-w-0 group-hover:max-w-24 group-hover:mx-1 overflow-hidden transition-all duration-500 whitespace-nowrap"
-                        >
-                            {{ item.user.name }}
-                        </div>
-                    </div>
-                </div>
-            </GQQuery>
             <!-- 分割线 -->
             <div class="flex-none w-full relative">
                 <div
@@ -527,6 +617,7 @@ function cancelReply() {
                     mode="html"
                     :placeholder="$t('chat.chatPlaceholder')"
                     class="flex-1 overflow-hidden"
+                    inner-class="min-h-20"
                     @loadref="r => (input = r)"
                     @enter="sendMessage"
                 />

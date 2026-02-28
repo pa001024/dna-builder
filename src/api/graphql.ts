@@ -244,7 +244,12 @@ const cacheExchange = offlineExchange({
                             msgCount
                             lastMsg {
                                 id
+                                roomId
+                                userId
+                                edited
                                 content
+                                createdAt
+                                updateAt
                                 replyToMsgId
                                 replyToUserId
                                 user {
@@ -270,10 +275,14 @@ const cacheExchange = offlineExchange({
                         lastMsg: {
                             __typename: "Msg",
                             id: msg.id,
+                            roomId: msg.roomId,
+                            userId: msg.userId,
+                            edited: msg.edited,
                             content: msg.content,
                             replyToMsgId: msg.replyToMsgId,
                             replyToUserId: msg.replyToUserId,
                             createdAt: msg.createdAt,
+                            updateAt: msg.updateAt,
                             user: {
                                 __typename: "User",
                                 id: msg.user.id,
@@ -306,6 +315,7 @@ const cacheExchange = offlineExchange({
                                     edited
                                     content
                                     createdAt
+                                    updateAt
                                     replyToMsgId
                                     replyToUserId
                                     user {
@@ -321,6 +331,16 @@ const cacheExchange = offlineExchange({
                                             name
                                             qq
                                         }
+                                    }
+                                    reactions {
+                                        id
+                                        count
+                                        users {
+                                            id
+                                            name
+                                            qq
+                                        }
+                                        createdAt
                                     }
                                 }
                             }
