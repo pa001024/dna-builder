@@ -141,10 +141,10 @@ export class CharBuild {
         DEF: "防御",
         HP: "生命",
         SP: "神智",
-        DPH: "or(多重,1)*伤害",
+        DPH: "or(多重,1)*(1+or(追加伤害,0))*伤害",
         总伤: "max(1,召唤物攻击次数)*伤害",
         暴击伤害: "伤害.暴击",
-        DPS: "or(攻速,1+技能速度)*or(多重,1)*伤害",
+        DPS: "or(攻速,1+技能速度)*or(多重,1)*(1+or(追加伤害,0))*伤害",
         范围收益: "技能范围*伤害",
         耐久收益: "技能耐久*伤害",
         效益收益: "技能效益*伤害",
@@ -600,7 +600,8 @@ export class CharBuild {
             const all = this.getAllWeaponsAttrs()
             if (this.dynamicBuffs.length > 0) {
                 for (const b of this.dynamicBuffs) {
-                    attrs = b.applyDynamicAttr(char, attrs, this.getAllWeapons(), all)
+                    const { weapon, ...rest } = b.applyDynamicAttr(char, attrs, this.getAllWeapons(), all)
+                    attrs = rest
                 }
             }
         }

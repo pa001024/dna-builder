@@ -41,6 +41,43 @@ function openWeaponSelect() {
     emit("openWeaponSelect")
     model.value = true
 }
+
+interface DynamicAttrSource {
+    sourceName: string
+    value: number
+}
+
+/**
+ * 通过“移除单个动态BUFF后重算”的方式，得到每个动态来源对武器属性的实际数值贡献。
+ */
+const dynamicWeaponAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>(() => {
+    const sourceMap: Record<string, DynamicAttrSource[]> = {}
+    const epsilon = 1e-10
+
+    props.charBuild.dynamicBuffs.forEach((buff, buffIndex) => {
+        const buildWithoutBuff = props.charBuild.clone()
+        buildWithoutBuff.dynamicBuffs = props.charBuild.dynamicBuffs.filter((_, index) => index !== buffIndex).map(item => item.clone())
+        const weaponWithoutBuff = buildWithoutBuff[`${props.wkey}Weapon`]
+        const weaponAttrsWithoutBuff = weaponWithoutBuff ? buildWithoutBuff.calculateWeaponAttributes(weaponWithoutBuff).weapon : undefined
+        if (!weaponAttrsWithoutBuff) return
+
+        Object.entries(weaponAttrs.value).forEach(([attrKey, attrValue]) => {
+            const withoutValue = weaponAttrsWithoutBuff[attrKey as keyof typeof weaponAttrsWithoutBuff]
+            if (typeof attrValue !== "number" || typeof withoutValue !== "number") return
+
+            const delta = attrValue - withoutValue
+            if (Math.abs(delta) < epsilon) return
+
+            sourceMap[attrKey] ||= []
+            sourceMap[attrKey].push({
+                sourceName: buff.名称,
+                value: delta,
+            })
+        })
+    })
+
+    return sourceMap
+})
 </script>
 <template>
     <!-- 武器 -->
@@ -111,6 +148,10 @@ function openWeaponSelect() {
                                     )
                                 }}
                             </li>
+                            <li v-if="'射速' in baseWeapon && key === '攻速'" class="flex justify-between gap-8 text-sm text-primary">
+                                <div class="text-base-content/80">基础{{ key }}</div>
+                                {{ formatWeaponProp("基础攻击", (baseWeapon as LeveledWeapon)["射速"]!) }}
+                            </li>
                             <!-- 角色自带加成 -->
                             <li
                                 v-if="key != '攻击' && key in (charBuild.char.加成 || {})"
@@ -159,6 +200,14 @@ function openWeaponSelect() {
                                 {{ format100r(buff[key]!) }}
                             </li>
                             <li
+                                v-for="(dynamicSource, index) in dynamicWeaponAttrSourceMap[key] || []"
+                                :key="`${dynamicSource.sourceName}-${index}`"
+                                class="flex justify-between gap-8 text-sm text-primary"
+                            >
+                                <div class="text-base-content/80">{{ dynamicSource.sourceName }}</div>
+                                {{ format100r(dynamicSource.value) }}
+                            </li>
+                            <li
                                 v-if="
                                     key === '攻击' &&
                                     (charBuild.char.精通.includes(charBuild[`${wkey}Weapon`]!.类别) ||
@@ -180,7 +229,7 @@ function openWeaponSelect() {
                         {{ key === "攻击" ? $t(`${charBuild[`${wkey}Weapon`]!.伤害类型}`) : "" }}{{ $t(key) }}
                     </div>
                     <div class="text-primary font-bold text-sm font-orbitron">
-                        {{ formatWeaponProp(key, val) }}
+                        {{ formatWeaponProp(["攻速", "多重", "弹匣", "装填"].includes(key) ? "基础攻击" : key, val) }}
                     </div>
                 </div>
             </FullTooltip>

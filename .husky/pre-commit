@@ -7,9 +7,11 @@ npm run format
 # 暂存修改的版本文件
 git add package.json
 git add src-tauri/tauri.conf.json
+git add src-tauri/Cargo.lock
+git add src-tauri/Cargo.toml
 
 # 全添加(别搞错了)
-git add .
+# git add .
 
 # 运行测试（如果需要可以注释掉）
 # npm run lint

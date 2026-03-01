@@ -64,7 +64,9 @@ function checkNewVersions() {
 // Close modal and update last popup version
 function closeModal() {
     showModal.value = false
-    lastPopupVersion.value = currentVersion
+    setTimeout(() => {
+        lastPopupVersion.value = currentVersion
+    }, 1000)
 }
 
 async function updateApp() {
@@ -117,8 +119,10 @@ declare global {
 }
 </script>
 <template>
-    <div v-if="isUpdating"
-        class="fixed h-screen w-screen bg-base-100/50 backdrop-blur-lg flex flex-col gap-4 p-8 justify-center items-center rounded-md shadow-md z-100">
+    <div
+        v-if="isUpdating"
+        class="fixed h-screen w-screen bg-base-100/50 backdrop-blur-lg flex flex-col gap-4 p-8 justify-center items-center rounded-md shadow-md z-100"
+    >
         {{ $t("updater.updating") }}
         <progress class="progress progress-primary w-1/2" :value="updateProgress" max="100" />
     </div>
@@ -133,8 +137,11 @@ declare global {
             </div>
             <div class="max-h-96 overflow-y-auto py-4">
                 <div v-if="versions.length > 0" class="space-y-4">
-                    <div v-for="version in versions.filter(v => compareVersions(v.version, lastPopupVersion) > 0)"
-                        :key="version.version" class="bg-base-200 p-4 rounded-lg">
+                    <div
+                        v-for="version in versions.filter(v => compareVersions(v.version, lastPopupVersion) > 0)"
+                        :key="version.version"
+                        class="bg-base-200 p-4 rounded-lg"
+                    >
                         <div class="font-bold text-primary">
                             {{ version.version }}
                         </div>
@@ -155,12 +162,14 @@ declare global {
                 <div class="flex flex-col gap-2">
                     <p>本软件是免费软件, 如果您喜欢这个项目，并且想支持作者的工作，请考虑以下方式：</p>
                     <div>
-                        直接捐赠：<a target="_black" class="link link-primary"
-                            href="https://afdian.com/a/pa001024">https://afdian.com/a/pa001024</a>
+                        直接捐赠：<a target="_black" class="link link-primary" href="https://afdian.com/a/pa001024"
+                            >https://afdian.com/a/pa001024</a
+                        >
                     </div>
                     <div>
-                        购买应用：<a target="_black" class="link link-primary"
-                            href="https://apps.microsoft.com/detail/9nk8zw43shb1">https://apps.microsoft.com/detail/9nk8zw43shb1</a>
+                        购买应用：<a target="_black" class="link link-primary" href="https://apps.microsoft.com/detail/9nk8zw43shb1"
+                            >https://apps.microsoft.com/detail/9nk8zw43shb1</a
+                        >
                     </div>
                 </div>
             </div>

@@ -201,7 +201,7 @@ export class LeveledBuff implements Buff {
             const maxValue = this._originalBuffData[prop]
             if (maxValue !== undefined) {
                 if (Array.isArray(maxValue)) {
-                    this[prop] = maxValue[x - 1] * this._ratio
+                    this[prop] = maxValue[Math.min(x, maxValue.length) - 1] * this._ratio
                 } else if (typeof maxValue === "number") {
                     // 属性值 = 满级属性/a*(1+(x-1)/b)
                     let currentValue = (maxValue / a) * (1 + (x - lx) / b) * this._ratio

@@ -253,10 +253,9 @@ function buildVoiceUrl(voice: CharVoice): string {
         return ""
     }
     const language = voiceLanguage.value
-    const icon = encodeURIComponent(props.char.icon)
     const genderSuffix = resolveVoiceGenderSuffixByText(voice.text)
     const res = encodeURIComponent(`${voice.res}${genderSuffix}`)
-    return `${VOICE_DATASET_BASE_URL}/${language}/char/voice_${language}_char_${icon}_${res}.ogg`
+    return `${VOICE_DATASET_BASE_URL}/${language}/char/voice_${language}_${res}.ogg`
 }
 
 /**
@@ -476,7 +475,7 @@ onBeforeUnmount(() => {
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
                         <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
                             <span class="text-base-content/70">{{ $t("攻击") }}</span>
-                            <span class="font-medium text-primary">{{ leveledWeapon.基础攻击 }}</span>
+                            <span class="font-medium text-primary">{{ +leveledWeapon.基础攻击.toFixed(2) }}</span>
                         </div>
                         <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
                             <span class="text-base-content/70">{{ $t("暴击") }}</span>
