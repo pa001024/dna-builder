@@ -347,6 +347,12 @@ const routes: readonly RouteRecordRaw[] = [
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
+                name: "map-local",
+                path: "map-local",
+                component: () => import("./views/DBMapLocalView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
                 name: "map-detail",
                 path: "map/:mapId",
                 component: () => import("./views/DBMapDetailView.vue"),

@@ -104,6 +104,13 @@ const databaseItems = [
         color: "from-green-500/20 to-emerald-600/20 text-green-500",
     },
     {
+        name: "本地分层地图",
+        path: "/db/map-local",
+        desc: "基于本地 world 图层文件的区域地图",
+        icon: "M3 3H21V21H3V3ZM5 5V19H19V5H5ZM7 7H11V11H7V7ZM13 7H17V11H13V7ZM7 13H11V17H7V13ZM13 13H17V17H13V13Z",
+        color: "from-cyan-500/20 to-sky-600/20 text-cyan-500",
+    },
+    {
         name: "database.walnut",
         path: "/db/walnut",
         desc: "database.walnut_desc",
