@@ -13,9 +13,10 @@ const props = defineProps<{
 interface PetSpawnLocation {
     subRegionId: number
     subRegionName: string
+    regionId: number
     regionName: string
     totalWeight: number
-    rcWeights: { rcId: number; petWeight: number; totalWeight: number; ratio: number }[]
+    rcWeights: { rcId: number; rcIndex: number; petWeight: number; totalWeight: number; ratio: number }[]
 }
 
 const currentLevel = ref(props.pet.最大等级 > 1 ? 3 : 0)
@@ -35,10 +36,10 @@ const petSpawnLocations = computed<PetSpawnLocation[]>(() => {
             continue
         }
 
-        const rcWeights: { rcId: number; petWeight: number; totalWeight: number; ratio: number }[] = []
+        const rcWeights: { rcId: number; rcIndex: number; petWeight: number; totalWeight: number; ratio: number }[] = []
         let totalWeight = 0
 
-        for (const randomCreator of subRegion.rc) {
+        for (const [rcIndex, randomCreator] of subRegion.rc.entries()) {
             const rcTotalWeight = randomCreator.info.reduce((sum, randomInfo) => sum + randomInfo.w, 0)
             let petWeight = 0
             for (const randomInfo of randomCreator.info) {
@@ -50,6 +51,7 @@ const petSpawnLocations = computed<PetSpawnLocation[]>(() => {
             if (petWeight > 0 && rcTotalWeight > 0) {
                 rcWeights.push({
                     rcId: randomCreator.id,
+                    rcIndex,
                     petWeight,
                     totalWeight: rcTotalWeight,
                     ratio: petWeight / rcTotalWeight,
@@ -65,6 +67,7 @@ const petSpawnLocations = computed<PetSpawnLocation[]>(() => {
         spawnLocations.push({
             subRegionId: subRegion.id,
             subRegionName: subRegion.name,
+            regionId: subRegion.rid,
             regionName: regionMap.get(subRegion.rid)?.name || `区域${subRegion.rid}`,
             totalWeight,
             rcWeights,
@@ -236,15 +239,24 @@ function getPrmName(id: number): string {
                         <span>ID: {{ location.subRegionId }}</span>
                     </div>
                     <div class="flex flex-wrap gap-1 mt-2">
-                        <span
+                        <SRouterLink
                             v-for="rcWeight in location.rcWeights"
-                            :key="`${location.subRegionId}-${rcWeight.rcId}`"
-                            class="px-1.5 py-0.5 rounded bg-base-300 text-xs"
+                            :key="`${location.subRegionId}-${rcWeight.rcId}-${rcWeight.rcIndex}`"
+                            class="px-1.5 py-0.5 rounded bg-base-300 text-xs hover:bg-primary/20 transition-colors"
+                            :to="{
+                                name: 'map-local',
+                                query: {
+                                    regionId: location.regionId,
+                                    subRegionId: location.subRegionId,
+                                    rcId: rcWeight.rcId,
+                                    rcIndex: rcWeight.rcIndex,
+                                },
+                            }"
                         >
                             RC {{ rcWeight.rcId }}: {{ rcWeight.petWeight }}/{{ rcWeight.totalWeight }} ({{
                                 formatPercent(rcWeight.ratio)
                             }})
-                        </span>
+                        </SRouterLink>
                     </div>
                 </div>
             </div>

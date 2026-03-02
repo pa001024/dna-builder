@@ -44,4 +44,3 @@ src-tauri/gen/android/keystore.properties
 docs/
 externals/dna-api/js/
 tools/radix-icons/
-public/imgs/world/*.webp

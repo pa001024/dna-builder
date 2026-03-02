@@ -6,11 +6,20 @@ export interface SubRegion {
     map: string
     pos?: [number, number]
     rc?: RandomCreator[]
+    range?: Range
+}
+
+export interface Range {
+    center: number[]
+    extent: number[]
+    anchor?: number[]
 }
 
 export interface RandomCreator {
     id: number
     info: RandomInfo[]
+    count: number
+    pos: [number, number][]
 }
 
 export interface RandomInfo {
@@ -75,6 +84,12 @@ export const subRegionData: SubRegion[] = [
                         w: 3491,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [11655.457, -4665.6777],
+                    [5120.906, 6124.65],
+                    [6197.635, 2150.597],
+                ],
             },
             {
                 id: 9010102,
@@ -108,8 +123,17 @@ export const subRegionData: SubRegion[] = [
                         w: 7222,
                     },
                 ],
+                count: 1,
+                pos: [
+                    [5060.087, 12161.824],
+                    [-3608.518, 10535.44],
+                ],
             },
         ],
+        range: {
+            center: [6080, -1610],
+            extent: [0, 0],
+        },
     },
     {
         id: 100102,
@@ -151,6 +175,12 @@ export const subRegionData: SubRegion[] = [
                         w: 7222,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [23230.3085, 6253.6973],
+                    [15621.6865, 8781.5195],
+                    [26622.531, 4795.134],
+                ],
             },
             {
                 id: 9010202,
@@ -184,8 +214,14 @@ export const subRegionData: SubRegion[] = [
                         w: 7222,
                     },
                 ],
+                count: 1,
+                pos: [[26758.711, -3669.841]],
             },
         ],
+        range: {
+            center: [22990, -4460],
+            extent: [0, 0],
+        },
     },
     {
         id: 100103,
@@ -246,6 +282,12 @@ export const subRegionData: SubRegion[] = [
                         id: 4933,
                         w: 2327,
                     },
+                ],
+                count: 2,
+                pos: [
+                    [19081.518, 23631.2656],
+                    [28542.598, 35567.512],
+                    [37121.336, 21173.97656],
                 ],
             },
         ],
@@ -328,6 +370,14 @@ export const subRegionData: SubRegion[] = [
                         w: 1164,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [-385.3145, 214.4003],
+                    [-4508.708008, 4606.427],
+                    [-7776.3726, 8788.623],
+                    [-2889.9258, -6075.498],
+                    [-8053.1494, -7062.668],
+                ],
             },
             {
                 id: 9020302,
@@ -365,8 +415,19 @@ export const subRegionData: SubRegion[] = [
                         w: 3611,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [-8039.2256, 9863.907],
+                    [-5962.5088, 3424.7],
+                    [-7490.5615, -12614.314],
+                    [-7501.0415, -10407.369],
+                ],
             },
         ],
+        range: {
+            center: [-3700, -2530],
+            extent: [0, 0],
+        },
     },
     {
         id: 101103,
@@ -423,6 +484,11 @@ export const subRegionData: SubRegion[] = [
                         w: 1444,
                     },
                 ],
+                count: 1,
+                pos: [
+                    [-22756.666, -10408.791],
+                    [-21046, -3143],
+                ],
             },
             {
                 id: 9020102,
@@ -471,6 +537,13 @@ export const subRegionData: SubRegion[] = [
                         id: 4932,
                         w: 1444,
                     },
+                ],
+                count: 2,
+                pos: [
+                    [-31564.826, 8724.589],
+                    [-33249.418, -709.87866],
+                    [-38130.344, -1261.986],
+                    [-24023.645, -2599.1194],
                 ],
             },
             {
@@ -533,6 +606,11 @@ export const subRegionData: SubRegion[] = [
                         w: 1396,
                     },
                 ],
+                count: 1,
+                pos: [
+                    [-25908.014, -11729.781],
+                    [-27188.06, -3692.8408],
+                ],
             },
             {
                 id: 9020104,
@@ -582,6 +660,8 @@ export const subRegionData: SubRegion[] = [
                         w: 1444,
                     },
                 ],
+                count: 1,
+                pos: [[-39436.633, -6742.218]],
             },
             {
                 id: 9020201,
@@ -642,6 +722,13 @@ export const subRegionData: SubRegion[] = [
                         id: 4932,
                         w: 903,
                     },
+                ],
+                count: 2,
+                pos: [
+                    [-40166.29, 35069.74],
+                    [-28811.521, 25382.383],
+                    [-28983.291, 17793.04],
+                    [-26366.63, 13694.323],
                 ],
             },
             {
@@ -704,6 +791,11 @@ export const subRegionData: SubRegion[] = [
                         w: 903,
                     },
                 ],
+                count: 1,
+                pos: [
+                    [-54638.664, 37695.5],
+                    [-45600.07, 38818.957],
+                ],
             },
             {
                 id: 9020203,
@@ -765,6 +857,13 @@ export const subRegionData: SubRegion[] = [
                         w: 1396,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [-49531.727, 28512.865],
+                    [-40739.51, 25762.861],
+                    [-33942.535, 24594.766],
+                    [-30892.955, 11922.168],
+                ],
             },
             {
                 id: 9020204,
@@ -797,6 +896,11 @@ export const subRegionData: SubRegion[] = [
                         id: 4931,
                         w: 7222,
                     },
+                ],
+                count: 1,
+                pos: [
+                    [-10737.393, 34475.617],
+                    [-18956.83, 25610.023],
                 ],
             },
             {
@@ -843,8 +947,18 @@ export const subRegionData: SubRegion[] = [
                         w: 6981,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [-1844.6661, 20536.732],
+                    [-11086.272, 14420.209],
+                    [-16607.379, 23424.396],
+                ],
             },
         ],
+        range: {
+            center: [-29898.516, -2645.25],
+            extent: [0, 0],
+        },
     },
     {
         id: 101104,
@@ -859,6 +973,10 @@ export const subRegionData: SubRegion[] = [
         name: "奥特赛德的家",
         desc: "奥特赛德住处描述",
         map: "Chapter01_OutsidersHome",
+        range: {
+            center: [-8800, -6180],
+            extent: [0, 0],
+        },
     },
     {
         id: 101106,
@@ -962,8 +1080,17 @@ export const subRegionData: SubRegion[] = [
                         w: 1396,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [-7296.454, 5635.274],
+                    [10367, 5506],
+                ],
             },
         ],
+        range: {
+            center: [9550, 4320],
+            extent: [0, 0],
+        },
     },
     {
         id: 101303,
@@ -1019,6 +1146,12 @@ export const subRegionData: SubRegion[] = [
                         id: 4932,
                         w: 1444,
                     },
+                ],
+                count: 2,
+                pos: [
+                    [-851.40674, 26959.19],
+                    [8052.373, 29345.334],
+                    [2041.5007, 30489.262],
                 ],
             },
         ],
@@ -1090,6 +1223,12 @@ export const subRegionData: SubRegion[] = [
                         w: 1396,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [20441.215, 34651.895],
+                    [27791, 35840],
+                    [17146, 27206.992],
+                ],
             },
         ],
     },
@@ -1148,6 +1287,11 @@ export const subRegionData: SubRegion[] = [
                         w: 1444,
                     },
                 ],
+                count: 1,
+                pos: [
+                    [-1099, 13434],
+                    [4420.8613, 15633.112],
+                ],
             },
         ],
     },
@@ -1205,6 +1349,13 @@ export const subRegionData: SubRegion[] = [
                         w: 7222,
                     },
                 ],
+                count: 3,
+                pos: [
+                    [-1573.3009, 5029.159],
+                    [-16258.16224, -3994.4453],
+                    [-35959.99024, -3382.2192],
+                    [-12237.30124, 6702.156],
+                ],
             },
             {
                 id: 9020802,
@@ -1250,8 +1401,17 @@ export const subRegionData: SubRegion[] = [
                         w: 6981,
                     },
                 ],
+                count: 1,
+                pos: [
+                    [-21514.66424, 5044.3477],
+                    [-24688.38524, -6023.2144],
+                ],
             },
         ],
+        range: {
+            center: [-39200, -700],
+            extent: [0, 0],
+        },
     },
     {
         id: 101702,
@@ -1293,6 +1453,12 @@ export const subRegionData: SubRegion[] = [
                         w: 7222,
                     },
                 ],
+                count: 1,
+                pos: [
+                    [-21160.627, -12619.211],
+                    [-17372, -11559],
+                    [-29994.07, -14369.729],
+                ],
             },
             {
                 id: 9020902,
@@ -1326,8 +1492,17 @@ export const subRegionData: SubRegion[] = [
                         w: 7222,
                     },
                 ],
+                count: 1,
+                pos: [
+                    [-27353.04, -21747.701],
+                    [-30449.375, -8490.287],
+                ],
             },
         ],
+        range: {
+            center: [-29310, -10890],
+            extent: [0, 0],
+        },
     },
     {
         id: 101703,
@@ -1369,8 +1544,17 @@ export const subRegionData: SubRegion[] = [
                         w: 7222,
                     },
                 ],
+                count: 1,
+                pos: [
+                    [-13377.057, -8170.688],
+                    [-4429, -5458],
+                ],
             },
         ],
+        range: {
+            center: [-10478, -4960],
+            extent: [0, 0],
+        },
     },
     {
         id: 101901,
@@ -1378,6 +1562,10 @@ export const subRegionData: SubRegion[] = [
         name: "盖雷亚剧院",
         desc: "UI_SUBREGION_DES_101901",
         map: "BH_Thea",
+        range: {
+            center: [20400, 5340],
+            extent: [0, 0],
+        },
     },
     {
         id: 102101,
@@ -1439,6 +1627,11 @@ export const subRegionData: SubRegion[] = [
                         w: 1204,
                     },
                 ],
+                count: 1,
+                pos: [
+                    [33706.37, -35625.207],
+                    [30252.455, -29575.652],
+                ],
             },
             {
                 id: 9030102,
@@ -1484,8 +1677,18 @@ export const subRegionData: SubRegion[] = [
                         w: 6981,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [1621.1261, -40211.96],
+                    [20689.154, -40741.58],
+                    [-1064.0873, -24023.295],
+                ],
             },
         ],
+        range: {
+            center: [-240, -35655],
+            extent: [0, 0],
+        },
     },
     {
         id: 102102,
@@ -1493,7 +1696,6 @@ export const subRegionData: SubRegion[] = [
         name: "中心区",
         desc: "UI_SUBREGION_DES_102102",
         map: "Haiboliya_Longsha02",
-        pos: [-500, 2500],
         rc: [
             {
                 id: 9030201,
@@ -1538,6 +1740,12 @@ export const subRegionData: SubRegion[] = [
                         id: 4931,
                         w: 6981,
                     },
+                ],
+                count: 2,
+                pos: [
+                    [-21631.242, 5120],
+                    [-23544.764, 2605.8232],
+                    [-4236.0137, 8481.419],
                 ],
             },
             {
@@ -1592,8 +1800,18 @@ export const subRegionData: SubRegion[] = [
                         w: 1204,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [-10638.75, -22130.13],
+                    [-24250.57, -4696.7144],
+                    [-14566.432, 2775.8813],
+                ],
             },
         ],
+        range: {
+            center: [-10751, 3126],
+            extent: [0, 0],
+        },
     },
     {
         id: 102103,
@@ -1624,6 +1842,10 @@ export const subRegionData: SubRegion[] = [
         name: "佩剑炼金院",
         desc: "UI_SUBREGION_DES_103201",
         map: "Chapter01_Alch",
+        range: {
+            center: [5029, -6025],
+            extent: [0, 0],
+        },
     },
     {
         id: 104102,
@@ -1676,8 +1898,19 @@ export const subRegionData: SubRegion[] = [
                         w: 6981,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [-50471.938, 10423.338],
+                    [-61051.047, 81.39783],
+                    [-69591.27, 6216.947],
+                ],
             },
         ],
+        range: {
+            center: [-92904.82, 10952.637],
+            extent: [60500, 52937.508],
+            anchor: [-48564.49, 12800.879],
+        },
     },
     {
         id: 104103,
@@ -1730,8 +1963,18 @@ export const subRegionData: SubRegion[] = [
                         w: 6981,
                     },
                 ],
+                count: 1,
+                pos: [
+                    [16763, 24927],
+                    [6018, 18257],
+                    [35.619, 33495.7148],
+                ],
             },
         ],
+        range: {
+            center: [6000, 20000],
+            extent: [11000, 6600],
+        },
     },
     {
         id: 104104,
@@ -1784,8 +2027,20 @@ export const subRegionData: SubRegion[] = [
                         w: 6981,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [-4083.9617, -2706.173],
+                    [8766.173, -7556.996],
+                    [7436, 2209],
+                    [-1395.7522, 6628],
+                ],
             },
         ],
+        range: {
+            center: [6000, -6000],
+            extent: [6600, 6600],
+            anchor: [4920, -1399],
+        },
     },
     {
         id: 104105,
@@ -1838,8 +2093,20 @@ export const subRegionData: SubRegion[] = [
                         w: 6981,
                     },
                 ],
+                count: 3,
+                pos: [
+                    [-21794.79116, -17224.154],
+                    [-22321.04116, -6763.949],
+                    [-18495.8869, -26227.4315],
+                    [-28188.2287, -34271.5233],
+                ],
             },
         ],
+        range: {
+            center: [-25000, -4500],
+            extent: [14300, 4950],
+            anchor: [-21776.38, -14957.99],
+        },
     },
     {
         id: 104106,
@@ -1880,6 +2147,12 @@ export const subRegionData: SubRegion[] = [
                         w: 7222,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [14781.262, -28165.658],
+                    [16961.924, -18873.26],
+                    [19007, -36545],
+                ],
             },
             {
                 id: 9040502,
@@ -1913,8 +2186,19 @@ export const subRegionData: SubRegion[] = [
                         w: 7222,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [12843.135, -20665.098],
+                    [19541.527, -28277.318],
+                    [27726.777, -14502.319],
+                ],
             },
         ],
+        range: {
+            center: [18000, -27000],
+            extent: [6600, 23100],
+            anchor: [17274, -28561],
+        },
     },
     {
         id: 104107,
@@ -1967,8 +2251,19 @@ export const subRegionData: SubRegion[] = [
                         w: 6981,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [6140.9043, 18304.8],
+                    [27761.04, 31996.963],
+                    [39199.57, 6605.2344],
+                ],
             },
         ],
+        range: {
+            center: [51690.57, -4000],
+            extent: [15125, 8800],
+            anchor: [39773.883, -2157.252],
+        },
     },
     {
         id: 104108,
@@ -2009,6 +2304,12 @@ export const subRegionData: SubRegion[] = [
                         w: 7222,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [38941.89, 64333.035],
+                    [32073.422, 42821.19],
+                    [39167.94, 39098.613],
+                ],
             },
             {
                 id: 9040102,
@@ -2041,6 +2342,12 @@ export const subRegionData: SubRegion[] = [
                         id: 4941,
                         w: 7222,
                     },
+                ],
+                count: 2,
+                pos: [
+                    [58448.15, 24298.906],
+                    [26611.691, 41805.867],
+                    [45586, 13789.305],
                 ],
             },
             {
@@ -2075,8 +2382,18 @@ export const subRegionData: SubRegion[] = [
                         w: 7222,
                     },
                 ],
+                count: 1,
+                pos: [
+                    [45235.043, 44419.113],
+                    [45916.71, 29777.049],
+                ],
             },
         ],
+        range: {
+            center: [52800, 40000],
+            extent: [13750, 39600],
+            anchor: [35173, 49665],
+        },
     },
     {
         id: 104109,
@@ -2117,6 +2434,12 @@ export const subRegionData: SubRegion[] = [
                         w: 7222,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [-33551.637, 2051.207],
+                    [-22547, 11753],
+                    [-19532.291, 15888.536],
+                ],
             },
             {
                 id: 9040702,
@@ -2150,8 +2473,19 @@ export const subRegionData: SubRegion[] = [
                         w: 7222,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [-13640.937, 11898.498],
+                    [-22372.387, 7860.6475],
+                    [-24763.309, 7165.386],
+                ],
             },
         ],
+        range: {
+            center: [-2000, 10500],
+            extent: [11000, 1650],
+            anchor: [-20576, 9367],
+        },
     },
     {
         id: 104110,
@@ -2192,8 +2526,20 @@ export const subRegionData: SubRegion[] = [
                         w: 7222,
                     },
                 ],
+                count: 2,
+                pos: [
+                    [28139.334, -1399.175],
+                    [23541.45, 4390.046],
+                    [32374, -9113],
+                    [34448, -5206],
+                ],
             },
         ],
+        range: {
+            center: [31000, -4000],
+            extent: [7700, 8800],
+            anchor: [32371, -5906],
+        },
     },
     {
         id: 104201,
@@ -2201,6 +2547,10 @@ export const subRegionData: SubRegion[] = [
         name: "千枢狩阵",
         desc: "UI_SUBREGION_DES_104201",
         map: "Huaxu_Yanjindu_Batt01",
+        range: {
+            center: [-9724.522, 34083.92],
+            extent: [0, 0],
+        },
     },
     {
         id: 104301,
@@ -2208,6 +2558,10 @@ export const subRegionData: SubRegion[] = [
         name: "往隙",
         desc: "UI_SUBREGION_DES_104301",
         map: "Huaxu_Yanjindu_Nai01",
+        range: {
+            center: [13280.904, 8445.662],
+            extent: [0, 0],
+        },
     },
     {
         id: 104401,
@@ -2215,6 +2569,10 @@ export const subRegionData: SubRegion[] = [
         name: "往隙",
         desc: "UI_SUBREGION_DES_104401",
         map: "Huaxu_Yanjindu_Nai02",
+        range: {
+            center: [6914.1816, -7342.533],
+            extent: [0, 0],
+        },
     },
     {
         id: 104501,
@@ -2278,6 +2636,10 @@ export const subRegionData: SubRegion[] = [
         name: "千枢狩阵",
         desc: "UI_SUBREGION_DES_104601",
         map: "Huaxu_Yanjindu_Batt02",
+        range: {
+            center: [60847.594, 25855.69],
+            extent: [0, 0],
+        },
     },
     {
         id: 104701,
@@ -2299,6 +2661,10 @@ export const subRegionData: SubRegion[] = [
         name: "潜龙居",
         desc: "UI_SUBREGION_DES_104901",
         map: "Huaxu_Yanjindu_Off",
+        range: {
+            center: [-25360, 6862],
+            extent: [0, 0],
+        },
     },
     {
         id: 105001,
@@ -2383,6 +2749,10 @@ export const subRegionData: SubRegion[] = [
         name: "烛阴祭坛",
         desc: "UI_SUBREGION_DES_105701",
         map: "Huaxu_Yanjindu_Alt",
+        range: {
+            center: [6000, -42000],
+            extent: [6600, 6600],
+        },
     },
     {
         id: 105801,
