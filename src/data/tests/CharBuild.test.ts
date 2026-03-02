@@ -955,6 +955,25 @@ describe("CharBuild类测试", () => {
             // 验证修改
             expect(result).toBe(2)
         })
+
+        it("动态武器属性应参与伤害计算", () => {
+            const baseBuild = createCharBuild()
+            baseBuild.baseName = "射击"
+
+            const dynamicBuild = createCharBuild()
+            dynamicBuild.baseName = "射击"
+            dynamicBuild.dynamicBuffs.push(
+                new LeveledBuff({
+                    名称: "测试动态追加伤害",
+                    描述: "测试用动态属性",
+                    code: "weaponAttr.追加伤害 += 100",
+                })
+            )
+
+            const dynamicAttrs = dynamicBuild.calculateWeaponAttributes()
+            expect(dynamicAttrs.weapon?.追加伤害).toBe(100)
+            expect(dynamicBuild.calculate()).toBeGreaterThan(baseBuild.calculate())
+        })
     })
 
     // 性能测试

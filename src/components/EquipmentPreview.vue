@@ -136,7 +136,7 @@ const summonAttributes = computed(() => {
                         {{ key === "攻击" ? charBuild.selectedWeapon.伤害类型 : "" }}{{ $t(key) }}
                     </div>
                     <div class="text-secondary font-bold text-lg font-orbitron">
-                        {{ ["攻击", "攻速", "多重"].includes(key) ? val : `${+(val * 100).toFixed(2)}%` }}
+                        {{ ["攻击", "攻速", "多重", "弹匣", "装填"].includes(key) ? `${+val.toFixed(2)}` : `${+(val * 100).toFixed(2)}%` }}
                         {{
                             key === "多重" && (charBuild.selectedWeapon?.弹片数 || 1) > 1
                                 ? ` * ${charBuild.selectedWeapon.弹片数! * val}`

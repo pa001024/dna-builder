@@ -141,10 +141,10 @@ export class CharBuild {
         DEF: "防御",
         HP: "生命",
         SP: "神智",
-        DPH: "or(多重,1)*(1+or(追加伤害,0))*伤害",
+        DPH: "or(多重,1)*伤害",
         总伤: "max(1,召唤物攻击次数)*伤害",
         暴击伤害: "伤害.暴击",
-        DPS: "or(攻速,1+技能速度)*or(多重,1)*(1+or(追加伤害,0))*伤害",
+        DPS: "or(攻速,1+技能速度)*or(多重,1)*伤害",
         范围收益: "技能范围*伤害",
         耐久收益: "技能耐久*伤害",
         效益收益: "技能效益*伤害",
@@ -1236,27 +1236,38 @@ export class CharBuild {
         const attrs = inputattrs || this.calculateWeaponAttributes()
         const weaponsMap = this.getAllWeaponsByBase()
         const weaponAttrs = this.getAllWeaponSkillsAttrs()
+        const selectedWeapon = this.selectedWeapon
+        /**
+         * 优先使用当前已计算出的武器属性，避免动态属性在AST求值时被基础映射覆盖。
+         */
+        const getCalculatedWeaponAttr = (base?: string) => {
+            const key = base || this.baseName
+            if (attrs.weapon && selectedWeapon && weaponsMap.get(key) === selectedWeapon) {
+                return attrs.weapon
+            }
+            return weaponAttrs.get(key)
+        }
         const skillAttrs = new Map(this.allSkills.map(v => [v.safeName, v.getFieldsWithAttr(attrs)]))
-        const getWeaponAttr = (fieldName: string, base?: string) =>
-            weaponAttrs?.get(base || this.baseName)?.[fieldName as keyof WeaponAttr] || 0
+        const getWeaponAttr = (fieldName: string, base?: string) => getCalculatedWeaponAttr(base)?.[fieldName as keyof WeaponAttr] || 0
         const getSkillAttr = (fieldName: string, base?: string) =>
             skillAttrs?.get(base || this.baseName)?.find(v => v.safeName.includes(fieldName))
         const damageCache = new Map<string, DamageResult>()
         const getDamage = (base?: string) => {
             const key = base || this.baseName
             if (damageCache.has(key)) return damageCache.get(key)!
-            const damage = weaponAttrs.has(base || this.baseName)
-                ? this.calculateWeaponDamage(
-                      { ...attrs, weapon: weaponAttrs.get(base || this.baseName)! },
-                      weaponsMap.get(base || this.baseName)!
-                  )
-                : this.calculateSkillDamage(attrs)
+            const weapon = weaponsMap.get(key)
+            const weaponAttr = getCalculatedWeaponAttr(base)
+            const damage =
+                weapon && weaponAttr
+                    ? this.calculateWeaponDamage({ ...attrs, weapon: weaponAttr }, weapon)
+                    : this.calculateSkillDamage(attrs)
             damageCache.set(key, damage)
             return damage
         }
         const defCache = new Map<boolean, number>()
         const getDef = (base?: string) => {
-            const isWeapon = weaponAttrs.has(base || this.baseName)
+            const key = base || this.baseName
+            const isWeapon = !!(weaponsMap.get(key) && getCalculatedWeaponAttr(base))
             if (defCache.has(isWeapon)) return defCache.get(isWeapon)!
             const def = this.calculateDefenseMultiplier(attrs, undefined, !isWeapon)
             defCache.set(isWeapon, def)
