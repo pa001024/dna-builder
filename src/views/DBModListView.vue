@@ -10,13 +10,13 @@ import modData from "../data/d/mod.data"
 import { formatProp } from "../util"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = useSearchParam<string>("mod.searchKeyword", "")
-const selectedModId = useSearchParam<number>("mod.selectedMod", 0)
-const selectedType = useSearchParam<string>("mod.selectedType", "")
-const selectedSeries = useSearchParam<string>("mod.selectedSeries", "")
-const selectedQuality = useSearchParam<string>("mod.selectedQuality", "")
-const selectedElem = useSearchParam<string>("mod.selectedElem", "")
-const selectedVersion = useSearchParam<string>("mod.selectedVersion", "")
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedModId = useSearchParam<number>("id", 0)
+const selectedType = useSearchParam<string>("tp", "")
+const selectedSeries = useSearchParam<string>("ser", "")
+const selectedQuality = useSearchParam<string>("ql", "")
+const selectedElem = useSearchParam<string>("el", "")
+const selectedVersion = useSearchParam<string>("ver", "")
 
 // 根据 ID 获取选中的魔之楔
 const selectedMod = computed(() => {
@@ -343,3 +343,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

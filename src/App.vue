@@ -28,7 +28,7 @@ watchEffect(() => {
 })
 
 watch(
-    () => route.fullPath,
+    () => route.path,
     () => {
         reportVisitorCount()
     }
@@ -165,11 +165,15 @@ onMounted(async () => {
 </script>
 
 <template>
-    <canvas v-if="setting.windowTrasnparent && !env.isApp" id="background"
-        class="fixed w-full h-full z-0 bg-indigo-300" />
+    <canvas v-if="setting.windowTrasnparent && !env.isApp" id="background" class="fixed w-full h-full z-0 bg-indigo-300" />
     <Updater />
-    <ResizeableWindow id="main-window" :title="ui.title || $t(`${String($route.name)}.title`, '')" darkable pinable
-        :class="{ 'is-app': env.isApp }">
+    <ResizeableWindow
+        id="main-window"
+        :title="ui.title || $t(`${String($route.name)}.title`, '')"
+        darkable
+        pinable
+        :class="{ 'is-app': env.isApp }"
+    >
         <RouterView v-slot="{ Component, route }">
             <transition name="slide-right">
                 <KeepAlive v-if="route.meta.keepAlive">

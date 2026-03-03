@@ -5,9 +5,9 @@ import { useSearchParam } from "@/composables/useSearchParam"
 import walnutData, { Walnut } from "../data/d/walnut.data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = useSearchParam<string>("walnut.searchKeyword", "")
-const selectedWalnutId = useSearchParam<number>("walnut.selectedWalnut", 0)
-const selectedType = useSearchParam<number>("walnut.selectedType", 0)
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedWalnutId = useSearchParam<number>("id", 0)
+const selectedType = useSearchParam<number>("tp", 0)
 
 // 根据 ID 获取选中的密函
 const selectedWalnut = computed(() => {
@@ -126,3 +126,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

@@ -6,10 +6,10 @@ import { fishingSpotMap, fishMap } from "@/data"
 import { fishingSpots, fishs } from "@/data/d/fish.data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = useSearchParam<string>("fish.searchKeyword", "")
-const selectedSpotId = useSearchParam<number>("fish.selectedSpot", 0)
-const selectedFishId = useSearchParam<number>("fish.selectedFish", 0)
-const selectedType = useSearchParam<number>("fish.selectedType", 0)
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedSpotId = useSearchParam<number>("sp", 0)
+const selectedFishId = useSearchParam<number>("id", 0)
+const selectedType = useSearchParam<number>("tp", 0)
 
 // 根据 ID 获取选中的钓鱼点
 const selectedSpot = computed(() => {
@@ -139,3 +139,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

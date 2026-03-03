@@ -4,8 +4,8 @@ import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollTo
 import { useSearchParam } from "@/composables/useSearchParam"
 import shopData from "../data/d/shop.data"
 
-const searchKeyword = useSearchParam<string>("shop.searchKeyword", "")
-const selectedShopId = useSearchParam<string>("shop.selectedShop", "")
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedShopId = useSearchParam<string>("id", "")
 
 // 根据 ID 获取选中的商店
 const selectedShop = computed(() => {
@@ -111,3 +111,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

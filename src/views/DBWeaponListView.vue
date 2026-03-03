@@ -7,10 +7,10 @@ import weaponData from "../data/d/weapon.data"
 import { formatProp } from "../util"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = useSearchParam<string>("weapon.searchKeyword", "")
-const selectedWeaponId = useSearchParam<number>("weapon.selectedWeapon", 0)
-const selectedCategory = useSearchParam<string>("weapon.selectedCategory", "")
-const selectedDamageType = useSearchParam<string>("weapon.selectedDamageType", "")
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedWeaponId = useSearchParam<number>("id", 0)
+const selectedCategory = useSearchParam<string>("cat", "")
+const selectedDamageType = useSearchParam<string>("dt", "")
 
 // 根据 ID 获取选中的武器
 const selectedWeapon = computed(() => {
@@ -196,3 +196,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

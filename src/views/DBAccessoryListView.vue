@@ -12,11 +12,11 @@ interface AccessoryItem extends Accessory {
     accessoryType: AccessoryType
 }
 
-const searchKeyword = useSearchParam<string>("accessory.searchKeyword", "")
-const selectedAccessoryKey = useSearchParam<string>("accessory.selectedAccessory", "")
-const selectedType = useSearchParam<"all" | AccessoryType>("accessory.selectedType", "all")
-const selectedRarity = useSearchParam<number | 0>("accessory.selectedRarity", 0)
-const selectedUnlock = useSearchParam<string>("accessory.selectedUnlock", "all")
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedAccessoryKey = useSearchParam<string>("id", "")
+const selectedType = useSearchParam<"all" | AccessoryType>("tp", "all")
+const selectedRarity = useSearchParam<number | 0>("rar", 0)
+const selectedUnlock = useSearchParam<string>("ul", "all")
 
 /**
  * 合并角色饰品与武器饰品数据，并标记来源类型。
@@ -292,3 +292,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

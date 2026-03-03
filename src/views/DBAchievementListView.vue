@@ -5,11 +5,11 @@ import { parseNumberOrEmptySearchParam, useSearchParam } from "@/composables/use
 import achievementData from "@/data/d/achievement.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
-const searchKeyword = useSearchParam<string>("achievement.searchKeyword", "")
-const selectedAchievementId = useSearchParam<number>("achievement.selectedAchievement", 0)
-const selectedCategory = useSearchParam<string | "">("achievement.selectedCategory", "")
-const selectedVersion = useSearchParam<string | "">("achievement.selectedVersion", "")
-const selectedQuality = useSearchParam<number | "">("achievement.selectedQuality", "", { parse: parseNumberOrEmptySearchParam })
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedAchievementId = useSearchParam<number>("id", 0)
+const selectedCategory = useSearchParam<string | "">("cat", "")
+const selectedVersion = useSearchParam<string | "">("ver", "")
+const selectedQuality = useSearchParam<number | "">("ql", "", { parse: parseNumberOrEmptySearchParam })
 
 const selectedAchievement = computed(() => {
     return selectedAchievementId.value ? achievementData.find(v => v.id === selectedAchievementId.value) || null : null
@@ -208,3 +208,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

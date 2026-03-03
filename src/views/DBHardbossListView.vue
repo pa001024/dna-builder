@@ -6,8 +6,8 @@ import { monsterMap } from "@/data"
 import { type HardBoss, hardBossMap } from "../data/d/hardboss.data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = useSearchParam<string>("hardboss.searchKeyword", "")
-const selectedBossId = useSearchParam<number>("hardboss.selectedBoss", 0)
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedBossId = useSearchParam<number>("id", 0)
 
 // 根据 ID 获取选中的 Boss
 const selectedBoss = computed(() => {
@@ -108,3 +108,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

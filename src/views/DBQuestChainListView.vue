@@ -35,11 +35,11 @@ interface QuestChainFullTextEntry {
     searchText: string
 }
 
-const searchKeyword = useSearchParam<string>("questchain.searchKeyword", "")
-const selectedQuestChainId = useSearchParam<number>("questchain.selectedQuestChain", 0)
-const showImprCheckOnly = useSearchParam<boolean>("questchain.showImprCheckOnly", false)
-const showImprIncreaseOnly = useSearchParam<boolean>("questchain.showImprIncreaseOnly", false)
-const showFullTextSearch = useSearchParam<boolean>("questchain.showFullTextSearch", false)
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedQuestChainId = useSearchParam<number>("id", 0)
+const showImprCheckOnly = useSearchParam<boolean>("ico", false)
+const showImprIncreaseOnly = useSearchParam<boolean>("iio", false)
+const showFullTextSearch = useSearchParam<boolean>("fts", false)
 const settingStore = useSettingStore()
 const localizedQuestData = ref<QuestStory[]>([])
 
@@ -631,3 +631,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

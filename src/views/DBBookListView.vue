@@ -7,10 +7,10 @@ import { regionMap } from "@/data/d/region.data"
 import { subRegionMap } from "@/data/d/subregion.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
-const searchKeyword = useSearchParam<string>("book.searchKeyword", "")
-const selectedBookId = useSearchParam<number>("book.selectedBook", 0)
-const selectedRegionId = useSearchParam<number>("book.selectedRegion", 0)
-const showFullTextSearch = useSearchParam<boolean>("book.showFullTextSearch", false)
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedBookId = useSearchParam<number>("id", 0)
+const selectedRegionId = useSearchParam<number>("rg", 0)
+const showFullTextSearch = useSearchParam<boolean>("fts", false)
 
 /**
  * 根据 ID 获取当前选中的读物。
@@ -238,3 +238,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

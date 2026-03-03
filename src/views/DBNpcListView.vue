@@ -5,10 +5,10 @@ import { useSearchParam } from "@/composables/useSearchParam"
 import npcData, { type NPC, npcMap } from "@/data/d/npc.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
-const searchKeyword = useSearchParam<string>("npc.searchKeyword", "")
-const selectedNpcId = useSearchParam<number>("npc.selectedNpc", 0)
-const showImprCheckOnly = useSearchParam<boolean>("npc.showImprCheckOnly", false)
-const showImprIncreaseOnly = useSearchParam<boolean>("npc.showImprIncreaseOnly", false)
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedNpcId = useSearchParam<number>("id", 0)
+const showImprCheckOnly = useSearchParam<boolean>("ico", false)
+const showImprIncreaseOnly = useSearchParam<boolean>("iio", false)
 
 /**
  * 判断 NPC 是否包含印象检定。
@@ -157,3 +157,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

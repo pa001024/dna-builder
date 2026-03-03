@@ -5,9 +5,9 @@ import { useSearchParam } from "@/composables/useSearchParam"
 import titleData from "@/data/d/title.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
-const searchKeyword = useSearchParam<string>("title.searchKeyword", "")
-const selectedTitleId = useSearchParam<number>("title.selectedTitle", 0)
-const selectedType = useSearchParam<number>("title.selectedType", 0)
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedTitleId = useSearchParam<number>("id", 0)
+const selectedType = useSearchParam<number>("tp", 0)
 
 const selectedTitle = computed(() => {
     if (!selectedTitleId.value) return null
@@ -105,3 +105,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

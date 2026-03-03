@@ -35,12 +35,12 @@ interface DynQuestFullTextEntry {
     searchText: string
 }
 
-const searchKeyword = useSearchParam<string>("dynquest.searchKeyword", "")
-const selectedQuestId = useSearchParam<number>("dynquest.selectedQuest", 0)
-const selectedRegion = useSearchParam<string>("dynquest.selectedRegion", "")
-const selectedSubRegion = useSearchParam<string>("dynquest.selectedSubRegion", "")
-const selectedLevel = useSearchParam<string>("dynquest.selectedLevel", "")
-const showFullTextSearch = useSearchParam<boolean>("dynquest.showFullTextSearch", false)
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedQuestId = useSearchParam<number>("id", 0)
+const selectedRegion = useSearchParam<string>("rg", "")
+const selectedSubRegion = useSearchParam<string>("srg", "")
+const selectedLevel = useSearchParam<string>("lv", "")
+const showFullTextSearch = useSearchParam<boolean>("fts", false)
 const showRegionFilter = useLocalStorage("dynquest.showRegionFilter", true)
 const showSubRegionFilter = useLocalStorage("dynquest.showSubRegionFilter", true)
 const showLevelFilter = useLocalStorage("dynquest.showLevelFilter", true)
@@ -648,3 +648,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

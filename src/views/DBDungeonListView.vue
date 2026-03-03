@@ -7,9 +7,9 @@ import dungeonData from "../data/d/dungeon.data"
 import { getDungeonName, getDungeonRewardNames, getDungeonType } from "../utils/dungeon-utils"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = useSearchParam<string>("dungeon.searchKeyword", "")
-const selectedDungeonId = useSearchParam<number>("dungeon.selectedDungeon", 0)
-const selectedType = useSearchParam<string>("dungeon.selectedType", "")
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedDungeonId = useSearchParam<number>("id", 0)
+const selectedType = useSearchParam<string>("tp", "")
 
 // 根据 ID 获取选中的副本
 const selectedDungeon = computed(() => {
@@ -147,3 +147,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

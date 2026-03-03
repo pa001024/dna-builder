@@ -7,9 +7,9 @@ import type { AbyssDungeon } from "../data/d/abyss.data"
 import { abyssDungeonMap, charMap } from "../data/d/index"
 import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
 
-const searchKeyword = useSearchParam<string>("abyss.searchKeyword", "")
-const selectedDungeonId = useSearchParam<number>("abyss.selectedDungeon", 0)
-const selectedDungeonGroup = useSearchParam<string>("abyss.selectedDungeonGroup", "")
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedDungeonId = useSearchParam<number>("id", 0)
+const selectedDungeonGroup = useSearchParam<string>("dgg", "")
 
 // 获取选中的深渊副本对象
 const selectedDungeon = computed(() => {
@@ -131,3 +131,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

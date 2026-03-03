@@ -5,8 +5,8 @@ import { useSearchParam } from "@/composables/useSearchParam"
 import reputationData from "@/data/d/reputation.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
-const searchKeyword = useSearchParam<string>("reputation.searchKeyword", "")
-const selectedReputationId = useSearchParam<number>("reputation.selectedReputation", 0)
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedReputationId = useSearchParam<number>("id", 0)
 
 /**
  * 根据 ID 获取当前选中的区域声名条目。
@@ -121,3 +121,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

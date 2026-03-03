@@ -9,9 +9,9 @@ import { getLocalizedPartyTopicDataByLanguage } from "@/data/d/story-locale"
 import { useSettingStore } from "@/store/setting"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
-const searchKeyword = useSearchParam<string>("partytopic.searchKeyword", "")
-const selectedPartyTopicId = useSearchParam<number>("partytopic.selectedTopic", 0)
-const selectedCharacterId = useSearchParam<string>("partytopic.selectedCharacter", "-")
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedPartyTopicId = useSearchParam<number>("id", 0)
+const selectedCharacterId = useSearchParam<string>("chr", "-")
 const settingStore = useSettingStore()
 const localizedPartyTopicData = ref<PartyTopic[]>([])
 
@@ -216,3 +216,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

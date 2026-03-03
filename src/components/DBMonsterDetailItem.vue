@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
-import { formatBigNumber } from "@/util"
+import * as echarts from "echarts"
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
+import { format100, formatBigNumber } from "@/util"
 import { abyssDungeonMap, Faction, Monster } from "../data"
 import dungeonData from "../data/d/dungeon.data"
 import { LeveledMonster } from "../data/leveled/LeveledMonster"
@@ -14,6 +15,8 @@ const props = defineProps<{
 
 const currentLevel = ref(props.defaultLevel || 180)
 const showRougeStats = ref(false)
+const levelTrendChartRef = ref<HTMLElement | null>(null)
+let levelTrendChartInstance: echarts.ECharts | null = null
 
 const leveledMonster = computed(() => {
     if (!props.monster) return null
@@ -67,6 +70,24 @@ const selectedDungeons = computed(() => {
 })
 
 /**
+ * 校验当前选中的副本名称是否仍有效，避免切换怪物后出现悬空选项。
+ */
+watch(
+    allDungeonNames,
+    names => {
+        if (names.length === 0) {
+            selectedDungeonName.value = ""
+            return
+        }
+
+        if (!names.includes(selectedDungeonName.value)) {
+            selectedDungeonName.value = names[0]
+        }
+    },
+    { immediate: true }
+)
+
+/**
  * 当前怪物关联的号令者信息。
  */
 const monsterTagGroup = computed(() => {
@@ -75,6 +96,237 @@ const monsterTagGroup = computed(() => {
     }
 
     return getMonsterTagGroupByMonsterName(props.monster.n)
+})
+
+/**
+ * 计算怪物防御减伤率。
+ */
+const defenseDamageReductionRate = computed(() => {
+    if (!leveledMonster.value) {
+        return 0
+    }
+
+    return leveledMonster.value.def / (300 + leveledMonster.value.def)
+})
+
+/**
+ * 计算怪物有效生命（生命受防御减伤增益后叠加护盾）。
+ */
+const effectiveHealth = computed(() => {
+    if (!leveledMonster.value) {
+        return 0
+    }
+
+    const defenseMultiplier = 1 - defenseDamageReductionRate.value
+    if (defenseMultiplier <= 0) {
+        return leveledMonster.value.hp + (leveledMonster.value.es || 0)
+    }
+
+    return leveledMonster.value.hp / defenseMultiplier + (leveledMonster.value.es || 0)
+})
+
+/**
+ * 等级趋势图数据（生命/护盾/有效生命）。
+ */
+const levelTrendData = computed(() => {
+    if (!props.monster) {
+        return {
+            levels: [] as number[],
+            hp: [] as number[],
+            shield: [] as number[],
+            effectiveHealth: [] as number[],
+        }
+    }
+
+    const levels: number[] = []
+    const hp: number[] = []
+    const shield: number[] = []
+    const effectiveHealthList: number[] = []
+
+    for (let level = 1; level <= 180; level++) {
+        const leveled = new LeveledMonster(props.monster, level, showRougeStats.value)
+        const currentHP = leveled.hp
+        const currentShield = leveled.es || 0
+        const currentDefenseDamageReductionRate = leveled.def / (300 + leveled.def)
+        const defenseMultiplier = Math.max(1 - currentDefenseDamageReductionRate, 0.000001)
+
+        levels.push(level)
+        hp.push(currentHP)
+        shield.push(currentShield)
+        effectiveHealthList.push(Math.round(currentHP / defenseMultiplier + currentShield))
+    }
+
+    return {
+        levels,
+        hp,
+        shield,
+        effectiveHealth: effectiveHealthList,
+    }
+})
+
+/**
+ * 等级趋势图配置。
+ */
+const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
+    return {
+        tooltip: {
+            trigger: "axis",
+            formatter: params => {
+                const paramList = Array.isArray(params) ? params : [params]
+                if (paramList.length === 0) {
+                    return ""
+                }
+
+                const firstValue = paramList[0]?.value
+                const level =
+                    Array.isArray(firstValue) && firstValue.length > 0
+                        ? Math.round(Number(firstValue[0]))
+                        : Number(paramList[0]?.name || 0)
+                const lines = [`Lv.${level}`]
+                paramList.forEach(item => {
+                    const rawValue = Array.isArray(item.value) ? item.value[item.value.length - 1] : item.value
+                    const value = typeof rawValue === "number" ? rawValue : Number(rawValue || 0)
+                    lines.push(`${item.marker}${item.seriesName}: ${formatBigNumber(value)}`)
+                })
+                return lines.join("<br/>")
+            },
+        },
+        legend: {
+            top: 6,
+            data: ["生命", "护盾", "有效生命"],
+        },
+        grid: {
+            left: 16,
+            right: 16,
+            top: 46,
+            bottom: 56,
+            containLabel: true,
+        },
+        xAxis: {
+            type: "value",
+            name: "等级",
+            min: 1,
+            max: 180,
+            boundaryGap: [0, 0],
+            axisLabel: {
+                formatter: value => `Lv.${Number(value)}`,
+            },
+        },
+        yAxis: {
+            type: "value",
+            name: "数值",
+            axisLabel: {
+                formatter: value => formatBigNumber(Number(value)),
+            },
+        },
+        dataZoom: [
+            {
+                type: "inside",
+                xAxisIndex: 0,
+                filterMode: "none",
+                startValue: 1,
+                endValue: 180,
+            },
+            {
+                type: "slider",
+                xAxisIndex: 0,
+                filterMode: "none",
+                startValue: 1,
+                endValue: 180,
+                height: 16,
+                bottom: 8,
+                labelFormatter: value => `Lv.${Math.round(Number(value))}`,
+            },
+        ],
+        series: [
+            {
+                name: "生命",
+                type: "line",
+                smooth: true,
+                showSymbol: false,
+                lineStyle: {
+                    width: 2,
+                    color: "#ef4444",
+                },
+                itemStyle: {
+                    color: "#ef4444",
+                },
+                data: levelTrendData.value.levels.map((level, index) => [level, levelTrendData.value.hp[index]]),
+            },
+            {
+                name: "护盾",
+                type: "line",
+                smooth: true,
+                showSymbol: false,
+                lineStyle: {
+                    width: 2,
+                    color: "#06b6d4",
+                },
+                itemStyle: {
+                    color: "#06b6d4",
+                },
+                data: levelTrendData.value.levels.map((level, index) => [level, levelTrendData.value.shield[index]]),
+            },
+            {
+                name: "有效生命",
+                type: "line",
+                smooth: true,
+                showSymbol: false,
+                lineStyle: {
+                    width: 2,
+                    color: "#a855f7",
+                },
+                itemStyle: {
+                    color: "#a855f7",
+                },
+                data: levelTrendData.value.levels.map((level, index) => [level, levelTrendData.value.effectiveHealth[index]]),
+            },
+        ],
+    }
+})
+
+/**
+ * 重绘等级趋势图。
+ */
+function renderLevelTrendChart(): void {
+    if (!levelTrendChartRef.value) {
+        return
+    }
+
+    if (!levelTrendChartInstance) {
+        levelTrendChartInstance = echarts.init(levelTrendChartRef.value)
+    }
+
+    levelTrendChartInstance.setOption(levelTrendChartOption.value, { notMerge: true })
+    levelTrendChartInstance.resize()
+}
+
+/**
+ * 处理等级趋势图容器尺寸变化。
+ */
+function handleLevelTrendChartResize(): void {
+    levelTrendChartInstance?.resize()
+}
+
+watch(
+    levelTrendChartOption,
+    async () => {
+        await nextTick()
+        renderLevelTrendChart()
+    },
+    { immediate: true }
+)
+
+onMounted(() => {
+    window.addEventListener("resize", handleLevelTrendChartResize)
+})
+
+onUnmounted(() => {
+    window.removeEventListener("resize", handleLevelTrendChartResize)
+    if (levelTrendChartInstance) {
+        levelTrendChartInstance.dispose()
+        levelTrendChartInstance = null
+    }
 })
 
 function getFactionName(faction: number | undefined): string {
@@ -164,27 +416,23 @@ function getFactionName(faction: number | undefined): string {
                     {{ formatBigNumber(leveledMonster.tn) }}
                 </div>
             </div>
+            <div class="bg-base-200 rounded p-2 text-center">
+                <div class="text-xs text-base-content/70 mb-1">防御减伤率</div>
+                <div class="font-bold text-warning">
+                    {{ format100(defenseDamageReductionRate, 2) }}
+                </div>
+            </div>
+            <div class="bg-base-200 rounded p-2 text-center">
+                <div class="text-xs text-base-content/70 mb-1">有效生命</div>
+                <div class="font-bold text-accent">
+                    {{ formatBigNumber(effectiveHealth) }}
+                </div>
+            </div>
         </div>
 
         <div v-if="leveledMonster">
             <div class="text-xs text-base-content/70 mb-1">等级成长预览</div>
-            <div class="h-24 flex items-end gap-0.5">
-                <div
-                    v-for="level in [80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180]"
-                    :key="level"
-                    class="h-full flex-1 flex flex-col items-center min-h-0"
-                >
-                    <div class="w-full relative flex-1 h-full flex flex-col justify-end">
-                        <div
-                            class="w-full bg-primary rounded-t"
-                            :style="{
-                                height: `${(leveledMonster.getHPByLevel(level) / leveledMonster.getHPByLevel(180)) * 100}%`,
-                            }"
-                        />
-                    </div>
-                    <span class="text-[10px] mt-1">Lv{{ level }}</span>
-                </div>
-            </div>
+            <div ref="levelTrendChartRef" class="w-full h-72 rounded bg-base-200/40" />
         </div>
 
         <div v-if="dungeons.length > 0">

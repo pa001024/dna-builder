@@ -8,13 +8,13 @@ import { charMap } from "../data/d"
 import charData from "../data/d/char.data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = useSearchParam<string>("char.searchKeyword", "")
-const selectedCharId = useSearchParam<number>("char.selectedChar", 0)
-const selectedElem = useSearchParam<string>("char.selectedElem", "")
-const selectedVersion = useSearchParam<string>("char.selectedVersion", "")
-const selectedTag = useSearchParam<string>("char.selectedTag", "")
-const selectedProficiency = useSearchParam<string>("char.selectedProficiency", "")
-const selectedFaction = useSearchParam<string>("char.selectedFaction", "")
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedCharId = useSearchParam<number>("id", 0)
+const selectedElem = useSearchParam<string>("el", "")
+const selectedVersion = useSearchParam<string>("ver", "")
+const selectedTag = useSearchParam<string>("tag", "")
+const selectedProficiency = useSearchParam<string>("prof", "")
+const selectedFaction = useSearchParam<string>("fac", "")
 
 // 根据 ID 获取选中的角色
 const selectedChar = computed(() => {
@@ -301,3 +301,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

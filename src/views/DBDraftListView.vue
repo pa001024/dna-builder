@@ -6,10 +6,10 @@ import { draftMap } from "../data/d"
 import draftData from "../data/d/draft.data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = useSearchParam<string>("draft.searchKeyword", "")
-const selectedDraftId = useSearchParam<number>("draft.selectedDraft", 0)
-const selectedType = useSearchParam<string | "">("draft.selectedType", "")
-const selectedRarity = useSearchParam<number | "">("draft.selectedRarity", "", { parse: parseNumberOrEmptySearchParam })
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedDraftId = useSearchParam<number>("id", 0)
+const selectedType = useSearchParam<string | "">("tp", "")
+const selectedRarity = useSearchParam<number | "">("rar", "", { parse: parseNumberOrEmptySearchParam })
 
 // 根据 ID 获取选中的图纸
 const selectedDraft = computed(() => {
@@ -196,3 +196,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+

@@ -7,10 +7,10 @@ import petData, { type Pet, petEntrys } from "../data/d/pet.data"
 import { LeveledPet } from "../data/leveled/LeveledPet"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = useSearchParam<string>("pet.searchKeyword", "")
-const selectedPetId = useSearchParam<number>("pet.selectedPetId", 0)
-const selectedType = useSearchParam<number>("pet.selectedType", 0)
-const selectedQuality = useSearchParam<number>("pet.selectedQuality", 0)
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedPetId = useSearchParam<number>("id", 0)
+const selectedType = useSearchParam<number>("tp", 0)
+const selectedQuality = useSearchParam<number>("ql", 0)
 
 // 根据 ID 获取选中的魔灵
 const selectedPet = computed(() => {
@@ -253,3 +253,5 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
+
+
