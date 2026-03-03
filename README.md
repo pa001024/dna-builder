@@ -1,7 +1,7 @@
 ﻿# 二重螺旋构筑模拟器 Duet Night Abyss Builder
 
 <p align="center">
-  <a href="https://dna-builder.edgeone.dev/"><img alt="Website" src="https://img.shields.io/website/https/dna-builder.edgeone.dev"></a>
+  <a href="https://dna-builder.cn/"><img alt="Website" src="https://img.shields.io/website/https/dna-builder.cn"></a>
   <a href="https://github.com/pa001024/dna-builder/actions/workflows/alpha.yml"><img src="https://img.shields.io/github/actions/workflow/status/pa001024/dna-builder/alpha.yml" alt="Build Status"></a>
   <a href="https://github.com/pa001024/dna-builder"><img src="https://img.shields.io/github/license/pa001024/dna-builder" alt="License"></a>
   <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/pa001024/dna-builder">

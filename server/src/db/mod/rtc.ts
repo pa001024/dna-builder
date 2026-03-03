@@ -48,6 +48,7 @@ export const resolvers = {
     Query: {
         rtcClients: async (_parent, { roomId }, context) => {
             if (!context.user) return []
+            if (!hasUser(roomId, context.user.id)) return []
             return getClients(roomId)
         },
     },
@@ -68,16 +69,18 @@ export const resolvers = {
         },
         rtcSignal: async (_parent, { roomId, type, from, to, body }, { user, pubsub }) => {
             if (!user) return false
+            if (!hasUser(roomId, user.id)) return false
             const clients = getClients(roomId)
             const rtc = clients?.find(c => c.id === from && c.user.id === user.id)
+            if (!rtc) return false
             pubsub.publish("newRtcEvent", roomId, { newRtcEvent: { id: id(), type, from, to, body } })
-            if (rtc) return true
-            return false
+            return true
         },
     },
     Subscription: {
         newRtcEvent: (_parent, { roomId }, { user, pubsub }) => {
             if (!user) throw createGraphQLError("need login")
+            if (!hasUser(roomId, user.id)) throw createGraphQLError("need room join")
             return pubsub.subscribe("newRtcEvent", roomId)
         },
     },

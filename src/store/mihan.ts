@@ -80,46 +80,71 @@ function createMihanNotify() {
      */
     async function updateMihanData(force = false) {
         if (mihanData.value && !isOutdated() && !force) return true
+
+        /**
+         * 标准化任务名称，统一勘探/勘察文案避免误判变更。
+         * @param missions 原始任务数组。
+         * @returns 标准化后的任务数组。
+         */
+        const normalizeMissions = (missions: string[][]) => missions.map(v => v.map(v => v.replace("勘探/无尽", "勘察/无尽")))
+
+        /**
+         * 应用新任务数据到本地存储。
+         * @param missions 任务数组。
+         * @param updateTime 更新时间戳。
+         * @returns 数据拉取成功（无论内容是否发生变更均视为成功）。
+         */
+        const applyMissions = (missions: string[][], updateTime: number) => {
+            const normalized = normalizeMissions(missions)
+            if (JSON.stringify(normalized) !== JSON.stringify(mihanData.value)) {
+                mihanData.value = normalized
+            }
+            mihanUpdateTime.value = updateTime
+            return true
+        }
+
         const setting = useSettingStore()
         const api = await setting.getDNAAPI()
         if (api) {
-            // 用户登录尝试使用DNAAPI获取密函
-            await setting.startHeartbeat()
-            const data = await api.defaultRoleForTool()
-            await setting.stopHeartbeat()
-            if (data?.data?.instanceInfo) {
-                const missions = data.data.instanceInfo.map(v => v.instances.map(v => v.name.replace("勘探/无尽", "勘察/无尽")))
-                if (!missions) return false
-                if (JSON.stringify(missions) === JSON.stringify(mihanData.value)) {
-                    mihanUpdateTime.value = Date.now()
-                    return false
+            try {
+                // 用户登录尝试使用DNAAPI获取密函
+                await setting.startHeartbeat()
+                const data = await api.defaultRoleForTool()
+                if (data?.data?.instanceInfo) {
+                    const missions = data.data.instanceInfo.map(v => v.instances.map(v => v.name))
+                    return applyMissions(missions, Date.now())
                 }
-                mihanData.value = missions
-                mihanUpdateTime.value = Date.now()
-                return true
+            } catch (error) {
+                console.error("DNAAPI获取密函失败:", error)
+            } finally {
+                await setting.stopHeartbeat()
             }
         }
+
         try {
             // 自己服务器
             const data = await missionsIngameQuery({ server: "cn" }, { requestPolicy: "network-only" })
-            const missions = data?.missions?.map(v => v.map(v => v.replace("勘探/无尽", "勘察/无尽")))
-            if (!missions) return false
-            if (JSON.stringify(missions) === JSON.stringify(mihanData.value)) {
-                mihanUpdateTime.value = Date.now()
-                return false
+            const missions = data?.missions
+            if (missions) {
+                const updateTime = data?.createdAt ? new Date(data.createdAt).getTime() : Date.now()
+                return applyMissions(missions, Number.isFinite(updateTime) ? updateTime : Date.now())
             }
-            mihanData.value = missions
-            mihanUpdateTime.value = new Date(data!.createdAt || "").getTime()
-        } catch {}
+        } catch (error) {
+            console.error("服务器获取密函失败:", error)
+        }
+
         if (isOutdated()) {
-            // gamekee
-            const instanceInfo = await getInstanceInfo()
-            if (instanceInfo) {
-                mihanData.value = instanceInfo.map(v => v.map(v => v.replace("勘探/无尽", "勘察/无尽")))
-                mihanUpdateTime.value = Date.now()
+            try {
+                // gamekee
+                const instanceInfo = await getInstanceInfo()
+                if (instanceInfo) {
+                    return applyMissions(instanceInfo, Date.now())
+                }
+            } catch (error) {
+                console.error("Gamekee获取密函失败:", error)
             }
         }
-        return true
+        return false
     }
 
     /**

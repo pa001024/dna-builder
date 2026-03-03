@@ -61,6 +61,8 @@ interface HistoryItem {
     description: string
 }
 
+const NODE_DATA_HISTORY_THROTTLE_MS = 400
+
 export const useNodeEditorStore = defineStore("nodeEditor", () => {
     // 节点和边
     const nodes = ref<Node[]>([])
@@ -91,6 +93,30 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     const history = ref<HistoryItem[]>([])
     const historyIndex = ref<number>(-1)
     const historyLimit = ref<number>(50) // 历史记录最大数量
+    let lastNodeHistoryRecordAt = 0
+    let lastNodeHistoryNodeId: string | null = null
+
+    /**
+     * 深拷贝图状态，优先使用 structuredClone 以提升大型图的复制性能。
+     * @param value 任意可克隆数据。
+     * @returns 深拷贝结果。
+     */
+    function cloneValue<T>(value: T): T {
+        if (typeof structuredClone === "function") {
+            return structuredClone(value)
+        }
+        return JSON.parse(JSON.stringify(value)) as T
+    }
+
+    /**
+     * 判断节点数据更新是否真的发生变化。
+     * @param nodeData 原节点数据。
+     * @param data 待合并的新数据。
+     * @returns 是否有字段变化。
+     */
+    function hasNodeDataChanges(nodeData: Record<string, any>, data: Record<string, any>) {
+        return Object.keys(data).some(key => !Object.is(nodeData[key], data[key]))
+    }
 
     /**
      * 保存当前状态到历史记录
@@ -103,8 +129,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
 
         // 创建历史记录项
         const historyItem: HistoryItem = {
-            nodes: JSON.parse(JSON.stringify(nodes.value)),
-            edges: JSON.parse(JSON.stringify(edges.value)),
+            nodes: cloneValue(nodes.value),
+            edges: cloneValue(edges.value),
             description,
         }
 
@@ -126,8 +152,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         if (historyIndex.value > 0) {
             historyIndex.value--
             const historyItem = history.value[historyIndex.value]
-            nodes.value = JSON.parse(JSON.stringify(historyItem.nodes))
-            edges.value = JSON.parse(JSON.stringify(historyItem.edges))
+            nodes.value = cloneValue(historyItem.nodes)
+            edges.value = cloneValue(historyItem.edges)
             clearCache()
             recalculateAllNodes()
         }
@@ -140,8 +166,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         if (historyIndex.value < history.value.length - 1) {
             historyIndex.value++
             const historyItem = history.value[historyIndex.value]
-            nodes.value = JSON.parse(JSON.stringify(historyItem.nodes))
-            edges.value = JSON.parse(JSON.stringify(historyItem.edges))
+            nodes.value = cloneValue(historyItem.nodes)
+            edges.value = cloneValue(historyItem.edges)
             clearCache()
             recalculateAllNodes()
         }
@@ -153,14 +179,25 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     function updateNodeData(nodeId: string, data: Record<string, any>) {
         const node = nodes.value.find(n => n.id === nodeId)
         if (node) {
-            // 保存历史记录
-            saveToHistory("更新节点数据")
+            const currentNodeData = (node.data ?? {}) as Record<string, any>
+            if (!hasNodeDataChanges(currentNodeData, data)) {
+                return
+            }
+
+            // 高频编辑（如输入框连续修改）时合并历史快照，减少整图深拷贝开销
+            const now = Date.now()
+            const shouldSaveHistory = lastNodeHistoryNodeId !== nodeId || now - lastNodeHistoryRecordAt >= NODE_DATA_HISTORY_THROTTLE_MS
+            if (shouldSaveHistory) {
+                saveToHistory("更新节点数据")
+                lastNodeHistoryRecordAt = now
+                lastNodeHistoryNodeId = nodeId
+            }
 
             // 保存当前的selectedSkill值
-            const oldSelectedSkill = node.data.selectedSkill
+            const oldSelectedSkill = currentNodeData.selectedSkill
 
             // 更新节点数据
-            node.data = { ...node.data, ...data }
+            node.data = { ...currentNodeData, ...data }
 
             // 如果是CoreCalc节点且selectedSkill发生变化，更新charBuild的baseName
             if (node.type === NodeType.CORE_CALC && data.selectedSkill !== oldSelectedSkill) {
@@ -1052,8 +1089,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                             break
                         }
                         case NodeType.WEAPON_DMG_CALC: {
-                            const weaponAttrs = charBuild.calculateWeaponAttributes()
-                            const weapon = charBuild.meleeWeapon
+                            const weapon = charBuild.selectedWeapon || charBuild.meleeWeapon
+                            const weaponAttrs = charBuild.calculateWeaponAttributes(weapon)
                             result = charBuild.calculateWeaponDamage(weaponAttrs, weapon)
                             break
                         }

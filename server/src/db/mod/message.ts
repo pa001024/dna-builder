@@ -252,6 +252,7 @@ export const resolvers = {
     Mutation: {
         sendMessage: async (_parent, { roomId, content, replyToMsgId }, { user, pubsub }) => {
             if (!user) throw createGraphQLError("need login")
+            if (!hasUser(roomId, user.id)) throw createGraphQLError("need room join")
             const room = await getRoomVisibilityInfo(roomId)
             if (!room) throw createGraphQLError("room not found")
             const userId = user.id
