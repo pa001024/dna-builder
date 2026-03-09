@@ -5419,6 +5419,8 @@
         "darkTheme": "다크 테마",
         "desc": "맞춤형 애플리케이션 설정",
         "lang": "언어",
+        "launchAtStartup": "시작 프로그램 실행",
+        "launchAtStartupTip": "로그인 후 데스크톱 앱을 자동으로 실행합니다",
         "lightTheme": "라이트 테마",
         "noModelAvailable": "사용 가능한 모델이 없습니다",
         "other": "기타 설정",

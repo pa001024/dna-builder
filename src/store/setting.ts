@@ -3,7 +3,7 @@ import { DNAAPI } from "dna-api"
 import i18next from "i18next"
 import { defineStore } from "pinia"
 import { sleep } from "@/util"
-import { applyMaterial, startHeartbeat, stopHeartbeat, tauriFetch } from "../api/app"
+import { applyMaterial, isLaunchAtStartupEnabled, setLaunchAtStartupEnabled, startHeartbeat, stopHeartbeat, tauriFetch } from "../api/app"
 import { executeSignFlow } from "../api/dna-sign"
 import { db } from "./db"
 
@@ -35,6 +35,7 @@ export const useSettingStore = defineStore("setting", {
             lastCapInterval: useLocalStorage("last_cap_interval", 0),
             // 自动签到设置
             autoSign: useLocalStorage("setting_auto_sign", false),
+            launchAtStartup: useLocalStorage("setting_launch_at_startup", false),
             nextSignCheckTime: useLocalStorage("setting_next_sign_check_time", 0),
             // 剧情文本替换设置
             protagonistName1: useLocalStorage("story_protagonist_name_1", "维塔"),
@@ -52,6 +53,22 @@ export const useSettingStore = defineStore("setting", {
         },
         setTheme(theme: string) {
             this.theme = theme
+        },
+        /**
+         * 同步桌面端开机启动状态，避免本地缓存与系统真实状态不一致。
+         */
+        async syncLaunchAtStartup() {
+            this.launchAtStartup = await isLaunchAtStartupEnabled()
+            return this.launchAtStartup
+        },
+        /**
+         * 更新开机启动设置，并以系统返回结果为准写回本地状态。
+         * @param enabled 是否启用开机启动
+         */
+        async setLaunchAtStartup(enabled: boolean) {
+            const nextState = await setLaunchAtStartupEnabled(enabled)
+            this.launchAtStartup = nextState
+            return nextState
         },
         setWinMaterial(mat: string) {
             this.winMaterial = mat

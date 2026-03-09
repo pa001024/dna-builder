@@ -74,6 +74,7 @@ strip = true      # Ensures debug symbols are removed.
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = "2"
+tauri-plugin-autostart = "2"
 window-vibrancy = "0.7.1"
 winreg = "0.55.0"
 windows = { version = "0.62.2", features = [

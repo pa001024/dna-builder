@@ -5415,6 +5415,8 @@
         "darkTheme": "ダークテーマ",
         "desc": "カスタムアプリケーション設定",
         "lang": "言語",
+        "launchAtStartup": "スタートアップ起動",
+        "launchAtStartupTip": "サインイン後にデスクトップアプリを自動で起動します",
         "lightTheme": "ライトテーマ",
         "noModelAvailable": "利用可能なモデルはありません",
         "other": "その他の設定",

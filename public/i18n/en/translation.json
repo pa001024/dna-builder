@@ -5419,6 +5419,8 @@
         "darkTheme": "Dark Theme",
         "desc": "Custom application settings",
         "lang": "Language",
+        "launchAtStartup": "Launch at startup",
+        "launchAtStartupTip": "Start the desktop app automatically after you sign in",
         "lightTheme": "Light Theme",
         "noModelAvailable": "No Model Available",
         "other": "Other settings",

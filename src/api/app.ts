@@ -71,6 +71,23 @@ export async function stopHeartbeat() {
 }
 
 /**
+ * 获取当前是否启用了开机启动。
+ * @returns 当前开机启动开关状态
+ */
+export async function isLaunchAtStartupEnabled() {
+    return await invoke<boolean>("is_launch_at_startup_enabled")
+}
+
+/**
+ * 更新开机启动开关状态。
+ * @param enabled 是否启用开机启动
+ * @returns 更新后的真实状态
+ */
+export async function setLaunchAtStartupEnabled(enabled: boolean) {
+    return await invoke<boolean>("set_launch_at_startup_enabled", { enabled })
+}
+
+/**
  * 导出二进制文件到指定路径
  * @param filePath 文件路径
  * @param binaryContent 二进制内容

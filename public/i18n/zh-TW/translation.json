@@ -5387,6 +5387,8 @@
         "darkTheme": "深色主題",
         "desc": "自定義應用程序設置",
         "lang": "語言",
+        "launchAtStartup": "開機啟動",
+        "launchAtStartupTip": "系統登入後自動啟動桌面應用程式",
         "lightTheme": "亮色主題",
         "noModelAvailable": "暫無可用模型",
         "other": "其他設置",

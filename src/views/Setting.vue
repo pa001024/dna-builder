@@ -11,6 +11,7 @@ import { useUIStore } from "../store/ui"
 
 const setting = useSettingStore()
 const ui = useUIStore()
+const isUpdatingLaunchAtStartup = ref(false)
 
 //#region UI
 const lightThemes = [
@@ -71,6 +72,22 @@ async function resetStorage() {
 async function openResetConfirmDialog() {
     if (await ui.showDialog(t("setting.reset"), t("setting.resetTip"))) {
         resetStorage()
+    }
+}
+
+/**
+ * 更新开机启动开关，并在失败时保留原状态。
+ * @param enabled 是否启用开机启动
+ */
+async function updateLaunchAtStartup(enabled: boolean) {
+    isUpdatingLaunchAtStartup.value = true
+    try {
+        await setting.setLaunchAtStartup(enabled)
+    } catch (error) {
+        console.error("更新开机启动设置失败:", error)
+        ui.showErrorMessage(error instanceof Error ? error.message : String(error))
+    } finally {
+        isUpdatingLaunchAtStartup.value = false
     }
 }
 
@@ -209,6 +226,19 @@ function resetAiSettings() {
                             <div class="text-xs text-base-content/50">{{ $t("setting.windowTrasnparentTip") }}</div>
                         </span>
                         <input v-model="setting.windowTrasnparent" type="checkbox" class="toggle toggle-secondary" />
+                    </div>
+                    <div v-if="env.isApp" class="flex justify-between items-center p-2">
+                        <span class="label-text">
+                            {{ $t("setting.launchAtStartup") }}
+                            <div class="text-xs text-base-content/50">{{ $t("setting.launchAtStartupTip") }}</div>
+                        </span>
+                        <input
+                            :checked="setting.launchAtStartup"
+                            :disabled="isUpdatingLaunchAtStartup"
+                            type="checkbox"
+                            class="toggle toggle-secondary"
+                            @change="updateLaunchAtStartup(($event.target as HTMLInputElement).checked)"
+                        />
                     </div>
                     <div v-if="env.isApp" class="flex justify-between items-center p-2">
                         <span class="label-text">

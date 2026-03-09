@@ -836,6 +836,8 @@
         "darkTheme": "深色主题",
         "desc": "自定义应用程序设置",
         "lang": "语言",
+        "launchAtStartup": "开机启动",
+        "launchAtStartupTip": "系统登录后自动启动桌面应用",
         "lightTheme": "亮色主题",
         "noModelAvailable": "暂无可用模型",
         "other": "其他设置",

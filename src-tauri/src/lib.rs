@@ -86,6 +86,8 @@ use tokio_tungstenite::{
     connect_async, tungstenite::client::IntoClientRequest, tungstenite::protocol::Message,
 };
 use url::Url;
+#[cfg(target_os = "windows")]
+use tauri_plugin_autostart::ManagerExt;
 
 // 定义发往WebSocket Actor的指令
 enum WsCommand {
@@ -2169,6 +2171,49 @@ fn unwatch_file(file_path: String) -> Result<String, String> {
     }
 }
 
+/// 获取当前开机启动状态。
+#[tauri::command]
+fn is_launch_at_startup_enabled(app_handle: tauri::AppHandle) -> Result<bool, String> {
+    #[cfg(target_os = "windows")]
+    {
+        app_handle
+            .autolaunch()
+            .is_enabled()
+            .map_err(|error| format!("读取开机启动状态失败: {error}"))
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = app_handle;
+        Err("当前平台暂不支持开机启动设置".to_string())
+    }
+}
+
+/// 更新开机启动状态。
+#[tauri::command]
+fn set_launch_at_startup_enabled(app_handle: tauri::AppHandle, enabled: bool) -> Result<bool, String> {
+    #[cfg(target_os = "windows")]
+    {
+        let manager = app_handle.autolaunch();
+        if enabled {
+            manager
+                .enable()
+                .map_err(|error| format!("启用开机启动失败: {error}"))?;
+        } else {
+            manager
+                .disable()
+                .map_err(|error| format!("关闭开机启动失败: {error}"))?;
+        }
+        manager
+            .is_enabled()
+            .map_err(|error| format!("校验开机启动状态失败: {error}"))
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = (app_handle, enabled);
+        Err("当前平台暂不支持开机启动设置".to_string())
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let mut app = tauri::Builder::default()
@@ -2182,6 +2227,7 @@ pub fn run() {
     #[cfg(target_os = "windows")]
     {
         app = app
+            .plugin(tauri_plugin_autostart::Builder::new().build())
             .plugin(tauri_plugin_updater::Builder::new().build())
             .plugin(tauri_plugin_window_state::Builder::default().build());
     }
@@ -2310,6 +2356,8 @@ pub fn run() {
     .invoke_handler(tauri::generate_handler![
         apply_material,
         app_close,
+        is_launch_at_startup_enabled,
+        set_launch_at_startup_enabled,
         get_os_version,
         get_game_install,
         is_game_running,

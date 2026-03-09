@@ -5342,6 +5342,8 @@
         "darkTheme": "Thème sombre",
         "desc": "Paramètres personnalisés de l'application",
         "lang": "Langue",
+        "launchAtStartup": "Lancement au démarrage",
+        "launchAtStartupTip": "Démarre automatiquement l'application de bureau après votre connexion",
         "lightTheme": "Thème clair",
         "noModelAvailable": "Aucun modèle disponible",
         "other": "Autres paramètres",

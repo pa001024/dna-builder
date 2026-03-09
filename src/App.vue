@@ -40,6 +40,9 @@ if (env.isApp) {
     if (setting.autoSign) {
         setting.startAutoSign()
     }
+    void setting.syncLaunchAtStartup().catch(error => {
+        console.error("同步开机启动状态失败:", error)
+    })
 } else {
     onMounted(() => {
         if (!setting.windowTrasnparent) return
