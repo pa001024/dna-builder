@@ -5,6 +5,9 @@ import { type DBGlobalSearchOption, GlobalSearchService } from "@/utils/global-s
 
 const router = useRouter()
 
+/**
+ * 跳转到指定资料库页面。
+ */
 function navigateTo(path: string) {
     router.push(path)
 }
@@ -190,14 +193,206 @@ const databaseItems = [
     },
 ]
 
+type DatabaseItem = (typeof databaseItems)[number]
+
+type DatabaseSectionConfig = {
+    id: string
+    title: string
+    description: string
+    badge: string
+    accentClass: string
+    paths: string[]
+}
+
+type SearchScopeOption = {
+    id: string
+    label: string
+}
+
 const globalSearchService = new GlobalSearchService()
+
+const featuredPaths = ["/db/char", "/db/weapon", "/db/mod", "/db/map", "/db/questchain", "/db/hardboss"]
+
+const databaseSectionConfigs: DatabaseSectionConfig[] = [
+    {
+        id: "build",
+        title: "构筑与养成",
+        description: "围绕角色培养、装备搭配与养成素材，适合从 Build 视角快速定位核心资料。",
+        badge: "Build",
+        accentClass: "bg-violet-500",
+        paths: ["/db/char", "/db/weapon", "/db/mod", "/db/damage", "/db/draft", "/db/pet", "/db/accessory"],
+    },
+    {
+        id: "explore",
+        title: "地图与探索",
+        description: "聚合区域、副本、刷新点位与采集相关资料，优先服务跑图、采集和副本路线查询。",
+        badge: "Explore",
+        accentClass: "bg-emerald-500",
+        paths: ["/db/dungeon", "/db/abyss", "/db/map", "/db/map-local", "/db/walnut", "/db/fish", "/db/shop"],
+    },
+    {
+        id: "world",
+        title: "任务与世界",
+        description: "把 NPC、动态任务、话题、声望与图鉴类内容整理到同一层，降低世界观检索成本。",
+        badge: "World",
+        accentClass: "bg-sky-500",
+        paths: ["/db/npc", "/db/reputation", "/db/rank", "/db/questchain", "/db/dynquest", "/db/partytopic"],
+    },
+    {
+        id: "challenge",
+        title: "挑战与收藏",
+        description: "面向首领、怪物、成就与称号等目标型内容，方便围绕挑战目标进行连续检索。",
+        badge: "Challenge",
+        accentClass: "bg-amber-500",
+        paths: ["/db/monster", "/db/hardboss", "/db/achievement", "/db/title", "/db/book"],
+    },
+]
+
+const databaseItemMap = new Map<string, DatabaseItem>(databaseItems.map(item => [item.path, item]))
+
+const selectedSearchSectionIds = ref(databaseSectionConfigs.map(section => section.id))
+
+const searchScopeOptions = computed<SearchScopeOption[]>(() => {
+    return [
+        { id: "all", label: "全部" },
+        ...databaseSectionConfigs.map(section => ({
+            id: section.id,
+            label: section.title,
+        })),
+    ]
+})
+
+const isAllSearchSectionsSelected = computed(() => {
+    return selectedSearchSectionIds.value.length === databaseSectionConfigs.length
+})
+
+const selectedSearchPaths = computed(() => {
+    if (isAllSearchSectionsSelected.value) {
+        return null
+    }
+
+    const pathSet = new Set<string>()
+
+    for (const section of databaseSectionConfigs) {
+        if (!selectedSearchSectionIds.value.includes(section.id)) {
+            continue
+        }
+
+        for (const path of section.paths) {
+            pathSet.add(path)
+        }
+    }
+
+    return pathSet
+})
 
 /**
  * 实时计算搜索候选，按融合评分返回前若干条。
  */
 const searchOptions = computed<DBGlobalSearchOption[]>(() => {
-    return globalSearchService.search(searchKeyword.value)
+    const options = globalSearchService.search(searchKeyword.value)
+
+    if (!selectedSearchPaths.value) {
+        return options
+    }
+
+    return options.filter(option => selectedSearchPaths.value?.has(option.path))
 })
+
+/**
+ * 生成搜索状态提示文案，兼顾空状态、命中状态与无结果状态。
+ */
+const searchStatusText = computed(() => {
+    const searchScopeText = isAllSearchSectionsSelected.value ? "全部模块" : `已选 ${selectedSearchSectionIds.value.length} 个模块`
+
+    if (!searchKeyword.value.trim()) {
+        return `当前搜索范围：${searchScopeText}`
+    }
+
+    if (searchOptions.value.length) {
+        return `${searchScopeText} · 已命中 ${searchOptions.value.length} 个结果`
+    }
+
+    return "没有找到匹配内容，试试角色、地图、任务、副本或怪物等关键词"
+})
+
+/**
+ * 首页展示的核心统计数据，用于强化“资料库工作台”的整体感知。
+ */
+const liveStats = computed(() => {
+    return [
+        {
+            label: "资料入口",
+            value: `${databaseItems.length}`,
+        },
+        {
+            label: "内容分区",
+            value: `${databaseSectionConfigs.length}`,
+        },
+    ]
+})
+
+/**
+ * 生成首页右侧的推荐入口，优先展示高频使用的核心资料。
+ */
+const featuredItems = computed(() => {
+    return featuredPaths.map(path => databaseItemMap.get(path)).filter((item): item is DatabaseItem => item !== undefined)
+})
+
+/**
+ * 将扁平入口重组为页面分区，形成更清晰的信息架构。
+ */
+const databaseSections = computed(() => {
+    return databaseSectionConfigs.map(section => ({
+        ...section,
+        items: section.paths.map(path => databaseItemMap.get(path)).filter((item): item is DatabaseItem => item !== undefined),
+    }))
+})
+
+/**
+ * 将路由片段转换为更适合展示的短标签。
+ */
+function getItemPathLabel(path: string) {
+    return path.replace(/^\/db\//, "").replaceAll("-", " · ")
+}
+
+/**
+ * 判断指定搜索模块是否处于选中状态。
+ */
+function isSearchScopeSelected(scopeId: string) {
+    if (scopeId === "all") {
+        return isAllSearchSectionsSelected.value
+    }
+
+    return selectedSearchSectionIds.value.includes(scopeId)
+}
+
+/**
+ * 一键切换为搜索全部模块。
+ */
+function selectAllSearchScopes() {
+    selectedSearchSectionIds.value = databaseSectionConfigs.map(section => section.id)
+}
+
+/**
+ * 切换单个搜索模块；若全部取消，则回退为全选。
+ */
+function toggleSearchScope(scopeId: string) {
+    if (scopeId === "all") {
+        selectAllSearchScopes()
+        return
+    }
+
+    const isSelected = selectedSearchSectionIds.value.includes(scopeId)
+
+    if (isSelected) {
+        const nextSectionIds = selectedSearchSectionIds.value.filter(id => id !== scopeId)
+        selectedSearchSectionIds.value = nextSectionIds.length ? nextSectionIds : databaseSectionConfigs.map(section => section.id)
+        return
+    }
+
+    selectedSearchSectionIds.value = [...selectedSearchSectionIds.value, scopeId]
+}
 
 /**
  * 选择搜索候选并跳转，同时重置输入内容。
@@ -209,65 +404,285 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
 </script>
 
 <template>
-    <ScrollArea class="h-full flex flex-col p-4">
-        <div class="max-w-6xl mx-auto w-full">
-            <div class="py-2">
-                <DBGlobalSearchAutocomplete
-                    v-model="searchKeyword"
-                    :options="searchOptions"
-                    placeholder="全局搜索资料库（支持拼音）..."
-                    empty-text="未找到匹配的资料库条目"
-                    :max-visible="14"
-                    @select="handleSelectSearchOption"
-                />
-            </div>
+    <ScrollArea class="h-full">
+        <div class="relative min-h-full overflow-hidden">
+            <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4 pb-8 md:p-6 lg:p-8">
+                <section class="glass-surface relative z-20 rounded-[28px] shadow-xl shadow-base-content/5">
+                    <div class="relative grid gap-6 p-6 md:p-8 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.85fr)]">
+                        <div class="space-y-6">
+                            <div class="grid gap-3 md:grid-cols-2">
+                                <div
+                                    v-for="stat in liveStats"
+                                    :key="stat.label"
+                                    class="glass-subtle rounded-2xl p-4 shadow-sm shadow-base-content/5"
+                                >
+                                    <div class="text-xs font-medium uppercase tracking-[0.18em] text-base-content/45">{{ stat.label }}</div>
+                                    <div class="mt-3 text-3xl font-black text-base-content">{{ stat.value }}</div>
+                                </div>
+                            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-4">
-                <div
-                    v-for="item in databaseItems"
-                    :key="item.path"
-                    class="shadow-md rounded-lg p-6 cursor-pointer bg-base-300/50 backdrop-blur-lg group relative overflow-hidden"
-                    @click="navigateTo(item.path)"
-                >
-                    <div
-                        class="absolute inset-0 bg-linear-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                        :class="[item.color]"
-                    />
-                    <div class="relative flex items-center gap-4">
-                        <div class="w-16 h-16 rounded-xl flex items-center justify-center shrink-0">
-                            <svg
-                                class="w-9 h-9 transition-all duration-300 group-hover:text-primary group-hover:scale-110 group-hover:rotate-6"
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                            >
-                                <path :d="item.icon" />
-                            </svg>
+                            <div class="glass-subtle relative z-30 rounded-3xl p-4 shadow-sm shadow-base-content/5 md:p-5">
+                                <div class="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                                    <div>
+                                        <div class="text-sm font-semibold text-base-content">全局检索入口</div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4 flex flex-wrap gap-2">
+                                    <button
+                                        v-for="scope in searchScopeOptions"
+                                        :key="scope.id"
+                                        type="button"
+                                        class="rounded-full border px-3 py-1.5 text-sm transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                                        :class="
+                                            isSearchScopeSelected(scope.id)
+                                                ? 'border-primary/70 bg-primary text-primary-content shadow-sm shadow-primary/20'
+                                                : 'border-base-300/50 bg-base-100/25 text-base-content/75 backdrop-blur-md hover:border-primary/35 hover:bg-base-100/35 hover:text-base-content'
+                                        "
+                                        @click="toggleSearchScope(scope.id)"
+                                    >
+                                        {{ scope.label }}
+                                    </button>
+                                </div>
+
+                                <DBGlobalSearchAutocomplete
+                                    v-model="searchKeyword"
+                                    :options="searchOptions"
+                                    placeholder="搜索已选模块..."
+                                    empty-text="未找到匹配的资料库条目"
+                                    :max-visible="14"
+                                    class="w-full"
+                                    input-class="db-search-input"
+                                    panel-class="db-search-panel"
+                                    option-class="db-search-option"
+                                    @select="handleSelectSearchOption"
+                                />
+
+                                <p class="mt-3 text-sm leading-6 text-base-content/60">{{ searchStatusText }}</p>
+                            </div>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <h2
-                                class="text-xl font-semibold text-base-content group-hover:text-primary transition-colors duration-300 truncate"
-                            >
-                                {{ $t(item.name) }}
-                            </h2>
-                            <p class="text-sm text-base-content/60 group-hover:text-base-content/80 transition-colors duration-300 mt-1">
-                                {{ $t(item.desc) }}
-                            </p>
-                        </div>
-                        <div
-                            class="w-8 h-8 rounded-full bg-base-content/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0"
-                        >
-                            <svg class="w-4 h-4 text-base-content/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
+
+                        <div class="grid gap-4">
+                            <div class="glass-subtle rounded-3xl p-5 shadow-sm shadow-base-content/5">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div>
+                                        <div class="text-sm font-semibold text-base-content">推荐入口</div>
+                                    </div>
+                                    <span class="badge badge-ghost badge-sm">{{ featuredItems.length }} 项</span>
+                                </div>
+
+                                <div class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                                    <button
+                                        v-for="item in featuredItems"
+                                        :key="item.path"
+                                        type="button"
+                                        class="glass-interactive group flex cursor-pointer items-center gap-3 rounded-2xl p-3 text-left transition-all duration-200 hover:border-primary/35 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                                        @click="navigateTo(item.path)"
+                                    >
+                                        <div
+                                            class="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-base-300/80 bg-base-200/90 text-base-content shadow-sm shadow-base-content/5"
+                                        >
+                                            <svg class="relative h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                                                <path :d="item.icon" />
+                                            </svg>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="truncate text-sm font-semibold text-base-content">{{ $t(item.name) }}</div>
+                                            <div class="mt-1 truncate text-[11px] font-medium uppercase tracking-wide text-base-content/45">
+                                                {{ getItemPathLabel(item.path) }}
+                                            </div>
+                                        </div>
+                                        <svg
+                                            class="h-4 w-4 shrink-0 text-base-content/35 transition-transform duration-200 group-hover:translate-x-0.5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </section>
 
-            <div class="flex flex-col gap-1 text-sm text-base-content/60 p-6">
-                除特别注明的内容外，本站文字内容遵循CC BY-SA 3.0协议，图片等媒体内容则遵循其原有协议。<br />
-                利用本站内容，您必须在给出适当的署名，并提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。不得以任何方式暗示本站为您或您的使用背书。
+                <div class="relative z-0 grid gap-6 xl:grid-cols-2">
+                    <section
+                        v-for="section in databaseSections"
+                        :key="section.id"
+                        class="glass-surface rounded-[28px] p-5 shadow-lg shadow-base-content/5 md:p-6"
+                    >
+                        <div class="flex flex-col gap-3 border-b border-base-300/70 pb-4 md:flex-row md:items-start md:justify-between">
+                            <div>
+                                <div class="flex items-center gap-3">
+                                    <span class="h-3 w-3 rounded-full" :class="section.accentClass" />
+                                    <span class="text-xs font-semibold uppercase tracking-[0.22em] text-base-content/45">{{
+                                        section.badge
+                                    }}</span>
+                                </div>
+                                <h2 class="mt-3 text-2xl font-bold text-base-content">{{ section.title }}</h2>
+                            </div>
+                            <span class="badge badge-ghost badge-lg shrink-0">{{ section.items.length }} 个入口</span>
+                        </div>
+
+                        <div class="mt-5 grid gap-4 md:grid-cols-2">
+                            <button
+                                v-for="item in section.items"
+                                :key="item.path"
+                                type="button"
+                                class="glass-interactive group relative flex h-full cursor-pointer flex-col rounded-3xl p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-lg hover:shadow-base-content/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45"
+                                @click="navigateTo(item.path)"
+                            >
+                                <div class="grid grid-cols-[56px_minmax(0,1fr)] items-start gap-4">
+                                    <div
+                                        class="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-base-300/80 bg-base-200/90 text-base-content shadow-sm shadow-base-content/10"
+                                    >
+                                        <svg class="relative h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
+                                            <path :d="item.icon" />
+                                        </svg>
+                                    </div>
+
+                                    <div class="min-w-0 flex h-full flex-col">
+                                        <h3 class="line-clamp-1 text-lg font-semibold text-base-content">
+                                            {{ $t(item.name) }}
+                                        </h3>
+                                        <div class="mt-1 line-clamp-1 text-[11px] font-medium uppercase tracking-wide text-base-content/45">
+                                            {{ getItemPathLabel(item.path) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3 flex items-end justify-between gap-3 text-sm text-base-content/62">
+                                    <span class="block min-w-0 flex-1 leading-6">
+                                        {{ $t(item.desc) }}
+                                    </span>
+                                    <span
+                                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-base-200/80 text-base-content/60 transition-transform duration-200 group-hover:translate-x-1"
+                                    >
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </span>
+                                </div>
+                            </button>
+                        </div>
+                    </section>
+                </div>
+
+                <section
+                    class="glass-subtle rounded-[28px] p-5 text-sm leading-7 text-base-content/60 shadow-sm shadow-base-content/5 md:p-6"
+                >
+                    <div class="text-sm font-semibold text-base-content">内容授权说明</div>
+                    <p class="mt-3">除特别注明的内容外，本站文字内容遵循 CC BY-SA 3.0 协议，图片等媒体内容则遵循其原有协议。</p>
+                    <p class="mt-2">
+                        利用本站内容时，您必须给出适当署名，并提供指向本许可协议的链接，同时标明是否对原始作品作了修改；不得以任何方式暗示本站为您或您的使用背书。
+                    </p>
+                </section>
             </div>
         </div>
     </ScrollArea>
 </template>
+
+<style scoped>
+.glass-surface,
+.glass-subtle,
+.glass-interactive {
+    position: relative;
+}
+
+.glass-surface {
+    border: 1px solid color-mix(in srgb, var(--color-base-content) 12%, transparent);
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--color-base-100) 26%, transparent),
+            color-mix(in srgb, var(--color-base-100) 14%, transparent)
+        ),
+        linear-gradient(135deg, rgb(255 255 255 / 0.16), transparent 42%);
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.18),
+        0 16px 40px rgb(15 23 42 / 0.1);
+    backdrop-filter: blur(24px) saturate(150%);
+}
+
+.glass-subtle {
+    border: 1px solid color-mix(in srgb, var(--color-base-content) 10%, transparent);
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--color-base-100) 20%, transparent),
+            color-mix(in srgb, var(--color-base-100) 10%, transparent)
+        ),
+        linear-gradient(135deg, rgb(255 255 255 / 0.12), transparent 46%);
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.14),
+        0 10px 28px rgb(15 23 42 / 0.08);
+    backdrop-filter: blur(18px) saturate(145%);
+}
+
+.glass-interactive {
+    border: 1px solid color-mix(in srgb, var(--color-base-content) 10%, transparent);
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--color-base-100) 18%, transparent),
+            color-mix(in srgb, var(--color-base-100) 8%, transparent)
+        ),
+        linear-gradient(135deg, rgb(255 255 255 / 0.1), transparent 48%);
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.12),
+        0 8px 24px rgb(15 23 42 / 0.07);
+    backdrop-filter: blur(16px) saturate(140%);
+}
+
+.glass-interactive:hover {
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--color-base-100) 24%, transparent),
+            color-mix(in srgb, var(--color-base-100) 12%, transparent)
+        ),
+        linear-gradient(135deg, rgb(255 255 255 / 0.16), transparent 48%);
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.18),
+        0 14px 34px rgb(15 23 42 / 0.1);
+}
+
+:deep(.db-search-input) {
+    border: 1px solid color-mix(in srgb, var(--color-base-content) 10%, transparent) !important;
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--color-base-100) 32%, transparent),
+        color-mix(in srgb, var(--color-base-100) 18%, transparent)
+    ) !important;
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.16),
+        0 8px 20px rgb(15 23 42 / 0.06);
+    backdrop-filter: blur(18px) saturate(145%);
+}
+
+:deep(.db-search-panel) {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-base-content) 10%, transparent) !important;
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--color-base-100) 32%, transparent),
+        color-mix(in srgb, var(--color-base-100) 18%, transparent)
+    ) !important;
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.18),
+        0 18px 36px rgb(15 23 42 / 0.1) !important;
+    backdrop-filter: blur(22px) saturate(150%);
+}
+
+:deep(.db-search-option) {
+    border-bottom-color: color-mix(in srgb, var(--color-base-content) 8%, transparent) !important;
+}
+
+:deep(.db-search-option:hover),
+:deep(.db-search-option[data-active="true"]) {
+    background: color-mix(in srgb, var(--color-base-100) 28%, transparent) !important;
+}
+</style>

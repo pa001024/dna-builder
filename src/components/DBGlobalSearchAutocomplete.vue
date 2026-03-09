@@ -16,11 +16,17 @@ const props = withDefaults(
         placeholder?: string
         emptyText?: string
         maxVisible?: number
+        inputClass?: string
+        panelClass?: string
+        optionClass?: string
     }>(),
     {
         placeholder: "搜索资料库内容...",
         emptyText: "没有匹配结果",
         maxVisible: 12,
+        inputClass: "",
+        panelClass: "",
+        optionClass: "",
     }
 )
 
@@ -109,6 +115,7 @@ function handleBlur() {
                 type="text"
                 :placeholder="placeholder"
                 class="w-full pl-10 pr-3 py-2 rounded-lg bg-base-200 text-base-content placeholder-base-content/60 outline-none border border-base-300 focus:border-primary transition-all"
+                :class="props.inputClass"
                 @input="handleInput"
                 @keydown="handleInputKeydown"
                 @focus="handleFocus"
@@ -120,6 +127,7 @@ function handleBlur() {
         <div
             v-if="isOpen && modelValue.trim()"
             class="absolute top-[calc(100%+8px)] left-0 right-0 z-50 bg-base-100 border border-base-300 rounded-lg shadow-lg overflow-hidden"
+            :class="props.panelClass"
         >
             <div v-if="!visibleOptions.length" class="px-3 py-4 text-sm text-base-content/60 text-center">
                 {{ emptyText }}
@@ -131,8 +139,9 @@ function handleBlur() {
                     :key="option.id"
                     type="button"
                     class="w-full text-left px-3 py-2.5 border-b border-base-200/80 last:border-b-0 hover:bg-base-200 transition-colors"
-                    :class="{ 'bg-base-200': index === activeIndex }"
+                    :class="[props.optionClass, { 'bg-base-200': index === activeIndex }]"
                     @mousedown.prevent="selectOption(option)"
+                    :data-active="index === activeIndex"
                 >
                     <div class="flex items-center justify-between gap-2">
                         <div class="min-w-0">
