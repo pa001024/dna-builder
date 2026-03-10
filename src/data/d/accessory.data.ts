@@ -94,7 +94,7 @@ export const charAccessoryData: Accessory[] = [
         desc: "端庄的象征，礼仪的具现，亦或是，一只无法飞翔的蝴蝶。",
         icon: "T_Fashion_Head_SilverBow",
         rarity: 4,
-        unlock: "",
+        unlock: "通过活动获得",
     },
     {
         id: 10012,
@@ -700,7 +700,7 @@ export const charAccessoryData: Accessory[] = [
         id: 11004,
         name: "星落如雨",
         desc: "疑是赤龙衔燧木，偷来星雨种人间。",
-        icon: "",
+        icon: "T_Fashion_Fx13",
         rarity: 5,
         unlock: "通过棱镜兑换获得",
     },
@@ -708,9 +708,9 @@ export const charAccessoryData: Accessory[] = [
         id: 12001,
         name: "釉色铭",
         desc: "这青蓝的茶盏，装的是半生风雨，端的是一顶山河。",
-        icon: "T_Fashion_Hat03",
+        icon: "T_Fashion_Hat03_01",
         rarity: 4,
-        unlock: "",
+        unlock: "通过商店获得",
     },
     {
         id: 12002,
@@ -718,7 +718,7 @@ export const charAccessoryData: Accessory[] = [
         desc: "不大不小的帽檐，刚好足以在朦胧雨雾里徐行。",
         icon: "T_Fashion_Hat04",
         rarity: 4,
-        unlock: "",
+        unlock: "通过商店获得",
     },
     {
         id: 12003,
@@ -726,7 +726,7 @@ export const charAccessoryData: Accessory[] = [
         desc: "将理想与未来掷向苍穹。",
         icon: "T_Fashion_Hat01",
         rarity: 4,
-        unlock: "",
+        unlock: "通过商店获得",
     },
     {
         id: 12004,
@@ -734,7 +734,7 @@ export const charAccessoryData: Accessory[] = [
         desc: "回廊转角处，发带在柔风中轻摇。",
         icon: "T_Fashion_Hat02",
         rarity: 4,
-        unlock: "",
+        unlock: "通过商店获得",
     },
     {
         id: 12121,
@@ -1468,7 +1468,7 @@ export const charAccessoryData: Accessory[] = [
         id: 21004,
         name: "星河游龙",
         desc: "逐焰摇光动星汉，垂天银河作游龙。",
-        icon: "",
+        icon: "T_Fashion_Fx12",
         rarity: 5,
         unlock: "通过棱镜兑换获得",
     },
@@ -1678,7 +1678,7 @@ export const charAccessoryData: Accessory[] = [
         desc: "可变更胜利动作。",
         icon: "T_Fashion_SettlementAction_01",
         rarity: 5,
-        unlock: "",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 31002,
@@ -1686,7 +1686,7 @@ export const charAccessoryData: Accessory[] = [
         desc: "可变更胜利动作。",
         icon: "T_Fashion_SettlementAction_02",
         rarity: 5,
-        unlock: "",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 40001,
@@ -2054,7 +2054,7 @@ export const charAccessoryData: Accessory[] = [
         desc: " ",
         icon: "T_Fashion_Fx11",
         rarity: 4,
-        unlock: "",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 60001,
@@ -2092,7 +2092,7 @@ export const charAccessoryData: Accessory[] = [
         id: 70003,
         name: "火树银花·鎏金",
         desc: "腾龙吹焰，彻夜欢歌。",
-        icon: "T_Fashion_Head_YellowChick",
+        icon: "T_Fashion_Fx10_02",
         rarity: 5,
         unlock: "通过棱镜兑换获得",
     },
@@ -2148,7 +2148,7 @@ export const charAccessoryData: Accessory[] = [
         id: 70031,
         name: "火树银花·锈红",
         desc: "腾龙吹焰，彻夜欢歌。",
-        icon: "T_Fashion_Head_YellowChick",
+        icon: "T_Fashion_Fx10_01",
         rarity: 5,
         unlock: "通过棱镜兑换获得",
     },
@@ -2156,7 +2156,7 @@ export const charAccessoryData: Accessory[] = [
         id: 70032,
         name: "火树银花·涅白",
         desc: "腾龙吹焰，彻夜欢歌。",
-        icon: "T_Fashion_Head_YellowChick",
+        icon: "T_Fashion_Fx10",
         rarity: 5,
         unlock: "通过棱镜兑换获得",
     },
@@ -2164,7 +2164,7 @@ export const charAccessoryData: Accessory[] = [
         id: 70033,
         name: "火树银花·黛蓝",
         desc: "腾龙吹焰，彻夜欢歌。",
-        icon: "T_Fashion_Head_YellowChick",
+        icon: "T_Fashion_Fx10_03",
         rarity: 5,
         unlock: "通过棱镜兑换获得",
     },
@@ -2273,7 +2273,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "奏响进击的旋律。",
         icon: "T_Fashion_Weapon22",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10002,
@@ -2281,7 +2281,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "奏响进击的旋律。",
         icon: "T_Fashion_Weapon23",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10003,
@@ -2289,7 +2289,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "奏响进击的旋律。",
         icon: "T_Fashion_Weapon02",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10004,
@@ -2297,7 +2297,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "奏响进击的旋律。",
         icon: "T_Fashion_Weapon01",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10005,
@@ -2305,7 +2305,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "蝴蝶了却了飞翔的故梦。",
         icon: "T_Fashion_Weapon16",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10006,
@@ -2313,7 +2313,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "蝴蝶了却了飞翔的故梦。",
         icon: "T_Fashion_Weapon15",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10007,
@@ -2321,7 +2321,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "蝴蝶了却了飞翔的故梦。",
         icon: "T_Fashion_Weapon13",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10008,
@@ -2329,7 +2329,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "蝴蝶了却了飞翔的故梦。",
         icon: "T_Fashion_Weapon14",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10009,
@@ -2337,7 +2337,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "于硝烟中绽放。",
         icon: "T_Fashion_Weapon17",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10010,
@@ -2345,7 +2345,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "于硝烟中绽放。",
         icon: "T_Fashion_Weapon20",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10011,
@@ -2353,7 +2353,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "于硝烟中绽放。",
         icon: "T_Fashion_Weapon18",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10012,
@@ -2361,7 +2361,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "于硝烟中绽放。",
         icon: "T_Fashion_Weapon19",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10013,
@@ -2369,7 +2369,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "被神遗弃的羽翼。",
         icon: "T_Fashion_Weapon03",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10014,
@@ -2377,7 +2377,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "被神遗弃的羽翼。",
         icon: "T_Fashion_Weapon05",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10015,
@@ -2385,7 +2385,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "被神遗弃的羽翼。",
         icon: "T_Fashion_Weapon09",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10016,
@@ -2393,7 +2393,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "被神遗弃的羽翼。",
         icon: "T_Fashion_Weapon06",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10017,
@@ -2401,7 +2401,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "阿特拉西亚大陆知名童话故事《啾啾的奇妙冒险》中的主角——一只名叫啾啾的小鸡，讲述啾啾每天在不同的位置苏醒，结识不同的友人，踏上奇妙冒险寻找鸡生意义，揭开反派阴谋的故事。",
         icon: "T_Fashion_Weapon21",
         rarity: 4,
-        unlock: "通过商店获得",
+        unlock: "通过蛋皎的印象商店获得",
     },
     {
         id: 10018,
@@ -2409,7 +2409,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "阿特拉西亚大陆知名童话故事《啾啾的奇妙冒险》中的主角——一只名叫啾啾的小鸡，讲述啾啾每天在不同的位置苏醒，结识不同的友人，踏上奇妙冒险寻找鸡生意义，揭开反派阴谋的故事。",
         icon: "T_Fashion_Weapon25",
         rarity: 4,
-        unlock: "通过商店获得",
+        unlock: "通过声名升级奖励获得",
     },
     {
         id: 10019,
@@ -2417,7 +2417,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "阿特拉西亚大陆知名童话故事《啾啾的奇妙冒险》中的主角——一只名叫啾啾的小鸡，讲述啾啾每天在不同的位置苏醒，结识不同的友人，踏上奇妙冒险寻找鸡生意义，揭开反派阴谋的故事。",
         icon: "T_Fashion_Weapon24",
         rarity: 4,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10020,
@@ -2425,7 +2425,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "阿特拉西亚大陆知名童话故事《啾啾的奇妙冒险》中的主角——一只名叫啾啾的小鸡，讲述啾啾每天在不同的位置苏醒，结识不同的友人，踏上奇妙冒险寻找鸡生意义，揭开反派阴谋的故事。",
         icon: "T_Fashion_Weapon26",
         rarity: 4,
-        unlock: "通过商店获得",
+        unlock: "通过声名升级奖励获得",
     },
     {
         id: 10021,
@@ -2433,7 +2433,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "乌乌随身携带款，灌注着铁匠皎皎饱满的灵感和热情，让人随时随地想起那由乌乌不断鼓动的热烈炉火。",
         icon: "T_Fashion_Weapon12",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过蛋皎的印象商店获得",
     },
     {
         id: 10022,
@@ -2441,7 +2441,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "龙在任何时代都拥有万千拥趸，它强大、野性却又因鲜有人见而显得疏远朦胧。正是这朦胧的概念，为人们搭建起肆意挥洒想象的无垠热土。",
         icon: "T_Fashion_Weapon10",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过蛋皎的印象商店获得",
     },
     {
         id: 10023,
@@ -2449,7 +2449,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "蛋壳之下还是蛋壳，蛋壳之下就是蛋壳，绝对不是皎皎，绝对！",
         icon: "T_Fashion_Weapon27",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10024,
@@ -2457,7 +2457,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "海星会梦到流星吗？",
         icon: "T_Fashion_Weapon33",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10025,
@@ -2465,7 +2465,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "海星会梦到流星吗？",
         icon: "T_Fashion_Weapon31",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10026,
@@ -2473,7 +2473,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "海星会梦到流星吗？",
         icon: "T_Fashion_Weapon32",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10027,
@@ -2481,7 +2481,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "为什么不问问缤纷海螺呢。",
         icon: "T_Fashion_Weapon30",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10028,
@@ -2489,7 +2489,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "为什么不问问缤纷海螺呢。",
         icon: "T_Fashion_Weapon29",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10029,
@@ -2497,7 +2497,7 @@ export const weaponAccessoryData: Accessory[] = [
         desc: "为什么不问问缤纷海螺呢。",
         icon: "T_Fashion_Weapon28",
         rarity: 5,
-        unlock: "通过商店获得",
+        unlock: "通过棱镜兑换获得",
     },
     {
         id: 10030,
@@ -2611,7 +2611,7 @@ export const weaponSkinData: Accessory[] = [
         name: "糖福禄·重剑",
         desc: "冰糖葫芦竹签儿串。",
         icon: "T_Head_Claymore_Tangfu",
-        rarity: 5,
+        rarity: 4,
         unlock: "通过商店获得",
     },
     {
@@ -2674,7 +2674,7 @@ export const weaponSkinData: Accessory[] = [
         id: 3010303,
         name: "惊弓之喵",
         desc: "喵呜呜！",
-        icon: "T_Head_Bow_Jinggong",
+        icon: "T_Head_Bow_jinggong",
         rarity: 5,
         unlock: "通过商店获得",
     },

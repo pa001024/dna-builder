@@ -21024,6 +21024,69 @@ export const questData_en: QuestStory[] = [
                         type: "TalkNode",
                         name: "达芙涅回忆过场",
                         next: ["17228313984997035147"],
+                        dialogues: [
+                            {
+                                id: 11015123,
+                                content:
+                                    "Dismania is a rainy place. When I was a little girl, all my friends hated the rain because it would mess with their hair and soil their pretty dresses.",
+                                voice: "story/1002/110151/1B93409E",
+                                npc: 110005,
+                                next: 11015124,
+                            },
+                            {
+                                id: 11015124,
+                                content:
+                                    "But I didn't hate the rain, because it never reached my shoulders.\nIn my eyes, the rain was just little ripples sprouting around my boots and droplets dripping off the brolly.",
+                                voice: "story/1002/110151/1B9340C8",
+                                npc: 110005,
+                                next: 11015125,
+                            },
+                            {
+                                id: 11015125,
+                                content:
+                                    "But as I grew older, I realised that rain wasn't that nice. It used to look nice, only because my dad was there to bear it for me.",
+                                voice: "story/1002/110151/1B9340F2",
+                                npc: 110005,
+                                next: 11015126,
+                            },
+                            {
+                                id: 11015126,
+                                content: "My dad was such a kind man, and such a stubborn one too. He always put others first. Always.",
+                                voice: "story/1002/110151/1B93411C",
+                                npc: 110005,
+                                next: 11015128,
+                            },
+                            {
+                                id: 11015128,
+                                content:
+                                    'Before I was born, he joined the Legion and fought hard to prove himself worthy of my mom. After I grew up, he left us because he didn\'t want to "soil my future."',
+                                voice: "story/1002/110151/1B934170",
+                                npc: 110005,
+                                next: 11015129,
+                            },
+                            {
+                                id: 11015129,
+                                content:
+                                    "...In public, he'd scowl and forbid me to call him Dad. But deep in the night,\nhe'd drunkenly shout mine and my mother's name, crying — He was always bearing the weight of everything on his own...",
+                                voice: "story/1002/110151/1B93419A",
+                                npc: 110005,
+                                next: 11015130,
+                            },
+                            {
+                                id: 11015130,
+                                content:
+                                    "But he never asked if I wanted any of this... Just like you never asked if I wanted to live knowing you sacrificed yourself for me!",
+                                voice: "story/1002/110151/1B9341C4",
+                                npc: 110005,
+                            },
+                            {
+                                id: 11015127,
+                                content: "...",
+                                voice: "story/1002/110151/1B934146",
+                                npc: 110022,
+                                next: 11015128,
+                            },
+                        ],
                     },
                     {
                         id: "17228313984997035147",
@@ -60158,7 +60221,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51140077,
                                 content:
-                                    "……我明白了！扶疏的姐姐救治的那个病人，不是尾生的妻子，而是尾生自己！他的妻子早就过世了，而他得了心病，一直以为自己的妻子还在身边！",
+                                    "Oh! I get it now! The patient Fushu's sister treated wasn't his wife at all — it was Weisheng himself! His wife had died long before, and he was so heartbroken he kept believing she was still beside him!",
                                 npc: 200002,
                             },
                             {

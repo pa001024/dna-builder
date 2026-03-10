@@ -279,10 +279,10 @@ export const PreRaidRank: Record<string | number, PreRaidRankItem> = {
         RankReward: [300316, 300317, 300318, 300319, 300320],
     },
     "1002": {
-        IsOnline: [true, true, false, false, false],
+        IsOnline: [false, false, false, false, false],
         PreRaidRank: 1,
         RankName: ["SSS", "SS", "S", "A", "B"],
-        RankPercent: [5, 20, 45, 70, 100],
+        RankPercent: [15, 35, 55, 75, 100],
         RankReward: [300316, 300317, 300318, 300319, 300320],
     },
 }

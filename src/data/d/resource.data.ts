@@ -2230,25 +2230,25 @@ export const resourceData: Resource[] = [
         id: 30113,
         name: "中级染剂·枫糖",
         icon: "T_Dye_15",
-        rarity: 5,
+        rarity: 4,
     },
     {
         id: 30114,
         name: "中级染剂·可可",
-        icon: "T_Dye_15",
-        rarity: 5,
+        icon: "T_Dye_15_01",
+        rarity: 4,
     },
     {
         id: 30115,
         name: "中级染剂·碧波",
         icon: "T_Dye_14",
-        rarity: 5,
+        rarity: 4,
     },
     {
         id: 30116,
         name: "中级染剂·苍松",
-        icon: "T_Dye_15",
-        rarity: 5,
+        icon: "T_Dye_14_01",
+        rarity: 4,
     },
     {
         id: 30117,
@@ -2259,13 +2259,13 @@ export const resourceData: Resource[] = [
     {
         id: 30118,
         name: "基础发色染剂",
-        icon: "T_Dye_12",
+        icon: "T_Dye_16",
         rarity: 4,
     },
     {
         id: 30119,
         name: "高级发色染剂",
-        icon: "T_Dye_12",
+        icon: "T_Dye_17",
         rarity: 5,
     },
     {

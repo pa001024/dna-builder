@@ -3,6 +3,7 @@ import { computed, ref, watch } from "vue"
 import { dungeonMap } from "@/data"
 import { PreRaidRank, RaidBuff, RaidCalculation, RaidDungeon, RaidSeason } from "../data/d/raid.data"
 import { getDropModeText, getRewardDetails } from "../utils/reward-utils"
+import { useSearchParam } from "@/composables/useSearchParam"
 
 // 计算分数函数
 const calculateScore = (baseRaidPoint: number, remainingTime: number, formulaId: number): number => {
@@ -39,10 +40,10 @@ const calculateScore = (baseRaidPoint: number, remainingTime: number, formulaId:
 }
 
 // 状态管理
-const selectedSeason = ref<number>(1001)
+const selectedSeason = useSearchParam<number>("s", 1002)
 const remainingTime = ref(30)
-const selectedDungeon = ref<number>(21013)
-const activeInfoTab = ref<"score" | "dungeon" | "rank">("score")
+const selectedDungeon = useSearchParam<number>("d", 21213)
+const activeInfoTab = useSearchParam<"score" | "dungeon" | "rank">("t", "rank")
 
 watch(selectedSeason, newSeason => {
     if (RaidDungeon[selectedDungeon.value].RaidSeason !== newSeason)
@@ -156,23 +157,27 @@ const rankData = computed(() => {
 function getDungeonName(dungeonId: number) {
     return dungeonMap.get(dungeonId)?.n || `${dungeonId}`
 }
+
+function getSeasonName(str: number) {
+    return `${~~(str / 1000)}.${~~(str % 1000)}`
+}
 </script>
 <template>
     <ScrollArea class="p-4 flex h-full min-h-0">
         <div class="grid grid-cols-3 gap-4 mb-4">
             <!-- 赛季选择 -->
             <div>
-                <label class="block text-sm font-medium mb-1">选择RaidSeason:</label>
+                <label class="block text-sm font-medium mb-1">选择赛季:</label>
                 <Select v-model="selectedSeason" class="input input-sm w-full max-w-xs">
                     <SelectItem v-for="season in Object.values(RaidSeason)" :key="season.RaidSeason" :value="season.RaidSeason">
-                        赛季 {{ season.RaidSeason }}
+                        {{ getSeasonName(season.RaidSeason) }}
                     </SelectItem>
                 </Select>
             </div>
 
             <!-- 副本选择 -->
             <div>
-                <label class="block text-sm font-medium mb-1">选择RaidDungeon:</label>
+                <label class="block text-sm font-medium mb-1">选择副本:</label>
                 <Select v-model="selectedDungeon" class="input input-sm w-full max-w-xs">
                     <SelectItem v-for="dungeon in currentDungeons" :key="dungeon.DungeonId" :value="dungeon.DungeonId">
                         {{ getDungeonName(dungeon.DungeonId) }} (难度{{ dungeon.DifficultyLevel }})
@@ -220,56 +225,57 @@ function getDungeonName(dungeonId: number) {
         <!-- 计算说明 -->
         <div v-if="activeInfoTab === 'score'">
             <div class="mb-4 p-4 bg-base-100 rounded-md">
-            <h3 class="font-medium mb-2">Buff:</h3>
-            <p class="text-sm mb-2">
-                {{ RaidDungeon[selectedDungeon]?.RaidBuffID.map(id => RaidBuff[id].RaidBuffDes).join("、") }}
-            </p>
-            <h3 class="font-medium mb-2">分数计算说明:</h3>
-            <p class="text-sm">
-                最终分数 = BaseRaidPoint + (1 + 时间区间1×速率1 + 时间区间2×速率2 + 时间区间3×速率3)
-                <span class="opacity-80 text-xs">依次取区间值直到剩余时间用完</span>
-            </p>
-            <p class="text-sm mt-2">
-                当前副本: {{ RaidDungeon[selectedDungeon]?.DungeonId }} | BaseRaidPoint: {{ RaidDungeon[selectedDungeon]?.BaseRaidPoint }} |
-                公式ID: {{ RaidDungeon[selectedDungeon]?.FomulaId }} | 时间区间: {{ currentFormula?.RaidTimeZone }} | 速率:
-                {{ currentFormula?.RaidTimeRate }}
-            </p>
-        </div>
-        <!-- 奖励数量展示 -->
-        <div class="mb-4 p-3 bg-base-100 rounded-md">
-            <h4 class="font-medium mb-2">分数奖励计算:</h4>
-            <p class="text-sm">
-                每1000分可获得 <span class="font-bold">1</span> 次奖励 | 最大奖励次数:
-                <span class="font-bold">{{ RaidSeason[selectedSeason]?.RaidPointToRewradMaxTime }}</span>
-                次
-            </p>
-            <div class="mt-3">
-                <p class="text-sm font-medium">当前获得奖励次数:</p>
-                <div class="flex items-center mt-1">
-                    <span class="text-lg font-bold">{{ currentRewardCount }}</span>
-                    <span class="text-sm opacity-80">次</span>
-                </div>
-
-                <!-- 使用RewardItem组件显示奖励 -->
-                <div class="mt-3 p-2 bg-base-200 rounded hover:bg-base-300 transition-colors">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium">奖励组 {{ rewardId }}</span>
-                        <span
-                            class="text-xs px-1.5 py-0.5 rounded"
-                            :class="
-                                getDropModeText(currentReward?.m || '') === '独立'
-                                    ? 'bg-success text-success-content'
-                                    : 'bg-warning text-warning-content'
-                            "
-                        >
-                            {{ getDropModeText(currentReward?.m || "") }}
-                        </span>
+                <h3 class="font-medium mb-2">Buff:</h3>
+                <p class="text-sm mb-2">
+                    {{ RaidDungeon[selectedDungeon]?.RaidBuffID.map(id => RaidBuff[id].RaidBuffDes).join("、") }}
+                </p>
+                <h3 class="font-medium mb-2">分数计算说明:</h3>
+                <p class="text-sm">
+                    最终分数 = BaseRaidPoint + (1 + 时间区间1×速率1 + 时间区间2×速率2 + 时间区间3×速率3)
+                    <span class="opacity-80 text-xs">依次取区间值直到剩余时间用完</span>
+                </p>
+                <p class="text-sm mt-2">
+                    当前副本: {{ RaidDungeon[selectedDungeon]?.DungeonId }} | BaseRaidPoint:
+                    {{ RaidDungeon[selectedDungeon]?.BaseRaidPoint }} | 公式ID: {{ RaidDungeon[selectedDungeon]?.FomulaId }} | 时间区间:
+                    {{ currentFormula?.RaidTimeZone }} | 速率:
+                    {{ currentFormula?.RaidTimeRate }}
+                </p>
+            </div>
+            <!-- 奖励数量展示 -->
+            <div class="mb-4 p-3 bg-base-100 rounded-md">
+                <h4 class="font-medium mb-2">分数奖励计算:</h4>
+                <p class="text-sm">
+                    每1000分可获得 <span class="font-bold">1</span> 次奖励 | 最大奖励次数:
+                    <span class="font-bold">{{ RaidSeason[selectedSeason]?.RaidPointToRewradMaxTime }}</span>
+                    次
+                </p>
+                <div class="mt-3">
+                    <p class="text-sm font-medium">当前获得奖励次数:</p>
+                    <div class="flex items-center mt-1">
+                        <span class="text-lg font-bold">{{ currentRewardCount }}</span>
+                        <span class="text-sm opacity-80">次</span>
                     </div>
-                    <RewardItem :reward="currentReward!" />
+
+                    <!-- 使用RewardItem组件显示奖励 -->
+                    <div class="mt-3 p-2 bg-base-200 rounded hover:bg-base-300 transition-colors">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-medium">奖励组 {{ rewardId }}</span>
+                            <span
+                                class="text-xs px-1.5 py-0.5 rounded"
+                                :class="
+                                    getDropModeText(currentReward?.m || '') === '独立'
+                                        ? 'bg-success text-success-content'
+                                        : 'bg-warning text-warning-content'
+                                "
+                            >
+                                {{ getDropModeText(currentReward?.m || "") }}
+                            </span>
+                        </div>
+                        <RewardItem :reward="currentReward!" />
+                    </div>
                 </div>
             </div>
-        </div>
-        <!-- 副本展示 -->
+            <!-- 副本展示 -->
         </div>
         <div class="mb-4 bg-base-100 rounded-md" v-if="activeInfoTab === 'dungeon' && currentDungeon">
             <DBDungeonDetailItem :dungeon="currentDungeon" />

@@ -20818,6 +20818,70 @@ export const questData_fr: QuestStory[] = [
                         type: "TalkNode",
                         name: "达芙涅回忆过场",
                         next: ["17228313984997035147"],
+                        dialogues: [
+                            {
+                                id: 11015123,
+                                content:
+                                    "À Dismania, il pleut souvent. Quand j’étais petite, mes camarades détestaient la pluie : elle abîmait leurs coiffures et salissait leurs jolies robes neuves.",
+                                voice: "story/1002/110151/1B93409E",
+                                npc: 110005,
+                                next: 11015124,
+                            },
+                            {
+                                id: 11015124,
+                                content:
+                                    "Mais moi, je ne la détestais pas. Parce qu’elle ne tombait jamais sur mes épaules. À mes yeux, la pluie, ce n’était que les ronds d’eau sous mes bottes, ou les gouttelettes glissant le long d’un parapluie.",
+                                voice: "story/1002/110151/1B9340C8",
+                                npc: 110005,
+                                next: 11015125,
+                            },
+                            {
+                                id: 11015125,
+                                content:
+                                    "En grandissant, j’ai compris... Ce n’était pas la pluie que j’aimais. C’était parce que mon père était là, et qu’il prenait toute la pluie pour moi.",
+                                voice: "story/1002/110151/1B9340F2",
+                                npc: 110005,
+                                next: 11015126,
+                            },
+                            {
+                                id: 11015126,
+                                content:
+                                    "Papa... était un homme si bon, mais aussi incroyablement têtu. Toujours prêt à se sacrifier pour les autres, toujours...",
+                                voice: "story/1002/110151/1B93411C",
+                                npc: 110005,
+                                next: 11015128,
+                            },
+                            {
+                                id: 11015128,
+                                content:
+                                    'Avant ma naissance, il a rejoint la Légion pour "mériter" maman, risquant sa vie au combat. Plus tard, il nous a quittées, maman et moi, afin de "ne pas gâcher mon avenir".',
+                                voice: "story/1002/110151/1B934170",
+                                npc: 110005,
+                                next: 11015129,
+                            },
+                            {
+                                id: 11015129,
+                                content:
+                                    "Dans la rue, il me défendait de l’appeler papa. Mais au fond d’une taverne, au cœur de la nuit, il criait nos noms, à maman et moi, en pleurant, ivre mort... Il portait toujours tout le poids du monde sur ses épaules...",
+                                voice: "story/1002/110151/1B93419A",
+                                npc: 110005,
+                                next: 11015130,
+                            },
+                            {
+                                id: 11015130,
+                                content:
+                                    "Mais jamais il ne m’a demandé si c’était vraiment ce que je voulais... Tout comme vous, à cet instant, ne me demandez pas si je veux vivre en portant le poids de votre sacrifice !",
+                                voice: "story/1002/110151/1B9341C4",
+                                npc: 110005,
+                            },
+                            {
+                                id: 11015127,
+                                content: "...",
+                                voice: "story/1002/110151/1B934146",
+                                npc: 110022,
+                                next: 11015128,
+                            },
+                        ],
                     },
                     {
                         id: "17228313984997035147",
@@ -43264,36 +43328,39 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 51008001,
-                                content: "走，走开……不买月石的话就赶紧走……别把那群当兵的引来了……",
+                                content:
+                                    "Va... va-t’en... si tu n’achètes pas de Phoxène, ne reste pas ici... et n’attire pas ces foutus soldats sur moi...",
                                 npc: 700113,
                                 next: 51008002,
                             },
                             {
                                 id: 51008002,
                                 content:
-                                    "（男人瑟缩在角落，与他健硕的体格所给人的印象相去甚远。他的眼神躲闪，渴望将身旁的月石脱手，却迟疑着要不要向他人寻求帮助。）",
+                                    "L’homme, pourtant bâti comme un colosse, se recroqueville dans un coin. Son regard fuyant trahit sa nervosité. À ses côtés, un sac rempli de Phoxènes qu’il semble vouloir vendre à tout prix... mais il hésite encore à demander de l’aide.",
                                 options: [
                                     {
                                         id: 51008003,
-                                        content: "我虽然不买，但分我一半报酬的话，可以帮你找找买家。",
+                                        content:
+                                            "Je n’achète pas, mais si on partage la récompense à parts égales, je peux t’aider à trouver un acheteur.",
                                         next: 51008009,
                                         impr: [1011, "Benefit", 3],
                                     },
                                     {
                                         id: 51008004,
-                                        content: "你需要什么帮助吗？",
+                                        content: "Tu as besoin d’aide ?",
                                         next: 51008009,
                                         impr: [1011, "Empathy", 3],
                                     },
                                     {
                                         id: 51008005,
-                                        content: "帝国肯定不会允许你干这种事，不想惹麻烦的话就快走吧。",
+                                        content: "L’Empire ne tolère pas ce genre de trafic. Si tu veux éviter les ennuis, pars vite.",
                                         next: 51008006,
                                         impr: [1011, "Morality", 3],
                                     },
                                     {
                                         id: 51008007,
-                                        content: "咳！军团的士兵委托我盘查你，赶紧把通行证拿出来！",
+                                        content:
+                                            "Hum ! La Légion m’a chargé de contrôler les gens comme toi. Montre-moi ton permis de circulation, tout de suite !",
                                         next: 51008008,
                                         impr: [1011, "Chaos", 3],
                                     },
@@ -43301,18 +43368,20 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51008009,
-                                content: "只要你帮我找个买家，报酬分你七成，不，八成！拜托了，拜托！",
+                                content: "Trouve-moi un acheteur et je te laisse 70 %... Non, 80 % ! Je t’en supplie, aide-moi !",
                                 npc: 700113,
                             },
                             {
                                 id: 51008006,
-                                content: "您高抬贵手，把我当个屁放了吧，我只要把这批月石卖掉就立马离开冰湖城，绝不回来。",
+                                content:
+                                    "Ayez pitié... Faites comme si je n’existais pas... Dès que j’ai vendu ce Phoxène, je quitte Givrelac pour de bon, je le jure !",
                                 npc: 700113,
                                 next: 51008009,
                             },
                             {
                                 id: 51008008,
-                                content: "（男人听罢提起袋子就要跑，好不容易向他说明玩笑并解释身份后，他才悄声说明了自己的难处。）",
+                                content:
+                                    "À ces mots, l’homme agrippe son sac et s’enfuit. Tu parviens à l’arrêter de justesse et, après lui avoir expliqué qu’il s’agissait d’une plaisanterie, il t’avoue à voix basse ses véritables difficultés.",
                                 npc: 700113,
                                 next: 51008009,
                             },
@@ -43325,7 +43394,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 51008009,
-                                content: "只要你帮我找个买家，报酬分你七成，不，八成！拜托了，拜托！",
+                                content: "Trouve-moi un acheteur et je te laisse 70 %... Non, 80 % ! Je t’en supplie, aide-moi !",
                                 npc: 700113,
                             },
                         ],
@@ -43337,7 +43406,8 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 51008010,
-                                content: "（虽说答应了男人的委托，但他的神色和袋子上干涸的暗红色痕迹都宣告着这批月石的来路并不单纯。）",
+                                content:
+                                    "Tu acceptes sa requête, mais son attitude nerveuse et les traces rouge sombre séchées sur son sac ne laissent guère de doute : cette cargaison de Phoxène n’a pas une origine très nette.",
                                 next: 51008011,
                             },
                             {
@@ -44227,7 +44297,7 @@ export const questData_fr: QuestStory[] = [
                                 options: [
                                     {
                                         id: 51000001,
-                                        content: "（接受）",
+                                        content: "Accepter",
                                         next: 51005311,
                                     },
                                     {
@@ -58095,7 +58165,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 51103013,
-                                content: "公尚师傅，你怎么在这？",
+                                content: "Maître Gongshang ?! Qu’est-ce que tu fais ici ?",
                                 npc: 100001,
                                 next: 51103014,
                             },
@@ -60203,7 +60273,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51140077,
                                 content:
-                                    "……我明白了！扶疏的姐姐救治的那个病人，不是尾生的妻子，而是尾生自己！他的妻子早就过世了，而他得了心病，一直以为自己的妻子还在身边！",
+                                    "Je comprends ! Celui que ta sœur soignait n’était pas l’épouse de Weisheng... mais Weisheng lui-même ! Son épouse était déjà morte, et son cœur brisé l’a conduit à croire qu’elle était encore là !",
                                 npc: 200002,
                             },
                             {
@@ -61286,7 +61356,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51118062,
-                                content: "（青青打着哈欠走了出来。）",
+                                content: "Qingqing sort en bâillant.",
                                 options: [
                                     {
                                         id: 51118044,

@@ -9973,6 +9973,7 @@ const t: DynQuest[] = [
                     {
                         id: 10010101,
                         content: "贝蕾，我……",
+                        voice: "story/1001/100101/190F2A32",
                         npc: 100001,
                     },
                 ],
@@ -9985,6 +9986,7 @@ const t: DynQuest[] = [
                     {
                         id: 10010101,
                         content: "贝蕾，我……",
+                        voice: "story/1001/100101/190F2A32",
                         npc: 100001,
                     },
                 ],
@@ -10131,6 +10133,7 @@ const t: DynQuest[] = [
                     {
                         id: 10010101,
                         content: "贝蕾，我……",
+                        voice: "story/1001/100101/190F2A32",
                         npc: 100001,
                     },
                 ],
@@ -10143,6 +10146,7 @@ const t: DynQuest[] = [
                     {
                         id: 10010101,
                         content: "贝蕾，我……",
+                        voice: "story/1001/100101/190F2A32",
                         npc: 100001,
                     },
                 ],

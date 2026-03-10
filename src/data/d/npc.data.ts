@@ -5238,6 +5238,13 @@ export const npcData: NPC[] = [
         type: "Normal",
     },
     {
+        id: 99998,
+        name: "运营团队",
+        camp: "NPC",
+        type: "Normal",
+        icon: "Gift",
+    },
+    {
         id: 99999,
         name: "运营团队",
         camp: "NPC",
@@ -27907,7 +27914,7 @@ export const npcData: NPC[] = [
     },
     {
         id: 830001,
-        name: "UI_Npc_Name_WuyouSheng_Explore",
+        name: "漂泊的无由生",
         camp: "NPC",
         type: "Normal",
     },

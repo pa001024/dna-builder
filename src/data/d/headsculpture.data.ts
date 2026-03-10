@@ -206,8 +206,8 @@ export const headSculptureData: HeadSculpture[] = [
     },
     {
         id: 20005,
-        name: "",
-        desc: "UI_PlayerHead_Des_20005",
+        name: "执棋者的肖像·觥筹",
+        desc: "适用于头像。",
         icon: "T_Head_Zhiliu01",
     },
     {
@@ -863,6 +863,48 @@ export const headSculptureData: HeadSculpture[] = [
         name: "呐喊",
         desc: "适用于头像。",
         icon: "T_Head_Art_0002",
+    },
+    {
+        id: 30110,
+        name: "睥睨山河·绛紫",
+        desc: "适用于头像。",
+        icon: "T_Head_Art_0014_03",
+    },
+    {
+        id: 30111,
+        name: "睥睨山河·铅灰",
+        desc: "适用于头像。",
+        icon: "T_Head_Art_0014_01",
+    },
+    {
+        id: 30112,
+        name: "睥睨山河·鎏金",
+        desc: "适用于头像。",
+        icon: "T_Head_Art_0014_02",
+    },
+    {
+        id: 30113,
+        name: "以笔尖铭记·黛蓝",
+        desc: "适用于头像。",
+        icon: "T_Head_Creator02",
+    },
+    {
+        id: 30114,
+        name: "以笔尖铭记·碧绿",
+        desc: "适用于头像。",
+        icon: "T_Head_Creator01",
+    },
+    {
+        id: 30115,
+        name: "以笔尖铭记·绛紫",
+        desc: "适用于头像。",
+        icon: "T_Head_Creator03",
+    },
+    {
+        id: 30116,
+        name: "神行聚宝",
+        desc: "适用于头像。",
+        icon: "T_Head_Art_0015",
     },
 ]
 
