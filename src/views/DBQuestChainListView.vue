@@ -340,7 +340,7 @@ function passesQuestChainSwitchFilters(questChain: QuestChain): boolean {
 }
 
 /**
- * 合并 Fuse 命中区间，避免相邻高亮块重复渲染。
+ * 合并命中区间，避免相邻高亮块重复渲染。
  * @param indices 原始命中区间
  * @returns 合并后的命中区间
  */
@@ -430,11 +430,55 @@ function buildHighlightedSnippet(text: string, indices: ReadonlyArray<readonly [
 }
 
 /**
- * 从 Fuse 匹配结果中提取最合适的对话高亮摘要。
+ * 获取关键词在文本中的全部精确命中区间。
+ * @param text 原始文本
+ * @param keyword 搜索关键词
+ * @returns 命中区间
+ */
+function findKeywordMatchIndices(text: string, keyword: string): [number, number][] {
+    if (keyword === "") {
+        return []
+    }
+
+    const indices: [number, number][] = []
+    let startIndex = 0
+
+    while (startIndex < text.length) {
+        const matchIndex = text.indexOf(keyword, startIndex)
+        if (matchIndex === -1) {
+            break
+        }
+
+        indices.push([matchIndex, matchIndex + keyword.length - 1])
+        startIndex = matchIndex + keyword.length
+    }
+
+    return indices
+}
+
+/**
+ * 从精确命中的文本片段中提取最合适的对话高亮摘要。
+ * @param snippets 可搜索片段
+ * @param keyword 搜索关键词
+ * @returns 对话高亮摘要
+ */
+function getQuestChainSearchSnippet(snippets: readonly string[], keyword: string): QuestChainSearchSnippet | null {
+    for (const snippet of snippets) {
+        const indices = findKeywordMatchIndices(snippet, keyword)
+        if (indices.length) {
+            return buildHighlightedSnippet(snippet, indices)
+        }
+    }
+
+    return null
+}
+
+/**
+ * 从模糊匹配结果中提取最合适的对话高亮摘要。
  * @param matches Fuse 匹配信息
  * @returns 对话高亮摘要
  */
-function getQuestChainSearchSnippet(matches: readonly FuseResultMatch[] | undefined): QuestChainSearchSnippet | null {
+function getQuestChainFuzzySnippet(matches: readonly FuseResultMatch[] | undefined): QuestChainSearchSnippet | null {
     if (!matches) {
         return null
     }
@@ -460,13 +504,23 @@ const filteredQuestChains = computed<QuestChainSearchResult[]>(() => {
             }))
         }
 
-        return questChainFullTextFuse.value
+        const reorderedResults = questChainFullTextFuse.value
             .search(keyword, { limit: 300 })
             .filter(result => passesQuestChainSwitchFilters(result.item.questChain))
+        const exactResults = reorderedResults
+            .filter(result => result.item.searchText.includes(keyword))
             .map(result => ({
                 questChain: result.item.questChain,
-                snippet: getQuestChainSearchSnippet(result.matches),
+                snippet: getQuestChainSearchSnippet(result.item.snippets, keyword) ?? getQuestChainFuzzySnippet(result.matches),
             }))
+        const fuzzyResults = reorderedResults
+            .filter(result => !result.item.searchText.includes(keyword))
+            .map(result => ({
+                questChain: result.item.questChain,
+                snippet: getQuestChainFuzzySnippet(result.matches),
+            }))
+
+        return [...exactResults, ...fuzzyResults]
     }
 
     return questChainData

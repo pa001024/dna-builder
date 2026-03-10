@@ -221,7 +221,7 @@ function createDynQuestFullTextFuse(entries: DynQuestFullTextEntry[]): Fuse<DynQ
 }
 
 /**
- * 合并 Fuse 命中区间，避免相邻高亮块重复渲染。
+ * 合并命中区间，避免相邻高亮块重复渲染。
  * @param indices 原始命中区间
  * @returns 合并后的命中区间
  */
@@ -311,11 +311,55 @@ function buildHighlightedSnippet(text: string, indices: ReadonlyArray<readonly [
 }
 
 /**
- * 从 Fuse 匹配结果中提取最合适的剧情高亮摘要。
+ * 获取关键词在文本中的全部精确命中区间。
+ * @param text 原始文本
+ * @param keyword 搜索关键词
+ * @returns 命中区间
+ */
+function findKeywordMatchIndices(text: string, keyword: string): [number, number][] {
+    if (keyword === "") {
+        return []
+    }
+
+    const indices: [number, number][] = []
+    let startIndex = 0
+
+    while (startIndex < text.length) {
+        const matchIndex = text.indexOf(keyword, startIndex)
+        if (matchIndex === -1) {
+            break
+        }
+
+        indices.push([matchIndex, matchIndex + keyword.length - 1])
+        startIndex = matchIndex + keyword.length
+    }
+
+    return indices
+}
+
+/**
+ * 从精确命中的文本片段中提取最合适的剧情高亮摘要。
+ * @param snippets 可搜索片段
+ * @param keyword 搜索关键词
+ * @returns 剧情高亮摘要
+ */
+function getDynQuestSearchSnippet(snippets: readonly string[], keyword: string): DynQuestSearchSnippet | null {
+    for (const snippet of snippets) {
+        const indices = findKeywordMatchIndices(snippet, keyword)
+        if (indices.length) {
+            return buildHighlightedSnippet(snippet, indices)
+        }
+    }
+
+    return null
+}
+
+/**
+ * 从模糊匹配结果中提取最合适的剧情高亮摘要。
  * @param matches Fuse 匹配信息
  * @returns 剧情高亮摘要
  */
-function getDynQuestSearchSnippet(matches: readonly FuseResultMatch[] | undefined): DynQuestSearchSnippet | null {
+function getDynQuestFuzzySnippet(matches: readonly FuseResultMatch[] | undefined): DynQuestSearchSnippet | null {
     if (!matches) {
         return null
     }
@@ -429,13 +473,23 @@ const filteredQuests = computed<DynQuestSearchResult[]>(() => {
             }))
         }
 
-        return dynQuestFullTextFuse
+        const reorderedResults = dynQuestFullTextFuse
             .search(keyword, { limit: 400 })
             .filter(result => passesRegionFilters(result.item.quest))
+        const exactResults = reorderedResults
+            .filter(result => result.item.searchText.includes(keyword))
             .map(result => ({
                 quest: result.item.quest,
-                snippet: getDynQuestSearchSnippet(result.matches),
+                snippet: getDynQuestSearchSnippet(result.item.snippets, keyword) ?? getDynQuestFuzzySnippet(result.matches),
             }))
+        const fuzzyResults = reorderedResults
+            .filter(result => !result.item.searchText.includes(keyword))
+            .map(result => ({
+                quest: result.item.quest,
+                snippet: getDynQuestFuzzySnippet(result.matches),
+            }))
+
+        return [...exactResults, ...fuzzyResults]
     }
 
     return dynQuestData

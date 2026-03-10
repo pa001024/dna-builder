@@ -294,7 +294,7 @@ function getSeasonName(str: number) {
                 <div class="inline-flex relative">
                     <img class="h-12" :src="`/imgs/rank/${selectedSeason}_${item.rank}.webp`" :alt="item.rank" />
                     <div class="absolute inset-0 flex items-center justify-center">
-                        <p class="text-sm font-bold">{{ getRewardDetails(item.reward)!.child?.[0].n }}</p>
+                        <p class="text-sm font-bold text-white">{{ getRewardDetails(item.reward)!.child?.[0].n }}</p>
                     </div>
                 </div>
                 <div

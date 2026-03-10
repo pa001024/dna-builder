@@ -45,3 +45,6 @@ docs/
 externals/dna-api/js/
 tools/radix-icons/
 .codex/
+.planning/
+.playwright/
+.playwright-cli/
