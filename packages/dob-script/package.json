@@ -10,7 +10,7 @@
     "scripts": {
         "release": "npm publish --registry https://registry.npmjs.org/"
     },
-    "files": ["bin/dob-script.js", "bin/dob-script.exe", "bin/opencv_world490.dll", "README.md"],
+    "files": ["bin/dob-script.js", "bin/dob-script.exe", "bin/opencv_world490.dll", "bin/DirectML.dll", "README.md"],
     "os": ["win32"],
     "cpu": ["x64", "arm64"],
     "publishConfig": {

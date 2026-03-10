@@ -36,6 +36,7 @@ use crate::submodules::{
     input::*,
     jsdnn::register_cv_dnn_namespace,
     jsmat::{IntoJs, JsMat},
+    mono_depth::predict_mono_depth,
     ocr::{self, OcrInitConfig},
     predict_rotation::predict_rotation,
     route::{find_path_direction_coords, predict_depth},
@@ -3644,6 +3645,57 @@ fn _predict_depth(
     Ok(result.into())
 }
 
+/// Lite-Mono 单目深度预测函数：输入 Mat，返回 8 位相对深度图。
+fn _mono_depth(js_image: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let js_image = js_image
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let input_mat = js_image.borrow().data().inner.clone();
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let resolvers_clone = resolvers.clone();
+
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            let async_result =
+                _spawn_blocking_with_script_stop_snapshot(move || predict_mono_depth(&input_mat))
+                    .await;
+
+            let context = &mut context.borrow_mut();
+            match async_result {
+                Ok(Ok(depth_mat)) => match Box::new(depth_mat).into_js(context) {
+                    Ok(js_depth) => resolvers_clone
+                        .resolve
+                        .call(&JsValue::undefined(), &[js_depth], context),
+                    Err(error) => {
+                        let message = format!("monoDepth 返回值转换失败: {error:?}");
+                        resolvers_clone.reject.call(
+                            &JsValue::undefined(),
+                            &[JsValue::from(js_string!(message))],
+                            context,
+                        )
+                    }
+                },
+                Ok(Err(message)) => resolvers_clone.reject.call(
+                    &JsValue::undefined(),
+                    &[JsValue::from(js_string!(message))],
+                    context,
+                ),
+                Err(error) => {
+                    let message = format!("monoDepth 线程执行失败: {error}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(message))],
+                        context,
+                    )
+                }
+            }
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
+}
+
 /// 边框绘制函数
 fn _draw_border(
     hwnd: Option<JsValue>,
@@ -4190,6 +4242,10 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     // 深度预测函数（双图深度 + 路径方向候选）
     let f = _predict_depth.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("predictDepth"), 6, f)?;
+
+    // Lite-Mono 单目深度预测函数
+    let f = _mono_depth.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("monoDepth"), 1, f)?;
 
     // OpenCV DNN 命名空间（cv.dnn.*）
     register_cv_dnn_namespace(context)?;

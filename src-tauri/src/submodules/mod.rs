@@ -10,6 +10,7 @@ pub mod jsdnn;
 pub mod jsmat;
 pub mod jstimer;
 pub mod logger;
+pub mod mono_depth;
 pub mod ocr;
 pub mod predict_rotation;
 pub mod route;

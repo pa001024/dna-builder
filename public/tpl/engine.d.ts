@@ -1094,3 +1094,10 @@ declare function predictDepth(
     minRegionArea?: number,
     maxCandidates?: number
 ): PredictDepthResult
+
+/**
+ * Lite-Mono 单目深度预测
+ * @param image 输入图像 Mat
+ * @returns 8 位相对深度图（值越大表示相对更近）
+ */
+declare function monoDepth(image: Mat): Promise<Mat>

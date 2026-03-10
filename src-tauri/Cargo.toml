@@ -1,6 +1,6 @@
 [package]
 name = "dna-builder"
-version = "0.12.14"
+version = "0.12.15"
 description = "A DNA Builder"
 authors = ["pa001024"]
 edition = "2024"
@@ -126,3 +126,5 @@ boa_runtime = "0.21.0"
 libffi = "5.1.0"
 hotwatch = "0.5.0"
 tauri-plugin-global-shortcut = "2"
+ndarray = "0.17"
+ort = "2.0.0-rc.12"
