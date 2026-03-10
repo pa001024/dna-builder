@@ -9,7 +9,7 @@ import { useRoute } from "vue-router"
 import { buildQuery, createBuildMutation } from "@/api/graphql"
 import { env } from "@/env"
 import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
-import { CharSettings, useCharSettings } from "../composables/useCharSettings"
+import { CharSettings, createDefaultCharSettings, normalizeCharSettings, useCharSettings } from "../composables/useCharSettings"
 import {
     buffData,
     buffMap,
@@ -71,19 +71,6 @@ const modOptions = modData
         lv: inv.getModLv(mod.id, mod.品质),
     }))
     .filter(mod => mod.count)
-
-    // 写入自定义BUFF
-    ; (function writeCustomBuff() {
-        const customBuff = useLocalStorage("customBuff", [] as [string, number][])
-        const buffObj = {
-            名称: "自定义BUFF",
-            描述: "自行填写",
-        } as any
-        customBuff.value.forEach(prop => {
-            buffObj[prop[0]] = prop[1]
-        })
-        buffMap.set("自定义BUFF", buffObj)
-    })()
 const _buffOptions = reactive(
     buffData.map(buff => ({
         value: new LeveledBuff(buff.名称),
@@ -300,7 +287,7 @@ const loadConfigByIndex = (index: number) => {
         return
     }
     charProject.value.selected = project.name
-    charSettings.value = cloneDeep(project.charSettings)
+    charSettings.value = normalizeCharSettings(cloneDeep(project.charSettings))
     targetFunction.value = charSettings.value.targetFunction
     updateCharBuild()
 }
@@ -421,35 +408,23 @@ const loadSharedBuild = async (buildId: string) => {
     }
 }
 
+/**
+ * 应用外部载入的角色配置，并补齐当前版本缺失字段。
+ * @param loadedSettings 外部载入的角色配置
+ * @returns void
+ */
 const applyLoadedSettings = (loadedSettings: CharSettings) => {
-    Object.assign(charSettings.value, loadedSettings)
+    charSettings.value = normalizeCharSettings(loadedSettings)
     targetFunction.value = charSettings.value.targetFunction
     ui.showSuccessMessage("已加载分享的构筑")
 }
 
+/**
+ * 重置当前角色配置为默认值。
+ * @returns void
+ */
 const resetConfig = () => {
-    charSettings.value.hpPercent = 1
-    charSettings.value.resonanceGain = 3
-    charSettings.value.enemyId = 130
-    charSettings.value.enemyLevel = 80
-    charSettings.value.enemyResistance = 0
-    charSettings.value.targetFunction = "伤害"
-    charSettings.value.imbalance = false
-    charSettings.value.charMods = Array(8).fill(null)
-    charSettings.value.meleeMods = Array(8).fill(null)
-    charSettings.value.rangedMods = Array(8).fill(null)
-    charSettings.value.skillWeaponMods = Array(4).fill(null)
-    charSettings.value.buffs = []
-    charSettings.value.team1 = "-"
-    charSettings.value.team2 = "-"
-}
-
-const reloadCustomBuff = () => {
-    const index = _buffOptions.findIndex(buff => buff.label === "自定义BUFF")
-    if (index > -1) {
-        _buffOptions[index].value = new LeveledBuff("自定义BUFF")
-    }
-    charSettings.value.buffs = [...charSettings.value.buffs]
+    Object.assign(charSettings.value, createDefaultCharSettings())
 }
 //#endregion
 
@@ -556,6 +531,39 @@ function updateCharBuild() {
     }
 }
 updateCharBuild()
+
+/**
+ * 将当前角色的自定义 BUFF 配置同步到运行时 buffMap。
+ * @param customBuff 自定义 BUFF 配置
+ * @returns void
+ */
+function syncCustomBuff(customBuff: [string, number][]) {
+    const buffObj = {
+        名称: "自定义BUFF",
+        描述: "自行填写",
+    } as any
+    customBuff.forEach(([property, value]) => {
+        buffObj[property] = value
+    })
+    buffMap.set("自定义BUFF", buffObj)
+
+    const index = _buffOptions.findIndex(buff => buff.label === "自定义BUFF")
+    if (index > -1) {
+        _buffOptions[index].value = new LeveledBuff("自定义BUFF")
+    }
+    charSettings.value.buffs = [...charSettings.value.buffs]
+}
+
+watch(
+    () => charSettings.value.customBuff,
+    customBuff => {
+        syncCustomBuff(customBuff)
+    },
+    {
+        deep: true,
+        immediate: true,
+    }
+)
 
 // 计算属性
 const attributes = computed(() => charBuild.value.calculateAttributes())
@@ -1472,7 +1480,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     <div v-if="selectedBuffs.some(v => v.名称 === '自定义BUFF')"
                         class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-lg overflow-hidden border border-base-200">
                         <div class="p-4">
-                            <CustomBuffEditor @submit="reloadCustomBuff" />
+                            <CustomBuffEditor :buffs="charSettings.customBuff" @submit="charSettings.customBuff = $event" />
                         </div>
                     </div>
 

@@ -3,6 +3,7 @@ import type { CharAttr } from "../CharBuild"
 import { effectMap, modMap } from "../d"
 import { type Mod, Quality, type WeaponSkill } from "../data-types"
 import { LeveledBuff } from "."
+import { getMinusAttrValue } from "./minusAttr"
 
 /**
  * LeveledMod类 - 继承Mod接口，添加等级属性和动态属性计算
@@ -473,7 +474,7 @@ export class LeveledMod implements Mod {
     get minusAttr() {
         const r: Record<string, any> = this.clone()
         this.properties.forEach(prop => {
-            r[prop] = -this[prop]
+            r[prop] = getMinusAttrValue(prop, this[prop])
         })
         r.极性 = ""
         r.isMinus = true

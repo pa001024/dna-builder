@@ -770,6 +770,23 @@ describe("CharBuild类测试", () => {
             expect(income1).toBeGreaterThan(0)
             expect(income2).toBeGreaterThan(0)
         })
+
+        it("移除技能倍率乘数BUFF时收益不应出现Infinity", () => {
+            const charBuild = createCharBuild()
+            const buff = new LeveledBuff("煜明2溯")
+
+            charBuild.buffs = [buff]
+            charBuild.calculate = () =>
+                Math.max(
+                    0,
+                    charBuild.buffs.reduce((value, currentBuff) => value * (1 + (currentBuff.技能倍率乘数 || 0)), 100)
+                )
+
+            const income = charBuild.calcIncome(buff, true)
+
+            expect(Number.isFinite(income)).toBe(true)
+            expect(income).toBeCloseTo(1.6, 10)
+        })
     })
 
     // 配置测试

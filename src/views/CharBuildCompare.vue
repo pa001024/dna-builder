@@ -2,10 +2,10 @@
 import { useLocalStorage } from "@vueuse/core"
 import { cloneDeep } from "lodash-es"
 import { computed, reactive, ref } from "vue"
-import { useCharSettings } from "../composables/useCharSettings"
+import { normalizeCharSettings, useCharSettings } from "../composables/useCharSettings"
 import {
     buffData,
-    buffMap,
+    Buff,
     CharAttr,
     CharBuild,
     CharBuildTimeline,
@@ -38,19 +38,6 @@ const modOptions = modData
     }))
     .filter(mod => mod.count)
 
-// BUFF options with custom buff support (same as CharBuildView)
-;(function writeCustomBuff() {
-    const customBuff = useLocalStorage("customBuff", [] as [string, number][])
-    const buffObj = {
-        名称: "自定义BUFF",
-        描述: "自行填写",
-    } as any
-    customBuff.value.forEach(prop => {
-        buffObj[prop[0]] = prop[1]
-    })
-    buffMap.set("自定义BUFF", buffObj)
-})()
-
 const _buffOptions = reactive(
     buffData.map(buff => ({
         value: new LeveledBuff(buff.名称),
@@ -71,13 +58,35 @@ interface BuildConfiguration {
     projects: { name: string; charSettings: ReturnType<typeof useCharSettings>["value"] }[]
 }
 
+/**
+ * 根据角色配置生成可直接参与计算的 BUFF 实例。
+ * 自定义 BUFF 需要使用配置内的 customBuff 数据构造，避免回退到旧的全局本地存储。
+ * @param name BUFF 名称
+ * @param level BUFF 等级
+ * @param customBuff 自定义 BUFF 配置
+ * @returns BUFF 实例
+ */
+function createLeveledBuff(name: string, level: number, customBuff: [string, number][] = []) {
+    if (name !== "自定义BUFF") {
+        return new LeveledBuff(name, level)
+    }
+    const buffObj: Buff = {
+        名称: "自定义BUFF",
+        描述: "自行填写",
+    }
+    customBuff.forEach(([property, value]) => {
+        buffObj[property] = value
+    })
+    return new LeveledBuff(buffObj, level)
+}
+
 // Helper function to create a new configuration
 function createConfig(name: string, char?: string): BuildConfiguration {
     const selectedChar = char ? ref(char) : useLocalStorage("selectedChar", "赛琪")
     const charSettingsRef = useCharSettings(selectedChar)
 
     // Clone charSettings value
-    const charSettings = cloneDeep(charSettingsRef.value)
+    const charSettings = normalizeCharSettings(cloneDeep(charSettingsRef.value))
 
     // Calculate available slots by subtracting existing non-null mods
     const charModSlots = Math.max(0, 8 - charSettings.charMods.filter((m: any) => m !== null).length)
@@ -92,7 +101,13 @@ function createConfig(name: string, char?: string): BuildConfiguration {
     })
 
     // Create projects array directly
-    const projects = [{ name: "当前配置", charSettings: cloneDeep(charSettings) }, ...cloneDeep(savedProjects.value.projects)]
+    const projects = [
+        { name: "当前配置", charSettings: cloneDeep(charSettings) },
+        ...cloneDeep(savedProjects.value.projects).map(project => ({
+            ...project,
+            charSettings: normalizeCharSettings(project.charSettings),
+        })),
+    ]
 
     // Create and return config object
     return {
@@ -128,7 +143,10 @@ const getFilteredBuffOptions = (configIndex: number) => {
             const b = config.additionalBuffs.find(b => b[0] === v.label)
             const lv = b?.[1] ?? v.value.等级
             return {
-                value: new LeveledBuff(v.value._originalBuffData, lv),
+                value:
+                    v.label === "自定义BUFF"
+                        ? createLeveledBuff(v.label, lv, config.charSettings.customBuff)
+                        : new LeveledBuff(v.value._originalBuffData, lv),
                 label: v.label,
                 limit: v.limit,
                 description: v.description,
@@ -191,7 +209,7 @@ const baseCharBuilds = computed(() => {
                 .map((v: any) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null))
                 .filter((m: any): m is LeveledMod => m !== null),
             skillLevel: settings.charSkillLevel,
-            buffs: settings.buffs.map((v: any) => new LeveledBuff(v[0], v[1])),
+            buffs: settings.buffs.map((v: any) => createLeveledBuff(v[0], v[1], settings.customBuff)),
             melee: new LeveledWeapon(
                 settings.meleeWeapon,
                 settings.meleeWeaponRefine,
@@ -278,7 +296,7 @@ const charBuilds = computed(() => {
         })
 
         // Combine BUFFs from project and additional selections for this configuration
-        const combinedBuffs = [...baseBuild.buffs, ...config.additionalBuffs.map(v => new LeveledBuff(v[0], v[1]))]
+        const combinedBuffs = [...baseBuild.buffs, ...config.additionalBuffs.map(v => createLeveledBuff(v[0], v[1], config.charSettings.customBuff))]
 
         // Create new CharBuild instance with combined settings for this configuration
         return new CharBuild({
@@ -609,7 +627,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                 </div>
                             </div>
                             <BuffEditer
-                                :selected-buffs="config.additionalBuffs.map(([name, lv]) => new LeveledBuff(name, lv))"
+                                :selected-buffs="config.additionalBuffs.map(([name, lv]) => createLeveledBuff(name, lv, config.charSettings.customBuff))"
                                 :buff-options="getFilteredBuffOptions(index)"
                                 :char-build="charBuilds[index]"
                                 @toggle-buff="toggleBuff(index, $event)"

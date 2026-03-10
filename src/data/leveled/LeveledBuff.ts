@@ -2,6 +2,7 @@ import type { CharAttr, CharBuild, WeaponAttr } from "../CharBuild"
 import { buffMap } from "../d"
 import type { Buff } from "../data-types"
 import type { LeveledChar, LeveledSkillWeapon, LeveledWeapon } from "."
+import { getMinusAttrValue } from "./minusAttr"
 
 /**
  * LeveledBuff类 - 继承Buff接口，添加等级属性和动态属性计算
@@ -264,7 +265,7 @@ export class LeveledBuff implements Buff {
     get minusAttr() {
         const r: Record<string, any> = this.clone()
         this.properties.forEach(prop => {
-            r[prop] = -this[prop]
+            r[prop] = getMinusAttrValue(prop, this[prop])
         })
         r.isMinus = true
         return r as LeveledBuff

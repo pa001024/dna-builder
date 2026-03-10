@@ -140,6 +140,13 @@ describe("LeveledBuff类测试", () => {
         expect(fullProps.攻击).toBeDefined()
     })
 
+    it("乘算BUFF的minusAttr应返回逆向倍率", () => {
+        const buff = new LeveledBuff("煜明2溯")
+        const minusAttr = buff.minusAttr
+
+        expect(minusAttr.技能倍率乘数).toBeCloseTo(-(buff.技能倍率乘数 / (1 + buff.技能倍率乘数)), 10)
+    })
+
     // 测试6：测试不存在的Buff名称
     it("测试不存在的Buff名称会抛出错误", () => {
         expect(() => {
@@ -149,6 +156,15 @@ describe("LeveledBuff类测试", () => {
         expect(() => {
             new LeveledBuff("不存在的Buff")
         }).toThrow("不存在的Buff")
+    })
+})
+
+describe("LeveledMod乘算反向属性测试", () => {
+    it("独立增伤的minusAttr应返回逆向倍率", () => {
+        const mod = new LeveledMod(31526)
+        const minusAttr = mod.minusAttr
+
+        expect(minusAttr.独立增伤).toBeCloseTo(-(mod.独立增伤 / (1 + mod.独立增伤)), 10)
     })
 })
 

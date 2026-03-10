@@ -173,8 +173,8 @@ export class CharBuild {
                     字段: [],
                 } as Skill
                 // 固定获取Q技能的伤害字段
-                this.skills[1].字段.forEach(field => {
-                    if (field.名称.includes(uweaponData.filter || "伤害") && field.名称.endsWith("伤害")) uweaponSkillData.字段!.push(field)
+                this.skills[uweaponData.skill || 0].字段.forEach(field => {
+                    if (field.名称.match(uweaponData.filter || "伤害") && field.名称.endsWith("伤害")) uweaponSkillData.字段!.push(field)
                 })
                 uweaponData.技能 = [uweaponSkillData]
                 this.skillWeapon = new LeveledSkillWeapon(uweaponData, this.skillLevel, this.char.等级)

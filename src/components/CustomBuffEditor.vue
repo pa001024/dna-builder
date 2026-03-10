@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { useLocalStorage } from "@vueuse/core"
-import { reactive, ref } from "vue"
-import { buffMap } from "../data"
+import { computed, reactive, ref } from "vue"
 import { formatProp } from "../util"
 
 // 获取所有可用的属性名
@@ -54,18 +52,11 @@ const properties = [
     "远程多重",
     "远程增伤",
 ]
-// 自定义BUFF
-const customBuff = useLocalStorage("customBuff", [] as [string, number][])
-function writeCustomBuff() {
-    const buffObj = {
-        名称: "自定义BUFF",
-        描述: "自行填写",
-    } as any
-    customBuff.value.forEach(prop => {
-        buffObj[prop[0]] = prop[1]
-    })
-    buffMap.set("自定义BUFF", buffObj)
-}
+const props = defineProps<{
+    buffs: [string, number][]
+}>()
+
+const customBuff = computed(() => props.buffs)
 
 // 定义组件事件
 const emit = defineEmits<{
@@ -87,7 +78,10 @@ const errors = ref({
     value: "",
 })
 
-// 验证表单
+/**
+ * 验证新增自定义 BUFF 表单。
+ * @returns 表单是否通过校验
+ */
 const validateForm = (): boolean => {
     let isValid = true
 
@@ -110,36 +104,43 @@ const validateForm = (): boolean => {
     return isValid
 }
 
-// 添加新的自定义buff
+/**
+ * 复制一份可安全编辑的自定义 BUFF 列表。
+ * @returns 新的自定义 BUFF 列表副本
+ */
+const cloneCustomBuffs = () => customBuff.value.map(([property, value]) => [property, value] as [string, number])
+
+/**
+ * 添加新的自定义 BUFF。
+ * 如果属性已存在，则累加数值后回传给父级持久化。
+ */
 const addBuff = () => {
     if (validateForm()) {
-        // 检查是否已经存在相同属性的buff
-        const existingIndex = customBuff.value.findIndex(buff => buff[0] === newBuff.property)
+        const nextBuff: [string, number] = [newBuff.property, +newBuff.value]
+        const nextCustomBuff = cloneCustomBuffs()
+        const existingIndex = nextCustomBuff.findIndex(buff => buff[0] === nextBuff[0])
         if (existingIndex !== -1) {
-            // 如果存在，更新数值
-            customBuff.value[existingIndex][1] += +newBuff.value
+            nextCustomBuff[existingIndex][1] += nextBuff[1]
         } else {
-            // 如果不存在，添加新buff
-            customBuff.value.push([newBuff.property, +newBuff.value])
+            nextCustomBuff.push(nextBuff)
         }
 
-        // 重置表单
+        emit("add", nextBuff)
+        emit("submit", nextCustomBuff)
         newBuff.property = ""
         newBuff.value = ""
-
-        // 触发事件
-        writeCustomBuff()
-        emit("add", [newBuff.property, +newBuff.value])
-        emit("submit", customBuff.value)
     }
 }
 
-// 移除自定义buff
+/**
+ * 移除指定下标的自定义 BUFF。
+ * @param index 需要移除的条目下标
+ */
 const removeBuff = (index: number) => {
-    customBuff.value.splice(index, 1)
-    writeCustomBuff()
+    const nextCustomBuff = cloneCustomBuffs()
+    nextCustomBuff.splice(index, 1)
     emit("remove", index)
-    emit("submit", customBuff.value)
+    emit("submit", nextCustomBuff)
 }
 </script>
 
