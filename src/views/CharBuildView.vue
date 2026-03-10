@@ -71,6 +71,21 @@ const modOptions = modData
         lv: inv.getModLv(mod.id, mod.品质),
     }))
     .filter(mod => mod.count)
+
+/**
+ * 游戏内魔之楔面板的线性返回顺序。
+ * 参考 GameStyleModView 的布局，按构筑页槽位记录对应的接口索引。
+ */
+const GAME_STYLE_MOD_SLOT_ORDER = [0, 2, 3, 1, 6, 4, 7, 5, 8] as const
+
+/**
+ * 将游戏接口返回的魔之楔列表重排为构筑页槽位顺序。
+ * @param modes 游戏接口返回的模块数组
+ * @returns 按构筑页槽位重排后的数组
+ */
+function reorderGameStyleModes<T>(modes: T[]): (T | null)[] {
+    return GAME_STYLE_MOD_SLOT_ORDER.map(index => modes[index] ?? null)
+}
 const _buffOptions = reactive(
     buffData.map(buff => ({
         value: new LeveledBuff(buff.名称),
@@ -848,14 +863,17 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
             ui.showErrorMessage("获取武器信息失败")
             return
         }
-        const mods = weapon.data.weaponDetail.modes.map(m => {
-            try {
-                const mod = new LeveledMod(+m.id, inv.getModLv(+m.id))
-                return [+m.id, mod.等级] as [number, number]
-            } catch {
-                return null
-            }
-        })
+        const mods = reorderGameStyleModes(weapon.data.weaponDetail.modes)
+            .slice(0, 8)
+            .map(m => {
+                try {
+                    if (!m?.id) return null
+                    const mod = new LeveledMod(+m.id, inv.getModLv(+m.id))
+                    return [+m.id, mod.等级] as [number, number]
+                } catch {
+                    return null
+                }
+            })
         switch (lw.类型) {
             case "近战":
                 charSettings.value.meleeMods = mods
@@ -874,9 +892,11 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
             ui.showErrorMessage("获取角色信息失败")
             return
         }
-        charSettings.value.charMods = char.data.charDetail.modes
+        const reorderedModes = reorderGameStyleModes(char.data.charDetail.modes)
+        charSettings.value.charMods = reorderedModes
             .map(m => {
                 try {
+                    if (!m?.id) return null
                     const mod = new LeveledMod(+m.id, m.level)
                     return [+m.id, mod.等级] as [number, number]
                 } catch {
@@ -884,9 +904,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                 }
             })
             .slice(0, 8)
-        const modes = char.data.charDetail.modes
-        if (modes.length > 8 && modes[8]?.id) {
-            charSettings.value.auraMod = +modes[8].id
+        if (reorderedModes[8]?.id) {
+            charSettings.value.auraMod = +reorderedModes[8].id
         }
     }
     localStorage.setItem(`build.${selectedChar.value}`, JSON.stringify(charSettings.value))
