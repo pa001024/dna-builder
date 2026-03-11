@@ -13,6 +13,7 @@ const props = defineProps<{
     defaultLevel?: number
 }>()
 
+const MAX_MONSTER_LEVEL = 240
 const currentLevel = ref(props.defaultLevel || 180)
 const showRougeStats = ref(false)
 const levelTrendChartRef = ref<HTMLElement | null>(null)
@@ -143,7 +144,7 @@ const levelTrendData = computed(() => {
     const shield: number[] = []
     const effectiveHealthList: number[] = []
 
-    for (let level = 1; level <= 180; level++) {
+    for (let level = 1; level <= MAX_MONSTER_LEVEL; level++) {
         const leveled = new LeveledMonster(props.monster, level, showRougeStats.value)
         const currentHP = leveled.hp
         const currentShield = leveled.es || 0
@@ -179,9 +180,7 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
 
                 const firstValue = paramList[0]?.value
                 const level =
-                    Array.isArray(firstValue) && firstValue.length > 0
-                        ? Math.round(Number(firstValue[0]))
-                        : Number(paramList[0]?.name || 0)
+                    Array.isArray(firstValue) && firstValue.length > 0 ? Math.round(Number(firstValue[0])) : Number(paramList[0]?.name || 0)
                 const lines = [`Lv.${level}`]
                 paramList.forEach(item => {
                     const rawValue = Array.isArray(item.value) ? item.value[item.value.length - 1] : item.value
@@ -206,7 +205,7 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
             type: "value",
             name: "等级",
             min: 1,
-            max: 180,
+            max: MAX_MONSTER_LEVEL,
             boundaryGap: [0, 0],
             axisLabel: {
                 formatter: value => `Lv.${Number(value)}`,
@@ -215,6 +214,7 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
         yAxis: {
             type: "value",
             name: "数值",
+            scale: true,
             axisLabel: {
                 formatter: value => formatBigNumber(Number(value)),
             },
@@ -223,16 +223,16 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
             {
                 type: "inside",
                 xAxisIndex: 0,
-                filterMode: "none",
+                filterMode: "filter",
                 startValue: 1,
-                endValue: 180,
+                endValue: MAX_MONSTER_LEVEL,
             },
             {
                 type: "slider",
                 xAxisIndex: 0,
-                filterMode: "none",
+                filterMode: "filter",
                 startValue: 1,
-                endValue: 180,
+                endValue: MAX_MONSTER_LEVEL,
                 height: 16,
                 bottom: 8,
                 labelFormatter: value => `Lv.${Math.round(Number(value))}`,
@@ -382,7 +382,14 @@ function getFactionName(faction: number | undefined): string {
 
         <div class="flex items-center gap-4">
             <span class="text-sm min-w-12">Lv. {{ currentLevel }}</span>
-            <input v-model.number="currentLevel" type="range" class="range range-primary range-xs grow" min="1" max="180" step="1" />
+            <input
+                v-model.number="currentLevel"
+                type="range"
+                class="range range-primary range-xs grow"
+                min="1"
+                :max="MAX_MONSTER_LEVEL"
+                step="1"
+            />
         </div>
 
         <div v-if="leveledMonster" class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">

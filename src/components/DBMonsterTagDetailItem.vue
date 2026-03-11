@@ -199,12 +199,17 @@ function formatBonusValue(value: number): string {
                     type="range"
                     class="range range-primary range-xs grow"
                     min="1"
-                    max="180"
+                    max="240"
                     step="1"
                 />
             </div>
             <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
-                <DBMonsterCompactCard v-for="monster in relatedMonsters" :key="monster.id" :monster="monster" :level="relatedMonsterLevel" />
+                <DBMonsterCompactCard
+                    v-for="monster in relatedMonsters"
+                    :key="monster.id"
+                    :monster="monster"
+                    :level="relatedMonsterLevel"
+                />
             </div>
         </div>
     </div>

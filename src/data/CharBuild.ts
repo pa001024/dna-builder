@@ -557,6 +557,7 @@ export class CharBuild {
         // 应用属性上限
         efficiency = Math.min(efficiency, 1.75) // 175%
         range = Math.min(range, 2.8) // 280%
+        durability = Math.min(durability, 4) // 400%
 
         let attrs: CharAttr = {
             // 基础属性

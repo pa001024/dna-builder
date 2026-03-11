@@ -19,7 +19,6 @@ function getCharName(charId: number): string {
 function getChar(charId: number): Char | undefined {
     return charMap.get(charId)
 }
-
 </script>
 
 <template>
@@ -196,7 +195,7 @@ function getChar(charId: number): Char | undefined {
             <!-- 等级控制 -->
             <div class="flex items-center gap-4 mb-3">
                 <span class="text-sm min-w-12">Lv. {{ currentLevel }}</span>
-                <input v-model.number="currentLevel" type="range" class="range range-primary range-xs grow" min="1" max="180" step="1" />
+                <input v-model.number="currentLevel" type="range" class="range range-primary range-xs grow" min="1" max="240" step="1" />
             </div>
             <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
                 <DBMonsterCompactCard

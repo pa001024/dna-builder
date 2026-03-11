@@ -12,7 +12,7 @@ const props = defineProps<{
 const currentLevel = ref(props.dungeon.lv)
 const ENDLESS_MAX_WAVE = 99
 const ENDLESS_LEVEL_STEP = 5
-const MAX_MONSTER_LEVEL = 180
+const MAX_MONSTER_LEVEL = 240
 type SpawnWave = NonNullable<Dungeon["spawn"]>[number]
 type SpawnGenerator = SpawnWave[number]
 type SpawnMonsterInfo = SpawnGenerator["m"][number]
@@ -492,7 +492,9 @@ watch(
                 :max="ENDLESS_MAX_WAVE"
                 step="1"
             />
-            <div class="mt-1 text-xs text-base-content/70">当前怪物等级基数 Lv.{{ endlessLevelBase }}（每波 +{{ ENDLESS_LEVEL_STEP }}，最高 180）</div>
+            <div class="mt-1 text-xs text-base-content/70">
+                当前怪物等级基数 Lv.{{ endlessLevelBase }}（每波 +{{ ENDLESS_LEVEL_STEP }}，最高 180）
+            </div>
         </div>
 
         <template v-if="activeTab === 'monster'">
@@ -507,7 +509,7 @@ watch(
                         type="range"
                         class="range range-primary range-xs grow"
                         min="1"
-                        max="180"
+                        max="240"
                         step="1"
                     />
                     <span v-else class="text-xs text-base-content/70">无尽副本等级由上方波次滑块控制</span>
@@ -534,7 +536,10 @@ watch(
                 </div>
             </div>
 
-            <div v-if="!dungeon.m?.length && !dungeon.sm?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3 text-sm text-base-content/70">
+            <div
+                v-if="!dungeon.m?.length && !dungeon.sm?.length"
+                class="card bg-base-100 border border-base-200 rounded-lg p-3 text-sm text-base-content/70"
+            >
                 暂无怪物数据
             </div>
         </template>
@@ -591,7 +596,9 @@ watch(
                                 </div>
 
                                 <div class="mb-2">
-                                    <div class="mb-1 text-xs font-medium text-base-content/70">普通怪物 ({{ spawnGenerator.m.length }}种)</div>
+                                    <div class="mb-1 text-xs font-medium text-base-content/70">
+                                        普通怪物 ({{ spawnGenerator.m.length }}种)
+                                    </div>
                                     <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
                                         <div
                                             v-for="(spawnMonster, monsterIndex) in spawnGenerator.m"
@@ -626,7 +633,9 @@ watch(
                                             <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1 text-xs">
                                                 <span class="text-base-content/70">权重</span>
                                                 <span class="font-medium">
-                                                    {{ spawnTagMonster.w }} ({{ getSpawnTagMonsterWeightPercentText(spawnGenerator, spawnTagMonster) }}%)
+                                                    {{ spawnTagMonster.w }} ({{
+                                                        getSpawnTagMonsterWeightPercentText(spawnGenerator, spawnTagMonster)
+                                                    }}%)
                                                 </span>
                                             </div>
                                         </div>
@@ -721,7 +730,10 @@ watch(
                 </div>
             </div>
 
-            <div v-if="!dungeon.r?.length && !dungeon.sr?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3 text-sm text-base-content/70">
+            <div
+                v-if="!dungeon.r?.length && !dungeon.sr?.length"
+                class="card bg-base-100 border border-base-200 rounded-lg p-3 text-sm text-base-content/70"
+            >
                 暂无奖励数据
             </div>
         </template>
