@@ -19,7 +19,7 @@
         "test": "vitest run",
         "coverage": "vitest run --coverage",
         "prepare": "husky",
-        "format": "biome format --write",
+        "format": "bun tools/canonicalize_tailwind_classes.ts && biome format --write",
         "ver": "node .husky/update-version.js",
         "deploy": "bun server/deploy.ts",
         "icon": "bun run tools/icon_tool.ts",

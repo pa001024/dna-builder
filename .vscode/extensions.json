@@ -4,6 +4,7 @@
         "Lokalise.i18n-ally",
         "fill-labs.dependi",
         "tauri-apps.tauri-vscode",
+        "bradlc.vscode-tailwindcss",
         "esbenp.prettier-vscode",
         "rust-lang.rust-analyzer",
         "vitest.explorer",

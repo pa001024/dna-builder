@@ -3,9 +3,9 @@ import { debounce } from "lodash-es"
 import { computed, onMounted, ref, watch } from "vue"
 import { useRoute } from "vue-router"
 import { buildQuery, createBuildMutation } from "@/api/graphql"
+import type { IconTypes } from "@/components/Icon.vue"
 import { type CharSettings, normalizeCharSettings, useCharSettings } from "@/composables/useCharSettings"
 import type { CharAttr } from "@/data"
-import { env } from "@/env"
 import {
     buffData,
     buffMap,
@@ -21,10 +21,10 @@ import {
     weaponData,
 } from "@/data"
 import { LeveledSkill } from "@/data/leveled/LeveledSkill"
+import { env } from "@/env"
 import { useInvStore } from "@/store/inv"
 import { useUIStore } from "@/store/ui"
 import { copyText, format100, format100r, formatWeaponProp } from "@/util"
-import type { IconTypes } from "@/components/Icon.vue"
 
 type BuildPanel = "角色" | "近战" | "远程" | "同律" | "光环"
 
@@ -1292,12 +1292,12 @@ onMounted(() => {
 
 <template>
     <dialog class="modal" :class="{ 'modal-open': modEditorOpen }">
-        <div class="modal-box h-[88%] max-w-[92%] overflow-hidden border border-white/10 bg-slate-950/95 p-0 text-white lg:max-w-[1200px]">
+        <div class="modal-box h-[88%] max-w-[92%] overflow-hidden border border-white/10 bg-slate-950/95 p-0 text-white lg:max-w-300">
             <div class="flex h-full flex-col">
                 <div class="flex items-center gap-4 border-b border-white/8 px-6 py-4">
                     <div>
                         <div class="font-mono text-[11px] tracking-[0.35em] text-white/45">MOD EDITOR</div>
-                        <div class="mt-1 text-2xl [font-family:'Cormorant_Garamond',serif]">
+                        <div class="mt-1 text-2xl font-['Cormorant_Garamond',serif]">
                             {{ editingModType }} 槽位 {{ editingModIndex + 1 }}
                         </div>
                     </div>
@@ -1316,7 +1316,7 @@ onMounted(() => {
                 </div>
 
                 <div class="grid min-h-0 flex-1 gap-0 lg:grid-cols-[320px_minmax(0,1fr)]">
-                    <div class="border-b border-white/8 bg-white/[0.03] p-5 lg:border-b-0 lg:border-r">
+                    <div class="border-b border-white/8 bg-white/3 p-5 lg:border-b-0 lg:border-r">
                         <div class="text-xs tracking-[0.28em] text-white/45">当前选择</div>
                         <div class="relative mt-3 overflow-hidden border border-white/8 bg-white/4 p-4">
                             <div
@@ -1329,7 +1329,7 @@ onMounted(() => {
                                 }"
                             />
                             <div
-                                class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/82 to-slate-950/35"
+                                class="pointer-events-none absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/82 to-slate-950/35"
                             />
                             <div class="relative z-10 font-mono text-[10px] tracking-[0.18em] text-cyan-300">
                                 SLOT {{ String(editingModIndex + 1).padStart(2, "0") }}
@@ -1342,7 +1342,7 @@ onMounted(() => {
                                         class="h-20 w-20 rounded-md border border-white/10 object-cover"
                                     />
                                     <div>
-                                        <div class="text-2xl [font-family:'Cormorant_Garamond',serif]">
+                                        <div class="text-2xl font-['Cormorant_Garamond',serif]">
                                             {{ new LeveledMod(editingModId, editingModLv, inv.getBuffLv(editingModId)).名称 }}
                                         </div>
                                         <div class="mt-2 text-sm text-white/65">
@@ -1381,7 +1381,7 @@ onMounted(() => {
                                 v-model="modSearchKeyword"
                                 type="text"
                                 placeholder="搜索名称 / 属性 / 描述"
-                                class="min-w-[220px] flex-1 border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none placeholder:text-white/30"
+                                class="min-w-55 flex-1 border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none placeholder:text-white/30"
                             />
                             <div class="flex flex-wrap gap-2">
                                 <button
@@ -1431,7 +1431,7 @@ onMounted(() => {
                                         }"
                                     />
                                     <div
-                                        class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/82 to-slate-950/38"
+                                        class="pointer-events-none absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/82 to-slate-950/38"
                                     />
                                     <div class="relative z-10 flex items-start justify-between gap-3">
                                         <div>
@@ -1443,7 +1443,7 @@ onMounted(() => {
                                             {{ format100r(entry.income, 1) }}
                                         </div>
                                     </div>
-                                    <div class="relative z-10 mt-3 text-xl [font-family:'Cormorant_Garamond',serif]">
+                                    <div class="relative z-10 mt-3 text-xl font-['Cormorant_Garamond',serif]">
                                         {{ entry.mod.名称 }}
                                     </div>
                                     <div class="relative z-10 mt-3 flex gap-3">
@@ -1499,12 +1499,12 @@ onMounted(() => {
     </dialog>
 
     <dialog class="modal" :class="{ 'modal-open': weaponSelectOpen }">
-        <div class="modal-box h-[88%] max-w-[92%] overflow-hidden border border-white/10 bg-slate-950/95 p-0 text-white lg:max-w-[1200px]">
+        <div class="modal-box h-[88%] max-w-[92%] overflow-hidden border border-white/10 bg-slate-950/95 p-0 text-white lg:max-w-300">
             <div class="flex h-full flex-col">
                 <div class="flex items-center gap-4 border-b border-white/8 px-6 py-4">
                     <div>
                         <div class="font-mono text-[11px] tracking-[0.35em] text-white/45">WEAPON SELECTOR</div>
-                        <div class="mt-1 text-2xl [font-family:'Cormorant_Garamond',serif]">{{ weaponDefaultTab }} 更换</div>
+                        <div class="mt-1 text-2xl font-['Cormorant_Garamond',serif]">{{ weaponDefaultTab }} 更换</div>
                     </div>
                     <button
                         class="ml-auto border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-xs text-white/70"
@@ -1532,7 +1532,7 @@ onMounted(() => {
                         v-model="weaponSearchKeyword"
                         type="text"
                         placeholder="搜索武器名称 / 类型"
-                        class="min-w-[220px] flex-1 border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none placeholder:text-white/30"
+                        class="min-w-55 flex-1 border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none placeholder:text-white/30"
                     />
                     <div class="ml-auto flex items-center gap-3">
                         <div class="flex items-center gap-2">
@@ -1610,7 +1610,7 @@ onMounted(() => {
                                 }"
                             />
                             <div
-                                class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/82 to-slate-950/38"
+                                class="pointer-events-none absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/82 to-slate-950/38"
                             />
                             <div class="relative z-10 flex items-start justify-between gap-3">
                                 <div class="font-mono text-[10px] tracking-[0.18em] text-cyan-300">
@@ -1620,7 +1620,7 @@ onMounted(() => {
                                     收益 {{ format100r(entry.income, 1) }}
                                 </div>
                             </div>
-                            <div class="relative z-10 mt-3 text-xl [font-family:'Cormorant_Garamond',serif]">
+                            <div class="relative z-10 mt-3 text-xl font-['Cormorant_Garamond',serif]">
                                 {{ entry.weapon.名称 }}
                             </div>
                             <div class="relative z-10 mt-3 flex gap-3">
@@ -1645,12 +1645,12 @@ onMounted(() => {
     </dialog>
 
     <dialog class="modal" :class="{ 'modal-open': supportSelectOpen }">
-        <div class="modal-box h-[88%] max-w-[92%] overflow-hidden border border-white/10 bg-slate-950/95 p-0 text-white lg:max-w-[1000px]">
+        <div class="modal-box h-[88%] max-w-[92%] overflow-hidden border border-white/10 bg-slate-950/95 p-0 text-white lg:max-w-250">
             <div class="flex h-full flex-col">
                 <div class="flex items-center gap-4 border-b border-white/8 px-6 py-4">
                     <div>
                         <div class="font-mono text-[11px] tracking-[0.35em] text-white/45">SUPPORT SELECTOR</div>
-                        <div class="mt-1 text-2xl [font-family:'Cormorant_Garamond',serif]">
+                        <div class="mt-1 text-2xl font-['Cormorant_Garamond',serif]">
                             {{ supportSelectMode.startsWith("char") ? "协战角色" : "协战武器" }}更换
                         </div>
                     </div>
@@ -1687,7 +1687,7 @@ onMounted(() => {
                                 />
                             </ImageFallback>
                             <div class="min-w-0">
-                                <div class="truncate text-[18px] [font-family:'Cormorant_Garamond',serif] text-white">
+                                <div class="truncate text-[18px] font-['Cormorant_Garamond',serif] text-white">
                                     {{ entry.label }}
                                 </div>
                                 <div class="font-mono text-[10px] tracking-[0.2em] text-cyan-300">{{ entry.elm || "EMPTY" }}</div>
@@ -1710,7 +1710,7 @@ onMounted(() => {
                                 />
                             </ImageFallback>
                             <div class="min-w-0">
-                                <div class="truncate text-[18px] [font-family:'Cormorant_Garamond',serif] text-white">
+                                <div class="truncate text-[18px] font-['Cormorant_Garamond',serif] text-white">
                                     {{ entry.label }}
                                 </div>
                                 <div class="font-mono text-[10px] tracking-[0.2em] text-cyan-300">{{ entry.type || "EMPTY" }}</div>
@@ -1749,7 +1749,7 @@ onMounted(() => {
             :style="{ backgroundImage: `url(${charBuild.char.bg})`, backgroundSize: 'cover', backgroundPosition: 'center' }"
         />
         <div
-            class="pointer-events-none absolute inset-0 z-0 opacity-40 [background-image:radial-gradient(1px_1px_at_10%_14%,rgba(255,255,255,0.95)_100%,transparent),radial-gradient(1.5px_1.5px_at_22%_74%,rgba(255,255,255,0.75)_100%,transparent),radial-gradient(1px_1px_at_43%_23%,rgba(255,255,255,0.7)_100%,transparent),radial-gradient(2px_2px_at_77%_38%,rgba(234,211,154,0.75)_100%,transparent),radial-gradient(1px_1px_at_88%_78%,rgba(241,120,100,0.75)_100%,transparent),radial-gradient(1px_1px_at_61%_84%,rgba(116,211,239,0.75)_100%,transparent)] [background-size:360px_360px]"
+            class="pointer-events-none absolute inset-0 z-0 opacity-40 bg-[radial-gradient(1px_1px_at_10%_14%,rgba(255,255,255,0.95)_100%,transparent),radial-gradient(1.5px_1.5px_at_22%_74%,rgba(255,255,255,0.75)_100%,transparent),radial-gradient(1px_1px_at_43%_23%,rgba(255,255,255,0.7)_100%,transparent),radial-gradient(2px_2px_at_77%_38%,rgba(234,211,154,0.75)_100%,transparent),radial-gradient(1px_1px_at_88%_78%,rgba(241,120,100,0.75)_100%,transparent),radial-gradient(1px_1px_at_61%_84%,rgba(116,211,239,0.75)_100%,transparent)] bg-size-[360px_360px]"
         />
         <div
             class="pointer-events-none absolute inset-0 z-0 blur-2xl [background:radial-gradient(circle_at_50%_54%,rgba(116,211,239,0.08),transparent_34%),radial-gradient(circle_at_50%_54%,rgba(127,102,192,0.1),transparent_48%)]"
@@ -1761,19 +1761,19 @@ onMounted(() => {
             <aside class="flex min-h-0 flex-col border border-white/10 bg-slate-950/70 backdrop-blur-xl">
                 <div class="flex items-center justify-between border-b border-white/8 px-5 py-5">
                     <div class="flex items-center gap-3">
-                        <button
-                            class="inline-flex items-center gap-2 border border-cyan-300/35 bg-cyan-300/10 px-3 py-1.5 font-mono text-[10px] tracking-[0.22em] text-cyan-200 transition hover:border-cyan-200/60 hover:bg-cyan-200/12"
-                            @click="openShareModal"
-                        >
-                            分享
-                        </button>
                         <div class="relative h-8 w-8 rotate-45 border border-white/15">
                             <div
                                 class="absolute inset-2 rounded-full bg-[radial-gradient(circle,#ead39a_0%,rgba(234,211,154,0.05)_72%,transparent_100%)] -rotate-45"
                             />
                         </div>
                     </div>
-                    <div class="font-mono text-[11px] tracking-[0.4em] text-white/70">STARFRAME</div>
+                    <div class="font-mono text-[11px] tracking-[0.4em] text-white/70">CHAR</div>
+                    <button
+                        class="inline-flex items-center gap-2 border border-cyan-300/35 bg-cyan-300/10 px-3 py-1.5 font-mono text-[10px] tracking-[0.22em] text-cyan-200 transition hover:border-cyan-200/60 hover:bg-cyan-200/12"
+                        @click="openShareModal"
+                    >
+                        分享
+                    </button>
                 </div>
 
                 <ScrollArea class="px-5 py-5 md:h-0 md:min-h-0 md:flex-1">
@@ -1789,17 +1789,17 @@ onMounted(() => {
                                 <ImageFallback
                                     :src="card.icon"
                                     :alt="card.label"
-                                    class="aspect-square w-[68px] rounded-full object-cover object-top"
+                                    class="aspect-square w-17 rounded-full object-cover object-top"
                                 >
                                     <img
                                         src="/imgs/webp/T_Head_Empty.webp"
                                         alt="武器头像"
-                                        class="aspect-square w-[68px] rounded-full object-cover object-top"
+                                        class="aspect-square w-17 rounded-full object-cover object-top"
                                     />
                                 </ImageFallback>
                                 <div class="min-w-0">
                                     <div class="font-mono text-[10px] uppercase tracking-[0.24em] text-cyan-300">{{ card.key }}</div>
-                                    <div class="mt-1 truncate text-[18px] [font-family:'Cormorant_Garamond',serif] text-white">
+                                    <div class="mt-1 truncate text-[18px] font-['Cormorant_Garamond',serif] text-white">
                                         {{ card.label }}
                                     </div>
                                     <div class="truncate text-sm text-white/70">{{ card.subtitle }}</div>
@@ -1827,19 +1827,19 @@ onMounted(() => {
                                     <ImageFallback
                                         :src="card.icon"
                                         :alt="card.label"
-                                        class="h-[52px] w-[52px] rounded-full object-cover object-top"
+                                        class="h-13 w-13 rounded-full object-cover object-top"
                                     >
                                         <img
                                             src="/imgs/webp/T_Head_Empty.webp"
                                             alt="协战槽位"
-                                            class="h-[52px] w-[52px] rounded-full object-cover object-top"
+                                            class="h-13 w-13 rounded-full object-cover object-top"
                                         />
                                     </ImageFallback>
                                     <div class="min-w-0">
                                         <div class="font-mono text-[10px] uppercase tracking-[0.22em] text-cyan-300">
                                             {{ card.subtitle }}
                                         </div>
-                                        <div class="mt-1 truncate text-[16px] [font-family:'Cormorant_Garamond',serif] text-white">
+                                        <div class="mt-1 truncate text-[16px] font-['Cormorant_Garamond',serif] text-white">
                                             {{ card.label }}
                                         </div>
                                     </div>
@@ -1859,7 +1859,7 @@ onMounted(() => {
                 <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div>
                         <div class="font-mono text-[11px] uppercase tracking-[0.24em] text-white/70">MOD // BUFF ORBIT</div>
-                        <h1 class="mt-1 text-5xl leading-[0.94] tracking-[0.04em] md:text-[54px] [font-family:'Cormorant_Garamond',serif]">
+                        <h1 class="mt-1 text-5xl leading-[0.94] tracking-[0.04em] md:text-[54px] font-['Cormorant_Garamond',serif]">
                             {{ selectedCharName }}
                         </h1>
                         <div class="text-sm text-white/70 md:text-[15px]">{{ activePanel }} 构筑矩阵</div>
@@ -1871,15 +1871,13 @@ onMounted(() => {
 
                 <ScrollArea class="pt-4 md:h-0 md:min-h-0 md:flex-1">
                     <div class="space-y-5 pr-1">
-                        <div class="relative flex min-h-[360px] items-center justify-center overflow-hidden md:min-h-[440px]">
+                        <div class="relative flex min-h-90 items-center justify-center overflow-hidden md:min-h-110">
+                            <div class="pointer-events-none absolute h-90 w-90 rounded-full border border-purple-300/25 md:h-90 md:w-90" />
                             <div
-                                class="pointer-events-none absolute h-[360px] w-[360px] rounded-full border border-purple-300/25 md:h-[360px] md:w-[360px]"
+                                class="pointer-events-none absolute h-100 w-100 rounded-full border border-cyan-300/25 border-dashed md:h-130 md:w-130 animate-[spin_78s_linear_infinite_reverse]"
                             />
                             <div
-                                class="pointer-events-none absolute h-[400px] w-[400px] rounded-full border border-cyan-300/25 border-dashed md:h-[520px] md:w-[520px] animate-[spin_78s_linear_infinite_reverse]"
-                            />
-                            <div
-                                class="pointer-events-none absolute h-[500px] w-[500px] rounded-full border border-white/8 md:h-[640px] md:w-[640px] animate-[spin_55s_linear_infinite]"
+                                class="pointer-events-none absolute h-125 w-125 rounded-full border border-white/8 md:h-160 md:w-160 animate-[spin_55s_linear_infinite]"
                             />
                             <div class="pointer-events-none absolute inset-[8%] z-0 flex items-center justify-center">
                                 <img
@@ -1887,26 +1885,24 @@ onMounted(() => {
                                     :alt="selectedCharName"
                                     class="h-full w-full object-contain opacity-[0.16] saturate-[0.9]"
                                 />
-                                <div class="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-transparent to-slate-950/70" />
-                                <div class="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-transparent to-slate-950/70" />
-                                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_42%,rgba(2,6,23,0.08)_64%,rgba(2,6,23,0.38)_82%,rgba(2,6,23,0.72)_100%)]" />
+                                <div class="absolute inset-0 bg-linear-to-r from-slate-950/70 via-transparent to-slate-950/70" />
+                                <div class="absolute inset-0 bg-linear-to-b from-slate-950/70 via-transparent to-slate-950/70" />
+                                <div
+                                    class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_42%,rgba(2,6,23,0.08)_64%,rgba(2,6,23,0.38)_82%,rgba(2,6,23,0.72)_100%)]"
+                                />
                             </div>
 
                             <div
                                 class="relative z-10 grid w-full gap-4"
-                                :class="
-                                    activePanel === '角色'
-                                        ? 'mx-auto max-w-[1280px] grid-cols-5'
-                                        : 'max-w-[980px] grid-cols-2 xl:grid-cols-4'
-                                "
+                                :class="activePanel === '角色' ? 'mx-auto max-w-7xl grid-cols-5' : 'max-w-245 grid-cols-2 xl:grid-cols-4'"
                             >
                                 <template v-for="(mod, index) in currentModSlots" :key="`${activePanel}-${index}`">
                                     <div
                                         v-if="activePanel === '角色' && (index === 2 || index === 6)"
-                                        class="pointer-events-none min-h-[132px]"
+                                        class="pointer-events-none min-h-33"
                                     />
                                     <button
-                                        class="relative min-h-[132px] overflow-hidden border p-4 text-left transition hover:-translate-y-1 hover:shadow-2xl"
+                                        class="relative min-h-33 overflow-hidden border p-4 text-left transition hover:-translate-y-1 hover:shadow-2xl"
                                         :class="mod ? 'border-amber-100/30 bg-white/4' : 'border-white/8 bg-white/3'"
                                         @click="openModEditor(activePanel, index)"
                                     >
@@ -1921,13 +1917,13 @@ onMounted(() => {
                                         />
                                         <div
                                             v-if="mod"
-                                            class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/82 to-slate-950/38"
+                                            class="pointer-events-none absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/82 to-slate-950/38"
                                         />
                                         <div class="relative z-10 font-mono text-[10px] tracking-[0.18em] text-cyan-300">
                                             {{ mod?.系列 || `槽位 ${String(index + 1).padStart(2, "0")}` }}
                                         </div>
                                         <template v-if="mod">
-                                            <div class="relative z-10 mt-3 text-[21px] [font-family:'Cormorant_Garamond',serif]">
+                                            <div class="relative z-10 mt-3 text-[21px] font-['Cormorant_Garamond',serif]">
                                                 {{ mod.名称 }} +{{ mod.等级 }}
                                             </div>
                                             <div class="relative z-10 mt-3 flex gap-3">
@@ -1988,7 +1984,7 @@ onMounted(() => {
                                             }"
                                         />
                                         <div
-                                            class="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent"
+                                            class="pointer-events-none absolute inset-0 rounded-full bg-linear-to-t from-slate-950 via-slate-950/70 to-transparent"
                                         />
                                         <template v-if="auraMod">
                                             <img
@@ -2001,7 +1997,7 @@ onMounted(() => {
                                             <div class="relative z-10 font-mono text-[10px] tracking-[0.24em] text-white/38">AURA</div>
                                         </template>
                                     </button>
-                                    <div class="text-sm [font-family:'Cormorant_Garamond',serif] text-white/85">
+                                    <div class="text-sm font-['Cormorant_Garamond',serif] text-white/85">
                                         {{ auraDisplayName }}
                                     </div>
                                 </div>
@@ -2041,18 +2037,13 @@ onMounted(() => {
                                         </button>
                                         <div class="flex items-center gap-3">
                                             <template v-for="(node, index) in group.nodes" :key="node.key">
-                                                <div
-                                                    class="h-px flex-1 bg-gradient-to-r from-[#f5edbd]/0 via-[#f5edbd]/90 to-[#f5edbd]/0"
-                                                />
+                                                <div class="h-px flex-1 bg-linear-to-r from-[#f5edbd]/0 via-[#f5edbd]/90 to-[#f5edbd]/0" />
                                                 <FullTooltip side="top">
                                                     <template #tooltip>
                                                         <div class="space-y-1">
                                                             <div class="text-sm text-white">{{ node.label }}</div>
                                                             <div v-if="node.value" class="text-sm text-cyan-200">{{ node.value }}</div>
-                                                            <div
-                                                                v-if="node.description"
-                                                                class="max-w-[260px] text-sm leading-6 text-white/70"
-                                                            >
+                                                            <div v-if="node.description" class="max-w-65 text-sm leading-6 text-white/70">
                                                                 {{ node.description }}
                                                             </div>
                                                         </div>
@@ -2070,7 +2061,7 @@ onMounted(() => {
                                                 </FullTooltip>
                                                 <div
                                                     v-if="index === group.nodes.length - 1"
-                                                    class="h-px flex-1 bg-gradient-to-r from-[#f5edbd]/0 via-[#f5edbd]/90 to-[#f5edbd]/0"
+                                                    class="h-px flex-1 bg-linear-to-r from-[#f5edbd]/0 via-[#f5edbd]/90 to-[#f5edbd]/0"
                                                 />
                                             </template>
                                         </div>
@@ -2091,7 +2082,7 @@ onMounted(() => {
                                             />
                                         </div>
                                         <div>
-                                            <div class="text-[20px] [font-family:'Cormorant_Garamond',serif] text-white">
+                                            <div class="text-[20px] font-['Cormorant_Garamond',serif] text-white">
                                                 {{ selectedSkillPanel.名称 }}
                                             </div>
                                             <div class="font-mono text-[10px] uppercase tracking-[0.22em] text-cyan-300">
@@ -2126,11 +2117,11 @@ onMounted(() => {
                                     @click="toggleBuff(buff)"
                                 >
                                     <div
-                                        class="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-cyan-200/0 via-cyan-200/90 to-cyan-200/0 opacity-0 transition group-hover:opacity-100"
+                                        class="pointer-events-none absolute inset-y-0 left-0 w-px bg-linear-to-b from-cyan-200/0 via-cyan-200/90 to-cyan-200/0 opacity-0 transition group-hover:opacity-100"
                                     />
                                     <div class="flex items-start justify-between gap-3">
                                         <div>
-                                            <div class="text-xl [font-family:'Cormorant_Garamond',serif]">{{ buff.名称 }}</div>
+                                            <div class="text-xl font-['Cormorant_Garamond',serif]">{{ buff.名称 }}</div>
                                             <div class="mt-1 font-mono text-[10px] tracking-[0.18em] text-white/40">
                                                 {{ selectedBuffNameSet.has(buff.名称) ? "SELECTED" : "AVAILABLE" }}
                                             </div>
@@ -2188,7 +2179,7 @@ onMounted(() => {
                                 >
                                     <div class="flex items-start justify-between gap-3">
                                         <div>
-                                            <div class="text-lg [font-family:'Cormorant_Garamond',serif]">{{ effect.label }}</div>
+                                            <div class="text-lg font-['Cormorant_Garamond',serif]">{{ effect.label }}</div>
                                             <div class="mt-1 font-mono text-[10px] tracking-[0.18em] text-white/45">
                                                 {{ effect.source }}
                                             </div>
@@ -2246,7 +2237,7 @@ onMounted(() => {
                 <div class="flex items-start justify-between gap-4 border-b border-[#ebd8a5]/15 pb-4">
                     <div>
                         <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-white/45">Attribute Matrix</div>
-                        <div class="mt-2 text-[34px] text-white [font-family:'Cormorant_Garamond',serif]">属性</div>
+                        <div class="mt-2 text-[34px] text-white font-['Cormorant_Garamond',serif]">属性</div>
                     </div>
                     <div class="text-right font-mono text-[10px] uppercase leading-5 tracking-[0.18em] text-white/40">
                         <div>{{ selectedCharName }}</div>
@@ -2261,7 +2252,7 @@ onMounted(() => {
                             class="relative overflow-hidden border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.035)_0%,rgba(255,255,255,0.012)_100%)] px-0 py-0"
                         >
                             <div
-                                class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-purple-300/0 via-purple-300/30 to-purple-300/0"
+                                class="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-purple-300/0 via-purple-300/30 to-purple-300/0"
                             />
                             <div class="border-b border-white/8 px-5 py-3">
                                 <div class="font-mono text-[10px] uppercase tracking-[0.28em] text-white/42">
@@ -2271,7 +2262,7 @@ onMounted(() => {
                             <div v-if="activePanel === '角色'" class="divide-y divide-white/8">
                                 <FullTooltip v-for="item in allAttributeEntries" :key="item.key" side="left">
                                     <template #tooltip>
-                                        <div class="flex max-w-[360px] flex-col gap-2">
+                                        <div class="flex max-w-90 flex-col gap-2">
                                             <div class="text-xs text-white/45">{{ item.key }}</div>
                                             <div v-if="item.key === '有效生命'" class="text-sm text-cyan-300">
                                                 (生命 / (1 - 防御 / (300 + 防御)) + 护盾) / (1 - 减伤)
@@ -2352,7 +2343,7 @@ onMounted(() => {
                                         </div>
                                     </template>
                                     <button
-                                        class="flex w-full items-center gap-4 px-5 py-3.5 text-left transition hover:bg-white/[0.03]"
+                                        class="flex w-full items-center gap-4 px-5 py-3.5 text-left transition hover:bg-white/3"
                                         @click="addSkill(item.key)"
                                     >
                                         <div
@@ -2376,7 +2367,7 @@ onMounted(() => {
                             <div v-else class="divide-y divide-white/8">
                                 <FullTooltip v-for="item in weaponAttributeEntries" :key="item.key" side="left">
                                     <template #tooltip>
-                                        <div class="flex max-w-[360px] flex-col gap-2">
+                                        <div class="flex max-w-90 flex-col gap-2">
                                             <div class="text-xs text-white/45">{{ item.key }}</div>
                                             <ul class="space-y-1">
                                                 <li
@@ -2485,7 +2476,7 @@ onMounted(() => {
                                         </div>
                                     </template>
                                     <button
-                                        class="flex w-full items-center gap-4 px-5 py-3.5 text-left transition hover:bg-white/[0.03]"
+                                        class="flex w-full items-center gap-4 px-5 py-3.5 text-left transition hover:bg-white/3"
                                         @click="addSkill(`${activeWeaponKey}::${item.key}`)"
                                     >
                                         <div
@@ -2582,7 +2573,7 @@ onMounted(() => {
 
                         <div class="border border-white/8 bg-white/4 p-4">
                             <div class="mb-3 font-mono text-[11px] uppercase tracking-[0.24em] text-white/70">配装分享</div>
-                            <div class="h-[420px] overflow-hidden">
+                            <div class="h-105 overflow-hidden">
                                 <DOBBuildShow
                                     ref="buildShow"
                                     :char-id="charBuild.char.id"
