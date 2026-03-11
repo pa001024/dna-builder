@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { computed, onMounted, ref } from "vue"
 import {
     deleteScriptMutation,
     pinScriptMutation,
     recommendScriptMutation,
+    scriptCategoriesQuery,
     type Script,
+    type ScriptCategory,
     scriptsCountQuery,
     scriptsQuery,
     updateScriptMutation,
@@ -11,10 +14,41 @@ import {
 import AdminCrudPage from "./AdminCrudPage.vue"
 import type { AdminCrudConfig } from "./crud-config"
 
+const scriptCategories = ref<ScriptCategory[]>([])
+const extraCategoryNames = ref<string[]>([])
+
+/**
+ * 获取脚本分类选项。
+ * @returns 下拉组件可用的分类选项
+ */
+const categoryOptions = computed(() => {
+    const names = new Set([
+        ...scriptCategories.value.map(category => category.name),
+        ...extraCategoryNames.value,
+    ])
+    return [...names].map(name => ({
+        label: name,
+        value: name,
+    }))
+})
+
+/**
+ * 拉取脚本分类列表。
+ */
+async function fetchScriptCategories() {
+    try {
+        const result = await scriptCategoriesQuery(undefined, { requestPolicy: "network-only" })
+        scriptCategories.value = result || []
+    } catch (error) {
+        console.error("获取脚本分类失败:", error)
+        scriptCategories.value = []
+    }
+}
+
 /**
  * 脚本管理页配置
  */
-const config: AdminCrudConfig<Script> = {
+const config = computed<AdminCrudConfig<Script>>(() => ({
     title: "脚本管理",
     description: "管理用户上传的脚本内容",
     pageSize: 10,
@@ -24,11 +58,7 @@ const config: AdminCrudConfig<Script> = {
             key: "category",
             type: "select",
             label: "脚本分类",
-            options: [
-                { label: "游戏脚本", value: "game" },
-                { label: "工具脚本", value: "tool" },
-                { label: "其他", value: "other" },
-            ],
+            options: categoryOptions.value,
         },
     ],
     columns: [
@@ -43,17 +73,9 @@ const config: AdminCrudConfig<Script> = {
             type: "badge",
             formatter: value => {
                 const category = String(value || "")
-                if (category === "game") return "游戏脚本"
-                if (category === "tool") return "工具脚本"
-                if (category === "other") return "其他"
                 return category || "-"
             },
-            badgeClass: (_, value) => {
-                const category = String(value || "")
-                if (category === "game") return "badge-primary"
-                if (category === "tool") return "badge-secondary"
-                return "badge-ghost"
-            },
+            badgeClass: "badge-ghost",
         },
         {
             key: "user",
@@ -103,6 +125,9 @@ const config: AdminCrudConfig<Script> = {
             ),
         ])
 
+        const categoryNames = new Set((items || []).map(item => item.category).filter(Boolean))
+        extraCategoryNames.value = [...categoryNames].filter(name => !scriptCategories.value.some(category => category.name === name))
+
         return {
             items: items || [],
             total: total || 0,
@@ -123,11 +148,7 @@ const config: AdminCrudConfig<Script> = {
                 label: "分类",
                 type: "select",
                 required: true,
-                options: [
-                    { label: "游戏脚本", value: "game" },
-                    { label: "工具脚本", value: "tool" },
-                    { label: "其他", value: "other" },
-                ],
+                options: categoryOptions.value,
             },
             {
                 key: "description",
@@ -202,7 +223,11 @@ const config: AdminCrudConfig<Script> = {
             await deleteScriptMutation({ id: item.id })
         },
     },
-}
+}))
+
+onMounted(async () => {
+    await fetchScriptCategories()
+})
 </script>
 
 <template>

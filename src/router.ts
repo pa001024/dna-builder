@@ -4,6 +4,7 @@ import { env } from "./env"
 import AchievementList from "./views/AchievementList.vue"
 import CharBuildCompare from "./views/CharBuildCompare.vue"
 import CharBuildView from "./views/CharBuildView.vue"
+import CharBuildViewNew from "./views/CharBuildViewNew.vue"
 import CharListView from "./views/CharListView.vue"
 import GuideDetailView from "./views/GuideDetailView.vue"
 import GuideEditView from "./views/GuideEditView.vue"
@@ -34,6 +35,13 @@ const routes: readonly RouteRecordRaw[] = [
             { name: "char-build-list", path: "", component: CharListView, beforeEnter: () => setMinSize(600, 600) },
             { name: "char-build", path: ":charId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
             { name: "char-build-code", path: ":charId/:buildId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
+            { name: "char-build-new", path: ":charId/new", component: CharBuildViewNew, beforeEnter: () => setMinSize(900, 700) },
+            {
+                name: "char-build-new-code",
+                path: ":charId/new/:buildId",
+                component: CharBuildViewNew,
+                beforeEnter: () => setMinSize(900, 700),
+            },
         ],
     },
     { name: "build-compare", path: "/char-build-compare", component: CharBuildCompare, beforeEnter: () => setMinSize(600, 600) },

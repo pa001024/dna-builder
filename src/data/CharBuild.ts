@@ -622,7 +622,14 @@ export class CharBuild {
      */
     private getConditionValues() {
         const conditionValues: Record<string, number> = {}
-        for (const weapon of [this.meleeWeapon, this.rangedWeapon, this.skillWeapon]) {
+        const weapons: (LeveledWeapon | LeveledSkillWeapon)[] = [this.meleeWeapon, this.rangedWeapon]
+        /**
+         * 同律武器存在继承关系时，不应在武器类别计数中额外算作一个独立武器。
+         */
+        if (this.skillWeapon && !this.skillWeapon.inherit) {
+            weapons.push(this.skillWeapon)
+        }
+        for (const weapon of weapons) {
             const category = weapon?.类别
             if (!category) continue
             conditionValues[category] = (conditionValues[category] || 0) + 1

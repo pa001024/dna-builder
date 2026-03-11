@@ -70,9 +70,9 @@ export function createDefaultCharSettings() {
         buffs: [] as [string, number][],
         customBuff: [] as [string, number][],
         team1: "-",
-        team1Weapon: "-",
+        team1Weapon: "-" as number | "-",
         team2: "-",
-        team2Weapon: "-",
+        team2Weapon: "-" as number | "-",
         timelineDPS: false,
         actions: {
             enable: false,

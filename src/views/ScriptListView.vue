@@ -21,7 +21,7 @@ import {
     writeTextFile,
 } from "@/api/app"
 import { createScriptMutation, deleteScriptMutation, updateScriptMutation } from "@/api/gen/api-mutations"
-import { Script, scriptQuery, scriptsCountQuery, scriptsQuery } from "@/api/graphql"
+import { scriptCategoriesQuery, scriptQuery, scriptsCountQuery, scriptsQuery, type Script, type ScriptCategory } from "@/api/graphql"
 import ContextMenu, { ContextMenuItem } from "@/components/contextmenu"
 import { type ScriptRuntimeSidePanelTab, type ScriptStatusItem, useScriptRuntimeStore } from "@/store/scriptRuntime"
 import { useUIStore } from "@/store/ui"
@@ -37,6 +37,8 @@ const searchKeyword = ref("")
 const selectedCategory = ref<string>("all")
 const loading = ref(false)
 const onlineScripts = ref<Script[]>([])
+const scriptCategories = ref<ScriptCategory[]>([])
+const extraOnlineCategoryNames = ref<string[]>([])
 const localScripts = ref<string[]>([])
 const totalCount = ref(0)
 const showNewScriptDialog = ref(false)
@@ -70,11 +72,24 @@ const newScriptContent = ref(DEFAULT_SCRIPT_CONTENT)
 
 const categoryOptions = computed(() => [
     { value: "all", label: "全部" },
-    { value: "战斗", label: "战斗" },
-    { value: "采集", label: "采集" },
-    { value: "任务", label: "任务" },
-    { value: "其他", label: "其他" },
+    ...[...new Set([...scriptCategories.value.map(category => category.name), ...extraOnlineCategoryNames.value])].map(name => ({
+        value: name,
+        label: name,
+    })),
 ])
+
+/**
+ * 获取脚本分类列表，供在线筛选使用。
+ */
+async function fetchScriptCategories() {
+    try {
+        const result = await scriptCategoriesQuery(undefined, { requestPolicy: "network-only" })
+        scriptCategories.value = result || []
+    } catch (error) {
+        console.error("获取脚本分类失败", error)
+        scriptCategories.value = []
+    }
+}
 
 /**
  * 将脚本标题转换为本地文件名。
@@ -374,6 +389,9 @@ async function fetchOnlineScripts(offset = 0) {
             } else {
                 onlineScripts.value.push(...result)
             }
+            extraOnlineCategoryNames.value = [
+                ...new Set(onlineScripts.value.map(script => script.category).filter(Boolean)),
+            ].filter(name => !scriptCategories.value.some(category => category.name === name))
         }
 
         const count = await scriptsCountQuery(
@@ -3026,6 +3044,7 @@ async function publishScript(fileName: string) {
                 input: scriptInput,
             })
             ui.showSuccessMessage("脚本发布成功")
+            await fetchScriptCategories()
 
             if (result) {
                 const newHeader = replaceScriptHeader(content, {
@@ -3151,6 +3170,7 @@ onMounted(async () => {
     } catch (error) {
         console.error("初始化脚本运行态监听失败", error)
     }
+    await fetchScriptCategories()
     await initScriptsDir()
     await initEngineDts()
     loadSchedulerConfig()

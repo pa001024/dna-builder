@@ -6,6 +6,26 @@ import { db, schema } from ".."
 import type { Context } from "../yoga"
 import { getSubSelection } from "."
 
+/**
+ * 确保脚本分类存在；若不存在则自动创建。
+ * @param category 原始分类名称
+ * @returns 规范化后的分类名称
+ */
+async function ensureScriptCategory(category: string) {
+    const normalizedCategory = category.trim() || "其他"
+    const existing = await db.query.scriptCategories.findFirst({
+        where: eq(schema.scriptCategories.name, normalizedCategory),
+    })
+
+    if (!existing) {
+        await db.insert(schema.scriptCategories).values({
+            name: normalizedCategory,
+        })
+    }
+
+    return normalizedCategory
+}
+
 export const typeDefs = /* GraphQL */ `
     type Script {
         id: String!
@@ -67,7 +87,7 @@ export const resolvers = {
 
             const result = await db.query.scripts.findMany({
                 where: conditions.length > 0 ? and(...conditions) : undefined,
-                orderBy: [desc(schema.scripts.createdAt)],
+                orderBy: [desc(schema.scripts.views), desc(schema.scripts.createdAt)],
                 limit,
                 offset,
                 with: { user: getSubSelection(info, "user") ? true : undefined },
@@ -160,11 +180,13 @@ export const resolvers = {
             }
 
             const { input } = args
+            const category = await ensureScriptCategory(input.category)
 
             const [script] = await db
                 .insert(schema.scripts)
                 .values({
                     ...input,
+                    category,
                     userId: context.user.id,
                 })
                 .returning()

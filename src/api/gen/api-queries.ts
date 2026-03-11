@@ -284,6 +284,42 @@ export const doingTasksQuery = typedQuery(
     ` as const
 )<Types.Task[], { roomId: string }>()
 
+export const scriptCategoriesQuery = typedQuery(
+    /* GraphQL */ `
+        query {
+            scriptCategories {
+                id
+                name
+                description
+                createdAt
+                updateAt
+            }
+        }
+    ` as const
+)<Types.ScriptCategory[]>()
+
+export const scriptCategoryQuery = typedQuery(
+    /* GraphQL */ `
+        query ($id: String!) {
+            scriptCategory(id: $id) {
+                id
+                name
+                description
+                createdAt
+                updateAt
+            }
+        }
+    ` as const
+)<Types.ScriptCategory, { id: string }>()
+
+export const scriptCategoriesCountQuery = typedQuery(
+    /* GraphQL */ `
+        query {
+            scriptCategoriesCount
+        }
+    ` as const
+)<number>()
+
 export const scriptsQuery = typedQuery(
     /* GraphQL */ `
         query ($search: String, $category: String, $userId: String, $limit: Int, $offset: Int) {
@@ -291,6 +327,7 @@ export const scriptsQuery = typedQuery(
                 id
                 title
                 description
+                category
                 views
                 likes
                 isRecommended

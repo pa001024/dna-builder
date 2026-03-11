@@ -678,6 +678,19 @@ export const scriptsRelations = relations(scripts, ({ one, many }) => ({
     likes: many(scriptLikes),
 }))
 
+/** 脚本分类 */
+export const scriptCategories = sqliteTable(
+    "script_categories",
+    {
+        id: text("id").$default(id).primaryKey(),
+        name: text("name").notNull(),
+        description: text("description"),
+        createdAt: text("created_at").$default(now),
+        updateAt: text("update_at").$onUpdate(now),
+    },
+    scriptCategories => [uniqueIndex("script_categories_name_idx").on(scriptCategories.name)]
+)
+
 /** 脚本点赞 */
 export const scriptLikes = sqliteTable(
     "script_likes",

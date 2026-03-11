@@ -282,6 +282,38 @@ export const pauseTaskMutation = typedMutation<boolean, { taskId: string }>(/* G
     }
 `)
 
+export const createScriptCategoryMutation = typedMutation<Types.ScriptCategory, { input: Types.ScriptCategoryInput }>(/* GraphQL */ `
+    mutation ($input: ScriptCategoryInput!) {
+        createScriptCategory(input: $input) {
+            id
+            name
+            description
+            createdAt
+            updateAt
+        }
+    }
+`)
+
+export const updateScriptCategoryMutation = typedMutation<Types.ScriptCategory, { id: string; input: Types.ScriptCategoryInput }>(
+    /* GraphQL */ `
+        mutation ($id: String!, $input: ScriptCategoryInput!) {
+            updateScriptCategory(id: $id, input: $input) {
+                id
+                name
+                description
+                createdAt
+                updateAt
+            }
+        }
+    `
+)
+
+export const deleteScriptCategoryMutation = typedMutation<boolean, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        deleteScriptCategory(id: $id)
+    }
+`)
+
 export const createScriptMutation = typedMutation<Types.Script, { input: Types.ScriptInput }>(/* GraphQL */ `
     mutation ($input: ScriptInput!) {
         createScript(input: $input) {

@@ -80,6 +80,14 @@ export interface Task {
     user: User
 }
 
+export interface ScriptCategory {
+    id: string
+    name: string
+    description?: string
+    createdAt: string
+    updateAt: string
+}
+
 export interface Script {
     id: string
     title: string
@@ -269,6 +277,11 @@ export interface TimelineInput {
     charName: string
     tracks: string
     items: string
+}
+
+export interface ScriptCategoryInput {
+    name: string
+    description?: string
 }
 
 export interface ScriptInput {

@@ -9,6 +9,7 @@ import { resolvers as missionsIngameResolvers, typeDefs as missionsIngameSchema 
 import { resolvers as roomResolvers, typeDefs as roomSchema } from "./room"
 import { resolvers as rtcResolvers, typeDefs as rtcSchema } from "./rtc"
 import { resolvers as scriptResolvers, typeDefs as scriptSchema } from "./script"
+import { resolvers as scriptCategoryResolvers, typeDefs as scriptCategorySchema } from "./scriptCategory"
 import { resolvers as taskResolvers, typeDefs as taskSchema } from "./task"
 import { resolvers as timelineResolvers, typeDefs as timelineSchema } from "./timeline"
 import { resolvers as todoResolvers, typeDefs as todoSchema } from "./todo"
@@ -30,6 +31,7 @@ export function schemaWith(ctx: any) {
         timelineSchema,
         dpsSchema,
         scriptSchema,
+        scriptCategorySchema,
     ]
     const resolvers = mergeResolvers(
         userResolvers,
@@ -45,7 +47,8 @@ export function schemaWith(ctx: any) {
         buildResolvers,
         timelineResolvers,
         dpsResolvers,
-        scriptResolvers
+        scriptResolvers,
+        scriptCategoryResolvers
     )
 
     function mergeResolvers(...items: any[]) {
