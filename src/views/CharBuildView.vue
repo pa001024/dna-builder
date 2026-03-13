@@ -319,7 +319,7 @@ const saveConfig = (index: number) => {
     }
     project.charSettings = cloneDeep(charSettings.value)
     charProject.value.selected = project.name
-    ui.showSuccessMessage("已保存当前项目")
+    ui.showSuccessMessage(t("char-build.project_saved"))
 }
 
 /**
@@ -336,7 +336,7 @@ const addProject = () => {
     if (existingIndex !== -1) {
         charProject.value.projects[existingIndex].charSettings = cloneDeep(charSettings.value)
         charProject.value.selected = inputName
-        ui.showSuccessMessage("已覆盖同名项目")
+        ui.showSuccessMessage(t("char-build.project_overwritten"))
         return
     }
     charProject.value.projects.push({
@@ -374,12 +374,12 @@ const finishEditProjectName = () => {
     }
     const newName = editProjectName.value.trim()
     if (!newName) {
-        ui.showErrorMessage("项目名称不能为空")
+        ui.showErrorMessage(t("char-build.project_name_required"))
         return
     }
     const duplicate = charProject.value.projects.some((project, index) => index !== editingProjectIndex.value && project.name === newName)
     if (duplicate) {
-        ui.showErrorMessage("项目名称已存在")
+        ui.showErrorMessage(t("char-build.project_name_exists"))
         return
     }
     const previousName = charProject.value.projects[editingProjectIndex.value].name
@@ -400,7 +400,7 @@ const deleteProject = async (index: number) => {
     if (!project) {
         return
     }
-    if (!(await ui.showDialog("删除确认", `确定要删除项目 ${project.name} 吗？`))) {
+    if (!(await ui.showDialog(t("todo.deleteConfirmTitle"), t("char-build.project_delete_confirm", { name: project.name })))) {
         return
     }
     charProject.value.projects.splice(index, 1)
@@ -419,7 +419,7 @@ const loadSharedBuild = async (buildId: string) => {
             applyLoadedSettings(loadedSettings)
         }
     } catch (error) {
-        ui.showErrorMessage("加载构筑失败:", error instanceof Error ? error.message : "未知错误")
+        ui.showErrorMessage(t("char-build.load_build_failed"), error instanceof Error ? error.message : t("char-build.unknown_error"))
     }
 }
 
@@ -431,7 +431,7 @@ const loadSharedBuild = async (buildId: string) => {
 const applyLoadedSettings = (loadedSettings: CharSettings) => {
     charSettings.value = normalizeCharSettings(loadedSettings)
     targetFunction.value = charSettings.value.targetFunction
-    ui.showSuccessMessage("已加载分享的构筑")
+    ui.showSuccessMessage(t("char-build.shared_build_loaded"))
 }
 
 /**
@@ -809,10 +809,10 @@ async function shareCharBuild(title: string, desc: string = "") {
         if (result) {
             const shareUrl = `${env.endpoint}/char/${route.params.charId}/${result.id}`
             await copyText(shareUrl)
-            ui.showSuccessMessage("分享链接已复制")
+            ui.showSuccessMessage(t("char-build.share_link_copied"))
         }
     } catch (error) {
-        ui.showErrorMessage("分享失败:", error instanceof Error ? error.message : "未知错误")
+        ui.showErrorMessage(t("char-build.share_failed"), error instanceof Error ? error.message : t("char-build.unknown_error"))
     }
 }
 ; (globalThis as any).__chapterCounter = 1
@@ -821,7 +821,7 @@ let roleCache: DNARoleShowBean | null = null
 async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boolean = false) {
     const dna = await setting.getDNAAPI()
     if (!dna) {
-        ui.showErrorMessage("请先登录")
+        ui.showErrorMessage(t("chat.needLogin"))
         return
     }
     if (!roleCache) {
@@ -829,7 +829,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         try {
             const res = await dna.defaultRoleForTool()
             if (!res.success || !res.data?.roleInfo.roleShow.roleChars) {
-                ui.showErrorMessage("获取角色信息失败")
+                ui.showErrorMessage(t("char-build.fetch_char_info_failed"))
                 return
             }
             roleCache = res.data.roleInfo.roleShow
@@ -854,13 +854,13 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
 
     if (isWeapon || isConWeapon) {
         if (!weapons[id]) {
-            ui.showErrorMessage("不可用的武器")
+            ui.showErrorMessage(t("char-build.unavailable_weapon"))
             return
         }
         const weapon = await dna.getWeaponDetail(id, weapons[id].weaponEid)
         const lw = new LeveledWeapon(id)
         if (!weapon.success || !weapon.data) {
-            ui.showErrorMessage("获取武器信息失败")
+            ui.showErrorMessage(t("char-build.fetch_weapon_info_failed"))
             return
         }
         const mods = reorderGameStyleModes(weapon.data.weaponDetail.modes)
@@ -884,12 +884,12 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         }
     } else {
         if (!chars[id]) {
-            ui.showErrorMessage("不可用的角色")
+            ui.showErrorMessage(t("char-build.unavailable_char"))
             return
         }
         const char = await dna.getRoleDetail(id, chars[id].charEid)
         if (!char.success || !char.data) {
-            ui.showErrorMessage("获取角色信息失败")
+            ui.showErrorMessage(t("char-build.fetch_char_info_failed"))
             return
         }
         const reorderedModes = reorderGameStyleModes(char.data.charDetail.modes)
@@ -909,7 +909,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         }
     }
     localStorage.setItem(`build.${selectedChar.value}`, JSON.stringify(charSettings.value))
-    ui.showSuccessMessage("同步成功")
+    ui.showSuccessMessage(t("char-build.sync_success"))
 }
 </script>
 
@@ -1041,27 +1041,27 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                             @blur="finishEditProjectName" @keyup.enter="finishEditProjectName"
                                             @keyup.escape="editingProjectIndex = -1" />
                                         <span v-else class="font-medium text-sm link link-primary link-hover"
-                                            title="点击加载" @click="loadConfigByIndex(index)">
+                                            :title="$t('char-build.click_to_load')" @click="loadConfigByIndex(index)">
                                             {{ project.name }}
                                         </span>
-                                        <div class="ml-auto btn btn-xs btn-ghost btn-square border-0" title="重命名"
+                                        <div class="ml-auto btn btn-xs btn-ghost btn-square border-0" :title="$t('char-build.rename')"
                                             @click="renameProject(index)">
                                             <Icon icon="ri:pencil-fill" class="h-4 w-4" />
                                         </div>
-                                        <div class="btn btn-xs btn-ghost btn-square border-0" title="保存"
+                                        <div class="btn btn-xs btn-ghost btn-square border-0" :title="$t('char-build.save')"
                                             @click="saveConfig(index)">
                                             <Icon icon="ri:save-fill" class="h-4 w-4" />
                                         </div>
-                                        <div class="btn btn-xs btn-ghost btn-square border-0" title="删除"
+                                        <div class="btn btn-xs btn-ghost btn-square border-0" :title="$t('common.delete')"
                                             @click="deleteProject(index)">
                                             <Icon icon="ri:delete-bin-2-fill" class="h-4 w-4" />
                                         </div>
                                     </li>
                                 </ul>
                                 <div v-else class="text-sm opacity-70">
-                                    暂无已保存项目
+                                    {{ $t("char-build.no_saved_projects") }}
                                 </div>
-                                <div class="btn btn-primary" @click="addProject()">新建项目</div>
+                                <div class="btn btn-primary" @click="addProject()">{{ $t("char-build.new_project") }}</div>
                             </div>
                         </div>
                     </div>
@@ -1182,7 +1182,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 <input v-model="isTimeline" type="checkbox" class="toggle toggle-secondary" />
                             </div>
                             <label v-if="!isTimeline" class="input input-sm input-primary text-sm flex justify-between">
-                                <input v-model="targetFunction" type="text" placeholder="伤害" class="grow" />
+                                <input v-model="targetFunction" type="text" :placeholder="$t('char-build.damage')" class="grow" />
                                 <div v-if="targetFunction" class="flex items-center cursor-pointer hover:text-primary"
                                     @click="targetFunction = ''">
                                     <Icon icon="codicon:chrome-close" />
@@ -1191,7 +1191,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             <!-- 时间线 -->
                             <template v-else>
                                 <Select :value="charSettings.baseName" class="input input-sm input-primary w-full"
-                                    placeholder="选择时间线" @change="charSettings.baseName = $event">
+                                    :placeholder="$t('char-build.select_timeline')" @change="charSettings.baseName = $event">
                                     <SelectItem v-for="timeline in timelines" :key="timeline.name"
                                         :value="timeline.name">
                                         {{ timeline.name }}

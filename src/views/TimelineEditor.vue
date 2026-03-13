@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from "i18next"
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watchEffect } from "vue"
 
 //#region UI
@@ -1471,7 +1472,7 @@ const importTimelineJson = () => {
                             hp: json.hp || [],
                         }
                         if (index !== -1) {
-                            if (!(await ui.showDialog("确认覆盖", `时间线 ${json.name} 已存在，是否覆盖？`))) {
+                            if (!(await ui.showDialog(t("timeline.overwrite_confirm_title"), t("timeline.overwrite_confirm_message", { name: json.name })))) {
                                 return
                             }
                             timelineData.value[index] = val
@@ -1643,11 +1644,11 @@ const importTimelineJson = () => {
 
                 <div class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-primary btn-sm">
-                        <span class="font-medium text-sm">加载/保存</span>
+                        <span class="font-medium text-sm">{{ $t("timeline.load_save") }}</span>
                     </div>
                     <div tabindex="0" class="card card-sm dropdown-content bg-base-100 rounded-box z-1 w-80 shadow-sm">
                         <div class="card-body space-y-2">
-                            <h2 class="card-title">保存方案</h2>
+                            <h2 class="card-title">{{ $t("timeline.save_scheme") }}</h2>
                             <ul>
                                 <li
                                     v-for="(item, index) in timelineData"
@@ -1667,30 +1668,30 @@ const importTimelineJson = () => {
                                     <span
                                         v-else
                                         class="font-medium text-sm link link-primary link-hover"
-                                        title="点击加载"
+                                        :title="$t('timeline.click_to_load')"
                                         @click="loadTimeline(index)"
                                     >
                                         {{ item.name }}
                                     </span>
                                     <div
                                         class="ml-auto btn btn-xs btn-ghost btn-square border-0"
-                                        title="重命名"
+                                        :title="$t('timeline.rename')"
                                         @click="renameTimeline(index)"
                                     >
                                         <Icon icon="ri:pencil-fill" class="h-4 w-4" />
                                     </div>
-                                    <div class="btn btn-xs btn-ghost btn-square border-0" title="保存" @click="saveTimeline(index)">
+                                    <div class="btn btn-xs btn-ghost btn-square border-0" :title="$t('timeline.save')" @click="saveTimeline(index)">
                                         <Icon icon="ri:save-fill" class="h-4 w-4" />
                                     </div>
-                                    <div class="btn btn-xs btn-ghost btn-square border-0" title="删除" @click="deleteTimeline(index)">
+                                    <div class="btn btn-xs btn-ghost btn-square border-0" :title="$t('common.delete')" @click="deleteTimeline(index)">
                                         <Icon icon="ri:delete-bin-2-fill" class="h-4 w-4" />
                                     </div>
                                 </li>
                             </ul>
-                            <div class="btn btn-primary" @click="addTimeline()">新建方案</div>
+                            <div class="btn btn-primary" @click="addTimeline()">{{ $t("timeline.new_scheme") }}</div>
                             <div class="w-full join flex gap-2">
-                                <div class="btn flex-1" @click="exportTimelineJson()">导出JSON</div>
-                                <div class="btn flex-1" @click="importTimelineJson()">加载JSON</div>
+                                <div class="btn flex-1" @click="exportTimelineJson()">{{ $t("timeline.export_json") }}</div>
+                                <div class="btn flex-1" @click="importTimelineJson()">{{ $t("timeline.import_json") }}</div>
                             </div>
                         </div>
                     </div>

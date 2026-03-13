@@ -81,7 +81,7 @@ function selectWeapon(weapon: Weapon) {
                 <input
                     v-model="searchQuery"
                     type="text"
-                    :placeholder="$t('搜索武器名称、类型（支持拼音）...')"
+                    :placeholder="$t('weapon-list.searchPlaceholder')"
                     class="input input-bordered w-full pl-10 pr-4 focus:input-primary transition-all"
                 />
                 <Icon icon="ri:search-line" class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50 w-5 h-5" />
@@ -108,7 +108,7 @@ function selectWeapon(weapon: Weapon) {
             <div v-if="filteredWeapons.length === 0" class="flex flex-col items-center justify-center h-full text-base-content/50 py-20">
                 <Icon icon="ri:emotion-sad-line" class="w-16 h-16 mb-4" />
                 <p class="text-lg">
-                    {{ $t("没有找到匹配的武器") }}
+                    {{ $t("weapon-list.noResults") }}
                 </p>
             </div>
 
@@ -180,7 +180,7 @@ function selectWeapon(weapon: Weapon) {
                                 {{ $t(weapon.伤害类型) }}
                             </span>
                             <span v-if="charBuild" class="text-primary">
-                                收益: {{ format100r(charBuild.calcIncome(new LeveledWeapon(weapon))) }}
+                                {{ $t("weapon-list.income") }}: {{ format100r(charBuild.calcIncome(new LeveledWeapon(weapon))) }}
                             </span>
                         </p>
 

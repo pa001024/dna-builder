@@ -168,11 +168,11 @@ const importAchievements = () => {
 
                 // 验证数据格式
                 if (!Array.isArray(importedData)) {
-                    throw new Error("无效的数据格式")
+                    throw new Error(t("achievement.invalidData"))
                 }
 
                 // 询问用户是否确认导入
-                if (await ui.showDialog("确认导入", t("achievement.importConfirm", { count: importedData.length }))) {
+                if (await ui.showDialog(t("achievement.importTitle"), t("achievement.importConfirm", { count: importedData.length }))) {
                     userFinishedIds.value = importedData
                 }
             } catch (e) {
@@ -358,7 +358,7 @@ function getAchievementIcon(category: string) {
                         v-model="searchQuery"
                         type="text"
                         class="ml-auto inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap min-w-40 max-w-80"
-                        :placeholder="$t('achievement.searchAchievements') + '（支持拼音）'"
+                        :placeholder="$t('achievement.searchPlaceholder')"
                     />
                 </div>
                 <ScrollArea class="flex-1">
@@ -388,7 +388,7 @@ function getAchievementIcon(category: string) {
                                     <img
                                         v-if="achievement.品质"
                                         :src="`/imgs/webp/Icon_Achievement_${['Copper', 'Silver', 'Gold'][achievement.品质 - 1]}.webp`"
-                                        alt="品质"
+                                        :alt="$t('achievement.quality')"
                                         class="w-6 h-6"
                                     />
                                 </div>

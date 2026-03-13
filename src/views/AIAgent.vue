@@ -3,6 +3,7 @@ import MarkdownIt from "markdown-it"
 import mdHighlightjs from "markdown-it-highlightjs"
 // @ts-expect-error 模块无ts定义 也不需要类型检查
 import mdKatex from "markdown-it-katex"
+import { t } from "i18next"
 import type { ChatCompletionMessageParam } from "openai/resources/index.mjs"
 import { onMounted, ref, watch } from "vue"
 import { AIClient } from "../api/openai"
@@ -137,8 +138,8 @@ async function stopMCPServer() {
         setTimeout(async () => {
             if (
                 await ui.showDialog(
-                    "确认",
-                    "MCP 服务器需要手动结束进程。\n\n在任务管理器中结束 'dna_mcp_server.exe' 进程。\n\n是否打开任务管理器？"
+                    t("setting.confirm"),
+                    t("ai.mcp_manual_stop_message")
                 )
             ) {
                 if (env.isApp) {
@@ -672,7 +673,7 @@ onMounted(() => {
                         ref="messageInputRef"
                         contenteditable
                         class="flex-1 p-3 bg-gray-100 rounded-lg focus:outline-none min-h-20 max-h-50 overflow-y-auto"
-                        placeholder="发消息或输入/选择指令，支持粘贴或拖拽图片"
+                        :placeholder="$t('ai.commandInputPlaceholder')"
                         @input="handleInput"
                         @keydown.enter="handleEnter"
                         @paste="handlePaste"

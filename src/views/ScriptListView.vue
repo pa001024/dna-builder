@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { listen, type UnlistenFn } from "@tauri-apps/api/event"
 import { register, unregisterAll } from "@tauri-apps/plugin-global-shortcut"
+import { t } from "i18next"
 import { debounce } from "lodash-es"
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
 import { useRouter } from "vue-router"
@@ -11,7 +12,6 @@ import {
     openExplorer,
     readTextFile,
     renameFile,
-    resolveScriptConfigRequest,
     runAsAdmin,
     runScript,
     type ScriptHotkeyBinding,
@@ -24,7 +24,7 @@ import { createScriptMutation, deleteScriptMutation, updateScriptMutation } from
 import { scriptCategoriesQuery, scriptQuery, scriptsCountQuery, scriptsQuery, type Script, type ScriptCategory } from "@/api/graphql"
 import ContextMenu, { ContextMenuItem } from "@/components/contextmenu"
 import { useCloudGameStore } from "@/store/cloudgame"
-import { type ScriptRuntimeSidePanelTab, type ScriptStatusItem, useScriptRuntimeStore } from "@/store/scriptRuntime"
+import { type ScriptRuntimeSidePanelTab, useScriptRuntimeStore } from "@/store/scriptRuntime"
 import { useUIStore } from "@/store/ui"
 import { parseScriptHeader, replaceScriptHeader } from "@/utils/script-header"
 
@@ -156,12 +156,6 @@ interface ScriptReadConfigPayload {
     defaultValue?: ScriptConfigValue
 }
 
-interface ScriptSetConfigPayload {
-    scope?: string
-    name: string
-    value: unknown
-}
-
 interface ScriptLiteralParseResult {
     ok: boolean
     value?: unknown
@@ -212,8 +206,8 @@ const sidePanelTab = computed({
         scriptRuntime.sidePanelTab = value
     },
 })
-const consoleLogs = computed(() => scriptRuntime.consoleLogs)
-const scriptStatuses = computed(() => scriptRuntime.scriptStatuses)
+const consoleLogs = computed(() => scriptRuntime.consoleLogs.filter(log => shouldAcceptScopedScriptEvent(log.scope)))
+const scriptStatuses = computed(() => scriptRuntime.scriptStatuses.filter(status => shouldAcceptScopedScriptEvent(status.scope)))
 const isRunning = computed({
     get: () => scriptRuntime.isRunning,
     set: value => {
@@ -251,11 +245,7 @@ const cloudGameEntryTitle = computed(() => {
     if (cloudgame.isWindowOpen) return "聚焦云游戏窗口"
     return "打开云游戏窗口"
 })
-let unlistenConsoleFn: UnlistenFn | null = null
-let unlistenStatusFn: UnlistenFn | null = null
 let unlistenFileChangedFn: UnlistenFn | null = null
-let unlistenScriptConfigFn: UnlistenFn | null = null
-let unlistenScriptSetConfigFn: UnlistenFn | null = null
 const watchedFiles = ref<Set<string>>(new Set())
 const codeEditor = ref<any>()
 const showSchedulerDialog = ref(false)
@@ -278,12 +268,16 @@ const schedulerDraftStepOptions = computed(() =>
         label: `${index + 1}. ${step.scriptName || "未选择脚本"}`,
     }))
 )
-const SCRIPT_CONFIG_STORAGE_KEY = "script-runtime-config-v1"
 const SCRIPT_HOTKEY_STORAGE_KEY = "script-hotkey-bindings-v1"
 const SCRIPT_RUNTIME_TIMEOUT_DEFAULT_SECONDS = 30
 const SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_NAME = "运行超时"
 const SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_DESC = "运行超时秒数，脚本运行中长时间未检测到事件时自动重启，0 表示关闭。"
-const scriptConfigStore = ref<Record<string, Record<string, ScriptConfigItem>>>({})
+const scriptConfigStore = computed({
+    get: () => scriptRuntime.scriptConfigStore as Record<string, Record<string, ScriptConfigItem>>,
+    set: value => {
+        scriptRuntime.scriptConfigStore = value as typeof scriptRuntime.scriptConfigStore
+    },
+})
 const scriptHotkeyStore = ref<Record<string, ScriptHotkeyConfig>>({})
 const showScriptHotkeyDialog = ref(false)
 const editingHotkeyScriptName = ref("")
@@ -293,7 +287,12 @@ const editingHotkeyHoldToLoop = ref(false)
 let scriptRuntimeWatchdogTimer: ReturnType<typeof setInterval> | null = null
 let lastScriptEventAt = 0
 let scriptRuntimeRestartingByTimeout = false
-const activeConfigScope = ref("")
+const activeConfigScope = computed({
+    get: () => scriptRuntime.activeConfigScope,
+    set: value => {
+        scriptRuntime.activeConfigScope = value
+    },
+})
 const currentConfigScope = computed(() => {
     if (activeTab.value?.type === "local") {
         return resolveStoredScriptConfigScope(activeTab.value.name)
@@ -692,7 +691,7 @@ function saveSchedulerConfig() {
     localStorage.setItem(SCHEDULER_STORAGE_KEY, JSON.stringify(schedulerConfig.value))
     showSchedulerDialog.value = false
     viewMode.value = "scheduler"
-    ui.showSuccessMessage("调度器配置已保存")
+    ui.showSuccessMessage(t("script-list.scheduler_saved"))
 }
 
 /**
@@ -711,10 +710,10 @@ async function runLocalScriptByName(
     const filePath = `${scriptsDir.value}\\${fileName}`
     scriptRuntime.markRunningScript(fileName, { keepSchedulerMode: options.keepSchedulerMode })
     touchScriptRuntimeEvent()
-    addConsoleLog("info", `开始运行脚本: ${fileName}`)
+    addConsoleLog("info", t("script-list.start_run_named", { name: fileName }))
     const result = await runScript(filePath)
     const normalizedResult = normalizeSchedulerResult(result)
-    addConsoleLog("info", `脚本执行完成: ${fileName}，返回结果: ${normalizedResult || "(empty)"}`)
+    addConsoleLog("info", t("script-list.run_completed_named", { name: fileName, result: normalizedResult || "(empty)" }))
     return normalizedResult
 }
 
@@ -820,16 +819,16 @@ const isRunButtonInStopState = computed(() =>
 )
 const runButtonTitle = computed(() => {
     if (viewMode.value === "scheduler") {
-        return isSchedulerRunning.value ? "停止调度器" : "运行调度器"
+        return isSchedulerRunning.value ? t("script-list.stop_scheduler") : t("script-list.run_scheduler")
     }
     if (activeTab.value?.type === "online") {
-        return "请先下载脚本"
+        return t("script-list.download_first")
     }
     const scriptName = activeLocalScriptName.value
     if (!scriptName) {
-        return "运行脚本"
+        return t("script-list.run_script")
     }
-    return isActiveLocalScriptRunning.value ? `停止脚本: ${scriptName}` : `运行脚本: ${scriptName}`
+    return isActiveLocalScriptRunning.value ? t("script-list.stop_script_named", { name: scriptName }) : t("script-list.run_script_named", { name: scriptName })
 })
 
 /**
@@ -850,10 +849,10 @@ async function stopLocalScriptByName(fileName: string) {
     if (!scriptName) return
     try {
         await scriptRuntime.stopScriptByFilePath(`${scriptsDir.value}\\${scriptName}`)
-        addConsoleLog("info", `已发送停止请求: ${scriptName}`)
+        addConsoleLog("info", t("script-list.stop_requested_named", { name: scriptName }))
     } catch (error) {
         console.error("停止指定脚本失败", error)
-        ui.showErrorMessage(`停止脚本失败: ${error}`)
+        ui.showErrorMessage(t("script-list.stop_script_failed"), error)
     }
 }
 
@@ -862,7 +861,7 @@ async function stopLocalScriptByName(fileName: string) {
  */
 async function runScheduler() {
     if (schedulerConfig.value.steps.length === 0) {
-        ui.showErrorMessage("请先在更多操作中配置调度器")
+        ui.showErrorMessage(t("script-list.configure_scheduler_first"))
         return
     }
 
@@ -870,7 +869,7 @@ async function runScheduler() {
     activateRuntimeDebugPanelOnStart()
     scriptRuntime.markSchedulerRunning()
     scriptRuntime.clearSchedulerStopRequest()
-    addConsoleLog("info", "开始执行调度器")
+    addConsoleLog("info", t("script-list.scheduler_started"))
 
     const MAX_SCHEDULER_EXECUTIONS = 500
     let executionCount = 0
@@ -880,37 +879,37 @@ async function runScheduler() {
         while (nextStepId && !schedulerStopRequested.value) {
             const stepIndex = schedulerConfig.value.steps.findIndex(step => step.id === nextStepId)
             if (stepIndex < 0) {
-                addConsoleLog("warn", "调度器跳转目标不存在，已终止执行")
+                addConsoleLog("warn", t("script-list.scheduler_target_missing"))
                 break
             }
 
             const step = schedulerConfig.value.steps[stepIndex]
             if (!step.scriptName) {
-                addConsoleLog("warn", `步骤 #${stepIndex + 1} 未配置脚本，自动跳过`)
+                addConsoleLog("warn", t("script-list.scheduler_step_missing_script", { index: stepIndex + 1 }))
                 nextStepId = getSequentialNextStepId(stepIndex)
                 continue
             }
 
-            addConsoleLog("info", `调度器执行步骤 #${stepIndex + 1}: ${step.scriptName}`)
+            addConsoleLog("info", t("script-list.scheduler_run_step", { index: stepIndex + 1, name: step.scriptName }))
             const result = await runLocalScriptByName(step.scriptName, { keepSchedulerMode: true })
             nextStepId = resolveSchedulerNextStepId(step, result, stepIndex)
 
             executionCount += 1
             if (executionCount >= MAX_SCHEDULER_EXECUTIONS) {
-                addConsoleLog("warn", "调度器执行次数超过上限，已自动停止")
+                addConsoleLog("warn", t("script-list.scheduler_execution_limit"))
                 break
             }
         }
 
         if (schedulerStopRequested.value) {
-            addConsoleLog("info", "调度器已停止")
+            addConsoleLog("info", t("script-list.scheduler_stopped"))
         } else {
-            addConsoleLog("info", "调度器执行完成")
+            addConsoleLog("info", t("script-list.scheduler_completed"))
         }
     } catch (error) {
         console.error("调度器执行失败", error)
-        ui.showErrorMessage("调度器执行失败，请检查脚本配置")
-        addConsoleLog("error", `调度器执行失败: ${error}`)
+        ui.showErrorMessage(t("script-list.scheduler_run_failed"))
+        addConsoleLog("error", t("script-list.scheduler_run_failed_with_error", { error: String(error) }))
     } finally {
         if (runningMode.value === "scheduler") {
             runningMode.value = null
@@ -1243,11 +1242,13 @@ async function toggleScriptHotkeyEnabled(scriptName: string) {
     try {
         await syncScriptHotkeysWithBackend()
         persistScriptHotkeys()
-        ui.showSuccessMessage(nextConfig.enabled ? `已启用热键: ${scriptName}` : `已禁用热键: ${scriptName}`)
+        ui.showSuccessMessage(
+            nextConfig.enabled ? t("script-list.hotkey_enabled", { name: scriptName }) : t("script-list.hotkey_disabled", { name: scriptName })
+        )
     } catch (error) {
         scriptHotkeyStore.value[scriptName] = previousConfig
         console.error("切换脚本热键状态失败", error)
-        ui.showErrorMessage(`切换脚本热键状态失败: ${error}`)
+        ui.showErrorMessage(t("script-list.toggle_hotkey_failed"), error)
     }
 }
 
@@ -1273,7 +1274,7 @@ async function saveScriptHotkeyBinding() {
     const previousConfig = scriptHotkeyStore.value[scriptName] ? { ...scriptHotkeyStore.value[scriptName] } : null
     const hotkey = normalizeScriptHotkeyValue(editingHotkeyValue.value)
     if (!hotkey) {
-        ui.showErrorMessage("请输入热键，示例：^c、CapsLock & c、RButton & XButton1")
+        ui.showErrorMessage(t("script-list.hotkey_required"))
         return
     }
 
@@ -1288,7 +1289,7 @@ async function saveScriptHotkeyBinding() {
         await syncScriptHotkeysWithBackend()
         persistScriptHotkeys()
         showScriptHotkeyDialog.value = false
-        ui.showSuccessMessage(`已绑定热键: ${scriptName} -> ${hotkey}`)
+        ui.showSuccessMessage(t("script-list.hotkey_bound", { name: scriptName, hotkey }))
     } catch (error) {
         if (previousConfig) {
             scriptHotkeyStore.value[scriptName] = previousConfig
@@ -1296,7 +1297,7 @@ async function saveScriptHotkeyBinding() {
             delete scriptHotkeyStore.value[scriptName]
         }
         console.error("保存脚本热键失败", error)
-        ui.showErrorMessage(`保存热键失败: ${error}`)
+        ui.showErrorMessage(t("script-list.save_hotkey_failed"), error)
     }
 }
 
@@ -1313,12 +1314,12 @@ async function clearScriptHotkeyBinding(scriptName: string, silent = false) {
         await syncScriptHotkeysWithBackend()
         persistScriptHotkeys()
         if (!silent) {
-            ui.showSuccessMessage(`已清除热键: ${scriptName}`)
+            ui.showSuccessMessage(t("script-list.hotkey_cleared", { name: scriptName }))
         }
     } catch (error) {
         scriptHotkeyStore.value[scriptName] = previousConfig
         console.error("清除脚本热键失败", error)
-        ui.showErrorMessage(`清除热键失败: ${error}`)
+        ui.showErrorMessage(t("script-list.clear_hotkey_failed"), error)
     }
 }
 
@@ -1950,55 +1951,15 @@ function getScriptConfigMultiSelectDisplayOptions(item: ScriptConfigItem): strin
  * 持久化脚本配置项。
  */
 function persistScriptConfigItems() {
-    localStorage.setItem(SCRIPT_CONFIG_STORAGE_KEY, JSON.stringify(scriptConfigStore.value))
+    scriptRuntime.persistScriptConfigItems()
 }
 
 /**
  * 从本地存储加载脚本配置项。
  */
 function loadScriptConfigItems() {
-    const stored = localStorage.getItem(SCRIPT_CONFIG_STORAGE_KEY)
-    if (!stored) {
-        scriptConfigStore.value = {}
-        return
-    }
-
     try {
-        const parsed = JSON.parse(stored) as Record<string, Record<string, Partial<ScriptConfigItem>>>
-        const normalizedStore: Record<string, Record<string, ScriptConfigItem>> = {}
-        for (const [scope, items] of Object.entries(parsed ?? {})) {
-            const normalizedScope = normalizeScriptConfigScope(scope)
-            if (!normalizedScope || !items || typeof items !== "object") continue
-            const scopeKey =
-                Object.keys(normalizedStore).find(key => key.toLowerCase() === normalizedScope.toLowerCase()) ?? normalizedScope
-            const scopeItems: Record<string, ScriptConfigItem> = {
-                ...(normalizedStore[scopeKey] ?? {}),
-            }
-            for (const [name, item] of Object.entries(items as Record<string, Partial<ScriptConfigItem>>)) {
-                if (!item || typeof item !== "object") continue
-                const normalizedName = String(name ?? "").trim()
-                if (!normalizedName) continue
-                const kind: ScriptConfigKind = ["number", "string", "select", "multi-select", "boolean"].includes(String(item.kind))
-                    ? (item.kind as ScriptConfigKind)
-                    : "string"
-                const options = normalizeScriptConfigOptions(item.options)
-                const fallbackDefaultValue: ScriptConfigValue =
-                    kind === "number" ? 0 : kind === "boolean" ? false : kind === "multi-select" ? [] : ""
-                const defaultValue = normalizeScriptConfigValue(kind, item.defaultValue, fallbackDefaultValue, options)
-                const value = normalizeScriptConfigValue(kind, item.value, defaultValue, options)
-                scopeItems[normalizedName] = {
-                    name: normalizedName,
-                    desc: String(item.desc ?? ""),
-                    kind,
-                    options,
-                    value,
-                    defaultValue,
-                    updatedAt: typeof item.updatedAt === "number" ? item.updatedAt : Date.now(),
-                }
-            }
-            normalizedStore[scopeKey] = scopeItems
-        }
-        scriptConfigStore.value = normalizedStore
+        scriptRuntime.loadScriptConfigItems()
         for (const scope of Object.keys(scriptConfigStore.value)) {
             ensureRuntimeTimeoutConfigItem(scope)
         }
@@ -2014,65 +1975,7 @@ function loadScriptConfigItems() {
  * @returns 当前配置值
  */
 function upsertScriptConfigFromRequest(payload: ScriptReadConfigPayload): ScriptConfigValue {
-    const scope = resolveStoredScriptConfigScope(payload.scope ?? activeTab.value?.name ?? activeConfigScope.value)
-    const normalizedName = String(payload.name ?? "").trim()
-    const kind: ScriptConfigKind = ["number", "string", "select", "multi-select", "boolean"].includes(String(payload.kind))
-        ? payload.kind
-        : "string"
-    const options = normalizeScriptConfigOptions(payload.options)
-    const fallbackDefaultValue: ScriptConfigValue = kind === "number" ? 0 : kind === "boolean" ? false : kind === "multi-select" ? [] : ""
-    const defaultValue = normalizeScriptConfigValue(kind, payload.defaultValue, fallbackDefaultValue, options)
-    if (!scope || !normalizedName) {
-        return defaultValue
-    }
-    const scopedItems = scriptConfigStore.value[scope] ?? {}
-    const existing = scopedItems[normalizedName]
-    const nextValue = normalizeScriptConfigValue(kind, existing?.value ?? defaultValue, defaultValue, options)
-    const merged: ScriptConfigItem = {
-        name: normalizedName,
-        desc: String(payload.desc ?? existing?.desc ?? ""),
-        kind,
-        options,
-        defaultValue,
-        value: nextValue,
-        updatedAt: Date.now(),
-    }
-    scriptConfigStore.value[scope] = {
-        ...scopedItems,
-        [normalizedName]: merged,
-    }
-    activeConfigScope.value = scope
-    persistScriptConfigItems()
-    return merged.value
-}
-
-/**
- * 处理脚本 setConfig 事件并更新已存在的配置项。
- * @param payload setConfig 事件负载
- * @returns 是否成功更新
- */
-function applyScriptSetConfigFromEvent(payload: ScriptSetConfigPayload): boolean {
-    const scope = resolveStoredScriptConfigScope(payload.scope ?? activeTab.value?.name ?? activeConfigScope.value)
-    const normalizedName = String(payload.name ?? "").trim()
-    if (!scope || !normalizedName) {
-        return false
-    }
-
-    const scopedItems = scriptConfigStore.value[scope]
-    if (!scopedItems) {
-        return false
-    }
-    const matchedName = Object.keys(scopedItems).find(key => key.toLowerCase() === normalizedName.toLowerCase()) ?? normalizedName
-    const item = scopedItems[matchedName]
-    if (!item) {
-        return false
-    }
-
-    item.value = normalizeScriptConfigValue(item.kind, payload.value, item.defaultValue, item.options)
-    item.updatedAt = Date.now()
-    activeConfigScope.value = scope
-    persistScriptConfigItems()
-    return true
+    return scriptRuntime.upsertScriptConfigFromRequest(payload, activeTab.value?.name ?? activeConfigScope.value)
 }
 
 /**
@@ -2309,47 +2212,6 @@ async function syncOpenedLocalTabAfterCloudUpdate(fileName: string, content: str
 }
 
 /**
- * 监听脚本 readConfig 请求事件，创建配置 UI 并回传当前值。
- */
-async function initScriptConfigListener() {
-    try {
-        unlistenScriptConfigFn = await listen<ScriptReadConfigPayload>("script-read-config", async event => {
-            const payload = event.payload
-            if (!payload?.requestId || !payload?.name) return
-            if (shouldAcceptScopedScriptEvent(payload.scope)) {
-                touchScriptRuntimeEvent()
-            }
-            const value = upsertScriptConfigFromRequest(payload)
-            try {
-                await resolveScriptConfigRequest(payload.requestId, value)
-            } catch (error) {
-                console.error("回传脚本配置失败", error)
-            }
-        })
-    } catch (error) {
-        console.error("监听脚本配置事件失败", error)
-    }
-}
-
-/**
- * 监听脚本 setConfig 事件并更新前端配置存储。
- */
-async function initScriptSetConfigListener() {
-    try {
-        unlistenScriptSetConfigFn = await listen<ScriptSetConfigPayload>("script-set-config", event => {
-            const payload = event.payload
-            if (!payload?.name) return
-            if (shouldAcceptScopedScriptEvent(payload.scope)) {
-                touchScriptRuntimeEvent()
-            }
-            applyScriptSetConfigFromEvent(payload)
-        })
-    } catch (error) {
-        console.error("监听脚本 setConfig 事件失败", error)
-    }
-}
-
-/**
  * 从后端同步脚本运行状态，确保页面刷新后仍可停止脚本。
  */
 async function syncRunningStateFromBackend(appendDetectedLog = true) {
@@ -2394,10 +2256,10 @@ async function downloadScript(script: Script) {
             { requestPolicy: "network-only" }
         )
         if (!result) {
-            throw new Error("获取脚本内容失败")
+            throw new Error(t("script-list.fetch_script_content_failed"))
         }
         if (hasHighRiskScriptOperation(result.content)) {
-            const confirmed = await ui.showDialog("高风险操作警告", "此脚本包含高风险操作 请在信任脚本作者的情况下使用")
+            const confirmed = await ui.showDialog(t("script-list.high_risk_title"), t("script-list.high_risk_message"))
             if (!confirmed) {
                 return
             }
@@ -2405,17 +2267,19 @@ async function downloadScript(script: Script) {
         await writeTextFile(filePath, result.content)
         await syncOpenedLocalTabAfterCloudUpdate(fileName, result.content)
         const summary = preparseScriptConfigFromSource(fileName, result.content)
-        const actionText = isUpdate ? "已更新" : "已下载"
+        const actionText = isUpdate ? t("script-list.updated") : t("script-list.downloaded")
         const parseText =
             summary.createdCount > 0
-                ? `，预解析 ${summary.createdCount} 项${summary.skippedCount > 0 ? `（跳过 ${summary.skippedCount} 项）` : ""}`
-                : "，未解析到可用 readConfig 字面量"
+                ? `${t("script-list.preparse_prefix", { created: summary.createdCount })}${
+                      summary.skippedCount > 0 ? t("script-list.preparse_skipped", { skipped: summary.skippedCount }) : ""
+                  }`
+                : t("script-list.preparse_none")
         ui.showSuccessMessage(`${actionText}: ${fileName}${parseText}`)
         await fetchLocalScripts()
         await openLocalScript(fileName)
     } catch (error) {
         console.error("下载脚本失败", error)
-        ui.showErrorMessage("下载/更新脚本失败，请重试")
+        ui.showErrorMessage(t("script-list.download_update_failed"))
     }
 }
 
@@ -2424,7 +2288,7 @@ async function openScriptDirectory() {
         await openExplorer(scriptsDir.value)
     } catch (error) {
         console.error("打开目录失败", error)
-        ui.showErrorMessage("打开目录失败，请重试")
+        ui.showErrorMessage(t("script-list.open_directory_failed"))
     }
 }
 
@@ -2475,10 +2339,10 @@ async function runCurrentTab() {
             try {
                 scriptRuntime.requestSchedulerStop()
                 await scriptRuntime.stopAllScripts()
-                addConsoleLog("info", "调度器停止请求已发送")
+                addConsoleLog("info", t("script-list.scheduler_stop_requested"))
             } catch (error) {
                 console.error("停止调度器失败", error)
-                ui.showErrorMessage("停止调度器失败，请重试")
+                ui.showErrorMessage(t("script-list.stop_scheduler_failed"))
             }
             return
         }
@@ -2488,7 +2352,7 @@ async function runCurrentTab() {
 
     if (!activeTab.value) return
     if (activeTab.value.type === "online") {
-        ui.showErrorMessage("请先下载脚本")
+        ui.showErrorMessage(t("script-list.download_first"))
         return
     }
     if (isLocalScriptRunning(activeTab.value.name)) {
@@ -2502,8 +2366,8 @@ async function runCurrentTab() {
         await runLocalScriptByName(activeTab.value.name)
     } catch (error) {
         console.error("运行脚本失败", error)
-        ui.showErrorMessage("运行脚本失败，请重试")
-        addConsoleLog("error", `运行脚本失败: ${error}`)
+        ui.showErrorMessage(t("script-list.run_script_failed"))
+        addConsoleLog("error", t("script-list.run_script_failed_with_error", { error: String(error) }))
     } finally {
         scriptRuntime.clearSchedulerStopRequest()
         await syncRunningStateFromBackend(false)
@@ -2518,7 +2382,7 @@ function openNewScriptDialog() {
 
 async function createNewScript() {
     if (!newScriptName.value.trim()) {
-        ui.showErrorMessage("请输入脚本名称")
+        ui.showErrorMessage(t("script-list.enter_script_name"))
         return
     }
 
@@ -2527,13 +2391,13 @@ async function createNewScript() {
         const filePath = `${scriptsDir.value}\\${fileName}`
 
         await writeTextFile(filePath, newScriptContent.value)
-        ui.showSuccessMessage(`脚本已创建: ${filePath}`)
+        ui.showSuccessMessage(t("script-list.script_created", { path: filePath }))
         showNewScriptDialog.value = false
         await fetchLocalScripts()
         await openLocalScript(fileName)
     } catch (error) {
         console.error("创建脚本失败", error)
-        ui.showErrorMessage("创建脚本失败，请重试")
+        ui.showErrorMessage(t("script-list.create_script_failed"))
     }
 }
 
@@ -2573,67 +2437,6 @@ function getLogLevelClass(level: string): string {
             return "text-base-content/60"
         default:
             return "text-base-content"
-    }
-}
-
-/**
- * 监听 Tauri 控制台事件
- */
-async function initConsoleListener() {
-    try {
-        unlistenConsoleFn = await listen<{ scope?: string; level: string; message: string }>("script-console", event => {
-            const { scope, level, message } = event.payload
-            if (!shouldAcceptScopedScriptEvent(scope)) return
-            touchScriptRuntimeEvent()
-            addConsoleLog(level, message)
-        })
-    } catch (error) {
-        console.error("监听控制台事件失败", error)
-    }
-}
-
-/**
- * 监听脚本状态事件（文字/图片）
- */
-async function initStatusListener() {
-    try {
-        unlistenStatusFn = await listen<{
-            scope?: string
-            action?: "upsert" | "remove"
-            title?: string
-            text?: string
-            image?: string
-            images?: string[]
-            timestamp?: number
-        }>("script-status", event => {
-            const { scope, action, title, text, image, images, timestamp } = event.payload ?? {}
-            if (!shouldAcceptScopedScriptEvent(scope)) return
-            const normalizedTitle = title?.trim()
-            if (!normalizedTitle) return
-            touchScriptRuntimeEvent()
-
-            const normalizedImages = Array.isArray(images) ? images.filter(item => typeof item === "string" && item.trim().length > 0) : []
-            const normalizedImage = typeof image === "string" && image.trim().length > 0 ? image : undefined
-            if (normalizedImages.length === 0 && normalizedImage) {
-                normalizedImages.push(normalizedImage)
-            }
-
-            if (action === "remove" || (!text && normalizedImages.length === 0)) {
-                scriptRuntime.removeScriptStatus(normalizedTitle)
-                return
-            }
-
-            const nextItem: ScriptStatusItem = {
-                title: normalizedTitle,
-                text,
-                image: normalizedImages[0],
-                images: normalizedImages,
-                timestamp: timestamp ?? Date.now(),
-            }
-            scriptRuntime.upsertScriptStatus(nextItem)
-        })
-    } catch (error) {
-        console.error("监听脚本状态事件失败", error)
     }
 }
 
@@ -2704,7 +2507,7 @@ async function confirmRenameScript() {
 
     const newName = editingScriptName.value.trim()
     if (!newName) {
-        ui.showErrorMessage("请输入脚本名称")
+        ui.showErrorMessage(t("script-list.enter_script_name"))
         return
     }
 
@@ -2725,7 +2528,7 @@ async function confirmRenameScript() {
         const newPath = `${scriptsDir.value}\\${newFileName}`
 
         await renameFile(oldPath, newPath)
-        ui.showSuccessMessage("重命名成功")
+        ui.showSuccessMessage(t("script-list.rename_success"))
 
         // 如果该文件已打开，更新标签页名称
         const tab = openedTabs.value.find(t => t.type === "local" && t.name === oldFileName)
@@ -2749,7 +2552,7 @@ async function confirmRenameScript() {
         await fetchLocalScripts()
     } catch (error) {
         console.error("重命名失败", error)
-        ui.showErrorMessage("重命名失败，请重试")
+        ui.showErrorMessage(t("script-list.rename_failed"))
     } finally {
         renamingScriptInFlight.value = false
     }
@@ -2798,11 +2601,11 @@ async function deleteScript(fileName: string) {
         await deleteFile(filePath)
         removeScriptConfigScope(fileName)
         await clearScriptHotkeyBinding(fileName, true)
-        ui.showSuccessMessage("文件已移动到回收站")
+        ui.showSuccessMessage(t("script-list.file_moved_to_recycle_bin"))
         await fetchLocalScripts()
     } catch (error) {
         console.error("删除失败", error)
-        ui.showErrorMessage("删除失败，请重试")
+        ui.showErrorMessage(t("script-list.delete_failed"))
     }
 }
 
@@ -2810,12 +2613,12 @@ async function deleteOnlineScript(script: Script) {
     try {
         const result = await deleteScriptMutation({ id: script.id })
         if (result) {
-            ui.showSuccessMessage("脚本已删除")
+            ui.showSuccessMessage(t("script-list.script_deleted"))
             await fetchOnlineScripts()
         }
     } catch (error) {
         console.error("删除失败", error)
-        ui.showErrorMessage("删除失败，请重试")
+        ui.showErrorMessage(t("script-list.delete_failed"))
     }
 }
 
@@ -2888,7 +2691,7 @@ async function openOnlineScript(script: Script) {
     }
     const result = await scriptQuery({ id: script.id }, { requestPolicy: "network-only" })
     if (!result) {
-        ui.showErrorMessage("获取脚本内容失败")
+        ui.showErrorMessage(t("script-list.fetch_script_content_failed"))
         return
     }
     const newTab: OpenedTab = {
@@ -2908,7 +2711,7 @@ async function closeTab(tabId: string) {
 
     const tab = openedTabs.value[index]
     if (tab.modified) {
-        if (!(await ui.showDialog("确认关闭", "文件已修改，确定要关闭吗？"))) {
+        if (!(await ui.showDialog(t("script-list.confirm_close_title"), t("script-list.confirm_close_message")))) {
             return
         }
     }
@@ -2934,7 +2737,7 @@ async function closeOtherTabs(tabId: string) {
     if (!tab) return
 
     const hasUnsaved = openedTabs.value.some(t => t.id !== tabId && t.modified)
-    if (hasUnsaved && !confirm("其他文件有未保存的修改，确定要关闭吗？")) {
+    if (hasUnsaved && !confirm(t("script-list.confirm_close_others_unsaved"))) {
         return
     }
 
@@ -2948,7 +2751,7 @@ async function closeOtherTabs(tabId: string) {
 
 async function closeAllTabs() {
     const hasUnsaved = openedTabs.value.some(t => t.modified)
-    if (hasUnsaved && !confirm("有文件未保存，确定要关闭所有标签吗？")) {
+    if (hasUnsaved && !confirm(t("script-list.confirm_close_all_unsaved"))) {
         return
     }
 
@@ -3046,13 +2849,13 @@ async function publishScript(fileName: string) {
                 input: scriptInput,
             })
             if (result) {
-                ui.showSuccessMessage("脚本更新成功")
+                ui.showSuccessMessage(t("script-list.script_updated_success"))
             }
         } else {
             result = await createScriptMutation({
                 input: scriptInput,
             })
-            ui.showSuccessMessage("脚本发布成功")
+            ui.showSuccessMessage(t("script-list.script_publish_success"))
             await fetchScriptCategories()
 
             if (result) {
@@ -3077,7 +2880,7 @@ async function publishScript(fileName: string) {
         }
     } catch (error) {
         console.error("发布/更新脚本失败", error)
-        ui.showErrorMessage("发布/更新脚本失败，请重试")
+        ui.showErrorMessage(t("script-list.publish_update_failed"))
     } finally {
         publishingScript.value = false
     }
@@ -3117,7 +2920,7 @@ async function restartAsAdmin() {
         await runAsAdmin()
     } catch (error) {
         console.error("以管理员权限重新启动失败", error)
-        ui.showErrorMessage("以管理员权限重新启动失败")
+        ui.showErrorMessage(t("script-list.restart_as_admin_failed"))
     }
 }
 
@@ -3135,7 +2938,7 @@ async function toggleGlobalShortcut() {
             // 禁用快捷键
             await unregisterAll()
             globalShortcutEnabled.value = false
-            ui.showSuccessMessage("全局快捷键已禁用")
+            ui.showSuccessMessage(t("script-list.global_shortcut_disabled"))
         } else {
             // 启用快捷键
             await register("F10", e => {
@@ -3145,11 +2948,11 @@ async function toggleGlobalShortcut() {
                 }
             })
             globalShortcutEnabled.value = true
-            ui.showSuccessMessage("全局快捷键已启用 (F10)")
+            ui.showSuccessMessage(t("script-list.global_shortcut_enabled"))
         }
     } catch (error) {
         console.error("切换全局快捷键失败", error)
-        ui.showErrorMessage("切换全局快捷键失败")
+        ui.showErrorMessage(t("script-list.toggle_global_shortcut_failed"))
     }
 }
 
@@ -3179,6 +2982,14 @@ watch(isRunning, running => {
     scriptRuntimeRestartingByTimeout = false
 })
 
+watch(
+    () => scriptRuntime.lastEventAt,
+    timestamp => {
+        if (!timestamp) return
+        lastScriptEventAt = timestamp
+    }
+)
+
 onMounted(async () => {
     startScriptRuntimeWatchdog()
     try {
@@ -3194,11 +3005,7 @@ onMounted(async () => {
     loadScriptHotkeys()
     await fetchLocalScripts()
     document.addEventListener("keydown", handleKeyDown)
-    await initConsoleListener()
-    await initStatusListener()
     await initFileChangeListener()
-    await initScriptConfigListener()
-    await initScriptSetConfigListener()
     await syncRunningStateFromBackend()
     await cloudgame.initCloudGameTracking()
 })
@@ -3212,20 +3019,8 @@ onUnmounted(async () => {
         startEditScriptTimer = null
     }
     document.removeEventListener("keydown", handleKeyDown)
-    if (unlistenConsoleFn) {
-        unlistenConsoleFn()
-    }
-    if (unlistenStatusFn) {
-        unlistenStatusFn()
-    }
     if (unlistenFileChangedFn) {
         unlistenFileChangedFn()
-    }
-    if (unlistenScriptConfigFn) {
-        unlistenScriptConfigFn()
-    }
-    if (unlistenScriptSetConfigFn) {
-        unlistenScriptSetConfigFn()
     }
     // 停止所有文件监听
     const stopPromises = Array.from(watchedFiles.value).map(fileName => stopWatchingFile(fileName))
@@ -3245,7 +3040,7 @@ onUnmounted(async () => {
                             class="p-2 rounded-md text-xs font-bold cursor-pointer hover:bg-base-300"
                             :class="{ 'bg-base-300': viewMode === 'scheduler' }"
                             @click="switchToScheduler"
-                            title="调度器"
+                            :title="$t('script-list.scheduler')"
                         >
                             <Icon icon="ri:git-branch-line" class="w-4 h-4" />
                         </button>
@@ -3255,7 +3050,7 @@ onUnmounted(async () => {
                             @click="switchToLocal"
                         >
                             <Icon icon="ri:folder-line" class="w-4 h-4" />
-                            本地
+                            {{ $t("script-list.local") }}
                         </button>
                         <button
                             class="p-2 rounded-md text-xs flex gap-2 font-bold cursor-pointer hover:bg-base-300"
@@ -3263,7 +3058,7 @@ onUnmounted(async () => {
                             @click="switchToOnline"
                         >
                             <Icon icon="ri:cloud-line" class="w-4 h-4" />
-                            云端
+                            {{ $t("script-list.online") }}
                         </button>
                         <div
                             class="p-2 rounded-md cursor-pointer hover:bg-base-300"
@@ -3277,7 +3072,7 @@ onUnmounted(async () => {
                     <input
                         v-model="searchKeyword"
                         type="text"
-                        placeholder="搜索脚本..."
+                        :placeholder="$t('script-list.search_placeholder')"
                         class="input input-bordered input-sm w-full"
                         @input="handleSearch"
                     />
@@ -3296,7 +3091,7 @@ onUnmounted(async () => {
                             v-else-if="viewMode === 'local' && localScripts.length === 0"
                             class="flex justify-center items-center h-full text-base-content/50 p-4"
                         >
-                            暂无本地脚本
+                            {{ $t("script-list.empty_local") }}
                         </div>
                         <div
                             v-else-if="
@@ -3305,12 +3100,12 @@ onUnmounted(async () => {
                             "
                             class="flex justify-center items-center h-full text-base-content/50 p-4"
                         >
-                            {{ viewMode === "scheduler" ? "暂无调度脚本，请在更多操作中配置调度器" : "暂无在线脚本" }}
+                            {{ viewMode === "scheduler" ? $t("script-list.empty_scheduler") : $t("script-list.empty_online") }}
                         </div>
                         <div v-else>
                             <template v-if="viewMode === 'scheduler'">
                                 <div class="px-3 py-2 text-xs text-base-content/60 border-b border-base-200">
-                                    调度脚本列表（按执行顺序）
+                                    {{ $t("script-list.scheduler_script_list") }}
                                 </div>
                                 <div
                                     v-for="(step, index) in schedulerConfig.steps"
@@ -3320,12 +3115,12 @@ onUnmounted(async () => {
                                 >
                                     <div class="text-xs font-mono text-base-content/60 w-7 shrink-0">#{{ index + 1 }}</div>
                                     <Icon icon="ri:file-line" class="w-4 h-4 shrink-0" />
-                                    <div class="flex-1 truncate">{{ step.scriptName || "未选择脚本" }}</div>
+                                    <div class="flex-1 truncate">{{ step.scriptName || $t("script-list.no_script_selected") }}</div>
                                     <Icon
                                         v-if="step.flowControl.enabled"
                                         icon="ri:git-branch-line"
                                         class="w-4 h-4 text-warning shrink-0"
-                                        title="流控已开启"
+                                        :title="$t('script-list.flow_control_enabled')"
                                     />
                                 </div>
                             </template>
@@ -3341,7 +3136,7 @@ onUnmounted(async () => {
                                         <button
                                             v-if="isLocalScriptRunning(script)"
                                             class="w-4 h-4 shrink-0 flex items-center justify-center cursor-pointer hover:opacity-80"
-                                            title="停止脚本"
+                                            :title="$t('script-list.stop_script')"
                                             @click.stop="stopLocalScriptByName(script)"
                                         >
                                             <span class="w-3 h-3 bg-error rounded-xs" />
@@ -3369,28 +3164,28 @@ onUnmounted(async () => {
                                                 @click="openNewScriptDialog"
                                             >
                                                 <Icon icon="ri:add-line" class="w-4 h-4 mr-2" />
-                                                新建脚本
+                                                {{ $t("script-list.new_script") }}
                                             </ContextMenuItem>
                                             <ContextMenuItem
                                                 class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
                                                 @click="openScriptDirectory"
                                             >
                                                 <Icon icon="ri:folder-open-line" class="w-4 h-4 mr-2" />
-                                                打开目录
+                                                {{ $t("script-list.open_directory") }}
                                             </ContextMenuItem>
                                             <ContextMenuItem
                                                 class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
                                                 @click.stop="startEditScript(script)"
                                             >
                                                 <Icon icon="ri:edit-line" class="w-4 h-4 mr-2" />
-                                                重命名
+                                                {{ $t("char-build.rename") }}
                                             </ContextMenuItem>
                                             <ContextMenuItem
                                                 class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
                                                 @click="openScriptHotkeyDialog(script)"
                                             >
                                                 <Icon icon="ri:edit-line" class="w-4 h-4 mr-2" />
-                                                {{ scriptHotkeyStore[script] ? "修改热键" : "设置热键" }}
+                                                {{ scriptHotkeyStore[script] ? $t("script-list.edit_hotkey") : $t("script-list.save_hotkey") }}
                                             </ContextMenuItem>
                                             <ContextMenuItem
                                                 v-if="scriptHotkeyStore[script]"
@@ -3398,7 +3193,7 @@ onUnmounted(async () => {
                                                 @click="clearScriptHotkeyBinding(script)"
                                             >
                                                 <Icon icon="ri:close-circle-line" class="w-4 h-4 mr-2" />
-                                                清除热键
+                                                {{ $t("script-list.clear_hotkey") }}
                                             </ContextMenuItem>
                                             <ContextMenuItem
                                                 v-if="scriptHotkeyStore[script]"
@@ -3406,21 +3201,21 @@ onUnmounted(async () => {
                                                 @click="toggleScriptHotkeyEnabled(script)"
                                             >
                                                 <Icon icon="ri:stop-circle-line" class="w-4 h-4 mr-2" />
-                                                {{ scriptHotkeyStore[script].enabled ? "禁用热键" : "启用热键" }}
+                                                {{ scriptHotkeyStore[script].enabled ? $t("script-list.disable_hotkey") : $t("script-list.enable_hotkey") }}
                                             </ContextMenuItem>
                                             <ContextMenuItem
                                                 class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-success data-highlighted:text-base-100"
                                                 @click="publishScript(script)"
                                             >
                                                 <Icon icon="ri:upload-cloud-line" class="w-4 h-4 mr-2" />
-                                                发布/更新
+                                                {{ $t("script-list.publish_update") }}
                                             </ContextMenuItem>
                                             <ContextMenuItem
                                                 class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-error data-highlighted:text-base-100"
                                                 @click="deleteScript(script)"
                                             >
                                                 <Icon icon="ri:delete-bin-line" class="w-4 h-4 mr-2" />
-                                                删除
+                                                {{ $t("common.delete") }}
                                             </ContextMenuItem>
                                         </template>
                                     </ContextMenu>
@@ -3452,7 +3247,7 @@ onUnmounted(async () => {
                                                     {{ script.user?.name }}
                                                 </span>
                                                 <button class="ml-auto btn btn-xs" @click.stop="downloadScript(script)">
-                                                    {{ isOnlineScriptExistsLocal(script) ? "更新" : "下载" }}
+                                                    {{ isOnlineScriptExistsLocal(script) ? $t("script-list.updated") : $t("script-list.download") }}
                                                 </button>
                                             </div>
                                         </div>
@@ -3463,7 +3258,7 @@ onUnmounted(async () => {
                                             @click="deleteOnlineScript(script)"
                                         >
                                             <Icon icon="ri:delete-bin-line" class="w-4 h-4 mr-2" />
-                                            删除
+                                            {{ $t("common.delete") }}
                                         </ContextMenuItem>
                                     </template>
                                 </ContextMenu>
@@ -3471,7 +3266,7 @@ onUnmounted(async () => {
                         </div>
                         <div v-if="viewMode === 'online'" class="flex justify-center p-2">
                             <button v-if="onlineScripts.length < totalCount" class="btn btn-sm btn-ghost" @click="loadMore">
-                                加载更多
+                                {{ $t("script-list.load_more") }}
                             </button>
                         </div>
                     </ScrollArea>
@@ -3481,14 +3276,14 @@ onUnmounted(async () => {
                             @click="openNewScriptDialog"
                         >
                             <Icon icon="ri:add-line" class="w-4 h-4 mr-2" />
-                            新建脚本
+                            {{ $t("script-list.new_script") }}
                         </ContextMenuItem>
                         <ContextMenuItem
                             class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
                             @click="openScriptDirectory"
                         >
                             <Icon icon="ri:folder-open-line" class="w-4 h-4 mr-2" />
-                            打开目录
+                            {{ $t("script-list.open_directory") }}
                         </ContextMenuItem>
                     </template>
                 </ContextMenu>
@@ -3531,13 +3326,13 @@ onUnmounted(async () => {
                                             class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
                                             @click="closeOtherTabs(tab.id)"
                                         >
-                                            关闭其他
+                                            {{ $t("script-list.close_others") }}
                                         </ContextMenuItem>
                                         <ContextMenuItem
                                             class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
                                             @click="closeAllTabs"
                                         >
-                                            关闭所有
+                                            {{ $t("script-list.close_all") }}
                                         </ContextMenuItem>
                                     </template>
                                 </ContextMenu>
@@ -3554,10 +3349,10 @@ onUnmounted(async () => {
                             >
                                 <Icon :icon="cloudgame.isBridgeConnected ? 'ri:cloud-fill' : 'ri:cloud-line'" class="w-4 h-4" />
                             </button>
-                            <button class="btn btn-sm btn-ghost btn-square" @click="showConsole = !showConsole" title="切换控制台">
+                            <button class="btn btn-sm btn-ghost btn-square" @click="showConsole = !showConsole" :title="$t('script-list.toggle_console')">
                                 <Icon :icon="showConsole ? 'ri:terminal-box-line' : 'ri:terminal-line'" class="w-4 h-4" />
                             </button>
-                            <button class="btn btn-sm btn-ghost btn-square" @click="toggleStatusPanel" title="切换状态栏">
+                            <button class="btn btn-sm btn-ghost btn-square" @click="toggleStatusPanel" :title="$t('script-list.toggle_status_panel')">
                                 <Icon :icon="showStatusPanel ? 'ri:menu-fold-line' : 'ri:menu-unfold-line'" class="w-4 h-4" />
                             </button>
                             <button
@@ -3574,23 +3369,23 @@ onUnmounted(async () => {
                                 class="btn btn-sm btn-primary btn-square"
                                 @click="saveCurrentTab"
                                 :disabled="!activeTab.modified"
-                                title="保存"
+                                :title="$t('char-build.save')"
                             >
                                 <Icon icon="ri:save-line" class="w-4 h-4" />
                             </button>
                             <div class="dropdown dropdown-end">
-                                <div tabindex="0" role="button" class="btn btn-sm btn-ghost btn-square" title="更多操作">
+                                <div tabindex="0" role="button" class="btn btn-sm btn-ghost btn-square" :title="$t('script-list.more_actions')">
                                     <Icon icon="ri:more-line" class="w-4 h-4" />
                                 </div>
                                 <ul tabindex="-1" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
-                                    <li><a @click="openSchedulerDialog">调度器配置</a></li>
-                                    <li><a @click="openSidePanel('config')">脚本配置</a></li>
-                                    <li><a @click="openColorToolPage">图色工具</a></li>
-                                    <li><a @click="openRecordToolPage">录制工具</a></li>
-                                    <li><a @click="restartAsAdmin">以管理员权限重新启动</a></li>
+                                    <li><a @click="openSchedulerDialog">{{ $t("script-list.scheduler_config") }}</a></li>
+                                    <li><a @click="openSidePanel('config')">{{ $t("script-list.script_config") }}</a></li>
+                                    <li><a @click="openColorToolPage">{{ $t("script-list.color_tool") }}</a></li>
+                                    <li><a @click="openRecordToolPage">{{ $t("script-list.record_tool") }}</a></li>
+                                    <li><a @click="restartAsAdmin">{{ $t("script-list.restart_as_admin") }}</a></li>
                                     <li>
                                         <a @click="toggleGlobalShortcut">{{
-                                            globalShortcutEnabled ? "禁用全局快捷键(F10)" : "启用全局快捷键(F10)"
+                                            globalShortcutEnabled ? $t("script-list.disable_global_shortcut") : $t("script-list.enable_global_shortcut")
                                         }}</a>
                                     </li>
                                 </ul>
@@ -3606,7 +3401,7 @@ onUnmounted(async () => {
                                     :file="activeTab.name"
                                     ref="codeEditor"
                                     v-model="activeTab.content"
-                                    placeholder="脚本内容..."
+                                    :placeholder="$t('script-list.script_content_placeholder')"
                                     class="w-full h-full p-2 font-mono text-sm"
                                     @update:modelValue="onCodeEditorUpdate"
                                 />
@@ -3615,7 +3410,7 @@ onUnmounted(async () => {
                         <div v-else class="flex-1 flex items-center justify-center text-base-content/50">
                             <div class="text-center">
                                 <Icon icon="ri:file-line" class="w-16 h-16 mx-auto mb-4" />
-                                <p>从左侧选择一个脚本开始编辑</p>
+                                <p>{{ $t("script-list.select_script_to_edit") }}</p>
                             </div>
                         </div>
                     </div>
@@ -3625,23 +3420,23 @@ onUnmounted(async () => {
                         <div class="h-8 bg-base-800 border-b border-base-700 flex items-center justify-between px-3 shrink-0">
                             <div class="flex items-center gap-2">
                                 <Icon icon="ri:terminal-line" class="w-4 h-4 text-base-content/60" />
-                                <span class="text-xs text-base-content/60">控制台</span>
+                                <span class="text-xs text-base-content/60">{{ $t("script-list.console") }}</span>
                                 <span v-if="isRunning" class="text-xs text-info">
-                                    运行中<span v-if="runningScriptName">: {{ runningScriptName }}</span>
+                                    {{ $t("script-runtime-floating.runningLabel", { count: runningScriptCount > 0 ? runningScriptCount : 1 }) }}<span v-if="runningScriptName">: {{ runningScriptName }}</span>
                                     <span v-if="runningScriptCount > 1">（{{ runningScriptCount }}）</span>
                                 </span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <button class="btn btn-xs btn-ghost" @click="clearConsole" title="清空">
+                                <button class="btn btn-xs btn-ghost" @click="clearConsole" :title="$t('script-list.clear')">
                                     <Icon icon="ri:delete-bin-line" class="w-3 h-3" />
                                 </button>
-                                <button class="btn btn-xs btn-ghost" @click="showConsole = false" title="关闭">
+                                <button class="btn btn-xs btn-ghost" @click="showConsole = false" :title="$t('script-list.close')">
                                     <Icon icon="ri:close-line" class="w-3 h-3" />
                                 </button>
                             </div>
                         </div>
                         <div id="console-output" class="flex-1 overflow-auto p-3 font-mono text-xs user-select">
-                            <div v-if="consoleLogs.length === 0" class="text-base-content/40 text-center py-4">暂无输出</div>
+                            <div v-if="consoleLogs.length === 0" class="text-base-content/40 text-center py-4">{{ $t("script-list.no_output") }}</div>
                             <div v-else class="space-y-1">
                                 <div v-for="(log, index) in consoleLogs" :key="index" class="flex gap-2">
                                     <span class="text-base-content/40 shrink-0">{{
@@ -3672,11 +3467,11 @@ onUnmounted(async () => {
                                 class="btn btn-xs btn-ghost"
                                 :disabled="sidePanelTab === 'status' ? scriptStatuses.length === 0 : sortedScriptConfigItems.length === 0"
                                 @click="sidePanelTab === 'status' ? clearAllStatus() : clearAllScriptConfigItems()"
-                                title="清空"
+                                :title="$t('script-list.clear')"
                             >
                                 <Icon icon="ri:delete-bin-line" class="w-3 h-3" />
                             </button>
-                            <button class="btn btn-xs btn-ghost" @click="showStatusPanel = false" title="关闭">
+                            <button class="btn btn-xs btn-ghost" @click="showStatusPanel = false" :title="$t('script-list.close')">
                                 <Icon icon="ri:close-line" class="w-3 h-3" />
                             </button>
                         </div>
@@ -3684,13 +3479,13 @@ onUnmounted(async () => {
 
                     <template v-if="sidePanelTab === 'config'">
                         <div v-if="!currentConfigScope" class="flex-1 flex items-center justify-center text-base-content/50 text-sm p-3">
-                            请先打开并运行本地脚本
+                            {{ $t("script-list.open_and_run_local_first") }}
                         </div>
                         <div
                             v-else-if="sortedScriptConfigItems.length === 0"
                             class="flex-1 flex items-center justify-center text-base-content/50 text-sm p-3"
                         >
-                            暂无配置，脚本调用 readConfig 后会自动创建
+                            {{ $t("script-list.no_config_yet") }}
                         </div>
                         <div v-else class="flex-1 min-h-0">
                             <ScrollArea class="h-full p-2">
@@ -3705,13 +3500,13 @@ onUnmounted(async () => {
                                             <button
                                                 class="btn btn-xs btn-ghost"
                                                 @click="deleteScriptConfigItem(item.name)"
-                                                title="删除配置"
+                                                :title="$t('script-list.delete_config')"
                                             >
                                                 <Icon icon="ri:delete-bin-line" class="w-3 h-3" />
                                             </button>
                                         </div>
                                         <div v-if="item.desc" class="text-xs text-base-content/70 break-all">{{ item.desc }}</div>
-                                        <div class="text-[11px] text-base-content/50">类型: {{ item.kind }}</div>
+                                        <div class="text-[11px] text-base-content/50">{{ $t("script-list.type") }}: {{ item.kind }}</div>
 
                                         <input
                                             v-if="item.kind === 'string'"
@@ -3739,7 +3534,7 @@ onUnmounted(async () => {
                                         </select>
 
                                         <div v-else-if="item.kind === 'multi-select'" class="space-y-2">
-                                            <div v-if="item.options.length === 0" class="text-xs text-base-content/60">暂无可选项</div>
+                                            <div v-if="item.options.length === 0" class="text-xs text-base-content/60">{{ $t("script-list.no_options") }}</div>
                                             <div v-else class="space-y-1">
                                                 <div
                                                     v-for="option in getScriptConfigMultiSelectDisplayOptions(item)"
@@ -3769,7 +3564,7 @@ onUnmounted(async () => {
                                                             class="btn btn-xs btn-ghost"
                                                             :disabled="getScriptConfigMultiSelectOptionIndex(item, option) <= 0"
                                                             @click="moveScriptConfigMultiSelectOption(item.name, option, -1)"
-                                                            title="上移"
+                                                            :title="$t('script-list.move_up')"
                                                         >
                                                             <Icon icon="ri:arrow-down-line" class="w-3 h-3 rotate-180" />
                                                         </button>
@@ -3780,7 +3575,7 @@ onUnmounted(async () => {
                                                                 getScriptConfigMultiSelectValues(item).length - 1
                                                             "
                                                             @click="moveScriptConfigMultiSelectOption(item.name, option, 1)"
-                                                            title="下移"
+                                                            :title="$t('script-list.move_down')"
                                                         >
                                                             <Icon icon="ri:arrow-down-line" class="w-3 h-3" />
                                                         </button>
@@ -3796,7 +3591,7 @@ onUnmounted(async () => {
                                                 :checked="Boolean(item.value)"
                                                 @change="updateScriptConfigValue(item.name, ($event.target as HTMLInputElement).checked)"
                                             />
-                                            <span class="text-sm">启用</span>
+                                            <span class="text-sm">{{ $t("script-list.enable") }}</span>
                                         </label>
                                     </div>
                                 </div>
@@ -3809,7 +3604,7 @@ onUnmounted(async () => {
                             v-if="scriptStatuses.length === 0"
                             class="flex-1 flex items-center justify-center text-base-content/50 text-sm"
                         >
-                            暂无状态
+                            {{ $t("script-list.no_status") }}
                         </div>
                         <div v-else class="flex-1 min-h-0">
                             <ScrollArea class="h-full p-2">
@@ -3851,92 +3646,91 @@ onUnmounted(async () => {
 
         <dialog :open="showNewScriptDialog" class="modal">
             <div class="modal-box">
-                <h3 class="font-bold text-lg mb-4">新建脚本</h3>
+                <h3 class="font-bold text-lg mb-4">{{ $t("script-list.new_script") }}</h3>
                 <div class="mb-4">
                     <label class="label block">
-                        <div class="mb-2 text-sm">脚本名称</div>
-                        <input v-model="newScriptName" type="text" placeholder="请输入脚本名称" class="input input-bordered w-full" />
+                        <div class="mb-2 text-sm">{{ $t("script-list.script_name") }}</div>
+                        <input v-model="newScriptName" type="text" :placeholder="$t('script-list.enter_script_name')" class="input input-bordered w-full" />
                     </label>
                 </div>
                 <div class="mb-4">
                     <label class="label block">
-                        <div class="mb-2 text-sm">脚本内容</div>
+                        <div class="mb-2 text-sm">{{ $t("script-list.script_content") }}</div>
                         <textarea
                             v-model="newScriptContent"
-                            placeholder="请输入脚本内容"
+                            :placeholder="$t('script-list.enter_script_content')"
                             class="textarea textarea-bordered w-full h-64 resize-none"
                         />
                     </label>
                 </div>
                 <div class="flex justify-end gap-2">
-                    <button class="btn btn-ghost" @click="showNewScriptDialog = false">取消</button>
-                    <button class="btn btn-primary" @click="createNewScript">创建</button>
+                    <button class="btn btn-ghost" @click="showNewScriptDialog = false">{{ $t("setting.cancel") }}</button>
+                    <button class="btn btn-primary" @click="createNewScript">{{ $t("script-list.create") }}</button>
                 </div>
             </div>
         </dialog>
 
         <dialog :open="showScriptHotkeyDialog" class="modal">
             <div class="modal-box max-w-lg">
-                <h3 class="font-bold text-lg mb-4">设置脚本热键</h3>
+                <h3 class="font-bold text-lg mb-4">{{ $t("script-list.save_hotkey") }}</h3>
                 <div class="space-y-3">
                     <div class="text-sm">
-                        <span class="text-base-content/70">脚本：</span>
+                        <span class="text-base-content/70">{{ $t("script-list.script_name") }}：</span>
                         <span class="font-mono">{{ editingHotkeyScriptName }}</span>
                     </div>
                     <label class="label block">
-                        <div class="mb-2 text-sm">AHK 格式热键</div>
+                        <div class="mb-2 text-sm">{{ $t("script-list.ahk_hotkey") }}</div>
                         <input
                             v-model="editingHotkeyValue"
                             type="text"
                             class="input input-bordered w-full"
-                            placeholder="例如：^c / CapsLock & c / RButton / RButton & XButton1"
+                            :placeholder="$t('script-list.hotkey_example')"
                         />
                     </label>
                     <label class="label block">
-                        <div class="mb-2 text-sm">生效条件（#HotIf WinActive）</div>
+                        <div class="mb-2 text-sm">{{ $t("script-list.hotif_condition") }}</div>
                         <input
                             v-model="editingHotkeyWinActive"
                             type="text"
                             class="input input-bordered w-full"
-                            placeholder="示例：Moonlight / ahk_exe EM-Win64-Shipping.exe / Moonlight ahk_exe EM-Win64-Shipping.exe（留空=全局）"
+                            :placeholder="$t('script-list.hotif_example')"
                         />
                     </label>
                     <label class="label cursor-pointer justify-start gap-3">
                         <input v-model="editingHotkeyHoldToLoop" type="checkbox" class="checkbox checkbox-sm" />
-                        <span class="label-text text-sm">按住循环（按住热键时循环运行脚本）</span>
+                        <span class="label-text text-sm">{{ $t("script-list.hold_to_loop") }}</span>
                     </label>
                     <div class="text-xs text-base-content/60 select-text">
-                        支持：`^ ! + # *` 前缀、`A & B` 组合键、`Up` 抬起触发，以及鼠标键 `LButton/RButton/MButton/XButton1/XButton2`
-                        ；WinActive 条件按窗口标题，支持`ahk_exe/ahk_class/ahk_pid` 示例: ahk_exe EM-Win64-Shipping.exe
+                        {{ $t("script-list.hotkey_help") }}
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 mt-4">
-                    <button class="btn btn-ghost" @click="showScriptHotkeyDialog = false">取消</button>
+                    <button class="btn btn-ghost" @click="showScriptHotkeyDialog = false">{{ $t("setting.cancel") }}</button>
                     <button
                         v-if="scriptHotkeyStore[editingHotkeyScriptName]"
                         class="btn btn-warning"
                         @click="(clearScriptHotkeyBinding(editingHotkeyScriptName), (showScriptHotkeyDialog = false))"
                     >
-                        清除绑定
+                        {{ $t("script-list.clear_binding") }}
                     </button>
-                    <button class="btn btn-primary" @click="saveScriptHotkeyBinding">保存</button>
+                    <button class="btn btn-primary" @click="saveScriptHotkeyBinding">{{ $t("char-build.save") }}</button>
                 </div>
             </div>
         </dialog>
 
         <dialog :open="showSchedulerDialog" class="modal">
             <div class="modal-box max-w-5xl">
-                <h3 class="font-bold text-lg mb-4">调度器配置</h3>
+                <h3 class="font-bold text-lg mb-4">{{ $t("script-list.scheduler_config") }}</h3>
                 <div class="mb-3 flex items-center gap-2">
-                    <button class="btn btn-sm btn-primary" @click="addSchedulerStep">添加本地脚本</button>
-                    <span class="text-xs text-base-content/70"> 默认按顺序执行；启用流控后可按返回值使用 case/default 跳转 </span>
+                    <button class="btn btn-sm btn-primary" @click="addSchedulerStep">{{ $t("script-list.add_local_script") }}</button>
+                    <span class="text-xs text-base-content/70">{{ $t("script-list.scheduler_help") }}</span>
                 </div>
                 <div class="space-y-3 max-h-[60vh] overflow-auto pr-1">
                     <div
                         v-if="schedulerDraftConfig.steps.length === 0"
                         class="border border-dashed border-base-300 rounded p-4 text-center text-base-content/60 text-sm"
                     >
-                        暂无步骤，点击“添加本地脚本”开始配置
+                        {{ $t("script-list.no_steps_config_hint") }}
                     </div>
                     <div
                         v-for="(step, stepIndex) in schedulerDraftConfig.steps"
@@ -3946,64 +3740,64 @@ onUnmounted(async () => {
                         <div class="flex flex-wrap items-center gap-2">
                             <div class="text-xs font-mono text-base-content/70 shrink-0">#{{ stepIndex + 1 }}</div>
                             <select v-model="step.scriptName" class="select select-bordered select-sm min-w-52">
-                                <option value="">选择本地脚本</option>
+                                <option value="">{{ $t("script-list.select_local_script") }}</option>
                                 <option v-for="script in localScripts" :key="script" :value="script">{{ script }}</option>
                             </select>
                             <select v-model="step.flowControl.enabled" class="select select-bordered select-sm">
-                                <option :value="false">顺序执行（默认）</option>
-                                <option :value="true">启用流控</option>
+                                <option :value="false">{{ $t("script-list.sequential_default") }}</option>
+                                <option :value="true">{{ $t("script-list.enable_flow_control") }}</option>
                             </select>
-                            <button class="btn btn-xs" :disabled="stepIndex === 0" @click="moveSchedulerStep(stepIndex, -1)">上移</button>
+                            <button class="btn btn-xs" :disabled="stepIndex === 0" @click="moveSchedulerStep(stepIndex, -1)">{{ $t("script-list.move_up") }}</button>
                             <button
                                 class="btn btn-xs"
                                 :disabled="stepIndex === schedulerDraftConfig.steps.length - 1"
                                 @click="moveSchedulerStep(stepIndex, 1)"
                             >
-                                下移
+                                {{ $t("script-list.move_down") }}
                             </button>
-                            <button class="btn btn-xs btn-error" @click="removeSchedulerStep(stepIndex)">删除</button>
+                            <button class="btn btn-xs btn-error" @click="removeSchedulerStep(stepIndex)">{{ $t("common.delete") }}</button>
                         </div>
 
                         <div v-if="step.flowControl.enabled" class="space-y-2 rounded border border-warning/40 p-2">
-                            <div class="text-xs font-medium text-warning-content">流程控制（switch 风格）</div>
+                            <div class="text-xs font-medium text-warning-content">{{ $t("script-list.flow_control_switch") }}</div>
                             <div
                                 v-for="(rule, caseIndex) in step.flowControl.cases"
                                 :key="rule.id"
                                 class="flex flex-wrap items-center gap-2"
                             >
-                                <span class="text-xs">case</span>
+                                <span class="text-xs">{{ $t("script-list.case_label") }}</span>
                                 <input
                                     v-model="rule.matchValue"
                                     type="text"
                                     class="input input-bordered input-sm w-40"
-                                    placeholder="返回值"
+                                    :placeholder="$t('script-list.return_value')"
                                 />
                                 <span class="text-xs">=></span>
                                 <select v-model="rule.targetStepId" class="select select-bordered select-sm min-w-52">
-                                    <option :value="null">不跳转</option>
+                                    <option :value="null">{{ $t("script-list.no_jump") }}</option>
                                     <option v-for="option in schedulerDraftStepOptions" :key="option.id" :value="option.id">
                                         {{ option.label }}
                                     </option>
                                 </select>
-                                <button class="btn btn-xs btn-ghost" @click="removeSchedulerCase(stepIndex, caseIndex)">删除 case</button>
+                                <button class="btn btn-xs btn-ghost" @click="removeSchedulerCase(stepIndex, caseIndex)">{{ $t("script-list.delete_case") }}</button>
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
-                                <span class="text-xs">default</span>
+                                <span class="text-xs">{{ $t("script-list.default_label") }}</span>
                                 <span class="text-xs">=></span>
                                 <select v-model="step.flowControl.defaultTargetStepId" class="select select-bordered select-sm min-w-52">
-                                    <option :value="null">顺序下一步</option>
+                                    <option :value="null">{{ $t("script-list.next_step_default") }}</option>
                                     <option v-for="option in schedulerDraftStepOptions" :key="option.id" :value="option.id">
                                         {{ option.label }}
                                     </option>
                                 </select>
-                                <button class="btn btn-xs" @click="addSchedulerCase(stepIndex)">添加 case</button>
+                                <button class="btn btn-xs" @click="addSchedulerCase(stepIndex)">{{ $t("script-list.add_case") }}</button>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 mt-4">
-                    <button class="btn btn-ghost" @click="showSchedulerDialog = false">取消</button>
-                    <button class="btn btn-primary" @click="saveSchedulerConfig">保存并切换</button>
+                    <button class="btn btn-ghost" @click="showSchedulerDialog = false">{{ $t("setting.cancel") }}</button>
+                    <button class="btn btn-primary" @click="saveSchedulerConfig">{{ $t("script-list.save_and_switch") }}</button>
                 </div>
             </div>
         </dialog>

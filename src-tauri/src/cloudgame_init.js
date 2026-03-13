@@ -1,5 +1,4 @@
 ;(() => {
-    const BRIDGE_EVENT = "cloudgame://bridge"
     const CONTROL_EVENT = "__dna_cloudgame_control__"
     const BRIDGE_NAME = "__DNA_CLOUDGAME_BRIDGE__"
 

@@ -2,6 +2,7 @@
 import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI, DNARoleEntity, DNAShortNoteEntity, DNAWeaponBean } from "dna-api"
 import { toPng } from "html-to-image"
+import { t } from "i18next"
 import { onMounted, ref } from "vue"
 import { Draft } from "@/data"
 import { imgRemoteToLocal } from "@/utils/remoteImg"
@@ -150,7 +151,7 @@ async function loadData(force = false) {
 async function syncInventory() {
     try {
         if (!roleInfo.value.roleInfo.roleShow.closeWeapons || !roleInfo.value.roleInfo.roleShow.langRangeWeapons) {
-            ui.showErrorMessage("无库存, 请先到官方APP绑定角色")
+            ui.showErrorMessage(t("dna-game-info.no_inventory"))
             return
         }
         inv.meleeWeapons = roleInfo.value.roleInfo.roleShow.closeWeapons.reduce(
@@ -167,9 +168,9 @@ async function syncInventory() {
             },
             {} as Record<string, number>
         )
-        ui.showSuccessMessage("库存同步成功")
+        ui.showSuccessMessage(t("dna-game-info.sync_inventory_success"))
     } catch (e) {
-        ui.showErrorMessage("库存同步失败:", e instanceof Error ? e.message : String(e))
+        ui.showErrorMessage(t("dna-game-info.sync_inventory_failed"), e instanceof Error ? e.message : String(e))
     }
 }
 

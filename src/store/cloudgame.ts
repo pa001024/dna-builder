@@ -104,7 +104,7 @@ export const useCloudGameStore = defineStore("cloudgame", {
         isBridgeConnected: state => Boolean(state.bridgeStatus?.connected),
         bridgeEventSummary: state => {
             if (!state.lastBridgeEventType) return ""
-            if (state.isBridgeConnected) {
+            if (state.bridgeStatus?.connected) {
                 return `${state.lastBridgeEventType} · 已连通`
             }
             return state.lastBridgeEventType

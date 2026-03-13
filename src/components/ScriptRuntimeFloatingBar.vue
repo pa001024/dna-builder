@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from "i18next"
 import { computed, onMounted } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { useScriptRuntimeStore } from "@/store/scriptRuntime"
@@ -96,10 +97,10 @@ async function stopRunningScriptFromFloating() {
             scriptRuntime.requestSchedulerStop()
         }
         await scriptRuntime.stopAllScripts()
-        ui.showSuccessMessage("已发送停止请求")
+        ui.showSuccessMessage(t("script-runtime-floating.stopRequested"))
     } catch (error) {
         console.error("停止脚本失败", error)
-        ui.showErrorMessage("停止脚本失败，请重试")
+        ui.showErrorMessage(t("script-runtime-floating.stopFailed"))
     }
 }
 
@@ -130,9 +131,9 @@ onMounted(async () => {
                     <Icon icon="ri:code-s-slash-line" class="w-4 h-4 opacity-85" />
                 </div>
                 <div class="min-w-0 flex-1 flex items-center gap-1.5"
-                    :title="`运行中(${runningScriptCountText}) ${runningScriptListText}`">
+                    :title="$t('script-runtime-floating.runningTitle', { count: runningScriptCountText, scripts: runningScriptListText })">
                     <span class="shrink-0 text-[11px] font-semibold tracking-[0.04em] opacity-85 font-orbitron">
-                        运行中({{ runningScriptCountText }})
+                        {{ $t("script-runtime-floating.runningLabel", { count: runningScriptCountText }) }}
                     </span>
                     <span class="min-w-0 flex-1 truncate text-[13px] font-medium tracking-[0.01em]">
                         {{ runningScriptListText }}
@@ -144,12 +145,12 @@ onMounted(async () => {
                 <div class="flex shrink-0 items-center gap-1">
                     <button
                         class="btn btn-xs btn-square h-7 w-7 min-h-0 border border-base-content/16 bg-base-100/52 text-base-content hover:bg-base-100/78 hover:border-base-content/30"
-                        @click="openScriptPageFromFloating" :title="`前往脚本页: ${runningScriptListText}`">
+                        @click="openScriptPageFromFloating" :title="$t('script-runtime-floating.openScriptPage', { scripts: runningScriptListText })">
                         <Icon icon="ri:arrow-right-line" class="w-4 h-4" />
                     </button>
                     <button
                         class="btn btn-xs btn-square h-7 w-7 min-h-0 border border-base-content/16 bg-base-100/52 text-error hover:bg-error/14 hover:border-error/40"
-                        @click="stopRunningScriptFromFloating" title="停止脚本">
+                        @click="stopRunningScriptFromFloating" :title="$t('script-runtime-floating.stopScript')">
                         <Icon icon="ri:stop-circle-line" class="w-4 h-4" />
                     </button>
                 </div>

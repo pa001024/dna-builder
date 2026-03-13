@@ -2,6 +2,7 @@
 import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI, PropInfo as DNAPropInfo, RoleInfo as DNARoleInfo, PropCategory } from "dna-api"
 import * as echarts from "echarts"
+import { t } from "i18next"
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
 import { db, PropFlow } from "@/store/db"
 import { useSettingStore } from "@/store/setting"
@@ -203,12 +204,12 @@ async function sendGameMail() {
     try {
         const res = await api.kf.sendGameMail(selectedVerifyRole.value.role_id)
         if (res.is_success) {
-            ui.showSuccessMessage("验证码已发送到游戏内邮件")
+            ui.showSuccessMessage(t("dna-prop-flow.mail_code_sent"))
         } else {
-            ui.showErrorMessage(res.msg || "发送验证码失败")
+            ui.showErrorMessage(res.msg || t("dna-prop-flow.send_code_failed"))
         }
     } catch (e) {
-        ui.showErrorMessage("发送验证码失败")
+        ui.showErrorMessage(t("dna-prop-flow.send_code_failed"))
     }
 }
 
@@ -221,16 +222,16 @@ async function verifyRoleMail() {
     try {
         const res = await api.kf.verifyRoleMailCode(mailCode.value)
         if (res.is_success) {
-            ui.showSuccessMessage("角色验证成功")
+            ui.showSuccessMessage(t("dna-prop-flow.role_verify_success"))
             showVerifyModal.value = false
             mailCode.value = ""
             // 重新加载角色列表以更新验证状态
             await loadRoles()
         } else {
-            ui.showErrorMessage(res.msg || "验证失败")
+            ui.showErrorMessage(res.msg || t("dna-prop-flow.verify_failed"))
         }
     } catch (e) {
-        ui.showErrorMessage("验证失败")
+        ui.showErrorMessage(t("dna-prop-flow.verify_failed"))
     }
 }
 
@@ -243,11 +244,11 @@ async function getCaptcha() {
         if (res.is_success && res.data) {
             captchaImage.value = res.data.picPath
         } else {
-            ui.showErrorMessage("获取验证码失败")
+            ui.showErrorMessage(t("dna-prop-flow.get_captcha_failed"))
         }
     } catch (e) {
         console.error("获取验证码失败", e)
-        ui.showErrorMessage("获取验证码失败")
+        ui.showErrorMessage(t("dna-prop-flow.get_captcha_failed"))
     }
 }
 
@@ -256,22 +257,22 @@ async function getCaptcha() {
  */
 async function sendVerifyCode() {
     if (!phoneNumber.value || !captchaImage.value) {
-        ui.showErrorMessage("请输入手机号并获取验证码")
+        ui.showErrorMessage(t("dna-prop-flow.enter_phone_and_get_captcha"))
         return
     }
 
     try {
         const res = await api.kf.sendVerifyCode(phoneNumber.value, captchaCode.value)
         if (res.is_success) {
-            ui.showSuccessMessage("短信验证码已发送")
+            ui.showSuccessMessage(t("dna-prop-flow.sms_code_sent"))
             // 开始倒计时
             lastSmsTime.value = ui.timeNow
         } else {
-            ui.showErrorMessage(res.msg || "发送验证码失败")
+            ui.showErrorMessage(res.msg || t("dna-prop-flow.send_code_failed"))
         }
     } catch (e) {
         console.error("发送短信失败", e)
-        ui.showErrorMessage("发送短信失败")
+        ui.showErrorMessage(t("dna-prop-flow.send_sms_failed"))
     }
 }
 
@@ -280,7 +281,7 @@ async function sendVerifyCode() {
  */
 async function loginByPhone() {
     if (!phoneNumber.value || !phoneVerifyCode.value || !Number.isInteger(+phoneVerifyCode.value)) {
-        ui.showErrorMessage("请输入手机号和验证码")
+        ui.showErrorMessage(t("dna-prop-flow.enter_phone_and_sms_code"))
         return
     }
 
@@ -290,17 +291,17 @@ async function loginByPhone() {
             const newToken = res.data.token
             // 保存token到数据库
             await setting.saveKFToken(newToken)
-            ui.showSuccessMessage("登录成功")
+            ui.showSuccessMessage(t("dna-prop-flow.login_success"))
             showPhoneLoginModal.value = false
             phoneNumber.value = ""
             phoneVerifyCode.value = ""
             await loadData()
         } else {
-            ui.showErrorMessage(res.msg || "登录失败")
+            ui.showErrorMessage(res.msg || t("dna-prop-flow.login_failed"))
         }
     } catch (e) {
         console.error("手机号登录失败", e)
-        ui.showErrorMessage("登录失败")
+        ui.showErrorMessage(t("dna-prop-flow.login_failed"))
     }
 }
 

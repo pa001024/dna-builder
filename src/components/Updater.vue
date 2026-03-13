@@ -93,7 +93,7 @@ async function updateApp() {
 
 async function siteCheck() {
     if (location.hostname === "xn--chq26veyq.icu") {
-        if (await ui.showDialog("是否跳转到新站点?", "新站点地址: https://dna-builder.cn/")) {
+        if (await ui.showDialog(t("updater.siteRedirectTitle"), t("updater.siteRedirectMessage"))) {
             window.location.href = "https://dna-builder.cn/"
         }
     }
@@ -160,14 +160,17 @@ declare global {
             </div>
             <div class="text-xs">
                 <div class="flex flex-col gap-2">
-                    <p>本软件是免费软件, 如果您喜欢这个项目，并且想支持作者的工作，请考虑以下方式：</p>
+                    <p>{{ $t("updater.supportIntro") }}</p>
                     <div>
-                        直接捐赠：<a target="_black" class="link link-primary" href="https://afdian.com/a/pa001024"
-                            >https://afdian.com/a/pa001024</a
+                        {{ $t("updater.supportDonate") }}：<a target="_black" class="link link-primary" href="https://ifdian.net/a/pa001024"
+                            >https://ifdian.net/a/pa001024</a
                         >
                     </div>
                     <div>
-                        购买应用：<a target="_black" class="link link-primary" href="https://apps.microsoft.com/detail/9nk8zw43shb1"
+                        {{ $t("updater.supportBuyApp") }}：<a
+                            target="_black"
+                            class="link link-primary"
+                            href="https://apps.microsoft.com/detail/9nk8zw43shb1"
                             >https://apps.microsoft.com/detail/9nk8zw43shb1</a
                         >
                     </div>
