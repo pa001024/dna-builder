@@ -25,7 +25,7 @@ use std::{
     thread,
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
-use tauri::Emitter;
+use tauri::{Emitter, Manager};
 use windows::Win32::Foundation::HWND;
 use windows::Win32::UI::WindowsAndMessaging::{GetForegroundWindow, SetForegroundWindow};
 
@@ -80,6 +80,7 @@ struct ImshowWorker {
 static IMSHOW_WORKER: OnceLock<ImshowWorker> = OnceLock::new();
 /// 全局脚本事件发送器（用于向前端推送脚本状态等事件）。
 static SCRIPT_EVENT_APP_HANDLE: OnceLock<Arc<tauri::AppHandle>> = OnceLock::new();
+const SCRIPT_CLOUDGAME_WINDOW_LABEL: &str = "cloudgame";
 /// readConfig 请求序号，用于生成唯一 request_id。
 static SCRIPT_CONFIG_REQ_SEQ: AtomicU64 = AtomicU64::new(1);
 /// readConfig 等待中的请求映射：request_id -> 回传通道。
@@ -1281,6 +1282,294 @@ fn _mm(x: Option<JsValue>, y: Option<JsValue>, ctx: &mut Context) -> JsResult<Js
     let x = x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
     let y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
     mouse_move(x, y);
+    Ok(JsValue::undefined())
+}
+
+/// 在 cloudgame 页面里调用 devtools 暴露的方法。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _call_cloudgame_devtools_method(method: &str, args: &[serde_json::Value]) -> Result<(), String> {
+    let Some(app_handle) = SCRIPT_EVENT_APP_HANDLE.get() else {
+        return Err("脚本运行时未绑定 AppHandle".to_string());
+    };
+    let Some(window) = app_handle.get_webview_window(SCRIPT_CLOUDGAME_WINDOW_LABEL) else {
+        return Err("云游戏窗口未打开".to_string());
+    };
+
+    let method_json =
+        serde_json::to_string(method).map_err(|e| format!("序列化 cloudgame 方法名失败: {e}"))?;
+    let args_json = serde_json::to_string(args).map_err(|e| format!("序列化 cloudgame 参数失败: {e}"))?;
+    let script = format!(
+        r#"
+(() => {{
+    const api = window.__DNA_CLOUDGAME_DEVTOOLS__;
+    if (!api || typeof api[{method_json}] !== "function") {{
+        throw new Error("cloudgame devtools api not ready");
+    }}
+    Promise.resolve(api[{method_json}](...{args_json})).catch(error => console.error("[cloudgame-script]", error));
+}})();
+"#
+    );
+    window
+        .eval(script)
+        .map_err(|e| format!("执行 cloudgame 脚本失败: {e}"))
+}
+
+/// 云游戏相对移动函数。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_move(dx: Option<JsValue>, dy: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let dx = dx.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let dy = dy.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    _call_cloudgame_devtools_method("businessMove", &[serde_json::json!(dx), serde_json::json!(dy)])
+        .map_err(|e| JsNativeError::error().with_message(e))?;
+    Ok(JsValue::undefined())
+}
+
+/// 云游戏绝对移动函数（异步）。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_move_to(
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    duration: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let x = x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let duration = duration.unwrap_or_else(|| js_value!(0)).to_number(ctx)? as u64;
+    _call_cloudgame_devtools_method(
+        "businessMoveTo",
+        &[
+            serde_json::json!(x),
+            serde_json::json!(y),
+            serde_json::json!(duration),
+        ],
+    )
+    .map_err(|e| JsNativeError::error().with_message(e))?;
+
+    let mut cb: Option<JsFunction> = None;
+    let promise = JsPromise::new(
+        |resolvers, _context| {
+            cb = Some(resolvers.resolve.clone());
+            Ok(JsValue::undefined())
+        },
+        ctx,
+    );
+    let job = boa_engine::job::TimeoutJob::new(
+        boa_engine::job::NativeJob::new(move |context| {
+            cb.unwrap()
+                .call(&JsValue::undefined(), &[], context)
+                .unwrap();
+            Ok(JsValue::undefined())
+        }),
+        duration,
+    );
+    ctx.enqueue_job(job.into());
+    Ok(promise.into())
+}
+
+/// 云游戏鼠标按键枚举转业务层字符串。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_mouse_button_name(button: MouseButtonKind) -> &'static str {
+    match button {
+        MouseButtonKind::Left => "left",
+        MouseButtonKind::Right => "right",
+        MouseButtonKind::Middle => "middle",
+        MouseButtonKind::X1 | MouseButtonKind::X2 => "left",
+    }
+}
+
+/// 云游戏鼠标点击函数。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_click(
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    button: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let button = _parse_mouse_button(button, ctx)?;
+    let mut args = vec![serde_json::json!(_cg_mouse_button_name(button))];
+    if let Some(value) = x.as_ref()
+        && !value.is_undefined()
+        && !value.is_null()
+    {
+        args.push(serde_json::json!(value.to_number(ctx)? as i32));
+        if let Some(y_value) = y.as_ref()
+            && !y_value.is_undefined()
+            && !y_value.is_null()
+        {
+            args.push(serde_json::json!(y_value.to_number(ctx)? as i32));
+        }
+    }
+    _call_cloudgame_devtools_method("businessClick", &args)
+    .map_err(|e| JsNativeError::error().with_message(e))?;
+    Ok(JsValue::undefined())
+}
+
+/// 云游戏鼠标按下函数。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_down(
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    button: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let button = _parse_mouse_button(button, ctx)?;
+    let mut args = vec![serde_json::json!(_cg_mouse_button_name(button))];
+    if let Some(value) = x.as_ref()
+        && !value.is_undefined()
+        && !value.is_null()
+    {
+        args.push(serde_json::json!(value.to_number(ctx)? as i32));
+        if let Some(y_value) = y.as_ref()
+            && !y_value.is_undefined()
+            && !y_value.is_null()
+        {
+            args.push(serde_json::json!(y_value.to_number(ctx)? as i32));
+        }
+    }
+    _call_cloudgame_devtools_method("businessDown", &args)
+    .map_err(|e| JsNativeError::error().with_message(e))?;
+    Ok(JsValue::undefined())
+}
+
+/// 云游戏鼠标抬起函数。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_up(
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    button: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let button = _parse_mouse_button(button, ctx)?;
+    let mut args = vec![serde_json::json!(_cg_mouse_button_name(button))];
+    if let Some(value) = x.as_ref()
+        && !value.is_undefined()
+        && !value.is_null()
+    {
+        args.push(serde_json::json!(value.to_number(ctx)? as i32));
+        if let Some(y_value) = y.as_ref()
+            && !y_value.is_undefined()
+            && !y_value.is_null()
+        {
+            args.push(serde_json::json!(y_value.to_number(ctx)? as i32));
+        }
+    }
+    _call_cloudgame_devtools_method("businessUp", &args)
+    .map_err(|e| JsNativeError::error().with_message(e))?;
+    Ok(JsValue::undefined())
+}
+
+/// 云游戏鼠标中键点击函数。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_middle_click(x: Option<JsValue>, y: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let mut args = Vec::new();
+    if let Some(value) = x.as_ref()
+        && !value.is_undefined()
+        && !value.is_null()
+    {
+        args.push(serde_json::json!(value.to_number(ctx)? as i32));
+        if let Some(y_value) = y.as_ref()
+            && !y_value.is_undefined()
+            && !y_value.is_null()
+        {
+            args.push(serde_json::json!(y_value.to_number(ctx)? as i32));
+        }
+    }
+    _call_cloudgame_devtools_method("businessMiddleClick", &args)
+    .map_err(|e| JsNativeError::error().with_message(e))?;
+    Ok(JsValue::undefined())
+}
+
+/// 云游戏滚轮函数。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_wheel(
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    delta: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let delta = delta.unwrap_or_else(|| js_value!(0)).to_number(ctx)? as i32;
+    let mut args = vec![serde_json::json!(delta)];
+    if let Some(value) = x.as_ref()
+        && !value.is_undefined()
+        && !value.is_null()
+    {
+        args.push(serde_json::json!(value.to_number(ctx)? as i32));
+        if let Some(y_value) = y.as_ref()
+            && !y_value.is_undefined()
+            && !y_value.is_null()
+        {
+            args.push(serde_json::json!(y_value.to_number(ctx)? as i32));
+        }
+    }
+    _call_cloudgame_devtools_method("businessWheel", &args)
+    .map_err(|e| JsNativeError::error().with_message(e))?;
+    Ok(JsValue::undefined())
+}
+
+/// 云游戏按键点击函数（异步）。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_key(
+    key: Option<JsValue>,
+    duration: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let key = key
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let vkey = key_to_vkey(&key);
+    let duration = duration.unwrap_or_else(|| js_value!(0)).to_number(ctx)? as u64;
+
+    _call_cloudgame_devtools_method(
+        "businessKeyTap",
+        &[serde_json::json!(vkey), serde_json::json!(duration)],
+    )
+    .map_err(|e| JsNativeError::error().with_message(e))?;
+
+    let mut cb: Option<JsFunction> = None;
+    let promise = JsPromise::new(
+        |resolvers, _context| {
+            cb = Some(resolvers.resolve.clone());
+            Ok(JsValue::undefined())
+        },
+        ctx,
+    );
+    let job = boa_engine::job::TimeoutJob::new(
+        boa_engine::job::NativeJob::new(move |context| {
+            cb.unwrap()
+                .call(&JsValue::undefined(), &[], context)
+                .unwrap();
+            Ok(JsValue::undefined())
+        }),
+        duration,
+    );
+    ctx.enqueue_job(job.into());
+    Ok(promise.into())
+}
+
+/// 云游戏按键按下函数。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_key_down(key: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let key = key
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let vkey = key_to_vkey(&key);
+    _call_cloudgame_devtools_method("businessKeyDown", &[serde_json::json!(vkey)])
+        .map_err(|e| JsNativeError::error().with_message(e))?;
+    Ok(JsValue::undefined())
+}
+
+/// 云游戏按键抬起函数。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_key_up(key: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let key = key
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let vkey = key_to_vkey(&key);
+    _call_cloudgame_devtools_method("businessKeyUp", &[serde_json::json!(vkey)])
+        .map_err(|e| JsNativeError::error().with_message(e))?;
     Ok(JsValue::undefined())
 }
 
@@ -3956,6 +4245,28 @@ fn _get_foreground_window(_ctx: &mut Context) -> JsResult<JsValue> {
     Ok(JsValue::new(hwnd.0 as u64 as f64))
 }
 
+/// 获取 cloudgame 窗口句柄函数。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _get_cg_window(_ctx: &mut Context) -> JsResult<JsValue> {
+    #[cfg(target_os = "windows")]
+    {
+        let Some(app_handle) = SCRIPT_EVENT_APP_HANDLE.get() else {
+            return Ok(JsValue::new(0 as u64 as f64));
+        };
+        let Some(window) = app_handle.get_webview_window(SCRIPT_CLOUDGAME_WINDOW_LABEL) else {
+            return Ok(JsValue::new(0 as u64 as f64));
+        };
+        match window.hwnd() {
+            Ok(hwnd) => Ok(JsValue::new(hwnd.0 as u64 as f64)),
+            Err(_) => Ok(JsValue::new(0 as u64 as f64)),
+        }
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Ok(JsValue::new(0 as u64 as f64))
+    }
+}
+
 /// 检查当前进程是否以管理员权限运行。
 fn _is_elevated(_ctx: &mut Context) -> JsResult<JsValue> {
     #[cfg(target_os = "windows")]
@@ -3996,6 +4307,40 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
 
     let f = _mm.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("mm"), 2, f)?;
+
+    #[cfg(not(feature = "dob-script-cli"))]
+    {
+        // 云游戏业务层相对移动函数
+        let f = _cg_move.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgMove"), 2, f)?;
+
+        let f = _cg_move_to.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgMoveTo"), 3, f)?;
+
+        let f = _cg_click.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgClick"), 3, f)?;
+
+        let f = _cg_down.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgDown"), 3, f)?;
+
+        let f = _cg_up.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgUp"), 3, f)?;
+
+        let f = _cg_middle_click.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgMiddleClick"), 2, f)?;
+
+        let f = _cg_wheel.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgWheel"), 3, f)?;
+
+        let f = _cg_key.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgKey"), 2, f)?;
+
+        let f = _cg_key_down.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgKeyDown"), 1, f)?;
+
+        let f = _cg_key_up.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgKeyUp"), 1, f)?;
+    }
 
     let f = _move_to.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("moveTo"), 4, f)?;
@@ -4066,6 +4411,13 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     // 获取前台窗口
     let f = _get_foreground_window.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("getForegroundWindow"), 0, f)?;
+
+    #[cfg(not(feature = "dob-script-cli"))]
+    {
+        // 获取 cloudgame 窗口句柄
+        let f = _get_cg_window.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("getCGWindow"), 0, f)?;
+    }
 
     // 检查是否以管理员权限运行
     let f = _is_elevated.into_js_function_copied(context);

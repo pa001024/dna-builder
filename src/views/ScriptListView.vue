@@ -23,11 +23,13 @@ import {
 import { createScriptMutation, deleteScriptMutation, updateScriptMutation } from "@/api/gen/api-mutations"
 import { scriptCategoriesQuery, scriptQuery, scriptsCountQuery, scriptsQuery, type Script, type ScriptCategory } from "@/api/graphql"
 import ContextMenu, { ContextMenuItem } from "@/components/contextmenu"
+import { useCloudGameStore } from "@/store/cloudgame"
 import { type ScriptRuntimeSidePanelTab, type ScriptStatusItem, useScriptRuntimeStore } from "@/store/scriptRuntime"
 import { useUIStore } from "@/store/ui"
 import { parseScriptHeader, replaceScriptHeader } from "@/utils/script-header"
 
 const ui = useUIStore()
+const cloudgame = useCloudGameStore()
 const scriptRuntime = useScriptRuntimeStore()
 const router = useRouter()
 
@@ -241,6 +243,13 @@ const runningScriptPaths = computed({
     set: value => {
         scriptRuntime.runningScriptPaths = value
     },
+})
+const isCloudGameEntryActive = computed(() => cloudgame.isWindowOpen || cloudgame.opening)
+const cloudGameEntryTitle = computed(() => {
+    if (cloudgame.opening) return "正在打开云游戏窗口"
+    if (cloudgame.isBridgeConnected) return "聚焦云游戏窗口（已连通）"
+    if (cloudgame.isWindowOpen) return "聚焦云游戏窗口"
+    return "打开云游戏窗口"
 })
 let unlistenConsoleFn: UnlistenFn | null = null
 let unlistenStatusFn: UnlistenFn | null = null
@@ -3086,6 +3095,13 @@ function handleKeyDown(e: KeyboardEvent) {
     }
 }
 
+/**
+ * 从脚本页打开或聚焦云游戏窗口。
+ */
+async function openCloudGameFromScript() {
+    await cloudgame.openOrFocusCloudGame()
+}
+
 function handleTabMiddleClick(e: MouseEvent, tabId: string) {
     if (e.button === 1) {
         e.preventDefault()
@@ -3184,6 +3200,7 @@ onMounted(async () => {
     await initScriptConfigListener()
     await initScriptSetConfigListener()
     await syncRunningStateFromBackend()
+    await cloudgame.initCloudGameTracking()
 })
 
 onUnmounted(async () => {
@@ -3528,6 +3545,15 @@ onUnmounted(async () => {
                         </ScrollArea>
                         <!-- actions -->
                         <div class="flex items-center gap-2 ml-2 px-1">
+                            <button
+                                class="btn btn-sm btn-ghost btn-square"
+                                :class="{ 'btn-primary': isCloudGameEntryActive }"
+                                :disabled="cloudgame.opening"
+                                @click="openCloudGameFromScript"
+                                :title="cloudGameEntryTitle"
+                            >
+                                <Icon :icon="cloudgame.isBridgeConnected ? 'ri:cloud-fill' : 'ri:cloud-line'" class="w-4 h-4" />
+                            </button>
                             <button class="btn btn-sm btn-ghost btn-square" @click="showConsole = !showConsole" title="切换控制台">
                                 <Icon :icon="showConsole ? 'ri:terminal-box-line' : 'ri:terminal-line'" class="w-4 h-4" />
                             </button>

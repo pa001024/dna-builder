@@ -5,6 +5,7 @@ import { computed, onMounted, onUnmounted, ref, watchEffect } from "vue"
 import { openExplorer } from "../api/app"
 import { charData, LeveledChar, weaponData } from "../data"
 import { env } from "../env"
+import { useCloudGameStore } from "../store/cloudgame"
 import { Mod } from "../store/db"
 import { useGameStore } from "../store/game"
 import { useUIStore } from "../store/ui"
@@ -13,6 +14,7 @@ import { useUIStore } from "../store/ui"
 const ui = useUIStore()
 const keys = ["path", "beforeGame", "afterGame"] as const
 const tab = ref("update")
+const cloudgame = useCloudGameStore()
 const game = useGameStore()
 //#region 启动
 async function selectPath(key: (typeof keys)[number]) {
@@ -57,6 +59,20 @@ const launchGame = async () => {
         console.error("启动游戏失败:", error)
         ui.showErrorMessage(t("game-launcher.launchGameFailed", { error: error instanceof Error ? error.message : String(error) }))
     }
+}
+
+const cloudGameEntryTitle = computed(() => {
+    if (cloudgame.opening) return "正在打开云游戏窗口"
+    if (cloudgame.isBridgeConnected) return "聚焦云游戏窗口（已连通）"
+    if (cloudgame.isWindowOpen) return "聚焦云游戏窗口"
+    return "打开云游戏窗口"
+})
+
+/**
+ * 从游戏启动页打开或聚焦云游戏窗口。
+ */
+async function openCloudGameFromLauncher() {
+    await cloudgame.openOrFocusCloudGame()
 }
 //#endregion
 //#region entity
@@ -158,6 +174,7 @@ let unlistenDragEnter = () => {}
 let unlistenDragLeave = () => {}
 let unlistenDragDrop = () => {}
 onMounted(async () => {
+    await cloudgame.initCloudGameTracking()
     // Tauri专用拖放逻辑
     if (env.isApp) {
         // 监听全局拖放事件以处理桌面应用中的文件拖放
@@ -254,6 +271,14 @@ onUnmounted(() => {
                 @click="openGameDirectory()"
             >
                 <Icon icon="ri:folder-line" class="w-6 h-6" />
+            </div>
+            <div
+                class="btn btn-square tooltip tooltip-bottom"
+                :class="{ 'btn-primary': cloudgame.isWindowOpen || cloudgame.opening }"
+                :data-tip="cloudGameEntryTitle"
+                @click="openCloudGameFromLauncher()"
+            >
+                <Icon :icon="cloudgame.isBridgeConnected ? 'ri:cloud-fill' : 'ri:cloud-line'" class="w-6 h-6" />
             </div>
             <div class="w-40 btn btn-primary mx-2" :class="{ 'btn-disabled': game.running }" @click="launchGame()">
                 <Icon icon="ri:rocket-2-line" class="w-6 h-6" />
