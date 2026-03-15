@@ -1,4 +1,5 @@
 import type { Mod } from "../data-types"
+import { applyVersionGate } from "../versionGate"
 
 const t: Mod[] = [
     {
@@ -8583,7 +8584,7 @@ const p = [
 
 const idmap = new Map(p.map(item => [item.id, item]))
 
-export default t.map((item: Mod) => {
+const data = t.map((item: Mod) => {
     const id = item.id
     const pi = idmap.get(id)
     if (pi) {
@@ -8604,3 +8605,5 @@ export default t.map((item: Mod) => {
     }
     return item
 })
+
+export default applyVersionGate(data)

@@ -1,4 +1,6 @@
-export default [
+import { applyVersionGate } from "../versionGate"
+
+const t = [
     {
         id: 20101,
         名称: "转动命运螺旋Ⅰ",
@@ -6529,3 +6531,5 @@ export default [
         },
     },
 ] satisfies import("../data-types").Achievement[]
+
+export default applyVersionGate(t)

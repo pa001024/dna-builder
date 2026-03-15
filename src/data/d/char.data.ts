@@ -1,4 +1,5 @@
 import type { Char } from "../data-types"
+import { applyVersionGate } from "../versionGate"
 
 const t: Char[] = [
     {
@@ -10208,4 +10209,4 @@ patch(4301, "指尖风暴", skill => {
     }
 })
 
-export default t
+export default applyVersionGate(t)

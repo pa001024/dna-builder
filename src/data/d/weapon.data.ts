@@ -1,4 +1,5 @@
 import type { Weapon } from "../data-types"
+import { applyVersionGate } from "../versionGate"
 
 const t: Weapon[] = [
     {
@@ -6356,4 +6357,4 @@ const t: Weapon[] = [
         射击间隔: 0.4,
     },
 ]
-export default t
+export default applyVersionGate(t)

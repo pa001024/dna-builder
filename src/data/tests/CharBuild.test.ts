@@ -645,7 +645,7 @@ describe("CharBuild类测试", () => {
     // 角色测试
     describe("角色测试", () => {
         it("应该能够处理不同角色", () => {
-            const chars = ["黎瑟", "菲娜", "希尔妲", "莉兹贝尔"]
+            const chars = ["黎瑟", "菲娜", "莉兹贝尔"]
 
             chars.forEach(charName => {
                 const charBuild = new CharBuild({

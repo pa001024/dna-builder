@@ -44,7 +44,11 @@ export const useInvStore = defineStore("inv", {
         },
         getWBuffLv(weaponId: number, elm: string = "any") {
             if (!(weaponId in this.wLv)) return 0
-            const eff = effectMap.get(weaponMap.get(weaponId)!.名称!)
+            const weapon = weaponMap.get(weaponId)
+            if (!weapon?.名称) {
+                return 0
+            }
+            const eff = effectMap.get(weapon.名称)
             if (eff?.限定 && eff.限定 !== elm && elm !== "any") {
                 return 0
             }

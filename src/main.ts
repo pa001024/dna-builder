@@ -4,6 +4,7 @@ import { registerSW } from "virtual:pwa-register"
 import i18next from "i18next"
 import I18NextVue from "i18next-vue"
 import packageJson from "../package.json"
+import { DNA_SAFE_VERSION_LIMIT, setCurrentVersionLimit } from "./data/versionGate"
 
 // prevent rightclicks
 // window.addEventListener(
@@ -19,6 +20,7 @@ import packageJson from "../package.json"
 // );
 
 initI18n(localStorage.getItem("setting_lang") || navigator.language)
+setCurrentVersionLimit(localStorage.getItem("setting_safe_mode") === "false" ? Number.POSITIVE_INFINITY : DNA_SAFE_VERSION_LIMIT)
 
 import { createPinia } from "pinia"
 import App from "./App.vue"

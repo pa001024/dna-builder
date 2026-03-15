@@ -42,6 +42,7 @@ export const useSettingStore = defineStore("setting", {
             protagonistName2: useLocalStorage("story_protagonist_name_2", "墨斯"),
             protagonistGender: useLocalStorage<"male" | "female">("story_protagonist_gender", "female"),
             protagonistGender2: useLocalStorage<"male" | "female">("story_protagonist_gender_2", "female"),
+            safeMode: useLocalStorage("setting_safe_mode", true),
             lastHeartbeatTime: 0,
         }
     },

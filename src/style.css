@@ -32,6 +32,7 @@
     --animate-shake: shake 0.4s;
     --font-orbitron: "Orbitron", sans-serif;
     --font-mona: "Mona Sans", sans-serif;
+    --font-wt: "WorldText02", sans-serif;
 
     /* Keyframes */
     @keyframes slideIn {
@@ -215,6 +216,14 @@ body {
 
 .pointer-events * {
     pointer-events: auto;
+}
+
+@font-face {
+    font-family: "WorldText02";
+    src: url("/fonts/WorldText02.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
 }
 
 @font-face {
