@@ -211,7 +211,7 @@ type SearchScopeOption = {
 
 const globalSearchService = new GlobalSearchService()
 
-const featuredPaths = ["/db/char", "/db/weapon", "/db/mod", "/db/map", "/db/questchain", "/db/hardboss"]
+const featuredPaths = ["/db/char", "/db/weapon", "/db/mod", "/db/map", "/db/questchain", "/db/dungeon"]
 
 const databaseSectionConfigs: DatabaseSectionConfig[] = [
     {

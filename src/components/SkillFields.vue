@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed, onBeforeUnmount, onMounted, ref } from "vue"
 import type { CharAttr, CharBuild, LeveledSkill, SkillField } from "../data"
 import { formatSkillProp } from "../util"
 
@@ -38,6 +38,10 @@ interface SkillFieldExtraItem {
     value: number
 }
 
+const expandedFieldKeys = ref<Record<string, boolean>>({})
+const shouldUseTouchToExpand = ref(false)
+let touchMediaQuery: MediaQueryList | null = null
+
 /**
  * 兼容 number / number[] 的字段取值
  * @param value 原始字段值
@@ -46,6 +50,16 @@ interface SkillFieldExtraItem {
 function pickFieldValue(value?: number | number[]) {
     if (value === undefined) return undefined
     return Array.isArray(value) ? value[0] : value
+}
+
+/**
+ * 生成技能字段的稳定展开键。
+ * @param field 技能字段。
+ * @param index 字段索引。
+ * @returns 当前字段对应的展开状态键。
+ */
+function getFieldExpandKey(field: SkillField, index: number) {
+    return `${field.名称}-${index}`
 }
 
 /**
@@ -70,6 +84,69 @@ function formatSkillFieldExtra(item: SkillFieldExtraItem) {
     if (["延迟", "卡肉", "取消", "连段"].includes(item.key)) return `${+item.value.toFixed(4)}秒`
     return `${+item.value.toFixed(2)}`
 }
+
+/**
+ * 判断当前字段是否存在可展开的附加信息。
+ * @param field 技能字段。
+ * @returns 是否展示额外展开区域。
+ */
+function hasExpandableContent(field: SkillField) {
+    return Boolean(field.影响 || getSkillFieldExtraItems(field).length)
+}
+
+/**
+ * 判断技能字段是否处于展开状态。
+ * @param field 技能字段。
+ * @param index 字段索引。
+ * @returns 当前字段是否展开。
+ */
+function isFieldExpanded(field: SkillField, index: number) {
+    return Boolean(expandedFieldKeys.value[getFieldExpandKey(field, index)])
+}
+
+/**
+ * 根据当前终端能力同步移动端触摸展开模式。
+ * 无 hover 能力或存在触控点时，使用 touchstart 展开。
+ */
+function syncTouchExpandMode() {
+    if (typeof window === "undefined") return
+    const hasTouchPoints = navigator.maxTouchPoints > 0
+    shouldUseTouchToExpand.value = Boolean(touchMediaQuery?.matches || hasTouchPoints)
+}
+
+/**
+ * 处理字段点击事件。
+ * 保留原有 addSkill 行为。
+ * @param field 技能字段。
+ */
+function handleFieldClick(field: SkillField) {
+    emit("addSkill", field.名称)
+}
+
+/**
+ * 处理字段触摸开始事件。
+ * 移动端触摸时展开/收起附加信息。
+ * @param field 技能字段。
+ * @param index 字段索引。
+ */
+function handleFieldTouchStart(field: SkillField, index: number) {
+    if (!shouldUseTouchToExpand.value || !hasExpandableContent(field)) return
+
+    const fieldKey = getFieldExpandKey(field, index)
+    expandedFieldKeys.value[fieldKey] = !expandedFieldKeys.value[fieldKey]
+}
+
+onMounted(() => {
+    if (typeof window === "undefined") return
+
+    touchMediaQuery = window.matchMedia("(hover: none), (pointer: coarse)")
+    syncTouchExpandMode()
+    touchMediaQuery.addEventListener("change", syncTouchExpandMode)
+})
+
+onBeforeUnmount(() => {
+    touchMediaQuery?.removeEventListener("change", syncTouchExpandMode)
+})
 </script>
 
 <template>
@@ -82,7 +159,8 @@ function formatSkillFieldExtra(item: SkillFieldExtraItem) {
                 'cursor-pointer': selectedIdentifiers,
                 'shadow-md shadow-primary/50 outline-2 outline-primary/60': isIdentifierUsed(field.名称),
             }"
-            @click="emit('addSkill', field.名称)"
+            @click="handleFieldClick(field)"
+            @touchstart="handleFieldTouchStart(field, index)"
         >
             <div class="flex justify-between items-center gap-4">
                 <div>{{ $t(field.名称) }}</div>
@@ -92,7 +170,12 @@ function formatSkillFieldExtra(item: SkillFieldExtraItem) {
             </div>
             <div
                 v-if="field.影响"
-                class="opacity-0 group-hover:opacity-80 justify-between items-center gap-4 flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
+                class="justify-between items-center gap-4 flex overflow-hidden transition-all duration-300"
+                :class="
+                    isFieldExpanded(field, index)
+                        ? 'opacity-80 max-h-32'
+                        : 'opacity-0 max-h-0 group-hover:opacity-80 group-hover:max-h-32'
+                "
             >
                 <div>{{ $t("属性影响") }}</div>
                 <div class="ml-auto font-medium">
@@ -106,7 +189,12 @@ function formatSkillFieldExtra(item: SkillFieldExtraItem) {
             </div>
             <div
                 v-if="getSkillFieldExtraItems(field).length"
-                class="opacity-0 group-hover:opacity-80 justify-between items-center gap-4 flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300 text-xs"
+                class="justify-between items-center gap-4 flex overflow-hidden transition-all duration-300 text-xs"
+                :class="
+                    isFieldExpanded(field, index)
+                        ? 'opacity-80 max-h-32'
+                        : 'opacity-0 max-h-0 group-hover:opacity-80 group-hover:max-h-32'
+                "
             >
                 <span>{{ $t("额外字段") }}</span>
                 <span class="ml-auto font-medium">

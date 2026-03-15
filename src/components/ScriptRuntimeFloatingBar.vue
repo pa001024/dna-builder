@@ -4,6 +4,7 @@ import { computed, onMounted } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { useScriptRuntimeStore } from "@/store/scriptRuntime"
 import { useUIStore } from "@/store/ui"
+import { env } from "@/env"
 
 const scriptRuntime = useScriptRuntimeStore()
 const ui = useUIStore()
@@ -33,10 +34,12 @@ function trimScriptExtension(scriptName: string): string {
  * @returns 文件名（可能为空）
  */
 function getScriptFileNameFromPath(scriptPath: string): string {
-    return String(scriptPath ?? "")
-        .split(/[\\/]/)
-        .filter(Boolean)
-        .pop() ?? ""
+    return (
+        String(scriptPath ?? "")
+            .split(/[\\/]/)
+            .filter(Boolean)
+            .pop() ?? ""
+    )
 }
 
 /**
@@ -112,26 +115,32 @@ function openScriptPageFromFloating() {
 }
 
 onMounted(async () => {
-    try {
-        await scriptRuntime.initRuntimeTracking()
-    } catch (error) {
-        console.error("初始化脚本运行态监听失败", error)
+    if (env.isApp) {
+        try {
+            await scriptRuntime.initRuntimeTracking()
+        } catch (error) {
+            console.error("初始化脚本运行态监听失败", error)
+        }
     }
 })
 </script>
 
 <template>
-    <div v-if="showScriptRuntimeFloating"
-        class="fixed left-1/2 bottom-3 z-90 -translate-x-1/2 w-[min(40rem,calc(100vw-1rem))] opacity-80 hover:opacity-100 transition-opacity duration-200">
+    <div
+        v-if="showScriptRuntimeFloating"
+        class="fixed left-1/2 bottom-3 z-90 -translate-x-1/2 w-[min(40rem,calc(100vw-1rem))] opacity-80 hover:opacity-100 transition-opacity duration-200"
+    >
         <div
-            class="rounded-[14px] border border-base-content/20 bg-base-100/60 text-base-content shadow-[0_16px_30px_rgb(0_0_0/0.25)] backdrop-blur-md">
+            class="rounded-[14px] border border-base-content/20 bg-base-100/60 text-base-content shadow-[0_16px_30px_rgb(0_0_0/0.25)] backdrop-blur-md"
+        >
             <div class="flex items-center gap-2 px-2.5 py-2">
-                <div
-                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border border-base-content/15 bg-base-100/45">
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border border-base-content/15 bg-base-100/45">
                     <Icon icon="ri:code-s-slash-line" class="w-4 h-4 opacity-85" />
                 </div>
-                <div class="min-w-0 flex-1 flex items-center gap-1.5"
-                    :title="$t('script-runtime-floating.runningTitle', { count: runningScriptCountText, scripts: runningScriptListText })">
+                <div
+                    class="min-w-0 flex-1 flex items-center gap-1.5"
+                    :title="$t('script-runtime-floating.runningTitle', { count: runningScriptCountText, scripts: runningScriptListText })"
+                >
                     <span class="shrink-0 text-[11px] font-semibold tracking-[0.04em] opacity-85 font-orbitron">
                         {{ $t("script-runtime-floating.runningLabel", { count: runningScriptCountText }) }}
                     </span>
@@ -145,12 +154,16 @@ onMounted(async () => {
                 <div class="flex shrink-0 items-center gap-1">
                     <button
                         class="btn btn-xs btn-square h-7 w-7 min-h-0 border border-base-content/16 bg-base-100/52 text-base-content hover:bg-base-100/78 hover:border-base-content/30"
-                        @click="openScriptPageFromFloating" :title="$t('script-runtime-floating.openScriptPage', { scripts: runningScriptListText })">
+                        @click="openScriptPageFromFloating"
+                        :title="$t('script-runtime-floating.openScriptPage', { scripts: runningScriptListText })"
+                    >
                         <Icon icon="ri:arrow-right-line" class="w-4 h-4" />
                     </button>
                     <button
                         class="btn btn-xs btn-square h-7 w-7 min-h-0 border border-base-content/16 bg-base-100/52 text-error hover:bg-error/14 hover:border-error/40"
-                        @click="stopRunningScriptFromFloating" :title="$t('script-runtime-floating.stopScript')">
+                        @click="stopRunningScriptFromFloating"
+                        :title="$t('script-runtime-floating.stopScript')"
+                    >
                         <Icon icon="ri:stop-circle-line" class="w-4 h-4" />
                     </button>
                 </div>

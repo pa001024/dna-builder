@@ -33,6 +33,7 @@ const props = defineProps<{
     questId: number
     nodes: QuestNode[]
     startIds?: string[]
+    voiceLanguage?: string
 }>()
 
 const settingStore = useSettingStore()
@@ -586,7 +587,7 @@ function getDialogueVoiceUrl(dialogue: Dialogue): string {
         text: dialogue.content,
         npcId: dialogue.npc,
         forceGenderNpcIds: nicknameNpcIds,
-        language: settingStore.lang,
+        language: props.voiceLanguage || settingStore.lang,
         gender: settingStore.protagonistGender,
         gender2: settingStore.protagonistGender2,
     })
@@ -992,7 +993,7 @@ const nodeDisplayLabelMap = computed(() => {
 })
 
 watch(
-    () => [settingStore.lang, settingStore.protagonistGender, settingStore.protagonistGender2],
+    () => [props.voiceLanguage || settingStore.lang, settingStore.protagonistGender, settingStore.protagonistGender2],
     () => {
         stopAutoPlay()
         stopDialogueVoicePlayback()

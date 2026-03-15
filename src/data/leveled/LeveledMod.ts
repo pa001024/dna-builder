@@ -223,11 +223,13 @@ export class LeveledMod implements Mod {
             const lv = this._等级
             const buff = this.buff!
             const maxValue = buff[prop] || 0
-            let currentValue = (maxValue / (10 + 1)) * (lv + 1)
+            let currentValue = (maxValue / (this.maxLevel + 1)) * (lv + 1)
             if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.ceil(currentValue)
             this[prop] = this[prop] ? this[prop] + currentValue : currentValue
             if (buff.描述.includes(`{%}`)) {
-                buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(buff.baseValue * 100).toFixed(1)}%`)
+                const stackCount = buff.等级 > 0 ? buff.等级 : 1
+                const perStackValue = currentValue / stackCount
+                buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(perStackValue * 100).toFixed(1)}%`)
             }
         })
     }

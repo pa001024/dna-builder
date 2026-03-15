@@ -140,6 +140,12 @@ describe("LeveledBuff类测试", () => {
         expect(fullProps.攻击).toBeDefined()
     })
 
+    it("倾力在蓝色满级时应按4层累计到80%暴击", () => {
+        const 倾力 = new LeveledMod(32301)
+
+        expect(倾力.暴击).toBeCloseTo(0.8, 10)
+    })
+
     it("乘算BUFF的minusAttr应返回逆向倍率", () => {
         const buff = new LeveledBuff("煜明2溯")
         const minusAttr = buff.minusAttr

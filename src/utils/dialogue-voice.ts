@@ -21,6 +21,8 @@ const DEFAULT_DATASET_BASE_URL = "https://modelscope.cn/datasets/pa001024/dna-vo
  */
 export function resolveDialogueVoiceLanguage(language: string): string {
     if (language.startsWith("zh")) return "ch"
+    if (language.startsWith("jp")) return "jp"
+    if (language.startsWith("kr")) return "kr"
     if (language.startsWith("ja")) return "jp"
     if (language.startsWith("ko")) return "kr"
     if (language.startsWith("en")) return "en"

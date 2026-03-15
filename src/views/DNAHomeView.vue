@@ -94,8 +94,10 @@ function handleRefreshAll() {
                 </Tooltip>
             </div>
         </div>
-        <ScrollArea class="flex-1 p-4">
-            <DNAAnnouncement v-if="activeTab === '公告'" ref="announcementRef" nobtn />
+        <div v-if="activeTab === '公告'" class="flex-1 overflow-hidden">
+            <DNAAnnouncement ref="announcementRef" nobtn />
+        </div>
+        <ScrollArea v-else class="flex-1 p-4">
             <DNAGameInfo v-if="activeTab === '游戏信息'" ref="gameInfoRef" nobtn />
             <DNAForum v-if="activeTab === '论坛'" ref="forumRef" nobtn />
             <DNASignCalendar v-if="activeTab === '签到'" ref="signCalendarRef" nobtn />

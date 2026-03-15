@@ -48,3 +48,6 @@ tools/radix-icons/
 .planning/
 .playwright/
 .playwright-cli/
+.umap-export/
+.tmp/
+.umap-cache/
