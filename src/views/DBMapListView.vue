@@ -152,7 +152,11 @@ useInitialScrollToSelectedItem()
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <div v-show="showLeftPanel" class="flex flex-col overflow-hidden"
                 :class="selectedMap ? 'flex-1' : 'w-full'">
-                <div class="p-3 border-b border-base-200">
+                <div class="p-3 border-b border-base-200 space-y-3">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="text-sm font-medium text-base-content/75">地图列表</div>
+                        <button class="btn btn-xs btn-info btn-outline" @click="$router.push('/db/map-3d')">Web 3D 场景</button>
+                    </div>
                     <input v-model="searchKeyword" type="text" placeholder="搜索地图ID/名称/描述..."
                         class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
                 </div>
