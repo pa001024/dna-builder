@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref, watch } from "vue"
+import { computed, nextTick, ref, watch } from "vue"
 import { LeveledSkill } from "@/data"
 import { modConvertData } from "@/data/d/convert.data"
 import { modShopSourceMap } from "@/data/d/shop.data"
@@ -37,8 +37,10 @@ const leveledMod = computed(() => {
 // 监听mod变化，重置等级为新mod的等级上限
 watch(
     () => props.mod,
-    newMod => {
+    async newMod => {
         currentLevel.value = LeveledMod.modQualityMaxLevel[newMod.品质] || 1
+        await nextTick()
+        buffLv.value = leveledMod.value.buff?.mx ?? 0
     }
 )
 

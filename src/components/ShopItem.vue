@@ -10,6 +10,7 @@ import { getRewardDetails, getRewardTypeText } from "@/utils/reward-utils"
 // 定义带有子项的商品类型
 interface ShopItemWithChildren extends ShopItem {
     children?: ShopItemWithChildren[]
+    diffState?: "added" | "removed"
 }
 
 const props = defineProps<{
@@ -156,6 +157,13 @@ function getPriceIcon(name: string) {
             <div class="flex-1">
                 <div class="flex justify-between items-center mb-2">
                     <div class="flex items-center gap-2">
+                        <span
+                            v-if="item.diffState"
+                            class="inline-flex h-5 min-w-5 items-center justify-center rounded text-xs font-bold"
+                            :class="item.diffState === 'added' ? 'bg-success text-success-content' : 'bg-error text-error-content'"
+                        >
+                            {{ item.diffState === "added" ? "+" : "-" }}
+                        </span>
                         <div>
                             <SRouterLink v-if="itemDetail?.link" :to="itemDetail?.link" class="hover:underline">
                                 {{ item.typeName }}

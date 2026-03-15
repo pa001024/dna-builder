@@ -40,6 +40,8 @@ export interface SelectOption {
 
 const props = defineProps<
     Omit<SelectRootProps, "modelValue"> & {
+        contentClass?: string
+        contentProps?: Record<string, unknown>
         placeholder?: string
         modelValue?: any
         hidebtn?: boolean
@@ -230,7 +232,9 @@ const forward = useForwardPropsEmits(props, emits)
 
         <SelectPortal>
             <SelectContent
+                v-bind="contentProps"
                 class="z-10000 overflow-hidden bg-base-100 border-base-content/20 border rounded-btn shadow-xl animate-slideDownAndFade"
+                :class="contentClass"
             >
                 <SelectScrollUpButton class="flex items-center justify-center cursor-default h-4">
                     <Icon icon="radix-icons:chevron-up" />

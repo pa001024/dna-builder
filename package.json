@@ -25,6 +25,7 @@
         "deploy": "bun server/deploy.ts",
         "icon": "bun run tools/icon_tool.ts",
         "gen": "bun run tools/generateApiCalls.ts",
+        "umap:web": "bun run tools/export_umap_web_scene.ts",
         "publish:dob-script": "pnpm run build:dob-script && cd packages/dob-script && npm publish --access public --registry https://registry.npmjs.org/"
     },
     "dependencies": {
@@ -97,6 +98,7 @@
     "devDependencies": {
         "@biomejs/biome": "2.3.15",
         "@eslint/js": "^9.39.2",
+        "@gltf-transform/cli": "4.3.0",
         "@tailwindcss/vite": "^4.1.18",
         "@tauri-apps/cli": "^2.10.0",
         "@types/lodash-es": "^4.17.12",

@@ -4,6 +4,7 @@ import type { Dungeon, RewardChild } from "@/data"
 import { LeveledMonster, rewardMap } from "@/data"
 import { getDungeonType } from "@/utils/dungeon-utils"
 import { getDropModeText, getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
+import { useSearchParam } from "@/composables/useSearchParam"
 
 const props = defineProps<{
     dungeon: Dungeon
@@ -60,7 +61,7 @@ function getDefaultDetailTab(dungeon: Dungeon): DetailTab {
     return "monster"
 }
 
-const activeTab = ref<DetailTab>(getDefaultDetailTab(props.dungeon))
+const activeTab = useSearchParam<DetailTab>("tab", getDefaultDetailTab(props.dungeon))
 
 /**
  * 判断副本是否为无尽任务。
@@ -418,7 +419,6 @@ watch(
         endlessWave.value = 1
         useNihaoBoxBonus.value = false
         useMobileSpawnRadius.value = false
-        activeTab.value = getDefaultDetailTab(props.dungeon)
     }
 )
 </script>

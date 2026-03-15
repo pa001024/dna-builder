@@ -8,6 +8,7 @@ import { subRegionMap } from "@/data/d/subregion.data"
 import { useSettingStore } from "@/store/setting"
 import { getDropModeText, getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
+import { useLocalStorage } from "@vueuse/core"
 
 interface QuestNextOption {
     condition: string
@@ -31,6 +32,16 @@ const props = defineProps<{
 
 const settingStore = useSettingStore()
 const localizedQuestData = ref<QuestStory[]>([])
+type VoiceLocale = "zh" | "en" | "jp" | "kr"
+const selectedVoiceLocale = useLocalStorage<VoiceLocale>("questvoice", "zh")
+const isVoiceSettingsOpen = ref(false)
+const voiceSettingsRef = ref<HTMLElement | null>(null)
+const voiceLocaleOptions: { key: VoiceLocale; label: string }[] = [
+    { key: "zh", label: "汉语" },
+    { key: "en", label: "EN" },
+    { key: "jp", label: "日本語" },
+    { key: "kr", label: "한국어" },
+]
 
 const highlightedQuestMap = reactive<Record<number, boolean>>({})
 
@@ -49,9 +60,52 @@ async function loadLocalizedQuestData(language: string): Promise<void> {
     localizedQuestData.value = data
 }
 
+/**
+ * 将设置语言代码映射为任务语音语言。
+ * @param language 设置语言代码
+ * @returns 任务语音语言
+ */
+function resolveVoiceLocaleBySetting(language: string): VoiceLocale {
+    if (language.startsWith("en")) return "en"
+    if (language.startsWith("ja")) return "jp"
+    if (language.startsWith("ko")) return "kr"
+    return "zh"
+}
+
+/**
+ * 切换语音设置面板显示状态。
+ */
+function toggleVoiceSettingsPanel(): void {
+    isVoiceSettingsOpen.value = !isVoiceSettingsOpen.value
+}
+
+/**
+ * 处理设置面板外部点击关闭逻辑。
+ * @param event 指针事件
+ */
+function handleVoiceSettingsPointerDown(event: PointerEvent): void {
+    if (!isVoiceSettingsOpen.value) {
+        return
+    }
+
+    const panelElement = voiceSettingsRef.value
+    const eventPath = typeof event.composedPath === "function" ? event.composedPath() : []
+    if (panelElement && eventPath.includes(panelElement)) {
+        return
+    }
+
+    const target = event.target as HTMLElement | null
+    if (target?.closest("[data-quest-voice-select-content='true']")) {
+        return
+    }
+
+    isVoiceSettingsOpen.value = false
+}
+
 watch(
     () => settingStore.lang,
     async language => {
+        selectedVoiceLocale.value = resolveVoiceLocaleBySetting(language)
         await loadLocalizedQuestData(language)
     },
     { immediate: true }
@@ -156,11 +210,21 @@ function jumpToQuest(questId: number) {
 }
 
 onBeforeUnmount(() => {
+    document.removeEventListener("pointerdown", handleVoiceSettingsPointerDown)
     for (const timer of questHighlightTimerMap.values()) {
         clearTimeout(timer)
     }
     questHighlightTimerMap.clear()
     questElementMap.clear()
+})
+
+watch(isVoiceSettingsOpen, isOpen => {
+    if (isOpen) {
+        document.addEventListener("pointerdown", handleVoiceSettingsPointerDown)
+        return
+    }
+
+    document.removeEventListener("pointerdown", handleVoiceSettingsPointerDown)
 })
 
 /**
@@ -254,6 +318,36 @@ function getSubRegionName(subRegionId: number): string {
                         {{ questChain.name }}
                     </SRouterLink>
                     <div class="text-sm text-base-content/70">ID: {{ questChain.id }}</div>
+                </div>
+            </div>
+
+            <div ref="voiceSettingsRef" class="relative">
+                <button
+                    type="button"
+                    class="btn btn-ghost btn-sm btn-square"
+                    title="剧情语音设置"
+                    :class="{ 'bg-base-200': isVoiceSettingsOpen }"
+                    @click="toggleVoiceSettingsPanel"
+                >
+                    <Icon icon="ri:settings-3-line" />
+                </button>
+                <div
+                    v-if="isVoiceSettingsOpen"
+                    class="absolute right-0 top-full z-[1000] mt-2 w-56 rounded-box border border-base-300 bg-base-100 p-3 shadow-lg"
+                >
+                    <div class="space-y-2">
+                        <div class="text-xs font-medium text-base-content/70">语音语言</div>
+                        <Select
+                            v-model="selectedVoiceLocale"
+                            class="w-full rounded-btn border border-base-300 bg-base-100 px-3 py-2 text-sm"
+                            content-class="z-[10010]"
+                            :content-props="{ 'data-quest-voice-select-content': 'true' }"
+                        >
+                            <SelectItem v-for="option in voiceLocaleOptions" :key="option.key" :value="option.key">
+                                {{ option.label }}
+                            </SelectItem>
+                        </Select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -350,6 +444,7 @@ function getSubRegionName(subRegionId: number): string {
                         :quest-id="quest.id"
                         :nodes="quest.details.nodes"
                         :start-ids="quest.details.startIds"
+                        :voice-language="selectedVoiceLocale"
                     />
 
                     <div v-if="quest.reward" class="mt-2 pl-2">

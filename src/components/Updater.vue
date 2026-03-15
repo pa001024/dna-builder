@@ -11,6 +11,8 @@ const ui = useUIStore()
 
 const isUpdating = ref(false)
 const updateProgress = ref(0)
+const searchParams = new URLSearchParams(window.location.search)
+const hideUpdateInfo = searchParams.get("hideUpdateInfo") === "1"
 
 // Welcome popup functionality
 const showModal = ref(false)
@@ -101,6 +103,7 @@ async function siteCheck() {
 
 // Initialize on mount
 onMounted(async () => {
+    if (hideUpdateInfo) return
     if (env.isApp) {
         await updateApp()
     } else {

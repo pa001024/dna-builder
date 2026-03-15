@@ -27,6 +27,7 @@ import { useCloudGameStore } from "@/store/cloudgame"
 import { type ScriptRuntimeSidePanelTab, useScriptRuntimeStore } from "@/store/scriptRuntime"
 import { useUIStore } from "@/store/ui"
 import { parseScriptHeader, replaceScriptHeader } from "@/utils/script-header"
+import { env } from "@/env"
 
 const ui = useUIStore()
 const cloudgame = useCloudGameStore()
@@ -397,9 +398,9 @@ async function fetchOnlineScripts(offset = 0) {
             } else {
                 onlineScripts.value.push(...result)
             }
-            extraOnlineCategoryNames.value = [
-                ...new Set(onlineScripts.value.map(script => script.category).filter(Boolean)),
-            ].filter(name => !scriptCategories.value.some(category => category.name === name))
+            extraOnlineCategoryNames.value = [...new Set(onlineScripts.value.map(script => script.category).filter(Boolean))].filter(
+                name => !scriptCategories.value.some(category => category.name === name)
+            )
         }
 
         const count = await scriptsCountQuery(
@@ -828,7 +829,9 @@ const runButtonTitle = computed(() => {
     if (!scriptName) {
         return t("script-list.run_script")
     }
-    return isActiveLocalScriptRunning.value ? t("script-list.stop_script_named", { name: scriptName }) : t("script-list.run_script_named", { name: scriptName })
+    return isActiveLocalScriptRunning.value
+        ? t("script-list.stop_script_named", { name: scriptName })
+        : t("script-list.run_script_named", { name: scriptName })
 })
 
 /**
@@ -1243,7 +1246,9 @@ async function toggleScriptHotkeyEnabled(scriptName: string) {
         await syncScriptHotkeysWithBackend()
         persistScriptHotkeys()
         ui.showSuccessMessage(
-            nextConfig.enabled ? t("script-list.hotkey_enabled", { name: scriptName }) : t("script-list.hotkey_disabled", { name: scriptName })
+            nextConfig.enabled
+                ? t("script-list.hotkey_enabled", { name: scriptName })
+                : t("script-list.hotkey_disabled", { name: scriptName })
         )
     } catch (error) {
         scriptHotkeyStore.value[scriptName] = previousConfig
@@ -2991,12 +2996,16 @@ watch(
 )
 
 onMounted(async () => {
-    startScriptRuntimeWatchdog()
-    try {
-        await scriptRuntime.initRuntimeTracking()
-    } catch (error) {
-        console.error("初始化脚本运行态监听失败", error)
+    if (!env.isApp) {
+        startScriptRuntimeWatchdog()
+
+        try {
+            await scriptRuntime.initRuntimeTracking()
+        } catch (error) {
+            console.error("初始化脚本运行态监听失败", error)
+        }
     }
+
     await fetchScriptCategories()
     await initScriptsDir()
     await initEngineDts()
@@ -3185,7 +3194,11 @@ onUnmounted(async () => {
                                                 @click="openScriptHotkeyDialog(script)"
                                             >
                                                 <Icon icon="ri:edit-line" class="w-4 h-4 mr-2" />
-                                                {{ scriptHotkeyStore[script] ? $t("script-list.edit_hotkey") : $t("script-list.save_hotkey") }}
+                                                {{
+                                                    scriptHotkeyStore[script]
+                                                        ? $t("script-list.edit_hotkey")
+                                                        : $t("script-list.save_hotkey")
+                                                }}
                                             </ContextMenuItem>
                                             <ContextMenuItem
                                                 v-if="scriptHotkeyStore[script]"
@@ -3201,7 +3214,11 @@ onUnmounted(async () => {
                                                 @click="toggleScriptHotkeyEnabled(script)"
                                             >
                                                 <Icon icon="ri:stop-circle-line" class="w-4 h-4 mr-2" />
-                                                {{ scriptHotkeyStore[script].enabled ? $t("script-list.disable_hotkey") : $t("script-list.enable_hotkey") }}
+                                                {{
+                                                    scriptHotkeyStore[script].enabled
+                                                        ? $t("script-list.disable_hotkey")
+                                                        : $t("script-list.enable_hotkey")
+                                                }}
                                             </ContextMenuItem>
                                             <ContextMenuItem
                                                 class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-success data-highlighted:text-base-100"
@@ -3247,7 +3264,11 @@ onUnmounted(async () => {
                                                     {{ script.user?.name }}
                                                 </span>
                                                 <button class="ml-auto btn btn-xs" @click.stop="downloadScript(script)">
-                                                    {{ isOnlineScriptExistsLocal(script) ? $t("script-list.updated") : $t("script-list.download") }}
+                                                    {{
+                                                        isOnlineScriptExistsLocal(script)
+                                                            ? $t("script-list.updated")
+                                                            : $t("script-list.download")
+                                                    }}
                                                 </button>
                                             </div>
                                         </div>
@@ -3349,10 +3370,18 @@ onUnmounted(async () => {
                             >
                                 <Icon :icon="cloudgame.isBridgeConnected ? 'ri:cloud-fill' : 'ri:cloud-line'" class="w-4 h-4" />
                             </button>
-                            <button class="btn btn-sm btn-ghost btn-square" @click="showConsole = !showConsole" :title="$t('script-list.toggle_console')">
+                            <button
+                                class="btn btn-sm btn-ghost btn-square"
+                                @click="showConsole = !showConsole"
+                                :title="$t('script-list.toggle_console')"
+                            >
                                 <Icon :icon="showConsole ? 'ri:terminal-box-line' : 'ri:terminal-line'" class="w-4 h-4" />
                             </button>
-                            <button class="btn btn-sm btn-ghost btn-square" @click="toggleStatusPanel" :title="$t('script-list.toggle_status_panel')">
+                            <button
+                                class="btn btn-sm btn-ghost btn-square"
+                                @click="toggleStatusPanel"
+                                :title="$t('script-list.toggle_status_panel')"
+                            >
                                 <Icon :icon="showStatusPanel ? 'ri:menu-fold-line' : 'ri:menu-unfold-line'" class="w-4 h-4" />
                             </button>
                             <button
@@ -3374,18 +3403,35 @@ onUnmounted(async () => {
                                 <Icon icon="ri:save-line" class="w-4 h-4" />
                             </button>
                             <div class="dropdown dropdown-end">
-                                <div tabindex="0" role="button" class="btn btn-sm btn-ghost btn-square" :title="$t('script-list.more_actions')">
+                                <div
+                                    tabindex="0"
+                                    role="button"
+                                    class="btn btn-sm btn-ghost btn-square"
+                                    :title="$t('script-list.more_actions')"
+                                >
                                     <Icon icon="ri:more-line" class="w-4 h-4" />
                                 </div>
                                 <ul tabindex="-1" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
-                                    <li><a @click="openSchedulerDialog">{{ $t("script-list.scheduler_config") }}</a></li>
-                                    <li><a @click="openSidePanel('config')">{{ $t("script-list.script_config") }}</a></li>
-                                    <li><a @click="openColorToolPage">{{ $t("script-list.color_tool") }}</a></li>
-                                    <li><a @click="openRecordToolPage">{{ $t("script-list.record_tool") }}</a></li>
-                                    <li><a @click="restartAsAdmin">{{ $t("script-list.restart_as_admin") }}</a></li>
+                                    <li>
+                                        <a @click="openSchedulerDialog">{{ $t("script-list.scheduler_config") }}</a>
+                                    </li>
+                                    <li>
+                                        <a @click="openSidePanel('config')">{{ $t("script-list.script_config") }}</a>
+                                    </li>
+                                    <li>
+                                        <a @click="openColorToolPage">{{ $t("script-list.color_tool") }}</a>
+                                    </li>
+                                    <li>
+                                        <a @click="openRecordToolPage">{{ $t("script-list.record_tool") }}</a>
+                                    </li>
+                                    <li>
+                                        <a @click="restartAsAdmin">{{ $t("script-list.restart_as_admin") }}</a>
+                                    </li>
                                     <li>
                                         <a @click="toggleGlobalShortcut">{{
-                                            globalShortcutEnabled ? $t("script-list.disable_global_shortcut") : $t("script-list.enable_global_shortcut")
+                                            globalShortcutEnabled
+                                                ? $t("script-list.disable_global_shortcut")
+                                                : $t("script-list.enable_global_shortcut")
                                         }}</a>
                                     </li>
                                 </ul>
@@ -3422,7 +3468,11 @@ onUnmounted(async () => {
                                 <Icon icon="ri:terminal-line" class="w-4 h-4 text-base-content/60" />
                                 <span class="text-xs text-base-content/60">{{ $t("script-list.console") }}</span>
                                 <span v-if="isRunning" class="text-xs text-info">
-                                    {{ $t("script-runtime-floating.runningLabel", { count: runningScriptCount > 0 ? runningScriptCount : 1 }) }}<span v-if="runningScriptName">: {{ runningScriptName }}</span>
+                                    {{
+                                        $t("script-runtime-floating.runningLabel", {
+                                            count: runningScriptCount > 0 ? runningScriptCount : 1,
+                                        })
+                                    }}<span v-if="runningScriptName">: {{ runningScriptName }}</span>
                                     <span v-if="runningScriptCount > 1">（{{ runningScriptCount }}）</span>
                                 </span>
                             </div>
@@ -3436,7 +3486,9 @@ onUnmounted(async () => {
                             </div>
                         </div>
                         <div id="console-output" class="flex-1 overflow-auto p-3 font-mono text-xs user-select">
-                            <div v-if="consoleLogs.length === 0" class="text-base-content/40 text-center py-4">{{ $t("script-list.no_output") }}</div>
+                            <div v-if="consoleLogs.length === 0" class="text-base-content/40 text-center py-4">
+                                {{ $t("script-list.no_output") }}
+                            </div>
                             <div v-else class="space-y-1">
                                 <div v-for="(log, index) in consoleLogs" :key="index" class="flex gap-2">
                                     <span class="text-base-content/40 shrink-0">{{
@@ -3534,7 +3586,9 @@ onUnmounted(async () => {
                                         </select>
 
                                         <div v-else-if="item.kind === 'multi-select'" class="space-y-2">
-                                            <div v-if="item.options.length === 0" class="text-xs text-base-content/60">{{ $t("script-list.no_options") }}</div>
+                                            <div v-if="item.options.length === 0" class="text-xs text-base-content/60">
+                                                {{ $t("script-list.no_options") }}
+                                            </div>
                                             <div v-else class="space-y-1">
                                                 <div
                                                     v-for="option in getScriptConfigMultiSelectDisplayOptions(item)"
@@ -3650,7 +3704,12 @@ onUnmounted(async () => {
                 <div class="mb-4">
                     <label class="label block">
                         <div class="mb-2 text-sm">{{ $t("script-list.script_name") }}</div>
-                        <input v-model="newScriptName" type="text" :placeholder="$t('script-list.enter_script_name')" class="input input-bordered w-full" />
+                        <input
+                            v-model="newScriptName"
+                            type="text"
+                            :placeholder="$t('script-list.enter_script_name')"
+                            class="input input-bordered w-full"
+                        />
                     </label>
                 </div>
                 <div class="mb-4">
@@ -3747,7 +3806,9 @@ onUnmounted(async () => {
                                 <option :value="false">{{ $t("script-list.sequential_default") }}</option>
                                 <option :value="true">{{ $t("script-list.enable_flow_control") }}</option>
                             </select>
-                            <button class="btn btn-xs" :disabled="stepIndex === 0" @click="moveSchedulerStep(stepIndex, -1)">{{ $t("script-list.move_up") }}</button>
+                            <button class="btn btn-xs" :disabled="stepIndex === 0" @click="moveSchedulerStep(stepIndex, -1)">
+                                {{ $t("script-list.move_up") }}
+                            </button>
                             <button
                                 class="btn btn-xs"
                                 :disabled="stepIndex === schedulerDraftConfig.steps.length - 1"
@@ -3779,7 +3840,9 @@ onUnmounted(async () => {
                                         {{ option.label }}
                                     </option>
                                 </select>
-                                <button class="btn btn-xs btn-ghost" @click="removeSchedulerCase(stepIndex, caseIndex)">{{ $t("script-list.delete_case") }}</button>
+                                <button class="btn btn-xs btn-ghost" @click="removeSchedulerCase(stepIndex, caseIndex)">
+                                    {{ $t("script-list.delete_case") }}
+                                </button>
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
                                 <span class="text-xs">{{ $t("script-list.default_label") }}</span>
