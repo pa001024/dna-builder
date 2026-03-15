@@ -1,6 +1,121 @@
 ;(() => {
     const CONTROL_EVENT = "__dna_cloudgame_control__"
     const BRIDGE_NAME = "__DNA_CLOUDGAME_BRIDGE__"
+    const POINTER_LOCK_EVENT_NAMES = new Set(["pointerlockchange", "mozpointerlockchange", "webkitpointerlockchange"])
+
+    /**
+     * 在线上 pointer lock 切换期间，仅屏蔽回调内部延迟补发的 Esc。
+     * 不阻断 pointer lock 状态流转，只给对应回调和它派生出的定时器打补丁。
+     */
+    ;(() => {
+        const originalAddEventListener = EventTarget.prototype.addEventListener
+        const originalRemoveEventListener = EventTarget.prototype.removeEventListener
+        const originalSetTimeout = window.setTimeout.bind(window)
+        /** @type {WeakMap<EventListenerOrEventListenerObject, EventListener>} */
+        const wrappedListenerMap = new WeakMap()
+        let suppressEscapeDuringPointerLockChange = false
+        let insidePointerLockHandler = 0
+
+        /**
+         * 在指定回调执行期间打开 Esc 屏蔽。
+         * @template {(...args: any[]) => any} T
+         * @param {T} callback 原始回调
+         * @param {unknown} context this 绑定
+         * @param {unknown[]} args 参数列表
+         * @returns {ReturnType<T>} 回调返回值
+         */
+        function runWithPointerLockSuppression(callback, context, args) {
+            suppressEscapeDuringPointerLockChange = true
+            try {
+                return Reflect.apply(callback, context, args)
+            } finally {
+                suppressEscapeDuringPointerLockChange = false
+            }
+        }
+
+        /**
+         * 包装 pointer lock 回调，并标记其内部衍生的异步任务。
+         * @param {EventListenerOrEventListenerObject | null | undefined} listener 原始监听器
+         * @returns {EventListenerOrEventListenerObject | null | undefined} 包装后的监听器
+         */
+        const wrapPointerLockListener = listener => {
+            if (typeof listener !== "function") {
+                return listener
+            }
+            const existingWrapped = wrappedListenerMap.get(listener)
+            if (existingWrapped) {
+                return existingWrapped
+            }
+            const wrappedListener = function wrappedPointerLockListener(...args) {
+                insidePointerLockHandler += 1
+                try {
+                    return runWithPointerLockSuppression(listener, this, args)
+                } finally {
+                    insidePointerLockHandler -= 1
+                }
+            }
+            wrappedListenerMap.set(listener, wrappedListener)
+            return wrappedListener
+        }
+
+        /**
+         * 包装通过属性赋值方式注册的 pointer lock 回调。
+         * 线上云游戏使用的是 `document.onpointerlockchange = ...` 这条路径。
+         * @param {object} target 原型对象
+         * @param {string} property 属性名
+         */
+        function patchPointerLockHandlerProperty(target, property) {
+            const descriptor = Object.getOwnPropertyDescriptor(target, property)
+            if (!descriptor || typeof descriptor.set !== "function" || typeof descriptor.get !== "function" || descriptor.configurable === false) {
+                return
+            }
+            Object.defineProperty(target, property, {
+                configurable: true,
+                enumerable: descriptor.enumerable ?? true,
+                get() {
+                    return Reflect.apply(descriptor.get, this, [])
+                },
+                set(listener) {
+                    return Reflect.apply(descriptor.set, this, [wrapPointerLockListener(listener)])
+                },
+            })
+        }
+
+        EventTarget.prototype.addEventListener = function patchedAddEventListener(type, listener, options) {
+            const normalizedType = typeof type === "string" ? type.toLowerCase() : ""
+            if (this === document && POINTER_LOCK_EVENT_NAMES.has(normalizedType)) {
+                return Reflect.apply(originalAddEventListener, this, [type, wrapPointerLockListener(listener), options])
+            }
+            return Reflect.apply(originalAddEventListener, this, [type, listener, options])
+        }
+
+        EventTarget.prototype.removeEventListener = function patchedRemoveEventListener(type, listener, options) {
+            const normalizedType = typeof type === "string" ? type.toLowerCase() : ""
+            if (this === document && POINTER_LOCK_EVENT_NAMES.has(normalizedType) && typeof listener === "function") {
+                const wrappedListener = wrappedListenerMap.get(listener) ?? listener
+                return Reflect.apply(originalRemoveEventListener, this, [type, wrappedListener, options])
+            }
+            return Reflect.apply(originalRemoveEventListener, this, [type, listener, options])
+        }
+
+        window.setTimeout = function patchedSetTimeout(callback, delay, ...args) {
+            if (insidePointerLockHandler > 0 && typeof callback === "function") {
+                const wrappedCallback = function wrappedPointerLockTimeoutCallback(...timeoutArgs) {
+                    return runWithPointerLockSuppression(callback, this, timeoutArgs)
+                }
+                return originalSetTimeout(wrappedCallback, delay, ...args)
+            }
+            return originalSetTimeout(callback, delay, ...args)
+        }
+
+        if (typeof Document !== "undefined") {
+            for (const eventName of POINTER_LOCK_EVENT_NAMES) {
+                patchPointerLockHandlerProperty(Document.prototype, `on${eventName}`)
+            }
+        }
+
+        window.__DNA_SUPPRESS_ESCAPE_ON_POINTERLOCK__ = () => suppressEscapeDuringPointerLockChange
+    })()
 
     /**
      * 安全序列化任意值，避免桥接事件因为循环引用而失败。
@@ -305,6 +420,19 @@
     function wrapPostMessage(original, kind) {
         return function wrappedPostMessage(...postArgs) {
             const [message] = postArgs
+            if (
+                window.__DNA_SUPPRESS_ESCAPE_ON_POINTERLOCK__?.() &&
+                message &&
+                typeof message === "object" &&
+                (message.action === "x_fn_exec" || message.action === "fn_exec") &&
+                message.actionName === "key_event" &&
+                Array.isArray(message.args)
+            ) {
+                const numericArgs = message.args.map(value => Number(value))
+                if (numericArgs.includes(27)) {
+                    return undefined
+                }
+            }
             if (isTransportPacket(message)) {
                 if (interestingActions.has(message.action)) {
                     rememberTransport(this, kind, message)

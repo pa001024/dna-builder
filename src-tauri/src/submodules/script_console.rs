@@ -219,7 +219,8 @@ fn formatter(data: &[JsValue], context: &mut Context) -> JsResult<String> {
                                 && let Ok(to_string) = obj.get(js_string!("toString"), context)
                                 && let Some(to_string_fn) = to_string.as_function()
                             {
-                                let arg = to_string_fn.call(arg, &[], context)?.to_string(context)?;
+                                let arg =
+                                    to_string_fn.call(arg, &[], context)?.to_string(context)?;
                                 formatted.push_str(&arg.to_std_string_escaped());
                                 written = true;
                             }
@@ -723,7 +724,11 @@ impl Console {
         logger: &impl Logger,
         context: &mut Context,
     ) -> JsResult<JsValue> {
-        logger.info(value_to_console_string(args.get_or_undefined(0), context)?, &console.state, context)?;
+        logger.info(
+            value_to_console_string(args.get_or_undefined(0), context)?,
+            &console.state,
+            context,
+        )?;
         Ok(JsValue::undefined())
     }
 }

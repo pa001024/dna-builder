@@ -48,8 +48,7 @@ fn _compress_bytes_zip_deflate(raw: &[u8]) -> Result<Vec<u8>, String> {
 /// 使用 ZIP(Deflate) 解压字节数组。
 fn _decompress_bytes_zip_deflate(compressed: &[u8]) -> Result<Vec<u8>, String> {
     let cursor = Cursor::new(compressed);
-    let mut archive =
-        ZipArchive::new(cursor).map_err(|e| format!("ORB 特征 ZIP 打开失败: {e}"))?;
+    let mut archive = ZipArchive::new(cursor).map_err(|e| format!("ORB 特征 ZIP 打开失败: {e}"))?;
     if archive.is_empty() {
         return Err("ORB 特征 ZIP 文件为空".to_string());
     }
@@ -372,8 +371,8 @@ pub fn preprocess_minimap_for_sift_impl(
     // 稀疏场景（仅看到一小块地图）时，优先保留离圆心最近的连通域，进一步抑制背景噪声。
     let minimap_area =
         core::count_non_zero(&mask).map_err(|e| format!("统计小地图区域像素失败: {e}"))?;
-    let cleaned_area = core::count_non_zero(&cleaned_mask)
-        .map_err(|e| format!("统计预处理前景像素失败: {e}"))?;
+    let cleaned_area =
+        core::count_non_zero(&cleaned_mask).map_err(|e| format!("统计预处理前景像素失败: {e}"))?;
     if minimap_area > 0 && (cleaned_area as f64) / (minimap_area as f64) < 0.05 {
         let mut sparse_labels = Mat::default();
         let mut sparse_stats = Mat::default();
@@ -649,12 +648,19 @@ pub fn segment_single_line_chars_impl(
 }
 
 /// 根据色键集合生成二值灰度图（命中为 255，未命中为 0）。
-pub fn color_filter_impl(mat: &Mat, colors: &[u32], tolerance: u8) -> Result<Mat, String> {
+pub fn color_filter_impl(mat: &Mat, colors: &[u32], tolerances: &[u8]) -> Result<Mat, String> {
     if mat.rows() <= 0 || mat.cols() <= 0 {
         return Err("源图像尺寸无效".to_string());
     }
     if colors.is_empty() {
         return Err("colors 不能为空".to_string());
+    }
+    if tolerances.len() != colors.len() {
+        return Err(format!(
+            "tolerances 长度必须与 colors 一致，期望 {}，实际 {}",
+            colors.len(),
+            tolerances.len()
+        ));
     }
 
     let mut bgr_mat = Mat::default();
@@ -673,18 +679,18 @@ pub fn color_filter_impl(mat: &Mat, colors: &[u32], tolerance: u8) -> Result<Mat
         .to_mat()
         .map_err(|e| format!("初始化掩码失败: {e}"))?;
 
-    for color in colors {
+    for (color, tolerance) in colors.iter().zip(tolerances.iter()) {
         let (b, g, r) = rgb_to_bgr(*color);
         let lower = Scalar::new(
-            b.saturating_sub(tolerance) as f64,
-            g.saturating_sub(tolerance) as f64,
-            r.saturating_sub(tolerance) as f64,
+            b.saturating_sub(*tolerance) as f64,
+            g.saturating_sub(*tolerance) as f64,
+            r.saturating_sub(*tolerance) as f64,
             0.0,
         );
         let upper = Scalar::new(
-            b.saturating_add(tolerance) as f64,
-            g.saturating_add(tolerance) as f64,
-            r.saturating_add(tolerance) as f64,
+            b.saturating_add(*tolerance) as f64,
+            g.saturating_add(*tolerance) as f64,
+            r.saturating_add(*tolerance) as f64,
             255.0,
         );
 
@@ -935,13 +941,20 @@ pub fn color_key_match_impl(
     mat: &Mat,
     colors: &[u32],
     min_mean: f64,
-    tolerance: u8,
+    tolerances: &[u8],
 ) -> Result<i32, String> {
     if mat.rows() <= 0 || mat.cols() <= 0 {
         return Err("源图像尺寸无效".to_string());
     }
     if colors.is_empty() {
         return Ok(-1);
+    }
+    if tolerances.len() != colors.len() {
+        return Err(format!(
+            "tolerances 长度必须与 colors 一致，期望 {}，实际 {}",
+            colors.len(),
+            tolerances.len()
+        ));
     }
 
     let mut bgr_mat = Mat::default();
@@ -958,18 +971,18 @@ pub fn color_key_match_impl(
     let mut best_mean = 0.0f64;
     let mut mask = Mat::default();
 
-    for (index, color) in colors.iter().enumerate() {
+    for (index, (color, tolerance)) in colors.iter().zip(tolerances.iter()).enumerate() {
         let (b, g, r) = rgb_to_bgr(*color);
         let lower = Scalar::new(
-            b.saturating_sub(tolerance) as f64,
-            g.saturating_sub(tolerance) as f64,
-            r.saturating_sub(tolerance) as f64,
+            b.saturating_sub(*tolerance) as f64,
+            g.saturating_sub(*tolerance) as f64,
+            r.saturating_sub(*tolerance) as f64,
             0.0,
         );
         let upper = Scalar::new(
-            b.saturating_add(tolerance) as f64,
-            g.saturating_add(tolerance) as f64,
-            r.saturating_add(tolerance) as f64,
+            b.saturating_add(*tolerance) as f64,
+            g.saturating_add(*tolerance) as f64,
+            r.saturating_add(*tolerance) as f64,
             255.0,
         );
 
@@ -1288,7 +1301,8 @@ fn _detect_orb_descriptors(gray: &Mat) -> Result<Mat, String> {
     }
 
     for candidate in &candidates {
-        let mut orb = features2d::ORB::create_def().map_err(|e| format!("创建 ORB 检测器失败: {e}"))?;
+        let mut orb =
+            features2d::ORB::create_def().map_err(|e| format!("创建 ORB 检测器失败: {e}"))?;
         let mut keypoints = core::Vector::<core::KeyPoint>::new();
         let mut descriptors = Mat::default();
         orb.detect_and_compute(
@@ -1314,7 +1328,11 @@ fn _detect_orb_descriptors(gray: &Mat) -> Result<Mat, String> {
 /// - 压缩前字节流格式为 `[rows:u16][cols:u16][descriptor bytes...]`；
 /// - 对整段字节流做 ZIP(Deflate) 压缩后，再做 Base64（无填充）编码。
 fn _encode_orb_descriptors(descriptors: &Mat) -> Result<String, String> {
-    let rows = if descriptors.empty() { 0 } else { descriptors.rows() };
+    let rows = if descriptors.empty() {
+        0
+    } else {
+        descriptors.rows()
+    };
     let cols = if descriptors.empty() {
         ORB_DESCRIPTOR_COLS
     } else {
@@ -1840,8 +1858,16 @@ pub fn sift_stitch_impl(
 
     let base_w = base_bgr.cols();
     let base_h = base_bgr.rows();
-    let pad_left = if min_x < 0.0 { (-min_x).ceil() as i32 } else { 0 };
-    let pad_top = if min_y < 0.0 { (-min_y).ceil() as i32 } else { 0 };
+    let pad_left = if min_x < 0.0 {
+        (-min_x).ceil() as i32
+    } else {
+        0
+    };
+    let pad_top = if min_y < 0.0 {
+        (-min_y).ceil() as i32
+    } else {
+        0
+    };
     let pad_right = if max_x > base_w as f32 {
         (max_x.ceil() as i32 - base_w).max(0)
     } else {
@@ -1944,8 +1970,12 @@ pub fn sift_stitch_impl(
         .map_err(|e| format!("融合拼接图失败: {e}"))?;
 
     let mut transformed_on_canvas = core::Vector::<Point2f>::new();
-    core::perspective_transform(&patch_corners, &mut transformed_on_canvas, &homography_on_canvas)
-        .map_err(|e| format!("计算画布角点失败: {e}"))?;
+    core::perspective_transform(
+        &patch_corners,
+        &mut transformed_on_canvas,
+        &homography_on_canvas,
+    )
+    .map_err(|e| format!("计算画布角点失败: {e}"))?;
     if transformed_on_canvas.len() != 4 {
         return Ok(None);
     }
@@ -2292,9 +2322,57 @@ pub fn draw_bboxes_impl(
         }
 
         let rect = core::Rect::new(x0, y0, cw, ch);
-        imgproc::rectangle(&mut output, rect, draw_color, draw_thickness, imgproc::LINE_8, 0)
-            .map_err(|e| format!("绘制 bbox[{index}] 失败: {e}"))?;
+        imgproc::rectangle(
+            &mut output,
+            rect,
+            draw_color,
+            draw_thickness,
+            imgproc::LINE_8,
+            0,
+        )
+        .map_err(|e| format!("绘制 bbox[{index}] 失败: {e}"))?;
     }
 
     Ok(output)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::color_filter_impl;
+    use opencv::{
+        core::{self, CV_8UC3, Mat, Scalar},
+        prelude::{MatTrait, MatTraitConst},
+    };
+
+    /// 构造最小测试图像，验证 colorFilter 支持按颜色分别指定容差。
+    #[test]
+    fn color_filter_uses_per_color_tolerances() {
+        let mut mat = Mat::new_rows_cols_with_default(1, 2, CV_8UC3, Scalar::all(0.0))
+            .expect("创建测试图像失败");
+        *mat.at_2d_mut::<core::Vec3b>(0, 0).expect("写入像素失败") = core::Vec3b::from([0, 0, 250]);
+        *mat.at_2d_mut::<core::Vec3b>(0, 1).expect("写入像素失败") = core::Vec3b::from([0, 245, 0]);
+
+        let mask = color_filter_impl(&mat, &[0xff0000, 0x00ff00], &[10, 2])
+            .expect("执行 color_filter_impl 失败");
+
+        let first = *mask.at_2d::<u8>(0, 0).expect("读取首个掩码像素失败");
+        let second = *mask.at_2d::<u8>(0, 1).expect("读取第二个掩码像素失败");
+
+        assert_eq!(first, 255);
+        assert_eq!(second, 0);
+    }
+
+    /// 验证 colorKeyMatch 支持按颜色分别指定容差，并正确返回最佳索引。
+    #[test]
+    fn color_key_match_uses_per_color_tolerances() {
+        let mut mat = Mat::new_rows_cols_with_default(1, 2, CV_8UC3, Scalar::all(0.0))
+            .expect("创建测试图像失败");
+        *mat.at_2d_mut::<core::Vec3b>(0, 0).expect("写入像素失败") = core::Vec3b::from([0, 0, 250]);
+        *mat.at_2d_mut::<core::Vec3b>(0, 1).expect("写入像素失败") = core::Vec3b::from([0, 245, 0]);
+
+        let matched = super::color_key_match_impl(&mat, &[0xff0000, 0x00ff00], 1.0, &[10, 2])
+            .expect("执行 color_key_match_impl 失败");
+
+        assert_eq!(matched, 0);
+    }
 }

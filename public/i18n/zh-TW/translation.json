@@ -5493,6 +5493,7 @@
         "preparse_none": "，未解析到可用的 readConfig 字面量",
         "preparse_prefix": "，預解析 {{created}} 項",
         "preparse_skipped": "（跳過 {{skipped}} 項）",
+        "publish_update": "發布/更新",
         "publish_update_failed": "發布/更新腳本失敗，請重試",
         "record_tool": "錄製工具",
         "rename_failed": "重新命名失敗，請重試",
@@ -5549,6 +5550,7 @@
         "toggle_hotkey_failed": "切換腳本熱鍵狀態失敗",
         "toggle_status_panel": "切換狀態欄",
         "type": "類型",
+        "update": "更新",
         "updated": "已更新"
     },
     "script-runtime-floating": {

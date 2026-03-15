@@ -823,10 +823,10 @@ declare function dllCall(func: number | string | { Ptr: number }, ...typeAndValu
  * 色键过滤并返回灰度二值图
  * @param mat 源图像 Mat
  * @param colors 色键数组（例如 [0xffffff, 0xff0000]）
- * @param tolerance 颜色容差（0-255）
+ * @param tolerance 颜色容差（0-255），可传单个数值或与 `colors` 一一对应的数值数组
  * @returns 灰度二值图 Mat（命中为255，未命中为0）
  */
-declare function colorFilter(mat: Mat, colors: number[], tolerance: number): Mat
+declare function colorFilter(mat: Mat, colors: number[], tolerance: number | number[]): Mat
 
 /**
  * 使用 HSL 加权差进行色键过滤并返回灰度二值图
@@ -843,10 +843,10 @@ declare function colorFilterHSL(mat: Mat, colors: number[], tolerance: number, w
  * @param mat 源图像 Mat
  * @param colors 色键数组（例如 [0xffffff, 0xff0000]）
  * @param minMean 最小 mean 阈值（0-255），低于该值返回 -1，默认 0
- * @param tolerance 颜色容差（0-255），默认 0
+ * @param tolerance 颜色容差（0-255），可传单个数值或与 `colors` 一一对应的数值数组，默认 0
  * @returns 命中的最佳索引；未命中返回 -1
  */
-declare function colorKeyMatch(mat: Mat, colors: number[], minMean?: number, tolerance?: number): number
+declare function colorKeyMatch(mat: Mat, colors: number[], minMean?: number, tolerance?: number | number[]): number
 
 /**
  * 批量模板匹配（并行）

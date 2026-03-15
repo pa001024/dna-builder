@@ -6,12 +6,12 @@ use crate::submodules::jstimer::JsTimer;
 #[cfg(feature = "dob-script-cli")]
 use crate::submodules::logger::StdioLogger;
 use crate::submodules::logger::TauriLogger;
-use crate::submodules::script_console::Console;
+#[cfg(feature = "dob-script-cli")]
+use crate::submodules::script_builtin::set_script_cli_config;
 use crate::submodules::script_builtin::{
     register_builtin_functions, set_current_script_path, set_script_event_app_handle,
 };
-#[cfg(feature = "dob-script-cli")]
-use crate::submodules::script_builtin::set_script_cli_config;
+use crate::submodules::script_console::Console;
 use boa_engine::builtins::error::Error as BoaErrorObject;
 use boa_engine::context::ContextBuilder;
 use boa_engine::job::JobExecutor;
@@ -258,13 +258,21 @@ pub async fn run_script_with_tauri_console(
                         .map(|s| s.to_std_string_escaped())
                         .unwrap_or_else(|_| format!("{:?}", result));
                     let error_message = format!("JavaScript 返回 Error 对象: {}", error_detail);
-                    return Err(emit_script_error(&app_handle, script_path.as_str(), error_message));
+                    return Err(emit_script_error(
+                        &app_handle,
+                        script_path.as_str(),
+                        error_message,
+                    ));
                 }
 
                 // 使用同步版本的 run_jobs
                 if let Err(e) = job_executor.run_jobs(context) {
                     let error_message = format_js_error_message(context, "运行任务失败", &e);
-                    return Err(emit_script_error(&app_handle, script_path.as_str(), error_message));
+                    return Err(emit_script_error(
+                        &app_handle,
+                        script_path.as_str(),
+                        error_message,
+                    ));
                 }
 
                 // 将脚本返回值转成字符串传回前端，供调度器流控做 case/default 匹配。
@@ -291,7 +299,11 @@ pub async fn run_script_with_tauri_console(
 
                 // 解析或运行时异常时，写入终端并同步推送到前端脚本控制台
                 let error_message = format_js_error_message(context, "JavaScript 执行错误", &e);
-                Err(emit_script_error(&app_handle, script_path.as_str(), error_message))
+                Err(emit_script_error(
+                    &app_handle,
+                    script_path.as_str(),
+                    error_message,
+                ))
             }
         }
     })
@@ -402,7 +414,10 @@ pub async fn run_script_with_stdio_console(
 }
 
 /// 运行脚本（对外入口）：先做路径规范化，再执行脚本。
-pub async fn run_script_file(script_path: String, app_handle: tauri::AppHandle) -> Result<String, String> {
+pub async fn run_script_file(
+    script_path: String,
+    app_handle: tauri::AppHandle,
+) -> Result<String, String> {
     let normalized_path = normalize_script_path(script_path)?;
     run_script_with_tauri_console(normalized_path, app_handle).await
 }

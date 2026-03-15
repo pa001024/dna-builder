@@ -5525,6 +5525,7 @@
         "preparse_none": ", 사용할 수 있는 readConfig 리터럴을 찾지 못했습니다",
         "preparse_prefix": ", {{created}}개 항목을 사전 파싱함",
         "preparse_skipped": " ({{skipped}}개 건너뜀)",
+        "publish_update": "게시/업데이트",
         "publish_update_failed": "스크립트 게시/업데이트에 실패했습니다. 다시 시도해 주세요.",
         "record_tool": "기록 도구",
         "rename_failed": "이름 변경에 실패했습니다. 다시 시도해 주세요.",
@@ -5581,6 +5582,7 @@
         "toggle_hotkey_failed": "스크립트 단축키 전환에 실패했습니다",
         "toggle_status_panel": "상태 패널 전환",
         "type": "유형",
+        "update": "업데이트",
         "updated": "업데이트됨"
     },
     "script-runtime-floating": {

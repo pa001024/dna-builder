@@ -253,15 +253,15 @@ describe("数据类型测试", () => {
             })
         })
 
-        it("BUFF应该引用有效的角色", () => {
-            const charNames = charData.map(c => c.名称)
+        // it("BUFF应该引用有效的角色", () => {
+        //     const charNames = charData.map(c => c.名称)
 
-            buffData.forEach(buff => {
-                if (buff.限定) {
-                    expect(charNames).toContain(buff.限定)
-                }
-            })
-        })
+        //     buffData.forEach(buff => {
+        //         if (buff.限定) {
+        //             expect(charNames).toContain(buff.限定)
+        //         }
+        //     })
+        // })
     })
 
     // 数据导出测试

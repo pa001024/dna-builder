@@ -27,7 +27,11 @@ fn _expect_mat(value: Option<&JsValue>) -> JsResult<JsObject<JsMat>> {
     value
         .and_then(JsValue::as_object)
         .and_then(|obj| obj.downcast::<JsMat>().ok())
-        .ok_or_else(|| JsNativeError::typ().with_message("Argument must be a Mat").into())
+        .ok_or_else(|| {
+            JsNativeError::typ()
+                .with_message("Argument must be a Mat")
+                .into()
+        })
 }
 
 /// 解析可选字符串参数，`undefined/null` 返回默认值。
@@ -46,7 +50,11 @@ fn _parse_optional_string_arg(
     value
         .to_string(ctx)
         .map(|s| s.to_std_string_lossy())
-        .map_err(|_| JsNativeError::typ().with_message(format!("参数[{index}] 必须是字符串")).into())
+        .map_err(|_| {
+            JsNativeError::typ()
+                .with_message(format!("参数[{index}] 必须是字符串"))
+                .into()
+        })
 }
 
 /// 解析可选数字参数，`undefined/null` 返回默认值。
@@ -62,9 +70,11 @@ fn _parse_optional_number_arg(
     if value.is_undefined() || value.is_null() {
         return Ok(default_value);
     }
-    value
-        .to_number(ctx)
-        .map_err(|_| JsNativeError::typ().with_message(format!("参数[{index}] 必须是数字")).into())
+    value.to_number(ctx).map_err(|_| {
+        JsNativeError::typ()
+            .with_message(format!("参数[{index}] 必须是数字"))
+            .into()
+    })
 }
 
 /// 解析可选布尔参数，`undefined/null` 返回默认值。
@@ -115,7 +125,11 @@ fn _parse_scalar_array(value: &JsValue, ctx: &mut Context) -> JsResult<Scalar> {
 /// - `undefined/null`: 默认 `Scalar::all(0.0)`
 /// - `number`: 扩展为 `[n, n, n, n]`
 /// - `number[]`: 解析为 `Scalar`
-fn _parse_optional_scalar_arg(args: &[JsValue], index: usize, ctx: &mut Context) -> JsResult<Scalar> {
+fn _parse_optional_scalar_arg(
+    args: &[JsValue],
+    index: usize,
+    ctx: &mut Context,
+) -> JsResult<Scalar> {
     let Some(value) = args.get(index) else {
         return Ok(Scalar::all(0.0));
     };
@@ -184,17 +198,15 @@ impl Class for JsDnnNet {
             js_string!("empty"),
             0,
             NativeFunction::from_fn_ptr(|this, _args, _ctx| {
-                let binding = this.as_object().ok_or_else(|| {
-                    JsNativeError::typ().with_message("Object is not a DnnNet")
-                })?;
+                let binding = this
+                    .as_object()
+                    .ok_or_else(|| JsNativeError::typ().with_message("Object is not a DnnNet"))?;
                 let js_net = binding
                     .downcast_ref::<JsDnnNet>()
                     .ok_or_else(|| JsNativeError::typ().with_message("Object is not a DnnNet"))?;
-                let is_empty = js_net
-                    .inner
-                    .borrow()
-                    .empty()
-                    .map_err(|e| JsNativeError::error().with_message(format!("Net.empty 失败: {e}")))?;
+                let is_empty = js_net.inner.borrow().empty().map_err(|e| {
+                    JsNativeError::error().with_message(format!("Net.empty 失败: {e}"))
+                })?;
                 Ok(JsValue::new(is_empty))
             }),
         );
@@ -205,19 +217,26 @@ impl Class for JsDnnNet {
             NativeFunction::from_fn_ptr(|this, args, ctx| {
                 let backend_id = args
                     .first()
-                    .ok_or_else(|| JsNativeError::typ().with_message("setPreferableBackend 需要 1 个参数"))?
+                    .ok_or_else(|| {
+                        JsNativeError::typ().with_message("setPreferableBackend 需要 1 个参数")
+                    })?
                     .to_number(ctx)
                     .map_err(|_| JsNativeError::typ().with_message("backendId 必须是数字"))?
                     .round() as i32;
-                let binding = this.as_object().ok_or_else(|| {
-                    JsNativeError::typ().with_message("Object is not a DnnNet")
-                })?;
+                let binding = this
+                    .as_object()
+                    .ok_or_else(|| JsNativeError::typ().with_message("Object is not a DnnNet"))?;
                 let js_net = binding
                     .downcast_ref::<JsDnnNet>()
                     .ok_or_else(|| JsNativeError::typ().with_message("Object is not a DnnNet"))?;
-                js_net.inner.borrow_mut().set_preferable_backend(backend_id).map_err(|e| {
-                    JsNativeError::error().with_message(format!("setPreferableBackend 失败: {e}"))
-                })?;
+                js_net
+                    .inner
+                    .borrow_mut()
+                    .set_preferable_backend(backend_id)
+                    .map_err(|e| {
+                        JsNativeError::error()
+                            .with_message(format!("setPreferableBackend 失败: {e}"))
+                    })?;
                 Ok(JsValue::undefined())
             }),
         );
@@ -228,19 +247,26 @@ impl Class for JsDnnNet {
             NativeFunction::from_fn_ptr(|this, args, ctx| {
                 let target_id = args
                     .first()
-                    .ok_or_else(|| JsNativeError::typ().with_message("setPreferableTarget 需要 1 个参数"))?
+                    .ok_or_else(|| {
+                        JsNativeError::typ().with_message("setPreferableTarget 需要 1 个参数")
+                    })?
                     .to_number(ctx)
                     .map_err(|_| JsNativeError::typ().with_message("targetId 必须是数字"))?
                     .round() as i32;
-                let binding = this.as_object().ok_or_else(|| {
-                    JsNativeError::typ().with_message("Object is not a DnnNet")
-                })?;
+                let binding = this
+                    .as_object()
+                    .ok_or_else(|| JsNativeError::typ().with_message("Object is not a DnnNet"))?;
                 let js_net = binding
                     .downcast_ref::<JsDnnNet>()
                     .ok_or_else(|| JsNativeError::typ().with_message("Object is not a DnnNet"))?;
-                js_net.inner.borrow_mut().set_preferable_target(target_id).map_err(|e| {
-                    JsNativeError::error().with_message(format!("setPreferableTarget 失败: {e}"))
-                })?;
+                js_net
+                    .inner
+                    .borrow_mut()
+                    .set_preferable_target(target_id)
+                    .map_err(|e| {
+                        JsNativeError::error()
+                            .with_message(format!("setPreferableTarget 失败: {e}"))
+                    })?;
                 Ok(JsValue::undefined())
             }),
         );
@@ -255,9 +281,9 @@ impl Class for JsDnnNet {
                 let scale = _parse_optional_number_arg(args, 2, 1.0, ctx)?;
                 let mean = _parse_optional_scalar_arg(args, 3, ctx)?;
 
-                let binding = this.as_object().ok_or_else(|| {
-                    JsNativeError::typ().with_message("Object is not a DnnNet")
-                })?;
+                let binding = this
+                    .as_object()
+                    .ok_or_else(|| JsNativeError::typ().with_message("Object is not a DnnNet"))?;
                 let js_net = binding
                     .downcast_ref::<JsDnnNet>()
                     .ok_or_else(|| JsNativeError::typ().with_message("Object is not a DnnNet"))?;
@@ -265,7 +291,9 @@ impl Class for JsDnnNet {
                     .inner
                     .borrow_mut()
                     .set_input(&*blob.data().inner, input_name.as_str(), scale, mean)
-                    .map_err(|e| JsNativeError::error().with_message(format!("setInput 失败: {e}")))?;
+                    .map_err(|e| {
+                        JsNativeError::error().with_message(format!("setInput 失败: {e}"))
+                    })?;
 
                 Ok(JsValue::undefined())
             }),
@@ -275,9 +303,9 @@ impl Class for JsDnnNet {
             js_string!("forward"),
             1,
             NativeFunction::from_fn_ptr(|this, args, ctx| {
-                let binding = this.as_object().ok_or_else(|| {
-                    JsNativeError::typ().with_message("Object is not a DnnNet")
-                })?;
+                let binding = this
+                    .as_object()
+                    .ok_or_else(|| JsNativeError::typ().with_message("Object is not a DnnNet"))?;
                 let js_net = binding
                     .downcast_ref::<JsDnnNet>()
                     .ok_or_else(|| JsNativeError::typ().with_message("Object is not a DnnNet"))?;
@@ -286,20 +314,28 @@ impl Class for JsDnnNet {
                     .first()
                     .is_some_and(|v| !v.is_undefined() && !v.is_null())
                 {
-                    let output_name = args[0].to_string(ctx).map(|s| s.to_std_string_lossy()).map_err(|_| {
-                        JsNativeError::typ().with_message("forward(outputName) 的 outputName 必须是字符串")
-                    })?;
+                    let output_name = args[0]
+                        .to_string(ctx)
+                        .map(|s| s.to_std_string_lossy())
+                        .map_err(|_| {
+                            JsNativeError::typ()
+                                .with_message("forward(outputName) 的 outputName 必须是字符串")
+                        })?;
                     js_net
                         .inner
                         .borrow_mut()
                         .forward_single(output_name.as_str())
-                        .map_err(|e| JsNativeError::error().with_message(format!("forward 失败: {e}")))?
+                        .map_err(|e| {
+                            JsNativeError::error().with_message(format!("forward 失败: {e}"))
+                        })?
                 } else {
                     js_net
                         .inner
                         .borrow_mut()
                         .forward_single_def()
-                        .map_err(|e| JsNativeError::error().with_message(format!("forward 失败: {e}")))?
+                        .map_err(|e| {
+                            JsNativeError::error().with_message(format!("forward 失败: {e}"))
+                        })?
                 };
 
                 Box::new(output).into_js(ctx)
@@ -310,9 +346,9 @@ impl Class for JsDnnNet {
             js_string!("getUnconnectedOutLayersNames"),
             0,
             NativeFunction::from_fn_ptr(|this, _args, ctx| {
-                let binding = this.as_object().ok_or_else(|| {
-                    JsNativeError::typ().with_message("Object is not a DnnNet")
-                })?;
+                let binding = this
+                    .as_object()
+                    .ok_or_else(|| JsNativeError::typ().with_message("Object is not a DnnNet"))?;
                 let js_net = binding
                     .downcast_ref::<JsDnnNet>()
                     .ok_or_else(|| JsNativeError::typ().with_message("Object is not a DnnNet"))?;
@@ -386,18 +422,24 @@ pub fn read_net_from_caffe_js(
 
     let model = _parse_optional_string_arg(args, 1, "", ctx)?;
     let net = if model.trim().is_empty() {
-        dnn::read_net_from_caffe_def(prototxt.as_str())
-            .map_err(|e| JsNativeError::error().with_message(format!("readNetFromCaffe 失败: {e}")))?
+        dnn::read_net_from_caffe_def(prototxt.as_str()).map_err(|e| {
+            JsNativeError::error().with_message(format!("readNetFromCaffe 失败: {e}"))
+        })?
     } else {
-        dnn::read_net_from_caffe(prototxt.as_str(), model.as_str())
-            .map_err(|e| JsNativeError::error().with_message(format!("readNetFromCaffe 失败: {e}")))?
+        dnn::read_net_from_caffe(prototxt.as_str(), model.as_str()).map_err(|e| {
+            JsNativeError::error().with_message(format!("readNetFromCaffe 失败: {e}"))
+        })?
     };
 
     Box::new(net).into_js(ctx)
 }
 
 /// JS: `cv.dnn.readNetFromONNX(modelPath)`。
-pub fn read_net_from_onnx_js(_this: &JsValue, args: &[JsValue], ctx: &mut Context) -> JsResult<JsValue> {
+pub fn read_net_from_onnx_js(
+    _this: &JsValue,
+    args: &[JsValue],
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
     let model_path = args
         .first()
         .ok_or_else(|| JsNativeError::typ().with_message("readNetFromONNX 需要 modelPath 参数"))?
@@ -416,7 +458,11 @@ pub fn read_net_from_onnx_js(_this: &JsValue, args: &[JsValue], ctx: &mut Contex
 }
 
 /// JS: `cv.dnn.blobFromImage(image, scale?, size?, mean?, swapRB?, crop?, ddepth?)`。
-pub fn blob_from_image_js(_this: &JsValue, args: &[JsValue], ctx: &mut Context) -> JsResult<JsValue> {
+pub fn blob_from_image_js(
+    _this: &JsValue,
+    args: &[JsValue],
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
     let js_image = _expect_mat(args.first())?;
     let image = js_image.borrow();
     if image.data().inner.rows() <= 0 || image.data().inner.cols() <= 0 {
@@ -432,9 +478,16 @@ pub fn blob_from_image_js(_this: &JsValue, args: &[JsValue], ctx: &mut Context) 
     let crop = _parse_optional_bool_arg(args, 5, false);
     let ddepth = _parse_optional_number_arg(args, 6, CV_32F as f64, ctx)?.round() as i32;
 
-    let blob: Mat =
-        dnn::blob_from_image(&*image.data().inner, scale, size, mean, swap_rb, crop, ddepth)
-            .map_err(|e| JsNativeError::error().with_message(format!("blobFromImage 失败: {e}")))?;
+    let blob: Mat = dnn::blob_from_image(
+        &*image.data().inner,
+        scale,
+        size,
+        mean,
+        swap_rb,
+        crop,
+        ddepth,
+    )
+    .map_err(|e| JsNativeError::error().with_message(format!("blobFromImage 失败: {e}")))?;
     Box::new(blob).into_js(ctx)
 }
 

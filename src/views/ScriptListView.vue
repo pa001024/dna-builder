@@ -239,6 +239,8 @@ const runningScriptPaths = computed({
         scriptRuntime.runningScriptPaths = value
     },
 })
+const consoleOutputRef = ref<HTMLDivElement | null>(null)
+const isConsolePinnedToBottom = ref(true)
 const isCloudGameEntryActive = computed(() => cloudgame.isWindowOpen || cloudgame.opening)
 const cloudGameEntryTitle = computed(() => {
     if (cloudgame.opening) return "正在打开云游戏窗口"
@@ -2407,17 +2409,41 @@ async function createNewScript() {
 }
 
 /**
+ * 判断控制台是否处于底部附近。
+ * @returns 是否贴近底部
+ */
+function isConsoleNearBottom(): boolean {
+    const consoleContainer = consoleOutputRef.value
+    if (!consoleContainer) {
+        return true
+    }
+    const threshold = 24
+    return consoleContainer.scrollTop + consoleContainer.clientHeight >= consoleContainer.scrollHeight - threshold
+}
+
+/**
+ * 处理控制台滚动，记录当前是否贴底。
+ */
+function handleConsoleScroll() {
+    isConsolePinnedToBottom.value = isConsoleNearBottom()
+}
+
+/**
+ * 将控制台滚动到底部。
+ */
+function scrollConsoleToBottom() {
+    const consoleContainer = consoleOutputRef.value
+    if (!consoleContainer) {
+        return
+    }
+    consoleContainer.scrollTop = consoleContainer.scrollHeight
+}
+
+/**
  * 添加控制台日志
  */
 function addConsoleLog(level: string, message: string) {
     scriptRuntime.appendConsoleLog(level, message)
-    // 自动滚动到底部
-    nextTick(() => {
-        const consoleContainer = document.getElementById("console-output")
-        if (consoleContainer) {
-            consoleContainer.scrollTop = consoleContainer.scrollHeight
-        }
-    })
 }
 
 /**
@@ -2995,6 +3021,26 @@ watch(
     }
 )
 
+watch(showConsole, async visible => {
+    if (!visible) {
+        return
+    }
+    isConsolePinnedToBottom.value = true
+    await nextTick()
+    scrollConsoleToBottom()
+})
+
+watch(
+    () => consoleLogs.value.length,
+    async () => {
+        if (!showConsole.value || !isConsolePinnedToBottom.value) {
+            return
+        }
+        await nextTick()
+        scrollConsoleToBottom()
+    }
+)
+
 onMounted(async () => {
     if (!env.isApp) {
         startScriptRuntimeWatchdog()
@@ -3266,7 +3312,7 @@ onUnmounted(async () => {
                                                 <button class="ml-auto btn btn-xs" @click.stop="downloadScript(script)">
                                                     {{
                                                         isOnlineScriptExistsLocal(script)
-                                                            ? $t("script-list.updated")
+                                                            ? $t("script-list.update")
                                                             : $t("script-list.download")
                                                     }}
                                                 </button>
@@ -3485,7 +3531,12 @@ onUnmounted(async () => {
                                 </button>
                             </div>
                         </div>
-                        <div id="console-output" class="flex-1 overflow-auto p-3 font-mono text-xs user-select">
+                        <div
+                            id="console-output"
+                            ref="consoleOutputRef"
+                            class="flex-1 overflow-auto p-3 font-mono text-xs user-select"
+                            @scroll="handleConsoleScroll"
+                        >
                             <div v-if="consoleLogs.length === 0" class="text-base-content/40 text-center py-4">
                                 {{ $t("script-list.no_output") }}
                             </div>

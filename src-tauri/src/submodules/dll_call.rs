@@ -177,7 +177,9 @@ mod platform {
                         (target, JsValue::new(**cell as f64))
                     }
                 }
-                PreparedValue::ByRefU8 { cell, target, .. } => (target, JsValue::new(**cell as f64)),
+                PreparedValue::ByRefU8 { cell, target, .. } => {
+                    (target, JsValue::new(**cell as f64))
+                }
                 PreparedValue::ByRefI16 {
                     cell,
                     target,
@@ -190,7 +192,9 @@ mod platform {
                         (target, JsValue::new(**cell as f64))
                     }
                 }
-                PreparedValue::ByRefU16 { cell, target, .. } => (target, JsValue::new(**cell as f64)),
+                PreparedValue::ByRefU16 { cell, target, .. } => {
+                    (target, JsValue::new(**cell as f64))
+                }
                 PreparedValue::ByRefI32 {
                     cell,
                     target,
@@ -203,7 +207,9 @@ mod platform {
                         (target, JsValue::new(**cell as f64))
                     }
                 }
-                PreparedValue::ByRefU32 { cell, target, .. } => (target, JsValue::new(**cell as f64)),
+                PreparedValue::ByRefU32 { cell, target, .. } => {
+                    (target, JsValue::new(**cell as f64))
+                }
                 PreparedValue::ByRefI64 {
                     cell,
                     target,
@@ -216,9 +222,15 @@ mod platform {
                         (target, JsValue::new(**cell as f64))
                     }
                 }
-                PreparedValue::ByRefU64 { cell, target, .. } => (target, JsValue::new(**cell as f64)),
-                PreparedValue::ByRefUsize { cell, target, .. } => (target, JsValue::new(**cell as u64 as f64)),
-                PreparedValue::ByRefF32 { cell, target, .. } => (target, JsValue::new(**cell as f64)),
+                PreparedValue::ByRefU64 { cell, target, .. } => {
+                    (target, JsValue::new(**cell as f64))
+                }
+                PreparedValue::ByRefUsize { cell, target, .. } => {
+                    (target, JsValue::new(**cell as u64 as f64))
+                }
+                PreparedValue::ByRefF32 { cell, target, .. } => {
+                    (target, JsValue::new(**cell as f64))
+                }
                 PreparedValue::ByRefF64 { cell, target, .. } => (target, JsValue::new(**cell)),
                 _ => return Ok(()),
             };
@@ -253,7 +265,9 @@ mod platform {
 
     /// 将普通字符串转为 Windows 宽字符串（末尾 NUL）。
     fn _to_wide_nul(text: &str) -> Vec<u16> {
-        let mut wide = std::ffi::OsStr::new(text).encode_wide().collect::<Vec<u16>>();
+        let mut wide = std::ffi::OsStr::new(text)
+            .encode_wide()
+            .collect::<Vec<u16>>();
         wide.push(0);
         wide
     }
@@ -304,7 +318,11 @@ mod platform {
             _ => return Err(format!("不支持的类型: {type_text}")),
         };
 
-        if matches!(base, DllBaseType::Str | DllBaseType::AStr | DllBaseType::WStr) && is_unsigned {
+        if matches!(
+            base,
+            DllBaseType::Str | DllBaseType::AStr | DllBaseType::WStr
+        ) && is_unsigned
+        {
             return Err(format!("字符串类型不支持无符号前缀: {type_text}"));
         }
         if matches!(base, DllBaseType::Void) && passed_by_address {
@@ -319,7 +337,10 @@ mod platform {
     }
 
     /// 解析返回类型（支持 `CDecl`/`HRESULT`）。
-    fn _parse_return_type(tail: Option<&JsValue>, ctx: &mut Context) -> Result<ReturnTypeDesc, String> {
+    fn _parse_return_type(
+        tail: Option<&JsValue>,
+        ctx: &mut Context,
+    ) -> Result<ReturnTypeDesc, String> {
         let default_return = ReturnTypeDesc {
             value_type: DllTypeDesc {
                 base: DllBaseType::Int,
@@ -377,7 +398,10 @@ mod platform {
     }
 
     /// 解析函数参数（地址、字符串、或带 Ptr 属性的对象）。
-    fn _parse_function_target(value: &JsValue, ctx: &mut Context) -> Result<FunctionTarget, String> {
+    fn _parse_function_target(
+        value: &JsValue,
+        ctx: &mut Context,
+    ) -> Result<FunctionTarget, String> {
         if let Some(number) = value.as_number() {
             let ptr = number as i64 as isize as usize;
             if ptr == 0 {
@@ -416,7 +440,8 @@ mod platform {
 
     /// 获取导出地址（支持自动追加 W 后缀）。
     fn _get_proc_address(module: HMODULE, function_name: &str) -> Result<Option<usize>, String> {
-        let symbol = CString::new(function_name).map_err(|e| format!("函数名无效: {function_name}, {e}"))?;
+        let symbol =
+            CString::new(function_name).map_err(|e| format!("函数名无效: {function_name}, {e}"))?;
         // SAFETY: module 句柄由系统 API 获取；symbol 为 NUL 终止字符串。
         let proc = unsafe { GetProcAddress(module, PCSTR(symbol.as_ptr() as *const u8)) };
         if let Some(p) = proc {
@@ -425,7 +450,8 @@ mod platform {
 
         if !function_name.ends_with('W') && !function_name.ends_with('A') {
             let with_w = format!("{function_name}W");
-            let symbol_w = CString::new(with_w.clone()).map_err(|e| format!("函数名无效: {with_w}, {e}"))?;
+            let symbol_w =
+                CString::new(with_w.clone()).map_err(|e| format!("函数名无效: {with_w}, {e}"))?;
             // SAFETY: 同上。
             let proc_w = unsafe { GetProcAddress(module, PCSTR(symbol_w.as_ptr() as *const u8)) };
             if let Some(p) = proc_w {
@@ -488,7 +514,10 @@ mod platform {
     }
 
     /// 读取对象初始化值：对象时优先取 `value` 字段，否则使用参数本身。
-    fn _extract_byref_initial(value: &JsValue, ctx: &mut Context) -> Result<(Option<JsObject>, JsValue), String> {
+    fn _extract_byref_initial(
+        value: &JsValue,
+        ctx: &mut Context,
+    ) -> Result<(Option<JsObject>, JsValue), String> {
         if let Some(obj) = value.as_object() {
             let initial = obj
                 .get(js_string!("value"), ctx)
@@ -721,7 +750,8 @@ mod platform {
             }
             DllBaseType::AStr => {
                 let text = _to_string(value, ctx)?;
-                let cstr = CString::new(text).map_err(|e| format!("AStr 包含非法 NUL 字符: {e}"))?;
+                let cstr =
+                    CString::new(text).map_err(|e| format!("AStr 包含非法 NUL 字符: {e}"))?;
                 let ptr = cstr.as_ptr() as usize;
                 pools.ansi_pool.push(cstr);
                 Ok(PreparedValue::Ptr(ptr))
@@ -755,9 +785,7 @@ mod platform {
             return String::new();
         }
         // SAFETY: 由调用方保证指针有效且 NUL 结尾。
-        unsafe { CStr::from_ptr(ptr) }
-            .to_string_lossy()
-            .to_string()
+        unsafe { CStr::from_ptr(ptr) }.to_string_lossy().to_string()
     }
 
     /// 将调用结果转换为 JS 值。
@@ -880,14 +908,18 @@ mod platform {
             let type_text = arg_tail[index]
                 .to_string(ctx)
                 .map_err(|_| {
-                    JsNativeError::typ().with_message(format!("dllCall 参数类型[{index}] 必须是字符串"))
+                    JsNativeError::typ()
+                        .with_message(format!("dllCall 参数类型[{index}] 必须是字符串"))
                 })?
                 .to_std_string_lossy();
-            let type_desc = _parse_dll_type(&type_text)
-                .map_err(|msg| JsNativeError::typ().with_message(format!("参数类型[{index}] 无效: {msg}")))?;
+            let type_desc = _parse_dll_type(&type_text).map_err(|msg| {
+                JsNativeError::typ().with_message(format!("参数类型[{index}] 无效: {msg}"))
+            })?;
 
             let value = _prepare_argument(type_desc, &arg_tail[index + 1], ctx, &mut pools)
-                .map_err(|msg| JsNativeError::typ().with_message(format!("参数值[{}] 无效: {msg}", index + 1)))?;
+                .map_err(|msg| {
+                    JsNativeError::typ().with_message(format!("参数值[{}] 无效: {msg}", index + 1))
+                })?;
 
             arg_types.push(_ffi_type(type_desc));
             prepared.push(value);

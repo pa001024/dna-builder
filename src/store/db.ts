@@ -170,9 +170,11 @@ export interface ScriptColorToolState {
     pointTolerances: Record<number, number>
     pointInitialCheckColors: Record<number, string>
     pointCheckColorInputs: Record<number, string>
+    pointCategoryForceChecks: Record<string, boolean>
     activeImageIndex: number
     zoomScale: number
     defaultTolerance: number
+    realtimeTestCloudMode?: boolean
     updatedAt: number
 }
 

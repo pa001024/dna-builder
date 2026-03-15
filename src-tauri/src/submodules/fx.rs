@@ -9,9 +9,9 @@ use windows::Win32::Graphics::Gdi::{
     PAINTSTRUCT, PatBlt, ReleaseDC,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
-    CreateWindowExW, HWND_TOPMOST, RegisterClassExW, SW_HIDE, SW_SHOW, SWP_HIDEWINDOW, SWP_NOACTIVATE,
-    SWP_NOMOVE, SWP_NOSIZE, SWP_NOOWNERZORDER, SetWindowPos, ShowWindow, ShowWindowAsync, WNDCLASSEXW,
-    WS_EX_LAYERED, WS_EX_TOOLWINDOW, WS_EX_TRANSPARENT, WS_POPUP,
+    CreateWindowExW, HWND_TOPMOST, RegisterClassExW, SW_HIDE, SW_SHOW, SWP_HIDEWINDOW,
+    SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOOWNERZORDER, SWP_NOSIZE, SetWindowPos, ShowWindow,
+    ShowWindowAsync, WNDCLASSEXW, WS_EX_LAYERED, WS_EX_TOOLWINDOW, WS_EX_TRANSPARENT, WS_POPUP,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
     DefWindowProcW, HCURSOR, HICON, IsWindow, WM_DESTROY, WM_PAINT, WNDCLASS_STYLES,
@@ -356,7 +356,10 @@ fn ensure_overlay_hide_worker_running() {
                     Some(deadline) => {
                         if Instant::now() >= deadline {
                             manager_guard.hide_deadline_at = None;
-                            hwnd_to_hide = manager_guard.overlay.as_ref().and_then(|overlay| overlay.hwnd);
+                            hwnd_to_hide = manager_guard
+                                .overlay
+                                .as_ref()
+                                .and_then(|overlay| overlay.hwnd);
                         }
                     }
                     None => {
@@ -386,7 +389,10 @@ fn ensure_overlay_hide_worker_running() {
 pub fn hide_border_immediately() {
     let hwnd_to_hide = if let Ok(mut manager_guard) = OVERLAY_MANAGER.lock() {
         manager_guard.hide_deadline_at = None;
-        manager_guard.overlay.as_ref().and_then(|overlay| overlay.hwnd)
+        manager_guard
+            .overlay
+            .as_ref()
+            .and_then(|overlay| overlay.hwnd)
     } else {
         None
     };
@@ -439,7 +445,8 @@ pub fn draw_border(
         // 显示边框
         overlay.show(abs_x, abs_y, width, height, color);
 
-        manager_guard.hide_deadline_at = Some(Instant::now() + Duration::from_millis(hide_delay_ms));
+        manager_guard.hide_deadline_at =
+            Some(Instant::now() + Duration::from_millis(hide_delay_ms));
         should_ensure_worker = true;
     }
     if should_ensure_worker {

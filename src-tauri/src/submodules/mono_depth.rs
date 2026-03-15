@@ -12,8 +12,7 @@ use std::{
 };
 
 /// Lite-Mono 默认模型根地址。
-const DEFAULT_MONO_DEPTH_BASE_URL: &str =
-    "https://modelscope.cn/models/pa001024/Lite-Mono-ONNX/resolve/master/model/lite-mono-tiny_640x192";
+const DEFAULT_MONO_DEPTH_BASE_URL: &str = "https://modelscope.cn/models/pa001024/Lite-Mono-ONNX/resolve/master/model/lite-mono-tiny_640x192";
 /// Lite-Mono 编码器模型文件名。
 const ENCODER_MODEL_FILE: &str = "encoder.onnx";
 /// Lite-Mono 解码器模型文件名。
@@ -86,13 +85,16 @@ fn download_file(url: &str, target_path: &Path) -> Result<(), String> {
         .map_err(|e| format!("读取 Lite-Mono 模型内容失败: {url}, {e}"))?;
 
     if let Some(parent) = target_path.parent() {
-        fs::create_dir_all(parent).map_err(|e| format!("创建 Lite-Mono 模型目录失败: {}, {e}", parent.display()))?;
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("创建 Lite-Mono 模型目录失败: {}, {e}", parent.display()))?;
     }
 
     let tmp_path = target_path.with_extension("downloading");
-    fs::write(&tmp_path, &bytes).map_err(|e| format!("写入 Lite-Mono 临时模型失败: {}, {e}", tmp_path.display()))?;
+    fs::write(&tmp_path, &bytes)
+        .map_err(|e| format!("写入 Lite-Mono 临时模型失败: {}, {e}", tmp_path.display()))?;
     if target_path.exists() {
-        fs::remove_file(target_path).map_err(|e| format!("删除旧 Lite-Mono 模型失败: {}, {e}", target_path.display()))?;
+        fs::remove_file(target_path)
+            .map_err(|e| format!("删除旧 Lite-Mono 模型失败: {}, {e}", target_path.display()))?;
     }
     fs::rename(&tmp_path, target_path).map_err(|e| {
         format!(
@@ -153,7 +155,11 @@ fn normalize_input_mat(input: &Mat) -> Result<Mat, String> {
             .map_err(|e| format!("Lite-Mono 复制输入图像失败: {e}"))?,
         4 => imgproc::cvt_color(input, &mut bgr, imgproc::COLOR_BGRA2BGR, 0)
             .map_err(|e| format!("Lite-Mono BGRA 转 BGR 失败: {e}"))?,
-        _ => return Err(format!("monoDepth 仅支持 1/3/4 通道 Mat，当前通道数: {channels}")),
+        _ => {
+            return Err(format!(
+                "monoDepth 仅支持 1/3/4 通道 Mat，当前通道数: {channels}"
+            ));
+        }
     }
     Ok(bgr)
 }
@@ -161,8 +167,15 @@ fn normalize_input_mat(input: &Mat) -> Result<Mat, String> {
 /// 将 RGB Mat 转为 NCHW Float32 输入张量。
 fn mat_to_input_array(input: &Mat, input_size: Size) -> Result<Array4<f32>, String> {
     let mut resized = Mat::default();
-    imgproc::resize(input, &mut resized, input_size, 0.0, 0.0, imgproc::INTER_LINEAR)
-        .map_err(|e| format!("Lite-Mono 输入缩放失败: {e}"))?;
+    imgproc::resize(
+        input,
+        &mut resized,
+        input_size,
+        0.0,
+        0.0,
+        imgproc::INTER_LINEAR,
+    )
+    .map_err(|e| format!("Lite-Mono 输入缩放失败: {e}"))?;
 
     let mut rgb = Mat::default();
     imgproc::cvt_color(&resized, &mut rgb, imgproc::COLOR_BGR2RGB, 0)

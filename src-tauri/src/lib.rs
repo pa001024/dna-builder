@@ -132,14 +132,14 @@ const GAME_PROCESS: &str = "EM-Win64-Shipping.exe";
 use futures_util::{SinkExt, StreamExt};
 use http::header::HeaderValue;
 use std::sync::Mutex;
+#[cfg(target_os = "windows")]
+use tauri_plugin_autostart::ManagerExt;
 use tokio::sync::mpsc;
 use tokio::time;
 use tokio_tungstenite::{
     connect_async, tungstenite::client::IntoClientRequest, tungstenite::protocol::Message,
 };
 use url::Url;
-#[cfg(target_os = "windows")]
-use tauri_plugin_autostart::ManagerExt;
 
 const CLOUDGAME_WINDOW_LABEL: &str = "cloudgame";
 const CLOUDGAME_DEFAULT_URL: &str = "https://dna.yingxiong.com/cloudgame/";
@@ -2058,7 +2058,10 @@ pub async fn run_script_cli(
 
 /// 响应脚本 readConfig 请求，将前端当前值回传给脚本运行时。
 #[tauri::command]
-fn resolve_script_config_request(request_id: String, value: serde_json::Value) -> Result<String, String> {
+fn resolve_script_config_request(
+    request_id: String,
+    value: serde_json::Value,
+) -> Result<String, String> {
     use submodules::script_builtin::resolve_script_config_request;
     resolve_script_config_request(request_id, value)?;
     Ok("配置请求已响应".to_string())
@@ -2149,7 +2152,8 @@ fn set_script_input_recorder_hotkey_enabled(
 
 /// 获取脚本输入录制器快照。
 #[tauri::command]
-fn get_script_input_recorder_snapshot() -> Result<submodules::hotkey::ScriptInputRecorderSnapshot, String> {
+fn get_script_input_recorder_snapshot()
+-> Result<submodules::hotkey::ScriptInputRecorderSnapshot, String> {
     use submodules::hotkey::get_script_input_recorder_snapshot;
     Ok(get_script_input_recorder_snapshot())
 }
@@ -2248,7 +2252,10 @@ fn is_launch_at_startup_enabled(app_handle: tauri::AppHandle) -> Result<bool, St
 
 /// 更新开机启动状态。
 #[tauri::command]
-fn set_launch_at_startup_enabled(app_handle: tauri::AppHandle, enabled: bool) -> Result<bool, String> {
+fn set_launch_at_startup_enabled(
+    app_handle: tauri::AppHandle,
+    enabled: bool,
+) -> Result<bool, String> {
     #[cfg(target_os = "windows")]
     {
         let manager = app_handle.autolaunch();
@@ -2310,7 +2317,10 @@ fn cloudgame_window_state(window: &WebviewWindow) -> Result<CloudGameWindowState
 }
 
 /// 向前端广播云游戏窗口状态。
-fn emit_cloudgame_window_state(app_handle: &tauri::AppHandle, window: &WebviewWindow) -> Result<CloudGameWindowState, String> {
+fn emit_cloudgame_window_state(
+    app_handle: &tauri::AppHandle,
+    window: &WebviewWindow,
+) -> Result<CloudGameWindowState, String> {
     let state = cloudgame_window_state(window)?;
     app_handle
         .emit(CLOUDGAME_WINDOW_EVENT, &state)
@@ -2373,7 +2383,8 @@ async fn open_cloudgame_window(
         .url
         .clone()
         .unwrap_or_else(|| CLOUDGAME_DEFAULT_URL.to_string());
-    let parsed_url = Url::parse(&target_url).map_err(|error| format!("云游戏 URL 无效: {error}"))?;
+    let parsed_url =
+        Url::parse(&target_url).map_err(|error| format!("云游戏 URL 无效: {error}"))?;
 
     if let Some(window) = app_handle.get_webview_window(CLOUDGAME_WINDOW_LABEL) {
         let current_url = window
@@ -2419,8 +2430,14 @@ async fn open_cloudgame_window(
     )
     .title(options.title.as_deref().unwrap_or("Cloudgame"))
     .position(options.x.unwrap_or(40.0), options.y.unwrap_or(40.0))
-    .inner_size(options.width.unwrap_or(1600.0), options.height.unwrap_or(900.0))
-    .min_inner_size(options.min_width.unwrap_or(480.0), options.min_height.unwrap_or(320.0))
+    .inner_size(
+        options.width.unwrap_or(1600.0),
+        options.height.unwrap_or(900.0),
+    )
+    .min_inner_size(
+        options.min_width.unwrap_or(480.0),
+        options.min_height.unwrap_or(320.0),
+    )
     .visible(options.visible.unwrap_or(true))
     .focused(options.focus.unwrap_or(true))
     .decorations(options.decorations.unwrap_or(true))
@@ -2477,7 +2494,9 @@ async fn open_cloudgame_window(
 
 /// 获取云游戏窗口当前状态。
 #[tauri::command]
-fn get_cloudgame_window_state(app_handle: tauri::AppHandle) -> Result<Option<CloudGameWindowState>, String> {
+fn get_cloudgame_window_state(
+    app_handle: tauri::AppHandle,
+) -> Result<Option<CloudGameWindowState>, String> {
     with_cloudgame_window(&app_handle, |window| cloudgame_window_state(&window))
 }
 
@@ -2500,7 +2519,9 @@ fn close_cloudgame_window(app_handle: tauri::AppHandle) -> Result<bool, String> 
 
 /// 显示云游戏窗口。
 #[tauri::command]
-fn show_cloudgame_window(app_handle: tauri::AppHandle) -> Result<Option<CloudGameWindowState>, String> {
+fn show_cloudgame_window(
+    app_handle: tauri::AppHandle,
+) -> Result<Option<CloudGameWindowState>, String> {
     with_cloudgame_window(&app_handle, |window| {
         window
             .show()
@@ -2511,7 +2532,9 @@ fn show_cloudgame_window(app_handle: tauri::AppHandle) -> Result<Option<CloudGam
 
 /// 隐藏云游戏窗口。
 #[tauri::command]
-fn hide_cloudgame_window(app_handle: tauri::AppHandle) -> Result<Option<CloudGameWindowState>, String> {
+fn hide_cloudgame_window(
+    app_handle: tauri::AppHandle,
+) -> Result<Option<CloudGameWindowState>, String> {
     with_cloudgame_window(&app_handle, |window| {
         window
             .hide()
@@ -2522,7 +2545,9 @@ fn hide_cloudgame_window(app_handle: tauri::AppHandle) -> Result<Option<CloudGam
 
 /// 聚焦云游戏窗口。
 #[tauri::command]
-fn focus_cloudgame_window(app_handle: tauri::AppHandle) -> Result<Option<CloudGameWindowState>, String> {
+fn focus_cloudgame_window(
+    app_handle: tauri::AppHandle,
+) -> Result<Option<CloudGameWindowState>, String> {
     with_cloudgame_window(&app_handle, |window| {
         window
             .show()
@@ -2536,7 +2561,9 @@ fn focus_cloudgame_window(app_handle: tauri::AppHandle) -> Result<Option<CloudGa
 
 /// 重新加载云游戏页面。
 #[tauri::command]
-fn reload_cloudgame_window(app_handle: tauri::AppHandle) -> Result<Option<CloudGameWindowState>, String> {
+fn reload_cloudgame_window(
+    app_handle: tauri::AppHandle,
+) -> Result<Option<CloudGameWindowState>, String> {
     with_cloudgame_window(&app_handle, |window| {
         window
             .reload()

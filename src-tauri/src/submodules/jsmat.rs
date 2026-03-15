@@ -28,29 +28,33 @@ fn _read_bgr_pixel(js_mat: &JsMat, row: i32, col: i32) -> JsResult<core::Vec3b> 
     let rows = js_mat.inner.rows();
     let cols = js_mat.inner.cols();
     if row < 0 || col < 0 || row >= rows || col >= cols {
-        return Err(
-            JsNativeError::typ()
-                .with_message(format!(
-                    "Pixel index out of range: row={row}, col={col}, rows={rows}, cols={cols}"
-                ))
-                .into(),
-        );
+        return Err(JsNativeError::typ()
+            .with_message(format!(
+                "Pixel index out of range: row={row}, col={col}, rows={rows}, cols={cols}"
+            ))
+            .into());
     }
 
     let channels = js_mat.inner.channels();
     if channels != 3 {
-        return Err(
-            JsNativeError::typ()
-                .with_message(format!("Mat must be 3-channel BGR, but got {channels} channels"))
-                .into(),
-        );
+        return Err(JsNativeError::typ()
+            .with_message(format!(
+                "Mat must be 3-channel BGR, but got {channels} channels"
+            ))
+            .into());
     }
 
-    js_mat.inner.at_2d::<core::Vec3b>(row, col).map(|v| *v).map_err(|err| {
-        JsNativeError::typ()
-            .with_message(format!("Failed to get pixel at row={row}, col={col}: {err}"))
-            .into()
-    })
+    js_mat
+        .inner
+        .at_2d::<core::Vec3b>(row, col)
+        .map(|v| *v)
+        .map_err(|err| {
+            JsNativeError::typ()
+                .with_message(format!(
+                    "Failed to get pixel at row={row}, col={col}: {err}"
+                ))
+                .into()
+        })
 }
 
 impl Class for JsMat {

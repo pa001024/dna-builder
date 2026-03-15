@@ -5448,6 +5448,7 @@
         "preparse_none": ", aucun litteral readConfig exploitable n'a ete analyse",
         "preparse_prefix": ", preanalyse de {{created}} element(s)",
         "preparse_skipped": " ({{skipped}} element(s) ignores)",
+        "publish_update": "Publier/Mettre a jour",
         "publish_update_failed": "Echec de la publication/mise a jour du script. Veuillez reessayer.",
         "record_tool": "Outil d'enregistrement",
         "rename_failed": "Le renommage a echoue. Veuillez reessayer.",
@@ -5504,6 +5505,7 @@
         "toggle_hotkey_failed": "Echec du basculement du raccourci du script",
         "toggle_status_panel": "Basculer le panneau d'etat",
         "type": "Type",
+        "update": "Mettre a jour",
         "updated": "Mis a jour"
     },
     "script-runtime-floating": {

@@ -9,26 +9,31 @@ use tauri::Emitter;
 #[cfg(target_os = "windows")]
 use windows::Win32::Foundation::{CloseHandle, LPARAM, LRESULT, WPARAM};
 #[cfg(target_os = "windows")]
-use windows::Win32::UI::Input::KeyboardAndMouse::{
-    VK_ADD, VK_APPS, VK_BACK, VK_CAPITAL, VK_CLEAR, VK_CONTROL, VK_DECIMAL, VK_DELETE, VK_DIVIDE, VK_DOWN, VK_END, VK_ESCAPE, VK_F1,
-    VK_F10, VK_F11, VK_F12, VK_F13, VK_F14, VK_F15, VK_F16, VK_F17, VK_F18, VK_F19, VK_F2, VK_F20, VK_F21, VK_F22, VK_F23, VK_F24,
-    VK_F3, VK_F4, VK_F5, VK_F6, VK_F7, VK_F8, VK_F9, VK_HOME, VK_INSERT, VK_LBUTTON, VK_LCONTROL, VK_LEFT, VK_LMENU, VK_LSHIFT, VK_LWIN,
-    VK_MBUTTON, VK_MENU, VK_MULTIPLY, VK_NEXT, VK_NUMLOCK, VK_NUMPAD0, VK_NUMPAD1, VK_NUMPAD2, VK_NUMPAD3, VK_NUMPAD4, VK_NUMPAD5,
-    VK_NUMPAD6, VK_NUMPAD7, VK_NUMPAD8, VK_NUMPAD9, VK_PAUSE, VK_PRIOR, VK_RBUTTON, VK_RCONTROL, VK_RETURN, VK_RIGHT, VK_RMENU, VK_RSHIFT,
-    VK_RWIN, VK_SCROLL, VK_SEPARATOR, VK_SHIFT, VK_SNAPSHOT, VK_SPACE, VK_SUBTRACT, VK_TAB, VK_UP, VK_XBUTTON1, VK_XBUTTON2,
-};
-#[cfg(target_os = "windows")]
 use windows::Win32::System::Diagnostics::ToolHelp::{
-    CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W, TH32CS_SNAPPROCESS,
+    CreateToolhelp32Snapshot, PROCESSENTRY32W, Process32FirstW, Process32NextW, TH32CS_SNAPPROCESS,
 };
 #[cfg(target_os = "windows")]
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 #[cfg(target_os = "windows")]
+use windows::Win32::UI::Input::KeyboardAndMouse::{
+    VK_ADD, VK_APPS, VK_BACK, VK_CAPITAL, VK_CLEAR, VK_CONTROL, VK_DECIMAL, VK_DELETE, VK_DIVIDE,
+    VK_DOWN, VK_END, VK_ESCAPE, VK_F1, VK_F2, VK_F3, VK_F4, VK_F5, VK_F6, VK_F7, VK_F8, VK_F9,
+    VK_F10, VK_F11, VK_F12, VK_F13, VK_F14, VK_F15, VK_F16, VK_F17, VK_F18, VK_F19, VK_F20, VK_F21,
+    VK_F22, VK_F23, VK_F24, VK_HOME, VK_INSERT, VK_LBUTTON, VK_LCONTROL, VK_LEFT, VK_LMENU,
+    VK_LSHIFT, VK_LWIN, VK_MBUTTON, VK_MENU, VK_MULTIPLY, VK_NEXT, VK_NUMLOCK, VK_NUMPAD0,
+    VK_NUMPAD1, VK_NUMPAD2, VK_NUMPAD3, VK_NUMPAD4, VK_NUMPAD5, VK_NUMPAD6, VK_NUMPAD7, VK_NUMPAD8,
+    VK_NUMPAD9, VK_PAUSE, VK_PRIOR, VK_RBUTTON, VK_RCONTROL, VK_RETURN, VK_RIGHT, VK_RMENU,
+    VK_RSHIFT, VK_RWIN, VK_SCROLL, VK_SEPARATOR, VK_SHIFT, VK_SNAPSHOT, VK_SPACE, VK_SUBTRACT,
+    VK_TAB, VK_UP, VK_XBUTTON1, VK_XBUTTON2,
+};
+#[cfg(target_os = "windows")]
 use windows::Win32::UI::WindowsAndMessaging::{
-    CallNextHookEx, DispatchMessageW, GetMessageW, HC_ACTION, KBDLLHOOKSTRUCT, MSLLHOOKSTRUCT, MSG, SetWindowsHookExW, TranslateMessage,
-    UnhookWindowsHookEx, WH_KEYBOARD_LL, WH_MOUSE_LL, WM_KEYDOWN, WM_KEYUP, WM_LBUTTONDOWN, WM_LBUTTONUP, WM_MBUTTONDOWN, WM_MBUTTONUP,
-    WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SYSKEYDOWN, WM_SYSKEYUP, WM_XBUTTONDOWN, WM_XBUTTONUP, XBUTTON1, GetClassNameW, GetForegroundWindow,
-    GetWindowTextW, GetWindowThreadProcessId,
+    CallNextHookEx, DispatchMessageW, GetClassNameW, GetForegroundWindow, GetMessageW,
+    GetWindowTextW, GetWindowThreadProcessId, HC_ACTION, KBDLLHOOKSTRUCT, MSG, MSLLHOOKSTRUCT,
+    SetWindowsHookExW, TranslateMessage, UnhookWindowsHookEx, WH_KEYBOARD_LL, WH_MOUSE_LL,
+    WM_KEYDOWN, WM_KEYUP, WM_LBUTTONDOWN, WM_LBUTTONUP, WM_MBUTTONDOWN, WM_MBUTTONUP,
+    WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SYSKEYDOWN, WM_SYSKEYUP, WM_XBUTTONDOWN, WM_XBUTTONUP,
+    XBUTTON1,
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -164,7 +169,8 @@ fn _parse_ahk_hotkey(raw: &str) -> Result<ParsedHotkey, String> {
             alt: prefix_term.alt || suffix_term.alt,
             shift: prefix_term.shift || suffix_term.shift,
             win: prefix_term.win || suffix_term.win,
-            allow_extra_modifiers: prefix_term.allow_extra_modifiers || suffix_term.allow_extra_modifiers,
+            allow_extra_modifiers: prefix_term.allow_extra_modifiers
+                || suffix_term.allow_extra_modifiers,
             key_vk: suffix_term.key_vk,
             combo_prefix_vk: Some(prefix_term.key_vk),
             trigger_on_key_up: suffix_term.trigger_on_key_up,
@@ -330,7 +336,9 @@ fn _parse_key_token_to_vk(token: &str) -> Result<u32, String> {
     }
 
     if normalized.starts_with("SC") {
-        return Err(format!("暂不支持 SC 扫描码写法: {token}，请改用键名或 VK 写法"));
+        return Err(format!(
+            "暂不支持 SC 扫描码写法: {token}，请改用键名或 VK 写法"
+        ));
     }
 
     match normalized.as_str() {
@@ -489,9 +497,15 @@ fn _vk_to_script_key(vk: u32) -> Option<String> {
         x if x == VK_DOWN.0 as u32 => Some("down".to_string()),
         x if x == VK_LEFT.0 as u32 => Some("left".to_string()),
         x if x == VK_RIGHT.0 as u32 => Some("right".to_string()),
-        x if x == VK_SHIFT.0 as u32 || x == VK_LSHIFT.0 as u32 || x == VK_RSHIFT.0 as u32 => Some("shift".to_string()),
-        x if x == VK_CONTROL.0 as u32 || x == VK_LCONTROL.0 as u32 || x == VK_RCONTROL.0 as u32 => Some("ctrl".to_string()),
-        x if x == VK_MENU.0 as u32 || x == VK_LMENU.0 as u32 || x == VK_RMENU.0 as u32 => Some("alt".to_string()),
+        x if x == VK_SHIFT.0 as u32 || x == VK_LSHIFT.0 as u32 || x == VK_RSHIFT.0 as u32 => {
+            Some("shift".to_string())
+        }
+        x if x == VK_CONTROL.0 as u32 || x == VK_LCONTROL.0 as u32 || x == VK_RCONTROL.0 as u32 => {
+            Some("ctrl".to_string())
+        }
+        x if x == VK_MENU.0 as u32 || x == VK_LMENU.0 as u32 || x == VK_RMENU.0 as u32 => {
+            Some("alt".to_string())
+        }
         x if x == VK_LWIN.0 as u32 => Some("lwin".to_string()),
         x if x == VK_RWIN.0 as u32 => Some("rwin".to_string()),
         x if x == VK_HOME.0 as u32 => Some("home".to_string()),
@@ -525,8 +539,10 @@ fn _record_script_input_action(action_type: &str, key: Option<String>, button: O
     if let Ok(mut actions) = recorder.actions.lock() {
         if let Some(last) = actions.last() {
             // 兜底去重：前端回填与 LLHook 同时命中时，短时间内完全相同动作只保留一次。
-            let same_action =
-                last.action_type == action_type && last.key == key && last.button == button && (elapsed_seconds - last.time).abs() <= 0.03;
+            let same_action = last.action_type == action_type
+                && last.key == key
+                && last.button == button
+                && (elapsed_seconds - last.time).abs() <= 0.03;
             if same_action {
                 return;
             }
@@ -554,7 +570,11 @@ fn _record_keyboard_input(vk: u32, is_key_down: bool) {
 }
 
 fn _record_mouse_input(button: &str, is_key_down: bool) {
-    let action_type = if is_key_down { "mouse_down" } else { "mouse_up" };
+    let action_type = if is_key_down {
+        "mouse_down"
+    } else {
+        "mouse_up"
+    };
     _record_script_input_action(action_type, None, Some(button.to_string()));
 }
 
@@ -593,7 +613,8 @@ fn _parse_hot_if_win_active_criteria(raw: &str) -> Result<Option<HotIfWinActiveC
                 if value.is_empty() {
                     return Err("`ahk_id` 缺少值".to_string());
                 }
-                criteria.hwnd_id = Some(_parse_hot_if_u64(value).map_err(|e| format!("`ahk_id` 无效：{e}"))?);
+                criteria.hwnd_id =
+                    Some(_parse_hot_if_u64(value).map_err(|e| format!("`ahk_id` 无效：{e}"))?);
             }
             HotIfToken::Pid => {
                 if value.is_empty() {
@@ -720,7 +741,8 @@ fn _get_foreground_window_info() -> Option<ForegroundWindowInfo> {
 
     let mut class_buf = [0u16; 256];
     let class_len = unsafe { GetClassNameW(hwnd, &mut class_buf) };
-    let class_name = String::from_utf16_lossy(&class_buf[..usize::try_from(class_len).unwrap_or(0)]);
+    let class_name =
+        String::from_utf16_lossy(&class_buf[..usize::try_from(class_len).unwrap_or(0)]);
 
     Some(ForegroundWindowInfo {
         hwnd_id,
@@ -864,18 +886,29 @@ fn _is_vk_pressed(target_vk: u32, pressed: &HashSet<u32>) -> bool {
 /// 判断事件按键是否与配置按键相符（兼容中性修饰键与左右修饰键）。
 fn _vk_matches(target_vk: u32, event_vk: u32) -> bool {
     if target_vk == VK_CONTROL.0 as u32 {
-        return event_vk == VK_CONTROL.0 as u32 || event_vk == VK_LCONTROL.0 as u32 || event_vk == VK_RCONTROL.0 as u32;
+        return event_vk == VK_CONTROL.0 as u32
+            || event_vk == VK_LCONTROL.0 as u32
+            || event_vk == VK_RCONTROL.0 as u32;
     }
     if target_vk == VK_MENU.0 as u32 {
-        return event_vk == VK_MENU.0 as u32 || event_vk == VK_LMENU.0 as u32 || event_vk == VK_RMENU.0 as u32;
+        return event_vk == VK_MENU.0 as u32
+            || event_vk == VK_LMENU.0 as u32
+            || event_vk == VK_RMENU.0 as u32;
     }
     if target_vk == VK_SHIFT.0 as u32 {
-        return event_vk == VK_SHIFT.0 as u32 || event_vk == VK_LSHIFT.0 as u32 || event_vk == VK_RSHIFT.0 as u32;
+        return event_vk == VK_SHIFT.0 as u32
+            || event_vk == VK_LSHIFT.0 as u32
+            || event_vk == VK_RSHIFT.0 as u32;
     }
     target_vk == event_vk
 }
 
-fn _binding_matches(parsed: &ParsedHotkey, vk: u32, is_key_down: bool, pressed: &HashSet<u32>) -> bool {
+fn _binding_matches(
+    parsed: &ParsedHotkey,
+    vk: u32,
+    is_key_down: bool,
+    pressed: &HashSet<u32>,
+) -> bool {
     if parsed.trigger_on_key_up == is_key_down {
         return false;
     }
@@ -1050,7 +1083,10 @@ fn _trigger_hotkey_scripts(vk: u32, is_key_down: bool, pressed: &HashSet<u32>) {
 
     let matched = bindings
         .into_iter()
-        .filter(|binding| _binding_matches(&binding.parsed, vk, is_key_down, pressed) && _binding_condition_matches(binding))
+        .filter(|binding| {
+            _binding_matches(&binding.parsed, vk, is_key_down, pressed)
+                && _binding_condition_matches(binding)
+        })
         .collect::<Vec<_>>();
 
     for binding in matched {
@@ -1105,7 +1141,9 @@ fn _handle_script_input_recorder_hotkey(vk: u32, is_key_down: bool) -> bool {
         } else {
             _start_script_input_recording();
         }
-        recorder.suppress_hotkey_keyup.store(true, Ordering::Release);
+        recorder
+            .suppress_hotkey_keyup
+            .store(true, Ordering::Release);
         return true;
     }
     if recorder.suppress_hotkey_keyup.swap(false, Ordering::AcqRel) {
@@ -1141,7 +1179,11 @@ fn _process_hotkey_event(vk: u32, is_key_down: bool) -> bool {
 }
 
 #[cfg(target_os = "windows")]
-unsafe extern "system" fn _low_level_keyboard_proc(code: i32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
+unsafe extern "system" fn _low_level_keyboard_proc(
+    code: i32,
+    wparam: WPARAM,
+    lparam: LPARAM,
+) -> LRESULT {
     if code == HC_ACTION as i32 {
         let event = unsafe { *(lparam.0 as *const KBDLLHOOKSTRUCT) };
         let vk = event.vkCode;
@@ -1165,7 +1207,11 @@ unsafe extern "system" fn _low_level_keyboard_proc(code: i32, wparam: WPARAM, lp
 }
 
 #[cfg(target_os = "windows")]
-unsafe extern "system" fn _low_level_mouse_proc(code: i32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
+unsafe extern "system" fn _low_level_mouse_proc(
+    code: i32,
+    wparam: WPARAM,
+    lparam: LPARAM,
+) -> LRESULT {
     if code == HC_ACTION as i32 {
         let event = unsafe { *(lparam.0 as *const MSLLHOOKSTRUCT) };
         let message = wparam.0 as u32;
@@ -1308,17 +1354,16 @@ pub fn sync_script_hotkey_bindings(
             continue;
         }
         let normalized_script_path = normalize_script_path(script_path.clone())?;
-        let parsed = _parse_ahk_hotkey(&hotkey).map_err(|e| format!("热键 `{hotkey}` 无效：{e}"))?;
+        let parsed =
+            _parse_ahk_hotkey(&hotkey).map_err(|e| format!("热键 `{hotkey}` 无效：{e}"))?;
         if binding.hold_to_loop && parsed.trigger_on_key_up {
-            return Err(format!("热键 `{hotkey}` 配置了按住循环，但 `Up` 抬起触发不支持按住循环"));
+            return Err(format!(
+                "热键 `{hotkey}` 配置了按住循环，但 `Up` 抬起触发不支持按住循环"
+            ));
         }
         let hot_if_win_active = {
             let text = binding.hot_if_win_active.trim().to_string();
-            if text.is_empty() {
-                None
-            } else {
-                Some(text)
-            }
+            if text.is_empty() { None } else { Some(text) }
         };
         let hot_if_win_active_criteria = if let Some(raw) = hot_if_win_active.as_deref() {
             _parse_hot_if_win_active_criteria(raw)
@@ -1386,7 +1431,9 @@ pub fn set_script_input_recorder_hotkey_enabled(
     recorder.hotkey_enabled.store(enabled, Ordering::Release);
 
     if !enabled {
-        recorder.suppress_hotkey_keyup.store(false, Ordering::Release);
+        recorder
+            .suppress_hotkey_keyup
+            .store(false, Ordering::Release);
         _stop_script_input_recording();
     } else {
         _emit_script_input_recorder_snapshot();
@@ -1457,7 +1504,9 @@ pub fn append_script_input_recorder_action(
         return Err(format!("不支持的录制动作类型: {action_type}"));
     }
 
-    let normalized_key = key.map(|value| value.trim().to_ascii_lowercase()).filter(|value| !value.is_empty());
+    let normalized_key = key
+        .map(|value| value.trim().to_ascii_lowercase())
+        .filter(|value| !value.is_empty());
     let normalized_button = button
         .map(|value| value.trim().to_ascii_lowercase())
         .filter(|value| !value.is_empty());
@@ -1465,7 +1514,9 @@ pub fn append_script_input_recorder_action(
     if (normalized_type == "key_down" || normalized_type == "key_up") && normalized_key.is_none() {
         return Err("键盘动作缺少 key 字段".to_string());
     }
-    if (normalized_type == "mouse_down" || normalized_type == "mouse_up") && normalized_button.is_none() {
+    if (normalized_type == "mouse_down" || normalized_type == "mouse_up")
+        && normalized_button.is_none()
+    {
         return Err("鼠标动作缺少 button 字段".to_string());
     }
 
@@ -1521,10 +1572,14 @@ mod tests {
         assert_eq!(title_only.title.as_deref(), Some("Moonlight"));
         assert!(title_only.exe_name.is_none());
 
-        let title_and_exe = _parse_hot_if_win_active_criteria("Moonlight ahk_exe EM-Win64-Shipping.exe")
-            .expect("should parse title+exe")
-            .expect("criteria should exist");
+        let title_and_exe =
+            _parse_hot_if_win_active_criteria("Moonlight ahk_exe EM-Win64-Shipping.exe")
+                .expect("should parse title+exe")
+                .expect("criteria should exist");
         assert_eq!(title_and_exe.title.as_deref(), Some("Moonlight"));
-        assert_eq!(title_and_exe.exe_name.as_deref(), Some("EM-Win64-Shipping.exe"));
+        assert_eq!(
+            title_and_exe.exe_name.as_deref(),
+            Some("EM-Win64-Shipping.exe")
+        );
     }
 }

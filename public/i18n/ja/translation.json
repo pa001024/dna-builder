@@ -5521,6 +5521,7 @@
         "preparse_none": "、使用可能な readConfig リテラルは解析されませんでした",
         "preparse_prefix": "、{{created}} 件を事前解析",
         "preparse_skipped": "（{{skipped}} 件をスキップ）",
+        "publish_update": "公開/更新",
         "publish_update_failed": "スクリプトの公開/更新に失敗しました。再試行してください。",
         "record_tool": "録画ツール",
         "rename_failed": "名前の変更に失敗しました。再試行してください。",
@@ -5577,6 +5578,7 @@
         "toggle_hotkey_failed": "スクリプトホットキーの切り替えに失敗しました",
         "toggle_status_panel": "ステータスパネルを切り替え",
         "type": "種類",
+        "update": "更新",
         "updated": "更新済み"
     },
     "script-runtime-floating": {

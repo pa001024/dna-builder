@@ -446,9 +446,7 @@ impl WgcContext {
             }
             Ok(())
         });
-        let frame_arrived_token = frame_pool
-            .FrameArrived(&frame_arrived_handler)
-            .ok();
+        let frame_arrived_token = frame_pool.FrameArrived(&frame_arrived_handler).ok();
 
         let session = frame_pool.CreateCaptureSession(&item).unwrap();
         let _ = session.SetIsBorderRequired(false);
@@ -498,9 +496,8 @@ impl WgcContext {
             return true;
         }
 
-        let waited = condvar.wait_timeout_while(guard, timeout, |seq| {
-            *seq <= self.frame_arrived_seen
-        });
+        let waited =
+            condvar.wait_timeout_while(guard, timeout, |seq| *seq <= self.frame_arrived_seen);
         match waited {
             Ok((new_guard, _)) => {
                 guard = new_guard;

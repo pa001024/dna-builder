@@ -248,9 +248,7 @@ pub fn predict_depth(
             .map_err(|e| format!("读取深度图可变数据失败: {}", e))?;
 
         for (index, label) in bright_labels_data.iter().enumerate() {
-            if *label > 0
-                && (*label as usize) < remove_label.len()
-                && remove_label[*label as usize]
+            if *label > 0 && (*label as usize) < remove_label.len() && remove_label[*label as usize]
             {
                 despeckled_data[index] = 0;
             }
@@ -637,7 +635,11 @@ pub fn find_path_direction_coords(
         let far_score = label_far_sum[label_index] / f64::from(area);
         let area_bonus = (f64::from(area).ln_1p()) * 1.4;
         let corridor_bonus = (f64::from(width) / f64::from(height)).clamp(0.0, 2.5) * 1.8;
-        let score = column_score * 180.0 + top_weight * 24.0 + far_score * 16.0 + area_bonus + corridor_bonus;
+        let score = column_score * 180.0
+            + top_weight * 24.0
+            + far_score * 16.0
+            + area_bonus
+            + corridor_bonus;
 
         candidates.push(DirectionCandidate {
             center_x,

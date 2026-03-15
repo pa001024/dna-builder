@@ -1,7 +1,4 @@
-use opencv::{
-    core::Mat,
-    prelude::MatTraitConst,
-};
+use opencv::{core::Mat, prelude::MatTraitConst};
 use std::{
     ffi::{CStr, CString, c_char, c_int, c_void},
     fs,
@@ -108,7 +105,9 @@ fn dll_remote_relative_path() -> &'static str {
 /// 获取 OCR 默认本地目录（优先 `%LOCALAPPDATA%`，失败回退到临时目录）。
 fn default_ocr_root_dir() -> PathBuf {
     if let Ok(local_app_data) = std::env::var("LOCALAPPDATA") {
-        return PathBuf::from(local_app_data).join("dna-builder").join("ocr");
+        return PathBuf::from(local_app_data)
+            .join("dna-builder")
+            .join("ocr");
     }
     std::env::temp_dir().join("dna-builder").join("ocr")
 }
@@ -150,13 +149,16 @@ fn download_file(url: &str, target_path: &Path) -> Result<(), String> {
         .map_err(|e| format!("读取下载内容失败: {url}, {e}"))?;
 
     if let Some(parent) = target_path.parent() {
-        fs::create_dir_all(parent).map_err(|e| format!("创建目录失败: {}, {e}", parent.display()))?;
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("创建目录失败: {}, {e}", parent.display()))?;
     }
 
     let tmp_path = target_path.with_extension("downloading");
-    fs::write(&tmp_path, &bytes).map_err(|e| format!("写入临时文件失败: {}, {e}", tmp_path.display()))?;
+    fs::write(&tmp_path, &bytes)
+        .map_err(|e| format!("写入临时文件失败: {}, {e}", tmp_path.display()))?;
     if target_path.exists() {
-        fs::remove_file(target_path).map_err(|e| format!("删除旧文件失败: {}, {e}", target_path.display()))?;
+        fs::remove_file(target_path)
+            .map_err(|e| format!("删除旧文件失败: {}, {e}", target_path.display()))?;
     }
     fs::rename(&tmp_path, target_path).map_err(|e| {
         format!(
@@ -170,7 +172,11 @@ fn download_file(url: &str, target_path: &Path) -> Result<(), String> {
 }
 
 /// 确保单个 OCR 资源文件存在（缺失时从 CDN 下载）。
-fn ensure_resource_file(base_url: &str, remote_relative: &str, local_path: &Path) -> Result<(), String> {
+fn ensure_resource_file(
+    base_url: &str,
+    remote_relative: &str,
+    local_path: &Path,
+) -> Result<(), String> {
     if let Ok(meta) = fs::metadata(local_path) {
         if meta.is_file() && meta.len() > 0 {
             return Ok(());
@@ -184,7 +190,10 @@ fn ensure_resource_file(base_url: &str, remote_relative: &str, local_path: &Path
 /// 预下载 OCR 运行所需文件。
 fn ensure_ocr_resources(root_dir: &Path, base_url: &str) -> Result<(), String> {
     let resource_list = vec![
-        (dll_remote_relative_path(), root_dir.join("RapidOcrOnnx.dll")),
+        (
+            dll_remote_relative_path(),
+            root_dir.join("RapidOcrOnnx.dll"),
+        ),
         (
             "models/ch_PP-OCRv3_det_infer.onnx",
             root_dir.join("models").join(DET_MODEL_FILE),
@@ -197,7 +206,10 @@ fn ensure_ocr_resources(root_dir: &Path, base_url: &str) -> Result<(), String> {
             "models/ch_PP-OCRv3_rec_infer.onnx",
             root_dir.join("models").join(REC_MODEL_FILE),
         ),
-        ("models/ppocr_keys_v1.txt", root_dir.join("models").join(KEYS_FILE)),
+        (
+            "models/ppocr_keys_v1.txt",
+            root_dir.join("models").join(KEYS_FILE),
+        ),
     ];
 
     for (remote_relative, local_path) in resource_list {
@@ -225,7 +237,11 @@ unsafe fn load_proc<T>(module: HMODULE, name: &str) -> Result<T, String> {
 }
 
 /// OCR 文本回调：将识别结果写入 `String`。
-unsafe extern "C" fn ocr_text_callback(userdata: *mut c_void, text: *const c_char, _result: *const c_void) {
+unsafe extern "C" fn ocr_text_callback(
+    userdata: *mut c_void,
+    text: *const c_char,
+    _result: *const c_void,
+) {
     if userdata.is_null() {
         return;
     }
@@ -312,9 +328,7 @@ pub fn ocr_text_from_mat(input: &Mat) -> Result<String, String> {
 
     let channels = input.channels();
     if channels != 1 && channels != 3 && channels != 4 {
-        return Err(format!(
-            "OCR 仅支持 1/3/4 通道 Mat，当前通道数: {channels}"
-        ));
+        return Err(format!("OCR 仅支持 1/3/4 通道 Mat，当前通道数: {channels}"));
     }
     let width = input.cols();
     let height = input.rows();

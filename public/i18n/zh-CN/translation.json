@@ -942,6 +942,7 @@
         "preparse_none": "，未解析到可用 readConfig 字面量",
         "preparse_prefix": "，预解析 {{created}} 项",
         "preparse_skipped": "（跳过 {{skipped}} 项）",
+        "publish_update": "发布/更新",
         "publish_update_failed": "发布/更新脚本失败，请重试",
         "record_tool": "录制工具",
         "rename_failed": "重命名失败，请重试",
@@ -998,6 +999,7 @@
         "toggle_hotkey_failed": "切换脚本热键状态失败",
         "toggle_status_panel": "切换状态栏",
         "type": "类型",
+        "update": "更新",
         "updated": "已更新"
     },
     "script-runtime-floating": {

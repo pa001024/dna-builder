@@ -5525,6 +5525,7 @@
         "preparse_none": ", no usable readConfig literal was parsed",
         "preparse_prefix": ", preparsed {{created}} item(s)",
         "preparse_skipped": " (skipped {{skipped}} item(s))",
+        "publish_update": "Publish/Update",
         "publish_update_failed": "Failed to publish/update script. Please try again.",
         "record_tool": "Recorder tool",
         "rename_failed": "Rename failed. Please try again.",
@@ -5581,6 +5582,7 @@
         "toggle_hotkey_failed": "Failed to toggle script hotkey",
         "toggle_status_panel": "Toggle status panel",
         "type": "Type",
+        "update": "Update",
         "updated": "Updated"
     },
     "script-runtime-floating": {

@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import type { CSSProperties } from "vue"
+import * as dialog from "@tauri-apps/plugin-dialog"
 import { computed, nextTick, onMounted, onUnmounted, ref } from "vue"
+import type { CSSProperties } from "vue"
 import { useRouter } from "vue-router"
-import { importPic } from "@/api/app"
+import { deleteFile, getDocumentsDir, importPic, runScript, stopScriptByPath, writeTextFile } from "@/api/app"
 import { env } from "@/env"
 import type { ScriptColorToolState } from "@/store/db"
 import { db } from "@/store/db"
+import { useScriptRuntimeStore } from "@/store/scriptRuntime"
 import { useUIStore } from "@/store/ui"
 import { copyText, pasteText } from "@/util"
 
@@ -45,6 +47,7 @@ interface PointColorRow {
     pointIndex: number
     referenceColor: PixelColorInfo | null
     tolerance: number
+    toleranceInput: string
     checkColor: PixelColorInfo | null
     checkColorDisplay: string
     checkColorInput: string
@@ -57,6 +60,7 @@ interface PointColorRow {
 interface ImagePointColorEntry {
     point: PointItem
     pointIndex: number
+    forceCheck: boolean
     color: PixelColorInfo | null
     match: boolean
 }
@@ -64,6 +68,7 @@ interface ImagePointColorEntry {
 interface ImageColorRow {
     image: LoadedImageItem
     imageIndex: number
+    label: string
     colors: ImagePointColorEntry[]
 }
 
@@ -72,9 +77,17 @@ interface ClassificationTestResult {
     error: boolean
 }
 
+interface ScriptColorToolProjectExport {
+    type: "script-color-tool-project"
+    version: 1
+    exportedAt: number
+    state: ScriptColorToolState
+}
+
 type ScriptCcFunction = (frame: unknown, x: number, y: number, color: unknown, tolerance?: unknown) => boolean
 
 interface ClassificationPointItem {
+    pointId: number
     pointIndex: number
     condition: string
     matches: boolean[]
@@ -100,7 +113,9 @@ const CLASSIFICATION_UNKNOWN_LABEL = "unknown"
 
 const router = useRouter()
 const ui = useUIStore()
+const scriptRuntime = useScriptRuntimeStore()
 const fileInputRef = ref<HTMLInputElement | null>(null)
+const projectFileInputRef = ref<HTMLInputElement | null>(null)
 const referenceImageRef = ref<HTMLImageElement | null>(null)
 const loadedImages = ref<LoadedImageItem[]>([])
 const points = ref<PointItem[]>([])
@@ -110,20 +125,102 @@ const imageLabelEditing = ref<Record<string, boolean>>({})
 const pointInitialCheckColors = ref<Record<number, string>>({})
 const pointCheckColorInputs = ref<Record<number, string>>({})
 const pointCheckColorEditing = ref<Record<number, boolean>>({})
+const pointCategoryForceChecks = ref<Record<string, boolean>>({})
 const pointTolerances = ref<Record<number, number>>({})
+const pointToleranceInputs = ref<Record<number, string>>({})
 const classificationTestResults = ref<Record<string, ClassificationTestResult>>({})
 const loading = ref(false)
 const isDragging = ref(false)
 const zoomScale = ref(4)
 const defaultTolerance = ref(10)
+const realtimeTestCloudMode = ref(false)
 const restoringPersistedState = ref(false)
+const realtimeTestScriptPath = ref("")
 let pointIdSeed = 1
 let unlistenDragEnter = () => {}
 let unlistenDragLeave = () => {}
 let unlistenDragDrop = () => {}
 let persistStateTimer: ReturnType<typeof setTimeout> | null = null
 
+const REALTIME_TEST_STATUS_RESULT = "result"
+const REALTIME_TEST_STATUS_IMAGE = "img"
+const REALTIME_TEST_STATUS_FPS = "fps"
+const REALTIME_TEST_SCRIPT_FILE_NAME = "__script_color_tool_realtime_test__.js"
+
 const referenceImage = computed(() => loadedImages.value[activeImageIndex.value] ?? null)
+/**
+ * 规范化脚本事件作用域，统一路径分隔符与大小写。
+ * @param scope 原始作用域
+ * @returns 规范化作用域
+ */
+function normalizeScriptEventScope(scope?: string | null): string {
+    return String(scope ?? "")
+        .trim()
+        .replace(/\//g, "\\")
+        .toLowerCase()
+}
+
+/**
+ * 按脚本路径提取文件名。
+ * @param scriptPath 脚本完整路径
+ * @returns 文件名
+ */
+function getScriptFileNameFromPath(scriptPath: string): string {
+    return (
+        String(scriptPath ?? "")
+            .split(/[\\/]/)
+            .filter(Boolean)
+            .pop() ?? ""
+    )
+}
+
+/**
+ * 获取图色工具实时测试脚本当前作用域。
+ * @returns 当前作用域
+ */
+function getCurrentRealtimeTestScope(): string {
+    return normalizeScriptEventScope(realtimeTestScriptPath.value)
+}
+
+/**
+ * 判断实时测试状态事件 scope 是否应被当前页面接收。
+ * @param scope 事件 scope
+ * @returns true 表示接收；false 表示忽略
+ */
+function shouldAcceptRealtimeTestScopedEvent(scope?: string | null): boolean {
+    const payloadScope = normalizeScriptEventScope(scope)
+    if (!payloadScope) {
+        return true
+    }
+    const currentScope = getCurrentRealtimeTestScope()
+    if (!currentScope) {
+        return false
+    }
+    if (payloadScope === currentScope) {
+        return true
+    }
+    const payloadFileName = getScriptFileNameFromPath(payloadScope).toLowerCase()
+    const currentFileName = getScriptFileNameFromPath(currentScope).toLowerCase()
+    return Boolean(payloadFileName) && payloadFileName === currentFileName
+}
+
+const realtimeTestStatuses = computed(() =>
+    scriptRuntime.scriptStatuses.filter(status => shouldAcceptRealtimeTestScopedEvent(status.scope))
+)
+const runningScriptFileNameSet = computed(
+    () => new Set(scriptRuntime.runningScriptPaths.map(path => getScriptFileNameFromPath(path)).filter(Boolean))
+)
+const realtimeTestResultStatus = computed(
+    () => realtimeTestStatuses.value.find(status => status.title === REALTIME_TEST_STATUS_RESULT) ?? null
+)
+const realtimeTestImageStatus = computed(
+    () => realtimeTestStatuses.value.find(status => status.title === REALTIME_TEST_STATUS_IMAGE) ?? null
+)
+const realtimeTestFpsStatus = computed(() => realtimeTestStatuses.value.find(status => status.title === REALTIME_TEST_STATUS_FPS) ?? null)
+const realtimeTestResultText = computed(() => realtimeTestResultStatus.value?.text ?? "")
+const realtimeTestFpsText = computed(() => realtimeTestFpsStatus.value?.text ?? "")
+const realtimeTestImageUrl = computed(() => realtimeTestImageStatus.value?.image ?? realtimeTestImageStatus.value?.images?.[0] ?? "")
+const isRealtimeTesting = computed(() => runningScriptFileNameSet.value.has(REALTIME_TEST_SCRIPT_FILE_NAME))
 const referenceImageStyle = computed<CSSProperties>(() => {
     const image = referenceImage.value
     if (!image) {
@@ -186,7 +283,9 @@ function resetImageState() {
     pointInitialCheckColors.value = {}
     pointCheckColorInputs.value = {}
     pointCheckColorEditing.value = {}
+    pointCategoryForceChecks.value = {}
     pointTolerances.value = {}
+    pointToleranceInputs.value = {}
     classificationTestResults.value = {}
     pointIdSeed = 1
 }
@@ -339,6 +438,27 @@ async function loadImagePath(path: string, index: number): Promise<LoadedImageIt
 }
 
 /**
+ * 读取 data URL 图片并转换为可采样的像素数据。
+ * @param sourceDataUrl 图片 data URL
+ * @param name 图片名称
+ * @param index 当前序号
+ * @returns 已加载图片对象
+ */
+async function loadImageDataUrl(sourceDataUrl: string, name: string, index: number): Promise<LoadedImageItem> {
+    const imageData = await readImageDataFromUrl(sourceDataUrl)
+    return {
+        id: `${name}-${Date.now()}-${index}`,
+        name,
+        url: sourceDataUrl,
+        sourceDataUrl,
+        width: imageData.width,
+        height: imageData.height,
+        data: imageData.data,
+        revokeUrl: false,
+    }
+}
+
+/**
  * 判断路径是否为支持的图片格式。
  * @param path 本地路径
  * @returns 是否支持
@@ -417,13 +537,11 @@ function normalizeTolerance(value: number): number {
 }
 
 /**
- * 将当前工具状态持久化到 Dexie。
+ * 构建当前图色工具状态快照。
+ * @returns 当前状态快照
  */
-async function persistScriptColorToolState() {
-    if (restoringPersistedState.value) {
-        return
-    }
-    const payload: ScriptColorToolState = {
+function createScriptColorToolStateSnapshot(): ScriptColorToolState {
+    return {
         id: "default",
         images: loadedImages.value.map(image => ({
             id: image.id,
@@ -439,11 +557,73 @@ async function persistScriptColorToolState() {
         pointTolerances: { ...pointTolerances.value },
         pointInitialCheckColors: { ...pointInitialCheckColors.value },
         pointCheckColorInputs: { ...pointCheckColorInputs.value },
+        pointCategoryForceChecks: { ...pointCategoryForceChecks.value },
         activeImageIndex: activeImageIndex.value,
         zoomScale: zoomScale.value,
         defaultTolerance: defaultTolerance.value,
+        realtimeTestCloudMode: realtimeTestCloudMode.value,
         updatedAt: Date.now(),
     }
+}
+
+/**
+ * 将状态快照应用到当前页面并重建图片数据。
+ * @param state 状态快照
+ */
+async function applyScriptColorToolStateSnapshot(state: ScriptColorToolState) {
+    resetImageState()
+
+    const restoredImages: LoadedImageItem[] = []
+    for (const image of state.images) {
+        const imageData = await readImageDataFromUrl(image.sourceDataUrl)
+        restoredImages.push({
+            id: image.id,
+            name: image.name,
+            url: image.sourceDataUrl,
+            sourceDataUrl: image.sourceDataUrl,
+            width: imageData.width,
+            height: imageData.height,
+            data: imageData.data,
+            revokeUrl: false,
+        })
+    }
+
+    loadedImages.value = restoredImages
+    imageLabels.value = { ...state.imageLabels }
+    points.value = state.points.map(point => ({
+        id: point.id,
+        x: point.x,
+        y: point.y,
+    }))
+    pointTolerances.value = { ...state.pointTolerances }
+    pointToleranceInputs.value = {}
+    pointInitialCheckColors.value = { ...state.pointInitialCheckColors }
+    pointCheckColorInputs.value = { ...state.pointCheckColorInputs }
+    pointCategoryForceChecks.value = { ...(state.pointCategoryForceChecks ?? {}) }
+    pointCheckColorEditing.value = {}
+    imageLabelEditing.value = {}
+    classificationTestResults.value = {}
+    defaultTolerance.value = normalizeTolerance(state.defaultTolerance ?? 10)
+    realtimeTestCloudMode.value = state.realtimeTestCloudMode ?? false
+    zoomScale.value = Math.max(1, Math.min(32, Math.round(state.zoomScale ?? 4)))
+    if (restoredImages.length > 0) {
+        activeImageIndex.value = Math.max(0, Math.min(restoredImages.length - 1, Math.round(state.activeImageIndex ?? 0)))
+    } else {
+        activeImageIndex.value = 0
+    }
+
+    const maxPointId = points.value.reduce((maxId, point) => Math.max(maxId, point.id), 0)
+    pointIdSeed = maxPointId + 1
+}
+
+/**
+ * 将当前工具状态持久化到 Dexie。
+ */
+async function persistScriptColorToolState() {
+    if (restoringPersistedState.value) {
+        return
+    }
+    const payload = createScriptColorToolStateSnapshot()
     await db.scriptColorToolStates.put(payload)
 }
 
@@ -472,46 +652,114 @@ async function restoreScriptColorToolState() {
         if (!state) {
             return
         }
-        resetImageState()
-
-        const restoredImages: LoadedImageItem[] = []
-        for (const image of state.images) {
-            const imageData = await readImageDataFromUrl(image.sourceDataUrl)
-            restoredImages.push({
-                id: image.id,
-                name: image.name,
-                url: image.sourceDataUrl,
-                sourceDataUrl: image.sourceDataUrl,
-                width: imageData.width,
-                height: imageData.height,
-                data: imageData.data,
-                revokeUrl: false,
-            })
-        }
-
-        loadedImages.value = restoredImages
-        imageLabels.value = { ...state.imageLabels }
-        points.value = state.points.map(point => ({
-            id: point.id,
-            x: point.x,
-            y: point.y,
-        }))
-        pointTolerances.value = { ...state.pointTolerances }
-        pointInitialCheckColors.value = { ...state.pointInitialCheckColors }
-        pointCheckColorInputs.value = { ...state.pointCheckColorInputs }
-        pointCheckColorEditing.value = {}
-        defaultTolerance.value = normalizeTolerance(state.defaultTolerance ?? 10)
-        zoomScale.value = Math.max(1, Math.min(32, Math.round(state.zoomScale ?? 4)))
-        if (restoredImages.length > 0) {
-            activeImageIndex.value = Math.max(0, Math.min(restoredImages.length - 1, Math.round(state.activeImageIndex ?? 0)))
-        } else {
-            activeImageIndex.value = 0
-        }
-
-        const maxPointId = points.value.reduce((maxId, point) => Math.max(maxId, point.id), 0)
-        pointIdSeed = maxPointId + 1
+        await applyScriptColorToolStateSnapshot(state)
     } catch (error) {
         console.error("恢复图色工具状态失败", error)
+    } finally {
+        restoringPersistedState.value = false
+    }
+}
+
+/**
+ * 读取工程文件并返回导出数据。
+ * @param file JSON 文件
+ * @returns 导出数据
+ */
+function readProjectExportFile(file: File): Promise<ScriptColorToolProjectExport> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = event => {
+            try {
+                const text = event.target?.result as string
+                const payload = JSON.parse(text) as Partial<ScriptColorToolProjectExport>
+                if (payload.type !== "script-color-tool-project" || payload.version !== 1 || !payload.state) {
+                    throw new Error("工程文件格式不正确")
+                }
+                resolve(payload as ScriptColorToolProjectExport)
+            } catch (error) {
+                reject(error)
+            }
+        }
+        reader.onerror = () => {
+            reject(new Error("读取工程文件失败"))
+        }
+        reader.readAsText(file)
+    })
+}
+
+/**
+ * 导出整个图色工程到 JSON 文件。
+ */
+async function exportProject() {
+    try {
+        const payload: ScriptColorToolProjectExport = {
+            type: "script-color-tool-project",
+            version: 1,
+            exportedAt: Date.now(),
+            state: createScriptColorToolStateSnapshot(),
+        }
+        const json = JSON.stringify(payload, null, 2)
+        const fileName = `script-color-tool-project-${new Date(payload.exportedAt).toISOString().slice(0, 19).replace(/[:T]/g, "-")}.json`
+
+        if (env.isApp) {
+            const path = await dialog.save({
+                title: "导出图色工具工程",
+                defaultPath: fileName,
+                filters: [{ name: "JSON 文件", extensions: ["json"] }],
+            })
+            if (!path) {
+                return
+            }
+            await writeTextFile(path, json)
+        } else {
+            const blob = new Blob([json], { type: "application/json" })
+            const url = URL.createObjectURL(blob)
+            const link = document.createElement("a")
+            link.href = url
+            link.download = fileName
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            URL.revokeObjectURL(url)
+        }
+        ui.showSuccessMessage("工程导出成功")
+    } catch (error) {
+        console.error("导出图色工具工程失败", error)
+        ui.showErrorMessage(error instanceof Error ? error.message : "工程导出失败")
+    }
+}
+
+/**
+ * 打开工程文件选择器。
+ */
+function openProjectImportPicker() {
+    projectFileInputRef.value?.click()
+}
+
+/**
+ * 导入整个图色工程。
+ * @param event input change 事件
+ */
+async function handleProjectImportSelection(event: Event) {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0]
+    input.value = ""
+    if (!file) {
+        return
+    }
+
+    restoringPersistedState.value = true
+    try {
+        const payload = await readProjectExportFile(file)
+        await applyScriptColorToolStateSnapshot(payload.state)
+        await db.scriptColorToolStates.put({
+            ...createScriptColorToolStateSnapshot(),
+            id: "default",
+        })
+        ui.showSuccessMessage("工程导入成功")
+    } catch (error) {
+        console.error("导入图色工具工程失败", error)
+        ui.showErrorMessage(error instanceof Error ? error.message : "工程导入失败")
     } finally {
         restoringPersistedState.value = false
     }
@@ -853,28 +1101,67 @@ function handleToleranceInput(event: Event) {
  * @param value 目标容差
  */
 function setPointTolerance(pointId: number, value: number) {
+    const normalizedValue = normalizeTolerance(value)
     pointTolerances.value = {
         ...pointTolerances.value,
-        [pointId]: normalizeTolerance(value),
+        [pointId]: normalizedValue,
+    }
+    pointToleranceInputs.value = {
+        ...pointToleranceInputs.value,
+        [pointId]: String(normalizedValue),
     }
     schedulePersistScriptColorToolState()
 }
 
 /**
- * 处理点位容差输入框变更。
+ * 处理点位容差输入框实时变更。
  * @param pointId 点位 ID
  * @param event 输入事件
  */
 function handlePointToleranceInput(pointId: number, event: Event) {
     const input = event.target as HTMLInputElement
-    setPointTolerance(pointId, Number(input.value))
+    pointToleranceInputs.value = {
+        ...pointToleranceInputs.value,
+        [pointId]: input.value,
+    }
+}
+
+/**
+ * 提交点位容差输入框的值。
+ * @param pointId 点位 ID
+ */
+function commitPointToleranceInput(pointId: number) {
+    const rawValue = pointToleranceInputs.value[pointId]
+    const parsedValue = Number(rawValue)
+    if (!Number.isFinite(parsedValue)) {
+        const fallbackValue = pointTolerances.value[pointId] ?? defaultTolerance.value
+        pointToleranceInputs.value = {
+            ...pointToleranceInputs.value,
+            [pointId]: String(fallbackValue),
+        }
+        return
+    }
+    setPointTolerance(pointId, parsedValue)
+}
+
+/**
+ * 取消点位容差输入，恢复到当前已生效值。
+ * @param pointId 点位 ID
+ */
+function revertPointToleranceInput(pointId: number) {
+    const fallbackValue = pointTolerances.value[pointId] ?? defaultTolerance.value
+    pointToleranceInputs.value = {
+        ...pointToleranceInputs.value,
+        [pointId]: String(fallbackValue),
+    }
 }
 
 /**
  * 在参考图上添加采样点。
- * @param event 鼠标点击事件
+ * @param event 鼠标事件
+ * @param forceCheck 是否按当前分类自动启用强制检查
  */
-function addPointOnReferenceImage(event: MouseEvent) {
+function addPointOnReferenceImage(event: MouseEvent, forceCheck: boolean) {
     const base = referenceImage.value
     const imageEl = referenceImageRef.value
     if (!base || !imageEl) {
@@ -911,7 +1198,31 @@ function addPointOnReferenceImage(event: MouseEvent) {
             [pointId]: baseColor.hex,
         }
     }
+    const activeLabel = getImageLabelByIndex(activeImageIndex.value)
+    if (forceCheck && activeLabel !== CLASSIFICATION_UNKNOWN_LABEL) {
+        pointCategoryForceChecks.value = {
+            ...pointCategoryForceChecks.value,
+            [getPointCategoryForceCheckKey(pointId, activeLabel)]: true,
+        }
+    }
     schedulePersistScriptColorToolState()
+}
+
+/**
+ * 处理参考图左键打点，仅添加普通点。
+ * @param event 鼠标事件
+ */
+function handleReferenceImageClick(event: MouseEvent) {
+    addPointOnReferenceImage(event, false)
+}
+
+/**
+ * 处理参考图右键打点，沿用当前强制点逻辑。
+ * @param event 鼠标事件
+ */
+function handleReferenceImageContextMenu(event: MouseEvent) {
+    event.preventDefault()
+    addPointOnReferenceImage(event, true)
 }
 
 /**
@@ -924,6 +1235,34 @@ function getPointAnchorStyle(point: PointItem): CSSProperties {
         left: `${(point.x + 0.5) * zoomScale.value}px`,
         top: `${(point.y + 0.5) * zoomScale.value}px`,
     }
+}
+
+/**
+ * 判断点位在当前图片分类下是否启用了强制检查。
+ * @param point 采样点
+ * @returns 是否为当前图强制点
+ */
+function isPointForcedOnActiveImage(point: PointItem): boolean {
+    const activeLabel = getImageLabelByIndex(activeImageIndex.value)
+    return activeLabel !== CLASSIFICATION_UNKNOWN_LABEL && isPointCategoryForceCheckEnabled(point.id, activeLabel)
+}
+
+/**
+ * 获取图片标点圆心的颜色类。
+ * @param point 采样点
+ * @returns Tailwind 类名
+ */
+function getPointAnchorColorClass(point: PointItem): string {
+    return isPointForcedOnActiveImage(point) ? "bg-success" : "bg-error"
+}
+
+/**
+ * 获取图片标点编号的颜色类。
+ * @param point 采样点
+ * @returns Tailwind 类名
+ */
+function getPointLabelColorClass(point: PointItem): string {
+    return isPointForcedOnActiveImage(point) ? "text-success" : "text-error"
 }
 
 /**
@@ -1002,9 +1341,19 @@ function removePoint(pointId: number) {
     const nextEditing = { ...pointCheckColorEditing.value }
     delete nextEditing[pointId]
     pointCheckColorEditing.value = nextEditing
+    const nextForceChecks = { ...pointCategoryForceChecks.value }
+    for (const key of Object.keys(nextForceChecks)) {
+        if (key.startsWith(`${pointId}:`)) {
+            delete nextForceChecks[key]
+        }
+    }
+    pointCategoryForceChecks.value = nextForceChecks
     const nextTolerances = { ...pointTolerances.value }
     delete nextTolerances[pointId]
     pointTolerances.value = nextTolerances
+    const nextToleranceInputs = { ...pointToleranceInputs.value }
+    delete nextToleranceInputs[pointId]
+    pointToleranceInputs.value = nextToleranceInputs
     schedulePersistScriptColorToolState()
 }
 
@@ -1016,7 +1365,49 @@ function clearPoints() {
     pointInitialCheckColors.value = {}
     pointCheckColorInputs.value = {}
     pointCheckColorEditing.value = {}
+    pointCategoryForceChecks.value = {}
     pointTolerances.value = {}
+    pointToleranceInputs.value = {}
+    schedulePersistScriptColorToolState()
+}
+
+/**
+ * 构建点位与分类标签的强制检查绑定键。
+ * @param pointId 点位 ID
+ * @param label 分类标签
+ * @returns 绑定键
+ */
+function getPointCategoryForceCheckKey(pointId: number, label: string): string {
+    const normalizedLabel = label.trim() || CLASSIFICATION_UNKNOWN_LABEL
+    return `${pointId}:${normalizedLabel}`
+}
+
+/**
+ * 获取指定点位在某个分类下是否开启强制检查。
+ * @param pointId 点位 ID
+ * @param label 分类标签
+ * @returns 是否开启强制检查
+ */
+function isPointCategoryForceCheckEnabled(pointId: number, label: string): boolean {
+    const key = getPointCategoryForceCheckKey(pointId, label)
+    return pointCategoryForceChecks.value[key] ?? false
+}
+
+/**
+ * 设置指定点位在某个分类下的强制检查开关。
+ * @param pointId 点位 ID
+ * @param label 分类标签
+ * @param forceCheck 是否强制检查
+ */
+function setPointCategoryForceCheck(pointId: number, label: string, forceCheck: boolean) {
+    const key = getPointCategoryForceCheckKey(pointId, label)
+    const nextForceChecks = { ...pointCategoryForceChecks.value }
+    if (forceCheck) {
+        nextForceChecks[key] = true
+    } else {
+        delete nextForceChecks[key]
+    }
+    pointCategoryForceChecks.value = nextForceChecks
     schedulePersistScriptColorToolState()
 }
 
@@ -1151,6 +1542,47 @@ function applyPointCheckColor(pointId: number, color: PixelColorInfo) {
 }
 
 /**
+ * 清除指定点位的自定义检查颜色，回退到默认采样色。
+ * @param pointId 点位 ID
+ */
+function clearPointCheckColor(pointId: number) {
+    const nextInputs = { ...pointCheckColorInputs.value }
+    delete nextInputs[pointId]
+    pointCheckColorInputs.value = nextInputs
+    schedulePersistScriptColorToolState()
+}
+
+/**
+ * 判断指定格子的颜色是否就是该点当前使用的检查色。
+ * @param pointId 点位 ID
+ * @param color 格子颜色
+ * @returns 是否已选为检查色
+ */
+function isCellUsingPointCheckColor(pointId: number, color: PixelColorInfo): boolean {
+    const customInput = pointCheckColorInputs.value[pointId]
+    const initialInput = pointInitialCheckColors.value[pointId] ?? ""
+    const effectiveInput = customInput?.trim().length ? customInput : initialInput
+    const checkColor = parseCheckHexColor(effectiveInput)
+    return checkColor?.hex === color.hex
+}
+
+/**
+ * 切换指定格子的“设为检查色”状态。
+ * @param pointId 点位 ID
+ * @param color 格子颜色
+ * @param checked 是否选中
+ */
+function togglePointCheckColor(pointId: number, color: PixelColorInfo, checked: boolean) {
+    if (checked) {
+        applyPointCheckColor(pointId, color)
+        return
+    }
+    if (isCellUsingPointCheckColor(pointId, color)) {
+        clearPointCheckColor(pointId)
+    }
+}
+
+/**
  * 获取分类中可用的点位条件列表（无效检查色和越界点位会被跳过）。
  * @returns 点位条件列表
  */
@@ -1164,6 +1596,7 @@ function getClassificationPointItems(): ClassificationPointItem[] {
             continue
         }
         items.push({
+            pointId: row.point.id,
             pointIndex: row.pointIndex,
             condition: `cc(frame,${row.point.x},${row.point.y},${toScriptHex(row.checkColor)},${row.tolerance})`,
             matches: row.colors.map(entry => entry.match),
@@ -1315,10 +1748,7 @@ function hasRenderableClassificationReturn(node: ClassificationTreeNode, pointIt
         return false
     }
 
-    return (
-        hasRenderableClassificationReturn(node.trueNode, pointItems) ||
-        hasRenderableClassificationReturn(node.falseNode, pointItems)
-    )
+    return hasRenderableClassificationReturn(node.trueNode, pointItems) || hasRenderableClassificationReturn(node.falseNode, pointItems)
 }
 
 /**
@@ -1338,6 +1768,25 @@ function buildCombinedConditionExpression(conditions: string[]): string | null {
 }
 
 /**
+ * 去重并保留条件原始顺序。
+ * @param conditions 条件数组
+ * @returns 去重后的条件数组
+ */
+function dedupeConditions(conditions: string[]): string[] {
+    const seen = new Set<string>()
+    const dedupedConditions: string[] = []
+    for (const condition of conditions) {
+        const normalizedCondition = condition.trim()
+        if (!normalizedCondition || seen.has(normalizedCondition)) {
+            continue
+        }
+        seen.add(normalizedCondition)
+        dedupedConditions.push(normalizedCondition)
+    }
+    return dedupedConditions
+}
+
+/**
  * 将分类树渲染为分支型 JavaScript 条件代码。
  * 对单分支链路合并为 && 条件；unknown 在函数底部统一兜底。
  * @param node 分类树节点
@@ -1350,7 +1799,9 @@ function renderClassificationTreeBranches(
     node: ClassificationTreeNode,
     pointItems: ClassificationPointItem[],
     indentLevel: number,
-    prefixConditions: string[] = []
+    prefixConditions: string[] = [],
+    activeConditions: string[] = [],
+    forcedConditionsByLabel: Record<string, string[]> = {}
 ): string[] {
     const indent = "    ".repeat(indentLevel)
 
@@ -1360,19 +1811,16 @@ function renderClassificationTreeBranches(
             return []
         }
         const labelLiteral = JSON.stringify(normalizedLabel)
-        const mergedCondition = buildCombinedConditionExpression(prefixConditions)
-        const returnLine =
-            node.ambiguous
-                ? `return ${labelLiteral} // 存在重叠样本，回退为多数标签`
-                : `return ${labelLiteral}`
+        const activeConditionSet = new Set(dedupeConditions(activeConditions))
+        const leafConditions = dedupeConditions([...prefixConditions, ...(forcedConditionsByLabel[normalizedLabel] ?? [])]).filter(
+            condition => !activeConditionSet.has(condition)
+        )
+        const mergedCondition = buildCombinedConditionExpression(leafConditions)
+        const returnLine = node.ambiguous ? `return ${labelLiteral} // 存在重叠样本，回退为多数标签` : `return ${labelLiteral}`
         if (!mergedCondition) {
             return [`${indent}${returnLine}`]
         }
-        return [
-            `${indent}if (${mergedCondition}) {`,
-            `${indent}    ${returnLine}`,
-            `${indent}}`,
-        ]
+        return [`${indent}if (${mergedCondition}) {`, `${indent}    ${returnLine}`, `${indent}}`]
     }
 
     const condition = pointItems[node.pointItemIndex]?.condition.trim()
@@ -1390,7 +1838,9 @@ function renderClassificationTreeBranches(
             node.trueNode,
             pointItems,
             indentLevel,
-            [...prefixConditions, condition]
+            [...prefixConditions, condition],
+            activeConditions,
+            forcedConditionsByLabel
         )
     }
     if (!trueHasRenderableReturn && falseHasRenderableReturn) {
@@ -1398,11 +1848,15 @@ function renderClassificationTreeBranches(
             node.falseNode,
             pointItems,
             indentLevel,
-            [...prefixConditions, `!(${condition})`]
+            [...prefixConditions, `!(${condition})`],
+            activeConditions,
+            forcedConditionsByLabel
         )
     }
 
-    const mergedPrefixCondition = buildCombinedConditionExpression(prefixConditions)
+    const mergedPrefixConditions = dedupeConditions(prefixConditions)
+    const mergedPrefixCondition = buildCombinedConditionExpression(mergedPrefixConditions)
+    const nextActiveConditions = dedupeConditions([...activeConditions, ...mergedPrefixConditions])
     const innerIndentLevel = mergedPrefixCondition ? indentLevel + 1 : indentLevel
     const innerIndent = "    ".repeat(innerIndentLevel)
     const lines: string[] = []
@@ -1411,9 +1865,27 @@ function renderClassificationTreeBranches(
     }
 
     lines.push(`${innerIndent}if (${condition}) {`)
-    lines.push(...renderClassificationTreeBranches(node.trueNode, pointItems, innerIndentLevel + 1))
+    lines.push(
+        ...renderClassificationTreeBranches(
+            node.trueNode,
+            pointItems,
+            innerIndentLevel + 1,
+            [],
+            [...nextActiveConditions, condition],
+            forcedConditionsByLabel
+        )
+    )
     lines.push(`${innerIndent}} else {`)
-    lines.push(...renderClassificationTreeBranches(node.falseNode, pointItems, innerIndentLevel + 1))
+    lines.push(
+        ...renderClassificationTreeBranches(
+            node.falseNode,
+            pointItems,
+            innerIndentLevel + 1,
+            [],
+            [...nextActiveConditions, `!(${condition})`],
+            forcedConditionsByLabel
+        )
+    )
     lines.push(`${innerIndent}}`)
 
     if (mergedPrefixCondition) {
@@ -1443,11 +1915,73 @@ function generateClassificationCode(): string | null {
     }
 
     const labels = loadedImages.value.map((_, index) => getImageLabelByIndex(index))
+    const uniqueLabels = Array.from(new Set(labels))
+    const pointItemIndexByPointId = new Map(pointItems.map((pointItem, index) => [pointItem.pointId, index]))
+    const unavailableForcedPointMap = new Map<string, number[]>()
+
+    for (const label of uniqueLabels) {
+        for (const row of pointColorRows.value) {
+            if (!isPointCategoryForceCheckEnabled(row.point.id, label)) {
+                continue
+            }
+            if (!pointItemIndexByPointId.has(row.point.id)) {
+                const pointIndices = unavailableForcedPointMap.get(label) ?? []
+                pointIndices.push(row.pointIndex)
+                unavailableForcedPointMap.set(label, pointIndices)
+            }
+        }
+    }
+
+    if (unavailableForcedPointMap.size > 0) {
+        const message = Array.from(unavailableForcedPointMap.entries())
+            .map(([label, pointIndices]) => `${label}: #${pointIndices.join("、#")}`)
+            .join("；")
+        ui.showErrorMessage(`强制检查点当前不可用于分类，请检查颜色输入和点位范围：${message}`)
+        return null
+    }
+
     const imageIndices = loadedImages.value.map((_, index) => index)
     const pointItemIndices = pointItems.map((_, index) => index)
     const tree = buildClassificationTree(imageIndices, pointItemIndices, labels, pointItems)
+    const missingForcedPointMap = new Map<string, number[]>()
+    const forcedConditionsByLabel: Record<string, string[]> = {}
+    for (const label of uniqueLabels) {
+        const labelImageIndices = imageIndices.filter(imageIndex => labels[imageIndex] === label)
+        for (const row of pointColorRows.value) {
+            if (!isPointCategoryForceCheckEnabled(row.point.id, label)) {
+                continue
+            }
+            const pointItemIndex = pointItemIndexByPointId.get(row.point.id)
+            if (pointItemIndex === undefined) {
+                continue
+            }
+            const pointItem = pointItems[pointItemIndex]
+            const matchesAllLabelImages = labelImageIndices.every(imageIndex => pointItem.matches[imageIndex])
+            const mismatchesAllLabelImages = labelImageIndices.every(imageIndex => !pointItem.matches[imageIndex])
+            if (!matchesAllLabelImages && !mismatchesAllLabelImages) {
+                const pointIndices = missingForcedPointMap.get(label) ?? []
+                pointIndices.push(row.pointIndex)
+                missingForcedPointMap.set(label, pointIndices)
+                continue
+            }
+            const nextConditions = forcedConditionsByLabel[label] ?? []
+            nextConditions.push(matchesAllLabelImages ? pointItem.condition : `!(${pointItem.condition})`)
+            forcedConditionsByLabel[label] = nextConditions
+        }
+    }
 
-    const lines = ["function checkState(frame) {", ...renderClassificationTreeBranches(tree, pointItems, 1)]
+    if (missingForcedPointMap.size > 0) {
+        const message = Array.from(missingForcedPointMap.entries())
+            .map(([label, pointIndices]) => `${label}: #${pointIndices.join("、#")}`)
+            .join("；")
+        ui.showErrorMessage(`强制检查点与对应分类样本冲突，请补充样本或关闭强制检查：${message}`)
+        return null
+    }
+
+    const lines = [
+        "function checkState(frame) {",
+        ...renderClassificationTreeBranches(tree, pointItems, 1, [], [], forcedConditionsByLabel),
+    ]
     lines.push(`    return ${JSON.stringify(CLASSIFICATION_UNKNOWN_LABEL)}`)
     lines.push("}")
     return lines.join("\n")
@@ -1466,6 +2000,152 @@ async function copyClassificationCode() {
         ui.showSuccessMessage("已复制自动分类代码")
     } catch (error) {
         ui.showErrorMessage(`复制失败: ${String(error)}`)
+    }
+}
+
+/**
+ * 构建图色工具实时测试脚本内容。
+ * @param checkStateCode 分类函数代码
+ * @returns 实时测试脚本文本
+ */
+function buildRealtimeTestScript(checkStateCode: string): string {
+    return `const cloud = ${realtimeTestCloudMode.value ? "true" : "false"}
+const hwnd = cloud ? getCGWindow() : getWindowByProcessName("EM-Win64-Shipping.exe")
+if (!hwnd) throw new Error("未找到窗口")
+checkSize(hwnd)
+
+${checkStateCode}
+
+async function main() {
+    let i = 0
+    const timer = new Timer()
+    while (true) {
+        const frame = captureWindowWGC(hwnd)
+        const state = checkState(frame)
+        setStatus(${JSON.stringify(REALTIME_TEST_STATUS_RESULT)}, state)
+        setStatus(${JSON.stringify(REALTIME_TEST_STATUS_IMAGE)}, frame)
+        if (timer.elapsed() > 1000) {
+            setStatus(${JSON.stringify(REALTIME_TEST_STATUS_FPS)}, i)
+            i = 0
+            timer.reset()
+        }
+        i++
+        await sleep(30)
+    }
+}
+main()
+`
+}
+
+/**
+ * 获取实时测试要使用的分类函数代码。
+ * 无点位或无图片时回退为恒定返回 unknown，保证实时测试可启动。
+ * @returns 分类函数代码
+ */
+function getRealtimeTestCheckStateCode(): string | null {
+    if (loadedImages.value.length === 0 || points.value.length === 0) {
+        return `function checkState(_frame) {
+    return ${JSON.stringify(CLASSIFICATION_UNKNOWN_LABEL)}
+}`
+    }
+    return generateClassificationCode()
+}
+
+/**
+ * 获取图色工具实时测试脚本路径。
+ * @returns 脚本路径
+ */
+async function ensureRealtimeTestScriptPath(): Promise<string> {
+    if (realtimeTestScriptPath.value) {
+        return realtimeTestScriptPath.value
+    }
+    const documentsDir = env.isApp ? await getDocumentsDir() : "C:\\Users\\Public\\Documents"
+    const scriptPath = `${documentsDir}\\dob-scripts\\${REALTIME_TEST_SCRIPT_FILE_NAME}`
+    realtimeTestScriptPath.value = scriptPath
+    return scriptPath
+}
+
+/**
+ * 启动图色工具实时测试。
+ */
+async function startRealtimeTest() {
+    const checkStateCode = getRealtimeTestCheckStateCode()
+    if (!checkStateCode) {
+        return
+    }
+
+    try {
+        await scriptRuntime.initRuntimeTracking()
+        const scriptPath = await ensureRealtimeTestScriptPath()
+        const scriptContent = buildRealtimeTestScript(checkStateCode)
+        await writeTextFile(scriptPath, scriptContent)
+        void runScript(scriptPath).catch(error => {
+            console.error("图色工具实时测试脚本运行失败", error)
+            ui.showErrorMessage(`实时测试运行失败: ${String(error)}`)
+        })
+    } catch (error) {
+        console.error("启动图色工具实时测试失败", error)
+        ui.showErrorMessage(`启动实时测试失败: ${String(error)}`)
+    }
+}
+
+/**
+ * 停止图色工具实时测试。
+ */
+async function stopRealtimeTest() {
+    try {
+        const scriptPath = await ensureRealtimeTestScriptPath()
+        await stopScriptByPath(scriptPath)
+        try {
+            await deleteFile(scriptPath)
+        } catch (deleteError) {
+            console.error("删除图色工具实时测试临时脚本失败", deleteError)
+        }
+        realtimeTestScriptPath.value = ""
+    } catch (error) {
+        console.error("停止图色工具实时测试失败", error)
+        ui.showErrorMessage(`停止实时测试失败: ${String(error)}`)
+    }
+}
+
+/**
+ * 切换图色工具实时测试状态。
+ */
+async function toggleRealtimeTest() {
+    if (isRealtimeTesting.value) {
+        await stopRealtimeTest()
+        return
+    }
+    await startRealtimeTest()
+}
+
+/**
+ * 将实时测试最新截图加入图片列表。
+ */
+async function addRealtimeTestScreenshot() {
+    const imageUrl = realtimeTestImageUrl.value
+    if (!imageUrl) {
+        ui.showErrorMessage("当前没有可添加的实时截图")
+        return
+    }
+
+    loading.value = true
+    try {
+        const baseIndex = loadedImages.value.length
+        const snapshotName = `realtime-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.png`
+        const item = await loadImageDataUrl(imageUrl, snapshotName, baseIndex)
+        loadedImages.value = [...loadedImages.value, item]
+        appendImageLabels([item])
+        if (baseIndex === 0) {
+            activeImageIndex.value = 0
+        }
+        schedulePersistScriptColorToolState()
+        ui.showSuccessMessage("已添加实时截图到图片列表")
+    } catch (error) {
+        console.error("添加实时截图失败", error)
+        ui.showErrorMessage(`添加实时截图失败: ${String(error)}`)
+    } finally {
+        loading.value = false
     }
 }
 
@@ -1509,12 +2189,14 @@ const pointColorRows = computed<PointColorRow[]>(() =>
         const checkColorDisplay = checkColor?.hex ?? (hasCustomInput ? (customInput ?? "") : initialInput)
         const checkColorEditing = pointCheckColorEditing.value[point.id] === true
         const tolerance = pointTolerances.value[point.id] ?? defaultTolerance.value
+        const toleranceInput = pointToleranceInputs.value[point.id] ?? String(tolerance)
 
         return {
             point,
             pointIndex: pointIndex + 1,
             referenceColor,
             tolerance,
+            toleranceInput,
             checkColor,
             checkColorDisplay,
             checkColorInput: hasCustomInput ? (customInput ?? "") : initialInput,
@@ -1534,19 +2216,24 @@ const pointColorRows = computed<PointColorRow[]>(() =>
  * 构建“图片 x 点位”的颜色矩阵（已按行列转置）。
  */
 const imageColorRows = computed<ImageColorRow[]>(() =>
-    loadedImages.value.map((image, imageIndex) => ({
-        image,
-        imageIndex,
-        colors: pointColorRows.value.map(pointRow => {
-            const entry = pointRow.colors[imageIndex]
-            return {
-                point: pointRow.point,
-                pointIndex: pointRow.pointIndex,
-                color: entry?.color ?? null,
-                match: entry?.match ?? false,
-            }
-        }),
-    }))
+    loadedImages.value.map((image, imageIndex) => {
+        const label = getImageLabelByIndex(imageIndex)
+        return {
+            image,
+            imageIndex,
+            label,
+            colors: pointColorRows.value.map(pointRow => {
+                const entry = pointRow.colors[imageIndex]
+                return {
+                    point: pointRow.point,
+                    pointIndex: pointRow.pointIndex,
+                    forceCheck: isPointCategoryForceCheckEnabled(pointRow.point.id, label),
+                    color: entry?.color ?? null,
+                    match: entry?.match ?? false,
+                }
+            }),
+        }
+    })
 )
 
 /**
@@ -1591,6 +2278,10 @@ async function initTauriDragEvents() {
 }
 
 onMounted(async () => {
+    if (env.isApp) {
+        await scriptRuntime.initRuntimeTracking()
+        await ensureRealtimeTestScriptPath()
+    }
     await restoreScriptColorToolState()
     initTauriDragEvents()
 })
@@ -1616,6 +2307,23 @@ onUnmounted(() => {
             </button>
             <button class="btn btn-sm btn-ghost" @click="clearImages" :disabled="loadedImages.length === 0">清空图片</button>
             <button class="btn btn-sm btn-ghost" @click="clearPoints" :disabled="points.length === 0">清空点位</button>
+            <button class="btn btn-sm btn-ghost" @click="openProjectImportPicker">导入工程</button>
+            <button class="btn btn-sm btn-ghost" @click="exportProject">导出工程</button>
+            <button
+                class="btn btn-sm btn-ghost"
+                @click="addRealtimeTestScreenshot"
+                :disabled="!env.isApp || !realtimeTestImageUrl || loading"
+            >
+                截图
+            </button>
+            <button
+                class="btn btn-sm"
+                :class="isRealtimeTesting ? 'btn-warning' : 'btn-success'"
+                @click="toggleRealtimeTest"
+                :disabled="!env.isApp"
+            >
+                {{ isRealtimeTesting ? "停止实时测试" : "启动实时测试" }}
+            </button>
             <button
                 class="btn btn-sm btn-secondary"
                 @click="copyClassificationCode"
@@ -1653,7 +2361,27 @@ onUnmounted(() => {
                 />
                 <span class="text-xs text-base-content/70">新打点使用</span>
             </div>
+            <label v-if="env.isApp" class="flex items-center gap-2 text-xs text-base-content/70">
+                <span>云游戏</span>
+                <input
+                    v-model="realtimeTestCloudMode"
+                    type="checkbox"
+                    class="toggle toggle-xs toggle-primary"
+                    @change="schedulePersistScriptColorToolState()"
+                />
+            </label>
             <input ref="fileInputRef" type="file" multiple accept="image/*" class="hidden" @change="handleFileSelection" />
+            <input
+                ref="projectFileInputRef"
+                type="file"
+                accept=".json,application/json"
+                class="hidden"
+                @change="handleProjectImportSelection"
+            />
+            <div v-if="env.isApp" class="flex items-center gap-3 text-xs text-base-content/70">
+                <span>实时结果 {{ realtimeTestResultText || "-" }}</span>
+                <span>FPS {{ realtimeTestFpsText || "-" }}</span>
+            </div>
             <div class="text-xs text-base-content/70">
                 请先加载多张图片，然后在当前图上点击添加坐标点（坐标可点击复制 cc，桌面端支持拖拽导入）
             </div>
@@ -1703,7 +2431,8 @@ onUnmounted(() => {
                                 :alt="referenceImage.name"
                                 class="select-none cursor-crosshair"
                                 :style="referenceImageStyle"
-                                @click="addPointOnReferenceImage"
+                                @click="handleReferenceImageClick"
+                                @contextmenu="handleReferenceImageContextMenu"
                             />
                             <div
                                 v-for="(point, index) in points"
@@ -1712,13 +2441,14 @@ onUnmounted(() => {
                                 :style="getPointAnchorStyle(point)"
                             >
                                 <div
-                                    class="absolute left-0 top-0 w-2 h-2 rounded-full bg-error border border-white shadow -translate-x-1/2 -translate-y-1/2"
+                                    class="absolute left-0 top-0 w-2 h-2 rounded-full border border-white shadow -translate-x-1/2 -translate-y-1/2"
+                                    :class="getPointAnchorColorClass(point)"
                                 ></div>
-                                <div class="absolute left-0 top-0" :style="getPointBubbleContainerStyle(point)">
+                                <div class="absolute left-0 top-0 opacity-50" :style="getPointBubbleContainerStyle(point)">
                                     <div
                                         class="relative rounded-md bg-base-100 border border-base-300 shadow px-2 py-1 text-[10px] leading-tight whitespace-nowrap"
                                     >
-                                        <div class="font-semibold text-error">#{{ index + 1 }}</div>
+                                        <div class="font-semibold" :class="getPointLabelColorClass(point)">#{{ index + 1 }}</div>
                                         <div class="text-base-content/80">{{ point.x }}, {{ point.y }}</div>
                                         <span
                                             class="absolute w-2 h-2 bg-base-100 border-l border-b border-base-300"
@@ -1791,12 +2521,15 @@ onUnmounted(() => {
                                                 <span class="text-[10px] text-base-content/60">容差</span>
                                                 <input
                                                     type="number"
-                                                    class="input input-xs input-bordered w-20 text-center"
-                                                    :value="row.tolerance"
+                                                    class="input input-xs input-bordered w-15 text-center"
+                                                    :value="row.toleranceInput"
                                                     min="0"
                                                     max="255"
                                                     step="1"
-                                                    @change="handlePointToleranceInput(row.point.id, $event)"
+                                                    @input="handlePointToleranceInput(row.point.id, $event)"
+                                                    @blur="commitPointToleranceInput(row.point.id)"
+                                                    @keydown.enter.prevent="commitPointToleranceInput(row.point.id)"
+                                                    @keydown.esc.prevent="revertPointToleranceInput(row.point.id)"
                                                 />
                                             </div>
                                         </div>
@@ -1887,12 +2620,34 @@ onUnmounted(() => {
                                                     </span>
                                                 </div>
                                                 <div class="text-[10px]">
-                                                    <button
-                                                        class="link link-hover text-info"
-                                                        @click="applyPointCheckColor(entry.point.id, entry.color)"
-                                                    >
-                                                        设为检查色
-                                                    </button>
+                                                    <div class="flex items-center gap-2">
+                                                        <label class="flex items-center gap-1 text-base-content/70">
+                                                            <input
+                                                                :checked="entry.forceCheck"
+                                                                type="checkbox"
+                                                                class="toggle toggle-xs toggle-primary"
+                                                                @change="
+                                                                    setPointCategoryForceCheck(
+                                                                        entry.point.id,
+                                                                        imageRow.label,
+                                                                        ($event.target as HTMLInputElement).checked
+                                                                    )
+                                                                "
+                                                            />
+                                                        </label>
+                                                        <input
+                                                            :checked="isCellUsingPointCheckColor(entry.point.id, entry.color)"
+                                                            type="checkbox"
+                                                            class="checkbox checkbox-xs checkbox-info"
+                                                            @change="
+                                                                togglePointCheckColor(
+                                                                    entry.point.id,
+                                                                    entry.color,
+                                                                    ($event.target as HTMLInputElement).checked
+                                                                )
+                                                            "
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

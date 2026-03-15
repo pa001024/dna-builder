@@ -1,7 +1,6 @@
 #[cfg(target_os = "windows")]
 use std::{
-    env,
-    fs,
+    env, fs,
     path::{Path, PathBuf},
 };
 
@@ -48,7 +47,11 @@ fn inject_vendor_runtime_dlls() {
         );
     }
     let profile_dir = cargo_profile_dir();
-    for target_dir in [profile_dir.clone(), profile_dir.join("examples"), profile_dir.join("deps")] {
+    for target_dir in [
+        profile_dir.clone(),
+        profile_dir.join("examples"),
+        profile_dir.join("deps"),
+    ] {
         link_or_copy_runtime_dll(&vendor_dll_path, &target_dir.join(OPENCV_DLL_NAME));
     }
 }
@@ -58,7 +61,10 @@ fn inject_vendor_runtime_dlls() {
  */
 #[cfg(target_os = "windows")]
 fn vendor_opencv_dll_path() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("vendor").join("opencv").join(OPENCV_DLL_NAME)
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("vendor")
+        .join("opencv")
+        .join(OPENCV_DLL_NAME)
 }
 
 /**

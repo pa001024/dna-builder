@@ -1,7 +1,7 @@
-use boa_engine::{Context, JsResult};
-use boa_gc::{Finalize, Trace};
 use crate::submodules::script_builtin::get_current_script_path;
 use crate::submodules::script_console::{ConsoleState, Logger};
+use boa_engine::{Context, JsResult};
+use boa_gc::{Finalize, Trace};
 use std::sync::Arc;
 use tauri::Emitter;
 

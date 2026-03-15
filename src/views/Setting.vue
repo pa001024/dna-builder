@@ -108,7 +108,6 @@ function handleSafeModeToggle(enabled: boolean) {
 function cancelDisableSafeMode() {
     safeModeGuardDialogRef.value?.close()
     safeModeAnswer.value = ""
-    currentSafeModeQuestion.value = null
     setting.safeMode = true
 }
 

@@ -538,6 +538,40 @@ fn _parse_u32_array(arg: JsValue, ctx: &mut Context) -> JsResult<Vec<u32>> {
     Ok(values)
 }
 
+/// 解析色键相关函数的容差参数，支持单个数字或与 colors 一一对应的数字数组。
+fn _parse_color_tolerances(
+    arg: JsValue,
+    color_count: usize,
+    ctx: &mut Context,
+) -> JsResult<Vec<u8>> {
+    if let Some(obj) = arg.as_object() {
+        if let Ok(array) = JsArray::from_object(obj.clone()) {
+            let length = array.length(ctx)? as usize;
+            if length != color_count {
+                return Err(JsNativeError::typ()
+                    .with_message(format!(
+                        "tolerance 数组长度必须与 colors 一致，期望 {color_count}，实际 {length}"
+                    ))
+                    .into());
+            }
+
+            let mut tolerances = Vec::with_capacity(length);
+            for idx in 0..length {
+                let value = array.get(idx as u32, ctx)?;
+                let tolerance = value.to_number(ctx).map_err(|_| {
+                    JsNativeError::typ().with_message(format!("tolerance[{idx}] 必须是数字"))
+                })?;
+                tolerances.push(tolerance.clamp(0.0, 255.0) as u8);
+            }
+
+            return Ok(tolerances);
+        }
+    }
+
+    let tolerance = arg.to_number(ctx)?;
+    Ok(vec![tolerance.clamp(0.0, 255.0) as u8; color_count])
+}
+
 /// 将 JS `string[]` 数组参数解析为 Rust `Vec<String>`。
 fn _parse_string_array(arg: JsValue, ctx: &mut Context) -> JsResult<Vec<String>> {
     let array_obj = arg
@@ -1297,7 +1331,8 @@ fn _call_cloudgame_devtools_method(method: &str, args: &[serde_json::Value]) -> 
 
     let method_json =
         serde_json::to_string(method).map_err(|e| format!("序列化 cloudgame 方法名失败: {e}"))?;
-    let args_json = serde_json::to_string(args).map_err(|e| format!("序列化 cloudgame 参数失败: {e}"))?;
+    let args_json =
+        serde_json::to_string(args).map_err(|e| format!("序列化 cloudgame 参数失败: {e}"))?;
     let script = format!(
         r#"
 (() => {{
@@ -1319,8 +1354,11 @@ fn _call_cloudgame_devtools_method(method: &str, args: &[serde_json::Value]) -> 
 fn _cg_move(dx: Option<JsValue>, dy: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
     let dx = dx.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
     let dy = dy.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
-    _call_cloudgame_devtools_method("businessMove", &[serde_json::json!(dx), serde_json::json!(dy)])
-        .map_err(|e| JsNativeError::error().with_message(e))?;
+    _call_cloudgame_devtools_method(
+        "businessMove",
+        &[serde_json::json!(dx), serde_json::json!(dy)],
+    )
+    .map_err(|e| JsNativeError::error().with_message(e))?;
     Ok(JsValue::undefined())
 }
 
@@ -1400,7 +1438,7 @@ fn _cg_click(
         }
     }
     _call_cloudgame_devtools_method("businessClick", &args)
-    .map_err(|e| JsNativeError::error().with_message(e))?;
+        .map_err(|e| JsNativeError::error().with_message(e))?;
     Ok(JsValue::undefined())
 }
 
@@ -1427,7 +1465,7 @@ fn _cg_down(
         }
     }
     _call_cloudgame_devtools_method("businessDown", &args)
-    .map_err(|e| JsNativeError::error().with_message(e))?;
+        .map_err(|e| JsNativeError::error().with_message(e))?;
     Ok(JsValue::undefined())
 }
 
@@ -1454,13 +1492,17 @@ fn _cg_up(
         }
     }
     _call_cloudgame_devtools_method("businessUp", &args)
-    .map_err(|e| JsNativeError::error().with_message(e))?;
+        .map_err(|e| JsNativeError::error().with_message(e))?;
     Ok(JsValue::undefined())
 }
 
 /// 云游戏鼠标中键点击函数。
 #[cfg(not(feature = "dob-script-cli"))]
-fn _cg_middle_click(x: Option<JsValue>, y: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+fn _cg_middle_click(
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
     let mut args = Vec::new();
     if let Some(value) = x.as_ref()
         && !value.is_undefined()
@@ -1475,7 +1517,7 @@ fn _cg_middle_click(x: Option<JsValue>, y: Option<JsValue>, ctx: &mut Context) -
         }
     }
     _call_cloudgame_devtools_method("businessMiddleClick", &args)
-    .map_err(|e| JsNativeError::error().with_message(e))?;
+        .map_err(|e| JsNativeError::error().with_message(e))?;
     Ok(JsValue::undefined())
 }
 
@@ -1502,7 +1544,7 @@ fn _cg_wheel(
         }
     }
     _call_cloudgame_devtools_method("businessWheel", &args)
-    .map_err(|e| JsNativeError::error().with_message(e))?;
+        .map_err(|e| JsNativeError::error().with_message(e))?;
     Ok(JsValue::undefined())
 }
 
@@ -2840,10 +2882,10 @@ fn _color_filter(
     let img_mat = (*js_img_mat.borrow().data().inner).clone();
 
     let colors = _parse_u32_array(colors.unwrap_or_else(|| JsValue::undefined()), ctx)?;
-    let tolerance = tolerance.unwrap_or_else(|| js_value!(0)).to_number(ctx)?;
-    let tolerance = tolerance.clamp(0.0, 255.0) as u8;
+    let tolerances =
+        _parse_color_tolerances(tolerance.unwrap_or_else(|| js_value!(0)), colors.len(), ctx)?;
 
-    match color_filter_impl(&img_mat, &colors, tolerance) {
+    match color_filter_impl(&img_mat, &colors, &tolerances) {
         Ok(mask) => Box::new(mask).into_js(ctx),
         Err(msg) => Err(JsNativeError::error().with_message(msg).into()),
     }
@@ -2897,10 +2939,10 @@ fn _color_key_match(
     } else {
         0.0
     };
-    let tolerance = tolerance.unwrap_or_else(|| js_value!(0)).to_number(ctx)?;
-    let tolerance = tolerance.clamp(0.0, 255.0) as u8;
+    let tolerances =
+        _parse_color_tolerances(tolerance.unwrap_or_else(|| js_value!(0)), colors.len(), ctx)?;
 
-    let index = color_key_match_impl(&img_mat, &colors, min_mean, tolerance)
+    let index = color_key_match_impl(&img_mat, &colors, min_mean, &tolerances)
         .map_err(|msg| JsNativeError::error().with_message(msg))?;
     Ok(JsValue::new(index))
 }
@@ -3952,9 +3994,11 @@ fn _mono_depth(js_image: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue
             let context = &mut context.borrow_mut();
             match async_result {
                 Ok(Ok(depth_mat)) => match Box::new(depth_mat).into_js(context) {
-                    Ok(js_depth) => resolvers_clone
-                        .resolve
-                        .call(&JsValue::undefined(), &[js_depth], context),
+                    Ok(js_depth) => {
+                        resolvers_clone
+                            .resolve
+                            .call(&JsValue::undefined(), &[js_depth], context)
+                    }
                     Err(error) => {
                         let message = format!("monoDepth 返回值转换失败: {error:?}");
                         resolvers_clone.reject.call(

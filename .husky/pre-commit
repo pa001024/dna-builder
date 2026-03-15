@@ -3,6 +3,9 @@ node .husky/update-version.js
 
 # 格式化代码
 npm run format
+cd src-tauri
+cargo fmt
+cd ..
 
 # 暂存修改的版本文件
 git add package.json
