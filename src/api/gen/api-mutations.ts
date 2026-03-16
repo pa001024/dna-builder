@@ -53,6 +53,58 @@ export const updateUserMetaMutation = typedMutation<Types.UserLoginResult, { dat
     }
 `)
 
+export const claimDailyLaunchExperienceMutation = typedMutation<Types.UserExperienceRewardResult>(/* GraphQL */ `
+    mutation {
+        claimDailyLaunchExperience {
+            success
+            message
+            source
+            awardedExp
+            retryAfterMs
+            token
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                level
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
+export const claimDailyOnlineExperienceMutation = typedMutation<Types.UserExperienceRewardResult>(/* GraphQL */ `
+    mutation {
+        claimDailyOnlineExperience {
+            success
+            message
+            source
+            awardedExp
+            retryAfterMs
+            token
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                level
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
 export const deleteUserMutation = typedMutation<boolean, { id: string }>(/* GraphQL */ `
     mutation ($id: String!) {
         deleteUser(id: $id)
@@ -69,6 +121,8 @@ export const updateUserMutation = typedMutation<Types.User, { id: string; email?
             pic
             uid
             roles
+            experience
+            level
             createdAt
             updateAt
         }

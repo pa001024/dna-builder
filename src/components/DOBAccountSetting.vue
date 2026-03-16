@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { nextTick, reactive, ref } from "vue"
+import { computed, nextTick, reactive, ref } from "vue"
 import { forgotPasswordMutation, loginMutation, registerMutation, resetPasswordMutation, updateUserMetaMutation } from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
+import { getUserLevelProgress } from "@/utils/user-level"
 
 const user = useUserStore()
 const ui = useUIStore()
@@ -37,6 +38,8 @@ const nameEdit = reactive({
     active: false,
     name: "",
 })
+
+const levelProgress = computed(() => getUserLevelProgress(user.experience, user.level))
 
 // 登录处理
 const handleLogin = async () => {
@@ -109,6 +112,7 @@ const handleRegister = async () => {
 // 退出登录
 const handleLogout = async () => {
     if (await ui.showDialog("确认退出", "确定要退出当前账号吗？")) {
+        user.clearProfile()
         user.jwtToken = ""
         ui.showSuccessMessage("已退出登录")
     }
@@ -270,6 +274,21 @@ async function startNameEdit() {
                 </div>
                 <!-- 用户详细信息 -->
                 <div class="text-sm space-y-1 pt-2 border-t border-base-300">
+                    <div class="mb-2">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="font-medium">等级 Lv.{{ user.level }}</span>
+                            <span class="text-base-content/60">{{ user.experience }} 总经验</span>
+                        </div>
+                        <progress
+                            class="progress progress-primary w-full mt-2"
+                            :value="levelProgress.currentLevelExp"
+                            :max="levelProgress.requiredExp"
+                        />
+                        <div class="text-xs text-base-content/60 mt-1 flex justify-between">
+                            <span>当前等级经验 {{ levelProgress.currentLevelExp }}/{{ levelProgress.requiredExp }}</span>
+                            <span>再获得 {{ levelProgress.requiredExp - levelProgress.currentLevelExp }} 经验升级</span>
+                        </div>
+                    </div>
                     <div v-if="user.qq" class="flex justify-between">
                         <span class="text-base-content/60">QQ:</span>
                         <span>{{ user.qq }}</span>

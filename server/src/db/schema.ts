@@ -121,6 +121,12 @@ export const users = sqliteTable(
         pic: text("pic"),
         uid: text("uid"),
         roles: text("roles"),
+        experience: integer("experience")
+            .notNull()
+            .$default(() => 0),
+        level: integer("level")
+            .notNull()
+            .$default(() => 1),
         createdAt: text("created_at").$default(now),
         updateAt: text("update_at").$onUpdate(now),
     },
@@ -295,6 +301,29 @@ export const schedulesRelations = relations(schedules, ({ one }) => ({
     user: one(users, { fields: [schedules.userId], references: [users.id] }),
 }))
 
+/** 用户经验奖励领取记录 */
+export const userExperienceRewards = sqliteTable(
+    "user_experience_rewards",
+    {
+        id: text("id").$default(id).primaryKey(),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        source: text("source").notNull(),
+        dateKey: text("date_key").notNull(),
+        awardedExp: integer("awarded_exp").notNull(),
+        createdAt: text("created_at").$default(now),
+    },
+    table => [
+        uniqueIndex("user_experience_reward_unique_idx").on(table.userId, table.source, table.dateKey),
+        index("user_experience_reward_user_idx").on(table.userId),
+    ]
+)
+
+export const userExperienceRewardsRelations = relations(userExperienceRewards, ({ one }) => ({
+    user: one(users, { fields: [userExperienceRewards.userId], references: [users.id] }),
+}))
+
 /** 任务 */
 export const tasks = sqliteTable("tasks", {
     id: text("id").$default(id).primaryKey(),
@@ -450,6 +479,7 @@ export const userRelations = relations(users, ({ one, many }) => ({
     timelineLikes: many(timelineLikes),
     scripts: many(scripts),
     scriptLikes: many(scriptLikes),
+    userExperienceRewards: many(userExperienceRewards),
 }))
 
 export const dnaUserBindingsRelations = relations(dnaUserBindings, ({ one }) => ({

@@ -6,6 +6,12 @@ import { sendPasswordResetEmail } from "../../util/email"
 import { db, schema } from ".."
 import { id } from "../schema"
 import { type Context, jwtToken } from "../yoga"
+import {
+    getDailyOnlineExperienceRetryAfterMs,
+    grantDailyUserExperience,
+    USER_EXPERIENCE_SOURCES,
+    validateDailyOnlineExperienceEligibility,
+} from "./userExperience"
 
 export const typeDefs = /* GraphQL */ `
     type Mutation {
@@ -14,6 +20,8 @@ export const typeDefs = /* GraphQL */ `
         guest(name: String!, qq: String): UserLoginResult!
         register(name: String!, qq: String!, email: String!, password: String!): UserLoginResult!
         updateUserMeta(data: UsersUpdateInput!): UserLoginResult!
+        claimDailyLaunchExperience: UserExperienceRewardResult!
+        claimDailyOnlineExperience: UserExperienceRewardResult!
         deleteUser(id: String!): Boolean!
         updateUser(id: String!, email: String, roles: String): User!
         forgotPassword(email: String!): Boolean!
@@ -35,6 +43,8 @@ export const typeDefs = /* GraphQL */ `
         pic: String
         uid: String
         roles: String
+        experience: Int!
+        level: Int!
         createdAt: String
         updateAt: String
     }
@@ -42,6 +52,16 @@ export const typeDefs = /* GraphQL */ `
     type UserLoginResult {
         success: Boolean!
         message: String!
+        token: String
+        user: User
+    }
+
+    type UserExperienceRewardResult {
+        success: Boolean!
+        message: String!
+        source: String!
+        awardedExp: Int!
+        retryAfterMs: Int
         token: String
         user: User
     }
@@ -60,7 +80,16 @@ export const typeDefs = /* GraphQL */ `
 `
 
 function signToken(user: typeof schema.users.$inferSelect) {
-    return jwt.sign({ id: user.id, email: user.email, name: user.name, qq: user.qq, roles: user.roles }, jwtToken)
+    return jwt.sign(
+        {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            qq: user.qq,
+            roles: user.roles,
+        },
+        jwtToken
+    )
 }
 
 export const resolvers = {
@@ -216,6 +245,71 @@ export const resolvers = {
                 return { success: true, message: "User updated successfully", token, user }
             }
             return { success: false, message: "User not found" }
+        },
+        claimDailyLaunchExperience: async (_parent, _args, context) => {
+            if (!context.user) {
+                return {
+                    success: false,
+                    message: "Unauthorized",
+                    source: USER_EXPERIENCE_SOURCES.DAILY_LAUNCH,
+                    awardedExp: 0,
+                }
+            }
+
+            const result = await grantDailyUserExperience(context.user.id, USER_EXPERIENCE_SOURCES.DAILY_LAUNCH)
+            const retryAfterMs = await getDailyOnlineExperienceRetryAfterMs(context.user.id)
+            return {
+                success: true,
+                message: result.alreadyClaimed ? "今日启动经验已领取" : "启动经验领取成功",
+                source: USER_EXPERIENCE_SOURCES.DAILY_LAUNCH,
+                awardedExp: result.awardedExp,
+                retryAfterMs,
+                token: signToken(result.user),
+                user: result.user,
+            }
+        },
+        claimDailyOnlineExperience: async (_parent, _args, context) => {
+            if (!context.user) {
+                return {
+                    success: false,
+                    message: "Unauthorized",
+                    source: USER_EXPERIENCE_SOURCES.DAILY_ONLINE_HOUR,
+                    awardedExp: 0,
+                }
+            }
+
+            const eligibility = await validateDailyOnlineExperienceEligibility(context.user.id)
+            if (!eligibility.ok) {
+                if (eligibility.reason === "launch_not_claimed") {
+                    return {
+                        success: false,
+                        message: "请先领取今日打开软件经验",
+                        source: USER_EXPERIENCE_SOURCES.DAILY_ONLINE_HOUR,
+                        awardedExp: 0,
+                        retryAfterMs: null,
+                    }
+                }
+
+                const waitMinutes = Math.max(1, Math.ceil((eligibility.waitMs ?? 0) / 60000))
+                return {
+                    success: false,
+                    message: `在线时长不足，需在今日打开软件后满 1 小时再领取，预计还需 ${waitMinutes} 分钟`,
+                    source: USER_EXPERIENCE_SOURCES.DAILY_ONLINE_HOUR,
+                    awardedExp: 0,
+                    retryAfterMs: eligibility.waitMs ?? null,
+                }
+            }
+
+            const result = await grantDailyUserExperience(context.user.id, USER_EXPERIENCE_SOURCES.DAILY_ONLINE_HOUR)
+            return {
+                success: true,
+                message: result.alreadyClaimed ? "今日在线经验已领取" : "在线经验领取成功",
+                source: USER_EXPERIENCE_SOURCES.DAILY_ONLINE_HOUR,
+                awardedExp: result.awardedExp,
+                retryAfterMs: 0,
+                token: signToken(result.user),
+                user: result.user,
+            }
         },
         deleteUser: async (_parent, { id }, context) => {
             if (!context.user || !context.user.roles?.includes("admin")) {

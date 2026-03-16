@@ -6,6 +6,8 @@ export interface User {
     pic?: string
     uid?: string
     roles?: string
+    experience: number
+    level: number
     createdAt?: string
     updateAt?: string
 }
@@ -13,6 +15,16 @@ export interface User {
 export interface UserLoginResult {
     success: boolean
     message: string
+    token?: string
+    user?: User
+}
+
+export interface UserExperienceRewardResult {
+    success: boolean
+    message: string
+    source: string
+    awardedExp: number
+    retryAfterMs?: number
     token?: string
     user?: User
 }

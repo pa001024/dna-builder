@@ -293,12 +293,15 @@ async function sendMessage(e: Event) {
     input.value.innerHTML = ""
     newMsgText.value = ""
     input.value.focus()
-    await sendMessageMutation({
+    const result = await sendMessageMutation({
         content,
         roomId: roomId.value,
         replyToMsgId: replyingTo.value?.id,
     })
     replyingTo.value = null
+    if (result) {
+        void user.refreshProfile()
+    }
     await nextTick()
     el.value?.scrollTo({
         top: el.value.scrollHeight,

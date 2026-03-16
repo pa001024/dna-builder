@@ -8,6 +8,7 @@ import type { Context } from "../yoga"
 import { getSubSelection } from "."
 import { processMessageImageContent } from "./messageImage"
 import { canViewMessageInRoom, getPrivateRoomMessageTopic, isPrivateRoomType } from "./roomVisibility"
+import { grantDailyUserExperience, USER_EXPERIENCE_SOURCES } from "./userExperience"
 
 export const typeDefs = /* GraphQL */ `
     type Query {
@@ -295,6 +296,17 @@ export const resolvers = {
                         pubsub.publish("newMessage", msg.roomId, { newMessage: msg })
                     }
                 }
+
+                /**
+                 * @description 聊天经验奖励不应影响正常发消息流程。
+                 * 即使奖励结算失败，也只记录日志，不阻断消息发送。
+                 */
+                try {
+                    await grantDailyUserExperience(userId, USER_EXPERIENCE_SOURCES.DAILY_MESSAGE)
+                } catch (error) {
+                    console.error("发消息经验结算失败:", error)
+                }
+
                 return rst
             }
             return null

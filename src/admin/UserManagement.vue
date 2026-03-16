@@ -41,6 +41,16 @@ const config: AdminCrudConfig<User> = {
             badgeClass: (_, value) => (value === "admin" ? "badge-primary" : "badge-ghost"),
         },
         {
+            key: "level",
+            title: "等级",
+            formatter: value => `Lv.${String(value || 1)}`,
+        },
+        {
+            key: "experience",
+            title: "经验",
+            formatter: value => String(value || 0),
+        },
+        {
             key: "createdAt",
             title: "创建时间",
             cellClass: "px-8 py-5 whitespace-nowrap text-sm text-base-content/70",

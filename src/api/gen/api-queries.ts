@@ -12,6 +12,8 @@ export const meQuery = typedQuery(
                 pic
                 uid
                 roles
+                experience
+                level
                 createdAt
                 updateAt
             }
@@ -30,6 +32,8 @@ export const userQuery = typedQuery(
                 pic
                 uid
                 roles
+                experience
+                level
                 createdAt
                 updateAt
             }
@@ -48,6 +52,8 @@ export const usersQuery = typedQuery(
                 pic
                 uid
                 roles
+                experience
+                level
                 createdAt
                 updateAt
             }
@@ -542,16 +548,6 @@ export const msgsQuery = typedQuery(
                         qq
                     }
                 }
-                reactions {
-                    id
-                    count
-                    users {
-                        id
-                        name
-                        qq
-                    }
-                    createdAt
-                }
             }
         }
     ` as const
@@ -583,17 +579,6 @@ export const lastMsgsQuery = typedQuery(
                         name
                         qq
                     }
-                }
-                reactions {
-                    id
-                    msgId
-                    count
-                    users {
-                        id
-                        name
-                        qq
-                    }
-                    createdAt
                 }
             }
         }
