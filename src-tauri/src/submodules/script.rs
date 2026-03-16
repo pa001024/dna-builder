@@ -11,11 +11,13 @@ use crate::submodules::script_builtin::set_script_cli_config;
 use crate::submodules::script_builtin::{
     register_builtin_functions, set_current_script_path, set_script_event_app_handle,
 };
-use crate::submodules::script_console::Console;
+use crate::submodules::script_console::{Console, ConsoleState, Logger};
 use boa_engine::builtins::error::Error as BoaErrorObject;
 use boa_engine::context::ContextBuilder;
 use boa_engine::job::JobExecutor;
 use boa_engine::{JsError, Script, Source};
+use boa_gc::{Finalize, Trace};
+use mcp_server::{ScriptConsoleEntry, ScriptExecConsoleEntry};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -62,6 +64,114 @@ fn emit_script_error(app_handle: &tauri::AppHandle, scope: &str, error_message: 
         }),
     );
     error_message
+}
+
+/// 记录 `exec_script` 的一次同步执行结果。
+pub struct ExecScriptRunResult {
+    pub result: String,
+    pub console: Vec<ScriptExecConsoleEntry>,
+}
+
+/// `exec_script` 专用内存 logger。
+#[derive(Debug, Trace, Finalize)]
+struct ExecScriptLogger {
+    #[unsafe_ignore_trace]
+    collector: Arc<Mutex<Vec<ScriptConsoleEntry>>>,
+    #[unsafe_ignore_trace]
+    scope: Option<String>,
+}
+
+impl ExecScriptLogger {
+    /// 追加一条控制台日志到返回缓冲区。
+    fn push(&self, level: &str, message: String) {
+        if let Ok(mut collector) = self.collector.lock() {
+            collector.push(ScriptConsoleEntry {
+                scope: self.scope.clone(),
+                level: level.to_string(),
+                message,
+                timestamp: std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .map(|duration| duration.as_millis() as u64)
+                    .unwrap_or(0),
+            });
+        }
+    }
+}
+
+/// 将内部完整控制台日志映射为 exec_script 对外返回的精简结构。
+fn collect_exec_script_console_entries(
+    collector: &Arc<Mutex<Vec<ScriptConsoleEntry>>>,
+) -> Vec<ScriptExecConsoleEntry> {
+    collector
+        .lock()
+        .map(|guard| {
+            guard
+                .iter()
+                .map(|entry| ScriptExecConsoleEntry {
+                    level: entry.level.clone(),
+                    message: entry.message.clone(),
+                    timestamp: entry.timestamp,
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+impl Logger for ExecScriptLogger {
+    /// `console.log`
+    fn log(
+        &self,
+        msg: String,
+        _state: &ConsoleState,
+        _context: &mut boa_engine::Context,
+    ) -> boa_engine::JsResult<()> {
+        self.push("log", msg);
+        Ok(())
+    }
+
+    /// `console.info`
+    fn info(
+        &self,
+        msg: String,
+        _state: &ConsoleState,
+        _context: &mut boa_engine::Context,
+    ) -> boa_engine::JsResult<()> {
+        self.push("info", msg);
+        Ok(())
+    }
+
+    /// `console.warn`
+    fn warn(
+        &self,
+        msg: String,
+        _state: &ConsoleState,
+        _context: &mut boa_engine::Context,
+    ) -> boa_engine::JsResult<()> {
+        self.push("warn", msg);
+        Ok(())
+    }
+
+    /// `console.error`
+    fn error(
+        &self,
+        msg: String,
+        _state: &ConsoleState,
+        _context: &mut boa_engine::Context,
+    ) -> boa_engine::JsResult<()> {
+        self.push("error", msg);
+        Ok(())
+    }
+
+    /// `console.debug`
+    fn debug(
+        &self,
+        msg: String,
+        _state: &ConsoleState,
+        _context: &mut boa_engine::Context,
+    ) -> boa_engine::JsResult<()> {
+        self.push("debug", msg);
+        Ok(())
+    }
 }
 
 /// 统一处理 CLI 模式下的脚本执行错误输出。
@@ -304,6 +414,112 @@ pub async fn run_script_with_tauri_console(
                     script_path.as_str(),
                     error_message,
                 ))
+            }
+        }
+    })
+    .await
+    .map_err(|e| format!("任务执行失败: {}", e))?
+}
+
+/// 执行内存中的脚本源码，并将控制台输出发送到 Tauri 事件系统。
+///
+/// # 参数
+/// - `script_source`: 脚本源码
+/// - `script_scope`: 脚本作用域，用于 status/console 归档
+/// - `app_handle`: Tauri 应用句柄，用于发送事件
+///
+/// # 返回
+/// 返回执行结果字符串，如果成功则返回 Ok(String)，否则返回错误信息
+pub async fn exec_script_with_tauri_console(
+    script_source: String,
+    script_scope: Option<String>,
+    app_handle: tauri::AppHandle,
+) -> Result<ExecScriptRunResult, String> {
+    tokio::task::spawn_blocking(move || {
+        let job_executor = std::rc::Rc::new(TokioJobExecutor::new());
+        let console_collector = Arc::new(Mutex::new(Vec::<ScriptConsoleEntry>::new()));
+        let context = &mut ContextBuilder::new()
+            .job_executor(job_executor.clone())
+            .build()
+            .unwrap();
+
+        context
+            .register_global_class::<JsMat>()
+            .map_err(|e| format!("注册 JsMat 失败: {:?}", e))?;
+        context
+            .register_global_class::<JsDnnNet>()
+            .map_err(|e| format!("注册 JsDnnNet 失败: {:?}", e))?;
+        context
+            .register_global_class::<JsTimer>()
+            .map_err(|e| format!("注册 JsTimer 失败: {:?}", e))?;
+
+        let exec_logger = ExecScriptLogger {
+            collector: console_collector.clone(),
+            scope: script_scope.clone(),
+        };
+
+        boa_runtime::register((boa_runtime::extensions::TimeoutExtension,), None, context)
+            .map_err(|e| format!("注册 Timeout Extension 失败: {:?}", e))?;
+        Console::register_with_logger(exec_logger, context)
+            .map_err(|e| format!("注册自定义 Console 失败: {:?}", e))?;
+
+        set_script_event_app_handle(app_handle.clone());
+        set_current_script_path(script_scope.clone().unwrap_or_default());
+        register_builtin_functions(context).map_err(|e| format!("注册内置函数失败: {:?}", e))?;
+        let runtime_scope = script_scope
+            .clone()
+            .unwrap_or_else(|| "__exec_script__".to_string());
+        let _running_guard = ScriptRunningGuard::enter(runtime_scope, app_handle.clone());
+        let source = Source::from_bytes(script_source.as_bytes());
+        let script = Script::parse(source, None, context)
+            .map_err(|e| format!("解析临时脚本失败: {:?}", e))?;
+        match script.evaluate(context) {
+            Ok(result) => {
+                if result
+                    .as_object()
+                    .is_some_and(|obj| obj.downcast_ref::<BoaErrorObject>().is_some())
+                {
+                    let error_detail = result
+                        .to_string(context)
+                        .map(|s| s.to_std_string_escaped())
+                        .unwrap_or_else(|_| format!("{:?}", result));
+                    let error_message = format!("JavaScript 返回 Error 对象: {}", error_detail);
+                    return Err(error_message);
+                }
+
+                if let Err(e) = job_executor.run_jobs(context) {
+                    let error_message = format_js_error_message(context, "运行任务失败", &e);
+                    return Err(error_message);
+                }
+
+                let result_text = if result.is_undefined() || result.is_null() {
+                    String::new()
+                } else {
+                    result
+                        .to_string(context)
+                        .map(|s| s.to_std_string_escaped())
+                        .unwrap_or_else(|_| format!("{:?}", result))
+                };
+                Ok::<ExecScriptRunResult, String>(ExecScriptRunResult {
+                    result: result_text,
+                    console: collect_exec_script_console_entries(&console_collector),
+                })
+            }
+            Err(e) => {
+                let opaque = e.to_opaque(context);
+                let detail = opaque
+                    .to_string(context)
+                    .map(|s| s.to_std_string_escaped())
+                    .unwrap_or_else(|_| format!("{:?}", opaque));
+                if detail.contains(SCRIPT_STOP_INTERRUPT_MESSAGE) {
+                    return Ok::<ExecScriptRunResult, String>(ExecScriptRunResult {
+                        result: String::new(),
+                        console: collect_exec_script_console_entries(&console_collector),
+                    });
+                }
+
+                let error_message = format_js_error_message(context, "JavaScript 执行错误", &e);
+                Err(error_message)
             }
         }
     })

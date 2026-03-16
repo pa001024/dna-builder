@@ -17,6 +17,7 @@ pub mod route;
 pub mod script;
 pub mod script_builtin;
 pub mod script_console;
+pub mod script_mcp;
 pub mod script_vision;
 pub mod setvol;
 pub mod tpl;

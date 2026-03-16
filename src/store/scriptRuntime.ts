@@ -277,6 +277,37 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
         },
 
         /**
+         * 按作用域清空控制台日志。
+         * @param scope 作用域
+         */
+        clearConsoleLogsByScope(scope?: string) {
+            const normalizedScope = normalizeScriptEventScope(scope)
+            if (!normalizedScope) {
+                return
+            }
+            this.consoleLogs = this.consoleLogs.filter(item => normalizeScriptEventScope(item.scope) !== normalizedScope)
+        },
+
+        /**
+         * 按“当前可见”语义清空控制台日志。
+         * @param scope 当前脚本作用域
+         * @param includeGlobal 是否同时清理无作用域日志
+         */
+        clearConsoleLogsForScope(scope?: string, includeGlobal = true) {
+            const normalizedScope = normalizeScriptEventScope(scope)
+            this.consoleLogs = this.consoleLogs.filter(item => {
+                const itemScope = normalizeScriptEventScope(item.scope)
+                if (normalizedScope && itemScope === normalizedScope) {
+                    return false
+                }
+                if (includeGlobal && !itemScope) {
+                    return false
+                }
+                return true
+            })
+        },
+
+        /**
          * 按标题移除指定脚本状态。
          * @param title 状态标题
          */
@@ -439,10 +470,13 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
          */
         upsertScriptConfigFromRequest(payload: ScriptReadConfigPayload, fallbackScope?: string | null): ScriptConfigValue {
             this.touchScriptEvent()
-            const scope = this.resolveStoredScriptConfigScope(
-                payload.scope,
-                fallbackScope ?? this.activeConfigScope ?? this.runningScriptPaths[0] ?? this.runningScriptName
-            )
+            const explicitScope = normalizeScriptEventScope(payload.scope)
+            const scope = explicitScope
+                ? this.resolveStoredScriptConfigScope(
+                      payload.scope,
+                      fallbackScope ?? this.activeConfigScope ?? this.runningScriptPaths[0] ?? this.runningScriptName
+                  )
+                : ""
             const normalizedName = String(payload.name ?? "").trim()
             const kind: ScriptConfigKind = ["number", "string", "select", "multi-select", "boolean"].includes(String(payload.kind))
                 ? payload.kind
@@ -483,10 +517,13 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
          */
         applyScriptSetConfigFromEvent(payload: ScriptSetConfigPayload, fallbackScope?: string | null): boolean {
             this.touchScriptEvent()
-            const scope = this.resolveStoredScriptConfigScope(
-                payload.scope,
-                fallbackScope ?? this.activeConfigScope ?? this.runningScriptPaths[0] ?? this.runningScriptName
-            )
+            const explicitScope = normalizeScriptEventScope(payload.scope)
+            const scope = explicitScope
+                ? this.resolveStoredScriptConfigScope(
+                      payload.scope,
+                      fallbackScope ?? this.activeConfigScope ?? this.runningScriptPaths[0] ?? this.runningScriptName
+                  )
+                : ""
             const normalizedName = String(payload.name ?? "").trim()
             if (!scope || !normalizedName) {
                 return false
@@ -514,6 +551,18 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
          */
         clearScriptStatuses() {
             this.scriptStatuses = []
+        },
+
+        /**
+         * 按作用域清空脚本状态。
+         * @param scope 作用域
+         */
+        clearScriptStatusesByScope(scope?: string) {
+            const normalizedScope = normalizeScriptEventScope(scope)
+            if (!normalizedScope) {
+                return
+            }
+            this.scriptStatuses = this.scriptStatuses.filter(item => normalizeScriptEventScope(item.scope) !== normalizedScope)
         },
 
         /**

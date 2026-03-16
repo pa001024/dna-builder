@@ -66,7 +66,12 @@
          */
         function patchPointerLockHandlerProperty(target, property) {
             const descriptor = Object.getOwnPropertyDescriptor(target, property)
-            if (!descriptor || typeof descriptor.set !== "function" || typeof descriptor.get !== "function" || descriptor.configurable === false) {
+            if (
+                !descriptor ||
+                typeof descriptor.set !== "function" ||
+                typeof descriptor.get !== "function" ||
+                descriptor.configurable === false
+            ) {
                 return
             }
             Object.defineProperty(target, property, {

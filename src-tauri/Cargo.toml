@@ -28,6 +28,8 @@ path = "src/main.rs"
 
 [dependencies]
 tauri = { version = "2", features = ["tray-icon", "image-ico", "unstable"] }
+mcp_server = { path = "../mcp_server" }
+async-trait = "0.1.89"
 tauri-plugin-opener = "2"
 tauri-plugin-clipboard-manager = "2"
 tauri-plugin-process = "2"

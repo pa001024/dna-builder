@@ -1,5 +1,6 @@
 use crate::submodules::script_builtin::get_current_script_path;
 use crate::submodules::script_console::{ConsoleState, Logger};
+use crate::submodules::script_mcp::{record_script_console, should_record_script_mcp_cache};
 use boa_engine::{Context, JsResult};
 use boa_gc::{Finalize, Trace};
 use std::sync::Arc;
@@ -21,6 +22,9 @@ impl Logger for TauriLogger {
     /// 发送控制台输出到 Tauri 事件系统
     fn log(&self, msg: String, _state: &ConsoleState, _context: &mut Context) -> JsResult<()> {
         let scope = get_current_script_path();
+        if should_record_script_mcp_cache() {
+            record_script_console(scope.clone(), "log".to_string(), msg.clone());
+        }
         let _ = self.app_handle.emit(
             "script-console",
             serde_json::json!({
@@ -34,6 +38,9 @@ impl Logger for TauriLogger {
 
     fn info(&self, msg: String, _state: &ConsoleState, _context: &mut Context) -> JsResult<()> {
         let scope = get_current_script_path();
+        if should_record_script_mcp_cache() {
+            record_script_console(scope.clone(), "info".to_string(), msg.clone());
+        }
         let _ = self.app_handle.emit(
             "script-console",
             serde_json::json!({
@@ -47,6 +54,9 @@ impl Logger for TauriLogger {
 
     fn warn(&self, msg: String, _state: &ConsoleState, _context: &mut Context) -> JsResult<()> {
         let scope = get_current_script_path();
+        if should_record_script_mcp_cache() {
+            record_script_console(scope.clone(), "warn".to_string(), msg.clone());
+        }
         let _ = self.app_handle.emit(
             "script-console",
             serde_json::json!({
@@ -60,6 +70,9 @@ impl Logger for TauriLogger {
 
     fn error(&self, msg: String, _state: &ConsoleState, _context: &mut Context) -> JsResult<()> {
         let scope = get_current_script_path();
+        if should_record_script_mcp_cache() {
+            record_script_console(scope.clone(), "error".to_string(), msg.clone());
+        }
         let _ = self.app_handle.emit(
             "script-console",
             serde_json::json!({
@@ -73,6 +86,9 @@ impl Logger for TauriLogger {
 
     fn debug(&self, msg: String, _state: &ConsoleState, _context: &mut Context) -> JsResult<()> {
         let scope = get_current_script_path();
+        if should_record_script_mcp_cache() {
+            record_script_console(scope.clone(), "debug".to_string(), msg.clone());
+        }
         let _ = self.app_handle.emit(
             "script-console",
             serde_json::json!({

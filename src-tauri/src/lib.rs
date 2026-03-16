@@ -2067,6 +2067,17 @@ fn resolve_script_config_request(
     Ok("配置请求已响应".to_string())
 }
 
+/// 响应脚本 MCP requestHelp 请求，将前端标注结果回传给 MCP 工具调用方。
+#[tauri::command]
+fn resolve_script_help_request(
+    request_id: String,
+    response: mcp_server::ScriptHelpResponse,
+) -> Result<String, String> {
+    use submodules::script_mcp::resolve_script_help_request;
+    resolve_script_help_request(request_id, response)?;
+    Ok("协助请求已响应".to_string())
+}
+
 #[tauri::command]
 fn stop_script() -> Result<String, String> {
     use submodules::script::stop_script;
@@ -2115,6 +2126,55 @@ fn get_script_runtime_info() -> Result<ScriptRuntimeInfo, String> {
         script_paths,
         running_count,
     })
+}
+
+/// 获取脚本页 MCP 服务当前状态。
+#[tauri::command]
+fn get_script_mcp_server_state() -> Result<submodules::script_mcp::ScriptMcpServerState, String> {
+    Ok(submodules::script_mcp::get_script_mcp_server_state())
+}
+
+/// 清空脚本页 MCP status / console 缓存。
+#[tauri::command]
+async fn clear_script_mcp_cache(
+    script_path: Option<String>,
+    app_handle: tauri::AppHandle,
+) -> Result<mcp_server::ScriptOperationResult, String> {
+    submodules::script_mcp::clear_script_mcp_cache(app_handle, script_path).await
+}
+
+/// 清空脚本页 MCP status 缓存。
+#[tauri::command]
+async fn clear_script_mcp_status(
+    script_path: Option<String>,
+    title: Option<String>,
+    app_handle: tauri::AppHandle,
+) -> Result<mcp_server::ScriptOperationResult, String> {
+    submodules::script_mcp::clear_script_mcp_status(app_handle, script_path, title).await
+}
+
+/// 清空脚本页 MCP console 缓存。
+#[tauri::command]
+async fn clear_script_mcp_console(
+    script_path: Option<String>,
+    include_global: Option<bool>,
+    app_handle: tauri::AppHandle,
+) -> Result<mcp_server::ScriptOperationResult, String> {
+    submodules::script_mcp::clear_script_mcp_console(app_handle, script_path, include_global).await
+}
+
+/// 更新脚本页 MCP 服务启停状态。
+#[tauri::command]
+async fn set_script_mcp_server_enabled(
+    enabled: bool,
+    port: Option<u16>,
+    app_handle: tauri::AppHandle,
+) -> Result<submodules::script_mcp::ScriptMcpServerState, String> {
+    if enabled {
+        submodules::script_mcp::start_script_mcp_server_runtime(app_handle, port).await
+    } else {
+        submodules::script_mcp::stop_script_mcp_server_runtime().await
+    }
 }
 
 /// 同步脚本热键绑定到后端（AHK 风格，如 ^c）。
@@ -2794,10 +2854,16 @@ pub fn run() {
         cleanup_temp_dir,
         run_script,
         resolve_script_config_request,
+        resolve_script_help_request,
         stop_script,
         stop_script_by_path,
         get_script_running_state,
         get_script_runtime_info,
+        get_script_mcp_server_state,
+        clear_script_mcp_cache,
+        clear_script_mcp_status,
+        clear_script_mcp_console,
+        set_script_mcp_server_enabled,
         sync_script_hotkey_bindings,
         get_script_hotkey_bindings,
         set_script_input_recorder_hotkey_enabled,

@@ -200,6 +200,42 @@ export async function resolveScriptConfigRequest(requestId: string, value: strin
     return await invoke<string>("resolve_script_config_request", { requestId, value })
 }
 
+export type ScriptHelpSelectionMode = "point" | "region"
+
+export interface ScriptHelpPoint {
+    x: number
+    y: number
+}
+
+export interface ScriptHelpRegion {
+    x: number
+    y: number
+    width: number
+    height: number
+    x2: number
+    y2: number
+}
+
+export interface ScriptHelpResponse {
+    confirmed: boolean
+    selectionMode: ScriptHelpSelectionMode
+    point?: ScriptHelpPoint | null
+    region?: ScriptHelpRegion | null
+    imageWidth?: number | null
+    imageHeight?: number | null
+    note?: string | null
+}
+
+/**
+ * 响应脚本 MCP 协助请求
+ * @param requestId 请求 ID
+ * @param response 协助结果
+ * @returns 成功消息
+ */
+export async function resolveScriptHelpRequest(requestId: string, response: ScriptHelpResponse) {
+    return await invoke<string>("resolve_script_help_request", { requestId, response })
+}
+
 /**
  * 停止当前运行的脚本
  * @returns 成功消息
@@ -235,6 +271,25 @@ export interface ScriptRuntimeInfo {
 }
 
 /**
+ * 脚本页 MCP 服务状态。
+ */
+export interface ScriptMcpServerState {
+    enabled: boolean
+    running: boolean
+    port: number
+    address: string
+    lastError?: string | null
+}
+
+/**
+ * 脚本 MCP 通用操作结果。
+ */
+export interface ScriptMcpOperationResult {
+    success: boolean
+    message: string
+}
+
+/**
  * 脚本热键绑定。
  */
 export interface ScriptHotkeyBinding {
@@ -250,6 +305,49 @@ export interface ScriptHotkeyBinding {
  */
 export async function getScriptRuntimeInfo() {
     return await invoke<ScriptRuntimeInfo>("get_script_runtime_info")
+}
+
+/**
+ * 获取脚本页 MCP 服务状态。
+ * @returns 当前 MCP 服务状态
+ */
+export async function getScriptMcpServerState() {
+    return await invoke<ScriptMcpServerState>("get_script_mcp_server_state")
+}
+
+/**
+ * 切换脚本页 MCP 服务开关。
+ * @param enabled 是否启用
+ * @returns 更新后的 MCP 服务状态
+ */
+export async function setScriptMcpServerEnabled(enabled: boolean, port?: number) {
+    return await invoke<ScriptMcpServerState>("set_script_mcp_server_enabled", { enabled, port })
+}
+
+/**
+ * 清空脚本页 MCP status / console 缓存。
+ * @param scriptPath 可选脚本路径，不传则清空全部
+ */
+export async function clearScriptMcpCache(scriptPath?: string) {
+    return await invoke<ScriptMcpOperationResult>("clear_script_mcp_cache", { scriptPath })
+}
+
+/**
+ * 清空脚本页 MCP status 缓存。
+ * @param scriptPath 可选脚本路径
+ * @param title 可选状态标题
+ */
+export async function clearScriptMcpStatus(scriptPath?: string, title?: string) {
+    return await invoke<ScriptMcpOperationResult>("clear_script_mcp_status", { scriptPath, title })
+}
+
+/**
+ * 清空脚本页 MCP console 缓存。
+ * @param scriptPath 可选脚本路径
+ * @param includeGlobal 传入脚本路径时，是否同时清空无 scope 的全局日志
+ */
+export async function clearScriptMcpConsole(scriptPath?: string, includeGlobal?: boolean) {
+    return await invoke<ScriptMcpOperationResult>("clear_script_mcp_console", { scriptPath, includeGlobal })
 }
 
 /**

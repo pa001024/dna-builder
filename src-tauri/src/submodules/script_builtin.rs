@@ -4151,6 +4151,17 @@ fn _emit_script_status(
         } else {
             "upsert"
         };
+        if crate::submodules::script_mcp::should_record_script_mcp_cache() {
+            crate::submodules::script_mcp::record_script_status(
+                scope.clone(),
+                action.to_string(),
+                title.clone(),
+                text.clone(),
+                image.clone(),
+                images.clone(),
+                timestamp,
+            );
+        }
         let _ = app_handle.emit(
             "script-status",
             serde_json::json!({

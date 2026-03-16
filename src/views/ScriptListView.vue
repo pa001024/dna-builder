@@ -8,13 +8,20 @@ import { useRouter } from "vue-router"
 import {
     deleteFile,
     getDocumentsDir,
+    getScriptMcpServerState,
     listScriptFiles,
     openExplorer,
     readTextFile,
     renameFile,
+    resolveScriptHelpRequest,
     runAsAdmin,
     runScript,
+    clearScriptMcpConsole,
+    clearScriptMcpStatus,
+    setScriptMcpServerEnabled,
+    type ScriptHelpResponse,
     type ScriptHotkeyBinding,
+    type ScriptMcpServerState,
     syncScriptHotkeyBindings,
     unwatchFile,
     watchFile,
@@ -26,6 +33,7 @@ import ContextMenu, { ContextMenuItem } from "@/components/contextmenu"
 import { useCloudGameStore } from "@/store/cloudgame"
 import { type ScriptRuntimeSidePanelTab, useScriptRuntimeStore } from "@/store/scriptRuntime"
 import { useUIStore } from "@/store/ui"
+import { copyText } from "@/util"
 import { parseScriptHeader, replaceScriptHeader } from "@/utils/script-header"
 import { env } from "@/env"
 
@@ -252,6 +260,51 @@ let unlistenFileChangedFn: UnlistenFn | null = null
 const watchedFiles = ref<Set<string>>(new Set())
 const codeEditor = ref<any>()
 const showSchedulerDialog = ref(false)
+const showScriptMcpDialog = ref(false)
+const SCRIPT_MCP_PORT_STORAGE_KEY = "script-mcp-port-v1"
+const scriptMcpServerState = ref<ScriptMcpServerState>({
+    enabled: false,
+    running: false,
+    port: 28080,
+    address: "http://127.0.0.1:28080/mcp",
+    lastError: null,
+})
+const scriptMcpUpdating = ref(false)
+const scriptMcpPortInput = ref<number>(28080)
+type ScriptHelpSelectionMode = "point" | "region"
+
+interface ScriptHelpRequestEvent {
+    requestId: string
+    title: string
+    message?: string
+    image: string
+    selectionMode: ScriptHelpSelectionMode
+}
+
+interface ScriptHelpPoint {
+    x: number
+    y: number
+}
+
+interface ScriptHelpRegion {
+    x: number
+    y: number
+    width: number
+    height: number
+    x2: number
+    y2: number
+}
+
+const showScriptHelpDialog = ref(false)
+const scriptHelpSubmitting = ref(false)
+const activeScriptHelpRequest = ref<ScriptHelpRequestEvent | null>(null)
+const scriptHelpImageRef = ref<HTMLImageElement | null>(null)
+const scriptHelpPoint = ref<ScriptHelpPoint | null>(null)
+const scriptHelpRegion = ref<ScriptHelpRegion | null>(null)
+const scriptHelpNote = ref("")
+const scriptHelpDragging = ref(false)
+const scriptHelpDragStart = ref<ScriptHelpPoint | null>(null)
+let unlistenScriptHelpRequestFn: UnlistenFn | null = null
 const schedulerStopRequested = computed({
     get: () => scriptRuntime.schedulerStopRequested,
     set: value => {
@@ -812,6 +865,12 @@ const runningScriptFileNameSet = computed(
     () => new Set(runningScriptPaths.value.map(path => getScriptFileNameFromPath(path)).filter(Boolean))
 )
 const activeLocalScriptName = computed(() => (activeTab.value?.type === "local" ? activeTab.value.name : ""))
+const activeLocalScriptPath = computed(() => {
+    if (activeTab.value?.type !== "local" || !scriptsDir.value) {
+        return ""
+    }
+    return `${scriptsDir.value}\\${activeTab.value.name}`
+})
 const isActiveLocalScriptRunning = computed(() => {
     const scriptName = activeLocalScriptName.value
     return scriptName ? isLocalScriptRunning(scriptName) : false
@@ -2449,8 +2508,18 @@ function addConsoleLog(level: string, message: string) {
 /**
  * 清空控制台
  */
-function clearConsole() {
-    scriptRuntime.clearConsoleLogs()
+async function clearConsole() {
+    const targetPath = activeLocalScriptPath.value || (runningScriptPaths.value.length === 1 ? runningScriptPaths.value[0] : undefined)
+    try {
+        await clearScriptMcpConsole(targetPath, true)
+    } catch (error) {
+        console.error("清空脚本控制台缓存失败", error)
+    }
+    if (targetPath) {
+        scriptRuntime.clearConsoleLogsForScope(targetPath, true)
+    } else {
+        scriptRuntime.clearConsoleLogs()
+    }
 }
 
 /**
@@ -2481,15 +2550,367 @@ function toggleStatusPanel() {
 /**
  * 清除指定标题的脚本状态（仅前端显示层）。
  */
-function clearStatus(title: string) {
-    scriptRuntime.removeScriptStatus(title)
+async function clearStatus(title: string, scope?: string) {
+    const targetPath = scope || activeLocalScriptPath.value || (runningScriptPaths.value.length === 1 ? runningScriptPaths.value[0] : undefined)
+    try {
+        await clearScriptMcpStatus(targetPath, title)
+    } catch (error) {
+        console.error("清空脚本状态缓存失败", error)
+    }
+    scriptRuntime.removeScriptStatus(title, scope)
 }
 
 /**
  * 清空全部脚本状态（仅前端显示层）。
  */
-function clearAllStatus() {
-    scriptRuntime.clearScriptStatuses()
+async function clearAllStatus() {
+    const visibleStatuses = [...scriptStatuses.value]
+    if (visibleStatuses.length === 0) {
+        return
+    }
+    try {
+        await Promise.all(
+            visibleStatuses.map(item => clearScriptMcpStatus(item.scope, item.title))
+        )
+    } catch (error) {
+        console.error("批量清空脚本状态缓存失败", error)
+    }
+    for (const item of visibleStatuses) {
+        scriptRuntime.removeScriptStatus(item.title, item.scope)
+    }
+}
+
+/**
+ * 判断当前协助请求是否为点选模式。
+ */
+const isScriptHelpPointMode = computed(() => activeScriptHelpRequest.value?.selectionMode === "point")
+
+/**
+ * 判断当前协助请求是否为框选模式。
+ */
+const isScriptHelpRegionMode = computed(() => activeScriptHelpRequest.value?.selectionMode === "region")
+
+/**
+ * 判断当前协助请求是否已完成有效选择。
+ */
+const hasScriptHelpSelection = computed(() =>
+    isScriptHelpPointMode.value ? Boolean(scriptHelpPoint.value) : Boolean(scriptHelpRegion.value && scriptHelpRegion.value.width > 0 && scriptHelpRegion.value.height > 0)
+)
+
+/**
+ * 清理协助弹窗本地状态。
+ */
+function resetScriptHelpState() {
+    showScriptHelpDialog.value = false
+    scriptHelpSubmitting.value = false
+    activeScriptHelpRequest.value = null
+    scriptHelpPoint.value = null
+    scriptHelpRegion.value = null
+    scriptHelpNote.value = ""
+    scriptHelpDragging.value = false
+    scriptHelpDragStart.value = null
+}
+
+/**
+ * 读取当前图片显示尺寸与原图尺寸，用于坐标换算。
+ * @returns 坐标换算所需的图片元信息
+ */
+function getScriptHelpImageMetrics() {
+    const image = scriptHelpImageRef.value
+    if (!image) return null
+    const rect = image.getBoundingClientRect()
+    const naturalWidth = image.naturalWidth || image.width
+    const naturalHeight = image.naturalHeight || image.height
+    if (!rect.width || !rect.height || !naturalWidth || !naturalHeight) {
+        return null
+    }
+    return {
+        rect,
+        naturalWidth,
+        naturalHeight,
+    }
+}
+
+/**
+ * 将鼠标事件坐标换算为原图像素点。
+ * @param clientX 鼠标横坐标
+ * @param clientY 鼠标纵坐标
+ * @returns 原图像素点
+ */
+function getScriptHelpImagePointFromClient(clientX: number, clientY: number): ScriptHelpPoint | null {
+    const metrics = getScriptHelpImageMetrics()
+    if (!metrics) return null
+    const relativeX = (clientX - metrics.rect.left) / metrics.rect.width
+    const relativeY = (clientY - metrics.rect.top) / metrics.rect.height
+    const x = Math.min(metrics.naturalWidth - 1, Math.max(0, Math.round(relativeX * metrics.naturalWidth)))
+    const y = Math.min(metrics.naturalHeight - 1, Math.max(0, Math.round(relativeY * metrics.naturalHeight)))
+    return { x, y }
+}
+
+/**
+ * 根据起止点生成标准化区域。
+ * @param start 起点
+ * @param end 终点
+ * @returns 归一化后的区域
+ */
+function createScriptHelpRegion(start: ScriptHelpPoint, end: ScriptHelpPoint): ScriptHelpRegion {
+    const x = Math.min(start.x, end.x)
+    const y = Math.min(start.y, end.y)
+    const x2 = Math.max(start.x, end.x)
+    const y2 = Math.max(start.y, end.y)
+    return {
+        x,
+        y,
+        width: x2 - x + 1,
+        height: y2 - y + 1,
+        x2,
+        y2,
+    }
+}
+
+/**
+ * 开始处理协助图片上的点选或框选。
+ * @param event 指针事件
+ */
+function handleScriptHelpPointerDown(event: PointerEvent) {
+    if (!activeScriptHelpRequest.value || scriptHelpSubmitting.value) return
+    const point = getScriptHelpImagePointFromClient(event.clientX, event.clientY)
+    if (!point) return
+    if (isScriptHelpPointMode.value) {
+        scriptHelpPoint.value = point
+        scriptHelpRegion.value = null
+        return
+    }
+    scriptHelpDragging.value = true
+    scriptHelpDragStart.value = point
+    scriptHelpRegion.value = createScriptHelpRegion(point, point)
+}
+
+/**
+ * 更新框选拖拽区域。
+ * @param event 指针事件
+ */
+function handleScriptHelpPointerMove(event: PointerEvent) {
+    if (!scriptHelpDragging.value || !scriptHelpDragStart.value || !isScriptHelpRegionMode.value) return
+    const point = getScriptHelpImagePointFromClient(event.clientX, event.clientY)
+    if (!point) return
+    scriptHelpRegion.value = createScriptHelpRegion(scriptHelpDragStart.value, point)
+}
+
+/**
+ * 结束框选拖拽。
+ * @param event 指针事件
+ */
+function handleScriptHelpPointerUp(event: PointerEvent) {
+    if (!scriptHelpDragging.value || !scriptHelpDragStart.value || !isScriptHelpRegionMode.value) return
+    const point = getScriptHelpImagePointFromClient(event.clientX, event.clientY)
+    if (point) {
+        scriptHelpRegion.value = createScriptHelpRegion(scriptHelpDragStart.value, point)
+    }
+    scriptHelpDragging.value = false
+    scriptHelpDragStart.value = null
+}
+
+/**
+ * 将原图点位换算到当前显示坐标，供前端绘制标记。
+ * @param point 原图点位
+ * @returns 当前显示区域内的偏移
+ */
+function getScriptHelpDisplayPoint(point: ScriptHelpPoint) {
+    const metrics = getScriptHelpImageMetrics()
+    if (!metrics) return null
+    return {
+        left: (point.x / metrics.naturalWidth) * metrics.rect.width,
+        top: (point.y / metrics.naturalHeight) * metrics.rect.height,
+    }
+}
+
+/**
+ * 将原图框选区域换算到当前显示坐标，供前端绘制覆盖层。
+ * @param region 原图区域
+ * @returns 当前显示区域内的覆盖层位置
+ */
+function getScriptHelpDisplayRegion(region: ScriptHelpRegion) {
+    const metrics = getScriptHelpImageMetrics()
+    if (!metrics) return null
+    const left = (region.x / metrics.naturalWidth) * metrics.rect.width
+    const top = (region.y / metrics.naturalHeight) * metrics.rect.height
+    const right = ((region.x2 + 1) / metrics.naturalWidth) * metrics.rect.width
+    const bottom = ((region.y2 + 1) / metrics.naturalHeight) * metrics.rect.height
+    return {
+        left,
+        top,
+        width: Math.max(1, right - left),
+        height: Math.max(1, bottom - top),
+    }
+}
+
+/**
+ * 提交协助结果给后端。
+ * @param confirmed 是否确认提交
+ */
+async function submitScriptHelpResponse(confirmed: boolean) {
+    if (!activeScriptHelpRequest.value || scriptHelpSubmitting.value) return
+    const request = activeScriptHelpRequest.value
+    const metrics = getScriptHelpImageMetrics()
+    const response: ScriptHelpResponse = {
+        confirmed,
+        selectionMode: request.selectionMode,
+        point: confirmed && isScriptHelpPointMode.value ? scriptHelpPoint.value : null,
+        region: confirmed && isScriptHelpRegionMode.value ? scriptHelpRegion.value : null,
+        imageWidth: metrics?.naturalWidth ?? null,
+        imageHeight: metrics?.naturalHeight ?? null,
+        note: scriptHelpNote.value.trim() || null,
+    }
+    scriptHelpSubmitting.value = true
+    try {
+        await resolveScriptHelpRequest(request.requestId, response)
+        resetScriptHelpState()
+    } catch (error) {
+        console.error("回传协助请求失败", error)
+        scriptHelpSubmitting.value = false
+        ui.showErrorMessage("回传协助请求失败")
+    }
+}
+
+/**
+ * 监听 MCP 发起的协助请求，并展示前端标注弹窗。
+ */
+async function initScriptHelpRequestListener() {
+    if (unlistenScriptHelpRequestFn) return
+    try {
+        unlistenScriptHelpRequestFn = await listen<ScriptHelpRequestEvent>("script-help-request", event => {
+            if (!event?.payload?.requestId || !event.payload.image) return
+            resetScriptHelpState()
+            activeScriptHelpRequest.value = event.payload
+            showScriptHelpDialog.value = true
+        })
+    } catch (error) {
+        console.error("监听脚本协助请求失败", error)
+    }
+}
+
+/**
+ * 当前点选标记的显示样式。
+ */
+const scriptHelpPointMarkerStyle = computed(() => {
+    if (!scriptHelpPoint.value) return null
+    const point = getScriptHelpDisplayPoint(scriptHelpPoint.value)
+    if (!point) return null
+    return {
+        left: `${point.left}px`,
+        top: `${point.top}px`,
+    }
+})
+
+/**
+ * 当前框选标记的显示样式。
+ */
+const scriptHelpRegionMarkerStyle = computed(() => {
+    if (!scriptHelpRegion.value) return null
+    const region = getScriptHelpDisplayRegion(scriptHelpRegion.value)
+    if (!region) return null
+    return {
+        left: `${region.left}px`,
+        top: `${region.top}px`,
+        width: `${region.width}px`,
+        height: `${region.height}px`,
+    }
+})
+
+/**
+ * 从本地存储加载脚本页 MCP 端口配置。
+ */
+function loadScriptMcpPortConfig() {
+    const stored = localStorage.getItem(SCRIPT_MCP_PORT_STORAGE_KEY)
+    if (!stored) {
+        scriptMcpPortInput.value = scriptMcpServerState.value.port || 28080
+        return
+    }
+
+    const parsed = Number.parseInt(stored, 10)
+    if (!Number.isFinite(parsed) || parsed <= 0 || parsed > 65535) {
+        scriptMcpPortInput.value = scriptMcpServerState.value.port || 28080
+        return
+    }
+
+    scriptMcpPortInput.value = parsed
+}
+
+/**
+ * 持久化脚本页 MCP 端口配置。
+ */
+function persistScriptMcpPortConfig() {
+    localStorage.setItem(SCRIPT_MCP_PORT_STORAGE_KEY, String(scriptMcpPortInput.value))
+}
+
+/**
+ * 同步脚本页 MCP 服务状态。
+ */
+async function syncScriptMcpServerState() {
+    if (!env.isApp) {
+        return
+    }
+    try {
+        scriptMcpServerState.value = await getScriptMcpServerState()
+        if (scriptMcpServerState.value.port > 0) {
+            scriptMcpPortInput.value = scriptMcpServerState.value.port
+            persistScriptMcpPortConfig()
+        }
+    } catch (error) {
+        console.error("获取脚本 MCP 服务状态失败", error)
+    }
+}
+
+/**
+ * 打开脚本页 MCP 服务面板。
+ */
+async function openScriptMcpDialog() {
+    showScriptMcpDialog.value = true
+    await syncScriptMcpServerState()
+}
+
+/**
+ * 切换脚本页 MCP 服务开关。
+ */
+async function toggleScriptMcpServer() {
+    if (!env.isApp || scriptMcpUpdating.value) {
+        return
+    }
+    scriptMcpUpdating.value = true
+    try {
+        const nextEnabled = !scriptMcpServerState.value.enabled
+        if (
+            nextEnabled &&
+            (!Number.isFinite(scriptMcpPortInput.value) || scriptMcpPortInput.value <= 0 || scriptMcpPortInput.value > 65535)
+        ) {
+            ui.showErrorMessage("MCP 端口必须在 1 到 65535 之间")
+            return
+        }
+        persistScriptMcpPortConfig()
+        scriptMcpServerState.value = await setScriptMcpServerEnabled(nextEnabled, nextEnabled ? scriptMcpPortInput.value : undefined)
+        scriptMcpPortInput.value = scriptMcpServerState.value.port
+        ui.showSuccessMessage(nextEnabled ? "MCP Server 已启动" : "MCP Server 已停止")
+    } catch (error) {
+        console.error("切换脚本 MCP 服务失败", error)
+        ui.showErrorMessage("切换 MCP Server 失败")
+        await syncScriptMcpServerState()
+    } finally {
+        scriptMcpUpdating.value = false
+    }
+}
+
+/**
+ * 复制脚本页 MCP 地址。
+ */
+async function copyScriptMcpAddress() {
+    try {
+        await copyText(scriptMcpServerState.value.address)
+        ui.showSuccessMessage("MCP 地址已复制")
+    } catch (error) {
+        console.error("复制 MCP 地址失败", error)
+        ui.showErrorMessage("复制 MCP 地址失败")
+    }
 }
 
 /**
@@ -3056,12 +3477,15 @@ onMounted(async () => {
     await initScriptsDir()
     await initEngineDts()
     loadSchedulerConfig()
+    loadScriptMcpPortConfig()
     loadScriptConfigItems()
     loadScriptHotkeys()
     await fetchLocalScripts()
     document.addEventListener("keydown", handleKeyDown)
     await initFileChangeListener()
+    await initScriptHelpRequestListener()
     await syncRunningStateFromBackend()
+    await syncScriptMcpServerState()
     await cloudgame.initCloudGameTracking()
 })
 
@@ -3076,6 +3500,10 @@ onUnmounted(async () => {
     document.removeEventListener("keydown", handleKeyDown)
     if (unlistenFileChangedFn) {
         unlistenFileChangedFn()
+    }
+    if (unlistenScriptHelpRequestFn) {
+        unlistenScriptHelpRequestFn()
+        unlistenScriptHelpRequestFn = null
     }
     // 停止所有文件监听
     const stopPromises = Array.from(watchedFiles.value).map(fileName => stopWatchingFile(fileName))
@@ -3459,6 +3887,9 @@ onUnmounted(async () => {
                                 </div>
                                 <ul tabindex="-1" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
                                     <li>
+                                        <a @click="openScriptMcpDialog">MCP Server</a>
+                                    </li>
+                                    <li>
                                         <a @click="openSchedulerDialog">{{ $t("script-list.scheduler_config") }}</a>
                                     </li>
                                     <li>
@@ -3721,7 +4152,7 @@ onUnmounted(async () => {
                                     >
                                         <div class="flex items-center justify-between gap-2">
                                             <div class="text-xs text-base-content/70 truncate">{{ item.title }}</div>
-                                            <button class="btn btn-xs btn-ghost" @click="clearStatus(item.title)">
+                                            <button class="btn btn-xs btn-ghost" @click="clearStatus(item.title, item.scope)">
                                                 <Icon icon="ri:close-line" class="w-3 h-3" />
                                             </button>
                                         </div>
@@ -3748,6 +4179,87 @@ onUnmounted(async () => {
                 </div>
             </div>
         </div>
+
+        <dialog v-if="showScriptHelpDialog" :open="showScriptHelpDialog" class="modal">
+            <div class="modal-box max-w-6xl">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h3 class="font-bold text-lg">{{ activeScriptHelpRequest?.title || "协助标注" }}</h3>
+                        <div class="text-sm text-base-content/70 mt-1">
+                            {{ activeScriptHelpRequest?.message || (isScriptHelpPointMode ? "请直接点击目标点。" : "请在图片上拖拽框选目标区域。") }}
+                        </div>
+                    </div>
+                    <div class="badge badge-outline">
+                        {{ isScriptHelpPointMode ? "点选" : "框选" }}
+                    </div>
+                </div>
+
+                <div class="mt-4 rounded-xl border border-base-300 bg-base-200/30 p-3">
+                    <div
+                        class="relative inline-block max-w-full select-none"
+                        @pointerdown.prevent="handleScriptHelpPointerDown"
+                        @pointermove.prevent="handleScriptHelpPointerMove"
+                        @pointerup.prevent="handleScriptHelpPointerUp"
+                        @pointercancel.prevent="handleScriptHelpPointerUp"
+                    >
+                        <img
+                            ref="scriptHelpImageRef"
+                            :src="activeScriptHelpRequest?.image"
+                            alt="script help"
+                            class="max-w-full max-h-[70vh] rounded-lg border border-base-300"
+                            draggable="false"
+                        />
+                        <div
+                            v-if="scriptHelpPointMarkerStyle"
+                            class="pointer-events-none absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-error bg-error/30 shadow"
+                            :style="scriptHelpPointMarkerStyle"
+                        >
+                            <div class="absolute left-1/2 top-1/2 h-8 w-px -translate-x-1/2 -translate-y-1/2 bg-error/80"></div>
+                            <div class="absolute left-1/2 top-1/2 h-px w-8 -translate-x-1/2 -translate-y-1/2 bg-error/80"></div>
+                        </div>
+                        <div
+                            v-if="scriptHelpRegionMarkerStyle"
+                            class="pointer-events-none absolute border-2 border-primary bg-primary/15 shadow-inner"
+                            :style="scriptHelpRegionMarkerStyle"
+                        ></div>
+                    </div>
+                </div>
+
+                <div class="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_18rem]">
+                    <div class="rounded-xl border border-base-300 p-3 text-sm">
+                        <div v-if="isScriptHelpPointMode">
+                            当前点位：
+                            {{ scriptHelpPoint ? `(${scriptHelpPoint.x}, ${scriptHelpPoint.y})` : "未选择" }}
+                        </div>
+                        <div v-else>
+                            当前区域：
+                            {{
+                                scriptHelpRegion
+                                    ? `(${scriptHelpRegion.x}, ${scriptHelpRegion.y}) -> (${scriptHelpRegion.x2}, ${scriptHelpRegion.y2}), ${scriptHelpRegion.width} x ${scriptHelpRegion.height}`
+                                    : "未选择"
+                            }}
+                        </div>
+                    </div>
+                    <label class="form-control">
+                        <div class="label py-1">
+                            <span class="label-text text-sm">备注</span>
+                        </div>
+                        <textarea
+                            v-model="scriptHelpNote"
+                            class="textarea textarea-bordered h-24 resize-none"
+                            placeholder="可选，补充你的判断依据"
+                        />
+                    </label>
+                </div>
+
+                <div class="mt-4 flex justify-end gap-2">
+                    <button class="btn btn-ghost" :disabled="scriptHelpSubmitting" @click="submitScriptHelpResponse(false)">取消</button>
+                    <button class="btn btn-primary" :disabled="!hasScriptHelpSelection || scriptHelpSubmitting" @click="submitScriptHelpResponse(true)">
+                        确认返回
+                    </button>
+                </div>
+            </div>
+        </dialog>
 
         <dialog :open="showNewScriptDialog" class="modal">
             <div class="modal-box">
@@ -3824,6 +4336,68 @@ onUnmounted(async () => {
                         {{ $t("script-list.clear_binding") }}
                     </button>
                     <button class="btn btn-primary" @click="saveScriptHotkeyBinding">{{ $t("char-build.save") }}</button>
+                </div>
+            </div>
+        </dialog>
+
+        <dialog :open="showScriptMcpDialog" class="modal">
+            <div class="modal-box max-w-4xl">
+                <h3 class="font-bold text-lg mb-4">MCP Server (Stream HTTP)</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between gap-4 rounded-lg border border-base-300 p-4">
+                        <div class="space-y-1">
+                            <div class="font-medium">服务开关</div>
+                            <div class="text-sm text-base-content/70">
+                                {{ scriptMcpServerState.running ? "运行中" : "已停止" }}
+                            </div>
+                            <div v-if="scriptMcpServerState.lastError" class="text-xs text-error break-all">
+                                {{ scriptMcpServerState.lastError }}
+                            </div>
+                        </div>
+                        <div class="flex-1"></div>
+
+                        <input
+                            v-model.number="scriptMcpPortInput"
+                            type="number"
+                            min="1"
+                            max="65535"
+                            class="input input-bordered w-40"
+                            :disabled="scriptMcpServerState.enabled"
+                            @change="persistScriptMcpPortConfig"
+                        />
+                        <button
+                            class="btn"
+                            :class="scriptMcpServerState.enabled ? 'btn-error' : 'btn-primary'"
+                            :disabled="scriptMcpUpdating"
+                            @click="toggleScriptMcpServer"
+                        >
+                            {{ scriptMcpServerState.enabled ? "停止" : "启动" }}
+                        </button>
+                    </div>
+                    <div class="rounded-lg border border-base-300 p-4 space-y-3">
+                        <div class="font-medium">MCP 地址</div>
+                        <div class="flex items-center gap-2">
+                            <input :value="scriptMcpServerState.address" class="input input-bordered flex-1" readonly />
+                            <button class="btn btn-primary" @click="copyScriptMcpAddress">复制地址</button>
+                        </div>
+                    </div>
+
+                    <div class="rounded-lg border border-base-300 p-4 space-y-3">
+                        <div class="font-medium">基本操控</div>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="btn btn-primary" :disabled="!activeTab || activeTab.type !== 'local'" @click="runCurrentTab">
+                                运行当前脚本
+                            </button>
+                            <button class="btn btn-error" :disabled="!isRunning" @click="scriptRuntime.stopAllScripts()">
+                                停止全部脚本
+                            </button>
+                            <button class="btn btn-ghost" @click="openSidePanel('status')">查看状态面板</button>
+                            <button class="btn btn-ghost" @click="showConsole = true">查看控制台</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 mt-4">
+                    <button class="btn btn-ghost" @click="showScriptMcpDialog = false">关闭</button>
                 </div>
             </div>
         </dialog>
