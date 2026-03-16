@@ -1253,7 +1253,7 @@ dependencies = [
 
 [[package]]
 name = "dna-builder"
-version = "0.13.0"
+version = "0.13.1"
 dependencies = [
  "arboard",
  "async-trait",
@@ -1272,6 +1272,7 @@ dependencies = [
  "ndarray",
  "opencv",
  "ort",
+ "regex",
  "reqwest 0.12.28",
  "scopeguard",
  "serde",

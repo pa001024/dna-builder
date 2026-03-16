@@ -8,6 +8,7 @@ use mcp_server::{
     ScriptMcpServerConfig, ScriptMcpServerHandle, ScriptOperationResult, ScriptRuntimeSnapshot,
     ScriptStatusEntry, start_script_mcp_server,
 };
+use regex::Regex;
 use serde::Serialize;
 use std::collections::{HashMap, VecDeque};
 use std::fs;
@@ -173,6 +174,19 @@ fn scope_matches(entry_scope: Option<&str>, filter_scope: Option<&str>) -> bool 
     }
 }
 
+/// 解析并编译可选正则过滤条件。
+fn compile_optional_regex(regex: Option<String>) -> Result<Option<Regex>, String> {
+    let Some(regex) = regex.map(|value| value.trim().to_string()) else {
+        return Ok(None);
+    };
+    if regex.is_empty() {
+        return Ok(None);
+    }
+    Regex::new(&regex)
+        .map(Some)
+        .map_err(|error| format!("regex 无效: {error}"))
+}
+
 /// Tauri 运行时对 MCP 后端 trait 的适配器。
 #[derive(Clone)]
 struct TauriScriptMcpBackend {
@@ -182,13 +196,32 @@ struct TauriScriptMcpBackend {
 #[async_trait::async_trait]
 impl ScriptMcpBackend for TauriScriptMcpBackend {
     /// 启动指定脚本，并立即返回已接受结果。
-    async fn run_script(&self, script_path: String) -> Result<ScriptOperationResult, String> {
+    async fn run_script(
+        &self,
+        script_path: String,
+        yield_ms: Option<u64>,
+    ) -> Result<ScriptOperationResult, String> {
         let resolved_path = resolve_script_path_input(&self.app_handle, script_path)?;
         let app_handle = self.app_handle.clone();
         let runner_path = resolved_path.clone();
         tauri::async_runtime::spawn(async move {
             let _ = run_script_file(runner_path, app_handle).await;
         });
+        if let Some(yield_ms) = yield_ms.filter(|value| *value > 0) {
+            let deadline = std::time::Instant::now() + std::time::Duration::from_millis(yield_ms);
+            let poll_interval = std::time::Duration::from_millis(50);
+            loop {
+                let (_, script_paths, _) = get_script_runtime_info();
+                let still_running = script_paths.iter().any(|path| {
+                    normalize_scope(Some(path.as_str()))
+                        == normalize_scope(Some(resolved_path.as_str()))
+                });
+                if !still_running || std::time::Instant::now() >= deadline {
+                    break;
+                }
+                tokio::time::sleep(poll_interval).await;
+            }
+        }
         Ok(ScriptOperationResult {
             success: true,
             message: format!("脚本启动请求已发送: {resolved_path}"),
@@ -200,14 +233,22 @@ impl ScriptMcpBackend for TauriScriptMcpBackend {
         &self,
         script: String,
         scope: Option<String>,
+        timeout_ms: Option<u64>,
     ) -> Result<ScriptExecResult, String> {
         let script = script.trim().to_string();
         if script.is_empty() {
             return Err("script 不能为空".to_string());
         }
         let scope = resolve_exec_script_scope(scope);
-        let run_result =
-            exec_script_with_tauri_console(script, scope.clone(), self.app_handle.clone()).await?;
+        let exec_future =
+            exec_script_with_tauri_console(script, scope.clone(), self.app_handle.clone());
+        let run_result = if let Some(timeout_ms) = timeout_ms.filter(|value| *value > 0) {
+            tokio::time::timeout(std::time::Duration::from_millis(timeout_ms), exec_future)
+                .await
+                .map_err(|_| format!("exec_script 执行超时: {timeout_ms}ms"))??
+        } else {
+            exec_future.await?
+        };
         Ok(ScriptExecResult {
             result: run_result.result,
             console: run_result.console,
@@ -249,17 +290,28 @@ impl ScriptMcpBackend for TauriScriptMcpBackend {
     async fn read_status(
         &self,
         script_path: Option<String>,
+        regex: Option<String>,
     ) -> Result<Vec<ScriptStatusEntry>, String> {
         let filter_scope = if let Some(script_path) = script_path {
             Some(resolve_script_path_input(&self.app_handle, script_path)?)
         } else {
             None
         };
+        let filter_regex = compile_optional_regex(regex)?;
         let statuses = SCRIPT_STATUS_BUFFER
             .lock()
             .map_err(|_| "读取脚本状态缓存失败".to_string())?
             .values()
             .filter(|entry| scope_matches(entry.scope.as_deref(), filter_scope.as_deref()))
+            .filter(|entry| {
+                filter_regex.as_ref().is_none_or(|regex| {
+                    regex.is_match(entry.title.as_str())
+                        || entry
+                            .text
+                            .as_deref()
+                            .is_some_and(|text| regex.is_match(text))
+                })
+            })
             .cloned()
             .map(|mut entry| {
                 if filter_scope.is_some() {
@@ -276,12 +328,14 @@ impl ScriptMcpBackend for TauriScriptMcpBackend {
         &self,
         script_path: Option<String>,
         limit: usize,
+        regex: Option<String>,
     ) -> Result<Vec<ScriptConsoleEntry>, String> {
         let filter_scope = if let Some(script_path) = script_path {
             Some(resolve_script_path_input(&self.app_handle, script_path)?)
         } else {
             None
         };
+        let filter_regex = compile_optional_regex(regex)?;
         let limit = limit.max(1).min(SCRIPT_MCP_MAX_CONSOLE_LOGS);
         let buffer = SCRIPT_CONSOLE_BUFFER
             .lock()
@@ -290,6 +344,11 @@ impl ScriptMcpBackend for TauriScriptMcpBackend {
             .iter()
             .rev()
             .filter(|entry| scope_matches(entry.scope.as_deref(), filter_scope.as_deref()))
+            .filter(|entry| {
+                filter_regex.as_ref().is_none_or(|regex| {
+                    regex.is_match(entry.level.as_str()) || regex.is_match(entry.message.as_str())
+                })
+            })
             .take(limit)
             .cloned()
             .map(|mut entry| {

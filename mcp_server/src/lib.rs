@@ -128,10 +128,19 @@ pub struct ScriptHelpResponse {
 #[async_trait]
 pub trait ScriptMcpBackend: Send + Sync + 'static {
     /// 启动指定脚本。
-    async fn run_script(&self, script_path: String) -> Result<ScriptOperationResult, String>;
+    async fn run_script(
+        &self,
+        script_path: String,
+        yield_ms: Option<u64>,
+    ) -> Result<ScriptOperationResult, String>;
 
     /// 执行一段临时脚本源码，并等待执行完成。
-    async fn exec_script(&self, script: String, scope: Option<String>) -> Result<ScriptExecResult, String>;
+    async fn exec_script(
+        &self,
+        script: String,
+        scope: Option<String>,
+        timeout_ms: Option<u64>,
+    ) -> Result<ScriptExecResult, String>;
 
     /// 停止脚本；为空时停止全部。
     async fn stop_script(&self, script_path: Option<String>) -> Result<ScriptOperationResult, String>;
@@ -140,10 +149,19 @@ pub trait ScriptMcpBackend: Send + Sync + 'static {
     async fn get_runtime_info(&self) -> Result<ScriptRuntimeSnapshot, String>;
 
     /// 读取脚本状态。
-    async fn read_status(&self, script_path: Option<String>) -> Result<Vec<ScriptStatusEntry>, String>;
+    async fn read_status(
+        &self,
+        script_path: Option<String>,
+        regex: Option<String>,
+    ) -> Result<Vec<ScriptStatusEntry>, String>;
 
     /// 读取脚本控制台日志。
-    async fn read_console(&self, script_path: Option<String>, limit: usize) -> Result<Vec<ScriptConsoleEntry>, String>;
+    async fn read_console(
+        &self,
+        script_path: Option<String>,
+        limit: usize,
+        regex: Option<String>,
+    ) -> Result<Vec<ScriptConsoleEntry>, String>;
 
     /// 清理脚本状态缓存。
     async fn clear_status(&self, script_path: Option<String>, title: Option<String>) -> Result<ScriptOperationResult, String>;
@@ -163,6 +181,7 @@ pub trait ScriptMcpBackend: Send + Sync + 'static {
 #[serde(rename_all = "camelCase")]
 struct RunScriptRequest {
     script_path: String,
+    yield_ms: Option<u64>,
 }
 
 /// 执行临时脚本请求。
@@ -171,6 +190,7 @@ struct RunScriptRequest {
 struct ExecScriptRequest {
     script: String,
     scope: Option<String>,
+    timeout_ms: Option<u64>,
 }
 
 /// 停止脚本请求。
@@ -185,6 +205,7 @@ struct StopScriptRequest {
 #[serde(rename_all = "camelCase")]
 struct ReadStatusRequest {
     script_path: Option<String>,
+    regex: Option<String>,
 }
 
 /// 读取控制台请求。
@@ -193,6 +214,7 @@ struct ReadStatusRequest {
 struct ReadConsoleRequest {
     script_path: Option<String>,
     limit: Option<usize>,
+    regex: Option<String>,
 }
 
 /// 清理状态与控制台请求。
@@ -352,25 +374,25 @@ impl ScriptRuntimeMcpService {
     }
 
     /// 启动指定脚本。
-    #[tool(description = "运行指定脚本。script_path 可以是绝对路径，也可以是脚本页中的本地脚本文件名。")]
+    #[tool(description = "运行指定脚本。script_path 可以是绝对路径，也可以是脚本页中的本地脚本文件名。可选 yield_ms 表示最多额外等待这么久；若脚本在此之前结束，则提前返回，便于后续紧接着读取 status/console。")]
     async fn run_script(
         &self,
         Parameters(request): Parameters<RunScriptRequest>,
     ) -> Result<Json<ScriptOperationResult>, String> {
         self.backend
-            .run_script(request.script_path)
+            .run_script(request.script_path, request.yield_ms)
             .await
             .map(Json)
     }
 
     /// 执行不落文件的临时脚本。
-    #[tool(description = "执行一段不落文件的临时脚本，类似 node -e。适合单次截图、点按、读像素等即时操作；调用会等待脚本执行完成。")]
+    #[tool(description = "执行一段不落文件的临时脚本，类似 node -e。适合单次截图、点按、读像素等即时操作；调用会等待脚本执行完成。可选 timeout_ms 用于超时保护。")]
     async fn exec_script(
         &self,
         Parameters(request): Parameters<ExecScriptRequest>,
     ) -> Result<Json<ScriptExecResult>, String> {
         self.backend
-            .exec_script(request.script, request.scope)
+            .exec_script(request.script, request.scope, request.timeout_ms)
             .await
             .map(Json)
     }
@@ -394,14 +416,14 @@ impl ScriptRuntimeMcpService {
     }
 
     /// 读取状态面板内容。
-    #[tool(description = "读取当前脚本状态面板内容。若传 script_path，仅返回该脚本对应状态。")]
+    #[tool(description = "读取当前脚本状态面板内容。若传 script_path，仅返回该脚本对应状态；若传 regex，则按正则过滤 title/text。")]
     async fn read_status(
         &self,
         Parameters(request): Parameters<ReadStatusRequest>,
     ) -> Result<CallToolResult, rmcp::ErrorData> {
         let statuses = self
             .backend
-            .read_status(request.script_path)
+            .read_status(request.script_path, request.regex)
             .await
             .map_err(|error| rmcp::ErrorData::internal_error(error, None))?;
         let mut content = vec![Content::text(Self::status_summary_text(&statuses))];
@@ -439,13 +461,13 @@ impl ScriptRuntimeMcpService {
     }
 
     /// 读取控制台日志。
-    #[tool(description = "读取当前脚本控制台输出。若传 script_path，仅返回该脚本对应日志；limit 默认为 100。")]
+    #[tool(description = "读取当前脚本控制台输出。若传 script_path，仅返回该脚本对应日志；limit 默认为 100；若传 regex，则按正则过滤 level/message。")]
     async fn read_console(
         &self,
         Parameters(request): Parameters<ReadConsoleRequest>,
     ) -> Result<Json<Vec<ScriptConsoleEntry>>, String> {
         self.backend
-            .read_console(request.script_path, request.limit.unwrap_or(100))
+            .read_console(request.script_path, request.limit.unwrap_or(100), request.regex)
             .await
             .map(Json)
     }

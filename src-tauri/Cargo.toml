@@ -1,6 +1,6 @@
 [package]
 name = "dna-builder"
-version = "0.13.0"
+version = "0.13.1"
 description = "A DNA Builder"
 authors = ["pa001024"]
 edition = "2024"
@@ -63,6 +63,7 @@ url = "2.5.0"
 futures-util = "0.3.31"
 http = "1.1.0"
 scopeguard = "1.2.0"
+regex = "1.11.1"
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.
