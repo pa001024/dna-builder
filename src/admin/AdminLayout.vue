@@ -53,6 +53,16 @@ const menuItems: {
         path: "/admin/script",
         icon: "ri:code-s-slash-line",
     },
+    {
+        name: "商城商品",
+        path: "/admin/shop-product",
+        icon: "ri:shopping-bag-4-line",
+    },
+    {
+        name: "兑换记录",
+        path: "/admin/shop-redemption",
+        icon: "ri:exchange-funds-line",
+    },
 ]
 
 const route = useRoute()

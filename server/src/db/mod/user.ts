@@ -13,6 +13,16 @@ import {
     validateDailyOnlineExperienceEligibility,
 } from "./userExperience"
 
+const TITLE_ASSET_CACHE_TTL_MS = 5 * 60 * 1000
+
+type CachedTitleAssetDisplay = {
+    rewardName: string | null
+    displayClass: string
+    expiresAt: number
+}
+
+const titleAssetDisplayCache = new Map<string, CachedTitleAssetDisplay>()
+
 export const typeDefs = /* GraphQL */ `
     type Mutation {
         updatePassword(old_password: String!, new_password: String!): UserLoginResult!
@@ -44,7 +54,13 @@ export const typeDefs = /* GraphQL */ `
         uid: String
         roles: String
         experience: Int!
+        points: Int!
         level: Int!
+        selectedTitleAssetId: String
+        selectedNameCardAssetId: String
+        currentTitleText: String
+        currentTitleClass: String
+        nameEffectClass: String
         createdAt: String
         updateAt: String
     }
@@ -61,6 +77,7 @@ export const typeDefs = /* GraphQL */ `
         message: String!
         source: String!
         awardedExp: Int!
+        awardedPoints: Int!
         retryAfterMs: Int
         token: String
         user: User
@@ -92,6 +109,48 @@ function signToken(user: typeof schema.users.$inferSelect) {
     )
 }
 
+/**
+ * @description 读取称号资产的展示信息，并做短时内存缓存，避免同一请求内外重复查库。
+ * @param assetId 已装备称号资产 ID。
+ * @returns 称号文本与展示类名。
+ */
+async function getCachedTitleAssetDisplay(assetId?: string | null): Promise<{ rewardName: string | null; displayClass: string }> {
+    if (!assetId) {
+        return {
+            rewardName: null,
+            displayClass: "",
+        }
+    }
+
+    const cached = titleAssetDisplayCache.get(assetId)
+    if (cached && cached.expiresAt > Date.now()) {
+        return {
+            rewardName: cached.rewardName,
+            displayClass: cached.displayClass,
+        }
+    }
+
+    const asset = await db.query.shopAssets.findFirst({
+        where: eq(schema.shopAssets.id, assetId),
+        columns: {
+            rewardName: true,
+            displayClass: true,
+        },
+    })
+
+    const nextValue = {
+        rewardName: asset?.rewardName ?? null,
+        displayClass: asset?.displayClass ?? "",
+        expiresAt: Date.now() + TITLE_ASSET_CACHE_TTL_MS,
+    }
+    titleAssetDisplayCache.set(assetId, nextValue)
+
+    return {
+        rewardName: nextValue.rewardName,
+        displayClass: nextValue.displayClass,
+    }
+}
+
 export const resolvers = {
     Query: {
         me: async (_parent, _args, context) => {
@@ -101,11 +160,17 @@ export const resolvers = {
             })
         },
         user: async (_parent, { id }, context, _info) => {
-            if (!context.user) return []
+            if (!context.user) throw createGraphQLError("Unauthorized")
 
-            return (await db.query.users.findFirst({
+            const user = await db.query.users.findFirst({
                 where: eq(schema.users.id, id),
-            })) as any
+            })
+
+            if (!user) {
+                throw createGraphQLError("User not found")
+            }
+
+            return user
         },
         users: async (_parent, args, context) => {
             if (!context.user || !context.user.roles?.includes("admin")) {
@@ -136,6 +201,41 @@ export const resolvers = {
             return result[0]?.count || 0
         },
     },
+    User: {
+        /**
+         * @description 读取用户当前装备的称号文本。
+         * @param parent 当前用户对象。
+         * @returns 当前称号文案；未装备时返回 null。
+         */
+        currentTitleText: async (parent: typeof schema.users.$inferSelect) => {
+            const assetDisplay = await getCachedTitleAssetDisplay(parent.selectedTitleAssetId)
+            return assetDisplay.rewardName
+        },
+        /**
+         * @description 读取用户当前装备称号的展示类名。
+         * @param parent 当前用户对象。
+         * @returns 称号样式 class；未装备时返回空字符串。
+         */
+        currentTitleClass: async (parent: typeof schema.users.$inferSelect) => {
+            const assetDisplay = await getCachedTitleAssetDisplay(parent.selectedTitleAssetId)
+            return assetDisplay.displayClass
+        },
+        /**
+         * @description 读取用户当前装备的名字特效类名。
+         * @param parent 当前用户对象。
+         * @returns 名字特效 class；未装备时返回空字符串。
+         */
+        nameEffectClass: async (parent: typeof schema.users.$inferSelect) => {
+            if (!parent.selectedNameCardAssetId) return ""
+            const asset = await db.query.shopAssets.findFirst({
+                where: eq(schema.shopAssets.id, parent.selectedNameCardAssetId),
+                columns: {
+                    displayClass: true,
+                },
+            })
+            return asset?.displayClass ?? ""
+        },
+    } as any,
     Mutation: {
         register: async (_parent, { name, qq, email, password }) => {
             if (!email) return { success: false, message: "missing email" }
@@ -204,6 +304,11 @@ export const resolvers = {
                             name: user.name,
                             qq: user.qq,
                             roles: user.roles,
+                            experience: user.experience,
+                            points: user.points,
+                            level: user.level,
+                            selectedTitleAssetId: user.selectedTitleAssetId,
+                            selectedNameCardAssetId: user.selectedNameCardAssetId,
                             createdAt: user.createdAt,
                             updateAt: user.updateAt,
                         },
@@ -253,6 +358,7 @@ export const resolvers = {
                     message: "Unauthorized",
                     source: USER_EXPERIENCE_SOURCES.DAILY_LAUNCH,
                     awardedExp: 0,
+                    awardedPoints: 0,
                 }
             }
 
@@ -263,6 +369,7 @@ export const resolvers = {
                 message: result.alreadyClaimed ? "今日启动经验已领取" : "启动经验领取成功",
                 source: USER_EXPERIENCE_SOURCES.DAILY_LAUNCH,
                 awardedExp: result.awardedExp,
+                awardedPoints: result.awardedPoints,
                 retryAfterMs,
                 token: signToken(result.user),
                 user: result.user,
@@ -286,6 +393,7 @@ export const resolvers = {
                         message: "请先领取今日打开软件经验",
                         source: USER_EXPERIENCE_SOURCES.DAILY_ONLINE_HOUR,
                         awardedExp: 0,
+                        awardedPoints: 0,
                         retryAfterMs: null,
                     }
                 }
@@ -296,6 +404,7 @@ export const resolvers = {
                     message: `在线时长不足，需在今日打开软件后满 1 小时再领取，预计还需 ${waitMinutes} 分钟`,
                     source: USER_EXPERIENCE_SOURCES.DAILY_ONLINE_HOUR,
                     awardedExp: 0,
+                    awardedPoints: 0,
                     retryAfterMs: eligibility.waitMs ?? null,
                 }
             }
@@ -306,6 +415,7 @@ export const resolvers = {
                 message: result.alreadyClaimed ? "今日在线经验已领取" : "在线经验领取成功",
                 source: USER_EXPERIENCE_SOURCES.DAILY_ONLINE_HOUR,
                 awardedExp: result.awardedExp,
+                awardedPoints: result.awardedPoints,
                 retryAfterMs: 0,
                 token: signToken(result.user),
                 user: result.user,

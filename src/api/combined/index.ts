@@ -1,8 +1,12 @@
 import {
+    adminShopRedemptionsCountQuery,
+    adminShopRedemptionsQuery,
     buildsCountQuery,
     buildsQuery,
     guidesCountQuery,
     guidesQuery,
+    shopProductsCountQuery,
+    shopProductsQuery,
     roomsCountQuery,
     roomsQuery,
     timelinesCountQuery,
@@ -20,3 +24,5 @@ export const todosWithCountQuery = combinedQuery(todosQuery, todosCountQuery)
 export const timelinesWithCountQuery = combinedQuery(timelinesQuery, timelinesCountQuery)
 export const roomsWithCountQuery = combinedQuery(roomsQuery, roomsCountQuery)
 export const guidesWithCountQuery = combinedQuery(guidesQuery, guidesCountQuery)
+export const shopProductsWithCountQuery = combinedQuery(shopProductsQuery, shopProductsCountQuery)
+export const adminShopRedemptionsWithCountQuery = combinedQuery(adminShopRedemptionsQuery, adminShopRedemptionsCountQuery)

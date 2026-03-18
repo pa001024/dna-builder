@@ -290,6 +290,172 @@ export const doingTasksQuery = typedQuery(
     ` as const
 )<Types.Task[], { roomId: string }>()
 
+export const shopProductsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($limit: Int, $offset: Int, $search: String, $rewardType: String, $activeOnly: Boolean) {
+            shopProducts(limit: $limit, offset: $offset, search: $search, rewardType: $rewardType, activeOnly: $activeOnly) {
+                id
+                name
+                description
+                assetId
+                rewardType
+                rewardKey
+                rewardName
+                displayClass
+                displayCss
+                pointsCost
+                sortOrder
+                isActive
+                startTime
+                endTime
+                createdAt
+                updateAt
+                asset {
+                    id
+                    rewardType
+                    rewardKey
+                    rewardName
+                    displayClass
+                    displayCss
+                    createdAt
+                    updateAt
+                }
+            }
+        }
+    ` as const
+)<Types.ShopProduct[], { limit?: number; offset?: number; search?: string; rewardType?: string; activeOnly?: boolean }>()
+
+export const shopProductsCountQuery = typedQuery(
+    /* GraphQL */ `
+        query ($search: String, $rewardType: String, $activeOnly: Boolean) {
+            shopProductsCount(search: $search, rewardType: $rewardType, activeOnly: $activeOnly)
+        }
+    ` as const
+)<number, { search?: string; rewardType?: string; activeOnly?: boolean }>()
+
+export const myShopItemsQuery = typedQuery(
+    /* GraphQL */ `
+        query {
+            myShopItems {
+                id
+                userId
+                assetId
+                createdAt
+                asset {
+                    id
+                    rewardType
+                    rewardKey
+                    rewardName
+                    displayClass
+                    displayCss
+                    createdAt
+                    updateAt
+                }
+            }
+        }
+    ` as const
+)<Types.UserShopItem[]>()
+
+export const myShopSummaryQuery = typedQuery(
+    /* GraphQL */ `
+        query {
+            myShopSummary {
+                points
+                selectedTitleAssetId
+                selectedNameCardAssetId
+                selectedTitleAsset {
+                    id
+                    rewardType
+                    rewardKey
+                    rewardName
+                    displayClass
+                    displayCss
+                    createdAt
+                    updateAt
+                }
+                selectedNameCardAsset {
+                    id
+                    rewardType
+                    rewardKey
+                    rewardName
+                    displayClass
+                    displayCss
+                    createdAt
+                    updateAt
+                }
+                ownedAssetIds
+            }
+        }
+    ` as const
+)<Types.UserShopSummary>()
+
+export const adminShopRedemptionsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($limit: Int, $offset: Int, $search: String) {
+            adminShopRedemptions(limit: $limit, offset: $offset, search: $search) {
+                id
+                userId
+                productId
+                assetId
+                pointsCost
+                createdAt
+                user {
+                    id
+                    name
+                    email
+                    qq
+                    pic
+                    uid
+                    roles
+                    experience
+                    points
+                    level
+                    selectedTitleAssetId
+                    selectedNameCardAssetId
+                    createdAt
+                    updateAt
+                }
+                product {
+                    id
+                    name
+                    description
+                    assetId
+                    rewardType
+                    rewardKey
+                    rewardName
+                    displayClass
+                    displayCss
+                    pointsCost
+                    sortOrder
+                    isActive
+                    startTime
+                    endTime
+                    createdAt
+                    updateAt
+                    asset {
+                        id
+                        rewardType
+                        rewardKey
+                        rewardName
+                        displayClass
+                        displayCss
+                        createdAt
+                        updateAt
+                    }
+                }
+            }
+        }
+    ` as const
+)<Types.ShopRedemption[], { limit?: number; offset?: number; search?: string }>()
+
+export const adminShopRedemptionsCountQuery = typedQuery(
+    /* GraphQL */ `
+        query ($search: String) {
+            adminShopRedemptionsCount(search: $search)
+        }
+    ` as const
+)<number, { search?: string }>()
+
 export const scriptCategoriesQuery = typedQuery(
     /* GraphQL */ `
         query {
@@ -538,6 +704,10 @@ export const msgsQuery = typedQuery(
                     id
                     name
                     qq
+                    level
+                    currentTitleText
+                    currentTitleClass
+                    nameEffectClass
                 }
                 replyTo {
                     id
@@ -546,6 +716,10 @@ export const msgsQuery = typedQuery(
                         id
                         name
                         qq
+                        level
+                        currentTitleText
+                        currentTitleClass
+                        nameEffectClass
                     }
                 }
             }
@@ -570,6 +744,10 @@ export const lastMsgsQuery = typedQuery(
                     id
                     name
                     qq
+                    level
+                    currentTitleText
+                    currentTitleClass
+                    nameEffectClass
                 }
                 replyTo {
                     id
@@ -578,6 +756,10 @@ export const lastMsgsQuery = typedQuery(
                         id
                         name
                         qq
+                        level
+                        currentTitleText
+                        currentTitleClass
+                        nameEffectClass
                     }
                 }
             }

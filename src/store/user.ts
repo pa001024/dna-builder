@@ -4,6 +4,10 @@ import { defineStore } from "pinia"
 import { meQuery } from "@/api/gen/api-queries"
 import type { User } from "@/api/gen/api-types"
 
+/**
+ * @description 从 JWT 中解析用户基础信息。该信息用于在未拉取到 profile 时提供兜底展示。
+ * @param token JWT token
+ */
 function getPayload(token: string) {
     if (!token) return
     return jwtDecode<{
@@ -46,6 +50,15 @@ export const useUserStore = defineStore("user", {
         level(state) {
             return state.profile?.level ?? 1
         },
+        points(state) {
+            return state.profile?.points ?? 0
+        },
+        selectedTitleAssetId(state) {
+            return state.profile?.selectedTitleAssetId ?? ""
+        },
+        selectedNameCardAssetId(state) {
+            return state.profile?.selectedNameCardAssetId ?? ""
+        },
         isAdmin(state) {
             return (state.profile?.roles || getPayload(state.jwtToken)?.roles || "").split(",").includes("admin")
         },
@@ -63,10 +76,16 @@ export const useUserStore = defineStore("user", {
                 roles: (state.profile?.roles || payload?.roles || "").split(",").filter(Boolean),
                 experience: state.profile?.experience ?? 0,
                 level: state.profile?.level ?? 1,
+                points: state.profile?.points ?? 0,
+                selectedTitleAssetId: state.profile?.selectedTitleAssetId ?? "",
+                selectedNameCardAssetId: state.profile?.selectedNameCardAssetId ?? "",
             }
         },
     },
     actions: {
+        /**
+         * @description 清理本地登录态并退出登录。
+         */
         logout() {
             this.jwtToken = ""
             this.profile = null
@@ -99,9 +118,18 @@ export const useUserStore = defineStore("user", {
             }
             return profile
         },
+        /**
+         * @description 更新某个房间的已读消息数量，用于未读角标等展示。
+         * @param roomId 房间 ID
+         * @param count 已读数量
+         */
         setRoomReadedCount(roomId: string, count: number) {
             this.roomReadedCount[roomId] = count
         },
+        /**
+         * @description 获取某个房间的已读消息数量。
+         * @param roomId 房间 ID
+         */
         getRoomReadedCount(roomId: string) {
             return this.roomReadedCount[roomId] || 0
         },

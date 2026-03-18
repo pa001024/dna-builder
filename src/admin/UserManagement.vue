@@ -1,7 +1,19 @@
 <script setup lang="ts">
+import { useUIStore } from "@/store/ui"
 import { deleteUserMutation, type User, updateUserMutation, usersWithCountQuery } from "@/api/graphql"
 import AdminCrudPage from "./AdminCrudPage.vue"
 import type { AdminCrudConfig } from "./crud-config"
+
+const ui = useUIStore()
+
+/**
+ * @description 复制用户 ID，方便后台直接发放商品等操作。
+ * @param item 用户记录。
+ */
+async function copyUserId(item: User) {
+    await navigator.clipboard.writeText(item.id)
+    ui.showSuccessMessage(`已复制用户 ID: ${item.id}`)
+}
 
 /**
  * 用户管理页配置
@@ -126,6 +138,14 @@ const config: AdminCrudConfig<User> = {
             await deleteUserMutation({ id: item.id })
         },
     },
+    rowActions: [
+        {
+            key: "copy-id",
+            label: "复制ID",
+            icon: "ri:file-copy-line",
+            handler: copyUserId,
+        },
+    ],
 }
 </script>
 

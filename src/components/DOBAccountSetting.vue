@@ -1,6 +1,14 @@
 <script setup lang="ts">
-import { computed, nextTick, reactive, ref } from "vue"
-import { forgotPasswordMutation, loginMutation, registerMutation, resetPasswordMutation, updateUserMetaMutation } from "@/api/graphql"
+import { computed, nextTick, reactive, ref, watch } from "vue"
+import {
+    forgotPasswordMutation,
+    loginMutation,
+    myShopSummaryQuery,
+    registerMutation,
+    resetPasswordMutation,
+    updateUserMetaMutation,
+    type UserShopSummary,
+} from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { getUserLevelProgress } from "@/utils/user-level"
@@ -40,6 +48,39 @@ const nameEdit = reactive({
 })
 
 const levelProgress = computed(() => getUserLevelProgress(user.experience, user.level))
+
+const shopSummary = ref<UserShopSummary | null>(null)
+const loadingShopSummary = ref(false)
+
+/**
+ * 拉取当前用户的积分与装扮摘要，用于在账号设置区做轻量信息展示与入口引导。
+ */
+async function refreshShopSummary(): Promise<void> {
+    if (!user.jwtToken) {
+        shopSummary.value = null
+        return
+    }
+
+    loadingShopSummary.value = true
+    try {
+        const result = await myShopSummaryQuery(undefined, { requestPolicy: "network-only" })
+        shopSummary.value = result ?? null
+    } catch (error) {
+        console.error("拉取积分/装扮摘要失败:", error)
+        ui.showErrorMessage("积分信息暂不可用，请稍后重试")
+        shopSummary.value = null
+    } finally {
+        loadingShopSummary.value = false
+    }
+}
+
+watch(
+    () => user.jwtToken,
+    () => {
+        refreshShopSummary()
+    },
+    { immediate: true }
+)
 
 // 登录处理
 const handleLogin = async () => {
@@ -296,6 +337,41 @@ async function startNameEdit() {
                     <div v-if="user.roles && user.roles.length" class="flex justify-between">
                         <span class="text-base-content/60">角色:</span>
                         <span v-for="role in user.roles" :key="role" class="badge badge-primary">{{ role }}</span>
+                    </div>
+                </div>
+
+                <!-- 积分/装扮摘要 -->
+                <div class="pt-3 border-t border-base-300">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm font-medium">积分与装扮</div>
+                        <span v-if="loadingShopSummary" class="loading loading-spinner loading-xs" />
+                    </div>
+                    <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="rounded-lg bg-base-200/60 border border-base-300 p-3">
+                            <div class="text-xs text-base-content/60">积分余额</div>
+                            <div class="text-2xl font-extrabold leading-tight">
+                                {{ shopSummary?.points ?? "--" }}
+                            </div>
+                            <div class="text-xs text-base-content/50 mt-1">用于兑换称号、名字特效等装扮</div>
+                        </div>
+                        <div class="rounded-lg bg-base-200/60 border border-base-300 p-3">
+                            <div class="text-xs text-base-content/60">当前装扮</div>
+                            <div class="mt-1 text-sm space-y-1">
+                                <div class="flex justify-between gap-2">
+                                    <span class="text-base-content/60">称号</span>
+                                    <span class="truncate">
+                                        {{ shopSummary?.selectedTitleAsset?.rewardName || "默认" }}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between gap-2">
+                                    <span class="text-base-content/60">名片</span>
+                                    <span class="truncate">
+                                        {{ shopSummary?.selectedNameCardAsset?.rewardName || "默认" }}
+                                    </span>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm btn-primary w-full mt-2" @click="$router.push('/points-mall')">前往积分商城</button>
+                        </div>
                     </div>
                 </div>
             </div>

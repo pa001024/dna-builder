@@ -21,6 +21,7 @@ export const USER_EXPERIENCE_REWARD_MAP: Record<UserExperienceSource, number> = 
 
 export type UserExperienceGrantResult = {
     awardedExp: number
+    awardedPoints: number
     user: typeof schema.users.$inferSelect
     levelChanged: boolean
     alreadyClaimed: boolean
@@ -192,6 +193,7 @@ export async function validateDailyOnlineExperienceEligibility(userId: string): 
  */
 export async function grantDailyUserExperience(userId: string, source: UserExperienceSource): Promise<UserExperienceGrantResult> {
     const awardedExp = USER_EXPERIENCE_REWARD_MAP[source]
+    const awardedPoints = awardedExp
     const dateKey = getShanghaiDateKey()
 
     return await db.transaction(async tx => {
@@ -219,6 +221,7 @@ export async function grantDailyUserExperience(userId: string, source: UserExper
         if (!rewardRecord) {
             return {
                 awardedExp: 0,
+                awardedPoints: 0,
                 user: currentUser,
                 levelChanged: false,
                 alreadyClaimed: true,
@@ -226,12 +229,14 @@ export async function grantDailyUserExperience(userId: string, source: UserExper
         }
 
         const nextExperience = (currentUser.experience ?? 0) + awardedExp
+        const nextPoints = (currentUser.points ?? 0) + awardedPoints
         const nextLevel = calculateUserLevel(nextExperience)
         const updatedUser = (
             await tx
                 .update(schema.users)
                 .set({
                     experience: nextExperience,
+                    points: nextPoints,
                     level: nextLevel,
                 })
                 .where(eq(schema.users.id, userId))
@@ -240,6 +245,7 @@ export async function grantDailyUserExperience(userId: string, source: UserExper
 
         return {
             awardedExp,
+            awardedPoints,
             user: updatedUser,
             levelChanged: nextLevel !== (currentUser.level ?? 1),
             alreadyClaimed: false,

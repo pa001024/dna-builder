@@ -10,6 +10,7 @@ import { resolvers as roomResolvers, typeDefs as roomSchema } from "./room"
 import { resolvers as rtcResolvers, typeDefs as rtcSchema } from "./rtc"
 import { resolvers as scriptResolvers, typeDefs as scriptSchema } from "./script"
 import { resolvers as scriptCategoryResolvers, typeDefs as scriptCategorySchema } from "./scriptCategory"
+import { resolvers as shopResolvers, typeDefs as shopSchema } from "./shop"
 import { resolvers as taskResolvers, typeDefs as taskSchema } from "./task"
 import { resolvers as timelineResolvers, typeDefs as timelineSchema } from "./timeline"
 import { resolvers as todoResolvers, typeDefs as todoSchema } from "./todo"
@@ -32,6 +33,7 @@ export function schemaWith(ctx: any) {
         dpsSchema,
         scriptSchema,
         scriptCategorySchema,
+        shopSchema,
     ]
     const resolvers = mergeResolvers(
         userResolvers,
@@ -48,7 +50,8 @@ export function schemaWith(ctx: any) {
         timelineResolvers,
         dpsResolvers,
         scriptResolvers,
-        scriptCategoryResolvers
+        scriptCategoryResolvers,
+        shopResolvers
     )
 
     function mergeResolvers(...items: any[]) {
@@ -56,7 +59,7 @@ export function schemaWith(ctx: any) {
             Query: {} as any,
             Mutation: {} as any,
             Subscription: {} as any,
-        }
+        } as Record<string, any>
         items.forEach(item => {
             if (typeof item === "function") {
                 item = item(ctx)
@@ -69,6 +72,11 @@ export function schemaWith(ctx: any) {
                         for (const subKey in item[key]) {
                             resolvers[key][subKey] = { subscribe: item[key][subKey] }
                         }
+                    } else {
+                        if (!resolvers[key]) {
+                            resolvers[key] = {}
+                        }
+                        Object.assign(resolvers[key], item[key])
                     }
                 })
             }

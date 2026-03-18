@@ -104,6 +104,15 @@ function initFilters() {
 }
 
 /**
+ * 判断筛选配置是否已经显式提供“全部/空值”选项。
+ * @param filter 筛选配置
+ * @returns 是否已包含空值选项
+ */
+function hasEmptyFilterOption(filter: { options?: Array<{ value: string | number }> }) {
+    return (filter.options || []).some(option => option.value === "")
+}
+
+/**
  * 重置表单
  * @param form 表单对象
  * @param fields 字段配置
@@ -470,7 +479,7 @@ onMounted(() => {
                 <template v-for="filter in config.filters || []" :key="filter.key">
                     <div v-if="filter.type === 'select'" class="w-full md:w-48">
                         <select v-model="filters[filter.key]" class="select select-bordered w-full" @change="handleFilterChange">
-                            <option value="">全部</option>
+                            <option v-if="!hasEmptyFilterOption(filter)" value="">全部</option>
                             <option v-for="option in filter.options || []" :key="String(option.value)" :value="option.value">
                                 {{ option.label }}
                             </option>
@@ -726,4 +735,3 @@ onMounted(() => {
         </Dialog>
     </div>
 </template>
-

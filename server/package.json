@@ -4,7 +4,7 @@
     "scripts": {
         "test": "bun test",
         "dev": "bun mig && bun run --watch src/index.ts",
-        "sv": "cross-env NODE_ENV=production bun run src/index.ts",
+        "sv": "bun mig && cross-env NODE_ENV=production bun run src/index.ts",
         "gen": "drizzle-kit generate --schema ./src/db/schema.ts --dialect sqlite",
         "mig": "bun run src/db/migrate.ts",
         "lint": "tsc --noEmit"

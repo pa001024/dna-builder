@@ -1,6 +1,7 @@
 import { fetch } from "bun"
 import { Elysia, t } from "elysia"
 import { uploadImage } from "./upload"
+import { getCachedNameEffectStylesheet } from "./util/name-effect-style"
 
 /**
  * 缓存的最新版本信息
@@ -125,6 +126,26 @@ export const apiPlugin = () => {
         set.status = 302
         set.headers.Location = downloadUrl
         return new Response(null, { status: 302, headers: { Location: downloadUrl } })
+    })
+
+    /**
+     * 聊天名字特效样式表
+     * 由服务端按当前名字特效资产动态拼接，并带 ETag 与短时缓存。
+     */
+    app.get("/chat/name-effects.css", async ({ request, set }) => {
+        const stylesheet = await getCachedNameEffectStylesheet()
+        const ifNoneMatch = request.headers.get("if-none-match")
+
+        set.headers["Content-Type"] = "text/css; charset=utf-8"
+        set.headers["Cache-Control"] = "public, max-age=300"
+        set.headers.ETag = stylesheet.etag
+
+        if (ifNoneMatch === stylesheet.etag) {
+            set.status = 304
+            return new Response(null, { status: 304 })
+        }
+
+        return stylesheet.css
     })
 
     return app

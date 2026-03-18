@@ -158,7 +158,7 @@ public/i18n/         # Translation files
 ## Dev Tools
 
 - **i18n**: `bun tools/i18n_tool.ts export|import` — export missing translations, import completed ones
-- **Icons**: `bun tools/icon_tool.ts add|check|clean|list` — manage icons in `src/components/Icon.vue`
+- **Icons**: `bun tools/icon_tool.ts add|check|clean|list` — manage icons in `src/components/Icon.vue` use when lint error on icon not found
 - **API gen**: `pnpm gen` — generate API calls from tools/generateApiCalls.ts
 
 ## Git Hooks (Husky)
@@ -178,3 +178,4 @@ Pre-commit hook auto-runs: version bump → `biome format` → `git add .`
 7. **Git workflow**: For complex tasks, `git add` to staging first so you can `git checkout` to revert mistakes
 8. **Prefer native APIs** over adding new library dependencies
 9. **Use `bun -e "code"`** for inline code execution
+10. Sensitive operations, such as generating migrations via `bun run gen`, must be confirmed by the user.

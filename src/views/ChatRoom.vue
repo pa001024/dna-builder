@@ -5,6 +5,7 @@ import { useSound } from "@vueuse/sound"
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watchEffect } from "vue"
 import { onBeforeRouteLeave, useRoute } from "vue-router"
 import { editMessageMutation, Msg, msgsQuery, roomQuery, rtcClientsQuery, rtcJoinMutation, sendMessageMutation } from "@/api/graphql"
+import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { copyHtmlContent, isImage, sanitizeHTML } from "@/utils/html"
@@ -17,6 +18,28 @@ const ui = useUIStore()
 const newMsgTip = ref(false)
 const variables = computed(() => ({ roomId: roomId.value }))
 const sfx = useSound("/sfx/notice.mp3")
+const NAME_EFFECT_STYLESHEET_ID = "dna-chat-name-effects"
+
+/**
+ * @description 将聊天名字特效样式表注入到页面，仅保留一份 link。
+ */
+function ensureNameEffectStylesheet() {
+    if (typeof document === "undefined") return
+    const existed = document.getElementById(NAME_EFFECT_STYLESHEET_ID) as HTMLLinkElement | null
+    const href = `${env.apiEndpoint.replace(/\/$/, "")}/api/chat/name-effects.css`
+    if (existed) {
+        if (existed.href !== href) {
+            existed.href = href
+        }
+        return
+    }
+
+    const link = document.createElement("link")
+    link.id = NAME_EFFECT_STYLESHEET_ID
+    link.rel = "stylesheet"
+    link.href = href
+    document.head.appendChild(link)
+}
 
 //#region RTC
 const loading = ref(true)
@@ -168,6 +191,7 @@ function handleVisibilityChange() {
 }
 
 onMounted(() => {
+    ensureNameEffectStylesheet()
     window.addEventListener("online", handleOnline)
     document.addEventListener("visibilitychange", handleVisibilityChange)
     void syncLatestMessagesFromServer()
@@ -196,6 +220,10 @@ useSubscription<{ newMessage: Msg }>(
                         id
                         name
                         qq
+                        level
+                        currentTitleText
+                        currentTitleClass
+                        nameEffectClass
                     }
                     replyTo {
                         id
@@ -204,6 +232,10 @@ useSubscription<{ newMessage: Msg }>(
                             id
                             name
                             qq
+                            level
+                            currentTitleText
+                            currentTitleClass
+                            nameEffectClass
                         }
                     }
                     reactions {
@@ -245,6 +277,10 @@ useSubscription<{ msgEdited: Msg }>({
                     id
                     name
                     qq
+                    level
+                    currentTitleText
+                    currentTitleClass
+                    nameEffectClass
                 }
                 replyTo {
                     id
@@ -253,6 +289,10 @@ useSubscription<{ msgEdited: Msg }>({
                         id
                         name
                         qq
+                        level
+                        currentTitleText
+                        currentTitleClass
+                        nameEffectClass
                     }
                 }
             }
@@ -469,13 +509,52 @@ function cancelReply() {
                                     </ContextMenuItem>
                                 </template>
                             </ContextMenu>
-                            <ContextMenu class="flex items-start flex-col" :class="{ 'items-end': user.id === item.user!.id }">
-                                <div class="text-base-content/60 text-sm min-h-5">{{ item.user!.name }}</div>
+                            <ContextMenu class="flex w-full items-start flex-col" :class="{ 'items-end': user.id === item.user!.id }">
+                                <div
+                                    class="flex min-h-5 w-full items-center gap-1.5 text-sm text-base-content/60"
+                                    :class="{ 'justify-end text-right': user.id === item.user!.id }"
+                                >
+                                    <span v-if="user.id === item.user?.id && item.user?.currentTitleText" :class="item.user?.currentTitleClass || ''">
+                                        {{ item.user.currentTitleText }}
+                                    </span>
+                                    <span v-if="item.user?.level" class="rounded-full bg-base-300/80 px-1.5 py-0.5 text-[10px] leading-none text-base-content/70">
+                                        LV{{ item.user.level }}
+                                    </span>
+                                    <span :class="item.user?.nameEffectClass || ''">
+                                        {{ item.user?.name || "" }}
+                                    </span>
+                                    <span v-if="user.id !== item.user?.id && item.user?.currentTitleText" :class="item.user?.currentTitleClass || ''">
+                                        {{ item.user.currentTitleText }}
+                                    </span>
+                                </div>
                                 <div
                                     v-if="item.replyTo"
                                     class="rounded-t-lg border-b border-base-300/40 bg-base-300/50 px-2 py-1 text-xs text-base-content/70 max-w-80"
+                                    :class="{ 'self-end': user.id === item.user!.id }"
                                 >
-                                    <span class="font-medium">{{ item.replyTo.user?.name || $t("chat.you") }}</span>
+                                    <span
+                                        v-if="user.id === item.replyTo.user?.id && item.replyTo.user?.currentTitleText"
+                                        class="mr-1 align-middle"
+                                        :class="item.replyTo.user?.currentTitleClass || ''"
+                                    >
+                                        {{ item.replyTo.user.currentTitleText }}
+                                    </span>
+                                    <span
+                                        v-if="item.replyTo.user?.level"
+                                        class="mr-1 rounded-full bg-base-200/80 px-1.5 py-0.5 text-[10px] leading-none text-base-content/60"
+                                    >
+                                        LV{{ item.replyTo.user.level }}
+                                    </span>
+                                    <span class="font-medium" :class="item.replyTo.user?.nameEffectClass || ''">
+                                        {{ item.replyTo.user?.name || $t("chat.you") }}
+                                    </span>
+                                    <span
+                                        v-if="user.id !== item.replyTo.user?.id && item.replyTo.user?.currentTitleText"
+                                        class="ml-1 align-middle"
+                                        :class="item.replyTo.user?.currentTitleClass || ''"
+                                    >
+                                        {{ item.replyTo.user.currentTitleText }}
+                                    </span>
                                     <span class="mx-1">:</span>
                                     <span>{{ getMessagePreview(item.replyTo.content || "") }}</span>
                                 </div>
@@ -484,13 +563,13 @@ function cancelReply() {
                                     ref="editInput"
                                     contenteditable
                                     class="safe-html rounded-lg bg-base-100 select-text inline-flex flex-col text-sm max-w-80 overflow-hidden gap-2"
-                                    :class="{ 'p-2': !isImage(item.content), 'bg-primary text-base-100': user.id === item.user!.id }"
+                                    :class="{ 'p-2': !isImage(item.content), 'bg-primary text-base-100 self-end': user.id === item.user!.id }"
                                     v-html="sanitizeHTML(item.content)"
                                 ></div>
                                 <div
                                     v-else
                                     class="safe-html rounded-lg bg-base-100 select-text inline-flex flex-col text-sm max-w-80 overflow-hidden gap-2"
-                                    :class="{ 'p-2': !isImage(item.content), 'bg-primary text-base-100': user.id === item.user!.id }"
+                                    :class="{ 'p-2': !isImage(item.content), 'bg-primary text-base-100 self-end': user.id === item.user!.id }"
                                     v-html="sanitizeHTML(item.content)"
                                 ></div>
 

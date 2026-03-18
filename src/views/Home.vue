@@ -1,5 +1,5 @@
 <script lang="tsx" setup>
-import { onMounted } from "vue"
+import { computed, onMounted } from "vue"
 import { useUIStore } from "@/store/ui"
 import pg from "../../package.json"
 import type { IconTypes } from "../components/Icon.vue"
@@ -27,6 +27,18 @@ const items = [
         icon: "ri:more-line",
     },
 ] satisfies { name: string; path: string; icon: IconTypes }[]
+
+const OPEN_SERVER_DATE = "2025-10-28T00:00:00+08:00"
+
+/**
+ * @description 计算从 2025-10-28 起的开服天数，首日记为第 1 天。
+ */
+const openServerDays = computed(() => {
+    const start = new Date(OPEN_SERVER_DATE).getTime()
+    const now = Date.now()
+    const diffDays = Math.floor((now - start) / (24 * 60 * 60 * 1000))
+    return Math.max(1, diffDays + 1)
+})
 
 onMounted(() => {
     if (env.isApp) {
@@ -75,6 +87,8 @@ async function checkUpdate() {
                     <div>
                         <h1 class="text-4xl sm:text-5xl font-bold">DNA Builder</h1>
                         <div class="py-3 sm:py-4">
+                            开服第 {{ openServerDays }} 天
+                            <span class="mx-2">·</span>
                             {{ $t("home.cureent_version") }}
                             <a class="link" :href="`https://github.com/pa001024/dna-builder/releases/tag/v${pg.version}`" target="_blank">
                                 {{ pg.version }}

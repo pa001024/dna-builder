@@ -268,6 +268,10 @@ body {
     @media (max-width: calc(40rem - 1px)) {
         font-size: calc(13px * var(--uiscale));
     }
+    /* 1px */
+    @media (max-width: calc(10rem - 1px)) {
+        font-size: calc(16px * var(--uiscale));
+    }
 }
 
 :root.is-app-font {

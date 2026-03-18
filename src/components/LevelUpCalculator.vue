@@ -63,6 +63,16 @@ const mods = useLocalStorage<ModItem[]>("lvup.mods", [])
 const syncing = ref(false)
 const roleInfo = useLocalStorage<DNARoleEntity>("dna.roleInfo", {} as any)
 
+// 批量添加角色相关
+const isBatchAddCharsModalOpen = ref(false)
+const charSearchQuery = ref("")
+const selectedCharsForBatch = ref<Set<number>>(new Set())
+
+// 批量添加武器相关
+const isBatchAddWeaponsModalOpen = ref(false)
+const weaponSearchQuery = ref("")
+const selectedWeaponsForBatch = ref<Set<number>>(new Set())
+
 // 批量添加魔之楔相关
 const isBatchAddModalOpen = ref(false)
 const modSearchQuery = ref("")
@@ -166,6 +176,26 @@ const filteredMods = computed(() => {
             return true
         }
         return false
+    })
+})
+
+const filteredChars = computed(() => {
+    if (!isBatchAddCharsModalOpen.value) return []
+    const query = charSearchQuery.value.trim()
+    if (!query) return charData
+
+    return charData.filter(char => {
+        return matchPinyin(char.名称, query).match || char.属性?.includes(query)
+    })
+})
+
+const filteredWeapons = computed(() => {
+    if (!isBatchAddWeaponsModalOpen.value) return []
+    const query = weaponSearchQuery.value.trim()
+    if (!query) return weaponData
+
+    return weaponData.filter(weapon => {
+        return matchPinyin(weapon.名称, query).match || weapon.类型?.some(type => type.includes(query))
     })
 })
 
@@ -419,29 +449,29 @@ onMounted(() => {
     calculateResult()
 })
 
-// 添加角色
-const addChar = () => {
-    chars.value.push({
-        id: charData[0]?.id || 0,
-        config: {
-            currentLevel: 1,
-            targetLevel: 80,
-            skills: [
-                {
-                    currentLevel: 1,
-                    targetLevel: 10,
-                },
-                {
-                    currentLevel: 1,
-                    targetLevel: 10,
-                },
-                {
-                    currentLevel: 1,
-                    targetLevel: 10,
-                },
-            ],
-        },
-    })
+/**
+ * 创建角色的默认养成配置
+ * @returns 角色默认配置
+ */
+function createDefaultCharConfig(): CharLevelUpConfig {
+    return {
+        currentLevel: 1,
+        targetLevel: 80,
+        skills: [
+            {
+                currentLevel: 1,
+                targetLevel: 10,
+            },
+            {
+                currentLevel: 1,
+                targetLevel: 10,
+            },
+            {
+                currentLevel: 1,
+                targetLevel: 10,
+            },
+        ],
+    }
 }
 
 // 移除角色
@@ -449,17 +479,17 @@ const removeChar = (index: number) => {
     chars.value.splice(index, 1)
 }
 
-// 添加武器
-const addWeapon = () => {
-    weapons.value.push({
-        id: weaponData[0]?.id || 0,
-        config: {
-            currentLevel: 1,
-            targetLevel: 80,
-            currentRefine: 0,
-            targetRefine: 5,
-        },
-    })
+/**
+ * 创建武器的默认养成配置
+ * @returns 武器默认配置
+ */
+function createDefaultWeaponConfig(): WeaponLevelUpConfig {
+    return {
+        currentLevel: 1,
+        targetLevel: 80,
+        currentRefine: 0,
+        targetRefine: 5,
+    }
 }
 
 // 移除武器
@@ -474,6 +504,90 @@ const removeMod = (index: number) => {
 
 const clearMods = () => {
     mods.value = []
+}
+
+/**
+ * 切换批量选择的角色
+ * @param charId 角色ID
+ */
+const toggleSelectCharForBatch = (charId: number) => {
+    if (selectedCharsForBatch.value.has(charId)) {
+        selectedCharsForBatch.value.delete(charId)
+    } else {
+        selectedCharsForBatch.value.add(charId)
+    }
+}
+
+/**
+ * 处理角色批量全选/取消全选
+ */
+const handleSelectAllCharsForBatch = () => {
+    if (selectedCharsForBatch.value.size === filteredChars.value.length) {
+        selectedCharsForBatch.value.clear()
+    } else {
+        filteredChars.value.forEach(char => {
+            selectedCharsForBatch.value.add(char.id)
+        })
+    }
+}
+
+/**
+ * 确认批量添加角色
+ */
+const handleBatchAddChars = () => {
+    selectedCharsForBatch.value.forEach(charId => {
+        const exists = chars.value.some(char => char.id === charId)
+        if (!exists) {
+            chars.value.push({
+                id: charId,
+                config: createDefaultCharConfig(),
+            })
+        }
+    })
+    isBatchAddCharsModalOpen.value = false
+    selectedCharsForBatch.value.clear()
+}
+
+/**
+ * 切换批量选择的武器
+ * @param weaponId 武器ID
+ */
+const toggleSelectWeaponForBatch = (weaponId: number) => {
+    if (selectedWeaponsForBatch.value.has(weaponId)) {
+        selectedWeaponsForBatch.value.delete(weaponId)
+    } else {
+        selectedWeaponsForBatch.value.add(weaponId)
+    }
+}
+
+/**
+ * 处理武器批量全选/取消全选
+ */
+const handleSelectAllWeaponsForBatch = () => {
+    if (selectedWeaponsForBatch.value.size === filteredWeapons.value.length) {
+        selectedWeaponsForBatch.value.clear()
+    } else {
+        filteredWeapons.value.forEach(weapon => {
+            selectedWeaponsForBatch.value.add(weapon.id)
+        })
+    }
+}
+
+/**
+ * 确认批量添加武器
+ */
+const handleBatchAddWeapons = () => {
+    selectedWeaponsForBatch.value.forEach(weaponId => {
+        const exists = weapons.value.some(weapon => weapon.id === weaponId)
+        if (!exists) {
+            weapons.value.push({
+                id: weaponId,
+                config: createDefaultWeaponConfig(),
+            })
+        }
+    })
+    isBatchAddWeaponsModalOpen.value = false
+    selectedWeaponsForBatch.value.clear()
 }
 
 // 批量添加魔之楔相关函数
@@ -523,6 +637,7 @@ const handleBatchAddMods = () => {
 }
 
 const isOpenGraph = ref(false)
+const isTimeEstimateConfigOpen = ref(false)
 </script>
 
 <template>
@@ -547,7 +662,7 @@ const isOpenGraph = ref(false)
                                 <Icon v-else icon="ri:refresh-line" />
                                 同步角色
                             </button>
-                            <button class="btn btn-primary btn-sm gap-2" @click="addChar" aria-label="添加角色">
+                            <button class="btn btn-primary btn-sm gap-2" @click="isBatchAddCharsModalOpen = true" aria-label="批量添加角色">
                                 <span class="text-xl font-bold">+</span>
                                 添加角色
                             </button>
@@ -659,7 +774,11 @@ const isOpenGraph = ref(false)
                                 <Icon v-else icon="ri:refresh-line" />
                                 同步武器
                             </button>
-                            <button class="btn btn-primary btn-sm gap-2" @click="addWeapon" aria-label="添加武器">
+                            <button
+                                class="btn btn-primary btn-sm gap-2"
+                                @click="isBatchAddWeaponsModalOpen = true"
+                                aria-label="批量添加武器"
+                            >
                                 <span class="text-xl font-bold">+</span>
                                 添加武器
                             </button>
@@ -789,13 +908,24 @@ const isOpenGraph = ref(false)
 
                 <section class="w-full">
                     <div
-                        class="card bg-base-100 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg mb-6"
+                        class="collapse bg-base-100 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg mb-6"
+                        :class="{ 'collapse-open': isTimeEstimateConfigOpen }"
                     >
-                        <div class="card-body p-4">
-                            <div class="flex items-center gap-2 mb-4">
+                        <div
+                            class="flex items-center justify-between gap-2 p-4 cursor-pointer"
+                            @click="isTimeEstimateConfigOpen = !isTimeEstimateConfigOpen"
+                        >
+                            <div class="flex items-center gap-2">
                                 <Icon icon="ri:settings-3-line" />
                                 <h3 class="text-lg font-semibold">副本估算配置</h3>
                             </div>
+                            <Icon
+                                icon="radix-icons:chevron-down"
+                                class="transition-transform duration-200"
+                                :class="{ 'rotate-180': isTimeEstimateConfigOpen }"
+                            />
+                        </div>
+                        <div class="collapse-content px-4 pb-4">
                             <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3">
                                 <label class="flex flex-col gap-1">
                                     <span class="text-xs opacity-80">掉落率加成(%)</span>
@@ -1101,6 +1231,137 @@ const isOpenGraph = ref(false)
             <ResourceTreeGraph :tree="result.resourceTree" />
         </div>
     </div>
+
+    <!-- 批量添加角色弹窗 -->
+    <DialogModel v-model="isBatchAddCharsModalOpen" class="w-[80vw] max-w-200">
+        <div class="w-full max-w-4xl">
+            <h2 class="text-2xl font-bold mb-4">批量添加角色</h2>
+            <p class="mb-4">选择要添加的角色，然后点击确认添加</p>
+
+            <div class="p-4 pb-0 flex flex-wrap items-center gap-2 mb-3 bg-base-100 rounded-lg">
+                <div class="ml-auto flex items-center gap-4">
+                    <label class="w-56 input input-sm">
+                        <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="m21 21-4.3-4.3" />
+                            </g>
+                        </svg>
+                        <input v-model="charSearchQuery" type="search" class="grow" placeholder="搜索角色..." />
+                    </label>
+                    <div
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'btn-disabled': !filteredChars.length }"
+                        @click="handleSelectAllCharsForBatch"
+                    >
+                        {{ selectedCharsForBatch.size === filteredChars.length ? "取消全选" : "全选" }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="min-h-80 w-full pb-4 max-h-[60vh] overflow-auto">
+                <div class="p-4 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
+                    <div
+                        v-for="char in filteredChars"
+                        :key="char.id"
+                        class="card bg-base-100 border-2 cursor-pointer transition-all duration-200 hover:scale-[1.02]"
+                        :class="selectedCharsForBatch.has(char.id) ? 'border-primary shadow-lg' : 'border-base-300'"
+                        @click="toggleSelectCharForBatch(char.id)"
+                    >
+                        <div class="card-body p-4 flex-row items-center gap-3">
+                            <ImageFallback :src="LeveledChar.url(char.icon)" alt="角色头像" class="size-14 rounded-full shrink-0">
+                                <img src="/imgs/webp/T_Head_Empty.webp" alt="角色头像" class="size-14 rounded-full shrink-0" />
+                            </ImageFallback>
+                            <div class="min-w-0 flex-1">
+                                <div class="font-semibold truncate">{{ char.名称 }}</div>
+                                <div class="text-sm opacity-70 flex items-center gap-2 mt-1">
+                                    <img :src="LeveledChar.elementUrl(char.属性)" alt="角色属性" class="w-4 h-6 object-cover rounded-sm" />
+                                    <span>{{ $t(char.属性) }}</span>
+                                </div>
+                            </div>
+                            <input
+                                type="checkbox"
+                                class="checkbox checkbox-primary pointer-events-none shrink-0"
+                                :checked="selectedCharsForBatch.has(char.id)"
+                                tabindex="-1"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <template #action>
+            <div class="flex justify-end gap-2">
+                <button class="btn btn-secondary" @click="isBatchAddCharsModalOpen = false">取消</button>
+                <button class="btn btn-primary" @click="handleBatchAddChars">确认添加 ({{ selectedCharsForBatch.size }})</button>
+            </div>
+        </template>
+    </DialogModel>
+
+    <!-- 批量添加武器弹窗 -->
+    <DialogModel v-model="isBatchAddWeaponsModalOpen" class="w-[80vw] max-w-200">
+        <div class="w-full max-w-4xl">
+            <h2 class="text-2xl font-bold mb-4">批量添加武器</h2>
+            <p class="mb-4">选择要添加的武器，然后点击确认添加</p>
+
+            <div class="p-4 pb-0 flex flex-wrap items-center gap-2 mb-3 bg-base-100 rounded-lg">
+                <div class="ml-auto flex items-center gap-4">
+                    <label class="w-56 input input-sm">
+                        <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="m21 21-4.3-4.3" />
+                            </g>
+                        </svg>
+                        <input v-model="weaponSearchQuery" type="search" class="grow" placeholder="搜索武器..." />
+                    </label>
+                    <div
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'btn-disabled': !filteredWeapons.length }"
+                        @click="handleSelectAllWeaponsForBatch"
+                    >
+                        {{ selectedWeaponsForBatch.size === filteredWeapons.length ? "取消全选" : "全选" }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="min-h-80 w-full pb-4 max-h-[60vh] overflow-auto">
+                <div class="p-4 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
+                    <div
+                        v-for="weapon in filteredWeapons"
+                        :key="weapon.id"
+                        class="card bg-base-100 border-2 cursor-pointer transition-all duration-200 hover:scale-[1.02]"
+                        :class="selectedWeaponsForBatch.has(weapon.id) ? 'border-primary shadow-lg' : 'border-base-300'"
+                        @click="toggleSelectWeaponForBatch(weapon.id)"
+                    >
+                        <div class="card-body p-4 flex-row items-center gap-3">
+                            <ImageFallback :src="LeveledWeapon.url(weapon.icon)" alt="武器头像" class="size-14 rounded-lg shrink-0">
+                                <img src="/imgs/webp/T_Head_Empty.webp" alt="武器头像" class="size-14 rounded-lg shrink-0" />
+                            </ImageFallback>
+                            <div class="min-w-0 flex-1">
+                                <div class="font-semibold truncate">{{ weapon.名称 }}</div>
+                                <div class="text-sm opacity-70 mt-1">{{ weapon.类型.join(" / ") }}</div>
+                            </div>
+                            <input
+                                type="checkbox"
+                                class="checkbox checkbox-primary pointer-events-none shrink-0"
+                                :checked="selectedWeaponsForBatch.has(weapon.id)"
+                                tabindex="-1"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <template #action>
+            <div class="flex justify-end gap-2">
+                <button class="btn btn-secondary" @click="isBatchAddWeaponsModalOpen = false">取消</button>
+                <button class="btn btn-primary" @click="handleBatchAddWeapons">确认添加 ({{ selectedWeaponsForBatch.size }})</button>
+            </div>
+        </template>
+    </DialogModel>
 
     <!-- 批量添加魔之楔弹窗 -->
     <DialogModel v-model="isBatchAddModalOpen" class="w-[80vw] max-w-200">

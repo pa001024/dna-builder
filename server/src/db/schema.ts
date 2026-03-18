@@ -124,9 +124,14 @@ export const users = sqliteTable(
         experience: integer("experience")
             .notNull()
             .$default(() => 0),
+        points: integer("points")
+            .notNull()
+            .$default(() => 0),
         level: integer("level")
             .notNull()
             .$default(() => 1),
+        selectedTitleAssetId: text("selected_title_asset_id"),
+        selectedNameCardAssetId: text("selected_name_card_asset_id"),
         createdAt: text("created_at").$default(now),
         updateAt: text("update_at").$onUpdate(now),
     },
@@ -322,6 +327,116 @@ export const userExperienceRewards = sqliteTable(
 
 export const userExperienceRewardsRelations = relations(userExperienceRewards, ({ one }) => ({
     user: one(users, { fields: [userExperienceRewards.userId], references: [users.id] }),
+}))
+
+/** 商店奖励资产 */
+export const shopAssets = sqliteTable(
+    "shop_assets",
+    {
+        id: text("id").$default(id).primaryKey(),
+        rewardType: text("reward_type").notNull(),
+        rewardKey: text("reward_key").notNull(),
+        rewardName: text("reward_name").notNull(),
+        displayClass: text("display_class"),
+        displayCss: text("display_css"),
+        createdAt: text("created_at").$default(now),
+        updateAt: text("update_at").$onUpdate(now),
+    },
+    table => [
+        uniqueIndex("shop_assets_reward_key_unique_idx").on(table.rewardType, table.rewardKey),
+        index("shop_assets_reward_type_idx").on(table.rewardType),
+    ]
+)
+
+/** 商店商品 */
+export const shopProducts = sqliteTable(
+    "shop_products",
+    {
+        id: text("id").$default(id).primaryKey(),
+        name: text("name").notNull(),
+        description: text("description"),
+        assetId: text("asset_id")
+            .notNull()
+            .references(() => shopAssets.id, { onDelete: "cascade" }),
+        pointsCost: integer("points_cost").notNull(),
+        sortOrder: integer("sort_order")
+            .notNull()
+            .$default(() => 0),
+        isActive: integer("is_active")
+            .notNull()
+            .$default(() => 1),
+        startTime: text("start_time"),
+        endTime: text("end_time"),
+        createdAt: text("created_at").$default(now),
+        updateAt: text("update_at").$onUpdate(now),
+    },
+    table => [
+        index("shop_products_asset_idx").on(table.assetId),
+        index("shop_products_active_sort_idx").on(table.isActive, table.sortOrder),
+    ]
+)
+
+/** 用户商店已拥有资产 */
+export const userShopItems = sqliteTable(
+    "user_shop_items",
+    {
+        id: text("id").$default(id).primaryKey(),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        assetId: text("asset_id")
+            .notNull()
+            .references(() => shopAssets.id, { onDelete: "cascade" }),
+        createdAt: text("created_at").$default(now),
+    },
+    table => [uniqueIndex("user_shop_item_unique_idx").on(table.userId, table.assetId), index("user_shop_item_user_idx").on(table.userId)]
+)
+
+/** 商店兑换记录 */
+export const shopRedemptions = sqliteTable(
+    "shop_redemptions",
+    {
+        id: text("id").$default(id).primaryKey(),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        productId: text("product_id")
+            .notNull()
+            .references(() => shopProducts.id, { onDelete: "cascade" }),
+        assetId: text("asset_id")
+            .notNull()
+            .references(() => shopAssets.id, { onDelete: "cascade" }),
+        pointsCost: integer("points_cost").notNull(),
+        createdAt: text("created_at").$default(now),
+    },
+    table => [
+        index("shop_redemptions_user_idx").on(table.userId),
+        index("shop_redemptions_product_idx").on(table.productId),
+        index("shop_redemptions_asset_idx").on(table.assetId),
+    ]
+)
+
+export const shopAssetsRelations = relations(shopAssets, ({ many }) => ({
+    products: many(shopProducts),
+    userItems: many(userShopItems),
+    redemptions: many(shopRedemptions),
+}))
+
+export const shopProductsRelations = relations(shopProducts, ({ one, many }) => ({
+    asset: one(shopAssets, { fields: [shopProducts.assetId], references: [shopAssets.id] }),
+    userItems: many(userShopItems),
+    redemptions: many(shopRedemptions),
+}))
+
+export const userShopItemsRelations = relations(userShopItems, ({ one }) => ({
+    user: one(users, { fields: [userShopItems.userId], references: [users.id] }),
+    asset: one(shopAssets, { fields: [userShopItems.assetId], references: [shopAssets.id] }),
+}))
+
+export const shopRedemptionsRelations = relations(shopRedemptions, ({ one }) => ({
+    user: one(users, { fields: [shopRedemptions.userId], references: [users.id] }),
+    product: one(shopProducts, { fields: [shopRedemptions.productId], references: [shopProducts.id] }),
+    asset: one(shopAssets, { fields: [shopRedemptions.assetId], references: [shopAssets.id] }),
 }))
 
 /** 任务 */

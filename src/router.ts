@@ -30,6 +30,12 @@ const routes: readonly RouteRecordRaw[] = [
     { name: "home", path: "/", component: Home, beforeEnter: () => setMinSize(360, 430) },
     { name: "setting", path: "/setting", component: Setting, beforeEnter: () => setMinSize(540, 430) },
     {
+        name: "points-mall",
+        path: "/points-mall",
+        component: () => import("./views/PointsMall.vue"),
+        beforeEnter: () => setMinSize(900, 700),
+    },
+    {
         path: "/char",
         children: [
             { name: "char-build-list", path: "", component: CharListView, beforeEnter: () => setMinSize(600, 600) },
@@ -143,6 +149,16 @@ const routes: readonly RouteRecordRaw[] = [
                 name: "admin-script",
                 path: "script",
                 component: () => import("./admin/ScriptManagement.vue"),
+            },
+            {
+                name: "admin-shop-product",
+                path: "shop-product",
+                component: () => import("./admin/ShopProductManagement.vue"),
+            },
+            {
+                name: "admin-shop-redemption",
+                path: "shop-redemption",
+                component: () => import("./admin/ShopRedemptionManagement.vue"),
             },
         ],
     },

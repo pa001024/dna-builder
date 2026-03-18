@@ -7,7 +7,13 @@ export interface User {
     uid?: string
     roles?: string
     experience: number
+    points: number
     level: number
+    selectedTitleAssetId?: string
+    selectedNameCardAssetId?: string
+    currentTitleText?: string
+    currentTitleClass?: string
+    nameEffectClass?: string
     createdAt?: string
     updateAt?: string
 }
@@ -24,6 +30,7 @@ export interface UserExperienceRewardResult {
     message: string
     source: string
     awardedExp: number
+    awardedPoints: number
     retryAfterMs?: number
     token?: string
     user?: User
@@ -90,6 +97,81 @@ export interface Task {
     online?: boolean
     paused?: boolean
     user: User
+}
+
+export interface ShopAsset {
+    id: string
+    rewardType: string
+    rewardKey: string
+    rewardName: string
+    displayClass?: string
+    displayCss?: string
+    createdAt?: string
+    updateAt?: string
+}
+
+export interface ShopProduct {
+    id: string
+    name: string
+    description?: string
+    assetId: string
+    rewardType: string
+    rewardKey: string
+    rewardName: string
+    displayClass?: string
+    displayCss?: string
+    pointsCost: number
+    sortOrder: number
+    isActive: boolean
+    startTime?: string
+    endTime?: string
+    createdAt?: string
+    updateAt?: string
+    asset: ShopAsset
+}
+
+export interface UserShopItem {
+    id: string
+    userId: string
+    assetId: string
+    createdAt?: string
+    asset: ShopAsset
+}
+
+export interface UserShopSummary {
+    points: number
+    selectedTitleAssetId?: string
+    selectedNameCardAssetId?: string
+    selectedTitleAsset?: ShopAsset
+    selectedNameCardAsset?: ShopAsset
+    ownedAssetIds?: string[]
+}
+
+export interface ShopRedemption {
+    id: string
+    userId: string
+    productId: string
+    assetId: string
+    pointsCost: number
+    createdAt?: string
+    user?: User
+    product?: ShopProduct
+    asset?: ShopAsset
+}
+
+export interface ShopRedeemResult {
+    success: boolean
+    message: string
+    awardedAsset?: ShopAsset
+    user?: User
+}
+
+export interface ShopEquipResult {
+    success: boolean
+    message: string
+    user?: User
+    selectedTitleAsset?: ShopAsset
+    selectedNameCardAsset?: ShopAsset
 }
 
 export interface ScriptCategory {
@@ -289,6 +371,21 @@ export interface TimelineInput {
     charName: string
     tracks: string
     items: string
+}
+
+export interface ShopProductInput {
+    name: string
+    description?: string
+    rewardType: string
+    pointsCost: number
+    rewardKey: string
+    rewardName: string
+    displayClass?: string
+    displayCss?: string
+    sortOrder: number
+    isActive: boolean
+    startTime?: string
+    endTime?: string
 }
 
 export interface ScriptCategoryInput {
