@@ -54,6 +54,6 @@ CREATE TABLE `user_shop_items` (
 --> statement-breakpoint
 CREATE UNIQUE INDEX `user_shop_item_unique_idx` ON `user_shop_items` (`user_id`,`asset_id`);--> statement-breakpoint
 CREATE INDEX `user_shop_item_user_idx` ON `user_shop_items` (`user_id`);--> statement-breakpoint
-ALTER TABLE `users` ADD `points` integer NOT NULL;--> statement-breakpoint
+ALTER TABLE `users` ADD `points` integer NOT NULL DEFAULT 0;--> statement-breakpoint
 ALTER TABLE `users` ADD `selected_title_asset_id` text;--> statement-breakpoint
 ALTER TABLE `users` ADD `selected_name_card_asset_id` text;

@@ -2630,7 +2630,8 @@
                     "type": "integer",
                     "primaryKey": false,
                     "notNull": true,
-                    "autoincrement": false
+                    "autoincrement": false,
+                    "default": 0
                 },
                 "level": {
                     "name": "level",

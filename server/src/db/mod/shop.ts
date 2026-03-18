@@ -1,5 +1,5 @@
 import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
-import { and, desc, eq, inArray } from "drizzle-orm"
+import { and, count, desc, eq, gte, inArray, isNull, like, or, sql } from "drizzle-orm"
 import { createGraphQLError } from "graphql-yoga"
 import { db, schema } from ".."
 import type { Context } from "../yoga"
@@ -204,6 +204,21 @@ function parseShopDateTime(value?: string | null): number | null {
 }
 
 /**
+ * @description 将当前时间格式化为可与商城时间文本做字典序比较的本地时间字符串。
+ * `datetime-local` 录入的 `YYYY-MM-DDTHH:mm` / `YYYY-MM-DDTHH:mm:ss` 在该格式下可安全比较。
+ * @param nowTs 当前时间戳。
+ * @returns 本地时间字符串。
+ */
+function formatShopDateTimeForComparison(nowTs = Date.now()): string {
+    const date = new Date(nowTs)
+    const pad = (value: number) => String(value).padStart(2, "0")
+
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(
+        date.getSeconds()
+    )}`
+}
+
+/**
  * @description 判断商品当前是否处于可展示/可兑换时间窗内。
  * @param product 商品记录。
  * @param nowTs 当前时间戳。
@@ -220,29 +235,6 @@ function isShopProductAvailable(
         return false
     }
     if (startTime !== null && nowTs < startTime) {
-        return false
-    }
-    if (endTime !== null && nowTs > endTime) {
-        return false
-    }
-    return true
-}
-
-/**
- * @description 判断商品当前是否应继续在商城展示。
- * 未开始的商品允许提前展示，已结束的商品不再展示。
- * @param product 商品记录。
- * @param nowTs 当前时间戳。
- * @returns 是否展示。
- */
-function shouldShowShopProduct(
-    product: Pick<typeof schema.shopProducts.$inferSelect, "startTime" | "endTime">,
-    nowTs = Date.now()
-): boolean {
-    const startTime = parseShopDateTime(product.startTime)
-    const endTime = parseShopDateTime(product.endTime)
-
-    if (Number.isNaN(startTime) || Number.isNaN(endTime)) {
         return false
     }
     if (endTime !== null && nowTs > endTime) {
@@ -370,77 +362,192 @@ async function findOrCreateShopAsset(
 }
 
 /**
- * @description 拉取商品列表并在内存中完成搜索与筛选，避免 join 过滤复杂化。
+ * @description 构建商城商品筛选条件，尽量将过滤下推到数据库执行。
  * @param allowInactive 管理员场景是否允许查看下架商品。
  * @param args 查询参数。
- * @returns 过滤后的商品列表。
+ * @returns Drizzle where 条件数组。
  */
-async function loadFilteredShopProducts(
+function buildShopProductFilterConditions(
     allowInactive: boolean,
     args: { search?: string | null; rewardType?: string | null; activeOnly?: boolean | null }
 ) {
-    const rows = await db.query.shopProducts.findMany({
-        with: {
-            asset: true,
-        },
-        orderBy: [schema.shopProducts.sortOrder, schema.shopProducts.createdAt],
-    })
-
     const search = String(args.search ?? "")
         .trim()
         .toLowerCase()
     const rewardType = args.rewardType ? normalizeRewardType(String(args.rewardType)) : null
     const activeFilter = allowInactive ? args.activeOnly : true
     const shouldFilterAvailability = !allowInactive
-    const nowTs = Date.now()
+    const conditions = [] as ReturnType<typeof eq>[]
 
-    return rows.filter(row => {
-        if (activeFilter === true && !row.isActive) return false
-        if (activeFilter === false && row.isActive) return false
-        if (shouldFilterAvailability && !shouldShowShopProduct(row, nowTs)) return false
-        if (rewardType && row.asset.rewardType !== rewardType) return false
-        if (!search) return true
-        const text = `${row.name} ${row.description ?? ""} ${row.asset.rewardName} ${row.asset.rewardKey}`.toLowerCase()
-        return text.includes(search)
-    })
+    if (activeFilter === true) {
+        conditions.push(eq(schema.shopProducts.isActive, 1))
+    } else if (activeFilter === false) {
+        conditions.push(eq(schema.shopProducts.isActive, 0))
+    }
+
+    if (shouldFilterAvailability) {
+        const nowText = formatShopDateTimeForComparison()
+        conditions.push(or(isNull(schema.shopProducts.endTime), gte(schema.shopProducts.endTime, nowText))!)
+    }
+
+    if (rewardType) {
+        conditions.push(eq(schema.shopAssets.rewardType, rewardType))
+    }
+
+    if (search) {
+        const searchPattern = `%${search}%`
+        conditions.push(
+            or(
+                like(sql`lower(${schema.shopProducts.name})`, searchPattern),
+                like(sql`lower(coalesce(${schema.shopProducts.description}, ''))`, searchPattern),
+                like(sql`lower(${schema.shopAssets.rewardName})`, searchPattern),
+                like(sql`lower(${schema.shopAssets.rewardKey})`, searchPattern)
+            )!
+        )
+    }
+
+    return conditions
 }
 
 /**
- * @description 读取后台兑换记录列表，并支持按用户、商品、资产关键字做内存筛选。
+ * @description 从数据库按条件读取商城商品列表，并在数据库层完成分页与筛选。
+ * @param allowInactive 管理员场景是否允许查看下架商品。
+ * @param args 查询参数。
+ * @returns 过滤后的商品列表。
+ */
+async function loadFilteredShopProducts(
+    allowInactive: boolean,
+    args: { search?: string | null; rewardType?: string | null; activeOnly?: boolean | null; limit?: number | null; offset?: number | null }
+) {
+    const limit = Math.max(0, Math.floor(args.limit ?? 50))
+    const offset = Math.max(0, Math.floor(args.offset ?? 0))
+    const conditions = buildShopProductFilterConditions(allowInactive, args)
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined
+
+    const rows = await db
+        .select({
+            product: schema.shopProducts,
+            asset: schema.shopAssets,
+        })
+        .from(schema.shopProducts)
+        .innerJoin(schema.shopAssets, eq(schema.shopProducts.assetId, schema.shopAssets.id))
+        .where(whereClause)
+        .orderBy(schema.shopProducts.sortOrder, schema.shopProducts.createdAt)
+        .limit(limit)
+        .offset(offset)
+
+    return rows.map(row => ({
+        ...row.product,
+        asset: row.asset,
+    }))
+}
+
+/**
+ * @description 统计数据库层筛选后的商城商品总数，避免读取整表后在内存中计数。
+ * @param allowInactive 管理员场景是否允许查看下架商品。
+ * @param args 查询参数。
+ * @returns 筛选结果总数。
+ */
+async function countFilteredShopProducts(
+    allowInactive: boolean,
+    args: { search?: string | null; rewardType?: string | null; activeOnly?: boolean | null }
+) {
+    const conditions = buildShopProductFilterConditions(allowInactive, args)
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined
+    const [result] = await db
+        .select({ value: count() })
+        .from(schema.shopProducts)
+        .innerJoin(schema.shopAssets, eq(schema.shopProducts.assetId, schema.shopAssets.id))
+        .where(whereClause)
+
+    return result?.value ?? 0
+}
+
+/**
+ * @description 构建后台兑换记录搜索条件，避免在内存中遍历大批量兑换记录。
+ * @param args 查询参数。
+ * @returns Drizzle where 条件数组。
+ */
+function buildAdminShopRedemptionFilterConditions(args: { search?: string | null }) {
+    const search = String(args.search ?? "")
+        .trim()
+        .toLowerCase()
+    const conditions = [] as ReturnType<typeof eq>[]
+
+    if (search) {
+        const searchPattern = `%${search}%`
+        conditions.push(
+            or(
+                like(sql`lower(coalesce(${schema.users.name}, ''))`, searchPattern),
+                like(sql`lower(coalesce(${schema.users.email}, ''))`, searchPattern),
+                like(sql`lower(coalesce(${schema.shopProducts.name}, ''))`, searchPattern),
+                like(sql`lower(coalesce(${schema.shopAssets.rewardName}, ''))`, searchPattern),
+                like(sql`lower(coalesce(${schema.shopAssets.rewardKey}, ''))`, searchPattern)
+            )!
+        )
+    }
+
+    return conditions
+}
+
+/**
+ * @description 读取后台兑换记录列表，并在数据库层完成搜索与分页。
  * @param args 查询参数。
  * @returns 过滤后的兑换记录。
  */
 async function loadAdminShopRedemptions(args: { limit?: number; offset?: number; search?: string | null }) {
-    const search = String(args.search ?? "")
-        .trim()
-        .toLowerCase()
-    const offset = args.offset || 0
-    const limit = args.limit || 20
-    const rows = await db.query.shopRedemptions.findMany({
-        with: {
-            user: true,
-            product: {
-                with: {
-                    asset: true,
-                },
-            },
-            asset: true,
-        },
-        orderBy: [desc(schema.shopRedemptions.createdAt)],
-    })
+    const offset = Math.max(0, Math.floor(args.offset ?? 0))
+    const limit = Math.max(0, Math.floor(args.limit ?? 20))
+    const conditions = buildAdminShopRedemptionFilterConditions(args)
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
-    const filtered = rows.filter(item => {
-        if (!search) return true
-        const text =
-            `${item.user?.name ?? ""} ${item.user?.email ?? ""} ${item.product?.name ?? ""} ${item.asset?.rewardName ?? ""} ${item.asset?.rewardKey ?? ""}`.toLowerCase()
-        return text.includes(search)
-    })
+    const rows = await db
+        .select({
+            redemption: schema.shopRedemptions,
+            user: schema.users,
+            product: schema.shopProducts,
+            asset: schema.shopAssets,
+        })
+        .from(schema.shopRedemptions)
+        .leftJoin(schema.users, eq(schema.shopRedemptions.userId, schema.users.id))
+        .leftJoin(schema.shopProducts, eq(schema.shopRedemptions.productId, schema.shopProducts.id))
+        .leftJoin(schema.shopAssets, eq(schema.shopRedemptions.assetId, schema.shopAssets.id))
+        .where(whereClause)
+        .orderBy(desc(schema.shopRedemptions.createdAt))
+        .limit(limit)
+        .offset(offset)
 
-    return filtered.slice(offset, offset + limit).map(item => ({
-        ...item,
-        product: serializeShopProduct(item.product as ShopProductRow | undefined),
-        asset: serializeShopAsset(item.asset),
+    return rows.map(row => ({
+        ...row.redemption,
+        user: row.user,
+        product:
+            row.product && row.asset
+                ? serializeShopProduct({
+                      ...row.product,
+                      asset: row.asset,
+                  } as ShopProductRow)
+                : undefined,
+        asset: serializeShopAsset(row.asset),
     }))
+}
+
+/**
+ * @description 统计后台兑换记录搜索后的总数，避免通过超大 limit 读取全部数据再计数。
+ * @param args 查询参数。
+ * @returns 兑换记录总数。
+ */
+async function countAdminShopRedemptions(args: { search?: string | null }) {
+    const conditions = buildAdminShopRedemptionFilterConditions(args)
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined
+    const [result] = await db
+        .select({ value: count() })
+        .from(schema.shopRedemptions)
+        .leftJoin(schema.users, eq(schema.shopRedemptions.userId, schema.users.id))
+        .leftJoin(schema.shopProducts, eq(schema.shopRedemptions.productId, schema.shopProducts.id))
+        .leftJoin(schema.shopAssets, eq(schema.shopRedemptions.assetId, schema.shopAssets.id))
+        .where(whereClause)
+
+    return result?.value ?? 0
 }
 
 /**
@@ -607,14 +714,11 @@ export const resolvers = {
         shopProducts: async (_parent, args, context) => {
             const allowInactive = !!context.user?.roles?.includes("admin")
             const filtered = await loadFilteredShopProducts(allowInactive, args ?? {})
-            const offset = args?.offset || 0
-            const limit = args?.limit || 50
-            return filtered.slice(offset, offset + limit).map(item => serializeShopProduct(item)!)
+            return filtered.map(item => serializeShopProduct(item)!)
         },
         shopProductsCount: async (_parent, args, context) => {
             const allowInactive = !!context.user?.roles?.includes("admin")
-            const filtered = await loadFilteredShopProducts(allowInactive, args ?? {})
-            return filtered.length
+            return countFilteredShopProducts(allowInactive, args ?? {})
         },
         myShopItems: async (_parent, _args, context) => {
             if (!context.user) {
@@ -646,8 +750,7 @@ export const resolvers = {
         },
         adminShopRedemptionsCount: async (_parent, args, context) => {
             requireAdmin(context)
-            const rows = await loadAdminShopRedemptions({ ...args, limit: Number.MAX_SAFE_INTEGER, offset: 0 })
-            return rows.length
+            return await countAdminShopRedemptions(args ?? {})
         },
     },
     Mutation: {
