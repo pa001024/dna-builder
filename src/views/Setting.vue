@@ -365,7 +365,7 @@ function resetAiSettings() {
                     <div class="flex justify-between items-center p-2">
                         <span class="label-text">
                             安全模式
-                            <div class="text-xs text-base-content/50">隐藏非当前版本内容</div>
+                            <div class="text-xs text-base-content/50">你知道的太多了</div>
                         </span>
                         <input
                             :checked="setting.safeMode"
