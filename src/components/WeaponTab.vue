@@ -35,6 +35,36 @@ const baseKey = computed(() => {
     return wkey
 })
 
+/**
+ * 判断当前面板是否为 inherit 型同律武器的攻击词条。
+ * @param key 属性键名
+ * @returns 是否需要展示属性转换标记
+ */
+function isInheritedAttackLabel(key: string) {
+    return key === "攻击" && props.wkey === "skill" && !!props.charBuild.skillWeapon?.inherit
+}
+
+/**
+ * 获取武器攻击展示前缀。
+ * @param key 属性键名
+ * @returns 展示前缀 key
+ */
+function getWeaponAttackLabelPrefix(key: string) {
+    if (key !== "攻击") return ""
+    if (isInheritedAttackLabel(key)) {
+        return `${props.charBuild.char.属性}属性`
+    }
+    return props.charBuild[`${props.wkey}Weapon`]!.伤害类型
+}
+
+/**
+ * 获取 inherit 型同律攻击的来源说明。
+ * @returns tooltip 文案
+ */
+function getInheritedAttackTooltip() {
+    return baseWeapon.value.伤害类型
+}
+
 const model = defineModel<boolean>("modelShow")
 
 function openWeaponSelect() {
@@ -140,7 +170,11 @@ const dynamicWeaponAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>
                         <div class="text-base-content/50 text-xs">{{ $t(key) }}</div>
                         <ul class="space-y-1">
                             <li v-if="'基础' + key in baseWeapon" class="flex justify-between gap-8 text-sm text-primary">
-                                <div class="text-base-content/80">基础{{ key }}</div>
+                                <div class="text-base-content/80">
+                                    {{ key === "攻击"
+                                        ? $t("char-build.base_weapon_attack_label", { dmg: $t(getWeaponAttackLabelPrefix(key)) })
+                                        : $t("char-build.base_attr_label", { attr: $t(key) }) }}
+                                </div>
                                 {{
                                     formatWeaponProp(
                                         key === "攻击" ? "基础攻击" : key,
@@ -149,7 +183,7 @@ const dynamicWeaponAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>
                                 }}
                             </li>
                             <li v-if="'射速' in baseWeapon && key === '攻速'" class="flex justify-between gap-8 text-sm text-primary">
-                                <div class="text-base-content/80">基础{{ key }}</div>
+                                <div class="text-base-content/80">{{ $t("char-build.base_attr_label", { attr: $t(key) }) }}</div>
                                 {{ formatWeaponProp("基础攻击", (baseWeapon as LeveledWeapon)["射速"]!) }}
                             </li>
                             <!-- 角色自带加成 -->
@@ -225,8 +259,22 @@ const dynamicWeaponAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>
                     class="cursor-pointer flex justify-between items-center p-1 px-2 transition-all duration-200 hover:bg-base-100 hover:shadow-md rounded-md"
                     @click="$emit('addSkill', `${wkey}::${key}`)"
                 >
-                    <div class="text-sm text-base-content/80">
-                        {{ key === "攻击" ? $t(`${charBuild[`${wkey}Weapon`]!.伤害类型}`) : "" }}{{ $t(key) }}
+                    <div class="flex items-center gap-1 text-sm text-base-content/80">
+                        <span>{{
+                            key === "攻击"
+                                ? $t("char-build.weapon_attack_label", { dmg: $t(getWeaponAttackLabelPrefix(key)) })
+                                : $t(key)
+                        }}</span>
+                        <FullTooltip v-if="isInheritedAttackLabel(key)" side="top">
+                            <template #tooltip>
+                                <div class="text-sm text-base-content">
+                                    {{ $t("char-build.weapon_attack_converted_from", { dmg: $t(getInheritedAttackTooltip()) }) }}
+                                </div>
+                            </template>
+                            <button class="inline-flex text-base-content/60 hover:text-primary" @click.stop>
+                                <Icon icon="ri:question-line" class="h-3.5 w-3.5" />
+                            </button>
+                        </FullTooltip>
                     </div>
                     <div class="text-primary font-bold text-sm font-orbitron">
                         {{ formatWeaponProp(["攻速", "多重", "弹匣", "装填"].includes(key) ? "基础攻击" : key, val) }}

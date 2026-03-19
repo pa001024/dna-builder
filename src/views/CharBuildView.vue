@@ -219,6 +219,42 @@ const charBuild = computed(() => {
     }
 })
 
+/**
+ * 侧边栏页签展示数据。
+ * 同律页签优先使用同律伤害技能图标，并通过 mask 适配不同主题。
+ */
+const charTabs = computed(() => {
+    const tabs = [
+        {
+            name: "角色",
+            url: charBuild.value.char.url,
+            skillMaskUrl: "",
+        },
+        {
+            name: "近战",
+            url: charBuild.value.meleeWeapon.url,
+            skillMaskUrl: "",
+        },
+        {
+            name: "远程",
+            url: charBuild.value.rangedWeapon.url,
+            skillMaskUrl: "",
+        },
+    ]
+
+    if (charBuild.value.skillWeapon) {
+        const skillWeaponUrl = charBuild.value.skillWeapon.url
+        const hasRealSkillWeaponIcon = !!charBuild.value.skillWeapon._originalWeaponData.icon && !skillWeaponUrl.endsWith("/_.webp")
+        tabs.push({
+            name: "同律",
+            url: hasRealSkillWeaponIcon ? skillWeaponUrl : "",
+            skillMaskUrl: hasRealSkillWeaponIcon ? "" : charBuild.value.skillWeaponSkills[0]?.url || charBuild.value.skillWeapon.技能?.[0]?.url || "",
+        })
+    }
+
+    return tabs
+})
+
 function selectMod(type: string, slotIndex: number, modId: number, lv: number) {
     if (type === "角色") {
         charSettings.value.charMods[slotIndex] = [modId, lv]
@@ -1077,34 +1113,19 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
             <ScrollArea id="char-build-scroll1" class="sm:w-92 flex-none flex flex-col gap-2 p-2">
                 <div class="flex flex-col gap-4">
                     <div data-tour="char-tabs" class="flex m-auto gap-2 overflow-x-auto pb-2">
-                        <div v-for="(tab, index) in [
-                            {
-                                name: '角色',
-                                url: charBuild.char.url,
-                            },
-                            {
-                                name: '近战',
-                                url: charBuild.meleeWeapon.url,
-                            },
-                            {
-                                name: '远程',
-                                url: charBuild.rangedWeapon.url,
-                            },
-                            ...(charBuild.skillWeapon
-                                ? [
-                                    {
-                                        name: '同律',
-                                        url: charBuild.skillWeapon.url,
-                                    },
-                                ]
-                                : []),
-                        ]" :key="index" class="flex items-center gap-2 shrink-0">
+                        <div v-for="tab in charTabs" :key="tab.name" class="flex items-center gap-2 shrink-0">
                             <div class="flex-none cursor-pointer size-10 sm:size-12 relative rounded-full overflow-hidden border-2 border-base-100 aspect-square"
                                 :class="{ 'border-primary! shadow-lg shadow-primary/40': charTab === tab.name }"
                                 @click="charTab = tab.name">
-                                <ImageFallback :src="tab.url" alt="角色头像" class="w-full h-full object-cover object-top">
+                                <ImageFallback v-if="!tab.skillMaskUrl" :src="tab.url" alt="角色头像" class="w-full h-full object-cover object-top">
                                     <Icon icon="kezhou" class="w-full h-full" />
                                 </ImageFallback>
+                                <div
+                                    v-else
+                                    alt="技能图标"
+                                    class="flex h-full w-full items-center justify-center bg-base-content"
+                                    :style="{ mask: `url(${tab.skillMaskUrl}) no-repeat center/68%` }"
+                                />
                                 <div
                                     class="absolute inset-0 bg-linear-to-t from-yellow-500/20 via-transparent to-transparent" />
                             </div>

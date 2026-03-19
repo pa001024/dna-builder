@@ -6,6 +6,8 @@ import { debounce } from "lodash-es"
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
 import { useRouter } from "vue-router"
 import {
+    clearScriptMcpConsole,
+    clearScriptMcpStatus,
     deleteFile,
     getDocumentsDir,
     getScriptMcpServerState,
@@ -16,26 +18,24 @@ import {
     resolveScriptHelpRequest,
     runAsAdmin,
     runScript,
-    clearScriptMcpConsole,
-    clearScriptMcpStatus,
-    setScriptMcpServerEnabled,
     type ScriptHelpResponse,
     type ScriptHotkeyBinding,
     type ScriptMcpServerState,
+    setScriptMcpServerEnabled,
     syncScriptHotkeyBindings,
     unwatchFile,
     watchFile,
     writeTextFile,
 } from "@/api/app"
 import { createScriptMutation, deleteScriptMutation, updateScriptMutation } from "@/api/gen/api-mutations"
-import { scriptCategoriesQuery, scriptQuery, scriptsCountQuery, scriptsQuery, type Script, type ScriptCategory } from "@/api/graphql"
+import { type Script, type ScriptCategory, scriptCategoriesQuery, scriptQuery, scriptsCountQuery, scriptsQuery } from "@/api/graphql"
 import ContextMenu, { ContextMenuItem } from "@/components/contextmenu"
+import { env } from "@/env"
 import { useCloudGameStore } from "@/store/cloudgame"
 import { type ScriptRuntimeSidePanelTab, useScriptRuntimeStore } from "@/store/scriptRuntime"
 import { useUIStore } from "@/store/ui"
 import { copyText } from "@/util"
 import { parseScriptHeader, replaceScriptHeader } from "@/utils/script-header"
-import { env } from "@/env"
 
 const ui = useUIStore()
 const cloudgame = useCloudGameStore()

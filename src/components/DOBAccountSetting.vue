@@ -6,8 +6,8 @@ import {
     myShopSummaryQuery,
     registerMutation,
     resetPasswordMutation,
-    updateUserMetaMutation,
     type UserShopSummary,
+    updateUserMetaMutation,
 } from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"

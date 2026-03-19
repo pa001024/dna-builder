@@ -361,6 +361,36 @@ const weaponAttributeEntries = computed<DisplayAttribute[]>(() => {
         .map(([key, value]) => ({ key, value: value as number }))
 })
 
+/**
+ * 判断当前属性项是否为 inherit 型同律武器的攻击词条。
+ * @param key 属性键名
+ * @returns 是否需要显示属性转换说明
+ */
+function isInheritedWeaponAttack(key: string) {
+    return key === "攻击" && activeWeaponKey.value === "skill" && !!charBuild.value.skillWeapon?.inherit
+}
+
+/**
+ * 获取武器攻击展示前缀。
+ * @param key 属性键名
+ * @returns 展示前缀 key
+ */
+function getWeaponAttackLabelPrefix(key: string) {
+    if (key !== "攻击") return ""
+    if (isInheritedWeaponAttack(key)) {
+        return `${charBuild.value.char.属性}属性`
+    }
+    return activeWeapon.value?.伤害类型 || ""
+}
+
+/**
+ * 获取 inherit 型同律攻击的来源提示。
+ * @returns 来源说明
+ */
+function getInheritedWeaponAttackTooltip() {
+    return baseWeapon.value?.伤害类型 || ""
+}
+
 const dynamicAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>(() => {
     const sourceMap: Record<string, DynamicAttrSource[]> = {}
     const epsilon = 1e-10
@@ -2272,7 +2302,7 @@ onMounted(() => {
                                                     v-if="'基础' + item.key in charBuild.char"
                                                     class="flex justify-between gap-8 text-sm text-cyan-200"
                                                 >
-                                                    <div class="text-white/75">基础{{ item.key }}</div>
+                                                    <div class="text-white/75">{{ $t("char-build.base_attr_label", { attr: $t(item.key) }) }}</div>
                                                     {{ charBuild.char[("基础" + item.key) as keyof LeveledChar] }}
                                                 </li>
                                                 <li
@@ -2374,7 +2404,11 @@ onMounted(() => {
                                                     v-if="baseWeapon && '基础' + item.key in baseWeapon"
                                                     class="flex justify-between gap-8 text-sm text-cyan-200"
                                                 >
-                                                    <div class="text-white/75">基础{{ item.key }}</div>
+                                                    <div class="text-white/75">
+                                                        {{ item.key === "攻击"
+                                                            ? $t("char-build.base_weapon_attack_label", { dmg: $t(getWeaponAttackLabelPrefix(item.key)) })
+                                                            : $t("char-build.base_attr_label", { attr: $t(item.key) }) }}
+                                                    </div>
                                                     {{
                                                         formatWeaponProp(
                                                             item.key === "攻击" ? "基础攻击" : item.key,
@@ -2386,7 +2420,7 @@ onMounted(() => {
                                                     v-if="baseWeapon && '射速' in baseWeapon && item.key === '攻速'"
                                                     class="flex justify-between gap-8 text-sm text-cyan-200"
                                                 >
-                                                    <div class="text-white/75">基础{{ item.key }}</div>
+                                                    <div class="text-white/75">{{ $t("char-build.base_attr_label", { attr: $t(item.key) }) }}</div>
                                                     {{ formatWeaponProp("基础攻击", (baseWeapon as never)["射速"] as number) }}
                                                 </li>
                                                 <li
@@ -2488,9 +2522,22 @@ onMounted(() => {
                                             <Icon :icon="getAttributeDisplayMeta(item.key).icon" class="h-4 w-4" />
                                         </div>
                                         <div class="min-w-0 flex-1">
-                                            <div class="text-[12px] text-white/72">
-                                                {{ item.key === "攻击" && activeWeapon ? activeWeapon.伤害类型 : ""
-                                                }}{{ getAttributeDisplayMeta(item.key).label }}
+                                            <div class="flex items-center gap-1 text-[12px] text-white/72">
+                                                <span>{{
+                                                    item.key === "攻击"
+                                                        ? $t("char-build.weapon_attack_label", { dmg: $t(getWeaponAttackLabelPrefix(item.key)) })
+                                                        : getAttributeDisplayMeta(item.key).label
+                                                }}</span>
+                                                <FullTooltip v-if="isInheritedWeaponAttack(item.key)" side="top">
+                                                    <template #tooltip>
+                                                        <div class="text-sm text-white">
+                                                            {{ $t("char-build.weapon_attack_converted_from", { dmg: $t(getInheritedWeaponAttackTooltip()) }) }}
+                                                        </div>
+                                                    </template>
+                                                    <button class="inline-flex text-white/55 hover:text-cyan-200" @click.stop>
+                                                        <Icon icon="ri:question-line" class="h-3.5 w-3.5" />
+                                                    </button>
+                                                </FullTooltip>
                                             </div>
                                         </div>
                                         <div

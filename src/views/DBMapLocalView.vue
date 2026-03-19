@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
-import { petMap } from "@/data/d"
-import { LeveledPet } from "@/data/leveled/LeveledPet"
-import regionData, { regionMap, type Region } from "@/data/d/region.data"
-import { subRegionData, type SubRegion } from "@/data/d/subregion.data"
 import { useRoute } from "vue-router"
+import { petMap } from "@/data/d"
+import regionData, { type Region, regionMap } from "@/data/d/region.data"
+import { type SubRegion, subRegionData } from "@/data/d/subregion.data"
+import { LeveledPet } from "@/data/leveled/LeveledPet"
 
 type LayerSelectMode = "single" | "multi"
 

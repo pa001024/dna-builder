@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import * as dialog from "@tauri-apps/plugin-dialog"
-import { computed, nextTick, onMounted, onUnmounted, ref } from "vue"
 import type { CSSProperties } from "vue"
+import { computed, nextTick, onMounted, onUnmounted, ref } from "vue"
 import { useRouter } from "vue-router"
 import { deleteFile, getDocumentsDir, importPic, runScript, stopScriptByPath, writeTextFile } from "@/api/app"
 import { env } from "@/env"

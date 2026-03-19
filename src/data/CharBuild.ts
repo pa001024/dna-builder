@@ -167,13 +167,15 @@ export class CharBuild {
         if (this.char.同律武器) {
             try {
                 const uweaponData = this.char.同律武器[0]
+                const sourceSkill = this.skills[uweaponData.skill ?? 1]
                 const uweaponSkillData = {
                     名称: uweaponData.名称,
                     类型: "同律武器伤害",
+                    icon: sourceSkill?.skillData.icon,
                     字段: [],
                 } as Skill
                 // 固定获取Q技能的伤害字段
-                this.skills[uweaponData.skill ?? 1].字段.forEach(field => {
+                sourceSkill?.字段.forEach(field => {
                     if (field.名称.match(uweaponData.filter || "伤害") && field.名称.endsWith("伤害")) uweaponSkillData.字段!.push(field)
                 })
                 uweaponData.技能 = [uweaponSkillData]
@@ -366,6 +368,7 @@ export class CharBuild {
         this.imbalance = options.imbalance || false
         this.meleeWeapon = options.melee
         this.rangedWeapon = options.ranged
+        this.syncInheritedSkillWeapon()
         this.baseName = options.baseName
         this.enemyLevel = options.enemyLevel || 80
         this.enemyId = options.enemyId ?? 130
@@ -385,6 +388,19 @@ export class CharBuild {
                     }
                 })
                 .filter((category): category is string => !!category)
+    }
+
+    /**
+     * 将 inherit 型同律武器的伤害类型同步为当前继承武器的伤害类型。
+     * 这样同律页签、MOD 限定和触发判定都能读取到真实的基础武器类型。
+     */
+    private syncInheritedSkillWeapon() {
+        if (!this.skillWeapon?.inherit) return
+
+        const inheritedWeapon = this.skillWeapon.inherit === "melee" ? this.meleeWeapon : this.rangedWeapon
+        if (!inheritedWeapon) return
+
+        this.skillWeapon.伤害类型 = inheritedWeapon.伤害类型
     }
 
     static fromCharSetting(
@@ -1000,8 +1016,9 @@ export class CharBuild {
         // 计算武器基础伤害
         const weaponAttackMultiplier = 1 // 倍率 这里设为1 使用动态计算
         const totalWeaponDamage = attrs.攻击 + weaponAttrs.攻击
-        const weaponDamagePhysical = (weaponAttackMultiplier * weaponAttrs.攻击) / totalWeaponDamage
-        const weaponDamageElemental = (weaponAttackMultiplier * attrs.攻击) / totalWeaponDamage
+        const inheritedSkillWeapon = weapon instanceof LeveledSkillWeapon && !!weapon.inherit
+        const weaponDamagePhysical = inheritedSkillWeapon ? 0 : (weaponAttackMultiplier * weaponAttrs.攻击) / totalWeaponDamage
+        const weaponDamageElemental = inheritedSkillWeapon ? 1 : (weaponAttackMultiplier * attrs.攻击) / totalWeaponDamage
 
         // 计算触发伤害期望
         const triggerDamageMultiplier =
@@ -1034,23 +1051,24 @@ export class CharBuild {
 
         // 计算最终伤害
         const elementalPart = weaponDamageElemental * resistance
+        const triggerablePart = inheritedSkillWeapon ? elementalPart : weaponDamagePhysical
+        const nonTriggerPart = inheritedSkillWeapon ? 0 : elementalPart
         return {
-            lowerCritNoTrigger: (weaponDamagePhysical + elementalPart) * lowerCritDamage * commonMore,
-            higherCritNoTrigger: (weaponDamagePhysical + elementalPart) * higherCritDamage * commonMore,
-            lowerCritTrigger: (weaponDamagePhysical * (lowerCritDamage + triggerDamageAdd) + elementalPart * lowerCritDamage) * commonMore,
-            higherCritTrigger:
-                (weaponDamagePhysical * (higherCritDamage + triggerDamageAdd) + elementalPart * higherCritDamage) * commonMore,
+            lowerCritNoTrigger: (triggerablePart + nonTriggerPart) * lowerCritDamage * commonMore,
+            higherCritNoTrigger: (triggerablePart + nonTriggerPart) * higherCritDamage * commonMore,
+            lowerCritTrigger: (triggerablePart * (lowerCritDamage + triggerDamageAdd) + nonTriggerPart * lowerCritDamage) * commonMore,
+            higherCritTrigger: (triggerablePart * (higherCritDamage + triggerDamageAdd) + nonTriggerPart * higherCritDamage) * commonMore,
             lowerCritExpectedTrigger:
-                (weaponDamagePhysical * (lowerCritDamage + triggerExpectedDamageAdd) + elementalPart * lowerCritDamage) * commonMore,
+                (triggerablePart * (lowerCritDamage + triggerExpectedDamageAdd) + nonTriggerPart * lowerCritDamage) * commonMore,
             higherCritExpectedTrigger:
-                (weaponDamagePhysical * (higherCritDamage + triggerExpectedDamageAdd) + elementalPart * higherCritDamage) * commonMore,
-            expectedCritTrigger: (weaponDamagePhysical + elementalPart) * critExpectedDamage * commonMore,
+                (triggerablePart * (higherCritDamage + triggerExpectedDamageAdd) + nonTriggerPart * higherCritDamage) * commonMore,
+            expectedCritTrigger: (triggerablePart + nonTriggerPart) * critExpectedDamage * commonMore,
             expectedCritNoTrigger:
-                (weaponDamagePhysical * (critExpectedDamage + triggerDamageAdd) + elementalPart * critExpectedDamage) * commonMore,
+                (triggerablePart * (critExpectedDamage + triggerDamageAdd) + nonTriggerPart * critExpectedDamage) * commonMore,
             expectedDamage:
-                (weaponDamagePhysical * (critExpectedDamage + triggerExpectedDamageAdd) + elementalPart * critExpectedDamage) * commonMore,
+                (triggerablePart * (critExpectedDamage + triggerExpectedDamageAdd) + nonTriggerPart * critExpectedDamage) * commonMore,
             noHpDamage:
-                (weaponDamagePhysical * (critExpectedDamage + triggerExpectedDamageAdd) + elementalPart * critExpectedDamage) * otherMore,
+                (triggerablePart * (critExpectedDamage + triggerExpectedDamageAdd) + nonTriggerPart * critExpectedDamage) * otherMore,
         }
     }
 

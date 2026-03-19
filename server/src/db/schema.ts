@@ -2,9 +2,9 @@
 
 import { relations, sql } from "drizzle-orm"
 import {
+    type AnySQLiteColumn,
     index,
     integer,
-    type AnySQLiteColumn,
     SQLiteColumn,
     type SQLiteTableWithColumns,
     sqliteTable,

@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
+import { useSearchParam } from "@/composables/useSearchParam"
 import type { Dungeon, RewardChild } from "@/data"
 import { LeveledMonster, rewardMap } from "@/data"
 import { getDungeonType } from "@/utils/dungeon-utils"
 import { getDropModeText, getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
-import { useSearchParam } from "@/composables/useSearchParam"
 
 const props = defineProps<{
     dungeon: Dungeon

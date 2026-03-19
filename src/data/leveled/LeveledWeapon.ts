@@ -223,7 +223,7 @@ export class LeveledWeapon {
             properties[prop] = this[prop]
         })
         for (const prop in this.buffProps) {
-            properties[prop] = this.buffProps[prop]
+            properties[prop] = (properties[prop] || 0) + this.buffProps[prop]
         }
         return properties
     }

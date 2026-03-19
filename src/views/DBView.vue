@@ -649,7 +649,7 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
         0 14px 34px rgb(15 23 42 / 0.1);
 }
 
-:deep(.db-search-input) {
+::v-deep(.db-search-input) {
     border: 1px solid color-mix(in srgb, var(--color-base-content) 10%, transparent) !important;
     background: linear-gradient(
         180deg,
@@ -662,7 +662,7 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
     backdrop-filter: blur(18px) saturate(145%);
 }
 
-:deep(.db-search-panel) {
+::v-deep(.db-search-panel) {
     position: relative;
     overflow: hidden;
     border: 1px solid color-mix(in srgb, var(--color-base-content) 10%, transparent) !important;
@@ -677,12 +677,12 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
     backdrop-filter: blur(22px) saturate(150%);
 }
 
-:deep(.db-search-option) {
+::v-deep(.db-search-option) {
     border-bottom-color: color-mix(in srgb, var(--color-base-content) 8%, transparent) !important;
 }
 
-:deep(.db-search-option:hover),
-:deep(.db-search-option[data-active="true"]) {
+::v-deep(.db-search-option:hover),
+::v-deep(.db-search-option[data-active="true"]) {
     background: color-mix(in srgb, var(--color-base-100) 28%, transparent) !important;
 }
 </style>

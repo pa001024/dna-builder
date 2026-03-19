@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useUIStore } from "@/store/ui"
 import { deleteUserMutation, type User, updateUserMutation, usersWithCountQuery } from "@/api/graphql"
+import { useUIStore } from "@/store/ui"
 import AdminCrudPage from "./AdminCrudPage.vue"
 import type { AdminCrudConfig } from "./crud-config"
 

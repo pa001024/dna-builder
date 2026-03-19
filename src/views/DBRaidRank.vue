@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue"
+import { useSearchParam } from "@/composables/useSearchParam"
 import { dungeonMap } from "@/data"
 import { PreRaidRank, RaidBuff, RaidCalculation, RaidDungeon, RaidSeason } from "../data/d/raid.data"
 import { getDropModeText, getRewardDetails } from "../utils/reward-utils"
-import { useSearchParam } from "@/composables/useSearchParam"
 
 // 计算分数函数
 const calculateScore = (baseRaidPoint: number, remainingTime: number, formulaId: number): number => {

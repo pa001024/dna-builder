@@ -1,6 +1,6 @@
 import type { Monster } from "@/data/d/monster.data"
 import monsterData from "@/data/d/monster.data"
-import { monsterTagData, type MonsterTag } from "@/data/d/monstertag.data"
+import { type MonsterTag, monsterTagData } from "@/data/d/monstertag.data"
 
 export interface MonsterTagGroup {
     name: string

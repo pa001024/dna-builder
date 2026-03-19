@@ -351,6 +351,15 @@ describe("LeveledWeapon类测试", () => {
         expect(fullProps.暴击).toBe(1)
     })
 
+    // 测试10.1：同名基础属性与效果属性应在简单属性中累加
+    it("getSimpleProperties会累加武器基础属性与效果属性的同名项", () => {
+        const 希冀的丰稔 = new LeveledWeapon("希冀的丰稔")
+        const simpleProps = 希冀的丰稔.getSimpleProperties()
+
+        expect(simpleProps.背水).toBeCloseTo(0.26, 10)
+        expect(simpleProps.攻速).toBeCloseTo(0.3, 10)
+    })
+
     // 测试11：测试不存在的武器名称
     it("测试不存在的武器名称会抛出错误", () => {
         expect(() => {

@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import { reactive } from "vue"
 import {
     adminGrantShopProductMutation,
     adminRevokeShopProductMutation,
     adminShopRedemptionsWithCountQuery,
     type ShopRedemption,
 } from "@/api/graphql"
-import { reactive } from "vue"
 import AdminCrudPage from "./AdminCrudPage.vue"
 import type { AdminCrudConfig } from "./crud-config"
 

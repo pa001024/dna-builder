@@ -4,8 +4,8 @@ import { cloneDeep } from "lodash-es"
 import { computed, reactive, ref } from "vue"
 import { normalizeCharSettings, useCharSettings } from "../composables/useCharSettings"
 import {
-    buffData,
     Buff,
+    buffData,
     CharAttr,
     CharBuild,
     CharBuildTimeline,

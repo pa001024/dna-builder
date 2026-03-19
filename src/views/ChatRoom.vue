@@ -137,6 +137,26 @@ function getLatestPageOffset(total: number, limit = 20) {
 }
 
 /**
+ * @description 等待浏览器下一帧，确保异步渲染后的滚动高度已经稳定。
+ */
+function waitForNextFrame() {
+    return new Promise<void>(resolve => {
+        requestAnimationFrame(() => resolve())
+    })
+}
+
+/**
+ * @description 将消息列表强制贴到底部，并在下一帧做一次补偿滚动，避免新消息渲染后 scrollHeight 再次增长。
+ */
+async function scrollMessageListToBottom() {
+    const viewport = el.value
+    if (!viewport) return
+    viewport.scrollTop = viewport.scrollHeight
+    await waitForNextFrame()
+    viewport.scrollTop = viewport.scrollHeight
+}
+
+/**
  * @description 在网络恢复或页面回到前台时，强制从服务端同步最新消息页，补齐断线期间可能漏掉的数据。
  */
 async function syncLatestMessagesFromServer() {
@@ -308,11 +328,7 @@ async function addMessage(msg: Msg) {
     }
     if (arrivedState.bottom) {
         await nextTick()
-        el.value?.scrollTo({
-            top: el.value.scrollHeight,
-            left: 0,
-            behavior: "smooth",
-        })
+        await scrollMessageListToBottom()
     }
 }
 
@@ -514,16 +530,25 @@ function cancelReply() {
                                     class="flex min-h-5 w-full items-center gap-1.5 text-sm text-base-content/60"
                                     :class="{ 'justify-end text-right': user.id === item.user!.id }"
                                 >
-                                    <span v-if="user.id === item.user?.id && item.user?.currentTitleText" :class="item.user?.currentTitleClass || ''">
+                                    <span
+                                        v-if="user.id === item.user?.id && item.user?.currentTitleText"
+                                        :class="item.user?.currentTitleClass || ''"
+                                    >
                                         {{ item.user.currentTitleText }}
                                     </span>
-                                    <span v-if="item.user?.level" class="rounded-full bg-base-300/80 px-1.5 py-0.5 text-[10px] leading-none text-base-content/70">
+                                    <span
+                                        v-if="item.user?.level"
+                                        class="rounded-full bg-base-300/80 px-1.5 py-0.5 text-[10px] leading-none text-base-content/70"
+                                    >
                                         LV{{ item.user.level }}
                                     </span>
                                     <span :class="item.user?.nameEffectClass || ''">
                                         {{ item.user?.name || "" }}
                                     </span>
-                                    <span v-if="user.id !== item.user?.id && item.user?.currentTitleText" :class="item.user?.currentTitleClass || ''">
+                                    <span
+                                        v-if="user.id !== item.user?.id && item.user?.currentTitleText"
+                                        :class="item.user?.currentTitleClass || ''"
+                                    >
                                         {{ item.user.currentTitleText }}
                                     </span>
                                 </div>
@@ -563,13 +588,19 @@ function cancelReply() {
                                     ref="editInput"
                                     contenteditable
                                     class="safe-html rounded-lg bg-base-100 select-text inline-flex flex-col text-sm max-w-80 overflow-hidden gap-2"
-                                    :class="{ 'p-2': !isImage(item.content), 'bg-primary text-base-100 self-end': user.id === item.user!.id }"
+                                    :class="{
+                                        'p-2': !isImage(item.content),
+                                        'bg-primary text-base-100 self-end': user.id === item.user!.id,
+                                    }"
                                     v-html="sanitizeHTML(item.content)"
                                 ></div>
                                 <div
                                     v-else
                                     class="safe-html rounded-lg bg-base-100 select-text inline-flex flex-col text-sm max-w-80 overflow-hidden gap-2"
-                                    :class="{ 'p-2': !isImage(item.content), 'bg-primary text-base-100 self-end': user.id === item.user!.id }"
+                                    :class="{
+                                        'p-2': !isImage(item.content),
+                                        'bg-primary text-base-100 self-end': user.id === item.user!.id,
+                                    }"
                                     v-html="sanitizeHTML(item.content)"
                                 ></div>
 
@@ -608,7 +639,9 @@ function cancelReply() {
                             </ContextMenu>
                             <div v-if="item.edited" class="text-xs text-base-content/60 self-end">{{ $t("chat.edited") }}</div>
                             <div class="flex-1"></div>
-                            <div class="hidden group-hover:block p-1 text-xs text-base-content/60">{{ item.createdAt }}</div>
+                            <div class="hidden group-hover:block p-1 text-xs text-base-content/60 whitespace-nowrap">
+                                {{ item.createdAt }}
+                            </div>
                         </div>
                     </div>
                 </GQAutoPage>

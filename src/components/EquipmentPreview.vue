@@ -24,6 +24,28 @@ const summonAttributes = computed(() => {
     }
     return undefined
 })
+
+/**
+ * 判断当前武器属性名是否为 inherit 型同律攻击。
+ * @param key 属性键名
+ * @returns 是否需要按属性攻击展示
+ */
+function isInheritedWeaponAttack(key: string) {
+    return key === "攻击" && !!props.charBuild.skillWeapon?.inherit && props.charBuild.selectedWeapon === props.charBuild.skillWeapon
+}
+
+/**
+ * 获取武器攻击展示前缀。
+ * @param key 属性键名
+ * @returns 展示前缀 key
+ */
+function getWeaponAttackLabelPrefix(key: string) {
+    if (key !== "攻击") return ""
+    if (isInheritedWeaponAttack(key)) {
+        return `${props.charBuild.char.属性}属性`
+    }
+    return props.charBuild.selectedWeapon?.伤害类型 || ""
+}
 </script>
 <template>
     <!-- 角色头部信息 -->
@@ -133,7 +155,9 @@ const summonAttributes = computed(() => {
                     class="bg-linear-to-br from-secondary/10 to-secondary/5 rounded-lg p-3 border border-secondary/20"
                 >
                     <div class="text-xs text-base-content/60 mb-1">
-                        {{ key === "攻击" ? charBuild.selectedWeapon.伤害类型 : "" }}{{ $t(key) }}
+                        {{ key === "攻击"
+                            ? $t("char-build.weapon_attack_label", { dmg: $t(getWeaponAttackLabelPrefix(key)) })
+                            : $t(key) }}
                     </div>
                     <div class="text-secondary font-bold text-lg font-orbitron">
                         {{ ["攻击", "攻速", "多重", "弹匣", "装填"].includes(key) ? `${+val.toFixed(2)}` : `${+(val * 100).toFixed(2)}%` }}

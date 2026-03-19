@@ -73,7 +73,7 @@ const dynamicAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>(() =>
                 <div v-if="key === '有效生命'" class="text-sm text-primary">(生命 / (1 - 防御 / (300 + 防御)) + 护盾) / (1 - 减伤)</div>
                 <ul class="space-y-1">
                     <li v-if="'基础' + key in charBuild.char" class="flex justify-between gap-8 text-sm text-primary">
-                        <div class="text-base-content/80">基础{{ key }}</div>
+                        <div class="text-base-content/80">{{ $t("char-build.base_attr_label", { attr: $t(key) }) }}</div>
                         {{ charBuild.char[("基础" + key) as keyof LeveledChar] }}
                     </li>
                     <li v-if="charBuild.char.加成 && key in charBuild.char.加成" class="flex justify-between gap-8 text-sm text-primary">

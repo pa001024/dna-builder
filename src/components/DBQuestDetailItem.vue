@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useLocalStorage } from "@vueuse/core"
 import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue"
 import DBQuestStoryNodes from "@/components/DBQuestStoryNodes.vue"
 import type { QuestItem, QuestStory } from "@/data/d/quest.data"
@@ -8,7 +9,6 @@ import { subRegionMap } from "@/data/d/subregion.data"
 import { useSettingStore } from "@/store/setting"
 import { getDropModeText, getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
-import { useLocalStorage } from "@vueuse/core"
 
 interface QuestNextOption {
     condition: string

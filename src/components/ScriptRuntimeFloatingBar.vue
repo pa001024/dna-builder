@@ -2,9 +2,9 @@
 import { t } from "i18next"
 import { computed, onMounted } from "vue"
 import { useRoute, useRouter } from "vue-router"
+import { env } from "@/env"
 import { useScriptRuntimeStore } from "@/store/scriptRuntime"
 import { useUIStore } from "@/store/ui"
-import { env } from "@/env"
 
 const scriptRuntime = useScriptRuntimeStore()
 const ui = useUIStore()

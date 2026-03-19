@@ -2,7 +2,7 @@
 import { computed, reactive } from "vue"
 import TypewriterText from "@/components/TypewriterText.vue"
 import type { NPC } from "@/data/d/npc.data"
-import { getImprType, getRegionType, type Dialogue, type DialogueOption } from "@/data/d/quest.data"
+import { type Dialogue, type DialogueOption, getImprType, getRegionType } from "@/data/d/quest.data"
 import { useSettingStore } from "@/store/setting"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 

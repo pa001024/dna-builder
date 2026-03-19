@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue"
-import { env } from "@/env"
 import {
     equipShopAssetMutation,
     myShopSummaryQuery,
     redeemShopProductMutation,
-    shopProductsQuery,
     type ShopProduct,
+    shopProductsQuery,
     type UserShopSummary,
 } from "@/api/graphql"
+import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 

@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core"
-import { listen, type Event, type UnlistenFn } from "@tauri-apps/api/event"
+import { type Event, listen, type UnlistenFn } from "@tauri-apps/api/event"
 
 export const CLOUDGAME_BRIDGE_EVENT = "cloudgame://bridge"
 export const CLOUDGAME_PAGE_LOAD_EVENT = "cloudgame://page-load"

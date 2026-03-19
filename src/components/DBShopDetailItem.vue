@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { computed, watch } from "vue"
 import { useRoute } from "vue-router"
-import type { Shop, ShopItem as ShopItemType, ShopMainTab, ShopSubTab } from "@/data/d/shop.data"
 import { useSearchParam } from "@/composables/useSearchParam"
+import type { Shop, ShopItem as ShopItemType, ShopMainTab, ShopSubTab } from "@/data/d/shop.data"
 
 const props = defineProps<{
     shop: Shop

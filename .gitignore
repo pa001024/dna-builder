@@ -52,3 +52,4 @@ tools/radix-icons/
 .tmp/
 .umap-cache/
 mcp_server/target/
+test-results/

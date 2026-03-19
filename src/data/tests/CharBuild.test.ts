@@ -705,6 +705,34 @@ describe("CharBuild类测试", () => {
                 expect(() => charBuild.calculateWeaponAttributes()).not.toThrow()
             })
         })
+
+        it("inherit 型同律武器应同步继承基础武器伤害类型并按纯元素结算", () => {
+            const charBuild = new CharBuild({
+                char: new LeveledChar("刻舟"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                charMods: [],
+                buffs: [],
+                melee: new LeveledWeapon(10303),
+                ranged: new LeveledWeapon(20601),
+                baseName: "剑非剑",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 1,
+                targetFunction: "伤害",
+            })
+
+            expect(charBuild.skillWeapon?.inherit).toBe("melee")
+            expect(charBuild.skillWeapon?.伤害类型).toBe(charBuild.meleeWeapon.伤害类型)
+            expect(charBuild.skillWeaponSkills[0]?.skillData.icon).toBe(charBuild.charSkills[1]?.skillData.icon)
+
+            const attrs = charBuild.calculateWeaponAttributes(charBuild.skillWeapon)
+            const damage = charBuild.calculateWeaponDamage(attrs, charBuild.skillWeapon!)
+
+            expect(damage.lowerCritNoTrigger).toBeCloseTo(0, 6)
+            expect(damage.expectedDamage).toBeCloseTo(0, 6)
+        })
     })
 
     // 收益计算测试

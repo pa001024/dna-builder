@@ -1,15 +1,15 @@
-import { getCurrentWindow } from "@tauri-apps/api/window"
 import type { UnlistenFn } from "@tauri-apps/api/event"
+import { getCurrentWindow } from "@tauri-apps/api/window"
 import { defineStore } from "pinia"
 import {
-    closeCloudGameWindow,
-    focusCloudGameWindow,
-    getCloudGameWindowState,
     type CloudGameBridgePayload,
     type CloudGameBridgeStatus,
     type CloudGamePageLoadPayload,
     type CloudGameWindowOptions,
     type CloudGameWindowState,
+    closeCloudGameWindow,
+    focusCloudGameWindow,
+    getCloudGameWindowState,
     listenCloudGameBridge,
     listenCloudGamePageLoad,
     listenCloudGameWindowState,

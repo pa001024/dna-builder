@@ -1,5 +1,5 @@
-import { defineStore } from "pinia"
 import { useLocalStorage } from "@vueuse/core"
+import { defineStore } from "pinia"
 
 export const useTourStore = defineStore("tour", () => {
     // 使用 localStorage 持久化已完成的 tour

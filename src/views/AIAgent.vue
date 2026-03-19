@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import { t } from "i18next"
 import MarkdownIt from "markdown-it"
 import mdHighlightjs from "markdown-it-highlightjs"
 // @ts-expect-error 模块无ts定义 也不需要类型检查
 import mdKatex from "markdown-it-katex"
-import { t } from "i18next"
 import type { ChatCompletionMessageParam } from "openai/resources/index.mjs"
 import { onMounted, ref, watch } from "vue"
 import { AIClient } from "../api/openai"
@@ -852,7 +852,7 @@ onMounted(() => {
     }
 
     /* 用户消息的markdown样式调整 */
-    :deep(.bg-primary) .markdown-content {
+    ::v-deep(.bg-primary) .markdown-content {
         /* 用户消息中的链接颜色 */
         a {
             color: #93c5fd;

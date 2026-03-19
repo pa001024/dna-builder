@@ -167,6 +167,5 @@ fishingSpots.forEach(v =>
     })
 )
 
-export type { Fish, FishingSpot }
-
 export { type Resource, resourceData, resourceMap } from "./resource.data"
+export type { Fish, FishingSpot }

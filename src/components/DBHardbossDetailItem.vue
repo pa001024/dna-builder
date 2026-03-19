@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { computed } from "vue"
+import { useSearchParam } from "@/composables/useSearchParam"
 import { monsterMap } from "@/data"
 import type { HardBoss, HardBossDetail } from "@/data/d/hardboss.data"
 import { getHardBossDetail } from "@/data/d/hardboss.data"
-import { useSearchParam } from "@/composables/useSearchParam"
 import { getDropModeText, getRewardDetails } from "@/utils/reward-utils"
 
 interface DynamicRewardEntry {
