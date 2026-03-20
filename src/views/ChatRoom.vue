@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { gql, useQuery, useSubscription } from "@urql/vue"
-import { useScroll } from "@vueuse/core"
+import { useLocalStorage, useScroll } from "@vueuse/core"
 import { useSound } from "@vueuse/sound"
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watchEffect } from "vue"
 import { onBeforeRouteLeave, useRoute } from "vue-router"
@@ -16,6 +16,7 @@ const roomId = computed(() => route.params.room as string)
 const user = useUserStore()
 const ui = useUIStore()
 const newMsgTip = ref(false)
+const blockedUserIds = useLocalStorage<string[]>("chat_blocked_user_ids", [])
 const variables = computed(() => ({ roomId: roomId.value }))
 const sfx = useSound("/sfx/notice.mp3")
 const NAME_EFFECT_STYLESHEET_ID = "dna-chat-name-effects"
@@ -323,7 +324,7 @@ useSubscription<{ msgEdited: Msg }>({
 
 async function addMessage(msg: Msg) {
     console.debug("addMessage", msg)
-    if (msg.user!.id !== user.id) {
+    if (msg.user?.id !== user.id && !isUserBlocked(msg.user?.id)) {
         sfx.play()
     }
     if (arrivedState.bottom) {
@@ -380,6 +381,44 @@ function insertEmoji(text: string) {
     range.collapse(false)
 }
 
+/**
+ * @description 判断指定用户是否已被当前用户屏蔽。
+ * @param userId 目标用户 ID。
+ * @returns 是否已屏蔽。
+ */
+function isUserBlocked(userId?: string | null) {
+    if (!userId) return false
+    return blockedUserIds.value.includes(userId)
+}
+
+/**
+ * @description 切换当前用户对目标用户的本地屏蔽状态。
+ * @param msg 目标消息，用于读取发送者信息。
+ */
+function toggleBlockedUser(msg: Msg) {
+    const targetUserId = msg.user?.id
+    const targetUserName = msg.user?.name || ""
+    if (!targetUserId || targetUserId === user.id) return
+
+    if (isUserBlocked(targetUserId)) {
+        blockedUserIds.value = blockedUserIds.value.filter(id => id !== targetUserId)
+        ui.showSuccessMessage(`已取消屏蔽 ${targetUserName}`)
+        return
+    }
+
+    blockedUserIds.value = [...blockedUserIds.value, targetUserId]
+    ui.showSuccessMessage(`已屏蔽 ${targetUserName}`)
+}
+
+/**
+ * @description 获取屏蔽菜单文案。
+ * @param msg 目标消息。
+ * @returns 菜单文本。
+ */
+function getBlockActionLabel(msg: Msg) {
+    return isUserBlocked(msg.user?.id) ? "chat.unblock" : "chat.block"
+}
+
 async function insertImage() {
     const fi = document.createElement("input")
     fi.type = "file"
@@ -406,12 +445,32 @@ async function insertImage() {
 const editId = ref("")
 const editInput = ref<HTMLDivElement[] | null>(null)
 const retractCache = new Map<string, string>()
+
+/**
+ * @description 判断当前用户是否可以撤回目标消息。
+ * @param msg 目标消息。
+ * @returns 是否允许撤回。
+ */
+function canRetractMessage(msg: Msg) {
+    return user.id === msg.user?.id || user.isAdmin
+}
+
+/**
+ * @description 判断当前用户是否可以恢复已撤回消息的重新编辑入口。
+ * @param msg 目标消息。
+ * @returns 是否允许恢复编辑。
+ */
+function canRestoreRetractedMessage(msg: Msg) {
+    return user.id === msg.user?.id
+}
+
 async function retractMessage(msg: Msg) {
     retractCache.set(msg.id, msg.content)
     await editMessageMutation({ content: "", msgId: msg.id })
     msg.content = ""
 }
 async function restoreMessage(msg: Msg) {
+    if (!canRestoreRetractedMessage(msg)) return
     const content = retractCache.get(msg.id)
     msg.content = content || msg.content
     startEdit(msg)
@@ -494,16 +553,20 @@ function cancelReply() {
                     @loadref="r => (el = r)"
                 >
                     <!-- 消息列表 -->
-                    <div v-for="item in msgs" v-if="msgs" :key="item.id" class="group flex items-start gap-2">
+                    <div v-for="item in msgs.filter(msg => !isUserBlocked(msg.user?.id))" v-if="msgs" :key="item.id" class="group flex items-start gap-2">
                         <div v-if="!item.content && editId !== item.id" class="text-xs text-base-content/60 m-auto">
                             {{
                                 $t("chat.retractedAMessage", {
                                     name: user.id === item.user!.id ? $t("chat.you") : item.user!.name,
                                 })
                             }}
-                            <span class="text-xs text-primary underline cursor-pointer" @click="restoreMessage(item)">{{
-                                $t("chat.restore")
-                            }}</span>
+                            <span
+                                v-if="canRestoreRetractedMessage(item)"
+                                class="text-xs text-primary underline cursor-pointer"
+                                @click="restoreMessage(item)"
+                            >
+                                {{ $t("chat.restore") }}
+                            </span>
                         </div>
 
                         <div v-else class="flex-1 flex items-start gap-2" :class="{ 'flex-row-reverse': user.id === item.user!.id }">
@@ -513,9 +576,10 @@ function cancelReply() {
                                 <template #menu>
                                     <ContextMenuItem
                                         class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
+                                        @click="toggleBlockedUser(item)"
                                     >
                                         <Icon class="size-4 mr-2" icon="ri:eye-line" />
-                                        {{ $t("chat.block") }}
+                                        {{ $t(getBlockActionLabel(item)) }}
                                     </ContextMenuItem>
                                     <ContextMenuItem
                                         class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
@@ -620,7 +684,7 @@ function cancelReply() {
                                         {{ $t("chat.copy") }}
                                     </ContextMenuItem>
                                     <ContextMenuItem
-                                        v-if="user.id === item.user?.id"
+                                        v-if="canRetractMessage(item)"
                                         class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
                                         @click="retractMessage(item)"
                                     >
@@ -666,7 +730,7 @@ function cancelReply() {
                             </div>
                         </div>
                         <div
-                            v-for="item in onlines.filter(v => v.user.id !== user.id)"
+                            v-for="item in onlines.filter(v => v.user.id !== user.id && !isUserBlocked(v.user.id))"
                             :key="item.id"
                             class="flex group bg-primary items-center rounded-full px-1"
                         >

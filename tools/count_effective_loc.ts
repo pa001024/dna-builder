@@ -95,7 +95,6 @@ function stripComments(content: string): string {
 
     for (let index = 0; index < content.length; index += 1) {
         const current = content[index]
-        const next = content[index + 1] ?? ""
         const nextTwo = content.slice(index, index + 2)
         const nextThree = content.slice(index, index + 3)
         const nextFour = content.slice(index, index + 4)

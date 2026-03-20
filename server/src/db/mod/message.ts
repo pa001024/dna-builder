@@ -365,7 +365,15 @@ export const resolvers = {
                 },
                 where: eq(schema.msgs.id, msgId),
             })
-            if (!msg || msg.userId !== user.id) return null
+            if (!msg) return null
+
+            /**
+             * 管理员仅允许撤回他人消息，不允许直接改写为任意内容。
+             */
+            const isOwner = msg.userId === user.id
+            const isAdmin = user.roles?.includes("admin")
+            const isRetractingOtherUserMessage = !isOwner && isAdmin && content === ""
+            if (!isOwner && !isRetractingOtherUserMessage) return null
 
             const content_sanitized = await preprocessMessageContent(content)
             const updated_msg = (
