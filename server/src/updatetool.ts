@@ -2,6 +2,8 @@
 // 作为客户端，通过 GraphQL API 更新委托数据到远端服务器
 
 import "dotenv/config"
+import { readFileSync, writeFileSync } from "node:fs"
+import { resolve } from "node:path"
 import { fetch } from "bun"
 import { Cron } from "croner"
 import type { DNAActivity } from "dna-api"
@@ -13,16 +15,37 @@ const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:8887"
 const API_TOKEN = process.env.API_TOKEN
 const DEV_CODE = process.env.DEV_CODE
 const USER_TOKEN = process.env.USER_TOKEN
+const REFRESH_TOKEN = process.env.REFRESH_TOKEN
 const USER_ID = process.env.USER_ID
+const ENV_FILE_PATH = resolve(process.cwd(), ".env")
 
-if (!API_TOKEN || !DEV_CODE || !USER_TOKEN) {
-    console.error("缺少必要的环境变量: API_TOKEN, DEV_CODE, USER_TOKEN")
+if (!API_TOKEN || !DEV_CODE || !USER_TOKEN || !REFRESH_TOKEN) {
+    console.error("缺少必要的环境变量: API_TOKEN, DEV_CODE, USER_TOKEN, REFRESH_TOKEN")
     process.exit(1)
 }
 
 // 休眠函数
 const sleep = (ms: number) => {
     return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+/**
+ * @description 将刷新后的用户访问 token 回写到 `.env`。
+ * 仅覆盖 `USER_TOKEN=` 这一行，其余环境变量保持原样。
+ * @param token 最新 token。
+ */
+function persistUserTokenToEnv(token: string) {
+    const envContent = readFileSync(ENV_FILE_PATH, "utf8")
+    const nextLine = `USER_TOKEN=${token}`
+
+    if (/^USER_TOKEN=.*$/m.test(envContent)) {
+        const updated = envContent.replace(/^USER_TOKEN=.*$/m, nextLine)
+        writeFileSync(ENV_FILE_PATH, updated, "utf8")
+        return
+    }
+
+    const suffix = envContent.endsWith("\n") ? "" : "\n"
+    writeFileSync(ENV_FILE_PATH, `${envContent}${suffix}${nextLine}\n`, "utf8")
 }
 
 // WebSocket客户端类，实现心跳机制和自定义请求头
@@ -159,6 +182,16 @@ class WsClient {
 async function fetchMissionsFromDNA() {
     try {
         const dnaAPI = getDNAAPI()
+        const loginRes = await dnaAPI.loginLog()
+        if (loginRes.msg.includes("失效") || loginRes.msg.includes("过期")) {
+            const refreshRes = await dnaAPI.refreshToken(REFRESH_TOKEN)
+            if (refreshRes.is_success && refreshRes.data?.token) {
+                dnaAPI.token = refreshRes.data.token
+                persistUserTokenToEnv(refreshRes.data.token)
+            } else {
+                throw new Error(`刷新 token 失败: ${refreshRes.msg}`)
+            }
+        }
         // 模拟别的请求 防止返回空值
         const res = await dnaAPI.defaultRoleForTool()
         if (res.is_success && res.data?.instanceInfo) {

@@ -53,3 +53,4 @@ tools/radix-icons/
 .umap-cache/
 mcp_server/target/
 test-results/
+tools/deploy_server.sh
