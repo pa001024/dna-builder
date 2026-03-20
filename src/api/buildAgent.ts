@@ -1,7 +1,8 @@
 import { AIMessage, type BaseMessage, HumanMessage, type MessageContent, SystemMessage, ToolMessage } from "@langchain/core/messages"
+import type { StructuredToolInterface } from "@langchain/core/tools"
 import { ChatOpenAI } from "@langchain/openai"
 import { useLocalStorage } from "@vueuse/core"
-import { createAgent, tool } from "langchain"
+import { tool } from "langchain"
 import type { Ref } from "vue"
 import { z } from "zod"
 import { renderBuildAgentSystemPrompt } from "@/shared/buildAgentSystemPrompt"
@@ -44,7 +45,7 @@ type EffectTarget = {
  */
 export class BuildAgent {
     private model: ChatOpenAI
-    private agent: ReturnType<typeof createAgent>
+    private tools: StructuredToolInterface[] = []
     private contextMessages: BaseMessage[] = []
     private isStreaming = false
 
@@ -55,7 +56,7 @@ export class BuildAgent {
         public inv: ReturnType<typeof useInvStore>
     ) {
         this.model = this.createChatModel()
-        this.agent = this.createAgentRunner()
+        this.tools = this.createTools()
         this.resetContext()
     }
 
@@ -84,18 +85,6 @@ export class BuildAgent {
             configuration: {
                 baseURL: this.config.base_url,
             },
-        })
-    }
-
-    /**
-     * 创建 createAgent 执行器
-     * @returns Agent 实例
-     */
-    private createAgentRunner() {
-        return createAgent({
-            model: this.model,
-            tools: this.getTools(),
-            version: "v2",
         })
     }
 
@@ -154,26 +143,6 @@ export class BuildAgent {
             }
         }
         return {}
-    }
-
-    /**
-     * 根据tool_call_id反查工具名称
-     * @param messages 当前消息列表
-     * @param toolCallId 工具调用ID
-     * @returns 工具名称
-     */
-    private resolveToolNameByCallId(messages: BaseMessage[], toolCallId: string): string {
-        for (let i = messages.length - 1; i >= 0; i--) {
-            const message = messages[i]
-            if (!(message instanceof AIMessage)) {
-                continue
-            }
-            const matched = (message.tool_calls || []).find(toolCall => toolCall.id === toolCallId)
-            if (matched?.name) {
-                return matched.name
-            }
-        }
-        return toolCallId
     }
 
     /**
@@ -505,7 +474,7 @@ export class BuildAgent {
     /**
      * 获取工具定义
      */
-    private getTools() {
+    private createTools() {
         return [
             tool(async ({ action, buffName, level }) => this.handleToolCall("setBuff", { action, buffName, level }), {
                 name: "setBuff",
@@ -1639,53 +1608,67 @@ export class BuildAgent {
      * @returns 更新后的消息上下文
      */
     private async invokeWithTools(onChunk: (chunk: string, type?: "reasoning" | "content" | "tool") => void): Promise<BaseMessage[]> {
-        const stream = await this.agent.stream(
-            {
-                messages: this.contextMessages,
-            },
-            {
-                streamMode: "values",
+        const runnable = this.model.bindTools(this.tools)
+        const latestMessages = [...this.contextMessages]
+        const toolMap = new Map(this.tools.map(item => [item.name, item]))
+
+        while (true) {
+            const response = await runnable.invoke(latestMessages)
+            latestMessages.push(response)
+
+            const toolCalls = response.tool_calls || []
+            for (const toolCall of toolCalls) {
+                onChunk(`[工具调用] ${toolCall.name}\n参数:\n${this.formatToolValue(toolCall.args)}\n`, "tool")
             }
-        )
 
-        let latestMessages = this.contextMessages
-        let processedMessageCount = this.contextMessages.length
-
-        for await (const rawChunk of stream as AsyncIterable<unknown>) {
-            const chunk = rawChunk as { messages?: BaseMessage[] }
-            if (!Array.isArray(chunk.messages) || chunk.messages.length === 0) {
-                continue
+            if (toolCalls.length === 0) {
+                const content = this.extractMessageText(response.content)
+                if (content.trim()) {
+                    onChunk(content, "content")
+                }
+                return latestMessages
             }
-            latestMessages = chunk.messages
-            const newMessages = latestMessages.slice(processedMessageCount)
-            processedMessageCount = latestMessages.length
 
-            for (const message of newMessages) {
-                if (message instanceof AIMessage) {
-                    const toolCalls = message.tool_calls || []
-                    for (const toolCall of toolCalls) {
-                        onChunk(`[工具调用] ${toolCall.name}\n参数:\n${this.formatToolValue(toolCall.args)}\n`, "tool")
-                    }
+            for (const toolCall of toolCalls) {
+                const currentTool = toolMap.get(toolCall.name)
+                const toolCallId = toolCall.id || toolCall.name
 
-                    if (toolCalls.length === 0) {
-                        const content = this.extractMessageText(message.content)
-                        if (content.trim()) {
-                            onChunk(content, "content")
-                        }
-                    }
+                if (!currentTool) {
+                    const errorContent = `未找到工具: ${toolCall.name}`
+                    latestMessages.push(
+                        new ToolMessage({
+                            content: errorContent,
+                            tool_call_id: toolCallId,
+                        })
+                    )
+                    onChunk(`[工具返回] ${toolCall.name}\n${errorContent}\n`, "tool")
                     continue
                 }
 
-                if (message instanceof ToolMessage) {
-                    const toolResult = this.extractMessageText(message.content)
-                    const toolName = this.resolveToolNameByCallId(latestMessages, message.tool_call_id)
-                    console.log("工具返回:", toolName, toolResult)
-                    onChunk(`[工具返回] ${toolName}\n${toolResult}\n`, "tool")
+                try {
+                    const toolResult = await currentTool.invoke(toolCall.args)
+                    const formattedToolResult = this.formatToolValue(toolResult)
+                    latestMessages.push(
+                        new ToolMessage({
+                            content: formattedToolResult,
+                            tool_call_id: toolCallId,
+                        })
+                    )
+                    console.log("工具返回:", toolCall.name, formattedToolResult)
+                    onChunk(`[工具返回] ${toolCall.name}\n${formattedToolResult}\n`, "tool")
+                } catch (error) {
+                    const errorContent = `工具执行失败: ${(error as Error).message}`
+                    latestMessages.push(
+                        new ToolMessage({
+                            content: errorContent,
+                            tool_call_id: toolCallId,
+                        })
+                    )
+                    console.error("工具执行失败:", toolCall.name, error)
+                    onChunk(`[工具返回] ${toolCall.name}\n${errorContent}\n`, "tool")
                 }
             }
         }
-
-        return latestMessages
     }
 
     /**

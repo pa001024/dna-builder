@@ -184,7 +184,7 @@ async function fetchMissionsFromDNA() {
         const dnaAPI = getDNAAPI()
         const loginRes = await dnaAPI.loginLog()
         if (loginRes.msg.includes("失效") || loginRes.msg.includes("过期")) {
-            const refreshRes = await dnaAPI.refreshToken(REFRESH_TOKEN)
+            const refreshRes = await dnaAPI.refreshToken(REFRESH_TOKEN!)
             if (refreshRes.is_success && refreshRes.data?.token) {
                 dnaAPI.token = refreshRes.data.token
                 persistUserTokenToEnv(refreshRes.data.token)
@@ -351,6 +351,7 @@ const updateMH = async (server: string = "cn", t: number = 10) => {
             // 每次请求前创建并连接WebSocket
             const wsClient = new WsClient("wss://dnabbs-api.yingxiong.com:8180/ws-community-websocket", USER_TOKEN, USER_ID || "", 10000)
             await wsClient.connect()
+            await sleep(2000)
 
             try {
                 // 执行委托数据同步
