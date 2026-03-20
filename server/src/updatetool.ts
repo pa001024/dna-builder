@@ -74,7 +74,7 @@ class WsClient {
                 const ws = new WebSocket(this.url, {
                     headers: {
                         token: this.token,
-                        appVersion: "1.2.0",
+                        appVersion: "1.2.2",
                         sourse: "android",
                     },
                 })
@@ -178,28 +178,38 @@ class WsClient {
     }
 }
 
-// 从 DNA API 获取委托数据
-async function fetchMissionsFromDNA() {
-    try {
-        const dnaAPI = getDNAAPI()
-        const loginRes = await dnaAPI.loginLog()
-        if (loginRes.msg.includes("失效") || loginRes.msg.includes("过期")) {
-            const refreshRes = await dnaAPI.refreshToken(REFRESH_TOKEN!)
-            if (refreshRes.is_success && refreshRes.data?.token) {
-                dnaAPI.token = refreshRes.data.token
-                persistUserTokenToEnv(refreshRes.data.token)
-            } else {
-                throw new Error(`刷新 token 失败: ${refreshRes.msg}`)
-            }
+/**
+ * @description 创建并校验一个可用的 DNA API 实例。
+ * 若访问 token 已过期，则会使用 refresh token 刷新并回写到 `.env`。
+ */
+async function prepareDNAAPI() {
+    const dnaAPI = getDNAAPI()
+    const loginRes = await dnaAPI.loginLog()
+    if (loginRes.msg.includes("失效") || loginRes.msg.includes("过期")) {
+        const refreshRes = await dnaAPI.refreshToken(REFRESH_TOKEN!)
+        if (refreshRes.is_success && refreshRes.data?.token) {
+            dnaAPI.token = refreshRes.data.token
+            console.info("刷新AK成功")
+            persistUserTokenToEnv(refreshRes.data.token)
+        } else {
+            throw new Error(`刷新 token 失败: ${refreshRes.msg}`)
         }
-        // 模拟别的请求 防止返回空值
+    }
+    return dnaAPI
+}
+
+/**
+ * @description 从 DNA API 获取委托数据。
+ * @param dnaAPI 已完成登录校验的 API 实例。
+ */
+async function fetchMissionsFromDNA(dnaAPI: ReturnType<typeof getDNAAPI>) {
+    try {
         const res = await dnaAPI.defaultRoleForTool()
         if (res.is_success && res.data?.instanceInfo) {
             const missions = res.data.instanceInfo.map(item => item.instances.map(v => v.name))
             return missions
-        } else {
-            throw new Error(`DNA API 返回失败: ${res.msg}`)
         }
+        throw new Error(`DNA API 返回失败: ${res.msg}`)
     } catch (error) {
         console.error("获取 DNA API 数据失败:", error)
         throw error
@@ -232,9 +242,8 @@ function normalizeActivity(activity: DNAActivity): UploadActivity {
 }
 
 // 从 DNA API 获取活动数据并过滤周期活动
-async function fetchActivitiesFromDNA(): Promise<UploadActivity[]> {
+async function fetchActivitiesFromDNA(dnaAPI: ReturnType<typeof getDNAAPI>): Promise<UploadActivity[]> {
     try {
-        const dnaAPI = getDNAAPI()
         const res = await dnaAPI.getActivityList()
 
         if (!res.is_success || !res.data?.activities) {
@@ -344,19 +353,21 @@ async function upsertActivitiesIngame(server: string, activities: UploadActivity
 const updateMH = async (server: string = "cn", t: number = 10) => {
     console.log(`${new Date().toLocaleString()} 开始同步密函信息 - server: ${server}`)
     let is_success = false
-    await sleep(30000)
+    if (t > 1) await sleep(30000)
     for (let i = 0; i < t; i++) {
-        await sleep(5000)
+        if (t > 1) await sleep(5000)
         try {
-            // 每次请求前创建并连接WebSocket
-            const wsClient = new WsClient("wss://dnabbs-api.yingxiong.com:8180/ws-community-websocket", USER_TOKEN, USER_ID || "", 10000)
+            const dnaAPI = await prepareDNAAPI()
+
+            // 每次请求前创建并连接 WebSocket，连接上下文与当前 API token 保持一致
+            const wsClient = new WsClient(dnaAPI.BASE_WEB_SOCKET_URL, dnaAPI.token, USER_ID || "", 10000)
             await wsClient.connect()
             await sleep(2000)
 
             try {
                 // 执行委托数据同步
-                const missions = await fetchMissionsFromDNA()
-                const activities = await fetchActivitiesFromDNA()
+                const missions = await fetchMissionsFromDNA(dnaAPI)
+                const activities = await fetchActivitiesFromDNA(dnaAPI)
                 const missionResult = await updateMissionsIngame(server, missions)
                 await upsertActivitiesIngame(server, activities)
                 if (missionResult === null) {
