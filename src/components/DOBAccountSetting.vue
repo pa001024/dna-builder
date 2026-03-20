@@ -3,6 +3,7 @@ import { computed, nextTick, reactive, ref, watch } from "vue"
 import {
     forgotPasswordMutation,
     loginMutation,
+    meQuery,
     myShopSummaryQuery,
     registerMutation,
     resetPasswordMutation,
@@ -49,6 +50,48 @@ const nameEdit = reactive({
 
 const levelProgress = computed(() => getUserLevelProgress(user.experience, user.level))
 
+const dailyExperienceStatus = ref<NonNullable<NonNullable<Awaited<ReturnType<typeof meQuery>>>["dailyExperienceStatus"]> | null>(null)
+
+/**
+ * @description 拉取当前用户每日经验状态，用于等级提示 tooltip。
+ */
+async function refreshDailyExperienceStatus(): Promise<void> {
+    if (!user.jwtToken) {
+        dailyExperienceStatus.value = null
+        return
+    }
+
+    try {
+        dailyExperienceStatus.value = (await meQuery(undefined, { requestPolicy: "network-only" }))?.dailyExperienceStatus ?? null
+    } catch (error) {
+        console.error("拉取每日经验状态失败:", error)
+        dailyExperienceStatus.value = null
+    }
+}
+
+/**
+ * @description 将毫秒格式化为便于展示的剩余时间文本。
+ * @param ms 剩余等待毫秒数。
+ * @returns 格式化后的中文文本。
+ */
+function formatRemainingDuration(ms: number | null | undefined): string {
+    if (!ms || ms <= 0) {
+        return ""
+    }
+
+    const totalSeconds = Math.ceil(ms / 1000)
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    const seconds = totalSeconds % 60
+    const parts: string[] = []
+
+    if (hours > 0) parts.push(`${hours}小时`)
+    if (minutes > 0) parts.push(`${minutes}分钟`)
+    if (seconds > 0 && hours === 0) parts.push(`${seconds}秒`)
+
+    return parts.join("") || "1分钟内"
+}
+
 const shopSummary = ref<UserShopSummary | null>(null)
 const loadingShopSummary = ref(false)
 
@@ -78,6 +121,7 @@ watch(
     () => user.jwtToken,
     () => {
         refreshShopSummary()
+        refreshDailyExperienceStatus()
     },
     { immediate: true }
 )
@@ -317,7 +361,56 @@ async function startNameEdit() {
                 <div class="text-sm space-y-1 pt-2 border-t border-base-300">
                     <div class="mb-2">
                         <div class="flex items-center justify-between text-sm">
-                            <span class="font-medium">等级 Lv.{{ user.level }}</span>
+                            <span class="font-medium inline-flex items-center gap-1.5">
+                                <span>等级 Lv.{{ user.level }}</span>
+                                <FullTooltip side="bottom">
+                                    <button type="button" class="inline-flex text-base-content/50 hover:text-base-content/80">
+                                        <Icon icon="ri:question-line" class="size-4" />
+                                    </button>
+                                    <template #tooltip>
+                                        <div class="w-72 space-y-2 text-xs leading-5 text-base-content">
+                                            <div class="font-semibold">每日经验进度</div>
+                                            <div v-if="dailyExperienceStatus">
+                                                今日已获得 {{ dailyExperienceStatus.todayAwardedExp }}/{{ dailyExperienceStatus.totalAvailableExp }} 经验
+                                            </div>
+                                            <div v-else>今日进度暂不可用</div>
+                                            <div class="border-t border-base-300/70 pt-2 space-y-1.5">
+                                                <div class="font-semibold">来源</div>
+                                                <div>
+                                                    打开软件 +2：
+                                                    {{ dailyExperienceStatus?.dailyLaunchProgress ?? 0 }}/{{
+                                                        dailyExperienceStatus?.dailyLaunchLimit ?? 1
+                                                    }}
+                                                </div>
+                                                <div>
+                                                    在线满1小时 +3：
+                                                    {{
+                                                        `${dailyExperienceStatus?.dailyOnlineHourProgress ?? 0}/${
+                                                            dailyExperienceStatus?.dailyOnlineHourLimit ?? 1
+                                                        }`
+                                                    }}
+                                                    <span
+                                                        v-if="
+                                                            (dailyExperienceStatus?.dailyOnlineHourProgress ?? 0) <
+                                                            (dailyExperienceStatus?.dailyOnlineHourLimit ?? 1)
+                                                        "
+                                                    >
+                                                        <span v-if="formatRemainingDuration(dailyExperienceStatus?.dailyOnlineHourRetryAfterMs)">
+                                                            （{{ formatRemainingDuration(dailyExperienceStatus?.dailyOnlineHourRetryAfterMs) }}）
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    今日首条聊天消息 +1：
+                                                    {{ dailyExperienceStatus?.dailyMessageProgress ?? 0 }}/{{
+                                                        dailyExperienceStatus?.dailyMessageLimit ?? 1
+                                                    }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </FullTooltip>
+                            </span>
                             <span class="text-base-content/60">{{ user.experience }} 总经验</span>
                         </div>
                         <progress

@@ -8,7 +8,9 @@ import { id } from "../schema"
 import { type Context, jwtToken } from "../yoga"
 import {
     getDailyOnlineExperienceRetryAfterMs,
+    getTodayUserExperienceRewards,
     grantDailyUserExperience,
+    USER_EXPERIENCE_REWARD_MAP,
     USER_EXPERIENCE_SOURCES,
     validateDailyOnlineExperienceEligibility,
 } from "./userExperience"
@@ -61,8 +63,21 @@ export const typeDefs = /* GraphQL */ `
         currentTitleText: String
         currentTitleClass: String
         nameEffectClass: String
+        dailyExperienceStatus: UserDailyExperienceStatus
         createdAt: String
         updateAt: String
+    }
+
+    type UserDailyExperienceStatus {
+        todayAwardedExp: Int!
+        totalAvailableExp: Int!
+        dailyLaunchProgress: Int!
+        dailyLaunchLimit: Int!
+        dailyOnlineHourProgress: Int!
+        dailyOnlineHourLimit: Int!
+        dailyMessageProgress: Int!
+        dailyMessageLimit: Int!
+        dailyOnlineHourRetryAfterMs: Int
     }
 
     type UserLoginResult {
@@ -234,6 +249,41 @@ export const resolvers = {
                 },
             })
             return asset?.displayClass ?? ""
+        },
+        /**
+         * @description 汇总当前用户今日经验奖励领取状态，仅本人可见。
+         * @param parent 当前用户对象。
+         * @param _args GraphQL 参数。
+         * @param context 请求上下文。
+         * @returns 今日经验来源进度摘要。
+         */
+        dailyExperienceStatus: async (parent: typeof schema.users.$inferSelect, _args: unknown, context: Context) => {
+            if (!context.user || context.user.id !== parent.id) {
+                return null
+            }
+
+            const todayRewards = await getTodayUserExperienceRewards(parent.id)
+            const launchReward = todayRewards[USER_EXPERIENCE_SOURCES.DAILY_LAUNCH] ?? null
+            const onlineReward = todayRewards[USER_EXPERIENCE_SOURCES.DAILY_ONLINE_HOUR] ?? null
+            const messageReward = todayRewards[USER_EXPERIENCE_SOURCES.DAILY_MESSAGE] ?? null
+            const onlineRetryAfterMs = await getDailyOnlineExperienceRetryAfterMs(parent.id, todayRewards)
+
+            const todayAwardedExp = (launchReward?.awardedExp ?? 0) + (onlineReward?.awardedExp ?? 0) + (messageReward?.awardedExp ?? 0)
+
+            return {
+                todayAwardedExp,
+                totalAvailableExp:
+                    USER_EXPERIENCE_REWARD_MAP[USER_EXPERIENCE_SOURCES.DAILY_LAUNCH] +
+                    USER_EXPERIENCE_REWARD_MAP[USER_EXPERIENCE_SOURCES.DAILY_ONLINE_HOUR] +
+                    USER_EXPERIENCE_REWARD_MAP[USER_EXPERIENCE_SOURCES.DAILY_MESSAGE],
+                dailyLaunchProgress: launchReward ? 1 : 0,
+                dailyLaunchLimit: 1,
+                dailyOnlineHourProgress: onlineReward ? 1 : 0,
+                dailyOnlineHourLimit: 1,
+                dailyMessageProgress: messageReward ? 1 : 0,
+                dailyMessageLimit: 1,
+                dailyOnlineHourRetryAfterMs: onlineReward ? 0 : onlineRetryAfterMs,
+            }
         },
     } as any,
     Mutation: {

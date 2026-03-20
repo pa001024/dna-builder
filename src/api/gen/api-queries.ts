@@ -14,6 +14,17 @@ export const meQuery = typedQuery(
                 roles
                 experience
                 level
+                dailyExperienceStatus {
+                    todayAwardedExp
+                    totalAvailableExp
+                    dailyLaunchProgress
+                    dailyLaunchLimit
+                    dailyOnlineHourProgress
+                    dailyOnlineHourLimit
+                    dailyMessageProgress
+                    dailyMessageLimit
+                    dailyOnlineHourRetryAfterMs
+                }
                 createdAt
                 updateAt
             }

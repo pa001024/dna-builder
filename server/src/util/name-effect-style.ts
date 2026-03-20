@@ -14,6 +14,21 @@ type NameEffectStylesheetCache = {
 let stylesheetCache: NameEffectStylesheetCache | null = null
 
 /**
+ * @description 对展示 CSS 做轻量压缩，减少传输体积。
+ * 这里不引入额外依赖，只处理常见空白、注释和分隔符冗余。
+ * @param css 原始 CSS 文本。
+ * @returns 压缩后的 CSS 文本。
+ */
+function minifyCss(css: string): string {
+    return css
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .replace(/\s+/g, " ")
+        .replace(/\s*([{}:;,>])\s*/g, "$1")
+        .replace(/;}/g, "}")
+        .trim()
+}
+
+/**
  * @description 返回名字特效样式表 URL，供前端以 link 方式加载。
  * @param origin 可选服务端源地址。
  * @returns 样式表绝对地址或相对地址。
@@ -31,10 +46,10 @@ export function getNameEffectStylesheetUrl(origin?: string): string {
 function buildNameEffectStylesheet(assets: Array<typeof schema.shopAssets.$inferSelect>): string {
     const header = `/* generated: dna-builder name effect stylesheet */`
     const body = assets
-        .map(asset => asset.displayCss?.trim() || "")
+        .map(asset => minifyCss(asset.displayCss?.trim() || ""))
         .filter(Boolean)
-        .join("\n\n")
-    return `${header}\n${body}`
+        .join("")
+    return `${header}${body}`
 }
 
 /**

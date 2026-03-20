@@ -37,13 +37,20 @@ export type UserExperienceEligibility =
           waitMs?: number
       }
 
+export type TodayUserExperienceRewardMap = Partial<Record<UserExperienceSource, typeof schema.userExperienceRewards.$inferSelect>>
+
 /**
  * @description 计算当前用户距离“每日在线一小时”奖励的剩余等待时长。
  * @param userId 用户 ID。
+ * @param todayRewards 可选的今日奖励缓存，避免重复查询。
  * @returns 剩余等待毫秒数；若今天尚未领取打开软件奖励，则返回 `null`。
  */
-export async function getDailyOnlineExperienceRetryAfterMs(userId: string): Promise<number | null> {
-    const launchReward = await getTodayUserExperienceReward(userId, USER_EXPERIENCE_SOURCES.DAILY_LAUNCH)
+export async function getDailyOnlineExperienceRetryAfterMs(
+    userId: string,
+    todayRewards?: TodayUserExperienceRewardMap
+): Promise<number | null> {
+    const rewards = todayRewards ?? (await getTodayUserExperienceRewards(userId))
+    const launchReward = rewards[USER_EXPERIENCE_SOURCES.DAILY_LAUNCH]
     if (!launchReward) {
         return null
     }
@@ -138,25 +145,40 @@ export function parseStoredDateTime(value?: string | null): number | null {
  * @returns 今日奖励记录，不存在则返回 `null`。
  */
 export async function getTodayUserExperienceReward(userId: string, source: UserExperienceSource) {
-    return (
-        (await db.query.userExperienceRewards.findFirst({
-            where: and(
-                eq(schema.userExperienceRewards.userId, userId),
-                eq(schema.userExperienceRewards.source, source),
-                eq(schema.userExperienceRewards.dateKey, getShanghaiDateKey())
-            ),
-        })) ?? null
-    )
+    const rewards = await getTodayUserExperienceRewards(userId)
+    return rewards[source] ?? null
+}
+
+/**
+ * @description 查询用户今天已经领取过的所有经验奖励，并按来源映射返回。
+ * @param userId 用户 ID。
+ * @returns 今日奖励映射。
+ */
+export async function getTodayUserExperienceRewards(userId: string): Promise<TodayUserExperienceRewardMap> {
+    const records = await db.query.userExperienceRewards.findMany({
+        where: and(eq(schema.userExperienceRewards.userId, userId), eq(schema.userExperienceRewards.dateKey, getShanghaiDateKey())),
+    })
+
+    return records.reduce<TodayUserExperienceRewardMap>((result, record) => {
+        const source = record.source as UserExperienceSource
+        result[source] = record
+        return result
+    }, {})
 }
 
 /**
  * @description 校验“每日在线一小时”奖励是否满足领取条件。
  * 必须先领取当天的“每日打开软件”奖励，并且距离那次领取已满 1 小时。
  * @param userId 用户 ID。
+ * @param todayRewards 可选的今日奖励缓存，避免重复查询。
  * @returns 是否满足在线奖励条件，以及未满足时的原因。
  */
-export async function validateDailyOnlineExperienceEligibility(userId: string): Promise<UserExperienceEligibility> {
-    const launchReward = await getTodayUserExperienceReward(userId, USER_EXPERIENCE_SOURCES.DAILY_LAUNCH)
+export async function validateDailyOnlineExperienceEligibility(
+    userId: string,
+    todayRewards?: TodayUserExperienceRewardMap
+): Promise<UserExperienceEligibility> {
+    const rewards = todayRewards ?? (await getTodayUserExperienceRewards(userId))
+    const launchReward = rewards[USER_EXPERIENCE_SOURCES.DAILY_LAUNCH]
     if (!launchReward) {
         return {
             ok: false,

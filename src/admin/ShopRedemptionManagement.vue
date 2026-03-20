@@ -1,27 +1,107 @@
 <script setup lang="ts">
-import { reactive } from "vue"
 import {
     adminGrantShopProductMutation,
     adminRevokeShopProductMutation,
     adminShopRedemptionsWithCountQuery,
     type ShopRedemption,
+    shopProductsQuery,
+    usersQuery,
 } from "@/api/graphql"
 import AdminCrudPage from "./AdminCrudPage.vue"
 import type { AdminCrudConfig } from "./crud-config"
 
-const revokeForm = reactive({
-    userId: "",
-    productId: "",
-})
+const DIRECT_GRANT_LOOKUP_LIMIT = 500
 
 /**
- * @description 直接按用户 ID 和商品 ID 撤回商品。
+ * @description 规范化文本，便于前端做名称精确匹配。
+ * @param value 原始文本。
+ * @returns 去首尾空格后的文本。
  */
-async function submitRevokeForm() {
-    await adminRevokeShopProductMutation({
-        userId: String(revokeForm.userId || "").trim(),
-        productId: String(revokeForm.productId || "").trim(),
+function normalizeLookupText(value: unknown): string {
+    return String(value ?? "").trim()
+}
+
+/**
+ * @description 根据输入的用户 ID / 名称 / 邮箱解析最终用户 ID。
+ * 不改后端搜索接口时，这里通过批量拉取用户列表后在前端做精确匹配。
+ * @param form 直接发放表单数据。
+ * @returns 解析后的用户 ID。
+ * @throws Error 当未匹配到或匹配到多个用户时抛出异常。
+ */
+async function resolveGrantUserId(form: Record<string, unknown>): Promise<string> {
+    const directUserId = normalizeLookupText(form.userId)
+    if (directUserId) {
+        return directUserId
+    }
+
+    const userEmail = normalizeLookupText(form.userEmail)
+    if (!userEmail) {
+        throw new Error("用户 ID 或用户邮箱不能为空")
+    }
+
+    const users = await usersQuery(
+        {
+            limit: 2,
+            offset: 0,
+            search: userEmail,
+        },
+        { requestPolicy: "network-only" }
+    )
+
+    const matchedUsers = (users || []).filter(item => {
+        return item.email === userEmail
     })
+
+    if (matchedUsers.length === 1) {
+        return matchedUsers[0].id
+    }
+
+    if (matchedUsers.length > 1) {
+        throw new Error("匹配到多个同名用户，请改用用户 ID 或邮箱")
+    }
+
+        throw new Error(`未找到邮箱对应用户：${userEmail}`)
+}
+
+/**
+ * @description 根据输入的商品 ID / 商品名称解析最终商品 ID。
+ * @param form 直接发放表单数据。
+ * @returns 解析后的商品 ID。
+ * @throws Error 当未匹配到或匹配到多个商品时抛出异常。
+ */
+async function resolveGrantProductId(form: Record<string, unknown>): Promise<string> {
+    const directProductId = normalizeLookupText(form.productId)
+    if (directProductId) {
+        return directProductId
+    }
+
+    const productKeyword = normalizeLookupText(form.productKeyword)
+    if (!productKeyword) {
+        throw new Error("商品 ID 或商品名称不能为空")
+    }
+
+    const products = await shopProductsQuery(
+        {
+            limit: DIRECT_GRANT_LOOKUP_LIMIT,
+            offset: 0,
+            activeOnly: false,
+        },
+        { requestPolicy: "network-only" }
+    )
+
+    const matchedProducts = (products || []).filter(item => {
+        return item.id === productKeyword || item.name === productKeyword || item.rewardName === productKeyword
+    })
+
+    if (matchedProducts.length === 1) {
+        return matchedProducts[0].id
+    }
+
+    if (matchedProducts.length > 1) {
+        throw new Error("匹配到多个同名商品，请改用商品 ID")
+    }
+
+    throw new Error(`未找到商品：${productKeyword}`)
 }
 
 /**
@@ -84,18 +164,22 @@ const config: AdminCrudConfig<ShopRedemption> = {
         createTitle: "直接发放商品",
         createButtonText: "直接发放",
         fields: [
-            { key: "userId", label: "用户 ID", type: "text", required: true, placeholder: "请输入目标用户 ID" },
-            { key: "productId", label: "商品 ID", type: "text", required: true, placeholder: "请输入要发放的商品 ID" },
+            { key: "userId", label: "用户 ID", type: "text", placeholder: "优先使用 ID，留空时可用邮箱精确匹配" },
+            { key: "userEmail", label: "用户邮箱", type: "email", placeholder: "用户 ID 留空时，按邮箱精确匹配" },
+            { key: "productId", label: "商品 ID", type: "text", placeholder: "优先使用 ID，留空时可用商品名称匹配" },
+            { key: "productKeyword", label: "商品名称", type: "text", placeholder: "商品 ID 留空时，按商品名称精确匹配" },
         ],
         validate(form) {
-            if (!String(form.userId ?? "").trim()) return "用户 ID 不能为空"
-            if (!String(form.productId ?? "").trim()) return "商品 ID 不能为空"
+            if (!normalizeLookupText(form.userId) && !normalizeLookupText(form.userEmail)) return "用户 ID 或用户邮箱 至少填写一项"
+            if (!normalizeLookupText(form.productId) && !normalizeLookupText(form.productKeyword)) return "商品 ID 或商品名称 至少填写一项"
             return null
         },
         async create(form) {
+            const userId = await resolveGrantUserId(form)
+            const productId = await resolveGrantProductId(form)
             await adminGrantShopProductMutation({
-                userId: String(form.userId ?? "").trim(),
-                productId: String(form.productId ?? "").trim(),
+                userId,
+                productId,
             })
         },
     },
@@ -119,18 +203,5 @@ const config: AdminCrudConfig<ShopRedemption> = {
 <template>
     <div class="space-y-4">
         <AdminCrudPage :config="config" />
-        <div class="card bg-base-100 shadow-sm">
-            <div class="card-body p-4">
-                <div class="text-sm font-semibold">直接撤回商品</div>
-                <div class="text-xs text-base-content/60 mt-1">
-                    输入用户 ID 和商品 ID，可直接撤回已发放/已兑换商品；若当前已装备会自动卸下。
-                </div>
-                <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <input v-model="revokeForm.userId" class="input input-bordered w-full" placeholder="用户 ID" />
-                    <input v-model="revokeForm.productId" class="input input-bordered w-full" placeholder="商品 ID" />
-                    <button class="btn btn-error" @click="submitRevokeForm">直接撤回</button>
-                </div>
-            </div>
-        </div>
     </div>
 </template>

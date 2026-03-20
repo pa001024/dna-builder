@@ -14,8 +14,21 @@ export interface User {
     currentTitleText?: string
     currentTitleClass?: string
     nameEffectClass?: string
+    dailyExperienceStatus?: UserDailyExperienceStatus
     createdAt?: string
     updateAt?: string
+}
+
+export interface UserDailyExperienceStatus {
+    todayAwardedExp: number
+    totalAvailableExp: number
+    dailyLaunchProgress: number
+    dailyLaunchLimit: number
+    dailyOnlineHourProgress: number
+    dailyOnlineHourLimit: number
+    dailyMessageProgress: number
+    dailyMessageLimit: number
+    dailyOnlineHourRetryAfterMs?: number
 }
 
 export interface UserLoginResult {
@@ -408,7 +421,7 @@ export interface RoomInput {
 
 export interface GuideInput {
     title: string
-    type: string
+    type: "image" | "text"
     content: string
     images: string[]
     charId?: number
