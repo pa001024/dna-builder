@@ -414,7 +414,7 @@ async function main() {
     if (mode === "cron") {
         // 持续定时执行（每小时）
         const updateTask = async () => {
-            await updateMH(server, 1)
+            await updateMH(server, 2)
             // 防止API没更新
             await updateMH(server, 3)
             const next = getNextUpdateTime()
@@ -426,7 +426,7 @@ async function main() {
         console.log(`下一次执行: ${syncMHJob.nextRun()}`)
 
         // 立即执行一次
-        await updateTask()
+        await updateMH(server, 1)
 
         // 保持进程运行
         process.on("SIGINT", () => {

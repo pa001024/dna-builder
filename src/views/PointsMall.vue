@@ -164,7 +164,6 @@ const selectedNameCard = computed(() => summary.value?.selectedNameCardAsset ?? 
 
 const filteredProducts = computed(() => {
     const list = products.value
-        .filter(p => p.isActive)
         .filter(p => ownedIdSet.value.has(p.assetId) || isProductAvailable(p))
         .filter(p => {
             if (tab.value === "all") return true
@@ -188,7 +187,7 @@ const filteredProducts = computed(() => {
 async function fetchProducts(): Promise<void> {
     loadingProducts.value = true
     try {
-        const result = await shopProductsQuery({ limit: 200, offset: 0, activeOnly: true }, { requestPolicy: "network-only" })
+        const result = await shopProductsQuery({ limit: 200, offset: 0 }, { requestPolicy: "network-only" })
         products.value = result ?? []
     } catch (error) {
         console.error("拉取积分商城商品失败:", error)

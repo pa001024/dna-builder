@@ -369,7 +369,8 @@ async function findOrCreateShopAsset(
  */
 function buildShopProductFilterConditions(
     allowInactive: boolean,
-    args: { search?: string | null; rewardType?: string | null; activeOnly?: boolean | null }
+    args: { search?: string | null; rewardType?: string | null; activeOnly?: boolean | null },
+    ownedAssetIds: string[] = []
 ) {
     const search = String(args.search ?? "")
         .trim()
@@ -379,15 +380,24 @@ function buildShopProductFilterConditions(
     const shouldFilterAvailability = !allowInactive
     const conditions = [] as ReturnType<typeof eq>[]
 
-    if (activeFilter === true) {
-        conditions.push(eq(schema.shopProducts.isActive, 1))
-    } else if (activeFilter === false) {
-        conditions.push(eq(schema.shopProducts.isActive, 0))
-    }
-
-    if (shouldFilterAvailability) {
+    if (allowInactive) {
+        if (activeFilter === true) {
+            conditions.push(eq(schema.shopProducts.isActive, 1))
+        } else if (activeFilter === false) {
+            conditions.push(eq(schema.shopProducts.isActive, 0))
+        }
+    } else {
         const nowText = formatShopDateTimeForComparison()
-        conditions.push(or(isNull(schema.shopProducts.endTime), gte(schema.shopProducts.endTime, nowText))!)
+        const baseAvailabilityConditions = [
+            eq(schema.shopProducts.isActive, 1),
+            or(isNull(schema.shopProducts.endTime), gte(schema.shopProducts.endTime, nowText))!,
+        ] as const
+
+        if (shouldFilterAvailability && ownedAssetIds.length > 0) {
+            conditions.push(or(and(...baseAvailabilityConditions), inArray(schema.shopProducts.assetId, ownedAssetIds))!)
+        } else if (shouldFilterAvailability) {
+            conditions.push(and(...baseAvailabilityConditions)!)
+        }
     }
 
     if (rewardType) {
@@ -417,11 +427,18 @@ function buildShopProductFilterConditions(
  */
 async function loadFilteredShopProducts(
     allowInactive: boolean,
-    args: { search?: string | null; rewardType?: string | null; activeOnly?: boolean | null; limit?: number | null; offset?: number | null }
+    args: {
+        search?: string | null
+        rewardType?: string | null
+        activeOnly?: boolean | null
+        limit?: number | null
+        offset?: number | null
+    },
+    ownedAssetIds: string[] = []
 ) {
     const limit = Math.max(0, Math.floor(args.limit ?? 50))
     const offset = Math.max(0, Math.floor(args.offset ?? 0))
-    const conditions = buildShopProductFilterConditions(allowInactive, args)
+    const conditions = buildShopProductFilterConditions(allowInactive, args, ownedAssetIds)
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
     const rows = await db
@@ -450,9 +467,10 @@ async function loadFilteredShopProducts(
  */
 async function countFilteredShopProducts(
     allowInactive: boolean,
-    args: { search?: string | null; rewardType?: string | null; activeOnly?: boolean | null }
+    args: { search?: string | null; rewardType?: string | null; activeOnly?: boolean | null },
+    ownedAssetIds: string[] = []
 ) {
-    const conditions = buildShopProductFilterConditions(allowInactive, args)
+    const conditions = buildShopProductFilterConditions(allowInactive, args, ownedAssetIds)
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined
     const [result] = await db
         .select({ value: count() })
@@ -461,6 +479,22 @@ async function countFilteredShopProducts(
         .where(whereClause)
 
     return result?.value ?? 0
+}
+
+/**
+ * @description 读取用户已拥有的奖励资产 ID，用于前台商品列表保留下架但已拥有的商品。
+ * @param userId 用户 ID。
+ * @returns 已拥有的奖励资产 ID 列表。
+ */
+async function loadOwnedShopAssetIds(userId: string) {
+    const ownedItems = await db.query.userShopItems.findMany({
+        where: eq(schema.userShopItems.userId, userId),
+        columns: {
+            assetId: true,
+        },
+    })
+
+    return ownedItems.map(item => item.assetId)
 }
 
 /**
@@ -713,12 +747,14 @@ export const resolvers = {
     Query: {
         shopProducts: async (_parent, args, context) => {
             const allowInactive = !!context.user?.roles?.includes("admin")
-            const filtered = await loadFilteredShopProducts(allowInactive, args ?? {})
+            const ownedAssetIds = !allowInactive && context.user ? await loadOwnedShopAssetIds(context.user.id) : []
+            const filtered = await loadFilteredShopProducts(allowInactive, args ?? {}, ownedAssetIds)
             return filtered.map(item => serializeShopProduct(item)!)
         },
         shopProductsCount: async (_parent, args, context) => {
             const allowInactive = !!context.user?.roles?.includes("admin")
-            return countFilteredShopProducts(allowInactive, args ?? {})
+            const ownedAssetIds = !allowInactive && context.user ? await loadOwnedShopAssetIds(context.user.id) : []
+            return countFilteredShopProducts(allowInactive, args ?? {}, ownedAssetIds)
         },
         myShopItems: async (_parent, _args, context) => {
             if (!context.user) {
