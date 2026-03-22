@@ -124,7 +124,7 @@ struct RuntimeHotkeyBinding {
     script_path: String,
     hotkey: String,
     hot_if_win_active: Option<String>,
-    hot_if_win_active_criteria: Option<HotIfWinActiveCriteria>,
+    hot_if_win_active_criteria: Option<Vec<HotIfWinActiveCriteria>>,
     hold_to_loop: bool,
     parsed: ParsedHotkey,
 }
@@ -678,6 +678,37 @@ fn _parse_hot_if_win_active_criteria(raw: &str) -> Result<Option<HotIfWinActiveC
     Ok(Some(criteria))
 }
 
+/// 解析带 `|` 的多段 WinActive 条件，语义为“任一整段匹配即可”。
+fn _parse_hot_if_win_active_criteria_list(
+    raw: &str,
+) -> Result<Option<Vec<HotIfWinActiveCriteria>>, String> {
+    let text = raw.trim();
+    if text.is_empty() {
+        return Ok(None);
+    }
+
+    let has_ahk_token = _find_next_hot_if_token(&text.to_ascii_lowercase(), 0).is_some();
+    if !has_ahk_token {
+        return _parse_hot_if_win_active_criteria(text).map(|item| item.map(|value| vec![value]));
+    }
+
+    let mut result = Vec::new();
+    for (index, part) in text.split('|').enumerate() {
+        let segment = part.trim();
+        if segment.is_empty() {
+            return Err(format!("第 {} 段 WinActive 条件为空", index + 1));
+        }
+        let parsed = _parse_hot_if_win_active_criteria(segment)?
+            .ok_or_else(|| format!("第 {} 段 WinActive 条件为空", index + 1))?;
+        result.push(parsed);
+    }
+
+    if result.is_empty() {
+        return Ok(None);
+    }
+    Ok(Some(result))
+}
+
 /// 在 WinTitle 字符串中查找下一个 `ahk_` 特殊 token。
 fn _find_next_hot_if_token(lowered: &str, from: usize) -> Option<(usize, HotIfToken, usize)> {
     let bytes = lowered.as_bytes();
@@ -687,7 +718,7 @@ fn _find_next_hot_if_token(lowered: &str, from: usize) -> Option<(usize, HotIfTo
             index += 1;
             continue;
         }
-        if index > 0 && !bytes[index - 1].is_ascii_whitespace() {
+        if index > 0 && !bytes[index - 1].is_ascii_whitespace() && bytes[index - 1] != b'|' {
             index += 1;
             continue;
         }
@@ -847,12 +878,12 @@ fn _matches_hot_if_win_active(_criteria: &HotIfWinActiveCriteria) -> bool {
 
 #[cfg(target_os = "windows")]
 fn _matches_hot_if_win_active_text(raw: &str) -> bool {
-    let parsed = match _parse_hot_if_win_active_criteria(raw) {
+    let parsed = match _parse_hot_if_win_active_criteria_list(raw) {
         Ok(v) => v,
         Err(_) => return false,
     };
-    if let Some(criteria) = parsed {
-        return _matches_hot_if_win_active(&criteria);
+    if let Some(criteria_list) = parsed {
+        return criteria_list.iter().any(_matches_hot_if_win_active);
     }
     true
 }
@@ -1007,8 +1038,8 @@ fn _is_binding_held(parsed: &ParsedHotkey, pressed: &HashSet<u32>) -> bool {
 
 /// 判断当前绑定的生效条件是否满足。
 fn _binding_condition_matches(binding: &RuntimeHotkeyBinding) -> bool {
-    if let Some(criteria) = binding.hot_if_win_active_criteria.as_ref() {
-        return _matches_hot_if_win_active(criteria);
+    if let Some(criteria_list) = binding.hot_if_win_active_criteria.as_ref() {
+        return criteria_list.iter().any(_matches_hot_if_win_active);
     }
     if let Some(raw) = binding.hot_if_win_active.as_deref() {
         return _matches_hot_if_win_active_text(raw);
@@ -1502,7 +1533,7 @@ pub fn sync_script_hotkey_bindings(
             if text.is_empty() { None } else { Some(text) }
         };
         let hot_if_win_active_criteria = if let Some(raw) = hot_if_win_active.as_deref() {
-            _parse_hot_if_win_active_criteria(raw)
+            _parse_hot_if_win_active_criteria_list(raw)
                 .map_err(|e| format!("热键 `{hotkey}` 的 WinActive 条件无效：{e}"))?
         } else {
             None
@@ -1656,6 +1687,32 @@ mod tests {
         assert_eq!(
             title_and_exe.exe_name.as_deref(),
             Some("EM-Win64-Shipping.exe")
+        );
+    }
+
+    #[test]
+    fn parse_hot_if_win_active_or_segments() {
+        let criteria_list = _parse_hot_if_win_active_criteria_list("A|ahk_exe B|C")
+            .expect("should parse or segments")
+            .expect("criteria list should exist");
+        assert_eq!(criteria_list.len(), 3);
+        assert_eq!(criteria_list[0].title.as_deref(), Some("A"));
+        assert_eq!(criteria_list[0].exe_name, None);
+        assert_eq!(criteria_list[1].title, None);
+        assert_eq!(criteria_list[1].exe_name.as_deref(), Some("B"));
+        assert_eq!(criteria_list[2].title.as_deref(), Some("C"));
+        assert_eq!(criteria_list[2].exe_name, None);
+    }
+
+    #[test]
+    fn parse_hot_if_win_active_title_keeps_pipe_without_ahk_token() {
+        let criteria_list = _parse_hot_if_win_active_criteria_list("云·二重螺旋|启动器")
+            .expect("should keep plain title intact")
+            .expect("criteria list should exist");
+        assert_eq!(criteria_list.len(), 1);
+        assert_eq!(
+            criteria_list[0].title.as_deref(),
+            Some("云·二重螺旋|启动器")
         );
     }
 
