@@ -85,7 +85,7 @@ async function checkUpdate() {
                 </div>
                 <div class="hero-content text-center container pb-8">
                     <div>
-                        <h1 class="text-4xl sm:text-5xl font-bold">DNA Builder</h1>
+<h1 class="text-4xl sm:text-5xl font-bold">DNA Tools</h1>
                         <div class="py-3 sm:py-4">
                             开服第 {{ openServerDays }} 天
                             <span class="mx-2">·</span>
