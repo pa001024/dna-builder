@@ -2,13 +2,11 @@
 import { listen, type UnlistenFn } from "@tauri-apps/api/event"
 import { computed, onMounted, onUnmounted, ref } from "vue"
 import {
-    appendScriptInputRecorderAction,
     clearScriptInputRecorderActions,
     getScriptInputRecorderSnapshot,
     type ScriptInputRecorderAction,
     type ScriptInputRecorderSnapshot,
     setScriptInputRecorderHotkeyEnabled,
-    toggleScriptInputRecording,
 } from "@/api/app"
 import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
@@ -40,10 +38,6 @@ const importJsonText = ref("")
 const importFileRef = ref<HTMLInputElement | null>(null)
 const recorderUnavailable = ref(false)
 let unlistenRecorderUpdate: UnlistenFn | null = null
-let windowKeydownListener: ((event: KeyboardEvent) => void) | null = null
-let windowKeyupListener: ((event: KeyboardEvent) => void) | null = null
-let windowMousedownListener: ((event: MouseEvent) => void) | null = null
-let windowMouseupListener: ((event: MouseEvent) => void) | null = null
 
 const usingImportedActions = computed(() => importedActions.value !== null)
 const currentActions = computed(() => importedActions.value ?? recorderSnapshot.value.actions)
@@ -354,179 +348,8 @@ function useRecordedActions() {
     importedActions.value = null
 }
 
-/**
- * 将 KeyboardEvent.key 规范化为脚本按键名。
- * @param event 键盘事件
- * @returns 规范化按键名；无法识别时返回 null
- */
-function normalizeKeyboardEventKey(event: KeyboardEvent): string | null {
-    const key = String(event.key ?? "").trim()
-    if (!key) {
-        return null
-    }
-
-    if (/^[a-zA-Z]$/.test(key)) {
-        return key.toLowerCase()
-    }
-    if (/^[0-9]$/.test(key)) {
-        return key
-    }
-
-    const lower = key.toLowerCase()
-    if (/^f([1-9]|1[0-9]|2[0-4])$/.test(lower)) {
-        return lower
-    }
-
-    const keyMap: Record<string, string> = {
-        " ": "space",
-        enter: "enter",
-        tab: "tab",
-        escape: "esc",
-        esc: "esc",
-        backspace: "backspace",
-        arrowup: "up",
-        arrowdown: "down",
-        arrowleft: "left",
-        arrowright: "right",
-        shift: "shift",
-        control: "ctrl",
-        alt: "alt",
-        meta: "lwin",
-        home: "home",
-        end: "end",
-        pageup: "pageup",
-        pagedown: "pagedown",
-        insert: "insert",
-        delete: "delete",
-        capslock: "capslock",
-        numlock: "numlock",
-        scrolllock: "scrolllock",
-        printscreen: "printscreen",
-    }
-    return keyMap[lower] ?? null
-}
-
-/**
- * 将鼠标按键编号映射为脚本按键名。
- * @param button 鼠标按键编号
- * @returns 规范化鼠标按键；无法识别时返回 null
- */
-function mapMouseButton(button: number): string | null {
-    if (button === 0) return "left"
-    if (button === 1) return "middle"
-    if (button === 2) return "right"
-    if (button === 3) return "x1"
-    if (button === 4) return "x2"
-    return null
-}
-
-/**
- * 判断当前是否应回填窗口内输入动作。
- * @returns true 表示应回填
- */
-function shouldAppendForegroundAction(): boolean {
-    return env.isApp && recorderSnapshot.value.recording && !usingImportedActions.value
-}
-
-/**
- * 处理前台窗口内 F10 切换录制（不依赖 LLHook）。
- * @param actionType 键盘动作类型
- * @param event 键盘事件
- */
-function handleForegroundF10Toggle(actionType: "key_down" | "key_up", event: KeyboardEvent) {
-    if (!env.isApp) {
-        return
-    }
-    if (actionType !== "key_down") {
-        return
-    }
-    const key = normalizeKeyboardEventKey(event)
-    if (key !== "f10" || event.repeat) {
-        return
-    }
-    event.preventDefault()
-    event.stopPropagation()
-    void toggleScriptInputRecording().catch(error => {
-        console.error("窗口内 F10 切换录制失败", error)
-    })
-}
-
-/**
- * 回填键盘动作到后端录制器。
- * @param actionType 键盘动作类型
- * @param event 键盘事件
- */
-function appendForegroundKeyboardAction(actionType: "key_down" | "key_up", event: KeyboardEvent) {
-    handleForegroundF10Toggle(actionType, event)
-    if (!shouldAppendForegroundAction()) {
-        return
-    }
-    const key = normalizeKeyboardEventKey(event)
-    if (!key || key === "f10") {
-        return
-    }
-    void appendScriptInputRecorderAction(actionType, key, undefined).catch(error => {
-        console.error("回填窗口键盘动作失败", error)
-    })
-}
-
-/**
- * 回填鼠标动作到后端录制器。
- * @param actionType 鼠标动作类型
- * @param event 鼠标事件
- */
-function appendForegroundMouseAction(actionType: "mouse_down" | "mouse_up", event: MouseEvent) {
-    if (!shouldAppendForegroundAction()) {
-        return
-    }
-    const button = mapMouseButton(event.button)
-    if (!button) {
-        return
-    }
-    void appendScriptInputRecorderAction(actionType, undefined, button).catch(error => {
-        console.error("回填窗口鼠标动作失败", error)
-    })
-}
-
-/**
- * 初始化窗口内输入监听，用于前台窗口录制兜底。
- */
-function initForegroundInputFallbackListeners() {
-    windowKeydownListener = event => appendForegroundKeyboardAction("key_down", event)
-    windowKeyupListener = event => appendForegroundKeyboardAction("key_up", event)
-    windowMousedownListener = event => appendForegroundMouseAction("mouse_down", event)
-    windowMouseupListener = event => appendForegroundMouseAction("mouse_up", event)
-    window.addEventListener("keydown", windowKeydownListener, true)
-    window.addEventListener("keyup", windowKeyupListener, true)
-    window.addEventListener("mousedown", windowMousedownListener, true)
-    window.addEventListener("mouseup", windowMouseupListener, true)
-}
-
-/**
- * 卸载窗口内输入监听。
- */
-function disposeForegroundInputFallbackListeners() {
-    if (windowKeydownListener) {
-        window.removeEventListener("keydown", windowKeydownListener, true)
-        windowKeydownListener = null
-    }
-    if (windowKeyupListener) {
-        window.removeEventListener("keyup", windowKeyupListener, true)
-        windowKeyupListener = null
-    }
-    if (windowMousedownListener) {
-        window.removeEventListener("mousedown", windowMousedownListener, true)
-        windowMousedownListener = null
-    }
-    if (windowMouseupListener) {
-        window.removeEventListener("mouseup", windowMouseupListener, true)
-        windowMouseupListener = null
-    }
-}
-
 onMounted(async () => {
     try {
-        initForegroundInputFallbackListeners()
         await initRecorderListener()
         await enableRecorderHotkey()
         await refreshRecorderSnapshot()
@@ -538,7 +361,6 @@ onMounted(async () => {
 })
 
 onUnmounted(async () => {
-    disposeForegroundInputFallbackListeners()
     if (unlistenRecorderUpdate) {
         unlistenRecorderUpdate()
         unlistenRecorderUpdate = null

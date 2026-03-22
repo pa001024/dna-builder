@@ -7,7 +7,9 @@ use std::time::{Duration, Instant};
 use tauri::Emitter;
 
 #[cfg(target_os = "windows")]
-use windows::Win32::Foundation::{CloseHandle, LPARAM, LRESULT, WPARAM};
+use windows::Win32::Foundation::{
+    CloseHandle, ERROR_CLASS_ALREADY_EXISTS, GetLastError, HWND, LPARAM, LRESULT, WPARAM,
+};
 #[cfg(target_os = "windows")]
 use windows::Win32::System::Diagnostics::ToolHelp::{
     CreateToolhelp32Snapshot, PROCESSENTRY32W, Process32FirstW, Process32NextW, TH32CS_SNAPPROCESS,
@@ -16,25 +18,33 @@ use windows::Win32::System::Diagnostics::ToolHelp::{
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 #[cfg(target_os = "windows")]
 use windows::Win32::UI::Input::KeyboardAndMouse::{
-    VK_ADD, VK_APPS, VK_BACK, VK_CAPITAL, VK_CLEAR, VK_CONTROL, VK_DECIMAL, VK_DELETE, VK_DIVIDE,
-    VK_DOWN, VK_END, VK_ESCAPE, VK_F1, VK_F2, VK_F3, VK_F4, VK_F5, VK_F6, VK_F7, VK_F8, VK_F9,
-    VK_F10, VK_F11, VK_F12, VK_F13, VK_F14, VK_F15, VK_F16, VK_F17, VK_F18, VK_F19, VK_F20, VK_F21,
-    VK_F22, VK_F23, VK_F24, VK_HOME, VK_INSERT, VK_LBUTTON, VK_LCONTROL, VK_LEFT, VK_LMENU,
-    VK_LSHIFT, VK_LWIN, VK_MBUTTON, VK_MENU, VK_MULTIPLY, VK_NEXT, VK_NUMLOCK, VK_NUMPAD0,
-    VK_NUMPAD1, VK_NUMPAD2, VK_NUMPAD3, VK_NUMPAD4, VK_NUMPAD5, VK_NUMPAD6, VK_NUMPAD7, VK_NUMPAD8,
-    VK_NUMPAD9, VK_PAUSE, VK_PRIOR, VK_RBUTTON, VK_RCONTROL, VK_RETURN, VK_RIGHT, VK_RMENU,
-    VK_RSHIFT, VK_RWIN, VK_SCROLL, VK_SEPARATOR, VK_SHIFT, VK_SNAPSHOT, VK_SPACE, VK_SUBTRACT,
-    VK_TAB, VK_UP, VK_XBUTTON1, VK_XBUTTON2,
+    MAPVK_VSC_TO_VK_EX, MapVirtualKeyW, VK_ADD, VK_APPS, VK_BACK, VK_CAPITAL, VK_CLEAR, VK_CONTROL,
+    VK_DECIMAL, VK_DELETE, VK_DIVIDE, VK_DOWN, VK_END, VK_ESCAPE, VK_F1, VK_F2, VK_F3, VK_F4,
+    VK_F5, VK_F6, VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12, VK_F13, VK_F14, VK_F15, VK_F16,
+    VK_F17, VK_F18, VK_F19, VK_F20, VK_F21, VK_F22, VK_F23, VK_F24, VK_HOME, VK_INSERT, VK_LBUTTON,
+    VK_LCONTROL, VK_LEFT, VK_LMENU, VK_LSHIFT, VK_LWIN, VK_MBUTTON, VK_MENU, VK_MULTIPLY, VK_NEXT,
+    VK_NUMLOCK, VK_NUMPAD0, VK_NUMPAD1, VK_NUMPAD2, VK_NUMPAD3, VK_NUMPAD4, VK_NUMPAD5, VK_NUMPAD6,
+    VK_NUMPAD7, VK_NUMPAD8, VK_NUMPAD9, VK_PAUSE, VK_PRIOR, VK_RBUTTON, VK_RCONTROL, VK_RETURN,
+    VK_RIGHT, VK_RMENU, VK_RSHIFT, VK_RWIN, VK_SCROLL, VK_SEPARATOR, VK_SHIFT, VK_SNAPSHOT,
+    VK_SPACE, VK_SUBTRACT, VK_TAB, VK_UP, VK_XBUTTON1, VK_XBUTTON2,
+};
+#[cfg(target_os = "windows")]
+use windows::Win32::UI::Input::{
+    GetRawInputData, HRAWINPUT, RAWINPUT, RAWINPUTDEVICE, RAWINPUTHEADER, RID_INPUT,
+    RIDEV_DEVNOTIFY, RIDEV_INPUTSINK, RIM_TYPEKEYBOARD, RegisterRawInputDevices,
 };
 #[cfg(target_os = "windows")]
 use windows::Win32::UI::WindowsAndMessaging::{
-    CallNextHookEx, DispatchMessageW, GetClassNameW, GetForegroundWindow, GetMessageW,
-    GetWindowTextW, GetWindowThreadProcessId, HC_ACTION, KBDLLHOOKSTRUCT, MSG, MSLLHOOKSTRUCT,
-    SetWindowsHookExW, TranslateMessage, UnhookWindowsHookEx, WH_KEYBOARD_LL, WH_MOUSE_LL,
-    WM_KEYDOWN, WM_KEYUP, WM_LBUTTONDOWN, WM_LBUTTONUP, WM_MBUTTONDOWN, WM_MBUTTONUP,
-    WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SYSKEYDOWN, WM_SYSKEYUP, WM_XBUTTONDOWN, WM_XBUTTONUP,
-    XBUTTON1,
+    CallNextHookEx, CreateWindowExW, DefWindowProcW, DispatchMessageW, GetClassNameW,
+    GetForegroundWindow, GetMessageW, GetWindowTextW, GetWindowThreadProcessId, HC_ACTION,
+    HWND_MESSAGE, MSG, MSLLHOOKSTRUCT, RegisterClassExW, SetWindowsHookExW, TranslateMessage,
+    UnhookWindowsHookEx, WH_MOUSE_LL, WINDOW_EX_STYLE, WINDOW_STYLE, WM_INPUT, WM_KEYDOWN,
+    WM_KEYUP, WM_LBUTTONDOWN, WM_LBUTTONUP, WM_MBUTTONDOWN, WM_MBUTTONUP, WM_RBUTTONDOWN,
+    WM_RBUTTONUP, WM_SYSKEYDOWN, WM_SYSKEYUP, WM_XBUTTONDOWN, WM_XBUTTONUP, WNDCLASS_STYLES,
+    WNDCLASSEXW, XBUTTON1,
 };
+#[cfg(target_os = "windows")]
+use windows::core::{HSTRING, PCWSTR};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -152,6 +162,17 @@ fn _hotkey_state() -> &'static Arc<HotkeyState> {
 fn _input_recorder_state() -> &'static InputRecorderState {
     &_hotkey_state().input_recorder
 }
+
+#[cfg(target_os = "windows")]
+const RAW_INPUT_CLASS_NAME: &str = "DnaBuilderScriptHotkeyRawInputWindow";
+#[cfg(target_os = "windows")]
+const HID_USAGE_PAGE_GENERIC: u16 = 0x01;
+#[cfg(target_os = "windows")]
+const HID_USAGE_GENERIC_KEYBOARD: u16 = 0x06;
+#[cfg(target_os = "windows")]
+const RI_KEY_E0: u16 = 0x02;
+#[cfg(target_os = "windows")]
+const RI_KEY_E1: u16 = 0x04;
 
 /// 解析 AHK 风格热键（支持 `^ ! + #` 与基础按键名）。
 fn _parse_ahk_hotkey(raw: &str) -> Result<ParsedHotkey, String> {
@@ -1125,6 +1146,156 @@ fn _trigger_hotkey_scripts(vk: u32, is_key_down: bool, pressed: &HashSet<u32>) {
 }
 
 #[cfg(target_os = "windows")]
+/// 将 Raw Input 键盘事件转换为虚拟键码，尽量保留左右修饰键区分。
+fn _raw_keyboard_to_vk(raw_keyboard: &windows::Win32::UI::Input::RAWKEYBOARD) -> Option<u32> {
+    let raw_vkey = raw_keyboard.VKey as u32;
+    if raw_vkey == 0 || raw_vkey == 0xFF {
+        return None;
+    }
+
+    let mut scan_code = u32::from(raw_keyboard.MakeCode);
+    if raw_keyboard.Flags & RI_KEY_E0 != 0 {
+        scan_code |= 0xE000;
+    }
+    if raw_keyboard.Flags & RI_KEY_E1 != 0 {
+        scan_code |= 0xE100;
+    }
+
+    let mapped_vk = unsafe { MapVirtualKeyW(scan_code, MAPVK_VSC_TO_VK_EX) };
+    if mapped_vk != 0 {
+        return Some(mapped_vk);
+    }
+    Some(raw_vkey)
+}
+
+#[cfg(target_os = "windows")]
+/// 处理一条 Raw Input 键盘消息。
+fn _handle_raw_keyboard_input(raw_keyboard: &windows::Win32::UI::Input::RAWKEYBOARD) {
+    let Some(vk) = _raw_keyboard_to_vk(raw_keyboard) else {
+        return;
+    };
+
+    let message = raw_keyboard.Message;
+    let is_key_down = message == WM_KEYDOWN || message == WM_SYSKEYDOWN;
+    let is_key_up = message == WM_KEYUP || message == WM_SYSKEYUP;
+    if !is_key_down && !is_key_up {
+        return;
+    }
+
+    if _handle_script_input_recorder_hotkey(vk, is_key_down) {
+        return;
+    }
+
+    let should_record = _process_hotkey_event(vk, is_key_down);
+    if should_record {
+        _record_keyboard_input(vk, is_key_down);
+    }
+}
+
+#[cfg(target_os = "windows")]
+/// 从 `WM_INPUT` 中读取键盘事件。
+fn _handle_raw_input_message(lparam: LPARAM) {
+    let mut raw_input = RAWINPUT::default();
+    let mut raw_input_size = std::mem::size_of::<RAWINPUT>() as u32;
+    let header_size = std::mem::size_of::<RAWINPUTHEADER>() as u32;
+
+    let status = unsafe {
+        GetRawInputData(
+            HRAWINPUT(lparam.0 as *mut _),
+            RID_INPUT,
+            Some(&mut raw_input as *mut _ as *mut std::ffi::c_void),
+            &mut raw_input_size,
+            header_size,
+        )
+    };
+    if status == u32::MAX || status == 0 {
+        return;
+    }
+    if raw_input.header.dwType != RIM_TYPEKEYBOARD.0 {
+        return;
+    }
+
+    let raw_keyboard = unsafe { raw_input.data.keyboard };
+    _handle_raw_keyboard_input(&raw_keyboard);
+}
+
+#[cfg(target_os = "windows")]
+/// Raw Input 消息窗口过程，仅处理键盘 `WM_INPUT`。
+unsafe extern "system" fn _raw_input_window_proc(
+    hwnd: HWND,
+    message: u32,
+    wparam: WPARAM,
+    lparam: LPARAM,
+) -> LRESULT {
+    if message == WM_INPUT {
+        _handle_raw_input_message(lparam);
+    }
+    unsafe { DefWindowProcW(hwnd, message, wparam, lparam) }
+}
+
+#[cfg(target_os = "windows")]
+/// 创建接收键盘 Raw Input 的消息窗口。
+fn _create_raw_input_window(
+    module_handle: windows::Win32::Foundation::HMODULE,
+) -> Result<HWND, String> {
+    let class_name = HSTRING::from(RAW_INPUT_CLASS_NAME);
+    let wnd_class = WNDCLASSEXW {
+        cbSize: std::mem::size_of::<WNDCLASSEXW>() as u32,
+        style: WNDCLASS_STYLES(0),
+        lpfnWndProc: Some(_raw_input_window_proc),
+        cbClsExtra: 0,
+        cbWndExtra: 0,
+        hInstance: module_handle.into(),
+        hIcon: Default::default(),
+        hCursor: Default::default(),
+        hbrBackground: Default::default(),
+        lpszMenuName: PCWSTR::null(),
+        lpszClassName: PCWSTR(class_name.as_ptr()),
+        hIconSm: Default::default(),
+    };
+
+    let atom = unsafe { RegisterClassExW(&wnd_class) };
+    if atom == 0 {
+        let last_error = unsafe { GetLastError() };
+        if last_error != ERROR_CLASS_ALREADY_EXISTS {
+            return Err(format!("注册 Raw Input 窗口类失败: {last_error:?}"));
+        }
+    }
+
+    unsafe {
+        CreateWindowExW(
+            WINDOW_EX_STYLE(0),
+            PCWSTR(class_name.as_ptr()),
+            PCWSTR::null(),
+            WINDOW_STYLE(0),
+            0,
+            0,
+            0,
+            0,
+            Some(HWND_MESSAGE),
+            None,
+            Some(module_handle.into()),
+            None,
+        )
+        .map_err(|error| format!("创建 Raw Input 消息窗口失败: {error}"))
+    }
+}
+
+#[cfg(target_os = "windows")]
+/// 注册键盘 Raw Input 设备，让后台线程在前后台都收到键盘输入。
+fn _register_keyboard_raw_input(hwnd: HWND) -> Result<(), String> {
+    let devices = [RAWINPUTDEVICE {
+        usUsagePage: HID_USAGE_PAGE_GENERIC,
+        usUsage: HID_USAGE_GENERIC_KEYBOARD,
+        dwFlags: RIDEV_DEVNOTIFY | RIDEV_INPUTSINK,
+        hwndTarget: hwnd,
+    }];
+
+    unsafe { RegisterRawInputDevices(&devices, std::mem::size_of::<RAWINPUTDEVICE>() as u32) }
+        .map_err(|error| format!("注册键盘 Raw Input 失败: {error}"))
+}
+
+#[cfg(target_os = "windows")]
 fn _handle_script_input_recorder_hotkey(vk: u32, is_key_down: bool) -> bool {
     const RECORDER_TOGGLE_VK: u32 = 0x79;
     let recorder = _input_recorder_state();
@@ -1176,34 +1347,6 @@ fn _process_hotkey_event(vk: u32, is_key_down: bool) -> bool {
         }
     }
     false
-}
-
-#[cfg(target_os = "windows")]
-unsafe extern "system" fn _low_level_keyboard_proc(
-    code: i32,
-    wparam: WPARAM,
-    lparam: LPARAM,
-) -> LRESULT {
-    if code == HC_ACTION as i32 {
-        let event = unsafe { *(lparam.0 as *const KBDLLHOOKSTRUCT) };
-        let vk = event.vkCode;
-        let message = wparam.0 as u32;
-        let is_key_down = message == WM_KEYDOWN || message == WM_SYSKEYDOWN;
-        let is_key_up = message == WM_KEYUP || message == WM_SYSKEYUP;
-
-        if is_key_down || is_key_up {
-            if _handle_script_input_recorder_hotkey(vk, is_key_down) {
-                return unsafe { CallNextHookEx(None, code, wparam, lparam) };
-            }
-
-            let should_record = _process_hotkey_event(vk, is_key_down);
-            if should_record {
-                _record_keyboard_input(vk, is_key_down);
-            }
-        }
-    }
-
-    unsafe { CallNextHookEx(None, code, wparam, lparam) }
 }
 
 #[cfg(target_os = "windows")]
@@ -1273,20 +1416,16 @@ fn _ensure_hook_thread_started() -> Result<(), String> {
                 }
             };
 
-            let keyboard_hook = match SetWindowsHookExW(
-                WH_KEYBOARD_LL,
-                Some(_low_level_keyboard_proc),
-                Some(windows::Win32::Foundation::HINSTANCE(module_handle.0)),
-                0,
-            ) {
-                Ok(hook) => hook,
+            let raw_input_window = match _create_raw_input_window(module_handle) {
+                Ok(hwnd) => hwnd,
                 Err(error) => {
-                    let _ = ready_tx.send(Err(format!("安装低级键盘钩子失败: {error}")));
+                    let _ = ready_tx.send(Err(error));
                     return;
                 }
             };
-            if keyboard_hook.is_invalid() {
-                let _ = ready_tx.send(Err("安装低级键盘钩子失败: 返回无效句柄".to_string()));
+
+            if let Err(error) = _register_keyboard_raw_input(raw_input_window) {
+                let _ = ready_tx.send(Err(error));
                 return;
             }
 
@@ -1299,13 +1438,11 @@ fn _ensure_hook_thread_started() -> Result<(), String> {
                 Ok(hook) => hook,
                 Err(error) => {
                     let _ = ready_tx.send(Err(format!("安装低级鼠标钩子失败: {error}")));
-                    let _ = UnhookWindowsHookEx(keyboard_hook);
                     return;
                 }
             };
             if mouse_hook.is_invalid() {
                 let _ = ready_tx.send(Err("安装低级鼠标钩子失败: 返回无效句柄".to_string()));
-                let _ = UnhookWindowsHookEx(keyboard_hook);
                 return;
             }
 
@@ -1316,7 +1453,6 @@ fn _ensure_hook_thread_started() -> Result<(), String> {
                 let _ = TranslateMessage(&msg);
                 let _ = DispatchMessageW(&msg);
             }
-            let _ = UnhookWindowsHookEx(keyboard_hook);
             let _ = UnhookWindowsHookEx(mouse_hook);
         })
         .map_err(|e| format!("启动热键钩子线程失败: {e}"))?;
@@ -1464,66 +1600,6 @@ pub fn clear_script_input_recorder_actions() -> Result<(), String> {
     Ok(())
 }
 
-/// 设置脚本输入录制状态。
-/// - `true`：开始新一轮录制（会清空旧动作）；
-/// - `false`：停止录制并保留已录制动作。
-pub fn set_script_input_recording(recording: bool) -> bool {
-    let recorder = _input_recorder_state();
-    let current = recorder.recording.load(Ordering::Acquire);
-    if recording {
-        if !current {
-            _start_script_input_recording();
-        }
-        return true;
-    }
-    if current {
-        _stop_script_input_recording();
-    }
-    false
-}
-
-/// 切换脚本输入录制状态并返回切换后的状态。
-pub fn toggle_script_input_recording() -> bool {
-    let recorder = _input_recorder_state();
-    let current = recorder.recording.load(Ordering::Acquire);
-    set_script_input_recording(!current)
-}
-
-/// 由前端窗口内事件回填一条录制动作（用于 LLHook 在当前窗口失效时的兜底）。
-pub fn append_script_input_recorder_action(
-    action_type: String,
-    key: Option<String>,
-    button: Option<String>,
-) -> Result<(), String> {
-    let normalized_type = action_type.trim().to_ascii_lowercase();
-    if normalized_type != "key_down"
-        && normalized_type != "key_up"
-        && normalized_type != "mouse_down"
-        && normalized_type != "mouse_up"
-    {
-        return Err(format!("不支持的录制动作类型: {action_type}"));
-    }
-
-    let normalized_key = key
-        .map(|value| value.trim().to_ascii_lowercase())
-        .filter(|value| !value.is_empty());
-    let normalized_button = button
-        .map(|value| value.trim().to_ascii_lowercase())
-        .filter(|value| !value.is_empty());
-
-    if (normalized_type == "key_down" || normalized_type == "key_up") && normalized_key.is_none() {
-        return Err("键盘动作缺少 key 字段".to_string());
-    }
-    if (normalized_type == "mouse_down" || normalized_type == "mouse_up")
-        && normalized_button.is_none()
-    {
-        return Err("鼠标动作缺少 button 字段".to_string());
-    }
-
-    _record_script_input_action(&normalized_type, normalized_key, normalized_button);
-    Ok(())
-}
-
 #[cfg(all(test, target_os = "windows"))]
 mod tests {
     use super::*;
@@ -1581,5 +1657,39 @@ mod tests {
             title_and_exe.exe_name.as_deref(),
             Some("EM-Win64-Shipping.exe")
         );
+    }
+
+    #[test]
+    fn raw_keyboard_maps_basic_key() {
+        let raw = windows::Win32::UI::Input::RAWKEYBOARD {
+            MakeCode: 0x1E,
+            Flags: 0,
+            VKey: 'A' as u16,
+            Message: WM_KEYDOWN,
+            ..Default::default()
+        };
+        assert_eq!(_raw_keyboard_to_vk(&raw), Some('A' as u32));
+    }
+
+    #[test]
+    fn raw_keyboard_maps_extended_right_control() {
+        let raw = windows::Win32::UI::Input::RAWKEYBOARD {
+            MakeCode: 0x1D,
+            Flags: RI_KEY_E0,
+            VKey: VK_CONTROL.0 as u16,
+            Message: WM_KEYDOWN,
+            ..Default::default()
+        };
+        assert_eq!(_raw_keyboard_to_vk(&raw), Some(VK_RCONTROL.0 as u32));
+    }
+
+    #[test]
+    fn raw_keyboard_ignores_invalid_vkey() {
+        let raw = windows::Win32::UI::Input::RAWKEYBOARD {
+            VKey: 0xFF,
+            Message: WM_KEYDOWN,
+            ..Default::default()
+        };
+        assert_eq!(_raw_keyboard_to_vk(&raw), None);
     }
 }
