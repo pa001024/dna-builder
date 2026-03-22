@@ -1989,13 +1989,20 @@ fn _set_foreground_window(hwnd: Option<JsValue>, ctx: &mut Context) -> JsResult<
 }
 
 /// 检查窗口大小函数
-fn _check_size(hwnd: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+fn _check_size(
+    hwnd: Option<JsValue>,
+    w: Option<JsValue>,
+    h: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
     let hwnd = HWND(
         hwnd.unwrap_or_else(|| JsValue::undefined())
             .to_number(ctx)? as isize as *mut std::ffi::c_void,
     );
-    check_size(hwnd);
-    Ok(JsValue::undefined())
+    let w = _parse_optional_i32_arg(w, ctx)?.unwrap_or(1600);
+    let h = _parse_optional_i32_arg(h, ctx)?.unwrap_or(900);
+    let result = check_size(hwnd, w, h);
+    Ok(JsValue::new(result))
 }
 
 /// 移动窗口并设置大小函数
@@ -4457,7 +4464,7 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
 
     // 检查窗口大小
     let f = _check_size.into_js_function_copied(context);
-    context.register_global_builtin_callable(js_string!("checkSize"), 1, f)?;
+    context.register_global_builtin_callable(js_string!("checkSize"), 3, f)?;
 
     // 移动窗口并设置大小
     let f = _move_window.into_js_function_copied(context);

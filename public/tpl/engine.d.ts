@@ -491,11 +491,13 @@ declare function getWindowByProcessName(process_name: string): number
 declare function setForegroundWindow(hwnd: number): void
 
 /**
- * 检查窗口大小 如果不为1600*900 则设置为1600*900
+ * 检查窗口大小 如果不为目标宽高则自动调整
  * @param hwnd 窗口句柄
+ * @param w 目标宽度 可选 默认1600
+ * @param h 目标高度 可选 默认900
  * @returns 是否成功
  */
-declare function checkSize(hwnd: number): boolean
+declare function checkSize(hwnd: number, w?: number, h?: number): boolean
 
 /**
  * 移动窗口并设置大小

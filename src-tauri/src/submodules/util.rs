@@ -169,47 +169,57 @@ pub(crate) fn check_color(hwnd: HWND, x: i32, y: i32, color: i32) -> bool {
     r_diff <= tolerance && g_diff <= tolerance && b_diff <= tolerance
 }
 
-// 检查并调整窗口大小
-pub(crate) fn check_size(hwnd: HWND) {
+/// 检查并调整窗口大小。
+///
+/// - `target_width/target_height` 为目标客户区宽高；
+/// - 当客户区尺寸不一致时，将窗口调整到目标尺寸（位置保持旧逻辑：移动到 0,0）。
+pub(crate) fn check_size(hwnd: HWND, target_width: i32, target_height: i32) -> bool {
     use windows::Win32::Foundation::RECT;
     use windows::Win32::UI::WindowsAndMessaging::{GetClientRect, GetWindowRect, MoveWindow};
+
+    if hwnd.is_invalid() {
+        return false;
+    }
 
     unsafe {
         // 获取客户端区域矩形
         let mut client_rect = RECT::default();
         if GetClientRect(hwnd, &mut client_rect).is_err() {
             println!("获取客户端区域失败");
-            return;
+            return false;
         }
 
         // 计算客户端区域宽度和高度
         let client_width = client_rect.right - client_rect.left;
         let client_height = client_rect.bottom - client_rect.top;
 
-        // 检查客户端区域大小是否为 1600x900
-        if client_width != 1600 || client_height != 900 {
+        // 检查客户端区域大小是否为目标宽高
+        if client_width != target_width || client_height != target_height {
             // 获取窗口矩形
             let mut window_rect = RECT::default();
             if GetWindowRect(hwnd, &mut window_rect).is_err() {
                 println!("获取窗口矩形失败");
-                return;
+                return false;
             }
 
             // 计算窗口宽度和高度
             let window_width = window_rect.right - window_rect.left;
             let window_height = window_rect.bottom - window_rect.top;
             // 计算新的窗口宽度和高度
-            let new_window_width = 1600 + (window_width - client_width);
-            let new_window_height = 900 + (window_height - client_height);
+            let new_window_width = target_width + (window_width - client_width);
+            let new_window_height = target_height + (window_height - client_height);
 
             // 调整窗口大小
             if MoveWindow(hwnd, 0, 0, new_window_width, new_window_height, true).is_err() {
                 println!("调整窗口大小失败");
+                return false;
             } else {
-                println!("已调整窗口大小为: {}x{}", client_width, client_height);
+                println!("已调整窗口大小为: {}x{}", target_width, target_height);
             }
         }
     }
+
+    true
 }
 fn get_window_and_client_rect(hwnd: HWND) -> Result<(RECT, RECT, i32, i32), UtilError> {
     unsafe {
