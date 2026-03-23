@@ -1,6 +1,6 @@
 import { config } from "./config.ts"
 import { writeFrpcCompose } from "./frpc-compose.ts"
-import { runOnce, scheduleRun } from "./runner.ts"
+import { scheduleRun } from "./runner.ts"
 import { startWebhookServer } from "./webhook.ts"
 
 /**

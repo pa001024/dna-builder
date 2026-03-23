@@ -706,7 +706,7 @@ describe("CharBuild类测试", () => {
             })
         })
 
-        it("inherit 型同律武器应同步继承基础武器伤害类型并按纯元素结算", () => {
+        it("普通 inherit 型同律武器应保留原始伤害类型并沿用旧结算逻辑", () => {
             const charBuild = new CharBuild({
                 char: new LeveledChar("刻舟"),
                 skillLevel: 10,
@@ -724,8 +724,37 @@ describe("CharBuild类测试", () => {
             })
 
             expect(charBuild.skillWeapon?.inherit).toBe("melee")
-            expect(charBuild.skillWeapon?.伤害类型).toBe(charBuild.meleeWeapon.伤害类型)
+            expect(charBuild.skillWeapon?.atk).toBeUndefined()
+            expect(charBuild.skillWeapon?.伤害类型).toBe(charBuild.skillWeapon?._originalWeaponData.伤害类型 || "切割")
             expect(charBuild.skillWeaponSkills[0]?.skillData.icon).toBe(charBuild.charSkills[1]?.skillData.icon)
+
+            const attrs = charBuild.calculateWeaponAttributes(charBuild.skillWeapon)
+            const damage = charBuild.calculateWeaponDamage(attrs, charBuild.skillWeapon!)
+
+            expect(damage.lowerCritNoTrigger).toBeGreaterThan(0)
+            expect(damage.expectedDamage).toBeGreaterThan(0)
+        })
+
+        it("atk=all 的 inherit 型同律武器才应同步继承基础武器伤害类型并按纯元素结算", () => {
+            const charBuild = new CharBuild({
+                char: new LeveledChar("煜明"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                charMods: [],
+                buffs: [],
+                melee: new LeveledWeapon(10303),
+                ranged: new LeveledWeapon(20601),
+                baseName: "疑星落",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 1,
+                targetFunction: "伤害",
+            })
+
+            expect(charBuild.skillWeapon?.inherit).toBe("melee")
+            expect(charBuild.skillWeapon?.atk).toBe("all")
+            expect(charBuild.skillWeapon?.伤害类型).toBe(charBuild.meleeWeapon.伤害类型)
 
             const attrs = charBuild.calculateWeaponAttributes(charBuild.skillWeapon)
             const damage = charBuild.calculateWeaponDamage(attrs, charBuild.skillWeapon!)

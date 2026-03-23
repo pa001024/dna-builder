@@ -56,6 +56,65 @@ describe("LeveledMod类测试", () => {
             new LeveledMod(99999)
         }).toThrow("99999")
     })
+
+    it("普通属性的单元素数组应按等级取数组项", () => {
+        const mod0级 = new LeveledMod(41413, 0)
+        const mod满级 = new LeveledMod(41413)
+
+        expect(mod0级.技能伤害).toBe(-0.5)
+        expect(mod满级.技能伤害).toBe(-0.5)
+    })
+
+    it("减伤单元素数组应按等级取数组项", () => {
+        const mod0级 = new LeveledMod(56142, 0)
+        const mod满级 = new LeveledMod(56142)
+
+        expect(mod0级.减伤).toBe(0.5)
+        expect(mod满级.减伤).toBe(0.5)
+    })
+
+    it("普通属性的多元素数组应像Buff一样按等级取值", () => {
+        const 测试mod0级 = new LeveledMod(
+            {
+                id: 99001,
+                名称: "测试数组属性",
+                系列: "测试",
+                品质: "金",
+                耐受: 10,
+                类型: "角色",
+                技能伤害: [0.1, 0.2, 0.3],
+            },
+            0
+        )
+        const 测试mod1级 = new LeveledMod(
+            {
+                id: 99001,
+                名称: "测试数组属性",
+                系列: "测试",
+                品质: "金",
+                耐受: 10,
+                类型: "角色",
+                技能伤害: [0.1, 0.2, 0.3],
+            },
+            1
+        )
+        const 测试mod满级 = new LeveledMod(
+            {
+                id: 99001,
+                名称: "测试数组属性",
+                系列: "测试",
+                品质: "金",
+                耐受: 10,
+                类型: "角色",
+                技能伤害: [0.1, 0.2, 0.3],
+            },
+            10
+        )
+
+        expect(测试mod0级.技能伤害).toBe(0.1)
+        expect(测试mod1级.技能伤害).toBe(0.2)
+        expect(测试mod满级.技能伤害).toBe(0.3)
+    })
 })
 describe("DynamicBuff", () => {
     it("applyDynamicAttr", () => {

@@ -391,11 +391,12 @@ export class CharBuild {
     }
 
     /**
-     * 将 inherit 型同律武器的伤害类型同步为当前继承武器的伤害类型。
-     * 这样同律页签、MOD 限定和触发判定都能读取到真实的基础武器类型。
+     * 仅当同律武器声明 atk=all 时，将 inherit 型同律武器的伤害类型同步为当前继承武器的伤害类型。
+     * 其他 inherit 同律武器继续保留自身原始伤害类型，维持旧逻辑。
      */
     private syncInheritedSkillWeapon() {
         if (!this.skillWeapon?.inherit) return
+        if (this.skillWeapon.atk !== "all") return
 
         const inheritedWeapon = this.skillWeapon.inherit === "melee" ? this.meleeWeapon : this.rangedWeapon
         if (!inheritedWeapon) return
@@ -1016,9 +1017,9 @@ export class CharBuild {
         // 计算武器基础伤害
         const weaponAttackMultiplier = 1 // 倍率 这里设为1 使用动态计算
         const totalWeaponDamage = attrs.攻击 + weaponAttrs.攻击
-        const inheritedSkillWeapon = weapon instanceof LeveledSkillWeapon && !!weapon.inherit
-        const weaponDamagePhysical = inheritedSkillWeapon ? 0 : (weaponAttackMultiplier * weaponAttrs.攻击) / totalWeaponDamage
-        const weaponDamageElemental = inheritedSkillWeapon ? 1 : (weaponAttackMultiplier * attrs.攻击) / totalWeaponDamage
+        const inheritAllSkillWeapon = weapon instanceof LeveledSkillWeapon && !!weapon.inherit && weapon.atk === "all"
+        const weaponDamagePhysical = inheritAllSkillWeapon ? 0 : (weaponAttackMultiplier * weaponAttrs.攻击) / totalWeaponDamage
+        const weaponDamageElemental = inheritAllSkillWeapon ? 1 : (weaponAttackMultiplier * attrs.攻击) / totalWeaponDamage
 
         // 计算触发伤害期望
         const triggerDamageMultiplier =
@@ -1051,8 +1052,8 @@ export class CharBuild {
 
         // 计算最终伤害
         const elementalPart = weaponDamageElemental * resistance
-        const triggerablePart = inheritedSkillWeapon ? elementalPart : weaponDamagePhysical
-        const nonTriggerPart = inheritedSkillWeapon ? 0 : elementalPart
+        const triggerablePart = inheritAllSkillWeapon ? elementalPart : weaponDamagePhysical
+        const nonTriggerPart = inheritAllSkillWeapon ? 0 : elementalPart
         return {
             lowerCritNoTrigger: (triggerablePart + nonTriggerPart) * lowerCritDamage * commonMore,
             higherCritNoTrigger: (triggerablePart + nonTriggerPart) * higherCritDamage * commonMore,

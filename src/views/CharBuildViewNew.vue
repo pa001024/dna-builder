@@ -367,7 +367,7 @@ const weaponAttributeEntries = computed<DisplayAttribute[]>(() => {
  * @returns 是否需要显示属性转换说明
  */
 function isInheritedWeaponAttack(key: string) {
-    return key === "攻击" && activeWeaponKey.value === "skill" && !!charBuild.value.skillWeapon?.inherit
+    return key === "攻击" && activeWeaponKey.value === "skill" && !!charBuild.value.skillWeapon?.inherit && charBuild.value.skillWeapon?.atk === "all"
 }
 
 /**

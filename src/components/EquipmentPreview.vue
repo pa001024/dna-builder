@@ -31,7 +31,12 @@ const summonAttributes = computed(() => {
  * @returns 是否需要按属性攻击展示
  */
 function isInheritedWeaponAttack(key: string) {
-    return key === "攻击" && !!props.charBuild.skillWeapon?.inherit && props.charBuild.selectedWeapon === props.charBuild.skillWeapon
+    return (
+        key === "攻击" &&
+        !!props.charBuild.skillWeapon?.inherit &&
+        props.charBuild.skillWeapon?.atk === "all" &&
+        props.charBuild.selectedWeapon === props.charBuild.skillWeapon
+    )
 }
 
 /**
@@ -109,7 +114,7 @@ function getWeaponAttackLabelPrefix(key: string) {
                     class="bg-linear-to-br from-secondary/10 to-secondary/5 rounded-lg p-3 border border-secondary/20 hover:border-secondary/40 transition-colors"
                 >
                     <div class="text-xs text-base-content/60 mb-1">
-                        {{ key === "攻击" ? $t(`${charBuild.char.属性}属性`) : "" }}{{ $t(key) }}
+                        {{ key === "攻击" ? $t(getWeaponAttackLabelPrefix(key)) : "" }}{{ $t(key) }}
                     </div>
                     <div class="text-secondary font-bold text-lg font-orbitron">
                         {{

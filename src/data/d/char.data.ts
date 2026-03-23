@@ -10176,6 +10176,7 @@ patchUW(4201, uw => {
             skill: 0,
             filter: "疑星落|星河寥落",
             inherit: "melee",
+            atk: "all",
         },
     ]
 })

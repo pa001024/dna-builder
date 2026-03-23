@@ -119,6 +119,7 @@ export interface SkillWeapon {
     skill?: 0 | 1 | 2
     filter?: string
     inherit?: "melee" | "ranged"
+    atk?: "melee" | "ranged" | "all"
 }
 
 export interface Weapon {

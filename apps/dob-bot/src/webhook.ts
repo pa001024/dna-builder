@@ -25,7 +25,7 @@ export async function startWebhookServer(): Promise<void> {
  * 创建 Elysia 应用。
  * @returns {Elysia}
  */
-export function createWebhookApp(): Elysia {
+export function createWebhookApp() {
     return new Elysia()
         .get("/health", () => ({ ok: true }))
         .post(config.webhookPath, async ({ request, headers, set }) => {

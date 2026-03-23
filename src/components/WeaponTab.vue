@@ -41,7 +41,7 @@ const baseKey = computed(() => {
  * @returns 是否需要展示属性转换标记
  */
 function isInheritedAttackLabel(key: string) {
-    return key === "攻击" && props.wkey === "skill" && !!props.charBuild.skillWeapon?.inherit
+    return key === "攻击" && props.wkey === "skill" && !!props.charBuild.skillWeapon?.inherit && props.charBuild.skillWeapon?.atk === "all"
 }
 
 /**

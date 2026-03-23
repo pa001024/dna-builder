@@ -14,6 +14,8 @@ dotenv.config({
  * @param {string | undefined} fallback
  * @returns {string | undefined}
  */
+function env(name: string): string | undefined
+function env(name: string, fallback: string): string
 function env(name: string, fallback?: string): string | undefined {
     const v = process.env[name]
     if (v === undefined || v === "") return fallback

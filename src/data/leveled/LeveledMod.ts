@@ -214,8 +214,7 @@ export class LeveledMod implements Mod {
             if (this.id > 100000) lv = this.maxLevel
             const maxValue = this._originalModData[prop] || 0
             if (maxValue) {
-                let currentValue = (maxValue / (this.maxLevel + 1)) * (lv + 1)
-                if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.ceil(currentValue)
+                const currentValue = this.calculateBasePropertyValue(prop, maxValue, lv)
                 this[prop] = currentValue
             }
         })
@@ -232,6 +231,34 @@ export class LeveledMod implements Mod {
                 buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(perStackValue * 100).toFixed(1)}%`)
             }
         })
+    }
+
+    /**
+     * 计算普通属性在当前等级下的值
+     * 数组属性按等级取对应项，超出长度时取最后一项
+     * @param prop 属性名
+     * @param maxValue 原始属性值
+     * @param lv 当前参与计算的等级
+     * @returns 当前属性值
+     */
+    private calculateBasePropertyValue(prop: string, maxValue: number | number[], lv: number) {
+        if (Array.isArray(maxValue)) {
+            return maxValue[Math.min(lv + 1, maxValue.length) - 1]
+        }
+        return this.scaleBaseNumberProperty(prop, maxValue, lv)
+    }
+
+    /**
+     * 按等级缩放普通数值属性
+     * @param prop 属性名
+     * @param maxValue 满级值
+     * @param lv 当前参与计算的等级
+     * @returns 缩放后的属性值
+     */
+    private scaleBaseNumberProperty(prop: string, maxValue: number, lv: number) {
+        let currentValue = (maxValue / (this.maxLevel + 1)) * (lv + 1)
+        if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.ceil(currentValue)
+        return currentValue
     }
 
     /**
