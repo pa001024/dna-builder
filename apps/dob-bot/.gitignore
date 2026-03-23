@@ -1,0 +1,6 @@
+docker-compose.frpc.yml
+node_modules/
+.env
+.env.local
+.env.*.local
+state/
