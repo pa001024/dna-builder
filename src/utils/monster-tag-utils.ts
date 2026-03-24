@@ -49,21 +49,42 @@ export const monsterTagGroups = [...monsterTagGroupByName.values()].sort((a, b) 
 
 const relatedMonstersByPrimaryTagId = new Map<string, Monster[]>()
 
+function resolveMonsterTagGroups(monster: Monster): MonsterTagGroup[] {
+    const groups: MonsterTagGroup[] = []
+    const seen = new Set<string>()
+
+    for (const strongTag of monster.tags || []) {
+        if (!strongTag.startsWith("Mon.Strong.")) {
+            continue
+        }
+        const group = getMonsterTagGroupByTagId(strongTag) || getMonsterTagGroupByTagId(strongTag.replace(/\.Double$|\.Triple$/, ""))
+        if (!group || seen.has(group.primaryTag.id)) {
+            continue
+        }
+        seen.add(group.primaryTag.id)
+        groups.push(group)
+    }
+
+    if (groups.length > 0) {
+        return groups
+    }
+
+    const fallbackGroup = getMonsterTagGroupByMonsterName(monster.n)
+    return fallbackGroup ? [fallbackGroup] : []
+}
+
 for (const monster of monsterData) {
     if (monster.id < 2000000) {
         continue
     }
 
-    const group = monsterTagGroupByPrefix.get(extractNamePrefix(monster.n))
-    if (!group) {
-        continue
-    }
-
-    const monsters = relatedMonstersByPrimaryTagId.get(group.primaryTag.id)
-    if (monsters) {
-        monsters.push(monster)
-    } else {
-        relatedMonstersByPrimaryTagId.set(group.primaryTag.id, [monster])
+    for (const group of resolveMonsterTagGroups(monster)) {
+        const monsters = relatedMonstersByPrimaryTagId.get(group.primaryTag.id)
+        if (monsters) {
+            monsters.push(monster)
+        } else {
+            relatedMonstersByPrimaryTagId.set(group.primaryTag.id, [monster])
+        }
     }
 }
 
@@ -92,6 +113,24 @@ export function getMonsterTagGroupByMonsterName(monsterName: string): MonsterTag
     }
 
     return monsterTagGroupByPrefix.get(prefix) || null
+}
+
+/**
+ * 根据怪物数据匹配号令者分组，优先使用 monster.tags。
+ * @param monster 怪物数据
+ * @returns 对应分组，不存在时返回 null
+ */
+export function getMonsterTagGroupByMonster(monster: Monster): MonsterTagGroup | null {
+    return resolveMonsterTagGroups(monster)[0] || null
+}
+
+/**
+ * 根据怪物数据匹配全部号令者分组，优先使用 monster.tags。
+ * @param monster 怪物数据
+ * @returns 对应分组列表
+ */
+export function getMonsterTagGroupsByMonster(monster: Monster): MonsterTagGroup[] {
+    return resolveMonsterTagGroups(monster)
 }
 
 /**

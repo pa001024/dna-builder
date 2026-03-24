@@ -9,6 +9,8 @@ export interface Monster {
     es?: number
     tn?: number
     icon?: string
+    /** 号令者词条标签，来自 GamePlayTags 中的 Mon.Strong.* */
+    tags?: string[]
 }
 
 export enum Faction {
@@ -44,6 +46,7 @@ const monsterData: Monster[] = [
         es: 340,
         hp: 340,
         tn: 250,
+        tags: ["Mon.Strong.Burst"],
     },
     {
         id: 6001001,
@@ -65,6 +68,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Jichong_C01",
+        tags: ["Mon.Strong.Frozen"],
     },
     {
         id: 6001012,
@@ -76,6 +80,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Jichong_C01",
+        tags: ["Mon.Strong.Burst"],
     },
     {
         id: 6001014,
@@ -87,6 +92,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Jichong_C01",
+        tags: ["Mon.Strong.Thunder"],
     },
     {
         id: 6001016,
@@ -98,6 +104,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Jichong_C01",
+        tags: ["Mon.Strong.Fade"],
     },
     {
         id: 6001018,
@@ -109,6 +116,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Jichong_C01",
+        tags: ["Mon.Strong.Revenge"],
     },
     {
         id: 6001601,
@@ -140,6 +148,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Youji_C01",
+        tags: ["Mon.Strong.Frozen"],
     },
     {
         id: 6002015,
@@ -151,6 +160,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Youji_C01",
+        tags: ["Mon.Strong.Blood"],
     },
     {
         id: 6002016,
@@ -162,6 +172,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Youji_C01",
+        tags: ["Mon.Strong.Fade"],
     },
     {
         id: 6002017,
@@ -173,6 +184,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Youji_C01",
+        tags: ["Mon.Strong.Shield"],
     },
     {
         id: 6002018,
@@ -184,6 +196,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Youji_C01",
+        tags: ["Mon.Strong.Revenge"],
     },
     {
         id: 6002601,
@@ -244,6 +257,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Baotu_C01",
+        tags: ["Mon.Strong.Burst"],
     },
     {
         id: 6004013,
@@ -255,6 +269,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Baotu_C01",
+        tags: ["Mon.Strong.Poison"],
     },
     {
         id: 6004014,
@@ -266,6 +281,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Baotu_C01",
+        tags: ["Mon.Strong.Thunder"],
     },
     {
         id: 6004020,
@@ -277,6 +293,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Baotu_C01",
+        tags: ["Mon.Strong.Reflect"],
     },
     {
         id: 6004601,
@@ -337,6 +354,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Zhuoxin",
+        tags: ["Mon.Strong.Frozen"],
     },
     {
         id: 6007016,
@@ -348,6 +366,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Zhuoxin",
+        tags: ["Mon.Strong.Fade"],
     },
     {
         id: 6007024,
@@ -359,6 +378,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Zhuoxin",
+        tags: ["Mon.Strong.Threefold"],
     },
     {
         id: 6007601,
@@ -430,6 +450,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "Gr_Piaofu_C01",
+        tags: ["Mon.Strong.Blood"],
     },
     {
         id: 6013017,
@@ -441,6 +462,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "Gr_Piaofu_C01",
+        tags: ["Mon.Strong.Shield"],
     },
     {
         id: 6013018,
@@ -452,6 +474,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "Gr_Piaofu_C01",
+        tags: ["Mon.Strong.Revenge"],
     },
     {
         id: 6013601,
@@ -503,6 +526,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Fangjin",
+        tags: ["Mon.Strong.Poison"],
     },
     {
         id: 6015018,
@@ -514,6 +538,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Fangjin",
+        tags: ["Mon.Strong.Revenge"],
     },
     {
         id: 6015021,
@@ -525,6 +550,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Fangjin",
+        tags: ["Mon.Strong.Kamikaze"],
     },
     {
         id: 6016001,
@@ -546,6 +572,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Eshi",
+        tags: ["Mon.Strong.Frozen"],
     },
     {
         id: 6016013,
@@ -557,6 +584,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Eshi",
+        tags: ["Mon.Strong.Poison"],
     },
     {
         id: 6016015,
@@ -568,6 +596,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Eshi",
+        tags: ["Mon.Strong.Blood"],
     },
     {
         id: 6016016,
@@ -579,6 +608,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Eshi",
+        tags: ["Mon.Strong.Fade"],
     },
     {
         id: 6016017,
@@ -590,6 +620,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Eshi",
+        tags: ["Mon.Strong.Shield"],
     },
     {
         id: 6016018,
@@ -601,6 +632,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Eshi",
+        tags: ["Mon.Strong.Revenge"],
     },
     {
         id: 6016021,
@@ -612,6 +644,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Eshi",
+        tags: ["Mon.Strong.Kamikaze"],
     },
     {
         id: 6017001,
@@ -633,6 +666,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Kuirui",
+        tags: ["Mon.Strong.Poison"],
     },
     {
         id: 6017014,
@@ -644,6 +678,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Kuirui",
+        tags: ["Mon.Strong.Thunder"],
     },
     {
         id: 6017018,
@@ -655,6 +690,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Kuirui",
+        tags: ["Mon.Strong.Revenge"],
     },
     {
         id: 7001001,
@@ -700,6 +736,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Juji_C01",
+        tags: ["Mon.Strong.Frozen"],
     },
     {
         id: 7001015,
@@ -712,6 +749,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Juji_C01",
+        tags: ["Mon.Strong.Blood"],
     },
     {
         id: 7001016,
@@ -724,6 +762,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Juji_C01",
+        tags: ["Mon.Strong.Fade"],
     },
     {
         id: 7001017,
@@ -736,6 +775,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Juji_C01",
+        tags: ["Mon.Strong.Shield"],
     },
     {
         id: 7001018,
@@ -748,6 +788,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Juji_C01",
+        tags: ["Mon.Strong.Revenge"],
     },
     {
         id: 7001024,
@@ -760,6 +801,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Juji_C01",
+        tags: ["Mon.Strong.Threefold"],
     },
     {
         id: 7001601,
@@ -816,6 +858,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Pizhuo_C01",
+        tags: ["Mon.Strong.Frozen"],
     },
     {
         id: 7002012,
@@ -828,6 +871,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Pizhuo_C01",
+        tags: ["Mon.Strong.Burst"],
     },
     {
         id: 7002014,
@@ -840,6 +884,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Pizhuo_C01",
+        tags: ["Mon.Strong.Thunder"],
     },
     {
         id: 7002016,
@@ -852,6 +897,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Pizhuo_C01",
+        tags: ["Mon.Strong.Fade"],
     },
     {
         id: 7002018,
@@ -864,6 +910,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Pizhuo_C01",
+        tags: ["Mon.Strong.Revenge"],
     },
     {
         id: 7002019,
@@ -876,6 +923,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Pizhuo_C01",
+        tags: ["Mon.Strong.IceOrb"],
     },
     {
         id: 7002601,
@@ -922,6 +970,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Ranger_C01",
+        tags: ["Mon.Strong.Frozen"],
     },
     {
         id: 7003015,
@@ -934,6 +983,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Ranger_C01",
+        tags: ["Mon.Strong.Blood"],
     },
     {
         id: 7003016,
@@ -946,6 +996,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Ranger_C01",
+        tags: ["Mon.Strong.Fade"],
     },
     {
         id: 7003017,
@@ -958,6 +1009,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Ranger_C01",
+        tags: ["Mon.Strong.Shield"],
     },
     {
         id: 7003018,
@@ -970,6 +1022,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Ranger_C01",
+        tags: ["Mon.Strong.Revenge"],
     },
     {
         id: 7003022,
@@ -982,6 +1035,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Ranger_C01",
+        tags: ["Mon.Strong.ThunderLaser"],
     },
     {
         id: 7003601,
@@ -1016,6 +1070,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Tuji_C01",
+        tags: ["Mon.Strong.Shield"],
     },
     {
         id: 7004020,
@@ -1028,6 +1083,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Tuji_C01",
+        tags: ["Mon.Strong.Reflect"],
     },
     {
         id: 7004601,
@@ -1094,6 +1150,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Zhihui",
+        tags: ["Mon.Strong.Vampire"],
     },
     {
         id: 7008071,
@@ -1129,6 +1186,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 300,
         icon: "Jt_Zhiren",
+        tags: ["Mon.Strong.Reflect"],
     },
     {
         id: 7010001,
@@ -1152,6 +1210,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 150,
         icon: "Jt_Zhijian",
+        tags: ["Mon.Strong.ThunderLaser"],
     },
     {
         id: 7010601,
@@ -1273,6 +1332,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 150,
         icon: "JT_Jingjie",
+        tags: ["Mon.Strong.Frozen"],
     },
     {
         id: 7015601,
@@ -1318,6 +1378,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Zhishi",
+        tags: ["Mon.Strong.Blood"],
     },
     {
         id: 8001019,
@@ -1330,6 +1391,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Zhishi",
+        tags: ["Mon.Strong.IceOrb"],
     },
     {
         id: 8001021,
@@ -1342,6 +1404,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Zhishi",
+        tags: ["Mon.Strong.Kamikaze"],
     },
     {
         id: 8001601,
@@ -1376,6 +1439,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Xianfeng",
+        tags: ["Mon.Strong.Burst"],
     },
     {
         id: 8002014,
@@ -1388,6 +1452,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Xianfeng",
+        tags: ["Mon.Strong.Thunder"],
     },
     {
         id: 8002016,
@@ -1400,6 +1465,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Xianfeng",
+        tags: ["Mon.Strong.Fade"],
     },
     {
         id: 8002018,
@@ -1412,6 +1478,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Xianfeng",
+        tags: ["Mon.Strong.Revenge"],
     },
     {
         id: 8002020,
@@ -1424,6 +1491,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Xianfeng",
+        tags: ["Mon.Strong.Reflect"],
     },
     {
         id: 8002601,
@@ -1435,6 +1503,58 @@ const monsterData: Monster[] = [
         hp: 70,
         tn: 150,
         icon: "Jh_Xianfeng",
+    },
+    {
+        id: 8002701,
+        n: "霹雳·霜狱 蒙恩的先锋",
+        t: "Elite_Monster",
+        f: 4,
+        atk: 32,
+        def: 300,
+        es: 3268,
+        hp: 408,
+        tn: 150,
+        icon: "Jh_Xianfeng",
+        tags: ["Mon.Strong.Thunder.Double", "Mon.Strong.IceOrb.Double"],
+    },
+    {
+        id: 8002702,
+        n: "霹雳 蒙恩的先锋",
+        t: "Elite_Monster",
+        f: 4,
+        atk: 32,
+        def: 300,
+        es: 3268,
+        hp: 408,
+        tn: 150,
+        icon: "Jh_Xianfeng",
+        tags: ["Mon.Strong.Thunder"],
+    },
+    {
+        id: 8002703,
+        n: "霜狱 蒙恩的先锋",
+        t: "Elite_Monster",
+        f: 4,
+        atk: 32,
+        def: 300,
+        es: 3268,
+        hp: 408,
+        tn: 150,
+        icon: "Jh_Xianfeng",
+        tags: ["Mon.Strong.IceOrb"],
+    },
+    {
+        id: 8002704,
+        n: "爆破·枯萎 蒙恩的先锋",
+        t: "Elite_Monster",
+        f: 4,
+        atk: 32,
+        def: 300,
+        es: 3268,
+        hp: 408,
+        tn: 150,
+        icon: "Jh_Xianfeng",
+        tags: ["Mon.Strong.Fade.Double", "Mon.Strong.Burst.Double"],
     },
     {
         id: 8003001,
@@ -1458,6 +1578,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Shenfu",
+        tags: ["Mon.Strong.Fade"],
     },
     {
         id: 8003021,
@@ -1470,6 +1591,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Shenfu",
+        tags: ["Mon.Strong.Kamikaze"],
     },
     {
         id: 8003022,
@@ -1482,6 +1604,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Shenfu",
+        tags: ["Mon.Strong.ThunderLaser"],
     },
     {
         id: 8003024,
@@ -1494,6 +1617,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Shenfu",
+        tags: ["Mon.Strong.Threefold"],
     },
     {
         id: 8003601,
@@ -1505,6 +1629,58 @@ const monsterData: Monster[] = [
         hp: 70,
         tn: 150,
         icon: "Jh_Shenfu",
+    },
+    {
+        id: 8003701,
+        n: "枯萎·守护 蒙恩的神甫",
+        t: "Elite_Monster",
+        f: 4,
+        atk: 20,
+        def: 300,
+        es: 3268,
+        hp: 408,
+        tn: 150,
+        icon: "Jh_Shenfu",
+        tags: ["Mon.Strong.Fade.Double", "Mon.Strong.Shield.Double"],
+    },
+    {
+        id: 8003702,
+        n: "枯萎 蒙恩的神甫",
+        t: "Elite_Monster",
+        f: 4,
+        atk: 20,
+        def: 300,
+        es: 3268,
+        hp: 408,
+        tn: 150,
+        icon: "Jh_Shenfu",
+        tags: ["Mon.Strong.Fade"],
+    },
+    {
+        id: 8003703,
+        n: "复仇 蒙恩的神甫",
+        t: "Elite_Monster",
+        f: 4,
+        atk: 20,
+        def: 300,
+        es: 3268,
+        hp: 408,
+        tn: 150,
+        icon: "Jh_Shenfu",
+        tags: ["Mon.Strong.Revenge"],
+    },
+    {
+        id: 8003704,
+        n: "浴血·凛霜 蒙恩的神甫",
+        t: "Elite_Monster",
+        f: 4,
+        atk: 20,
+        def: 300,
+        es: 3268,
+        hp: 408,
+        tn: 150,
+        icon: "Jh_Shenfu",
+        tags: ["Mon.Strong.Frozen.Double", "Mon.Strong.Vampire.Double"],
     },
     {
         id: 8500001,
@@ -1783,6 +1959,7 @@ const monsterData: Monster[] = [
         hp: 225000,
         tn: 2000,
         icon: "Boss_Kuxiu",
+        tags: ["Mon.Strong.ThunderLaser"],
     },
     {
         id: 8514001,
@@ -1822,6 +1999,7 @@ const monsterData: Monster[] = [
         hp: 225000,
         tn: 4500,
         icon: "Boss_Shenpan",
+        tags: ["Mon.Strong.Thunder"],
     },
     {
         id: 8515001,
@@ -1935,6 +2113,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Yinxie",
+        tags: ["Mon.Strong.Thunder"],
     },
     {
         id: 9001017,
@@ -1947,6 +2126,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Yinxie",
+        tags: ["Mon.Strong.Shield"],
     },
     {
         id: 9001023,
@@ -1959,6 +2139,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Yinxie",
+        tags: ["Mon.Strong.Vampire"],
     },
     {
         id: 9001024,
@@ -1971,6 +2152,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Yinxie",
+        tags: ["Mon.Strong.Threefold"],
     },
     {
         id: 9001601,
@@ -2005,6 +2187,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Dufeng",
+        tags: ["Mon.Strong.Blood"],
     },
     {
         id: 9002019,
@@ -2017,6 +2200,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Dufeng",
+        tags: ["Mon.Strong.IceOrb"],
     },
     {
         id: 9002023,
@@ -2029,6 +2213,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Dufeng",
+        tags: ["Mon.Strong.Vampire"],
     },
     {
         id: 9002024,
@@ -2041,6 +2226,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Dufeng",
+        tags: ["Mon.Strong.Threefold"],
     },
     {
         id: 9002601,
@@ -2147,6 +2333,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Niaopao",
+        tags: ["Mon.Strong.IceOrb"],
     },
     {
         id: 9007022,
@@ -2159,6 +2346,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Niaopao",
+        tags: ["Mon.Strong.ThunderLaser"],
     },
     {
         id: 9007023,
@@ -2171,6 +2359,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Niaopao",
+        tags: ["Mon.Strong.Vampire"],
     },
     {
         id: 9007601,
@@ -2397,6 +2586,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "HX_Tianshi02",
+        tags: ["Mon.Strong.Frozen"],
     },
     {
         id: 10005012,
@@ -2409,6 +2599,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "HX_Tianshi02",
+        tags: ["Mon.Strong.Burst"],
     },
     {
         id: 10005013,
@@ -2421,6 +2612,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "HX_Tianshi02",
+        tags: ["Mon.Strong.Poison"],
     },
     {
         id: 10005014,
@@ -2433,6 +2625,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "HX_Tianshi02",
+        tags: ["Mon.Strong.Thunder"],
     },
     {
         id: 10005016,
@@ -2445,6 +2638,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "HX_Tianshi02",
+        tags: ["Mon.Strong.Fade"],
     },
     {
         id: 10005018,
@@ -2457,6 +2651,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "HX_Tianshi02",
+        tags: ["Mon.Strong.Revenge"],
     },
     {
         id: 10005024,
@@ -2469,15 +2664,13 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "HX_Tianshi02",
+        tags: ["Mon.Strong.Threefold"],
     },
 ]
 
-const allMonsters = [...mock, ...monsterData] as Monster[]
+monsterData.push(...mock)
 
-// 将mob数据转换为Map
 export const monsterMap = new Map<number, Monster>()
-allMonsters.forEach(mob => {
-    monsterMap.set(mob.id, mob as Monster)
-})
+monsterData.forEach(v => monsterMap.set(v.id, v))
 
-export default allMonsters
+export default monsterData

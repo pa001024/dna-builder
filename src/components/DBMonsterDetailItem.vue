@@ -6,7 +6,7 @@ import { abyssDungeonMap, Faction, Monster } from "../data"
 import dungeonData from "../data/d/dungeon.data"
 import { LeveledMonster } from "../data/leveled/LeveledMonster"
 import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
-import { getMonsterTagGroupByMonsterName } from "../utils/monster-tag-utils"
+import { getMonsterTagGroupsByMonster } from "../utils/monster-tag-utils"
 
 const props = defineProps<{
     monster: Monster
@@ -91,12 +91,12 @@ watch(
 /**
  * 当前怪物关联的号令者信息。
  */
-const monsterTagGroup = computed(() => {
+const monsterTagGroups = computed(() => {
     if (!props.monster) {
-        return null
+        return []
     }
 
-    return getMonsterTagGroupByMonsterName(props.monster.n)
+    return getMonsterTagGroupsByMonster(props.monster)
 })
 
 /**
@@ -353,26 +353,32 @@ function getFactionName(faction: number | undefined): string {
             </label>
         </div>
 
-        <div v-if="monsterTagGroup" class="p-3 bg-base-200 rounded space-y-2">
-            <div class="flex items-center justify-between gap-2">
-                <div class="text-xs text-base-content/70">号令者信息</div>
-                <SRouterLink :to="`/db/monstertag/${monsterTagGroup.primaryTag.id}`" class="text-xs link link-primary">
-                    查看详情
-                </SRouterLink>
-            </div>
-            <div class="text-sm font-medium">{{ monsterTagGroup.name }}</div>
-            <div class="text-sm whitespace-pre-line">
-                {{ monsterTagGroup.primaryTag.desc }}
-            </div>
-            <div v-if="monsterTagGroup.tags.length > 1" class="flex flex-wrap gap-2">
-                <SRouterLink
-                    v-for="tag in monsterTagGroup.tags"
-                    :key="tag.id"
-                    :to="`/db/monstertag/${tag.id}`"
-                    class="text-xs px-2 py-1 rounded bg-base-300 hover:bg-base-100 transition-colors"
-                >
-                    {{ tag.id }}
-                </SRouterLink>
+        <div v-if="monsterTagGroups.length" class="p-3 bg-base-200 rounded space-y-3">
+            <div class="text-xs text-base-content/70">号令者信息</div>
+            <div
+                v-for="monsterTagGroup in monsterTagGroups"
+                :key="monsterTagGroup.primaryTag.id"
+                class="rounded bg-base-100 p-3 space-y-2"
+            >
+                <div class="flex items-center justify-between gap-2">
+                    <div class="text-sm font-medium">{{ monsterTagGroup.name }}</div>
+                    <SRouterLink :to="`/db/monstertag/${monsterTagGroup.primaryTag.id}`" class="text-xs link link-primary">
+                        查看详情
+                    </SRouterLink>
+                </div>
+                <div class="text-sm whitespace-pre-line">
+                    {{ monsterTagGroup.primaryTag.desc }}
+                </div>
+                <div v-if="monsterTagGroup.tags.length > 1" class="flex flex-wrap gap-2">
+                    <SRouterLink
+                        v-for="tag in monsterTagGroup.tags"
+                        :key="tag.id"
+                        :to="`/db/monstertag/${tag.id}`"
+                        class="text-xs px-2 py-1 rounded bg-base-200 hover:bg-base-300 transition-colors"
+                    >
+                        {{ tag.id }}
+                    </SRouterLink>
+                </div>
             </div>
         </div>
 

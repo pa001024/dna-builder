@@ -5,7 +5,7 @@ import { parseNumberOrEmptySearchParam, useSearchParam } from "@/composables/use
 import { LeveledMonster, monsterMap } from "@/data"
 import { monsterTagData } from "@/data/d/monstertag.data"
 import monsterData, { Faction } from "../data/d/monster.data"
-import { getMonsterTagGroupByMonsterName, monsterTagGroups } from "../utils/monster-tag-utils"
+import { getMonsterTagGroupByMonster, monsterTagGroups } from "../utils/monster-tag-utils"
 import { getMonsterType } from "../utils/monster-utils"
 import { matchPinyin } from "../utils/pinyin-utils"
 
@@ -58,7 +58,7 @@ const commanderMonsterIdSet = computed(() => {
         if (monster.id < 2000000) {
             return
         }
-        if (getMonsterTagGroupByMonsterName(monster.n)) {
+        if (getMonsterTagGroupByMonster(monster)) {
             idSet.add(monster.id)
         }
     })

@@ -24,6 +24,6 @@ export const DATA_TYPE_INTERFACE_DEFINITION_MAP = {
     QuestStory: "export interface QuestStory {\n    id: number\n    quests: QuestItem[]\n}",
     Reward: "export interface Reward {\n    id: number\n    m: string\n    child: RewardChild[]\n}",
     SubRegion:
-        "export interface SubRegion {\n    id: number\n    rid: number\n    name: string\n    desc: string\n    map: string\n    pos?: [number, number]\n    rc?: RandomCreator[]\n}",
+        "export interface SubRegion {\n    id: number\n    rid: number\n    name: string\n    desc: string\n    map: string\n    pos?: [number, number]\n    rc?: RandomCreator[]\n    range?: Range\n}",
     Weapon: "export interface Weapon {\n    id: number\n    icon?: string\n    名称: string\n    版本?: string\n    描述?: string\n    类型: string[]\n    伤害类型: keyof typeof DmgType\n    攻击: number\n    暴击: number\n    暴伤: number\n    触发: number\n    突破?: Record<string, number>[]\n    弹匣?: number\n    最大弹药?: number\n    弹药转化率?: number\n    最大射程?: number\n    射击间隔?: number\n    弹道类型?: keyof typeof BulletType\n    装填?: number\n    加成?: CommonAttr\n    熔炼?: string[]\n    技能?: WeaponSkill[]\n}",
 } as const
