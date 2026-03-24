@@ -2075,7 +2075,7 @@ async function startRealtimeTest() {
     }
 
     try {
-        await scriptRuntime.initRuntimeTracking()
+        await scriptRuntime.initRuntimeTracking({ includeConfigListeners: false })
         const scriptPath = await ensureRealtimeTestScriptPath()
         const scriptContent = buildRealtimeTestScript(checkStateCode)
         await writeTextFile(scriptPath, scriptContent)
@@ -2279,7 +2279,7 @@ async function initTauriDragEvents() {
 
 onMounted(async () => {
     if (env.isApp) {
-        await scriptRuntime.initRuntimeTracking()
+        await scriptRuntime.initRuntimeTracking({ includeConfigListeners: false })
         await ensureRealtimeTestScriptPath()
     }
     await restoreScriptColorToolState()

@@ -29,6 +29,7 @@ import {
 } from "@/api/app"
 import { createScriptMutation, deleteScriptMutation, updateScriptMutation } from "@/api/gen/api-mutations"
 import { type Script, type ScriptCategory, scriptCategoriesQuery, scriptQuery, scriptsCountQuery, scriptsQuery } from "@/api/graphql"
+import { openSChat } from "@/api/swindow"
 import ContextMenu, { ContextMenuItem } from "@/components/contextmenu"
 import { env } from "@/env"
 import { useCloudGameStore } from "@/store/cloudgame"
@@ -2361,8 +2362,18 @@ async function openScriptDirectory() {
 /**
  * 打开图色工具页面。
  */
-function openColorToolPage() {
-    router.push({ name: "script-color-tool" })
+async function openColorToolPage() {
+    if (!env.isApp) {
+        router.push({ name: "script-color-tool" })
+        return
+    }
+
+    try {
+        await openSChat("/scripts/color-tool")
+    } catch (error) {
+        console.error("打开图色工具新窗口失败", error)
+        router.push({ name: "script-color-tool" })
+    }
 }
 
 /**

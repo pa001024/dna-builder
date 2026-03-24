@@ -1,9 +1,12 @@
+use std::sync::{LazyLock, Mutex};
 use windows::Win32::{
     Foundation::{HWND, LPARAM, POINT, WPARAM},
     Graphics::Gdi::{ClientToScreen, ScreenToClient},
     System::Threading::{AttachThreadInput, GetCurrentThreadId},
     UI::{Input::KeyboardAndMouse::*, WindowsAndMessaging::*},
 };
+
+static LAST_BACKGROUND_ACTIVATED_HWND: LazyLock<Mutex<isize>> = LazyLock::new(|| Mutex::new(0));
 
 /// 鼠标按键类型。
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -239,6 +242,33 @@ pub fn mouse_move(dx: i32, dy: i32) {
     unsafe { mouse_event(MOUSEEVENTF_MOVE, dx, dy, 0, 0) };
 }
 
+pub fn mouse_move_relative_with_hwnd(hwnd: HWND, dx: i32, dy: i32) {
+    unsafe {
+        let mut original_pos = POINT::default();
+        let _ = GetCursorPos(&mut original_pos);
+
+        let root = {
+            let candidate = GetAncestor(hwnd, GA_ROOT);
+            if candidate.is_invalid() {
+                hwnd
+            } else {
+                candidate
+            }
+        };
+        let was_foreground = !root.is_invalid() && GetForegroundWindow() == root;
+
+        if !root.is_invalid() && !was_foreground {
+            let _ = SetForegroundWindow(root);
+            sleep(20);
+        }
+
+        mouse_event(MOUSEEVENTF_MOVE, dx, dy, 0, 0);
+        sleep(1);
+
+        let _ = SetCursorPos(original_pos.x, original_pos.y);
+    }
+}
+
 pub fn mouse_down() {
     unsafe { mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0) }
 }
@@ -434,12 +464,6 @@ fn resolve_keyboard_target_window(hwnd: HWND) -> HWND {
     hwnd
 }
 
-/// 发送 PostMessage 前临时对齐输入线程并设置目标活动窗口。
-///
-/// 参考 AutoHotkey ControlClick 默认行为：
-/// 1. 尝试 `AttachThreadInput` 到目标窗口线程；
-/// 2. 调用 `SetActiveWindow` 提升后台消息处理可靠性；
-/// 3. 发送 `PostMessage` 后再解除线程附加。
 fn post_message_with_attach(target_hwnd: HWND, msg: u32, wparam: WPARAM, lparam: LPARAM) {
     if target_hwnd.is_invalid() {
         return;
@@ -453,6 +477,8 @@ fn post_message_with_attach(target_hwnd: HWND, msg: u32, wparam: WPARAM, lparam:
     let current_thread = unsafe { GetCurrentThreadId() };
     let target_thread = unsafe { GetWindowThreadProcessId(active_hwnd, None) };
     let mut attached = false;
+    let is_foreground = unsafe { GetForegroundWindow() == active_hwnd };
+    let active_hwnd_key = active_hwnd.0 as isize;
 
     unsafe {
         if target_thread != 0
@@ -462,7 +488,21 @@ fn post_message_with_attach(target_hwnd: HWND, msg: u32, wparam: WPARAM, lparam:
             attached = AttachThreadInput(current_thread, target_thread, true).as_bool();
         }
 
-        let _ = SetActiveWindow(active_hwnd);
+        if is_foreground {
+            if let Ok(mut guard) = LAST_BACKGROUND_ACTIVATED_HWND.lock() {
+                *guard = 0;
+            }
+        } else if let Ok(mut guard) = LAST_BACKGROUND_ACTIVATED_HWND.lock()
+            && *guard != active_hwnd_key
+        {
+            let _ = PostMessageW(
+                Some(active_hwnd),
+                WM_ACTIVATE,
+                WPARAM(WA_ACTIVE as usize),
+                LPARAM(0),
+            );
+            *guard = active_hwnd_key;
+        }
         let _ = PostMessageW(Some(target_hwnd), msg, wparam, lparam);
 
         if attached {

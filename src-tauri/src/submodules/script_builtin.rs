@@ -9,13 +9,16 @@ use boa_engine::{
 };
 use boa_engine::{js_error, js_object};
 use opencv::{
-    core::Mat,
-    imgproc,
+    core::{self, Mat},
+    imgcodecs, imgproc,
     prelude::{MatTraitConst, MatTraitConstManual, VectorToVec},
 };
+use serde::Deserialize;
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
+    fs::{self, File},
+    io::{self, Write},
     path::{Path, PathBuf},
     sync::{
         Arc, Mutex, OnceLock,
@@ -28,7 +31,9 @@ use std::{
 use tauri::{Emitter, Manager};
 use windows::Win32::Foundation::HWND;
 use windows::Win32::UI::WindowsAndMessaging::{GetForegroundWindow, SetForegroundWindow};
+use zip::ZipArchive;
 
+use crate::submodules::script_mcp::record_script_console;
 use crate::submodules::{
     color_match::{check_color_mat, find_color_and_match_template, rgb_to_bgr},
     dll_call::dll_call_js,
@@ -36,10 +41,12 @@ use crate::submodules::{
     input::*,
     jsdnn::register_cv_dnn_namespace,
     jsmat::{IntoJs, JsMat},
-    mono_depth::predict_mono_depth,
+    mono_depth::{
+        MonoDepthInitConfig, init_mono_depth, predict_mono_depth, predict_mono_depth_model_space,
+    },
     ocr::{self, OcrInitConfig},
     predict_rotation::predict_rotation,
-    route::{find_path_direction_coords, predict_depth},
+    route::{find_path_direction_coords, predict_depth, predict_mono_route},
     script::{
         SCRIPT_STOP_INTERRUPT_MESSAGE, capture_current_script_stop_snapshot,
         run_with_script_stop_snapshot, should_stop_current_script,
@@ -106,6 +113,29 @@ enum ScriptConfigKind {
     Select,
     MultiSelect,
     Boolean,
+}
+
+/// OK 外部脚本中的单条时间轴动作。
+#[derive(Debug, Clone, Deserialize)]
+struct OksAction {
+    #[serde(rename = "type")]
+    action_type: String,
+    time: f64,
+    key: Option<String>,
+    button: Option<String>,
+    dx: Option<f64>,
+    dy: Option<f64>,
+    direction: Option<String>,
+    angle: Option<f64>,
+    sensitivity: Option<f64>,
+}
+
+/// OK 外部脚本单个节点文件。
+#[derive(Debug, Clone, Deserialize)]
+struct OksMacroFile {
+    actions: Vec<OksAction>,
+    original_x_sensitivity: Option<f64>,
+    original_y_sensitivity: Option<f64>,
 }
 
 impl ScriptConfigKind {
@@ -1319,6 +1349,27 @@ fn _mm(x: Option<JsValue>, y: Option<JsValue>, ctx: &mut Context) -> JsResult<Js
     Ok(JsValue::undefined())
 }
 
+/// 鼠标相对移动函数（可传 hwnd，但后台语义仍为相对视角移动）。
+fn _mmr(
+    hwnd: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let hwnd = HWND(
+        hwnd.unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let x = x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    if hwnd.is_invalid() {
+        mouse_move(x, y);
+    } else {
+        mouse_move_relative_with_hwnd(hwnd, x, y);
+    }
+    Ok(JsValue::undefined())
+}
+
 /// 在 cloudgame 页面里调用 devtools 暴露的方法。
 #[cfg(not(feature = "dob-script-cli"))]
 fn _call_cloudgame_devtools_method(method: &str, args: &[serde_json::Value]) -> Result<(), String> {
@@ -1562,11 +1613,8 @@ fn _cg_key(
     let vkey = key_to_vkey(&key);
     let duration = duration.unwrap_or_else(|| js_value!(0)).to_number(ctx)? as u64;
 
-    _call_cloudgame_devtools_method(
-        "businessKeyTap",
-        &[serde_json::json!(vkey), serde_json::json!(duration)],
-    )
-    .map_err(|e| JsNativeError::error().with_message(e))?;
+    _call_cloudgame_devtools_method("keyTap", &[serde_json::json!(vkey)])
+        .map_err(|e| JsNativeError::error().with_message(e))?;
 
     let mut cb: Option<JsFunction> = None;
     let promise = JsPromise::new(
@@ -1597,7 +1645,7 @@ fn _cg_key_down(key: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
         .to_string(ctx)?
         .to_std_string_lossy();
     let vkey = key_to_vkey(&key);
-    _call_cloudgame_devtools_method("businessKeyDown", &[serde_json::json!(vkey)])
+    _call_cloudgame_devtools_method("keyDown", &[serde_json::json!(vkey)])
         .map_err(|e| JsNativeError::error().with_message(e))?;
     Ok(JsValue::undefined())
 }
@@ -1610,7 +1658,7 @@ fn _cg_key_up(key: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
         .to_string(ctx)?
         .to_std_string_lossy();
     let vkey = key_to_vkey(&key);
-    _call_cloudgame_devtools_method("businessKeyUp", &[serde_json::json!(vkey)])
+    _call_cloudgame_devtools_method("keyUp", &[serde_json::json!(vkey)])
         .map_err(|e| JsNativeError::error().with_message(e))?;
     Ok(JsValue::undefined())
 }
@@ -2727,6 +2775,57 @@ fn _init_ocr(
     };
     let root_dir = ocr::init_ocr(config)
         .map_err(|e| JsNativeError::error().with_message(format!("initOcr 失败: {e}")))?;
+    Ok(JsValue::from(js_string!(
+        root_dir.to_string_lossy().to_string()
+    )))
+}
+
+/// 初始化 Lite-Mono：下载模型并预热运行时。
+///
+/// 参数：
+/// - `local_root_dir`：可选，本地模型目录（为空时使用默认目录）；
+/// - `cdn_base_url`：可选，模型根地址（默认 Lite-Mono 官方地址）。
+///
+/// 返回：
+/// - 实际使用的本地模型目录绝对路径。
+fn _init_mono_depth(
+    local_root_dir: Option<JsValue>,
+    cdn_base_url: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let local_root_dir = local_root_dir.unwrap_or_else(|| JsValue::undefined());
+    let cdn_base_url = cdn_base_url.unwrap_or_else(|| JsValue::undefined());
+
+    let local_root_dir = if local_root_dir.is_undefined() || local_root_dir.is_null() {
+        None
+    } else {
+        let raw = local_root_dir.to_string(ctx)?.to_std_string_lossy();
+        let normalized = raw.trim().to_string();
+        if normalized.is_empty() {
+            None
+        } else {
+            Some(PathBuf::from(_resolve_script_resource_path(&normalized)))
+        }
+    };
+
+    let base_url = if cdn_base_url.is_undefined() || cdn_base_url.is_null() {
+        None
+    } else {
+        let raw = cdn_base_url.to_string(ctx)?.to_std_string_lossy();
+        let normalized = raw.trim().to_string();
+        if normalized.is_empty() {
+            None
+        } else {
+            Some(normalized)
+        }
+    };
+
+    let config = MonoDepthInitConfig {
+        local_root_dir,
+        base_url,
+    };
+    let root_dir = init_mono_depth(config)
+        .map_err(|e| JsNativeError::error().with_message(format!("initMonoDepth 失败: {e}")))?;
     Ok(JsValue::from(js_string!(
         root_dir.to_string_lossy().to_string()
     )))
@@ -4036,6 +4135,125 @@ fn _mono_depth(js_image: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue
     Ok(promise.into())
 }
 
+/// Lite-Mono 单目路线预测函数：返回相对深度图、地形掩码、障碍掩码与候选方向。
+fn _predict_mono_route(
+    js_image: Option<JsValue>,
+    min_region_area: Option<JsValue>,
+    max_candidates: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_image = js_image
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let input_mat = js_image.borrow().data().inner.clone();
+    let min_region_area = min_region_area
+        .unwrap_or_else(|| js_value!(800))
+        .to_number(ctx)? as i32;
+    let max_candidates = max_candidates
+        .unwrap_or_else(|| js_value!(3))
+        .to_number(ctx)? as usize;
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let resolvers_clone = resolvers.clone();
+
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            let async_result = _spawn_blocking_with_script_stop_snapshot(move || {
+                let input_size = input_mat
+                    .size()
+                    .map_err(|e| format!("读取 predictMonoRoute 输入尺寸失败: {e}"))?;
+                let mono_started_at = Instant::now();
+                let depth_mat = predict_mono_depth_model_space(&input_mat)?;
+                let mono_cost_ms = mono_started_at.elapsed().as_millis();
+                let depth_size = depth_mat
+                    .size()
+                    .map_err(|e| format!("读取 predictMonoRoute 深度尺寸失败: {e}"))?;
+                let route_started_at = Instant::now();
+                let mono_route = predict_mono_route(&depth_mat, min_region_area, max_candidates)?;
+                let route_cost_ms = route_started_at.elapsed().as_millis();
+                let scale_x = if depth_size.width > 0 {
+                    f64::from(input_size.width) / f64::from(depth_size.width)
+                } else {
+                    1.0
+                };
+                let scale_y = if depth_size.height > 0 {
+                    f64::from(input_size.height) / f64::from(depth_size.height)
+                } else {
+                    1.0
+                };
+                let mapped_directions = mono_route
+                    .directions
+                    .iter()
+                    .map(|point| {
+                        [
+                            ((f64::from(point[0]) * scale_x).round() as i32)
+                                .clamp(0, input_size.width.saturating_sub(1)),
+                            ((f64::from(point[1]) * scale_y).round() as i32)
+                                .clamp(0, input_size.height.saturating_sub(1)),
+                        ]
+                    })
+                    .collect::<Vec<_>>();
+                println!(
+                    "[predictMonoRoute] monoDepth={}ms routePost={}ms total={}ms",
+                    mono_cost_ms,
+                    route_cost_ms,
+                    mono_cost_ms + route_cost_ms
+                );
+                Ok::<_, String>((depth_mat, mono_route, mapped_directions))
+            })
+            .await;
+
+            let context = &mut context.borrow_mut();
+            match async_result {
+                Ok(Ok((depth_mat, mono_route, mapped_directions))) => {
+                    let _ = depth_mat;
+                    let _ = mono_route;
+                    let js_directions = JsArray::new(context);
+                    for point in mapped_directions {
+                        let point_array = js_value!([point[0], point[1]], context);
+                        if let Err(error) = js_directions.push(point_array, context) {
+                            let message = format!("predictMonoRoute 方向列表转换失败: {error:?}");
+                            return resolvers_clone.reject.call(
+                                &JsValue::undefined(),
+                                &[JsValue::from(js_string!(message))],
+                                context,
+                            );
+                        }
+                    }
+
+                    let result = js_object!(
+                        {
+                            // depth: js_depth,
+                            // terrainMask: js_terrain_mask,
+                            // obstacleMask: js_obstacle_mask,
+                            directions: js_directions,
+                        },
+                        context
+                    );
+                    resolvers_clone
+                        .resolve
+                        .call(&JsValue::undefined(), &[result.into()], context)
+                }
+                Ok(Err(message)) => resolvers_clone.reject.call(
+                    &JsValue::undefined(),
+                    &[JsValue::from(js_string!(message))],
+                    context,
+                ),
+                Err(error) => {
+                    let message = format!("predictMonoRoute 线程执行失败: {error}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(message))],
+                        context,
+                    )
+                }
+            }
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
+}
+
 /// 边框绘制函数
 fn _draw_border(
     hwnd: Option<JsValue>,
@@ -4128,6 +4346,749 @@ fn _paste_text(_ctx: &mut Context) -> JsResult<JsValue> {
         Ok(text) => Ok(JsValue::from(js_string!(text))),
         Err(_) => Ok(JsValue::undefined()),
     }
+}
+
+/// 记录 runoks 调试日志，便于 MCP console 直接观察执行阶段。
+fn _emit_runoks_console(level: &str, message: impl Into<String>) {
+    let message = message.into();
+    let scope = get_current_script_path();
+    println!("[runoks][{level}] {message}");
+    record_script_console(scope, level.to_string(), message);
+}
+
+/// 推送 runoks 状态，便于页面状态面板观察。
+fn _emit_runoks_status(text: impl Into<String>) {
+    _emit_script_status("runoks".to_string(), Some(text.into()), None, None);
+}
+
+/// 规范化 OK 宏里的按键名，兼容常见别名。
+fn _normalize_oks_key(key: &str) -> String {
+    match key.trim().to_lowercase().as_str() {
+        "shift" => "lshift".to_string(),
+        "ctrl" => "lctrl".to_string(),
+        other => other.to_string(),
+    }
+}
+
+/// 将字符串鼠标按键转换为内部枚举。
+fn _parse_oks_mouse_button(button: Option<&str>) -> Result<MouseButtonKind, String> {
+    match button.unwrap_or("left").trim().to_lowercase().as_str() {
+        "left" | "l" | "primary" => Ok(MouseButtonKind::Left),
+        "right" | "r" | "secondary" => Ok(MouseButtonKind::Right),
+        "middle" | "m" | "mid" | "wheel" => Ok(MouseButtonKind::Middle),
+        "x1" | "xbutton1" | "xb1" | "back" => Ok(MouseButtonKind::X1),
+        "x2" | "xbutton2" | "xb2" | "forward" => Ok(MouseButtonKind::X2),
+        other => Err(format!("runoks 不支持的鼠标按键: {other}")),
+    }
+}
+
+/// 将鼠标旋转动作转换为相对移动像素。
+fn _resolve_oks_rotation_delta(action: &OksAction) -> Result<(i32, i32), String> {
+    let direction = action
+        .direction
+        .as_deref()
+        .unwrap_or("up")
+        .trim()
+        .to_lowercase();
+    let angle = action.angle.unwrap_or(0.0);
+    let sensitivity = action.sensitivity.unwrap_or(10.0);
+    let pixels = (angle * sensitivity).round() as i32;
+    match direction.as_str() {
+        "left" => Ok((-pixels, 0)),
+        "right" => Ok((pixels, 0)),
+        "up" => Ok((0, -pixels)),
+        "down" => Ok((0, pixels)),
+        _ => Err(format!("runoks 不支持的 mouse_rotation 方向: {direction}")),
+    }
+}
+
+/// 等待到动作目标时间，并在等待期间持续响应脚本停止请求。
+fn _oks_wait_until(started_at: Instant, target_secs: f64) -> Result<(), String> {
+    let target_ms = (target_secs.max(0.0) * 1000.0).round().max(0.0) as u64;
+    let target = started_at + Duration::from_millis(target_ms);
+    let poll_step = Duration::from_millis(20);
+    loop {
+        if should_stop_current_script() {
+            return Err(SCRIPT_STOP_INTERRUPT_MESSAGE.to_string());
+        }
+        let now = Instant::now();
+        if now >= target {
+            return Ok(());
+        }
+        let remain = target.saturating_duration_since(now);
+        thread::sleep(remain.min(poll_step));
+    }
+}
+
+/// 执行单条 OK 宏动作。
+fn _execute_oks_action(action: &OksAction) -> Result<(), String> {
+    _execute_oks_action_with_hwnd(action, HWND(std::ptr::null_mut()))
+}
+
+/// 执行单条 OK 宏动作（可选后台窗口句柄）。
+fn _execute_oks_action_with_hwnd(action: &OksAction, hwnd: HWND) -> Result<(), String> {
+    if should_stop_current_script() {
+        return Err(SCRIPT_STOP_INTERRUPT_MESSAGE.to_string());
+    }
+
+    let use_hwnd = !hwnd.is_invalid();
+    match action.action_type.trim().to_lowercase().as_str() {
+        "delay" => Ok(()),
+        "mouse_move" => {
+            let dx = action.dx.unwrap_or(0.0).round() as i32;
+            let dy = action.dy.unwrap_or(0.0).round() as i32;
+            if use_hwnd {
+                mouse_move_relative_with_hwnd(hwnd, dx, dy);
+            } else {
+                mouse_move(dx, dy);
+            }
+            Ok(())
+        }
+        "mouse_rotation" => {
+            let (dx, dy) = _resolve_oks_rotation_delta(action)?;
+            if use_hwnd {
+                mouse_move_relative_with_hwnd(hwnd, dx, dy);
+            } else {
+                mouse_move(dx, dy);
+            }
+            Ok(())
+        }
+        "mouse_down" => {
+            let button = _parse_oks_mouse_button(action.button.as_deref())?;
+            if use_hwnd {
+                post_mouse_down_by_button(hwnd, 10, 10, button);
+            } else {
+                mouse_down_by_button(button);
+            }
+            Ok(())
+        }
+        "mouse_up" => {
+            let button = _parse_oks_mouse_button(action.button.as_deref())?;
+            if use_hwnd {
+                post_mouse_up_by_button(hwnd, 10, 10, button);
+            } else {
+                mouse_up_by_button(button);
+            }
+            Ok(())
+        }
+        "mouse_click" => {
+            let button = _parse_oks_mouse_button(action.button.as_deref())?;
+            if use_hwnd {
+                post_mouse_click_by_button(hwnd, 10, 10, button);
+            } else {
+                mouse_click_by_button(button, 10);
+            }
+            Ok(())
+        }
+        "key_down" => {
+            let key = action
+                .key
+                .as_deref()
+                .ok_or_else(|| "runoks key_down 缺少 key".to_string())?;
+            let normalized = _normalize_oks_key(key);
+            let vkey = key_to_vkey(normalized.as_str());
+            if vkey == 0 {
+                return Err(format!("runoks 不支持的按键: {normalized}"));
+            }
+            if use_hwnd {
+                post_key_down(hwnd, vkey);
+            } else {
+                key_down(vkey);
+            }
+            Ok(())
+        }
+        "key_up" => {
+            let key = action
+                .key
+                .as_deref()
+                .ok_or_else(|| "runoks key_up 缺少 key".to_string())?;
+            let normalized = _normalize_oks_key(key);
+            let vkey = key_to_vkey(normalized.as_str());
+            if vkey == 0 {
+                return Err(format!("runoks 不支持的按键: {normalized}"));
+            }
+            if use_hwnd {
+                post_key_up(hwnd, vkey);
+            } else {
+                key_up(vkey);
+            }
+            Ok(())
+        }
+        other => Err(format!("runoks 不支持的动作类型: {other}")),
+    }
+}
+
+/// 判断名称是否以字母结尾，用于复用 OK 外部 mod 的起始节点选择规则。
+fn _oks_name_ends_with_letter(name: &str) -> bool {
+    name.chars()
+        .last()
+        .is_some_and(|ch| ch.is_ascii_alphabetic())
+}
+
+/// 判断候选节点是否符合前序节点约束。
+fn _oks_is_candidate_map_name(previous: Option<&str>, candidate: &str) -> bool {
+    let Some(previous) = previous else {
+        return _oks_name_ends_with_letter(candidate);
+    };
+
+    if previous == candidate || !candidate.starts_with(previous) {
+        return false;
+    }
+
+    let suffix = &candidate[previous.len()..];
+    suffix.starts_with('-') && suffix.matches('-').count() < 2 && suffix.len() <= 4
+}
+
+/// 收集输入目录的一层子目录候选。
+fn _oks_direct_child_dirs(dir: &Path) -> Result<Vec<PathBuf>, String> {
+    let entries = fs::read_dir(dir)
+        .map_err(|error| format!("runoks 扫描目录失败: {}: {error}", dir.to_string_lossy()))?;
+    let mut child_dirs = Vec::new();
+    for entry in entries {
+        let entry = entry.map_err(|error| format!("runoks 读取目录项失败: {error}"))?;
+        let path = entry.path();
+        if path.is_dir() {
+            child_dirs.push(path);
+        }
+    }
+    Ok(child_dirs)
+}
+
+/// 解析传入目录实际对应的 OK 外部 mod 根目录。
+fn _resolve_oks_root_dir(input_dir: &Path) -> Result<PathBuf, String> {
+    if input_dir.join("scripts").is_dir() {
+        return Ok(input_dir.to_path_buf());
+    }
+
+    let mut candidates = _oks_direct_child_dirs(input_dir)?
+        .into_iter()
+        .filter(|path| path.join("scripts").is_dir())
+        .collect::<Vec<_>>();
+    candidates.sort();
+    candidates.dedup();
+
+    match candidates.len() {
+        0 => Err(format!(
+            "runoks 未找到包含 scripts 目录的外部 mod 根目录: {}",
+            input_dir.to_string_lossy()
+        )),
+        1 => Ok(candidates.remove(0)),
+        _ => Err(format!(
+            "runoks 发现多个外部 mod 候选目录，请传更精确的路径: {}",
+            input_dir.to_string_lossy()
+        )),
+    }
+}
+
+/// 判断输入路径是否为 zip 包。
+fn _is_oks_zip_path(path: &Path) -> bool {
+    path.extension()
+        .map(|ext| ext.to_string_lossy().eq_ignore_ascii_case("zip"))
+        .unwrap_or(false)
+}
+
+/// 将 OK 外部 mod zip 包解压到临时目录。
+fn _extract_oks_zip(zip_path: &Path, target_dir: &Path) -> Result<(), String> {
+    let file = File::open(zip_path).map_err(|error| {
+        format!(
+            "runoks 打开 zip 失败: {}: {error}",
+            zip_path.to_string_lossy()
+        )
+    })?;
+    let mut archive =
+        ZipArchive::new(file).map_err(|error| format!("runoks 读取 zip 失败: {error}"))?;
+
+    for index in 0..archive.len() {
+        let mut entry = archive
+            .by_index(index)
+            .map_err(|error| format!("runoks 读取 zip 条目失败: {error}"))?;
+        let Some(relative_path) = entry.enclosed_name().map(|value| value.to_path_buf()) else {
+            continue;
+        };
+        let output_path = target_dir.join(relative_path);
+        if entry.is_dir() {
+            fs::create_dir_all(&output_path).map_err(|error| {
+                format!(
+                    "runoks 创建解压目录失败: {}: {error}",
+                    output_path.to_string_lossy()
+                )
+            })?;
+            continue;
+        }
+
+        if let Some(parent) = output_path.parent() {
+            fs::create_dir_all(parent).map_err(|error| {
+                format!(
+                    "runoks 创建解压父目录失败: {}: {error}",
+                    parent.to_string_lossy()
+                )
+            })?;
+        }
+        let mut output = File::create(&output_path).map_err(|error| {
+            format!(
+                "runoks 创建解压文件失败: {}: {error}",
+                output_path.to_string_lossy()
+            )
+        })?;
+        io::copy(&mut entry, &mut output).map_err(|error| {
+            format!(
+                "runoks 写入解压文件失败: {}: {error}",
+                output_path.to_string_lossy()
+            )
+        })?;
+        output
+            .flush()
+            .map_err(|error| format!("runoks 刷新解压文件失败: {error}"))?;
+    }
+
+    Ok(())
+}
+
+/// 为 zip 解压创建唯一临时目录。
+fn _create_oks_temp_dir() -> Result<PathBuf, String> {
+    let stamp = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_millis())
+        .unwrap_or(0);
+    let temp_dir = std::env::temp_dir().join(format!("dna-builder-runoks-{stamp}"));
+    fs::create_dir_all(&temp_dir).map_err(|error| {
+        format!(
+            "runoks 创建临时解压目录失败: {}: {error}",
+            temp_dir.to_string_lossy()
+        )
+    })?;
+    Ok(temp_dir)
+}
+
+/// 加载 OK 外部 mod 的所有动作节点。
+fn _load_oks_scripts(root_dir: &Path) -> Result<HashMap<String, OksMacroFile>, String> {
+    let scripts_dir = root_dir.join("scripts");
+    _emit_runoks_console(
+        "info",
+        format!("read scripts dir={}", scripts_dir.to_string_lossy()),
+    );
+    let entries = fs::read_dir(&scripts_dir).map_err(|error| {
+        format!(
+            "runoks 读取 scripts 目录失败: {}: {error}",
+            scripts_dir.to_string_lossy()
+        )
+    })?;
+
+    let mut scripts = HashMap::new();
+    for entry in entries {
+        let entry = entry.map_err(|error| format!("runoks 读取脚本目录项失败: {error}"))?;
+        let path = entry.path();
+        if !path.is_file() {
+            continue;
+        }
+        let is_json = path
+            .extension()
+            .map(|ext| ext.to_string_lossy().eq_ignore_ascii_case("json"))
+            .unwrap_or(false);
+        if !is_json {
+            continue;
+        }
+
+        let key = path
+            .file_stem()
+            .map(|value| value.to_string_lossy().to_string())
+            .ok_or_else(|| format!("runoks 无法解析脚本文件名: {}", path.to_string_lossy()))?;
+        let content = fs::read_to_string(&path).map_err(|error| {
+            format!(
+                "runoks 读取脚本文件失败: {}: {error}",
+                path.to_string_lossy()
+            )
+        })?;
+        let parsed = serde_json::from_str::<OksMacroFile>(&content).map_err(|error| {
+            format!(
+                "runoks 解析脚本 JSON 失败: {}: {error}",
+                path.to_string_lossy()
+            )
+        })?;
+        scripts.insert(key, parsed);
+        _emit_runoks_console(
+            "debug",
+            format!("script loaded file={}", path.to_string_lossy()),
+        );
+    }
+
+    if scripts.is_empty() {
+        return Err(format!(
+            "runoks 未在 scripts 目录中找到任何 JSON 脚本: {}",
+            scripts_dir.to_string_lossy()
+        ));
+    }
+
+    Ok(scripts)
+}
+
+/// 加载 OK 外部 mod 的地图模板。
+fn _load_oks_maps(root_dir: &Path) -> Result<Vec<(String, Mat)>, String> {
+    let maps_dir = root_dir.join("map");
+    if !maps_dir.is_dir() {
+        return Ok(Vec::new());
+    }
+
+    _emit_runoks_console(
+        "info",
+        format!("read map dir={}", maps_dir.to_string_lossy()),
+    );
+    let entries = fs::read_dir(&maps_dir).map_err(|error| {
+        format!(
+            "runoks 读取 map 目录失败: {}: {error}",
+            maps_dir.to_string_lossy()
+        )
+    })?;
+    let mut templates = Vec::new();
+    for entry in entries {
+        let entry = entry.map_err(|error| format!("runoks 读取 map 目录项失败: {error}"))?;
+        let path = entry.path();
+        if !path.is_file() {
+            continue;
+        }
+        let is_png = path
+            .extension()
+            .map(|ext| ext.to_string_lossy().eq_ignore_ascii_case("png"))
+            .unwrap_or(false);
+        if !is_png {
+            continue;
+        }
+
+        let key = path
+            .file_stem()
+            .map(|value| value.to_string_lossy().to_string())
+            .ok_or_else(|| format!("runoks 无法解析模板文件名: {}", path.to_string_lossy()))?;
+        let raw = fs::read(&path).map_err(|error| {
+            format!(
+                "runoks 读取模板文件失败: {}: {error}",
+                path.to_string_lossy()
+            )
+        })?;
+        let image = imgcodecs::imdecode(
+            &opencv::core::Vector::<u8>::from_slice(&raw),
+            imgcodecs::IMREAD_GRAYSCALE,
+        )
+        .map_err(|error| format!("runoks 加载模板失败: {}: {error}", path.to_string_lossy()))?;
+        if image.rows() <= 0 || image.cols() <= 0 {
+            return Err(format!("runoks 模板图像无效: {}", path.to_string_lossy()));
+        }
+        let mut normalized = Mat::default();
+        imgproc::resize(
+            &image,
+            &mut normalized,
+            core::Size::new(0, 0),
+            1600.0 / 1920.0,
+            900.0 / 1080.0,
+            imgproc::INTER_LINEAR,
+        )
+        .map_err(|error| format!("runoks 缩放模板失败: {}: {error}", path.to_string_lossy()))?;
+        if normalized.rows() <= 0 || normalized.cols() <= 0 {
+            return Err(format!(
+                "runoks 缩放后模板图像无效: {}",
+                path.to_string_lossy()
+            ));
+        }
+        templates.push((key, normalized));
+        _emit_runoks_console(
+            "debug",
+            format!("map loaded file={}", path.to_string_lossy()),
+        );
+    }
+
+    templates.sort_by(|left, right| {
+        left.0
+            .len()
+            .cmp(&right.0.len())
+            .then_with(|| left.0.cmp(&right.0))
+    });
+    Ok(templates)
+}
+
+/// 将当前前台窗口截图转换为灰度图。
+fn _capture_window_gray(hwnd: HWND) -> Result<Mat, String> {
+    if hwnd.is_invalid() {
+        return Err("runoks 未找到窗口句柄".to_string());
+    }
+
+    let captured = capture_window_wgc(hwnd).ok_or_else(|| "runoks 截图窗口失败".to_string())?;
+    if captured.rows() <= 0 || captured.cols() <= 0 {
+        return Err("runoks 截图结果为空".to_string());
+    }
+
+    let captured_ref: &Mat = &captured;
+    if captured_ref.channels() == 1 {
+        return Ok(captured_ref.clone());
+    }
+
+    let mut gray = Mat::default();
+    let code = if captured_ref.channels() == 4 {
+        imgproc::COLOR_BGRA2GRAY
+    } else {
+        imgproc::COLOR_BGR2GRAY
+    };
+    imgproc::cvt_color(captured_ref, &mut gray, code, 0)
+        .map_err(|error| format!("runoks 灰度转换失败: {error}"))?;
+    Ok(gray)
+}
+
+/// 计算单个模板在屏幕上的最大匹配置信度。
+fn _calc_oks_match_confidence(screen_gray: &Mat, template_gray: &Mat) -> Result<f64, String> {
+    if screen_gray.rows() < template_gray.rows() || screen_gray.cols() < template_gray.cols() {
+        return Ok(0.0);
+    }
+
+    let result_rows = screen_gray.rows() - template_gray.rows() + 1;
+    let result_cols = screen_gray.cols() - template_gray.cols() + 1;
+    let mut result = unsafe {
+        Mat::new_rows_cols(result_rows, result_cols, core::CV_32F)
+            .map_err(|error| format!("runoks 创建匹配结果失败: {error}"))?
+    };
+    imgproc::match_template(
+        screen_gray,
+        template_gray,
+        &mut result,
+        imgproc::TM_CCOEFF_NORMED,
+        &Mat::default(),
+    )
+    .map_err(|error| format!("runoks 模板匹配失败: {error}"))?;
+
+    let mut min_val = 0.0;
+    let mut max_val = 0.0;
+    let mut min_loc = core::Point::new(0, 0);
+    let mut max_loc = core::Point::new(0, 0);
+    core::min_max_loc(
+        &result,
+        Some(&mut min_val),
+        Some(&mut max_val),
+        Some(&mut min_loc),
+        Some(&mut max_loc),
+        &Mat::default(),
+    )
+    .map_err(|error| format!("runoks 读取匹配结果失败: {error}"))?;
+    Ok(max_val)
+}
+
+/// 无地图模板时，按脚本文件名顺序取下一个节点。
+fn _find_next_oks_script_without_map(
+    script_keys: &[String],
+    previous: Option<&str>,
+) -> Option<String> {
+    let previous = previous?;
+    let current_index = script_keys.iter().position(|value| value == previous)?;
+    script_keys.get(current_index + 1).cloned()
+}
+
+/// 复用 OK 外部 mod 的匹配逻辑寻找下一个节点。
+fn _match_oks_map(
+    previous: Option<&str>,
+    map_templates: &[(String, Mat)],
+    script_keys: &[String],
+    hwnd: HWND,
+) -> Result<Option<String>, String> {
+    if map_templates.is_empty() {
+        return Ok(if previous.is_none() {
+            script_keys.first().cloned()
+        } else {
+            _find_next_oks_script_without_map(script_keys, previous)
+        });
+    }
+
+    let started_at = Instant::now();
+    while started_at.elapsed() < Duration::from_secs(5) {
+        if should_stop_current_script() {
+            return Err(SCRIPT_STOP_INTERRUPT_MESSAGE.to_string());
+        }
+
+        let screen_gray = _capture_window_gray(hwnd)?;
+        let mut best_name: Option<String> = None;
+        let mut best_confidence = 0.0_f64;
+        let mut candidate_count = 0_usize;
+
+        for (name, template_gray) in map_templates {
+            if !script_keys.iter().any(|key| key == name) {
+                continue;
+            }
+            if !_oks_is_candidate_map_name(previous, name.as_str()) {
+                continue;
+            }
+            candidate_count += 1;
+            let confidence = _calc_oks_match_confidence(&screen_gray, template_gray)?;
+            if confidence > best_confidence {
+                best_confidence = confidence;
+                best_name = Some(name.clone());
+            }
+        }
+
+        if candidate_count == 0 {
+            return Ok(None);
+        }
+        if best_name.is_some() {
+            return Ok(best_name);
+        }
+
+        thread::sleep(Duration::from_millis(100));
+    }
+
+    Ok(None)
+}
+
+/// 播放单个 OK 动作节点。
+fn _play_oks_macro_node(node: &OksMacroFile) -> Result<(), String> {
+    let _ = node.original_x_sensitivity;
+    let _ = node.original_y_sensitivity;
+
+    let started_at = Instant::now();
+    for action in &node.actions {
+        _oks_wait_until(started_at, action.time)?;
+        _execute_oks_action(action)?;
+    }
+    Ok(())
+}
+
+/// 播放单个 OK 动作节点（可选后台窗口句柄）。
+fn _play_oks_macro_node_with_hwnd(node: &OksMacroFile, hwnd: HWND) -> Result<(), String> {
+    let _ = node.original_x_sensitivity;
+    let _ = node.original_y_sensitivity;
+
+    let started_at = Instant::now();
+    for action in &node.actions {
+        _oks_wait_until(started_at, action.time)?;
+        _execute_oks_action_with_hwnd(action, hwnd)?;
+    }
+    Ok(())
+}
+
+/// 执行 OK 外部 mod 的主流程。
+fn _run_oks_impl(path: &str, hwnd: HWND) -> Result<(), String> {
+    let resolved_input = PathBuf::from(_resolve_script_resource_path(path));
+    _emit_runoks_console(
+        "info",
+        format!("start path={}", resolved_input.to_string_lossy()),
+    );
+    _emit_runoks_status("正在解析外部 mod");
+    if !resolved_input.exists() {
+        return Err(format!(
+            "runoks 路径不存在: {}",
+            resolved_input.to_string_lossy()
+        ));
+    }
+
+    let temp_dir = if _is_oks_zip_path(&resolved_input) {
+        let temp_dir = _create_oks_temp_dir()?;
+        _extract_oks_zip(&resolved_input, &temp_dir)?;
+        Some(temp_dir)
+    } else {
+        None
+    };
+
+    let base_dir = temp_dir.as_deref().unwrap_or(resolved_input.as_path());
+    _emit_runoks_console(
+        "info",
+        format!("resolve root dir from={}", base_dir.to_string_lossy()),
+    );
+    let root_dir = _resolve_oks_root_dir(base_dir)?;
+    _emit_runoks_console("info", format!("root dir={}", root_dir.to_string_lossy()));
+    let scripts = _load_oks_scripts(&root_dir)?;
+    let maps = _load_oks_maps(&root_dir)?;
+    _emit_runoks_console(
+        "info",
+        format!(
+            "loaded root={} scripts={} maps={}",
+            root_dir.to_string_lossy(),
+            scripts.len(),
+            maps.len()
+        ),
+    );
+    _emit_runoks_status(format!(
+        "已加载脚本 {} 个，模板 {} 个",
+        scripts.len(),
+        maps.len()
+    ));
+    let mut script_keys = scripts.keys().cloned().collect::<Vec<_>>();
+    script_keys.sort();
+
+    let playback_result = (|| -> Result<(), String> {
+        let mut current: Option<String> = None;
+        loop {
+            _emit_runoks_console(
+                "info",
+                format!("match current={}", current.as_deref().unwrap_or("<start>")),
+            );
+            let next = _match_oks_map(current.as_deref(), &maps, &script_keys, hwnd)?;
+            let Some(next_name) = next else {
+                _emit_runoks_console("info", "no next node, finish".to_string());
+                _emit_runoks_status("播放结束");
+                return Ok(());
+            };
+            _emit_runoks_console("info", format!("play node={next_name}"));
+            _emit_runoks_status(format!("正在播放 {next_name}"));
+            let node = scripts
+                .get(&next_name)
+                .ok_or_else(|| format!("runoks 未找到节点对应的脚本: {next_name}"))?;
+            _play_oks_macro_node_with_hwnd(node, hwnd)?;
+            current = Some(next_name);
+        }
+    })();
+
+    if let Some(temp_dir) = temp_dir {
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    playback_result
+}
+
+/// 运行 OK 外部 mod 宏，支持直接传目录或 zip 包。
+fn _runoks(hwnd: Option<JsValue>, path: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let hwnd = hwnd
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as isize;
+    let path = path
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy()
+        .trim()
+        .to_string();
+    let current_script_path = get_current_script_path().unwrap_or_default();
+    if path.is_empty() {
+        return Err(JsNativeError::typ()
+            .with_message("runoks path 不能为空")
+            .into());
+    }
+    _emit_runoks_console("info", format!("invoke path={path}"));
+
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let resolvers_clone = resolvers.clone();
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            let async_result = _spawn_blocking_with_script_stop_snapshot(move || {
+                set_current_script_path(current_script_path.clone());
+                _run_oks_impl(path.as_str(), HWND(hwnd as *mut std::ffi::c_void))
+            })
+            .await;
+            let context = &mut context.borrow_mut();
+            match async_result {
+                Ok(Ok(())) => resolvers_clone
+                    .resolve
+                    .call(&JsValue::undefined(), &[], context),
+                Ok(Err(message)) => resolvers_clone.reject.call(
+                    &JsValue::undefined(),
+                    &[JsValue::from(js_string!(message))],
+                    context,
+                ),
+                Err(error) => {
+                    let message = format!("runoks 线程执行失败: {error}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(message))],
+                        context,
+                    )
+                }
+            }
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
 }
 
 /// 将 Mat 编码为 PNG data URL，便于前端直接显示。
@@ -4370,6 +5331,9 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     let f = _mm.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("mm"), 2, f)?;
 
+    let f = _mmr.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("mmr"), 3, f)?;
+
     #[cfg(not(feature = "dob-script-cli"))]
     {
         // 云游戏业务层相对移动函数
@@ -4439,6 +5403,10 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     // 异步延迟函数
     let f = _sleep.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("sleep"), 1, f)?;
+
+    // 运行 OK 外部 mod 宏（目录 / zip）
+    let f = _runoks.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("runoks"), 1, f)?;
 
     // 剪贴板操作函数
     let f = _copy_text.into_js_function_copied(context);
@@ -4536,6 +5504,10 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     // OCR 初始化（自动下载资源）
     let f = _init_ocr.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("initOcr"), 3, f)?;
+
+    // Lite-Mono 初始化（自动下载模型并预热运行时）
+    let f = _init_mono_depth.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("initMonoDepth"), 2, f)?;
 
     // OCR 文字识别
     let f = _ocr_text.into_js_function_copied(context);
@@ -4661,8 +5633,46 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     let f = _mono_depth.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("monoDepth"), 1, f)?;
 
+    // Lite-Mono 单目路线预测函数
+    let f = _predict_mono_route.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("predictMonoRoute"), 3, f)?;
+
     // OpenCV DNN 命名空间（cv.dnn.*）
     register_cv_dnn_namespace(context)?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn oks_start_node_requires_letter_suffix() {
+        assert!(_oks_is_candidate_map_name(None, "60角色-A"));
+        assert!(!_oks_is_candidate_map_name(None, "60角色-1"));
+    }
+
+    #[test]
+    fn oks_followup_node_reuses_import_task_rules() {
+        assert!(_oks_is_candidate_map_name(
+            Some("60角色-A-1"),
+            "60角色-A-1-1"
+        ));
+        assert!(!_oks_is_candidate_map_name(
+            Some("60角色-A-1"),
+            "60角色-A-10"
+        ));
+        assert!(!_oks_is_candidate_map_name(
+            Some("60角色-A-1"),
+            "60角色-A-1-1-1"
+        ));
+    }
+
+    #[test]
+    fn oks_normalize_key_aliases() {
+        assert_eq!(_normalize_oks_key("Shift"), "lshift");
+        assert_eq!(_normalize_oks_key("CTRL"), "lctrl");
+        assert_eq!(_normalize_oks_key("f"), "f");
+    }
 }

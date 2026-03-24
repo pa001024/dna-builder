@@ -7,6 +7,10 @@ type ScriptConfigKind = "number" | "string" | "select" | "multi-select" | "boole
 type ScriptConfigValue = string | number | boolean | string[]
 export type ScriptRuntimeSidePanelTab = "status" | "config"
 
+interface InitRuntimeTrackingOptions {
+    includeConfigListeners?: boolean
+}
+
 interface ScriptReadConfigPayload {
     requestId: string
     scope?: string
@@ -627,9 +631,13 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
 
         /**
          * 初始化全局脚本运行态监听，仅初始化一次。
+         * @param options 初始化选项
          */
-        async initRuntimeTracking() {
-            this.loadScriptConfigItems()
+        async initRuntimeTracking(options: InitRuntimeTrackingOptions = {}) {
+            const includeConfigListeners = options.includeConfigListeners !== false
+            if (includeConfigListeners) {
+                this.loadScriptConfigItems()
+            }
             if (runtimeListenerReady) {
                 await this.syncRunningStateFromBackend()
             } else {
@@ -665,7 +673,7 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
                 statusListenerReady = true
             }
 
-            if (!readConfigListenerReady) {
+            if (includeConfigListeners && !readConfigListenerReady) {
                 readConfigUnlistenFn = await listen<ScriptReadConfigPayload>("script-read-config", async event => {
                     const payload = event.payload
                     if (!payload?.requestId || !payload?.name) return
@@ -679,7 +687,7 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
                 readConfigListenerReady = true
             }
 
-            if (!setConfigListenerReady) {
+            if (includeConfigListeners && !setConfigListenerReady) {
                 setConfigUnlistenFn = await listen<ScriptSetConfigPayload>("script-set-config", event => {
                     if (!event?.payload?.name) return
                     this.applyScriptSetConfigFromEvent(event.payload)
