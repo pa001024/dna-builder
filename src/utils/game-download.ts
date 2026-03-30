@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core"
 import { listen, type UnlistenFn } from "@tauri-apps/api/event"
-import { tauriFetch } from "@/api/app"
+import { getFileHash, getFileSize, tauriFetch } from "@/api/app"
 
 /**
  * rawurl
@@ -70,6 +70,15 @@ export interface GameAssets {
 }
 
 /**
+ * 统一本地哈希字符串格式，避免大小写差异影响比较结果。
+ * @param hash 原始哈希字符串
+ * @returns 归一化后的哈希字符串
+ */
+export function normalizeFileHash(hash: string) {
+    return hash.trim().toLowerCase()
+}
+
+/**
  * 下载进度信息
  */
 export interface DownloadProgress {
@@ -86,10 +95,173 @@ export interface GameVersionListWithPre {
     preVersionList?: GameVersionListRes
 }
 
+export interface HotUpdateVersionInfo {
+    major: number
+    minor: number
+    revamp: number
+    patchKey: number
+    patchVersion: number
+    bOptional: boolean
+    bRestart: boolean
+}
+
+export interface HotUpdateVersionListRes {
+    versionList: Record<string, HotUpdateVersionInfo>
+}
+
+export interface HotUpdatePakFileInfo {
+    fileName: string
+    hash: string
+    pakOptionalSign: string
+    fileSize: number
+    bExamineIgnore: boolean
+}
+
+export interface HotUpdatePakFilesInfoRes {
+    pakFilesMap: Record<
+        string,
+        {
+            pakFileInfos: HotUpdatePakFileInfo[]
+        }
+    >
+}
+
+export interface OptionalPatchInfo {
+    state: string
+    version: number
+}
+
+export interface OptionalPatchSignsRes {
+    optionalPatchInfos: Record<string, OptionalPatchInfo>
+}
+
 /**
  * 下载进度回调函数
  */
 export type ProgressCallback = (progress: DownloadProgress) => void
+
+/**
+ * 校验本地文件是否与远端清单一致。
+ * @param filePath 本地文件路径
+ * @param expectedSize 预期文件大小
+ * @param expectedHash 预期 MD5 哈希
+ * @returns 是否完全匹配
+ */
+export async function isLocalFileMatch(filePath: string, expectedSize: number, expectedHash: string) {
+    try {
+        const actualSize = await getFileSize(filePath)
+        if (actualSize === 0 || actualSize !== expectedSize) {
+            return false
+        }
+
+        const actualHash = await getFileHash(filePath)
+        if (!actualHash) {
+            return false
+        }
+
+        return normalizeFileHash(actualHash) === normalizeFileHash(expectedHash)
+    } catch (error) {
+        console.error("校验本地文件 hash 失败:", error)
+        return false
+    }
+}
+
+/**
+ * 获取热更版本清单。
+ * @param cdn CDN 地址
+ * @param channel 渠道
+ * @returns 热更版本清单
+ */
+export async function getHotUpdateVersionList(cdn: string, channel: string) {
+    const server = channel.match(/(Global)_Pub/)?.[1] || "CN"
+    const versionUrl = `/Patches/FinalPatch/${server}/Default/WindowsNoEditor/${channel}/VersionList.json`
+    const res = await tauriFetch(`${cdn}${versionUrl}`)
+    return (await res.json()) as HotUpdateVersionListRes
+}
+
+/**
+ * 获取热更补丁文件清单。
+ * @param cdn CDN 地址
+ * @param channel 渠道
+ * @param patchVersion 补丁版本号
+ * @returns 补丁文件清单
+ */
+export async function getHotUpdatePakFilesInfo(cdn: string, channel: string, patchVersion: number) {
+    const server = channel.match(/(Global)_Pub/)?.[1] || "CN"
+    const versionUrl = `/Patches/FinalPatch/${server}/Default/WindowsNoEditor/${channel}/${patchVersion}/PakFilesInfo.json`
+    const res = await tauriFetch(`${cdn}${versionUrl}`)
+    return (await res.json()) as HotUpdatePakFilesInfoRes
+}
+
+/**
+ * 获取热更离散资源清单。
+ * @param cdn CDN 地址
+ * @param channel 渠道
+ * @param patchVersion 补丁版本号
+ * @returns 离散资源清单
+ */
+export async function getHotUpdateResDiscreteInfo(cdn: string, channel: string, patchVersion: number) {
+    const server = channel.match(/(Global)_Pub/)?.[1] || "CN"
+    const versionUrl = `/Patches/FinalPatch/${server}/Default/WindowsNoEditor/${channel}/${patchVersion}/ResDiscreteInfo.json`
+    const res = await tauriFetch(`${cdn}${versionUrl}`)
+    return (await res.json()) as HotUpdatePakFilesInfoRes
+}
+
+/**
+ * 下载热更补丁文件。
+ * @param cdn CDN 地址
+ * @param filename 文件名
+ * @param channel 渠道
+ * @param patchVersion 补丁版本号
+ * @param concurrentThreads 并发线程数
+ * @param onProgress 下载进度回调
+ * @param downloadDir 下载目录
+ * @returns 下载结果消息
+ */
+export async function downloadHotUpdateAssets(
+    cdn: string,
+    filename: string,
+    channel: string,
+    patchVersion: number,
+    concurrentThreads = 10,
+    onProgress?: ProgressCallback,
+    downloadDir: string = "download/"
+): Promise<string> {
+    let unlistenFn: UnlistenFn | undefined
+
+    try {
+        const normalizedDir = downloadDir.endsWith("\\") ? downloadDir : `${downloadDir}\\`
+        const fullFilePath = `${normalizedDir}${filename}`
+
+        if (onProgress) {
+            unlistenFn = await listen<DownloadProgress>("download_progress", event => {
+                if (event.payload.filename === fullFilePath) {
+                    onProgress({
+                        ...event.payload,
+                        filename: filename,
+                    })
+                }
+            })
+        }
+
+        const server = channel.match(/(Global)_Pub/)?.[1] || "CN"
+        const versionUrl = `/Patches/FinalPatch/${server}/Default/WindowsNoEditor/${channel}/${patchVersion}`
+        const result = await invoke<string>("download_file", {
+            url: `${cdn}${versionUrl}/${filename}`,
+            filename: fullFilePath,
+            concurrentThreads,
+        })
+
+        return result
+    } catch (error) {
+        console.error("下载热更资源失败:", error)
+        throw new Error(`下载 ${filename} 失败: ${error instanceof Error ? error.message : String(error)}`)
+    } finally {
+        if (unlistenFn) {
+            unlistenFn()
+        }
+    }
+}
 
 export async function getBaseVersion(cdn: string, channel: string) {
     const server = channel.match(/(Global)_Pub/)?.[1] || "CN"

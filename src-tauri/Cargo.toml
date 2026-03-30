@@ -64,6 +64,7 @@ futures-util = "0.3.31"
 http = "1.1.0"
 scopeguard = "1.2.0"
 regex = "1.11.1"
+md5 = "0.8.0"
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.

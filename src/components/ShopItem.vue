@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { draftMap, LeveledMod, LeveledWeapon, modMap, resourceMap, walnutMap, weaponMap } from "@/data"
-import { charAccessoryData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { charAccessoryData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import { headSculptureMap } from "@/data/d/headsculpture.data"
 import { mountData } from "@/data/d/mount.data"
 import type { ShopItem } from "@/data/d/shop.data"
@@ -95,6 +95,19 @@ const itemDetail = computed(() => {
                     type: props.item.itemType,
                     icon: `/imgs/webp/T_Head_Empty.webp`,
                 }
+            }
+        case "Skin":
+            const skin = skinData.find(item => item.id === props.item.typeId)
+            if (!skin) {
+                return {
+                    type: props.item.itemType,
+                    icon: `/imgs/webp/T_Head_Empty.webp`,
+                }
+            }
+            return {
+                type: props.item.itemType,
+                icon: `/imgs/fashion/${skin.icon}.webp`,
+                link: `/db/accessory/skin/${skin.id}`,
             }
         case "Title":
             return {

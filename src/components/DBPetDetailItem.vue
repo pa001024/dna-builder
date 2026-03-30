@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
-import { petMap } from "@/data"
+import { petMap, resourceMap } from "@/data"
 import { regionMap } from "@/data/d/region.data"
+import shopData from "@/data/d/shop.data"
 import { subRegionData } from "@/data/d/subregion.data"
 import type { Pet } from "../data/data-types"
 import { LeveledPet } from "../data/leveled/LeveledPet"
@@ -17,6 +18,19 @@ interface PetSpawnLocation {
     regionName: string
     totalWeight: number
     rcWeights: { rcId: number; rcIndex: number; petWeight: number; totalWeight: number; ratio: number }[]
+}
+
+interface PetShopSource {
+    key: string
+    shopId: string
+    shopName: string
+    mainTabName: string
+    subTabName: string
+    subTabId: number
+    price: number
+    priceName: string
+    timeStart?: number
+    timeEnd?: number
 }
 
 const currentLevel = ref(props.pet.最大等级 > 1 ? 3 : 0)
@@ -86,6 +100,25 @@ function formatPercent(ratio: number): string {
     return `${(ratio * 100).toFixed(2)}%`
 }
 
+/**
+ * 将时间戳格式化为可读的时间区间。
+ * @param start 开始时间戳
+ * @param end 结束时间戳
+ * @returns 时间区间文本
+ */
+function formatTimeRange(start: number, end?: number) {
+    const formatTime = (timestamp: number) =>
+        new Date(timestamp * 1000).toLocaleString("zh-CN", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+        })
+
+    return `${formatTime(start)}~${end ? formatTime(end) : "至今"}`
+}
+
 watch(
     () => props.pet,
     () => {
@@ -147,6 +180,74 @@ function getTypeName(type: number): string {
 function getPrmName(id: number): string {
     return petMap.get(id)?.名称 || id.toString()
 }
+
+/**
+ * 通过魔灵 id 获取图标地址。
+ * @param id 魔灵 id
+ * @returns 图标 URL
+ */
+function getPrmIconUrl(id: number): string {
+    const pet = petMap.get(id)
+    return pet?.icon ? `/imgs/webp/T_Head_Pet_${pet.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+}
+
+/**
+ * 根据价格名称获取资源图标。
+ * @param priceName 价格资源名称
+ * @returns 资源图标 URL
+ */
+function getPriceIcon(priceName: string): string {
+    const priceResource = resourceMap.get(priceName)
+    return priceResource?.icon ? `/imgs/res/${priceResource.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+}
+
+/**
+ * 收集当前魔灵的商店来源信息。
+ * @param pet 魔灵数据
+ * @returns 商店来源列表
+ */
+function collectPetShopSources(pet: Pet): PetShopSource[] {
+    const result: PetShopSource[] = []
+    const sourceKeySet = new Set<string>()
+
+    shopData.forEach(shop => {
+        shop.mainTabs.forEach(mainTab => {
+            mainTab.subTabs.forEach(subTab => {
+                subTab.items.forEach(item => {
+                    if (item.itemType !== "Pet" || item.typeId !== pet.id) {
+                        return
+                    }
+
+                    const key = `shop-${shop.id}-${mainTab.id}-${subTab.id}-${item.id}-${pet.id}`
+                    if (sourceKeySet.has(key)) {
+                        return
+                    }
+
+                    sourceKeySet.add(key)
+                    result.push({
+                        key,
+                        shopId: shop.id,
+                        shopName: shop.name,
+                        mainTabName: mainTab.name,
+                        subTabName: subTab.name,
+                        subTabId: subTab.id,
+                        price: item.price,
+                        priceName: item.priceName,
+                        timeStart: item.startTime,
+                        timeEnd: item.endTime,
+                    })
+                })
+            })
+        })
+    })
+
+    return result
+}
+
+/**
+ * 当前魔灵的商店来源列表。
+ */
+const petShopSources = computed<PetShopSource[]>(() => collectPetShopSources(props.pet))
 </script>
 
 <template>
@@ -183,12 +284,15 @@ function getPrmName(id: number): string {
 
         <div v-if="pet.异化 && pet.异化 !== pet.id" class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-1">异化</div>
-            <div class="text-sm">
-                <span>{{ $t(getPrmName(pet.异化)) }}</span>
+            <div class="flex items-center gap-2 text-sm">
+                <img :src="getPrmIconUrl(pet.异化)" :alt="getPrmName(pet.异化)" class="w-6 h-6 rounded object-cover bg-base-300" />
+                <SRouterLink :to="`/db/pet/${pet.异化}`" class="hover:underline">
+                    {{ $t(getPrmName(pet.异化)) }}
+                </SRouterLink>
             </div>
         </div>
 
-        <div>
+        <div v-if="pet.最大等级 > 1">
             <div class="flex items-center gap-4">
                 <span class="text-sm min-w-12">Lv. {{ currentLevel }}</span>
                 <input
@@ -261,6 +365,26 @@ function getPrmName(id: number): string {
                 </div>
             </div>
             <div v-else class="text-sm text-base-content/70">大世界不刷新该魔灵。</div>
+        </div>
+
+        <div v-if="petShopSources.length > 0" class="space-y-2">
+            <div class="text-xs text-base-content/60">商店购买</div>
+            <div v-for="source in petShopSources" :key="source.key" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors">
+                <div class="flex justify-between items-center gap-2 mb-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <SRouterLink :to="`/db/shop/${source.shopId}/${source.subTabId}`" class="hover:underline min-w-0 truncate">
+                            {{ source.mainTabName }} / {{ source.subTabName }}
+                        </SRouterLink>
+                        <span class="text-xs text-base-content/70">({{ source.shopName }})</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <img :src="getPriceIcon(source.priceName)" class="w-4 h-4 object-cover rounded" :alt="source.priceName" />
+                        <span class="text-xs text-base-content/70">{{ source.priceName }}</span>
+                        <span class="text-sm font-medium">{{ source.price }}</span>
+                    </div>
+                </div>
+                <div v-if="source.timeStart" class="text-xs text-base-content/70">{{ formatTimeRange(source.timeStart, source.timeEnd) }}</div>
+            </div>
         </div>
     </div>
 </template>

@@ -8,6 +8,7 @@ use std::{
 
 use hotwatch::{Event, EventKind, Hotwatch};
 use lazy_static::lazy_static;
+use md5::Context;
 use reqwest::multipart;
 use serde::{Deserialize, Serialize};
 
@@ -1886,6 +1887,32 @@ async fn get_file_size(file_path: String) -> Result<u64, String> {
     Ok(metadata.len())
 }
 
+/// 获取文件的 MD5 哈希值
+#[tauri::command]
+async fn get_file_hash(file_path: String) -> Result<String, String> {
+    let path = Path::new(&file_path);
+    if !path.exists() {
+        return Ok(String::new());
+    }
+
+    let file = File::open(path).map_err(|e| format!("Failed to open file: {}", e))?;
+    let mut reader = io::BufReader::new(file);
+    let mut context = Context::new();
+    let mut buffer = [0u8; 8192];
+
+    loop {
+        let read_size = reader
+            .read(&mut buffer)
+            .map_err(|e| format!("Failed to read file: {}", e))?;
+        if read_size == 0 {
+            break;
+        }
+        context.consume(&buffer[..read_size]);
+    }
+
+    Ok(format!("{:x}", context.finalize()))
+}
+
 /// 清理临时目录
 #[tauri::command]
 async fn cleanup_temp_dir(temp_dir: String) -> Result<String, String> {
@@ -1934,6 +1961,31 @@ async fn list_files(dir_path: String) -> Result<Vec<String>, String> {
     }
 
     Ok(files)
+}
+
+/// 列出指定目录下的所有子目录
+#[tauri::command]
+async fn list_directories(dir_path: String) -> Result<Vec<String>, String> {
+    let path = Path::new(&dir_path);
+    if !path.exists() {
+        return Ok(vec![]);
+    }
+
+    let mut directories = vec![];
+    if let Ok(entries) = fs::read_dir(path) {
+        for entry in entries.flatten() {
+            let entry_path = entry.path();
+            if entry_path.is_dir() {
+                if let Some(file_name) = entry_path.file_name() {
+                    if let Some(name_str) = file_name.to_str() {
+                        directories.push(name_str.to_string());
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(directories)
 }
 /// 列出指定目录下的所有 JS 文件
 #[tauri::command]
@@ -2855,6 +2907,7 @@ pub fn run() {
         download_file,
         extract_game_assets,
         get_file_size,
+        get_file_hash,
         cleanup_temp_dir,
         run_script,
         resolve_script_config_request,
@@ -2889,7 +2942,8 @@ pub fn run() {
         delete_file,
         watch_file,
         unwatch_file,
-        list_files
+        list_files,
+        list_directories
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

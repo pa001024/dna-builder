@@ -135,6 +135,15 @@ export async function listFiles(dirPath: string) {
 }
 
 /**
+ * 列出指定目录下的所有子目录
+ * @param dirPath 目录路径
+ * @returns 子目录名列表
+ */
+export async function listDirectories(dirPath: string) {
+    return await invoke<string[]>("list_directories", { dirPath })
+}
+
+/**
  * 提取游戏资产
  * @param zipPath 压缩包路径
  * @param targetDir 目标目录
@@ -654,6 +663,15 @@ export async function tauriFetch(url: RequestInfo | URL, options?: RequestInit):
  */
 export async function getFileSize(filePath: string) {
     return await invoke<number>("get_file_size", { filePath })
+}
+
+/**
+ * 获取文件哈希。
+ * @param filePath 文件路径
+ * @returns 文件的 MD5 哈希值，不存在时返回空字符串
+ */
+export async function getFileHash(filePath: string) {
+    return await invoke<string>("get_file_hash", { filePath })
 }
 
 /**
