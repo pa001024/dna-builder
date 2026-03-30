@@ -7,7 +7,7 @@ import { env } from "./env"
 export function useState<T, N extends keyof T>(obj: T, key: N) {
     return [computed(() => obj[key]), (val: T[N]) => (obj[key] = val)] as const
 }
-export function format1(n1: number, di = 1) {
+export function format1(n1: number, di = 2) {
     return `${+n1.toFixed(di)}`
 }
 export function format100(n100: number, di = 2) {
@@ -24,7 +24,7 @@ export function format1000(n: number, di = 0) {
 export function formatBigNumber(n: number) {
     if (i18next.language.startsWith("zh")) {
         if (n >= 1e8) return `${+(n / 1e8).toFixed(3)}E`
-        if (n >= 1e4) return `${+(n / 1e4).toFixed(3)}W`
+        if (n >= 1e5) return `${+(n / 1e4).toFixed(3)}W`
     } else {
         if (n >= 1e9) return `${+(n / 1e9).toFixed(3)}B`
         if (n >= 1e6) return `${+(n / 1e6).toFixed(3)}M`
@@ -48,27 +48,34 @@ const numKeys = new Set([
     "基础装填",
     "基础弹匣",
     "连击持续时间",
+    "子弹爆炸范围",
+    "弹药",
 ])
 export function formatProp(prop: string, val: any): string {
     // 实现属性格式化的逻辑
     if (typeof val !== "number") return String(val)
-    if (numKeys.has(prop)) return val > 0 && !prop.startsWith("基础") ? `+${val}` : `${val}`
+    if (numKeys.has(prop)) return val > 0 && !prop.startsWith("基础") ? `+${+val.toFixed(2)}` : `${+val.toFixed(2)}`
     return prop.startsWith("基础") ? format100(val, 1) : format100r(val, 1)
 }
 export function formatWeaponProp(prop: string, val: any): string {
     // 实现属性格式化的逻辑
     if (typeof val !== "number") return String(val)
-    if (numKeys.has(prop)) return `${val.toFixed(2)}`
-    return format100(val, 1)
+    if (prop === "攻击" || numKeys.has(prop)) return `${+val.toFixed(2)}`
+    return format100(val, 2)
 }
 const propRegex = /神智消耗|神智回复$/
 export function formatSkillProp(prop: string, val: LeveledSkillField) {
     const fmt = propRegex.test(prop) ? format1 : format100
-    return val.格式
-        ? val.格式.replace(/\{%?\}/g, (v, i) =>
-              v.includes("%") ? format100(i ? (val.值2 || val.段数)! : val.值) : format1(i ? (val.值2 || val.段数)! : val.值)
-          )
-        : fmt(val.值)
+    if (!val.格式) {
+        return fmt(val.值)
+    }
+
+    let placeholderIndex = 0
+    return val.格式.replace(/\{%?\}/g, v => {
+        const currentValue = placeholderIndex === 0 ? val.值 : (val.值2 ?? val.值)
+        placeholderIndex += 1
+        return v.includes("%") ? format100(currentValue) : format1(currentValue)
+    })
 }
 
 export async function copyText(text: string) {

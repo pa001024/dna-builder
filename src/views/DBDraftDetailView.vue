@@ -16,7 +16,7 @@ const draft = computed(() => {
 </script>
 
 <template>
-    <div class="h-full flex flex-col">
+    <ScrollArea class="h-full flex flex-col">
         <DBDraftDetailItem :draft="draft" class="flex-1" />
-    </div>
+    </ScrollArea>
 </template>

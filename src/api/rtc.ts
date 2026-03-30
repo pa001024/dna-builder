@@ -249,7 +249,7 @@ class RTCConnection {
     }
     async connect() {
         this.pc = new RTCPeerConnection({
-            iceServers: [{ urls: "turn:xn--chq26veyq.icu:3478?transport=tcp", username: "rtc", credential: "rtc" }],
+            iceServers: [{ urls: "turn:dna-builder.cn:3478?transport=tcp", username: "rtc", credential: "rtc" }],
         })
         this.pc.onicecandidate = event => {
             if (event.candidate) this.send("candidate", event.candidate)

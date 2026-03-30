@@ -1,12 +1,36 @@
 import { RespCode, TimeBasicResponse } from "../TimeBasicResponse"
 import type { DNACommonConfigEntity } from "../type-generated"
-import { aesDecryptImageUrl, build_signature, build_upload_signature, type HeadersPayload, type RequestOptions } from "./utils"
+import {
+    aesDecryptImageUrl,
+    build_signature111,
+    build_signature120,
+    build_signature122,
+    build_upload_signature,
+    type HeadersPayload,
+    type RequestOptions,
+    rand_str2,
+    rsa_encrypt,
+} from "./utils"
+
+export interface DNABaseAPIConfig {
+    server?: "cn" | "global"
+    lang?: string //"zh-Hans" | "en"
+    dev_code?: string
+    token?: string
+    kf_token?: string
+    fetchFn?: typeof fetch
+    is_h5?: boolean
+    rsa_public_key?: string
+    mode?: "android" | "ios"
+    debug?: boolean
+}
 
 export class DNABaseAPI {
     public fetchFn?: typeof fetch
     public RSA_PUBLIC_KEY =
         "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDGpdbezK+eknQZQzPOjp8mr/dP+QHwk8CRkQh6C6qFnfLH3tiyl0pnt3dePuFDnM1PUXGhCkQ157ePJCQgkDU2+mimDmXh0oLFn9zuWSp+U8uLSLX3t3PpJ8TmNCROfUDWvzdbnShqg7JfDmnrOJz49qd234W84nrfTHbzdqeigQIDAQAB"
     public BASE_URL = "https://dnabbs-api.yingxiong.com/"
+    public BASE_WEB_SOCKET_URL = "wss://dnabbs-api.yingxiong.com:8180/ws-community-websocket"
     public KF_BASE_URL = "https://kf.yingxiong.com/"
     public uploadKey: string = ""
     public sign_api_urls = new Set<string>()
@@ -17,42 +41,89 @@ export class DNABaseAPI {
     public kf_token = ""
     public debug = false
     public cookieToken = ""
-    constructor(
-        options: {
-            dev_code?: string
-            token?: string
-            kf_token?: string
-            fetchFn?: typeof fetch
-            rsa_public_key?: string
-            mode?: "ios" | "android"
-            debug?: boolean
-        } = {}
-    ) {
+    private _server: "cn" | "global" = "cn"
+    public get server() {
+        return this._server
+    }
+    public set server(value: "cn" | "global") {
+        this._server = value
+        if (value === "global") {
+            this.BASE_URL = "https://lunoloft-api.yingxiong.com/"
+            this.BASE_WEB_SOCKET_URL = "wss://lunoloft-api.yingxiong.com:8181/ws-community-websocket"
+        } else {
+            this.BASE_URL = "https://dnabbs-api.yingxiong.com/"
+            this.BASE_WEB_SOCKET_URL = "wss://dnabbs-api.yingxiong.com:8180/ws-community-websocket"
+        }
+        this.updateHeaders()
+    }
+    private _mode: "android" | "ios" = "ios"
+    public get mode() {
+        return this._mode
+    }
+    public set mode(value: "android" | "ios") {
+        this._mode = value
+        this.updateHeaders()
+    }
+    private _lang: string = "zh-Hans"
+    public get lang() {
+        return this._lang
+    }
+    public set lang(value: string) {
+        this._lang = value
+        this.updateHeaders()
+    }
+
+    constructor(options: DNABaseAPIConfig = {}) {
+        if (options.server === "global") {
+            this.server = "global"
+        } else {
+            this.server = "cn"
+        }
         this.fetchFn = options.fetchFn
+        if (options.mode !== undefined) this.mode = options.mode
+        if (options.lang !== undefined) this.lang = options.lang
         if (options.rsa_public_key !== undefined) this.RSA_PUBLIC_KEY = options.rsa_public_key
-        if (options.dev_code !== undefined) this.dev_code = options.dev_code
+        if (options.dev_code !== undefined) {
+            this.dev_code = options.dev_code
+        } else {
+            this.dev_code = DNABaseAPI.generateDeviceCode()
+        }
         if (options.token !== undefined) this.token = options.token
         if (options.kf_token !== undefined) this.kf_token = options.kf_token
         if (options.debug) this.debug = true
-        if (options.mode === "android") {
+    }
+    /**
+     * 生成设备码
+     */
+    static generateDeviceCode() {
+        return `2${rand_str2(32)}`
+    }
+
+    updateHeaders() {
+        if (this.mode === "android") {
             this.baseHeaders = {
                 "log-header": "I am the log request header.",
                 countrycode: "CN",
-                version: "1.2.0",
-                versioncode: "7",
+                version: this.server === "cn" ? "1.2.2" : "1.1.1",
+                versioncode: this.server === "cn" ? "9" : "5",
                 source: "android",
+                lang: this.lang,
                 "Content-Type": "application/x-www-form-urlencoded",
-                "User-Agent": "okhttp/3.10.0",
+                "User-Agent": this.server === "cn" ? "okhttp/3.10.0" : "okhttp/5.3.2",
             }
         } else {
             this.baseHeaders = {
                 "log-header": "I am the log request header.",
                 countrycode: "CN",
-                version: "1.2.0",
-                versioncode: "7",
+                version: this.server === "cn" ? "1.2.0" : "1.1.1",
+                versioncode: this.server === "cn" ? "7" : "5",
                 source: "ios",
+                lang: this.lang,
                 "Content-Type": "application/x-www-form-urlencoded",
-                "User-Agent": "DoubleHelix/3 CFNetwork/3860.300.31 Darwin/25.2.0",
+                "User-Agent":
+                    this.server === "cn"
+                        ? "DoubleHelix/3 CFNetwork/3860.300.31 Darwin/25.2.0"
+                        : "DoubleHelix/4 CFNetwork/3860.100.1 Darwin/25.0.0",
             }
         }
     }
@@ -145,12 +216,23 @@ export class DNABaseAPI {
         } else if (typeof payload === "object") {
             if (!kf) {
                 const pk = await this.getRsaPublicKey()
-                const { rk, tn, sa } = build_signature(pk, payload, token)
+                if (this.server === "cn") {
+                    if (this.mode === "android") {
+                        const { tn, sa } = build_signature122(pk, payload, token)
 
-                // 更新 headers
-                headers.rk = rk
-                headers.tn = tn
-                headers.sa = sa
+                        // 更新 headers
+                        // headers.rk = rk
+                        headers.tn = tn
+                        headers.sa = sa
+                    } else {
+                        const { tn, sa, rk } = build_signature120(pk, payload, token)
+
+                        // 更新 headers
+                        headers.rk = rk
+                        headers.tn = tn
+                        headers.sa = sa
+                    }
+                }
 
                 if (exparams) {
                     Object.assign(payload, exparams)
@@ -159,7 +241,23 @@ export class DNABaseAPI {
                 Object.entries(payload).forEach(([key, value]) => {
                     params.append(key, String(value))
                 })
+                const objPayload = payload
                 payload = params.toString()
+
+                if (!kf && this.server !== "cn") {
+                    // 国际服貌似没签名 姑且加上
+                    const si = kf ? {} : build_signature111(objPayload, "")
+                    Object.assign(objPayload, { sign: si.s, timestamp: si.t })
+                    const rk = si.k
+                    const pk = await this.getRsaPublicKey()
+                    const ek = rsa_encrypt(rk, pk)
+                    if (h5) {
+                        headers.k = ek
+                    } else {
+                        headers.rk = rk
+                        headers.key = ek
+                    }
+                }
             } else {
                 payload = JSON.stringify(payload)
             }
@@ -247,7 +345,7 @@ export class DNABaseAPI {
             try {
                 let body: string | FormData | undefined = data
                 if (data && typeof data === "object" && !(data instanceof FormData)) {
-                    if (!kf) {
+                    if (!kf || method === "GET") {
                         const p = new URLSearchParams()
                         Object.entries(data).forEach(([key, value]) => {
                             if (value !== undefined) p.append(key, String(value))

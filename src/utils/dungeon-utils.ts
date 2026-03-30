@@ -2,6 +2,10 @@ import { t } from "i18next"
 import { type AbyssDungeon, abyssDungeonMap, type Dungeon, monsterMap } from "../data"
 import { getRewardDetails } from "./reward-utils"
 
+export const ABYSS_DUNGEON_ELEMENT_KEYS = ["暗", "水", "火", "雷", "风", "光"] as const
+
+export type AbyssDungeonElementKey = (typeof ABYSS_DUNGEON_ELEMENT_KEYS)[number]
+
 // 获取副本类型信息
 export function getDungeonType(type: string): { t: string; label: string; color: string } {
     const typeMap: Record<string, { t: string; label: string; color: string }> = {
@@ -45,17 +49,41 @@ export function getAbyssDungeonName(dungeon: AbyssDungeon) {
     return `${getAbyssDungeonGroup(dungeon)} ${getAbyssDungeonLevel(dungeon)}`
 }
 
+/**
+ * 判断深渊副本是否存在 400% 的怪物属性加成。
+ */
+export function hasAbyssDungeonMaxMb(dungeon: AbyssDungeon) {
+    return Object.values(dungeon.mb || {}).some(value => value === 4)
+}
+
+/**
+ * 格式化深渊副本怪物属性加成。
+ * 当存在 400% 加成时，未配置的属性按 -50% 展示，避免出现 NaN。
+ */
+export function formatAbyssDungeonMbValue(dungeon: AbyssDungeon, key: AbyssDungeonElementKey) {
+    const value = dungeon.mb?.[key]
+    const displayValue = typeof value === "number" ? value : hasAbyssDungeonMaxMb(dungeon) ? -0.5 : undefined
+
+    return typeof displayValue === "number" ? `${(displayValue * 100).toFixed(0)}%` : "--"
+}
+
 const mhList = [
     {
-        DungeonId: [60102, 60202, 60302, 60402, 60502, 60602, 60702, 60802, 60902, 61002, 61102],
+        DungeonId: [60102, 60202, 60402, 60502, 60602, 60702, 60902, 61102],
+        // DungeonRandomNum: [3, 3],
+        // Sequence: 1,
         WalnutType: 1,
     },
     {
-        DungeonId: [62102, 62202, 62302, 62402, 62502, 62602, 62702, 62802, 62902, 63002, 63102],
+        DungeonId: [62102, 62202, 62402, 62502, 62602, 62702, 62902, 63102],
+        // DungeonRandomNum: [3, 3],
+        // Sequence: 2,
         WalnutType: 2,
     },
     {
-        DungeonId: [64102, 64202, 64302, 64402, 64502, 64602, 64702, 64802, 64902, 65002, 65102],
+        DungeonId: [64102, 64202, 64402, 64502, 64602, 64702, 64902, 65102],
+        // DungeonRandomNum: [3, 3],
+        // Sequence: 3,
         WalnutType: 3,
     },
 ].reduce(

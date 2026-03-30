@@ -1,20 +1,200 @@
 <script lang="ts" setup>
-import { resourceMap } from "@/data"
+import { computed } from "vue"
+import { cutoffMap, draftMap, LeveledMod, LeveledWeapon, modMap, resourceMap, rewardMap, walnutMap, weaponMap } from "@/data"
+import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import type { Cutoff } from "@/data/d/cutoff.data"
+import { headSculptureMap } from "@/data/d/headsculpture.data"
+import { mountData } from "@/data/d/mount.data"
 import type { ShopItem } from "@/data/d/shop.data"
+import { getRewardDetails, getRewardTypeText } from "@/utils/reward-utils"
 
 // 定义带有子项的商品类型
 interface ShopItemWithChildren extends ShopItem {
     children?: ShopItemWithChildren[]
+    diffState?: "added" | "removed"
 }
 
-// 定义组件接收的Props
-interface Props {
+const props = defineProps<{
     item: ShopItemWithChildren
+}>()
+
+/**
+ * 反查当前商品对应的折扣配置。
+ */
+const cutoffInfo = computed<Cutoff | null>(() => cutoffMap.get(props.item.id) ?? null)
+
+/**
+ * 当前商品的实际展示价格。
+ * 有折扣时显示折后价，否则显示商品原价。
+ */
+const currentPrice = computed(() => cutoffInfo.value?.price ?? props.item.price)
+
+/**
+ * 格式化时间戳，便于 tooltip 展示。
+ * @param timestamp 秒级时间戳
+ * @returns 本地化时间文本
+ */
+function formatCutoffTime(timestamp: number) {
+    return new Date(timestamp * 1000).toLocaleString()
 }
 
-defineProps<Props>()
-
-function getResourceIcon(name: string) {
+const itemDetail = computed(() => {
+    switch (props.item.itemType) {
+        case "Mod":
+            const mod = modMap.get(props.item.typeId)
+            return {
+                type: "Mod" as const,
+                mod,
+                icon: LeveledMod.url(mod?.icon),
+                link: `/db/mod/${mod?.id}`,
+            }
+        case "Weapon":
+            const weapon = weaponMap.get(props.item.typeId)
+            return {
+                type: "Weapon" as const,
+                weapon,
+                icon: LeveledWeapon.url(weapon?.icon),
+                link: `/db/weapon/${weapon?.id}`,
+            }
+        case "Resource":
+            const res = resourceMap.get(props.item.typeId)
+            return {
+                type: "Resource" as const,
+                res,
+                icon: `/imgs/res/${res?.icon}.webp`,
+            }
+        case "Draft":
+            const draft = draftMap.get(props.item.typeId)
+            let icon = `/imgs/webp/T_Head_Empty.webp`
+            if (draft) {
+                if (draft.t === "Mod" && draft.p) {
+                    icon = LeveledMod.url(modMap.get(draft.p)?.icon)
+                } else if (draft.t === "Weapon" && draft.p) {
+                    icon = LeveledWeapon.url(weaponMap.get(draft.p)?.icon)
+                } else {
+                    switch (draft.t) {
+                        case "CharAccessory":
+                            let acc = charAccessoryData.find(item => item.id === props.item.typeId)
+                            if (acc) icon = `/imgs/fashion/${acc.icon}.webp`
+                    }
+                }
+            }
+            return {
+                type: "Draft" as const,
+                draft,
+                icon,
+                link: `/db/draft/${draft?.id}`,
+            }
+        case "Walnut":
+            const walnut = walnutMap.get(props.item.typeId)
+            const reward = walnut?.奖励?.[0]
+            let icon2 = `/imgs/webp/T_Head_Empty.webp`
+            if (reward) {
+                if (reward.type === "Mod") {
+                    icon2 = LeveledMod.url(modMap.get(reward.id)?.icon)
+                } else if (reward.type === "Weapon") {
+                    icon2 = LeveledWeapon.url(weaponMap.get(reward.id)?.icon)
+                } else if (reward.type === "Resource") {
+                    icon2 = `/imgs/res/${resourceMap.get(reward.id)?.icon}.webp`
+                }
+            }
+            return {
+                type: "Walnut" as const,
+                walnut,
+                icon: icon2,
+                link: `/db/walnut/${walnut?.id}`,
+            }
+        case "HeadSculpture":
+            let head = headSculptureMap.get(props.item.typeId)
+            if (head) {
+                return {
+                    type: props.item.itemType,
+                    icon: `/imgs/head/${head.icon}.webp`,
+                }
+            } else {
+                return {
+                    type: props.item.itemType,
+                    icon: `/imgs/webp/T_Head_Empty.webp`,
+                }
+            }
+        case "HeadFrame":
+            const headFrame = headFrameData.find(item => item.id === props.item.typeId)
+            if (headFrame) {
+                return {
+                    type: props.item.itemType,
+                    icon: `/imgs/headframe/${headFrame.icon}.webp`,
+                    link: `/db/accessory/headframe/${headFrame.id}`,
+                }
+            }
+            return {
+                type: props.item.itemType,
+                icon: `/imgs/webp/T_Head_Empty.webp`,
+            }
+        case "Skin":
+            const skin = skinData.find(item => item.id === props.item.typeId)
+            if (!skin) {
+                return {
+                    type: props.item.itemType,
+                    icon: `/imgs/webp/T_Head_Empty.webp`,
+                }
+            }
+            return {
+                type: props.item.itemType,
+                icon: `/imgs/webp/${skin.icon}.webp`,
+                link: `/db/accessory/skin/${skin.id}`,
+            }
+        case "Title":
+            return {
+                type: props.item.itemType,
+                icon: `/imgs/webp/T_Icon_Random_Title.webp`,
+            }
+        case "Mount":
+            let mount = mountData.find(item => item.id === props.item.typeId)
+            if (mount) {
+                return {
+                    type: props.item.itemType,
+                    icon: `/imgs/res/T_Icon_${mount.icon}.webp`,
+                }
+            } else {
+                return {
+                    type: props.item.itemType,
+                    icon: `/imgs/webp/T_Head_Empty.webp`,
+                }
+            }
+        case "CharAccessory":
+        case "WeaponSkin":
+        case "WeaponAccessory":
+            let acc = weaponAccessoryData.find(item => item.id === props.item.typeId)
+            if (!acc) acc = charAccessoryData.find(item => item.id === props.item.typeId)
+            if (!acc) acc = weaponSkinData.find(item => item.id === props.item.typeId)
+            if (!acc || !acc.icon)
+                return {
+                    type: props.item.itemType,
+                    icon: `/imgs/webp/T_Head_Empty.webp`,
+                }
+            return {
+                type: props.item.itemType,
+                icon: `/imgs/fashion/${acc.icon}.webp`,
+            }
+        case "TitleFrame":
+            return {
+                type: props.item.itemType,
+                icon: `/imgs/webp/T_Icon_Random_TitleFrame.webp`,
+            }
+        case "Reward":
+            const rewardDetail = rewardMap.get(props.item.typeId)
+            return {
+                type: props.item.itemType,
+                icon: rewardDetail?.icon ? `/imgs/res/${rewardDetail.icon}.webp` : `/imgs/webp/T_Head_Empty.webp`,
+            }
+        default:
+            return {
+                type: props.item.itemType,
+                icon: `/imgs/webp/T_Head_Empty.webp`,
+            }
+    }
+})
+function getPriceIcon(name: string) {
     const res = resourceMap.get(name)
     return res?.icon ? `/imgs/res/${res.icon}.webp` : `/imgs/webp/T_Head_Empty.webp`
 }
@@ -23,47 +203,88 @@ function getResourceIcon(name: string) {
 <template>
     <div class="space-y-3">
         <!-- 商品项内容 -->
-        <div class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors">
-            <div class="flex justify-between items-center mb-2">
-                <div class="flex items-center gap-2">
-                    <div class="w-6 h-6">
-                        <img :src="getResourceIcon(item.typeName)" class="w-full h-full object-cover rounded" :alt="item.typeName" />
-                    </div>
-                    <div>
-                        <span class="font-medium">{{ item.typeName }}</span>
-                        <span class="ml-1 text-xs text-base-content/70">({{ item.itemType }})</span>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <div class="flex items-center gap-1">
-                        <img :src="getResourceIcon(item.priceName)" class="w-4 h-4 object-cover rounded" :alt="item.priceName" />
-                        <span class="text-sm font-medium">{{ item.price }}</span>
-                    </div>
-                    <span class="text-xs px-1.5 py-0.5 rounded bg-base-300">x{{ item.num }}</span>
-                </div>
+        <div class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors flex items-center gap-4">
+            <div class="size-16 hover:size-32 transition-all duration-200">
+                <img :src="itemDetail?.icon" class="w-full h-full object-cover rounded" :alt="item.typeName" />
             </div>
-            <div class="grid grid-cols-4 gap-2 text-xs">
-                <div>
-                    <span class="text-base-content/70">ID:</span> {{ item.id }}
+            <div class="flex-1">
+                <div class="flex justify-between items-center mb-2">
+                    <div class="flex items-center gap-2">
+                        <span
+                            v-if="item.diffState"
+                            class="inline-flex h-5 min-w-5 items-center justify-center rounded text-xs font-bold"
+                            :class="item.diffState === 'added' ? 'bg-success text-success-content' : 'bg-error text-error-content'"
+                        >
+                            {{ item.diffState === "added" ? "+" : "-" }}
+                        </span>
+                        <div>
+                            <SRouterLink v-if="itemDetail?.link" :to="itemDetail?.link" class="hover:underline">
+                                {{ item.typeName }}
+                            </SRouterLink>
+                            <span v-else>{{ item.typeName }}</span>
+                            <span class="ml-1 text-xs text-base-content/70">({{ $t(getRewardTypeText(item.itemType)) }})</span>
+                            <span class="text-xs px-1.5 py-0.5 rounded bg-base-300">x{{ item.num }}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <FullTooltip v-if="cutoffInfo" side="top">
+                            <template #tooltip>
+                                <div class="flex flex-col gap-2 max-w-75 min-w-28">
+                                    <div class="text-sm font-bold">{{ $t("shop-detail.discountInfo") }}</div>
+                                    <div class="flex justify-between items-center gap-2 text-sm">
+                                        <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.discount") }}</div>
+                                        <div class="font-medium text-primary">{{ cutoffInfo.discount }}折</div>
+                                    </div>
+                                    <div class="flex justify-between items-center gap-2 text-sm">
+                                        <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.originalPrice") }}</div>
+                                        <div class="font-medium text-primary line-through">{{ cutoffInfo.originalPrice }}</div>
+                                    </div>
+                                    <div class="flex justify-between items-center gap-2 text-sm">
+                                        <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.currentPrice") }}</div>
+                                        <div class="font-medium text-primary">{{ cutoffInfo.price }}</div>
+                                    </div>
+                                    <div class="text-xs text-neutral-500">
+                                        <div>{{ $t("shop-detail.startTime") }}：{{ formatCutoffTime(cutoffInfo.startTime) }}</div>
+                                        <div v-if="typeof cutoffInfo.endTime === 'number'">
+                                            {{ $t("shop-detail.endTime") }}：{{ formatCutoffTime(cutoffInfo.endTime) }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                            <div class="flex items-center gap-1">
+                                <img :src="getPriceIcon(item.priceName)" class="w-4 h-4 object-cover rounded" :alt="item.priceName" />
+                                <span class="text-xs text-base-content/70">{{ item.priceName }}</span>
+                                <span class="text-sm font-medium">{{ currentPrice }}</span>
+                                <span class="text-xs text-base-content/40 line-through">{{ cutoffInfo.originalPrice }}</span>
+                            </div>
+                        </FullTooltip>
+                        <div v-else class="flex items-center gap-1">
+                            <img :src="getPriceIcon(item.priceName)" class="w-4 h-4 object-cover rounded" :alt="item.priceName" />
+                            <span class="text-xs text-base-content/70">{{ item.priceName }}</span>
+                            <span class="text-sm font-medium">{{ currentPrice }}</span>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <span class="text-base-content/70">类型ID:</span> {{ item.typeId }}
+                <div class="grid grid-cols-4 gap-2 text-xs">
+                    <div><span class="text-base-content/70">ID:</span> {{ item.id }}</div>
+                    <div><span class="text-base-content/70">物品ID:</span> {{ item.typeId }}</div>
+                    <div><span class="text-base-content/70">限购:</span> {{ item.limit || "∞" }}</div>
+                    <div v-if="item.lv"><span class="text-base-content/70">解锁等级:</span> {{ item.lv }}</div>
+                    <div v-if="item.cond"><span class="text-base-content/70">解锁条件:</span> {{ item.cond }}</div>
                 </div>
-                <div v-if="item.limit">
-                    <span class="text-base-content/70">限制:</span> {{ item.limit }}个
+                <div v-if="item.startTime" class="mt-1 text-xs text-base-content/70">
+                    <span>开始时间:</span> {{ new Date(item.startTime * 1000).toLocaleString() }}
+                    <span v-if="item.endTime" class="ml-2">结束时间:</span>
+                    {{ item.endTime ? new Date(item.endTime * 1000).toLocaleString() : "" }}
                 </div>
-                <div>
-                    <span class="text-base-content/70">排序:</span> {{ item.sequence }}
+                <div v-if="item.itemType === 'Reward'" class="mt-1">
+                    <RewardItem :reward="getRewardDetails(item.typeId)!" />
                 </div>
-            </div>
-            <div v-if="item.startTime" class="mt-1 text-xs text-base-content/70">
-                <span>开始时间:</span> {{ new Date(item.startTime * 1000).toLocaleString() }}
-                <span v-if="item.endTime" class="ml-2">结束时间:</span> {{ item.endTime ? new Date(item.endTime * 1000).toLocaleString() : '' }}
             </div>
         </div>
-        
+
         <!-- 递归渲染子项 -->
-        <div v-if="item.children && item.children.length" class="ml-6 pl-3 border-l-2 border-base-300">
+        <div v-if="item.children && item.children.length" class="ml-6 pl-3">
             <ShopItem v-for="child in item.children" :key="child.id" :item="child" />
         </div>
     </div>

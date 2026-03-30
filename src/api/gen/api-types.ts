@@ -6,13 +6,45 @@ export interface User {
     pic?: string
     uid?: string
     roles?: string
+    experience: number
+    points: number
+    level: number
+    selectedTitleAssetId?: string
+    selectedNameCardAssetId?: string
+    currentTitleText?: string
+    currentTitleClass?: string
+    nameEffectClass?: string
+    dailyExperienceStatus?: UserDailyExperienceStatus
     createdAt?: string
     updateAt?: string
+}
+
+export interface UserDailyExperienceStatus {
+    todayAwardedExp: number
+    totalAvailableExp: number
+    dailyLaunchProgress: number
+    dailyLaunchLimit: number
+    dailyOnlineHourProgress: number
+    dailyOnlineHourLimit: number
+    dailyMessageProgress: number
+    dailyMessageLimit: number
+    dailyOnlineHourRetryAfterMs?: number
 }
 
 export interface UserLoginResult {
     success: boolean
     message: string
+    token?: string
+    user?: User
+}
+
+export interface UserExperienceRewardResult {
+    success: boolean
+    message: string
+    source: string
+    awardedExp: number
+    awardedPoints: number
+    retryAfterMs?: number
     token?: string
     user?: User
 }
@@ -80,6 +112,106 @@ export interface Task {
     user: User
 }
 
+export interface ShopAsset {
+    id: string
+    rewardType: string
+    rewardKey: string
+    rewardName: string
+    displayClass?: string
+    displayCss?: string
+    createdAt?: string
+    updateAt?: string
+}
+
+export interface ShopProduct {
+    id: string
+    name: string
+    description?: string
+    assetId: string
+    rewardType: string
+    rewardKey: string
+    rewardName: string
+    displayClass?: string
+    displayCss?: string
+    pointsCost: number
+    sortOrder: number
+    isActive: boolean
+    startTime?: string
+    endTime?: string
+    createdAt?: string
+    updateAt?: string
+    asset: ShopAsset
+}
+
+export interface UserShopItem {
+    id: string
+    userId: string
+    assetId: string
+    createdAt?: string
+    asset: ShopAsset
+}
+
+export interface UserShopSummary {
+    points: number
+    selectedTitleAssetId?: string
+    selectedNameCardAssetId?: string
+    selectedTitleAsset?: ShopAsset
+    selectedNameCardAsset?: ShopAsset
+    ownedAssetIds?: string[]
+}
+
+export interface ShopRedemption {
+    id: string
+    userId: string
+    productId: string
+    assetId: string
+    pointsCost: number
+    createdAt?: string
+    user?: User
+    product?: ShopProduct
+    asset?: ShopAsset
+}
+
+export interface ShopRedeemResult {
+    success: boolean
+    message: string
+    awardedAsset?: ShopAsset
+    user?: User
+}
+
+export interface ShopEquipResult {
+    success: boolean
+    message: string
+    user?: User
+    selectedTitleAsset?: ShopAsset
+    selectedNameCardAsset?: ShopAsset
+}
+
+export interface ScriptCategory {
+    id: string
+    name: string
+    description?: string
+    createdAt: string
+    updateAt: string
+}
+
+export interface Script {
+    id: string
+    title: string
+    description?: string
+    content: string
+    category: string
+    userId: string
+    views: number
+    likes: number
+    isRecommended?: boolean
+    isPinned?: boolean
+    createdAt: string
+    updateAt: string
+    user?: User
+    isLiked?: boolean
+}
+
 export interface RtcJoinResult {
     id: string
     end: boolean
@@ -138,7 +270,10 @@ export interface Msg {
     edited?: number
     createdAt?: string
     updateAt?: string
-    user: User
+    replyToMsgId?: string
+    replyToUserId?: string
+    user?: User
+    replyTo?: Msg
     reactions?: Reaction[]
 }
 
@@ -218,6 +353,19 @@ export interface RecentActivity {
     time: string
 }
 
+export interface Activity {
+    id: number
+    server: string
+    postId?: string
+    startTime: number
+    endTime: number
+    name: string
+    icon: string
+    desc: string
+    createdAt?: string
+    updateAt?: string
+}
+
 export interface UsersUpdateInput {
     name?: string
     qq?: string
@@ -238,6 +386,33 @@ export interface TimelineInput {
     items: string
 }
 
+export interface ShopProductInput {
+    name: string
+    description?: string
+    rewardType: string
+    pointsCost: number
+    rewardKey: string
+    rewardName: string
+    displayClass?: string
+    displayCss?: string
+    sortOrder: number
+    isActive: boolean
+    startTime?: string
+    endTime?: string
+}
+
+export interface ScriptCategoryInput {
+    name: string
+    description?: string
+}
+
+export interface ScriptInput {
+    title: string
+    description?: string
+    content: string
+    category: string
+}
+
 export interface RoomInput {
     name: string
     type?: string
@@ -246,7 +421,7 @@ export interface RoomInput {
 
 export interface GuideInput {
     title: string
-    type: string
+    type: "image" | "text"
     content: string
     images: string[]
     charId?: number
@@ -266,4 +441,23 @@ export interface BuildInput {
     desc?: string
     charId: number
     charSettings: string
+}
+
+export interface ActivityInput {
+    id: number
+    postId?: string
+    startTime: number
+    endTime: number
+    name: string
+    icon: string
+    desc: string
+}
+
+export interface ActivityUpdateInput {
+    postId?: string
+    startTime: number
+    endTime: number
+    name: string
+    icon: string
+    desc: string
 }

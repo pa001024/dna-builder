@@ -34,7 +34,28 @@ const inv = useInvStore()
 const sortByIncome = ref(true)
 const selectedProperty = ref("")
 const auraModOptions = computed(() => {
-    return props.modOptions.filter(option => option.ser === "羽蛇")
+    const options = props.modOptions.filter(option => option.ser === "羽蛇")
+    /**
+     * 兼容历史构筑或库存变更场景：若当前已选光环不在可选列表中，补入一条用于显示名称。
+     */
+    if (props.auraMod && !options.some(option => option.value === props.auraMod)) {
+        try {
+            const aura = new LeveledMod(props.auraMod)
+            options.unshift({
+                value: aura.id,
+                label: aura.名称,
+                type: aura.类型,
+                quality: aura.品质,
+                ser: aura.系列,
+                count: 0,
+                bufflv: inv.getBuffLv(aura.id),
+                lv: aura.等级,
+            })
+        } catch (error) {
+            console.error("补充光环选项失败", error)
+        }
+    }
+    return options
 })
 const sortedModOptions = computed(() => {
     // 获取已装备的互斥系列名称集合和非契约者MOD名称集合
@@ -345,7 +366,7 @@ const mod_model_show = ref(false)
                 v-for="(mod, index) in mods"
                 :key="index"
                 :mod="mod"
-                :income="mod ? charBuild.calcIncome(mod, true) : 0"
+                :income="mod ? charBuild.calcEquippedModIncome(type, index) : 0"
                 :index="index"
                 :polset="polset?.includes(index)"
                 control

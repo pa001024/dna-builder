@@ -1,7 +1,11 @@
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow"
 import { getCurrentWindow } from "@tauri-apps/api/window"
 
-export async function openSChat(path: string) {
+/**
+ * 打开聊天独立窗口。
+ * @param path 聊天页面路由
+ */
+export async function openSChat(path: string, title = "DOB") {
     const app = getCurrentWindow()
     const pos = await app.outerPosition()
     const size = await app.innerSize()
@@ -16,7 +20,7 @@ export async function openSChat(path: string) {
         height: size.height,
         decorations: false,
         transparent: true,
-        title: "Chat",
+        title,
     })
     win.once("initialized", () => {
         // win.

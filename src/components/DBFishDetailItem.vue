@@ -76,65 +76,60 @@ const fishSpots = computed(() => {
 </script>
 
 <template>
-    <ScrollArea class="h-full">
-        <div class="p-3 space-y-4">
-            <!-- 鱼基本信息 -->
-            <div class="p-3">
-                <div class="flex items-center gap-3 mb-3">
-                    <SRouterLink :to="`/db/fish/${fish.id}`" class="text-lg font-bold link link-primary">
-                        {{ fish.name }}
+    <div class="p-3 space-y-3">
+        <div class="flex items-center gap-3">
+            <SRouterLink :to="`/db/fish/${fish.id}`" class="text-lg font-bold link link-primary">
+                {{ fish.name }}
+            </SRouterLink>
+            <span class="text-xs text-base-content/70">ID: {{ fish.id }}</span>
+            <div class="text-sm text-base-content/70 flex items-center gap-2">
+                <span class="px-1.5 py-0.5 rounded" :class="getRarityColor(fish.type)">
+                    {{ getRarityName(fish.type) }}
+                </span>
+            </div>
+        </div>
+
+        <div class="flex justify-center items-center">
+            <img :src="`/imgs/webp/T_Fish_${fish.icon}.webp`" class="w-24 object-cover rounded" />
+        </div>
+
+        <div class="flex flex-wrap gap-2 text-sm opacity-70">
+            <span>Lv. {{ fish.level }}</span>
+            <span>长度: {{ fish.length[0] }}-{{ fish.length[1] }}</span>
+            <span>价格: {{ fish.price[0] }}</span>
+        </div>
+
+        <div class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-1">出现时间</div>
+            <div class="text-sm">{{ getAppearName(fish.appear) }}</div>
+        </div>
+
+        <div v-if="fish.var && fish.varProb && fish.var.length > 0 && fish.varProb > 0" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-1">变异概率</div>
+            <div class="text-sm">{{ (fish.varProb * 100).toFixed(0) }}%</div>
+        </div>
+
+        <div v-if="s2bFish" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-1">授渔以鱼</div>
+            <div class="flex items-center gap-2">
+                <img :src="`/imgs/webp/T_Fish_${s2bFish.icon}.webp`" class="w-10 h-10 object-cover rounded" />
+                <SRouterLink :to="`/db/fish/${s2bFish.id}`" class="text-sm link link-primary">
+                    {{ s2bFish.name }}
+                </SRouterLink>
+                <span class="text-xs text-base-content/70">价格: {{ calculateFishPrice(s2bFish).price }}</span>
+            </div>
+        </div>
+
+        <div v-if="fishSpots.length > 0" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-1">出现鱼池及权重</div>
+            <div class="space-y-2">
+                <div v-for="spot in fishSpots" :key="spot.spotId" class="flex items-center justify-between">
+                    <SRouterLink :to="`/fish/${spot.spotId}`" class="text-sm link link-primary">
+                        {{ spot.spotName }}
                     </SRouterLink>
-                    <span class="text-xs text-base-content/70">ID: {{ fish.id }}</span>
-                    <div class="text-sm text-base-content/70 flex items-center gap-2">
-                        <span class="px-1.5 py-0.5 rounded" :class="getRarityColor(fish.type)">
-                            {{ getRarityName(fish.type) }}
-                        </span>
-                    </div>
-                </div>
-
-                <div class="flex justify-center items-center mb-3">
-                    <img :src="`/imgs/webp/T_Fish_${fish.icon}.webp`" class="w-24 object-cover rounded" />
-                </div>
-
-                <div class="flex flex-wrap gap-2 text-sm opacity-70 mb-3">
-                    <span>Lv. {{ fish.level }}</span>
-                    <span>长度: {{ fish.length[0] }}-{{ fish.length[1] }}</span>
-                    <span>价格: {{ fish.price[0] }}</span>
-                </div>
-
-                <div class="p-3 bg-base-200 rounded mb-3">
-                    <div class="text-xs text-base-content/70 mb-1">出现时间</div>
-                    <div class="text-sm">{{ getAppearName(fish.appear) }}</div>
-                </div>
-
-                <div v-if="fish.var && fish.varProb && fish.var.length > 0 && fish.varProb > 0" class="p-3 bg-base-200 rounded mb-3">
-                    <div class="text-xs text-base-content/70 mb-1">变异概率</div>
-                    <div class="text-sm">{{ (fish.varProb * 100).toFixed(0) }}%</div>
-                </div>
-
-                <div v-if="s2bFish" class="p-3 bg-base-200 rounded mb-3">
-                    <div class="text-xs text-base-content/70 mb-1">授渔以鱼</div>
-                    <div class="flex items-center gap-2">
-                        <img :src="`/imgs/webp/T_Fish_${s2bFish.icon}.webp`" class="w-10 h-10 object-cover rounded" />
-                        <SRouterLink :to="`/db/fish/${s2bFish.id}`" class="text-sm link link-primary">
-                            {{ s2bFish.name }}
-                        </SRouterLink>
-                        <span class="text-xs text-base-content/70">价格: {{ calculateFishPrice(s2bFish).price }}</span>
-                    </div>
-                </div>
-
-                <div v-if="fishSpots.length > 0" class="p-3 bg-base-200 rounded mb-3">
-                    <div class="text-xs text-base-content/70 mb-1">出现鱼池及权重</div>
-                    <div class="space-y-2">
-                        <div v-for="spot in fishSpots" :key="spot.spotId" class="flex items-center justify-between">
-                            <SRouterLink :to="`/fish/${spot.spotId}`" class="text-sm link link-primary">
-                                {{ spot.spotName }}
-                            </SRouterLink>
-                            <span class="text-sm">{{ spot.weight }}</span>
-                        </div>
-                    </div>
+                    <span class="text-sm">{{ spot.weight }}</span>
                 </div>
             </div>
         </div>
-    </ScrollArea>
+    </div>
 </template>

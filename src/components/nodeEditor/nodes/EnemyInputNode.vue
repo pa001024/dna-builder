@@ -97,7 +97,7 @@ const imbalance = computed({
                     type="number"
                     class="input input-sm w-full"
                     min="1"
-                    max="180"
+                    max="240"
                     @change="updateEnemyLevel(enemyLevel)"
                 />
             </div>

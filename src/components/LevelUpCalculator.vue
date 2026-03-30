@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI, DNARoleEntity } from "dna-api"
-import { computed, onBeforeUnmount, onMounted, ref } from "vue"
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from "vue"
 import {
     charData,
     charMap,
@@ -16,7 +16,13 @@ import {
     weaponData,
     weaponMap,
 } from "@/data"
-import { type CharLevelUpConfig, type LevelUpResult, type ModLevelUpConfig, type WeaponLevelUpConfig } from "@/data/LevelUpCalculator"
+import {
+    type CharLevelUpConfig,
+    type LevelUpResult,
+    type ModLevelUpConfig,
+    type TimeEstimateConfig,
+    type WeaponLevelUpConfig,
+} from "@/data/LevelUpCalculator"
 import { getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
 import { LevelUpCalculator } from "../data/LevelUpCalculator"
 import { useSettingStore } from "../store/setting"
@@ -57,6 +63,16 @@ const mods = useLocalStorage<ModItem[]>("lvup.mods", [])
 const syncing = ref(false)
 const roleInfo = useLocalStorage<DNARoleEntity>("dna.roleInfo", {} as any)
 
+// 批量添加角色相关
+const isBatchAddCharsModalOpen = ref(false)
+const charSearchQuery = ref("")
+const selectedCharsForBatch = ref<Set<number>>(new Set())
+
+// 批量添加武器相关
+const isBatchAddWeaponsModalOpen = ref(false)
+const weaponSearchQuery = ref("")
+const selectedWeaponsForBatch = ref<Set<number>>(new Set())
+
 // 批量添加魔之楔相关
 const isBatchAddModalOpen = ref(false)
 const modSearchQuery = ref("")
@@ -70,7 +86,54 @@ const enableMods = ref({
 })
 
 // 资源过滤相关
-const excludedResources = ref<Set<string>>(new Set())
+const excludedResources = useLocalStorage<Set<string>>("lvup.excludedResources", new Set())
+
+/**
+ * 时间估算页面配置
+ */
+interface TimeEstimateUIConfig {
+    dungeonDropRateBonusPercent: number
+    dungeonTimeMultiplier: number
+    dungeonTypeTimes: {
+        Defense: number
+        ExtermPro: number
+        SurvivalMiniPro: number
+    }
+}
+
+// 时间估算配置
+const timeEstimateConfig = useLocalStorage<TimeEstimateUIConfig>("lvup.timeEstimateConfig", {
+    dungeonDropRateBonusPercent: 30,
+    dungeonTimeMultiplier: 1,
+    dungeonTypeTimes: {
+        Defense: 1,
+        ExtermPro: 0.5,
+        SurvivalMiniPro: 0.7,
+    },
+})
+
+/**
+ * 获取时间估算请求配置
+ * @returns 传递给计算器的时间估算配置
+ */
+function getTimeEstimateRequestConfig(): TimeEstimateConfig {
+    const dropRateBonusPercent = Number(timeEstimateConfig.value.dungeonDropRateBonusPercent)
+    const dungeonTimeMultiplier = Number(timeEstimateConfig.value.dungeonTimeMultiplier)
+
+    const defenseTime = Number(timeEstimateConfig.value.dungeonTypeTimes.Defense)
+    const extermProTime = Number(timeEstimateConfig.value.dungeonTypeTimes.ExtermPro)
+    const survivalMiniProTime = Number(timeEstimateConfig.value.dungeonTypeTimes.SurvivalMiniPro)
+
+    return {
+        dungeonDropRateBonus: Number.isFinite(dropRateBonusPercent) ? Math.max(-99, dropRateBonusPercent) / 100 : 0,
+        dungeonTimeMultiplier: Number.isFinite(dungeonTimeMultiplier) ? Math.max(0.01, dungeonTimeMultiplier) : 1,
+        dungeonTypeTimes: {
+            Defense: Number.isFinite(defenseTime) ? Math.max(0.01, defenseTime) : 1,
+            ExtermPro: Number.isFinite(extermProTime) ? Math.max(0.01, extermProTime) : 0.5,
+            SurvivalMiniPro: Number.isFinite(survivalMiniProTime) ? Math.max(0.01, survivalMiniProTime) : 0.7,
+        },
+    }
+}
 
 // 切换资源过滤状态
 const toggleResourceFilter = (resourceName: string) => {
@@ -113,6 +176,26 @@ const filteredMods = computed(() => {
             return true
         }
         return false
+    })
+})
+
+const filteredChars = computed(() => {
+    if (!isBatchAddCharsModalOpen.value) return []
+    const query = charSearchQuery.value.trim()
+    if (!query) return charData
+
+    return charData.filter(char => {
+        return matchPinyin(char.名称, query).match || char.属性?.includes(query)
+    })
+})
+
+const filteredWeapons = computed(() => {
+    if (!isBatchAddWeaponsModalOpen.value) return []
+    const query = weaponSearchQuery.value.trim()
+    if (!query) return weaponData
+
+    return weaponData.filter(weapon => {
+        return matchPinyin(weapon.名称, query).match || weapon.类型?.some(type => type.includes(query))
     })
 })
 
@@ -221,7 +304,7 @@ async function syncChars() {
  */
 async function loadRoleInfo() {
     try {
-        await api.getMine()
+        await setting.startHeartbeat()
         const roleRes = await api.defaultRoleForTool()
         if (roleRes.is_success && roleRes.data) {
             roleInfo.value = roleRes.data
@@ -230,12 +313,14 @@ async function loadRoleInfo() {
         }
     } catch (e) {
         ui.showErrorMessage("获取角色信息失败", e)
+    } finally {
+        await setting.stopHeartbeat()
     }
 }
 
 // 结果状态
 const calculating = ref(false)
-const result = ref<ReturnType<typeof LevelUpCalculator.mergeResults> | null>(null)
+const result = shallowRef<ReturnType<typeof LevelUpCalculator.mergeResults> | null>(null)
 // 请求ID，用于解决异步竞态条件
 const latestRequestId = ref(0)
 
@@ -277,9 +362,7 @@ async function calculateResult() {
         const resultsToMerge = [mergeResults.charResult, mergeResults.weaponResult, mergeResults.modResult].filter(
             Boolean
         ) as LevelUpResult[]
-
         let mergedResult = LevelUpCalculator.mergeResults(resultsToMerge)
-
         // 如果有排除的资源，重新计算结果
         if (excludedResources.value.size > 0) {
             // 过滤总消耗
@@ -312,11 +395,12 @@ async function calculateResult() {
             // 返回过滤后的结果
             mergedResult = {
                 totalCost: filteredTotalCost,
+                resourceTree: mergedResult.resourceTree,
                 details: filteredDetails,
             }
         }
         // 重新计算时间，基于过滤后的资源
-        mergedResult.timeEstimate = await levelUpCalculator.value.estimateTime(mergedResult.totalCost)
+        mergedResult.timeEstimate = await levelUpCalculator.value.estimateTime(mergedResult.totalCost, getTimeEstimateRequestConfig())
 
         // 检查是否为最新请求，如果不是则终止
         if (requestId !== latestRequestId.value) {
@@ -346,7 +430,7 @@ import { matchPinyin } from "@/utils/pinyin-utils"
 let debounceTimer: number | null = null
 
 watch(
-    [chars, weapons, mods, excludedResources],
+    [chars, weapons, mods, excludedResources, timeEstimateConfig],
     () => {
         if (debounceTimer) {
             clearTimeout(debounceTimer)
@@ -365,29 +449,29 @@ onMounted(() => {
     calculateResult()
 })
 
-// 添加角色
-const addChar = () => {
-    chars.value.push({
-        id: charData[0]?.id || 0,
-        config: {
-            currentLevel: 1,
-            targetLevel: 80,
-            skills: [
-                {
-                    currentLevel: 1,
-                    targetLevel: 10,
-                },
-                {
-                    currentLevel: 1,
-                    targetLevel: 10,
-                },
-                {
-                    currentLevel: 1,
-                    targetLevel: 10,
-                },
-            ],
-        },
-    })
+/**
+ * 创建角色的默认养成配置
+ * @returns 角色默认配置
+ */
+function createDefaultCharConfig(): CharLevelUpConfig {
+    return {
+        currentLevel: 1,
+        targetLevel: 80,
+        skills: [
+            {
+                currentLevel: 1,
+                targetLevel: 10,
+            },
+            {
+                currentLevel: 1,
+                targetLevel: 10,
+            },
+            {
+                currentLevel: 1,
+                targetLevel: 10,
+            },
+        ],
+    }
 }
 
 // 移除角色
@@ -395,17 +479,17 @@ const removeChar = (index: number) => {
     chars.value.splice(index, 1)
 }
 
-// 添加武器
-const addWeapon = () => {
-    weapons.value.push({
-        id: weaponData[0]?.id || 0,
-        config: {
-            currentLevel: 1,
-            targetLevel: 80,
-            currentRefine: 0,
-            targetRefine: 5,
-        },
-    })
+/**
+ * 创建武器的默认养成配置
+ * @returns 武器默认配置
+ */
+function createDefaultWeaponConfig(): WeaponLevelUpConfig {
+    return {
+        currentLevel: 1,
+        targetLevel: 80,
+        currentRefine: 0,
+        targetRefine: 5,
+    }
 }
 
 // 移除武器
@@ -416,6 +500,94 @@ const removeWeapon = (index: number) => {
 // 移除魔之楔
 const removeMod = (index: number) => {
     mods.value.splice(index, 1)
+}
+
+const clearMods = () => {
+    mods.value = []
+}
+
+/**
+ * 切换批量选择的角色
+ * @param charId 角色ID
+ */
+const toggleSelectCharForBatch = (charId: number) => {
+    if (selectedCharsForBatch.value.has(charId)) {
+        selectedCharsForBatch.value.delete(charId)
+    } else {
+        selectedCharsForBatch.value.add(charId)
+    }
+}
+
+/**
+ * 处理角色批量全选/取消全选
+ */
+const handleSelectAllCharsForBatch = () => {
+    if (selectedCharsForBatch.value.size === filteredChars.value.length) {
+        selectedCharsForBatch.value.clear()
+    } else {
+        filteredChars.value.forEach(char => {
+            selectedCharsForBatch.value.add(char.id)
+        })
+    }
+}
+
+/**
+ * 确认批量添加角色
+ */
+const handleBatchAddChars = () => {
+    selectedCharsForBatch.value.forEach(charId => {
+        const exists = chars.value.some(char => char.id === charId)
+        if (!exists) {
+            chars.value.push({
+                id: charId,
+                config: createDefaultCharConfig(),
+            })
+        }
+    })
+    isBatchAddCharsModalOpen.value = false
+    selectedCharsForBatch.value.clear()
+}
+
+/**
+ * 切换批量选择的武器
+ * @param weaponId 武器ID
+ */
+const toggleSelectWeaponForBatch = (weaponId: number) => {
+    if (selectedWeaponsForBatch.value.has(weaponId)) {
+        selectedWeaponsForBatch.value.delete(weaponId)
+    } else {
+        selectedWeaponsForBatch.value.add(weaponId)
+    }
+}
+
+/**
+ * 处理武器批量全选/取消全选
+ */
+const handleSelectAllWeaponsForBatch = () => {
+    if (selectedWeaponsForBatch.value.size === filteredWeapons.value.length) {
+        selectedWeaponsForBatch.value.clear()
+    } else {
+        filteredWeapons.value.forEach(weapon => {
+            selectedWeaponsForBatch.value.add(weapon.id)
+        })
+    }
+}
+
+/**
+ * 确认批量添加武器
+ */
+const handleBatchAddWeapons = () => {
+    selectedWeaponsForBatch.value.forEach(weaponId => {
+        const exists = weapons.value.some(weapon => weapon.id === weaponId)
+        if (!exists) {
+            weapons.value.push({
+                id: weaponId,
+                config: createDefaultWeaponConfig(),
+            })
+        }
+    })
+    isBatchAddWeaponsModalOpen.value = false
+    selectedWeaponsForBatch.value.clear()
 }
 
 // 批量添加魔之楔相关函数
@@ -463,14 +635,17 @@ const handleBatchAddMods = () => {
     isBatchAddModalOpen.value = false
     selectedModsForBatch.value.clear()
 }
+
+const isOpenGraph = ref(false)
+const isTimeEstimateConfigOpen = ref(false)
 </script>
 
 <template>
-    <div class="h-full flex flex-col gap-4 md:flex-row">
-        <ScrollArea class="md:h-full flex-1">
-            <div class="p-4 space-y-4">
+    <div class="h-full relative">
+        <ScrollArea class="h-full">
+            <div class="p-4 flex flex-col justify-center items-center gap-4">
                 <!-- 角色养成 -->
-                <section>
+                <section class="w-full">
                     <div class="flex items-center justify-between mb-2 p-2">
                         <h3 class="text-xl font-semibold text-base-content flex items-center gap-2">
                             <Icon icon="ri:user-line" />
@@ -487,7 +662,7 @@ const handleBatchAddMods = () => {
                                 <Icon v-else icon="ri:refresh-line" />
                                 同步角色
                             </button>
-                            <button class="btn btn-primary btn-sm gap-2" @click="addChar" aria-label="添加角色">
+                            <button class="btn btn-primary btn-sm gap-2" @click="isBatchAddCharsModalOpen = true" aria-label="批量添加角色">
                                 <span class="text-xl font-bold">+</span>
                                 添加角色
                             </button>
@@ -582,7 +757,7 @@ const handleBatchAddMods = () => {
                 </section>
 
                 <!-- 武器养成 -->
-                <section>
+                <section class="w-full">
                     <div class="flex items-center justify-between mb-2 p-2">
                         <h3 class="text-xl font-semibold text-base-content flex items-center gap-2">
                             <Icon icon="ri:sword-line" />
@@ -599,7 +774,11 @@ const handleBatchAddMods = () => {
                                 <Icon v-else icon="ri:refresh-line" />
                                 同步武器
                             </button>
-                            <button class="btn btn-primary btn-sm gap-2" @click="addWeapon" aria-label="添加武器">
+                            <button
+                                class="btn btn-primary btn-sm gap-2"
+                                @click="isBatchAddWeaponsModalOpen = true"
+                                aria-label="批量添加武器"
+                            >
                                 <span class="text-xl font-bold">+</span>
                                 添加武器
                             </button>
@@ -661,13 +840,14 @@ const handleBatchAddMods = () => {
                 </section>
 
                 <!-- 魔之楔养成 -->
-                <section>
+                <section class="w-full">
                     <div class="flex items-center justify-between mb-2 p-2">
                         <h3 class="text-xl font-semibold text-base-content flex items-center gap-2">
                             <Icon icon="po-A" />
                             魔之楔养成
                         </h3>
                         <div class="flex gap-2">
+                            <button class="btn btn-primary btn-sm gap-2" @click="clearMods" aria-label="清空">清空</button>
                             <button class="btn btn-primary btn-sm gap-2" @click="isBatchAddModalOpen = true" aria-label="批量添加魔之楔">
                                 <span class="text-xl font-bold">+</span>
                                 添加魔之楔
@@ -675,7 +855,7 @@ const handleBatchAddMods = () => {
                         </div>
                     </div>
 
-                    <div class="flex flex-col gap-4">
+                    <div class="grid grid-cols-[repeat(auto-fill,minmax(450px,1fr))] gap-4">
                         <div
                             v-for="(mod, index) in mods"
                             :key="index"
@@ -683,27 +863,23 @@ const handleBatchAddMods = () => {
                         >
                             <div class="card-body p-2">
                                 <!-- 魔之楔信息卡片 -->
-                                <div v-if="modMap.get(mod.id)" class="rounded-xl p-4 flex items-center gap-4">
+                                <div v-if="modMap.get(mod.id)" class="rounded-xl p-2 flex items-center gap-4">
                                     <div class="relative bg-linear-15 from-yellow-500/80 to-yellow-700/80 rounded-lg overflow-hidden">
                                         <img
                                             :src="LeveledMod.url(modMap.get(mod.id)?.icon)"
                                             alt="魔之楔图片"
-                                            class="w-16 h-16 object-cover"
+                                            class="size-12 object-cover"
                                         />
                                     </div>
                                     <div class="flex-1">
-                                        <div class="flex justify-between">
-                                            <h4 class="text-lg font-semibold">{{ modMap.get(mod.id)?.名称 }}</h4>
-
-                                            <button class="btn btn-error btn-sm" @click="removeMod(index)" aria-label="删除魔之楔">
-                                                删除
-                                            </button>
-                                        </div>
                                         <div class="mt-1 flex items-center gap-4">
+                                            <div class="flex flex-1 justify-between">
+                                                <h4 class="text-md font-semibold">{{ modMap.get(mod.id)?.名称 }}</h4>
+                                            </div>
                                             <label class="flex flex-col gap-1">
                                                 <span class="text-xs opacity-80">选择等级</span>
                                                 <RangeSelector
-                                                    class="w-40"
+                                                    class="w-full"
                                                     v-model:from="mod.config.currentLevel"
                                                     v-model:to="mod.config.targetLevel"
                                                     :min="0"
@@ -712,9 +888,15 @@ const handleBatchAddMods = () => {
                                             </label>
                                             <label class="flex flex-col gap-1">
                                                 <span class="text-xs opacity-80">选择数量</span>
-                                                <Select class="input input-sm w-40" v-model="mod.config.count">
+                                                <Select class="input input-sm w-full" v-model="mod.config.count">
                                                     <SelectItem v-for="i in 8" :key="i" :value="i">{{ i }}</SelectItem>
                                                 </Select>
+                                            </label>
+                                            <label class="flex flex-col gap-1">
+                                                <span class="text-xs opacity-80">操作</span>
+                                                <button class="btn btn-error btn-sm" @click="removeMod(index)" aria-label="删除魔之楔">
+                                                    <Icon icon="ri:delete-bin-line" />
+                                                </button>
                                             </label>
                                         </div>
                                     </div>
@@ -723,15 +905,103 @@ const handleBatchAddMods = () => {
                         </div>
                     </div>
                 </section>
+
+                <section class="w-full">
+                    <div
+                        class="collapse bg-base-100 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg mb-6"
+                        :class="{ 'collapse-open': isTimeEstimateConfigOpen }"
+                    >
+                        <div
+                            class="flex items-center justify-between gap-2 p-4 cursor-pointer"
+                            @click="isTimeEstimateConfigOpen = !isTimeEstimateConfigOpen"
+                        >
+                            <div class="flex items-center gap-2">
+                                <Icon icon="ri:settings-3-line" />
+                                <h3 class="text-lg font-semibold">副本估算配置</h3>
+                            </div>
+                            <Icon
+                                icon="radix-icons:chevron-down"
+                                class="transition-transform duration-200"
+                                :class="{ 'rotate-180': isTimeEstimateConfigOpen }"
+                            />
+                        </div>
+                        <div class="collapse-content px-4 pb-4">
+                            <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3">
+                                <label class="flex flex-col gap-1">
+                                    <span class="text-xs opacity-80">掉落率加成(%)</span>
+                                    <input
+                                        v-model.number="timeEstimateConfig.dungeonDropRateBonusPercent"
+                                        type="number"
+                                        class="input input-sm w-full"
+                                        min="-100"
+                                        max="1000"
+                                        step="1"
+                                    />
+                                </label>
+                                <label class="flex flex-col gap-1">
+                                    <span class="text-xs opacity-80">副本耗时倍率</span>
+                                    <input
+                                        v-model.number="timeEstimateConfig.dungeonTimeMultiplier"
+                                        type="number"
+                                        class="input input-sm w-full"
+                                        min="0.01"
+                                        max="20"
+                                        step="0.01"
+                                    />
+                                </label>
+                                <label class="flex flex-col gap-1">
+                                    <span class="text-xs opacity-80">扼守单次时间(分钟)</span>
+                                    <input
+                                        v-model.number="timeEstimateConfig.dungeonTypeTimes.Defense"
+                                        type="number"
+                                        class="input input-sm w-full"
+                                        min="0.01"
+                                        max="60"
+                                        step="0.1"
+                                    />
+                                </label>
+                                <label class="flex flex-col gap-1">
+                                    <span class="text-xs opacity-80">驱离单次时间(分钟)</span>
+                                    <input
+                                        v-model.number="timeEstimateConfig.dungeonTypeTimes.ExtermPro"
+                                        type="number"
+                                        class="input input-sm w-full"
+                                        min="0.01"
+                                        max="60"
+                                        step="0.1"
+                                    />
+                                </label>
+                                <label class="flex flex-col gap-1">
+                                    <span class="text-xs opacity-80">避险单次时间(分钟)</span>
+                                    <input
+                                        v-model.number="timeEstimateConfig.dungeonTypeTimes.SurvivalMiniPro"
+                                        type="number"
+                                        class="input input-sm w-full"
+                                        min="0.01"
+                                        max="60"
+                                        step="0.1"
+                                    />
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
-        </ScrollArea>
-        <ScrollArea class="md:h-full flex-1">
-            <div class="p-4">
+            <div class="p-4 flex justify-center">
                 <!-- 结果显示 -->
-                <section class="mb-4" v-if="result">
+                <div v-if="result" class="w-full">
                     <h3 class="text-xl font-bold text-base-content mb-6 flex items-center gap-2">
-                        <Icon icon="ri:bar-chart-line" />
-                        结果
+                        <div class="flex items-center gap-2">
+                            <Icon icon="ri:bar-chart-line" />
+                            结果
+                        </div>
+                        <div
+                            class="ml-auto cursor-pointer text-primary flex items-center gap-2 hover:underline"
+                            @click="isOpenGraph = true"
+                        >
+                            <Icon icon="ri:git-branch-line" />
+                            点击查看关系图
+                        </div>
                     </h3>
 
                     <!-- 时间估算 -->
@@ -786,7 +1056,7 @@ const handleBatchAddMods = () => {
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2 mt-2 text-xs opacity-70">
-                                    <span>怪物: {{ (dungeon.m || []).length }}个</span>
+                                    <span>怪物: {{ (dungeon.m || []).length }}种</span>
                                     <span v-if="(dungeon.sm || []).length">特殊: {{ (dungeon.sm || []).length }}个</span>
                                     <span v-if="dungeon.r?.length"> 奖励: {{ getDungeonRewardNames(dungeon) }} </span>
                                     <span class="ml-auto">ID: {{ dungeon.id }}</span>
@@ -839,7 +1109,7 @@ const handleBatchAddMods = () => {
                                 </div>
                                 <div class="text-xs opacity-70">点击资源可过滤</div>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
                                 <ResourceCostItem
                                     v-for="(value, key) in result.totalCost"
                                     :key="key"
@@ -863,7 +1133,7 @@ const handleBatchAddMods = () => {
                                     <Icon icon="ri:lightbulb-line" />
                                     <h4 class="font-semibold text-base-content">等级升级消耗</h4>
                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
                                     <ResourceCostItem
                                         v-for="(value, key) in result.details.levelUp"
                                         :key="key"
@@ -886,7 +1156,7 @@ const handleBatchAddMods = () => {
                                     <Icon icon="ri:flashlight-line" />
                                     <h4 class="font-semibold text-base-content">技能升级消耗</h4>
                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
                                     <ResourceCostItem
                                         v-for="(value, key) in result.details.skills"
                                         :key="key"
@@ -909,7 +1179,7 @@ const handleBatchAddMods = () => {
                                     <Icon icon="ri:star-line" />
                                     <h4 class="font-semibold text-base-content">突破消耗</h4>
                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
                                     <ResourceCostItem
                                         v-for="(value, key) in result.details.breakthrough"
                                         :key="key"
@@ -932,7 +1202,7 @@ const handleBatchAddMods = () => {
                                     <Icon icon="ri:hammer-line" />
                                     <h4 class="font-semibold text-base-content">锻造消耗</h4>
                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
                                     <ResourceCostItem
                                         v-for="(value, key) in result.details.craft"
                                         :key="key"
@@ -945,11 +1215,153 @@ const handleBatchAddMods = () => {
                             </div>
                         </div>
                     </div>
-                </section>
-                <div v-else class="loading loading-spinner"></div>
+                </div>
+                <div v-else class="loading loading-spinner mb-4"></div>
             </div>
         </ScrollArea>
+        <div class="inset-0 absolute bg-base-100" v-if="isOpenGraph && result?.resourceTree">
+            <div class="absolute flex justify-center items-center p-2 z-1">
+                <div
+                    class="flex items-center gap-1 text-xs bg-base-200 hover:bg-base-300 cursor-pointer p-1 rounded"
+                    @click="isOpenGraph = false"
+                >
+                    <Icon icon="ri:close-line" class="text-2xl text-red-500" />
+                </div>
+            </div>
+            <ResourceTreeGraph :tree="result.resourceTree" />
+        </div>
     </div>
+
+    <!-- 批量添加角色弹窗 -->
+    <DialogModel v-model="isBatchAddCharsModalOpen" class="w-[80vw] max-w-200">
+        <div class="w-full max-w-4xl">
+            <h2 class="text-2xl font-bold mb-4">批量添加角色</h2>
+            <p class="mb-4">选择要添加的角色，然后点击确认添加</p>
+
+            <div class="p-4 pb-0 flex flex-wrap items-center gap-2 mb-3 bg-base-100 rounded-lg">
+                <div class="ml-auto flex items-center gap-4">
+                    <label class="w-56 input input-sm">
+                        <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="m21 21-4.3-4.3" />
+                            </g>
+                        </svg>
+                        <input v-model="charSearchQuery" type="search" class="grow" placeholder="搜索角色..." />
+                    </label>
+                    <div
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'btn-disabled': !filteredChars.length }"
+                        @click="handleSelectAllCharsForBatch"
+                    >
+                        {{ selectedCharsForBatch.size === filteredChars.length ? "取消全选" : "全选" }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="min-h-80 w-full pb-4 max-h-[60vh] overflow-auto">
+                <div class="p-4 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
+                    <div
+                        v-for="char in filteredChars"
+                        :key="char.id"
+                        class="card bg-base-100 border-2 cursor-pointer transition-all duration-200 hover:scale-[1.02]"
+                        :class="selectedCharsForBatch.has(char.id) ? 'border-primary shadow-lg' : 'border-base-300'"
+                        @click="toggleSelectCharForBatch(char.id)"
+                    >
+                        <div class="card-body p-4 flex-row items-center gap-3">
+                            <ImageFallback :src="LeveledChar.url(char.icon)" alt="角色头像" class="size-14 rounded-full shrink-0">
+                                <img src="/imgs/webp/T_Head_Empty.webp" alt="角色头像" class="size-14 rounded-full shrink-0" />
+                            </ImageFallback>
+                            <div class="min-w-0 flex-1">
+                                <div class="font-semibold truncate">{{ char.名称 }}</div>
+                                <div class="text-sm opacity-70 flex items-center gap-2 mt-1">
+                                    <img :src="LeveledChar.elementUrl(char.属性)" alt="角色属性" class="w-4 h-6 object-cover rounded-sm" />
+                                    <span>{{ $t(char.属性) }}</span>
+                                </div>
+                            </div>
+                            <input
+                                type="checkbox"
+                                class="checkbox checkbox-primary pointer-events-none shrink-0"
+                                :checked="selectedCharsForBatch.has(char.id)"
+                                tabindex="-1"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <template #action>
+            <div class="flex justify-end gap-2">
+                <button class="btn btn-secondary" @click="isBatchAddCharsModalOpen = false">取消</button>
+                <button class="btn btn-primary" @click="handleBatchAddChars">确认添加 ({{ selectedCharsForBatch.size }})</button>
+            </div>
+        </template>
+    </DialogModel>
+
+    <!-- 批量添加武器弹窗 -->
+    <DialogModel v-model="isBatchAddWeaponsModalOpen" class="w-[80vw] max-w-200">
+        <div class="w-full max-w-4xl">
+            <h2 class="text-2xl font-bold mb-4">批量添加武器</h2>
+            <p class="mb-4">选择要添加的武器，然后点击确认添加</p>
+
+            <div class="p-4 pb-0 flex flex-wrap items-center gap-2 mb-3 bg-base-100 rounded-lg">
+                <div class="ml-auto flex items-center gap-4">
+                    <label class="w-56 input input-sm">
+                        <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="m21 21-4.3-4.3" />
+                            </g>
+                        </svg>
+                        <input v-model="weaponSearchQuery" type="search" class="grow" placeholder="搜索武器..." />
+                    </label>
+                    <div
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'btn-disabled': !filteredWeapons.length }"
+                        @click="handleSelectAllWeaponsForBatch"
+                    >
+                        {{ selectedWeaponsForBatch.size === filteredWeapons.length ? "取消全选" : "全选" }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="min-h-80 w-full pb-4 max-h-[60vh] overflow-auto">
+                <div class="p-4 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
+                    <div
+                        v-for="weapon in filteredWeapons"
+                        :key="weapon.id"
+                        class="card bg-base-100 border-2 cursor-pointer transition-all duration-200 hover:scale-[1.02]"
+                        :class="selectedWeaponsForBatch.has(weapon.id) ? 'border-primary shadow-lg' : 'border-base-300'"
+                        @click="toggleSelectWeaponForBatch(weapon.id)"
+                    >
+                        <div class="card-body p-4 flex-row items-center gap-3">
+                            <ImageFallback :src="LeveledWeapon.url(weapon.icon)" alt="武器头像" class="size-14 rounded-lg shrink-0">
+                                <img src="/imgs/webp/T_Head_Empty.webp" alt="武器头像" class="size-14 rounded-lg shrink-0" />
+                            </ImageFallback>
+                            <div class="min-w-0 flex-1">
+                                <div class="font-semibold truncate">{{ weapon.名称 }}</div>
+                                <div class="text-sm opacity-70 mt-1">{{ weapon.类型.join(" / ") }}</div>
+                            </div>
+                            <input
+                                type="checkbox"
+                                class="checkbox checkbox-primary pointer-events-none shrink-0"
+                                :checked="selectedWeaponsForBatch.has(weapon.id)"
+                                tabindex="-1"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <template #action>
+            <div class="flex justify-end gap-2">
+                <button class="btn btn-secondary" @click="isBatchAddWeaponsModalOpen = false">取消</button>
+                <button class="btn btn-primary" @click="handleBatchAddWeapons">确认添加 ({{ selectedWeaponsForBatch.size }})</button>
+            </div>
+        </template>
+    </DialogModel>
 
     <!-- 批量添加魔之楔弹窗 -->
     <DialogModel v-model="isBatchAddModalOpen" class="w-[80vw] max-w-200">

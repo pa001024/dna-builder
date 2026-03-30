@@ -1,4 +1,5 @@
 import type {
+    DNAActivityListBean,
     DNABlockBean,
     DNACommentListResponse,
     DNACreateCommentResponse,
@@ -181,6 +182,38 @@ export class HomeAPI extends DNASubModule {
     async gameSignIn(dayAwardId: number, period: number) {
         const data = { dayAwardId, periodId: period, signinType: 1 }
         return await this._dna_request<DNAGameSignInResultBean>("encourage/signin/signin", data, { sign: true })
+    }
+
+    async getActivityList(curTime?: string, startTime?: string, endTime?: string) {
+        const now = new Date()
+        function formatDate(date: Date) {
+            return date
+                .toLocaleString("zh-CN", {
+                    timeZone: "Asia/Shanghai",
+                    hour12: false,
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                })
+                .replace(/\//g, "-")
+        }
+        if (!curTime) {
+            curTime = formatDate(now)
+        }
+        if (!startTime) {
+            // 往前三个月
+            const minDate = new Date("2025-12-29 00:00:00 GMT+0800")
+            const maxDate = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate())
+            startTime = formatDate(maxDate > minDate ? maxDate : minDate)
+        }
+        if (!endTime) {
+            // 往后三个月
+            endTime = formatDate(new Date(now.getFullYear(), now.getMonth() + 3, now.getDate(), 23, 59))
+        }
+        return await this._dna_request<DNAActivityListBean>("encourage/calendar/Activity/list", { curTime, startTime, endTime })
     }
 
     async getDoujin(forumId: number) {

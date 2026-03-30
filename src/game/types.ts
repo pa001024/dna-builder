@@ -1,5 +1,5 @@
 import type * as THREE from "three"
-import type { Faction } from "../data/data-types"
+import type { Faction } from "../data"
 
 export interface VoxelData {
     x: number

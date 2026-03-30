@@ -1,15 +1,28 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { useLocalStorage } from "@vueuse/core"
+import { computed } from "vue"
+import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
+import { useSearchParam } from "@/composables/useSearchParam"
 import { LeveledWeapon } from "@/data"
 import weaponData from "../data/d/weapon.data"
-import type { Weapon } from "../data/data-types"
 import { formatProp } from "../util"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = ref("")
-const selectedWeapon = ref<Weapon | null>(null)
-const selectedCategory = ref<string | "">("")
-const selectedDamageType = ref<string | "">("")
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedWeaponId = useSearchParam<number>("id", 0)
+const selectedCategory = useSearchParam<string>("cat", "")
+const selectedDamageType = useSearchParam<string>("dt", "")
+const selectedVersion = useSearchParam<string>("ver", "")
+
+// 过滤选项显示控制
+const showCategoryFilter = useLocalStorage("weapon.showCategoryFilter", false)
+const showDamageTypeFilter = useLocalStorage("weapon.showDamageTypeFilter", false)
+const showVersionFilter = useLocalStorage("weapon.showVersionFilter", false)
+
+// 根据 ID 获取选中的武器
+const selectedWeapon = computed(() => {
+    return selectedWeaponId.value ? weaponData.find(weapon => weapon.id === selectedWeaponId.value) || null : null
+})
 
 const categories = computed(() => {
     const categorySet = new Set<string>()
@@ -31,13 +44,25 @@ const damageTypes = computed(() => {
     return Array.from(typeSet).sort()
 })
 
+// 获取所有可用版本
+const versionOptions = computed(() => {
+    const versionSet = new Set<string>()
+    weaponData.forEach(w => {
+        if (w.版本) {
+            versionSet.add(w.版本)
+        }
+    })
+    return Array.from(versionSet).sort()
+})
+
 const filteredWeapons = computed(() => {
     return weaponData.filter(w => {
         const matchCategory = selectedCategory.value === "" || w.类型.includes(selectedCategory.value)
         const matchDamageType = selectedDamageType.value === "" || w.伤害类型 === selectedDamageType.value
+        const matchVersion = selectedVersion.value === "" || w.版本 === selectedVersion.value
 
         if (searchKeyword.value === "") {
-            return matchCategory && matchDamageType
+            return matchCategory && matchDamageType && matchVersion
         }
 
         const query = searchKeyword.value
@@ -45,7 +70,7 @@ const filteredWeapons = computed(() => {
         // 直接中文匹配
         const directMatch = w.名称.includes(query) || w.类型.some(t => t.includes(query)) || w.伤害类型.includes(query)
         if (directMatch) {
-            return matchCategory && matchDamageType
+            return matchCategory && matchDamageType && matchVersion
         }
 
         // 拼音匹配（全拼/首字母）
@@ -55,9 +80,41 @@ const filteredWeapons = computed(() => {
 
         const matchKeyword = nameMatch || typeMatch || damageMatch
 
-        return matchKeyword && matchCategory && matchDamageType
+        return matchKeyword && matchCategory && matchDamageType && matchVersion
     })
 })
+
+/**
+ * 切换武器分类过滤显示状态
+ * @param show 是否显示武器分类过滤
+ */
+function toggleCategoryFilter(show: boolean) {
+    if (!show) {
+        selectedCategory.value = ""
+    }
+}
+
+/**
+ * 切换伤害类型过滤显示状态
+ * @param show 是否显示伤害类型过滤
+ */
+function toggleDamageTypeFilter(show: boolean) {
+    if (!show) {
+        selectedDamageType.value = ""
+    }
+}
+
+/**
+ * 切换版本过滤显示状态
+ * @param show 是否显示版本过滤
+ */
+function toggleVersionFilter(show: boolean) {
+    if (!show) {
+        selectedVersion.value = ""
+    }
+}
+
+useInitialScrollToSelectedItem()
 </script>
 
 <template>
@@ -65,79 +122,84 @@ const filteredWeapons = computed(() => {
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedWeapon }">
                 <div class="p-3 border-b border-base-200">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索武器名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
-                    />
+                    <input v-model="searchKeyword" type="text" placeholder="搜索武器名称（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
                 </div>
 
                 <div class="p-2 border-b border-base-200 space-y-2">
-                    <div>
+                    <div class="flex flex-wrap gap-2">
+                        <label class="flex items-center gap-1 cursor-pointer">
+                            <input type="checkbox" v-model="showCategoryFilter"
+                                @change="toggleCategoryFilter(showCategoryFilter)" class="checkbox checkbox-xs" />
+                            <span class="text-xs text-base-content/70">武器分类</span>
+                        </label>
+                        <label class="flex items-center gap-1 cursor-pointer">
+                            <input type="checkbox" v-model="showDamageTypeFilter"
+                                @change="toggleDamageTypeFilter(showDamageTypeFilter)" class="checkbox checkbox-xs" />
+                            <span class="text-xs text-base-content/70">伤害类型</span>
+                        </label>
+                        <label class="flex items-center gap-1 cursor-pointer">
+                            <input type="checkbox" v-model="showVersionFilter"
+                                @change="toggleVersionFilter(showVersionFilter)" class="checkbox checkbox-xs" />
+                            <span class="text-xs text-base-content/70">{{ $t("char-build.version") }}</span>
+                        </label>
+                    </div>
+
+                    <div v-show="showCategoryFilter">
                         <div class="text-xs text-base-content/70 mb-1">武器分类</div>
                         <div class="flex flex-wrap gap-1 pb-1">
-                            <button
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
-                                :class="
-                                    selectedCategory === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                "
-                                @click="selectedCategory = ''"
-                            >
-                                全部
+                            <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all" :class="selectedCategory === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                " @click="selectedCategory = ''">
+                                {{ $t("全部") }}
                             </button>
-                            <button
-                                v-for="cat in categories"
-                                :key="cat"
+                            <button v-for="cat in categories" :key="cat"
                                 class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                                :class="
-                                    selectedCategory === cat ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                "
-                                @click="selectedCategory = cat"
-                            >
+                                :class="selectedCategory === cat ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                    " @click="selectedCategory = cat">
                                 {{ $t(cat) }}
                             </button>
                         </div>
                     </div>
 
-                    <div>
+                    <div v-show="showDamageTypeFilter">
                         <div class="text-xs text-base-content/70 mb-1">伤害类型</div>
                         <div class="flex flex-wrap gap-1 pb-1">
-                            <button
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
-                                :class="
-                                    selectedDamageType === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                "
-                                @click="selectedDamageType = ''"
-                            >
-                                全部
+                            <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all" :class="selectedDamageType === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                " @click="selectedDamageType = ''">
+                                {{ $t("全部") }}
                             </button>
-                            <button
-                                v-for="type in damageTypes"
-                                :key="type"
+                            <button v-for="type in damageTypes" :key="type"
                                 class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                                :class="
-                                    selectedDamageType === type
-                                        ? 'bg-primary text-white'
-                                        : 'bg-base-200 text-base-content hover:bg-base-300'
-                                "
-                                @click="selectedDamageType = type"
-                            >
+                                :class="selectedDamageType === type
+                                    ? 'bg-primary text-white'
+                                    : 'bg-base-200 text-base-content hover:bg-base-300'
+                                    " @click="selectedDamageType = type">
                                 {{ $t(type) }}
                             </button>
                         </div>
+                    </div>
+
+                    <div v-show="showVersionFilter" class="flex flex-wrap gap-1 pb-1">
+                        <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                            :class="selectedVersion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            @click="selectedVersion = ''">
+                            {{ $t("全部") }}
+                        </button>
+                        <button v-for="version in versionOptions" :key="version"
+                            class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
+                            :class="selectedVersion === version ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            @click="selectedVersion = version">
+                            {{ version }}
+                        </button>
                     </div>
                 </div>
 
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div
-                            v-for="weapon in filteredWeapons"
-                            :key="weapon.id"
+                        <div v-for="weapon in filteredWeapons" :key="weapon.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedWeapon?.id === weapon.id }"
-                            @click="selectedWeapon = weapon"
-                        >
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedWeaponId === weapon.id }"
+                            @click="selectedWeaponId = weapon.id">
                             <div class="flex items-start justify-between">
                                 <div class="flex">
                                     <div class="flex items-center gap-2">
@@ -147,7 +209,7 @@ const filteredWeapons = computed(() => {
                                                 {{ $t(weapon.名称) }}
                                             </div>
                                             <div class="text-xs opacity-70 mt-1 flex gap-2">
-                                                <span>{{ weapon.类型.map(t => $t(t)).join(", ") }}</span>
+                                                <span>{{weapon.类型.map(t => $t(t)).join(", ")}}</span>
                                                 <span>{{ $t(weapon.伤害类型) }}</span>
                                             </div>
                                         </div>
@@ -182,6 +244,18 @@ const filteredWeapons = computed(() => {
                                     <span>{{ $t("最大弹药") }}</span>
                                     <span class="font-medium">{{ weapon.最大弹药 }}</span>
                                 </div>
+                                <div v-if="weapon.装填" class="flex items-center gap-1">
+                                    <span>{{ $t("装填") }}</span>
+                                    <span class="font-medium">{{ formatProp("基础装填", weapon.装填) }}</span>
+                                </div>
+                                <div v-if="weapon.射击间隔" class="flex items-center gap-1">
+                                    <span>{{ $t("射击间隔") }}</span>
+                                    <span class="font-medium">{{ formatProp("基础装填", weapon.射击间隔) }}</span>
+                                </div>
+                                <div v-if="weapon.射击间隔" class="flex items-center gap-1">
+                                    <span>{{ $t("射速") }}</span>
+                                    <span class="font-medium">{{ +((1 / weapon.射击间隔).toFixed(2)) }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -191,17 +265,17 @@ const filteredWeapons = computed(() => {
                     共 {{ filteredWeapons.length }} 个武器
                 </div>
             </div>
-            <div
-                v-if="selectedWeapon"
+            <div v-if="selectedWeapon"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedWeapon = null"
-            >
+                @click="selectedWeaponId = 0">
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 
-            <div v-if="selectedWeapon" class="flex-1 overflow-hidden">
+            <ScrollArea v-if="selectedWeapon" class="flex-1 overflow-hidden">
                 <DBWeaponDetailItem :weapon="selectedWeapon" />
-            </div>
+            </ScrollArea>
         </div>
     </div>
 </template>
+
+

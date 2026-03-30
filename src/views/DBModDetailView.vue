@@ -16,7 +16,7 @@ const mod = computed(() => {
 </script>
 
 <template>
-    <div class="h-full flex flex-col">
-        <DBModDetailItem :mod="mod" class="flex-1" />
-    </div>
+    <ScrollArea class="h-full">
+        <DBModDetailItem :mod="mod" />
+    </ScrollArea>
 </template>

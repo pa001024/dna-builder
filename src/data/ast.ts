@@ -92,12 +92,12 @@ class Tokenizer {
 
         // 标识符处理 (属性名或函数名)
         // 支持标准字符, 中文, 以及 [Tag]Name 格式
-        if (/[a-zA-Z_\u4e00-\u9fa5[]/.test(char)) {
+        if (/[a-zA-Z_\u4e00-\u9fa5·[]/.test(char)) {
             let value = ""
 
             while (this.position < this.input.length) {
                 const c = this.input[this.position]
-                if (/[a-zA-Z0-9_\u4e00-\u9fa5[\]]/.test(c)) {
+                if (/[a-zA-Z0-9_\u4e00-\u9fa5·[\]]/.test(c)) {
                     value += c
                     this.position++
                 } else {

@@ -124,6 +124,7 @@ watch(el, newVal => {
                 :limit="page.limit"
                 :offset="page.offset"
                 :data-key="dataKey"
+                :request-policy="requestPolicy"
                 @load="pages[index].loaded = true"
                 @end="end = direction === 'top' ? pages.length > 1 : true"
             >

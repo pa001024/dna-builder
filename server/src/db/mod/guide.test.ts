@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test"
-import { sanitizeImages, isSafeURL } from "../mod/guide"
 import { sanitizeHTML } from "../../util/html"
+import { isSafeURL, sanitizeImages } from "../mod/guide"
 
 describe("guide XSS 防护", () => {
     describe("isSafeURL", () => {

@@ -53,6 +53,58 @@ export const updateUserMetaMutation = typedMutation<Types.UserLoginResult, { dat
     }
 `)
 
+export const claimDailyLaunchExperienceMutation = typedMutation<Types.UserExperienceRewardResult>(/* GraphQL */ `
+    mutation {
+        claimDailyLaunchExperience {
+            success
+            message
+            source
+            awardedExp
+            retryAfterMs
+            token
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                level
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
+export const claimDailyOnlineExperienceMutation = typedMutation<Types.UserExperienceRewardResult>(/* GraphQL */ `
+    mutation {
+        claimDailyOnlineExperience {
+            success
+            message
+            source
+            awardedExp
+            retryAfterMs
+            token
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                level
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
 export const deleteUserMutation = typedMutation<boolean, { id: string }>(/* GraphQL */ `
     mutation ($id: String!) {
         deleteUser(id: $id)
@@ -69,8 +121,26 @@ export const updateUserMutation = typedMutation<Types.User, { id: string; email?
             pic
             uid
             roles
+            experience
+            level
             createdAt
             updateAt
+        }
+    }
+`)
+
+export const forgotPasswordMutation = typedMutation<boolean, { email: string }>(/* GraphQL */ `
+    mutation ($email: String!) {
+        forgotPassword(email: $email)
+    }
+`)
+
+export const resetPasswordMutation = typedMutation<Types.UserLoginResult, { token: string; new_password: string }>(/* GraphQL */ `
+    mutation ($token: String!, $new_password: String!) {
+        resetPassword(token: $token, new_password: $new_password) {
+            success
+            message
+            token
         }
     }
 `)
@@ -266,6 +336,319 @@ export const pauseTaskMutation = typedMutation<boolean, { taskId: string }>(/* G
     }
 `)
 
+export const redeemShopProductMutation = typedMutation<Types.ShopRedeemResult, { productId: string }>(/* GraphQL */ `
+    mutation ($productId: String!) {
+        redeemShopProduct(productId: $productId) {
+            success
+            message
+            awardedAsset {
+                id
+                rewardType
+                rewardKey
+                rewardName
+                displayClass
+                displayCss
+                createdAt
+                updateAt
+            }
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                points
+                level
+                selectedTitleAssetId
+                selectedNameCardAssetId
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
+export const equipShopAssetMutation = typedMutation<Types.ShopEquipResult, { assetId: string }>(/* GraphQL */ `
+    mutation ($assetId: String!) {
+        equipShopAsset(assetId: $assetId) {
+            success
+            message
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                points
+                level
+                selectedTitleAssetId
+                selectedNameCardAssetId
+                createdAt
+                updateAt
+            }
+            selectedTitleAsset {
+                id
+                rewardType
+                rewardKey
+                rewardName
+                displayClass
+                displayCss
+                createdAt
+                updateAt
+            }
+            selectedNameCardAsset {
+                id
+                rewardType
+                rewardKey
+                rewardName
+                displayClass
+                displayCss
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
+export const adminGrantShopProductMutation = typedMutation<Types.ShopRedeemResult, { userId: string; productId: string }>(/* GraphQL */ `
+    mutation ($userId: String!, $productId: String!) {
+        adminGrantShopProduct(userId: $userId, productId: $productId) {
+            success
+            message
+            awardedAsset {
+                id
+                rewardType
+                rewardKey
+                rewardName
+                displayClass
+                displayCss
+                createdAt
+                updateAt
+            }
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                points
+                level
+                selectedTitleAssetId
+                selectedNameCardAssetId
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
+export const adminRevokeShopProductMutation = typedMutation<Types.ShopRedeemResult, { userId: string; productId: string }>(/* GraphQL */ `
+    mutation ($userId: String!, $productId: String!) {
+        adminRevokeShopProduct(userId: $userId, productId: $productId) {
+            success
+            message
+            awardedAsset {
+                id
+                rewardType
+                rewardKey
+                rewardName
+                displayClass
+                displayCss
+                createdAt
+                updateAt
+            }
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                points
+                level
+                selectedTitleAssetId
+                selectedNameCardAssetId
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
+export const createShopProductMutation = typedMutation<Types.ShopProduct, { data: Types.ShopProductInput }>(/* GraphQL */ `
+    mutation ($data: ShopProductInput!) {
+        createShopProduct(data: $data) {
+            id
+            name
+            description
+            assetId
+            rewardType
+            rewardKey
+            rewardName
+            displayClass
+            displayCss
+            pointsCost
+            sortOrder
+            isActive
+            startTime
+            endTime
+            createdAt
+            updateAt
+            asset {
+                id
+                rewardType
+                rewardKey
+                rewardName
+                displayClass
+                displayCss
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
+export const updateShopProductMutation = typedMutation<Types.ShopProduct, { id: string; data: Types.ShopProductInput }>(/* GraphQL */ `
+    mutation ($id: String!, $data: ShopProductInput!) {
+        updateShopProduct(id: $id, data: $data) {
+            id
+            name
+            description
+            assetId
+            rewardType
+            rewardKey
+            rewardName
+            displayClass
+            displayCss
+            pointsCost
+            sortOrder
+            isActive
+            startTime
+            endTime
+            createdAt
+            updateAt
+            asset {
+                id
+                rewardType
+                rewardKey
+                rewardName
+                displayClass
+                displayCss
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
+export const deleteShopProductMutation = typedMutation<boolean, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        deleteShopProduct(id: $id)
+    }
+`)
+
+export const createScriptCategoryMutation = typedMutation<Types.ScriptCategory, { input: Types.ScriptCategoryInput }>(/* GraphQL */ `
+    mutation ($input: ScriptCategoryInput!) {
+        createScriptCategory(input: $input) {
+            id
+            name
+            description
+            createdAt
+            updateAt
+        }
+    }
+`)
+
+export const updateScriptCategoryMutation = typedMutation<Types.ScriptCategory, { id: string; input: Types.ScriptCategoryInput }>(
+    /* GraphQL */ `
+        mutation ($id: String!, $input: ScriptCategoryInput!) {
+            updateScriptCategory(id: $id, input: $input) {
+                id
+                name
+                description
+                createdAt
+                updateAt
+            }
+        }
+    `
+)
+
+export const deleteScriptCategoryMutation = typedMutation<boolean, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        deleteScriptCategory(id: $id)
+    }
+`)
+
+export const createScriptMutation = typedMutation<Types.Script, { input: Types.ScriptInput }>(/* GraphQL */ `
+    mutation ($input: ScriptInput!) {
+        createScript(input: $input) {
+            id
+            user {
+                name
+            }
+        }
+    }
+`)
+
+export const updateScriptMutation = typedMutation<Types.Script, { id: string; input: Types.ScriptInput }>(/* GraphQL */ `
+    mutation ($id: String!, $input: ScriptInput!) {
+        updateScript(id: $id, input: $input) {
+            id
+        }
+    }
+`)
+
+export const deleteScriptMutation = typedMutation<boolean, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        deleteScript(id: $id)
+    }
+`)
+
+export const likeScriptMutation = typedMutation<Types.Script, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        likeScript(id: $id) {
+            id
+            isLiked
+        }
+    }
+`)
+
+export const unlikeScriptMutation = typedMutation<Types.Script, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        unlikeScript(id: $id) {
+            id
+            isLiked
+        }
+    }
+`)
+
+export const recommendScriptMutation = typedMutation<Types.Script, { id: string; recommended: boolean }>(/* GraphQL */ `
+    mutation ($id: String!, $recommended: Boolean!) {
+        recommendScript(id: $id, recommended: $recommended) {
+            id
+        }
+    }
+`)
+
+export const pinScriptMutation = typedMutation<Types.Script, { id: string; pinned: boolean }>(/* GraphQL */ `
+    mutation ($id: String!, $pinned: Boolean!) {
+        pinScript(id: $id, pinned: $pinned) {
+            id
+        }
+    }
+`)
+
 export const rtcSignalMutation = typedMutation<boolean, { roomId: string; type: string; from: string; to: string; body: string }>(
     /* GraphQL */ `
         mutation ($roomId: String!, $type: String!, $from: String!, $to: String!, $body: String!) {
@@ -337,9 +720,9 @@ export const addMissionsIngameMutation = typedMutation<Types.MissionsIngame, { t
     `
 )
 
-export const sendMessageMutation = typedMutation<Types.Msg, { roomId: string; content: string }>(/* GraphQL */ `
-    mutation ($roomId: String!, $content: String!) {
-        sendMessage(roomId: $roomId, content: $content) {
+export const sendMessageMutation = typedMutation<Types.Msg, { roomId: string; content: string; replyToMsgId?: string }>(/* GraphQL */ `
+    mutation ($roomId: String!, $content: String!, $replyToMsgId: String) {
+        sendMessage(roomId: $roomId, content: $content, replyToMsgId: $replyToMsgId) {
             id
         }
     }
@@ -540,6 +923,68 @@ export const pinBuildMutation = typedMutation<Types.Build, { id: string; pinned:
         pinBuild(id: $id, pinned: $pinned) {
             id
             isPinned
+        }
+    }
+`)
+
+export const createActivityMutation = typedMutation<Types.Activity, { server: string; input: Types.ActivityInput }>(/* GraphQL */ `
+    mutation ($server: String!, $input: ActivityInput!) {
+        createActivity(server: $server, input: $input) {
+            id
+            server
+            postId
+            startTime
+            endTime
+            name
+            icon
+            desc
+            createdAt
+            updateAt
+        }
+    }
+`)
+
+export const updateActivityMutation = typedMutation<Types.Activity, { server: string; id: number; input: Types.ActivityUpdateInput }>(
+    /* GraphQL */ `
+        mutation ($server: String!, $id: Int!, $input: ActivityUpdateInput!) {
+            updateActivity(server: $server, id: $id, input: $input) {
+                id
+                server
+                postId
+                startTime
+                endTime
+                name
+                icon
+                desc
+                createdAt
+                updateAt
+            }
+        }
+    `
+)
+
+export const deleteActivityMutation = typedMutation<boolean, { server: string; id: number }>(/* GraphQL */ `
+    mutation ($server: String!, $id: Int!) {
+        deleteActivity(server: $server, id: $id)
+    }
+`)
+
+export const upsertActivitiesIngameMutation = typedMutation<
+    Types.Activity[],
+    { token: string; server: string; activities: Types.ActivityInput[] }
+>(/* GraphQL */ `
+    mutation ($token: String!, $server: String!, $activities: [ActivityInput!]!) {
+        upsertActivitiesIngame(token: $token, server: $server, activities: $activities) {
+            id
+            server
+            postId
+            startTime
+            endTime
+            name
+            icon
+            desc
+            createdAt
+            updateAt
         }
     }
 `)

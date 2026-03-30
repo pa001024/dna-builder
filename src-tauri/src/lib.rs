@@ -1,15 +1,18 @@
 use std::{
     fs::{self, File},
-    io::{self, Read, Write},
+    io::{self, Read, Seek, SeekFrom, Write},
     path::{Path, PathBuf},
     sync::Arc,
     time::Duration,
 };
 
+use hotwatch::{Event, EventKind, Hotwatch};
 use lazy_static::lazy_static;
+use md5::Context;
 use reqwest::multipart;
 use serde::{Deserialize, Serialize};
-use tauri::Manager;
+
+use tauri::{Emitter, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 use zip::ZipArchive;
 mod util;
 
@@ -28,6 +31,7 @@ lazy_static! {
             .build()
             .expect("Failed to create HTTP client")
     );
+    static ref DOWNLOAD_PROGRESS_LOCK: Mutex<()> = Mutex::new(());
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -41,6 +45,86 @@ enum FormDataValue {
     },
 }
 
+/// 下载分块进度信息
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct ChunkProgress {
+    /// 分块索引
+    index: usize,
+    /// 分块起始位置
+    start: u64,
+    /// 分块结束位置
+    end: u64,
+    /// 已下载字节数
+    downloaded: u64,
+    /// 是否已完成
+    completed: bool,
+}
+
+/// 下载进度文件
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct DownloadProgress {
+    /// 文件总大小
+    total_size: u64,
+    /// 分块大小
+    chunk_size: u64,
+    /// 分块总数
+    num_chunks: usize,
+    /// 各分块进度
+    chunks: Vec<ChunkProgress>,
+}
+
+/// 云游戏受控窗口的可选配置。
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct CloudGameWindowOptions {
+    url: Option<String>,
+    title: Option<String>,
+    width: Option<f64>,
+    height: Option<f64>,
+    min_width: Option<f64>,
+    min_height: Option<f64>,
+    x: Option<f64>,
+    y: Option<f64>,
+    visible: Option<bool>,
+    focus: Option<bool>,
+    decorations: Option<bool>,
+    resizable: Option<bool>,
+    always_on_top: Option<bool>,
+    skip_taskbar: Option<bool>,
+    incognito: Option<bool>,
+    open_devtools: Option<bool>,
+    user_agent: Option<String>,
+    proxy_url: Option<String>,
+}
+
+/// 云游戏受控窗口的当前状态。
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct CloudGameWindowState {
+    label: String,
+    url: String,
+    title: String,
+    visible: bool,
+    focused: bool,
+}
+
+/// 云游戏页面加载事件负载。
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct CloudGamePageLoadPayload {
+    label: String,
+    url: String,
+    event: String,
+}
+
+/// 云游戏桥接事件负载。
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct CloudGameBridgeEventPayload {
+    event_type: String,
+    payload: Option<serde_json::Value>,
+}
+
 // #[macro_use]
 // extern crate lazy_static;
 // const GAME_PROCESS: &str = "EM.exe";
@@ -50,12 +134,20 @@ const GAME_PROCESS: &str = "EM-Win64-Shipping.exe";
 use futures_util::{SinkExt, StreamExt};
 use http::header::HeaderValue;
 use std::sync::Mutex;
+#[cfg(target_os = "windows")]
+use tauri_plugin_autostart::ManagerExt;
 use tokio::sync::mpsc;
 use tokio::time;
 use tokio_tungstenite::{
     connect_async, tungstenite::client::IntoClientRequest, tungstenite::protocol::Message,
 };
 use url::Url;
+
+const CLOUDGAME_WINDOW_LABEL: &str = "cloudgame";
+const CLOUDGAME_DEFAULT_URL: &str = "https://dna.yingxiong.com/cloudgame/";
+const CLOUDGAME_BRIDGE_EVENT: &str = "cloudgame://bridge";
+const CLOUDGAME_PAGE_LOAD_EVENT: &str = "cloudgame://page-load";
+const CLOUDGAME_WINDOW_EVENT: &str = "cloudgame://window-state";
 
 // 定义发往WebSocket Actor的指令
 enum WsCommand {
@@ -68,6 +160,7 @@ enum WsCommand {
 lazy_static! {
     static ref WS_TX: Mutex<Option<mpsc::UnboundedSender<WsCommand>>> = Mutex::new(None);
     static ref WS_CONFIG: Mutex<Option<(String, String)>> = Mutex::new(None); // (userId, token)
+    static ref HOTWATCH: Arc<Mutex<Option<Hotwatch>>> = Arc::new(Mutex::new(None));
 }
 
 /// WebSocket消息响应结构
@@ -391,35 +484,302 @@ fn is_zip_file(path: &Path) -> io::Result<bool> {
         return Ok(false);
     }
     let mut file = File::open(path)?;
-    let mut signature = [0u8; 4];
+    let mut signature = [0u8; 6];
     let read = file.read(&mut signature)?;
-    Ok(read >= 2 && signature[0] == b'P' && signature[1] == b'K')
+
+    // 检查是否是ZIP文件 (PK)
+    if read >= 2 && signature[0] == b'P' && signature[1] == b'K' {
+        return Ok(true);
+    }
+
+    // 检查是否是7z文件 (7z)
+    if read >= 6 && &signature[..6] == &[0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C] {
+        return Ok(true);
+    }
+
+    Ok(false)
 }
 
 fn extract_zip_into(
     archive_path: &Path,
     target_dir: &Path,
     output: &mut Vec<(String, u64)>,
+    app_handle: Option<&tauri::AppHandle>,
 ) -> io::Result<()> {
     let file = File::open(archive_path)?;
-    let mut archive = ZipArchive::new(file)
-        .map_err(|err| io::Error::new(io::ErrorKind::Other, err.to_string()))?;
-    for i in 0..archive.len() {
-        let mut entry = archive
-            .by_index(i)
+
+    // 检查文件签名以确定文件类型
+    let mut signature = [0u8; 6];
+    let mut file_clone = file.try_clone()?;
+    let read = file_clone.read(&mut signature)?;
+
+    // 重置文件指针
+    drop(file_clone);
+    let file = File::open(archive_path)?;
+
+    // 处理ZIP文件
+    if read >= 2 && signature[0] == b'P' && signature[1] == b'K' {
+        let mut archive = ZipArchive::new(file)
             .map_err(|err| io::Error::new(io::ErrorKind::Other, err.to_string()))?;
-        if entry.is_dir() {
-            continue;
+        let total_files = archive.len();
+
+        // 计算总大小
+        let mut total_size = 0;
+        for i in 0..total_files {
+            if let Ok(entry) = archive.by_index(i) {
+                if !entry.is_dir() {
+                    total_size += entry.size();
+                }
+            }
         }
-        let relative = entry.mangled_name();
-        let out_path = target_dir.join(relative);
-        if let Some(parent) = out_path.parent() {
-            fs::create_dir_all(parent)?;
+
+        // 发送开始解压的进度
+        if let Some(app) = app_handle {
+            let _ = app.emit(
+                "extract_progress",
+                serde_json::json!({
+                    "current_file_count": 0,
+                    "current_size": 0,
+                    "total_files": total_files,
+                    "total_size": total_size,
+                    "current_file": "",
+                }),
+            );
         }
-        let mut extracted = File::create(&out_path)?;
-        io::copy(&mut entry, &mut extracted)?;
-        output.push((out_path.to_string_lossy().to_string(), entry.size()));
+
+        // 重置归档以便重新读取
+        let file = File::open(archive_path)?;
+        let mut archive = ZipArchive::new(file)
+            .map_err(|err| io::Error::new(io::ErrorKind::Other, err.to_string()))?;
+
+        let mut current_file_index = 0;
+        let mut current_size = 0;
+
+        for (_i, entry_index) in (0..total_files).enumerate() {
+            let mut entry = archive
+                .by_index(entry_index)
+                .map_err(|err| io::Error::new(io::ErrorKind::Other, err.to_string()))?;
+            if entry.is_dir() {
+                continue;
+            }
+
+            // 增加当前文件索引和大小
+            current_file_index += 1;
+            current_size += entry.size();
+
+            let relative = entry.mangled_name();
+            let out_path = target_dir.join(relative);
+            if let Some(parent) = out_path.parent() {
+                fs::create_dir_all(parent)?;
+            }
+            let mut extracted = File::create(&out_path)?;
+            io::copy(&mut entry, &mut extracted)?;
+            output.push((out_path.to_string_lossy().to_string(), entry.size()));
+
+            // 发送进度更新
+            if let Some(app) = app_handle {
+                let _ = app.emit(
+                    "extract_progress",
+                    serde_json::json!({
+                        "current_file_count": current_file_index,
+                        "current_size": current_size,
+                        "total_files": total_files,
+                        "total_size": total_size,
+                        "current_file": entry.name(),
+                    }),
+                );
+            }
+        }
+
+        // 发送解压完成的进度
+        if let Some(app) = app_handle {
+            let _ = app.emit(
+                "extract_progress",
+                serde_json::json!({
+                    "current_file_count": current_file_index,
+                    "current_size": current_size,
+                    "total_files": current_file_index,
+                    "total_size": total_size,
+                    "current_file": "",
+                }),
+            );
+        }
     }
+    // 处理7z文件
+    else if read >= 6 && &signature[..6] == &[0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C] {
+        // 导入 sevenz_rust2 的必要类型
+        use sevenz_rust2::{ArchiveEntry, Error};
+        use std::io::Read;
+        use std::path::PathBuf;
+
+        // 第一次调用：只计算文件数量和大小，不写入文件
+        let mut total_files = 0;
+        let mut total_size = 0;
+
+        match sevenz_rust2::decompress_file_with_extract_fn(
+            archive_path,
+            target_dir,
+            |entry: &ArchiveEntry, _reader: &mut dyn Read, _path: &PathBuf| {
+                // 只统计文件，跳过目录
+                if !entry.is_directory() {
+                    total_files += 1;
+                    total_size += entry.size();
+                }
+                Ok(true) // 继续处理下一个条目，但不写入文件
+            },
+        ) {
+            Err(err) => {
+                return Err(io::Error::new(io::ErrorKind::Other, format!("{:?}", err)));
+            }
+            _ => {}
+        }
+
+        // 发送开始解压的进度（使用实际计算的文件数量和大小）
+        if let Some(app) = app_handle {
+            let _ = app.emit(
+                "extract_progress",
+                serde_json::json!({
+                    "current_file_count": 0,
+                    "current_size": 0,
+                    "total_files": total_files,
+                    "total_size": total_size,
+                    "current_file": "",
+                }),
+            );
+        }
+
+        // 第二次调用：实际解压文件并更新进度
+        let mut current_file_index = 0;
+        let mut current_size = 0;
+        let app_handle_clone = app_handle.clone();
+
+        match sevenz_rust2::decompress_file_with_extract_fn(
+            archive_path,
+            target_dir,
+            move |entry: &ArchiveEntry, reader: &mut dyn Read, path: &PathBuf| {
+                // 跳过目录
+                if entry.is_directory() {
+                    return Ok(true);
+                }
+
+                // 增加当前文件索引
+                current_file_index += 1;
+                // 更新当前处理的大小
+                current_size += entry.size();
+
+                // 发送解压进度
+                if let Some(app) = &app_handle_clone {
+                    let _ = app.emit(
+                        "extract_progress",
+                        serde_json::json!({
+                            "current_file_count": current_file_index,
+                            "current_size": current_size,
+                            "total_files": total_files,
+                            "total_size": total_size,
+                            "current_file": entry.name(),
+                        }),
+                    );
+                }
+
+                // 处理目录和文件
+                if entry.is_directory() {
+                    // 创建目录
+                    if !path.exists() {
+                        if let Err(e) = std::fs::create_dir_all(path) {
+                            return Err(Error::from(std::io::Error::new(
+                                std::io::ErrorKind::Other,
+                                e,
+                            )));
+                        }
+                    }
+                } else {
+                    // 确保父目录存在
+                    if let Some(parent) = path.parent() {
+                        if !parent.exists() {
+                            if let Err(e) = std::fs::create_dir_all(parent) {
+                                return Err(Error::from(std::io::Error::new(
+                                    std::io::ErrorKind::Other,
+                                    e,
+                                )));
+                            }
+                        }
+                    }
+
+                    // 创建文件并写入内容
+                    use std::io::BufWriter;
+                    let file = match std::fs::File::create(path) {
+                        Ok(f) => f,
+                        Err(e) => {
+                            return Err(Error::from(std::io::Error::new(
+                                std::io::ErrorKind::Other,
+                                e,
+                            )));
+                        }
+                    };
+
+                    if entry.size() > 0 {
+                        let mut writer = BufWriter::new(file);
+                        if let Err(e) = std::io::copy(reader, &mut writer) {
+                            return Err(Error::from(std::io::Error::new(
+                                std::io::ErrorKind::Other,
+                                e,
+                            )));
+                        }
+
+                        // 设置文件时间戳
+                        use std::fs::FileTimes;
+                        #[cfg(target_os = "macos")]
+                        use std::os::macos::fs::FileTimesExt;
+                        #[cfg(windows)]
+                        use std::os::windows::fs::FileTimesExt;
+
+                        let file = writer.get_mut();
+                        let file_times = FileTimes::new()
+                            .set_accessed(entry.access_date().into())
+                            .set_modified(entry.last_modified_date().into());
+
+                        #[cfg(any(windows, target_os = "macos"))]
+                        let file_times = file_times.set_created(entry.creation_date().into());
+
+                        let _ = file.set_times(file_times);
+                    }
+                }
+
+                // 添加到输出列表
+                if let Ok(metadata) = std::fs::metadata(path) {
+                    let path_str = path.to_string_lossy().to_string();
+                    output.push((path_str, metadata.len()));
+                }
+
+                Ok(true)
+            },
+        ) {
+            Ok(_) => {
+                // 发送解压完成的进度
+                if let Some(app) = app_handle {
+                    let _ = app.emit(
+                        "extract_progress",
+                        serde_json::json!({
+                            "current_file_count": current_file_index,
+                            "current_size": current_size,
+                            "total_files": current_file_index,
+                            "total_size": total_size,
+                            "current_file": "",
+                        }),
+                    );
+                }
+            }
+            Err(err) => {
+                return Err(io::Error::new(io::ErrorKind::Other, format!("{:?}", err)));
+            }
+        }
+    } else {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            "Unsupported archive format",
+        ));
+    }
+
     Ok(())
 }
 
@@ -461,7 +821,7 @@ fn import_mod(gamebase: String, paths: Vec<String>) -> String {
         }
         match is_zip_file(&src) {
             Ok(true) => {
-                if let Err(err) = extract_zip_into(&src, &base_path, &mut output) {
+                if let Err(err) = extract_zip_into(&src, &base_path, &mut output, None) {
                     eprintln!("Failed to extract {:?}: {err}", src);
                 }
             }
@@ -519,6 +879,12 @@ fn import_pic(path: String) -> Result<String, String> {
 }
 
 #[tauri::command]
+fn predict_font_ocr(image_path: String) -> Result<submodules::font_ocr::FontOcrPrediction, String> {
+    let path = PathBuf::from(image_path);
+    submodules::font_ocr::predict_font_ocr(path.as_path(), true)
+}
+
+#[tauri::command]
 fn get_game_install() -> String {
     #[cfg(target_os = "windows")]
     {
@@ -548,14 +914,14 @@ fn get_game_install() -> String {
 async fn is_game_running(is_run: bool) -> String {
     #[cfg(target_os = "windows")]
     {
-        use crate::util::{get_process_by_name, get_process_exe_path};
+        use crate::util::get_process_exe_path;
 
         let mut elapsed = Duration::from_secs(0);
         let timeout = Duration::from_secs(60 * 60); // 1h
         let interval = Duration::from_millis(500); // 500ms
 
         while elapsed <= timeout {
-            let now_is_run = get_process_by_name(GAME_PROCESS).unwrap_or(0) > 0;
+            let now_is_run = submodules::win::get_pid_by_name(GAME_PROCESS).unwrap_or(0) > 0;
             if now_is_run != is_run {
                 break;
             }
@@ -576,6 +942,19 @@ async fn is_game_running(is_run: bool) -> String {
 async fn launch_exe(path: String, params: String) -> bool {
     #[cfg(target_os = "windows")]
     {
+        use crate::util::shell_execute_runas;
+        let pid = shell_execute_runas(path.as_str(), Some(params.as_str()), None);
+        if let Err(err) = pid {
+            println!("Failed to launch game: {:?}", err);
+            return false;
+        }
+    }
+    true
+}
+#[tauri::command]
+async fn launch_normal(path: String, params: String) -> bool {
+    #[cfg(target_os = "windows")]
+    {
         use crate::util::shell_execute;
         let pid = shell_execute(path.as_str(), Some(params.as_str()), None);
         if let Err(err) = pid {
@@ -584,6 +963,53 @@ async fn launch_exe(path: String, params: String) -> bool {
         }
     }
     true
+}
+
+/// 以管理员权限重新启动当前程序
+#[tauri::command]
+async fn run_as_admin(app_handle: tauri::AppHandle) -> Result<bool, String> {
+    #[cfg(target_os = "windows")]
+    {
+        use crate::util::shell_execute_runas;
+        use std::env;
+
+        // 获取当前可执行文件路径
+        let exe_path = env::current_exe().map_err(|e| format!("获取可执行文件路径失败: {}", e))?;
+
+        // 使用 shell_execute 以管理员权限启动
+        let exe_path_str = exe_path.to_string_lossy().to_string();
+        let result = shell_execute_runas(&exe_path_str, None, None);
+
+        match result {
+            Ok(_) => {
+                // 启动成功后退出当前进程
+                let _ = app_handle.exit(0);
+                Ok(true)
+            }
+            Err(e) => Err(format!("以管理员权限启动失败: {:?}", e)),
+        }
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Ok(false)
+    }
+}
+
+/// 检查当前进程是否以管理员权限运行
+#[tauri::command]
+fn check_is_admin() -> bool {
+    #[cfg(target_os = "windows")]
+    {
+        use crate::util::is_elevated;
+        match is_elevated() {
+            Ok(is_admin) => is_admin,
+            Err(_) => false,
+        }
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        false
+    }
 }
 
 #[tauri::command]
@@ -731,28 +1157,6 @@ async fn fetch(
     }
 }
 
-/// 导出JSON文件到指定路径
-#[tauri::command]
-async fn export_json_file(file_path: String, json_content: String) -> Result<String, String> {
-    // 创建文件路径
-    let path = Path::new(&file_path);
-
-    // 确保父目录存在
-    if let Some(parent) = path.parent() {
-        if !parent.exists() {
-            fs::create_dir_all(parent)
-                .map_err(|e| format!("Failed to create parent directory: {}", e))?;
-        }
-    }
-
-    // 写入JSON内容到文件
-    let mut file = File::create(path).map_err(|e| format!("Failed to create file: {}", e))?;
-    file.write_all(json_content.as_bytes())
-        .map_err(|e| format!("Failed to write JSON content: {}", e))?;
-
-    Ok(format!("Successfully exported JSON to {}", file_path))
-}
-
 /// 导出二进制文件到指定路径
 #[tauri::command]
 async fn export_binary_file(file_path: String, binary_content: Vec<u8>) -> Result<String, String> {
@@ -778,6 +1182,913 @@ async fn export_binary_file(file_path: String, binary_content: Vec<u8>) -> Resul
     ))
 }
 
+/// 读取文本文件内容
+#[tauri::command]
+async fn read_text_file(file_path: String) -> Result<String, String> {
+    let path = Path::new(&file_path);
+    if !path.exists() {
+        return Err(format!("文件不存在: {}", file_path));
+    }
+
+    let content = fs::read_to_string(path).map_err(|e| format!("读取文件失败: {}", e))?;
+    Ok(content)
+}
+
+/// 写入文本文件内容
+#[tauri::command]
+async fn write_text_file(file_path: String, content: String) -> Result<String, String> {
+    let path = Path::new(&file_path);
+
+    // 确保父目录存在
+    if let Some(parent) = path.parent() {
+        if !parent.exists() {
+            fs::create_dir_all(parent)
+                .map_err(|e| format!("Failed to create parent directory: {}", e))?;
+        }
+    }
+
+    fs::write(path, content).map_err(|e| format!("写入文件失败: {}", e))?;
+    Ok(format!("文件已保存: {}", file_path))
+}
+
+/// 获取文档目录路径
+#[tauri::command]
+fn get_documents_dir() -> String {
+    #[cfg(target_os = "windows")]
+    {
+        use widestring::U16CStr;
+        use windows::Win32::System::Com::CoTaskMemFree;
+        use windows::Win32::UI::Shell::FOLDERID_Documents;
+        use windows::Win32::UI::Shell::KNOWN_FOLDER_FLAG;
+        use windows::Win32::UI::Shell::SHGetKnownFolderPath;
+
+        unsafe {
+            let result = SHGetKnownFolderPath(&FOLDERID_Documents, KNOWN_FOLDER_FLAG(0), None);
+
+            match result {
+                Ok(path_ptr) => {
+                    let ptr = path_ptr.as_ptr();
+                    if ptr.is_null() {
+                        return "C:/Users/Public/Documents".to_string();
+                    }
+
+                    let u16cstr = U16CStr::from_ptr_str(ptr);
+                    let result = u16cstr.to_string_lossy().to_string();
+
+                    CoTaskMemFree(Some(ptr as *const _));
+                    result
+                }
+                Err(_) => "C:/Users/Public/Documents".to_string(),
+            }
+        }
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        use std::env;
+        if let Some(home) = env::var("HOME").ok() {
+            let docs_dir = format!("{}/Documents", home);
+            if Path::new(&docs_dir).exists() {
+                return docs_dir;
+            }
+        }
+        "/tmp".to_string()
+    }
+}
+
+/// 获取进度文件路径
+fn get_progress_file_path(file_path: &Path) -> PathBuf {
+    let file_name = file_path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+    let parent = file_path.parent().unwrap_or(Path::new(""));
+    let progress_file_name = format!("{}.progress", file_name);
+    parent.join(progress_file_name)
+}
+
+/// 创建初始进度文件
+fn create_progress_file(
+    file_path: &Path,
+    total_size: u64,
+    chunk_size: u64,
+    num_chunks: usize,
+) -> Result<DownloadProgress, String> {
+    let _guard = DOWNLOAD_PROGRESS_LOCK.lock().unwrap();
+    let mut chunks = Vec::with_capacity(num_chunks);
+
+    for i in 0..num_chunks {
+        let start = i as u64 * chunk_size;
+        let end = if i == num_chunks - 1 {
+            total_size - 1
+        } else {
+            start + chunk_size - 1
+        };
+
+        chunks.push(ChunkProgress {
+            index: i,
+            start,
+            end,
+            downloaded: 0,
+            completed: false,
+        });
+    }
+
+    let progress = DownloadProgress {
+        total_size,
+        chunk_size,
+        num_chunks,
+        chunks,
+    };
+
+    // 写入进度文件
+    let progress_path = get_progress_file_path(file_path);
+    let progress_json = serde_json::to_string_pretty(&progress)
+        .map_err(|e| format!("序列化进度文件失败: {}", e))?;
+
+    fs::write(&progress_path, progress_json).map_err(|e| format!("写入进度文件失败: {}", e))?;
+
+    Ok(progress)
+}
+
+/// 读取进度文件
+fn read_progress_file(file_path: &Path) -> Option<DownloadProgress> {
+    let _guard = DOWNLOAD_PROGRESS_LOCK.lock().unwrap();
+    read_progress_file_unlocked(file_path)
+}
+
+/// 读取进度文件（调用方需自行持有锁）
+fn read_progress_file_unlocked(file_path: &Path) -> Option<DownloadProgress> {
+    let progress_path = get_progress_file_path(file_path);
+
+    if !progress_path.exists() {
+        return None;
+    }
+
+    let content = fs::read_to_string(&progress_path).ok()?;
+    serde_json::from_str(&content).ok()
+}
+
+/// 更新进度文件中的单个分块
+fn update_chunk_progress(
+    file_path: &Path,
+    chunk_index: usize,
+    downloaded: u64,
+    completed: bool,
+) -> Result<(), String> {
+    let _guard = DOWNLOAD_PROGRESS_LOCK.lock().unwrap();
+    let mut progress = match read_progress_file_unlocked(file_path) {
+        Some(progress) => progress,
+        None => {
+            eprintln!("进度文件缺失，跳过本次更新: {}", file_path.display());
+            return Ok(());
+        }
+    };
+
+    if chunk_index >= progress.chunks.len() {
+        return Err("分块索引超出范围".to_string());
+    }
+
+    progress.chunks[chunk_index].downloaded = downloaded;
+    progress.chunks[chunk_index].completed = completed;
+
+    // 写入进度文件
+    let progress_path = get_progress_file_path(file_path);
+    let progress_json = serde_json::to_string_pretty(&progress)
+        .map_err(|e| format!("序列化进度文件失败: {}", e))?;
+
+    fs::write(&progress_path, progress_json).map_err(|e| format!("写入进度文件失败: {}", e))?;
+
+    Ok(())
+}
+
+/// 删除进度文件
+fn delete_progress_file(file_path: &Path) {
+    let _guard = DOWNLOAD_PROGRESS_LOCK.lock().unwrap();
+    let progress_path = get_progress_file_path(file_path);
+    let _ = fs::remove_file(progress_path);
+}
+
+/// 多线程下载单个分块，支持断点续传和自动重试
+async fn download_chunk(
+    url: &str,
+    start: u64,
+    end: u64,
+    file_path: &Path,
+    chunk_index: usize,
+    resume_offset: u64, // 断点续传的偏移量
+) -> Result<u64, String> {
+    const MAX_RETRIES: u32 = 3; // 最大重试次数
+    const RETRY_DELAY_MS: u64 = 1000; // 重试延迟（毫秒）
+
+    let client = HTTP_CLIENT.clone();
+
+    // 计算实际下载的起始位置（支持断点续传）
+    let actual_start = start + resume_offset;
+
+    // 如果已经下载完成，直接返回
+    if actual_start > end {
+        return Ok(resume_offset);
+    }
+
+    // 构建Range 请求头
+    let range_header = format!("bytes={}-{}", actual_start, end);
+
+    // 重试循环
+    for retry in 0..MAX_RETRIES {
+        // 发送 Range 请求
+        let response = client
+            .get(url)
+            .header("Range", range_header.clone())
+            .send()
+            .await;
+
+        match response {
+            Ok(resp) => {
+                // 检查响应状态
+                if resp.status().is_success() || resp.status() == 206 {
+                    // 获取响应体流
+                    let mut stream = resp.bytes_stream();
+                    let mut downloaded = 0u64;
+
+                    // 打开文件并定位到指定位置
+                    let mut file = File::options()
+                        .write(true)
+                        .open(file_path)
+                        .map_err(|e| format!("分块 {} 打开文件失败: {}", chunk_index, e))?;
+
+                    file.seek(SeekFrom::Start(actual_start))
+                        .map_err(|e| format!("分块 {} 定位文件位置失败: {}", chunk_index, e))?;
+
+                    // 读取并写入文件
+                    while let Some(chunk) = stream.next().await {
+                        let chunk = chunk
+                            .map_err(|e| format!("分块 {} 读取数据失败: {}", chunk_index, e))?;
+
+                        file.write_all(&chunk)
+                            .map_err(|e| format!("分块 {} 写入文件失败: {}", chunk_index, e))?;
+
+                        downloaded += chunk.len() as u64;
+                    }
+
+                    // 返回总共下载的字节数（包括之前已下载的部分）
+                    return Ok(resume_offset + downloaded);
+                } else {
+                    // 响应状态错误，重试
+                    if retry < MAX_RETRIES - 1 {
+                        eprintln!(
+                            "分块 {} 下载失败 (HTTP {})，{} 秒后重试 ({}/{})",
+                            chunk_index,
+                            resp.status(),
+                            RETRY_DELAY_MS / 1000,
+                            retry + 1,
+                            MAX_RETRIES
+                        );
+                        tokio::time::sleep(tokio::time::Duration::from_millis(RETRY_DELAY_MS))
+                            .await;
+                        continue;
+                    } else {
+                        return Err(format!(
+                            "分块 {} 下载失败: HTTP {} (已重试 {} 次)",
+                            chunk_index,
+                            resp.status(),
+                            MAX_RETRIES
+                        ));
+                    }
+                }
+            }
+            Err(e) => {
+                // 请求错误，重试
+                if retry < MAX_RETRIES - 1 {
+                    eprintln!(
+                        "分块 {} 请求错误: {}，{} 秒后重试 ({}/{})",
+                        chunk_index,
+                        e,
+                        RETRY_DELAY_MS / 1000,
+                        retry + 1,
+                        MAX_RETRIES
+                    );
+                    tokio::time::sleep(tokio::time::Duration::from_millis(RETRY_DELAY_MS)).await;
+                    continue;
+                } else {
+                    return Err(format!(
+                        "分块 {} 请求失败: {} (已重试 {} 次)",
+                        chunk_index, e, MAX_RETRIES
+                    ));
+                }
+            }
+        }
+    }
+
+    // 理论上不会到达这里
+    Err("未知错误".to_string())
+}
+
+/// 使用 Range 多线程下载大文件，支持断点续传
+async fn download_file_multithreaded(
+    app_handle: tauri::AppHandle,
+    url: &str,
+    file_path: &Path,
+    total_size: u64,
+    filename: &str,
+    concurrent_threads: usize,
+) -> Result<String, String> {
+    // 配置参数
+    const CHUNK_SIZE: u64 = 5 * 1024 * 1024; // 每个分块 5MB
+
+    // 计算分块数量
+    let num_chunks = (total_size + CHUNK_SIZE - 1) / CHUNK_SIZE;
+    let num_chunks = num_chunks as usize;
+
+    // 检查是否存在进度文件（断点续传）
+    let progress_info = read_progress_file(file_path);
+    let is_resume = progress_info.is_some();
+
+    let progress_info = if let Some(info) = progress_info {
+        // 验证进度文件是否有效
+        if info.total_size == total_size
+            && info.chunk_size == CHUNK_SIZE
+            && info.num_chunks == num_chunks
+        {
+            info
+        } else {
+            // 进度文件无效，重新创建
+            create_progress_file(file_path, total_size, CHUNK_SIZE, num_chunks)
+                .map_err(|e| format!("创建进度文件失败: {}", e))?
+        }
+    } else {
+        // 创建新的进度文件
+        create_progress_file(file_path, total_size, CHUNK_SIZE, num_chunks)
+            .map_err(|e| format!("创建进度文件失败: {}", e))?
+    };
+
+    // 如果不是断点续传，创建文件并预分配空间
+    if !is_resume {
+        let file = File::create(file_path).map_err(|e| format!("创建文件失败: {}", e))?;
+        file.set_len(total_size)
+            .map_err(|e| format!("预分配文件空间失败: {}", e))?;
+    }
+
+    // 创建并发控制器
+    let semaphore = Arc::new(tokio::sync::Semaphore::new(concurrent_threads));
+    let file_path = file_path.to_path_buf();
+    let url = url.to_string();
+    let filename = filename.to_string();
+    let total_size_clone = total_size; // 克隆 total_size 以便在 async 块中使用
+
+    // 创建进度跟踪（用于发送进度事件）
+    let event_progress = Arc::new(std::sync::atomic::AtomicU64::new(0));
+
+    // 计算已下载的总字节数
+    let initial_downloaded: u64 = progress_info.chunks.iter().map(|c| c.downloaded).sum();
+
+    // 更新事件进度
+    event_progress.store(initial_downloaded, std::sync::atomic::Ordering::Relaxed);
+
+    // 创建任务列表
+    let mut tasks = Vec::with_capacity(num_chunks);
+
+    for i in 0..num_chunks {
+        let chunk_info = &progress_info.chunks[i];
+
+        // 如果分块已完成，跳过
+        if chunk_info.completed {
+            continue;
+        }
+
+        let start = chunk_info.start;
+        let end = chunk_info.end;
+        let resume_offset = chunk_info.downloaded;
+
+        let url_clone = url.clone();
+        let file_path_clone = file_path.clone();
+        let filename_clone = filename.clone();
+        let app_handle_clone = app_handle.clone();
+        let event_progress_clone = event_progress.clone();
+        let semaphore_clone = semaphore.clone();
+        let total_size_for_task = total_size_clone; // 为每个任务创建 total_size 的副本
+
+        let task = tokio::spawn(async move {
+            // 获取信号量许可
+            let _permit = semaphore_clone
+                .acquire()
+                .await
+                .map_err(|e| format!("获取并发许可失败: {}", e))?;
+
+            // 下载分块（传入断点续传偏移量）
+            let downloaded =
+                download_chunk(&url_clone, start, end, &file_path_clone, i, resume_offset).await?;
+
+            // 更新进度文件
+            update_chunk_progress(&file_path_clone, i, downloaded, true)
+                .map_err(|e| format!("更新进度文件失败: {}", e))?;
+
+            // 更新事件进度
+            let old_progress = event_progress_clone.fetch_add(
+                downloaded - resume_offset,
+                std::sync::atomic::Ordering::Relaxed,
+            );
+            let new_progress = old_progress + (downloaded - resume_offset);
+
+            // 计算进度百分比
+            let progress_percent = if total_size_for_task > 0 {
+                (new_progress * 100) / total_size_for_task
+            } else {
+                0
+            };
+
+            // 发送进度事件
+            app_handle_clone
+                .emit(
+                    "download_progress",
+                    serde_json::json!({
+                        "filename": &filename_clone,
+                        "progress": progress_percent,
+                        "downloaded": new_progress,
+                        "total": total_size_for_task,
+                    }),
+                )
+                .map_err(|e| format!("发送进度事件失败: {}", e))?;
+
+            Ok::<u64, String>(downloaded)
+        });
+
+        tasks.push(task);
+    }
+
+    // 等待所有任务完成
+    for task in tasks {
+        match task.await {
+            Ok(Ok(_downloaded)) => {}
+            Ok(Err(e)) => {
+                return Err(format!("下载分块失败: {}", e));
+            }
+            Err(e) => {
+                return Err(format!("任务执行失败: {}", e));
+            }
+        }
+    }
+
+    // 下载完成，删除进度文件
+    delete_progress_file(&file_path);
+
+    Ok(format!("成功下载文件到 {}", file_path.to_string_lossy()))
+}
+
+/// 从指定URL下载文件到本地，并通过事件系统发送进度更新
+/// 对于大于 10MB 的文件使用 Range 多线程下载，否则使用单线程下载
+#[tauri::command]
+async fn download_file(
+    app_handle: tauri::AppHandle,
+    url: String,
+    filename: String,
+    concurrent_threads: usize,
+) -> Result<String, String> {
+    let client = HTTP_CLIENT.clone();
+
+    // 发送 HEAD 请求获取文件信息和 Range 支持
+    let head_response = client.head(&url).send().await;
+
+    let (total_size, accept_ranges) = match head_response {
+        Ok(response) => {
+            if response.status().is_success() {
+                // 直接从响应头读取 Content-Length
+                let length = response
+                    .headers()
+                    .get("content-length")
+                    .and_then(|v| v.to_str().ok())
+                    .and_then(|s| s.parse::<u64>().ok())
+                    .unwrap_or(0);
+
+                let ranges = response
+                    .headers()
+                    .get("Accept-Ranges")
+                    .and_then(|v| v.to_str().ok())
+                    .unwrap_or("")
+                    .to_string();
+                (length, ranges)
+            } else {
+                // HEAD 请求失败，使用 GET 请求
+                let get_response = client
+                    .get(&url)
+                    .send()
+                    .await
+                    .map_err(|e| format!("Failed to send GET request: {}", e))?;
+
+                if !get_response.status().is_success() {
+                    return Err(format!(
+                        "Failed to get file info: HTTP {}",
+                        get_response.status()
+                    ));
+                }
+
+                // 直接从响应头读取 Content-Length
+                let length = get_response
+                    .headers()
+                    .get("content-length")
+                    .and_then(|v| v.to_str().ok())
+                    .and_then(|s| s.parse::<u64>().ok())
+                    .unwrap_or(0);
+
+                let ranges = get_response
+                    .headers()
+                    .get("Accept-Ranges")
+                    .and_then(|v| v.to_str().ok())
+                    .unwrap_or("")
+                    .to_string();
+                (length, ranges)
+            }
+        }
+        Err(_) => {
+            // HEAD 请求失败，使用 GET 请求
+            let get_response = client
+                .get(&url)
+                .send()
+                .await
+                .map_err(|e| format!("Failed to send GET request: {}", e))?;
+
+            if !get_response.status().is_success() {
+                return Err(format!(
+                    "Failed to get file info: HTTP {}",
+                    get_response.status()
+                ));
+            }
+
+            // 直接从响应头读取 Content-Length
+            let length = get_response
+                .headers()
+                .get("content-length")
+                .and_then(|v| v.to_str().ok())
+                .and_then(|s| s.parse::<u64>().ok())
+                .unwrap_or(0);
+
+            let ranges = get_response
+                .headers()
+                .get("Accept-Ranges")
+                .and_then(|v| v.to_str().ok())
+                .unwrap_or("")
+                .to_string();
+            (length, ranges)
+        }
+    };
+
+    // 获取当前工作目录
+    let current_dir =
+        std::env::current_dir().map_err(|e| format!("Failed to get current directory: {}", e))?;
+
+    // 创建文件路径
+    let file_path = current_dir.join(&filename);
+
+    // 确保父目录存在
+    if let Some(parent_dir) = file_path.parent() {
+        if !parent_dir.exists() {
+            fs::create_dir_all(parent_dir)
+                .map_err(|e| format!("Failed to create parent directories: {}", e))?;
+        }
+    }
+
+    // 判断是否使用多线程下载（大于 10MB）
+    const MULTITHREAD_THRESHOLD: u64 = 10 * 1024 * 1024; // 10MB
+
+    if total_size > MULTITHREAD_THRESHOLD && accept_ranges == "bytes" && concurrent_threads > 1 {
+        println!(
+            "文件大小: {} bytes ({} MB)，启用多线程下载",
+            total_size,
+            total_size / (1024 * 1024)
+        );
+        // 使用多线程下载
+        return download_file_multithreaded(
+            app_handle.clone(),
+            &url,
+            &file_path,
+            total_size,
+            &filename,
+            concurrent_threads,
+        )
+        .await;
+    }
+
+    // 单线程下载
+    let response = client
+        .get(&url)
+        .send()
+        .await
+        .map_err(|e| format!("Failed to send request: {}", e))?;
+
+    // 检查响应状态
+    if !response.status().is_success() {
+        return Err(format!(
+            "Failed to download file: HTTP {}",
+            response.status()
+        ));
+    }
+
+    // 创建文件
+    let mut file = File::create(&file_path).map_err(|e| format!("Failed to create file: {}", e))?;
+
+    // 获取响应体流
+    let mut stream = response.bytes_stream();
+
+    // 已下载字节数
+    let mut downloaded = 0u64;
+
+    // 读取并写入文件，同时发送进度更新
+    while let Some(chunk) = stream.next().await {
+        let chunk = chunk.map_err(|e| format!("Failed to read chunk: {}", e))?;
+
+        // 写入文件
+        file.write_all(&chunk)
+            .map_err(|e| format!("Failed to write file: {}", e))?;
+
+        // 更新已下载字节数
+        downloaded += chunk.len() as u64;
+
+        // 计算进度百分比
+        let progress = if total_size > 0 {
+            (downloaded * 100) / total_size
+        } else {
+            0
+        };
+
+        // 发送进度事件
+        app_handle
+            .emit(
+                "download_progress",
+                serde_json::json!({
+                    "filename": &filename,
+                    "progress": progress,
+                    "downloaded": downloaded,
+                    "total": total_size,
+                }),
+            )
+            .map_err(|e| format!("Failed to emit progress event: {}", e))?;
+    }
+
+    Ok(format!(
+        "Successfully downloaded file to {}",
+        file_path.to_string_lossy()
+    ))
+}
+
+/// 解压缩游戏资源文件
+#[tauri::command]
+async fn extract_game_assets(
+    app_handle: tauri::AppHandle,
+    zip_path: String,
+    target_dir: String,
+) -> Result<String, String> {
+    // 获取当前工作目录
+    let current_dir =
+        std::env::current_dir().map_err(|e| format!("Failed to get current directory: {}", e))?;
+
+    // 创建文件路径
+    let zip_file_path = current_dir.join(&zip_path);
+    let target_directory = current_dir.join(&target_dir);
+
+    // 确保目标目录存在
+    if !target_directory.exists() {
+        fs::create_dir_all(&target_directory)
+            .map_err(|e| format!("Failed to create target directory: {}", e))?;
+    }
+
+    // 检查是否是ZIP文件
+    if !is_zip_file(&zip_file_path).map_err(|e| format!("Failed to check if file is zip: {}", e))? {
+        return Err("Provided file is not a ZIP archive".to_string());
+    }
+
+    // 解压缩文件
+    let mut extracted_files = Vec::new();
+    if let Err(err) = extract_zip_into(
+        &zip_file_path,
+        &target_directory,
+        &mut extracted_files,
+        Some(&app_handle),
+    ) {
+        return Err(format!("Failed to extract zip file: {}", err));
+    }
+
+    Ok(format!(
+        "Successfully extracted {} files to {}",
+        extracted_files.len(),
+        target_directory.to_string_lossy()
+    ))
+}
+
+/// 获取文件大小
+#[tauri::command]
+async fn get_file_size(file_path: String) -> Result<u64, String> {
+    let path = Path::new(&file_path);
+    if !path.exists() {
+        return Ok(0);
+    }
+
+    let metadata = fs::metadata(path).map_err(|e| format!("Failed to get file metadata: {}", e))?;
+    if !metadata.is_file() {
+        return Ok(0);
+    }
+
+    Ok(metadata.len())
+}
+
+/// 获取文件的 MD5 哈希值
+#[tauri::command]
+async fn get_file_hash(file_path: String) -> Result<String, String> {
+    let path = Path::new(&file_path);
+    if !path.exists() {
+        return Ok(String::new());
+    }
+
+    let file = File::open(path).map_err(|e| format!("Failed to open file: {}", e))?;
+    let mut reader = io::BufReader::new(file);
+    let mut context = Context::new();
+    let mut buffer = [0u8; 8192];
+
+    loop {
+        let read_size = reader
+            .read(&mut buffer)
+            .map_err(|e| format!("Failed to read file: {}", e))?;
+        if read_size == 0 {
+            break;
+        }
+        context.consume(&buffer[..read_size]);
+    }
+
+    Ok(format!("{:x}", context.finalize()))
+}
+
+/// 清理临时目录
+#[tauri::command]
+async fn cleanup_temp_dir(temp_dir: String) -> Result<String, String> {
+    let path = Path::new(&temp_dir);
+    if !path.exists() {
+        return Ok(format!("临时目录不存在: {}", temp_dir));
+    }
+
+    // 遍历目录，只删除文件，保留目录结构
+    if let Ok(entries) = fs::read_dir(path) {
+        for entry in entries {
+            if let Ok(entry) = entry {
+                let entry_path = entry.path();
+                if entry_path.is_file() {
+                    if let Err(e) = fs::remove_file(&entry_path) {
+                        eprintln!("Failed to remove file {}: {}", entry_path.display(), e);
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(format!("临时目录清理完成: {}", temp_dir))
+}
+
+/// 列出指定目录下的所有文件
+#[tauri::command]
+async fn list_files(dir_path: String) -> Result<Vec<String>, String> {
+    let path = Path::new(&dir_path);
+    if !path.exists() {
+        return Ok(vec![]);
+    }
+
+    let mut files = vec![];
+    if let Ok(entries) = fs::read_dir(path) {
+        for entry in entries.flatten() {
+            let entry_path = entry.path();
+            if entry_path.is_file() {
+                if let Some(file_name) = entry_path.file_name() {
+                    if let Some(name_str) = file_name.to_str() {
+                        files.push(name_str.to_string());
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(files)
+}
+
+/// 列出指定目录下的所有子目录
+#[tauri::command]
+async fn list_directories(dir_path: String) -> Result<Vec<String>, String> {
+    let path = Path::new(&dir_path);
+    if !path.exists() {
+        return Ok(vec![]);
+    }
+
+    let mut directories = vec![];
+    if let Ok(entries) = fs::read_dir(path) {
+        for entry in entries.flatten() {
+            let entry_path = entry.path();
+            if entry_path.is_dir() {
+                if let Some(file_name) = entry_path.file_name() {
+                    if let Some(name_str) = file_name.to_str() {
+                        directories.push(name_str.to_string());
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(directories)
+}
+/// 列出指定目录下的所有 JS 文件
+#[tauri::command]
+async fn list_script_files(dir_path: String) -> Result<Vec<String>, String> {
+    let path = Path::new(&dir_path);
+    if !path.exists() {
+        return Ok(vec![]);
+    }
+
+    let mut files = vec![];
+    if let Ok(entries) = fs::read_dir(path) {
+        for entry in entries.flatten() {
+            let entry_path = entry.path();
+            if entry_path.is_file() {
+                if let Some(ext) = entry_path.extension() {
+                    if ext == "js" {
+                        if let Some(file_name) = entry_path.file_name() {
+                            if let Some(name_str) = file_name.to_str() {
+                                files.push(name_str.to_string());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(files)
+}
+
+/// 重命名文件（支持自动创建目标目录的父目录结构）
+#[tauri::command]
+async fn rename_file(old_path: String, new_path: String) -> Result<String, String> {
+    let old = Path::new(&old_path);
+    let new = Path::new(&new_path);
+
+    if !old.exists() {
+        return Err(format!("源文件不存在: {}", old_path));
+    }
+
+    if new.exists() {
+        return Err(format!("目标文件已存在: {}", new_path));
+    }
+
+    // 自动创建目标目录的父目录结构
+    if let Some(parent) = new.parent() {
+        if !parent.exists() {
+            fs::create_dir_all(parent).map_err(|e| format!("创建目标目录失败: {}", e))?;
+        }
+    }
+
+    fs::rename(old, new).map_err(|e| format!("重命名文件失败: {}", e))?;
+    Ok(format!("文件已重命名: {} -> {}", old_path, new_path))
+}
+
+/// 删除文件（移动到回收站）
+#[tauri::command]
+async fn delete_file(file_path: String) -> Result<String, String> {
+    let path = Path::new(&file_path);
+
+    if !path.exists() {
+        return Err(format!("文件不存在: {}", file_path));
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        use windows::Win32::Foundation::HWND;
+        use windows::Win32::UI::Shell::*;
+        use windows::core::{BOOL, PCWSTR};
+
+        // 将路径转换为 Windows 需要的格式（双 null 终止的宽字符串）
+        let mut from = file_path.encode_utf16().collect::<Vec<u16>>();
+        from.push(0); // 添加 null 终止符
+        from.push(0); // 双 null 终止符
+
+        let mut op = SHFILEOPSTRUCTW {
+            hwnd: HWND::default(),
+            wFunc: FO_DELETE,
+            pFrom: PCWSTR::from_raw(from.as_ptr()),
+            pTo: PCWSTR::null(),
+            fFlags: (FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_SILENT).0 as u16,
+            fAnyOperationsAborted: BOOL::from(false),
+            hNameMappings: std::ptr::null_mut(),
+            lpszProgressTitle: PCWSTR::null(),
+        };
+
+        unsafe {
+            let result = SHFileOperationW(&mut op);
+            if result != 0 {
+                return Err(format!("删除文件失败: 错误代码 {}", result));
+            }
+        }
+
+        Ok(format!("文件已移动到回收站: {}", file_path))
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        fs::remove_file(path).map_err(|e| format!("删除文件失败: {}", e))?;
+        Ok(format!("文件已删除: {}", file_path))
+    }
+}
+
 #[tauri::command]
 fn get_os_version() -> String {
     use sysinfo::System;
@@ -789,10 +2100,650 @@ fn get_os_version() -> String {
         "".to_string()
     }
 }
+mod submodules;
+
+#[tauri::command]
+async fn run_script(script_path: String, app_handle: tauri::AppHandle) -> Result<String, String> {
+    use submodules::script::run_script_file;
+    match run_script_file(script_path, app_handle).await {
+        Ok(result) => Ok(result),
+        Err(e) => Err(format!("脚本执行失败: {}", e)),
+    }
+}
+
+/// CLI 入口：执行指定脚本文件。
+///
+/// # 参数
+/// - `script_path`: 脚本路径（可相对或绝对）
+/// - `script_config`: 可选脚本配置（用于 CLI 模式 readConfig）
+/// - `script_config_file_path`: 可选配置文件路径（用于 CLI 模式 setConfig 写回）
+///
+/// # 返回
+/// 返回脚本执行结果字符串；失败时返回错误信息
+#[cfg(feature = "dob-script-cli")]
+pub async fn run_script_cli(
+    script_path: String,
+    script_config: Option<serde_json::Value>,
+    script_config_file_path: Option<String>,
+) -> Result<String, String> {
+    use submodules::script::run_script_file_cli;
+    run_script_file_cli(script_path, script_config, script_config_file_path).await
+}
+
+/// 响应脚本 readConfig 请求，将前端当前值回传给脚本运行时。
+#[tauri::command]
+fn resolve_script_config_request(
+    request_id: String,
+    value: serde_json::Value,
+) -> Result<String, String> {
+    use submodules::script_builtin::resolve_script_config_request;
+    resolve_script_config_request(request_id, value)?;
+    Ok("配置请求已响应".to_string())
+}
+
+/// 响应脚本 MCP requestHelp 请求，将前端标注结果回传给 MCP 工具调用方。
+#[tauri::command]
+fn resolve_script_help_request(
+    request_id: String,
+    response: mcp_server::ScriptHelpResponse,
+) -> Result<String, String> {
+    use submodules::script_mcp::resolve_script_help_request;
+    resolve_script_help_request(request_id, response)?;
+    Ok("协助请求已响应".to_string())
+}
+
+#[tauri::command]
+fn stop_script() -> Result<String, String> {
+    use submodules::script::stop_script;
+    match stop_script() {
+        Ok(_) => Ok("脚本已停止".to_string()),
+        Err(e) => Err(format!("停止脚本失败: {:?}", e)),
+    }
+}
+
+/// 停止指定脚本路径对应的运行实例。
+#[tauri::command]
+fn stop_script_by_path(script_path: String) -> Result<String, String> {
+    use submodules::script::stop_script_by_path;
+    match stop_script_by_path(script_path) {
+        Ok(_) => Ok("脚本停止请求已发送".to_string()),
+        Err(e) => Err(format!("停止脚本失败: {:?}", e)),
+    }
+}
+
+/// 获取当前脚本运行状态，供前端刷新后恢复停止能力。
+#[tauri::command]
+fn get_script_running_state() -> Result<bool, String> {
+    use submodules::script::is_script_running;
+    Ok(is_script_running())
+}
+
+/// 脚本运行信息。
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ScriptRuntimeInfo {
+    /// 是否存在运行中的脚本
+    running: bool,
+    /// 正在运行的脚本路径列表（去重）
+    script_paths: Vec<String>,
+    /// 运行实例总数（同一路径并行会累计）
+    running_count: usize,
+}
+
+/// 获取当前脚本运行信息（运行状态 + 正在执行脚本列表）。
+#[tauri::command]
+fn get_script_runtime_info() -> Result<ScriptRuntimeInfo, String> {
+    use submodules::script::get_script_runtime_info;
+    let (running, script_paths, running_count) = get_script_runtime_info();
+    Ok(ScriptRuntimeInfo {
+        running,
+        script_paths,
+        running_count,
+    })
+}
+
+/// 获取脚本页 MCP 服务当前状态。
+#[tauri::command]
+fn get_script_mcp_server_state() -> Result<submodules::script_mcp::ScriptMcpServerState, String> {
+    Ok(submodules::script_mcp::get_script_mcp_server_state())
+}
+
+/// 清空脚本页 MCP status / console 缓存。
+#[tauri::command]
+async fn clear_script_mcp_cache(
+    script_path: Option<String>,
+    app_handle: tauri::AppHandle,
+) -> Result<mcp_server::ScriptOperationResult, String> {
+    submodules::script_mcp::clear_script_mcp_cache(app_handle, script_path).await
+}
+
+/// 清空脚本页 MCP status 缓存。
+#[tauri::command]
+async fn clear_script_mcp_status(
+    script_path: Option<String>,
+    title: Option<String>,
+    app_handle: tauri::AppHandle,
+) -> Result<mcp_server::ScriptOperationResult, String> {
+    submodules::script_mcp::clear_script_mcp_status(app_handle, script_path, title).await
+}
+
+/// 清空脚本页 MCP console 缓存。
+#[tauri::command]
+async fn clear_script_mcp_console(
+    script_path: Option<String>,
+    include_global: Option<bool>,
+    app_handle: tauri::AppHandle,
+) -> Result<mcp_server::ScriptOperationResult, String> {
+    submodules::script_mcp::clear_script_mcp_console(app_handle, script_path, include_global).await
+}
+
+/// 更新脚本页 MCP 服务启停状态。
+#[tauri::command]
+async fn set_script_mcp_server_enabled(
+    enabled: bool,
+    port: Option<u16>,
+    app_handle: tauri::AppHandle,
+) -> Result<submodules::script_mcp::ScriptMcpServerState, String> {
+    if enabled {
+        submodules::script_mcp::start_script_mcp_server_runtime(app_handle, port).await
+    } else {
+        submodules::script_mcp::stop_script_mcp_server_runtime().await
+    }
+}
+
+/// 同步脚本热键绑定到后端（AHK 风格，如 ^c）。
+#[tauri::command]
+fn sync_script_hotkey_bindings(
+    bindings: Vec<submodules::hotkey::ScriptHotkeyBinding>,
+    app_handle: tauri::AppHandle,
+) -> Result<String, String> {
+    use submodules::hotkey::sync_script_hotkey_bindings;
+    sync_script_hotkey_bindings(app_handle, bindings)?;
+    Ok("热键绑定已同步".to_string())
+}
+
+/// 获取后端当前生效的热键绑定。
+#[tauri::command]
+fn get_script_hotkey_bindings() -> Result<Vec<submodules::hotkey::ScriptHotkeyBinding>, String> {
+    use submodules::hotkey::get_script_hotkey_bindings;
+    Ok(get_script_hotkey_bindings())
+}
+
+/// 设置脚本输入录制器是否启用 F10 热键监听。
+#[tauri::command]
+fn set_script_input_recorder_hotkey_enabled(
+    enabled: bool,
+    app_handle: tauri::AppHandle,
+) -> Result<String, String> {
+    use submodules::hotkey::set_script_input_recorder_hotkey_enabled;
+    set_script_input_recorder_hotkey_enabled(app_handle, enabled)?;
+    Ok(if enabled {
+        "录制热键监听已启用".to_string()
+    } else {
+        "录制热键监听已禁用".to_string()
+    })
+}
+
+/// 获取脚本输入录制器快照。
+#[tauri::command]
+fn get_script_input_recorder_snapshot()
+-> Result<submodules::hotkey::ScriptInputRecorderSnapshot, String> {
+    use submodules::hotkey::get_script_input_recorder_snapshot;
+    Ok(get_script_input_recorder_snapshot())
+}
+
+/// 清空脚本输入录制器动作列表。
+#[tauri::command]
+fn clear_script_input_recorder_actions() -> Result<String, String> {
+    use submodules::hotkey::clear_script_input_recorder_actions;
+    clear_script_input_recorder_actions()?;
+    Ok("录制动作已清空".to_string())
+}
+
+/// 监听文件变化
+#[tauri::command]
+fn watch_file(file_path: String, app_handle: tauri::AppHandle) -> Result<String, String> {
+    let mut hotwatch_guard = HOTWATCH
+        .lock()
+        .map_err(|e| format!("获取 hotwatch 锁失败: {:?}", e))?;
+
+    // 如果 hotwatch 不存在，则创建
+    if hotwatch_guard.is_none() {
+        *hotwatch_guard = Some(
+            Hotwatch::new_with_custom_delay(Duration::from_millis(500))
+                .map_err(|e| format!("创建 hotwatch 失败: {:?}", e))?,
+        );
+    }
+
+    let hotwatch = hotwatch_guard.as_mut().unwrap();
+
+    // 克隆文件路径用于闭包
+    let file_path_clone = file_path.clone();
+    // 监听文件
+    hotwatch
+        .watch(&file_path, move |event: Event| {
+            // 检查事件类型
+            if let EventKind::Modify(_) = event.kind {
+                // 文件被修改，发送事件到前端
+                let _ = app_handle.emit("file-changed", &file_path_clone);
+            }
+        })
+        .map_err(|e| format!("监听文件失败: {:?}", e))?;
+
+    Ok(format!("开始监听文件: {}", file_path))
+}
+
+/// 取消监听文件
+#[tauri::command]
+fn unwatch_file(file_path: String) -> Result<String, String> {
+    let mut hotwatch_guard = HOTWATCH
+        .lock()
+        .map_err(|e| format!("获取 hotwatch 锁失败: {:?}", e))?;
+
+    if let Some(hotwatch) = hotwatch_guard.as_mut() {
+        let _ = hotwatch.unwatch(&file_path);
+        Ok(format!("取消监听文件: {}", file_path))
+    } else {
+        Err("Hotwatch 未初始化".to_string())
+    }
+}
+
+/// 获取当前开机启动状态。
+#[tauri::command]
+fn is_launch_at_startup_enabled(app_handle: tauri::AppHandle) -> Result<bool, String> {
+    #[cfg(target_os = "windows")]
+    {
+        app_handle
+            .autolaunch()
+            .is_enabled()
+            .map_err(|error| format!("读取开机启动状态失败: {error}"))
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = app_handle;
+        Err("当前平台暂不支持开机启动设置".to_string())
+    }
+}
+
+/// 更新开机启动状态。
+#[tauri::command]
+fn set_launch_at_startup_enabled(
+    app_handle: tauri::AppHandle,
+    enabled: bool,
+) -> Result<bool, String> {
+    #[cfg(target_os = "windows")]
+    {
+        let manager = app_handle.autolaunch();
+        if enabled {
+            manager
+                .enable()
+                .map_err(|error| format!("启用开机启动失败: {error}"))?;
+        } else {
+            manager
+                .disable()
+                .map_err(|error| format!("关闭开机启动失败: {error}"))?;
+        }
+        manager
+            .is_enabled()
+            .map_err(|error| format!("校验开机启动状态失败: {error}"))
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = (app_handle, enabled);
+        Err("当前平台暂不支持开机启动设置".to_string())
+    }
+}
+
+/// 构建注入到云游戏页面中的后台控制桥。
+fn build_cloudgame_init_script() -> String {
+    include_str!("cloudgame_init.js").to_string()
+}
+
+/// 将页面加载事件转换成稳定的字符串值。
+fn cloudgame_page_load_event_name(event: tauri::webview::PageLoadEvent) -> &'static str {
+    match event {
+        tauri::webview::PageLoadEvent::Started => "started",
+        tauri::webview::PageLoadEvent::Finished => "finished",
+    }
+}
+
+/// 读取云游戏窗口当前状态。
+fn cloudgame_window_state(window: &WebviewWindow) -> Result<CloudGameWindowState, String> {
+    let url = window
+        .url()
+        .map_err(|error| format!("读取云游戏窗口 URL 失败: {error}"))?;
+    let title = window
+        .title()
+        .map_err(|error| format!("读取云游戏窗口标题失败: {error}"))?;
+    let visible = window
+        .is_visible()
+        .map_err(|error| format!("读取云游戏窗口可见状态失败: {error}"))?;
+    let focused = window
+        .is_focused()
+        .map_err(|error| format!("读取云游戏窗口焦点状态失败: {error}"))?;
+
+    Ok(CloudGameWindowState {
+        label: CLOUDGAME_WINDOW_LABEL.to_string(),
+        url: url.to_string(),
+        title,
+        visible,
+        focused,
+    })
+}
+
+/// 向前端广播云游戏窗口状态。
+fn emit_cloudgame_window_state(
+    app_handle: &tauri::AppHandle,
+    window: &WebviewWindow,
+) -> Result<CloudGameWindowState, String> {
+    let state = cloudgame_window_state(window)?;
+    app_handle
+        .emit(CLOUDGAME_WINDOW_EVENT, &state)
+        .map_err(|error| format!("发送云游戏窗口状态失败: {error}"))?;
+    Ok(state)
+}
+
+/// 向前端广播云游戏页面加载事件。
+fn emit_cloudgame_page_load(
+    app_handle: &tauri::AppHandle,
+    url: &Url,
+    event: tauri::webview::PageLoadEvent,
+) -> Result<(), String> {
+    let payload = CloudGamePageLoadPayload {
+        label: CLOUDGAME_WINDOW_LABEL.to_string(),
+        url: url.to_string(),
+        event: cloudgame_page_load_event_name(event).to_string(),
+    };
+    app_handle
+        .emit(CLOUDGAME_PAGE_LOAD_EVENT, &payload)
+        .map_err(|error| format!("发送云游戏页面加载事件失败: {error}"))
+}
+
+/// 接收远程云游戏页桥接事件并转发到主窗口。
+#[tauri::command]
+fn dispatch_cloudgame_bridge_event(
+    app_handle: tauri::AppHandle,
+    payload: CloudGameBridgeEventPayload,
+) -> Result<(), String> {
+    app_handle
+        .emit(
+            CLOUDGAME_BRIDGE_EVENT,
+            &serde_json::json!({
+                "type": payload.event_type,
+                "payload": payload.payload,
+            }),
+        )
+        .map_err(|error| format!("转发云游戏桥接事件失败: {error}"))
+}
+
+/// 统一获取云游戏窗口句柄，避免各命令重复判空。
+fn with_cloudgame_window<T, F>(app_handle: &tauri::AppHandle, f: F) -> Result<Option<T>, String>
+where
+    F: FnOnce(WebviewWindow) -> Result<T, String>,
+{
+    match app_handle.get_webview_window(CLOUDGAME_WINDOW_LABEL) {
+        Some(window) => f(window).map(Some),
+        None => Ok(None),
+    }
+}
+
+/// 创建或复用云游戏受控窗口。
+#[tauri::command]
+async fn open_cloudgame_window(
+    app_handle: tauri::AppHandle,
+    options: Option<CloudGameWindowOptions>,
+) -> Result<CloudGameWindowState, String> {
+    let options = options.unwrap_or_default();
+    let target_url = options
+        .url
+        .clone()
+        .unwrap_or_else(|| CLOUDGAME_DEFAULT_URL.to_string());
+    let parsed_url =
+        Url::parse(&target_url).map_err(|error| format!("云游戏 URL 无效: {error}"))?;
+
+    if let Some(window) = app_handle.get_webview_window(CLOUDGAME_WINDOW_LABEL) {
+        let current_url = window
+            .url()
+            .map(|value| value.to_string())
+            .unwrap_or_default();
+        if current_url != parsed_url.as_str() {
+            window
+                .navigate(parsed_url)
+                .map_err(|error| format!("导航云游戏窗口失败: {error}"))?;
+        }
+        if let Some(title) = options.title.as_deref() {
+            window
+                .set_title(title)
+                .map_err(|error| format!("更新云游戏窗口标题失败: {error}"))?;
+        }
+        match options.visible {
+            Some(false) => window
+                .hide()
+                .map_err(|error| format!("隐藏云游戏窗口失败: {error}"))?,
+            Some(true) | None => window
+                .show()
+                .map_err(|error| format!("显示云游戏窗口失败: {error}"))?,
+        }
+        if options.focus.unwrap_or(true) {
+            window
+                .set_focus()
+                .map_err(|error| format!("聚焦云游戏窗口失败: {error}"))?;
+        }
+        #[cfg(debug_assertions)]
+        if options.open_devtools.unwrap_or(false) {
+            window.open_devtools();
+        }
+        return emit_cloudgame_window_state(&app_handle, &window);
+    }
+
+    let page_load_handle = app_handle.clone();
+    let title_event_handle = app_handle.clone();
+    let mut builder = WebviewWindowBuilder::new(
+        &app_handle,
+        CLOUDGAME_WINDOW_LABEL,
+        WebviewUrl::External(parsed_url),
+    )
+    .title(options.title.as_deref().unwrap_or("Cloudgame"))
+    .position(options.x.unwrap_or(40.0), options.y.unwrap_or(40.0))
+    .inner_size(
+        options.width.unwrap_or(1600.0),
+        options.height.unwrap_or(900.0),
+    )
+    .min_inner_size(
+        options.min_width.unwrap_or(480.0),
+        options.min_height.unwrap_or(320.0),
+    )
+    .visible(options.visible.unwrap_or(true))
+    .focused(options.focus.unwrap_or(true))
+    .decorations(options.decorations.unwrap_or(true))
+    .resizable(options.resizable.unwrap_or(true))
+    .always_on_top(options.always_on_top.unwrap_or(false))
+    .skip_taskbar(options.skip_taskbar.unwrap_or(false))
+    .incognito(options.incognito.unwrap_or(false))
+    .initialization_script(build_cloudgame_init_script())
+    .on_page_load(move |window, payload| {
+        let _ = emit_cloudgame_page_load(&page_load_handle, payload.url(), payload.event());
+        let _ = emit_cloudgame_window_state(&page_load_handle, &window);
+    })
+    .on_document_title_changed(move |window, title| {
+        let _ = title_event_handle.emit(
+            CLOUDGAME_BRIDGE_EVENT,
+            serde_json::json!({
+                "type": "title-change",
+                "payload": {
+                    "title": title,
+                    "href": window.url().map(|value| value.to_string()).unwrap_or_default(),
+                }
+            }),
+        );
+        let _ = emit_cloudgame_window_state(&title_event_handle, &window);
+    });
+
+    if let Some(user_agent) = options.user_agent.as_deref() {
+        builder = builder.user_agent(user_agent);
+    }
+    if let Some(proxy_url) = options.proxy_url.as_deref() {
+        let proxy = Url::parse(proxy_url).map_err(|error| format!("代理 URL 无效: {error}"))?;
+        builder = builder.proxy_url(proxy);
+    }
+
+    let window = builder
+        .build()
+        .map_err(|error| format!("创建云游戏窗口失败: {error}"))?;
+
+    let close_event_handle = app_handle.clone();
+    window.on_window_event(move |event| {
+        if matches!(event, tauri::WindowEvent::Destroyed) {
+            let empty_state: Option<CloudGameWindowState> = None;
+            let _ = close_event_handle.emit(CLOUDGAME_WINDOW_EVENT, &empty_state);
+        }
+    });
+
+    #[cfg(debug_assertions)]
+    if options.open_devtools.unwrap_or(false) {
+        window.open_devtools();
+    }
+
+    emit_cloudgame_window_state(&app_handle, &window)
+}
+
+/// 获取云游戏窗口当前状态。
+#[tauri::command]
+fn get_cloudgame_window_state(
+    app_handle: tauri::AppHandle,
+) -> Result<Option<CloudGameWindowState>, String> {
+    with_cloudgame_window(&app_handle, |window| cloudgame_window_state(&window))
+}
+
+/// 关闭云游戏窗口。
+#[tauri::command]
+fn close_cloudgame_window(app_handle: tauri::AppHandle) -> Result<bool, String> {
+    if let Some(window) = app_handle.get_webview_window(CLOUDGAME_WINDOW_LABEL) {
+        window
+            .close()
+            .map_err(|error| format!("关闭云游戏窗口失败: {error}"))?;
+        let empty_state: Option<CloudGameWindowState> = None;
+        app_handle
+            .emit(CLOUDGAME_WINDOW_EVENT, &empty_state)
+            .map_err(|error| format!("发送云游戏窗口关闭事件失败: {error}"))?;
+        Ok(true)
+    } else {
+        Ok(false)
+    }
+}
+
+/// 显示云游戏窗口。
+#[tauri::command]
+fn show_cloudgame_window(
+    app_handle: tauri::AppHandle,
+) -> Result<Option<CloudGameWindowState>, String> {
+    with_cloudgame_window(&app_handle, |window| {
+        window
+            .show()
+            .map_err(|error| format!("显示云游戏窗口失败: {error}"))?;
+        emit_cloudgame_window_state(&app_handle, &window)
+    })
+}
+
+/// 隐藏云游戏窗口。
+#[tauri::command]
+fn hide_cloudgame_window(
+    app_handle: tauri::AppHandle,
+) -> Result<Option<CloudGameWindowState>, String> {
+    with_cloudgame_window(&app_handle, |window| {
+        window
+            .hide()
+            .map_err(|error| format!("隐藏云游戏窗口失败: {error}"))?;
+        emit_cloudgame_window_state(&app_handle, &window)
+    })
+}
+
+/// 聚焦云游戏窗口。
+#[tauri::command]
+fn focus_cloudgame_window(
+    app_handle: tauri::AppHandle,
+) -> Result<Option<CloudGameWindowState>, String> {
+    with_cloudgame_window(&app_handle, |window| {
+        window
+            .show()
+            .map_err(|error| format!("显示云游戏窗口失败: {error}"))?;
+        window
+            .set_focus()
+            .map_err(|error| format!("聚焦云游戏窗口失败: {error}"))?;
+        emit_cloudgame_window_state(&app_handle, &window)
+    })
+}
+
+/// 重新加载云游戏页面。
+#[tauri::command]
+fn reload_cloudgame_window(
+    app_handle: tauri::AppHandle,
+) -> Result<Option<CloudGameWindowState>, String> {
+    with_cloudgame_window(&app_handle, |window| {
+        window
+            .reload()
+            .map_err(|error| format!("重新加载云游戏页面失败: {error}"))?;
+        emit_cloudgame_window_state(&app_handle, &window)
+    })
+}
+
+/// 导航云游戏窗口到新的地址。
+#[tauri::command]
+fn navigate_cloudgame_window(
+    app_handle: tauri::AppHandle,
+    url: String,
+) -> Result<Option<CloudGameWindowState>, String> {
+    let target_url = Url::parse(&url).map_err(|error| format!("导航 URL 无效: {error}"))?;
+    with_cloudgame_window(&app_handle, |window| {
+        window
+            .navigate(target_url)
+            .map_err(|error| format!("导航云游戏窗口失败: {error}"))?;
+        emit_cloudgame_window_state(&app_handle, &window)
+    })
+}
+
+/// 向云游戏页面派发桥接命令。
+#[tauri::command]
+fn dispatch_cloudgame_command(
+    app_handle: tauri::AppHandle,
+    action: String,
+    payload: Option<serde_json::Value>,
+) -> Result<(), String> {
+    let Some(window) = app_handle.get_webview_window(CLOUDGAME_WINDOW_LABEL) else {
+        return Err("云游戏窗口未打开".to_string());
+    };
+
+    let detail = serde_json::json!({
+        "action": action,
+        "payload": payload.unwrap_or(serde_json::Value::Null),
+    });
+    let detail_json =
+        serde_json::to_string(&detail).map_err(|error| format!("序列化云游戏命令失败: {error}"))?;
+    let script = format!(
+        "window.dispatchEvent(new CustomEvent('__dna_cloudgame_control__', {{ detail: {detail_json} }}));",
+    );
+
+    window
+        .eval(script)
+        .map_err(|error| format!("派发云游戏命令失败: {error}"))
+}
+
+/// 直接在云游戏页面执行任意脚本，作为高阶兜底入口。
+#[tauri::command]
+fn eval_cloudgame_window(app_handle: tauri::AppHandle, script: String) -> Result<(), String> {
+    let Some(window) = app_handle.get_webview_window(CLOUDGAME_WINDOW_LABEL) else {
+        return Err("云游戏窗口未打开".to_string());
+    };
+
+    window
+        .eval(script)
+        .map_err(|error| format!("执行云游戏脚本失败: {error}"))
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let mut app = tauri::Builder::default()
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
@@ -802,6 +2753,7 @@ pub fn run() {
     #[cfg(target_os = "windows")]
     {
         app = app
+            .plugin(tauri_plugin_autostart::Builder::new().build())
             .plugin(tauri_plugin_updater::Builder::new().build())
             .plugin(tauri_plugin_window_state::Builder::default().build());
     }
@@ -822,24 +2774,6 @@ pub fn run() {
             let mut sys = System::new_all();
             sys.refresh_all();
 
-            use windows_sys::Win32::Foundation::CloseHandle;
-            use windows_sys::Win32::System::Threading::CreateMutexA;
-            use windows_sys::Win32::UI::WindowsAndMessaging::*;
-            let h_mutex =
-                unsafe { CreateMutexA(std::ptr::null_mut(), 0, "dna-builder-mutex".as_ptr()) };
-            if h_mutex == std::ptr::null_mut() {
-                // Mutex already exists, app is already running.
-                unsafe {
-                    CloseHandle(h_mutex);
-                    let hwnd = FindWindowA(std::ptr::null(), "DNA Builder".as_ptr());
-                    let mut wpm = std::mem::zeroed::<WINDOWPLACEMENT>();
-                    if GetWindowPlacement(hwnd, &mut wpm) != 0 {
-                        ShowWindow(hwnd, SW_SHOWNORMAL);
-                        SetForegroundWindow(hwnd);
-                    }
-                };
-                handle.exit(0);
-            }
             let submenu = SubmenuBuilder::new(handle, "材质")
                 .check("None", "None")
                 .check("Blur", "Blur")
@@ -881,20 +2815,68 @@ pub fn run() {
     .invoke_handler(tauri::generate_handler![
         apply_material,
         app_close,
+        is_launch_at_startup_enabled,
+        set_launch_at_startup_enabled,
         get_os_version,
         get_game_install,
         is_game_running,
         launch_exe,
+        launch_normal,
+        run_as_admin,
+        check_is_admin,
         import_mod,
         enable_mod,
         import_pic,
+        predict_font_ocr,
         fetch,
         get_local_qq,
-        export_json_file,
+        list_script_files,
+        read_text_file,
+        write_text_file,
         export_binary_file,
         start_heartbeat,
         stop_heartbeat,
-        send_ws_msg
+        send_ws_msg,
+        download_file,
+        extract_game_assets,
+        get_file_size,
+        get_file_hash,
+        cleanup_temp_dir,
+        run_script,
+        resolve_script_config_request,
+        resolve_script_help_request,
+        stop_script,
+        stop_script_by_path,
+        get_script_running_state,
+        get_script_runtime_info,
+        get_script_mcp_server_state,
+        clear_script_mcp_cache,
+        clear_script_mcp_status,
+        clear_script_mcp_console,
+        set_script_mcp_server_enabled,
+        sync_script_hotkey_bindings,
+        get_script_hotkey_bindings,
+        set_script_input_recorder_hotkey_enabled,
+        get_script_input_recorder_snapshot,
+        clear_script_input_recorder_actions,
+        dispatch_cloudgame_bridge_event,
+        open_cloudgame_window,
+        get_cloudgame_window_state,
+        close_cloudgame_window,
+        show_cloudgame_window,
+        hide_cloudgame_window,
+        focus_cloudgame_window,
+        reload_cloudgame_window,
+        navigate_cloudgame_window,
+        dispatch_cloudgame_command,
+        eval_cloudgame_window,
+        get_documents_dir,
+        rename_file,
+        delete_file,
+        watch_file,
+        unwatch_file,
+        list_files,
+        list_directories
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

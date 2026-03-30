@@ -16,7 +16,7 @@ const fish = computed(() => {
 </script>
 
 <template>
-    <div class="h-full flex flex-col">
-        <DBFishDetailItem :fish="fish" class="flex-1" />
-    </div>
+    <ScrollArea class="h-full">
+        <DBFishDetailItem :fish="fish" />
+    </ScrollArea>
 </template>

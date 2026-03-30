@@ -71,7 +71,7 @@ const formatEffectAttr = (effect: EffectAttr): string => {
     if (effect.ba) parts.push(`基础属性:${effect.ba}`)
     if (effect.r !== undefined) parts.push(`倍率:${formatValue(effect.r)}`)
     if (effect.v !== undefined) parts.push(`值:${formatValue(effect.v)}`)
-    if (effect.co) parts.push(`概率:${effect.co}%`)
+    if (effect.co) parts.push(`条件:${effect.co}`)
     if (effect.Dilation !== undefined) parts.push(`时间膨胀:${effect.Dilation}`)
     if (effect.Duration !== undefined) parts.push(`持续时间:${effect.Duration}`)
     if (effect.Delay !== undefined) parts.push(`延迟:${effect.Delay}`)

@@ -21,6 +21,41 @@ const charSettings = useCharSettings(nameRef)
 defineEmits<{
     addSkill: [skill: string]
 }>()
+
+interface DynamicAttrSource {
+    sourceName: string
+    value: number
+}
+
+/**
+ * 通过“移除单个动态BUFF后重算”的方式，得到每个动态来源对角色属性的实际数值贡献。
+ */
+const dynamicAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>(() => {
+    const sourceMap: Record<string, DynamicAttrSource[]> = {}
+    const epsilon = 1e-10
+
+    props.charBuild.dynamicBuffs.forEach((buff, buffIndex) => {
+        const buildWithoutBuff = props.charBuild.clone()
+        buildWithoutBuff.dynamicBuffs = props.charBuild.dynamicBuffs.filter((_, index) => index !== buffIndex).map(item => item.clone())
+        const attrsWithoutBuff = buildWithoutBuff.calculateAttributes()
+
+        Object.entries(props.attributes).forEach(([attrKey, attrValue]) => {
+            const withoutValue = attrsWithoutBuff[attrKey as keyof CharAttr]
+            if (typeof attrValue !== "number" || typeof withoutValue !== "number") return
+
+            const delta = attrValue - withoutValue
+            if (Math.abs(delta) < epsilon) return
+
+            sourceMap[attrKey] ||= []
+            sourceMap[attrKey].push({
+                sourceName: buff.名称,
+                value: delta,
+            })
+        })
+    })
+
+    return sourceMap
+})
 </script>
 <template>
     <FullTooltip
@@ -38,7 +73,7 @@ defineEmits<{
                 <div v-if="key === '有效生命'" class="text-sm text-primary">(生命 / (1 - 防御 / (300 + 防御)) + 护盾) / (1 - 减伤)</div>
                 <ul class="space-y-1">
                     <li v-if="'基础' + key in charBuild.char" class="flex justify-between gap-8 text-sm text-primary">
-                        <div class="text-base-content/80">基础{{ key }}</div>
+                        <div class="text-base-content/80">{{ $t("char-build.base_attr_label", { attr: $t(key) }) }}</div>
                         {{ charBuild.char[("基础" + key) as keyof LeveledChar] }}
                     </li>
                     <li v-if="charBuild.char.加成 && key in charBuild.char.加成" class="flex justify-between gap-8 text-sm text-primary">
@@ -90,6 +125,14 @@ defineEmits<{
                             {{ buff.名称 }}
                         </div>
                         {{ format100r(buff[key]!) }}
+                    </li>
+                    <li
+                        v-for="(dynamicSource, index) in dynamicAttrSourceMap[key] || []"
+                        :key="`${dynamicSource.sourceName}-${index}`"
+                        class="flex justify-between gap-8 text-sm text-primary"
+                    >
+                        <div class="text-base-content/80">{{ dynamicSource.sourceName }}</div>
+                        {{ format100r(dynamicSource.value) }}
                     </li>
                 </ul>
             </div>

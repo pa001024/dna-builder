@@ -95,6 +95,38 @@ export interface DNAGameSignInResultBean {
     signinTimeNow: string
 }
 
+export interface DNAActivityListBean {
+    activities: DNAActivity[]
+    timelines: DNAActivityTimeline[]
+}
+
+export interface DNAActivityTimeline {
+    curTime: number
+    ids: (number | null)[]
+}
+
+export interface DNAActivity {
+    color: string
+    cycleDay: number
+    description: string
+    endTime: number
+    icon: string
+    iconShowType: number
+    id: number
+    name: string
+    postId?: string
+    startTime: number
+    timeStrs: {
+        endTime: string
+        startTime: string
+    }[]
+    times: {
+        endTime: number
+        startTime: number
+    }[]
+    type: number
+}
+
 export interface DNADiscussAreaResponse {
     bannerList: DNABannerListBean[]
     hasNext: number
@@ -611,7 +643,7 @@ export interface DNAUserDataBean {
     headUrl: string
     isRegister: number
     is_mute: number
-    mobile: string
+    mobile?: string // 国服专属
     refreshToken: string
     signature: string
     status: number
@@ -621,6 +653,7 @@ export interface DNAUserDataBean {
     userName: string
     isComplete: number
     isOfficial: number
+    registerLang?: string // 国际服专属
 }
 
 export interface DNARecommendConfig {
@@ -692,7 +725,8 @@ export interface DNACharDetailBean {
     charName: string
     conWeaponEid?: string
     conWeaponId?: number
-    currentVolume: string
+    sumVolume: number
+    currentVolume: number
     elementIcon: string
     elementName: string
     gradeLevel: number
@@ -701,7 +735,6 @@ export interface DNACharDetailBean {
     modes: DNAModesBean[]
     paint: string
     skills: DNASkillBean[]
-    sumVolume: string
     traces: DNATraceBean[]
 }
 

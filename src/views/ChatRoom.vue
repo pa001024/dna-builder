@@ -1,22 +1,46 @@
 <script lang="ts" setup>
 import { gql, useQuery, useSubscription } from "@urql/vue"
-import { useScroll } from "@vueuse/core"
+import { useLocalStorage, useScroll } from "@vueuse/core"
 import { useSound } from "@vueuse/sound"
-import { computed, onMounted, ref, watchEffect } from "vue"
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watchEffect } from "vue"
 import { onBeforeRouteLeave, useRoute } from "vue-router"
-import { editMessageMutation, Msg, msgsQuery, rtcClientsQuery, rtcJoinMutation, sendMessageMutation } from "@/api/graphql"
+import { editMessageMutation, Msg, msgsQuery, roomQuery, rtcClientsQuery, rtcJoinMutation, sendMessageMutation } from "@/api/graphql"
+import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
-import { sleep } from "@/util"
 import { copyHtmlContent, isImage, sanitizeHTML } from "@/utils/html"
+import { fileToDataUrlWithRealMime, normalizeInlineImageDataUrlMime } from "@/utils/image-data-url"
 
 const route = useRoute()
 const roomId = computed(() => route.params.room as string)
 const user = useUserStore()
 const ui = useUIStore()
 const newMsgTip = ref(false)
+const blockedUserIds = useLocalStorage<string[]>("chat_blocked_user_ids", [])
 const variables = computed(() => ({ roomId: roomId.value }))
 const sfx = useSound("/sfx/notice.mp3")
+const NAME_EFFECT_STYLESHEET_ID = "dna-chat-name-effects"
+
+/**
+ * @description 将聊天名字特效样式表注入到页面，仅保留一份 link。
+ */
+function ensureNameEffectStylesheet() {
+    if (typeof document === "undefined") return
+    const existed = document.getElementById(NAME_EFFECT_STYLESHEET_ID) as HTMLLinkElement | null
+    const href = `${env.apiEndpoint.replace(/\/$/, "")}/api/chat/name-effects.css`
+    if (existed) {
+        if (existed.href !== href) {
+            existed.href = href
+        }
+        return
+    }
+
+    const link = document.createElement("link")
+    link.id = NAME_EFFECT_STYLESHEET_ID
+    link.rel = "stylesheet"
+    link.href = href
+    document.head.appendChild(link)
+}
 
 //#region RTC
 const loading = ref(true)
@@ -100,19 +124,150 @@ onMounted(async () => {
     if (msgCount.value > 0) user.setRoomReadedCount(roomId.value, msgCount.value)
 })
 
+const isSyncingLatestMessages = ref(false)
+
+/**
+ * @description 计算消息分页中“最新页”的偏移量。
+ * @param total 总消息数。
+ * @param limit 每页条数。
+ * @returns 最新页 offset。
+ */
+function getLatestPageOffset(total: number, limit = 20) {
+    if (total <= 0) return 0
+    return total - (total % limit || limit)
+}
+
+/**
+ * @description 等待浏览器下一帧，确保异步渲染后的滚动高度已经稳定。
+ */
+function waitForNextFrame() {
+    return new Promise<void>(resolve => {
+        requestAnimationFrame(() => resolve())
+    })
+}
+
+/**
+ * @description 将消息列表强制贴到底部，并在下一帧做一次补偿滚动，避免新消息渲染后 scrollHeight 再次增长。
+ */
+async function scrollMessageListToBottom() {
+    const viewport = el.value
+    if (!viewport) return
+    viewport.scrollTop = viewport.scrollHeight
+    await waitForNextFrame()
+    viewport.scrollTop = viewport.scrollHeight
+}
+
+/**
+ * @description 在网络恢复或页面回到前台时，强制从服务端同步最新消息页，补齐断线期间可能漏掉的数据。
+ */
+async function syncLatestMessagesFromServer() {
+    if (!roomId.value) return
+    if (!navigator.onLine) return
+    if (isSyncingLatestMessages.value) return
+
+    isSyncingLatestMessages.value = true
+    try {
+        const room = await roomQuery(
+            {
+                id: roomId.value,
+            },
+            {
+                requestPolicy: "network-only",
+            }
+        )
+        const latestCount = room?.msgCount || 0
+        if (!latestCount) return
+
+        await msgsQuery(
+            {
+                roomId: roomId.value,
+                limit: 20,
+                offset: getLatestPageOffset(latestCount, 20),
+            },
+            {
+                requestPolicy: "network-only",
+            }
+        )
+    } catch (error) {
+        console.error("同步最新消息失败", error)
+    } finally {
+        isSyncingLatestMessages.value = false
+    }
+}
+
+/**
+ * @description 浏览器网络恢复时触发服务端补同步。
+ */
+function handleOnline() {
+    void syncLatestMessagesFromServer()
+}
+
+/**
+ * @description 页面重新可见时触发服务端补同步，兜底处理后台恢复场景。
+ */
+function handleVisibilityChange() {
+    if (document.visibilityState === "visible") {
+        void syncLatestMessagesFromServer()
+    }
+}
+
+onMounted(() => {
+    ensureNameEffectStylesheet()
+    window.addEventListener("online", handleOnline)
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    void syncLatestMessagesFromServer()
+})
+
+onBeforeUnmount(() => {
+    window.removeEventListener("online", handleOnline)
+    document.removeEventListener("visibilitychange", handleVisibilityChange)
+})
+
 useSubscription<{ newMessage: Msg }>(
     {
         query: gql`
             subscription ($roomId: String!) {
                 newMessage(roomId: $roomId) {
                     id
+                    roomId
+                    userId
                     edited
                     content
                     createdAt
+                    updateAt
+                    replyToMsgId
+                    replyToUserId
                     user {
                         id
                         name
                         qq
+                        level
+                        currentTitleText
+                        currentTitleClass
+                        nameEffectClass
+                    }
+                    replyTo {
+                        id
+                        content
+                        user {
+                            id
+                            name
+                            qq
+                            level
+                            currentTitleText
+                            currentTitleClass
+                            nameEffectClass
+                        }
+                    }
+                    reactions {
+                        id
+                        count
+                        users {
+                            id
+                            name
+                            qq
+                        }
+                        createdAt
                     }
                 }
             }
@@ -132,13 +287,34 @@ useSubscription<{ msgEdited: Msg }>({
         subscription ($roomId: String!) {
             msgEdited(roomId: $roomId) {
                 id
+                roomId
+                userId
                 edited
                 content
                 createdAt
+                replyToMsgId
+                replyToUserId
                 user {
                     id
                     name
                     qq
+                    level
+                    currentTitleText
+                    currentTitleClass
+                    nameEffectClass
+                }
+                replyTo {
+                    id
+                    content
+                    user {
+                        id
+                        name
+                        qq
+                        level
+                        currentTitleText
+                        currentTitleClass
+                        nameEffectClass
+                    }
                 }
             }
         }
@@ -148,22 +324,19 @@ useSubscription<{ msgEdited: Msg }>({
 
 async function addMessage(msg: Msg) {
     console.debug("addMessage", msg)
-    if (msg.user.id !== user.id) {
+    if (msg.user?.id !== user.id && !isUserBlocked(msg.user?.id)) {
         sfx.play()
     }
     if (arrivedState.bottom) {
-        await sleep(50)
-        el.value?.scrollTo({
-            top: el.value.scrollHeight,
-            left: 0,
-            behavior: "smooth",
-        })
+        await nextTick()
+        await scrollMessageListToBottom()
     }
 }
 
 const input = ref<HTMLDivElement>(null as any)
 const inputForm = ref<HTMLDivElement>(null as any)
 const newMsgText = ref("")
+const replyingTo = ref<Msg | null>(null)
 
 async function sendMessage(e: Event) {
     if ((e as KeyboardEvent)?.shiftKey) {
@@ -172,11 +345,21 @@ async function sendMessage(e: Event) {
     e.preventDefault()
     const html = input.value?.innerHTML
     if (!html) return
-    const content = sanitizeHTML(html)
+    const content = sanitizeHTML(normalizeInlineImageDataUrlMime(html))
     if (!content) return
     input.value.innerHTML = ""
+    newMsgText.value = ""
     input.value.focus()
-    await sendMessageMutation({ content, roomId: roomId.value })
+    const result = await sendMessageMutation({
+        content,
+        roomId: roomId.value,
+        replyToMsgId: replyingTo.value?.id,
+    })
+    replyingTo.value = null
+    if (result) {
+        void user.refreshProfile()
+    }
+    await nextTick()
     el.value?.scrollTo({
         top: el.value.scrollHeight,
         left: 0,
@@ -198,41 +381,96 @@ function insertEmoji(text: string) {
     range.collapse(false)
 }
 
+/**
+ * @description 判断指定用户是否已被当前用户屏蔽。
+ * @param userId 目标用户 ID。
+ * @returns 是否已屏蔽。
+ */
+function isUserBlocked(userId?: string | null) {
+    if (!userId) return false
+    return blockedUserIds.value.includes(userId)
+}
+
+/**
+ * @description 切换当前用户对目标用户的本地屏蔽状态。
+ * @param msg 目标消息，用于读取发送者信息。
+ */
+function toggleBlockedUser(msg: Msg) {
+    const targetUserId = msg.user?.id
+    const targetUserName = msg.user?.name || ""
+    if (!targetUserId || targetUserId === user.id) return
+
+    if (isUserBlocked(targetUserId)) {
+        blockedUserIds.value = blockedUserIds.value.filter(id => id !== targetUserId)
+        ui.showSuccessMessage(`已取消屏蔽 ${targetUserName}`)
+        return
+    }
+
+    blockedUserIds.value = [...blockedUserIds.value, targetUserId]
+    ui.showSuccessMessage(`已屏蔽 ${targetUserName}`)
+}
+
+/**
+ * @description 获取屏蔽菜单文案。
+ * @param msg 目标消息。
+ * @returns 菜单文本。
+ */
+function getBlockActionLabel(msg: Msg) {
+    return isUserBlocked(msg.user?.id) ? "chat.unblock" : "chat.block"
+}
+
 async function insertImage() {
     const fi = document.createElement("input")
     fi.type = "file"
+    fi.accept = "image/png,image/jpeg,image/gif,image/webp"
     fi.click()
     fi.onchange = async e => {
         const file = (e.target as HTMLInputElement).files?.[0]
         if (!file) return
-        const reader = new FileReader()
-        reader.readAsDataURL(file)
-        reader.onload = async e => {
-            const data = e.target!.result as string
-            const el = input.value
-            el.focus()
-            const sel = window.getSelection()!
-            const range = sel.getRangeAt(0)
-            const node = document.createElement("div")
-            node.innerHTML = `<img src="${data}" />`
-            let frag = document.createDocumentFragment()
-            while (node.firstChild) frag.appendChild(node.firstChild)
-            range.deleteContents()
-            range.insertNode(frag)
-            range.collapse(false)
-        }
+        const data = await fileToDataUrlWithRealMime(file)
+        const el = input.value
+        el.focus()
+        const sel = window.getSelection()!
+        const range = sel.getRangeAt(0)
+        const node = document.createElement("div")
+        node.innerHTML = `<img src="${data}" />`
+        let frag = document.createDocumentFragment()
+        while (node.firstChild) frag.appendChild(node.firstChild)
+        range.deleteContents()
+        range.insertNode(frag)
+        range.collapse(false)
     }
 }
 
 const editId = ref("")
 const editInput = ref<HTMLDivElement[] | null>(null)
 const retractCache = new Map<string, string>()
+
+/**
+ * @description 判断当前用户是否可以撤回目标消息。
+ * @param msg 目标消息。
+ * @returns 是否允许撤回。
+ */
+function canRetractMessage(msg: Msg) {
+    return user.id === msg.user?.id || user.isAdmin
+}
+
+/**
+ * @description 判断当前用户是否可以恢复已撤回消息的重新编辑入口。
+ * @param msg 目标消息。
+ * @returns 是否允许恢复编辑。
+ */
+function canRestoreRetractedMessage(msg: Msg) {
+    return user.id === msg.user?.id
+}
+
 async function retractMessage(msg: Msg) {
     retractCache.set(msg.id, msg.content)
     await editMessageMutation({ content: "", msgId: msg.id })
     msg.content = ""
 }
 async function restoreMessage(msg: Msg) {
+    if (!canRestoreRetractedMessage(msg)) return
     const content = retractCache.get(msg.id)
     msg.content = content || msg.content
     startEdit(msg)
@@ -244,7 +482,7 @@ async function startEdit(msg: Msg) {
         let el = editInput.value[0]
         el.focus()
         el.onblur = async () => {
-            const newVal = sanitizeHTML(el.innerHTML || "")
+            const newVal = sanitizeHTML(normalizeInlineImageDataUrlMime(el.innerHTML || ""))
             if (msg.content === newVal) return
             await editMessageMutation({ content: newVal, msgId: editId.value })
             msg.content = newVal
@@ -261,12 +499,44 @@ async function startEdit(msg: Msg) {
         }
     }
 }
+
+/**
+ * @description 从消息 HTML 提取简短预览文本，优先保留可读文本；纯图片消息返回占位。
+ * @param content 消息 HTML 内容。
+ * @returns 预览文本。
+ */
+function getMessagePreview(content: string) {
+    const wrapper = document.createElement("div")
+    wrapper.innerHTML = content
+    const text = (wrapper.textContent || "").replace(/\s+/g, " ").trim()
+    if (text) {
+        return text.length > 60 ? `${text.slice(0, 60)}...` : text
+    }
+    if (wrapper.querySelector("img")) return "[图片]"
+    return "[消息]"
+}
+
+/**
+ * @description 设置当前正在回复的消息，并聚焦输入框。
+ * @param msg 目标消息。
+ */
+function startReply(msg: Msg) {
+    replyingTo.value = msg
+    input.value?.focus()
+}
+
+/**
+ * @description 取消当前回复状态。
+ */
+function cancelReply() {
+    replyingTo.value = null
+}
 </script>
 
 <template>
     <div class="w-full h-full bg-base-200/50 flex">
         <!-- 聊天窗口 -->
-        <div v-if="isJoined && !loading" class="flex-1 flex flex-col overflow-hidden">
+        <div v-if="isJoined && !loading" class="flex-1 flex flex-col">
             <!-- 主内容区 -->
             <div class="flex-1 flex flex-col overflow-hidden relative">
                 <GQAutoPage
@@ -279,27 +549,37 @@ async function startEdit(msg: Msg) {
                     :offset="msgCount"
                     :query="msgsQuery"
                     :variables="variables"
+                    request-policy="cache-first"
                     @loadref="r => (el = r)"
                 >
                     <!-- 消息列表 -->
-                    <div v-for="item in msgs" v-if="msgs" :key="item.id" class="group flex items-start gap-2">
+                    <div v-for="item in msgs.filter(msg => !isUserBlocked(msg.user?.id))" v-if="msgs" :key="item.id" class="group flex items-start gap-2">
                         <div v-if="!item.content && editId !== item.id" class="text-xs text-base-content/60 m-auto">
-                            {{ $t("chat.retractedAMessage", { name: user.id === item.user.id ? $t("chat.you") : item.user?.name }) }}
-                            <span class="text-xs text-primary underline cursor-pointer" @click="restoreMessage(item)">{{
-                                $t("chat.restore")
-                            }}</span>
+                            {{
+                                $t("chat.retractedAMessage", {
+                                    name: user.id === item.user!.id ? $t("chat.you") : item.user!.name,
+                                })
+                            }}
+                            <span
+                                v-if="canRestoreRetractedMessage(item)"
+                                class="text-xs text-primary underline cursor-pointer"
+                                @click="restoreMessage(item)"
+                            >
+                                {{ $t("chat.restore") }}
+                            </span>
                         </div>
 
-                        <div v-else class="flex-1 flex items-start gap-2" :class="{ 'flex-row-reverse': user.id === item.user.id }">
+                        <div v-else class="flex-1 flex items-start gap-2" :class="{ 'flex-row-reverse': user.id === item.user!.id }">
                             <ContextMenu>
-                                <QQAvatar class="mt-2 size-8" :qq="item.user.qq" :name="item.user?.name"></QQAvatar>
+                                <QQAvatar class="mt-2 size-8" :qq="item.user!.qq" :name="item.user!.name"></QQAvatar>
 
                                 <template #menu>
                                     <ContextMenuItem
                                         class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
+                                        @click="toggleBlockedUser(item)"
                                     >
                                         <Icon class="size-4 mr-2" icon="ri:eye-line" />
-                                        {{ $t("chat.block") }}
+                                        {{ $t(getBlockActionLabel(item)) }}
                                     </ContextMenuItem>
                                     <ContextMenuItem
                                         class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
@@ -309,24 +589,93 @@ async function startEdit(msg: Msg) {
                                     </ContextMenuItem>
                                 </template>
                             </ContextMenu>
-                            <ContextMenu class="flex items-start flex-col" :class="{ 'items-end': user.id === item.user.id }">
-                                <div class="text-base-content/60 text-sm min-h-5">{{ item.user.name }}</div>
+                            <ContextMenu class="flex w-full items-start flex-col" :class="{ 'items-end': user.id === item.user!.id }">
+                                <div
+                                    class="flex min-h-5 w-full items-center gap-1.5 text-sm text-base-content/60"
+                                    :class="{ 'justify-end text-right': user.id === item.user!.id }"
+                                >
+                                    <span
+                                        v-if="user.id === item.user?.id && item.user?.currentTitleText"
+                                        :class="item.user?.currentTitleClass || ''"
+                                    >
+                                        {{ item.user.currentTitleText }}
+                                    </span>
+                                    <span
+                                        v-if="item.user?.level"
+                                        class="rounded-full bg-base-300/80 px-1.5 py-0.5 text-[10px] leading-none text-base-content/70"
+                                    >
+                                        LV{{ item.user.level }}
+                                    </span>
+                                    <span :class="item.user?.nameEffectClass || ''">
+                                        {{ item.user?.name || "" }}
+                                    </span>
+                                    <span
+                                        v-if="user.id !== item.user?.id && item.user?.currentTitleText"
+                                        :class="item.user?.currentTitleClass || ''"
+                                    >
+                                        {{ item.user.currentTitleText }}
+                                    </span>
+                                </div>
+                                <div
+                                    v-if="item.replyTo"
+                                    class="rounded-t-lg border-b border-base-300/40 bg-base-300/50 px-2 py-1 text-xs text-base-content/70 max-w-80"
+                                    :class="{ 'self-end': user.id === item.user!.id }"
+                                >
+                                    <span
+                                        v-if="user.id === item.replyTo.user?.id && item.replyTo.user?.currentTitleText"
+                                        class="mr-1 align-middle"
+                                        :class="item.replyTo.user?.currentTitleClass || ''"
+                                    >
+                                        {{ item.replyTo.user.currentTitleText }}
+                                    </span>
+                                    <span
+                                        v-if="item.replyTo.user?.level"
+                                        class="mr-1 rounded-full bg-base-200/80 px-1.5 py-0.5 text-[10px] leading-none text-base-content/60"
+                                    >
+                                        LV{{ item.replyTo.user.level }}
+                                    </span>
+                                    <span class="font-medium" :class="item.replyTo.user?.nameEffectClass || ''">
+                                        {{ item.replyTo.user?.name || $t("chat.you") }}
+                                    </span>
+                                    <span
+                                        v-if="user.id !== item.replyTo.user?.id && item.replyTo.user?.currentTitleText"
+                                        class="ml-1 align-middle"
+                                        :class="item.replyTo.user?.currentTitleClass || ''"
+                                    >
+                                        {{ item.replyTo.user.currentTitleText }}
+                                    </span>
+                                    <span class="mx-1">:</span>
+                                    <span>{{ getMessagePreview(item.replyTo.content || "") }}</span>
+                                </div>
                                 <div
                                     v-if="editId === item.id"
                                     ref="editInput"
                                     contenteditable
                                     class="safe-html rounded-lg bg-base-100 select-text inline-flex flex-col text-sm max-w-80 overflow-hidden gap-2"
-                                    :class="{ 'p-2': !isImage(item.content), 'bg-primary text-base-100': user.id === item.user.id }"
+                                    :class="{
+                                        'p-2': !isImage(item.content),
+                                        'bg-primary text-base-100 self-end': user.id === item.user!.id,
+                                    }"
                                     v-html="sanitizeHTML(item.content)"
                                 ></div>
                                 <div
                                     v-else
                                     class="safe-html rounded-lg bg-base-100 select-text inline-flex flex-col text-sm max-w-80 overflow-hidden gap-2"
-                                    :class="{ 'p-2': !isImage(item.content), 'bg-primary text-base-100': user.id === item.user.id }"
+                                    :class="{
+                                        'p-2': !isImage(item.content),
+                                        'bg-primary text-base-100 self-end': user.id === item.user!.id,
+                                    }"
                                     v-html="sanitizeHTML(item.content)"
                                 ></div>
 
                                 <template #menu>
+                                    <ContextMenuItem
+                                        class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
+                                        @click="startReply(item)"
+                                    >
+                                        <Icon class="size-4 mr-2" icon="ri:reply-line" />
+                                        {{ $t("chat.reply") }}
+                                    </ContextMenuItem>
                                     <ContextMenuItem
                                         class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
                                         @click="copyHtmlContent(item.content)"
@@ -335,7 +684,7 @@ async function startEdit(msg: Msg) {
                                         {{ $t("chat.copy") }}
                                     </ContextMenuItem>
                                     <ContextMenuItem
-                                        v-if="user.id === item.user.id"
+                                        v-if="canRetractMessage(item)"
                                         class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
                                         @click="retractMessage(item)"
                                     >
@@ -343,7 +692,7 @@ async function startEdit(msg: Msg) {
                                         {{ $t("chat.revert") }}
                                     </ContextMenuItem>
                                     <ContextMenuItem
-                                        v-if="user.id === item.user.id"
+                                        v-if="user.id === item.user?.id"
                                         class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-disabled:text-base-content/60 data-disabled:pointer-events-none data-highlighted:bg-primary data-highlighted:text-base-100"
                                         @click="startEdit(item)"
                                     >
@@ -354,7 +703,9 @@ async function startEdit(msg: Msg) {
                             </ContextMenu>
                             <div v-if="item.edited" class="text-xs text-base-content/60 self-end">{{ $t("chat.edited") }}</div>
                             <div class="flex-1"></div>
-                            <div class="hidden group-hover:block p-1 text-xs text-base-content/60">{{ item.createdAt }}</div>
+                            <div class="hidden group-hover:block p-1 text-xs text-base-content/60 whitespace-nowrap">
+                                {{ item.createdAt }}
+                            </div>
                         </div>
                     </div>
                 </GQAutoPage>
@@ -366,32 +717,33 @@ async function startEdit(msg: Msg) {
                         </div>
                     </div>
                 </div>
+
+                <!-- 在线用户 -->
+                <GQQuery v-slot="{ data: onlines }" :query="rtcClientsQuery" :variables="variables">
+                    <div v-if="onlines" class="flex items-center p-1 gap-1 absolute bottom-0">
+                        <div class="flex group bg-primary items-center rounded-full px-1">
+                            <QQAvatar class="size-6 my-1" :name="user.name!" :qq="user.qq!" />
+                            <div
+                                class="flex text-sm text-base-100 max-w-0 group-hover:max-w-24 group-hover:mx-1 overflow-hidden transition-all duration-500 whitespace-nowrap"
+                            >
+                                {{ user.name }}
+                            </div>
+                        </div>
+                        <div
+                            v-for="item in onlines.filter(v => v.user.id !== user.id && !isUserBlocked(v.user.id))"
+                            :key="item.id"
+                            class="flex group bg-primary items-center rounded-full px-1"
+                        >
+                            <QQAvatar class="size-6 my-1" :name="item.user.name" :qq="item.user.qq" />
+                            <div
+                                class="flex text-sm text-base-100 max-w-0 group-hover:max-w-24 group-hover:mx-1 overflow-hidden transition-all duration-500 whitespace-nowrap"
+                            >
+                                {{ item.user.name }}
+                            </div>
+                        </div>
+                    </div>
+                </GQQuery>
             </div>
-            <!-- 在线用户 -->
-            <GQQuery v-slot="{ data: onlines }" :query="rtcClientsQuery" :variables="variables">
-                <div v-if="onlines" class="flex items-center p-1 gap-1">
-                    <div class="flex group bg-primary items-center rounded-full px-1">
-                        <QQAvatar class="size-6 my-1" :name="user.name!" :qq="user.qq!" />
-                        <div
-                            class="flex text-sm text-base-100 max-w-0 group-hover:max-w-24 group-hover:mx-1 overflow-hidden transition-all duration-500 whitespace-nowrap"
-                        >
-                            {{ user.name }}
-                        </div>
-                    </div>
-                    <div
-                        v-for="item in onlines.filter(v => v.user.id !== user.id)"
-                        :key="item.id"
-                        class="flex group bg-primary items-center rounded-full px-1"
-                    >
-                        <QQAvatar class="size-6 my-1" :name="item.user.name" :qq="item.user.qq" />
-                        <div
-                            class="flex text-sm text-base-100 max-w-0 group-hover:max-w-24 group-hover:mx-1 overflow-hidden transition-all duration-500 whitespace-nowrap"
-                        >
-                            {{ item.user.name }}
-                        </div>
-                    </div>
-                </div>
-            </GQQuery>
             <!-- 分割线 -->
             <div class="flex-none w-full relative">
                 <div
@@ -401,6 +753,17 @@ async function startEdit(msg: Msg) {
             </div>
             <!-- 输入 -->
             <form ref="inputForm" class="h-44 flex flex-col relative border-t border-base-300/50" @submit="sendMessage">
+                <div v-if="replyingTo" class="flex-none px-3 pt-2">
+                    <div class="flex items-center gap-2 rounded-lg bg-base-300/60 px-2 py-1.5 text-xs text-base-content/80">
+                        <Icon icon="ri:reply-line" class="text-base-content/60" />
+                        <div class="min-w-0 flex-1 truncate">
+                            <span class="font-medium">{{ replyingTo.user?.name || $t("chat.you") }}</span>
+                            <span class="mx-1">:</span>
+                            <span>{{ getMessagePreview(replyingTo.content || "") }}</span>
+                        </div>
+                        <button type="button" class="btn btn-ghost btn-xs" @click="cancelReply">{{ $t("chat.cancelReply") }}</button>
+                    </div>
+                </div>
                 <!-- 工具栏 -->
                 <div class="flex-none p-1 px-2 border-t border-base-300/50 flex items-center gap-2">
                     <!-- 表情 -->
@@ -433,6 +796,7 @@ async function startEdit(msg: Msg) {
                     mode="html"
                     :placeholder="$t('chat.chatPlaceholder')"
                     class="flex-1 overflow-hidden"
+                    inner-class="min-h-20"
                     @loadref="r => (input = r)"
                     @enter="sendMessage"
                 />

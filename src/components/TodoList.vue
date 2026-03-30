@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
+import { t } from "i18next"
 import { computed, onMounted, ref } from "vue"
 import { completeTodoMutation, createTodoMutation, deleteTodoMutation, todosQuery, updateTodoMutation } from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
+import { copyText } from "@/util"
 
 const userStore = useUserStore()
 const ui = useUIStore()
@@ -55,9 +57,10 @@ const createForm = ref<EditTodoForm>({
     endTime: "",
 })
 const formSubmitting = ref(false)
+const hideCompleted = useLocalStorage("todo.hide_completed", true)
 
 // 本地存储的完成状态（未登录用户使用）
-const localCompletedTodos = useLocalStorage<Record<string, boolean>>("local_completed_todos", {})
+const localCompletedTodos = useLocalStorage<Record<string, boolean>>("todo.local_completed_todos", {})
 
 // 计算属性：用户 todos（排在前面）
 const userTodos = computed(() => {
@@ -67,6 +70,20 @@ const userTodos = computed(() => {
 // 计算属性：系统 todos
 const systemTodos = computed(() => {
     return todos.value.filter(todo => todo.type === "system")
+})
+
+// 根据隐藏开关过滤已完成的系统待办
+const filteredSystemTodos = computed(() => {
+    if (!hideCompleted.value) {
+        return systemTodos.value
+    }
+
+    return systemTodos.value.filter(todo => !(todo.isCompleted || localCompletedTodos.value[todo.id]))
+})
+
+// 当前可见的待办数量（用于空状态展示）
+const visibleTodosCount = computed(() => {
+    return userTodos.value.length + filteredSystemTodos.value.length
 })
 
 // 获取待办事项列表
@@ -147,7 +164,7 @@ const closeEditDialog = () => {
 const submitCreate = async () => {
     // 表单验证
     if (!createForm.value.title || createForm.value.title.trim() === "") {
-        ui.showErrorMessage("请输入待办事项标题")
+        ui.showErrorMessage(t("todo.enterTitle"))
         return
     }
 
@@ -174,7 +191,7 @@ const submitCreate = async () => {
         }
     } catch (error) {
         console.error("创建待办事项失败:", error)
-        ui.showErrorMessage("创建待办事项失败")
+        ui.showErrorMessage(t("todo.createFailed"))
     } finally {
         formSubmitting.value = false
     }
@@ -186,7 +203,7 @@ const submitEdit = async () => {
 
     // 表单验证
     if (!editForm.value.title || editForm.value.title.trim() === "") {
-        ui.showErrorMessage("请输入待办事项标题")
+        ui.showErrorMessage(t("todo.enterTitle"))
         return
     }
 
@@ -216,7 +233,7 @@ const submitEdit = async () => {
         }
     } catch (error) {
         console.error("更新待办事项失败:", error)
-        ui.showErrorMessage("更新待办事项失败")
+        ui.showErrorMessage(t("todo.updateFailed"))
     } finally {
         formSubmitting.value = false
     }
@@ -224,7 +241,7 @@ const submitEdit = async () => {
 
 // 删除待办事项
 const deleteTodo = async (todoId: string) => {
-    if (await ui.showDialog("删除确认", "确定要删除这个待办事项吗？")) {
+    if (await ui.showDialog(t("todo.deleteConfirmTitle"), t("todo.deleteConfirmMessage"))) {
         try {
             const result = await deleteTodoMutation({ id: todoId })
 
@@ -252,7 +269,7 @@ const toggleComplete = async (todo: Todo) => {
             }
         } catch (error) {
             console.error("标记完成失败:", error)
-            ui.showErrorMessage("标记完成失败")
+            ui.showErrorMessage(t("todo.completeFailed"))
         }
     } else {
         // 未登录，保存到本地存储
@@ -284,12 +301,18 @@ onMounted(() => {
         <!-- 页面标题 -->
         <div class="mb-4 flex items-center justify-between">
             <div>
-                <h3 class="text-lg font-semibold text-base-content">待办</h3>
+                <h3 class="text-lg font-semibold text-base-content">{{ $t("todo.title") }}</h3>
             </div>
-            <button class="btn btn-sm btn-primary px-4 flex items-center gap-2" @click="openCreateDialog">
-                <Icon icon="ri:add-line"></Icon>
-                <span>新建</span>
-            </button>
+            <div class="flex items-center gap-3">
+                <label class="label cursor-pointer gap-2 py-0">
+                    <span class="label-text text-sm">{{ $t("todo.hideCompleted") }}</span>
+                    <input v-model="hideCompleted" type="checkbox" class="toggle toggle-sm toggle-primary" />
+                </label>
+                <button class="btn btn-sm btn-primary px-4 flex items-center gap-2" @click="openCreateDialog">
+                    <Icon icon="ri:add-line"></Icon>
+                    <span>{{ $t("todo.create") }}</span>
+                </button>
+            </div>
         </div>
 
         <!-- 加载状态 -->
@@ -301,7 +324,7 @@ onMounted(() => {
         <div v-else class="space-y-2">
             <!-- 用户待办事项 -->
             <div v-if="userTodos.length > 0" class="mb-4">
-                <h4 class="text-sm font-medium text-base-content/80 mb-2 px-2">个人</h4>
+                <h4 class="text-sm font-medium text-base-content/80 mb-2 px-2">{{ $t("todo.personal") }}</h4>
                 <div class="space-y-2">
                     <div
                         v-for="todo in userTodos"
@@ -315,9 +338,9 @@ onMounted(() => {
                                     {{ todo.description }}
                                 </div>
                                 <div v-if="todo.startTime || todo.endTime" class="text-xs text-base-content/50">
-                                    <span v-if="todo.startTime">开始: {{ formatTime(todo.startTime) }}</span>
+                                    <span v-if="todo.startTime">{{ $t("todo.start") }}: {{ formatTime(todo.startTime) }}</span>
                                     <span v-if="todo.startTime && todo.endTime"> ~ </span>
-                                    <span v-if="todo.endTime">结束: {{ formatTime(todo.endTime) }}</span>
+                                    <span v-if="todo.endTime">{{ $t("todo.end") }}: {{ formatTime(todo.endTime) }}</span>
                                 </div>
                             </div>
                             <div class="flex gap-2">
@@ -334,11 +357,11 @@ onMounted(() => {
             </div>
 
             <!-- 系统待办事项 -->
-            <div v-if="systemTodos.length > 0">
-                <h4 class="text-sm font-medium text-base-content/80 mb-2 px-2">系统</h4>
+            <div v-if="filteredSystemTodos.length > 0">
+                <h4 class="text-sm font-medium text-base-content/80 mb-2 px-2">{{ $t("todo.system") }}</h4>
                 <div class="space-y-2">
                     <div
-                        v-for="todo in systemTodos"
+                        v-for="todo in filteredSystemTodos"
                         :key="todo.id"
                         class="card bg-base-100 border border-base-300 p-4 hover:border-primary/50 transition-colors"
                         :class="{ 'opacity-60': todo.isCompleted }"
@@ -358,14 +381,22 @@ onMounted(() => {
                                         :class="{ 'line-through text-base-content/50': todo.isCompleted || localCompletedTodos[todo.id] }"
                                     >
                                         {{ todo.title }}
+
+                                        <span
+                                            class="inline-block cursor-pointer hover:text-primary ml-1"
+                                            @click="copyText(todo.title.replace('兑换码:', '').trim())"
+                                            v-if="todo.title.includes('兑换码')"
+                                        >
+                                            <Icon icon="ri:file-copy-line" />
+                                        </span>
                                     </div>
                                     <div v-if="todo.description" class="text-sm text-base-content/70 mb-2">
                                         {{ todo.description }}
                                     </div>
                                     <div v-if="todo.startTime || todo.endTime" class="text-xs text-base-content/50">
-                                        <span v-if="todo.startTime">开始: {{ formatTime(todo.startTime) }}</span>
+                                        <span v-if="todo.startTime">{{ $t("todo.start") }}: {{ formatTime(todo.startTime) }}</span>
                                         <span v-if="todo.startTime && todo.endTime"> ~ </span>
-                                        <span v-if="todo.endTime">结束: {{ formatTime(todo.endTime) }}</span>
+                                        <span v-if="todo.endTime">{{ $t("todo.end") }}: {{ formatTime(todo.endTime) }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -375,37 +406,37 @@ onMounted(() => {
             </div>
 
             <!-- 空状态 -->
-            <div v-if="todos.length === 0" class="text-center text-base-content/50">
-                <p>暂无待办事项</p>
+            <div v-if="visibleTodosCount === 0" class="text-center text-base-content/50">
+                <p>{{ $t("todo.empty") }}</p>
             </div>
         </div>
 
         <!-- 创建待办事项对话框 -->
-        <Dialog v-model:open="createDialogOpen" title="新建待办事项">
+        <Dialog v-model:open="createDialogOpen" :title="$t('todo.createDialogTitle')">
             <template #content>
                 <div class="space-y-4 py-4">
                     <div class="space-y-2">
-                        <label class="text-sm font-medium text-base-content">标题 <span class="text-error">*</span></label>
+                        <label class="text-sm font-medium text-base-content">{{ $t("todo.formTitle") }} <span class="text-error">*</span></label>
                         <input
                             v-model="createForm.title"
                             type="text"
-                            placeholder="待办事项标题"
+                            :placeholder="$t('todo.titlePlaceholder')"
                             class="input input-bordered w-full"
                             :disabled="formSubmitting"
                         />
                     </div>
                     <div class="space-y-2">
-                        <label class="text-sm font-medium text-base-content">描述</label>
+                        <label class="text-sm font-medium text-base-content">{{ $t("todo.formDescription") }}</label>
                         <textarea
                             v-model="createForm.description"
-                            placeholder="待办事项描述（可选）"
+                            :placeholder="$t('todo.descriptionPlaceholder')"
                             class="textarea textarea-bordered w-full h-24"
                             :disabled="formSubmitting"
                         ></textarea>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-2">
-                            <label class="text-sm font-medium text-base-content">开始时间</label>
+                            <label class="text-sm font-medium text-base-content">{{ $t("todo.start") }}</label>
                             <input
                                 v-model="createForm.startTime"
                                 type="datetime-local"
@@ -414,7 +445,7 @@ onMounted(() => {
                             />
                         </div>
                         <div class="space-y-2">
-                            <label class="text-sm font-medium text-base-content">结束时间</label>
+                            <label class="text-sm font-medium text-base-content">{{ $t("todo.end") }}</label>
                             <input
                                 v-model="createForm.endTime"
                                 type="datetime-local"
@@ -426,10 +457,10 @@ onMounted(() => {
                 </div>
             </template>
             <template #actions>
-                <button class="btn" :disabled="formSubmitting" @click="closeCreateDialog">取消</button>
+                <button class="btn" :disabled="formSubmitting" @click="closeCreateDialog">{{ $t("setting.cancel") }}</button>
                 <button class="btn btn-primary" :disabled="formSubmitting" @click="submitCreate">
                     <span v-if="formSubmitting" class="loading loading-spinner loading-sm mr-2"></span>
-                    创建
+                    {{ $t("todo.create") }}
                 </button>
             </template>
         </Dialog>
@@ -437,33 +468,33 @@ onMounted(() => {
         <!-- 编辑待办事项对话框 -->
         <Dialog
             v-model:open="editDialogOpen"
-            :title="editingTodo ? '编辑待办事项' : ''"
-            :description="editingTodo ? `编辑待办事项: ${editingTodo.title}` : ''"
+            :title="editingTodo ? $t('todo.editDialogTitle') : ''"
+            :description="editingTodo ? $t('todo.editDialogDescription', { title: editingTodo.title }) : ''"
         >
             <template #content>
                 <div class="space-y-4 py-4">
                     <div class="space-y-2">
-                        <label class="text-sm font-medium text-base-content">标题 <span class="text-error">*</span></label>
+                        <label class="text-sm font-medium text-base-content">{{ $t("todo.formTitle") }} <span class="text-error">*</span></label>
                         <input
                             v-model="editForm.title"
                             type="text"
-                            placeholder="待办事项标题"
+                            :placeholder="$t('todo.titlePlaceholder')"
                             class="input input-bordered w-full"
                             :disabled="formSubmitting"
                         />
                     </div>
                     <div class="space-y-2">
-                        <label class="text-sm font-medium text-base-content">描述</label>
+                        <label class="text-sm font-medium text-base-content">{{ $t("todo.formDescription") }}</label>
                         <textarea
                             v-model="editForm.description"
-                            placeholder="待办事项描述（可选）"
+                            :placeholder="$t('todo.descriptionPlaceholder')"
                             class="textarea textarea-bordered w-full h-24"
                             :disabled="formSubmitting"
                         ></textarea>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-2">
-                            <label class="text-sm font-medium text-base-content">开始时间</label>
+                            <label class="text-sm font-medium text-base-content">{{ $t("todo.start") }}</label>
                             <input
                                 v-model="editForm.startTime"
                                 type="datetime-local"
@@ -472,7 +503,7 @@ onMounted(() => {
                             />
                         </div>
                         <div class="space-y-2">
-                            <label class="text-sm font-medium text-base-content">结束时间</label>
+                            <label class="text-sm font-medium text-base-content">{{ $t("todo.end") }}</label>
                             <input
                                 v-model="editForm.endTime"
                                 type="datetime-local"
@@ -484,10 +515,10 @@ onMounted(() => {
                 </div>
             </template>
             <template #actions>
-                <button class="btn" :disabled="formSubmitting" @click="closeEditDialog">取消</button>
+                <button class="btn" :disabled="formSubmitting" @click="closeEditDialog">{{ $t("setting.cancel") }}</button>
                 <button class="btn btn-primary" :disabled="formSubmitting" @click="submitEdit">
                     <span v-if="formSubmitting" class="loading loading-spinner loading-sm mr-2"></span>
-                    保存
+                    {{ $t("todo.save") }}
                 </button>
             </template>
         </Dialog>

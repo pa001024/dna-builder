@@ -9,5 +9,5 @@ export const db = drizzle(new Database("data.db"), {
     schema,
 })
 
-export { schema }
 export { yogaPlugin } from "./yoga"
+export { schema }

@@ -25,6 +25,7 @@ export class LeveledSkillWeapon {
     基础弹匣?: number
     技能?: LeveledSkill[]
     inherit?: "melee" | "ranged"
+    atk?: "melee" | "ranged" | "all"
 
     // 等级和精炼属性
     _等级: number = 80 // 武器等级，默认80级
@@ -63,6 +64,7 @@ export class LeveledSkillWeapon {
             this.技能 = weaponData.技能.map(skill => new LeveledSkill({ ...skill, 武器: this.类型 }, this._技能等级, weaponData.名称))
 
         if (weaponData.inherit) this.inherit = weaponData.inherit
+        if (weaponData.atk) this.atk = weaponData.atk
 
         // 初始化倍率相关属性为undefined
         this.弹片数 = undefined

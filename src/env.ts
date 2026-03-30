@@ -3,4 +3,5 @@ export const env = {
     isMSStore: true,
     endpoint: import.meta.env.DEV ? "http://localhost:8887" : "https://xn--chq26veyq.icu",
     // endpoint: "http://localhost:8887",
+    apiEndpoint: "https://api.dna-builder.cn",
 }

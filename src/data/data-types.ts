@@ -1,10 +1,13 @@
 import type { AbyssBuff, AbyssDungeon, MonsterBuff } from "./d/abyss.data"
-export type { AbyssDungeon, MonsterBuff, AbyssBuff }
+
+export type { AbyssBuff, AbyssDungeon, MonsterBuff }
 
 import type { Pet } from "./d/pet.data"
+
 export type { Pet }
 
 import type { Draft } from "./d/draft.data"
+
 export type { Draft }
 
 export interface Buff {
@@ -55,7 +58,14 @@ export interface Char {
     版本?: string
     别名?: string
     阵营?: string
+    势力?: string
     属性: string
+    出生地?: string
+    生日?: string
+    中文CV?: string
+    日文CV?: string
+    英文CV?: string
+    韩文CV?: string
     突破?: Record<string, number>[]
     精通: string[]
     标签?: string[]
@@ -67,6 +77,7 @@ export interface Char {
     加成?: CommonAttr
     技能: Skill[]
     溯源?: string[]
+    专武?: number
     同律武器?: SkillWeapon[]
 }
 
@@ -106,8 +117,10 @@ export interface SkillWeapon {
     触发?: number
     攻速?: number
     技能?: Skill[]
+    skill?: 0 | 1 | 2
     filter?: string
     inherit?: "melee" | "ranged"
+    atk?: "melee" | "ranged" | "all"
 }
 
 export interface Weapon {
@@ -127,6 +140,7 @@ export interface Weapon {
     最大弹药?: number
     弹药转化率?: number
     最大射程?: number
+    射击间隔?: number
     弹道类型?: keyof typeof BulletType
     装填?: number
     加成?: CommonAttr
@@ -149,7 +163,24 @@ export interface Skill {
     e?: SkillEffect[]
     b?: SkillBuff[]
     p?: SkillPassive[]
-    子技能?: Omit<Skill, "名称">[]
+    子技能?: SubSkill[]
+}
+
+export interface SubSkill {
+    id?: number
+    名称?: string
+    类型: string
+    武器?: string
+    升级?: Record<string, number>[]
+    描述?: string
+    icon?: string
+    字段?: SkillField[]
+    术语解释?: Record<string, string>
+    召唤物?: SkillSummon
+    cd?: number
+    e?: SkillEffect[]
+    b?: SkillBuff[]
+    p?: SkillPassive[]
 }
 
 export interface SkillPassive {
@@ -210,7 +241,7 @@ export interface EffectAttr {
     fn?: string
     r?: number[] | number // Rate
     v?: number[] | number // Value
-    co?: number
+    co?: number // Condition
     Dilation?: number
     Duration?: number
     t?: BuffAttr[]
@@ -313,7 +344,7 @@ export interface WeaponSkill {
     类型: string
     武器?: string
     描述?: string
-    字段?: Record<string, string>
+    字段?: SkillField[]
     削韧?: number[]
     延迟?: number[]
     卡肉?: number[]
@@ -339,6 +370,11 @@ export interface SkillField {
     值: number[] | number
     格式?: string
     值2?: number[] | number
+    削韧?: number[] | number
+    延迟?: number[] | number
+    卡肉?: number[] | number
+    取消?: number[] | number
+    连段?: number[] | number
     段数?: number
 }
 
@@ -352,6 +388,7 @@ export enum DmgType {
     切割 = "切割",
     贯穿 = "贯穿",
     震荡 = "震荡",
+    灵能 = "灵能",
 }
 
 export enum BulletType {
@@ -368,40 +405,6 @@ export enum SkillType {
     防御 = "防御",
 }
 
-export interface Monster {
-    id: number
-    n: string
-    t?: "Rescue_Elite_Monster" | "Elite_Monster" | "Boss"
-    f?: Faction
-    atk: number
-    def: number
-    hp: number
-    es?: number
-    tn?: number
-    icon?: string
-}
-
-export enum Faction {
-    其他 = 0,
-    秽兽 = 1,
-    海伯利亚帝国 = 2,
-    神弃者同盟 = 3,
-    艾利西安传颂会 = 4,
-    华胥 = 5,
-}
-
-export interface DynamicMonster extends Monster {
-    currentHP: number
-    currentShield: number
-    currentWarPose: number
-}
-
-export enum MobType {
-    小型 = "小型",
-    大型 = "大型",
-    首领 = "首领",
-}
-
 export interface Mod {
     id: number
     icon?: string
@@ -415,6 +418,8 @@ export interface Mod {
     属性?: string
     限定?: string
     效果?: string
+    消耗?: number[]
+    技能替换?: Record<string, WeaponSkill>
     buff?: Buff
 
     [key: string]: any
@@ -490,6 +495,7 @@ export interface Achievement {
 export interface Reward {
     id: number
     m: string
+    icon?: string
     child: RewardChild[]
 }
 
@@ -503,18 +509,4 @@ export interface RewardChild {
     n?: string
 }
 
-export interface Dungeon {
-    id: number
-    n: string
-    t: string
-    e?: string
-    ts?: string
-    lv: number
-    rd: number
-    desc?: string
-    m: number[]
-    r?: number[]
-    win: number
-    sm?: number[]
-    sr?: number[]
-}
+export type { Dungeon } from "./d/dungeon.data"

@@ -1,10 +1,16 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { computed } from "vue"
+import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
+import { useSearchParam } from "@/composables/useSearchParam"
 import shopData from "../data/d/shop.data"
-import DBShopDetailItem from "@/components/DBShopDetailItem.vue"
 
-const searchKeyword = ref("")
-const selectedShop = ref<typeof shopData[0] | null>(null)
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedShopId = useSearchParam<string>("id", "")
+
+// 根据 ID 获取选中的商店
+const selectedShop = computed(() => {
+    return selectedShopId.value ? shopData.find(shop => shop.id === selectedShopId.value) || null : null
+})
 
 // 按关键词筛选商店
 const filteredShops = computed(() => {
@@ -16,25 +22,30 @@ const filteredShops = computed(() => {
             return (
                 shop.id.toLowerCase().includes(q) ||
                 shop.name.toLowerCase().includes(q) ||
-                shop.mainTabs.some(mainTab =>
-                    mainTab.name.toLowerCase().includes(q) ||
-                    mainTab.subTabs.some(subTab =>
-                        subTab.name.toLowerCase().includes(q) ||
-                        subTab.items.some(item =>
-                            item.typeName.toLowerCase().includes(q) ||
-                            item.itemType.toLowerCase().includes(q) ||
-                            item.priceName.toLowerCase().includes(q)
+                shop.mainTabs.some(
+                    mainTab =>
+                        mainTab.name.toLowerCase().includes(q) ||
+                        mainTab.subTabs.some(
+                            subTab =>
+                                subTab.name.toLowerCase().includes(q) ||
+                                subTab.items.some(
+                                    item =>
+                                        item.typeName.toLowerCase().includes(q) ||
+                                        item.itemType.toLowerCase().includes(q) ||
+                                        item.priceName.toLowerCase().includes(q)
+                                )
                         )
-                    )
                 )
             )
         }
     })
 })
 
-function selectShop(shop: typeof shopData[0] | null) {
-    selectedShop.value = shop
+function selectShop(shop: (typeof shopData)[0] | null) {
+    selectedShopId.value = shop?.id || ""
 }
+
+useInitialScrollToSelectedItem()
 </script>
 
 <template>
@@ -59,25 +70,34 @@ function selectShop(shop: typeof shopData[0] | null) {
                             v-for="shop in filteredShops"
                             :key="shop.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedShop?.id === shop.id }"
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedShopId === shop.id }"
                             @click="selectShop(shop)"
                         >
                             <div class="flex items-start justify-between">
                                 <div>
                                     <div class="font-medium">{{ shop.name }}</div>
-                                    <div class="text-xs opacity-70 mt-1">
-                                        {{ shop.mainTabs.length }}个主标签
-                                    </div>
+                                    <div class="text-xs opacity-70 mt-1">{{ shop.mainTabs.length }}个主标签</div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">
                                     <span class="text-xs px-2 py-0.5 rounded bg-primary text-white">
                                         {{ shop.id }}
                                     </span>
-                                    <span class="text-xs opacity-70">{{ shop.mainTabs.reduce((total, tab) => total + tab.subTabs.length, 0) }}个子标签</span>
+                                    <span class="text-xs opacity-70"
+                                        >{{ shop.mainTabs.reduce((total, tab) => total + tab.subTabs.length, 0) }}个子标签</span
+                                    >
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 mt-2 text-xs opacity-70">
-                                <span>商品总数: {{ shop.mainTabs.reduce((total, tab) => total + tab.subTabs.reduce((subTotal, subTab) => subTotal + subTab.items.length, 0), 0) }}</span>
+                                <span
+                                    >商品总数:
+                                    {{
+                                        shop.mainTabs.reduce(
+                                            (total, tab) =>
+                                                total + tab.subTabs.reduce((subTotal, subTab) => subTotal + subTab.items.length, 0),
+                                            0
+                                        )
+                                    }}</span
+                                >
                             </div>
                         </div>
                     </div>
@@ -95,11 +115,10 @@ function selectShop(shop: typeof shopData[0] | null) {
             >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
-
             <!-- 右侧详情面板 -->
-            <div v-if="selectedShop" class="flex-1 overflow-hidden">
-                <DBShopDetailItem :shop="selectedShop" />
-            </div>
+            <ScrollArea v-if="selectedShop" class="flex-2" :key="selectedShopId">
+                <DBShopDetailItem :shop="selectedShop" :key="selectedShopId" />
+            </ScrollArea>
         </div>
     </div>
 </template>

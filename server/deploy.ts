@@ -21,8 +21,7 @@ const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"))
 const version = packageJson.version
 
 const OSS_CONFIG = {
-    region: envConfig.OSS_REGION || envConfig.OSS_ENDPOINT?.replace(".aliyuncs.com", "") || "oss-cn-hongkong",
-    endpoint: envConfig.OSS_ENDPOINT || "",
+    endpoint: envConfig.OSS_ACC_ENDPOINT || envConfig.OSS_ENDPOINT || "",
     bucket: envConfig.OSS_BUCKET || "",
     accessKeyId: envConfig.OSS_ACCESS_KEY_ID || "",
     accessKeySecret: envConfig.OSS_ACCESS_KEY_SECRET || "",
@@ -56,10 +55,11 @@ async function uploadToOss(filePath: string, ossKey: string): Promise<void> {
     console.log(`📤 上传文件到OSS: ${ossKey}`)
 
     const client = new OSS({
-        region: OSS_CONFIG.region,
+        endpoint: OSS_CONFIG.endpoint,
         accessKeyId: OSS_CONFIG.accessKeyId,
         accessKeySecret: OSS_CONFIG.accessKeySecret,
         bucket: OSS_CONFIG.bucket,
+        secure: true,
     })
 
     // 强制覆盖：先删除旧文件，再上传新文件
@@ -141,7 +141,7 @@ async function deployWeb() {
         const distPath = path.resolve(CONFIG.local.distDir)
 
         // 使用 PowerShell 的 Compress-Archive 命令创建zip文件
-        await $`powershell -Command "Compress-Archive -Path ${distPath}\* -DestinationPath ${zipPath} -Force"`
+        await $`pwsh -Command "Compress-Archive -Path ${distPath}\* -DestinationPath ${zipPath} -Force"`
 
         // 检查zip文件是否创建成功
         if (!fs.existsSync(zipPath)) {

@@ -4,6 +4,7 @@ import { env } from "./env"
 import AchievementList from "./views/AchievementList.vue"
 import CharBuildCompare from "./views/CharBuildCompare.vue"
 import CharBuildView from "./views/CharBuildView.vue"
+import CharBuildViewNew from "./views/CharBuildViewNew.vue"
 import CharListView from "./views/CharListView.vue"
 import GuideDetailView from "./views/GuideDetailView.vue"
 import GuideEditView from "./views/GuideEditView.vue"
@@ -28,14 +29,36 @@ let setMinSize = async (_w: number, _h: number) => {}
 const routes: readonly RouteRecordRaw[] = [
     { name: "home", path: "/", component: Home, beforeEnter: () => setMinSize(360, 430) },
     { name: "setting", path: "/setting", component: Setting, beforeEnter: () => setMinSize(540, 430) },
-    { name: "char-list", path: "/char", component: CharListView, beforeEnter: () => setMinSize(600, 600) },
-    { name: "char-build", path: "/char/:charId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
-    { name: "char-build-code", path: "/char/:charId/:buildId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
-    { name: "build-share", path: "/build/:buildId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
-    { name: "timeline-share", path: "/timeline/:timelineId", component: TimelineEditor, beforeEnter: () => setMinSize(600, 600) },
+    {
+        name: "points-mall",
+        path: "/points-mall",
+        component: () => import("./views/PointsMall.vue"),
+        beforeEnter: () => setMinSize(900, 700),
+    },
+    {
+        path: "/char",
+        children: [
+            { name: "char-build-list", path: "", component: CharListView, beforeEnter: () => setMinSize(600, 600) },
+            { name: "char-build", path: ":charId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
+            { name: "char-build-code", path: ":charId/:buildId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
+            { name: "char-build-new", path: ":charId/new", component: CharBuildViewNew, beforeEnter: () => setMinSize(900, 700) },
+            {
+                name: "char-build-new-code",
+                path: ":charId/new/:buildId",
+                component: CharBuildViewNew,
+                beforeEnter: () => setMinSize(900, 700),
+            },
+        ],
+    },
     { name: "build-compare", path: "/char-build-compare", component: CharBuildCompare, beforeEnter: () => setMinSize(600, 600) },
+    {
+        path: "/timeline",
+        children: [
+            { name: "timeline", path: "", component: TimelineEditor, beforeEnter: () => setMinSize(600, 600) },
+            { name: "timeline-share", path: ":timelineId", component: TimelineEditor, beforeEnter: () => setMinSize(600, 600) },
+        ],
+    },
     { name: "inventory", path: "/inventory", component: InventoryEdit, beforeEnter: () => setMinSize(600, 600) },
-    { name: "timeline", path: "/timeline", component: TimelineEditor, beforeEnter: () => setMinSize(600, 600) },
     { name: "achievement", path: "/achievement", component: AchievementList, beforeEnter: () => setMinSize(600, 600) },
     {
         name: "game-launcher",
@@ -122,9 +145,24 @@ const routes: readonly RouteRecordRaw[] = [
                 path: "timeline",
                 component: () => import("./admin/TimelineManagement.vue"),
             },
+            {
+                name: "admin-script",
+                path: "script",
+                component: () => import("./admin/ScriptManagement.vue"),
+            },
+            {
+                name: "admin-shop-product",
+                path: "shop-product",
+                component: () => import("./admin/ShopProductManagement.vue"),
+            },
+            {
+                name: "admin-shop-redemption",
+                path: "shop-redemption",
+                component: () => import("./admin/ShopRedemptionManagement.vue"),
+            },
         ],
     },
-    // 数据库路由
+    // 资料库路由
     {
         path: "/db",
         children: [
@@ -133,6 +171,12 @@ const routes: readonly RouteRecordRaw[] = [
                 path: "",
                 component: () => import("./views/DBView.vue"),
                 beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "db-damage",
+                path: "damage",
+                component: () => import("./views/DBDamageView.vue"),
+                beforeEnter: () => setMinSize(800, 700),
             },
             {
                 name: "walnut-list",
@@ -145,6 +189,30 @@ const routes: readonly RouteRecordRaw[] = [
                 path: "walnut/:id",
                 component: () => import("./views/DBWalnutDetailView.vue"),
                 beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "title-list",
+                path: "title",
+                component: () => import("./views/DBTitleListView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "title-detail",
+                path: "title/:id",
+                component: () => import("./views/DBTitleDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "book-list",
+                path: "book",
+                component: () => import("./views/DBBookListView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "book-detail",
+                path: "book/:id",
+                component: () => import("./views/DBBookDetailView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
             },
             {
                 name: "raid-rank",
@@ -162,6 +230,18 @@ const routes: readonly RouteRecordRaw[] = [
                 name: "mod-detail",
                 path: "mod/:id",
                 component: () => import("./views/DBModDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "char-list",
+                path: "char",
+                component: () => import("./views/DBCharListView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "char-detail",
+                path: "char/:id",
+                component: () => import("./views/DBCharDetailView.vue"),
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
@@ -189,6 +269,12 @@ const routes: readonly RouteRecordRaw[] = [
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
+                name: "monster-tag-detail",
+                path: "monstertag/:monsterTagId",
+                component: () => import("./views/DBMonsterTagDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
                 name: "weapon-list",
                 path: "weapon",
                 component: () => import("./views/DBWeaponListView.vue"),
@@ -201,6 +287,18 @@ const routes: readonly RouteRecordRaw[] = [
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
+                name: "accessory-list",
+                path: "accessory",
+                component: () => import("./views/DBAccessoryListView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "accessory-detail",
+                path: "accessory/:accessoryType/:accessoryId",
+                component: () => import("./views/DBAccessoryDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
                 name: "dungeon-list",
                 path: "dungeon",
                 component: () => import("./views/DBDungeonListView.vue"),
@@ -210,6 +308,18 @@ const routes: readonly RouteRecordRaw[] = [
                 name: "dungeon-detail",
                 path: "dungeon/:dungeonId",
                 component: () => import("./views/DBDungeonDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "reputation-list",
+                path: "reputation",
+                component: () => import("./views/DBReputationListView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "reputation-detail",
+                path: "reputation/:reputationId",
+                component: () => import("./views/DBReputationDetailView.vue"),
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
@@ -243,6 +353,12 @@ const routes: readonly RouteRecordRaw[] = [
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
+                name: "fish-spot-detail",
+                path: "fishspot/:id",
+                component: () => import("./views/DBFishSpotDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
                 name: "fish-detail",
                 path: "fish/:id",
                 component: () => import("./views/DBFishDetailView.vue"),
@@ -253,6 +369,12 @@ const routes: readonly RouteRecordRaw[] = [
                 path: "map",
                 component: () => import("./views/DBMapListView.vue"),
                 beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "map-local",
+                path: "map-local",
+                component: () => import("./views/DBMapLocalView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
             },
             {
                 name: "map-detail",
@@ -268,9 +390,82 @@ const routes: readonly RouteRecordRaw[] = [
             },
             {
                 name: "shop-detail",
-                path: "shop/:shopId",
+                path: "shop/:shopId/:subTabId?",
                 component: () => import("./views/DBShopDetailView.vue"),
                 beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "hardboss-list",
+                path: "hardboss",
+                component: () => import("./views/DBHardbossListView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "hardboss-detail",
+                path: "hardboss/:bossId",
+                component: () => import("./views/DBHardbossDetailView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "dynquest-list",
+                path: "dynquest",
+                component: () => import("./views/DBDynQuestListView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "dynquest-detail",
+                path: "dynquest/:questId",
+                component: () => import("./views/DBDynQuestDetailView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "partytopic-list",
+                path: "partytopic",
+                component: () => import("./views/DBPartyTopicListView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "partytopic-detail",
+                path: "partytopic/:partyTopicId",
+                component: () => import("./views/DBPartyTopicDetailView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "questchain-list",
+                path: "questchain",
+                component: () => import("./views/DBQuestChainListView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "questchain-detail",
+                path: "questchain/:questChainId",
+                component: () => import("./views/DBQuestDetailView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "achievement-list",
+                path: "achievement",
+                component: () => import("./views/DBAchievementListView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "achievement-detail",
+                path: "achievement/:id",
+                component: () => import("./views/DBAchievementDetailView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "npc-list",
+                path: "npc",
+                component: () => import("./views/DBNpcListView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+                meta: { keepAlive: true },
+            },
+            {
+                name: "npc-detail",
+                path: "npc/:npcId",
+                component: () => import("./views/DBNpcDetailView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
             },
         ],
     },
@@ -329,6 +524,26 @@ const routes: readonly RouteRecordRaw[] = [
     { name: "guide-detail", path: "/guides/:id", component: GuideDetailView, beforeEnter: () => setMinSize(800, 600) },
     { name: "guide-create", path: "/guides/create", component: GuideEditView, beforeEnter: () => setMinSize(800, 800) },
     { name: "guide-edit", path: "/guides/:id/edit", component: GuideEditView, beforeEnter: () => setMinSize(800, 800) },
+
+    // 脚本 routes
+    {
+        name: "script-list",
+        path: "/scripts",
+        component: () => import("./views/ScriptListView.vue"),
+        beforeEnter: () => setMinSize(800, 600),
+    },
+    {
+        name: "script-color-tool",
+        path: "/scripts/color-tool",
+        component: () => import("./views/ScriptColorToolView.vue"),
+        beforeEnter: () => setMinSize(1000, 700),
+    },
+    {
+        name: "script-record-tool",
+        path: "/scripts/record-tool",
+        component: () => import("./views/ScriptRecordToolView.vue"),
+        beforeEnter: () => setMinSize(1000, 700),
+    },
 
     // 404 页面 - 必须放在最后作为捕获所有未匹配路由
     { path: "/:pathMatch(.*)*", name: "notfound", component: NotFound, beforeEnter: () => setMinSize(360, 430) },

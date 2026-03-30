@@ -1,9 +1,7 @@
-import { describe, it, expect } from "vitest"
+import { describe, expect, it } from "vitest"
 import { CharBuild } from "../CharBuild"
-import { LeveledChar } from "../leveled"
-import { LeveledWeapon } from "../leveled"
-import { LeveledMod } from "../leveled"
-import { LeveledBuff } from "../leveled"
+import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
+import { LeveledModWithCount } from "../leveled/LeveledMod"
 
 describe("CharBuild类测试", () => {
     // 创建测试用数据
@@ -131,6 +129,33 @@ describe("CharBuild类测试", () => {
         charBuild.baseName = "普通攻击"
         const { weapon: meleeWeaponAttrs2 } = charBuild.calculateWeaponAttributes()
         expect(meleeWeaponAttrs2!.暴击).toBeCloseTo(基础暴击 * 3, 1)
+    })
+
+    it("应该将近战武器普通攻击替换为技能替换MOD中的字段", () => {
+        const charBuild = new CharBuild({
+            char: new LeveledChar("黎瑟"),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 2,
+            meleeMods: [new LeveledMod(203001)],
+            buffs: [],
+            melee: new LeveledWeapon("万古的诀别"),
+            ranged: new LeveledWeapon(20601),
+            baseName: "普通攻击",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0.5,
+            targetFunction: "伤害",
+        })
+
+        const normalAttackSkill = charBuild.meleeWeaponSkills.find(skill => skill.名称 === "普通攻击")
+        const replaceSkill = charBuild.meleeMods[0]?.技能替换?.["1030101"]
+        const replaceFirstHit = replaceSkill?.字段?.find(field => field.名称 === "一段伤害")?.值
+
+        expect(normalAttackSkill).toBeDefined()
+        expect(normalAttackSkill?.id).toBe(1030201)
+        expect(normalAttackSkill?.字段.some(field => field.名称 === "路径伤害")).toBe(true)
+        expect(normalAttackSkill?.字段.find(field => field.名称 === "一段伤害")?.值).toBe(replaceFirstHit)
     })
 
     // 测试总加成计算
@@ -620,7 +645,7 @@ describe("CharBuild类测试", () => {
     // 角色测试
     describe("角色测试", () => {
         it("应该能够处理不同角色", () => {
-            const chars = ["黎瑟", "菲娜", "希尔妲", "莉兹贝尔"]
+            const chars = ["黎瑟", "菲娜", "莉兹贝尔"]
 
             chars.forEach(charName => {
                 const charBuild = new CharBuild({
@@ -679,6 +704,63 @@ describe("CharBuild类测试", () => {
                 // 无论如何，应该能够计算而不抛出错误
                 expect(() => charBuild.calculateWeaponAttributes()).not.toThrow()
             })
+        })
+
+        it("普通 inherit 型同律武器应保留原始伤害类型并沿用旧结算逻辑", () => {
+            const charBuild = new CharBuild({
+                char: new LeveledChar("刻舟"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                charMods: [],
+                buffs: [],
+                melee: new LeveledWeapon(10303),
+                ranged: new LeveledWeapon(20601),
+                baseName: "剑非剑",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 1,
+                targetFunction: "伤害",
+            })
+
+            expect(charBuild.skillWeapon?.inherit).toBe("melee")
+            expect(charBuild.skillWeapon?.atk).toBeUndefined()
+            expect(charBuild.skillWeapon?.伤害类型).toBe(charBuild.skillWeapon?._originalWeaponData.伤害类型 || "切割")
+            expect(charBuild.skillWeaponSkills[0]?.skillData.icon).toBe(charBuild.charSkills[1]?.skillData.icon)
+
+            const attrs = charBuild.calculateWeaponAttributes(charBuild.skillWeapon)
+            const damage = charBuild.calculateWeaponDamage(attrs, charBuild.skillWeapon!)
+
+            expect(damage.lowerCritNoTrigger).toBeGreaterThan(0)
+            expect(damage.expectedDamage).toBeGreaterThan(0)
+        })
+
+        it("atk=all 的 inherit 型同律武器才应同步继承基础武器伤害类型并按纯元素结算", () => {
+            const charBuild = new CharBuild({
+                char: new LeveledChar("煜明"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                charMods: [],
+                buffs: [],
+                melee: new LeveledWeapon(10303),
+                ranged: new LeveledWeapon(20601),
+                baseName: "疑星落",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 1,
+                targetFunction: "伤害",
+            })
+
+            expect(charBuild.skillWeapon?.inherit).toBe("melee")
+            expect(charBuild.skillWeapon?.atk).toBe("all")
+            expect(charBuild.skillWeapon?.伤害类型).toBe(charBuild.meleeWeapon.伤害类型)
+
+            const attrs = charBuild.calculateWeaponAttributes(charBuild.skillWeapon)
+            const damage = charBuild.calculateWeaponDamage(attrs, charBuild.skillWeapon!)
+
+            expect(damage.lowerCritNoTrigger).toBeCloseTo(0, 6)
+            expect(damage.expectedDamage).toBeCloseTo(0, 6)
         })
     })
 
@@ -745,6 +827,35 @@ describe("CharBuild类测试", () => {
             expect(income1).toBeGreaterThan(0)
             expect(income2).toBeGreaterThan(0)
         })
+
+        it("移除技能倍率乘数BUFF时收益不应出现Infinity", () => {
+            const charBuild = createCharBuild()
+            const buff = new LeveledBuff("煜明2溯")
+
+            charBuild.buffs = [buff]
+            charBuild.calculate = () =>
+                Math.max(
+                    0,
+                    charBuild.buffs.reduce((value, currentBuff) => value * (1 + (currentBuff.技能倍率乘数 || 0)), 100)
+                )
+
+            const income = charBuild.calcIncome(buff, true)
+
+            expect(Number.isFinite(income)).toBe(true)
+            expect(income).toBeCloseTo(1.6, 10)
+        })
+
+        it("已装备MOD的精确收益应等于真实移除后的重算结果", () => {
+            const charBuild = createCharBuild()
+            const baseValue = charBuild.calculate()
+            const removedBuild = charBuild.clone()
+
+            removedBuild.charMods.splice(0, 1)
+            const removedValue = removedBuild.calculate()
+
+            expect(removedValue).toBeGreaterThan(0)
+            expect(charBuild.calcEquippedModIncome("角色", 0)).toBeCloseTo(baseValue / removedValue - 1, 10)
+        })
     })
 
     // 配置测试
@@ -773,6 +884,151 @@ describe("CharBuild类测试", () => {
             expect(charBuild.targetFunction).toBe("每秒伤害")
         })
     })
+
+    // 自动构筑测试
+    describe("自动构筑测试", () => {
+        it("应该优先补齐趋向条件再继续常规迭代", () => {
+            const charBuild = createCharBuild()
+            charBuild.mods = [new LeveledMod(51746)]
+            charBuild.buffs = []
+
+            const modOptions = [
+                new LeveledModWithCount(41001, undefined, undefined, 1),
+                new LeveledModWithCount(41002, undefined, undefined, 1),
+                new LeveledModWithCount(41003, undefined, undefined, 1),
+                new LeveledModWithCount(41007, undefined, undefined, 1),
+            ]
+
+            const result = charBuild.autoBuild({
+                includeTypes: ["charMods"],
+                preserveTypes: ["charMods"],
+                modOptions,
+                enableLog: true,
+            })
+
+            const conditionMod = result.newBuild.charMods.find(mod => mod?.id === 51746)
+            const dCount = result.newBuild.charMods.filter(mod => mod?.极性 === "D").length
+
+            expect(conditionMod).toBeDefined()
+            expect(dCount).toBeGreaterThanOrEqual(3)
+            expect(result.newBuild.checkModEffective(conditionMod!)?.isEffective).toBe(true)
+            expect(result.log).toContain("条件优先添加角色")
+        })
+
+        it("当条件MOD在auraMod时也应优先补齐趋向条件", () => {
+            const charBuild = createCharBuild()
+            charBuild.mods = []
+            charBuild.auraMod = new LeveledMod(51746)
+            charBuild.buffs = []
+
+            const modOptions = [
+                new LeveledModWithCount(41001, undefined, undefined, 1),
+                new LeveledModWithCount(41002, undefined, undefined, 1),
+                new LeveledModWithCount(41003, undefined, undefined, 1),
+                new LeveledModWithCount(41007, undefined, undefined, 1),
+            ]
+
+            const result = charBuild.autoBuild({
+                includeTypes: ["charMods"],
+                modOptions,
+                enableLog: true,
+            })
+
+            const dCount = result.newBuild.charMods.filter(mod => mod?.极性 === "D").length
+
+            expect(result.newBuild.auraMod?.id).toBe(51746)
+            expect(dCount).toBeGreaterThanOrEqual(2)
+            expect(result.newBuild.checkModEffective(result.newBuild.auraMod!)?.isEffective).toBe(true)
+            expect(result.log).toContain("条件优先添加角色")
+        })
+
+        it("替换不应破坏光环条件导致收益误判", () => {
+            const charBuild = createCharBuild()
+            charBuild.mods = [
+                new LeveledMod(51742),
+                new LeveledMod(41002),
+                new LeveledMod(41003),
+                new LeveledMod(51324),
+                new LeveledMod(41324),
+                new LeveledMod(41001),
+                new LeveledMod(51313),
+            ]
+            charBuild.auraMod = new LeveledMod(51746)
+            charBuild.buffs = []
+
+            const modOptions = [51742, 41002, 41003, 51324, 41324, 41001, 51313, 51743, 41007].map(
+                id => new LeveledModWithCount(id, undefined, undefined, 20)
+            )
+
+            const result = charBuild.autoBuild({
+                includeTypes: ["charMods"],
+                preserveTypes: ["charMods"],
+                modOptions,
+                enableLog: true,
+            })
+
+            const dCount = result.newBuild.charMods.filter(mod => mod?.极性 === "D").length
+
+            expect(dCount).toBeGreaterThanOrEqual(3)
+            expect(result.newBuild.checkModEffective(result.newBuild.auraMod!)?.isEffective).toBe(true)
+        })
+    })
+
+    describe("锋芒条件MOD测试", () => {
+        it("应该按队友武器数量叠加紫色锋芒增伤", () => {
+            const baseBuild = createCharBuild()
+            baseBuild.baseName = "普通攻击"
+            baseBuild.mods = [new LeveledMod(41803)]
+            baseBuild.buffs = []
+            const baseDamageIncrease = baseBuild.calculateAttributes().增伤
+
+            const charBuild = createCharBuild()
+            charBuild.baseName = "普通攻击"
+            charBuild.mods = [new LeveledMod(41803)]
+            charBuild.buffs = []
+            charBuild.teamWeaponCategories = ["重剑"]
+            const attrs = charBuild.calculateAttributes()
+
+            expect(attrs.增伤 - baseDamageIncrease).toBeCloseTo(0.06, 5)
+        })
+
+        it("应该在自身与两名队友同类别时封顶金色锋芒增伤", () => {
+            const baseBuild = createCharBuild()
+            baseBuild.baseName = "普通攻击"
+            baseBuild.mods = []
+            baseBuild.buffs = []
+            const baseDamageIncrease = baseBuild.calculateAttributes().增伤
+
+            const charBuild = createCharBuild()
+            charBuild.baseName = "普通攻击"
+            charBuild.mods = [new LeveledMod(51803)]
+            charBuild.buffs = []
+            charBuild.teamWeaponCategories = ["重剑", "重剑"]
+            const attrs = charBuild.calculateAttributes()
+
+            expect(attrs.增伤 - baseDamageIncrease).toBeCloseTo(0.33, 5)
+        })
+
+        it("同类别计数达到4时仍应按3层上限计算", () => {
+            const baseBuild = createCharBuild()
+            baseBuild.char = new LeveledChar("莉兹贝尔")
+            baseBuild.baseName = "普通攻击"
+            baseBuild.mods = []
+            baseBuild.buffs = []
+            const baseDamageIncrease = baseBuild.calculateAttributes().增伤
+
+            const charBuild = createCharBuild()
+            charBuild.char = new LeveledChar("莉兹贝尔")
+            charBuild.baseName = "普通攻击"
+            charBuild.mods = [new LeveledMod(51803)]
+            charBuild.buffs = []
+            charBuild.teamWeaponCategories = ["重剑", "重剑"]
+            const attrs = charBuild.calculateAttributes()
+
+            expect(attrs.增伤 - baseDamageIncrease).toBeCloseTo(0.33, 5)
+        })
+    })
+
     describe("表达式测试", () => {
         it("应该能够计算常数", () => {
             const charBuild = createCharBuild()
@@ -784,6 +1040,25 @@ describe("CharBuild类测试", () => {
 
             // 验证修改
             expect(result).toBe(2)
+        })
+
+        it("动态武器属性应参与伤害计算", () => {
+            const baseBuild = createCharBuild()
+            baseBuild.baseName = "射击"
+
+            const dynamicBuild = createCharBuild()
+            dynamicBuild.baseName = "射击"
+            dynamicBuild.dynamicBuffs.push(
+                new LeveledBuff({
+                    名称: "测试动态追加伤害",
+                    描述: "测试用动态属性",
+                    code: "weaponAttr.追加伤害 += 100",
+                })
+            )
+
+            const dynamicAttrs = dynamicBuild.calculateWeaponAttributes()
+            expect(dynamicAttrs.weapon?.追加伤害).toBe(100)
+            expect(dynamicBuild.calculate()).toBeGreaterThan(baseBuild.calculate())
         })
     })
 

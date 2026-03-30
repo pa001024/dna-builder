@@ -48,7 +48,7 @@ function sortJson(obj) {
     )
 }
 
-const langs = ["en", "zh-CN", "zh-TW", "ja", "ko"]
+const langs = ["en", "zh-CN", "zh-TW", "ja", "ko", "fr"]
 for (const lang of langs) {
     const i18nPath = path.join(import.meta.url.replace("file:///", ""), "..", "..", "public", "i18n", lang, `translation.json`)
     let i18n = JSON.parse(fs.readFileSync(i18nPath, "utf8"))

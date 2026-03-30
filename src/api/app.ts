@@ -23,8 +23,16 @@ export async function launchExe(path: string, params: string) {
     return await invoke<string>("launch_exe", { path, params })
 }
 
+export async function launchNormal(path: string, params: string) {
+    return await invoke<string>("launch_normal", { path, params })
+}
+
+export async function runAsAdmin() {
+    return await invoke<string>("run_as_admin", {})
+}
+
 export async function openExplorer(dir: string) {
-    return await invoke<string>("launch_exe", { path: "explorer.exe", params: dir })
+    return await invoke<string>("launch_normal", { path: "explorer.exe", params: dir })
 }
 
 export async function importMod(gamebase: string, paths: string[]) {
@@ -38,10 +46,6 @@ export async function enableMod(srcdir: string, dstdir: string, files: string[])
 
 export async function importPic(path: string) {
     return await invoke<string>("import_pic", { path })
-}
-
-export async function exportJsonFile(filePath: string, jsonContent: string) {
-    return await invoke<string>("export_json_file", { filePath, jsonContent })
 }
 
 /**
@@ -67,6 +71,23 @@ export async function stopHeartbeat() {
 }
 
 /**
+ * 获取当前是否启用了开机启动。
+ * @returns 当前开机启动开关状态
+ */
+export async function isLaunchAtStartupEnabled() {
+    return await invoke<boolean>("is_launch_at_startup_enabled")
+}
+
+/**
+ * 更新开机启动开关状态。
+ * @param enabled 是否启用开机启动
+ * @returns 更新后的真实状态
+ */
+export async function setLaunchAtStartupEnabled(enabled: boolean) {
+    return await invoke<boolean>("set_launch_at_startup_enabled", { enabled })
+}
+
+/**
  * 导出二进制文件到指定路径
  * @param filePath 文件路径
  * @param binaryContent 二进制内容
@@ -74,6 +95,343 @@ export async function stopHeartbeat() {
  */
 export async function exportBinaryFile(filePath: string, binaryContent: Uint8Array) {
     return await invoke<string>("export_binary_file", { filePath, binaryContent })
+}
+
+/**
+ * 读取文本文件内容
+ * @param filePath 文件路径
+ * @returns 文件内容
+ */
+export async function readTextFile(filePath: string) {
+    return await invoke<string>("read_text_file", { filePath })
+}
+
+/**
+ * 写入文本文件内容
+ * @param filePath 文件路径
+ * @param content 文件内容
+ * @returns 成功消息
+ */
+export async function writeTextFile(filePath: string, content: string) {
+    return await invoke<string>("write_text_file", { filePath, content })
+}
+
+/**
+ * 列出指定目录下的所有 JS 文件
+ * @param dirPath 目录路径
+ * @returns 文件名列表
+ */
+export async function listScriptFiles(dirPath: string) {
+    return await invoke<string[]>("list_script_files", { dirPath })
+}
+
+/**
+ * 列出指定目录下的所有文件
+ * @param dirPath 目录路径
+ * @returns 文件名列表
+ */
+export async function listFiles(dirPath: string) {
+    return await invoke<string[]>("list_files", { dirPath })
+}
+
+/**
+ * 列出指定目录下的所有子目录
+ * @param dirPath 目录路径
+ * @returns 子目录名列表
+ */
+export async function listDirectories(dirPath: string) {
+    return await invoke<string[]>("list_directories", { dirPath })
+}
+
+/**
+ * 提取游戏资产
+ * @param zipPath 压缩包路径
+ * @param targetDir 目标目录
+ * @returns 成功消息
+ */
+export async function extractGameAssets(zipPath: string, targetDir: string) {
+    return await invoke<string>("extract_game_assets", { zipPath, targetDir })
+}
+
+/**
+ * 重命名文件
+ * @param oldPath 原文件路径
+ * @param newPath 新文件路径
+ * @returns 成功消息
+ */
+export async function renameFile(oldPath: string, newPath: string) {
+    return await invoke<string>("rename_file", { oldPath, newPath })
+}
+
+/**
+ * 删除文件
+ * @param filePath 文件路径
+ * @returns 成功消息
+ */
+export async function deleteFile(filePath: string) {
+    return await invoke<string>("delete_file", { filePath })
+}
+
+/**
+ * 监听文件变化
+ * @param filePath 文件路径
+ * @returns 成功消息
+ */
+export async function watchFile(filePath: string) {
+    return await invoke<string>("watch_file", { filePath })
+}
+
+/**
+ * 取消监听文件
+ * @param filePath 文件路径
+ * @returns 成功消息
+ */
+export async function unwatchFile(filePath: string) {
+    return await invoke<string>("unwatch_file", { filePath })
+}
+
+/**
+ * 运行指定的脚本文件
+ * @param filePath 脚本文件路径
+ * @returns 脚本返回值字符串（无返回值时为空字符串）
+ */
+export async function runScript(scriptPath: string) {
+    return await invoke<string>("run_script", { scriptPath })
+}
+
+/**
+ * 响应脚本配置读取请求
+ * @param requestId 请求 ID
+ * @param value 配置值（string/number/boolean/string[]）
+ * @returns 成功消息
+ */
+export async function resolveScriptConfigRequest(requestId: string, value: string | number | boolean | string[]) {
+    return await invoke<string>("resolve_script_config_request", { requestId, value })
+}
+
+export type ScriptHelpSelectionMode = "point" | "region"
+
+export interface ScriptHelpPoint {
+    x: number
+    y: number
+}
+
+export interface ScriptHelpRegion {
+    x: number
+    y: number
+    width: number
+    height: number
+    x2: number
+    y2: number
+}
+
+export interface ScriptHelpResponse {
+    confirmed: boolean
+    selectionMode: ScriptHelpSelectionMode
+    point?: ScriptHelpPoint | null
+    region?: ScriptHelpRegion | null
+    imageWidth?: number | null
+    imageHeight?: number | null
+    note?: string | null
+}
+
+/**
+ * 响应脚本 MCP 协助请求
+ * @param requestId 请求 ID
+ * @param response 协助结果
+ * @returns 成功消息
+ */
+export async function resolveScriptHelpRequest(requestId: string, response: ScriptHelpResponse) {
+    return await invoke<string>("resolve_script_help_request", { requestId, response })
+}
+
+/**
+ * 停止当前运行的脚本
+ * @returns 成功消息
+ */
+export async function stopScript() {
+    return await invoke<string>("stop_script")
+}
+
+/**
+ * 停止指定脚本路径对应的运行实例。
+ * @param scriptPath 脚本完整路径
+ * @returns 成功消息
+ */
+export async function stopScriptByPath(scriptPath: string) {
+    return await invoke<string>("stop_script_by_path", { scriptPath })
+}
+
+/**
+ * 获取脚本运行状态（用于页面刷新后恢复运行态显示）。
+ * @returns 是否存在正在运行的脚本
+ */
+export async function getScriptRunningState() {
+    return await invoke<boolean>("get_script_running_state")
+}
+
+/**
+ * 脚本运行信息。
+ */
+export interface ScriptRuntimeInfo {
+    running: boolean
+    scriptPaths: string[]
+    runningCount: number
+}
+
+/**
+ * 脚本页 MCP 服务状态。
+ */
+export interface ScriptMcpServerState {
+    enabled: boolean
+    running: boolean
+    port: number
+    address: string
+    lastError?: string | null
+}
+
+/**
+ * 脚本 MCP 通用操作结果。
+ */
+export interface ScriptMcpOperationResult {
+    success: boolean
+    message: string
+}
+
+/**
+ * 脚本热键绑定。
+ */
+export interface ScriptHotkeyBinding {
+    scriptPath: string
+    hotkey: string
+    hotIfWinActive?: string
+    holdToLoop?: boolean
+}
+
+/**
+ * 获取脚本运行信息（用于页面刷新后恢复运行脚本上下文）。
+ * @returns 脚本运行信息
+ */
+export async function getScriptRuntimeInfo() {
+    return await invoke<ScriptRuntimeInfo>("get_script_runtime_info")
+}
+
+/**
+ * 获取脚本页 MCP 服务状态。
+ * @returns 当前 MCP 服务状态
+ */
+export async function getScriptMcpServerState() {
+    return await invoke<ScriptMcpServerState>("get_script_mcp_server_state")
+}
+
+/**
+ * 切换脚本页 MCP 服务开关。
+ * @param enabled 是否启用
+ * @returns 更新后的 MCP 服务状态
+ */
+export async function setScriptMcpServerEnabled(enabled: boolean, port?: number) {
+    return await invoke<ScriptMcpServerState>("set_script_mcp_server_enabled", { enabled, port })
+}
+
+/**
+ * 清空脚本页 MCP status / console 缓存。
+ * @param scriptPath 可选脚本路径，不传则清空全部
+ */
+export async function clearScriptMcpCache(scriptPath?: string) {
+    return await invoke<ScriptMcpOperationResult>("clear_script_mcp_cache", { scriptPath })
+}
+
+/**
+ * 清空脚本页 MCP status 缓存。
+ * @param scriptPath 可选脚本路径
+ * @param title 可选状态标题
+ */
+export async function clearScriptMcpStatus(scriptPath?: string, title?: string) {
+    return await invoke<ScriptMcpOperationResult>("clear_script_mcp_status", { scriptPath, title })
+}
+
+/**
+ * 清空脚本页 MCP console 缓存。
+ * @param scriptPath 可选脚本路径
+ * @param includeGlobal 传入脚本路径时，是否同时清空无 scope 的全局日志
+ */
+export async function clearScriptMcpConsole(scriptPath?: string, includeGlobal?: boolean) {
+    return await invoke<ScriptMcpOperationResult>("clear_script_mcp_console", { scriptPath, includeGlobal })
+}
+
+/**
+ * 同步脚本热键绑定。
+ * @param bindings 完整绑定列表（会覆盖后端当前配置）
+ * @returns 成功消息
+ */
+export async function syncScriptHotkeyBindings(bindings: ScriptHotkeyBinding[]) {
+    return await invoke<string>("sync_script_hotkey_bindings", { bindings })
+}
+
+/**
+ * 读取后端当前已生效的热键绑定。
+ * @returns 热键绑定列表
+ */
+export async function getScriptHotkeyBindings() {
+    return await invoke<ScriptHotkeyBinding[]>("get_script_hotkey_bindings")
+}
+
+/**
+ * 录制动作类型。
+ */
+export type ScriptInputRecorderActionType = "key_down" | "key_up" | "mouse_down" | "mouse_up"
+
+/**
+ * 脚本输入录制动作。
+ */
+export interface ScriptInputRecorderAction {
+    type: ScriptInputRecorderActionType
+    key?: string
+    button?: string
+    time: number
+}
+
+/**
+ * 脚本输入录制快照。
+ */
+export interface ScriptInputRecorderSnapshot {
+    hotkeyEnabled: boolean
+    recording: boolean
+    totalTime: number
+    actionCount: number
+    actions: ScriptInputRecorderAction[]
+}
+
+/**
+ * 启用或禁用 F10 录制热键监听。
+ * @param enabled 是否启用
+ */
+export async function setScriptInputRecorderHotkeyEnabled(enabled: boolean) {
+    return await invoke<string>("set_script_input_recorder_hotkey_enabled", { enabled })
+}
+
+/**
+ * 获取脚本输入录制快照。
+ * @returns 录制器当前状态与动作列表
+ */
+export async function getScriptInputRecorderSnapshot() {
+    return await invoke<ScriptInputRecorderSnapshot>("get_script_input_recorder_snapshot")
+}
+
+/**
+ * 清空脚本输入录制动作。
+ * @returns 成功消息
+ */
+export async function clearScriptInputRecorderActions() {
+    return await invoke<string>("clear_script_input_recorder_actions")
+}
+
+/**
+ * 获取文档目录路径
+ * @returns 文档目录路径
+ */
+export async function getDocumentsDir() {
+    return await invoke<string>("get_documents_dir")
 }
 /**
  * 获取本地登录的QQ号
@@ -296,6 +654,33 @@ export async function tauriFetch(url: RequestInfo | URL, options?: RequestInit):
         multipart,
     })
     return new TauriResponse(result.status, result.body, result.headers)
+}
+
+/**
+ * 获取文件大小
+ * @param filePath 文件路径
+ * @returns 文件大小（字节），如果文件不存在返回0
+ */
+export async function getFileSize(filePath: string) {
+    return await invoke<number>("get_file_size", { filePath })
+}
+
+/**
+ * 获取文件哈希。
+ * @param filePath 文件路径
+ * @returns 文件的 MD5 哈希值，不存在时返回空字符串
+ */
+export async function getFileHash(filePath: string) {
+    return await invoke<string>("get_file_hash", { filePath })
+}
+
+/**
+ * 清理临时目录
+ * @param tempDir 临时目录路径
+ * @returns 清理结果消息
+ */
+export async function cleanupTempDir(tempDir: string) {
+    return await invoke<string>("cleanup_temp_dir", { tempDir })
 }
 
 export const getMapAPI = () => {

@@ -166,7 +166,7 @@ async function submitComment() {
 
                 <!-- 帖子内容 -->
                 <div class="card bg-base-100 shadow-xl">
-                    <div class="card-body">
+                    <div class="card-body select-text">
                         <div class="space-y-6">
                             <DNAPostContent :contents="postRes.postDetail.postContent" />
                         </div>
@@ -227,10 +227,7 @@ async function submitComment() {
                                 </div>
 
                                 <!-- 回复列表 -->
-                                <div
-                                    v-if="comment.replyVos && comment.replyVos.length > 0"
-                                    class="mt-3 space-y-3 pl-4 border-l-2 border-base-300"
-                                >
+                                <div v-if="comment.replyVos && comment.replyVos.length > 0" class="mt-3 space-y-3 pl-4">
                                     <div
                                         v-for="reply in comment.replyVos"
                                         :key="reply.postCommentReplayId"

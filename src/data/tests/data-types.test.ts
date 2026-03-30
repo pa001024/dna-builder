@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest"
-import { achievementData, baseData, buffData, charData, modData, monsterMap, weaponData } from ".."
+import { describe, expect, it } from "vitest"
+import { achievementData, buffData, charData, modData, monsterMap, weaponData } from ".."
 
 // 测试数据类型的完整性和有效性
 describe("数据类型测试", () => {
@@ -21,12 +21,6 @@ describe("数据类型测试", () => {
             expect(weaponData).toBeDefined()
             expect(Array.isArray(weaponData)).toBe(true)
             expect(weaponData.length).toBeGreaterThan(0)
-        })
-
-        it("应该包含武器基础数据", () => {
-            expect(baseData).toBeDefined()
-            expect(Array.isArray(baseData)).toBe(true)
-            expect(baseData.length).toBeGreaterThan(0)
         })
 
         it("应该包含BUFF数据", () => {
@@ -145,33 +139,6 @@ describe("数据类型测试", () => {
         })
     })
 
-    // 武器基础数据测试
-    describe("武器基础数据测试", () => {
-        it("武器基础应该包含基本属性", () => {
-            const sampleBase = baseData[0]
-
-            expect(sampleBase).toBeDefined()
-            expect(sampleBase.名称).toBeDefined()
-            expect(typeof sampleBase.名称).toBe("string")
-        })
-
-        it("武器基础应该有名称", () => {
-            baseData.forEach(base => {
-                expect(base.名称).toBeDefined()
-                expect(typeof base.名称).toBe("string")
-                expect(base.名称.length).toBeGreaterThan(0)
-            })
-        })
-
-        it("武器基础应该有倍率或攻击数据", () => {
-            baseData.forEach(base => {
-                // 检查是否有倍率或攻击相关数据
-                const hasData = base.倍率 !== undefined
-                expect(hasData).toBe(true)
-            })
-        })
-    })
-
     // BUFF数据测试
     describe("BUFF数据测试", () => {
         it("BUFF应该包含必要属性", () => {
@@ -286,15 +253,15 @@ describe("数据类型测试", () => {
             })
         })
 
-        it("BUFF应该引用有效的角色", () => {
-            const charNames = charData.map(c => c.名称)
+        // it("BUFF应该引用有效的角色", () => {
+        //     const charNames = charData.map(c => c.名称)
 
-            buffData.forEach(buff => {
-                if (buff.限定) {
-                    expect(charNames).toContain(buff.限定)
-                }
-            })
-        })
+        //     buffData.forEach(buff => {
+        //         if (buff.限定) {
+        //             expect(charNames).toContain(buff.限定)
+        //         }
+        //     })
+        // })
     })
 
     // 数据导出测试

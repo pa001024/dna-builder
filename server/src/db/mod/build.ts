@@ -52,7 +52,7 @@ export const typeDefs = /* GraphQL */ `
 export const resolvers = {
     Query: {
         builds: async (_parent, args, context, info) => {
-            const { search, charId, userId, limit = 20, offset = 0, sortBy = "recent" } = args || {}
+            const { search, charId, userId, limit = 20, offset = 0, sortBy = "latest" } = args || {}
             const conditions = []
 
             if (search) {
@@ -74,7 +74,7 @@ export const resolvers = {
                     orderBy = [desc(schema.builds.views)]
                     break
                 default:
-                    orderBy = [desc(schema.builds.createdAt)]
+                    orderBy = [desc(schema.builds.updateAt)]
             }
 
             const result = await db.query.builds.findMany({
@@ -232,11 +232,15 @@ export const resolvers = {
             }
 
             const { input } = args
+            if (input.charSettings.length > 20000) {
+                throw createGraphQLError("非法请求")
+            }
             const [build] = await db
                 .insert(schema.builds)
                 .values({
                     ...input,
                     userId: context.user.id,
+                    updateAt: schema.now(),
                 })
                 .returning()
 
@@ -270,6 +274,9 @@ export const resolvers = {
             }
 
             const { id, input } = args
+            if (input.charSettings.length > 20000) {
+                throw createGraphQLError("非法请求")
+            }
             const build = await db.query.builds.findFirst({
                 where: eq(schema.builds.id, id),
             })
@@ -284,7 +291,7 @@ export const resolvers = {
 
             const [updated] = await db
                 .update(schema.builds)
-                .set({ ...input })
+                .set({ ...input, updateAt: schema.now() })
                 .where(eq(schema.builds.id, id))
                 .returning()
 

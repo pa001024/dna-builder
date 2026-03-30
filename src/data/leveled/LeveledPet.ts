@@ -2,10 +2,14 @@ import { petMap } from "../d"
 import type { PetSkill } from "../d/pet.data"
 import type { Pet } from "../data-types"
 
+const PET_BREAKTHROUGH_MAX_LEVEL = 4
+
 export class LeveledPet implements Pet {
     id: number
     uid: number
     名称: string
+    描述: string
+    异化?: number
     icon: string
     品质: number
     类型: number
@@ -35,15 +39,17 @@ export class LeveledPet implements Pet {
         this._originalPetData = petData
 
         this.id = petData.id
-        this.uid = petData.uid
+        this.uid = petData.uid || 0
         this.名称 = petData.名称
         this.icon = petData.icon
         this.品质 = petData.品质
         this.类型 = petData.类型
         this.最大等级 = petData.最大等级
         this.捕获经验 = petData.捕获经验
+        this.异化 = petData.异化
+        this.描述 = petData.描述
 
-        this._等级 = level !== undefined ? Math.max(0, Math.min(3, level)) : 0
+        this._等级 = level !== undefined ? Math.max(0, Math.min(PET_BREAKTHROUGH_MAX_LEVEL, level)) : 0
 
         this.updateProperties()
     }
@@ -53,20 +59,20 @@ export class LeveledPet implements Pet {
     }
 
     set 等级(value: number) {
-        this._等级 = Math.max(0, Math.min(3, value))
+        this._等级 = Math.max(0, Math.min(PET_BREAKTHROUGH_MAX_LEVEL, value))
         this.updateProperties()
     }
 
     private updateProperties(): void {
-        const baseExp = this._originalPetData.经验
-        const multiplier = 1 + this._等级 / 3
-        this.经验 = Math.floor(baseExp * multiplier)
+        this.经验 = Math.floor(50 * this._等级)
 
         if (this._originalPetData.主动) {
             const activeValues = this.calculateSkillValues(this._originalPetData.主动)
             this.主动 = {
+                id: this._originalPetData.主动.id,
                 描述: this.formatSkillDescription(this._originalPetData.主动.描述, activeValues),
-                值: activeValues,
+                值: this._originalPetData.主动.值,
+                cd: this._originalPetData.主动.cd,
             }
         }
 
@@ -74,36 +80,35 @@ export class LeveledPet implements Pet {
             const passiveValues = this.calculateSkillValues(this._originalPetData.被动)
             this.被动 = {
                 描述: this.formatSkillDescription(this._originalPetData.被动.描述, passiveValues),
-                值: passiveValues,
+                值: this._originalPetData.被动.值,
             }
         }
     }
 
     private calculateSkillValues(skill: PetSkill): number[] {
-        const multiplier = 1 + this._等级 / 3
-        return skill.值.map((val, i) => {
-            // 对持续时间进行特殊处理，不进行等级提升
-            const isDuration = skill.描述.match(/\{%?\}秒?/g)?.[i]?.endsWith("秒")
-            return isDuration && val > 2 ? val : val * multiplier
+        return skill.值.map(val => {
+            return val[this._等级]
         })
     }
 
     private formatSkillDescription(description: string, values: number[]): string {
-        let formattedDesc = description
         let valueIndex = 0
 
-        while (formattedDesc.includes("{%}") && valueIndex < values.length) {
-            const val = values[valueIndex]
-            formattedDesc = formattedDesc.replace("{%}", `${+(val * 100).toFixed(2)}%`)
-            valueIndex++
-        }
+        return description.replace(/\{%\}|\{\}/g, placeholder => {
+            if (valueIndex >= values.length) {
+                return placeholder
+            }
 
-        while (formattedDesc.includes("{}") && valueIndex < values.length) {
-            formattedDesc = formattedDesc.replace("{}", `${+values[valueIndex].toFixed(2)}`)
+            const value = values[valueIndex]
             valueIndex++
-        }
 
-        return formattedDesc
+            // 按占位符类型格式化当前顺序对应的数值，确保严格按出现顺序替换。
+            if (placeholder === "{%}") {
+                return `${+(value * 100).toFixed(2)}%`
+            }
+
+            return `${+value.toFixed(2)}`
+        })
     }
 
     getProperties(): Partial<Pet> {

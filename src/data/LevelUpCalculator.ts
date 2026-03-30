@@ -1,4 +1,10 @@
+import { getModDropInfo } from "../utils/reward-utils"
+import { draftDungeonMap, modDraftMap, modDungeonMap, resourceDraftMap, weaponDraftMap } from "./d"
+import modData from "./d/mod.data"
+import { draftShopSourceMap, modShopSourceMap, weaponShopSourceMap } from "./d/shop.data"
 import type { Char, Mod, Weapon } from "./data-types"
+import type { MergeCalculateData, WorkerMessageData, WorkerMethod, WorkerResponse } from "./LevelUpCalculator.worker"
+import type { ModExt, WeaponExt } from "./LevelUpCalculatorImpl"
 
 /**
  * 角色养成配置
@@ -56,10 +62,23 @@ export interface ResourceCost {
 }
 
 /**
+ * 资源依赖树节点
+ */
+export interface ResourceTreeNode {
+    id: string
+    cid?: number
+    name: string
+    type: "Resource" | "Mod" | "Draft"
+    amount: number
+    children?: ResourceTreeNode[]
+}
+
+/**
  * 养成计算器结果
  */
 export interface LevelUpResult {
     totalCost: ResourceCost
+    resourceTree?: ResourceTreeNode
     timeEstimate?: {
         days: number
         hours: number
@@ -93,80 +112,13 @@ export interface TimeEstimateResult {
     dungeonTimes: Record<number, [number, string]>
 }
 
-// 定义 Worker 消息类型
-type WorkerMethod = "calculateCharLevelUp" | "calculateWeaponLevelUp" | "calculateModLevelUp" | "estimateTime" | "mergeCalculate"
-
-// 精简角色数据类型
-type MinimalChar = {
-    id: number
-    突破?: Record<string, number>[]
-    技能: {
-        升级?: Record<string, number>[]
-    }[]
-}
-
-// 精简武器数据类型
-type MinimalWeapon = {
-    id: number
-    突破?: Record<string, number>[]
-    熔炼?: string[]
-}
-
-// 精简魔之楔数据类型
-type MinimalMod = {
-    id: number
-    品质: string
-    名称: string
-}
-
-// 合并计算请求数据类型
-type MergeCalculateData = {
-    chars?: {
-        chars: MinimalChar[]
-        config: LevelUpCalculatorConfig
-    }
-    weapons?: {
-        weapons: MinimalWeapon[]
-        config: LevelUpCalculatorConfig
-    }
-    mods?: {
-        mods: MinimalMod[]
-        config: LevelUpCalculatorConfig
-    }
-}
-
-type CalculateCharLevelUpData = {
-    chars: MinimalChar[]
-    config: LevelUpCalculatorConfig
-}
-
-type CalculateWeaponLevelUpData = {
-    weapons: MinimalWeapon[]
-    config: LevelUpCalculatorConfig
-}
-
-type CalculateModLevelUpData = {
-    mods: MinimalMod[]
-    config: LevelUpCalculatorConfig
-}
-
-type EstimateTimeData = {
-    totalCost: ResourceCost
-}
-
-type WorkerMessageData =
-    | CalculateCharLevelUpData
-    | CalculateWeaponLevelUpData
-    | CalculateModLevelUpData
-    | EstimateTimeData
-    | MergeCalculateData
-
-// Worker 响应类型
-interface WorkerResponse {
-    success: boolean
-    result?: LevelUpResult | TimeEstimateResult | { charResult?: LevelUpResult; weaponResult?: LevelUpResult; modResult?: LevelUpResult }
-    error?: string
-    id: number
+/**
+ * 副本时间估算配置
+ */
+export interface TimeEstimateConfig {
+    dungeonDropRateBonus?: number
+    dungeonTimeMultiplier?: number
+    dungeonTypeTimes?: Partial<Record<"Defense" | "ExtermPro" | "SurvivalMiniPro", number>>
 }
 
 /**
@@ -271,11 +223,13 @@ export class LevelUpCalculator {
      * @param weapon 武器数据
      * @returns 精简后的武器数据
      */
-    private extractMinimalWeaponData(weapon: Weapon) {
+    private extractMinimalWeaponData(weapon: Weapon): WeaponExt {
+        console.log(weapon, weaponShopSourceMap.get(weapon.id))
         return {
             id: weapon.id,
             突破: weapon.突破,
-            熔炼: weapon.熔炼,
+            walnut: weaponShopSourceMap.get(weapon.id) && 1,
+            draft: weaponDraftMap.get(weapon.id),
         }
     }
 
@@ -284,11 +238,37 @@ export class LevelUpCalculator {
      * @param mod 魔之楔数据
      * @returns 精简后的魔之楔数据
      */
-    private extractMinimalModData(mod: Mod) {
+    extractMinimalModData(mod: Mod): ModExt {
+        const draft = modDraftMap.get(mod.id)
+        const costDraft = modDraftMap.get(mod.消耗?.[0] || mod.id)
+        let shop = undefined as { price: string; n: number } | undefined
+        if (draft) {
+            const item = draftShopSourceMap.get(draft.id)
+            if (item) {
+                shop = { price: item.cost, n: item.n }
+            }
+        }
         return {
             id: mod.id,
             品质: mod.品质,
             名称: mod.名称,
+            消耗: mod.消耗,
+            draft,
+            costDraft,
+            walnut: modShopSourceMap.get(mod.id) && 1,
+            shop,
+            dropInfo: modDungeonMap.get(mod.id)?.map(d => ({
+                id: d.id,
+                name: d.n,
+                t: d.t,
+                dropInfo: getModDropInfo(d, mod.id),
+            })),
+            draftInfo: draftDungeonMap.get(mod.id)?.map(d => ({
+                id: d.id,
+                name: d.n,
+                t: d.t,
+                dropInfo: getModDropInfo(d, mod.id),
+            })),
         }
     }
 
@@ -323,7 +303,11 @@ export class LevelUpCalculator {
         const cleanConfig = this.cleanConfig(config)
         // 提取最小数据集，只传递计算所需的字段
         const minimalWeapons = weapons.map(weapon => this.extractMinimalWeaponData(weapon))
-        return this.sendMessage("calculateWeaponLevelUp", { weapons: minimalWeapons, config: cleanConfig }) as Promise<LevelUpResult>
+        return this.sendMessage("calculateWeaponLevelUp", {
+            weapons: minimalWeapons,
+            config: cleanConfig,
+            resourceDraftMap,
+        }) as Promise<LevelUpResult>
     }
 
     /**
@@ -340,16 +324,28 @@ export class LevelUpCalculator {
         const cleanConfig = this.cleanConfig(config)
         // 提取最小数据集，只传递计算所需的字段
         const minimalMods = mods.map(mod => this.extractMinimalModData(mod))
-        return this.sendMessage("calculateModLevelUp", { mods: minimalMods, config: cleanConfig }) as Promise<LevelUpResult>
+        return this.sendMessage("calculateModLevelUp", {
+            mods: minimalMods,
+            config: cleanConfig,
+            modDraftMap,
+            resourceDraftMap,
+        }) as Promise<LevelUpResult>
     }
 
     /**
      * 估算资源获取时间
      * @param totalCost 总消耗
+     * @param config 时间估算配置
      * @returns 时间估算
      */
-    async estimateTime(totalCost: ResourceCost): Promise<TimeEstimateResult> {
-        return (await this.sendMessage("estimateTime", { totalCost })) as TimeEstimateResult
+    async estimateTime(totalCost: ResourceCost, config?: TimeEstimateConfig): Promise<TimeEstimateResult> {
+        const modMap = modData
+            .map(mod => this.extractMinimalModData(mod))
+            .reduce((acc, mod) => {
+                acc.set(mod.id, mod)
+                return acc
+            }, new Map<number, ModExt>())
+        return (await this.sendMessage("estimateTime", { totalCost, modMap, config })) as TimeEstimateResult
     }
 
     /**
@@ -370,7 +366,10 @@ export class LevelUpCalculator {
         mods?: Mod[],
         modConfig?: ModLevelUpConfig[]
     ): Promise<{ charResult?: LevelUpResult; weaponResult?: LevelUpResult; modResult?: LevelUpResult }> {
-        const message: MergeCalculateData = {}
+        const message: MergeCalculateData = {
+            modDraftMap,
+            resourceDraftMap,
+        }
 
         // 添加角色计算请求
         if (chars && charConfig && chars.length > 0 && charConfig.length > 0) {
@@ -499,8 +498,32 @@ export class LevelUpCalculator {
             } as LevelUpResult["details"]
         )
 
+        // 合并资源依赖树
+        let resourceTree: ResourceTreeNode | undefined
+        if (results.length > 0) {
+            // 收集所有结果的资源树
+            const resourceTrees = results.map(result => result.resourceTree).filter((tree): tree is ResourceTreeNode => tree !== undefined)
+
+            if (resourceTrees.length > 0) {
+                if (resourceTrees.length === 1) {
+                    // 如果只有一个资源树，直接使用它
+                    resourceTree = resourceTrees[0]
+                } else {
+                    // 如果有多个资源树，创建一个根节点来包含它们
+                    resourceTree = {
+                        id: "root",
+                        name: "总资源依赖",
+                        type: "Resource",
+                        amount: 1,
+                        children: resourceTrees,
+                    }
+                }
+            }
+        }
+
         return {
             totalCost,
+            resourceTree,
             details,
         }
     }

@@ -196,6 +196,7 @@ const calculateBoostMultiplier = (hpPercent: number): number => {
 const desperatePath = computed(() => {
     let path = ""
     const steps = 100
+    if (maxMultiplier.value === 1) return ""
 
     for (let i = 0; i <= steps; i++) {
         const hpPercent = i / steps
@@ -219,6 +220,7 @@ const desperatePath = computed(() => {
 const boostPath = computed(() => {
     let path = ""
     const steps = 100
+    if (maxMultiplier.value === 1) return ""
 
     for (let i = 0; i <= steps; i++) {
         const hpPercent = i / steps
@@ -242,6 +244,7 @@ const boostPath = computed(() => {
 const totalPath = computed(() => {
     let path = ""
     const steps = 100
+    if (maxMultiplier.value === 1) return ""
 
     for (let i = 0; i <= steps; i++) {
         const hpPercent = i / steps
@@ -263,15 +266,8 @@ const totalPath = computed(() => {
 </script>
 <template>
     <div class="w-full h-full overflow-hidden" id="char-hp-curve">
-        <svg
-            :width="width"
-            :height="height"
-            :viewBox="`0 0 ${width} ${height}`"
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-full h-full"
-            @mousemove="handleMouseMove"
-            @mouseleave="handleMouseLeave"
-        >
+        <svg :width="width" :height="height" :viewBox="`0 0 ${width} ${height}`" xmlns="http://www.w3.org/2000/svg"
+            class="w-full h-full" @mousemove="handleMouseMove" @mouseleave="handleMouseLeave">
             <!-- 网格线 -->
             <g class="grid">
                 <!-- 水平网格线 -->
@@ -281,40 +277,28 @@ const totalPath = computed(() => {
 
                 <!-- 垂直网格线 -->
                 <template v-for="(percent, index) in [0, 20, 40, 60, 80, 100]" :key="`vertical-${index}`">
-                    <line
-                        :x1="padding + (percent / 100) * chartWidth"
-                        :y1="padding"
-                        :x2="padding + (percent / 100) * chartWidth"
-                        :y2="padding + chartHeight"
-                        stroke="#e0e0e0"
-                        stroke-width="1"
-                    />
+                    <line :x1="padding + (percent / 100) * chartWidth" :y1="padding"
+                        :x2="padding + (percent / 100) * chartWidth" :y2="padding + chartHeight" stroke="#e0e0e0"
+                        stroke-width="1" />
                 </template>
             </g>
 
             <!-- 坐标轴标签 -->
             <g class="axis-labels">
-                <text :x="props.width / 2" :y="props.height - 10" text-anchor="middle" font-size="12" fill="#666">血量百分比 (%)</text>
-                <text x="16" y="200" text-anchor="middle" font-size="12" fill="#666" transform="rotate(-90, 20, 200)">收益倍数</text>
+                <text :x="props.width / 2" :y="props.height - 10" text-anchor="middle" font-size="12" fill="#666">血量百分比
+                    (%)</text>
+                <text x="16" y="200" text-anchor="middle" font-size="12" fill="#666"
+                    transform="rotate(-90, 20, 200)">收益倍数</text>
                 <template v-for="(percent, index) in [0, 20, 40, 60, 80, 100]" :key="`label-${index}`">
-                    <text
-                        :x="padding + (percent / 100) * chartWidth"
-                        :y="padding + chartHeight + 20"
-                        text-anchor="middle"
-                        font-size="10"
-                        fill="#999"
-                    >
+                    <text :x="padding + (percent / 100) * chartWidth" :y="padding + chartHeight + 20"
+                        text-anchor="middle" font-size="10" fill="#999">
                         {{ percent }}
                     </text>
                 </template>
                 <template v-for="(label, index) in yAxisLabels" :key="index">
-                    <text
-                        :x="30"
+                    <text :x="30"
                         :y="padding + chartHeight - (parseFloat(label) - 1) * (chartHeight / (maxMultiplier - 1))"
-                        text-anchor="end"
-                        font-size="10"
-                        fill="#999"
-                    >
+                        text-anchor="end" font-size="10" fill="#999">
                         {{ label }}
                     </text>
                 </template>
@@ -327,73 +311,44 @@ const totalPath = computed(() => {
             <path :d="boostPath" fill="none" stroke="#3742fa" stroke-width="2" stroke-linecap="round" />
 
             <!-- 总计曲线 -->
-            <path :d="totalPath" fill="none" stroke="#2ed573" stroke-width="2" stroke-linecap="round" stroke-dasharray="5,5" />
+            <path :d="totalPath" fill="none" stroke="#2ed573" stroke-width="2" stroke-linecap="round"
+                stroke-dasharray="5,5" />
 
             <!-- 鼠标悬停垂直线 -->
-            <line
-                v-if="isHovering"
-                :x1="hoverX"
-                :y1="padding"
-                :x2="hoverX"
-                :y2="padding + chartHeight"
-                stroke="#3498db"
-                stroke-width="1"
-                stroke-dasharray="2,2"
-            />
+            <line v-if="isHovering" :x1="hoverX" :y1="padding" :x2="hoverX" :y2="padding + chartHeight" stroke="#3498db"
+                stroke-width="1" stroke-dasharray="2,2" />
 
             <!-- 工具提示 -->
             <g v-if="isHovering">
                 <!-- 工具提示背景 -->
-                <rect
-                    :x="tooltipX - 10"
-                    :y="tooltipY - 20"
-                    width="150"
-                    height="90"
-                    rx="4"
-                    ry="4"
-                    fill="rgba(255, 255, 255, 0.5)"
-                    stroke="#e0e0e0"
-                    stroke-width="1"
-                />
+                <rect :x="tooltipX - 10" :y="tooltipY - 20" width="150" height="90" rx="4" ry="4"
+                    fill="rgba(255, 255, 255, 0.5)" stroke="#e0e0e0" stroke-width="1" />
                 <!-- 背水数值 -->
-                <text :x="tooltipX" :y="tooltipY" font-size="12" fill="#ff4757">背水: {{ hoverDesperateValue.toFixed(3) }}</text>
+                <text :x="tooltipX" :y="tooltipY" font-size="12" fill="#ff4757">背水: {{ hoverDesperateValue.toFixed(3)
+                }}</text>
                 <!-- 昂扬数值 -->
-                <text :x="tooltipX" :y="tooltipY + 20" font-size="12" fill="#3742fa">昂扬: {{ hoverBoostValue.toFixed(3) }}</text>
+                <text :x="tooltipX" :y="tooltipY + 20" font-size="12" fill="#3742fa">昂扬: {{ hoverBoostValue.toFixed(3)
+                }}</text>
                 <!-- 总计数值 -->
-                <text :x="tooltipX" :y="tooltipY + 40" font-size="12" fill="#2ed573">总计: {{ hoverTotalValue.toFixed(3) }}</text>
+                <text :x="tooltipX" :y="tooltipY + 40" font-size="12" fill="#2ed573">总计: {{ hoverTotalValue.toFixed(3)
+                }}</text>
                 <!-- 血量百分比 -->
-                <text :x="tooltipX" :y="tooltipY + 60" font-size="12" fill="#333">血量: {{ (hoverHpPercent * 100).toFixed(1) }}%</text>
+                <text :x="tooltipX" :y="tooltipY + 60" font-size="12" fill="#333">血量: {{ (hoverHpPercent *
+                    100).toFixed(1)
+                }}%</text>
             </g>
 
             <!-- 图例 -->
             <g class="legend">
                 <!-- 动态计算图例位置，确保在不同宽度的图表中都能正确显示 -->
-                <line
-                    :x1="padding + chartWidth - 150"
-                    :y1="padding + 10"
-                    :x2="padding + chartWidth - 120"
-                    :y2="padding + 10"
-                    stroke="#ff4757"
-                    stroke-width="2"
-                />
+                <line :x1="padding + chartWidth - 150" :y1="padding + 10" :x2="padding + chartWidth - 120"
+                    :y2="padding + 10" stroke="#ff4757" stroke-width="2" />
                 <text :x="padding + chartWidth - 110" :y="padding + 15" font-size="12" fill="#333">背水</text>
-                <line
-                    :x1="padding + chartWidth - 150"
-                    :y1="padding + 30"
-                    :x2="padding + chartWidth - 120"
-                    :y2="padding + 30"
-                    stroke="#3742fa"
-                    stroke-width="2"
-                />
+                <line :x1="padding + chartWidth - 150" :y1="padding + 30" :x2="padding + chartWidth - 120"
+                    :y2="padding + 30" stroke="#3742fa" stroke-width="2" />
                 <text :x="padding + chartWidth - 110" :y="padding + 35" font-size="12" fill="#333">昂扬</text>
-                <line
-                    :x1="padding + chartWidth - 150"
-                    :y1="padding + 50"
-                    :x2="padding + chartWidth - 120"
-                    :y2="padding + 50"
-                    stroke="#2ed573"
-                    stroke-width="2"
-                />
+                <line :x1="padding + chartWidth - 150" :y1="padding + 50" :x2="padding + chartWidth - 120"
+                    :y2="padding + 50" stroke="#2ed573" stroke-width="2" />
                 <text :x="padding + chartWidth - 110" :y="padding + 55" font-size="12" fill="#333">总计</text>
             </g>
         </svg>

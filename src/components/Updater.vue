@@ -11,6 +11,8 @@ const ui = useUIStore()
 
 const isUpdating = ref(false)
 const updateProgress = ref(0)
+const searchParams = new URLSearchParams(window.location.search)
+const hideUpdateInfo = searchParams.get("hideUpdateInfo") === "1"
 
 // Welcome popup functionality
 const showModal = ref(false)
@@ -64,35 +66,60 @@ function checkNewVersions() {
 // Close modal and update last popup version
 function closeModal() {
     showModal.value = false
-    lastPopupVersion.value = currentVersion
+    setTimeout(() => {
+        lastPopupVersion.value = currentVersion
+    }, 1000)
+}
+
+async function updateApp() {
+    const updateInfo = await checkUpdate()
+    if (updateInfo) {
+        const message = t("updater.newVersionMessage", { version: updateInfo.latestVersion, body: updateInfo.body || "" })
+        if (await ui.showDialog(t("updater.newVersionTitle"), message)) {
+            try {
+                isUpdating.value = true
+                await downloadAndInstallUpdate(progress => {
+                    updateProgress.value = progress
+                    // console.log(`下载进度: ${progress}%`)
+                })
+            } catch (error: any) {
+                console.error("更新失败:", error)
+                await ui.showDialog(t("updater.updateFailed"), error || t("updater.updateErrorMessage"))
+            } finally {
+                updateProgress.value = 0
+                isUpdating.value = false
+            }
+        }
+    }
+}
+
+async function siteCheck() {
+    if (location.hostname === "xn--chq26veyq.icu") {
+        if (await ui.showDialog(t("updater.siteRedirectTitle"), t("updater.siteRedirectMessage"))) {
+            window.location.href = "https://dna-builder.cn/"
+        }
+    }
 }
 
 // Initialize on mount
 onMounted(async () => {
-    if (env.isApp && !env.isMSStore) {
-        const updateInfo = await checkUpdate()
-        if (updateInfo) {
-            const message = t("updater.newVersionMessage", { version: updateInfo.latestVersion, body: updateInfo.body || "" })
-            if (await ui.showDialog(t("updater.newVersionTitle"), message)) {
-                try {
-                    isUpdating.value = true
-                    await downloadAndInstallUpdate(progress => {
-                        updateProgress.value = progress
-                        // console.log(`下载进度: ${progress}%`)
-                    })
-                } catch (error: any) {
-                    console.error("更新失败:", error)
-                    await ui.showDialog(t("updater.updateFailed"), error || t("updater.updateErrorMessage"))
-                } finally {
-                    updateProgress.value = 0
-                    isUpdating.value = false
-                }
-            }
-        }
+    if (hideUpdateInfo) return
+    if (env.isApp) {
+        await updateApp()
+    } else {
+        await siteCheck()
     }
     await fetchVersions()
     checkNewVersions()
 })
+
+window.updateApp = updateApp
+
+declare global {
+    interface Window {
+        updateApp: () => Promise<void>
+    }
+}
 </script>
 <template>
     <div
@@ -132,6 +159,24 @@ onMounted(async () => {
                 </div>
                 <div v-else class="text-center text-gray-500">
                     {{ $t("home.noupdate") }}
+                </div>
+            </div>
+            <div class="text-xs">
+                <div class="flex flex-col gap-2">
+                    <p>{{ $t("updater.supportIntro") }}</p>
+                    <div>
+                        {{ $t("updater.supportDonate") }}：<a target="_black" class="link link-primary" href="https://ifdian.net/a/pa001024"
+                            >https://ifdian.net/a/pa001024</a
+                        >
+                    </div>
+                    <div>
+                        {{ $t("updater.supportBuyApp") }}：<a
+                            target="_black"
+                            class="link link-primary"
+                            href="https://apps.microsoft.com/detail/9nk8zw43shb1"
+                            >https://apps.microsoft.com/detail/9nk8zw43shb1</a
+                        >
+                    </div>
                 </div>
             </div>
             <div class="modal-action justify-center">

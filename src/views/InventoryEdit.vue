@@ -195,14 +195,15 @@ async function handleImport() {
 }
 
 async function syncInventory() {
+    const setting = useSettingStore()
     try {
-        const setting = useSettingStore()
         const api = await setting.getDNAAPI()
         if (!api) {
             ui.showErrorMessage("请先登录皎皎角账号")
             return
         }
-        const res = await api?.defaultRoleForTool()
+        await setting.startHeartbeat()
+        const res = await api.defaultRoleForTool()
         if (!res.is_success) {
             ui.showErrorMessage("库存同步失败")
             return
@@ -229,6 +230,8 @@ async function syncInventory() {
         ui.showSuccessMessage("库存同步成功")
     } catch (e) {
         ui.showErrorMessage("库存同步失败:", e instanceof Error ? e.message : String(e))
+    } finally {
+        setting.stopHeartbeat()
     }
 }
 
@@ -301,11 +304,15 @@ function setBuffLv(buff: LeveledBuff, lv: number) {
         inv.setBuffLv(buff.pid, lv)
     }
 }
+
+// 经验计算器
+const showExpCalculator = ref(false)
 </script>
 <template>
     <ScrollArea class="h-full">
         <div class="flex h-full flex-col p-4">
             <div class="flex justify-end gap-2 mb-4">
+                <div class="btn btn-sm btn-primary" @click="showExpCalculator = true">经验计算</div>
                 <div class="btn btn-sm btn-primary" @click="syncInventory">同步游戏</div>
                 <div class="btn btn-sm btn-primary" @click="handleImport">导入JSON</div>
                 <div class="btn btn-sm btn-primary" @click="handleExport">复制JSON</div>
@@ -441,5 +448,8 @@ function setBuffLv(buff: LeveledBuff, lv: number) {
                 </div>
             </div>
         </div>
+        <DialogModel v-model="showExpCalculator" class="max-w-[90vw]">
+            <PlayerExpCalculator />
+        </DialogModel>
     </ScrollArea>
 </template>

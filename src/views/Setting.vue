@@ -11,6 +11,56 @@ import { useUIStore } from "../store/ui"
 
 const setting = useSettingStore()
 const ui = useUIStore()
+const isUpdatingLaunchAtStartup = ref(false)
+const safeModeGuardDialogRef = ref<HTMLDialogElement | null>(null)
+const safeModeAnswer = ref("")
+const questions = [
+    {
+        question: "What is the ultimate answer to the universe?",
+        answer: "42",
+    },
+    {
+        question: "What is the current game version?",
+        answer: "1.2",
+    },
+    {
+        question: "What is the game server opening time? (8-digit number)",
+        answer: "20251028",
+    },
+    {
+        question: "What time do daily tasks refresh every day? (1-digit number)",
+        answer: "5",
+    },
+    {
+        question: "What color is the sky on a clear day?",
+        answer: "blue",
+    },
+    {
+        question: "Type the word 'unlock' backwards.",
+        answer: "kcolnu",
+    },
+    {
+        question: "What is the second day of the week in English?",
+        answer: "Tuesday",
+    },
+    {
+        question: "What is the first month of the year?",
+        answer: "January",
+    },
+    {
+        question: "What is the color of a banana?",
+        answer: "yellow",
+    },
+    {
+        question: "What is the opposite of cold?",
+        answer: "hot",
+    },
+    {
+        question: "How many days are in a week?",
+        answer: "7",
+    },
+]
+const currentSafeModeQuestion = ref<(typeof questions)[number] | null>(null)
 
 //#region UI
 const lightThemes = [
@@ -60,6 +110,58 @@ function capitalize(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
+/**
+ * 应用安全模式状态并刷新页面，使 data 层导出重新按当前版本门控生效。
+ * @param enabled 是否开启安全模式
+ */
+function applySafeMode(enabled: boolean) {
+    setting.safeMode = enabled
+    location.reload()
+}
+
+/**
+ * 处理安全模式开关。关闭前要求先完成校验表单。
+ * @param enabled 目标开关状态
+ */
+function handleSafeModeToggle(enabled: boolean) {
+    if (enabled) {
+        applySafeMode(true)
+        return
+    }
+
+    safeModeAnswer.value = ""
+    currentSafeModeQuestion.value = questions[Math.floor(Math.random() * questions.length)]
+    safeModeGuardDialogRef.value?.showModal()
+}
+
+/**
+ * 取消关闭安全模式，保持当前开启状态。
+ */
+function cancelDisableSafeMode() {
+    safeModeGuardDialogRef.value?.close()
+    safeModeAnswer.value = ""
+    setting.safeMode = true
+}
+
+/**
+ * 提交关闭安全模式校验表单，只有回答正确且填写原因后才允许关闭。
+ */
+function confirmDisableSafeMode() {
+    if (!currentSafeModeQuestion.value) {
+        ui.showErrorMessage("当前没有可校验的问题")
+        return
+    }
+
+    if (safeModeAnswer.value.trim() !== currentSafeModeQuestion.value.answer) {
+        ui.showErrorMessage("回答错误，安全模式仍保持开启")
+        return
+    }
+
+    safeModeGuardDialogRef.value?.close()
+    currentSafeModeQuestion.value = null
+    applySafeMode(false)
+}
+
 async function resetStorage() {
     localStorage.clear()
     db.delete()
@@ -71,6 +173,22 @@ async function resetStorage() {
 async function openResetConfirmDialog() {
     if (await ui.showDialog(t("setting.reset"), t("setting.resetTip"))) {
         resetStorage()
+    }
+}
+
+/**
+ * 更新开机启动开关，并在失败时保留原状态。
+ * @param enabled 是否启用开机启动
+ */
+async function updateLaunchAtStartup(enabled: boolean) {
+    isUpdatingLaunchAtStartup.value = true
+    try {
+        await setting.setLaunchAtStartup(enabled)
+    } catch (error) {
+        console.error("更新开机启动设置失败:", error)
+        ui.showErrorMessage(error instanceof Error ? error.message : String(error))
+    } finally {
+        isUpdatingLaunchAtStartup.value = false
     }
 }
 
@@ -212,6 +330,19 @@ function resetAiSettings() {
                     </div>
                     <div v-if="env.isApp" class="flex justify-between items-center p-2">
                         <span class="label-text">
+                            {{ $t("setting.launchAtStartup") }}
+                            <div class="text-xs text-base-content/50">{{ $t("setting.launchAtStartupTip") }}</div>
+                        </span>
+                        <input
+                            :checked="setting.launchAtStartup"
+                            :disabled="isUpdatingLaunchAtStartup"
+                            type="checkbox"
+                            class="toggle toggle-secondary"
+                            @change="updateLaunchAtStartup(($event.target as HTMLInputElement).checked)"
+                        />
+                    </div>
+                    <div v-if="env.isApp" class="flex justify-between items-center p-2">
+                        <span class="label-text">
                             {{ $t("setting.winMaterial") }}
                         </span>
 
@@ -263,6 +394,18 @@ function resetAiSettings() {
                             </div>
                         </div>
                     </div>
+                    <div class="flex justify-between items-center p-2">
+                        <span class="label-text">
+                            安全模式
+                            <div class="text-xs text-base-content/50">你知道的太多了</div>
+                        </span>
+                        <input
+                            :checked="setting.safeMode"
+                            type="checkbox"
+                            class="toggle toggle-secondary"
+                            @click.prevent="handleSafeModeToggle(!setting.safeMode)"
+                        />
+                    </div>
                 </div>
             </article>
 
@@ -272,6 +415,40 @@ function resetAiSettings() {
                 </h2>
                 <div class="bg-base-100 p-2 rounded-lg">
                     <DOBAccountSetting />
+                </div>
+            </article>
+
+            <article>
+                <h2 class="text-sm font-bold m-2">剧情文本</h2>
+                <div class="bg-base-100 p-2 rounded-lg">
+                    <div class="flex justify-between items-center p-2 gap-4">
+                        <span class="label-text">主角名称1</span>
+                        <input v-model="setting.protagonistName1" type="text" class="input input-bordered input-sm w-64" />
+                    </div>
+                    <div class="flex justify-between items-center p-2 gap-4">
+                        <span class="label-text">主角性别1</span>
+                        <Select
+                            v-model="setting.protagonistGender"
+                            class="inline-flex items-center justify-between input input-bordered input-sm w-64"
+                        >
+                            <SelectItem value="female">女</SelectItem>
+                            <SelectItem value="male">男</SelectItem>
+                        </Select>
+                    </div>
+                    <div class="flex justify-between items-center p-2 gap-4">
+                        <span class="label-text">主角名称2</span>
+                        <input v-model="setting.protagonistName2" type="text" class="input input-bordered input-sm w-64" />
+                    </div>
+                    <div class="flex justify-between items-center p-2 gap-4">
+                        <span class="label-text">主角性别2</span>
+                        <Select
+                            v-model="setting.protagonistGender2"
+                            class="inline-flex items-center justify-between input input-bordered input-sm w-64"
+                        >
+                            <SelectItem value="female">女</SelectItem>
+                            <SelectItem value="male">男</SelectItem>
+                        </Select>
+                    </div>
                 </div>
             </article>
 
@@ -403,4 +580,24 @@ function resetAiSettings() {
             </article>
         </div>
     </div>
+
+    <dialog ref="safeModeGuardDialogRef" class="modal">
+        <div class="modal-box font-wt">
+            <h3 class="font-bold text-lg">Turn off Safe Mode</h3>
+            <p class="py-2 text-sm text-base-content/70">Please answer the question correctly.</p>
+
+            <div class="flex flex-col gap-3">
+                <label class="w-full flex flex-col gap-2">
+                    <span class="text-sm">{{ currentSafeModeQuestion?.question || "no question" }}</span>
+                    <input v-model="safeModeAnswer" type="password" class="input input-bordered" placeholder="enter your answer" />
+                </label>
+            </div>
+
+            <div class="modal-action">
+                <button class="btn" type="button" @click="cancelDisableSafeMode">Forget it</button>
+                <button class="btn btn-error" type="button" @click="confirmDisableSafeMode">Confirm</button>
+            </div>
+        </div>
+        <div class="modal-backdrop" @click="cancelDisableSafeMode"></div>
+    </dialog>
 </template>

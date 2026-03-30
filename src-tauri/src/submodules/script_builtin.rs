@@ -1,0 +1,5678 @@
+use base64::{Engine as _, engine::general_purpose};
+use boa_engine::class::Class;
+use boa_engine::job::NativeAsyncJob;
+use boa_engine::native_function::NativeFunction;
+use boa_engine::object::builtins::{JsArray, JsFunction, JsPromise};
+use boa_engine::{
+    Context, IntoJsFunctionCopied, JsData, JsNativeError, JsObject, JsResult, JsValue, js_string,
+    js_value,
+};
+use boa_engine::{js_error, js_object};
+use opencv::{
+    core::{self, Mat},
+    imgcodecs, imgproc,
+    prelude::{MatTraitConst, MatTraitConstManual, VectorToVec},
+};
+use serde::Deserialize;
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+    fs::{self, File},
+    io::{self, Write},
+    path::{Path, PathBuf},
+    sync::{
+        Arc, Mutex, OnceLock,
+        atomic::{AtomicU64, Ordering},
+        mpsc,
+    },
+    thread,
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
+};
+use tauri::{Emitter, Manager};
+use windows::Win32::Foundation::HWND;
+use windows::Win32::UI::WindowsAndMessaging::{GetForegroundWindow, SetForegroundWindow};
+use zip::ZipArchive;
+
+use crate::submodules::script_mcp::record_script_console;
+use crate::submodules::{
+    color_match::{check_color_mat, find_color_and_match_template, rgb_to_bgr},
+    dll_call::dll_call_js,
+    fx::draw_border,
+    input::*,
+    jsdnn::register_cv_dnn_namespace,
+    jsmat::{IntoJs, JsMat},
+    mono_depth::{
+        MonoDepthInitConfig, init_mono_depth, predict_mono_depth, predict_mono_depth_model_space,
+    },
+    ocr::{self, OcrInitConfig},
+    predict_rotation::predict_rotation,
+    route::{find_path_direction_coords, predict_depth, predict_mono_route},
+    script::{
+        SCRIPT_STOP_INTERRUPT_MESSAGE, capture_current_script_stop_snapshot,
+        run_with_script_stop_snapshot, should_stop_current_script,
+    },
+    script_vision::{
+        batch_match_color_impl, color_filter_hsl_impl, color_filter_impl, color_key_match_impl,
+        draw_bboxes_impl, draw_contours_impl, find_contours_impl, hamming_distance_hex,
+        match_orb_feature_impl, morphology_ex_impl, normalize_hash_hex, orb_feature_impl,
+        orb_match_count_impl, perceptual_hash_impl, preprocess_minimap_for_sift_impl,
+        segment_single_line_chars_impl, sift_locate_impl, sift_stitch_impl,
+    },
+    tpl::{get_template, get_template_b64},
+    tpl_match::match_template,
+    util::{
+        capture_window, capture_window_roi, capture_window_wgc, capture_window_wgc_roi, check_size,
+    },
+    win::{find_window, get_window_by_process_name, move_window, win_get_client_pos},
+};
+use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
+
+trait JsArgExt {
+    // 泛型 T 必须实现 Class (为了获取名字) 和 JsData (为了转换)
+    fn get_native<T: Class + JsData>(&self) -> JsResult<JsObject<T>>;
+}
+
+/// imshow 工作线程命令。
+enum ImshowCommand {
+    /// 显示或更新指定标题窗口的图像。
+    Show { title: String, mat: Mat },
+}
+
+/// imshow 全局工作线程状态。
+struct ImshowWorker {
+    sender: mpsc::Sender<ImshowCommand>,
+}
+
+/// 全局 imshow 工作线程单例。
+static IMSHOW_WORKER: OnceLock<ImshowWorker> = OnceLock::new();
+/// 全局脚本事件发送器（用于向前端推送脚本状态等事件）。
+static SCRIPT_EVENT_APP_HANDLE: OnceLock<Arc<tauri::AppHandle>> = OnceLock::new();
+const SCRIPT_CLOUDGAME_WINDOW_LABEL: &str = "cloudgame";
+/// readConfig 请求序号，用于生成唯一 request_id。
+static SCRIPT_CONFIG_REQ_SEQ: AtomicU64 = AtomicU64::new(1);
+/// readConfig 等待中的请求映射：request_id -> 回传通道。
+static SCRIPT_CONFIG_PENDING: OnceLock<Mutex<HashMap<String, mpsc::Sender<serde_json::Value>>>> =
+    OnceLock::new();
+/// CLI 模式 readConfig/setConfig 的可选外部配置（JSON 值 + 可选文件路径）。
+#[cfg(feature = "dob-script-cli")]
+static SCRIPT_CLI_CONFIG: OnceLock<Mutex<Option<ScriptCliConfigState>>> = OnceLock::new();
+
+thread_local! {
+    /// 当前执行线程对应的脚本路径（用于 readConfig 作用域与相对路径解析）。
+    static CURRENT_SCRIPT_PATH: RefCell<String> = const { RefCell::new(String::new()) };
+    /// 当前执行线程内 readConfig 注册的配置格式（name -> format）。
+    static CURRENT_SCRIPT_CONFIG_FORMATS: RefCell<HashMap<String, ScriptConfigFormatSpec>> = RefCell::new(HashMap::new());
+    /// WGC 截图返回对象缓存：按 hwnd 复用同一个 JS Mat，降低高频截图的 GC 压力。
+    static WGC_CAPTURE_MAT_CACHE: RefCell<HashMap<isize, JsObject<JsMat>>> = RefCell::new(HashMap::new());
+}
+
+#[derive(Clone, Copy)]
+enum ScriptConfigKind {
+    Number,
+    String,
+    Select,
+    MultiSelect,
+    Boolean,
+}
+
+/// OK 外部脚本中的单条时间轴动作。
+#[derive(Debug, Clone, Deserialize)]
+struct OksAction {
+    #[serde(rename = "type")]
+    action_type: String,
+    time: f64,
+    key: Option<String>,
+    button: Option<String>,
+    dx: Option<f64>,
+    dy: Option<f64>,
+    direction: Option<String>,
+    angle: Option<f64>,
+    sensitivity: Option<f64>,
+}
+
+/// OK 外部脚本单个节点文件。
+#[derive(Debug, Clone, Deserialize)]
+struct OksMacroFile {
+    actions: Vec<OksAction>,
+    original_x_sensitivity: Option<f64>,
+    original_y_sensitivity: Option<f64>,
+}
+
+impl ScriptConfigKind {
+    /// 配置类型转前端字符串标识。
+    fn as_str(self) -> &'static str {
+        match self {
+            ScriptConfigKind::Number => "number",
+            ScriptConfigKind::String => "string",
+            ScriptConfigKind::Select => "select",
+            ScriptConfigKind::MultiSelect => "multi-select",
+            ScriptConfigKind::Boolean => "boolean",
+        }
+    }
+}
+
+#[derive(Clone)]
+struct ScriptConfigFormatSpec {
+    kind: ScriptConfigKind,
+    options: Vec<String>,
+}
+
+#[derive(Clone)]
+enum ScriptConfigValue {
+    Number(f64),
+    String(String),
+    Strings(Vec<String>),
+    Boolean(bool),
+}
+
+/// CLI 模式脚本配置状态（支持 setConfig 写回文件）。
+#[cfg(feature = "dob-script-cli")]
+#[derive(Clone)]
+struct ScriptCliConfigState {
+    value: serde_json::Value,
+    file_path: Option<String>,
+}
+
+/// 设置脚本事件发送器（首次设置生效）。
+pub fn set_script_event_app_handle(app_handle: tauri::AppHandle) {
+    let _ = SCRIPT_EVENT_APP_HANDLE.set(Arc::new(app_handle));
+}
+
+/// 设置当前执行脚本路径（用于 readConfig 作用域标识）。
+pub fn set_current_script_path(script_path: String) {
+    CURRENT_SCRIPT_PATH.with(|storage| {
+        *storage.borrow_mut() = script_path;
+    });
+    CURRENT_SCRIPT_CONFIG_FORMATS.with(|formats| {
+        formats.borrow_mut().clear();
+    });
+}
+
+/// 获取当前执行脚本路径（完整路径，用于事件 scope）。
+pub fn get_current_script_path() -> Option<String> {
+    let script_path = CURRENT_SCRIPT_PATH.with(|storage| storage.borrow().clone());
+    let normalized = script_path.trim().to_string();
+    if normalized.is_empty() {
+        None
+    } else {
+        Some(normalized)
+    }
+}
+
+/// 获取 readConfig 等待映射表。
+fn _script_config_pending_map() -> &'static Mutex<HashMap<String, mpsc::Sender<serde_json::Value>>>
+{
+    SCRIPT_CONFIG_PENDING.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+/// 获取 CLI 配置存储槽。
+#[cfg(feature = "dob-script-cli")]
+fn _script_cli_config_slot() -> &'static Mutex<Option<ScriptCliConfigState>> {
+    SCRIPT_CLI_CONFIG.get_or_init(|| Mutex::new(None))
+}
+
+/// 设置 CLI 模式 readConfig 配置。
+#[cfg(feature = "dob-script-cli")]
+pub fn set_script_cli_config(
+    config: Option<serde_json::Value>,
+    config_file_path: Option<String>,
+) -> Result<(), String> {
+    let normalized_file_path = config_file_path.and_then(|raw| {
+        let normalized = raw.trim().to_string();
+        if normalized.is_empty() {
+            None
+        } else {
+            Some(normalized)
+        }
+    });
+    let mut guard = _script_cli_config_slot()
+        .lock()
+        .map_err(|e| format!("获取 CLI 配置锁失败: {e:?}"))?;
+    *guard = config.map(|value| ScriptCliConfigState {
+        value,
+        file_path: normalized_file_path,
+    });
+    Ok(())
+}
+
+/// 将 CLI 配置写回到文件（仅在传入了配置路径时执行）。
+#[cfg(feature = "dob-script-cli")]
+fn _persist_cli_script_config_file(state: &ScriptCliConfigState) -> Result<(), String> {
+    let Some(config_file_path) = state.file_path.as_deref() else {
+        return Ok(());
+    };
+    let config_path = Path::new(config_file_path);
+    if let Some(parent_dir) = config_path.parent()
+        && !parent_dir.as_os_str().is_empty()
+    {
+        std::fs::create_dir_all(parent_dir).map_err(|e| {
+            format!(
+                "创建 CLI 配置目录失败: {}, {e}",
+                parent_dir.to_string_lossy()
+            )
+        })?;
+    }
+    let pretty_json = serde_json::to_string_pretty(&state.value)
+        .map_err(|e| format!("序列化 CLI 配置失败: {e}"))?;
+    std::fs::write(config_path, format!("{pretty_json}\n")).map_err(|e| {
+        format!(
+            "写入 CLI 配置文件失败: {}, {e}",
+            config_path.to_string_lossy()
+        )
+    })?;
+    Ok(())
+}
+
+/// 在 CLI 配置中更新指定键值（优先写入当前脚本作用域）。
+#[cfg(feature = "dob-script-cli")]
+fn _set_cli_script_config_value(name: &str, value: serde_json::Value) -> Result<(), String> {
+    let mut guard = _script_cli_config_slot()
+        .lock()
+        .map_err(|e| format!("获取 CLI 配置锁失败: {e:?}"))?;
+    let state = guard.get_or_insert_with(|| ScriptCliConfigState {
+        value: serde_json::json!({}),
+        file_path: None,
+    });
+
+    if !state.value.is_object() {
+        state.value = serde_json::json!({});
+    }
+    let root_object = state
+        .value
+        .as_object_mut()
+        .ok_or_else(|| "CLI 配置不是有效对象".to_string())?;
+
+    if let Some(scope) = _current_script_scope_name() {
+        let scoped_entry = root_object
+            .entry(scope)
+            .or_insert_with(|| serde_json::json!({}));
+        if !scoped_entry.is_object() {
+            *scoped_entry = serde_json::json!({});
+        }
+        let scoped_object = scoped_entry
+            .as_object_mut()
+            .ok_or_else(|| "CLI 作用域配置不是对象".to_string())?;
+        scoped_object.insert(name.to_string(), value);
+    } else {
+        root_object.insert(name.to_string(), value);
+    }
+
+    _persist_cli_script_config_file(state)
+}
+
+/// 从 JSON 对象按 key（大小写不敏感）获取字段值。
+#[cfg(feature = "dob-script-cli")]
+fn _json_object_get_case_insensitive<'a>(
+    value: &'a serde_json::Value,
+    key: &str,
+) -> Option<&'a serde_json::Value> {
+    let object = value.as_object()?;
+    object.get(key).or_else(|| {
+        object
+            .iter()
+            .find(|(candidate_key, _)| candidate_key.eq_ignore_ascii_case(key))
+            .map(|(_, candidate_value)| candidate_value)
+    })
+}
+
+/// 在 CLI 传入配置中按“作用域 + 配置名”查找配置原始值。
+///
+/// 查找优先级：
+/// 1. `<当前脚本文件名>.<name>`（即 `config[scope][name]`）
+/// 2. `<当前脚本完整路径>.<name>`（即 `config[script_path][name]`）
+/// 3. `<name>`（即 `config[name]`）
+#[cfg(feature = "dob-script-cli")]
+fn _lookup_cli_script_config_raw_value(
+    config: &serde_json::Value,
+    name: &str,
+) -> Option<serde_json::Value> {
+    if let Some(scope) = _current_script_scope_name() {
+        if let Some(scoped_config) = _json_object_get_case_insensitive(config, scope.as_str()) {
+            if let Some(value) = _json_object_get_case_insensitive(scoped_config, name) {
+                return Some(value.clone());
+            }
+        }
+    }
+
+    if let Some(script_path) = get_current_script_path() {
+        if let Some(scoped_config) = _json_object_get_case_insensitive(config, script_path.as_str())
+        {
+            if let Some(value) = _json_object_get_case_insensitive(scoped_config, name) {
+                return Some(value.clone());
+            }
+        }
+    }
+
+    _json_object_get_case_insensitive(config, name).cloned()
+}
+
+/// 解析 CLI 传入配置并转换成 readConfig 目标类型。
+#[cfg(feature = "dob-script-cli")]
+fn _resolve_cli_script_config_value(
+    name: &str,
+    format_spec: &ScriptConfigFormatSpec,
+    default_value: &ScriptConfigValue,
+) -> Result<Option<ScriptConfigValue>, String> {
+    let config = {
+        let guard = _script_cli_config_slot()
+            .lock()
+            .map_err(|e| format!("获取 CLI 配置锁失败: {e:?}"))?;
+        guard.as_ref().map(|state| state.value.clone())
+    };
+    let Some(config) = config else {
+        return Ok(None);
+    };
+
+    let Some(raw_value) = _lookup_cli_script_config_raw_value(&config, name) else {
+        return Ok(None);
+    };
+
+    Ok(Some(_coerce_json_to_script_config_value(
+        &raw_value,
+        format_spec,
+        default_value,
+    )))
+}
+
+/// 生成 readConfig 的唯一请求 ID。
+fn _next_script_config_request_id() -> String {
+    let seq = SCRIPT_CONFIG_REQ_SEQ.fetch_add(1, Ordering::Relaxed);
+    let now_ms = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_millis())
+        .unwrap_or(0);
+    format!("script_cfg_{now_ms}_{seq}")
+}
+
+/// 获取当前脚本配置作用域（文件名）。
+fn _current_script_scope_name() -> Option<String> {
+    let script_path = CURRENT_SCRIPT_PATH.with(|storage| storage.borrow().clone());
+    if script_path.trim().is_empty() {
+        return None;
+    }
+    let file_name = Path::new(script_path.as_str())
+        .file_name()?
+        .to_string_lossy();
+    let normalized = file_name.trim().to_string();
+    if normalized.is_empty() {
+        None
+    } else {
+        Some(normalized)
+    }
+}
+
+/// 获取当前脚本所在目录。
+fn _current_script_dir() -> Option<PathBuf> {
+    let script_path = CURRENT_SCRIPT_PATH.with(|storage| storage.borrow().clone());
+    if script_path.trim().is_empty() {
+        return None;
+    }
+    let path = Path::new(script_path.as_str());
+    path.parent().map(|parent| parent.to_path_buf())
+}
+
+/// 按当前脚本目录解析资源路径（绝对路径保持不变，相对路径转绝对）。
+fn _resolve_script_resource_path(path: &str) -> String {
+    let normalized = String::from(path).trim().to_string();
+    if normalized.is_empty() {
+        return normalized;
+    }
+    let raw_path = Path::new(normalized.as_str());
+    if raw_path.is_absolute() {
+        return normalized;
+    }
+    if let Some(script_dir) = _current_script_dir() {
+        return script_dir.join(raw_path).to_string_lossy().to_string();
+    }
+    normalized
+}
+
+/// 记录 readConfig 注册的配置格式，供 setConfig 做类型规整与校验。
+fn _remember_script_config_format(name: &str, spec: &ScriptConfigFormatSpec) {
+    CURRENT_SCRIPT_CONFIG_FORMATS.with(|formats| {
+        formats.borrow_mut().insert(name.to_string(), spec.clone());
+    });
+}
+
+/// 获取已注册的配置格式（兼容大小写差异）。
+fn _find_script_config_format(name: &str) -> Option<ScriptConfigFormatSpec> {
+    CURRENT_SCRIPT_CONFIG_FORMATS.with(|formats| {
+        let borrowed = formats.borrow();
+        borrowed.get(name).cloned().or_else(|| {
+            borrowed
+                .iter()
+                .find(|(candidate_name, _)| candidate_name.eq_ignore_ascii_case(name))
+                .map(|(_, spec)| spec.clone())
+        })
+    })
+}
+
+/// 由前端回传 readConfig 请求结果。
+pub fn resolve_script_config_request(
+    request_id: String,
+    value: serde_json::Value,
+) -> Result<(), String> {
+    let sender = {
+        let pending = _script_config_pending_map()
+            .lock()
+            .map_err(|e| format!("获取配置请求映射锁失败: {e:?}"))?;
+        pending.get(&request_id).cloned()
+    };
+
+    if let Some(tx) = sender {
+        tx.send(value)
+            .map_err(|e| format!("发送配置回传值失败: {e}"))?;
+    }
+
+    Ok(())
+}
+
+/// 获取 imshow 工作线程发送端；首次调用会自动启动渲染线程。
+fn _get_imshow_sender() -> mpsc::Sender<ImshowCommand> {
+    IMSHOW_WORKER
+        .get_or_init(|| {
+            let (sender, receiver) = mpsc::channel::<ImshowCommand>();
+            thread::spawn(move || _imshow_worker_loop(receiver));
+            ImshowWorker { sender }
+        })
+        .sender
+        .clone()
+}
+
+/// imshow 后台渲染循环。
+///
+/// 特性：
+/// 1. 同标题窗口重复调用会实时更新内容；
+/// 2. 不同标题可并行展示多窗口；
+/// 3. 使用短 wait_key(1) 轮询事件，避免单次调用阻塞后续调用。
+fn _imshow_worker_loop(receiver: mpsc::Receiver<ImshowCommand>) {
+    let mut latest_frames: HashMap<String, Mat> = HashMap::new();
+    let mut dirty_titles: HashSet<String> = HashSet::new();
+
+    loop {
+        match receiver.recv_timeout(Duration::from_millis(8)) {
+            Ok(ImshowCommand::Show { title, mat }) => {
+                latest_frames.insert(title.clone(), mat);
+                dirty_titles.insert(title);
+            }
+            Err(mpsc::RecvTimeoutError::Timeout) => {}
+            Err(mpsc::RecvTimeoutError::Disconnected) => break,
+        }
+
+        while let Ok(ImshowCommand::Show { title, mat }) = receiver.try_recv() {
+            latest_frames.insert(title.clone(), mat);
+            dirty_titles.insert(title);
+        }
+
+        if !dirty_titles.is_empty() {
+            for title in dirty_titles.drain() {
+                if let Some(mat) = latest_frames.get(&title) {
+                    let _ = opencv::highgui::imshow(&title, mat);
+                }
+            }
+        }
+
+        let _ = opencv::highgui::wait_key(1);
+    }
+}
+// 为 JsValue 实现该 Trait
+impl JsArgExt for JsValue {
+    fn get_native<T: Class + JsData>(&self) -> JsResult<JsObject<T>> {
+        self.as_object()
+            .and_then(|obj| obj.downcast::<T>().ok())
+            .ok_or_else(|| {
+                // 自动生成清晰的错误信息，例如 "Argument must be a Mat"
+                let msg = format!("Argument must be a {}", T::NAME);
+                JsNativeError::typ().with_message(msg).into()
+            })
+    }
+}
+
+/// 将 JS `Mat[]` 数组参数解析为 Rust `Vec<Mat>`。
+fn _parse_mat_array(arg: JsValue, ctx: &mut Context) -> JsResult<Vec<Mat>> {
+    let array_obj = arg
+        .as_object()
+        .ok_or_else(|| JsNativeError::typ().with_message("tpls 参数必须是 Mat[]"))?;
+    let array = JsArray::from_object(array_obj.clone())?;
+    let length = array.length(ctx)? as usize;
+    let mut mats = Vec::with_capacity(length);
+
+    for idx in 0..length {
+        let value = array.get(idx as u32, ctx)?;
+        let js_mat = value
+            .get_native::<JsMat>()
+            .map_err(|_| JsNativeError::typ().with_message(format!("tpls[{idx}] 必须是 Mat")))?;
+        mats.push((*js_mat.borrow().data().inner).clone());
+    }
+
+    Ok(mats)
+}
+
+/// 将 JS `number[]` 数组参数解析为 Rust `Vec<u32>`。
+fn _parse_u32_array(arg: JsValue, ctx: &mut Context) -> JsResult<Vec<u32>> {
+    let array_obj = arg
+        .as_object()
+        .ok_or_else(|| JsNativeError::typ().with_message("colors 参数必须是 number[]"))?;
+    let array = JsArray::from_object(array_obj.clone())?;
+    let length = array.length(ctx)? as usize;
+    let mut values = Vec::with_capacity(length);
+
+    for idx in 0..length {
+        let value = array.get(idx as u32, ctx)?;
+        let number = value
+            .to_number(ctx)
+            .map_err(|_| JsNativeError::typ().with_message(format!("colors[{idx}] 必须是数字")))?;
+        values.push(number as u32 & 0x00FF_FFFF);
+    }
+
+    Ok(values)
+}
+
+/// 解析色键相关函数的容差参数，支持单个数字或与 colors 一一对应的数字数组。
+fn _parse_color_tolerances(
+    arg: JsValue,
+    color_count: usize,
+    ctx: &mut Context,
+) -> JsResult<Vec<u8>> {
+    if let Some(obj) = arg.as_object() {
+        if let Ok(array) = JsArray::from_object(obj.clone()) {
+            let length = array.length(ctx)? as usize;
+            if length != color_count {
+                return Err(JsNativeError::typ()
+                    .with_message(format!(
+                        "tolerance 数组长度必须与 colors 一致，期望 {color_count}，实际 {length}"
+                    ))
+                    .into());
+            }
+
+            let mut tolerances = Vec::with_capacity(length);
+            for idx in 0..length {
+                let value = array.get(idx as u32, ctx)?;
+                let tolerance = value.to_number(ctx).map_err(|_| {
+                    JsNativeError::typ().with_message(format!("tolerance[{idx}] 必须是数字"))
+                })?;
+                tolerances.push(tolerance.clamp(0.0, 255.0) as u8);
+            }
+
+            return Ok(tolerances);
+        }
+    }
+
+    let tolerance = arg.to_number(ctx)?;
+    Ok(vec![tolerance.clamp(0.0, 255.0) as u8; color_count])
+}
+
+/// 将 JS `string[]` 数组参数解析为 Rust `Vec<String>`。
+fn _parse_string_array(arg: JsValue, ctx: &mut Context) -> JsResult<Vec<String>> {
+    let array_obj = arg
+        .as_object()
+        .ok_or_else(|| JsNativeError::typ().with_message("hashes 参数必须是 string[]"))?;
+    let array = JsArray::from_object(array_obj.clone())?;
+    let length = array.length(ctx)? as usize;
+    let mut values = Vec::with_capacity(length);
+
+    for idx in 0..length {
+        let value = array.get(idx as u32, ctx)?;
+        let text = value
+            .to_string(ctx)
+            .map_err(|_| JsNativeError::typ().with_message(format!("hashes[{idx}] 必须是字符串")))?
+            .to_std_string_lossy();
+        values.push(text);
+    }
+
+    Ok(values)
+}
+
+/// 解析 colorFilterHSL 的可选权重参数 `[h, s, l]`。
+fn _parse_hsl_weights(arg: JsValue, ctx: &mut Context) -> JsResult<Option<[f64; 3]>> {
+    if arg.is_undefined() || arg.is_null() {
+        return Ok(None);
+    }
+
+    let array_obj = arg.as_object().ok_or_else(|| {
+        JsNativeError::typ().with_message("weights 参数必须是 [number, number, number]")
+    })?;
+    let array = JsArray::from_object(array_obj.clone()).map_err(|_| {
+        JsNativeError::typ().with_message("weights 参数必须是 [number, number, number]")
+    })?;
+    let length = array.length(ctx)? as usize;
+    if length != 3 {
+        return Err(JsNativeError::typ()
+            .with_message("weights 长度必须为 3，格式为 [h, s, l]")
+            .into());
+    }
+
+    let mut values = [0.0f64; 3];
+    for (idx, item) in values.iter_mut().enumerate() {
+        let number = array
+            .get(idx as u32, ctx)?
+            .to_number(ctx)
+            .map_err(|_| JsNativeError::typ().with_message(format!("weights[{idx}] 必须是数字")))?;
+        if !number.is_finite() || number < 0.0 {
+            return Err(JsNativeError::typ()
+                .with_message(format!("weights[{idx}] 必须是非负有限数"))
+                .into());
+        }
+        *item = number;
+    }
+
+    Ok(Some(values))
+}
+
+/// 规范化 select 选项：去除空白、去重并保留原顺序。
+fn _normalize_select_options(options: Vec<String>) -> Vec<String> {
+    let mut seen = HashSet::<String>::new();
+    let mut normalized = Vec::with_capacity(options.len());
+    for option in options {
+        let trimmed = option.trim().to_string();
+        if trimmed.is_empty() {
+            continue;
+        }
+        if seen.insert(trimmed.clone()) {
+            normalized.push(trimmed);
+        }
+    }
+    normalized
+}
+
+/// 规范化 multi-select 值：去空、去重，并按 options（若存在）过滤。
+fn _normalize_multi_select_values(values: Vec<String>, options: &[String]) -> Vec<String> {
+    let mut seen = HashSet::<String>::new();
+    let mut normalized = Vec::with_capacity(values.len());
+
+    for value in values {
+        let text = value.trim().to_string();
+        if text.is_empty() || seen.contains(&text) {
+            continue;
+        }
+        if !options.is_empty() && !options.iter().any(|option| option == &text) {
+            continue;
+        }
+        seen.insert(text.clone());
+        normalized.push(text);
+    }
+
+    normalized
+}
+
+/// 从 JS 数组解析 select 选项列表。
+fn _parse_select_options_from_array(array: &JsArray, ctx: &mut Context) -> JsResult<Vec<String>> {
+    let length = array.length(ctx)? as usize;
+    let mut options = Vec::with_capacity(length);
+    for idx in 0..length {
+        let option = array
+            .get(idx as u32, ctx)?
+            .to_string(ctx)?
+            .to_std_string_lossy();
+        options.push(option);
+    }
+    Ok(_normalize_select_options(options))
+}
+
+/// 解析 readConfig 的 format 参数。
+///
+/// 支持：
+/// 1. 字符串：`number` / `string` / `boolean` / `select` / `multi-select` /
+///    `select:a|b|c` / `multi-select:a|b|c`
+/// 2. 数组：`[\"选项A\", \"选项B\"]`（等价 select）
+/// 3. 对象：`{ type: \"select\"|\"multi-select\", options: [...] }`
+fn _parse_script_config_format(
+    format: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<ScriptConfigFormatSpec> {
+    let Some(value) = format else {
+        return Ok(ScriptConfigFormatSpec {
+            kind: ScriptConfigKind::String,
+            options: Vec::new(),
+        });
+    };
+
+    if value.is_undefined() || value.is_null() {
+        return Ok(ScriptConfigFormatSpec {
+            kind: ScriptConfigKind::String,
+            options: Vec::new(),
+        });
+    }
+
+    if let Some(obj) = value.as_object() {
+        if let Ok(array) = JsArray::from_object(obj.clone()) {
+            let options = _parse_select_options_from_array(&array, ctx)?;
+            return Ok(ScriptConfigFormatSpec {
+                kind: ScriptConfigKind::Select,
+                options,
+            });
+        }
+
+        let type_text = obj
+            .get(js_string!("type"), ctx)?
+            .to_string(ctx)?
+            .to_std_string_lossy()
+            .trim()
+            .to_lowercase();
+
+        let kind = match type_text.as_str() {
+            "number" => ScriptConfigKind::Number,
+            "string" => ScriptConfigKind::String,
+            "boolean" | "bool" => ScriptConfigKind::Boolean,
+            "select" => ScriptConfigKind::Select,
+            "multi-select" | "multiselect" | "multi_select" => ScriptConfigKind::MultiSelect,
+            _ => {
+                return Err(JsNativeError::typ()
+                    .with_message(
+                        "readConfig format.type 无效，可选 number/string/select/multi-select/boolean",
+                    )
+                    .into());
+            }
+        };
+
+        let options = if matches!(
+            kind,
+            ScriptConfigKind::Select | ScriptConfigKind::MultiSelect
+        ) {
+            let options_value = obj.get(js_string!("options"), ctx)?;
+            if options_value.is_undefined() || options_value.is_null() {
+                Vec::new()
+            } else {
+                let options_obj = options_value.as_object().ok_or_else(|| {
+                    JsNativeError::typ().with_message("readConfig format.options 必须是字符串数组")
+                })?;
+                let options_array = JsArray::from_object(options_obj.clone()).map_err(|_| {
+                    JsNativeError::typ().with_message("readConfig format.options 必须是字符串数组")
+                })?;
+                _parse_select_options_from_array(&options_array, ctx)?
+            }
+        } else {
+            Vec::new()
+        };
+
+        return Ok(ScriptConfigFormatSpec { kind, options });
+    }
+
+    let raw_format_text = value
+        .to_string(ctx)?
+        .to_std_string_lossy()
+        .trim()
+        .to_string();
+    let format_text = raw_format_text.to_lowercase();
+    match format_text.as_str() {
+        "number" => Ok(ScriptConfigFormatSpec {
+            kind: ScriptConfigKind::Number,
+            options: Vec::new(),
+        }),
+        "string" => Ok(ScriptConfigFormatSpec {
+            kind: ScriptConfigKind::String,
+            options: Vec::new(),
+        }),
+        "boolean" | "bool" => Ok(ScriptConfigFormatSpec {
+            kind: ScriptConfigKind::Boolean,
+            options: Vec::new(),
+        }),
+        "select" => Ok(ScriptConfigFormatSpec {
+            kind: ScriptConfigKind::Select,
+            options: Vec::new(),
+        }),
+        "multi-select" | "multiselect" | "multi_select" => Ok(ScriptConfigFormatSpec {
+            kind: ScriptConfigKind::MultiSelect,
+            options: Vec::new(),
+        }),
+        _ if format_text.starts_with("select:") => {
+            let tail = raw_format_text
+                .split_once(':')
+                .map(|(_, rest)| rest)
+                .unwrap_or_default();
+            let separator = if tail.contains('|') { '|' } else { ',' };
+            let options = _normalize_select_options(
+                tail.split(separator)
+                    .map(|item| item.trim().to_string())
+                    .collect(),
+            );
+            Ok(ScriptConfigFormatSpec {
+                kind: ScriptConfigKind::Select,
+                options,
+            })
+        }
+        _ if format_text.starts_with("multi-select:")
+            || format_text.starts_with("multiselect:")
+            || format_text.starts_with("multi_select:") =>
+        {
+            let tail = raw_format_text
+                .split_once(':')
+                .map(|(_, rest)| rest)
+                .unwrap_or_default();
+            let separator = if tail.contains('|') { '|' } else { ',' };
+            let options = _normalize_select_options(
+                tail.split(separator)
+                    .map(|item| item.trim().to_string())
+                    .collect(),
+            );
+            Ok(ScriptConfigFormatSpec {
+                kind: ScriptConfigKind::MultiSelect,
+                options,
+            })
+        }
+        _ => Err(JsNativeError::typ()
+            .with_message("readConfig format 无效，可选 number/string/select/multi-select/boolean")
+            .into()),
+    }
+}
+
+/// 为指定配置类型生成默认值。
+fn _default_script_config_value(spec: &ScriptConfigFormatSpec) -> ScriptConfigValue {
+    match spec.kind {
+        ScriptConfigKind::Number => ScriptConfigValue::Number(0.0),
+        ScriptConfigKind::String => ScriptConfigValue::String(String::new()),
+        ScriptConfigKind::Boolean => ScriptConfigValue::Boolean(false),
+        ScriptConfigKind::Select => {
+            ScriptConfigValue::String(spec.options.first().cloned().unwrap_or_default())
+        }
+        ScriptConfigKind::MultiSelect => ScriptConfigValue::Strings(Vec::new()),
+    }
+}
+
+/// 将 JS 值规整为配置值类型。
+fn _coerce_js_to_script_config_value(
+    value: JsValue,
+    spec: &ScriptConfigFormatSpec,
+    ctx: &mut Context,
+) -> JsResult<ScriptConfigValue> {
+    if value.is_undefined() || value.is_null() {
+        return Ok(_default_script_config_value(spec));
+    }
+
+    match spec.kind {
+        ScriptConfigKind::Number => {
+            let mut number = value.to_number(ctx)?;
+            if !number.is_finite() {
+                number = 0.0;
+            }
+            Ok(ScriptConfigValue::Number(number))
+        }
+        ScriptConfigKind::Boolean => {
+            if let Some(bool_value) = value.as_boolean() {
+                return Ok(ScriptConfigValue::Boolean(bool_value));
+            }
+            if let Some(number) = value.as_number() {
+                return Ok(ScriptConfigValue::Boolean(number != 0.0));
+            }
+            let text = value
+                .to_string(ctx)?
+                .to_std_string_lossy()
+                .trim()
+                .to_lowercase();
+            let bool_value = matches!(text.as_str(), "1" | "true" | "yes" | "y" | "on");
+            Ok(ScriptConfigValue::Boolean(bool_value))
+        }
+        ScriptConfigKind::String => {
+            let text = value.to_string(ctx)?.to_std_string_lossy();
+            Ok(ScriptConfigValue::String(text))
+        }
+        ScriptConfigKind::Select => {
+            let text = value.to_string(ctx)?.to_std_string_lossy();
+            if spec.options.is_empty() || spec.options.iter().any(|option| option == &text) {
+                Ok(ScriptConfigValue::String(text))
+            } else {
+                Ok(ScriptConfigValue::String(
+                    spec.options.first().cloned().unwrap_or_default(),
+                ))
+            }
+        }
+        ScriptConfigKind::MultiSelect => {
+            let raw_values = if let Some(obj) = value.as_object() {
+                if let Ok(array) = JsArray::from_object(obj.clone()) {
+                    let length = array.length(ctx)? as usize;
+                    let mut values = Vec::with_capacity(length);
+                    for idx in 0..length {
+                        let item_text = array
+                            .get(idx as u32, ctx)?
+                            .to_string(ctx)?
+                            .to_std_string_lossy();
+                        values.push(item_text);
+                    }
+                    values
+                } else {
+                    let text = value.to_string(ctx)?.to_std_string_lossy();
+                    if text.trim().is_empty() {
+                        Vec::new()
+                    } else {
+                        vec![text]
+                    }
+                }
+            } else {
+                let text = value.to_string(ctx)?.to_std_string_lossy();
+                if text.trim().is_empty() {
+                    Vec::new()
+                } else {
+                    vec![text]
+                }
+            };
+
+            Ok(ScriptConfigValue::Strings(_normalize_multi_select_values(
+                raw_values,
+                &spec.options,
+            )))
+        }
+    }
+}
+
+/// 将配置值转为 JSON，便于通过事件发送给前端。
+fn _script_config_value_to_json(value: &ScriptConfigValue) -> serde_json::Value {
+    match value {
+        ScriptConfigValue::Number(number) => serde_json::json!(number),
+        ScriptConfigValue::String(text) => serde_json::json!(text),
+        ScriptConfigValue::Strings(values) => serde_json::json!(values),
+        ScriptConfigValue::Boolean(boolean) => serde_json::json!(boolean),
+    }
+}
+
+/// 将前端回传的 JSON 值规整为配置值类型。
+fn _coerce_json_to_script_config_value(
+    value: &serde_json::Value,
+    spec: &ScriptConfigFormatSpec,
+    fallback: &ScriptConfigValue,
+) -> ScriptConfigValue {
+    match spec.kind {
+        ScriptConfigKind::Number => {
+            let parsed = if let Some(number) = value.as_f64() {
+                Some(number)
+            } else if let Some(text) = value.as_str() {
+                text.parse::<f64>().ok()
+            } else {
+                None
+            };
+
+            match parsed.filter(|number| number.is_finite()) {
+                Some(number) => ScriptConfigValue::Number(number),
+                None => fallback.clone(),
+            }
+        }
+        ScriptConfigKind::Boolean => {
+            let parsed = if let Some(boolean) = value.as_bool() {
+                Some(boolean)
+            } else if let Some(number) = value.as_f64() {
+                Some(number != 0.0)
+            } else if let Some(text) = value.as_str() {
+                let normalized = text.trim().to_lowercase();
+                Some(matches!(
+                    normalized.as_str(),
+                    "1" | "true" | "yes" | "y" | "on"
+                ))
+            } else {
+                None
+            };
+
+            match parsed {
+                Some(boolean) => ScriptConfigValue::Boolean(boolean),
+                None => fallback.clone(),
+            }
+        }
+        ScriptConfigKind::String => {
+            if let Some(text) = value.as_str() {
+                ScriptConfigValue::String(text.to_string())
+            } else if value.is_null() {
+                fallback.clone()
+            } else {
+                ScriptConfigValue::String(value.to_string())
+            }
+        }
+        ScriptConfigKind::Select => {
+            let text = if let Some(text) = value.as_str() {
+                text.to_string()
+            } else if value.is_null() {
+                String::new()
+            } else {
+                value.to_string()
+            };
+
+            if spec.options.is_empty() || spec.options.iter().any(|option| option == &text) {
+                ScriptConfigValue::String(text)
+            } else {
+                fallback.clone()
+            }
+        }
+        ScriptConfigKind::MultiSelect => {
+            if value.is_null() {
+                return fallback.clone();
+            }
+
+            let raw_values = if let Some(array) = value.as_array() {
+                array
+                    .iter()
+                    .map(|item| {
+                        item.as_str()
+                            .map(|s| s.to_string())
+                            .unwrap_or_else(|| item.to_string())
+                    })
+                    .collect::<Vec<String>>()
+            } else if let Some(text) = value.as_str() {
+                if text.trim().is_empty() {
+                    Vec::new()
+                } else {
+                    vec![text.to_string()]
+                }
+            } else {
+                vec![value.to_string()]
+            };
+
+            ScriptConfigValue::Strings(_normalize_multi_select_values(raw_values, &spec.options))
+        }
+    }
+}
+
+/// 将配置值转换为 JS 值返回给脚本。
+fn _script_config_value_to_js(value: &ScriptConfigValue, ctx: &mut Context) -> JsResult<JsValue> {
+    match value {
+        ScriptConfigValue::Number(number) => Ok(JsValue::new(*number)),
+        ScriptConfigValue::String(text) => Ok(JsValue::from(js_string!(text.clone()))),
+        ScriptConfigValue::Strings(values) => {
+            let js_array = JsArray::new(ctx);
+            for value in values {
+                js_array.push(JsValue::from(js_string!(value.clone())), ctx)?;
+            }
+            Ok(js_array.into())
+        }
+        ScriptConfigValue::Boolean(boolean) => Ok(JsValue::new(*boolean)),
+    }
+}
+
+/// 从 JS 数组对象中解析单个 bbox 元组 `(x, y, w, h)`。
+fn _parse_bbox_tuple(
+    array: &JsArray,
+    index: usize,
+    ctx: &mut Context,
+) -> JsResult<(i32, i32, i32, i32)> {
+    if array.length(ctx)? < 4 {
+        return Err(JsNativeError::typ()
+            .with_message(format!("bboxes[{index}] 长度不足 4，必须为 [x, y, w, h]"))
+            .into());
+    }
+
+    let x = array.get(0, ctx)?.to_number(ctx)?.round() as i32;
+    let y = array.get(1, ctx)?.to_number(ctx)?.round() as i32;
+    let w = array.get(2, ctx)?.to_number(ctx)?.round() as i32;
+    let h = array.get(3, ctx)?.to_number(ctx)?.round() as i32;
+    Ok((x, y, w, h))
+}
+
+/// 将 JS bbox 数组解析为 Rust 向量。
+///
+/// 支持两种元素格式：
+/// 1. `[x, y, w, h]`
+/// 2. `{ bbox: [x, y, w, h] }`
+fn _parse_bbox_array(arg: JsValue, ctx: &mut Context) -> JsResult<Vec<(i32, i32, i32, i32)>> {
+    let array_obj = arg
+        .as_object()
+        .ok_or_else(|| JsNativeError::typ().with_message("bboxes 参数必须是数组"))?;
+    let array = JsArray::from_object(array_obj.clone())
+        .map_err(|_| JsNativeError::typ().with_message("bboxes 参数必须是数组"))?;
+    let length = array.length(ctx)? as usize;
+    let mut values = Vec::with_capacity(length);
+
+    for idx in 0..length {
+        let item = array.get(idx as u32, ctx)?;
+        let item_obj = item.as_object().ok_or_else(|| {
+            JsNativeError::typ().with_message(format!("bboxes[{idx}] 必须是数组或对象"))
+        })?;
+
+        // 格式1：[x, y, w, h]
+        if let Ok(item_array) = JsArray::from_object(item_obj.clone()) {
+            values.push(_parse_bbox_tuple(&item_array, idx, ctx)?);
+            continue;
+        }
+
+        // 格式2：{ bbox: [x, y, w, h] }
+        let bbox_value = item_obj.get(js_string!("bbox"), ctx).map_err(|_| {
+            JsNativeError::typ().with_message(format!("读取 bboxes[{idx}].bbox 失败"))
+        })?;
+        let bbox_obj = bbox_value.as_object().ok_or_else(|| {
+            JsNativeError::typ().with_message(format!("bboxes[{idx}].bbox 必须是数组"))
+        })?;
+        let bbox_array = JsArray::from_object(bbox_obj.clone()).map_err(|_| {
+            JsNativeError::typ().with_message(format!("bboxes[{idx}].bbox 必须是数组"))
+        })?;
+        values.push(_parse_bbox_tuple(&bbox_array, idx, ctx)?);
+    }
+
+    Ok(values)
+}
+
+/// 解析轮廓检索模式参数，支持字符串别名或 OpenCV 常量值。
+fn _parse_contour_mode(mode: Option<JsValue>, ctx: &mut Context) -> JsResult<i32> {
+    let Some(value) = mode else {
+        return Ok(imgproc::RETR_TREE);
+    };
+    if value.is_undefined() || value.is_null() {
+        return Ok(imgproc::RETR_TREE);
+    }
+
+    if let Some(mode_num) = value.as_number() {
+        return Ok(mode_num as i32);
+    }
+
+    let mode_text = value.to_string(ctx)?.to_std_string_lossy().to_lowercase();
+    match mode_text.as_str() {
+        "external" => Ok(imgproc::RETR_EXTERNAL),
+        "list" => Ok(imgproc::RETR_LIST),
+        "ccomp" => Ok(imgproc::RETR_CCOMP),
+        "tree" => Ok(imgproc::RETR_TREE),
+        "floodfill" => Ok(imgproc::RETR_FLOODFILL),
+        _ => Err(JsNativeError::typ()
+            .with_message(
+                "mode 参数无效，可选: external/list/ccomp/tree/floodfill 或 OpenCV 常量值",
+            )
+            .into()),
+    }
+}
+
+/// 解析轮廓逼近方法参数，支持字符串别名或 OpenCV 常量值。
+fn _parse_contour_method(method: Option<JsValue>, ctx: &mut Context) -> JsResult<i32> {
+    let Some(value) = method else {
+        return Ok(imgproc::CHAIN_APPROX_SIMPLE);
+    };
+    if value.is_undefined() || value.is_null() {
+        return Ok(imgproc::CHAIN_APPROX_SIMPLE);
+    }
+
+    if let Some(method_num) = value.as_number() {
+        return Ok(method_num as i32);
+    }
+
+    let method_text = value.to_string(ctx)?.to_std_string_lossy().to_lowercase();
+    match method_text.as_str() {
+        "none" => Ok(imgproc::CHAIN_APPROX_NONE),
+        "simple" => Ok(imgproc::CHAIN_APPROX_SIMPLE),
+        "tc89l1" => Ok(imgproc::CHAIN_APPROX_TC89_L1),
+        "tc89kcos" => Ok(imgproc::CHAIN_APPROX_TC89_KCOS),
+        _ => Err(JsNativeError::typ()
+            .with_message("method 参数无效，可选: none/simple/tc89l1/tc89kcos 或 OpenCV 常量值")
+            .into()),
+    }
+}
+
+/// 解析形态学操作类型参数，支持字符串别名或 OpenCV 常量值。
+fn _parse_morphology_op(op: Option<JsValue>, ctx: &mut Context) -> JsResult<i32> {
+    let Some(value) = op else {
+        return Ok(imgproc::MORPH_OPEN);
+    };
+    if value.is_undefined() || value.is_null() {
+        return Ok(imgproc::MORPH_OPEN);
+    }
+
+    if let Some(op_num) = value.as_number() {
+        return Ok(op_num as i32);
+    }
+
+    let op_text = value.to_string(ctx)?.to_std_string_lossy().to_lowercase();
+    match op_text.as_str() {
+        "erode" => Ok(imgproc::MORPH_ERODE),
+        "dilate" => Ok(imgproc::MORPH_DILATE),
+        "open" => Ok(imgproc::MORPH_OPEN),
+        "close" => Ok(imgproc::MORPH_CLOSE),
+        "gradient" => Ok(imgproc::MORPH_GRADIENT),
+        "tophat" => Ok(imgproc::MORPH_TOPHAT),
+        "blackhat" => Ok(imgproc::MORPH_BLACKHAT),
+        "hitmiss" => Ok(imgproc::MORPH_HITMISS),
+        _ => Err(JsNativeError::typ()
+            .with_message("op 参数无效，可选: erode/dilate/open/close/gradient/tophat/blackhat/hitmiss 或 OpenCV 常量值")
+            .into()),
+    }
+}
+
+/// 解析形态学核形状参数，支持字符串别名或 OpenCV 常量值。
+fn _parse_morphology_shape(shape: Option<JsValue>, ctx: &mut Context) -> JsResult<i32> {
+    let Some(value) = shape else {
+        return Ok(imgproc::MORPH_RECT);
+    };
+    if value.is_undefined() || value.is_null() {
+        return Ok(imgproc::MORPH_RECT);
+    }
+
+    if let Some(shape_num) = value.as_number() {
+        return Ok(shape_num as i32);
+    }
+
+    let shape_text = value.to_string(ctx)?.to_std_string_lossy().to_lowercase();
+    match shape_text.as_str() {
+        "rect" => Ok(imgproc::MORPH_RECT),
+        "cross" => Ok(imgproc::MORPH_CROSS),
+        "ellipse" => Ok(imgproc::MORPH_ELLIPSE),
+        _ => Err(JsNativeError::typ()
+            .with_message("shape 参数无效，可选: rect/cross/ellipse 或 OpenCV 常量值")
+            .into()),
+    }
+}
+
+/// 解析鼠标按键参数，支持 left/right/middle/x1/x2（或同义写法）。
+fn _parse_mouse_button(button: Option<JsValue>, ctx: &mut Context) -> JsResult<MouseButtonKind> {
+    let Some(value) = button else {
+        return Ok(MouseButtonKind::Left);
+    };
+    if value.is_undefined() || value.is_null() {
+        return Ok(MouseButtonKind::Left);
+    }
+
+    if let Some(num) = value.as_number() {
+        return match num as i32 {
+            0 | 1 => Ok(MouseButtonKind::Left),
+            2 => Ok(MouseButtonKind::Right),
+            3 => Ok(MouseButtonKind::Middle),
+            4 => Ok(MouseButtonKind::X1),
+            5 => Ok(MouseButtonKind::X2),
+            _ => Err(JsNativeError::typ()
+                .with_message("button 参数无效，可选: left/right/middle/x1/x2（或 1/2/3/4/5）")
+                .into()),
+        };
+    }
+
+    let text = value.to_string(ctx)?.to_std_string_lossy().to_lowercase();
+    match text.as_str() {
+        "left" | "l" | "primary" => Ok(MouseButtonKind::Left),
+        "right" | "r" | "secondary" => Ok(MouseButtonKind::Right),
+        "middle" | "m" | "mid" | "wheel" => Ok(MouseButtonKind::Middle),
+        "x1" | "xbutton1" | "xb1" | "back" => Ok(MouseButtonKind::X1),
+        "x2" | "xbutton2" | "xb2" | "forward" => Ok(MouseButtonKind::X2),
+        _ => Err(JsNativeError::typ()
+            .with_message("button 参数无效，可选: left/right/middle/x1/x2")
+            .into()),
+    }
+}
+
+fn _win_get_client_pos(hwnd: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let hwnd = HWND(
+        hwnd.unwrap_or_else(|| JsValue::undefined())
+            .to_i32(ctx)
+            .unwrap_or(0) as isize as *mut std::ffi::c_void,
+    );
+    // Get ownership of rest arguments.
+    if let Some((x, y, width, height)) = win_get_client_pos(hwnd) {
+        Ok(js_value!([x, y, width, height], ctx))
+    } else {
+        Ok(JsValue::undefined())
+    }
+}
+
+/// 鼠标点击函数
+fn _mc(
+    hwnd: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    button: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    // 兼容重载：
+    // 1) mc("right") / mc("x1")
+    // 2) mc(hwnd, "middle")
+    // 通过参数类型自动判断 button 所在位置。
+    let (hwnd_arg, x_arg, y_arg, button_arg) = match (hwnd, x, y, button) {
+        (Some(first), x_arg, y_arg, button_arg) if first.is_string() => {
+            let merged_button = if button_arg.is_some() {
+                button_arg
+            } else {
+                Some(first)
+            };
+            (None, x_arg, y_arg, merged_button)
+        }
+        (hwnd_arg, Some(second), None, None) if second.is_string() => {
+            (hwnd_arg, None, None, Some(second))
+        }
+        (hwnd_arg, x_arg, y_arg, button_arg) => (hwnd_arg, x_arg, y_arg, button_arg),
+    };
+
+    let hwnd = HWND(
+        hwnd_arg
+            .unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let x = x_arg
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as i32;
+    let y = y_arg
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as i32;
+    let button = _parse_mouse_button(button_arg, ctx)?;
+    if hwnd.is_invalid() {
+        if x <= 0 || y <= 0 {
+            mouse_click_by_button(button, 10);
+            return Ok(JsValue::undefined());
+        }
+        mouse_click_to_by_button(x, y, button);
+    } else {
+        post_mouse_click_by_button(hwnd, x, y, button);
+    }
+    Ok(JsValue::undefined())
+}
+
+/// 鼠标移动函数
+fn _mm(x: Option<JsValue>, y: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let x = x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    mouse_move(x, y);
+    Ok(JsValue::undefined())
+}
+
+/// 鼠标相对移动函数（可传 hwnd，但后台语义仍为相对视角移动）。
+fn _mmr(
+    hwnd: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let hwnd = HWND(
+        hwnd.unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let x = x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    if hwnd.is_invalid() {
+        mouse_move(x, y);
+    } else {
+        mouse_move_relative_with_hwnd(hwnd, x, y);
+    }
+    Ok(JsValue::undefined())
+}
+
+/// 在 cloudgame 页面里调用 devtools 暴露的方法。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _call_cloudgame_devtools_method(method: &str, args: &[serde_json::Value]) -> Result<(), String> {
+    let Some(app_handle) = SCRIPT_EVENT_APP_HANDLE.get() else {
+        return Err("脚本运行时未绑定 AppHandle".to_string());
+    };
+    let Some(window) = app_handle.get_webview_window(SCRIPT_CLOUDGAME_WINDOW_LABEL) else {
+        return Err("云游戏窗口未打开".to_string());
+    };
+
+    let method_json =
+        serde_json::to_string(method).map_err(|e| format!("序列化 cloudgame 方法名失败: {e}"))?;
+    let args_json =
+        serde_json::to_string(args).map_err(|e| format!("序列化 cloudgame 参数失败: {e}"))?;
+    let script = format!(
+        r#"
+(() => {{
+    const api = window.__DNA_CLOUDGAME_DEVTOOLS__;
+    if (!api || typeof api[{method_json}] !== "function") {{
+        throw new Error("cloudgame devtools api not ready");
+    }}
+    Promise.resolve(api[{method_json}](...{args_json})).catch(error => console.error("[cloudgame-script]", error));
+}})();
+"#
+    );
+    window
+        .eval(script)
+        .map_err(|e| format!("执行 cloudgame 脚本失败: {e}"))
+}
+
+/// 云游戏相对移动函数。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_move(dx: Option<JsValue>, dy: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let dx = dx.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let dy = dy.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    _call_cloudgame_devtools_method(
+        "businessMove",
+        &[serde_json::json!(dx), serde_json::json!(dy)],
+    )
+    .map_err(|e| JsNativeError::error().with_message(e))?;
+    Ok(JsValue::undefined())
+}
+
+/// 云游戏绝对移动函数（异步）。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_move_to(
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    duration: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let x = x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let duration = duration.unwrap_or_else(|| js_value!(0)).to_number(ctx)? as u64;
+    _call_cloudgame_devtools_method(
+        "businessMoveTo",
+        &[
+            serde_json::json!(x),
+            serde_json::json!(y),
+            serde_json::json!(duration),
+        ],
+    )
+    .map_err(|e| JsNativeError::error().with_message(e))?;
+
+    let mut cb: Option<JsFunction> = None;
+    let promise = JsPromise::new(
+        |resolvers, _context| {
+            cb = Some(resolvers.resolve.clone());
+            Ok(JsValue::undefined())
+        },
+        ctx,
+    );
+    let job = boa_engine::job::TimeoutJob::new(
+        boa_engine::job::NativeJob::new(move |context| {
+            cb.unwrap()
+                .call(&JsValue::undefined(), &[], context)
+                .unwrap();
+            Ok(JsValue::undefined())
+        }),
+        duration,
+    );
+    ctx.enqueue_job(job.into());
+    Ok(promise.into())
+}
+
+/// 云游戏鼠标按键枚举转业务层字符串。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_mouse_button_name(button: MouseButtonKind) -> &'static str {
+    match button {
+        MouseButtonKind::Left => "left",
+        MouseButtonKind::Right => "right",
+        MouseButtonKind::Middle => "middle",
+        MouseButtonKind::X1 | MouseButtonKind::X2 => "left",
+    }
+}
+
+/// 云游戏鼠标点击函数。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_click(
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    button: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let button = _parse_mouse_button(button, ctx)?;
+    let mut args = vec![serde_json::json!(_cg_mouse_button_name(button))];
+    if let Some(value) = x.as_ref()
+        && !value.is_undefined()
+        && !value.is_null()
+    {
+        args.push(serde_json::json!(value.to_number(ctx)? as i32));
+        if let Some(y_value) = y.as_ref()
+            && !y_value.is_undefined()
+            && !y_value.is_null()
+        {
+            args.push(serde_json::json!(y_value.to_number(ctx)? as i32));
+        }
+    }
+    _call_cloudgame_devtools_method("businessClick", &args)
+        .map_err(|e| JsNativeError::error().with_message(e))?;
+    Ok(JsValue::undefined())
+}
+
+/// 云游戏鼠标按下函数。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_down(
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    button: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let button = _parse_mouse_button(button, ctx)?;
+    let mut args = vec![serde_json::json!(_cg_mouse_button_name(button))];
+    if let Some(value) = x.as_ref()
+        && !value.is_undefined()
+        && !value.is_null()
+    {
+        args.push(serde_json::json!(value.to_number(ctx)? as i32));
+        if let Some(y_value) = y.as_ref()
+            && !y_value.is_undefined()
+            && !y_value.is_null()
+        {
+            args.push(serde_json::json!(y_value.to_number(ctx)? as i32));
+        }
+    }
+    _call_cloudgame_devtools_method("businessDown", &args)
+        .map_err(|e| JsNativeError::error().with_message(e))?;
+    Ok(JsValue::undefined())
+}
+
+/// 云游戏鼠标抬起函数。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_up(
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    button: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let button = _parse_mouse_button(button, ctx)?;
+    let mut args = vec![serde_json::json!(_cg_mouse_button_name(button))];
+    if let Some(value) = x.as_ref()
+        && !value.is_undefined()
+        && !value.is_null()
+    {
+        args.push(serde_json::json!(value.to_number(ctx)? as i32));
+        if let Some(y_value) = y.as_ref()
+            && !y_value.is_undefined()
+            && !y_value.is_null()
+        {
+            args.push(serde_json::json!(y_value.to_number(ctx)? as i32));
+        }
+    }
+    _call_cloudgame_devtools_method("businessUp", &args)
+        .map_err(|e| JsNativeError::error().with_message(e))?;
+    Ok(JsValue::undefined())
+}
+
+/// 云游戏鼠标中键点击函数。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_middle_click(
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let mut args = Vec::new();
+    if let Some(value) = x.as_ref()
+        && !value.is_undefined()
+        && !value.is_null()
+    {
+        args.push(serde_json::json!(value.to_number(ctx)? as i32));
+        if let Some(y_value) = y.as_ref()
+            && !y_value.is_undefined()
+            && !y_value.is_null()
+        {
+            args.push(serde_json::json!(y_value.to_number(ctx)? as i32));
+        }
+    }
+    _call_cloudgame_devtools_method("businessMiddleClick", &args)
+        .map_err(|e| JsNativeError::error().with_message(e))?;
+    Ok(JsValue::undefined())
+}
+
+/// 云游戏滚轮函数。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_wheel(
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    delta: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let delta = delta.unwrap_or_else(|| js_value!(0)).to_number(ctx)? as i32;
+    let mut args = vec![serde_json::json!(delta)];
+    if let Some(value) = x.as_ref()
+        && !value.is_undefined()
+        && !value.is_null()
+    {
+        args.push(serde_json::json!(value.to_number(ctx)? as i32));
+        if let Some(y_value) = y.as_ref()
+            && !y_value.is_undefined()
+            && !y_value.is_null()
+        {
+            args.push(serde_json::json!(y_value.to_number(ctx)? as i32));
+        }
+    }
+    _call_cloudgame_devtools_method("businessWheel", &args)
+        .map_err(|e| JsNativeError::error().with_message(e))?;
+    Ok(JsValue::undefined())
+}
+
+/// 云游戏按键点击函数（异步）。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_key(
+    key: Option<JsValue>,
+    duration: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let key = key
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let vkey = key_to_vkey(&key);
+    let duration = duration.unwrap_or_else(|| js_value!(0)).to_number(ctx)? as u64;
+
+    _call_cloudgame_devtools_method("keyTap", &[serde_json::json!(vkey)])
+        .map_err(|e| JsNativeError::error().with_message(e))?;
+
+    let mut cb: Option<JsFunction> = None;
+    let promise = JsPromise::new(
+        |resolvers, _context| {
+            cb = Some(resolvers.resolve.clone());
+            Ok(JsValue::undefined())
+        },
+        ctx,
+    );
+    let job = boa_engine::job::TimeoutJob::new(
+        boa_engine::job::NativeJob::new(move |context| {
+            cb.unwrap()
+                .call(&JsValue::undefined(), &[], context)
+                .unwrap();
+            Ok(JsValue::undefined())
+        }),
+        duration,
+    );
+    ctx.enqueue_job(job.into());
+    Ok(promise.into())
+}
+
+/// 云游戏按键按下函数。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_key_down(key: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let key = key
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let vkey = key_to_vkey(&key);
+    _call_cloudgame_devtools_method("keyDown", &[serde_json::json!(vkey)])
+        .map_err(|e| JsNativeError::error().with_message(e))?;
+    Ok(JsValue::undefined())
+}
+
+/// 云游戏按键抬起函数。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _cg_key_up(key: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let key = key
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let vkey = key_to_vkey(&key);
+    _call_cloudgame_devtools_method("keyUp", &[serde_json::json!(vkey)])
+        .map_err(|e| JsNativeError::error().with_message(e))?;
+    Ok(JsValue::undefined())
+}
+
+/// 鼠标绝对移动函数（带缓动，异步）
+fn _move_to(
+    hwnd: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    duration: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let hwnd = HWND(
+        hwnd.unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let mut end_x = x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let mut end_y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let duration = duration
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as u64;
+
+    if !hwnd.is_invalid() {
+        let (x, y, _width, _height) = win_get_client_pos(hwnd).unwrap_or((0, 0, 0, 0));
+        end_x += x;
+        end_y += y;
+    }
+
+    // 获取当前鼠标位置
+    let mut current_pos = windows::Win32::Foundation::POINT { x: 0, y: 0 };
+    unsafe {
+        let _ = GetCursorPos(&mut current_pos);
+    }
+
+    // 立即开始移动（在 tokio 任务中）
+    let start_x = current_pos.x;
+    let start_y = current_pos.y;
+    let duration_ms = duration as u32;
+    tokio::spawn(async move {
+        mouse_move_to_eased(start_x, start_y, end_x, end_y, duration_ms).await;
+    });
+
+    // 返回在 duration 毫秒后 resolve 的 promise
+    let mut cb: Option<JsFunction> = None;
+    let promise = JsPromise::new(
+        |resolvers, _context| {
+            cb = Some(resolvers.resolve.clone());
+
+            Ok(JsValue::undefined())
+        },
+        ctx,
+    );
+    let job = boa_engine::job::TimeoutJob::new(
+        boa_engine::job::NativeJob::new(move |context| {
+            cb.unwrap()
+                .call(&JsValue::undefined(), &[], context)
+                .unwrap();
+            Ok(JsValue::undefined())
+        }),
+        duration,
+    );
+    ctx.enqueue_job(job.into());
+    Ok(promise.into())
+}
+
+/// 鼠标绝对移动后点击 (带缓动)
+fn _move_c(
+    hwnd: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    duration: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let hwnd = HWND(
+        hwnd.unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let mut end_x = x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let mut end_y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let cx = end_x;
+    let cy = end_y;
+    let duration = duration
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as u64;
+
+    if !hwnd.is_invalid() {
+        let (x, y, _width, _height) = win_get_client_pos(hwnd).unwrap_or((0, 0, 0, 0));
+        end_x += x;
+        end_y += y;
+    }
+
+    // 获取当前鼠标位置
+    let mut current_pos = windows::Win32::Foundation::POINT { x: 0, y: 0 };
+    unsafe {
+        let _ = GetCursorPos(&mut current_pos);
+    }
+
+    // 立即开始移动（在 tokio 任务中）
+    let start_x = current_pos.x;
+    let start_y = current_pos.y;
+    let duration_ms = duration as u32;
+    let hwnd_safe = hwnd.0 as isize;
+    tokio::spawn(async move {
+        mouse_move_to_eased(start_x, start_y, end_x, end_y, duration_ms).await;
+        if hwnd_safe != 0 {
+            post_click(HWND(hwnd_safe as *mut std::ffi::c_void), cx, cy, 1);
+        } else {
+            click(10);
+        }
+    });
+
+    // 返回在 duration 毫秒后 resolve 的 promise
+    let mut cb: Option<JsFunction> = None;
+    let promise = JsPromise::new(
+        |resolvers, _context| {
+            cb = Some(resolvers.resolve.clone());
+
+            Ok(JsValue::undefined())
+        },
+        ctx,
+    );
+    let job = boa_engine::job::TimeoutJob::new(
+        boa_engine::job::NativeJob::new(move |context| {
+            cb.unwrap()
+                .call(&JsValue::undefined(), &[], context)
+                .unwrap();
+            Ok(JsValue::undefined())
+        }),
+        duration,
+    );
+    ctx.enqueue_job(job.into());
+    Ok(promise.into())
+}
+
+/// 鼠标按下函数
+fn _md(
+    hwnd: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    button: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    // 兼容重载：md("right") / md("x1")
+    // 当首参是字符串时，将其视为 button，并忽略 hwnd。
+    let (hwnd_arg, x_arg, y_arg, button_arg) = match hwnd {
+        Some(first) if first.is_string() => {
+            let merged_button = if button.is_some() {
+                button
+            } else {
+                Some(first)
+            };
+            (None, x, y, merged_button)
+        }
+        other => (other, x, y, button),
+    };
+
+    let hwnd = HWND(
+        hwnd_arg
+            .unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let x = x_arg.unwrap_or_else(|| js_value!(-1)).to_number(ctx)? as i32;
+    let y = y_arg.unwrap_or_else(|| js_value!(-1)).to_number(ctx)? as i32;
+    let button = _parse_mouse_button(button_arg, ctx)?;
+    if hwnd.is_invalid() {
+        if x == -1 || y == -1 {
+            mouse_down_by_button(button);
+        } else {
+            mouse_move_to(x, y);
+            mouse_down_by_button(button);
+        }
+    } else {
+        post_mouse_down_by_button(hwnd, x, y, button);
+    }
+    Ok(JsValue::undefined())
+}
+
+/// 鼠标释放函数
+fn _mu(
+    hwnd: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    button: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    // 兼容重载：mu("right") / mu("x1")
+    // 当首参是字符串时，将其视为 button，并忽略 hwnd。
+    let (hwnd_arg, x_arg, y_arg, button_arg) = match hwnd {
+        Some(first) if first.is_string() => {
+            let merged_button = if button.is_some() {
+                button
+            } else {
+                Some(first)
+            };
+            (None, x, y, merged_button)
+        }
+        other => (other, x, y, button),
+    };
+
+    let hwnd = HWND(
+        hwnd_arg
+            .unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let x = x_arg.unwrap_or_else(|| js_value!(-1)).to_number(ctx)? as i32;
+    let y = y_arg.unwrap_or_else(|| js_value!(-1)).to_number(ctx)? as i32;
+    let button = _parse_mouse_button(button_arg, ctx)?;
+    if hwnd.is_invalid() {
+        if x == -1 || y == -1 {
+            mouse_up_by_button(button);
+        } else {
+            mouse_move_to(x, y);
+            mouse_up_by_button(button);
+        }
+    } else {
+        post_mouse_up_by_button(hwnd, x, y, button);
+    }
+    Ok(JsValue::undefined())
+}
+
+/// 鼠标中键点击函数
+fn _mt(
+    hwnd: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let hwnd = HWND(
+        hwnd.unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let x = x.unwrap_or_else(|| js_value!(-1)).to_number(ctx)? as i32;
+    let y = y.unwrap_or_else(|| js_value!(-1)).to_number(ctx)? as i32;
+    if hwnd.is_invalid() {
+        if x == -1 || y == -1 {
+            middle_click();
+        } else {
+            middle_click_to(x, y);
+        }
+    } else {
+        post_mouse_middle_click(hwnd, x, y);
+    }
+    Ok(JsValue::undefined())
+}
+
+/// 鼠标滚轮函数
+///
+/// 行为说明：
+/// - `hwnd = 0`：发送到前台（可选先移动到 `x,y`）；
+/// - `hwnd != 0`：通过 `PostMessage` 向指定窗口发送 `WM_MOUSEWHEEL`。
+fn _wheel(
+    hwnd: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    delta: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let hwnd = HWND(
+        hwnd.unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let x = x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let delta = delta.unwrap_or_else(|| js_value!(0)).to_number(ctx)? as i32;
+
+    if hwnd.is_invalid() {
+        if x > 0 && y > 0 {
+            mouse_move_to(x, y);
+        }
+        wheel(delta);
+    } else {
+        post_wheel(hwnd, x, y, delta);
+    }
+    Ok(JsValue::undefined())
+}
+
+/// 键盘按键函数
+fn _kb(
+    hwnd: Option<JsValue>,
+    key: Option<JsValue>,
+    duration: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let hwnd_raw = hwnd
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as isize;
+    let key = key
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let duration = duration.unwrap_or_else(|| js_value!(0)).to_number(ctx)? as u32;
+
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let resolvers_clone = resolvers.clone();
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            let async_result = _spawn_blocking_with_script_stop_snapshot(move || {
+                let hwnd = HWND(hwnd_raw as *mut std::ffi::c_void);
+                if hwnd.is_invalid() {
+                    key_press(&key, duration);
+                } else {
+                    post_key_press(hwnd, &key, duration);
+                }
+            })
+            .await;
+
+            let context = &mut context.borrow_mut();
+            match async_result {
+                Ok(_) => resolvers_clone
+                    .resolve
+                    .call(&JsValue::undefined(), &[], context),
+                Err(e) => {
+                    let msg = format!("kb 线程执行失败: {e}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(msg))],
+                        context,
+                    )
+                }
+            }
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
+}
+
+/// 键盘按下函数
+fn _kd(hwnd: Option<JsValue>, key: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let hwnd = HWND(
+        hwnd.unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let key = key
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let vkey = key_to_vkey(&key);
+    if hwnd.is_invalid() {
+        key_down(vkey);
+    } else {
+        post_key_down(hwnd, vkey);
+    }
+    Ok(JsValue::undefined())
+}
+
+/// 键盘释放函数
+fn _ku(hwnd: Option<JsValue>, key: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let hwnd = HWND(
+        hwnd.unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let key = key
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let vkey = key_to_vkey(&key);
+    if hwnd.is_invalid() {
+        key_up(vkey);
+    } else {
+        post_key_up(hwnd, vkey);
+    }
+    Ok(JsValue::undefined())
+}
+
+/// 设置前景窗口函数
+fn _set_foreground_window(hwnd: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let hwnd = HWND(
+        hwnd.unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    unsafe {
+        let _ = SetForegroundWindow(hwnd);
+    }
+    Ok(JsValue::undefined())
+}
+
+/// 检查窗口大小函数
+fn _check_size(
+    hwnd: Option<JsValue>,
+    w: Option<JsValue>,
+    h: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let hwnd = HWND(
+        hwnd.unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let w = _parse_optional_i32_arg(w, ctx)?.unwrap_or(1600);
+    let h = _parse_optional_i32_arg(h, ctx)?.unwrap_or(900);
+    let result = check_size(hwnd, w, h);
+    Ok(JsValue::new(result))
+}
+
+/// 移动窗口并设置大小函数
+fn _move_window(
+    hwnd: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    w: Option<JsValue>,
+    h: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let hwnd = HWND(
+        hwnd.unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let x = x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let w = w.and_then(|v| v.to_number(ctx).ok()).map(|v| v as i32);
+    let h = h.and_then(|v| v.to_number(ctx).ok()).map(|v| v as i32);
+    if hwnd.is_invalid() {
+        return Ok(JsValue::new(false));
+    }
+    let result = move_window(hwnd, x, y, w, h);
+    Ok(JsValue::new(result))
+}
+
+/// 解析可选 ROI 数值参数。
+///
+/// - 参数为 `undefined` 时返回 `None`；
+/// - 参数为数字时返回对应 `i32`。
+fn _parse_optional_i32_arg(value: Option<JsValue>, ctx: &mut Context) -> JsResult<Option<i32>> {
+    if let Some(value) = value {
+        if value.is_undefined() || value.is_null() {
+            return Ok(None);
+        }
+        return Ok(Some(value.to_number(ctx)? as i32));
+    }
+    Ok(None)
+}
+
+/// 统一解析 ROI 参数，要求 x/y/w/h 要么全部缺省，要么全部提供。
+fn _parse_capture_roi_args(
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    w: Option<JsValue>,
+    h: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<Option<(i32, i32, i32, i32)>> {
+    let x = _parse_optional_i32_arg(x, ctx)?;
+    let y = _parse_optional_i32_arg(y, ctx)?;
+    let w = _parse_optional_i32_arg(w, ctx)?;
+    let h = _parse_optional_i32_arg(h, ctx)?;
+    match (x, y, w, h) {
+        (None, None, None, None) => Ok(None),
+        (Some(x), Some(y), Some(w), Some(h)) => Ok(Some((x, y, w, h))),
+        _ => Err(js_error!("ROI 参数必须同时提供 x、y、w、h")),
+    }
+}
+
+/// 检查当前脚本是否已收到停止请求。
+///
+/// 若已停止，抛出带统一中断标记的异常，
+/// 由脚本运行入口识别并按“正常停止”处理。
+fn _throw_if_script_stop_requested() -> JsResult<()> {
+    if should_stop_current_script() {
+        return Err(JsNativeError::error()
+            .with_message(SCRIPT_STOP_INTERRUPT_MESSAGE)
+            .into());
+    }
+    Ok(())
+}
+
+/// 在阻塞线程中执行任务，并继承当前脚本线程的停止快照。
+fn _spawn_blocking_with_script_stop_snapshot<F, R>(task: F) -> tokio::task::JoinHandle<R>
+where
+    F: FnOnce() -> R + Send + 'static,
+    R: Send + 'static,
+{
+    let snapshot = capture_current_script_stop_snapshot();
+    tokio::task::spawn_blocking(move || run_with_script_stop_snapshot(snapshot, task))
+}
+
+/// 从窗口获取图像 Mat 对象函数。
+///
+/// 参数：
+/// - `hwnd`: 窗口句柄
+/// - `x/y/w/h`（可选）: ROI 参数（相对客户区）
+/// - `useWgc`（可选）: 是否启用 WGC 实现（默认 false）
+fn _capture_window(
+    hwnd: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    w: Option<JsValue>,
+    h: Option<JsValue>,
+    use_wgc: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    _throw_if_script_stop_requested()?;
+
+    let hwnd = HWND(
+        hwnd.unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let roi = _parse_capture_roi_args(x, y, w, h, ctx)?;
+    let use_wgc = use_wgc.unwrap_or_else(|| JsValue::new(false)).to_boolean();
+
+    let mat = if use_wgc {
+        if let Some((x, y, w, h)) = roi {
+            capture_window_wgc_roi(hwnd, x, y, w, h)
+        } else {
+            capture_window_wgc(hwnd)
+        }
+    } else if let Some((x, y, w, h)) = roi {
+        capture_window_roi(hwnd, x, y, w, h)
+    } else {
+        capture_window(hwnd)
+    };
+
+    if let Some(mat) = mat {
+        mat.into_js(ctx)
+    } else {
+        // 捕获流程可能在调用过程中收到停止请求，这里再次兜底识别。
+        _throw_if_script_stop_requested()?;
+        Err(js_error!("capture_window failed"))
+    }
+}
+
+/// 从窗口获取图像 Mat 对象函数（WGC 优化版，兼容旧接口）。
+///
+/// 参数：
+/// - `hwnd`: 窗口句柄
+/// - `x/y/w/h`（可选）: ROI 参数（相对客户区）
+fn _capture_window_wgc(
+    hwnd: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    w: Option<JsValue>,
+    h: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    _throw_if_script_stop_requested()?;
+
+    let hwnd = HWND(
+        hwnd.unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let roi = _parse_capture_roi_args(x, y, w, h, ctx)?;
+    let mat = if let Some((x, y, w, h)) = roi {
+        capture_window_wgc_roi(hwnd, x, y, w, h)
+    } else {
+        capture_window_wgc(hwnd)
+    };
+    if let Some(mat) = mat {
+        let cache_key = hwnd.0 as isize;
+        WGC_CAPTURE_MAT_CACHE.with(|cache| {
+            let mut cache_map = cache.borrow_mut();
+            if let Some(js_mat_obj) = cache_map.get(&cache_key).cloned() {
+                // 复用同一个 hwnd 对应的 JS Mat 对象，减少 GC 压力。
+                {
+                    let mut dst_binding = js_mat_obj.borrow_mut();
+                    let dst_inner = &mut dst_binding.data_mut().inner;
+                    // 性能优化：直接替换底层 Mat 句柄，避免每帧 copy_to 的整图内存拷贝。
+                    *dst_inner = mat;
+                }
+                Ok(js_mat_obj.upcast().into())
+            } else {
+                let js_value = mat.into_js(ctx)?;
+                let js_mat_obj = js_value.get_native::<JsMat>()?;
+                cache_map.insert(cache_key, js_mat_obj);
+                Ok(js_value)
+            }
+        })
+    } else {
+        // WGC 捕获内含等待与重试，结束后需再次判断是否为主动停止。
+        _throw_if_script_stop_requested()?;
+        Err(js_error!("capture_window_wgc failed"))
+    }
+}
+
+/// 从文件加载模板Mat对象函数
+fn _get_template(path: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let path = path
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let resolved_path = _resolve_script_resource_path(&path);
+
+    if let Ok(mat) = get_template(&resolved_path) {
+        let js_mat = Box::new(mat).into_js(ctx)?;
+        Ok(js_mat)
+    } else {
+        Err(js_error!("get_template failed"))
+    }
+}
+
+/// 从 base64 字符串加载模板Mat对象函数
+fn _get_template_b64(b64_str: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let b64_str = b64_str
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+
+    if let Ok(mat) = get_template_b64(&b64_str) {
+        let js_mat = Box::new(mat).into_js(ctx)?;
+        Ok(js_mat)
+    } else {
+        Err(js_error!("get_template_b64 failed"))
+    }
+}
+
+/// 从文件加载图像Mat对象函数
+fn _imread(path: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let path = path
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let resolved_path = _resolve_script_resource_path(&path);
+
+    if let Ok(mat) = opencv::imgcodecs::imread(&resolved_path, opencv::imgcodecs::IMREAD_COLOR) {
+        let js_mat = Box::new(mat).into_js(ctx)?;
+        Ok(js_mat)
+    } else {
+        Err(js_error!("imread failed"))
+    }
+}
+/// 从文件加载图像Mat对象函数
+fn _imread_rgba(path: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let path = path
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let resolved_path = _resolve_script_resource_path(&path);
+
+    if let Ok(mat) = opencv::imgcodecs::imread(&resolved_path, opencv::imgcodecs::IMREAD_UNCHANGED)
+    {
+        let js_mat = Box::new(mat).into_js(ctx)?;
+        Ok(js_mat)
+    } else {
+        Err(js_error!("imread_rgba failed"))
+    }
+}
+
+/// 保存Mat对象到文件函数
+fn _imwrite(
+    path: Option<JsValue>,
+    js_img_mat: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    // 获取第一个参数 (文件路径)
+    let path = path
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let resolved_path = _resolve_script_resource_path(&path);
+    let resolved_file_path = Path::new(&resolved_path);
+
+    // 在保存图片前自动创建父目录，避免目标路径不存在导致写入失败
+    if let Some(parent_dir) = resolved_file_path.parent() {
+        if !parent_dir.as_os_str().is_empty() && !parent_dir.exists() {
+            if std::fs::create_dir_all(parent_dir).is_err() {
+                return Ok(JsValue::new(false));
+            }
+        }
+    }
+
+    // 获取第二个参数 (图像Mat)
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+
+    // 保存图像到文件
+    match opencv::imgcodecs::imwrite(
+        &resolved_path,
+        &*js_img_mat.borrow().data().inner,
+        &opencv::core::Vector::new(),
+    ) {
+        Ok(_) => Ok(JsValue::new(true)),
+        Err(_) => Ok(JsValue::new(false)),
+    }
+}
+
+/// 复制Mat对象到剪贴板函数
+fn _copy_image(js_img_mat: Option<JsValue>, _ctx: &mut Context) -> JsResult<JsValue> {
+    // 获取第一个参数 (图像Mat)
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+
+    // 将 Mat 转换为字节数据
+    let mut buf = opencv::core::Vector::new();
+    let params = opencv::core::Vector::new();
+    match opencv::imgcodecs::imencode(
+        ".png",
+        &*js_img_mat.borrow().data().inner,
+        &mut buf,
+        &params,
+    ) {
+        Ok(_) => {
+            // 使用 arboard 复制图像到剪贴板
+            let (width, height, rgba_bytes) = {
+                let mat_ref = js_img_mat.borrow();
+                let src_mat = &*mat_ref.data().inner;
+                let width = src_mat.cols();
+                let height = src_mat.rows();
+                if width <= 0 || height <= 0 {
+                    return Ok(JsValue::new(false));
+                }
+
+                let mut rgba_mat = opencv::core::Mat::default();
+                let convert_result = match src_mat.channels() {
+                    1 => opencv::imgproc::cvt_color(
+                        src_mat,
+                        &mut rgba_mat,
+                        opencv::imgproc::COLOR_GRAY2RGBA,
+                        0,
+                    ),
+                    3 => opencv::imgproc::cvt_color(
+                        src_mat,
+                        &mut rgba_mat,
+                        opencv::imgproc::COLOR_BGR2RGBA,
+                        0,
+                    ),
+                    4 => opencv::imgproc::cvt_color(
+                        src_mat,
+                        &mut rgba_mat,
+                        opencv::imgproc::COLOR_BGRA2RGBA,
+                        0,
+                    ),
+                    _ => return Ok(JsValue::new(false)),
+                };
+                if convert_result.is_err() {
+                    return Ok(JsValue::new(false));
+                }
+
+                let rgba_bytes = match rgba_mat.data_bytes() {
+                    Ok(bytes) => bytes.to_vec(),
+                    Err(_) => return Ok(JsValue::new(false)),
+                };
+                let expected_len = width as usize * height as usize * 4;
+                if rgba_bytes.len() != expected_len {
+                    return Ok(JsValue::new(false));
+                }
+
+                (width, height, rgba_bytes)
+            };
+
+            let mut clipboard = match arboard::Clipboard::new() {
+                Ok(clipboard) => clipboard,
+                Err(_) => return Ok(JsValue::new(false)),
+            };
+            let image_data = arboard::ImageData {
+                bytes: rgba_bytes.into(),
+                width: width as usize,
+                height: height as usize,
+            };
+
+            match clipboard.set_image(image_data) {
+                Ok(_) => Ok(JsValue::new(true)),
+                Err(_) => Ok(JsValue::new(false)),
+            }
+        }
+        Err(_) => Ok(JsValue::new(false)),
+    }
+}
+
+/// 读取文本内容（优先本地，其次网络）。
+/// - `path` 不为空时优先读取本地文件；
+/// - 本地不存在/读取失败且提供 `url` 时回退网络；
+/// - 提供 `path` 且网络读取成功时会写入本地缓存。
+fn _read_text(path: Option<JsValue>, url: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let path = path
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy()
+        .trim()
+        .to_string();
+    let url = url
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy()
+        .trim()
+        .to_string();
+    let resolved_path = _resolve_script_resource_path(&path);
+
+    // path 不为空时优先读取本地文本。
+    if !path.is_empty()
+        && let Ok(content) = std::fs::read_to_string(&resolved_path)
+    {
+        return Ok(JsValue::from(js_string!(content)));
+    }
+
+    // 本地未命中且无 url 时，保持与 imreadUrl 一致，返回 undefined。
+    if url.is_empty() {
+        return Ok(JsValue::undefined());
+    }
+
+    // 回退到网络读取；若提供 path 则同步写入本地缓存。
+    let response = reqwest::blocking::get(url.as_str())
+        .map_err(|e| JsNativeError::error().with_message(format!("readText 请求失败: {e}")))?;
+    if !response.status().is_success() {
+        return Err(JsNativeError::error()
+            .with_message(format!(
+                "readText 请求失败，HTTP 状态码: {}",
+                response.status()
+            ))
+            .into());
+    }
+    let content = response.text().map_err(|e| {
+        JsNativeError::error().with_message(format!("readText 读取响应文本失败: {e}"))
+    })?;
+
+    if !path.is_empty() {
+        let target_path = Path::new(resolved_path.as_str());
+        if let Some(parent_dir) = target_path.parent()
+            && !parent_dir.as_os_str().is_empty()
+        {
+            std::fs::create_dir_all(parent_dir).map_err(|e| {
+                JsNativeError::error().with_message(format!(
+                    "readText 创建目录失败: {}, {e}",
+                    parent_dir.to_string_lossy()
+                ))
+            })?;
+        }
+        std::fs::write(target_path, content.as_bytes()).map_err(|e| {
+            JsNativeError::error().with_message(format!(
+                "readText 写入文件失败: {}, {e}",
+                target_path.to_string_lossy()
+            ))
+        })?;
+    }
+
+    Ok(JsValue::from(js_string!(content)))
+}
+
+/// 从本地或网络加载图像Mat对象函数
+/// 如果 local_path 不为空，先尝试从本地路径加载，失败则从网络下载并保存到本地
+/// 如果 local_path 为空，直接从网络加载不保存到本地
+fn _download_file(
+    url: Option<JsValue>,
+    filename: Option<JsValue>,
+    force: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let url = url
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy()
+        .trim()
+        .to_string();
+    let filename = filename
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy()
+        .trim()
+        .to_string();
+    let force = force.unwrap_or_else(|| JsValue::new(false)).to_boolean();
+
+    if url.is_empty() {
+        return Err(JsNativeError::typ()
+            .with_message("downloadFile url 不能为空")
+            .into());
+    }
+    if filename.is_empty() {
+        return Err(JsNativeError::typ()
+            .with_message("downloadFile filename 不能为空")
+            .into());
+    }
+
+    let resolved_filename = _resolve_script_resource_path(&filename);
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let resolvers_clone = resolvers.clone();
+
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            let async_result =
+                _spawn_blocking_with_script_stop_snapshot(move || -> Result<(), String> {
+                    let target_path = Path::new(resolved_filename.as_str());
+
+                    // force=false 且文件已存在时直接返回成功，不重复下载。
+                    if !force && target_path.exists() {
+                        return Ok(());
+                    }
+
+                    if let Some(parent) = target_path.parent()
+                        && !parent.as_os_str().is_empty()
+                    {
+                        std::fs::create_dir_all(parent).map_err(|e| {
+                            format!("创建下载目录失败: {}, {e}", parent.to_string_lossy())
+                        })?;
+                    }
+
+                    let client = reqwest::blocking::Client::builder()
+                        .connect_timeout(Duration::from_secs(8))
+                        .timeout(Duration::from_secs(30))
+                        .build()
+                        .map_err(|e| format!("初始化下载客户端失败: {e}"))?;
+                    let response = client
+                        .get(url.as_str())
+                        .send()
+                        .map_err(|e| format!("请求下载地址失败: {e}"))?;
+                    if !response.status().is_success() {
+                        return Err(format!("下载失败，HTTP 状态码: {}", response.status()));
+                    }
+
+                    let bytes = response
+                        .bytes()
+                        .map_err(|e| format!("读取下载内容失败: {e}"))?;
+                    std::fs::write(target_path, &bytes).map_err(|e| {
+                        format!("写入下载文件失败: {}, {e}", target_path.to_string_lossy())
+                    })?;
+
+                    Ok(())
+                })
+                .await;
+
+            let context = &mut context.borrow_mut();
+            match async_result {
+                Ok(Ok(())) => resolvers_clone
+                    .resolve
+                    .call(&JsValue::undefined(), &[], context),
+                Ok(Err(message)) => resolvers_clone.reject.call(
+                    &JsValue::undefined(),
+                    &[JsValue::from(js_string!(message))],
+                    context,
+                ),
+                Err(e) => {
+                    let message = format!("downloadFile 线程执行失败: {e}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(message))],
+                        context,
+                    )
+                }
+            }
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
+}
+
+/// 从本地或网络加载图像Mat对象函数
+/// 如果 local_path 不为空，先尝试从本地路径加载，失败则从网络下载并保存到本地
+/// 如果 local_path 为空，直接从网络加载不保存到本地
+fn _imread_url(
+    local_path: Option<JsValue>,
+    url: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let local_path = local_path
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let url = url
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let resolved_local_path = _resolve_script_resource_path(&local_path);
+
+    // 如果 local_path 不为空，先尝试从本地加载
+    if !local_path.is_empty() {
+        if let Ok(mat) =
+            opencv::imgcodecs::imread(&resolved_local_path, opencv::imgcodecs::IMREAD_COLOR)
+        {
+            let js_mat = Box::new(mat).into_js(ctx)?;
+            return Ok(js_mat);
+        }
+    }
+
+    // 从网络下载
+    match reqwest::blocking::get(&url) {
+        Ok(response) => {
+            if response.status().is_success() {
+                match response.bytes() {
+                    Ok(bytes) => {
+                        // 将字节数据转换为 Vec<u8>
+                        let byte_vec: Vec<u8> = bytes.to_vec();
+
+                        // 如果 local_path 不为空，保存原始数据到本地
+                        if !local_path.is_empty() {
+                            if let Err(_) = std::fs::write(&resolved_local_path, &byte_vec) {
+                                return Ok(JsValue::undefined());
+                            }
+                        }
+
+                        // 将字节数据解码为图像
+                        match opencv::imgcodecs::imdecode(
+                            &opencv::core::Vector::<u8>::from(byte_vec),
+                            opencv::imgcodecs::IMREAD_COLOR,
+                        ) {
+                            Ok(mat) => {
+                                let js_mat = Box::new(mat).into_js(ctx)?;
+                                Ok(js_mat)
+                            }
+                            Err(_) => Ok(JsValue::undefined()),
+                        }
+                    }
+                    Err(_) => Ok(JsValue::undefined()),
+                }
+            } else {
+                Err(js_error!("imread_url failed"))
+            }
+        }
+        Err(_) => Err(js_error!("imread_url failed")),
+    }
+}
+
+/// 从本地或网络加载图像Mat对象函数
+/// 如果 local_path 不为空，先尝试从本地路径加载，失败则从网络下载并保存到本地
+/// 如果 local_path 为空，直接从网络加载不保存到本地
+fn _imread_url_rgba(
+    local_path: Option<JsValue>,
+    url: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let local_path = local_path
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let url = url
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let resolved_local_path = _resolve_script_resource_path(&local_path);
+
+    // 如果 local_path 不为空，先尝试从本地加载
+    if !local_path.is_empty() {
+        if let Ok(mat) =
+            opencv::imgcodecs::imread(&resolved_local_path, opencv::imgcodecs::IMREAD_UNCHANGED)
+        {
+            let js_mat = Box::new(mat).into_js(ctx)?;
+            return Ok(js_mat);
+        }
+    }
+
+    // 从网络下载
+    match reqwest::blocking::get(&url) {
+        Ok(response) => {
+            if response.status().is_success() {
+                match response.bytes() {
+                    Ok(bytes) => {
+                        // 将字节数据转换为 Vec<u8>
+                        let byte_vec: Vec<u8> = bytes.to_vec();
+
+                        // 如果 local_path 不为空，保存原始数据到本地
+                        if !local_path.is_empty() {
+                            if let Err(_) = std::fs::write(&resolved_local_path, &byte_vec) {
+                                return Ok(JsValue::undefined());
+                            }
+                        }
+
+                        // 将字节数据解码为图像
+                        match opencv::imgcodecs::imdecode(
+                            &opencv::core::Vector::<u8>::from(byte_vec),
+                            opencv::imgcodecs::IMREAD_COLOR,
+                        ) {
+                            Ok(mat) => {
+                                let js_mat = Box::new(mat).into_js(ctx)?;
+                                Ok(js_mat)
+                            }
+                            Err(_) => Ok(JsValue::undefined()),
+                        }
+                    }
+                    Err(_) => Ok(JsValue::undefined()),
+                }
+            } else {
+                Err(js_error!("imread_url_rgba failed"))
+            }
+        }
+        Err(_) => Err(js_error!("imread_url_rgba failed")),
+    }
+}
+
+/// 初始化 OCR 模块（自动下载缺失资源）。
+///
+/// 参数：
+/// - `local_root_dir`：可选，本地资源目录（为空时使用默认目录）；
+/// - `cdn_base_url`：可选，CDN 根地址（默认 `https://cdn.dna-builder.cn/ocr`）；
+/// - `num_thread`：可选，OCR 线程数（默认 2）。
+///
+/// 返回：
+/// - 实际使用的本地资源目录绝对路径。
+fn _init_ocr(
+    local_root_dir: Option<JsValue>,
+    cdn_base_url: Option<JsValue>,
+    num_thread: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let local_root_dir = local_root_dir.unwrap_or_else(|| JsValue::undefined());
+    let cdn_base_url = cdn_base_url.unwrap_or_else(|| JsValue::undefined());
+    let num_thread = num_thread.unwrap_or_else(|| JsValue::new(4.0));
+
+    let local_root_dir = if local_root_dir.is_undefined() || local_root_dir.is_null() {
+        None
+    } else {
+        let raw = local_root_dir.to_string(ctx)?.to_std_string_lossy();
+        let normalized = raw.trim().to_string();
+        if normalized.is_empty() {
+            None
+        } else {
+            Some(PathBuf::from(_resolve_script_resource_path(&normalized)))
+        }
+    };
+
+    let cdn_base_url = if cdn_base_url.is_undefined() || cdn_base_url.is_null() {
+        None
+    } else {
+        let raw = cdn_base_url.to_string(ctx)?.to_std_string_lossy();
+        let normalized = raw.trim().to_string();
+        if normalized.is_empty() {
+            None
+        } else {
+            Some(normalized)
+        }
+    };
+
+    let num_thread = num_thread.to_number(ctx)? as i32;
+    let config = OcrInitConfig {
+        local_root_dir,
+        cdn_base_url,
+        num_thread,
+    };
+    let root_dir = ocr::init_ocr(config)
+        .map_err(|e| JsNativeError::error().with_message(format!("initOcr 失败: {e}")))?;
+    Ok(JsValue::from(js_string!(
+        root_dir.to_string_lossy().to_string()
+    )))
+}
+
+/// 初始化 Lite-Mono：下载模型并预热运行时。
+///
+/// 参数：
+/// - `local_root_dir`：可选，本地模型目录（为空时使用默认目录）；
+/// - `cdn_base_url`：可选，模型根地址（默认 Lite-Mono 官方地址）。
+///
+/// 返回：
+/// - 实际使用的本地模型目录绝对路径。
+fn _init_mono_depth(
+    local_root_dir: Option<JsValue>,
+    cdn_base_url: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let local_root_dir = local_root_dir.unwrap_or_else(|| JsValue::undefined());
+    let cdn_base_url = cdn_base_url.unwrap_or_else(|| JsValue::undefined());
+
+    let local_root_dir = if local_root_dir.is_undefined() || local_root_dir.is_null() {
+        None
+    } else {
+        let raw = local_root_dir.to_string(ctx)?.to_std_string_lossy();
+        let normalized = raw.trim().to_string();
+        if normalized.is_empty() {
+            None
+        } else {
+            Some(PathBuf::from(_resolve_script_resource_path(&normalized)))
+        }
+    };
+
+    let base_url = if cdn_base_url.is_undefined() || cdn_base_url.is_null() {
+        None
+    } else {
+        let raw = cdn_base_url.to_string(ctx)?.to_std_string_lossy();
+        let normalized = raw.trim().to_string();
+        if normalized.is_empty() {
+            None
+        } else {
+            Some(normalized)
+        }
+    };
+
+    let config = MonoDepthInitConfig {
+        local_root_dir,
+        base_url,
+    };
+    let root_dir = init_mono_depth(config)
+        .map_err(|e| JsNativeError::error().with_message(format!("initMonoDepth 失败: {e}")))?;
+    Ok(JsValue::from(js_string!(
+        root_dir.to_string_lossy().to_string()
+    )))
+}
+
+/// OCR 文字识别：输入 Mat，返回识别文本。
+fn _ocr_text(js_img_mat: Option<JsValue>, _ctx: &mut Context) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let mat = (*js_img_mat.borrow().data().inner).clone();
+    let text = ocr::ocr_text_from_mat(&mat)
+        .map_err(|e| JsNativeError::error().with_message(format!("ocrText 失败: {e}")))?;
+    Ok(JsValue::from(js_string!(text)))
+}
+
+/// 显示图片函数 (异步)
+fn _imshow(
+    title: Option<JsValue>,
+    js_img_mat: Option<JsValue>,
+    wait_key_ms: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    _throw_if_script_stop_requested()?;
+
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let js_img_mat = js_img_mat.unwrap_or_else(|| JsValue::undefined());
+    let js_img_mat = js_img_mat.get_native::<JsMat>()?;
+
+    let title = title
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let wait_key_ms = wait_key_ms.unwrap_or_else(|| js_value!(0)).to_number(ctx)? as i32;
+
+    let mat_clone = (*js_img_mat.borrow().data().inner).clone();
+    let sender = _get_imshow_sender();
+    let delay_ms = wait_key_ms.max(0) as u64;
+
+    // 先同步投递帧到渲染线程，避免脚本未让出执行权时窗口无内容。
+    let _ = sender.send(ImshowCommand::Show {
+        title,
+        mat: mat_clone,
+    });
+
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            if delay_ms > 0 {
+                thread::sleep(Duration::from_millis(delay_ms));
+            }
+
+            let context = &mut context.borrow_mut();
+            resolvers.resolve.call(&JsValue::undefined(), &[], context)
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
+}
+
+/// 交互式选择图像 ROI 区域函数（异步）
+///
+/// 在独立线程中弹出窗口，用户按回车/空格确认选区，按 c 取消。
+/// 取消时返回 `undefined`，确认时返回 `[x, y, w, h]`。
+fn _select_roi(
+    title: Option<JsValue>,
+    js_img_mat: Option<JsValue>,
+    show_crosshair: Option<JsValue>,
+    from_center: Option<JsValue>,
+    print_notice: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let js_img_mat = js_img_mat.unwrap_or_else(|| JsValue::undefined());
+    let js_img_mat = js_img_mat.get_native::<JsMat>()?;
+
+    let title = title
+        .unwrap_or_else(|| JsValue::from(js_string!("selectroi")))
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let show_crosshair = show_crosshair
+        .unwrap_or_else(|| JsValue::new(true))
+        .to_boolean();
+    let from_center = from_center
+        .unwrap_or_else(|| JsValue::new(false))
+        .to_boolean();
+    let print_notice = print_notice
+        .unwrap_or_else(|| JsValue::new(true))
+        .to_boolean();
+
+    let mat_clone = (*js_img_mat.borrow().data().inner).clone();
+    let resolvers_clone = resolvers.clone();
+
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            let async_result = _spawn_blocking_with_script_stop_snapshot(move || {
+                let roi_result = opencv::highgui::select_roi(
+                    &title,
+                    &mat_clone,
+                    show_crosshair,
+                    from_center,
+                    print_notice,
+                );
+                let _ = opencv::highgui::destroy_window(&title);
+
+                roi_result.map(|rect| {
+                    if rect.width > 0 && rect.height > 0 {
+                        Some((rect.x, rect.y, rect.width, rect.height))
+                    } else {
+                        None
+                    }
+                })
+            })
+            .await;
+
+            let context = &mut context.borrow_mut();
+            match async_result {
+                Ok(Ok(Some((x, y, w, h)))) => resolvers_clone.resolve.call(
+                    &JsValue::undefined(),
+                    &[js_value!([x, y, w, h], context)],
+                    context,
+                ),
+                Ok(Ok(None)) => resolvers_clone
+                    .resolve
+                    .call(&JsValue::undefined(), &[], context),
+                Ok(Err(e)) => {
+                    let msg = format!("selectroi 失败: {e}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(msg))],
+                        context,
+                    )
+                }
+                Err(e) => {
+                    let msg = format!("selectroi 线程执行失败: {e}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(msg))],
+                        context,
+                    )
+                }
+            }
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
+}
+
+/// 颜色键过滤函数，返回根据色键过滤后的灰度图像。
+fn _color_filter(
+    js_img_mat: Option<JsValue>,
+    colors: Option<JsValue>,
+    tolerance: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+
+    let colors = _parse_u32_array(colors.unwrap_or_else(|| JsValue::undefined()), ctx)?;
+    let tolerances =
+        _parse_color_tolerances(tolerance.unwrap_or_else(|| js_value!(0)), colors.len(), ctx)?;
+
+    match color_filter_impl(&img_mat, &colors, &tolerances) {
+        Ok(mask) => Box::new(mask).into_js(ctx),
+        Err(msg) => Err(JsNativeError::error().with_message(msg).into()),
+    }
+}
+
+/// HSL 加权色键过滤函数，返回根据色键过滤后的灰度图像。
+fn _color_filter_hsl(
+    js_img_mat: Option<JsValue>,
+    colors: Option<JsValue>,
+    tolerance: Option<JsValue>,
+    weights: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+
+    let colors = _parse_u32_array(colors.unwrap_or_else(|| JsValue::undefined()), ctx)?;
+    let tolerance = tolerance.unwrap_or_else(|| js_value!(0.0)).to_number(ctx)?;
+    let tolerance = if tolerance.is_finite() {
+        tolerance.max(0.0)
+    } else {
+        0.0
+    };
+    let weights = _parse_hsl_weights(weights.unwrap_or_else(|| JsValue::undefined()), ctx)?;
+
+    match color_filter_hsl_impl(&img_mat, &colors, tolerance, weights) {
+        Ok(mask) => Box::new(mask).into_js(ctx),
+        Err(msg) => Err(JsNativeError::error().with_message(msg).into()),
+    }
+}
+
+/// 色键匹配函数，返回匹配像素均值最大的颜色索引（支持最小 mean 与颜色容差）。
+fn _color_key_match(
+    js_img_mat: Option<JsValue>,
+    colors: Option<JsValue>,
+    min_mean: Option<JsValue>,
+    tolerance: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+
+    let colors = _parse_u32_array(colors.unwrap_or_else(|| JsValue::undefined()), ctx)?;
+    let min_mean = min_mean.unwrap_or_else(|| js_value!(0.0)).to_number(ctx)?;
+    let min_mean = if min_mean.is_finite() {
+        min_mean.max(0.0)
+    } else {
+        0.0
+    };
+    let tolerances =
+        _parse_color_tolerances(tolerance.unwrap_or_else(|| js_value!(0)), colors.len(), ctx)?;
+
+    let index = color_key_match_impl(&img_mat, &colors, min_mean, &tolerances)
+        .map_err(|msg| JsNativeError::error().with_message(msg))?;
+    Ok(JsValue::new(index))
+}
+
+/// 批量颜色模板匹配函数，返回首个命中模板的位置和索引。
+fn _batch_match_color(
+    js_src_mat: Option<JsValue>,
+    js_tpl_mats: Option<JsValue>,
+    cap: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_src_mat = js_src_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let src_mat = (*js_src_mat.borrow().data().inner).clone();
+
+    let tpl_mats = _parse_mat_array(js_tpl_mats.unwrap_or_else(|| JsValue::undefined()), ctx)?;
+    let cap = cap.unwrap_or_else(|| js_value!(0.8)).to_number(ctx)?;
+    let cap = cap.clamp(0.0, 1.0);
+
+    match batch_match_color_impl(&src_mat, tpl_mats, cap) {
+        Ok(Some((index, x, y))) => {
+            let pos = js_value!([x, y], ctx);
+            let result = js_object!({
+                pos: pos,
+                index: index,
+            }, ctx);
+
+            Ok(result.into())
+        }
+        Ok(None) => Ok(JsValue::undefined()),
+        Err(msg) => Err(JsNativeError::error().with_message(msg).into()),
+    }
+}
+
+/// ORB 特征比较函数，返回优质匹配数量。
+fn _orb_match_count(
+    js_img1_mat: Option<JsValue>,
+    js_img2_mat: Option<JsValue>,
+    _ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img1_mat = js_img1_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img1_mat = (*js_img1_mat.borrow().data().inner).clone();
+
+    let js_img2_mat = js_img2_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img2_mat = (*js_img2_mat.borrow().data().inner).clone();
+
+    let count = orb_match_count_impl(&img1_mat, &img2_mat)
+        .map_err(|msg| JsNativeError::error().with_message(msg))?;
+    Ok(JsValue::new(count))
+}
+
+/// SIFT 匹配定位函数，返回 img2 在 img1 中的坐标与尺寸信息。
+fn _sift_locate(
+    js_img1_mat: Option<JsValue>,
+    js_img2_mat: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img1_mat = js_img1_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img1_mat = (*js_img1_mat.borrow().data().inner).clone();
+
+    let js_img2_mat = js_img2_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img2_mat = (*js_img2_mat.borrow().data().inner).clone();
+
+    let result = sift_locate_impl(&img1_mat, &img2_mat)
+        .map_err(|msg| JsNativeError::error().with_message(msg))?;
+
+    let Some((x, y, w, h, good_matches, inliers, corners)) = result else {
+        return Ok(JsValue::undefined());
+    };
+
+    let js_corners = JsArray::new(ctx);
+    for point in corners {
+        js_corners.push(js_value!([point.x, point.y], ctx), ctx)?;
+    }
+
+    let result_obj = js_object!(
+        {
+            pos: js_value!([x, y], ctx),
+            size: js_value!([w, h], ctx),
+            bbox: js_value!([x, y, w, h], ctx),
+            goodMatches: good_matches,
+            inliers: inliers,
+            corners: js_corners,
+        },
+        ctx
+    );
+
+    Ok(result_obj.into())
+}
+
+/// 小地图预处理函数：遮蔽圆盘外区域、中心角色区域与朝向高亮锥形区域。
+///
+/// 参数：
+/// - `img`: 输入 Mat
+/// - `centerX/centerY`: 圆心坐标（默认图像中心）
+/// - `radius`: 小地图半径（默认 min(w,h)/2 - 1）
+/// - `coneAngleDeg`: 视角锥形角度（默认 70，<=0 表示不遮蔽锥形）
+/// - `innerRadius`: 中心遮罩半径（默认 radius*0.22，<=0 表示不遮蔽中心）
+/// - `headingDeg`: 锥形方向角（默认 -90，即向上）
+fn _preprocess_minimap_for_sift(
+    js_img_mat: Option<JsValue>,
+    center_x: Option<JsValue>,
+    center_y: Option<JsValue>,
+    radius: Option<JsValue>,
+    cone_angle_deg: Option<JsValue>,
+    inner_radius: Option<JsValue>,
+    heading_deg: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+    if img_mat.rows() <= 0 || img_mat.cols() <= 0 {
+        return Err(JsNativeError::typ()
+            .with_message("输入 Mat 尺寸无效")
+            .into());
+    }
+
+    let cols = img_mat.cols();
+    let rows = img_mat.rows();
+    let default_center_x = cols / 2;
+    let default_center_y = rows / 2;
+    let default_radius = (cols.min(rows) / 2 - 1).max(1);
+    let default_inner_radius = ((default_radius as f64) * 0.22).round() as i32;
+
+    let center_x = center_x
+        .unwrap_or_else(|| js_value!(default_center_x))
+        .to_number(ctx)? as i32;
+    let center_y = center_y
+        .unwrap_or_else(|| js_value!(default_center_y))
+        .to_number(ctx)? as i32;
+    let radius = radius
+        .unwrap_or_else(|| js_value!(default_radius))
+        .to_number(ctx)? as i32;
+    let cone_angle_deg = cone_angle_deg
+        .unwrap_or_else(|| js_value!(70.0))
+        .to_number(ctx)?;
+    let inner_radius = inner_radius
+        .unwrap_or_else(|| js_value!(default_inner_radius))
+        .to_number(ctx)? as i32;
+    let heading_deg = heading_deg
+        .unwrap_or_else(|| js_value!(-90.0))
+        .to_number(ctx)?;
+
+    let out = preprocess_minimap_for_sift_impl(
+        &img_mat,
+        center_x,
+        center_y,
+        radius,
+        cone_angle_deg,
+        inner_radius,
+        heading_deg,
+    )
+    .map_err(|msg| JsNativeError::error().with_message(msg))?;
+    Box::new(out).into_js(ctx)
+}
+
+/// SIFT 拼接函数：将 patch 对齐并融合到 base，必要时自动扩展画布。
+fn _sift_stitch(
+    js_base_mat: Option<JsValue>,
+    js_patch_mat: Option<JsValue>,
+    min_good_matches: Option<JsValue>,
+    min_inliers: Option<JsValue>,
+    ransac_reproj_threshold: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_base_mat = js_base_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let base_mat = (*js_base_mat.borrow().data().inner).clone();
+    let js_patch_mat = js_patch_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let patch_mat = (*js_patch_mat.borrow().data().inner).clone();
+
+    let min_good_matches = min_good_matches
+        .unwrap_or_else(|| js_value!(10))
+        .to_number(ctx)? as i32;
+    let min_inliers = min_inliers.unwrap_or_else(|| js_value!(8)).to_number(ctx)? as i32;
+    let ransac_reproj_threshold = ransac_reproj_threshold
+        .unwrap_or_else(|| js_value!(3.0))
+        .to_number(ctx)?;
+
+    let result = sift_stitch_impl(
+        &base_mat,
+        &patch_mat,
+        min_good_matches,
+        min_inliers,
+        ransac_reproj_threshold,
+    )
+    .map_err(|msg| JsNativeError::error().with_message(msg))?;
+
+    let Some((stitched, x, y, w, h, good_matches, inliers, corners)) = result else {
+        return Ok(JsValue::undefined());
+    };
+
+    let js_image = Box::new(stitched).into_js(ctx)?;
+    let js_corners = JsArray::new(ctx);
+    for point in corners {
+        js_corners.push(js_value!([point.x, point.y], ctx), ctx)?;
+    }
+
+    let result_obj = js_object!(
+        {
+            image: js_image,
+            pos: js_value!([x, y], ctx),
+            size: js_value!([w, h], ctx),
+            bbox: js_value!([x, y, w, h], ctx),
+            goodMatches: good_matches,
+            inliers: inliers,
+            corners: js_corners,
+        },
+        ctx
+    );
+    Ok(result_obj.into())
+}
+
+/// 计算输入图像的感知哈希（支持彩色模式）。
+fn _perceptual_hash(
+    js_img_mat: Option<JsValue>,
+    color: Option<JsValue>,
+    _ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+    let color = color.is_some_and(|v| v.to_boolean());
+
+    let hash = perceptual_hash_impl(&img_mat, color)
+        .map_err(|msg| JsNativeError::error().with_message(msg))?;
+    Ok(JsValue::from(js_string!(hash)))
+}
+
+/// 计算输入图像的 ORB 特征字符串（压缩后的原始 ORB 描述子）。
+fn _orb_feature(js_img_mat: Option<JsValue>, _ctx: &mut Context) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+
+    let feature =
+        orb_feature_impl(&img_mat).map_err(|msg| JsNativeError::error().with_message(msg))?;
+    Ok(JsValue::from(js_string!(feature)))
+}
+
+/// 预测罗盘/圆盘类图像朝向角度（单位：度，范围 0-359）。
+fn _predict_rotation(js_img_mat: Option<JsValue>, _ctx: &mut Context) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+
+    let angle = predict_rotation(&img_mat)
+        .map_err(|e| JsNativeError::error().with_message(e.to_string()))?;
+    Ok(JsValue::new(angle))
+}
+
+/// 比较源哈希和模板哈希数组的汉明距离，返回最佳匹配索引或 -1。
+fn _match_hamming_hash(
+    source_hash: Option<JsValue>,
+    template_hashes: Option<JsValue>,
+    max_distance: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let source_hash = source_hash
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let source_hash =
+        normalize_hash_hex(&source_hash).map_err(|msg| JsNativeError::error().with_message(msg))?;
+
+    let template_hashes =
+        _parse_string_array(template_hashes.unwrap_or_else(|| JsValue::undefined()), ctx)?;
+    let max_distance = max_distance
+        .unwrap_or_else(|| js_value!(0))
+        .to_number(ctx)?;
+    let max_distance = if max_distance.is_finite() {
+        max_distance.max(0.0) as u32
+    } else {
+        0
+    };
+
+    let mut best_index: i32 = -1;
+    let mut best_distance = u32::MAX;
+    for (index, template_hash) in template_hashes.iter().enumerate() {
+        let normalized = normalize_hash_hex(template_hash)
+            .map_err(|msg| JsNativeError::error().with_message(msg))?;
+        if normalized.len() != source_hash.len() {
+            continue;
+        }
+        let distance = hamming_distance_hex(&source_hash, &normalized)
+            .map_err(|msg| JsNativeError::error().with_message(msg))?;
+        if distance <= max_distance && distance < best_distance {
+            best_distance = distance;
+            best_index = index as i32;
+            if distance == 0 {
+                break;
+            }
+        }
+    }
+
+    Ok(JsValue::new(best_index))
+}
+
+/// 比较 ORB 特征字符串和模板数组，返回最佳匹配索引或 -1。
+///
+/// 参数 `threshold` 表示最小置信度（0-1 或 0-100）。
+fn _match_orb_feature(
+    source_feature: Option<JsValue>,
+    template_features: Option<JsValue>,
+    threshold: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let source_feature = source_feature
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+
+    let template_features = _parse_string_array(
+        template_features.unwrap_or_else(|| JsValue::undefined()),
+        ctx,
+    )?;
+    let threshold = threshold.unwrap_or_else(|| js_value!(0)).to_number(ctx)?;
+    let threshold = if threshold.is_finite() {
+        threshold
+    } else {
+        0.0
+    };
+
+    let best_index = match_orb_feature_impl(&source_feature, &template_features, threshold)
+        .map_err(|msg| JsNativeError::error().with_message(msg))?;
+    Ok(JsValue::new(best_index))
+}
+
+/// 形态学图像处理函数，支持开闭运算、腐蚀、膨胀等操作。
+fn _morphology_ex(
+    js_img_mat: Option<JsValue>,
+    op: Option<JsValue>,
+    kernel_size: Option<JsValue>,
+    iterations: Option<JsValue>,
+    shape: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+
+    let op = _parse_morphology_op(op, ctx)?;
+    let shape = _parse_morphology_shape(shape, ctx)?;
+    let kernel_size = kernel_size.unwrap_or_else(|| js_value!(3)).to_number(ctx)? as i32;
+    let iterations = iterations.unwrap_or_else(|| js_value!(1)).to_number(ctx)? as i32;
+
+    match morphology_ex_impl(&img_mat, op, kernel_size, iterations, shape) {
+        Ok(dst) => Box::new(dst).into_js(ctx),
+        Err(msg) => Err(JsNativeError::error().with_message(msg).into()),
+    }
+}
+
+/// 轮廓提取函数，返回轮廓信息列表（面积、外接矩形、中心点）。
+fn _find_contours(
+    js_img_mat: Option<JsValue>,
+    min_area: Option<JsValue>,
+    mode: Option<JsValue>,
+    method: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+
+    // 兼容旧参数顺序: findContours(img, mode, method, minArea)
+    // 新参数顺序: findContours(img, minArea, mode, method)
+    let (raw_min_area, raw_mode, raw_method) = if min_area.as_ref().is_some_and(JsValue::is_string)
+    {
+        (method, min_area, mode)
+    } else {
+        (min_area, mode, method)
+    };
+
+    let mode = _parse_contour_mode(raw_mode, ctx)?;
+    let method = _parse_contour_method(raw_method, ctx)?;
+    let min_area = raw_min_area
+        .unwrap_or_else(|| js_value!(0.0))
+        .to_number(ctx)?;
+    let min_area = if min_area.is_finite() {
+        min_area.max(0.0)
+    } else {
+        0.0
+    };
+
+    let contours = find_contours_impl(&img_mat, mode, method, min_area)
+        .map_err(|msg| JsNativeError::error().with_message(msg))?;
+
+    let result = JsArray::new(ctx);
+    for (area, rect, center) in contours {
+        let contour_obj = js_object!(
+            {
+                area: area,
+                bbox: js_value!([rect.x, rect.y, rect.width, rect.height], ctx),
+                center: js_value!([center.0, center.1], ctx),
+            },
+            ctx
+        );
+
+        result.push(contour_obj, ctx)?;
+    }
+
+    Ok(result.into())
+}
+
+/// 单行文本字符分割函数（基于灰度图 + 横向空隙检测）。
+///
+/// 参数：
+/// - `js_img_mat`: 输入图像 Mat（建议灰度图；彩色会自动转灰度）
+/// - `min_gap_width`: 最小分割空隙宽度，默认 2
+/// - `min_char_width`: 最小字符宽度，默认 2
+///
+/// 返回：
+/// - `[[x, y, w, h], ...]`，按从左到右排序的 bbox 数组
+fn _segment_chars(
+    js_img_mat: Option<JsValue>,
+    min_gap_width: Option<JsValue>,
+    min_char_width: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+
+    let min_gap_width = min_gap_width
+        .unwrap_or_else(|| js_value!(2))
+        .to_number(ctx)? as i32;
+    let min_char_width = min_char_width
+        .unwrap_or_else(|| js_value!(2))
+        .to_number(ctx)? as i32;
+
+    let bboxes = segment_single_line_chars_impl(&img_mat, min_gap_width, min_char_width)
+        .map_err(|msg| JsNativeError::error().with_message(msg))?;
+
+    let result = JsArray::new(ctx);
+    for (x, y, w, h) in bboxes {
+        result.push(js_value!([x, y, w, h], ctx), ctx)?;
+    }
+
+    Ok(result.into())
+}
+
+/// 轮廓绘制函数，返回绘制后的图像（BGR）。
+fn _draw_contours(
+    js_img_mat: Option<JsValue>,
+    min_area: Option<JsValue>,
+    mode: Option<JsValue>,
+    method: Option<JsValue>,
+    color: Option<JsValue>,
+    thickness: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+
+    // 新增模式：drawContours(img, bboxes, color?, thickness?)
+    // 其中 bboxes 支持 [[x,y,w,h], ...] 或 [{ bbox: [x,y,w,h] }, ...]
+    let is_bbox_mode = min_area
+        .as_ref()
+        .and_then(JsValue::as_object)
+        .is_some_and(|obj| JsArray::from_object(obj.clone()).is_ok());
+    if is_bbox_mode {
+        let bboxes = _parse_bbox_array(min_area.unwrap_or_else(|| JsValue::undefined()), ctx)?;
+        // 在 bbox 模式下，第三、四参数分别映射为 color/thickness
+        let draw_color = color
+            .or(mode)
+            .unwrap_or_else(|| js_value!(0x00FF00))
+            .to_number(ctx)? as u32
+            & 0x00FF_FFFF;
+        let draw_thickness = thickness
+            .or(method)
+            .unwrap_or_else(|| js_value!(1))
+            .to_number(ctx)? as i32;
+
+        return match draw_bboxes_impl(&img_mat, &bboxes, draw_color, draw_thickness.max(1)) {
+            Ok(dst) => Box::new(dst).into_js(ctx),
+            Err(msg) => Err(JsNativeError::error().with_message(msg).into()),
+        };
+    }
+
+    // 兼容旧参数顺序: drawContours(img, mode, method, minArea, color, thickness)
+    // 新参数顺序: drawContours(img, minArea, mode, method, color, thickness)
+    let (raw_min_area, raw_mode, raw_method) = if min_area.as_ref().is_some_and(JsValue::is_string)
+    {
+        (method, min_area, mode)
+    } else {
+        (min_area, mode, method)
+    };
+
+    let mode = _parse_contour_mode(raw_mode, ctx)?;
+    let method = _parse_contour_method(raw_method, ctx)?;
+    let min_area = raw_min_area
+        .unwrap_or_else(|| js_value!(0.0))
+        .to_number(ctx)?;
+    let min_area = if min_area.is_finite() {
+        min_area.max(0.0)
+    } else {
+        0.0
+    };
+
+    let color = color
+        .unwrap_or_else(|| js_value!(0x00FF00))
+        .to_number(ctx)? as u32
+        & 0x00FF_FFFF;
+    let thickness = thickness.unwrap_or_else(|| js_value!(1)).to_number(ctx)? as i32;
+    let thickness = thickness.max(1);
+
+    match draw_contours_impl(&img_mat, mode, method, min_area, color, thickness) {
+        Ok(dst) => Box::new(dst).into_js(ctx),
+        Err(msg) => Err(JsNativeError::error().with_message(msg).into()),
+    }
+}
+
+/// 使用两个Mat对象进行颜色和模板匹配函数
+fn _find_color_and_match_template(
+    js_img_mat: Option<JsValue>,
+    js_tpl_mat: Option<JsValue>,
+    color: Option<JsValue>,
+    tolerance: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    // 获取第一个参数 (图像Mat)
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+
+    // 获取第二个参数 (模板Mat)
+    let js_tpl_mat = js_tpl_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+
+    // 获取颜色参数
+    let color = color
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as u32;
+    let tolerance = tolerance
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as u8;
+    let bgr_color = rgb_to_bgr(color);
+
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+    let tpl_mat = (*js_tpl_mat.borrow().data().inner).clone();
+    let resolvers_clone = resolvers.clone();
+
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            let async_result = _spawn_blocking_with_script_stop_snapshot(move || {
+                find_color_and_match_template(&img_mat, &tpl_mat, bgr_color, tolerance)
+            })
+            .await;
+
+            let context = &mut context.borrow_mut();
+            match async_result {
+                Ok(Ok(Some((x, y)))) => resolvers_clone.resolve.call(
+                    &JsValue::undefined(),
+                    &[js_value!([x, y], context)],
+                    context,
+                ),
+                Ok(Ok(None)) => resolvers_clone
+                    .resolve
+                    .call(&JsValue::undefined(), &[], context),
+                Ok(Err(e)) => {
+                    let msg = format!("findColorAndMatchTemplate 匹配失败: {:?}", e);
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(msg))],
+                        context,
+                    )
+                }
+                Err(e) => {
+                    let msg = format!("findColorAndMatchTemplate 线程执行失败: {e}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(msg))],
+                        context,
+                    )
+                }
+            }
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
+}
+
+/// 模板匹配函数
+fn _match_template(
+    js_img_mat: Option<JsValue>,
+    js_tpl_mat: Option<JsValue>,
+    tolerance: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    // 获取第一个参数 (图像Mat)
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+
+    // 获取第二个参数 (模板Mat)
+    let js_tpl_mat = js_tpl_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+
+    // 获取容差参数
+    let tolerance = tolerance
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as f64;
+
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+    let tpl_mat = (*js_tpl_mat.borrow().data().inner).clone();
+    let resolvers_clone = resolvers.clone();
+
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            let async_result = _spawn_blocking_with_script_stop_snapshot(move || {
+                match_template(&img_mat, &tpl_mat, tolerance)
+            })
+            .await;
+
+            let context = &mut context.borrow_mut();
+            match async_result {
+                Ok(Ok(Some((x, y)))) => resolvers_clone.resolve.call(
+                    &JsValue::undefined(),
+                    &[js_value!([x, y], context)],
+                    context,
+                ),
+                Ok(Ok(None)) => resolvers_clone
+                    .resolve
+                    .call(&JsValue::undefined(), &[], context),
+                Ok(Err(e)) => {
+                    let msg = format!("matchTemplate 匹配失败: {:?}", e);
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(msg))],
+                        context,
+                    )
+                }
+                Err(e) => {
+                    let msg = format!("matchTemplate 线程执行失败: {e}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(msg))],
+                        context,
+                    )
+                }
+            }
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
+}
+
+/// 颜色矩阵检查函数
+fn _cc(
+    js_img_mat: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    color: Option<JsValue>,
+    tolerance: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    // 获取第一个参数 (图像Mat)
+    let js_img_mat = js_img_mat
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+
+    let x = x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let color = color
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as u32;
+    let tolerance = tolerance
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as u8;
+
+    Ok(JsValue::new(check_color_mat(
+        &js_img_mat.borrow().data().inner,
+        x,
+        y,
+        color,
+        tolerance,
+    )))
+}
+
+/// 等待窗口指定坐标颜色达到条件（异步）。
+///
+/// 规则：
+/// - `tolerance >= 0`：等待颜色“满足”条件后返回 `true`。
+/// - `tolerance < 0`：等待颜色“变为不满足”条件后返回 `true`。
+/// - 超时后返回 `false`。
+fn _wait_color(
+    hwnd: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    color: Option<JsValue>,
+    tolerance: Option<JsValue>,
+    timeout: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let hwnd_raw = hwnd
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as isize;
+    let x = x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let color = color
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as u32;
+
+    let tolerance_raw = tolerance.unwrap_or_else(|| js_value!(0)).to_number(ctx)?;
+    let wait_for_match = tolerance_raw >= 0.0;
+    let tolerance_abs = tolerance_raw.abs().clamp(0.0, 255.0) as u8;
+
+    let timeout_raw = timeout
+        .unwrap_or_else(|| js_value!(20_000))
+        .to_number(ctx)?;
+    let timeout_ms = if timeout_raw.is_finite() {
+        timeout_raw.clamp(0.0, u64::MAX as f64) as u64
+    } else {
+        20_000_u64
+    };
+
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let resolvers_clone = resolvers.clone();
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            let async_result = _spawn_blocking_with_script_stop_snapshot(move || {
+                let hwnd = HWND(hwnd_raw as *mut std::ffi::c_void);
+                let deadline = Duration::from_millis(timeout_ms);
+                let start = std::time::Instant::now();
+                let poll_interval = Duration::from_millis(30);
+
+                loop {
+                    if should_stop_current_script() {
+                        return false;
+                    }
+                    if let Some(img_mat) = capture_window_wgc(hwnd) {
+                        let matched = check_color_mat(&img_mat, x, y, color, tolerance_abs);
+                        let condition_met = if wait_for_match { matched } else { !matched };
+                        if condition_met {
+                            return true;
+                        }
+                    }
+
+                    if start.elapsed() >= deadline {
+                        return false;
+                    }
+                    thread::sleep(poll_interval);
+                }
+            })
+            .await;
+
+            let context = &mut context.borrow_mut();
+            match async_result {
+                Ok(result) => resolvers_clone.resolve.call(
+                    &JsValue::undefined(),
+                    &[JsValue::new(result)],
+                    context,
+                ),
+                Err(e) => {
+                    let msg = format!("waitColor 线程执行失败: {e}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(msg))],
+                        context,
+                    )
+                }
+            }
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
+}
+
+/// 读取脚本配置项并返回当前值。
+///
+/// 行为说明：
+/// 1. GUI 模式会向前端发送事件，请求创建/更新配置 UI；
+/// 2. 前端持久化配置并回传当前值；
+/// 3. CLI 模式优先读取外部传入配置；
+/// 4. 若回传超时、未命中配置或出现异常，则返回默认值。
+fn _read_config(
+    name: Option<JsValue>,
+    desc: Option<JsValue>,
+    format: Option<JsValue>,
+    default_value: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    _throw_if_script_stop_requested()?;
+
+    let name = name
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy()
+        .trim()
+        .to_string();
+    if name.is_empty() {
+        return Err(JsNativeError::typ()
+            .with_message("readConfig name 不能为空")
+            .into());
+    }
+
+    let desc = desc
+        .unwrap_or_else(|| JsValue::from(js_string!("")))
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let format_spec = _parse_script_config_format(format, ctx)?;
+    let default_value = _coerce_js_to_script_config_value(
+        default_value.unwrap_or_else(|| JsValue::undefined()),
+        &format_spec,
+        ctx,
+    )?;
+    _remember_script_config_format(name.as_str(), &format_spec);
+
+    #[cfg(feature = "dob-script-cli")]
+    if SCRIPT_EVENT_APP_HANDLE.get().is_none() {
+        if let Some(cli_value) =
+            _resolve_cli_script_config_value(name.as_str(), &format_spec, &default_value)
+                .map_err(|e| JsNativeError::error().with_message(e))?
+        {
+            return _script_config_value_to_js(&cli_value, ctx);
+        }
+    }
+
+    let Some(app_handle) = SCRIPT_EVENT_APP_HANDLE.get() else {
+        return _script_config_value_to_js(&default_value, ctx);
+    };
+
+    let request_id = _next_script_config_request_id();
+    let (tx, rx) = mpsc::channel::<serde_json::Value>();
+    {
+        let mut pending = _script_config_pending_map().lock().map_err(|e| {
+            JsNativeError::error().with_message(format!("配置请求映射锁失败: {e:?}"))
+        })?;
+        pending.insert(request_id.clone(), tx);
+    }
+
+    let emit_result = app_handle.emit(
+        "script-read-config",
+        serde_json::json!({
+            "requestId": request_id,
+            "scope": _current_script_scope_name(),
+            "name": name,
+            "desc": desc,
+            "kind": format_spec.kind.as_str(),
+            "options": format_spec.options.clone(),
+            "defaultValue": _script_config_value_to_json(&default_value),
+        }),
+    );
+    if let Err(e) = emit_result {
+        let mut pending = _script_config_pending_map().lock().map_err(|lock_err| {
+            JsNativeError::error().with_message(format!("配置请求映射锁失败: {lock_err:?}"))
+        })?;
+        pending.remove(&request_id);
+        return Err(JsNativeError::error()
+            .with_message(format!("发送 script-read-config 事件失败: {e}"))
+            .into());
+    }
+
+    let wait_deadline = Instant::now() + Duration::from_secs(10);
+    let response = loop {
+        if should_stop_current_script() {
+            break None;
+        }
+        let now = Instant::now();
+        if now >= wait_deadline {
+            break None;
+        }
+        let wait_for = (wait_deadline - now).min(Duration::from_millis(100));
+        match rx.recv_timeout(wait_for) {
+            Ok(value) => break Some(value),
+            Err(mpsc::RecvTimeoutError::Timeout) => continue,
+            Err(mpsc::RecvTimeoutError::Disconnected) => break None,
+        }
+    };
+    {
+        let mut pending = _script_config_pending_map().lock().map_err(|e| {
+            JsNativeError::error().with_message(format!("配置请求映射锁失败: {e:?}"))
+        })?;
+        pending.remove(&request_id);
+    }
+
+    _throw_if_script_stop_requested()?;
+
+    let result_value = if let Some(response_value) = response {
+        _coerce_json_to_script_config_value(&response_value, &format_spec, &default_value)
+    } else {
+        default_value
+    };
+
+    _script_config_value_to_js(&result_value, ctx)
+}
+
+/// 写入脚本配置项当前值（仅允许写入 readConfig 已定义键）。
+fn _set_config(
+    name: Option<JsValue>,
+    value: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let name = name
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy()
+        .trim()
+        .to_string();
+    if name.is_empty() {
+        return Err(JsNativeError::typ()
+            .with_message("setConfig name 不能为空")
+            .into());
+    }
+
+    let format_spec = _find_script_config_format(name.as_str()).ok_or_else(|| {
+        JsNativeError::typ().with_message(format!(
+            "setConfig '{name}' 只能写入已通过 readConfig 定义的配置键"
+        ))
+    })?;
+    let normalized_value = _coerce_js_to_script_config_value(
+        value.unwrap_or_else(|| JsValue::undefined()),
+        &format_spec,
+        ctx,
+    )?;
+    let value_json = _script_config_value_to_json(&normalized_value);
+
+    #[cfg(feature = "dob-script-cli")]
+    if SCRIPT_EVENT_APP_HANDLE.get().is_none() {
+        _set_cli_script_config_value(name.as_str(), value_json.clone())
+            .map_err(|e| JsNativeError::error().with_message(e))?;
+        return Ok(JsValue::new(true));
+    }
+
+    let Some(app_handle) = SCRIPT_EVENT_APP_HANDLE.get() else {
+        return Ok(JsValue::new(false));
+    };
+    app_handle
+        .emit(
+            "script-set-config",
+            serde_json::json!({
+                "scope": _current_script_scope_name(),
+                "name": name,
+                "value": value_json,
+            }),
+        )
+        .map_err(|e| {
+            JsNativeError::error().with_message(format!("发送 script-set-config 事件失败: {e}"))
+        })?;
+
+    Ok(JsValue::new(true))
+}
+
+/// 深度预测函数：返回深度图、障碍掩码与路径方向候选点。
+fn _predict_depth(
+    js_left_image: Option<JsValue>,
+    js_right_image: Option<JsValue>,
+    num_disp: Option<JsValue>,
+    block_size: Option<JsValue>,
+    min_region_area: Option<JsValue>,
+    max_candidates: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    // 获取第一个参数 (左图Mat)
+    let js_left_image = js_left_image
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+
+    // 获取第二个参数 (右图Mat)
+    let js_right_image = js_right_image
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+
+    let num_disp = num_disp.unwrap_or_else(|| js_value!(160)).to_number(ctx)? as i32;
+    let block_size = block_size.unwrap_or_else(|| js_value!(5)).to_number(ctx)? as i32;
+    let min_region_area = min_region_area
+        .unwrap_or_else(|| js_value!(800))
+        .to_number(ctx)? as i32;
+    let max_candidates = max_candidates
+        .unwrap_or_else(|| js_value!(3))
+        .to_number(ctx)? as usize;
+
+    // 执行深度估计
+    let depth_map = predict_depth(
+        &js_left_image.borrow().data().inner,
+        &js_right_image.borrow().data().inner,
+        num_disp,
+        block_size,
+    )
+    .map_err(|msg| JsNativeError::error().with_message(msg))?;
+
+    let directions = find_path_direction_coords(&depth_map, min_region_area, max_candidates)
+        .map_err(|msg| JsNativeError::error().with_message(msg))?;
+
+    let js_depth = Box::new(depth_map.disparity_mat).into_js(ctx)?;
+    let js_obstacle_mask = Box::new(depth_map.obstacle_mask).into_js(ctx)?;
+
+    let js_directions = JsArray::new(ctx);
+    for point in directions {
+        let point_array = js_value!([point[0], point[1]], ctx);
+        js_directions.push(point_array, ctx)?;
+    }
+
+    let result = js_object!(
+        {
+            depth: js_depth,
+            obstacleMask: js_obstacle_mask,
+            directions: js_directions,
+        },
+        ctx
+    );
+    Ok(result.into())
+}
+
+/// Lite-Mono 单目深度预测函数：输入 Mat，返回 8 位相对深度图。
+fn _mono_depth(js_image: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let js_image = js_image
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let input_mat = js_image.borrow().data().inner.clone();
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let resolvers_clone = resolvers.clone();
+
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            let async_result =
+                _spawn_blocking_with_script_stop_snapshot(move || predict_mono_depth(&input_mat))
+                    .await;
+
+            let context = &mut context.borrow_mut();
+            match async_result {
+                Ok(Ok(depth_mat)) => match Box::new(depth_mat).into_js(context) {
+                    Ok(js_depth) => {
+                        resolvers_clone
+                            .resolve
+                            .call(&JsValue::undefined(), &[js_depth], context)
+                    }
+                    Err(error) => {
+                        let message = format!("monoDepth 返回值转换失败: {error:?}");
+                        resolvers_clone.reject.call(
+                            &JsValue::undefined(),
+                            &[JsValue::from(js_string!(message))],
+                            context,
+                        )
+                    }
+                },
+                Ok(Err(message)) => resolvers_clone.reject.call(
+                    &JsValue::undefined(),
+                    &[JsValue::from(js_string!(message))],
+                    context,
+                ),
+                Err(error) => {
+                    let message = format!("monoDepth 线程执行失败: {error}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(message))],
+                        context,
+                    )
+                }
+            }
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
+}
+
+/// Lite-Mono 单目路线预测函数：返回相对深度图、地形掩码、障碍掩码与候选方向。
+fn _predict_mono_route(
+    js_image: Option<JsValue>,
+    min_region_area: Option<JsValue>,
+    max_candidates: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let js_image = js_image
+        .unwrap_or_else(|| JsValue::undefined())
+        .get_native::<JsMat>()?;
+    let input_mat = js_image.borrow().data().inner.clone();
+    let min_region_area = min_region_area
+        .unwrap_or_else(|| js_value!(800))
+        .to_number(ctx)? as i32;
+    let max_candidates = max_candidates
+        .unwrap_or_else(|| js_value!(3))
+        .to_number(ctx)? as usize;
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let resolvers_clone = resolvers.clone();
+
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            let async_result = _spawn_blocking_with_script_stop_snapshot(move || {
+                let input_size = input_mat
+                    .size()
+                    .map_err(|e| format!("读取 predictMonoRoute 输入尺寸失败: {e}"))?;
+                let mono_started_at = Instant::now();
+                let depth_mat = predict_mono_depth_model_space(&input_mat)?;
+                let mono_cost_ms = mono_started_at.elapsed().as_millis();
+                let depth_size = depth_mat
+                    .size()
+                    .map_err(|e| format!("读取 predictMonoRoute 深度尺寸失败: {e}"))?;
+                let route_started_at = Instant::now();
+                let mono_route = predict_mono_route(&depth_mat, min_region_area, max_candidates)?;
+                let route_cost_ms = route_started_at.elapsed().as_millis();
+                let scale_x = if depth_size.width > 0 {
+                    f64::from(input_size.width) / f64::from(depth_size.width)
+                } else {
+                    1.0
+                };
+                let scale_y = if depth_size.height > 0 {
+                    f64::from(input_size.height) / f64::from(depth_size.height)
+                } else {
+                    1.0
+                };
+                let mapped_directions = mono_route
+                    .directions
+                    .iter()
+                    .map(|point| {
+                        [
+                            ((f64::from(point[0]) * scale_x).round() as i32)
+                                .clamp(0, input_size.width.saturating_sub(1)),
+                            ((f64::from(point[1]) * scale_y).round() as i32)
+                                .clamp(0, input_size.height.saturating_sub(1)),
+                        ]
+                    })
+                    .collect::<Vec<_>>();
+                println!(
+                    "[predictMonoRoute] monoDepth={}ms routePost={}ms total={}ms",
+                    mono_cost_ms,
+                    route_cost_ms,
+                    mono_cost_ms + route_cost_ms
+                );
+                Ok::<_, String>((depth_mat, mono_route, mapped_directions))
+            })
+            .await;
+
+            let context = &mut context.borrow_mut();
+            match async_result {
+                Ok(Ok((depth_mat, mono_route, mapped_directions))) => {
+                    let _ = depth_mat;
+                    let _ = mono_route;
+                    let js_directions = JsArray::new(context);
+                    for point in mapped_directions {
+                        let point_array = js_value!([point[0], point[1]], context);
+                        if let Err(error) = js_directions.push(point_array, context) {
+                            let message = format!("predictMonoRoute 方向列表转换失败: {error:?}");
+                            return resolvers_clone.reject.call(
+                                &JsValue::undefined(),
+                                &[JsValue::from(js_string!(message))],
+                                context,
+                            );
+                        }
+                    }
+
+                    let result = js_object!(
+                        {
+                            // depth: js_depth,
+                            // terrainMask: js_terrain_mask,
+                            // obstacleMask: js_obstacle_mask,
+                            directions: js_directions,
+                        },
+                        context
+                    );
+                    resolvers_clone
+                        .resolve
+                        .call(&JsValue::undefined(), &[result.into()], context)
+                }
+                Ok(Err(message)) => resolvers_clone.reject.call(
+                    &JsValue::undefined(),
+                    &[JsValue::from(js_string!(message))],
+                    context,
+                ),
+                Err(error) => {
+                    let message = format!("predictMonoRoute 线程执行失败: {error}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(message))],
+                        context,
+                    )
+                }
+            }
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
+}
+
+/// 边框绘制函数
+fn _draw_border(
+    hwnd: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    w: Option<JsValue>,
+    h: Option<JsValue>,
+    timeout: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let hwnd = HWND(
+        hwnd.unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let x = x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let w = w.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let h = h.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
+    let timeout_ms = timeout
+        .map(|value| value.to_number(ctx))
+        .transpose()?
+        .map(|ms| ms.max(0.0) as u64);
+
+    draw_border(hwnd, x, y, w, h, Some(0xFF0000), timeout_ms);
+    Ok(JsValue::undefined())
+}
+
+/// 延迟函数
+fn _s(ms: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let ms = ms.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as u64;
+    let total = Duration::from_millis(ms);
+    let started_at = Instant::now();
+    let poll_step = Duration::from_millis(20);
+    loop {
+        _throw_if_script_stop_requested()?;
+        let elapsed = started_at.elapsed();
+        if elapsed >= total {
+            break;
+        }
+        let remain = total - elapsed;
+        thread::sleep(remain.min(poll_step));
+    }
+    Ok(JsValue::undefined())
+}
+
+/// 异步延迟函数
+fn _sleep(ms: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let ms = ms.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as u64;
+    let mut cb: Option<JsFunction> = None;
+    let promise = JsPromise::new(
+        |resolvers, _context| {
+            cb = Some(resolvers.resolve.clone());
+
+            Ok(JsValue::undefined())
+        },
+        ctx,
+    );
+    let job = boa_engine::job::TimeoutJob::new(
+        boa_engine::job::NativeJob::new(move |context| {
+            cb.unwrap()
+                .call(&JsValue::undefined(), &[], context)
+                .unwrap();
+            Ok(JsValue::undefined())
+        }),
+        ms,
+    );
+    ctx.enqueue_job(job.into());
+    Ok(promise.into())
+}
+
+/// 复制文本到剪贴板
+fn _copy_text(text: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let text = text
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+
+    // 使用 arboard 复制文本到剪贴板
+    let mut clipboard = arboard::Clipboard::new().unwrap();
+    let _ = clipboard.set_text(&text);
+
+    Ok(JsValue::undefined())
+}
+
+/// 从剪贴板粘贴文本
+fn _paste_text(_ctx: &mut Context) -> JsResult<JsValue> {
+    // 使用 arboard 从剪贴板读取文本
+    let mut clipboard = arboard::Clipboard::new().unwrap();
+    match clipboard.get_text() {
+        Ok(text) => Ok(JsValue::from(js_string!(text))),
+        Err(_) => Ok(JsValue::undefined()),
+    }
+}
+
+/// 记录 runoks 调试日志，便于 MCP console 直接观察执行阶段。
+fn _emit_runoks_console(level: &str, message: impl Into<String>) {
+    let message = message.into();
+    let scope = get_current_script_path();
+    println!("[runoks][{level}] {message}");
+    record_script_console(scope, level.to_string(), message);
+}
+
+/// 推送 runoks 状态，便于页面状态面板观察。
+fn _emit_runoks_status(text: impl Into<String>) {
+    _emit_script_status("runoks".to_string(), Some(text.into()), None, None);
+}
+
+/// 规范化 OK 宏里的按键名，兼容常见别名。
+fn _normalize_oks_key(key: &str) -> String {
+    match key.trim().to_lowercase().as_str() {
+        "shift" => "lshift".to_string(),
+        "ctrl" => "lctrl".to_string(),
+        other => other.to_string(),
+    }
+}
+
+/// 将字符串鼠标按键转换为内部枚举。
+fn _parse_oks_mouse_button(button: Option<&str>) -> Result<MouseButtonKind, String> {
+    match button.unwrap_or("left").trim().to_lowercase().as_str() {
+        "left" | "l" | "primary" => Ok(MouseButtonKind::Left),
+        "right" | "r" | "secondary" => Ok(MouseButtonKind::Right),
+        "middle" | "m" | "mid" | "wheel" => Ok(MouseButtonKind::Middle),
+        "x1" | "xbutton1" | "xb1" | "back" => Ok(MouseButtonKind::X1),
+        "x2" | "xbutton2" | "xb2" | "forward" => Ok(MouseButtonKind::X2),
+        other => Err(format!("runoks 不支持的鼠标按键: {other}")),
+    }
+}
+
+/// 将鼠标旋转动作转换为相对移动像素。
+fn _resolve_oks_rotation_delta(action: &OksAction) -> Result<(i32, i32), String> {
+    let direction = action
+        .direction
+        .as_deref()
+        .unwrap_or("up")
+        .trim()
+        .to_lowercase();
+    let angle = action.angle.unwrap_or(0.0);
+    let sensitivity = action.sensitivity.unwrap_or(10.0);
+    let pixels = (angle * sensitivity).round() as i32;
+    match direction.as_str() {
+        "left" => Ok((-pixels, 0)),
+        "right" => Ok((pixels, 0)),
+        "up" => Ok((0, -pixels)),
+        "down" => Ok((0, pixels)),
+        _ => Err(format!("runoks 不支持的 mouse_rotation 方向: {direction}")),
+    }
+}
+
+/// 等待到动作目标时间，并在等待期间持续响应脚本停止请求。
+fn _oks_wait_until(started_at: Instant, target_secs: f64) -> Result<(), String> {
+    let target_ms = (target_secs.max(0.0) * 1000.0).round().max(0.0) as u64;
+    let target = started_at + Duration::from_millis(target_ms);
+    let poll_step = Duration::from_millis(20);
+    loop {
+        if should_stop_current_script() {
+            return Err(SCRIPT_STOP_INTERRUPT_MESSAGE.to_string());
+        }
+        let now = Instant::now();
+        if now >= target {
+            return Ok(());
+        }
+        let remain = target.saturating_duration_since(now);
+        thread::sleep(remain.min(poll_step));
+    }
+}
+
+/// 执行单条 OK 宏动作。
+fn _execute_oks_action(action: &OksAction) -> Result<(), String> {
+    _execute_oks_action_with_hwnd(action, HWND(std::ptr::null_mut()))
+}
+
+/// 执行单条 OK 宏动作（可选后台窗口句柄）。
+fn _execute_oks_action_with_hwnd(action: &OksAction, hwnd: HWND) -> Result<(), String> {
+    if should_stop_current_script() {
+        return Err(SCRIPT_STOP_INTERRUPT_MESSAGE.to_string());
+    }
+
+    let use_hwnd = !hwnd.is_invalid();
+    match action.action_type.trim().to_lowercase().as_str() {
+        "delay" => Ok(()),
+        "mouse_move" => {
+            let dx = action.dx.unwrap_or(0.0).round() as i32;
+            let dy = action.dy.unwrap_or(0.0).round() as i32;
+            if use_hwnd {
+                mouse_move_relative_with_hwnd(hwnd, dx, dy);
+            } else {
+                mouse_move(dx, dy);
+            }
+            Ok(())
+        }
+        "mouse_rotation" => {
+            let (dx, dy) = _resolve_oks_rotation_delta(action)?;
+            if use_hwnd {
+                mouse_move_relative_with_hwnd(hwnd, dx, dy);
+            } else {
+                mouse_move(dx, dy);
+            }
+            Ok(())
+        }
+        "mouse_down" => {
+            let button = _parse_oks_mouse_button(action.button.as_deref())?;
+            if use_hwnd {
+                post_mouse_down_by_button(hwnd, 10, 10, button);
+            } else {
+                mouse_down_by_button(button);
+            }
+            Ok(())
+        }
+        "mouse_up" => {
+            let button = _parse_oks_mouse_button(action.button.as_deref())?;
+            if use_hwnd {
+                post_mouse_up_by_button(hwnd, 10, 10, button);
+            } else {
+                mouse_up_by_button(button);
+            }
+            Ok(())
+        }
+        "mouse_click" => {
+            let button = _parse_oks_mouse_button(action.button.as_deref())?;
+            if use_hwnd {
+                post_mouse_click_by_button(hwnd, 10, 10, button);
+            } else {
+                mouse_click_by_button(button, 10);
+            }
+            Ok(())
+        }
+        "key_down" => {
+            let key = action
+                .key
+                .as_deref()
+                .ok_or_else(|| "runoks key_down 缺少 key".to_string())?;
+            let normalized = _normalize_oks_key(key);
+            let vkey = key_to_vkey(normalized.as_str());
+            if vkey == 0 {
+                return Err(format!("runoks 不支持的按键: {normalized}"));
+            }
+            if use_hwnd {
+                post_key_down(hwnd, vkey);
+            } else {
+                key_down(vkey);
+            }
+            Ok(())
+        }
+        "key_up" => {
+            let key = action
+                .key
+                .as_deref()
+                .ok_or_else(|| "runoks key_up 缺少 key".to_string())?;
+            let normalized = _normalize_oks_key(key);
+            let vkey = key_to_vkey(normalized.as_str());
+            if vkey == 0 {
+                return Err(format!("runoks 不支持的按键: {normalized}"));
+            }
+            if use_hwnd {
+                post_key_up(hwnd, vkey);
+            } else {
+                key_up(vkey);
+            }
+            Ok(())
+        }
+        other => Err(format!("runoks 不支持的动作类型: {other}")),
+    }
+}
+
+/// 判断名称是否以字母结尾，用于复用 OK 外部 mod 的起始节点选择规则。
+fn _oks_name_ends_with_letter(name: &str) -> bool {
+    name.chars()
+        .last()
+        .is_some_and(|ch| ch.is_ascii_alphabetic())
+}
+
+/// 判断候选节点是否符合前序节点约束。
+fn _oks_is_candidate_map_name(previous: Option<&str>, candidate: &str) -> bool {
+    let Some(previous) = previous else {
+        return _oks_name_ends_with_letter(candidate);
+    };
+
+    if previous == candidate || !candidate.starts_with(previous) {
+        return false;
+    }
+
+    let suffix = &candidate[previous.len()..];
+    suffix.starts_with('-') && suffix.matches('-').count() < 2 && suffix.len() <= 4
+}
+
+/// 收集输入目录的一层子目录候选。
+fn _oks_direct_child_dirs(dir: &Path) -> Result<Vec<PathBuf>, String> {
+    let entries = fs::read_dir(dir)
+        .map_err(|error| format!("runoks 扫描目录失败: {}: {error}", dir.to_string_lossy()))?;
+    let mut child_dirs = Vec::new();
+    for entry in entries {
+        let entry = entry.map_err(|error| format!("runoks 读取目录项失败: {error}"))?;
+        let path = entry.path();
+        if path.is_dir() {
+            child_dirs.push(path);
+        }
+    }
+    Ok(child_dirs)
+}
+
+/// 解析传入目录实际对应的 OK 外部 mod 根目录。
+fn _resolve_oks_root_dir(input_dir: &Path) -> Result<PathBuf, String> {
+    if input_dir.join("scripts").is_dir() {
+        return Ok(input_dir.to_path_buf());
+    }
+
+    let mut candidates = _oks_direct_child_dirs(input_dir)?
+        .into_iter()
+        .filter(|path| path.join("scripts").is_dir())
+        .collect::<Vec<_>>();
+    candidates.sort();
+    candidates.dedup();
+
+    match candidates.len() {
+        0 => Err(format!(
+            "runoks 未找到包含 scripts 目录的外部 mod 根目录: {}",
+            input_dir.to_string_lossy()
+        )),
+        1 => Ok(candidates.remove(0)),
+        _ => Err(format!(
+            "runoks 发现多个外部 mod 候选目录，请传更精确的路径: {}",
+            input_dir.to_string_lossy()
+        )),
+    }
+}
+
+/// 判断输入路径是否为 zip 包。
+fn _is_oks_zip_path(path: &Path) -> bool {
+    path.extension()
+        .map(|ext| ext.to_string_lossy().eq_ignore_ascii_case("zip"))
+        .unwrap_or(false)
+}
+
+/// 将 OK 外部 mod zip 包解压到临时目录。
+fn _extract_oks_zip(zip_path: &Path, target_dir: &Path) -> Result<(), String> {
+    let file = File::open(zip_path).map_err(|error| {
+        format!(
+            "runoks 打开 zip 失败: {}: {error}",
+            zip_path.to_string_lossy()
+        )
+    })?;
+    let mut archive =
+        ZipArchive::new(file).map_err(|error| format!("runoks 读取 zip 失败: {error}"))?;
+
+    for index in 0..archive.len() {
+        let mut entry = archive
+            .by_index(index)
+            .map_err(|error| format!("runoks 读取 zip 条目失败: {error}"))?;
+        let Some(relative_path) = entry.enclosed_name().map(|value| value.to_path_buf()) else {
+            continue;
+        };
+        let output_path = target_dir.join(relative_path);
+        if entry.is_dir() {
+            fs::create_dir_all(&output_path).map_err(|error| {
+                format!(
+                    "runoks 创建解压目录失败: {}: {error}",
+                    output_path.to_string_lossy()
+                )
+            })?;
+            continue;
+        }
+
+        if let Some(parent) = output_path.parent() {
+            fs::create_dir_all(parent).map_err(|error| {
+                format!(
+                    "runoks 创建解压父目录失败: {}: {error}",
+                    parent.to_string_lossy()
+                )
+            })?;
+        }
+        let mut output = File::create(&output_path).map_err(|error| {
+            format!(
+                "runoks 创建解压文件失败: {}: {error}",
+                output_path.to_string_lossy()
+            )
+        })?;
+        io::copy(&mut entry, &mut output).map_err(|error| {
+            format!(
+                "runoks 写入解压文件失败: {}: {error}",
+                output_path.to_string_lossy()
+            )
+        })?;
+        output
+            .flush()
+            .map_err(|error| format!("runoks 刷新解压文件失败: {error}"))?;
+    }
+
+    Ok(())
+}
+
+/// 为 zip 解压创建唯一临时目录。
+fn _create_oks_temp_dir() -> Result<PathBuf, String> {
+    let stamp = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_millis())
+        .unwrap_or(0);
+    let temp_dir = std::env::temp_dir().join(format!("dna-builder-runoks-{stamp}"));
+    fs::create_dir_all(&temp_dir).map_err(|error| {
+        format!(
+            "runoks 创建临时解压目录失败: {}: {error}",
+            temp_dir.to_string_lossy()
+        )
+    })?;
+    Ok(temp_dir)
+}
+
+/// 加载 OK 外部 mod 的所有动作节点。
+fn _load_oks_scripts(root_dir: &Path) -> Result<HashMap<String, OksMacroFile>, String> {
+    let scripts_dir = root_dir.join("scripts");
+    _emit_runoks_console(
+        "info",
+        format!("read scripts dir={}", scripts_dir.to_string_lossy()),
+    );
+    let entries = fs::read_dir(&scripts_dir).map_err(|error| {
+        format!(
+            "runoks 读取 scripts 目录失败: {}: {error}",
+            scripts_dir.to_string_lossy()
+        )
+    })?;
+
+    let mut scripts = HashMap::new();
+    for entry in entries {
+        let entry = entry.map_err(|error| format!("runoks 读取脚本目录项失败: {error}"))?;
+        let path = entry.path();
+        if !path.is_file() {
+            continue;
+        }
+        let is_json = path
+            .extension()
+            .map(|ext| ext.to_string_lossy().eq_ignore_ascii_case("json"))
+            .unwrap_or(false);
+        if !is_json {
+            continue;
+        }
+
+        let key = path
+            .file_stem()
+            .map(|value| value.to_string_lossy().to_string())
+            .ok_or_else(|| format!("runoks 无法解析脚本文件名: {}", path.to_string_lossy()))?;
+        let content = fs::read_to_string(&path).map_err(|error| {
+            format!(
+                "runoks 读取脚本文件失败: {}: {error}",
+                path.to_string_lossy()
+            )
+        })?;
+        let parsed = serde_json::from_str::<OksMacroFile>(&content).map_err(|error| {
+            format!(
+                "runoks 解析脚本 JSON 失败: {}: {error}",
+                path.to_string_lossy()
+            )
+        })?;
+        scripts.insert(key, parsed);
+        _emit_runoks_console(
+            "debug",
+            format!("script loaded file={}", path.to_string_lossy()),
+        );
+    }
+
+    if scripts.is_empty() {
+        return Err(format!(
+            "runoks 未在 scripts 目录中找到任何 JSON 脚本: {}",
+            scripts_dir.to_string_lossy()
+        ));
+    }
+
+    Ok(scripts)
+}
+
+/// 加载 OK 外部 mod 的地图模板。
+fn _load_oks_maps(root_dir: &Path) -> Result<Vec<(String, Mat)>, String> {
+    let maps_dir = root_dir.join("map");
+    if !maps_dir.is_dir() {
+        return Ok(Vec::new());
+    }
+
+    _emit_runoks_console(
+        "info",
+        format!("read map dir={}", maps_dir.to_string_lossy()),
+    );
+    let entries = fs::read_dir(&maps_dir).map_err(|error| {
+        format!(
+            "runoks 读取 map 目录失败: {}: {error}",
+            maps_dir.to_string_lossy()
+        )
+    })?;
+    let mut templates = Vec::new();
+    for entry in entries {
+        let entry = entry.map_err(|error| format!("runoks 读取 map 目录项失败: {error}"))?;
+        let path = entry.path();
+        if !path.is_file() {
+            continue;
+        }
+        let is_png = path
+            .extension()
+            .map(|ext| ext.to_string_lossy().eq_ignore_ascii_case("png"))
+            .unwrap_or(false);
+        if !is_png {
+            continue;
+        }
+
+        let key = path
+            .file_stem()
+            .map(|value| value.to_string_lossy().to_string())
+            .ok_or_else(|| format!("runoks 无法解析模板文件名: {}", path.to_string_lossy()))?;
+        let raw = fs::read(&path).map_err(|error| {
+            format!(
+                "runoks 读取模板文件失败: {}: {error}",
+                path.to_string_lossy()
+            )
+        })?;
+        let image = imgcodecs::imdecode(
+            &opencv::core::Vector::<u8>::from_slice(&raw),
+            imgcodecs::IMREAD_GRAYSCALE,
+        )
+        .map_err(|error| format!("runoks 加载模板失败: {}: {error}", path.to_string_lossy()))?;
+        if image.rows() <= 0 || image.cols() <= 0 {
+            return Err(format!("runoks 模板图像无效: {}", path.to_string_lossy()));
+        }
+        let mut normalized = Mat::default();
+        imgproc::resize(
+            &image,
+            &mut normalized,
+            core::Size::new(0, 0),
+            1600.0 / 1920.0,
+            900.0 / 1080.0,
+            imgproc::INTER_LINEAR,
+        )
+        .map_err(|error| format!("runoks 缩放模板失败: {}: {error}", path.to_string_lossy()))?;
+        if normalized.rows() <= 0 || normalized.cols() <= 0 {
+            return Err(format!(
+                "runoks 缩放后模板图像无效: {}",
+                path.to_string_lossy()
+            ));
+        }
+        templates.push((key, normalized));
+        _emit_runoks_console(
+            "debug",
+            format!("map loaded file={}", path.to_string_lossy()),
+        );
+    }
+
+    templates.sort_by(|left, right| {
+        left.0
+            .len()
+            .cmp(&right.0.len())
+            .then_with(|| left.0.cmp(&right.0))
+    });
+    Ok(templates)
+}
+
+/// 将当前前台窗口截图转换为灰度图。
+fn _capture_window_gray(hwnd: HWND) -> Result<Mat, String> {
+    if hwnd.is_invalid() {
+        return Err("runoks 未找到窗口句柄".to_string());
+    }
+
+    let captured = capture_window_wgc(hwnd).ok_or_else(|| "runoks 截图窗口失败".to_string())?;
+    if captured.rows() <= 0 || captured.cols() <= 0 {
+        return Err("runoks 截图结果为空".to_string());
+    }
+
+    let captured_ref: &Mat = &captured;
+    if captured_ref.channels() == 1 {
+        return Ok(captured_ref.clone());
+    }
+
+    let mut gray = Mat::default();
+    let code = if captured_ref.channels() == 4 {
+        imgproc::COLOR_BGRA2GRAY
+    } else {
+        imgproc::COLOR_BGR2GRAY
+    };
+    imgproc::cvt_color(captured_ref, &mut gray, code, 0)
+        .map_err(|error| format!("runoks 灰度转换失败: {error}"))?;
+    Ok(gray)
+}
+
+/// 计算单个模板在屏幕上的最大匹配置信度。
+fn _calc_oks_match_confidence(screen_gray: &Mat, template_gray: &Mat) -> Result<f64, String> {
+    if screen_gray.rows() < template_gray.rows() || screen_gray.cols() < template_gray.cols() {
+        return Ok(0.0);
+    }
+
+    let result_rows = screen_gray.rows() - template_gray.rows() + 1;
+    let result_cols = screen_gray.cols() - template_gray.cols() + 1;
+    let mut result = unsafe {
+        Mat::new_rows_cols(result_rows, result_cols, core::CV_32F)
+            .map_err(|error| format!("runoks 创建匹配结果失败: {error}"))?
+    };
+    imgproc::match_template(
+        screen_gray,
+        template_gray,
+        &mut result,
+        imgproc::TM_CCOEFF_NORMED,
+        &Mat::default(),
+    )
+    .map_err(|error| format!("runoks 模板匹配失败: {error}"))?;
+
+    let mut min_val = 0.0;
+    let mut max_val = 0.0;
+    let mut min_loc = core::Point::new(0, 0);
+    let mut max_loc = core::Point::new(0, 0);
+    core::min_max_loc(
+        &result,
+        Some(&mut min_val),
+        Some(&mut max_val),
+        Some(&mut min_loc),
+        Some(&mut max_loc),
+        &Mat::default(),
+    )
+    .map_err(|error| format!("runoks 读取匹配结果失败: {error}"))?;
+    Ok(max_val)
+}
+
+/// 无地图模板时，按脚本文件名顺序取下一个节点。
+fn _find_next_oks_script_without_map(
+    script_keys: &[String],
+    previous: Option<&str>,
+) -> Option<String> {
+    let previous = previous?;
+    let current_index = script_keys.iter().position(|value| value == previous)?;
+    script_keys.get(current_index + 1).cloned()
+}
+
+/// 复用 OK 外部 mod 的匹配逻辑寻找下一个节点。
+fn _match_oks_map(
+    previous: Option<&str>,
+    map_templates: &[(String, Mat)],
+    script_keys: &[String],
+    hwnd: HWND,
+) -> Result<Option<String>, String> {
+    if map_templates.is_empty() {
+        return Ok(if previous.is_none() {
+            script_keys.first().cloned()
+        } else {
+            _find_next_oks_script_without_map(script_keys, previous)
+        });
+    }
+
+    let started_at = Instant::now();
+    while started_at.elapsed() < Duration::from_secs(5) {
+        if should_stop_current_script() {
+            return Err(SCRIPT_STOP_INTERRUPT_MESSAGE.to_string());
+        }
+
+        let screen_gray = _capture_window_gray(hwnd)?;
+        let mut best_name: Option<String> = None;
+        let mut best_confidence = 0.0_f64;
+        let mut candidate_count = 0_usize;
+
+        for (name, template_gray) in map_templates {
+            if !script_keys.iter().any(|key| key == name) {
+                continue;
+            }
+            if !_oks_is_candidate_map_name(previous, name.as_str()) {
+                continue;
+            }
+            candidate_count += 1;
+            let confidence = _calc_oks_match_confidence(&screen_gray, template_gray)?;
+            if confidence > best_confidence {
+                best_confidence = confidence;
+                best_name = Some(name.clone());
+            }
+        }
+
+        if candidate_count == 0 {
+            return Ok(None);
+        }
+        if best_name.is_some() {
+            return Ok(best_name);
+        }
+
+        thread::sleep(Duration::from_millis(100));
+    }
+
+    Ok(None)
+}
+
+/// 播放单个 OK 动作节点。
+fn _play_oks_macro_node(node: &OksMacroFile) -> Result<(), String> {
+    let _ = node.original_x_sensitivity;
+    let _ = node.original_y_sensitivity;
+
+    let started_at = Instant::now();
+    for action in &node.actions {
+        _oks_wait_until(started_at, action.time)?;
+        _execute_oks_action(action)?;
+    }
+    Ok(())
+}
+
+/// 播放单个 OK 动作节点（可选后台窗口句柄）。
+fn _play_oks_macro_node_with_hwnd(node: &OksMacroFile, hwnd: HWND) -> Result<(), String> {
+    let _ = node.original_x_sensitivity;
+    let _ = node.original_y_sensitivity;
+
+    let started_at = Instant::now();
+    for action in &node.actions {
+        _oks_wait_until(started_at, action.time)?;
+        _execute_oks_action_with_hwnd(action, hwnd)?;
+    }
+    Ok(())
+}
+
+/// 执行 OK 外部 mod 的主流程。
+fn _run_oks_impl(path: &str, hwnd: HWND) -> Result<(), String> {
+    let resolved_input = PathBuf::from(_resolve_script_resource_path(path));
+    _emit_runoks_console(
+        "info",
+        format!("start path={}", resolved_input.to_string_lossy()),
+    );
+    _emit_runoks_status("正在解析外部 mod");
+    if !resolved_input.exists() {
+        return Err(format!(
+            "runoks 路径不存在: {}",
+            resolved_input.to_string_lossy()
+        ));
+    }
+
+    let temp_dir = if _is_oks_zip_path(&resolved_input) {
+        let temp_dir = _create_oks_temp_dir()?;
+        _extract_oks_zip(&resolved_input, &temp_dir)?;
+        Some(temp_dir)
+    } else {
+        None
+    };
+
+    let base_dir = temp_dir.as_deref().unwrap_or(resolved_input.as_path());
+    _emit_runoks_console(
+        "info",
+        format!("resolve root dir from={}", base_dir.to_string_lossy()),
+    );
+    let root_dir = _resolve_oks_root_dir(base_dir)?;
+    _emit_runoks_console("info", format!("root dir={}", root_dir.to_string_lossy()));
+    let scripts = _load_oks_scripts(&root_dir)?;
+    let maps = _load_oks_maps(&root_dir)?;
+    _emit_runoks_console(
+        "info",
+        format!(
+            "loaded root={} scripts={} maps={}",
+            root_dir.to_string_lossy(),
+            scripts.len(),
+            maps.len()
+        ),
+    );
+    _emit_runoks_status(format!(
+        "已加载脚本 {} 个，模板 {} 个",
+        scripts.len(),
+        maps.len()
+    ));
+    let mut script_keys = scripts.keys().cloned().collect::<Vec<_>>();
+    script_keys.sort();
+
+    let playback_result = (|| -> Result<(), String> {
+        let mut current: Option<String> = None;
+        loop {
+            _emit_runoks_console(
+                "info",
+                format!("match current={}", current.as_deref().unwrap_or("<start>")),
+            );
+            let next = _match_oks_map(current.as_deref(), &maps, &script_keys, hwnd)?;
+            let Some(next_name) = next else {
+                _emit_runoks_console("info", "no next node, finish".to_string());
+                _emit_runoks_status("播放结束");
+                return Ok(());
+            };
+            _emit_runoks_console("info", format!("play node={next_name}"));
+            _emit_runoks_status(format!("正在播放 {next_name}"));
+            let node = scripts
+                .get(&next_name)
+                .ok_or_else(|| format!("runoks 未找到节点对应的脚本: {next_name}"))?;
+            _play_oks_macro_node_with_hwnd(node, hwnd)?;
+            current = Some(next_name);
+        }
+    })();
+
+    if let Some(temp_dir) = temp_dir {
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    playback_result
+}
+
+/// 运行 OK 外部 mod 宏，支持直接传目录或 zip 包。
+fn _runoks(hwnd: Option<JsValue>, path: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let hwnd = hwnd
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as isize;
+    let path = path
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy()
+        .trim()
+        .to_string();
+    let current_script_path = get_current_script_path().unwrap_or_default();
+    if path.is_empty() {
+        return Err(JsNativeError::typ()
+            .with_message("runoks path 不能为空")
+            .into());
+    }
+    _emit_runoks_console("info", format!("invoke path={path}"));
+
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let resolvers_clone = resolvers.clone();
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            let async_result = _spawn_blocking_with_script_stop_snapshot(move || {
+                set_current_script_path(current_script_path.clone());
+                _run_oks_impl(path.as_str(), HWND(hwnd as *mut std::ffi::c_void))
+            })
+            .await;
+            let context = &mut context.borrow_mut();
+            match async_result {
+                Ok(Ok(())) => resolvers_clone
+                    .resolve
+                    .call(&JsValue::undefined(), &[], context),
+                Ok(Err(message)) => resolvers_clone.reject.call(
+                    &JsValue::undefined(),
+                    &[JsValue::from(js_string!(message))],
+                    context,
+                ),
+                Err(error) => {
+                    let message = format!("runoks 线程执行失败: {error}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(message))],
+                        context,
+                    )
+                }
+            }
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
+}
+
+/// 将 Mat 编码为 PNG data URL，便于前端直接显示。
+fn _mat_to_png_data_url(mat: &Mat) -> Result<String, String> {
+    let mut buf = opencv::core::Vector::<u8>::new();
+    opencv::imgcodecs::imencode(".png", mat, &mut buf, &opencv::core::Vector::new())
+        .map_err(|e| format!("状态图片编码失败: {e}"))?;
+    let image_b64 = general_purpose::STANDARD.encode(buf.to_vec());
+    Ok(format!("data:image/png;base64,{image_b64}"))
+}
+
+/// 向前端发送脚本状态事件（支持按标题新增/更新/删除）。
+fn _emit_script_status(
+    title: String,
+    text: Option<String>,
+    image: Option<String>,
+    images: Option<Vec<String>>,
+) {
+    if let Some(app_handle) = SCRIPT_EVENT_APP_HANDLE.get() {
+        let scope = get_current_script_path();
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|d| d.as_millis() as u64)
+            .unwrap_or(0);
+        let has_images = images.as_ref().is_some_and(|items| !items.is_empty());
+        let action = if text.is_none() && image.is_none() && !has_images {
+            "remove"
+        } else {
+            "upsert"
+        };
+        if crate::submodules::script_mcp::should_record_script_mcp_cache() {
+            crate::submodules::script_mcp::record_script_status(
+                scope.clone(),
+                action.to_string(),
+                title.clone(),
+                text.clone(),
+                image.clone(),
+                images.clone(),
+                timestamp,
+            );
+        }
+        let _ = app_handle.emit(
+            "script-status",
+            serde_json::json!({
+                "scope": scope,
+                "action": action,
+                "title": title,
+                "text": text,
+                "image": image,
+                "images": images,
+                "timestamp": timestamp,
+            }),
+        );
+    }
+}
+
+/// 设置脚本运行状态（按标题维护，内容参数自动按类型判断）。
+///
+/// 参数：
+/// - `title`: 状态标题（必填，用于区分多条状态）
+/// - `payload`: 状态内容，可选
+///   - Mat: 作为图片状态
+///   - Mat[]: 作为多图状态
+///   - 其他类型: 转为字符串作为文本状态
+/// - `payload_text`: 附加文本，可选，仅在 payload 为 Mat/Mat[] 时生效
+///   - undefined/null: 删除该标题状态
+fn _set_status(
+    title: Option<JsValue>,
+    payload: Option<JsValue>,
+    payload_text: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let title = title
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy()
+        .trim()
+        .to_string();
+    if title.is_empty() {
+        return Err(JsNativeError::typ().with_message("title 不能为空").into());
+    }
+
+    let mut text: Option<String> = None;
+    let mut image: Option<String> = None;
+    let mut images: Option<Vec<String>> = None;
+    let mut has_image_payload = false;
+    if let Some(value) = payload {
+        if !value.is_undefined() && !value.is_null() {
+            if value.as_object().is_some() {
+                if let Ok(js_mat) = value.get_native::<JsMat>() {
+                    let mat = (*js_mat.borrow().data().inner).clone();
+                    let image_data = _mat_to_png_data_url(&mat)
+                        .map_err(|msg| JsNativeError::error().with_message(msg))?;
+                    image = Some(image_data.clone());
+                    images = Some(vec![image_data]);
+                    has_image_payload = true;
+                } else if let Some(array_obj) = value.as_object() {
+                    if let Ok(array) = JsArray::from_object(array_obj.clone()) {
+                        let length = array.length(ctx)? as usize;
+                        let mut next_images = Vec::with_capacity(length);
+
+                        for idx in 0..length {
+                            let item = array.get(idx as u32, ctx)?;
+                            let js_mat = item.get_native::<JsMat>().map_err(|_| {
+                                JsNativeError::typ().with_message(format!(
+                                    "payload[{idx}] 必须是 Mat（数组模式下仅支持 Mat[]）"
+                                ))
+                            })?;
+                            let mat = (*js_mat.borrow().data().inner).clone();
+                            let image_data = _mat_to_png_data_url(&mat)
+                                .map_err(|msg| JsNativeError::error().with_message(msg))?;
+                            next_images.push(image_data);
+                        }
+
+                        if !next_images.is_empty() {
+                            image = next_images.first().cloned();
+                            images = Some(next_images);
+                            has_image_payload = true;
+                        }
+                    } else {
+                        return Err(JsNativeError::typ()
+                            .with_message("payload 必须是 Mat、Mat[] 或可转字符串值")
+                            .into());
+                    }
+                } else {
+                    return Err(JsNativeError::typ()
+                        .with_message("payload 必须是 Mat、Mat[] 或可转字符串值")
+                        .into());
+                }
+            } else {
+                text = Some(value.to_string(ctx)?.to_std_string_lossy());
+            }
+        }
+    }
+    if has_image_payload {
+        if let Some(value) = payload_text {
+            if !value.is_undefined() && !value.is_null() {
+                text = Some(value.to_string(ctx)?.to_std_string_lossy());
+            }
+        }
+    }
+
+    _emit_script_status(title, text, image, images);
+    Ok(JsValue::undefined())
+}
+
+/// 根据窗口标题查找窗口句柄函数
+fn _find_window(title: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let title = title
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    match find_window(&title) {
+        Some(hwnd) => Ok(JsValue::new(hwnd.0 as u64 as f64)),
+        None => Ok(JsValue::new(0 as u64 as f64)),
+    }
+}
+
+/// 获取窗口句柄函数
+fn _get_window_by_process_name(
+    process_name: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let process_name = process_name
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    match get_window_by_process_name(&process_name) {
+        Some(hwnd) => Ok(JsValue::new(hwnd.0 as u64 as f64)),
+        None => Ok(JsValue::new(0 as u64 as f64)),
+    }
+}
+
+/// 获取前台窗口函数
+fn _get_foreground_window(_ctx: &mut Context) -> JsResult<JsValue> {
+    let hwnd = unsafe { GetForegroundWindow() };
+    Ok(JsValue::new(hwnd.0 as u64 as f64))
+}
+
+/// 获取 cloudgame 窗口句柄函数。
+#[cfg(not(feature = "dob-script-cli"))]
+fn _get_cg_window(_ctx: &mut Context) -> JsResult<JsValue> {
+    #[cfg(target_os = "windows")]
+    {
+        let Some(app_handle) = SCRIPT_EVENT_APP_HANDLE.get() else {
+            return Ok(JsValue::new(0 as u64 as f64));
+        };
+        let Some(window) = app_handle.get_webview_window(SCRIPT_CLOUDGAME_WINDOW_LABEL) else {
+            return Ok(JsValue::new(0 as u64 as f64));
+        };
+        match window.hwnd() {
+            Ok(hwnd) => Ok(JsValue::new(hwnd.0 as u64 as f64)),
+            Err(_) => Ok(JsValue::new(0 as u64 as f64)),
+        }
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Ok(JsValue::new(0 as u64 as f64))
+    }
+}
+
+/// 检查当前进程是否以管理员权限运行。
+fn _is_elevated(_ctx: &mut Context) -> JsResult<JsValue> {
+    #[cfg(target_os = "windows")]
+    {
+        let elevated = crate::util::is_elevated().unwrap_or(false);
+        Ok(JsValue::new(elevated))
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Ok(JsValue::new(false))
+    }
+}
+
+fn _set_program_volume(
+    program_name: Option<JsValue>,
+    volume: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let program_name = program_name
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy();
+    let volume = volume
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as f32;
+    super::setvol::set_program_volume(program_name, volume);
+    Ok(JsValue::undefined())
+}
+
+// 注册到JS环境中的函数集合
+pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
+    // AHK: WinGetClientPos
+    let f = _win_get_client_pos.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("winGetClientPos"), 1, f)?;
+    // 鼠标操作函数
+    let f = _mc.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("mc"), 4, f)?;
+
+    let f = _mm.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("mm"), 2, f)?;
+
+    let f = _mmr.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("mmr"), 3, f)?;
+
+    #[cfg(not(feature = "dob-script-cli"))]
+    {
+        // 云游戏业务层相对移动函数
+        let f = _cg_move.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgMove"), 2, f)?;
+
+        let f = _cg_move_to.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgMoveTo"), 3, f)?;
+
+        let f = _cg_click.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgClick"), 3, f)?;
+
+        let f = _cg_down.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgDown"), 3, f)?;
+
+        let f = _cg_up.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgUp"), 3, f)?;
+
+        let f = _cg_middle_click.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgMiddleClick"), 2, f)?;
+
+        let f = _cg_wheel.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgWheel"), 3, f)?;
+
+        let f = _cg_key.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgKey"), 2, f)?;
+
+        let f = _cg_key_down.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgKeyDown"), 1, f)?;
+
+        let f = _cg_key_up.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("cgKeyUp"), 1, f)?;
+    }
+
+    let f = _move_to.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("moveTo"), 4, f)?;
+
+    let f = _move_c.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("moveC"), 4, f)?;
+
+    let f = _md.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("md"), 4, f)?;
+
+    let f = _mu.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("mu"), 4, f)?;
+
+    let f = _mt.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("mt"), 3, f)?;
+
+    let f = _wheel.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("wheel"), 4, f)?;
+
+    // 键盘操作函数
+    let f = _kb.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("kb"), 3, f)?;
+
+    let f = _kd.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("kd"), 2, f)?;
+
+    let f = _ku.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("ku"), 2, f)?;
+
+    // 延迟函数
+    let f = _s.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("s"), 1, f)?;
+
+    // 异步延迟函数
+    let f = _sleep.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("sleep"), 1, f)?;
+
+    // 运行 OK 外部 mod 宏（目录 / zip）
+    let f = _runoks.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("runoks"), 1, f)?;
+
+    // 剪贴板操作函数
+    let f = _copy_text.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("copyText"), 1, f)?;
+
+    let f = _paste_text.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("pasteText"), 0, f)?;
+
+    // 脚本状态显示函数（支持文字与图片）
+    let f = _set_status.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("setStatus"), 3, f)?;
+
+    // 获取窗口句柄函数
+    let f = _find_window.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("findWindow"), 1, f)?;
+
+    let f = _get_window_by_process_name.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("getWindowByProcessName"), 1, f)?;
+
+    // 设置前景窗口
+    let f = _set_foreground_window.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("setForegroundWindow"), 1, f)?;
+
+    // 检查窗口大小
+    let f = _check_size.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("checkSize"), 3, f)?;
+
+    // 移动窗口并设置大小
+    let f = _move_window.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("moveWindow"), 5, f)?;
+
+    // 获取前台窗口
+    let f = _get_foreground_window.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("getForegroundWindow"), 0, f)?;
+
+    #[cfg(not(feature = "dob-script-cli"))]
+    {
+        // 获取 cloudgame 窗口句柄
+        let f = _get_cg_window.into_js_function_copied(context);
+        context.register_global_builtin_callable(js_string!("getCGWindow"), 0, f)?;
+    }
+
+    // 检查是否以管理员权限运行
+    let f = _is_elevated.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("isElevated"), 0, f)?;
+
+    // 从窗口获取图像Mat对象
+    let f = _capture_window.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("captureWindow"), 6, f)?;
+
+    // 从窗口获取图像Mat对象（WGC优化版）
+    let f = _capture_window_wgc.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("captureWindowWGC"), 5, f)?;
+
+    // 从文件加载模板Mat对象
+    let f = _get_template.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("getTemplate"), 1, f)?;
+
+    // 从 base64 字符串加载模板Mat对象
+    let f = _get_template_b64.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("getTemplateB64"), 1, f)?;
+
+    // 从文件加载模板Mat对象
+    let f = _imread.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("imread"), 1, f)?;
+
+    // 从文件加载图像Mat对象（RGBA通道）
+    let f = _imread_rgba.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("imreadRgba"), 1, f)?;
+
+    // 保存Mat对象到文件
+    let f = _imwrite.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("imwrite"), 2, f)?;
+
+    // 复制Mat对象到剪贴板
+    let f = _copy_image.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("copyImage"), 1, f)?;
+
+    // 从本地或网络加载图像Mat对象
+    let f = _imread_url.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("imreadUrl"), 2, f)?;
+
+    // 读取本地/网络文本内容
+    let f = _read_text.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("readText"), 2, f)?;
+
+    // 从本地或网络加载图像Mat对象，并返回RGBA通道
+    let f = _imread_url_rgba.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("imreadUrlRgba"), 2, f)?;
+
+    // 下载文件（异步）
+    let f = _download_file.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("downloadFile"), 3, f)?;
+
+    // OCR 初始化（自动下载资源）
+    let f = _init_ocr.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("initOcr"), 3, f)?;
+
+    // Lite-Mono 初始化（自动下载模型并预热运行时）
+    let f = _init_mono_depth.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("initMonoDepth"), 2, f)?;
+
+    // OCR 文字识别
+    let f = _ocr_text.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("ocrText"), 1, f)?;
+
+    // 显示图片
+    let f = _imshow.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("imshow"), 3, f)?;
+
+    // 交互式选择图像 ROI
+    let f = _select_roi.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("selectroi"), 5, f)?;
+
+    // 使用两个Mat对象进行颜色和模板匹配
+    let f = _find_color_and_match_template.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("findColorAndMatchTemplate"), 4, f)?;
+
+    // 颜色键过滤函数
+    let f = _color_filter.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("colorFilter"), 3, f)?;
+
+    // HSL 加权颜色键过滤函数
+    let f = _color_filter_hsl.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("colorFilterHSL"), 4, f)?;
+
+    // 色键匹配函数
+    let f = _color_key_match.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("colorKeyMatch"), 4, f)?;
+
+    // 并行批量模板匹配函数
+    let f = _batch_match_color.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("batchMatchColor"), 3, f)?;
+
+    // ORB 优质匹配计数函数
+    let f = _orb_match_count.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("orbMatchCount"), 2, f)?;
+
+    // SIFT 定位函数
+    let f = _sift_locate.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("siftLocate"), 2, f)?;
+
+    // 小地图 SIFT 预处理函数（遮蔽圆盘外、中心与视角锥形）
+    let f = _preprocess_minimap_for_sift.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("preprocessMinimapForSift"), 7, f)?;
+
+    // SIFT 自动拼接函数（对齐 patch 到 base 并融合）
+    let f = _sift_stitch.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("siftStitch"), 5, f)?;
+
+    // 感知哈希函数（支持彩色）
+    let f = _perceptual_hash.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("perceptualHash"), 2, f)?;
+
+    // AHK 风格动态 DLL 调用函数（可变参数）
+    let f = NativeFunction::from_fn_ptr(dll_call_js);
+    context.register_global_builtin_callable(js_string!("dllCall"), 1, f)?;
+
+    // ORB 特征函数
+    let f = _orb_feature.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("orbFeature"), 1, f)?;
+
+    // 图像角度预测函数
+    let f = _predict_rotation.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("predictRotation"), 1, f)?;
+
+    // 哈希汉明距离匹配函数
+    let f = _match_hamming_hash.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("matchHammingHash"), 3, f)?;
+
+    // ORB 特征匹配函数
+    let f = _match_orb_feature.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("matchOrbFeature"), 3, f)?;
+
+    // 形态学图像处理函数
+    let f = _morphology_ex.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("morphologyEx"), 5, f)?;
+
+    // 轮廓提取函数
+    let f = _find_contours.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("findContours"), 4, f)?;
+
+    // 单行字符分割函数（横向空隙检测）
+    let f = _segment_chars.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("segmentChars"), 3, f)?;
+
+    // 轮廓绘制函数
+    let f = _draw_contours.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("drawContours"), 6, f)?;
+
+    // 模板匹配函数
+    let f = _match_template.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("matchTemplate"), 3, f)?;
+
+    // 边框绘制函数
+    let f = _draw_border.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("drawBorder"), 6, f)?;
+
+    // 颜色矩阵检查函数
+    let f = _cc.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("cc"), 5, f)?;
+
+    // 等待颜色达到条件函数（异步）
+    let f = _wait_color.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("waitColor"), 6, f)?;
+
+    // 脚本配置读取函数
+    let f = _read_config.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("readConfig"), 4, f)?;
+
+    // 脚本配置写入函数
+    let f = _set_config.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("setConfig"), 2, f)?;
+
+    // 设置程序音量函数
+    let f = _set_program_volume.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("setProgramVolume"), 2, f)?;
+
+    // 深度预测函数（双图深度 + 路径方向候选）
+    let f = _predict_depth.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("predictDepth"), 6, f)?;
+
+    // Lite-Mono 单目深度预测函数
+    let f = _mono_depth.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("monoDepth"), 1, f)?;
+
+    // Lite-Mono 单目路线预测函数
+    let f = _predict_mono_route.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("predictMonoRoute"), 3, f)?;
+
+    // OpenCV DNN 命名空间（cv.dnn.*）
+    register_cv_dnn_namespace(context)?;
+
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn oks_start_node_requires_letter_suffix() {
+        assert!(_oks_is_candidate_map_name(None, "60角色-A"));
+        assert!(!_oks_is_candidate_map_name(None, "60角色-1"));
+    }
+
+    #[test]
+    fn oks_followup_node_reuses_import_task_rules() {
+        assert!(_oks_is_candidate_map_name(
+            Some("60角色-A-1"),
+            "60角色-A-1-1"
+        ));
+        assert!(!_oks_is_candidate_map_name(
+            Some("60角色-A-1"),
+            "60角色-A-10"
+        ));
+        assert!(!_oks_is_candidate_map_name(
+            Some("60角色-A-1"),
+            "60角色-A-1-1-1"
+        ));
+    }
+
+    #[test]
+    fn oks_normalize_key_aliases() {
+        assert_eq!(_normalize_oks_key("Shift"), "lshift");
+        assert_eq!(_normalize_oks_key("CTRL"), "lctrl");
+        assert_eq!(_normalize_oks_key("f"), "f");
+    }
+}

@@ -1,13 +1,25 @@
 <script lang="ts" setup>
-import { ref, computed } from "vue"
+import { computed } from "vue"
+import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
+import { useSearchParam } from "@/composables/useSearchParam"
+import { fishingSpotMap, fishMap } from "@/data"
+import { fishingSpots, fishs } from "@/data/d/fish.data"
 import { matchPinyin } from "../utils/pinyin-utils"
-import { FishingSpot, fishMap } from "@/data"
-import { Fish, fishingSpots, fishs } from "@/data/d/fish.data"
 
-const searchKeyword = ref("")
-const selectedSpot = ref<FishingSpot | null>(null)
-const selectedFish = ref<Fish | null>(null)
-const selectedType = ref(0)
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedSpotId = useSearchParam<number>("sp", 0)
+const selectedFishId = useSearchParam<number>("id", 0)
+const selectedType = useSearchParam<number>("tp", 0)
+
+// 根据 ID 获取选中的钓鱼点
+const selectedSpot = computed(() => {
+    return selectedSpotId.value ? fishingSpotMap.get(selectedSpotId.value) || null : null
+})
+
+// 根据 ID 获取选中的鱼
+const selectedFish = computed(() => {
+    return selectedFishId.value ? fishMap.get(selectedFishId.value) || null : null
+})
 
 const filteredSpots = computed(() => {
     return fishingSpots.filter(spot => {
@@ -33,6 +45,8 @@ const filteredFish = computed(() => {
         return match.match
     })
 })
+
+useInitialScrollToSelectedItem()
 </script>
 
 <template>
@@ -40,12 +54,8 @@ const filteredFish = computed(() => {
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedSpot }">
                 <div class="p-3 border-b border-base-200">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索钓鱼点/鱼名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
-                    />
+                    <input v-model="searchKeyword" type="text" placeholder="搜索钓鱼点/鱼名称（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
                 </div>
 
                 <!-- 筛选条件 -->
@@ -54,18 +64,14 @@ const filteredFish = computed(() => {
                     <div>
                         <div class="text-xs text-base-content/70 mb-1">类型</div>
                         <div class="flex flex-wrap gap-1 pb-1">
-                            <button
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                            <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
                                 :class="selectedType === 0 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedType = 0"
-                            >
+                                @click="selectedType = 0">
                                 钓鱼点
                             </button>
-                            <button
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                            <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
                                 :class="selectedType === 1 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedType = 1"
-                            >
+                                @click="selectedType = 1">
                                 鱼
                             </button>
                         </div>
@@ -74,14 +80,10 @@ const filteredFish = computed(() => {
 
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div
-                            v-for="spot in filteredSpots"
-                            v-if="selectedType === 0"
-                            :key="spot.id"
+                        <div v-for="spot in filteredSpots" v-if="selectedType === 0" :key="spot.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedSpot?.id === spot.id }"
-                            @click="((selectedSpot = spot), (selectedFish = null))"
-                        >
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedSpotId === spot.id }"
+                            @click="((selectedSpotId = spot.id), (selectedFishId = 0))">
                             <div class="flex items-start gap-2">
                                 <div class="w-12 h-12 overflow-hidden rounded-full">
                                     <img :src="`/imgs/webp/${spot.icon}.webp`" class="w-full h-full object-cover" />
@@ -95,17 +97,14 @@ const filteredFish = computed(() => {
                                 </div>
                             </div>
                         </div>
-                        <div
-                            v-for="fish in filteredFish"
-                            v-else
-                            :key="fish.id"
+                        <div v-for="fish in filteredFish" v-else :key="fish.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedFish?.id === fish.id }"
-                            @click="((selectedFish = fish), (selectedSpot = null))"
-                        >
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedFishId === fish.id }"
+                            @click="((selectedFishId = fish.id), (selectedSpotId = 0))">
                             <div class="flex items-start gap-2">
                                 <div class="w-12 h-12 overflow-hidden rounded-full">
-                                    <img :src="`/imgs/webp/T_Fish_${fish.icon}.webp`" class="w-full h-full object-cover" />
+                                    <img :src="`/imgs/webp/T_Fish_${fish.icon}.webp`"
+                                        class="w-full h-full object-cover" />
                                 </div>
                                 <div>
                                     <div class="font-medium">{{ fish.name }}</div>
@@ -124,11 +123,9 @@ const filteredFish = computed(() => {
                 </div>
             </div>
 
-            <div
-                v-if="selectedSpot"
+            <div v-if="selectedSpot"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedSpot = null"
-            >
+                @click="selectedSpotId = 0">
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 
@@ -136,9 +133,11 @@ const filteredFish = computed(() => {
                 <DBFishSpotDetailItem :spot="selectedSpot" />
             </div>
 
-            <div v-if="selectedFish" class="flex-1 overflow-hidden">
+            <ScrollArea v-if="selectedFish" class="flex-1">
                 <DBFishDetailItem :fish="selectedFish" />
-            </div>
+            </ScrollArea>
         </div>
     </div>
 </template>
+
+

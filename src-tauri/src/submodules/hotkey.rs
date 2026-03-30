@@ -1,0 +1,1752 @@
+use crate::submodules::script::{normalize_script_path, run_script_file};
+use serde::{Deserialize, Serialize};
+use std::collections::{HashMap, HashSet};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, LazyLock, Mutex, RwLock};
+use std::time::{Duration, Instant};
+use tauri::Emitter;
+
+#[cfg(target_os = "windows")]
+use windows::Win32::Foundation::{
+    CloseHandle, ERROR_CLASS_ALREADY_EXISTS, GetLastError, HWND, LPARAM, LRESULT, WPARAM,
+};
+#[cfg(target_os = "windows")]
+use windows::Win32::System::Diagnostics::ToolHelp::{
+    CreateToolhelp32Snapshot, PROCESSENTRY32W, Process32FirstW, Process32NextW, TH32CS_SNAPPROCESS,
+};
+#[cfg(target_os = "windows")]
+use windows::Win32::System::LibraryLoader::GetModuleHandleW;
+#[cfg(target_os = "windows")]
+use windows::Win32::UI::Input::KeyboardAndMouse::{
+    MAPVK_VSC_TO_VK_EX, MapVirtualKeyW, VK_ADD, VK_APPS, VK_BACK, VK_CAPITAL, VK_CLEAR, VK_CONTROL,
+    VK_DECIMAL, VK_DELETE, VK_DIVIDE, VK_DOWN, VK_END, VK_ESCAPE, VK_F1, VK_F2, VK_F3, VK_F4,
+    VK_F5, VK_F6, VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12, VK_F13, VK_F14, VK_F15, VK_F16,
+    VK_F17, VK_F18, VK_F19, VK_F20, VK_F21, VK_F22, VK_F23, VK_F24, VK_HOME, VK_INSERT, VK_LBUTTON,
+    VK_LCONTROL, VK_LEFT, VK_LMENU, VK_LSHIFT, VK_LWIN, VK_MBUTTON, VK_MENU, VK_MULTIPLY, VK_NEXT,
+    VK_NUMLOCK, VK_NUMPAD0, VK_NUMPAD1, VK_NUMPAD2, VK_NUMPAD3, VK_NUMPAD4, VK_NUMPAD5, VK_NUMPAD6,
+    VK_NUMPAD7, VK_NUMPAD8, VK_NUMPAD9, VK_PAUSE, VK_PRIOR, VK_RBUTTON, VK_RCONTROL, VK_RETURN,
+    VK_RIGHT, VK_RMENU, VK_RSHIFT, VK_RWIN, VK_SCROLL, VK_SEPARATOR, VK_SHIFT, VK_SNAPSHOT,
+    VK_SPACE, VK_SUBTRACT, VK_TAB, VK_UP, VK_XBUTTON1, VK_XBUTTON2,
+};
+#[cfg(target_os = "windows")]
+use windows::Win32::UI::Input::{
+    GetRawInputData, HRAWINPUT, RAWINPUT, RAWINPUTDEVICE, RAWINPUTHEADER, RID_INPUT,
+    RIDEV_DEVNOTIFY, RIDEV_INPUTSINK, RIM_TYPEKEYBOARD, RegisterRawInputDevices,
+};
+#[cfg(target_os = "windows")]
+use windows::Win32::UI::WindowsAndMessaging::{
+    CallNextHookEx, CreateWindowExW, DefWindowProcW, DispatchMessageW, GetClassNameW,
+    GetForegroundWindow, GetMessageW, GetWindowTextW, GetWindowThreadProcessId, HC_ACTION,
+    HWND_MESSAGE, MSG, MSLLHOOKSTRUCT, RegisterClassExW, SetWindowsHookExW, TranslateMessage,
+    UnhookWindowsHookEx, WH_MOUSE_LL, WINDOW_EX_STYLE, WINDOW_STYLE, WM_INPUT, WM_KEYDOWN,
+    WM_KEYUP, WM_LBUTTONDOWN, WM_LBUTTONUP, WM_MBUTTONDOWN, WM_MBUTTONUP, WM_RBUTTONDOWN,
+    WM_RBUTTONUP, WM_SYSKEYDOWN, WM_SYSKEYUP, WM_XBUTTONDOWN, WM_XBUTTONUP, WNDCLASS_STYLES,
+    WNDCLASSEXW, XBUTTON1,
+};
+#[cfg(target_os = "windows")]
+use windows::core::{HSTRING, PCWSTR};
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScriptHotkeyBinding {
+    pub script_path: String,
+    pub hotkey: String,
+    #[serde(default)]
+    pub hot_if_win_active: String,
+    #[serde(default)]
+    pub hold_to_loop: bool,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScriptInputRecorderAction {
+    #[serde(rename = "type")]
+    pub action_type: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub button: Option<String>,
+    pub time: f64,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScriptInputRecorderSnapshot {
+    pub hotkey_enabled: bool,
+    pub recording: bool,
+    pub total_time: f64,
+    pub action_count: usize,
+    pub actions: Vec<ScriptInputRecorderAction>,
+}
+
+struct InputRecorderState {
+    hotkey_enabled: AtomicBool,
+    recording: AtomicBool,
+    started_at: Mutex<Option<Instant>>,
+    actions: Mutex<Vec<ScriptInputRecorderAction>>,
+    suppress_hotkey_keyup: AtomicBool,
+}
+
+#[derive(Clone, Debug)]
+struct ParsedHotkey {
+    ctrl: bool,
+    alt: bool,
+    shift: bool,
+    win: bool,
+    allow_extra_modifiers: bool,
+    key_vk: u32,
+    combo_prefix_vk: Option<u32>,
+    trigger_on_key_up: bool,
+}
+
+#[derive(Clone, Debug)]
+struct ParsedHotkeyTerm {
+    ctrl: bool,
+    alt: bool,
+    shift: bool,
+    win: bool,
+    allow_extra_modifiers: bool,
+    key_vk: u32,
+    trigger_on_key_up: bool,
+}
+
+#[derive(Clone, Debug, Default)]
+struct HotIfWinActiveCriteria {
+    title: Option<String>,
+    class_name: Option<String>,
+    exe_name: Option<String>,
+    pid: Option<u32>,
+    hwnd_id: Option<u64>,
+}
+
+#[derive(Clone, Debug)]
+struct RuntimeHotkeyBinding {
+    script_path: String,
+    hotkey: String,
+    hot_if_win_active: Option<String>,
+    hot_if_win_active_criteria: Option<Vec<HotIfWinActiveCriteria>>,
+    hold_to_loop: bool,
+    parsed: ParsedHotkey,
+}
+
+struct HotkeyState {
+    app_handle: Mutex<Option<tauri::AppHandle>>,
+    bindings: RwLock<HashMap<String, RuntimeHotkeyBinding>>,
+    pressed_keys: Mutex<HashSet<u32>>,
+    hold_loop_flags: Mutex<HashMap<String, Arc<AtomicBool>>>,
+    hook_started: AtomicBool,
+    input_recorder: InputRecorderState,
+}
+
+static HOTKEY_STATE: LazyLock<Arc<HotkeyState>> = LazyLock::new(|| {
+    Arc::new(HotkeyState {
+        app_handle: Mutex::new(None),
+        bindings: RwLock::new(HashMap::new()),
+        pressed_keys: Mutex::new(HashSet::new()),
+        hold_loop_flags: Mutex::new(HashMap::new()),
+        hook_started: AtomicBool::new(false),
+        input_recorder: InputRecorderState {
+            hotkey_enabled: AtomicBool::new(false),
+            recording: AtomicBool::new(false),
+            started_at: Mutex::new(None),
+            actions: Mutex::new(Vec::new()),
+            suppress_hotkey_keyup: AtomicBool::new(false),
+        },
+    })
+});
+
+fn _hotkey_state() -> &'static Arc<HotkeyState> {
+    &HOTKEY_STATE
+}
+
+fn _input_recorder_state() -> &'static InputRecorderState {
+    &_hotkey_state().input_recorder
+}
+
+#[cfg(target_os = "windows")]
+const RAW_INPUT_CLASS_NAME: &str = "DnaBuilderScriptHotkeyRawInputWindow";
+#[cfg(target_os = "windows")]
+const HID_USAGE_PAGE_GENERIC: u16 = 0x01;
+#[cfg(target_os = "windows")]
+const HID_USAGE_GENERIC_KEYBOARD: u16 = 0x06;
+#[cfg(target_os = "windows")]
+const RI_KEY_E0: u16 = 0x02;
+#[cfg(target_os = "windows")]
+const RI_KEY_E1: u16 = 0x04;
+
+/// 解析 AHK 风格热键（支持 `^ ! + #` 与基础按键名）。
+fn _parse_ahk_hotkey(raw: &str) -> Result<ParsedHotkey, String> {
+    let text = raw.trim();
+    if text.is_empty() {
+        return Err("热键不能为空".to_string());
+    }
+
+    if let Some((prefix_text, suffix_text)) = _split_custom_combo_hotkey(text)? {
+        let prefix_term = _parse_ahk_hotkey_term(prefix_text, false)?;
+        let suffix_term = _parse_ahk_hotkey_term(suffix_text, true)?;
+
+        return Ok(ParsedHotkey {
+            ctrl: prefix_term.ctrl || suffix_term.ctrl,
+            alt: prefix_term.alt || suffix_term.alt,
+            shift: prefix_term.shift || suffix_term.shift,
+            win: prefix_term.win || suffix_term.win,
+            allow_extra_modifiers: prefix_term.allow_extra_modifiers
+                || suffix_term.allow_extra_modifiers,
+            key_vk: suffix_term.key_vk,
+            combo_prefix_vk: Some(prefix_term.key_vk),
+            trigger_on_key_up: suffix_term.trigger_on_key_up,
+        });
+    }
+
+    let term = _parse_ahk_hotkey_term(text, true)?;
+
+    Ok(ParsedHotkey {
+        ctrl: term.ctrl,
+        alt: term.alt,
+        shift: term.shift,
+        win: term.win,
+        allow_extra_modifiers: term.allow_extra_modifiers,
+        key_vk: term.key_vk,
+        combo_prefix_vk: None,
+        trigger_on_key_up: term.trigger_on_key_up,
+    })
+}
+
+/// 解析单段 AHK 热键文本（支持前缀修饰符和 `Up`）。
+fn _parse_ahk_hotkey_term(raw: &str, allow_key_up: bool) -> Result<ParsedHotkeyTerm, String> {
+    let text = raw.trim();
+    if text.is_empty() {
+        return Err("热键不能为空".to_string());
+    }
+
+    let mut ctrl = false;
+    let mut alt = false;
+    let mut shift = false;
+    let mut win = false;
+    let mut allow_extra_modifiers = false;
+    let mut index = 0usize;
+    let bytes = text.as_bytes();
+
+    while index < bytes.len() {
+        let ch = bytes[index] as char;
+        match ch {
+            '^' => ctrl = true,
+            '!' => alt = true,
+            '+' => shift = true,
+            '#' => win = true,
+            '*' => allow_extra_modifiers = true,
+            '~' | '$' => {}
+            '<' | '>' => {
+                // AHK 支持左右修饰符精确限定；当前实现先按通用修饰符处理。
+            }
+            _ => break,
+        }
+        index += 1;
+    }
+
+    let mut key_token = text[index..].trim().to_string();
+    if key_token.is_empty() {
+        return Err("热键缺少主键".to_string());
+    }
+
+    let mut trigger_on_key_up = false;
+    if allow_key_up {
+        if let Some(stripped) = key_token
+            .to_ascii_lowercase()
+            .strip_suffix(" up")
+            .map(|_| key_token[..key_token.len() - 3].trim().to_string())
+        {
+            key_token = stripped;
+            trigger_on_key_up = true;
+        }
+    }
+    if key_token.is_empty() {
+        return Err("热键缺少主键".to_string());
+    }
+
+    let key_vk = _parse_key_token_to_vk(&key_token)?;
+    Ok(ParsedHotkeyTerm {
+        ctrl,
+        alt,
+        shift,
+        win,
+        allow_extra_modifiers,
+        key_vk,
+        trigger_on_key_up,
+    })
+}
+
+/// 解析 `A & B` 自定义组合键写法。
+fn _split_custom_combo_hotkey(raw: &str) -> Result<Option<(&str, &str)>, String> {
+    let mut parts = raw.split('&');
+    let Some(prefix_part) = parts.next() else {
+        return Ok(None);
+    };
+    let Some(suffix_part) = parts.next() else {
+        return Ok(None);
+    };
+    if parts.next().is_some() {
+        return Err("暂不支持多重 `&` 组合（例如 `a & b & c`）".to_string());
+    }
+
+    let prefix = prefix_part.trim();
+    let suffix = suffix_part.trim();
+    if prefix.is_empty() || suffix.is_empty() {
+        return Err("`&` 组合热键格式无效，请使用类似 `CapsLock & c` 的写法".to_string());
+    }
+    Ok(Some((prefix, suffix)))
+}
+
+/// 将按键文本解析为虚拟键码。
+fn _parse_key_token_to_vk(token: &str) -> Result<u32, String> {
+    let normalized = token.trim().to_uppercase();
+    if normalized.is_empty() {
+        return Err("按键不能为空".to_string());
+    }
+
+    if normalized.len() == 1 {
+        let ch = normalized.chars().next().unwrap_or_default();
+        if ch.is_ascii_alphabetic() || ch.is_ascii_digit() {
+            return Ok(ch as u32);
+        }
+    }
+
+    if let Some(number_text) = normalized.strip_prefix('F') {
+        if let Ok(num) = number_text.parse::<u32>() {
+            return match num {
+                1 => Ok(VK_F1.0 as u32),
+                2 => Ok(VK_F2.0 as u32),
+                3 => Ok(VK_F3.0 as u32),
+                4 => Ok(VK_F4.0 as u32),
+                5 => Ok(VK_F5.0 as u32),
+                6 => Ok(VK_F6.0 as u32),
+                7 => Ok(VK_F7.0 as u32),
+                8 => Ok(VK_F8.0 as u32),
+                9 => Ok(VK_F9.0 as u32),
+                10 => Ok(VK_F10.0 as u32),
+                11 => Ok(VK_F11.0 as u32),
+                12 => Ok(VK_F12.0 as u32),
+                13 => Ok(VK_F13.0 as u32),
+                14 => Ok(VK_F14.0 as u32),
+                15 => Ok(VK_F15.0 as u32),
+                16 => Ok(VK_F16.0 as u32),
+                17 => Ok(VK_F17.0 as u32),
+                18 => Ok(VK_F18.0 as u32),
+                19 => Ok(VK_F19.0 as u32),
+                20 => Ok(VK_F20.0 as u32),
+                21 => Ok(VK_F21.0 as u32),
+                22 => Ok(VK_F22.0 as u32),
+                23 => Ok(VK_F23.0 as u32),
+                24 => Ok(VK_F24.0 as u32),
+                _ => Err(format!("不支持的功能键: {token}")),
+            };
+        }
+    }
+
+    if let Some(vk_text) = normalized.strip_prefix("VK") {
+        if vk_text.is_empty() {
+            return Err(format!("无效的 VK 按键写法: {token}"));
+        }
+        if let Ok(vk_hex) = u32::from_str_radix(vk_text, 16) {
+            return Ok(vk_hex);
+        }
+        if let Ok(vk_dec) = vk_text.parse::<u32>() {
+            return Ok(vk_dec);
+        }
+        return Err(format!("无效的 VK 按键写法: {token}"));
+    }
+
+    if normalized.starts_with("SC") {
+        return Err(format!(
+            "暂不支持 SC 扫描码写法: {token}，请改用键名或 VK 写法"
+        ));
+    }
+
+    match normalized.as_str() {
+        "CTRL" | "CONTROL" => Ok(VK_CONTROL.0 as u32),
+        "LCTRL" | "LCONTROL" => Ok(VK_LCONTROL.0 as u32),
+        "RCTRL" | "RCONTROL" => Ok(VK_RCONTROL.0 as u32),
+        "ALT" => Ok(VK_MENU.0 as u32),
+        "LALT" => Ok(VK_LMENU.0 as u32),
+        "RALT" => Ok(VK_RMENU.0 as u32),
+        "SHIFT" => Ok(VK_SHIFT.0 as u32),
+        "LSHIFT" => Ok(VK_LSHIFT.0 as u32),
+        "RSHIFT" => Ok(VK_RSHIFT.0 as u32),
+        "WIN" | "LWIN" => Ok(VK_LWIN.0 as u32),
+        "RWIN" => Ok(VK_RWIN.0 as u32),
+        "APPSKEY" | "APPS" => Ok(VK_APPS.0 as u32),
+        "TAB" => Ok(VK_TAB.0 as u32),
+        "ENTER" | "RETURN" => Ok(VK_RETURN.0 as u32),
+        "ESC" | "ESCAPE" => Ok(VK_ESCAPE.0 as u32),
+        "PAUSE" | "BREAK" => Ok(VK_PAUSE.0 as u32),
+        "PRINTSCREEN" | "PRTSC" | "PRTSCN" => Ok(VK_SNAPSHOT.0 as u32),
+        "SPACE" => Ok(VK_SPACE.0 as u32),
+        "LEFT" => Ok(VK_LEFT.0 as u32),
+        "RIGHT" => Ok(VK_RIGHT.0 as u32),
+        "UP" => Ok(VK_UP.0 as u32),
+        "DOWN" => Ok(VK_DOWN.0 as u32),
+        "HOME" => Ok(VK_HOME.0 as u32),
+        "END" => Ok(VK_END.0 as u32),
+        "PGUP" | "PRIOR" => Ok(VK_PRIOR.0 as u32),
+        "PGDN" | "NEXT" => Ok(VK_NEXT.0 as u32),
+        "INS" | "INSERT" => Ok(VK_INSERT.0 as u32),
+        "DEL" | "DELETE" => Ok(VK_DELETE.0 as u32),
+        "BACKSPACE" | "BS" => Ok(VK_BACK.0 as u32),
+        "CAPSLOCK" => Ok(VK_CAPITAL.0 as u32),
+        "NUMLOCK" => Ok(VK_NUMLOCK.0 as u32),
+        "SCROLLLOCK" => Ok(VK_SCROLL.0 as u32),
+        "NUMPAD0" | "NUMPADINS" => Ok(VK_NUMPAD0.0 as u32),
+        "NUMPAD1" | "NUMPADEND" => Ok(VK_NUMPAD1.0 as u32),
+        "NUMPAD2" | "NUMPADDOWN" => Ok(VK_NUMPAD2.0 as u32),
+        "NUMPAD3" | "NUMPADPGDN" => Ok(VK_NUMPAD3.0 as u32),
+        "NUMPAD4" | "NUMPADLEFT" => Ok(VK_NUMPAD4.0 as u32),
+        "NUMPAD5" | "NUMPADCLEAR" => Ok(VK_NUMPAD5.0 as u32),
+        "NUMPAD6" | "NUMPADRIGHT" => Ok(VK_NUMPAD6.0 as u32),
+        "NUMPAD7" | "NUMPADHOME" => Ok(VK_NUMPAD7.0 as u32),
+        "NUMPAD8" | "NUMPADUP" => Ok(VK_NUMPAD8.0 as u32),
+        "NUMPAD9" | "NUMPADPGUP" => Ok(VK_NUMPAD9.0 as u32),
+        "NUMPADDOT" | "NUMPADDEL" => Ok(VK_DECIMAL.0 as u32),
+        "NUMPADADD" => Ok(VK_ADD.0 as u32),
+        "NUMPADSUB" => Ok(VK_SUBTRACT.0 as u32),
+        "NUMPADMULT" => Ok(VK_MULTIPLY.0 as u32),
+        "NUMPADDIV" => Ok(VK_DIVIDE.0 as u32),
+        "NUMPADENTER" => Ok(VK_RETURN.0 as u32),
+        "NUMPADSEP" => Ok(VK_SEPARATOR.0 as u32),
+        "CLEAR" => Ok(VK_CLEAR.0 as u32),
+        "LBUTTON" => Ok(VK_LBUTTON.0 as u32),
+        "RBUTTON" => Ok(VK_RBUTTON.0 as u32),
+        "MBUTTON" => Ok(VK_MBUTTON.0 as u32),
+        "XBUTTON1" => Ok(VK_XBUTTON1.0 as u32),
+        "XBUTTON2" => Ok(VK_XBUTTON2.0 as u32),
+        _ => Err(format!("不支持的按键写法: {token}")),
+    }
+}
+
+fn _set_app_handle(app_handle: tauri::AppHandle) {
+    if let Ok(mut guard) = _hotkey_state().app_handle.lock() {
+        *guard = Some(app_handle);
+    }
+}
+
+fn _build_script_input_recorder_snapshot() -> ScriptInputRecorderSnapshot {
+    let recorder = _input_recorder_state();
+    let hotkey_enabled = recorder.hotkey_enabled.load(Ordering::Acquire);
+    let recording = recorder.recording.load(Ordering::Acquire);
+    let actions = if let Ok(guard) = recorder.actions.lock() {
+        guard.clone()
+    } else {
+        Vec::new()
+    };
+    let action_count = actions.len();
+    let total_time = if recording {
+        if let Ok(guard) = recorder.started_at.lock() {
+            if let Some(started_at) = *guard {
+                started_at.elapsed().as_secs_f64()
+            } else {
+                0.0
+            }
+        } else {
+            actions.last().map(|item| item.time).unwrap_or(0.0)
+        }
+    } else {
+        actions.last().map(|item| item.time).unwrap_or(0.0)
+    };
+    ScriptInputRecorderSnapshot {
+        hotkey_enabled,
+        recording,
+        total_time,
+        action_count,
+        actions,
+    }
+}
+
+fn _emit_script_input_recorder_snapshot() {
+    let app_handle = if let Ok(guard) = _hotkey_state().app_handle.lock() {
+        guard.clone()
+    } else {
+        None
+    };
+    let Some(app_handle) = app_handle else {
+        return;
+    };
+    let snapshot = _build_script_input_recorder_snapshot();
+    let _ = app_handle.emit("script-input-recorder-updated", snapshot);
+}
+
+fn _start_script_input_recording() {
+    let recorder = _input_recorder_state();
+    if let Ok(mut actions) = recorder.actions.lock() {
+        actions.clear();
+    }
+    if let Ok(mut pressed_keys) = _hotkey_state().pressed_keys.lock() {
+        pressed_keys.clear();
+    }
+    if let Ok(mut started_at) = recorder.started_at.lock() {
+        *started_at = None;
+    }
+    recorder.recording.store(true, Ordering::Release);
+    _emit_script_input_recorder_snapshot();
+}
+
+fn _stop_script_input_recording() {
+    let recorder = _input_recorder_state();
+    recorder.recording.store(false, Ordering::Release);
+    if let Ok(mut started_at) = recorder.started_at.lock() {
+        *started_at = None;
+    }
+    _emit_script_input_recorder_snapshot();
+}
+
+#[cfg(target_os = "windows")]
+fn _vk_to_script_key(vk: u32) -> Option<String> {
+    if (0x41..=0x5A).contains(&vk) {
+        return char::from_u32(vk).map(|ch| ch.to_ascii_lowercase().to_string());
+    }
+    if (0x30..=0x39).contains(&vk) {
+        return char::from_u32(vk).map(|ch| ch.to_string());
+    }
+    if (VK_F1.0 as u32..=VK_F24.0 as u32).contains(&vk) {
+        return Some(format!("f{}", vk - VK_F1.0 as u32 + 1));
+    }
+    match vk {
+        x if x == VK_SPACE.0 as u32 => Some("space".to_string()),
+        x if x == VK_RETURN.0 as u32 => Some("enter".to_string()),
+        x if x == VK_BACK.0 as u32 => Some("backspace".to_string()),
+        x if x == VK_ESCAPE.0 as u32 => Some("esc".to_string()),
+        x if x == VK_TAB.0 as u32 => Some("tab".to_string()),
+        x if x == VK_UP.0 as u32 => Some("up".to_string()),
+        x if x == VK_DOWN.0 as u32 => Some("down".to_string()),
+        x if x == VK_LEFT.0 as u32 => Some("left".to_string()),
+        x if x == VK_RIGHT.0 as u32 => Some("right".to_string()),
+        x if x == VK_SHIFT.0 as u32 || x == VK_LSHIFT.0 as u32 || x == VK_RSHIFT.0 as u32 => {
+            Some("shift".to_string())
+        }
+        x if x == VK_CONTROL.0 as u32 || x == VK_LCONTROL.0 as u32 || x == VK_RCONTROL.0 as u32 => {
+            Some("ctrl".to_string())
+        }
+        x if x == VK_MENU.0 as u32 || x == VK_LMENU.0 as u32 || x == VK_RMENU.0 as u32 => {
+            Some("alt".to_string())
+        }
+        x if x == VK_LWIN.0 as u32 => Some("lwin".to_string()),
+        x if x == VK_RWIN.0 as u32 => Some("rwin".to_string()),
+        x if x == VK_HOME.0 as u32 => Some("home".to_string()),
+        x if x == VK_END.0 as u32 => Some("end".to_string()),
+        x if x == VK_PRIOR.0 as u32 => Some("pageup".to_string()),
+        x if x == VK_NEXT.0 as u32 => Some("pagedown".to_string()),
+        x if x == VK_INSERT.0 as u32 => Some("insert".to_string()),
+        x if x == VK_DELETE.0 as u32 => Some("delete".to_string()),
+        x if x == VK_CAPITAL.0 as u32 => Some("capslock".to_string()),
+        x if x == VK_NUMLOCK.0 as u32 => Some("numlock".to_string()),
+        x if x == VK_SCROLL.0 as u32 => Some("scrolllock".to_string()),
+        x if x == VK_SNAPSHOT.0 as u32 => Some("printscreen".to_string()),
+        _ => None,
+    }
+}
+
+fn _record_script_input_action(action_type: &str, key: Option<String>, button: Option<String>) {
+    let recorder = _input_recorder_state();
+    if !recorder.recording.load(Ordering::Acquire) {
+        return;
+    }
+
+    let now = Instant::now();
+    let elapsed_seconds = if let Ok(mut started_at) = recorder.started_at.lock() {
+        let start = started_at.get_or_insert(now);
+        now.duration_since(*start).as_secs_f64()
+    } else {
+        return;
+    };
+
+    if let Ok(mut actions) = recorder.actions.lock() {
+        if let Some(last) = actions.last() {
+            // 兜底去重：前端回填与 LLHook 同时命中时，短时间内完全相同动作只保留一次。
+            let same_action = last.action_type == action_type
+                && last.key == key
+                && last.button == button
+                && (elapsed_seconds - last.time).abs() <= 0.03;
+            if same_action {
+                return;
+            }
+        }
+        actions.push(ScriptInputRecorderAction {
+            action_type: action_type.to_string(),
+            key,
+            button,
+            time: elapsed_seconds,
+        });
+    } else {
+        return;
+    }
+
+    _emit_script_input_recorder_snapshot();
+}
+
+#[cfg(target_os = "windows")]
+fn _record_keyboard_input(vk: u32, is_key_down: bool) {
+    let Some(key) = _vk_to_script_key(vk) else {
+        return;
+    };
+    let action_type = if is_key_down { "key_down" } else { "key_up" };
+    _record_script_input_action(action_type, Some(key), None);
+}
+
+fn _record_mouse_input(button: &str, is_key_down: bool) {
+    let action_type = if is_key_down {
+        "mouse_down"
+    } else {
+        "mouse_up"
+    };
+    _record_script_input_action(action_type, None, Some(button.to_string()));
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum HotIfToken {
+    Id,
+    Pid,
+    Exe,
+    Class,
+    Group,
+}
+
+/// 将 `WinActive("...")` 的 WinTitle 字符串解析为可匹配条件。
+fn _parse_hot_if_win_active_criteria(raw: &str) -> Result<Option<HotIfWinActiveCriteria>, String> {
+    let text = raw.trim();
+    if text.is_empty() {
+        return Ok(None);
+    }
+
+    let mut criteria = HotIfWinActiveCriteria::default();
+    let lowered = text.to_ascii_lowercase();
+
+    let mut first_token_pos: Option<usize> = None;
+    let mut cursor = 0usize;
+    while let Some((token_pos, token, value_start)) = _find_next_hot_if_token(&lowered, cursor) {
+        if first_token_pos.is_none() {
+            first_token_pos = Some(token_pos);
+        }
+        let next_token_pos = _find_next_hot_if_token(&lowered, value_start)
+            .map(|(pos, _, _)| pos)
+            .unwrap_or(text.len());
+        let value = text[value_start..next_token_pos].trim();
+
+        match token {
+            HotIfToken::Id => {
+                if value.is_empty() {
+                    return Err("`ahk_id` 缺少值".to_string());
+                }
+                criteria.hwnd_id =
+                    Some(_parse_hot_if_u64(value).map_err(|e| format!("`ahk_id` 无效：{e}"))?);
+            }
+            HotIfToken::Pid => {
+                if value.is_empty() {
+                    return Err("`ahk_pid` 缺少值".to_string());
+                }
+                let pid64 = _parse_hot_if_u64(value).map_err(|e| format!("`ahk_pid` 无效：{e}"))?;
+                let pid = u32::try_from(pid64).map_err(|_| "`ahk_pid` 超出范围".to_string())?;
+                criteria.pid = Some(pid);
+            }
+            HotIfToken::Exe => {
+                if value.is_empty() {
+                    return Err("`ahk_exe` 缺少值".to_string());
+                }
+                criteria.exe_name = Some(value.to_string());
+            }
+            HotIfToken::Class => {
+                if value.is_empty() {
+                    return Err("`ahk_class` 缺少值".to_string());
+                }
+                criteria.class_name = Some(value.to_string());
+            }
+            HotIfToken::Group => {
+                return Err("暂不支持 `ahk_group` 条件".to_string());
+            }
+        }
+
+        cursor = next_token_pos;
+    }
+
+    if let Some(pos) = first_token_pos {
+        let title_part = text[..pos].trim_end();
+        if !title_part.trim().is_empty() {
+            criteria.title = Some(title_part.trim().to_string());
+        }
+    } else {
+        // AHK 语义：未使用 ahk_ 前缀时，WinTitle 按窗口标题匹配。
+        criteria.title = Some(text.to_string());
+    }
+
+    Ok(Some(criteria))
+}
+
+/// 解析带 `|` 的多段 WinActive 条件，语义为“任一整段匹配即可”。
+fn _parse_hot_if_win_active_criteria_list(
+    raw: &str,
+) -> Result<Option<Vec<HotIfWinActiveCriteria>>, String> {
+    let text = raw.trim();
+    if text.is_empty() {
+        return Ok(None);
+    }
+
+    let has_ahk_token = _find_next_hot_if_token(&text.to_ascii_lowercase(), 0).is_some();
+    if !has_ahk_token {
+        return _parse_hot_if_win_active_criteria(text).map(|item| item.map(|value| vec![value]));
+    }
+
+    let mut result = Vec::new();
+    for (index, part) in text.split('|').enumerate() {
+        let segment = part.trim();
+        if segment.is_empty() {
+            return Err(format!("第 {} 段 WinActive 条件为空", index + 1));
+        }
+        let parsed = _parse_hot_if_win_active_criteria(segment)?
+            .ok_or_else(|| format!("第 {} 段 WinActive 条件为空", index + 1))?;
+        result.push(parsed);
+    }
+
+    if result.is_empty() {
+        return Ok(None);
+    }
+    Ok(Some(result))
+}
+
+/// 在 WinTitle 字符串中查找下一个 `ahk_` 特殊 token。
+fn _find_next_hot_if_token(lowered: &str, from: usize) -> Option<(usize, HotIfToken, usize)> {
+    let bytes = lowered.as_bytes();
+    let mut index = from;
+    while index + 4 <= bytes.len() {
+        if &bytes[index..index + 4] != b"ahk_" {
+            index += 1;
+            continue;
+        }
+        if index > 0 && !bytes[index - 1].is_ascii_whitespace() && bytes[index - 1] != b'|' {
+            index += 1;
+            continue;
+        }
+
+        let remain = &lowered[index + 4..];
+        if remain.starts_with("id") {
+            return Some((index, HotIfToken::Id, index + 6));
+        }
+        if remain.starts_with("pid") {
+            return Some((index, HotIfToken::Pid, index + 7));
+        }
+        if remain.starts_with("exe") {
+            return Some((index, HotIfToken::Exe, index + 7));
+        }
+        if remain.starts_with("class") {
+            return Some((index, HotIfToken::Class, index + 9));
+        }
+        if remain.starts_with("group") {
+            return Some((index, HotIfToken::Group, index + 9));
+        }
+        index += 1;
+    }
+    None
+}
+
+/// 解析 `ahk_pid` / `ahk_id` 数值（支持十进制和 `0x` 十六进制）。
+fn _parse_hot_if_u64(text: &str) -> Result<u64, String> {
+    let trimmed = text.trim();
+    if trimmed.is_empty() {
+        return Err("值不能为空".to_string());
+    }
+    if let Some(hex) = trimmed
+        .strip_prefix("0x")
+        .or_else(|| trimmed.strip_prefix("0X"))
+    {
+        return u64::from_str_radix(hex, 16).map_err(|e| e.to_string());
+    }
+    trimmed.parse::<u64>().map_err(|e| e.to_string())
+}
+
+#[cfg(target_os = "windows")]
+#[derive(Clone, Debug)]
+struct ForegroundWindowInfo {
+    hwnd_id: u64,
+    pid: u32,
+    title: String,
+    class_name: String,
+    exe_name: String,
+}
+
+#[cfg(target_os = "windows")]
+/// 读取当前前台窗口所属进程名（仅文件名，如 `notepad.exe`）。
+fn _get_foreground_window_info() -> Option<ForegroundWindowInfo> {
+    let hwnd = unsafe { GetForegroundWindow() };
+    if hwnd.0.is_null() {
+        return None;
+    }
+    let hwnd_id = hwnd.0 as usize as u64;
+
+    let mut pid = 0u32;
+    unsafe {
+        GetWindowThreadProcessId(hwnd, Some(&mut pid));
+    }
+    if pid == 0 {
+        return None;
+    }
+    let exe_name = _get_process_name_by_pid(pid)?;
+
+    let mut title_buf = [0u16; 1024];
+    let title_len = unsafe { GetWindowTextW(hwnd, &mut title_buf) };
+    let title = String::from_utf16_lossy(&title_buf[..usize::try_from(title_len).unwrap_or(0)]);
+
+    let mut class_buf = [0u16; 256];
+    let class_len = unsafe { GetClassNameW(hwnd, &mut class_buf) };
+    let class_name =
+        String::from_utf16_lossy(&class_buf[..usize::try_from(class_len).unwrap_or(0)]);
+
+    Some(ForegroundWindowInfo {
+        hwnd_id,
+        pid,
+        title,
+        class_name,
+        exe_name,
+    })
+}
+
+#[cfg(target_os = "windows")]
+/// 根据 PID 获取进程名（不带路径）。
+fn _get_process_name_by_pid(target_pid: u32) -> Option<String> {
+    let snapshot = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0).ok() }?;
+    let mut entry = PROCESSENTRY32W::default();
+    entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as u32;
+
+    let mut result: Option<String> = None;
+    if unsafe { Process32FirstW(snapshot, &mut entry).is_ok() } {
+        loop {
+            if entry.th32ProcessID == target_pid {
+                let process_name = String::from_utf16_lossy(&entry.szExeFile);
+                result = Some(process_name.trim_matches('\0').to_string());
+                break;
+            }
+            if !unsafe { Process32NextW(snapshot, &mut entry).is_ok() } {
+                break;
+            }
+        }
+    }
+
+    let _ = unsafe { CloseHandle(snapshot) };
+    result
+}
+
+#[cfg(target_os = "windows")]
+/// 按 AHK `WinActive(WinTitle)` 语义匹配当前前台窗口。
+fn _matches_hot_if_win_active(criteria: &HotIfWinActiveCriteria) -> bool {
+    let info = if let Some(info) = _get_foreground_window_info() {
+        info
+    } else {
+        return false;
+    };
+
+    if let Some(hwnd_id) = criteria.hwnd_id {
+        if info.hwnd_id != hwnd_id {
+            return false;
+        }
+    }
+    if let Some(pid) = criteria.pid {
+        if info.pid != pid {
+            return false;
+        }
+    }
+    if let Some(title) = criteria.title.as_deref() {
+        // 对齐 AHK 默认 SetTitleMatchMode=2（FIND_ANYWHERE）。
+        if !title.is_empty() && !info.title.contains(title) {
+            return false;
+        }
+    }
+    if let Some(class_name) = criteria.class_name.as_deref() {
+        // AHK 非正则模式下 ahk_class 为大小写不敏感精确匹配。
+        if !info.class_name.eq_ignore_ascii_case(class_name) {
+            return false;
+        }
+    }
+    if let Some(exe_name) = criteria.exe_name.as_deref() {
+        // AHK 非正则模式下 ahk_exe 为大小写不敏感精确匹配。
+        if !info.exe_name.eq_ignore_ascii_case(exe_name) {
+            return false;
+        }
+    }
+
+    true
+}
+
+#[cfg(not(target_os = "windows"))]
+fn _matches_hot_if_win_active(_criteria: &HotIfWinActiveCriteria) -> bool {
+    true
+}
+
+#[cfg(target_os = "windows")]
+fn _matches_hot_if_win_active_text(raw: &str) -> bool {
+    let parsed = match _parse_hot_if_win_active_criteria_list(raw) {
+        Ok(v) => v,
+        Err(_) => return false,
+    };
+    if let Some(criteria_list) = parsed {
+        return criteria_list.iter().any(_matches_hot_if_win_active);
+    }
+    true
+}
+
+#[cfg(not(target_os = "windows"))]
+fn _matches_hot_if_win_active_text(_raw: &str) -> bool {
+    true
+}
+
+fn _is_ctrl_pressed(pressed: &HashSet<u32>) -> bool {
+    pressed.contains(&(VK_CONTROL.0 as u32))
+        || pressed.contains(&(VK_LCONTROL.0 as u32))
+        || pressed.contains(&(VK_RCONTROL.0 as u32))
+}
+
+fn _is_alt_pressed(pressed: &HashSet<u32>) -> bool {
+    pressed.contains(&(VK_MENU.0 as u32))
+        || pressed.contains(&(VK_LMENU.0 as u32))
+        || pressed.contains(&(VK_RMENU.0 as u32))
+}
+
+fn _is_shift_pressed(pressed: &HashSet<u32>) -> bool {
+    pressed.contains(&(VK_SHIFT.0 as u32))
+        || pressed.contains(&(VK_LSHIFT.0 as u32))
+        || pressed.contains(&(VK_RSHIFT.0 as u32))
+}
+
+fn _is_win_pressed(pressed: &HashSet<u32>) -> bool {
+    pressed.contains(&(VK_LWIN.0 as u32)) || pressed.contains(&(VK_RWIN.0 as u32))
+}
+
+/// 判断一个逻辑按键（例如 `Ctrl`）是否在当前按下集合中。
+fn _is_vk_pressed(target_vk: u32, pressed: &HashSet<u32>) -> bool {
+    if target_vk == VK_CONTROL.0 as u32 {
+        return _is_ctrl_pressed(pressed);
+    }
+    if target_vk == VK_MENU.0 as u32 {
+        return _is_alt_pressed(pressed);
+    }
+    if target_vk == VK_SHIFT.0 as u32 {
+        return _is_shift_pressed(pressed);
+    }
+    if target_vk == VK_LWIN.0 as u32 {
+        return pressed.contains(&(VK_LWIN.0 as u32));
+    }
+    if target_vk == VK_RWIN.0 as u32 {
+        return pressed.contains(&(VK_RWIN.0 as u32));
+    }
+    pressed.contains(&target_vk)
+}
+
+/// 判断事件按键是否与配置按键相符（兼容中性修饰键与左右修饰键）。
+fn _vk_matches(target_vk: u32, event_vk: u32) -> bool {
+    if target_vk == VK_CONTROL.0 as u32 {
+        return event_vk == VK_CONTROL.0 as u32
+            || event_vk == VK_LCONTROL.0 as u32
+            || event_vk == VK_RCONTROL.0 as u32;
+    }
+    if target_vk == VK_MENU.0 as u32 {
+        return event_vk == VK_MENU.0 as u32
+            || event_vk == VK_LMENU.0 as u32
+            || event_vk == VK_RMENU.0 as u32;
+    }
+    if target_vk == VK_SHIFT.0 as u32 {
+        return event_vk == VK_SHIFT.0 as u32
+            || event_vk == VK_LSHIFT.0 as u32
+            || event_vk == VK_RSHIFT.0 as u32;
+    }
+    target_vk == event_vk
+}
+
+fn _binding_matches(
+    parsed: &ParsedHotkey,
+    vk: u32,
+    is_key_down: bool,
+    pressed: &HashSet<u32>,
+) -> bool {
+    if parsed.trigger_on_key_up == is_key_down {
+        return false;
+    }
+    if !_vk_matches(parsed.key_vk, vk) {
+        return false;
+    }
+    if let Some(combo_prefix_vk) = parsed.combo_prefix_vk {
+        if !_is_vk_pressed(combo_prefix_vk, pressed) {
+            return false;
+        }
+    }
+
+    let ctrl = _is_ctrl_pressed(pressed);
+    let alt = _is_alt_pressed(pressed);
+    let shift = _is_shift_pressed(pressed);
+    let win = _is_win_pressed(pressed);
+
+    if parsed.ctrl && !ctrl {
+        return false;
+    }
+    if parsed.alt && !alt {
+        return false;
+    }
+    if parsed.shift && !shift {
+        return false;
+    }
+    if parsed.win && !win {
+        return false;
+    }
+
+    if !parsed.allow_extra_modifiers
+        && (ctrl != parsed.ctrl || alt != parsed.alt || shift != parsed.shift || win != parsed.win)
+    {
+        return false;
+    }
+
+    true
+}
+
+/// 判断按住循环时热键是否仍处于“按住”状态。
+fn _is_binding_held(parsed: &ParsedHotkey, pressed: &HashSet<u32>) -> bool {
+    if !_is_vk_pressed(parsed.key_vk, pressed) {
+        return false;
+    }
+    if let Some(prefix_vk) = parsed.combo_prefix_vk {
+        if !_is_vk_pressed(prefix_vk, pressed) {
+            return false;
+        }
+    }
+
+    let ctrl = _is_ctrl_pressed(pressed);
+    let alt = _is_alt_pressed(pressed);
+    let shift = _is_shift_pressed(pressed);
+    let win = _is_win_pressed(pressed);
+
+    if parsed.ctrl && !ctrl {
+        return false;
+    }
+    if parsed.alt && !alt {
+        return false;
+    }
+    if parsed.shift && !shift {
+        return false;
+    }
+    if parsed.win && !win {
+        return false;
+    }
+    if !parsed.allow_extra_modifiers
+        && (ctrl != parsed.ctrl || alt != parsed.alt || shift != parsed.shift || win != parsed.win)
+    {
+        return false;
+    }
+    true
+}
+
+/// 判断当前绑定的生效条件是否满足。
+fn _binding_condition_matches(binding: &RuntimeHotkeyBinding) -> bool {
+    if let Some(criteria_list) = binding.hot_if_win_active_criteria.as_ref() {
+        return criteria_list.iter().any(_matches_hot_if_win_active);
+    }
+    if let Some(raw) = binding.hot_if_win_active.as_deref() {
+        return _matches_hot_if_win_active_text(raw);
+    }
+    true
+}
+
+/// 启动“按住循环”热键任务。
+fn _spawn_hold_loop(binding: RuntimeHotkeyBinding, app_handle: tauri::AppHandle) {
+    let loop_flag = Arc::new(AtomicBool::new(true));
+    if let Ok(mut guard) = _hotkey_state().hold_loop_flags.lock() {
+        if let Some(prev) = guard.insert(binding.script_path.clone(), loop_flag.clone()) {
+            prev.store(false, Ordering::Release);
+        }
+    }
+
+    let script_path = binding.script_path.clone();
+    let hotkey_text = binding.hotkey.clone();
+    tauri::async_runtime::spawn(async move {
+        let _ = app_handle.emit(
+            "script-console",
+            serde_json::json!({
+                "scope": script_path.clone(),
+                "level": "info",
+                "message": format!("热键按住循环开始: {} ({})", script_path, hotkey_text),
+            }),
+        );
+
+        loop {
+            if !loop_flag.load(Ordering::Acquire) {
+                break;
+            }
+            let should_continue = if let Ok(pressed) = _hotkey_state().pressed_keys.lock() {
+                _is_binding_held(&binding.parsed, &pressed) && _binding_condition_matches(&binding)
+            } else {
+                false
+            };
+            if !should_continue {
+                break;
+            }
+
+            if let Err(error) = run_script_file(script_path.clone(), app_handle.clone()).await {
+                let _ = app_handle.emit(
+                    "script-console",
+                    serde_json::json!({
+                        "scope": script_path.clone(),
+                        "level": "error",
+                        "message": format!("热键按住循环执行失败: {}，错误: {}", script_path, error),
+                    }),
+                );
+                break;
+            }
+        }
+
+        if let Ok(mut guard) = _hotkey_state().hold_loop_flags.lock() {
+            if let Some(current_flag) = guard.get(&script_path) {
+                if Arc::ptr_eq(current_flag, &loop_flag) {
+                    guard.remove(&script_path);
+                }
+            }
+        }
+        let _ = app_handle.emit(
+            "script-console",
+            serde_json::json!({
+                "scope": script_path.clone(),
+                "level": "info",
+                "message": format!("热键按住循环结束: {} ({})", script_path, hotkey_text),
+            }),
+        );
+    });
+}
+
+fn _trigger_hotkey_scripts(vk: u32, is_key_down: bool, pressed: &HashSet<u32>) {
+    let bindings = {
+        if let Ok(guard) = _hotkey_state().bindings.read() {
+            guard.values().cloned().collect::<Vec<_>>()
+        } else {
+            Vec::new()
+        }
+    };
+    if bindings.is_empty() {
+        return;
+    }
+
+    let app_handle = if let Ok(guard) = _hotkey_state().app_handle.lock() {
+        guard.clone()
+    } else {
+        None
+    };
+    let Some(app_handle) = app_handle else {
+        return;
+    };
+
+    let matched = bindings
+        .into_iter()
+        .filter(|binding| {
+            _binding_matches(&binding.parsed, vk, is_key_down, pressed)
+                && _binding_condition_matches(binding)
+        })
+        .collect::<Vec<_>>();
+
+    for binding in matched {
+        if binding.hold_to_loop {
+            _spawn_hold_loop(binding, app_handle.clone());
+            continue;
+        }
+
+        let runner_app_handle = app_handle.clone();
+        let script_path = binding.script_path.clone();
+        let hotkey_text = binding.hotkey.clone();
+        tauri::async_runtime::spawn(async move {
+            let _ = runner_app_handle.emit(
+                "script-console",
+                serde_json::json!({
+                    "scope": script_path.clone(),
+                    "level": "info",
+                    "message": format!("热键触发脚本: {} ({})", script_path, hotkey_text),
+                }),
+            );
+            match run_script_file(script_path.clone(), runner_app_handle.clone()).await {
+                Ok(_) => {}
+                Err(error) => {
+                    let _ = runner_app_handle.emit(
+                        "script-console",
+                        serde_json::json!({
+                            "scope": script_path.clone(),
+                            "level": "error",
+                            "message": format!("热键执行失败: {}，错误: {}", script_path, error),
+                        }),
+                    );
+                }
+            }
+        });
+    }
+}
+
+#[cfg(target_os = "windows")]
+/// 将 Raw Input 键盘事件转换为虚拟键码，尽量保留左右修饰键区分。
+fn _raw_keyboard_to_vk(raw_keyboard: &windows::Win32::UI::Input::RAWKEYBOARD) -> Option<u32> {
+    let raw_vkey = raw_keyboard.VKey as u32;
+    if raw_vkey == 0 || raw_vkey == 0xFF {
+        return None;
+    }
+
+    let mut scan_code = u32::from(raw_keyboard.MakeCode);
+    if raw_keyboard.Flags & RI_KEY_E0 != 0 {
+        scan_code |= 0xE000;
+    }
+    if raw_keyboard.Flags & RI_KEY_E1 != 0 {
+        scan_code |= 0xE100;
+    }
+
+    let mapped_vk = unsafe { MapVirtualKeyW(scan_code, MAPVK_VSC_TO_VK_EX) };
+    if mapped_vk != 0 {
+        return Some(mapped_vk);
+    }
+    Some(raw_vkey)
+}
+
+#[cfg(target_os = "windows")]
+/// 处理一条 Raw Input 键盘消息。
+fn _handle_raw_keyboard_input(raw_keyboard: &windows::Win32::UI::Input::RAWKEYBOARD) {
+    let Some(vk) = _raw_keyboard_to_vk(raw_keyboard) else {
+        return;
+    };
+
+    let message = raw_keyboard.Message;
+    let is_key_down = message == WM_KEYDOWN || message == WM_SYSKEYDOWN;
+    let is_key_up = message == WM_KEYUP || message == WM_SYSKEYUP;
+    if !is_key_down && !is_key_up {
+        return;
+    }
+
+    if _handle_script_input_recorder_hotkey(vk, is_key_down) {
+        return;
+    }
+
+    let should_record = _process_hotkey_event(vk, is_key_down);
+    if should_record {
+        _record_keyboard_input(vk, is_key_down);
+    }
+}
+
+#[cfg(target_os = "windows")]
+/// 从 `WM_INPUT` 中读取键盘事件。
+fn _handle_raw_input_message(lparam: LPARAM) {
+    let mut raw_input = RAWINPUT::default();
+    let mut raw_input_size = std::mem::size_of::<RAWINPUT>() as u32;
+    let header_size = std::mem::size_of::<RAWINPUTHEADER>() as u32;
+
+    let status = unsafe {
+        GetRawInputData(
+            HRAWINPUT(lparam.0 as *mut _),
+            RID_INPUT,
+            Some(&mut raw_input as *mut _ as *mut std::ffi::c_void),
+            &mut raw_input_size,
+            header_size,
+        )
+    };
+    if status == u32::MAX || status == 0 {
+        return;
+    }
+    if raw_input.header.dwType != RIM_TYPEKEYBOARD.0 {
+        return;
+    }
+
+    let raw_keyboard = unsafe { raw_input.data.keyboard };
+    _handle_raw_keyboard_input(&raw_keyboard);
+}
+
+#[cfg(target_os = "windows")]
+/// Raw Input 消息窗口过程，仅处理键盘 `WM_INPUT`。
+unsafe extern "system" fn _raw_input_window_proc(
+    hwnd: HWND,
+    message: u32,
+    wparam: WPARAM,
+    lparam: LPARAM,
+) -> LRESULT {
+    if message == WM_INPUT {
+        _handle_raw_input_message(lparam);
+    }
+    unsafe { DefWindowProcW(hwnd, message, wparam, lparam) }
+}
+
+#[cfg(target_os = "windows")]
+/// 创建接收键盘 Raw Input 的消息窗口。
+fn _create_raw_input_window(
+    module_handle: windows::Win32::Foundation::HMODULE,
+) -> Result<HWND, String> {
+    let class_name = HSTRING::from(RAW_INPUT_CLASS_NAME);
+    let wnd_class = WNDCLASSEXW {
+        cbSize: std::mem::size_of::<WNDCLASSEXW>() as u32,
+        style: WNDCLASS_STYLES(0),
+        lpfnWndProc: Some(_raw_input_window_proc),
+        cbClsExtra: 0,
+        cbWndExtra: 0,
+        hInstance: module_handle.into(),
+        hIcon: Default::default(),
+        hCursor: Default::default(),
+        hbrBackground: Default::default(),
+        lpszMenuName: PCWSTR::null(),
+        lpszClassName: PCWSTR(class_name.as_ptr()),
+        hIconSm: Default::default(),
+    };
+
+    let atom = unsafe { RegisterClassExW(&wnd_class) };
+    if atom == 0 {
+        let last_error = unsafe { GetLastError() };
+        if last_error != ERROR_CLASS_ALREADY_EXISTS {
+            return Err(format!("注册 Raw Input 窗口类失败: {last_error:?}"));
+        }
+    }
+
+    unsafe {
+        CreateWindowExW(
+            WINDOW_EX_STYLE(0),
+            PCWSTR(class_name.as_ptr()),
+            PCWSTR::null(),
+            WINDOW_STYLE(0),
+            0,
+            0,
+            0,
+            0,
+            Some(HWND_MESSAGE),
+            None,
+            Some(module_handle.into()),
+            None,
+        )
+        .map_err(|error| format!("创建 Raw Input 消息窗口失败: {error}"))
+    }
+}
+
+#[cfg(target_os = "windows")]
+/// 注册键盘 Raw Input 设备，让后台线程在前后台都收到键盘输入。
+fn _register_keyboard_raw_input(hwnd: HWND) -> Result<(), String> {
+    let devices = [RAWINPUTDEVICE {
+        usUsagePage: HID_USAGE_PAGE_GENERIC,
+        usUsage: HID_USAGE_GENERIC_KEYBOARD,
+        dwFlags: RIDEV_DEVNOTIFY | RIDEV_INPUTSINK,
+        hwndTarget: hwnd,
+    }];
+
+    unsafe { RegisterRawInputDevices(&devices, std::mem::size_of::<RAWINPUTDEVICE>() as u32) }
+        .map_err(|error| format!("注册键盘 Raw Input 失败: {error}"))
+}
+
+#[cfg(target_os = "windows")]
+fn _handle_script_input_recorder_hotkey(vk: u32, is_key_down: bool) -> bool {
+    const RECORDER_TOGGLE_VK: u32 = 0x79;
+    let recorder = _input_recorder_state();
+    if !recorder.hotkey_enabled.load(Ordering::Acquire) {
+        return false;
+    }
+    if vk != RECORDER_TOGGLE_VK {
+        return false;
+    }
+
+    if is_key_down {
+        if recorder.recording.load(Ordering::Acquire) {
+            _stop_script_input_recording();
+        } else {
+            _start_script_input_recording();
+        }
+        recorder
+            .suppress_hotkey_keyup
+            .store(true, Ordering::Release);
+        return true;
+    }
+    if recorder.suppress_hotkey_keyup.swap(false, Ordering::AcqRel) {
+        return true;
+    }
+    true
+}
+
+#[cfg(not(target_os = "windows"))]
+fn _handle_script_input_recorder_hotkey(_vk: u32, _is_key_down: bool) -> bool {
+    false
+}
+
+#[cfg(target_os = "windows")]
+fn _process_hotkey_event(vk: u32, is_key_down: bool) -> bool {
+    if let Ok(mut pressed_keys) = _hotkey_state().pressed_keys.lock() {
+        if is_key_down {
+            let inserted = pressed_keys.insert(vk);
+            if inserted {
+                _trigger_hotkey_scripts(vk, true, &pressed_keys);
+            }
+            return inserted;
+        } else {
+            let existed = pressed_keys.contains(&vk);
+            if existed {
+                _trigger_hotkey_scripts(vk, false, &pressed_keys);
+            }
+            pressed_keys.remove(&vk);
+            return existed;
+        }
+    }
+    false
+}
+
+#[cfg(target_os = "windows")]
+unsafe extern "system" fn _low_level_mouse_proc(
+    code: i32,
+    wparam: WPARAM,
+    lparam: LPARAM,
+) -> LRESULT {
+    if code == HC_ACTION as i32 {
+        let event = unsafe { *(lparam.0 as *const MSLLHOOKSTRUCT) };
+        let message = wparam.0 as u32;
+
+        let (vk, button, is_key_down) = match message {
+            WM_LBUTTONDOWN => (Some(VK_LBUTTON.0 as u32), Some("left"), true),
+            WM_LBUTTONUP => (Some(VK_LBUTTON.0 as u32), Some("left"), false),
+            WM_RBUTTONDOWN => (Some(VK_RBUTTON.0 as u32), Some("right"), true),
+            WM_RBUTTONUP => (Some(VK_RBUTTON.0 as u32), Some("right"), false),
+            WM_MBUTTONDOWN => (Some(VK_MBUTTON.0 as u32), Some("middle"), true),
+            WM_MBUTTONUP => (Some(VK_MBUTTON.0 as u32), Some("middle"), false),
+            WM_XBUTTONDOWN => {
+                let xbutton = ((event.mouseData >> 16) & 0xFFFF) as u16;
+                if xbutton == XBUTTON1 as u16 {
+                    (Some(VK_XBUTTON1.0 as u32), Some("x1"), true)
+                } else {
+                    (Some(VK_XBUTTON2.0 as u32), Some("x2"), true)
+                }
+            }
+            WM_XBUTTONUP => {
+                let xbutton = ((event.mouseData >> 16) & 0xFFFF) as u16;
+                if xbutton == XBUTTON1 as u16 {
+                    (Some(VK_XBUTTON1.0 as u32), Some("x1"), false)
+                } else {
+                    (Some(VK_XBUTTON2.0 as u32), Some("x2"), false)
+                }
+            }
+            _ => (None, None, false),
+        };
+
+        if let Some(vk) = vk {
+            let should_record = _process_hotkey_event(vk, is_key_down);
+            if should_record {
+                if let Some(button) = button {
+                    _record_mouse_input(button, is_key_down);
+                }
+            }
+        }
+    }
+
+    unsafe { CallNextHookEx(None, code, wparam, lparam) }
+}
+
+#[cfg(target_os = "windows")]
+fn _ensure_hook_thread_started() -> Result<(), String> {
+    if _hotkey_state().hook_started.load(Ordering::Acquire) {
+        return Ok(());
+    }
+
+    let (ready_tx, ready_rx) = std::sync::mpsc::channel::<Result<(), String>>();
+    std::thread::Builder::new()
+        .name("script-hotkey-hook".to_string())
+        .spawn(move || unsafe {
+            let module_handle = match GetModuleHandleW(None) {
+                Ok(handle) => handle,
+                Err(error) => {
+                    let _ = ready_tx.send(Err(format!("获取模块句柄失败: {error}")));
+                    return;
+                }
+            };
+
+            let raw_input_window = match _create_raw_input_window(module_handle) {
+                Ok(hwnd) => hwnd,
+                Err(error) => {
+                    let _ = ready_tx.send(Err(error));
+                    return;
+                }
+            };
+
+            if let Err(error) = _register_keyboard_raw_input(raw_input_window) {
+                let _ = ready_tx.send(Err(error));
+                return;
+            }
+
+            let mouse_hook = match SetWindowsHookExW(
+                WH_MOUSE_LL,
+                Some(_low_level_mouse_proc),
+                Some(windows::Win32::Foundation::HINSTANCE(module_handle.0)),
+                0,
+            ) {
+                Ok(hook) => hook,
+                Err(error) => {
+                    let _ = ready_tx.send(Err(format!("安装低级鼠标钩子失败: {error}")));
+                    return;
+                }
+            };
+            if mouse_hook.is_invalid() {
+                let _ = ready_tx.send(Err("安装低级鼠标钩子失败: 返回无效句柄".to_string()));
+                return;
+            }
+
+            let _ = ready_tx.send(Ok(()));
+
+            let mut msg = MSG::default();
+            while GetMessageW(&mut msg, None, 0, 0).as_bool() {
+                let _ = TranslateMessage(&msg);
+                let _ = DispatchMessageW(&msg);
+            }
+            let _ = UnhookWindowsHookEx(mouse_hook);
+        })
+        .map_err(|e| format!("启动热键钩子线程失败: {e}"))?;
+
+    match ready_rx.recv_timeout(Duration::from_secs(2)) {
+        Ok(Ok(())) => {
+            _hotkey_state().hook_started.store(true, Ordering::Release);
+            Ok(())
+        }
+        Ok(Err(e)) => Err(e),
+        Err(e) => Err(format!("等待热键钩子启动超时: {e}")),
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn _ensure_hook_thread_started() -> Result<(), String> {
+    Err("当前平台不支持热键钩子".to_string())
+}
+
+/// 同步脚本热键绑定（后端将以此列表作为最新配置）。
+pub fn sync_script_hotkey_bindings(
+    app_handle: tauri::AppHandle,
+    bindings: Vec<ScriptHotkeyBinding>,
+) -> Result<(), String> {
+    _set_app_handle(app_handle);
+    if !bindings.is_empty() {
+        _ensure_hook_thread_started()?;
+    }
+
+    let mut next_map: HashMap<String, RuntimeHotkeyBinding> = HashMap::new();
+    for binding in bindings {
+        let hotkey = binding.hotkey.trim().to_string();
+        let script_path = binding.script_path.trim().to_string();
+        if script_path.is_empty() || hotkey.is_empty() {
+            continue;
+        }
+        let normalized_script_path = normalize_script_path(script_path.clone())?;
+        let parsed =
+            _parse_ahk_hotkey(&hotkey).map_err(|e| format!("热键 `{hotkey}` 无效：{e}"))?;
+        if binding.hold_to_loop && parsed.trigger_on_key_up {
+            return Err(format!(
+                "热键 `{hotkey}` 配置了按住循环，但 `Up` 抬起触发不支持按住循环"
+            ));
+        }
+        let hot_if_win_active = {
+            let text = binding.hot_if_win_active.trim().to_string();
+            if text.is_empty() { None } else { Some(text) }
+        };
+        let hot_if_win_active_criteria = if let Some(raw) = hot_if_win_active.as_deref() {
+            _parse_hot_if_win_active_criteria_list(raw)
+                .map_err(|e| format!("热键 `{hotkey}` 的 WinActive 条件无效：{e}"))?
+        } else {
+            None
+        };
+        next_map.insert(
+            normalized_script_path.clone(),
+            RuntimeHotkeyBinding {
+                script_path: normalized_script_path,
+                hotkey,
+                hot_if_win_active,
+                hot_if_win_active_criteria,
+                hold_to_loop: binding.hold_to_loop,
+                parsed,
+            },
+        );
+    }
+
+    if let Ok(mut guard) = _hotkey_state().hold_loop_flags.lock() {
+        for flag in guard.values() {
+            flag.store(false, Ordering::Release);
+        }
+        guard.clear();
+    }
+
+    if let Ok(mut guard) = _hotkey_state().bindings.write() {
+        *guard = next_map;
+    }
+    if let Ok(mut pressed_keys) = _hotkey_state().pressed_keys.lock() {
+        pressed_keys.clear();
+    }
+
+    Ok(())
+}
+
+/// 获取当前后端已生效的脚本热键绑定。
+pub fn get_script_hotkey_bindings() -> Vec<ScriptHotkeyBinding> {
+    if let Ok(guard) = _hotkey_state().bindings.read() {
+        return guard
+            .values()
+            .map(|binding| ScriptHotkeyBinding {
+                script_path: binding.script_path.clone(),
+                hotkey: binding.hotkey.clone(),
+                hot_if_win_active: binding.hot_if_win_active.clone().unwrap_or_default(),
+                hold_to_loop: binding.hold_to_loop,
+            })
+            .collect();
+    }
+    Vec::new()
+}
+
+/// 设置脚本输入录制器是否启用 F10 热键监听。
+pub fn set_script_input_recorder_hotkey_enabled(
+    app_handle: tauri::AppHandle,
+    enabled: bool,
+) -> Result<(), String> {
+    _set_app_handle(app_handle);
+    if enabled {
+        _ensure_hook_thread_started()?;
+    }
+
+    let recorder = _input_recorder_state();
+    recorder.hotkey_enabled.store(enabled, Ordering::Release);
+
+    if !enabled {
+        recorder
+            .suppress_hotkey_keyup
+            .store(false, Ordering::Release);
+        _stop_script_input_recording();
+    } else {
+        _emit_script_input_recorder_snapshot();
+    }
+
+    Ok(())
+}
+
+/// 获取当前脚本输入录制器快照。
+pub fn get_script_input_recorder_snapshot() -> ScriptInputRecorderSnapshot {
+    _build_script_input_recorder_snapshot()
+}
+
+/// 清空已录制动作，并重置起始时间基准。
+pub fn clear_script_input_recorder_actions() -> Result<(), String> {
+    let recorder = _input_recorder_state();
+    if let Ok(mut actions) = recorder.actions.lock() {
+        actions.clear();
+    } else {
+        return Err("清空录制动作失败：无法获取动作锁".to_string());
+    }
+    if let Ok(mut started_at) = recorder.started_at.lock() {
+        *started_at = None;
+    } else {
+        return Err("清空录制动作失败：无法获取时间锁".to_string());
+    }
+    _emit_script_input_recorder_snapshot();
+    Ok(())
+}
+
+#[cfg(all(test, target_os = "windows"))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_custom_combo_capslock() {
+        let parsed = _parse_ahk_hotkey("CapsLock & c").expect("should parse combo hotkey");
+        assert_eq!(parsed.combo_prefix_vk, Some(VK_CAPITAL.0 as u32));
+        assert_eq!(parsed.key_vk, 'C' as u32);
+        assert!(!parsed.trigger_on_key_up);
+    }
+
+    #[test]
+    fn parse_key_up_hotkey() {
+        let parsed = _parse_ahk_hotkey("^c Up").expect("should parse key-up hotkey");
+        assert!(parsed.ctrl);
+        assert_eq!(parsed.key_vk, 'C' as u32);
+        assert!(parsed.trigger_on_key_up);
+    }
+
+    #[test]
+    fn parse_numpad_hotkey() {
+        let parsed = _parse_ahk_hotkey("NumpadAdd").expect("should parse numpad key");
+        assert_eq!(parsed.key_vk, VK_ADD.0 as u32);
+        assert!(parsed.combo_prefix_vk.is_none());
+    }
+
+    #[test]
+    fn parse_mouse_hotkey() {
+        let parsed = _parse_ahk_hotkey("RButton").expect("should parse mouse key");
+        assert_eq!(parsed.key_vk, VK_RBUTTON.0 as u32);
+    }
+
+    #[test]
+    fn parse_mouse_combo_hotkey() {
+        let parsed = _parse_ahk_hotkey("RButton & XButton1").expect("should parse mouse combo");
+        assert_eq!(parsed.combo_prefix_vk, Some(VK_RBUTTON.0 as u32));
+        assert_eq!(parsed.key_vk, VK_XBUTTON1.0 as u32);
+    }
+
+    #[test]
+    fn parse_hot_if_win_active_value() {
+        let title_only = _parse_hot_if_win_active_criteria("Moonlight")
+            .expect("should parse title")
+            .expect("criteria should exist");
+        assert_eq!(title_only.title.as_deref(), Some("Moonlight"));
+        assert!(title_only.exe_name.is_none());
+
+        let title_and_exe =
+            _parse_hot_if_win_active_criteria("Moonlight ahk_exe EM-Win64-Shipping.exe")
+                .expect("should parse title+exe")
+                .expect("criteria should exist");
+        assert_eq!(title_and_exe.title.as_deref(), Some("Moonlight"));
+        assert_eq!(
+            title_and_exe.exe_name.as_deref(),
+            Some("EM-Win64-Shipping.exe")
+        );
+    }
+
+    #[test]
+    fn parse_hot_if_win_active_or_segments() {
+        let criteria_list = _parse_hot_if_win_active_criteria_list("A|ahk_exe B|C")
+            .expect("should parse or segments")
+            .expect("criteria list should exist");
+        assert_eq!(criteria_list.len(), 3);
+        assert_eq!(criteria_list[0].title.as_deref(), Some("A"));
+        assert_eq!(criteria_list[0].exe_name, None);
+        assert_eq!(criteria_list[1].title, None);
+        assert_eq!(criteria_list[1].exe_name.as_deref(), Some("B"));
+        assert_eq!(criteria_list[2].title.as_deref(), Some("C"));
+        assert_eq!(criteria_list[2].exe_name, None);
+    }
+
+    #[test]
+    fn parse_hot_if_win_active_title_keeps_pipe_without_ahk_token() {
+        let criteria_list = _parse_hot_if_win_active_criteria_list("云·二重螺旋|启动器")
+            .expect("should keep plain title intact")
+            .expect("criteria list should exist");
+        assert_eq!(criteria_list.len(), 1);
+        assert_eq!(
+            criteria_list[0].title.as_deref(),
+            Some("云·二重螺旋|启动器")
+        );
+    }
+
+    #[test]
+    fn raw_keyboard_maps_basic_key() {
+        let raw = windows::Win32::UI::Input::RAWKEYBOARD {
+            MakeCode: 0x1E,
+            Flags: 0,
+            VKey: 'A' as u16,
+            Message: WM_KEYDOWN,
+            ..Default::default()
+        };
+        assert_eq!(_raw_keyboard_to_vk(&raw), Some('A' as u32));
+    }
+
+    #[test]
+    fn raw_keyboard_maps_extended_right_control() {
+        let raw = windows::Win32::UI::Input::RAWKEYBOARD {
+            MakeCode: 0x1D,
+            Flags: RI_KEY_E0,
+            VKey: VK_CONTROL.0 as u16,
+            Message: WM_KEYDOWN,
+            ..Default::default()
+        };
+        assert_eq!(_raw_keyboard_to_vk(&raw), Some(VK_RCONTROL.0 as u32));
+    }
+
+    #[test]
+    fn raw_keyboard_ignores_invalid_vkey() {
+        let raw = windows::Win32::UI::Input::RAWKEYBOARD {
+            VKey: 0xFF,
+            Message: WM_KEYDOWN,
+            ..Default::default()
+        };
+        assert_eq!(_raw_keyboard_to_vk(&raw), None);
+    }
+}

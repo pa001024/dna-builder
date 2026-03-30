@@ -2,7 +2,7 @@
     "$schema": "../gen/schemas/desktop-schema.json",
     "identifier": "default",
     "description": "Capability for the main window",
-    "windows": ["main", "si"],
+    "windows": ["main", "si", "cloudgame"],
     "permissions": [
         "core:default",
         "opener:default",
@@ -29,6 +29,11 @@
         {
             "identifier": "http:default",
             "allow": [{ "url": "https://dnabbs-api.yingxiong.com" }]
-        }
+        },
+        "global-shortcut:default",
+        "global-shortcut:allow-is-registered",
+        "global-shortcut:allow-register",
+        "global-shortcut:allow-unregister",
+        "global-shortcut:allow-unregister-all"
     ]
 }

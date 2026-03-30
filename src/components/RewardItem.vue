@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { LeveledMod } from "../data"
-import { RewardItem as RewardItemType } from "../utils/reward-utils"
+import { charMap, LeveledMod } from "../data"
+import { getRewardTypeText, RewardItem as RewardItemType } from "../utils/reward-utils"
 
 // 递归
 defineOptions({
@@ -27,30 +27,6 @@ function getDropModeText(mode: string): string {
     }
 
     return modeMap[mode] || mode
-}
-
-// 获取奖励类型文本
-function getRewardTypeText(type: string): string {
-    const typeMap: Record<string, string> = {
-        Char: "角色",
-        CharAccessory: "角色饰品",
-        Drop: "掉落物",
-        HeadFrame: "头像框",
-        HeadSculpture: "头像",
-        Mod: "魔之楔",
-        Pet: "魔灵",
-        Resource: "资源",
-        Reward: "奖励组",
-        Skin: "角色皮肤",
-        Title: "称号",
-        TitleFrame: "称号框",
-        Walnut: "密函",
-        Weapon: "武器",
-        WeaponAccessory: "武器饰品",
-        WeaponSkin: "武器皮肤",
-    }
-
-    return typeMap[type] || type
 }
 </script>
 
@@ -80,22 +56,34 @@ function getRewardTypeText(type: string): string {
                                 :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
                                 :effdesc="mod.效果"
                             >
-                                <SRouterLink :to="`/db/mod/${item.id}`" class="text-xs hover:text-primary hover:underline">{{
-                                    (item.n && $t(item.n)) || `ID: ${item.id}`
-                                }}</SRouterLink>
+                                <SRouterLink
+                                    v-if="item.t === 'Mod'"
+                                    :to="`/db/mod/${item.id}`"
+                                    class="text-xs hover:text-primary hover:underline"
+                                >
+                                    {{ (item.n && $t(item.n)) || `ID: ${item.id}` }}
+                                </SRouterLink>
                             </ShowProps>
+                            <SRouterLink
+                                v-else-if="item.t === 'Char'"
+                                :to="`/char/${item.id}`"
+                                class="text-xs hover:text-primary hover:underline"
+                            >
+                                {{ charMap.get(item.id)?.名称 || `ID: ${item.id}` }}
+                            </SRouterLink>
                             <span v-else>{{
                                 (item.n && $t(item.n)) || (item.t === "Reward" ? `奖励组 ${item.id}` : `ID: ${item.id}`)
                             }}</span>
                             <span class="text-xs text-base-content/50">({{ $t(getRewardTypeText(item.t)) }})</span>
                         </span>
                         <span v-if="item.c" class="text-base-content/70">x{{ item.c }}</span>
-                        <span v-if="item.p" class="text-base-content/70">
+                        <span v-if="item.p && item.m !== 'Independent'" class="text-base-content/70">
                             ({{ item.m === "Sequence" ? `容量:${item.p}` : `权重:${item.p}` }}
                             {{ item.pp ? `比例:${+(item.pp * 100).toFixed(2)}%` : "" }}
                             {{ item.times ? `每个期望:${+item.times.toFixed(2)}次` : "" }}
                             )
                         </span>
+                        <span v-if="item.m === 'Independent'">独立掉落 {{ `概率:${+(item.p / 100).toFixed(2)}%` }}</span>
                         <!-- 显示掉落模式 -->
                         <span
                             v-if="item.t === 'Reward'"

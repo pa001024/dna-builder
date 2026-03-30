@@ -1,11 +1,18 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { computed } from "vue"
+import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
+import { useSearchParam } from "@/composables/useSearchParam"
 import walnutData, { Walnut } from "../data/d/walnut.data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
-const searchKeyword = ref("")
-const selectedWalnut = ref<Walnut | null>(null)
-const selectedType = ref<number>(0)
+const searchKeyword = useSearchParam<string>("kw", "")
+const selectedWalnutId = useSearchParam<number>("id", 0)
+const selectedType = useSearchParam<number>("tp", 0)
+
+// 根据 ID 获取选中的密函
+const selectedWalnut = computed(() => {
+    return selectedWalnutId.value ? walnutData.find(walnut => walnut.id === selectedWalnutId.value) || null : null
+})
 
 // 所有密函类型
 const allTypes = computed(() => {
@@ -37,8 +44,10 @@ const filteredWalnuts = computed(() => {
 })
 
 function selectWalnut(walnut: Walnut | null) {
-    selectedWalnut.value = walnut
+    selectedWalnutId.value = walnut?.id || 0
 }
+
+useInitialScrollToSelectedItem()
 </script>
 
 <template>
@@ -48,31 +57,22 @@ function selectWalnut(walnut: Walnut | null) {
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedWalnut }">
                 <!-- 搜索栏 -->
                 <div class="p-3 border-b border-base-200">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索密函ID/名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
-                    />
+                    <input v-model="searchKeyword" type="text" placeholder="搜索密函ID/名称（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
                 </div>
 
                 <!-- 类型筛选Tab -->
                 <div class="p-2 border-b border-base-200">
                     <div class="flex flex-wrap gap-1 pb-1">
-                        <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
                             :class="selectedType === 0 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                            @click="selectedType = 0"
-                        >
+                            @click="selectedType = 0">
                             全部
                         </button>
-                        <button
-                            v-for="type in allTypes"
-                            :key="type"
+                        <button v-for="type in allTypes" :key="type"
                             class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all cursor-pointer"
                             :class="selectedType === type ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                            @click="selectedType = type"
-                        >
+                            @click="selectedType = type">
                             {{ $t(type === 1 ? "角色" : type === 2 ? "武器" : "魔之楔") }}
                         </button>
                     </div>
@@ -81,19 +81,17 @@ function selectWalnut(walnut: Walnut | null) {
                 <!-- 密函列表 -->
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div
-                            v-for="walnut in filteredWalnuts"
-                            :key="walnut.id"
+                        <div v-for="walnut in filteredWalnuts" :key="walnut.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedWalnut?.id === walnut.id }"
-                            @click="selectWalnut(walnut)"
-                        >
+                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedWalnutId === walnut.id }"
+                            @click="selectWalnut(walnut)">
                             <div class="flex items-start justify-between">
                                 <div>
                                     <div class="font-medium">
                                         {{ walnut.名称 }}
                                     </div>
-                                    <div class="text-xs opacity-70 mt-1">ID: {{ walnut.id }} | 稀有度: {{ walnut.稀有度 }}星</div>
+                                    <div class="text-xs opacity-70 mt-1">ID: {{ walnut.id }} | 稀有度: {{ walnut.稀有度 }}星
+                                    </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">
                                     <span class="text-xs px-2 py-0.5 rounded bg-primary text-white">
@@ -115,18 +113,18 @@ function selectWalnut(walnut: Walnut | null) {
                     共 {{ filteredWalnuts.length }} 个密函
                 </div>
             </div>
-            <div
-                v-if="selectedWalnut"
+            <div v-if="selectedWalnut"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectWalnut(null)"
-            >
+                @click="selectWalnut(null)">
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 
             <!-- 右侧详情面板 -->
-            <div v-if="selectedWalnut" class="flex-1 overflow-hidden">
+            <ScrollArea v-if="selectedWalnut" class="flex-1">
                 <DBWalnutDetailItem :walnut="selectedWalnut" />
-            </div>
+            </ScrollArea>
         </div>
     </div>
 </template>
+
+

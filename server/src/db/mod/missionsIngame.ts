@@ -8,6 +8,7 @@ export const typeDefs = /* GraphQL */ `
     type Query {
         "获取委托"
         missionsIngame(server: String!): MissionsIngame
+        missionsIngames(server: String!, limit: Int = 10, offset: Int = 0): [MissionsIngame!]!
     }
     type Mutation {
         "添加委托"
@@ -33,7 +34,17 @@ export const resolvers = {
                 where: eq(schema.missionsIngame.server, server),
                 orderBy: desc(schema.missionsIngame.id),
             })
+            if (!missionsIngame) throw createGraphQLError("no missionsIngame")
             return missionsIngame
+        },
+        missionsIngames: async (_parent, { server, limit, offset }) => {
+            const missionsIngames = await db.query.missionsIngame.findMany({
+                where: eq(schema.missionsIngame.server, server),
+                orderBy: desc(schema.missionsIngame.id),
+                limit,
+                offset,
+            })
+            return missionsIngames
         },
     },
     Mutation: {

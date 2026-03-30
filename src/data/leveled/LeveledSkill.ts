@@ -8,7 +8,6 @@ export interface LeveledSkillField {
     格式?: string
     基础?: string
     值2?: number
-    段数?: number
     safeName: string
 }
 
@@ -50,6 +49,12 @@ export class LeveledSkill {
         this.描述 = skillData.描述
         if (skillData.武器) this.武器 = skillData.武器
         this.术语解释 = skillData.术语解释
+        /**
+         * 兼容子技能对象结构，优先使用名称，其次使用ID作为展示键
+         */
+        this.子技能 = (skillData.子技能 || [])
+            .map((subSkill, index) => subSkill.名称 || (subSkill.id ? `${subSkill.id}` : `子技能${index + 1}`))
+            .filter(Boolean)
         // 设置技能等级（如果提供），否则设为10
         this.等级 = 等级 || 10
         this.字段 = []
@@ -103,9 +108,6 @@ export class LeveledSkill {
                 if (obj.值2) {
                     obj.值2 = Array.isArray(fo.值2) ? fo.值2[this._level - 1] : fo.值2
                 }
-                if (obj.段数) {
-                    obj.段数 = Array.isArray(fo.段数) ? fo.段数[this._level - 1] : fo.段数
-                }
                 if (obj.格式) {
                     const m = obj.格式.match(/生命|防御/g)
                     if (m) obj.基础 = m[0]
@@ -126,14 +128,14 @@ export class LeveledSkill {
             if (attrs?.技能倍率赋值 && field.名称.includes("伤害")) {
                 return {
                     ...field,
-                    值: attrs.技能倍率赋值 + attrs.技能倍率加数,
+                    值: attrs.技能倍率赋值 * attrs.技能倍率乘数 + attrs.技能倍率加数,
                 }
             }
             if (field.影响) {
                 let val = field.值
                 let val2 = field.值2 || 0
                 if (field.名称.includes("伤害")) {
-                    val += attrs?.技能倍率加数 || 0
+                    val = val * (attrs?.技能倍率乘数 || 1) + (attrs?.技能倍率加数 || 0)
                 }
                 const propSet = new Set(field.影响.split(","))
                 if (propSet.has("技能范围")) {

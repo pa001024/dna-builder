@@ -1,9 +1,9 @@
-import { defineConfig } from "eslint/config"
-import vue from "eslint-plugin-vue"
-import vueParser from "vue-eslint-parser"
 import typescriptEslint from "@typescript-eslint/parser"
-import tseslint from "typescript-eslint"
+import { defineConfig } from "eslint/config"
 import prettier from "eslint-plugin-prettier/recommended"
+import vue from "eslint-plugin-vue"
+import tseslint from "typescript-eslint"
+import vueParser from "vue-eslint-parser"
 
 export default defineConfig([
     {

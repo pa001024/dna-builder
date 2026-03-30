@@ -332,4 +332,4 @@ export const dnaAuthPlugin = () => {
     return app
 }
 
-export { encodeCodeToImage, decodeCodeFromImage }
+export { decodeCodeFromImage, encodeCodeToImage }

@@ -1,9 +1,9 @@
 import * as dialog from "@tauri-apps/plugin-dialog"
-import type { Connection, Edge, Node } from "@vue-flow/core"
+import type { Connection } from "@vue-flow/core"
 import { nanoid } from "nanoid"
 import { defineStore } from "pinia"
 import { computed, ref } from "vue"
-import { exportJsonFile } from "@/api/app"
+import { writeTextFile } from "@/api/app"
 import { env } from "@/env"
 import { CharBuild } from "../data/CharBuild"
 import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../data/leveled"
@@ -56,15 +56,58 @@ export enum NodeType {
  * 历史记录项类型
  */
 interface HistoryItem {
-    nodes: Node[]
-    edges: Edge[]
+    nodes: UNodeEditorGraph["nodes"]
+    edges: UNodeEditorGraph["edges"]
     description: string
 }
 
+/**
+ * 节点编辑器中使用的轻量节点数据类型。
+ */
+type EditorNodeData = Record<string, any>
+
+/**
+ * 节点位置类型。
+ */
+interface EditorNodePosition {
+    x: number
+    y: number
+}
+
+/**
+ * 节点编辑器内部使用的轻量节点类型，避免直接依赖 vue-flow 的深层递归泛型。
+ */
+interface EditorNode {
+    id: string
+    type?: string
+    position: EditorNodePosition
+    data: EditorNodeData
+}
+
+/**
+ * 节点编辑器内部使用的轻量边类型，避免直接依赖 vue-flow 的深层递归泛型。
+ */
+interface EditorEdge {
+    id: string
+    source: string
+    target: string
+    sourceHandle?: string | null
+    targetHandle?: string | null
+}
+
+/**
+ * 外部传入的节点类型，兼容 vue-flow 中可选 data 的定义。
+ */
+interface EditorNodeInput extends Omit<EditorNode, "data"> {
+    data?: EditorNodeData
+}
+
+const NODE_DATA_HISTORY_THROTTLE_MS = 400
+
 export const useNodeEditorStore = defineStore("nodeEditor", () => {
     // 节点和边
-    const nodes = ref<Node[]>([])
-    const edges = ref<Edge[]>([])
+    const nodes = ref<EditorNode[]>([])
+    const edges = ref<EditorEdge[]>([])
 
     // 计算缓存（防止重复计算）
     const calculationCache = new Map<string, any>()
@@ -84,13 +127,58 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     const currentGraphName = ref<string>("未命名图")
 
     // 复制粘贴状态
-    const copiedNodes = ref<Node[]>([])
-    const copiedEdges = ref<Edge[]>([])
+    const copiedNodes = ref<EditorNode[]>([])
+    const copiedEdges = ref<EditorEdge[]>([])
 
     // 历史记录状态
     const history = ref<HistoryItem[]>([])
     const historyIndex = ref<number>(-1)
     const historyLimit = ref<number>(50) // 历史记录最大数量
+    let lastNodeHistoryRecordAt = 0
+    let lastNodeHistoryNodeId: string | null = null
+
+    /**
+     * 深拷贝图状态，优先使用 structuredClone 以提升大型图的复制性能。
+     * @param value 任意可克隆数据。
+     * @returns 深拷贝结果。
+     */
+    function cloneValue<T>(value: T): T {
+        if (typeof structuredClone === "function") {
+            return structuredClone(value)
+        }
+        return JSON.parse(JSON.stringify(value)) as T
+    }
+
+    /**
+     * 判断节点数据更新是否真的发生变化。
+     * @param nodeData 原节点数据。
+     * @param data 待合并的新数据。
+     * @returns 是否有字段变化。
+     */
+    function hasNodeDataChanges(nodeData: Record<string, any>, data: Record<string, any>) {
+        return Object.keys(data).some(key => !Object.is(nodeData[key], data[key]))
+    }
+
+    /**
+     * 归一化单个节点，确保内部始终持有带 data 的轻量节点结构。
+     * @param node 外部传入节点。
+     * @returns 可安全读写的内部节点。
+     */
+    function normalizeNode(node: EditorNodeInput): EditorNode {
+        return {
+            ...node,
+            data: node.data ?? {},
+        }
+    }
+
+    /**
+     * 批量归一化节点数组。
+     * @param inputNodes 外部节点数组。
+     * @returns 内部节点数组。
+     */
+    function normalizeNodes(inputNodes: EditorNodeInput[]): EditorNode[] {
+        return inputNodes.map(normalizeNode)
+    }
 
     /**
      * 保存当前状态到历史记录
@@ -103,8 +191,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
 
         // 创建历史记录项
         const historyItem: HistoryItem = {
-            nodes: JSON.parse(JSON.stringify(nodes.value)),
-            edges: JSON.parse(JSON.stringify(edges.value)),
+            nodes: cloneValue(nodes.value),
+            edges: cloneValue(edges.value),
             description,
         }
 
@@ -126,8 +214,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         if (historyIndex.value > 0) {
             historyIndex.value--
             const historyItem = history.value[historyIndex.value]
-            nodes.value = JSON.parse(JSON.stringify(historyItem.nodes))
-            edges.value = JSON.parse(JSON.stringify(historyItem.edges))
+            nodes.value = cloneValue(historyItem.nodes)
+            edges.value = cloneValue(historyItem.edges)
             clearCache()
             recalculateAllNodes()
         }
@@ -140,8 +228,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         if (historyIndex.value < history.value.length - 1) {
             historyIndex.value++
             const historyItem = history.value[historyIndex.value]
-            nodes.value = JSON.parse(JSON.stringify(historyItem.nodes))
-            edges.value = JSON.parse(JSON.stringify(historyItem.edges))
+            nodes.value = cloneValue(historyItem.nodes)
+            edges.value = cloneValue(historyItem.edges)
             clearCache()
             recalculateAllNodes()
         }
@@ -153,14 +241,25 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     function updateNodeData(nodeId: string, data: Record<string, any>) {
         const node = nodes.value.find(n => n.id === nodeId)
         if (node) {
-            // 保存历史记录
-            saveToHistory("更新节点数据")
+            const currentNodeData = node.data
+            if (!hasNodeDataChanges(currentNodeData, data)) {
+                return
+            }
+
+            // 高频编辑（如输入框连续修改）时合并历史快照，减少整图深拷贝开销
+            const now = Date.now()
+            const shouldSaveHistory = lastNodeHistoryNodeId !== nodeId || now - lastNodeHistoryRecordAt >= NODE_DATA_HISTORY_THROTTLE_MS
+            if (shouldSaveHistory) {
+                saveToHistory("更新节点数据")
+                lastNodeHistoryRecordAt = now
+                lastNodeHistoryNodeId = nodeId
+            }
 
             // 保存当前的selectedSkill值
-            const oldSelectedSkill = node.data.selectedSkill
+            const oldSelectedSkill = currentNodeData.selectedSkill
 
             // 更新节点数据
-            node.data = { ...node.data, ...data }
+            node.data = { ...currentNodeData, ...data }
 
             // 如果是CoreCalc节点且selectedSkill发生变化，更新charBuild的baseName
             if (node.type === NodeType.CORE_CALC && data.selectedSkill !== oldSelectedSkill) {
@@ -179,10 +278,10 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     /**
      * 添加节点
      */
-    function addNode(node: Node) {
+    function addNode(node: EditorNodeInput) {
         // 保存历史记录
         saveToHistory(`添加节点: ${node.type}`)
-        nodes.value.push(node)
+        nodes.value.push(normalizeNode(node))
     }
 
     /**
@@ -199,7 +298,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     /**
      * 添加边
      */
-    function addEdge(edge: Edge) {
+    function addEdge(edge: EditorEdge) {
         // 检查是否会产生循环依赖
         if (wouldCreateCycle(edge)) {
             console.warn("Cannot add edge: would create cycle")
@@ -234,11 +333,11 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     /**
      * 复制选中的节点和相关边
      */
-    function copySelectedNodes(selectedNodes: Node[]) {
+    function copySelectedNodes(selectedNodes: EditorNodeInput[]) {
         if (selectedNodes.length === 0) return
 
         // 保存选中的节点
-        copiedNodes.value = JSON.parse(JSON.stringify(selectedNodes))
+        copiedNodes.value = normalizeNodes(JSON.parse(JSON.stringify(selectedNodes)))
 
         // 保存与选中节点相关的边（源或目标在选中节点中）
         const selectedNodeIds = new Set(selectedNodes.map(node => node.id))
@@ -306,7 +405,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
      * 连接节点（@vue-flow onConnect 回调）
      */
     function onConnect(connection: Connection) {
-        const edge: Edge = {
+        const edge: EditorEdge = {
             id: `e${nanoid()}`,
             source: connection.source!,
             target: connection.target!,
@@ -339,10 +438,10 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     /**
      * 序列化节点，只返回必要的数据
      */
-    function serializeNodes(nodesToSerialize: Node[]): Node[] {
+    function serializeNodes(nodesToSerialize: EditorNode[]): EditorNode[] {
         return nodesToSerialize.map(node => {
             // 只保留必要的节点属性
-            const serializedNode: Node = {
+            const serializedNode: EditorNode = {
                 id: node.id,
                 type: node.type,
                 position: node.position,
@@ -363,10 +462,10 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     /**
      * 序列化边，只返回必要的数据
      */
-    function serializeEdges(edgesToSerialize: Edge[]): Edge[] {
+    function serializeEdges(edgesToSerialize: EditorEdge[]): EditorEdge[] {
         return edgesToSerialize.map(edge => {
             // 只保留必要的边属性
-            const serializedEdge: Edge = {
+            const serializedEdge: EditorEdge = {
                 id: edge.id,
                 source: edge.source,
                 target: edge.target,
@@ -436,7 +535,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     async function loadGraphFromDB(graphId: number): Promise<void> {
         const graph = await db.nodeEditorGraphs.get(graphId)
         if (graph) {
-            nodes.value = graph.nodes
+            nodes.value = normalizeNodes(graph.nodes)
             edges.value = graph.edges
             currentGraphId.value = graph.id
 
@@ -583,7 +682,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                 filters: [{ name: "JSON 文件", extensions: ["json"] }],
             })
             if (!path) return
-            await exportJsonFile(path, json)
+            await writeTextFile(path, json)
         } else {
             const blob = new Blob([json], { type: "application/json" })
             const url = URL.createObjectURL(blob)
@@ -609,7 +708,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                     const graphData = JSON.parse(json)
 
                     // 加载图数据
-                    nodes.value = graphData.nodes || []
+                    nodes.value = normalizeNodes(graphData.nodes || [])
                     edges.value = graphData.edges || []
                     currentGraphName.value = graphData.name || "导入的图"
                     currentGraphId.value = null // 新图，未保存
@@ -971,7 +1070,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     /**
      * 使用输入数据执行计算
      */
-    function calculateWithInputData(node: Node, inputData: any[]): any {
+    function calculateWithInputData(node: EditorNode, inputData: any[]): any {
         try {
             // 首先获取节点类型
             const nodeType = node.type
@@ -1052,8 +1151,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                             break
                         }
                         case NodeType.WEAPON_DMG_CALC: {
-                            const weaponAttrs = charBuild.calculateWeaponAttributes()
-                            const weapon = charBuild.meleeWeapon
+                            const weapon = charBuild.selectedWeapon || charBuild.meleeWeapon
+                            const weaponAttrs = charBuild.calculateWeaponAttributes(weapon)
                             result = charBuild.calculateWeaponDamage(weaponAttrs, weapon)
                             break
                         }
@@ -1111,7 +1210,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     /**
      * 检查添加边是否会创建循环
      */
-    function wouldCreateCycle(newEdge: Edge): boolean {
+    function wouldCreateCycle(newEdge: EditorEdge): boolean {
         // 使用拓扑排序检测循环
         const graph = new Map<string, string[]>()
 

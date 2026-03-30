@@ -1,15 +1,17 @@
-import type { Buff, Char, Draft, Dungeon, Mod, Monster, Reward, RewardChild, Weapon, WeaponBase } from "../data-types"
+import type { Buff, Char, Draft, Dungeon, Mod, Reward, RewardChild, Weapon } from "../data-types"
 import { type AbyssBuff, type AbyssDungeon, abyssBuffs, abyssDungeons } from "./abyss.data"
-import baseData from "./base.data"
 import buffData from "./buff.data"
 import charData from "./char.data"
+import cutoffData from "./cutoff.data"
 import draftData from "./draft.data"
 import dungeonData from "./dungeon.data"
 import effectData from "./effect.data"
 import modData from "./mod.data"
-import monsterData from "./monster.data"
+import monsterData, { monsterMap } from "./monster.data"
 import rewardData from "./reward.data"
 import weaponData from "./weapon.data"
+
+export { headFrameData } from "./accessory.data"
 
 // 将静态表转换为Map，提高查找效率
 export const charMap = new Map<number | string, Char>()
@@ -18,10 +20,11 @@ charData.forEach(char => {
     charMap.set(char.id, char as Char)
 })
 
-// 将mob数据转换为Map
-export const monsterMap = new Map<number, Monster>()
-monsterData.forEach(mob => {
-    monsterMap.set(mob.id, mob as Monster)
+export { cutoffData, monsterData, monsterMap }
+
+export const cutoffMap = new Map<number, (typeof cutoffData)[number]>()
+cutoffData.forEach(cutoff => {
+    cutoffMap.set(cutoff.itemId, cutoff)
 })
 
 // 将mod数据转换为Map
@@ -50,16 +53,6 @@ export const weaponNameMap = new Map<string, Weapon>()
 weaponData.forEach(weapon => {
     weaponMap.set(weapon.id, weapon as Weapon)
     weaponNameMap.set(weapon.名称, weapon as Weapon)
-})
-
-// 将base数据转换为Map，用于快速查找武器倍率信息
-export const baseMap = new Map<string, WeaponBase[]>()
-
-baseData.forEach((base: any) => {
-    if (!baseMap.has(base.武器类型)) {
-        baseMap.set(base.武器类型, [])
-    }
-    baseMap.get(base.武器类型)!.push(base as WeaponBase)
 })
 
 export const rewardMap = new Map<number, Reward>()
@@ -128,7 +121,7 @@ function findModRewards(child: RewardChild[], modIds: Set<number>, draftIds: Set
 dungeonData.forEach(dungeon => {
     dungeonMap.set(dungeon.id, dungeon as Dungeon)
     // 获取副本的所有奖励ID
-    const rewardIds = [...dungeon.r, ...(dungeon.sr || [])]
+    const rewardIds = [...(dungeon.r || []), ...(dungeon.sr || [])]
     if (rewardIds.length > 0) {
         rewardIds.forEach(rewardId => {
             const reward = rewardMap.get(rewardId)
@@ -163,17 +156,7 @@ petData.forEach(v => petMap.set(v.id, v))
 
 export type { DBMap, DBMapMarker } from "./map.data"
 
-import walnutData, { type Walnut } from "./walnut.data"
-export const walnutMap = new Map<number, Walnut>()
-export const walnutRewardMap = new Map<number, Walnut>()
-walnutData.forEach(v => {
-    walnutMap.set(v.id, v)
-    if (v.奖励[0].type === "Mod" || v.奖励[0].type === "Weapon") {
-        walnutRewardMap.set(v.奖励[0].id, v)
-    }
-})
-
-export type { Walnut, WalnutReward } from "./walnut.data"
+export { type Walnut, type WalnutReward, walnutMap, walnutRewardMap } from "./walnut.data"
 
 import { type Fish, type FishingSpot, fishingSpots, fishs } from "./fish.data"
 export const fishMap = new Map<number, Fish>()
@@ -192,14 +175,5 @@ fishingSpots.forEach(v =>
     })
 )
 
+export { type Resource, resourceData, resourceMap } from "./resource.data"
 export type { Fish, FishingSpot }
-
-import resourceData, { type Resource } from "./resource.data"
-
-export const resourceMap = new Map<number | string, Resource>()
-resourceData.forEach(v => {
-    resourceMap.set(v.id, v)
-    resourceMap.set(v.name, v)
-})
-
-export type { Resource }

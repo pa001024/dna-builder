@@ -31,7 +31,7 @@ onMounted(() => {
             orientation="vertical"
         >
             <ScrollAreaThumb
-                class="flex-1 bg-gray-500/30 rounded-[10px] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-11 before:min-h-11"
+                class="flex-1 bg-gray-500/30 rounded-[10px] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-4 before:min-h-4"
             />
         </ScrollAreaScrollbar>
         <ScrollAreaScrollbar
@@ -40,7 +40,7 @@ onMounted(() => {
             orientation="horizontal"
         >
             <ScrollAreaThumb
-                class="flex-1 bg-gray-500/30 rounded-[10px] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-11 before:min-h-11"
+                class="flex-1 bg-gray-500/30 rounded-[10px] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-4 before:min-h-4"
             />
         </ScrollAreaScrollbar>
     </ScrollAreaRoot>

@@ -1,7 +1,7 @@
-import { describe, it, expect } from "vitest"
-import * as dataModule from "../index"
+import { describe, expect, it } from "vitest"
 import { CharBuild } from "../CharBuild"
-import { LeveledChar, LeveledWeapon, LeveledMod, LeveledBuff } from "../leveled"
+import * as dataModule from "../index"
+import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
 
 // 测试模块导出
 describe("模块导出测试", () => {
@@ -147,7 +147,6 @@ describe("模块使用场景测试", () => {
         expect(moduleExports.weaponData).toBeDefined()
         expect(moduleExports.buffData).toBeDefined()
         expect(moduleExports.achievementData).toBeDefined()
-        expect(moduleExports.baseData).toBeDefined()
         expect(moduleExports.monsterData).toBeDefined()
         expect(moduleExports.effectData).toBeDefined()
     })

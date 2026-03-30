@@ -1,8 +1,9 @@
 import { t as translate } from "i18next"
 import type { CharAttr } from "../CharBuild"
 import { effectMap, modMap } from "../d"
-import { type Mod, Quality } from "../data-types"
+import { type Mod, Quality, type WeaponSkill } from "../data-types"
 import { LeveledBuff } from "."
+import { getMinusAttrValue } from "./minusAttr"
 
 /**
  * LeveledMod类 - 继承Mod接口，添加等级属性和动态属性计算
@@ -26,11 +27,12 @@ export class LeveledMod implements Mod {
     系列: string
     品质: string
     耐受: number
-    类型: string;
-    [key: string]: any
+    类型: string
+    极性?: "D" | "O" | "V" | "A"
+    技能替换?: Record<string, WeaponSkill>
     // MOD效果
-    buff?: LeveledBuff
-
+    buff?: LeveledBuff;
+    [key: string]: any
     // 等级属性
     private _等级: number
     // 原始MOD对象
@@ -101,6 +103,8 @@ export class LeveledMod implements Mod {
         if (modData.属性) this.属性 = modData.属性
         if (modData.限定) this.限定 = modData.限定
         if (modData.效果) this.效果 = modData.效果
+        if (modData.消耗) this.消耗 = modData.消耗
+        if (modData.技能替换) this.技能替换 = modData.技能替换
         if (effectMap.has(this.名称)) {
             const effect = effectMap.get(this.名称)!
             if (!effect.品质 || effect.品质 === this.品质) {
@@ -158,10 +162,18 @@ export class LeveledMod implements Mod {
         // 架势MOD属性耐受等级越高越低
         if (this.id > 100000) {
             this.耐受 = this._originalModData.耐受 + this.maxLevel - this._等级
+            if (this.id > 200000) {
+                this.效果 = this._originalModData.效果?.replace(/200\.0%/g, () => `${+(this._等级 * 10 + 100).toFixed(1)}%`)
+            }
         } else {
             this.耐受 = this._originalModData.耐受 - this.maxLevel + this._等级
         }
         const lv = this._等级
+
+        if (this._originalModData.技能替换) {
+            const ratio = this.getSkillReplaceScaleRatio()
+            this.技能替换 = this.scaleSkillReplaceByRatio(this._originalModData.技能替换, ratio)
+        }
 
         if (this._originalModData.生效) {
             const maxValue = this._originalModData.生效
@@ -202,8 +214,7 @@ export class LeveledMod implements Mod {
             if (this.id > 100000) lv = this.maxLevel
             const maxValue = this._originalModData[prop] || 0
             if (maxValue) {
-                let currentValue = (maxValue / (this.maxLevel + 1)) * (lv + 1)
-                if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.ceil(currentValue)
+                const currentValue = this.calculateBasePropertyValue(prop, maxValue, lv)
                 this[prop] = currentValue
             }
         })
@@ -211,27 +222,108 @@ export class LeveledMod implements Mod {
             const lv = this._等级
             const buff = this.buff!
             const maxValue = buff[prop] || 0
-            let currentValue = (maxValue / (10 + 1)) * (lv + 1)
+            let currentValue = (maxValue / (this.maxLevel + 1)) * (lv + 1)
             if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.ceil(currentValue)
             this[prop] = this[prop] ? this[prop] + currentValue : currentValue
             if (buff.描述.includes(`{%}`)) {
-                buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(buff.baseValue * 100).toFixed(1)}%`)
+                const stackCount = buff.等级 > 0 ? buff.等级 : 1
+                const perStackValue = currentValue / stackCount
+                buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(perStackValue * 100).toFixed(1)}%`)
             }
         })
     }
 
-    checkCondition(attrs: CharAttr, charMods: LeveledMod[]): { isEffective: boolean; props: Record<string, any> } | undefined {
+    /**
+     * 计算普通属性在当前等级下的值
+     * 数组属性按等级取对应项，超出长度时取最后一项
+     * @param prop 属性名
+     * @param maxValue 原始属性值
+     * @param lv 当前参与计算的等级
+     * @returns 当前属性值
+     */
+    private calculateBasePropertyValue(prop: string, maxValue: number | number[], lv: number) {
+        if (Array.isArray(maxValue)) {
+            return maxValue[Math.min(lv + 1, maxValue.length) - 1]
+        }
+        return this.scaleBaseNumberProperty(prop, maxValue, lv)
+    }
+
+    /**
+     * 按等级缩放普通数值属性
+     * @param prop 属性名
+     * @param maxValue 满级值
+     * @param lv 当前参与计算的等级
+     * @returns 缩放后的属性值
+     */
+    private scaleBaseNumberProperty(prop: string, maxValue: number, lv: number) {
+        let currentValue = (maxValue / (this.maxLevel + 1)) * (lv + 1)
+        if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.ceil(currentValue)
+        return currentValue
+    }
+
+    /**
+     * 获取技能替换的数值缩放比例
+     * 规则：100% 为基准（1.0），200% 时提高 50%（1.5）
+     */
+    private getSkillReplaceScaleRatio() {
+        if (this.id <= 200000) return 1
+        const effectPercent = this._等级 * 10 + 100
+        return 1 + (effectPercent - 100) / 200
+    }
+
+    /**
+     * 对技能替换中的字段数值按比例缩放
+     * @param skillReplace 原始技能替换数据
+     * @param ratio 缩放比例
+     * @returns 缩放后的技能替换数据（深拷贝）
+     */
+    private scaleSkillReplaceByRatio(skillReplace: Record<string, WeaponSkill>, ratio: number) {
+        if (ratio === 1) return skillReplace
+        return Object.fromEntries(
+            Object.entries(skillReplace).map(([skillId, skill]) => [
+                skillId,
+                {
+                    ...skill,
+                    字段: skill.字段?.map(field => ({
+                        ...field,
+                        值: this.scaleFieldValue(field.值, ratio),
+                        值2: this.scaleFieldValue(field.值2, ratio),
+                    })),
+                },
+            ])
+        ) as Record<string, WeaponSkill>
+    }
+
+    /**
+     * 缩放技能字段中的数值类型
+     * @param value 原始值
+     * @param ratio 缩放比例
+     * @returns 缩放后的值
+     */
+    private scaleFieldValue(value: number | number[] | undefined, ratio: number) {
+        if (value === undefined) return undefined
+        if (Array.isArray(value)) {
+            return value.map(v => +((v || 0) * ratio).toFixed(4))
+        }
+        return +((value || 0) * ratio).toFixed(4)
+    }
+
+    checkCondition(
+        attrs: CharAttr,
+        charMods: LeveledMod[],
+        conditionValues?: Record<string, number>
+    ): { isEffective: boolean; props: Record<string, any> } | undefined {
         if (!this.生效?.条件?.length) return undefined
         const poTable = charMods.reduce(
             (acc, mod) => {
-                acc[mod.极性] = (acc[mod.极性] || 0) + 1
+                if (mod.极性) acc[mod.极性] = (acc[mod.极性] || 0) + 1
                 return acc
             },
             {} as Record<string, number>
         )
-        if (this.极性) poTable[this.极性] = (poTable[this.极性] || 0) + 1
+        // if (this.极性) poTable[this.极性] = (poTable[this.极性] || 0) + 1
         const isEffective: boolean = this.生效.条件.every(([attr, op, value]: [string, string, number]) => {
-            const attrValue = poTable[attr.slice(0, 1)] || attrs[attr as keyof CharAttr]
+            const attrValue = poTable[attr.slice(0, 1)] ?? conditionValues?.[attr] ?? attrs[attr as keyof CharAttr]
             if (op === "*") return true
             if (op === "=") return attrValue === value
             if (op === ">") return attrValue > value
@@ -269,6 +361,7 @@ export class LeveledMod implements Mod {
             技能速度: 0,
             失衡易伤: 0,
             技能倍率加数: 0,
+            技能倍率乘数: 1,
             技能倍率赋值: 0,
             召唤物攻击速度: 0,
             召唤物范围: 0,
@@ -295,16 +388,17 @@ export class LeveledMod implements Mod {
     /**
      * 应用MOD条件 (mutable)
      */
-    applyCondition(attrs: CharAttr, charMods: LeveledMod[]) {
-        const condition = this.checkCondition(attrs, charMods)
+    applyCondition(attrs: CharAttr, charMods: LeveledMod[], conditionValues?: Record<string, number>) {
+        const condition = this.checkCondition(attrs, charMods, conditionValues)
         if (!condition) return false
         let changed = false
         Object.keys(condition.props).forEach(key => {
             if (condition.isEffective) {
                 if (Array.isArray(condition.props[key])) {
                     const [v1, v2] = condition.props[key]
-                    const cond = this.生效!.条件![0][0] as keyof CharAttr
-                    const finalValue = Math.min(attrs[cond] * v1, v2)
+                    const cond = this.生效!.条件![0][0]
+                    const baseValue = conditionValues?.[cond] ?? attrs[cond as keyof CharAttr] ?? 0
+                    const finalValue = Math.min(baseValue * v1, v2)
                     if (this[key] !== finalValue) {
                         this[key] = finalValue
                         changed = true
@@ -343,6 +437,8 @@ export class LeveledMod implements Mod {
         "限定",
         "极性",
         "属性",
+        "消耗",
+        "技能替换",
         "_等级",
         "_originalModData",
         "buff",
@@ -407,8 +503,9 @@ export class LeveledMod implements Mod {
     get minusAttr() {
         const r: Record<string, any> = this.clone()
         this.properties.forEach(prop => {
-            r[prop] = -this[prop]
+            r[prop] = getMinusAttrValue(prop, this[prop])
         })
+        r.极性 = ""
         r.isMinus = true
         return r as LeveledMod
     }

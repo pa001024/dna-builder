@@ -1,5 +1,6 @@
 import type { DNAAPI, DNAGameSignInDayAward, DNAGameSignInShowDataBean, DNAPostListBean } from "dna-api"
 import { shuffle } from "lodash-es"
+import { useSettingStore } from "@/store/setting"
 import { sleep } from "@/util"
 import { useUIStore } from "../store/ui"
 
@@ -8,34 +9,6 @@ import { useUIStore } from "../store/ui"
  * 包含多种类型的积极回复，避免重复使用相同内容
  */
 const REPLY_LIBRARY = [
-    // 支持/赞同类
-    "说得太好了！完全同意",
-    "分析得很到位，受教了",
-    "有道理，支持一下",
-    "确实如此，同感",
-    "说得在理",
-    "很棒的见解，赞同",
-    "分析得很有深度",
-    "这个观点很独特",
-
-    // 鼓励/赞赏类
-    "楼主用心了，感谢分享",
-    "写得真不错，继续加油",
-    "很有帮助的内容",
-    "感谢楼主的分享",
-    "写得非常详细，感谢",
-    "内容很有价值",
-    "感谢分享，学到了",
-
-    // 交流/互动类
-    "哈哈，有趣的观点",
-    "原来是这样，了解了",
-    "确实有启发",
-    "说得对，支持",
-    "不错的想法",
-    "很有参考价值",
-
-    // 简短回应类
     "_[/皎皎-好耶]",
     "_[/皎皎-冲鸭]",
     "_[/皎皎-得意]",
@@ -205,6 +178,9 @@ export async function handleReply(api: DNAAPI, posts: DNAPostListBean[]): Promis
  */
 export async function executeSignFlow(api: DNAAPI): Promise<boolean> {
     const ui = useUIStore()
+
+    const setting = useSettingStore()
+    await setting.startHeartbeat()
     try {
         // 加载日历数据和任务进度
         const [calendarRes, taskRes] = await Promise.all([api.signCalendar(), api.getTaskProcess()])
@@ -228,7 +204,7 @@ export async function executeSignFlow(api: DNAAPI): Promise<boolean> {
             if (firstUnsignedDay) {
                 const signSuccess = await handleGameSign(api, firstUnsignedDay, calendarData)
                 if (signSuccess) {
-                    ui.showSuccessMessage("游戏签到成功")
+                    // ui.showSuccessMessage("游戏签到成功")
                 }
             }
         }
@@ -280,10 +256,17 @@ export async function executeSignFlow(api: DNAAPI): Promise<boolean> {
         const todaySigned = newCalendarData.todaySignin || false
         const allTasksCompleted = !newTaskProcess.dailyTask.some(task => task.completeTimes < task.times)
 
-        return todaySigned && allTasksCompleted
+        if (todaySigned && allTasksCompleted) {
+            ui.showSuccessMessage("签到成功")
+            return true
+        }
+        ui.showErrorMessage("签到流程未完成, 将在1小时后重试")
+        return false
     } catch (error) {
         console.error("签到流程执行失败:", error)
         ui.showErrorMessage("签到流程执行失败")
         return false
+    } finally {
+        setting.stopHeartbeat()
     }
 }

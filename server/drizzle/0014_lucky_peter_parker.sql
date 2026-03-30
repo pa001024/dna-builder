@@ -1,0 +1,1 @@
+CREATE INDEX `builds_char_id_update_at_created_at_idx` ON `builds` (`char_id`,`update_at`,`created_at`);

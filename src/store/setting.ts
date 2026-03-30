@@ -1,9 +1,10 @@
 import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI } from "dna-api"
-import i18next from "i18next"
 import { defineStore } from "pinia"
-import { applyMaterial, startHeartbeat, stopHeartbeat, tauriFetch } from "../api/app"
+import { sleep } from "@/util"
+import { applyMaterial, isLaunchAtStartupEnabled, setLaunchAtStartupEnabled, startHeartbeat, stopHeartbeat, tauriFetch } from "../api/app"
 import { executeSignFlow } from "../api/dna-sign"
+import { applyLanguageFontClass, changeLanguage } from "../i18n"
 import { db } from "./db"
 
 let apiCache: DNAAPI | null = null
@@ -18,7 +19,7 @@ export const useSettingStore = defineStore("setting", {
             theme: useLocalStorage("setting_theme", "dark"),
             uiScale: useLocalStorage("setting_ui_scale", 1),
             winMaterial: useLocalStorage("setting_win_material", "Unset"),
-            windowTrasnparent: useLocalStorage("setting_window_trasnparent", true),
+            windowTrasnparent: useLocalStorage("setting_window_trasnparent", false),
             lang: useLocalStorage("setting_lang", navigator.language),
             // AI大模型设置
             aiBaseUrl: useLocalStorage("ai_base_url", "https://open.bigmodel.cn/api/paas/v4/"),
@@ -34,17 +35,42 @@ export const useSettingStore = defineStore("setting", {
             lastCapInterval: useLocalStorage("last_cap_interval", 0),
             // 自动签到设置
             autoSign: useLocalStorage("setting_auto_sign", false),
+            launchAtStartup: useLocalStorage("setting_launch_at_startup", false),
             nextSignCheckTime: useLocalStorage("setting_next_sign_check_time", 0),
+            // 剧情文本替换设置
+            protagonistName1: useLocalStorage("story_protagonist_name_1", "维塔"),
+            protagonistName2: useLocalStorage("story_protagonist_name_2", "墨斯"),
+            protagonistGender: useLocalStorage<"male" | "female">("story_protagonist_gender", "female"),
+            protagonistGender2: useLocalStorage<"male" | "female">("story_protagonist_gender_2", "female"),
+            safeMode: useLocalStorage("setting_safe_mode", true),
+            lastHeartbeatTime: 0,
         }
     },
     getters: {},
     actions: {
         setLang(lang: string) {
             this.lang = lang
-            i18next.changeLanguage(lang)
+            changeLanguage(lang)
+            applyLanguageFontClass(lang)
         },
         setTheme(theme: string) {
             this.theme = theme
+        },
+        /**
+         * 同步桌面端开机启动状态，避免本地缓存与系统真实状态不一致。
+         */
+        async syncLaunchAtStartup() {
+            this.launchAtStartup = await isLaunchAtStartupEnabled()
+            return this.launchAtStartup
+        },
+        /**
+         * 更新开机启动设置，并以系统返回结果为准写回本地状态。
+         * @param enabled 是否启用开机启动
+         */
+        async setLaunchAtStartup(enabled: boolean) {
+            const nextState = await setLaunchAtStartupEnabled(enabled)
+            this.launchAtStartup = nextState
+            return nextState
         },
         setWinMaterial(mat: string) {
             this.winMaterial = mat
@@ -109,6 +135,7 @@ export const useSettingStore = defineStore("setting", {
             // 创建新的初始化Promise
             apiInitPromise = (async () => {
                 try {
+                    const lang = this.lang === "zh-CN" ? "zh-Hans" : this.lang === "zh-TW" ? "zh-Hant" : this.lang
                     this.dnaUserUID = user.uid
                     const api = new DNAAPI({
                         dev_code: user.dev_code,
@@ -116,10 +143,12 @@ export const useSettingStore = defineStore("setting", {
                         kf_token: user.kf_token,
                         debug: import.meta.env.DEV,
                         mode: "android",
+                        server: user.server || "cn",
+                        lang,
                         fetchFn: tauriFetch,
                     })
                     const res = await api.loginLog()
-                    if (res.msg.includes("失效")) {
+                    if (res.msg.includes("失效") || res.msg.includes("过期")) {
                         const refreshRes = await api.refreshToken(user.refreshToken)
                         if (refreshRes.is_success && refreshRes.data?.token) {
                             api.token = refreshRes.data.token
@@ -152,10 +181,15 @@ export const useSettingStore = defineStore("setting", {
                 if (!user) return false
                 userId = user.uid
                 token = user.token
+                if (user.server === "global") return true
             }
             try {
                 // 调用Rust实现的心跳功能
                 const res = await startHeartbeat("wss://dnabbs-api.yingxiong.com:8180/ws-community-websocket", token, userId)
+                if (this.lastHeartbeatTime + 1000 * 10 < Date.now()) {
+                    this.lastHeartbeatTime = Date.now()
+                    await sleep(1000) // 确保API有值
+                }
                 if (res.includes("成功")) {
                     console.log("心跳已启动")
                     return true
@@ -171,6 +205,9 @@ export const useSettingStore = defineStore("setting", {
         // 停止心跳计时器
         async stopHeartbeat() {
             try {
+                const user = await this.getCurrentUser()
+                if (!user) return false
+                if (user.server === "global") return true
                 // 调用Rust实现的停止心跳功能
                 await stopHeartbeat()
                 console.log("心跳已停止")

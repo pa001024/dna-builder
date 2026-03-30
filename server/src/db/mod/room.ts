@@ -5,6 +5,7 @@ import { db, schema } from ".."
 import { addClient, getClientRoom, getUsers, hasUser, removeClient, waitForUser } from "../kv/room"
 import type { Context } from "../yoga"
 import { getSubSelection } from "."
+import { ROOM_TYPE_PRIVATE } from "./roomVisibility"
 
 export const typeDefs = /* GraphQL */ `
     type Mutation {
@@ -70,31 +71,33 @@ export const resolvers = {
                     schema.removeNull({
                         ...getTableColumns(schema.rooms),
                         owner: schema.link(schema.users, schema.rooms.ownerId),
-                        msgCount: sql<number>`(select count(*) from ${schema.msgs} where ${schema.msgs.roomId} = "rooms"."id")`.as(
-                            "msgCount"
-                        ),
+                        msgCount:
+                            sql<number>`(select count(*) from ${schema.msgs} where ${schema.msgs.roomId} = "rooms"."id" and (coalesce("rooms"."type", '') != ${ROOM_TYPE_PRIVATE} or "rooms"."owner_id" = ${context.user.id} or ${schema.msgs.userId} = ${context.user.id} or ${schema.msgs.replyToUserId} = ${context.user.id}))`.as(
+                                "msgCount"
+                            ),
                         lastMsg:
                             lastMsgSel &&
-                            sql`(select json_array("id", "room_id", "user_id", "content", "edited", "created_at", "update_at", (select json_array("id", "email", "name", "qq", "roles", "created_at", "update_at") from (select * from users where id = "rooms_lastMsgs"."user_id" limit 1))) from (select * from "msgs" "rooms_lastMsgs" where "rooms_lastMsgs"."room_id" = "rooms"."id" order by rowid desc limit 1) "rooms_lastMsgs" )`
+                            sql`(select json_array("id", "room_id", "user_id", "content", "edited", "created_at", "update_at", (select json_array("id", "email", "name", "qq", "roles", "created_at", "update_at") from (select * from users where id = "rooms_lastMsgs"."user_id" limit 1))) from (select * from "msgs" "rooms_lastMsgs" where "rooms_lastMsgs"."room_id" = "rooms"."id" and (coalesce("rooms"."type", '') != ${ROOM_TYPE_PRIVATE} or "rooms"."owner_id" = ${context.user.id} or "rooms_lastMsgs"."user_id" = ${context.user.id} or "rooms_lastMsgs"."reply_to_user_id" = ${context.user.id}) order by rowid desc limit 1) "rooms_lastMsgs" )`
                                 .mapWith(data => {
+                                    if (!data) return null
                                     data = JSON.parse(data)
                                     const userData = data[7]
                                     return {
                                         id: data[0],
-                                        room_id: data[1],
-                                        user_id: data[2],
+                                        roomId: data[1],
+                                        userId: data[2],
                                         content: data[3],
                                         edited: data[4],
-                                        created_at: data[5],
-                                        update_at: data[6],
+                                        createdAt: data[5],
+                                        updateAt: data[6],
                                         user: {
                                             id: userData[0],
                                             email: userData[1],
                                             name: userData[2],
                                             qq: userData[3],
                                             roles: userData[4],
-                                            created_at: userData[5],
-                                            update_at: userData[6],
+                                            createdAt: userData[5],
+                                            updateAt: userData[6],
                                         },
                                     }
                                 })
@@ -125,31 +128,33 @@ export const resolvers = {
                     schema.removeNull({
                         ...getTableColumns(schema.rooms),
                         owner: schema.link(schema.users, schema.rooms.ownerId),
-                        msgCount: sql<number>`(select count(*) from ${schema.msgs} where ${schema.msgs.roomId} = "rooms"."id")`.as(
-                            "msgCount"
-                        ),
+                        msgCount:
+                            sql<number>`(select count(*) from ${schema.msgs} where ${schema.msgs.roomId} = "rooms"."id" and (coalesce("rooms"."type", '') != ${ROOM_TYPE_PRIVATE} or "rooms"."owner_id" = ${context.user.id} or ${schema.msgs.userId} = ${context.user.id} or ${schema.msgs.replyToUserId} = ${context.user.id}))`.as(
+                                "msgCount"
+                            ),
                         lastMsg:
                             lastMsgSel &&
-                            sql`(select json_array("id", "room_id", "user_id", "content", "edited", "created_at", "update_at", (select json_array("id", "email", "name", "qq", "roles", "created_at", "update_at") from (select * from users where id = "rooms_lastMsgs"."user_id" limit 1))) from (select * from "msgs" "rooms_lastMsgs" where "rooms_lastMsgs"."room_id" = "rooms"."id" order by rowid desc limit 1) "rooms_lastMsgs" )`
+                            sql`(select json_array("id", "room_id", "user_id", "content", "edited", "created_at", "update_at", (select json_array("id", "email", "name", "qq", "roles", "created_at", "update_at") from (select * from users where id = "rooms_lastMsgs"."user_id" limit 1))) from (select * from "msgs" "rooms_lastMsgs" where "rooms_lastMsgs"."room_id" = "rooms"."id" and (coalesce("rooms"."type", '') != ${ROOM_TYPE_PRIVATE} or "rooms"."owner_id" = ${context.user.id} or "rooms_lastMsgs"."user_id" = ${context.user.id} or "rooms_lastMsgs"."reply_to_user_id" = ${context.user.id}) order by rowid desc limit 1) "rooms_lastMsgs" )`
                                 .mapWith(data => {
+                                    if (!data) return null
                                     data = JSON.parse(data)
                                     const userData = data[7]
                                     return {
                                         id: data[0],
-                                        room_id: data[1],
-                                        user_id: data[2],
+                                        roomId: data[1],
+                                        userId: data[2],
                                         content: data[3],
                                         edited: data[4],
-                                        created_at: data[5],
-                                        update_at: data[6],
+                                        createdAt: data[5],
+                                        updateAt: data[6],
                                         user: {
                                             id: userData[0],
                                             email: userData[1],
                                             name: userData[2],
                                             qq: userData[3],
                                             roles: userData[4],
-                                            created_at: userData[5],
-                                            update_at: userData[6],
+                                            createdAt: userData[5],
+                                            updateAt: userData[6],
                                         },
                                     }
                                 })
@@ -217,9 +222,10 @@ export const resolvers = {
                     schema.removeNull({
                         ...getTableColumns(schema.rooms),
                         owner: schema.link(schema.users, schema.rooms.ownerId),
-                        msgCount: sql<number>`(select count(*) from ${schema.msgs} where ${schema.msgs.roomId} = "rooms"."id")`.as(
-                            "msgCount"
-                        ),
+                        msgCount:
+                            sql<number>`(select count(*) from ${schema.msgs} where ${schema.msgs.roomId} = "rooms"."id" and (coalesce("rooms"."type", '') != ${ROOM_TYPE_PRIVATE} or "rooms"."owner_id" = ${user.id} or ${schema.msgs.userId} = ${user.id} or ${schema.msgs.replyToUserId} = ${user.id}))`.as(
+                                "msgCount"
+                            ),
                     })
                 )
                 .from(schema.rooms)
@@ -230,8 +236,12 @@ export const resolvers = {
                 const room = rst[0]
                 if (room) {
                     if (hasUser(room.id, user.id) || room.maxUsers > getUsers(room.id).length) {
-                        await waitForUser(room.id, user.id)
-                        return room
+                        try {
+                            await waitForUser(room.id, user.id)
+                            return room
+                        } catch {
+                            throw createGraphQLError("wait for user timeout")
+                        }
                     }
                 }
             }

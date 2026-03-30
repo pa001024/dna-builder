@@ -1,7 +1,16 @@
 // for `bun gen`
 
 import { relations, sql } from "drizzle-orm"
-import { index, integer, SQLiteColumn, type SQLiteTableWithColumns, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
+import {
+    type AnySQLiteColumn,
+    index,
+    integer,
+    SQLiteColumn,
+    type SQLiteTableWithColumns,
+    sqliteTable,
+    text,
+    uniqueIndex,
+} from "drizzle-orm/sqlite-core"
 import { nanoid } from "nanoid"
 
 export function now() {
@@ -112,6 +121,17 @@ export const users = sqliteTable(
         pic: text("pic"),
         uid: text("uid"),
         roles: text("roles"),
+        experience: integer("experience")
+            .notNull()
+            .$default(() => 0),
+        points: integer("points")
+            .notNull()
+            .$default(() => 0),
+        level: integer("level")
+            .notNull()
+            .$default(() => 1),
+        selectedTitleAssetId: text("selected_title_asset_id"),
+        selectedNameCardAssetId: text("selected_name_card_asset_id"),
         createdAt: text("created_at").$default(now),
         updateAt: text("update_at").$onUpdate(now),
     },
@@ -144,6 +164,29 @@ export const passwords = sqliteTable("passwords", {
     updateAt: text("update_at").$onUpdate(now),
 })
 
+export const passwordsRelations = relations(passwords, ({ one }) => ({
+    user: one(users, { fields: [passwords.userId], references: [users.id] }),
+}))
+
+/** 密码重置 */
+export const passwordResets = sqliteTable(
+    "password_resets",
+    {
+        id: text("id").$default(id).primaryKey(),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        token: text("token").notNull(),
+        expiresAt: text("expires_at").notNull(),
+        createdAt: text("created_at").$default(now),
+    },
+    table => [uniqueIndex("password_resets_user_id_unique").on(table.userId)]
+)
+
+export const passwordResetsRelations = relations(passwordResets, ({ one }) => ({
+    user: one(users, { fields: [passwordResets.userId], references: [users.id] }),
+}))
+
 /** 房间 */
 export const rooms = sqliteTable("rooms", {
     id: text("id").$default(id).primaryKey(),
@@ -173,6 +216,8 @@ export const msgs = sqliteTable(
         userId: text("user_id")
             .notNull()
             .references(() => users.id, { onDelete: "cascade" }),
+        replyToMsgId: text("reply_to_msg_id").references((): AnySQLiteColumn => msgs.id, { onDelete: "set null" }),
+        replyToUserId: text("reply_to_user_id").references(() => users.id, { onDelete: "set null" }),
         content: text("content").notNull(),
         edited: integer("edited").$default(() => 0),
         createdAt: text("created_at").$default(now),
@@ -184,6 +229,9 @@ export const msgs = sqliteTable(
 export const msgsRelations = relations(msgs, ({ one, many }) => ({
     room: one(rooms, { fields: [msgs.roomId], references: [rooms.id], relationName: "room" }),
     user: one(users, { fields: [msgs.userId], references: [users.id], relationName: "user" }),
+    replyTo: one(msgs, { fields: [msgs.replyToMsgId], references: [msgs.id], relationName: "reply" }),
+    replyToUser: one(users, { fields: [msgs.replyToUserId], references: [users.id], relationName: "replyToUser" }),
+    repliedMessages: many(msgs, { relationName: "reply" }),
     reactions: many(reactions),
 }))
 
@@ -258,6 +306,139 @@ export const schedulesRelations = relations(schedules, ({ one }) => ({
     user: one(users, { fields: [schedules.userId], references: [users.id] }),
 }))
 
+/** 用户经验奖励领取记录 */
+export const userExperienceRewards = sqliteTable(
+    "user_experience_rewards",
+    {
+        id: text("id").$default(id).primaryKey(),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        source: text("source").notNull(),
+        dateKey: text("date_key").notNull(),
+        awardedExp: integer("awarded_exp").notNull(),
+        createdAt: text("created_at").$default(now),
+    },
+    table => [
+        uniqueIndex("user_experience_reward_unique_idx").on(table.userId, table.source, table.dateKey),
+        index("user_experience_reward_user_idx").on(table.userId),
+    ]
+)
+
+export const userExperienceRewardsRelations = relations(userExperienceRewards, ({ one }) => ({
+    user: one(users, { fields: [userExperienceRewards.userId], references: [users.id] }),
+}))
+
+/** 商店奖励资产 */
+export const shopAssets = sqliteTable(
+    "shop_assets",
+    {
+        id: text("id").$default(id).primaryKey(),
+        rewardType: text("reward_type").notNull(),
+        rewardKey: text("reward_key").notNull(),
+        rewardName: text("reward_name").notNull(),
+        displayClass: text("display_class"),
+        displayCss: text("display_css"),
+        createdAt: text("created_at").$default(now),
+        updateAt: text("update_at").$onUpdate(now),
+    },
+    table => [
+        uniqueIndex("shop_assets_reward_key_unique_idx").on(table.rewardType, table.rewardKey),
+        index("shop_assets_reward_type_idx").on(table.rewardType),
+    ]
+)
+
+/** 商店商品 */
+export const shopProducts = sqliteTable(
+    "shop_products",
+    {
+        id: text("id").$default(id).primaryKey(),
+        name: text("name").notNull(),
+        description: text("description"),
+        assetId: text("asset_id")
+            .notNull()
+            .references(() => shopAssets.id, { onDelete: "cascade" }),
+        pointsCost: integer("points_cost").notNull(),
+        sortOrder: integer("sort_order")
+            .notNull()
+            .$default(() => 0),
+        isActive: integer("is_active")
+            .notNull()
+            .$default(() => 1),
+        startTime: text("start_time"),
+        endTime: text("end_time"),
+        createdAt: text("created_at").$default(now),
+        updateAt: text("update_at").$onUpdate(now),
+    },
+    table => [
+        index("shop_products_asset_idx").on(table.assetId),
+        index("shop_products_active_sort_idx").on(table.isActive, table.sortOrder),
+    ]
+)
+
+/** 用户商店已拥有资产 */
+export const userShopItems = sqliteTable(
+    "user_shop_items",
+    {
+        id: text("id").$default(id).primaryKey(),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        assetId: text("asset_id")
+            .notNull()
+            .references(() => shopAssets.id, { onDelete: "cascade" }),
+        createdAt: text("created_at").$default(now),
+    },
+    table => [uniqueIndex("user_shop_item_unique_idx").on(table.userId, table.assetId), index("user_shop_item_user_idx").on(table.userId)]
+)
+
+/** 商店兑换记录 */
+export const shopRedemptions = sqliteTable(
+    "shop_redemptions",
+    {
+        id: text("id").$default(id).primaryKey(),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        productId: text("product_id")
+            .notNull()
+            .references(() => shopProducts.id, { onDelete: "cascade" }),
+        assetId: text("asset_id")
+            .notNull()
+            .references(() => shopAssets.id, { onDelete: "cascade" }),
+        pointsCost: integer("points_cost").notNull(),
+        createdAt: text("created_at").$default(now),
+    },
+    table => [
+        index("shop_redemptions_user_idx").on(table.userId),
+        index("shop_redemptions_product_idx").on(table.productId),
+        index("shop_redemptions_asset_idx").on(table.assetId),
+    ]
+)
+
+export const shopAssetsRelations = relations(shopAssets, ({ many }) => ({
+    products: many(shopProducts),
+    userItems: many(userShopItems),
+    redemptions: many(shopRedemptions),
+}))
+
+export const shopProductsRelations = relations(shopProducts, ({ one, many }) => ({
+    asset: one(shopAssets, { fields: [shopProducts.assetId], references: [shopAssets.id] }),
+    userItems: many(userShopItems),
+    redemptions: many(shopRedemptions),
+}))
+
+export const userShopItemsRelations = relations(userShopItems, ({ one }) => ({
+    user: one(users, { fields: [userShopItems.userId], references: [users.id] }),
+    asset: one(shopAssets, { fields: [userShopItems.assetId], references: [shopAssets.id] }),
+}))
+
+export const shopRedemptionsRelations = relations(shopRedemptions, ({ one }) => ({
+    user: one(users, { fields: [shopRedemptions.userId], references: [users.id] }),
+    product: one(shopProducts, { fields: [shopRedemptions.productId], references: [shopProducts.id] }),
+    asset: one(shopAssets, { fields: [shopRedemptions.assetId], references: [shopAssets.id] }),
+}))
+
 /** 任务 */
 export const tasks = sqliteTable("tasks", {
     id: text("id").$default(id).primaryKey(),
@@ -293,6 +474,30 @@ export const missionsIngame = sqliteTable(
     },
     missionsIngame => [index("missions_ingame_server_idx").on(missionsIngame.server)]
 )
+
+export const missionsIngameRelations = relations(missionsIngame, () => ({}))
+
+export const activitiesIngame = sqliteTable(
+    "activities_ingame",
+    {
+        id: integer("id").notNull(),
+        server: text("server").notNull(),
+        postId: text("post_id"),
+        startTime: integer("start_time").notNull(),
+        endTime: integer("end_time").notNull(),
+        name: text("name").notNull(),
+        icon: text("icon").notNull(),
+        desc: text("desc").notNull(),
+        createdAt: text("created_at").$default(now),
+        updateAt: text("update_at").$onUpdate(now),
+    },
+    activitiesIngame => [
+        uniqueIndex("activities_ingame_server_id_idx").on(activitiesIngame.server, activitiesIngame.id),
+        index("activities_ingame_server_start_time_idx").on(activitiesIngame.server, activitiesIngame.startTime),
+    ]
+)
+
+export const activitiesIngameRelations = relations(activitiesIngame, () => ({}))
 
 /** 攻略 */
 export const guides = sqliteTable(
@@ -361,6 +566,8 @@ export const dnaAuthSessions = sqliteTable("dna_auth_sessions", {
     createdAt: text("created_at").$default(now),
 })
 
+export const dnaAuthSessionsRelations = relations(dnaAuthSessions, () => ({}))
+
 /** DNA 用户绑定 */
 export const dnaUserBindings = sqliteTable(
     "dna_user_bindings",
@@ -385,6 +592,9 @@ export const userRelations = relations(users, ({ one, many }) => ({
     buildLikes: many(buildLikes),
     timelines: many(timelines),
     timelineLikes: many(timelineLikes),
+    scripts: many(scripts),
+    scriptLikes: many(scriptLikes),
+    userExperienceRewards: many(userExperienceRewards),
 }))
 
 export const dnaUserBindingsRelations = relations(dnaUserBindings, ({ one }) => ({
@@ -459,6 +669,10 @@ export const builds = sqliteTable(
         index("builds_char_id_idx").on(builds.charId),
         index("builds_user_id_idx").on(builds.userId),
         index("builds_is_recommended_idx").on(builds.isRecommended),
+        index("builds_char_id_update_at_idx").on(builds.charId, builds.updateAt),
+        index("builds_char_id_views_idx").on(builds.charId, builds.views),
+        index("builds_update_at_idx").on(builds.updateAt),
+        index("builds_views_idx").on(builds.views),
     ]
 )
 
@@ -518,6 +732,12 @@ export const timelines = sqliteTable(
     ]
 )
 
+export const timelinesRelations = relations(timelines, ({ one, many }) => ({
+    user: one(users, { fields: [timelines.userId], references: [users.id] }),
+    likes: many(timelineLikes),
+    dps: many(dps),
+}))
+
 /** 时间线点赞 */
 export const timelineLikes = sqliteTable(
     "timeline_likes",
@@ -536,6 +756,11 @@ export const timelineLikes = sqliteTable(
         index("timeline_like_timeline_idx").on(timelineLikes.timelineId),
     ]
 )
+
+export const timelineLikesRelations = relations(timelineLikes, ({ one }) => ({
+    timeline: one(timelines, { fields: [timelineLikes.timelineId], references: [timelines.id] }),
+    user: one(users, { fields: [timelineLikes.userId], references: [users.id] }),
+}))
 
 /** DPS数据 */
 export const dps = sqliteTable(
@@ -565,4 +790,72 @@ export const dpsRelations = relations(dps, ({ one }) => ({
     user: one(users, { fields: [dps.userId], references: [users.id] }),
     build: one(builds, { fields: [dps.buildId], references: [builds.id] }),
     timeline: one(timelines, { fields: [dps.timelineId], references: [timelines.id] }),
+}))
+
+/** 脚本 */
+export const scripts = sqliteTable(
+    "scripts",
+    {
+        id: text("id").$default(id).primaryKey(),
+        title: text("title").notNull(),
+        description: text("desc"),
+        content: text("content").notNull(),
+        category: text("category").notNull(),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        views: integer("views").default(0),
+        likes: integer("likes").default(0),
+        isRecommended: integer("is_recommended", { mode: "boolean" }).default(false),
+        isPinned: integer("is_pinned", { mode: "boolean" }).default(false),
+        createdAt: text("created_at").$default(now),
+        updateAt: text("update_at").$onUpdate(now),
+    },
+    scripts => [
+        index("scripts_category_idx").on(scripts.category),
+        index("scripts_user_id_idx").on(scripts.userId),
+        index("scripts_is_recommended_idx").on(scripts.isRecommended),
+    ]
+)
+
+export const scriptsRelations = relations(scripts, ({ one, many }) => ({
+    user: one(users, { fields: [scripts.userId], references: [users.id] }),
+    likes: many(scriptLikes),
+}))
+
+/** 脚本分类 */
+export const scriptCategories = sqliteTable(
+    "script_categories",
+    {
+        id: text("id").$default(id).primaryKey(),
+        name: text("name").notNull(),
+        description: text("description"),
+        createdAt: text("created_at").$default(now),
+        updateAt: text("update_at").$onUpdate(now),
+    },
+    scriptCategories => [uniqueIndex("script_categories_name_idx").on(scriptCategories.name)]
+)
+
+/** 脚本点赞 */
+export const scriptLikes = sqliteTable(
+    "script_likes",
+    {
+        id: text("id").$default(id).primaryKey(),
+        scriptId: text("script_id")
+            .notNull()
+            .references(() => scripts.id, { onDelete: "cascade" }),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        createdAt: text("created_at").$default(now),
+    },
+    scriptLikes => [
+        uniqueIndex("script_like_idx").on(scriptLikes.userId, scriptLikes.scriptId),
+        index("script_like_script_idx").on(scriptLikes.scriptId),
+    ]
+)
+
+export const scriptLikesRelations = relations(scriptLikes, ({ one }) => ({
+    script: one(scripts, { fields: [scriptLikes.scriptId], references: [scripts.id] }),
+    user: one(users, { fields: [scriptLikes.userId], references: [users.id] }),
 }))

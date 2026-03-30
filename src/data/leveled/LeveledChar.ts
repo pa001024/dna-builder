@@ -148,7 +148,8 @@ export class LeveledChar {
         return icon ? `/imgs/webp/T_Head_${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
     }
     static idToUrl(id?: number) {
-        const icon = charMap.get(id || 0)?.icon || "Nanzhu"
+        if (id === 160101) return LeveledChar.url("Nanzhu")
+        const icon = charMap.get(id || 0)?.icon || "Empty"
         return LeveledChar.url(icon)
     }
     get elementUrl() {
@@ -192,4 +193,6 @@ const bgMap = {
     达芙涅: "dafunie.png",
     耶尔与奥利弗: "yeer.png",
     海尔法: "haierfa.png",
+    止流: "zhiliu.png",
+    煜明: "yuming.png",
 } as Record<string, string>

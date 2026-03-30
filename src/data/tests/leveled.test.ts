@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest"
-import { LeveledMod, LeveledBuff, LeveledChar, LeveledWeapon } from "../leveled"
+import { describe, expect, it } from "vitest"
 import type { CharAttr } from "../CharBuild"
+import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
 
 // 测试LeveledMod类
 describe("LeveledMod类测试", () => {
@@ -56,6 +56,65 @@ describe("LeveledMod类测试", () => {
             new LeveledMod(99999)
         }).toThrow("99999")
     })
+
+    it("普通属性的单元素数组应按等级取数组项", () => {
+        const mod0级 = new LeveledMod(41413, 0)
+        const mod满级 = new LeveledMod(41413)
+
+        expect(mod0级.技能伤害).toBe(-0.5)
+        expect(mod满级.技能伤害).toBe(-0.5)
+    })
+
+    it("减伤单元素数组应按等级取数组项", () => {
+        const mod0级 = new LeveledMod(56142, 0)
+        const mod满级 = new LeveledMod(56142)
+
+        expect(mod0级.减伤).toBe(0.5)
+        expect(mod满级.减伤).toBe(0.5)
+    })
+
+    it("普通属性的多元素数组应像Buff一样按等级取值", () => {
+        const 测试mod0级 = new LeveledMod(
+            {
+                id: 99001,
+                名称: "测试数组属性",
+                系列: "测试",
+                品质: "金",
+                耐受: 10,
+                类型: "角色",
+                技能伤害: [0.1, 0.2, 0.3],
+            },
+            0
+        )
+        const 测试mod1级 = new LeveledMod(
+            {
+                id: 99001,
+                名称: "测试数组属性",
+                系列: "测试",
+                品质: "金",
+                耐受: 10,
+                类型: "角色",
+                技能伤害: [0.1, 0.2, 0.3],
+            },
+            1
+        )
+        const 测试mod满级 = new LeveledMod(
+            {
+                id: 99001,
+                名称: "测试数组属性",
+                系列: "测试",
+                品质: "金",
+                耐受: 10,
+                类型: "角色",
+                技能伤害: [0.1, 0.2, 0.3],
+            },
+            10
+        )
+
+        expect(测试mod0级.技能伤害).toBe(0.1)
+        expect(测试mod1级.技能伤害).toBe(0.2)
+        expect(测试mod满级.技能伤害).toBe(0.3)
+    })
 })
 describe("DynamicBuff", () => {
     it("applyDynamicAttr", () => {
@@ -89,6 +148,7 @@ describe("DynamicBuff", () => {
             召唤物范围: 1,
             减伤: 1,
             技能倍率赋值: 0,
+            技能倍率乘数: 1,
             有效生命: 1,
         }
         attrs = buff.applyDynamicAttr(char, attrs, [])
@@ -139,6 +199,19 @@ describe("LeveledBuff类测试", () => {
         expect(fullProps.攻击).toBeDefined()
     })
 
+    it("倾力在蓝色满级时应按4层累计到80%暴击", () => {
+        const 倾力 = new LeveledMod(32301)
+
+        expect(倾力.暴击).toBeCloseTo(0.8, 10)
+    })
+
+    it("乘算BUFF的minusAttr应返回逆向倍率", () => {
+        const buff = new LeveledBuff("煜明2溯")
+        const minusAttr = buff.minusAttr
+
+        expect(minusAttr.技能倍率乘数).toBeCloseTo(-(buff.技能倍率乘数 / (1 + buff.技能倍率乘数)), 10)
+    })
+
     // 测试6：测试不存在的Buff名称
     it("测试不存在的Buff名称会抛出错误", () => {
         expect(() => {
@@ -148,6 +221,15 @@ describe("LeveledBuff类测试", () => {
         expect(() => {
             new LeveledBuff("不存在的Buff")
         }).toThrow("不存在的Buff")
+    })
+})
+
+describe("LeveledMod乘算反向属性测试", () => {
+    it("独立增伤的minusAttr应返回逆向倍率", () => {
+        const mod = new LeveledMod(31526)
+        const minusAttr = mod.minusAttr
+
+        expect(minusAttr.独立增伤).toBeCloseTo(-(mod.独立增伤 / (1 + mod.独立增伤)), 10)
     })
 })
 
@@ -326,6 +408,15 @@ describe("LeveledWeapon类测试", () => {
         const 铸铁者5级 = new LeveledWeapon(10302, 5)
         const fullProps = 铸铁者5级.getProperties()
         expect(fullProps.暴击).toBe(1)
+    })
+
+    // 测试10.1：同名基础属性与效果属性应在简单属性中累加
+    it("getSimpleProperties会累加武器基础属性与效果属性的同名项", () => {
+        const 希冀的丰稔 = new LeveledWeapon("希冀的丰稔")
+        const simpleProps = 希冀的丰稔.getSimpleProperties()
+
+        expect(simpleProps.背水).toBeCloseTo(0.26, 10)
+        expect(simpleProps.攻速).toBeCloseTo(0.3, 10)
     })
 
     // 测试11：测试不存在的武器名称

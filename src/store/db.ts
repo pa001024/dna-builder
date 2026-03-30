@@ -75,6 +75,22 @@ export interface Message {
 
 export type UMessage = Omit<Message, "id">
 
+// 配装助手对话持久化接口
+export interface BuildAgentChatMessage {
+    role: "user" | "assistant"
+    content: string
+    reasoning?: string
+}
+
+export interface BuildAgentChat {
+    id: string
+    charName: string
+    messages: BuildAgentChatMessage[]
+    updatedAt: number
+}
+
+export type UBuildAgentChat = BuildAgentChat
+
 // 节点编辑器相关接口
 export interface NodeEditorGraph {
     id: number
@@ -93,6 +109,7 @@ export interface DNAUser {
     name: string // userName
     dev_code: string
     token: string
+    server: "cn" | "global"
     kf_token: string
     refreshToken: string
     pic: string
@@ -133,26 +150,61 @@ export interface PropFlow {
 
 export type UPropFlow = Omit<PropFlow, "id">
 
+export interface ScriptColorToolPoint {
+    id: number
+    x: number
+    y: number
+}
+
+export interface ScriptColorToolImage {
+    id: string
+    name: string
+    sourceDataUrl: string
+}
+
+export interface ScriptColorToolState {
+    id: string
+    images: ScriptColorToolImage[]
+    imageLabels: Record<string, string>
+    points: ScriptColorToolPoint[]
+    pointTolerances: Record<number, number>
+    pointInitialCheckColors: Record<number, string>
+    pointCheckColorInputs: Record<number, string>
+    pointCategoryForceChecks: Record<string, boolean>
+    activeImageIndex: number
+    zoomScale: number
+    defaultTolerance: number
+    realtimeTestCloudMode?: boolean
+    updatedAt: number
+}
+
+export type UScriptColorToolState = ScriptColorToolState
+
 interface DB {
     mods: Mod
     customEntitys: CustomEntity
     entityMods: EntityMod
     conversations: Conversation
     messages: Message
+    buildAgentChats: BuildAgentChat
     dnaUsers: DNAUser
     userMapMarkers: UserMapMarker
     nodeEditorGraphs: NodeEditorGraph
     propFlows: PropFlow
+    scriptColorToolStates: ScriptColorToolState
 }
 
+// 加表不需要改version!
 db.version(1).stores({
     mods: "++id, entity, name",
     customEntitys: "++id, &name",
     entityMods: "++id, entity, modid",
     conversations: "++id, createdAt, updatedAt",
     messages: "++id, conversationId, createdAt",
+    buildAgentChats: "&id, charName, updatedAt",
     dnaUsers: "++id, uid",
     userMapMarkers: "++id, mapId, createdAt",
     nodeEditorGraphs: "++id, name, createdAt, updatedAt",
     propFlows: "++id, time, prop_name, category_name",
+    scriptColorToolStates: "&id, updatedAt",
 })

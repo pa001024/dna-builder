@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { useSettingStore } from "@/store/setting"
 import type { IconTypes } from "../components/Icon.vue"
 import { env } from "../env"
 
+const setting = useSettingStore()
 const items = [
     {
         name: "char-build",
@@ -12,6 +14,12 @@ const items = [
         name: "guides",
         path: "/guides",
         icon: "ri:book-line",
+    },
+    {
+        name: "script-list",
+        path: "/scripts",
+        icon: "ri:code-s-slash-line",
+        show: env.isApp && !setting.safeMode,
     },
     {
         name: "build-compare",
@@ -83,6 +91,7 @@ const items = [
         name: "game-accounts",
         path: "/game-accounts",
         icon: "ri:user-line",
+        show: env.isApp,
     },
 ] satisfies { name: string; path: string; icon: IconTypes; show?: boolean }[]
 // 卡片进入动画延迟

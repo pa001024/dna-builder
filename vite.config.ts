@@ -22,7 +22,9 @@ export default defineConfig(async () => ({
     resolve: {
         alias: {
             "@": resolve(__dirname, "src"),
-            // "dna-api": resolve(__dirname, "externals/dna-api/src/index.ts"),
+            "dna-api": resolve(__dirname, "externals/dna-api/src/index.ts"),
+            "node:async_hooks": resolve(__dirname, "src/polyfills/async_hooks.ts"),
+            async_hooks: resolve(__dirname, "src/polyfills/async_hooks.ts"),
         },
     },
     plugins: [
@@ -42,8 +44,8 @@ export default defineConfig(async () => ({
         chunkSplitPlugin({
             strategy: "default",
             customSplitting: {
-                dna: [/src\/views\/DNA/],
-                db: [/src\/views\/DB/],
+                // DNA/DB 两类页面存在交叉依赖，拆成独立 chunk 容易形成循环引用，统一合并到同一块避免闭环
+                dna: [/src\/views\/DNA/, /src\/views\/DB/],
             },
         }),
         graphqlTag({
@@ -78,7 +80,8 @@ export default defineConfig(async () => ({
             },
             workbox: {
                 navigateFallbackDenylist: [/^\/graphql/, /^\/api/],
-                maximumFileSizeToCacheInBytes: 3000000,
+                maximumFileSizeToCacheInBytes: 12000000,
+                globPatterns: ["**/*.{js,css,html,json}"],
                 runtimeCaching: [
                     // {
                     //     urlPattern: /^https:\/\/xn--chq26veyq\.icu\/api\/.+/,
@@ -161,7 +164,6 @@ export default defineConfig(async () => ({
             // 3. tell Vite to ignore watching `src-tauri`
             ignored: [
                 "**/src-tauri/**",
-                "**/*.d.ts",
                 "**/*.md",
                 "**/*.test.ts",
                 "**/mcp_server/**",

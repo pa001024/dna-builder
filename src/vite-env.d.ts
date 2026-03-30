@@ -16,6 +16,22 @@ declare module "virtual:pwa-register" {
     export function registerSW(options?: RegisterSWOptions): (onUpdateReady: (registration: ServiceWorkerRegistration) => void) => void
 }
 
+declare module "prismjs" {
+    interface PrismGrammar {
+        [name: string]: unknown
+    }
+
+    interface PrismStatic {
+        languages: Record<string, PrismGrammar | undefined>
+        manual?: boolean
+        disableWorkerMessageHandler?: boolean
+        highlight(text: string, grammar: PrismGrammar | undefined, language: string): string
+    }
+
+    const Prism: PrismStatic
+    export default Prism
+}
+
 declare global {
     interface Window {
         __TAURI__?: any

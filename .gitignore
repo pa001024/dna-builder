@@ -44,3 +44,13 @@ src-tauri/gen/android/keystore.properties
 docs/
 externals/dna-api/js/
 tools/radix-icons/
+.codex/
+.planning/
+.playwright/
+.playwright-cli/
+.umap-export/
+.tmp/
+.umap-cache/
+mcp_server/target/
+test-results/
+tools/deploy_server.sh

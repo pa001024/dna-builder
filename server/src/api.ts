@@ -1,6 +1,7 @@
 import { fetch } from "bun"
 import { Elysia, t } from "elysia"
 import { uploadImage } from "./upload"
+import { getCachedNameEffectStylesheet } from "./util/name-effect-style"
 
 /**
  * 缓存的最新版本信息
@@ -22,21 +23,22 @@ async function getMsiDownloadUrl(): Promise<string | null> {
         region: process.env.OSS_REGION || process.env.OSS_ENDPOINT?.replace(".aliyuncs.com", "") || "oss-cn-hongkong",
         endpoint: process.env.OSS_ENDPOINT || "",
         bucket: process.env.OSS_BUCKET || "",
+        cdn: process.env.CDN_URL || "",
     }
 
     if (!OSS_CONFIG.endpoint || !OSS_CONFIG.bucket) {
         return null
     }
 
-    // 检查缓存（1 小时有效期）
-    const CACHE_DURATION = 60 * 60 * 1000 // 1 小时
+    // 检查缓存（5 分钟有效期）
+    const CACHE_DURATION = 5 * 60 * 1000 // 5 分钟
     if (cachedVersion && Date.now() < cachedVersion.expireTime) {
         return cachedVersion.url
     }
 
     try {
         // 从在线的 latest.json 获取最新版本信息
-        const latestJsonUrl = `http://${OSS_CONFIG.bucket}.${OSS_CONFIG.endpoint}/latest.json`
+        const latestJsonUrl = `${OSS_CONFIG.cdn || `https://${OSS_CONFIG.bucket}.${OSS_CONFIG.endpoint}`}/latest.json`
         const response = await fetch(latestJsonUrl)
 
         if (!response.ok) {
@@ -124,6 +126,26 @@ export const apiPlugin = () => {
         set.status = 302
         set.headers.Location = downloadUrl
         return new Response(null, { status: 302, headers: { Location: downloadUrl } })
+    })
+
+    /**
+     * 聊天名字特效样式表
+     * 由服务端按当前名字特效资产动态拼接，并带 ETag 与短时缓存。
+     */
+    app.get("/chat/name-effects.css", async ({ request, set }) => {
+        const stylesheet = await getCachedNameEffectStylesheet()
+        const ifNoneMatch = request.headers.get("if-none-match")
+
+        set.headers["Content-Type"] = "text/css; charset=utf-8"
+        set.headers["Cache-Control"] = "public, max-age=300"
+        set.headers.ETag = stylesheet.etag
+
+        if (ifNoneMatch === stylesheet.etag) {
+            set.status = 304
+            return new Response(null, { status: 304 })
+        }
+
+        return stylesheet.css
     })
 
     return app

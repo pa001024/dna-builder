@@ -1,25 +1,173 @@
 <script setup lang="ts">
 import { provideClient } from "@urql/vue"
-import { onMounted, watchEffect } from "vue"
-import { gqClient } from "./api/graphql"
-import Updater from "./components/Updater.vue"
+import { onBeforeUnmount, onMounted, watch, watchEffect } from "vue"
+import { useRoute } from "vue-router"
+import { claimDailyLaunchExperienceMutation, claimDailyOnlineExperienceMutation, gqClient } from "./api/graphql"
 import { env } from "./env"
+import { useMihanNotify } from "./store/mihan"
 import { useSettingStore } from "./store/setting"
 import { useUIStore } from "./store/ui"
+import { useUserStore } from "./store/user"
+import { postVisitorCount } from "./vercount"
 
 const setting = useSettingStore()
 const ui = useUIStore()
+const mihanNotify = useMihanNotify()
+const route = useRoute()
+const user = useUserStore()
+const ONLINE_EXPERIENCE_TICK_MS = 60 * 1000
+const ONLINE_EXPERIENCE_RETRY_AT_KEY = "user_online_experience_retry_at"
+let onlineExperienceTimer: number | null = null
+
+/**
+ * 上报页面访问统计，不阻塞主流程。
+ */
+function reportVisitorCount() {
+    void postVisitorCount(window.location.href)
+}
+
+/**
+ * @description 生成本地自然日键，用于前端区分每天的在线奖励请求状态。
+ * @returns 当前日期键。
+ */
+function getLocalDateKey() {
+    return new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Shanghai",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+    }).format(new Date())
+}
+
+/**
+ * @description 确保经验奖励 mutation 返回的新 token 和用户资料会同步回本地状态。
+ * @param result 奖励接口返回值。
+ */
+function applyExperienceRewardResult(result?: { token?: string; user?: any; retryAfterMs?: number; source?: string; success?: boolean } | null) {
+    if (!result) return
+    if (result.token) {
+        user.jwtToken = result.token
+    }
+    if (result.user) {
+        user.setProfile(result.user)
+    }
+
+    if (typeof result.retryAfterMs === "number") {
+        const retryAt = Date.now() + Math.max(0, result.retryAfterMs)
+        localStorage.setItem(ONLINE_EXPERIENCE_RETRY_AT_KEY, String(retryAt))
+    }
+}
+
+/**
+ * @description 在用户已登录时领取“每日打开软件”经验，并同步用户资料。
+ */
+async function claimLaunchExperienceIfNeeded() {
+    if (!user.jwtToken) return
+    const result = await claimDailyLaunchExperienceMutation()
+    applyExperienceRewardResult(result)
+}
+
+/**
+ * @description 定时向服务端请求“每日在线一小时”奖励。
+ * 是否满足 1 小时门槛由服务端基于今日打开软件奖励时间校验。
+ */
+async function tickOnlineExperience() {
+    if (!user.jwtToken) {
+        return
+    }
+
+    const now = Date.now()
+    const dateKey = getLocalDateKey()
+    const storedDateKey = localStorage.getItem("user_online_experience_date")
+    const storedClaimedDateKey = localStorage.getItem("user_online_experience_claimed_date")
+    const didCrossDay = !!storedDateKey && storedDateKey !== dateKey
+
+    if (storedDateKey !== dateKey) {
+        localStorage.setItem("user_online_experience_date", dateKey)
+        localStorage.removeItem("user_online_experience_claimed_date")
+        localStorage.removeItem(ONLINE_EXPERIENCE_RETRY_AT_KEY)
+
+        /**
+         * @description 软件持续运行跨越 0 点时，也应视为进入了新的自然日。
+         * 这里补发新一天的“每日打开软件”奖励，避免该奖励只在冷启动时触发。
+         */
+        if (didCrossDay) {
+            await claimLaunchExperienceIfNeeded()
+        }
+    }
+    if (document.hidden) return
+
+    if (storedClaimedDateKey === dateKey) {
+        return
+    }
+
+    const retryAt = Number(localStorage.getItem(ONLINE_EXPERIENCE_RETRY_AT_KEY) || "0")
+    if (retryAt > now) {
+        return
+    }
+
+    const result = await claimDailyOnlineExperienceMutation()
+    applyExperienceRewardResult(result)
+    if (result?.success) {
+        localStorage.setItem("user_online_experience_claimed_date", dateKey)
+        localStorage.removeItem(ONLINE_EXPERIENCE_RETRY_AT_KEY)
+    }
+}
+
+/**
+ * @description 启动在线经验计时器，仅在应用存活期间运行一个实例。
+ */
+function startOnlineExperienceTimer() {
+    if (onlineExperienceTimer !== null) return
+    onlineExperienceTimer = window.setInterval(() => {
+        void tickOnlineExperience()
+    }, ONLINE_EXPERIENCE_TICK_MS)
+}
+
+/**
+ * @description 停止在线经验计时器，避免重复注册。
+ */
+function stopOnlineExperienceTimer() {
+    if (onlineExperienceTimer === null) return
+    window.clearInterval(onlineExperienceTimer)
+    onlineExperienceTimer = null
+}
+
 watchEffect(() => {
     document.body.setAttribute("data-theme", setting.theme)
     document.body.style.background = setting.windowTrasnparent ? "transparent" : "var(--color-base-300)"
     document.documentElement.style.setProperty("--uiscale", String(setting.uiScale))
 })
+
+watch(
+    () => route.path,
+    () => {
+        reportVisitorCount()
+    }
+)
+
+watch(
+    () => user.jwtToken,
+    async token => {
+        if (!token) {
+            user.clearProfile()
+            return
+        }
+        await user.refreshProfile()
+        await claimLaunchExperienceIfNeeded()
+    },
+    { immediate: true }
+)
+
 provideClient(gqClient)
 if (env.isApp) {
     // 自动签到
     if (setting.autoSign) {
         setting.startAutoSign()
     }
+    void setting.syncLaunchAtStartup().catch(error => {
+        console.error("同步开机启动状态失败:", error)
+    })
 } else {
     onMounted(() => {
         if (!setting.windowTrasnparent) return
@@ -133,9 +281,19 @@ if (env.isApp) {
     })
 }
 
-onMounted(() => {
+onMounted(async () => {
     ui.setLoginState(setting.dnaUserId !== 0)
     ui.startTimer()
+    reportVisitorCount()
+    startOnlineExperienceTimer()
+    if (mihanNotify.mihanEnableNotify.value) {
+        await mihanNotify.updateMihanData()
+        mihanNotify.startWatch()
+    }
+})
+
+onBeforeUnmount(() => {
+    stopOnlineExperienceTimer()
 })
 </script>
 
@@ -172,12 +330,14 @@ onMounted(() => {
             <Sidebar />
         </template>
     </ResizeableWindow>
+    <ScriptRuntimeFloatingBar />
 </template>
 
 <style>
 .slide-right-enter-active {
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
 .slide-right-leave-active {
     transition: all 0.2s cubic-bezier(0.6, -0.28, 0.73, 0.04);
 }
@@ -186,6 +346,7 @@ onMounted(() => {
     opacity: 0;
     transform: translateX(-2rem);
 }
+
 .slide-right-leave-to {
     opacity: 0;
     transform: translateX(2rem);

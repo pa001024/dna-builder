@@ -8,9 +8,37 @@ import { env } from "../env"
 import { sleep } from "../util"
 import { type CustomEntity, db, type Mod, type UCustomEntity, type UMod } from "./db"
 
+const GAME_RUNNING_POLL_MS = 1000
+const GAME_LIVE_PERSIST_MS = 1000
+
 if (env.isApp && getCurrentWindow().label === "main") {
     setTimeout(async () => {
         const game = useGameStore()
+        let stopped = false
+        let pendingLiveTotal = 0
+        let pendingLiveDiff = 0
+        let runtimeLiveTime = game.liveTime || Date.now()
+        let lastPersistAt = Date.now()
+
+        /**
+         * 将累计的在线时长写回持久化状态，降低 localStorage 高频写入压力。
+         */
+        function flushLiveDuration() {
+            if (pendingLiveTotal === 0 && pendingLiveDiff === 0) return
+            game.liveTotal += pendingLiveTotal
+            game.liveDiff += pendingLiveDiff
+            game.liveTime = runtimeLiveTime
+            pendingLiveTotal = 0
+            pendingLiveDiff = 0
+        }
+
+        /**
+         * 在窗口关闭时停止轮询，避免后台无意义循环。
+         */
+        function stopPolling() {
+            stopped = true
+        }
+        window.addEventListener("beforeunload", stopPolling, { once: true })
 
         if (!game.path) {
             const installPath = await getGameInstall()
@@ -19,29 +47,50 @@ if (env.isApp && getCurrentWindow().label === "main") {
             }
         }
 
-        while (true) {
-            const path = await isGameRunning(game.running)
-            const realPath = path?.replace(/EM\\Binaries\\Win64\\EM-Win64-Shipping.exe$/, "EM.exe")
-            const running = !!path
-            if (realPath && (!game.path || game.path !== realPath)) {
-                game.path = realPath
+        try {
+            while (!stopped) {
+                const now = Date.now()
+
+                // 先累计上一个周期的在线时长，确保运行状态切换时不丢时长
+                if (game.running) {
+                    const delta = now - runtimeLiveTime
+                    if (delta > 0) {
+                        pendingLiveTotal += delta
+                        pendingLiveDiff += delta
+                    }
+                    runtimeLiveTime = now
+                }
+
+                const path = await isGameRunning(game.running)
+                const realPath = path?.replace(/EM\\Binaries\\Win64\\EM-Win64-Shipping.exe$/, "EM.exe")
+                const running = !!path
+
+                if (realPath && (!game.path || game.path !== realPath)) {
+                    game.path = realPath
+                }
+                if (game.running !== running) {
+                    game.running = running
+                    runtimeLiveTime = now
+                    game.liveTime = runtimeLiveTime
+                }
+
+                const date = new Date().toLocaleDateString("zh")
+                // 新的一天重新计时
+                if (date !== game.liveDate) {
+                    flushLiveDuration()
+                    game.liveDate = date
+                    game.liveDiff = 0
+                }
+
+                if (!running || now - lastPersistAt >= GAME_LIVE_PERSIST_MS) {
+                    flushLiveDuration()
+                    lastPersistAt = now
+                }
+                await sleep(GAME_RUNNING_POLL_MS)
             }
-            if (game.running !== running) {
-                game.running = running
-                game.liveTime = Date.now()
-            }
-            const date = new Date().toLocaleDateString("zh")
-            // 新的一天重新计时
-            if (date !== game.liveDate) {
-                game.liveDate = date
-                game.liveDiff = 0
-            }
-            if (running) {
-                game.liveTotal += Date.now() - game.liveTime
-                game.liveDiff += Date.now() - game.liveTime
-                game.liveTime = Date.now()
-            }
-            await sleep(100)
+        } finally {
+            flushLiveDuration()
+            window.removeEventListener("beforeunload", stopPolling)
         }
     }, 1e3)
 }
@@ -49,6 +98,7 @@ if (env.isApp && getCurrentWindow().label === "main") {
 export const useGameStore = defineStore("game", {
     state: () => {
         return {
+            dx11Enable: useLocalStorage("game.dx11_enable", false),
             modEnable: useLocalStorage("game.mod_enable", false),
             modLoader: useLocalStorage("game.mod_loader", "legacy"),
             pathEnable: useLocalStorage("game.path_enable", true),
@@ -73,8 +123,9 @@ export const useGameStore = defineStore("game", {
         }
     },
     getters: {
-        modsDir: state => state.path.replace(/EM.exe$/, "DNA Game\\EM\\Content\\Paks\\~mods"),
-        modsLib: state => state.path.replace(/EM.exe$/, "DNA Game\\EM\\Content\\Paks\\lib"),
+        gameDir: state => state.path.replace(/EM\.exe$/, ""),
+        modsDir: state => state.path.replace(/EM\.exe$/, "EM\\Content\\Paks\\~mods"),
+        modsLib: state => state.path.replace(/EM\.exe$/, "EM\\Content\\Paks\\lib"),
     },
     actions: {
         async launchGame() {
@@ -92,6 +143,9 @@ export const useGameStore = defineStore("game", {
                 let p = this.pathParams
                 if (this.modEnable && this.modLoader === "legacy") {
                     p += ` -fileopenlog`
+                }
+                if (this.dx11Enable) {
+                    p += ` -dx11`
                 }
                 await launchExe(this.path, p)
                 console.log("game exited")

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { encodeCodeToImage, decodeCodeFromImage } from "../api/dna-auth"
+import { decodeCodeFromImage, encodeCodeToImage } from "../api/dna-auth"
 
 describe("隐写技术测试", () => {
     it("应该能够编码和解码基本验证码", async () => {

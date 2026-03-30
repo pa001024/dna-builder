@@ -1,5 +1,6 @@
 <script lang="tsx" setup>
-import { onMounted } from "vue"
+import { computed, onMounted } from "vue"
+import { useUIStore } from "@/store/ui"
 import pg from "../../package.json"
 import type { IconTypes } from "../components/Icon.vue"
 import { env } from "../env"
@@ -27,11 +28,28 @@ const items = [
     },
 ] satisfies { name: string; path: string; icon: IconTypes }[]
 
+const OPEN_SERVER_DATE = "2025-10-28T00:00:00+08:00"
+
+/**
+ * @description 计算从 2025-10-28 起的开服天数，首日记为第 1 天。
+ */
+const openServerDays = computed(() => {
+    const start = new Date(OPEN_SERVER_DATE).getTime()
+    const now = Date.now()
+    const diffDays = Math.floor((now - start) / (24 * 60 * 60 * 1000))
+    return Math.max(1, diffDays + 1)
+})
+
 onMounted(() => {
     if (env.isApp) {
         return
     }
 })
+
+async function checkUpdate() {
+    await window.updateApp()
+    useUIStore().showSuccessMessage("已是最新版本")
+}
 </script>
 
 <template>
@@ -69,6 +87,8 @@ onMounted(() => {
                     <div>
                         <h1 class="text-4xl sm:text-5xl font-bold">DNA Builder</h1>
                         <div class="py-3 sm:py-4">
+                            开服第 {{ openServerDays }} 天
+                            <span class="mx-2">·</span>
                             {{ $t("home.cureent_version") }}
                             <a class="link" :href="`https://github.com/pa001024/dna-builder/releases/tag/v${pg.version}`" target="_blank">
                                 {{ pg.version }}
@@ -80,6 +100,10 @@ onMounted(() => {
                                 <Icon icon="ri:windows-fill" class="w-5 h-5 sm:w-6 sm:h-6" />
                                 <span class="hidden sm:inline">{{ $t("home.download") }}</span>
                             </a>
+                            <button v-else @click="checkUpdate" class="btn btn-primary btn-sm sm:btn-md">
+                                <Icon icon="ri:refresh-line" class="w-5 h-5 sm:w-6 sm:h-6" />
+                                <span class="hidden sm:inline">{{ $t("home.checkUpdate") }}</span>
+                            </button>
                             <a href="https://github.com/pa001024/dna-builder" target="_blank" class="btn btn-primary btn-sm sm:btn-md">
                                 <Icon icon="ri:github-fill" class="w-5 h-5 sm:w-6 sm:h-6" />
                                 <span class="hidden sm:inline">{{ $t("home.starme") }}</span>
@@ -117,6 +141,10 @@ onMounted(() => {
 
             <!-- 活动日历组件 -->
             <ActivityCalendar />
+
+            <div v-if="!env.isApp" class="flex items-center justify-center p-4">
+                <a class="link center" href="https://beian.miit.gov.cn" target="_blank" one-link-mark="yes">浙ICP备2024097919号</a>
+            </div>
         </ScrollArea>
     </div>
 </template>

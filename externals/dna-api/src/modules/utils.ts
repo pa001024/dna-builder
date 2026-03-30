@@ -44,6 +44,14 @@ export function rand_str(length: number = 16): string {
     }
     return result
 }
+export function rand_str2(length: number = 16): string {
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
+    let result = ""
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    return result
+}
 
 export function md5_upper(text: string): string {
     const md = forge.md.md5.create()
@@ -151,7 +159,7 @@ export function xor_encode(text: string, key: string): string {
     return out.join("")
 }
 
-export function build_signature(pk: string, payload: Record<string, any>, token?: string): Record<string, any> {
+export function build_signature120(pk: string, payload: Record<string, any>, token?: string): Record<string, any> {
     const rk = rand_str(16)
     const [raw_sa, shuffled_sa] = generate_sa()
     const str_params: Record<string, any> = {}
@@ -178,6 +186,68 @@ export function build_signature(pk: string, payload: Record<string, any>, token?
     const tn = `${rk_encrypted},${sign_encoded}`
 
     return { rk, tn, sa: shuffled_sa }
+}
+
+function swap_chars(text: string, i: number, j: number): string {
+    if (i < 0 || j < 0 || i >= text.length || j >= text.length) {
+        return text
+    }
+    const chars = text.split("")
+    ;[chars[i], chars[j]] = [chars[j], chars[i]]
+    return chars.join("")
+}
+
+function build_sa_header122(raw_sa: string, timestamp: number = Date.now()): string {
+    let sa = raw_sa
+    sa = swap_chars(sa, 7, 11)
+    sa = swap_chars(sa, 18, 26)
+    sa = swap_chars(sa, 12, 22)
+    sa = swap_chars(sa, 3, 15)
+
+    const ts = String(timestamp)
+    if (sa.length !== 30 || ts.length < 13) {
+        return sa
+    }
+
+    let timeIndex = 0
+    const out: string[] = []
+    for (let i = 0; i < sa.length; i++) {
+        if (i === 8 || i === 16) {
+            out.push(ts.slice(timeIndex, timeIndex + 5))
+            timeIndex += 5
+        } else if (i === 22) {
+            out.push(ts.slice(timeIndex, timeIndex + 3))
+            timeIndex += 3
+        }
+        out.push(sa[i])
+    }
+
+    return out.join("")
+}
+
+export function build_signature122(pk: string, payload: Record<string, any>, token?: string): Record<string, any> {
+    const rk = rand_str(16)
+
+    const raw_sa = rand_str(30)
+    const sa = build_sa_header122(raw_sa)
+    const str_params: Record<string, any> = {}
+
+    for (const [k, v] of Object.entries(payload)) {
+        str_params[k] = String(v)
+    }
+
+    const sign_params = { ...str_params }
+    if (token) {
+        sign_params.token = token
+    }
+    sign_params.sa = raw_sa
+
+    const sign_val = sign_shuffled(sign_params, rk)
+    const sign_encoded = xor_encode(sign_val, rk)
+    const rk_encrypted = rsa_encrypt(rk, pk)
+    const tn = `${rk_encrypted},${sign_encoded}`
+
+    return { rk, tn, sa }
 }
 
 // 构建上传图片签名（返回签名和密钥）
@@ -217,4 +287,42 @@ export function aesDecryptImageUrl(encryptedUrl: string, key: string): string {
     decipher.finish()
 
     return decipher.output.getBytes()
+}
+
+function signature_hash(text: string): string {
+    function swap_positions(text: string, positions: number[]): string {
+        const chars = text.split("")
+        for (let i = 1; i < positions.length; i += 2) {
+            const p1 = positions[i - 1]
+            const p2 = positions[i]
+            if (p1 >= 0 && p1 < chars.length && p2 >= 0 && p2 < chars.length) {
+                ;[chars[p1], chars[p2]] = [chars[p2], chars[p1]]
+            }
+        }
+        return chars.join("")
+    }
+    return swap_positions(md5_upper(text), [1, 13, 5, 17, 7, 23])
+}
+
+function sign_fI(data: Record<string, any>, secret: string): string {
+    const pairs: string[] = []
+    const sortedKeys = Object.keys(data).sort()
+    for (const k of sortedKeys) {
+        const v = data[k]
+        if (v !== null && v !== undefined && v !== "") {
+            pairs.push(`${k}=${v}`)
+        }
+    }
+    const qs = pairs.join("&")
+    return signature_hash(`${qs}&${secret}`)
+}
+
+/** 1.1.1版本加密 */
+export function build_signature111(data: Record<string, any>, token?: string): Record<string, any> {
+    const ts = Date.now()
+    const sign_data = { ...data, timestamp: ts, token }
+    const sec = rand_str(16)
+    const sig = sign_fI(sign_data, sec)
+    const enc = xor_encode(sig, sec)
+    return { s: enc, t: ts, k: sec }
 }

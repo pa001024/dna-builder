@@ -16,7 +16,7 @@ const weapon = computed(() => {
 </script>
 
 <template>
-    <div class="h-full flex flex-col">
+    <ScrollArea class="h-full flex flex-col">
         <DBWeaponDetailItem :weapon="weapon" class="flex-1" />
-    </div>
+    </ScrollArea>
 </template>
