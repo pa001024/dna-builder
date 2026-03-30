@@ -2,14 +2,16 @@
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
-import { type Accessory, charAccessoryData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { type Accessory, charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import { getAccessoryUnlockLabelKey, normalizeAccessoryUnlock } from "@/utils/accessory-utils"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
-type AccessoryType = "char" | "weapon" | "skin"
+type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "headframe"
 
 interface AccessoryItem extends Accessory {
     accessoryType: AccessoryType
+    rarity?: number
+    unlock?: string
 }
 
 const searchKeyword = useSearchParam<string>("kw", "")
@@ -24,8 +26,10 @@ const selectedUnlock = useSearchParam<string>("ul", "all")
 const allAccessories = computed<AccessoryItem[]>(() => {
     const charItems = charAccessoryData.map(item => ({ ...item, accessoryType: "char" as const }))
     const weaponItems = weaponAccessoryData.map(item => ({ ...item, accessoryType: "weapon" as const }))
-    const skinItems = weaponSkinData.map(item => ({ ...item, accessoryType: "skin" as const }))
-    return [...charItems, ...weaponItems, ...skinItems]
+    const skinItems = skinData.map(item => ({ ...item, accessoryType: "skin" as const }))
+    const weaponSkinItems = weaponSkinData.map(item => ({ ...item, accessoryType: "weaponskin" as const }))
+    const headFrameItems = headFrameData.map(item => ({ ...item, accessoryType: "headframe" as const }))
+    return [...charItems, ...weaponItems, ...skinItems, ...weaponSkinItems, ...headFrameItems]
 })
 
 /**
@@ -58,7 +62,9 @@ const allUnlockMethods = computed(() => {
 const allRarities = computed(() => {
     const raritySet = new Set<number>()
     for (const accessory of allAccessories.value) {
-        raritySet.add(accessory.rarity)
+        if (typeof accessory.rarity === "number") {
+            raritySet.add(accessory.rarity)
+        }
     }
     return Array.from(raritySet).sort((a, b) => a - b)
 })
@@ -112,8 +118,14 @@ function selectAccessory(accessory: AccessoryItem | null) {
  * @param icon 图标资源名
  * @returns 图标 URL
  */
-function getAccessoryIcon(icon: string): string {
-    return icon ? `/imgs/fashion/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+function getAccessoryIcon(accessory: AccessoryItem): string {
+    if (accessory.accessoryType === "weaponskin") {
+        return accessory.icon ? `/imgs/fashion/${accessory.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+    }
+    if (accessory.accessoryType === "headframe") {
+        return accessory.icon ? `/imgs/headframe/${accessory.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+    }
+    return accessory.icon ? `/imgs/fashion/${accessory.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
 }
 
 /**
@@ -168,7 +180,19 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
     if (accessoryType === "char") {
         return "accessory.typeChar"
     }
-    return accessoryType === "weapon" ? "accessory.typeWeapon" : "accessory.typeSkin"
+    if (accessoryType === "weapon") {
+        return "accessory.typeWeapon"
+    }
+    if (accessoryType === "skin") {
+        return "accessory.typeSkin"
+    }
+    if (accessoryType === "weaponskin") {
+        return "accessory.typeWeaponSkin"
+    }
+    if (accessoryType === "headframe") {
+        return "accessory.typeHeadFrame"
+    }
+    return "accessory.typeSkin"
 }
 
 useInitialScrollToSelectedItem()
@@ -205,6 +229,11 @@ useInitialScrollToSelectedItem()
                             :class="selectedType === 'skin' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
                             @click="selectedType = 'skin'">
                             {{ $t("accessory.typeSkin") }}
+                        </button>
+                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            :class="selectedType === 'headframe' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
+                            @click="selectedType = 'headframe'">
+                            {{ $t("accessory.typeHeadFrame") }}
                         </button>
                     </div>
 
@@ -247,7 +276,7 @@ useInitialScrollToSelectedItem()
                             }" @click="selectAccessory(accessory)">
                             <div class="flex items-start justify-between gap-3">
                                 <div class="min-w-0 flex items-start gap-2">
-                                    <img :src="getAccessoryIcon(accessory.icon)" :alt="accessory.name"
+                                    <img :src="getAccessoryIcon(accessory)" :alt="accessory.name"
                                         class="size-10 rounded bg-linear-15 object-cover"
                                         :class="getRarityGradientClass(accessory.rarity)" />
                                     <div class="min-w-0">

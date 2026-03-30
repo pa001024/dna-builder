@@ -5019,8 +5019,10 @@
         "type": "Type",
         "typeAll": "All",
         "typeChar": "Character Accessory",
-        "typeSkin": "Weapon Skin",
+        "typeHeadFrame": "Avatar Frame",
+        "typeSkin": "Character Skin",
         "typeWeapon": "Weapon Accessory",
+        "typeWeaponSkin": "Weapon Skin",
         "unlock": "Unlock Method",
         "unlockMethods": {
             "eggShop": "Eggshop",

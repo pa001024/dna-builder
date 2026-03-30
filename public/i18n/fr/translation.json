@@ -4911,8 +4911,10 @@
         "type": "Type",
         "typeAll": "Tous",
         "typeChar": "Accessoire de personnage",
-        "typeSkin": "Skin d'arme",
+        "typeHeadFrame": "Cadre d’avatar",
+        "typeSkin": "Skin de personnage",
         "typeWeapon": "Accessoire d'arme",
+        "typeWeaponSkin": "Skin d'arme",
         "unlock": "Méthode d'obtention",
         "unlockMethods": {
             "eggShop": "Boutique d'impressions d'Eggjiao",

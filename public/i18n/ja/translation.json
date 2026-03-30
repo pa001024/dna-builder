@@ -5014,8 +5014,10 @@
         "type": "タイプ",
         "typeAll": "すべて",
         "typeChar": "キャラクターアクセサリー",
-        "typeSkin": "武器スキン",
+        "typeHeadFrame": "アイコンフレーム",
+        "typeSkin": "キャラクタースキン",
         "typeWeapon": "武器アクセサリー",
+        "typeWeaponSkin": "武器スキン",
         "unlock": "入手方法",
         "unlockMethods": {
             "eggShop": "タマゴ印象ショップ",

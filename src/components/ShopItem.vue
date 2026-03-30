@@ -123,6 +123,7 @@ const itemDetail = computed(() => {
                 return {
                     type: props.item.itemType,
                     icon: `/imgs/headframe/${headFrame.icon}.webp`,
+                    link: `/db/accessory/headframe/${headFrame.id}`,
                 }
             }
             return {

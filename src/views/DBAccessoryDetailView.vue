@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useRoute } from "vue-router"
-import { charAccessoryData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 
-type AccessoryType = "char" | "weapon" | "skin"
+type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "headframe"
 
 const route = useRoute()
 
@@ -14,6 +14,12 @@ const accessoryType = computed(() => {
     const value = route.params.accessoryType as string
     if (value === "weapon") {
         return "weapon"
+    }
+    if (value === "headframe") {
+        return "headframe"
+    }
+    if (value === "weaponskin") {
+        return "weaponskin"
     }
     return value === "skin" ? "skin" : "char"
 })
@@ -30,7 +36,9 @@ const accessory = computed(() => {
     const sourceMap = {
         char: charAccessoryData,
         weapon: weaponAccessoryData,
-        skin: weaponSkinData,
+        skin: skinData,
+        weaponskin: weaponSkinData,
+        headframe: headFrameData,
     }
     const source = sourceMap[accessoryType.value]
     const item = source.find(v => v.id === accessoryId.value)

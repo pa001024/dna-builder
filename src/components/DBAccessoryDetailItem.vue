@@ -1,15 +1,30 @@
 <script lang="ts" setup>
+import { t } from "i18next"
 import { computed } from "vue"
-import { resourceMap } from "@/data"
-import type { Accessory } from "@/data/d/accessory.data"
+import { charData, resourceMap } from "@/data"
+import type { Accessory, HeadFrameItem, SkinItem } from "@/data/d/accessory.data"
 import draftData, { type Draft } from "@/data/d/draft.data"
 import shopData from "@/data/d/shop.data"
 
-type AccessoryType = "char" | "weapon" | "skin"
+type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "headframe"
 
 interface AccessoryItem extends Accessory {
     accessoryType: AccessoryType
 }
+
+interface SkinAccessoryItem extends SkinItem {
+    accessoryType: "skin"
+}
+
+interface WeaponSkinAccessoryItem extends Accessory {
+    accessoryType: "weaponskin"
+}
+
+interface HeadFrameAccessoryItem extends HeadFrameItem {
+    accessoryType: "headframe"
+}
+
+type DetailAccessoryItem = AccessoryItem | SkinAccessoryItem | WeaponSkinAccessoryItem | HeadFrameAccessoryItem
 
 interface AccessoryShopSource {
     key: string
@@ -31,8 +46,35 @@ interface AccessoryDraftSource {
 }
 
 const props = defineProps<{
-    accessory: AccessoryItem
+    accessory: DetailAccessoryItem
 }>()
+
+/**
+ * 判断是否为角色皮肤。
+ * @param accessory 详情数据
+ * @returns 是否为角色皮肤
+ */
+function isSkinAccessory(accessory: DetailAccessoryItem): accessory is SkinAccessoryItem {
+    return accessory.accessoryType === "skin"
+}
+
+/**
+ * 判断是否为武器皮肤。
+ * @param accessory 详情数据
+ * @returns 是否为武器皮肤
+ */
+function isWeaponSkinAccessory(accessory: DetailAccessoryItem): accessory is WeaponSkinAccessoryItem {
+    return accessory.accessoryType === "weaponskin"
+}
+
+/**
+ * 判断是否为头像框。
+ * @param accessory 详情数据
+ * @returns 是否为头像框
+ */
+function isHeadFrameAccessory(accessory: DetailAccessoryItem): accessory is HeadFrameAccessoryItem {
+    return accessory.accessoryType === "headframe"
+}
 
 /**
  * 将饰品图标名转换为可访问的图片地址。
@@ -41,6 +83,24 @@ const props = defineProps<{
  */
 function getAccessoryIcon(icon: string): string {
     return icon ? `/imgs/fashion/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+}
+
+/**
+ * 获取武器皮肤图标地址。
+ * @param icon 图标资源名
+ * @returns 图标 URL
+ */
+function getWeaponSkinIcon(icon: string): string {
+    return icon ? `/imgs/fashion/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+}
+
+/**
+ * 获取头像框图标地址。
+ * @param icon 图标资源名
+ * @returns 图标 URL
+ */
+function getHeadFrameIcon(icon: string): string {
+    return icon ? `/imgs/headframe/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
 }
 
 /**
@@ -95,7 +155,50 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
     if (accessoryType === "char") {
         return "accessory.typeChar"
     }
-    return accessoryType === "weapon" ? "accessory.typeWeapon" : "accessory.typeSkin"
+    if (accessoryType === "weapon") {
+        return "accessory.typeWeapon"
+    }
+    if (accessoryType === "headframe") {
+        return "accessory.typeHeadFrame"
+    }
+    if (accessoryType === "weaponskin") {
+        return "accessory.typeWeaponSkin"
+    }
+    return "accessory.typeSkin"
+}
+
+/**
+ * 获取角色皮肤分类文本。
+ * @param skin 角色皮肤数据
+ * @returns 分类文本
+ */
+function getSkinCategoryText(skin: SkinItem): string {
+    const charInfo = charData.find(char => char.id === skin.charId)
+    if (!charInfo) {
+        return skin.tag || skin.release || "-"
+    }
+    return `${charInfo.名称}${skin.tag ? ` · ${skin.tag}` : ""}`
+}
+
+/**
+ * 获取角色皮肤图标地址。
+ * @param icon 图标资源名
+ * @returns 图标 URL
+ */
+function getSkinIcon(icon: string): string {
+    return icon ? `/imgs/webp/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+}
+
+/**
+ * 获取头像框分类文本。
+ * @param headFrame 头像框数据
+ * @returns 分类文本
+ */
+function getHeadFrameCategoryText(headFrame: HeadFrameItem): string {
+    if (headFrame.access) {
+        return headFrame.access
+    }
+    return "-"
 }
 
 /**
@@ -167,7 +270,9 @@ const relatedShopSources = computed<AccessoryShopSource[]>(() => {
     const itemTypeMap = {
         char: "CharAccessory",
         weapon: "WeaponAccessory",
-        skin: "WeaponSkin",
+        skin: "Skin",
+        weaponskin: "WeaponSkin",
+        headframe: "HeadFrame",
     } as const
     const targetItemType = itemTypeMap[props.accessory.accessoryType]
     return collectShopSources(item => item.itemType === targetItemType && item.typeId === props.accessory.id)
@@ -190,6 +295,22 @@ const relatedDraftSources = computed<AccessoryDraftSource[]>(() => {
 })
 
 /**
+ * 当前详情页展示的分类文本。
+ */
+const accessoryCategoryText = computed(() => {
+    if (props.accessory.accessoryType === "skin") {
+        return getSkinCategoryText(props.accessory)
+    }
+    if (props.accessory.accessoryType === "weaponskin") {
+        return "武器"
+    }
+    if (props.accessory.accessoryType === "headframe") {
+        return getHeadFrameCategoryText(props.accessory)
+    }
+    return "-"
+})
+
+/**
  * 供页面最终展示的商店来源（优先饰品本体，找不到时使用图纸来源）。
  */
 const displayShopSources = computed<AccessoryShopSource[]>(() => {
@@ -198,6 +319,53 @@ const displayShopSources = computed<AccessoryShopSource[]>(() => {
     }
     return relatedDraftSources.value.flatMap(source => source.shopSources)
 })
+
+/**
+ * 详情页标题图标地址。
+ */
+const accessoryIcon = computed(() => {
+    if (isHeadFrameAccessory(props.accessory)) {
+        return getHeadFrameIcon(props.accessory.icon)
+    }
+    if (isWeaponSkinAccessory(props.accessory)) {
+        return getWeaponSkinIcon(props.accessory.icon)
+    }
+    if (isSkinAccessory(props.accessory)) {
+        return getSkinIcon(props.accessory.icon)
+    }
+    return getAccessoryIcon(props.accessory.icon)
+})
+
+/**
+ * 详情页标题的展示名称。
+ */
+const accessoryName = computed(() => props.accessory.name)
+
+/**
+ * 详情页描述文本。
+ */
+const accessoryDesc = computed(() => props.accessory.desc)
+
+/**
+ * 详情页稀有度文本。
+ */
+const accessoryRarity = computed(() => props.accessory.rarity)
+
+/**
+ * 详情页获取方式文本。
+ */
+const accessoryUnlock = computed(() => {
+    if (isHeadFrameAccessory(props.accessory)) {
+        return props.accessory.access || "-"
+    }
+    if (isSkinAccessory(props.accessory)) {
+        return props.accessory.release ? `v${props.accessory.release}` : "-"
+    }
+    if (isWeaponSkinAccessory(props.accessory)) {
+        return "-"
+    }
+    return props.accessory.unlock ? t(props.accessory.unlock) : "-"
+})
 </script>
 
 <template>
@@ -205,23 +373,20 @@ const displayShopSources = computed<AccessoryShopSource[]>(() => {
         <div class="flex items-start justify-between gap-3">
             <div class="flex items-start gap-3 min-w-0">
                 <img
-                    :src="getAccessoryIcon(accessory.icon)"
-                    :alt="accessory.name"
+                    :src="accessoryIcon"
+                    :alt="accessoryName"
                     class="size-12 rounded-lg bg-linear-15 object-cover"
-                    :class="getRarityGradientClass(accessory.rarity)"
+                    :class="isHeadFrameAccessory(accessory) ? 'bg-base-200' : getRarityGradientClass(accessoryRarity)"
                 />
                 <div class="min-w-0">
-                    <SRouterLink
-                        :to="`/db/accessory/${accessory.accessoryType}/${accessory.id}`"
-                        class="text-lg font-bold link link-primary"
-                    >
-                        {{ $t(accessory.name) }}
-                    </SRouterLink>
+                    <div class="text-lg font-bold">
+                        {{ $t(accessoryName) }}
+                    </div>
                     <div class="text-xs text-base-content/70 mt-1">ID: {{ accessory.id }}</div>
                 </div>
             </div>
-            <span class="text-xs px-2 py-1 rounded" :class="getRarityBadgeClass(accessory.rarity)">
-                {{ getRarityText(accessory.rarity) }}
+            <span class="text-xs px-2 py-1 rounded" :class="getRarityBadgeClass(accessoryRarity)">
+                {{ getRarityText(accessoryRarity) }}
             </span>
         </div>
 
@@ -233,8 +398,12 @@ const displayShopSources = computed<AccessoryShopSource[]>(() => {
                     <span>{{ $t(getAccessoryTypeLabelKey(accessory.accessoryType)) }}</span>
                 </div>
                 <div class="flex justify-between gap-2">
+                    <span class="text-base-content/70">{{ $t("accessory.category") }}</span>
+                    <span>{{ accessoryCategoryText }}</span>
+                </div>
+                <div class="flex justify-between gap-2">
                     <span class="text-base-content/70">{{ $t("accessory.rarity") }}</span>
-                    <span>{{ getRarityText(accessory.rarity) }}</span>
+                    <span>{{ getRarityText(accessoryRarity) }}</span>
                 </div>
             </div>
         </div>
@@ -242,14 +411,14 @@ const displayShopSources = computed<AccessoryShopSource[]>(() => {
         <div class="card bg-base-100 border border-base-200 rounded-lg p-3 space-y-2">
             <h3 class="font-bold">{{ $t("accessory.description") }}</h3>
             <div class="text-sm text-base-content/80 wrap-break-word">
-                {{ $t(accessory.desc) }}
+                {{ $t(accessoryDesc) }}
             </div>
         </div>
 
         <div class="card bg-base-100 border border-base-200 rounded-lg p-3 space-y-2">
             <h3 class="font-bold">{{ $t("accessory.unlock") }}</h3>
             <div class="text-sm text-base-content/80 wrap-break-word">
-                {{ accessory.unlock ? $t(accessory.unlock) : "-" }}
+                {{ accessoryUnlock }}
             </div>
 
             <div v-if="relatedDraftSources.length" class="pt-1 border-t border-base-200/70">

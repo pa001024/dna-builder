@@ -127,8 +127,10 @@
         "type": "类型",
         "typeAll": "全部",
         "typeChar": "角色饰品",
-        "typeSkin": "武器皮肤",
+        "typeHeadFrame": "头像框",
+        "typeSkin": "角色皮肤",
         "typeWeapon": "武器饰品",
+        "typeWeaponSkin": "武器皮肤",
         "unlock": "解锁方式",
         "unlockMethods": {
             "eggShop": "蛋皎的印象商店",

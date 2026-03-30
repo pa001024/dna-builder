@@ -5019,8 +5019,10 @@
         "type": "유형",
         "typeAll": "전체",
         "typeChar": "캐릭터 장식품",
-        "typeSkin": "무기 스킨",
+        "typeHeadFrame": "프로필 프레임",
+        "typeSkin": "캐릭터 스킨",
         "typeWeapon": "무기 장식품",
+        "typeWeaponSkin": "무기 스킨",
         "unlock": "획득 방법",
         "unlockMethods": {
             "eggShop": "에그 인상 상점",

@@ -2,7 +2,7 @@ import Fuse from "fuse.js"
 import { t } from "i18next"
 import { charMap } from "@/data/d"
 import { abyssDungeons } from "@/data/d/abyss.data"
-import { charAccessoryData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import achievementData from "@/data/d/achievement.data"
 import { booksData } from "@/data/d/book.data"
 import charData from "@/data/d/char.data"
@@ -164,6 +164,36 @@ export class GlobalSearchService {
                         path: `/db/accessory/skin/${accessory.id}`,
                     },
                     [accessory.id, accessory.name, accessory.desc, accessory.unlock, accessory.rarity, accessory.icon]
+                )
+            )
+        )
+
+        entries.push(
+            ...skinData.map(accessory =>
+                this.buildSearchEntry(
+                    {
+                        id: `skin:${accessory.id}`,
+                        title: accessory.name,
+                        subtitle: `皮肤 ID: ${accessory.id} | 角色皮肤`,
+                        typeLabel: t("database.accessory"),
+                        path: `/db/accessory/skin/${accessory.id}`,
+                    },
+                    [accessory.id, accessory.name, accessory.desc, accessory.charId, accessory.tag, accessory.release, accessory.icon]
+                )
+            )
+        )
+
+        entries.push(
+            ...headFrameData.map(accessory =>
+                this.buildSearchEntry(
+                    {
+                        id: `headframe:${accessory.id}`,
+                        title: accessory.name,
+                        subtitle: `头像框 ID: ${accessory.id} | 头像框`,
+                        typeLabel: t("database.accessory"),
+                        path: `/db/accessory/headframe/${accessory.id}`,
+                    },
+                    [accessory.id, accessory.name, accessory.desc, accessory.access, accessory.icon]
                 )
             )
         )
