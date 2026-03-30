@@ -5718,6 +5718,35 @@
     "partytopic-list": {
         "title": "Party Topic List"
     },
+    "pet_detail": {
+        "active_skill": "Active skill",
+        "alternative_form": "Alternative form",
+        "base_id": "Base ID",
+        "breakthrough_level_range": "The slider level range is 0 to 3. When Old Master is enabled, it is treated as level +1.",
+        "capture_exp": "Capture EXP",
+        "corresponding_inactive": "Corresponding inactive Geniemon",
+        "count_suffix": "entries",
+        "description": "Description",
+        "effect": "Effect",
+        "exp": "EXP",
+        "group_by_weight": "Group by weight",
+        "max_level": "Max level",
+        "name": "Name",
+        "next_level": "Next level",
+        "no_pet_entry_sources": "No corresponding Geniemon potential sources",
+        "no_sources": "No corresponding sources",
+        "no_spawn": "No spawn locations",
+        "old_master": "Old Master",
+        "passive_skill": "Passive skill",
+        "pet_entry": "Geniemon potential",
+        "rarity": "Rarity",
+        "rc_label": "RC",
+        "region_fallback": "Region {{id}}",
+        "shop_purchase": "Shop purchases",
+        "spawn_area": "Spawn areas",
+        "spot_count": "Spot count",
+        "until_now": "Now"
+    },
     "pet-list": {
         "title": "Geniemon List"
     },

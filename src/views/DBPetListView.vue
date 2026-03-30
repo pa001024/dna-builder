@@ -3,7 +3,7 @@ import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { petMap } from "../data/d"
-import petData, { type Pet, petEntrys } from "../data/d/pet.data"
+import petData, { type Pet, type PetEntry, petEntrys } from "../data/d/pet.data"
 import { LeveledPet } from "../data/leveled/LeveledPet"
 import { matchPinyin } from "../utils/pinyin-utils"
 
@@ -11,10 +11,21 @@ const searchKeyword = useSearchParam<string>("kw", "")
 const selectedPetId = useSearchParam<number>("id", 0)
 const selectedType = useSearchParam<number>("tp", 0)
 const selectedQuality = useSearchParam<number>("ql", 0)
-
 // 根据 ID 获取选中的魔灵
-const selectedPet = computed(() => {
-    return selectedPetId.value ? petMap.get(selectedPetId.value) || null : null
+const selectedPet = computed<Pet | null>(() => {
+    if (!selectedPetId.value || selectedType.value === 999) {
+        return null
+    }
+
+    return petMap.get(selectedPetId.value) || null
+})
+
+const selectedPetEntry = computed<PetEntry | null>(() => {
+    if (!selectedPetId.value || selectedType.value !== 999) {
+        return null
+    }
+
+    return petEntrys.find(entry => entry.id === selectedPetId.value) || null
 })
 
 const types = computed(() => {
@@ -191,6 +202,7 @@ useInitialScrollToSelectedItem()
                             </button>
                         </div>
                     </div>
+
                 </div>
 
                 <ScrollArea class="flex-1">
@@ -200,7 +212,7 @@ useInitialScrollToSelectedItem()
                             :key="item.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedPetId === item.id }"
-                            @click="selectedPetId = selectedType === 999 ? 0 : (item as Pet).id"
+                            @click="selectedPetId = (item as Pet | PetEntry).id"
                         >
                             <div class="flex items-start gap-2">
                                 <div class="w-12 h-12 overflow-hidden rounded-full">
@@ -260,7 +272,7 @@ useInitialScrollToSelectedItem()
                 </div>
             </div>
             <div
-                v-if="selectedPet"
+                v-if="selectedPet || selectedPetEntry"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
                 @click="selectedPetId = 0"
             >
@@ -269,6 +281,10 @@ useInitialScrollToSelectedItem()
 
             <ScrollArea v-if="selectedPet" class="flex-1">
                 <DBPetDetailItem :pet="selectedPet" />
+            </ScrollArea>
+
+            <ScrollArea v-else-if="selectedPetEntry" class="flex-1">
+                <DBPetEntryDetailItem :entry="selectedPetEntry" />
             </ScrollArea>
         </div>
     </div>

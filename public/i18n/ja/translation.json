@@ -5713,6 +5713,35 @@
     "partytopic-list": {
         "title": "追憶録一覧"
     },
+    "pet_detail": {
+        "active_skill": "アクティブスキル",
+        "alternative_form": "異化形態",
+        "base_id": "ベースID",
+        "breakthrough_level_range": "スライダーのレベル範囲は0から3です。老練を有効にするとレベル+1として扱います。",
+        "capture_exp": "捕獲経験値",
+        "corresponding_inactive": "対応する非活性化ジェネモン",
+        "count_suffix": "件",
+        "description": "説明",
+        "effect": "効果",
+        "exp": "経験値",
+        "group_by_weight": "重みでグループ化",
+        "max_level": "最大レベル",
+        "name": "名称",
+        "next_level": "次のレベル",
+        "no_pet_entry_sources": "対応するジェネモン潜質のソースはありません",
+        "no_sources": "対応するソースはありません",
+        "no_spawn": "出現場所はありません",
+        "old_master": "老練",
+        "passive_skill": "パッシブスキル",
+        "pet_entry": "ジェネモン潜質",
+        "rarity": "品質",
+        "rc_label": "RC",
+        "region_fallback": "地域{{id}}",
+        "shop_purchase": "ショップ購入",
+        "spawn_area": "出現エリア",
+        "spot_count": "出現数",
+        "until_now": "現在まで"
+    },
     "pet-list": {
         "title": "ジェネモン一覧"
     },

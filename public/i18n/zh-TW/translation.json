@@ -5679,6 +5679,35 @@
     "partytopic-list": {
         "title": "光陰集列表"
     },
+    "pet_detail": {
+        "active_skill": "主動技能",
+        "alternative_form": "異化形態",
+        "base_id": "基礎ID",
+        "breakthrough_level_range": "滑塊等級範圍為 0 到 3，開啟老道後視作等級 +1。",
+        "capture_exp": "捕獲經驗",
+        "corresponding_inactive": "對應失活魔靈",
+        "count_suffix": "個",
+        "description": "描述",
+        "effect": "效果",
+        "exp": "經驗",
+        "group_by_weight": "按權重分組",
+        "max_level": "最大等級",
+        "name": "名稱",
+        "next_level": "下一級",
+        "no_pet_entry_sources": "暫無對應魔靈潛質來源",
+        "no_sources": "暫無對應來源",
+        "no_spawn": "暫無出現地點",
+        "old_master": "老道",
+        "passive_skill": "被動技能",
+        "pet_entry": "魔靈潛質",
+        "rarity": "品質",
+        "rc_label": "RC",
+        "region_fallback": "區域{{id}}",
+        "shop_purchase": "商店購買",
+        "spawn_area": "出現區域",
+        "spot_count": "點位數",
+        "until_now": "至今"
+    },
     "pet-list": {
         "title": "魔靈列表"
     },

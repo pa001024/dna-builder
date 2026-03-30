@@ -5644,6 +5644,35 @@
     "partytopic-list": {
         "title": "Liste des Chroniques"
     },
+    "pet_detail": {
+        "active_skill": "Compétence active",
+        "alternative_form": "Forme alternative",
+        "base_id": "ID de base",
+        "breakthrough_level_range": "La plage du curseur est de 0 à 3. Quand Vieil Expert est activé, cela compte comme niveau +1.",
+        "capture_exp": "EXP de capture",
+        "corresponding_inactive": "Géniemon inactif correspondant",
+        "count_suffix": "éléments",
+        "description": "Description",
+        "effect": "Effet",
+        "exp": "EXP",
+        "group_by_weight": "Grouper par poids",
+        "max_level": "Niveau max",
+        "name": "Nom",
+        "next_level": "Niveau suivant",
+        "no_pet_entry_sources": "Aucune source de potentiel Géniemon correspondante",
+        "no_sources": "Aucune source correspondante",
+        "no_spawn": "Aucun emplacement d'apparition",
+        "old_master": "Vieil Expert",
+        "passive_skill": "Compétence passive",
+        "pet_entry": "Potentiel Géniemon",
+        "rarity": "Rareté",
+        "rc_label": "RC",
+        "region_fallback": "Région {{id}}",
+        "shop_purchase": "Achats en boutique",
+        "spawn_area": "Zones d'apparition",
+        "spot_count": "Nombre d'emplacements",
+        "until_now": "Maintenant"
+    },
     "pet-list": {
         "title": "Liste des Géniemon"
     },

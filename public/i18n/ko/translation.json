@@ -5718,6 +5718,35 @@
     "partytopic-list": {
         "title": "추억집 목록"
     },
+    "pet_detail": {
+        "active_skill": "액티브 스킬",
+        "alternative_form": "이형 형태",
+        "base_id": "기본 ID",
+        "breakthrough_level_range": "슬라이더 레벨 범위는 0에서 3입니다. 노련함을 켜면 레벨 +1로 취급합니다.",
+        "capture_exp": "포획 경험치",
+        "corresponding_inactive": "대응하는 비활성 마령",
+        "count_suffix": "개",
+        "description": "설명",
+        "effect": "효과",
+        "exp": "경험치",
+        "group_by_weight": "가중치별 그룹화",
+        "max_level": "최대 레벨",
+        "name": "이름",
+        "next_level": "다음 레벨",
+        "no_pet_entry_sources": "해당하는 마령 잠질 소스가 없습니다",
+        "no_sources": "해당하는 소스가 없습니다",
+        "no_spawn": "출현 위치가 없습니다",
+        "old_master": "노련함",
+        "passive_skill": "패시브 스킬",
+        "pet_entry": "마령 잠질",
+        "rarity": "품질",
+        "rc_label": "RC",
+        "region_fallback": "지역{{id}}",
+        "shop_purchase": "상점 구매",
+        "spawn_area": "출현 지역",
+        "spot_count": "출현 수",
+        "until_now": "현재까지"
+    },
     "pet-list": {
         "title": "마령 목록"
     },

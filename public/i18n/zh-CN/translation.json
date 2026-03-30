@@ -820,6 +820,35 @@
     "partytopic-list": {
         "title": "光阴集列表"
     },
+    "pet_detail": {
+        "active_skill": "主动技能",
+        "alternative_form": "异化形态",
+        "base_id": "基础ID",
+        "breakthrough_level_range": "滑块等级范围为 0 到 3，开启老道后视作等级 +1。",
+        "capture_exp": "捕获经验",
+        "corresponding_inactive": "对应失活魔灵",
+        "count_suffix": "个",
+        "description": "描述",
+        "effect": "效果",
+        "exp": "经验",
+        "group_by_weight": "按权重分组",
+        "max_level": "最大等级",
+        "name": "名称",
+        "next_level": "下一级",
+        "no_pet_entry_sources": "暂无对应魔灵潜质来源",
+        "no_sources": "暂无对应来源",
+        "no_spawn": "暂无出现地点",
+        "old_master": "老道",
+        "passive_skill": "被动技能",
+        "pet_entry": "魔灵潜质",
+        "rarity": "品质",
+        "rc_label": "RC",
+        "region_fallback": "区域{{id}}",
+        "shop_purchase": "商店购买",
+        "spawn_area": "出现区域",
+        "spot_count": "点位数",
+        "until_now": "至今"
+    },
     "pet-list": {
         "title": "魔灵列表"
     },

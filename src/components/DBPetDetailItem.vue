@@ -1,15 +1,19 @@
 <script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
 import { computed, ref, watch } from "vue"
 import { petMap, resourceMap } from "@/data"
 import { regionMap } from "@/data/d/region.data"
 import shopData from "@/data/d/shop.data"
 import { subRegionData } from "@/data/d/subregion.data"
+import { petEntrys, petToEntey } from "../data/d/pet.data"
 import type { Pet } from "../data/data-types"
 import { LeveledPet } from "../data/leveled/LeveledPet"
 
 const props = defineProps<{
     pet: Pet
 }>()
+
+const { t } = useTranslation()
 
 const PET_BREAKTHROUGH_SLIDER_MAX_LEVEL = 3
 
@@ -33,6 +37,25 @@ interface PetShopSource {
     priceName: string
     timeStart?: number
     timeEnd?: number
+}
+
+interface PetEntrySource {
+    entryId: number
+    entryName: string
+    entryIcon: string
+    entryDesc: string
+    weight: number
+}
+
+const groupPetSourcesByWeight = ref(true)
+
+/**
+ * 将权重格式化为百分比文本。
+ * @param weight 原始权重
+ * @returns 格式化文本
+ */
+function formatWeight(weight: number): string {
+    return `${weight.toFixed(3)}%`
 }
 
 const currentLevel = ref(props.pet.最大等级 > 1 ? PET_BREAKTHROUGH_SLIDER_MAX_LEVEL : 0)
@@ -92,7 +115,7 @@ const petSpawnLocations = computed<PetSpawnLocation[]>(() => {
             subRegionId: subRegion.id,
             subRegionName: subRegion.name,
             regionId: subRegion.rid,
-            regionName: regionMap.get(subRegion.rid)?.name || `区域${subRegion.rid}`,
+            regionName: regionMap.get(subRegion.rid)?.name || t("pet_detail.region_fallback", { id: subRegion.rid }),
             totalWeight,
             rcWeights,
         })
@@ -126,7 +149,7 @@ function formatTimeRange(start: number, end?: number) {
             minute: "2-digit",
         })
 
-    return `${formatTime(start)}~${end ? formatTime(end) : "至今"}`
+    return `${formatTime(start)}~${end ? formatTime(end) : t("pet_detail.until_now")}`
 }
 
 watch(
@@ -259,6 +282,66 @@ function collectPetShopSources(pet: Pet): PetShopSource[] {
  * 当前魔灵的商店来源列表。
  */
 const petShopSources = computed<PetShopSource[]>(() => collectPetShopSources(props.pet))
+
+/**
+ * 收集当前失活魔灵对应的魔灵潜质来源。
+ */
+const petToEnteySources = computed<PetEntrySource[]>(() => {
+    if (props.pet.类型 !== 2) {
+        return []
+    }
+
+    const sources: PetEntrySource[] = []
+    const entryWeightMap = petToEntey[String(props.pet.id)]
+    if (!entryWeightMap) {
+        return sources
+    }
+
+    for (const [entryIdText, weight] of Object.entries(entryWeightMap)) {
+        const entryId = Number(entryIdText)
+        const entry = petEntrys.find(item => item.id === entryId)
+        if (!entry) {
+            continue
+        }
+
+        sources.push({
+            entryId,
+            entryName: entry.name,
+            entryIcon: entry.icon,
+            entryDesc: entry.desc,
+            weight,
+        })
+    }
+
+    return sources.sort((a, b) => b.weight - a.weight || a.entryId - b.entryId)
+})
+
+interface PetSourceGroup {
+    weight: number
+    sources: PetEntrySource[]
+}
+
+const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
+    if (!groupPetSourcesByWeight.value) {
+        return []
+    }
+
+    const groupMap = new Map<string, PetEntrySource[]>()
+    for (const source of petToEnteySources.value) {
+        const key = source.weight.toFixed(6)
+        if (!groupMap.has(key)) {
+            groupMap.set(key, [])
+        }
+        groupMap.get(key)!.push(source)
+    }
+
+    return Array.from(groupMap.entries())
+        .map(([key, sources]) => ({
+            weight: Number(key),
+            sources: [...sources].sort((a, b) => a.entryId - b.entryId),
+        }))
+        .sort((a, b) => b.weight - a.weight)
+})
 </script>
 
 <template>
@@ -281,20 +364,20 @@ const petShopSources = computed<PetShopSource[]>(() => collectPetShopSources(pro
         </div>
 
         <div class="flex flex-wrap gap-2 text-sm opacity-70">
-            <span>最大等级: {{ pet.最大等级 }}</span>
-            <span>捕获经验: {{ pet.捕获经验 }}</span>
-            <span>经验: {{ displayedExperience }}</span>
+            <span>{{ $t("pet_detail.max_level") }}: {{ pet.最大等级 }}</span>
+            <span>{{ $t("pet_detail.capture_exp") }}: {{ pet.捕获经验 }}</span>
+            <span>{{ $t("pet_detail.exp") }}: {{ displayedExperience }}</span>
         </div>
 
         <div v-if="pet.描述" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-1">描述</div>
+            <div class="text-xs text-base-content/70 mb-1">{{ $t("pet_detail.description") }}</div>
             <div class="text-sm">
                 <span>{{ pet.描述 }}</span>
             </div>
         </div>
 
         <div v-if="pet.异化 && pet.异化 !== pet.id" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-1">异化</div>
+            <div class="text-xs text-base-content/70 mb-1">{{ $t("pet_detail.alternative_form") }}</div>
             <div class="flex items-center gap-2 text-sm">
                 <img :src="getPrmIconUrl(pet.异化)" :alt="getPrmName(pet.异化)" class="w-6 h-6 rounded object-cover bg-base-300" />
                 <SRouterLink :to="`/db/pet/${pet.异化}`" class="hover:underline">
@@ -316,16 +399,16 @@ const petShopSources = computed<PetShopSource[]>(() => collectPetShopSources(pro
                     step="1"
                 />
                 <label class="label cursor-pointer gap-2 px-2 py-0">
-                    <span class="label-text text-xs text-base-content/70 whitespace-nowrap">老道</span>
+                    <span class="label-text text-xs text-base-content/70 whitespace-nowrap">{{ $t("pet_detail.old_master") }}</span>
                     <input v-model="enableFourthLevel" type="checkbox" class="toggle toggle-primary toggle-sm" />
                 </label>
             </div>
-            <div class="text-xs text-base-content/50 mt-1">突破等级 (0-3)</div>
+            <div class="text-xs text-base-content/50 mt-1">{{ $t("pet_detail.breakthrough_level_range") }}</div>
         </div>
 
         <div v-if="leveledPet.主动" class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-1">
-                主动技能
+                {{ $t("pet_detail.active_skill") }}
                 <span class="text-xs text-base-content/70">CD: {{ leveledPet.主动.cd }}</span>
             </div>
             <div class="text-sm whitespace-pre-wrap">
@@ -334,14 +417,14 @@ const petShopSources = computed<PetShopSource[]>(() => collectPetShopSources(pro
         </div>
 
         <div v-if="leveledPet.被动" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-1">被动技能</div>
+            <div class="text-xs text-base-content/70 mb-1">{{ $t("pet_detail.passive_skill") }}</div>
             <div class="text-sm whitespace-pre-wrap">
                 {{ leveledPet.被动.描述 }}
             </div>
         </div>
 
         <div class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-1">刷新区域</div>
+            <div class="text-xs text-base-content/70 mb-1">{{ $t("pet_detail.spawn_area") }}</div>
             <div v-if="petSpawnLocations.length" class="space-y-2">
                 <div
                     v-for="location in petSpawnLocations"
@@ -350,7 +433,7 @@ const petShopSources = computed<PetShopSource[]>(() => collectPetShopSources(pro
                 >
                     <div class="flex items-center justify-between gap-2">
                         <span class="text-sm font-medium">{{ location.subRegionName }}</span>
-                        <span class="text-xs text-base-content/70">点位: {{ location.rcWeights.length }}</span>
+                        <span class="text-xs text-base-content/70">{{ $t("pet_detail.spot_count") }}: {{ location.rcWeights.length }}</span>
                     </div>
                     <div class="text-xs text-base-content/60 mt-1">
                         <span>{{ location.regionName }}</span>
@@ -372,18 +455,18 @@ const petShopSources = computed<PetShopSource[]>(() => collectPetShopSources(pro
                                 },
                             }"
                         >
-                            RC {{ rcWeight.rcId }}: {{ rcWeight.petWeight }}/{{ rcWeight.totalWeight }} ({{
+                            {{ $t("pet_detail.rc_label") }} {{ rcWeight.rcId }}: {{ rcWeight.petWeight }}/{{ rcWeight.totalWeight }} ({{
                                 formatPercent(rcWeight.ratio)
                             }})
                         </SRouterLink>
                     </div>
                 </div>
             </div>
-            <div v-else class="text-sm text-base-content/70">大世界不刷新该魔灵。</div>
+            <div v-else class="text-sm text-base-content/70">{{ $t("pet_detail.no_spawn") }}</div>
         </div>
 
         <div v-if="petShopSources.length > 0" class="space-y-2">
-            <div class="text-xs text-base-content/60">商店购买</div>
+            <div class="text-xs text-base-content/60">{{ $t("pet_detail.shop_purchase") }}</div>
             <div v-for="source in petShopSources" :key="source.key" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors">
                 <div class="flex justify-between items-center gap-2 mb-2">
                     <div class="flex items-center gap-2 min-w-0">
@@ -398,8 +481,72 @@ const petShopSources = computed<PetShopSource[]>(() => collectPetShopSources(pro
                         <span class="text-sm font-medium">{{ source.price }}</span>
                     </div>
                 </div>
-                <div v-if="source.timeStart" class="text-xs text-base-content/70">{{ formatTimeRange(source.timeStart, source.timeEnd) }}</div>
+                <div v-if="source.timeStart" class="text-xs text-base-content/70">
+                    {{ formatTimeRange(source.timeStart, source.timeEnd) }}
+                </div>
             </div>
+        </div>
+
+        <div v-if="pet.类型 === 2" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-1">{{ $t("pet_detail.pet_entry") }}</div>
+            <div v-if="petToEnteySources.length" class="space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs text-base-content/60">{{ $t("pet_detail.group_by_weight") }}</span>
+                    <input v-model="groupPetSourcesByWeight" type="checkbox" class="toggle toggle-primary toggle-sm" />
+                </div>
+
+                <template v-if="groupPetSourcesByWeight">
+                    <div v-for="group in groupedPetToEnteySources" :key="group.weight" class="space-y-1">
+                        <div class="text-xs text-base-content/60 px-1">
+                            {{ formatWeight(group.weight) }} · {{ group.sources.length }} {{ $t("pet_detail.count_suffix") }}
+                        </div>
+                        <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-1">
+                            <div
+                                v-for="source in group.sources"
+                                :key="source.entryId"
+                                class="p-2 rounded bg-base-100 border border-base-300/60"
+                            >
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <img
+                                            :src="`/imgs/webp/T_Armory_Pet_Attr_${source.entryIcon}.webp`"
+                                            class="w-6 h-6 rounded object-cover bg-base-300"
+                                        />
+                                        <SRouterLink :to="`/db/pet/${source.entryId}`" class="font-medium hover:underline truncate">
+                                            {{ $t(source.entryName) }}
+                                        </SRouterLink>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                <template v-else>
+                    <div
+                        v-for="source in petToEnteySources"
+                        :key="source.entryId"
+                        class="p-2 rounded bg-base-100 border border-base-300/60"
+                    >
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <img
+                                    :src="`/imgs/webp/T_Armory_Pet_Attr_${source.entryIcon}.webp`"
+                                    class="w-6 h-6 rounded object-cover bg-base-300"
+                                />
+                                <SRouterLink :to="`/db/pet/${source.entryId}`" class="font-medium hover:underline truncate">
+                                    {{ $t(source.entryName) }}
+                                </SRouterLink>
+                            </div>
+                            <span class="text-xs text-base-content/70">{{ formatWeight(source.weight) }}</span>
+                        </div>
+                        <div class="text-xs text-base-content/60 mt-1 flex flex-wrap gap-2">
+                            <span>ID: {{ source.entryId }}</span>
+                            <span class="truncate">{{ source.entryDesc }}</span>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            <div v-else class="text-sm text-base-content/70">{{ $t("pet_detail.no_pet_entry_sources") }}</div>
         </div>
     </div>
 </template>
