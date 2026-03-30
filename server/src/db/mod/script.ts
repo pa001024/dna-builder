@@ -64,7 +64,7 @@ export const typeDefs = /* GraphQL */ `
     type Query {
         scripts(search: String, category: String, userId: String, limit: Int = 20, offset: Int = 0): [Script!]!
         scriptsCount(search: String, category: String): Int!
-        script(id: String!): Script
+        script(id: String!, preview: Boolean = false): Script
     }
 `
 
@@ -136,7 +136,7 @@ export const resolvers = {
             return result?.count || 0
         },
         script: async (_parent, args, context, info) => {
-            const { id } = args
+            const { id, preview = false } = args
             const script = await db.query.scripts.findFirst({
                 where: eq(schema.scripts.id, id),
                 with: { user: getSubSelection(info, "user") ? true : undefined },
@@ -146,10 +146,12 @@ export const resolvers = {
                 throw createGraphQLError("脚本不存在")
             }
 
-            await db
-                .update(schema.scripts)
-                .set({ views: sql`${schema.scripts.views} + 1` })
-                .where(eq(schema.scripts.id, id))
+            if (!preview) {
+                await db
+                    .update(schema.scripts)
+                    .set({ views: sql`${schema.scripts.views} + 1` })
+                    .where(eq(schema.scripts.id, id))
+            }
 
             let isLiked = false
             if (context.user) {
@@ -191,7 +193,12 @@ export const resolvers = {
                 })
                 .returning()
 
-            const content = replaceScriptHeader(input.content, { id: script.id, name: input.title, author: context.user.name })
+            const content = replaceScriptHeader(input.content, {
+                id: script.id,
+                name: input.title,
+                author: context.user.name,
+                date: script.updateAt ?? undefined,
+            })
             await db.update(schema.scripts).set({ content }).where(eq(schema.scripts.id, script.id))
             let result = script
             result.content = content

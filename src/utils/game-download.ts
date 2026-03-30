@@ -5,19 +5,24 @@ import { tauriFetch } from "@/api/app"
 /**
  * rawurl
  * 正式服
- * http://pan01-1-eo.shyxhy.com/Patches/FinalPatch/CN/Default/WindowsNoEditor/PC_OBT_CN_Pub/VersionList.json
  * http://pan01-cdn-dna-ali.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/BaseVersion.json
  * http://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/PreDownloadVersion.json
  * http://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/10/BaseVersion.json
- * 媒体服
- * http://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT12_Media_CN_Pub/PackageBaseVersion.txt
- * http://pan01-1-eo.shyxhy.com/Patches/FinalPatch/CN/Default/WindowsNoEditor/PC_OBT12_Media_CN_Pub/VersionList.json
- * http://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT12_Media_CN_Pub/3/BaseVersion.json
+ *
  * B服
  * http://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT_Bili_Pub/PackageBaseVersion.txt
  *
- * CDN
- * http://pan01-1-hs.shyxhy.com
+ * 热更
+ * http://pan01-1-eo.shyxhy.com/Patches/FinalPatch/CN/Default/WindowsNoEditor/PC_OBT_CN_Pub/VersionList.json
+ * http://pan01-1-eo.shyxhy.com/Patches/FinalPatch/CN/Default/WindowsNoEditor/PC_OBT_CN_Pub/1010116/PakFilesInfo.json
+ * http://pan01-1-eo.shyxhy.com/Patches/FinalPatch/CN/Default/WindowsNoEditor/PC_OBT_CN_Pub/1010116/ResDiscreteInfo.json
+ * 先看/VersionList.json 拿到 patchVersion
+ * 拼到/${version}/PakFilesInfo.json 拿到文件名 拼到/${version}/${filename}
+ * 本地
+ * DNA Game\EM\EMPatches\Paks\CN\PC_OBT_CN_Pub\Patch\
+ * 本地版本缓存 VersionList.json
+ * 语音包记录 OptionalPatchSigns.json
+ * patch下载到 Patch\${version}\
  */
 
 export const CDN_LIST = [

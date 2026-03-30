@@ -1,10 +1,10 @@
 import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI } from "dna-api"
-import i18next from "i18next"
 import { defineStore } from "pinia"
 import { sleep } from "@/util"
 import { applyMaterial, isLaunchAtStartupEnabled, setLaunchAtStartupEnabled, startHeartbeat, stopHeartbeat, tauriFetch } from "../api/app"
 import { executeSignFlow } from "../api/dna-sign"
+import { applyLanguageFontClass, changeLanguage } from "../i18n"
 import { db } from "./db"
 
 let apiCache: DNAAPI | null = null
@@ -50,7 +50,8 @@ export const useSettingStore = defineStore("setting", {
     actions: {
         setLang(lang: string) {
             this.lang = lang
-            i18next.changeLanguage(lang)
+            changeLanguage(lang)
+            applyLanguageFontClass(lang)
         },
         setTheme(theme: string) {
             this.theme = theme

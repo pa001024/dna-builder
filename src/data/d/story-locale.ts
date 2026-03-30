@@ -35,6 +35,9 @@ const questLoaderMap: Record<StoryExtendedLocale, () => Promise<QuestStory[]>> =
  * @returns 剧情数据语言
  */
 export function resolveStoryLocaleBySetting(language: string): StoryLocale {
+    if (language === "jiaojiao") {
+        return "en"
+    }
     if (language.startsWith("en")) {
         return "en"
     }

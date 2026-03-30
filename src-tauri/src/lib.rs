@@ -30,6 +30,7 @@ lazy_static! {
             .build()
             .expect("Failed to create HTTP client")
     );
+    static ref DOWNLOAD_PROGRESS_LOCK: Mutex<()> = Mutex::new(());
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -877,6 +878,12 @@ fn import_pic(path: String) -> Result<String, String> {
 }
 
 #[tauri::command]
+fn predict_font_ocr(image_path: String) -> Result<submodules::font_ocr::FontOcrPrediction, String> {
+    let path = PathBuf::from(image_path);
+    submodules::font_ocr::predict_font_ocr(path.as_path(), true)
+}
+
+#[tauri::command]
 fn get_game_install() -> String {
     #[cfg(target_os = "windows")]
     {
@@ -1263,6 +1270,7 @@ fn create_progress_file(
     chunk_size: u64,
     num_chunks: usize,
 ) -> Result<DownloadProgress, String> {
+    let _guard = DOWNLOAD_PROGRESS_LOCK.lock().unwrap();
     let mut chunks = Vec::with_capacity(num_chunks);
 
     for i in 0..num_chunks {
@@ -1301,6 +1309,12 @@ fn create_progress_file(
 
 /// 读取进度文件
 fn read_progress_file(file_path: &Path) -> Option<DownloadProgress> {
+    let _guard = DOWNLOAD_PROGRESS_LOCK.lock().unwrap();
+    read_progress_file_unlocked(file_path)
+}
+
+/// 读取进度文件（调用方需自行持有锁）
+fn read_progress_file_unlocked(file_path: &Path) -> Option<DownloadProgress> {
     let progress_path = get_progress_file_path(file_path);
 
     if !progress_path.exists() {
@@ -1318,7 +1332,14 @@ fn update_chunk_progress(
     downloaded: u64,
     completed: bool,
 ) -> Result<(), String> {
-    let mut progress = read_progress_file(file_path).ok_or("进度文件不存在")?;
+    let _guard = DOWNLOAD_PROGRESS_LOCK.lock().unwrap();
+    let mut progress = match read_progress_file_unlocked(file_path) {
+        Some(progress) => progress,
+        None => {
+            eprintln!("进度文件缺失，跳过本次更新: {}", file_path.display());
+            return Ok(());
+        }
+    };
 
     if chunk_index >= progress.chunks.len() {
         return Err("分块索引超出范围".to_string());
@@ -1339,6 +1360,7 @@ fn update_chunk_progress(
 
 /// 删除进度文件
 fn delete_progress_file(file_path: &Path) {
+    let _guard = DOWNLOAD_PROGRESS_LOCK.lock().unwrap();
     let progress_path = get_progress_file_path(file_path);
     let _ = fs::remove_file(progress_path);
 }
@@ -2820,6 +2842,7 @@ pub fn run() {
         import_mod,
         enable_mod,
         import_pic,
+        predict_font_ocr,
         fetch,
         get_local_qq,
         list_script_files,

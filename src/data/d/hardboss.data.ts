@@ -4,7 +4,7 @@ export interface HardBoss {
     icon: string
     desc: string
     diff: Diff[]
-    mid: number
+    mid: number[]
 }
 
 export interface Diff {
@@ -40,7 +40,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "61": {
             DynamicRewardId: 1016,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 61,
             RewardId: 1016,
             RewardView: 1016,
@@ -52,7 +52,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 91,
             RewardId: 1016,
             RewardView: 1016,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "121": {
             DynamicRewardId: 1016,
@@ -61,6 +61,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1016,
             RewardView: 1016,
             StartTime: 1773090001,
+        },
+        "151": {
+            DynamicRewardId: 1016,
+            EndTime: 1777928400,
+            Index: 151,
+            RewardId: 1016,
+            RewardView: 1016,
+            StartTime: 1775509201,
+        },
+        "181": {
+            DynamicRewardId: 1016,
+            EndTime: 1780347600,
+            Index: 181,
+            RewardId: 1016,
+            RewardView: 1016,
+            StartTime: 1777928401,
         },
     },
     "1017": {
@@ -82,7 +98,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "62": {
             DynamicRewardId: 1017,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 62,
             RewardId: 1017,
             RewardView: 1017,
@@ -94,7 +110,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 92,
             RewardId: 1017,
             RewardView: 1017,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "122": {
             DynamicRewardId: 1017,
@@ -103,6 +119,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1017,
             RewardView: 1017,
             StartTime: 1773090001,
+        },
+        "152": {
+            DynamicRewardId: 1017,
+            EndTime: 1777928400,
+            Index: 152,
+            RewardId: 1017,
+            RewardView: 1017,
+            StartTime: 1775509201,
+        },
+        "182": {
+            DynamicRewardId: 1017,
+            EndTime: 1780347600,
+            Index: 182,
+            RewardId: 1017,
+            RewardView: 1017,
+            StartTime: 1777928401,
         },
     },
     "1018": {
@@ -124,7 +156,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "63": {
             DynamicRewardId: 1018,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 63,
             RewardId: 1018,
             RewardView: 1018,
@@ -136,7 +168,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 93,
             RewardId: 1018,
             RewardView: 1018,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "123": {
             DynamicRewardId: 1018,
@@ -145,6 +177,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1018,
             RewardView: 1018,
             StartTime: 1773090001,
+        },
+        "153": {
+            DynamicRewardId: 1018,
+            EndTime: 1777928400,
+            Index: 153,
+            RewardId: 1018,
+            RewardView: 1018,
+            StartTime: 1775509201,
+        },
+        "183": {
+            DynamicRewardId: 1018,
+            EndTime: 1780347600,
+            Index: 183,
+            RewardId: 1018,
+            RewardView: 1018,
+            StartTime: 1777928401,
         },
     },
     "1019": {
@@ -166,7 +214,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "64": {
             DynamicRewardId: 1019,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 64,
             RewardId: 1019,
             RewardView: 1019,
@@ -178,7 +226,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 94,
             RewardId: 1019,
             RewardView: 1019,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "124": {
             DynamicRewardId: 1019,
@@ -187,6 +235,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1019,
             RewardView: 1019,
             StartTime: 1773090001,
+        },
+        "154": {
+            DynamicRewardId: 1019,
+            EndTime: 1777928400,
+            Index: 154,
+            RewardId: 1019,
+            RewardView: 1019,
+            StartTime: 1775509201,
+        },
+        "184": {
+            DynamicRewardId: 1019,
+            EndTime: 1780347600,
+            Index: 184,
+            RewardId: 1019,
+            RewardView: 1019,
+            StartTime: 1777928401,
         },
     },
     "1020": {
@@ -208,7 +272,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "65": {
             DynamicRewardId: 1020,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 65,
             RewardId: 1020,
             RewardView: 1020,
@@ -220,7 +284,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 95,
             RewardId: 1020,
             RewardView: 1020,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "125": {
             DynamicRewardId: 1020,
@@ -229,6 +293,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1020,
             RewardView: 1020,
             StartTime: 1773090001,
+        },
+        "155": {
+            DynamicRewardId: 1020,
+            EndTime: 1777928400,
+            Index: 155,
+            RewardId: 1020,
+            RewardView: 1020,
+            StartTime: 1775509201,
+        },
+        "185": {
+            DynamicRewardId: 1020,
+            EndTime: 1780347600,
+            Index: 185,
+            RewardId: 1020,
+            RewardView: 1020,
+            StartTime: 1777928401,
         },
     },
     "1021": {
@@ -250,7 +330,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "66": {
             DynamicRewardId: 1021,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 66,
             RewardId: 1021,
             RewardView: 1021,
@@ -262,7 +342,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 96,
             RewardId: 1021,
             RewardView: 1021,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "126": {
             DynamicRewardId: 1021,
@@ -271,6 +351,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1021,
             RewardView: 1021,
             StartTime: 1773090001,
+        },
+        "156": {
+            DynamicRewardId: 1021,
+            EndTime: 1777928400,
+            Index: 156,
+            RewardId: 1021,
+            RewardView: 1021,
+            StartTime: 1775509201,
+        },
+        "186": {
+            DynamicRewardId: 1021,
+            EndTime: 1780347600,
+            Index: 186,
+            RewardId: 1311021,
+            RewardView: 1311021,
+            StartTime: 1777928401,
         },
     },
     "1022": {
@@ -292,7 +388,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "67": {
             DynamicRewardId: 1022,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 67,
             RewardId: 1022,
             RewardView: 1022,
@@ -304,7 +400,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 97,
             RewardId: 1022,
             RewardView: 1022,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "127": {
             DynamicRewardId: 1022,
@@ -313,6 +409,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1022,
             RewardView: 1022,
             StartTime: 1773090001,
+        },
+        "157": {
+            DynamicRewardId: 1022,
+            EndTime: 1777928400,
+            Index: 157,
+            RewardId: 1022,
+            RewardView: 1022,
+            StartTime: 1775509201,
+        },
+        "187": {
+            DynamicRewardId: 1022,
+            EndTime: 1780347600,
+            Index: 187,
+            RewardId: 1022,
+            RewardView: 1022,
+            StartTime: 1777928401,
         },
     },
     "1023": {
@@ -334,7 +446,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "68": {
             DynamicRewardId: 1023,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 68,
             RewardId: 1111023,
             RewardView: 1111023,
@@ -346,7 +458,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 98,
             RewardId: 1111023,
             RewardView: 1111023,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "128": {
             DynamicRewardId: 1023,
@@ -355,6 +467,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1111023,
             RewardView: 1111023,
             StartTime: 1773090001,
+        },
+        "158": {
+            DynamicRewardId: 1023,
+            EndTime: 1777928400,
+            Index: 158,
+            RewardId: 1111023,
+            RewardView: 1111023,
+            StartTime: 1775509201,
+        },
+        "188": {
+            DynamicRewardId: 1023,
+            EndTime: 1780347600,
+            Index: 188,
+            RewardId: 1111023,
+            RewardView: 1111023,
+            StartTime: 1777928401,
         },
     },
     "1024": {
@@ -376,7 +504,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "69": {
             DynamicRewardId: 1024,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 69,
             RewardId: 1024,
             RewardView: 1024,
@@ -388,7 +516,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 99,
             RewardId: 1024,
             RewardView: 1024,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "129": {
             DynamicRewardId: 1024,
@@ -397,6 +525,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1024,
             RewardView: 1024,
             StartTime: 1773090001,
+        },
+        "159": {
+            DynamicRewardId: 1024,
+            EndTime: 1777928400,
+            Index: 159,
+            RewardId: 1301024,
+            RewardView: 1301024,
+            StartTime: 1775509201,
+        },
+        "189": {
+            DynamicRewardId: 1024,
+            EndTime: 1780347600,
+            Index: 189,
+            RewardId: 1301024,
+            RewardView: 1301024,
+            StartTime: 1777928401,
         },
     },
     "1025": {
@@ -418,7 +562,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "70": {
             DynamicRewardId: 1025,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 70,
             RewardId: 1025,
             RewardView: 1025,
@@ -430,7 +574,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 100,
             RewardId: 1025,
             RewardView: 1025,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "130": {
             DynamicRewardId: 1025,
@@ -439,6 +583,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1025,
             RewardView: 1025,
             StartTime: 1773090001,
+        },
+        "160": {
+            DynamicRewardId: 1025,
+            EndTime: 1777928400,
+            Index: 160,
+            RewardId: 1025,
+            RewardView: 1025,
+            StartTime: 1775509201,
+        },
+        "190": {
+            DynamicRewardId: 1025,
+            EndTime: 1780347600,
+            Index: 190,
+            RewardId: 1025,
+            RewardView: 1025,
+            StartTime: 1777928401,
         },
     },
     "1026": {
@@ -460,7 +620,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "71": {
             DynamicRewardId: 1026,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 71,
             RewardId: 1026,
             RewardView: 1026,
@@ -472,7 +632,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 101,
             RewardId: 1026,
             RewardView: 1026,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "131": {
             DynamicRewardId: 1026,
@@ -481,6 +641,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1026,
             RewardView: 1026,
             StartTime: 1773090001,
+        },
+        "161": {
+            DynamicRewardId: 1026,
+            EndTime: 1777928400,
+            Index: 161,
+            RewardId: 1301026,
+            RewardView: 1301026,
+            StartTime: 1775509201,
+        },
+        "191": {
+            DynamicRewardId: 1026,
+            EndTime: 1780347600,
+            Index: 191,
+            RewardId: 1301026,
+            RewardView: 1301026,
+            StartTime: 1777928401,
         },
     },
     "1027": {
@@ -502,7 +678,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "72": {
             DynamicRewardId: 1027,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 72,
             RewardId: 1027,
             RewardView: 1027,
@@ -514,7 +690,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 102,
             RewardId: 1027,
             RewardView: 1027,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "132": {
             DynamicRewardId: 1027,
@@ -523,6 +699,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1211027,
             RewardView: 1211027,
             StartTime: 1773090001,
+        },
+        "162": {
+            DynamicRewardId: 1027,
+            EndTime: 1777928400,
+            Index: 162,
+            RewardId: 1211027,
+            RewardView: 1211027,
+            StartTime: 1775509201,
+        },
+        "192": {
+            DynamicRewardId: 1027,
+            EndTime: 1780347600,
+            Index: 192,
+            RewardId: 1211027,
+            RewardView: 1211027,
+            StartTime: 1777928401,
         },
     },
     "1028": {
@@ -544,7 +736,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "73": {
             DynamicRewardId: 1028,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 73,
             RewardId: 1028,
             RewardView: 1028,
@@ -556,7 +748,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 103,
             RewardId: 1028,
             RewardView: 1028,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "133": {
             DynamicRewardId: 1028,
@@ -565,6 +757,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1028,
             RewardView: 1028,
             StartTime: 1773090001,
+        },
+        "163": {
+            DynamicRewardId: 1028,
+            EndTime: 1777928400,
+            Index: 163,
+            RewardId: 1028,
+            RewardView: 1028,
+            StartTime: 1775509201,
+        },
+        "193": {
+            DynamicRewardId: 1028,
+            EndTime: 1780347600,
+            Index: 193,
+            RewardId: 1028,
+            RewardView: 1028,
+            StartTime: 1777928401,
         },
     },
     "1029": {
@@ -586,7 +794,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "74": {
             DynamicRewardId: 1029,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 74,
             RewardId: 1029,
             RewardView: 1029,
@@ -598,7 +806,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 104,
             RewardId: 1029,
             RewardView: 1029,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "134": {
             DynamicRewardId: 1029,
@@ -607,6 +815,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1029,
             RewardView: 1029,
             StartTime: 1773090001,
+        },
+        "164": {
+            DynamicRewardId: 1029,
+            EndTime: 1777928400,
+            Index: 164,
+            RewardId: 1301029,
+            RewardView: 1301029,
+            StartTime: 1775509201,
+        },
+        "194": {
+            DynamicRewardId: 1029,
+            EndTime: 1780347600,
+            Index: 194,
+            RewardId: 1301029,
+            RewardView: 1301029,
+            StartTime: 1777928401,
         },
     },
     "1030": {
@@ -628,7 +852,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "75": {
             DynamicRewardId: 1030,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 75,
             RewardId: 1111030,
             RewardView: 1111030,
@@ -640,7 +864,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 105,
             RewardId: 1111030,
             RewardView: 1111030,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "135": {
             DynamicRewardId: 1030,
@@ -649,6 +873,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1111030,
             RewardView: 1111030,
             StartTime: 1773090001,
+        },
+        "165": {
+            DynamicRewardId: 1030,
+            EndTime: 1777928400,
+            Index: 165,
+            RewardId: 1111030,
+            RewardView: 1111030,
+            StartTime: 1775509201,
+        },
+        "195": {
+            DynamicRewardId: 1030,
+            EndTime: 1780347600,
+            Index: 195,
+            RewardId: 1111030,
+            RewardView: 1111030,
+            StartTime: 1777928401,
         },
     },
     "1031": {
@@ -670,7 +910,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "76": {
             DynamicRewardId: 1031,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 76,
             RewardId: 1031,
             RewardView: 1031,
@@ -682,7 +922,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 106,
             RewardId: 1031,
             RewardView: 1031,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "136": {
             DynamicRewardId: 1031,
@@ -691,6 +931,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1031,
             RewardView: 1031,
             StartTime: 1773090001,
+        },
+        "166": {
+            DynamicRewardId: 1031,
+            EndTime: 1777928400,
+            Index: 166,
+            RewardId: 1031,
+            RewardView: 1031,
+            StartTime: 1775509201,
+        },
+        "196": {
+            DynamicRewardId: 1031,
+            EndTime: 1780347600,
+            Index: 196,
+            RewardId: 1031,
+            RewardView: 1031,
+            StartTime: 1777928401,
         },
     },
     "1032": {
@@ -712,7 +968,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "77": {
             DynamicRewardId: 1032,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 77,
             RewardId: 1111032,
             RewardView: 1111032,
@@ -724,7 +980,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 107,
             RewardId: 1111032,
             RewardView: 1111032,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "137": {
             DynamicRewardId: 1032,
@@ -733,6 +989,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1111032,
             RewardView: 1111032,
             StartTime: 1773090001,
+        },
+        "167": {
+            DynamicRewardId: 1032,
+            EndTime: 1777928400,
+            Index: 167,
+            RewardId: 1111032,
+            RewardView: 1111032,
+            StartTime: 1775509201,
+        },
+        "197": {
+            DynamicRewardId: 1032,
+            EndTime: 1780347600,
+            Index: 197,
+            RewardId: 1111032,
+            RewardView: 1111032,
+            StartTime: 1777928401,
         },
     },
     "1033": {
@@ -754,7 +1026,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "78": {
             DynamicRewardId: 1033,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 78,
             RewardId: 1101033,
             RewardView: 1101033,
@@ -766,7 +1038,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 108,
             RewardId: 1101033,
             RewardView: 1101033,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "138": {
             DynamicRewardId: 1033,
@@ -775,6 +1047,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1101033,
             RewardView: 1101033,
             StartTime: 1773090001,
+        },
+        "168": {
+            DynamicRewardId: 1033,
+            EndTime: 1777928400,
+            Index: 168,
+            RewardId: 1101033,
+            RewardView: 1101033,
+            StartTime: 1775509201,
+        },
+        "198": {
+            DynamicRewardId: 1033,
+            EndTime: 1780347600,
+            Index: 198,
+            RewardId: 1101033,
+            RewardView: 1101033,
+            StartTime: 1777928401,
         },
     },
     "1034": {
@@ -796,7 +1084,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "79": {
             DynamicRewardId: 1034,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 79,
             RewardId: 1034,
             RewardView: 1034,
@@ -808,7 +1096,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 109,
             RewardId: 1034,
             RewardView: 1034,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "139": {
             DynamicRewardId: 1034,
@@ -817,6 +1105,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1034,
             RewardView: 1034,
             StartTime: 1773090001,
+        },
+        "169": {
+            DynamicRewardId: 1034,
+            EndTime: 1777928400,
+            Index: 169,
+            RewardId: 1034,
+            RewardView: 1034,
+            StartTime: 1775509201,
+        },
+        "199": {
+            DynamicRewardId: 1034,
+            EndTime: 1780347600,
+            Index: 199,
+            RewardId: 1034,
+            RewardView: 1034,
+            StartTime: 1777928401,
         },
     },
     "1035": {
@@ -838,7 +1142,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "80": {
             DynamicRewardId: 1035,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 80,
             RewardId: 1035,
             RewardView: 1035,
@@ -850,7 +1154,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 110,
             RewardId: 1201035,
             RewardView: 1201035,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "140": {
             DynamicRewardId: 1035,
@@ -859,6 +1163,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1201035,
             RewardView: 1201035,
             StartTime: 1773090001,
+        },
+        "170": {
+            DynamicRewardId: 1035,
+            EndTime: 1777928400,
+            Index: 170,
+            RewardId: 1201035,
+            RewardView: 1201035,
+            StartTime: 1775509201,
+        },
+        "200": {
+            DynamicRewardId: 1035,
+            EndTime: 1780347600,
+            Index: 200,
+            RewardId: 1201035,
+            RewardView: 1201035,
+            StartTime: 1777928401,
         },
     },
     "1036": {
@@ -880,7 +1200,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "81": {
             DynamicRewardId: 1036,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 81,
             RewardId: 1036,
             RewardView: 1036,
@@ -892,7 +1212,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 111,
             RewardId: 1201036,
             RewardView: 1201036,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "141": {
             DynamicRewardId: 1036,
@@ -901,6 +1221,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1201036,
             RewardView: 1201036,
             StartTime: 1773090001,
+        },
+        "171": {
+            DynamicRewardId: 1036,
+            EndTime: 1777928400,
+            Index: 171,
+            RewardId: 1201036,
+            RewardView: 1201036,
+            StartTime: 1775509201,
+        },
+        "201": {
+            DynamicRewardId: 1036,
+            EndTime: 1780347600,
+            Index: 201,
+            RewardId: 1201036,
+            RewardView: 1201036,
+            StartTime: 1777928401,
         },
     },
     "1037": {
@@ -922,7 +1258,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "82": {
             DynamicRewardId: 1037,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 82,
             RewardId: 1037,
             RewardView: 1037,
@@ -934,7 +1270,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 112,
             RewardId: 1037,
             RewardView: 1037,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "142": {
             DynamicRewardId: 1037,
@@ -943,6 +1279,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1037,
             RewardView: 1037,
             StartTime: 1773090001,
+        },
+        "172": {
+            DynamicRewardId: 1037,
+            EndTime: 1777928400,
+            Index: 172,
+            RewardId: 1037,
+            RewardView: 1037,
+            StartTime: 1775509201,
+        },
+        "202": {
+            DynamicRewardId: 1037,
+            EndTime: 1780347600,
+            Index: 202,
+            RewardId: 1311037,
+            RewardView: 1311037,
+            StartTime: 1777928401,
         },
     },
     "1038": {
@@ -964,7 +1316,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "83": {
             DynamicRewardId: 1038,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 83,
             RewardId: 1101038,
             RewardView: 1101038,
@@ -976,7 +1328,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 113,
             RewardId: 1101038,
             RewardView: 1101038,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "143": {
             DynamicRewardId: 1038,
@@ -985,6 +1337,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1101038,
             RewardView: 1101038,
             StartTime: 1773090001,
+        },
+        "173": {
+            DynamicRewardId: 1038,
+            EndTime: 1777928400,
+            Index: 173,
+            RewardId: 1101038,
+            RewardView: 1101038,
+            StartTime: 1775509201,
+        },
+        "203": {
+            DynamicRewardId: 1038,
+            EndTime: 1780347600,
+            Index: 203,
+            RewardId: 1101038,
+            RewardView: 1101038,
+            StartTime: 1777928401,
         },
     },
     "1039": {
@@ -1006,7 +1374,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "84": {
             DynamicRewardId: 1039,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 84,
             RewardId: 1039,
             RewardView: 1039,
@@ -1018,7 +1386,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 114,
             RewardId: 1039,
             RewardView: 1039,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "144": {
             DynamicRewardId: 1039,
@@ -1027,6 +1395,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1211039,
             RewardView: 1211039,
             StartTime: 1773090001,
+        },
+        "174": {
+            DynamicRewardId: 1039,
+            EndTime: 1777928400,
+            Index: 174,
+            RewardId: 1211039,
+            RewardView: 1211039,
+            StartTime: 1775509201,
+        },
+        "204": {
+            DynamicRewardId: 1039,
+            EndTime: 1780347600,
+            Index: 204,
+            RewardId: 1211039,
+            RewardView: 1211039,
+            StartTime: 1777928401,
         },
     },
     "1040": {
@@ -1048,7 +1432,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "85": {
             DynamicRewardId: 1040,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 85,
             RewardId: 1040,
             RewardView: 1040,
@@ -1060,7 +1444,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 115,
             RewardId: 1040,
             RewardView: 1040,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "145": {
             DynamicRewardId: 1040,
@@ -1069,6 +1453,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1040,
             RewardView: 1040,
             StartTime: 1773090001,
+        },
+        "175": {
+            DynamicRewardId: 1040,
+            EndTime: 1777928400,
+            Index: 175,
+            RewardId: 1040,
+            RewardView: 1040,
+            StartTime: 1775509201,
+        },
+        "205": {
+            DynamicRewardId: 1040,
+            EndTime: 1780347600,
+            Index: 205,
+            RewardId: 1040,
+            RewardView: 1040,
+            StartTime: 1777928401,
         },
     },
     "1041": {
@@ -1090,7 +1490,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "86": {
             DynamicRewardId: 1041,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 86,
             RewardId: 1041,
             RewardView: 1041,
@@ -1102,7 +1502,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 116,
             RewardId: 1041,
             RewardView: 1041,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "146": {
             DynamicRewardId: 1041,
@@ -1111,6 +1511,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1041,
             RewardView: 1041,
             StartTime: 1773090001,
+        },
+        "176": {
+            DynamicRewardId: 1041,
+            EndTime: 1777928400,
+            Index: 176,
+            RewardId: 1041,
+            RewardView: 1041,
+            StartTime: 1775509201,
+        },
+        "206": {
+            DynamicRewardId: 1041,
+            EndTime: 1780347600,
+            Index: 206,
+            RewardId: 1041,
+            RewardView: 1041,
+            StartTime: 1777928401,
         },
     },
     "1042": {
@@ -1132,7 +1548,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "87": {
             DynamicRewardId: 1042,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 87,
             RewardId: 1101042,
             RewardView: 1101042,
@@ -1144,7 +1560,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 117,
             RewardId: 1101042,
             RewardView: 1101042,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "147": {
             DynamicRewardId: 1042,
@@ -1153,6 +1569,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1101042,
             RewardView: 1101042,
             StartTime: 1773090001,
+        },
+        "177": {
+            DynamicRewardId: 1042,
+            EndTime: 1777928400,
+            Index: 177,
+            RewardId: 1101042,
+            RewardView: 1101042,
+            StartTime: 1775509201,
+        },
+        "207": {
+            DynamicRewardId: 1042,
+            EndTime: 1780347600,
+            Index: 207,
+            RewardId: 1101042,
+            RewardView: 1101042,
+            StartTime: 1777928401,
         },
     },
     "1043": {
@@ -1174,7 +1606,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "88": {
             DynamicRewardId: 1043,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 88,
             RewardId: 1043,
             RewardView: 1043,
@@ -1186,7 +1618,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 118,
             RewardId: 1201043,
             RewardView: 1201043,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "148": {
             DynamicRewardId: 1043,
@@ -1195,6 +1627,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1201043,
             RewardView: 1201043,
             StartTime: 1773090001,
+        },
+        "178": {
+            DynamicRewardId: 1043,
+            EndTime: 1777928400,
+            Index: 178,
+            RewardId: 1201043,
+            RewardView: 1201043,
+            StartTime: 1775509201,
+        },
+        "208": {
+            DynamicRewardId: 1043,
+            EndTime: 1780347600,
+            Index: 208,
+            RewardId: 1201043,
+            RewardView: 1201043,
+            StartTime: 1777928401,
         },
     },
     "1044": {
@@ -1216,7 +1664,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "89": {
             DynamicRewardId: 1044,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 89,
             RewardId: 1044,
             RewardView: 1044,
@@ -1228,7 +1676,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 119,
             RewardId: 1044,
             RewardView: 1044,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "149": {
             DynamicRewardId: 1044,
@@ -1237,6 +1685,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1211044,
             RewardView: 1211044,
             StartTime: 1773090001,
+        },
+        "179": {
+            DynamicRewardId: 1044,
+            EndTime: 1777928400,
+            Index: 179,
+            RewardId: 1211044,
+            RewardView: 1211044,
+            StartTime: 1775509201,
+        },
+        "209": {
+            DynamicRewardId: 1044,
+            EndTime: 1780347600,
+            Index: 209,
+            RewardId: 1211044,
+            RewardView: 1211044,
+            StartTime: 1777928401,
         },
     },
     "1045": {
@@ -1258,7 +1722,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
         },
         "90": {
             DynamicRewardId: 1045,
-            EndTime: 1770670800,
+            EndTime: 1770584400,
             Index: 90,
             RewardId: 1045,
             RewardView: 1045,
@@ -1270,7 +1734,7 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             Index: 120,
             RewardId: 1045,
             RewardView: 1045,
-            StartTime: 1770670801,
+            StartTime: 1770584401,
         },
         "150": {
             DynamicRewardId: 1045,
@@ -1279,6 +1743,22 @@ export const dynamicRewardMap: Record<string | number, Record<string | number, D
             RewardId: 1045,
             RewardView: 1045,
             StartTime: 1773090001,
+        },
+        "180": {
+            DynamicRewardId: 1045,
+            EndTime: 1777928400,
+            Index: 180,
+            RewardId: 1045,
+            RewardView: 1045,
+            StartTime: 1775509201,
+        },
+        "210": {
+            DynamicRewardId: 1045,
+            EndTime: 1780347600,
+            Index: 210,
+            RewardId: 1311045,
+            RewardView: 1311045,
+            StartTime: 1777928401,
         },
     },
 }
@@ -1294,13 +1774,13 @@ export interface HardBossDetail {
         r: number
         dr: DynamicReward[]
     }[]
-    mid: number
+    mid: number[]
 }
 export const hardBossMap: Map<number, HardBoss> = [
     {
         id: 1,
         name: "西比尔",
-        icon: "Xibi",
+        icon: "T_Permanent_HardBoss_Xibi_S",
         desc: "海伯利亚帝国第十三军团军团长。那一日在净界岛，她的出现，让我们的命运永远地偏离了曾经的轨道。",
         diff: [
             {
@@ -1334,12 +1814,12 @@ export const hardBossMap: Map<number, HardBoss> = [
                 r: 1021,
             },
         ],
-        mid: 8500002,
+        mid: [8500002],
     },
     {
         id: 2,
         name: "嗜晶者",
-        icon: "ShiJingZhe",
+        icon: "T_Permanent_HardBoss_ShiJingZhe_S",
         desc: "格雷姆的死神。出现在格雷姆矿坑深处的巨大秽兽，机械性地重复着挖掘通道与吞噬发光物的行为。",
         diff: [
             {
@@ -1373,12 +1853,12 @@ export const hardBossMap: Map<number, HardBoss> = [
                 r: 1027,
             },
         ],
-        mid: 8503002,
+        mid: [8503002],
     },
     {
         id: 3,
         name: "羽化者",
-        icon: "Saiqi",
+        icon: "T_Permanent_HardBoss_Saiqi_S",
         desc: "冻土中的种子，错过了温和地走入夜幕的契机。",
         diff: [
             {
@@ -1412,12 +1892,12 @@ export const hardBossMap: Map<number, HardBoss> = [
                 r: 1033,
             },
         ],
-        mid: 8502002,
+        mid: [8502002],
     },
     {
         id: 4,
         name: "“炼火的典狱长”",
-        icon: "Haier",
+        icon: "T_Permanent_HardBoss_Haier_S",
         desc: "帝国皇家军监狱典狱长，她的锁链将会惩戒罪恶，她的火焰将会坚守正义。",
         diff: [
             {
@@ -1451,12 +1931,12 @@ export const hardBossMap: Map<number, HardBoss> = [
                 r: 1039,
             },
         ],
-        mid: 8505002,
+        mid: [8505002],
     },
     {
         id: 5,
         name: "“雪国的野兽”",
-        icon: "Linen",
+        icon: "T_Permanent_HardBoss_Linen_S",
         desc: "那是肆虐在雪国的野兽，摧毁了孩子们的故乡，融化了妖精的碎梦。",
         diff: [
             {
@@ -1490,7 +1970,46 @@ export const hardBossMap: Map<number, HardBoss> = [
                 r: 1045,
             },
         ],
-        mid: 8512002,
+        mid: [8512002],
+    },
+    {
+        id: 6,
+        name: "太皓与烛阴",
+        icon: "T_Permanent_HardBoss_Bailong_S",
+        desc: "待包装",
+        diff: [
+            {
+                id: 1051,
+                lv: 30,
+                r: 1016,
+            },
+            {
+                id: 1052,
+                lv: 40,
+                r: 1017,
+            },
+            {
+                id: 1053,
+                lv: 50,
+                r: 1018,
+            },
+            {
+                id: 1054,
+                lv: 60,
+                r: 1019,
+            },
+            {
+                id: 1055,
+                lv: 70,
+                r: 1020,
+            },
+            {
+                id: 1056,
+                lv: 80,
+                r: 1021,
+            },
+        ],
+        mid: [8510004, 8511002],
     },
 ].reduce((acc, cur) => {
     acc.set(cur.id, cur)
@@ -1508,6 +2027,15 @@ export const getHardBossDetail = (id: number) => {
         })),
     }
     return detail
+}
+
+/**
+ * 获取高难 Boss 关联的怪物 ID 列表。
+ * @param boss 高难 Boss 数据
+ * @returns 关联的怪物 ID 列表
+ */
+export function getHardBossMonsterIds(boss: HardBoss): number[] {
+    return boss.mid
 }
 
 function mergeDynamicRewards(rewards: DynamicReward[]): DynamicReward[] {

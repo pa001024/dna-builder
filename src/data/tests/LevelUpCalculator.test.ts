@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest"
+import draftData from "../d/draft.data"
 import modData from "../d/mod.data"
 import { LevelUpCalculator, type ResourceCost } from "../LevelUpCalculator"
-import { estimateTime, type ModExt } from "../LevelUpCalculatorImpl"
+import { calculateModLevelUp, estimateTime, type ModExt } from "../LevelUpCalculatorImpl"
 
 describe("LevelUpCalculator", () => {
     const mockResourceNeeds: ResourceCost = {
@@ -77,5 +78,39 @@ describe("LevelUpCalculator", () => {
 
         expect(fastResult.mins).toBe(1)
         expect(slowResult.mins).toBe(2)
+    })
+
+    it("应该把直接赠送的追踪模式按 9 个色散成霓图纸计算", () => {
+        const costDraft = draftData.find(draft => draft.p === 51961)
+        expect(costDraft).toBeTruthy()
+
+        const result = calculateModLevelUp(
+            [
+                {
+                    id: 150401,
+                    名称: "追踪模式",
+                    品质: "金",
+                    costDraft,
+                } as ModExt,
+            ],
+            new Map(),
+            new Map(),
+            {
+                mods: [
+                    {
+                        currentLevel: 0,
+                        targetLevel: 10,
+                        count: 1,
+                    },
+                ],
+            }
+        )
+
+        expect(result.totalCost["图纸: 色散成霓-151961"]).toEqual([9, 51961, "Draft"])
+        const productNode = result.resourceTree?.children?.[0]?.children?.find(child => child.cid === 51961 && child.type === "Mod")
+        expect(productNode?.amount).toBe(9)
+        expect(productNode?.children?.find(child => child.cid === 51961 && child.type === "Draft")?.amount).toBe(9)
+        expect(productNode?.children?.find(child => child.cid === 41961 && child.type === "Mod")?.amount).toBe(45)
+        expect(productNode?.children?.some(child => child.cid === 150401 && child.type === "Draft")).toBe(false)
     })
 })

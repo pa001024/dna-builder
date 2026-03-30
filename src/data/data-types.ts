@@ -77,6 +77,7 @@ export interface Char {
     加成?: CommonAttr
     技能: Skill[]
     溯源?: string[]
+    专武?: number
     同律武器?: SkillWeapon[]
 }
 
@@ -387,6 +388,7 @@ export enum DmgType {
     切割 = "切割",
     贯穿 = "贯穿",
     震荡 = "震荡",
+    灵能 = "灵能",
 }
 
 export enum BulletType {

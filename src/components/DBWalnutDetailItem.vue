@@ -1,12 +1,17 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
-import { draftMap } from "@/data"
+import { draftMap, modMap, weaponMap } from "@/data"
 import { Walnut } from "../data/d/walnut.data"
 import { WalnutSequenceSimulator } from "../utils/walnut-utils"
 
 const props = defineProps<{
     walnut: Walnut
 }>()
+
+interface RewardLinkInfo {
+    text: string
+    to: string
+}
 
 // 草稿数据，用于 DBDraftDetailItem 组件
 const draft = computed(() => {
@@ -43,6 +48,71 @@ const sortedRewardCounts = computed(() => {
         })
         .sort((a, b) => a.rarity - b.rarity) // 稀有度值越小越稀有，排在前面
 })
+
+/**
+ * 预计算每个奖励对应的跳转信息，避免模板重复查表。
+ */
+const rewardLinkItems = computed(() =>
+    props.walnut.奖励.map(reward => ({
+        reward,
+        links: getRewardLinks(reward),
+    }))
+)
+
+/**
+ * 获取奖励对应的跳转链接。
+ * @param reward 奖励项
+ * @returns 跳转链接列表
+ */
+function getRewardLinks(reward: Walnut["奖励"][number]): RewardLinkInfo[] {
+    const links: RewardLinkInfo[] = []
+
+    if (reward.d) {
+        const draft = draftMap.get(reward.id)
+        if (draft) {
+            links.push({
+                text: `图纸: ${draft.n}`,
+                to: `/db/draft/${draft.id}`,
+            })
+
+            if (draft.t === "Mod") {
+                const mod = modMap.get(draft.p)
+                if (mod) {
+                    links.push({
+                        text: `本体: ${mod.系列}${mod.名称}`,
+                        to: `/db/mod/${mod.id}`,
+                    })
+                }
+            } else if (draft.t === "Weapon") {
+                const weapon = weaponMap.get(draft.p)
+                if (weapon) {
+                    links.push({
+                        text: `本体: ${weapon.名称}`,
+                        to: `/db/weapon/${weapon.id}`,
+                    })
+                }
+            }
+        }
+    } else if (reward.type === "Mod") {
+        const mod = modMap.get(reward.id)
+        if (mod) {
+            links.push({
+                text: `${mod.系列}${mod.名称}`,
+                to: `/db/mod/${mod.id}`,
+            })
+        }
+    } else if (reward.type === "Weapon") {
+        const weapon = weaponMap.get(reward.id)
+        if (weapon) {
+            links.push({
+                text: weapon.名称,
+                to: `/db/weapon/${weapon.id}`,
+            })
+        }
+    }
+
+    return links
+}
 
 // 获取奖励的颜色类名
 function getRewardColor(rarity: number): string {
@@ -240,6 +310,7 @@ function getRewardInfo(index: number) {
         name: reward?.name || "未知",
         count: reward?.count || 1,
         d: reward?.d || 0,
+        links: reward ? getRewardLinks(reward) : [],
     }
 }
 
@@ -307,16 +378,23 @@ function getRewardTypeColor(index: number): string {
                     </thead>
                     <tbody>
                         <tr
-                            v-for="(reward, index) in props.walnut.奖励"
+                            v-for="(item, index) in rewardLinkItems"
                             :key="index"
                             class="border-b border-base-content/10 hover:bg-base-300/50 transition-colors"
                         >
-                            <td class="py-2 px-3 text-sm">{{ reward.id }}</td>
+                            <td class="py-2 px-3 text-sm">{{ item.reward.id }}</td>
                             <td class="py-2 px-3 text-sm">
-                                {{ (reward.d || 0) > 0 ? `图纸: ` : "" }}
-                                {{ $t(reward.name) }}
+                                <template v-if="item.links.length > 0">
+                                    <span v-for="(link, linkIndex) in item.links" :key="link.to" class="inline-flex items-center">
+                                        <SRouterLink :to="link.to" class="link link-primary hover:underline">
+                                            {{ link.text }}
+                                        </SRouterLink>
+                                        <span v-if="linkIndex < item.links.length - 1" class="mx-1 text-base-content/50">/</span>
+                                    </span>
+                                </template>
+                                <span v-else>{{ $t(item.reward.name) }}</span>
                             </td>
-                            <td class="py-2 px-3 text-sm">{{ reward.count }}</td>
+                            <td class="py-2 px-3 text-sm">{{ item.reward.count }}</td>
                             <td class="py-2 px-3 text-sm">{{ index > 0 ? `0~${props.walnut.参数[index]}` : 1 }}</td>
                         </tr>
                     </tbody>
@@ -383,8 +461,15 @@ function getRewardTypeColor(index: number): string {
                                     class="px-1.5 py-0.5 rounded text-xs font-medium"
                                     :class="[getRewardTypeColor(reward.index), rIndex === 0 ? 'underline' : '']"
                                 >
-                                    {{ reward.d > 0 ? $t(`图纸: `) : "" }}
-                                    {{ $t(reward.name) }}
+                                    <template v-if="reward.links.length > 0">
+                                        <span v-for="(link, linkIndex) in reward.links" :key="link.to" class="inline-flex items-center">
+                                            <SRouterLink :to="link.to" class="hover:text-primary hover:underline">
+                                                {{ link.text }}
+                                            </SRouterLink>
+                                            <span v-if="linkIndex < reward.links.length - 1" class="mx-1 text-base-content/50">/</span>
+                                        </span>
+                                    </template>
+                                    <span v-else>{{ $t(reward.name) }}</span>
                                     {{ reward.count > 1 ? `*${reward.count}` : "" }}
                                 </span>
                             </div>
@@ -407,8 +492,7 @@ function getRewardTypeColor(index: number): string {
                         >
                             <div>
                                 <span :class="getRewardColor(reward.rarity)">
-                                    {{ reward.d > 0 ? $t(`图纸: `) : "" }}
-                                    {{ $t(reward.name) }}</span
+                                    <span>{{ $t(reward.name) }}</span></span
                                 >
                             </div>
                             <span class="font-medium text-primary">*{{ reward.count }}</span>

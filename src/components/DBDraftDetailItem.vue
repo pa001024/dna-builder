@@ -54,6 +54,24 @@ const draftDungeons = computed<Dungeon[]>(() => {
 const draftShopSource = computed(() => {
     return draftShopSourceMap.get(props.draft.id)
 })
+
+/**
+ * 获取产物展示项的 ResourceCostItem 入参。
+ * @returns 产物名称与值
+ */
+const productDisplay = computed(() => {
+    if (props.draft.t === "Mod" || props.draft.t === "Weapon") {
+        return {
+            name: product.value?.名称 || props.draft.n,
+            value: [props.draft.c, props.draft.p, props.draft.t] as [number, number, "Mod" | "Weapon"],
+        }
+    }
+
+    return {
+        name: product.value?.名称 || props.draft.n,
+        value: props.draft.c,
+    }
+})
 </script>
 
 <template>
@@ -65,87 +83,50 @@ const draftShopSource = computed(() => {
 
         <div class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-2">基本信息</div>
-            <div class="space-y-2 text-sm">
-                <div class="grid grid-cols-3 gap-2">
-                    <div class="col-span-1 opacity-70">名称</div>
-                    <div class="col-span-2 font-medium">
-                        {{ draft.n }}
-                    </div>
-                </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <div class="col-span-1 opacity-70">稀有度</div>
-                    <div class="col-span-2 font-medium">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+                <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                    <span class="text-base-content/70">稀有度</span>
+                    <span class="font-medium text-primary">
                         <Icon v-for="i in draft.r" :key="i" class="inline-block mr-1" icon="ri:star-fill" />
-                    </div>
+                    </span>
                 </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <div class="col-span-1 opacity-70">版本</div>
-                    <div class="col-span-2 font-medium">
+                <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                    <span class="text-base-content/70">版本</span>
+                    <span class="font-medium text-primary">
                         {{ draft.v }}
-                    </div>
+                    </span>
                 </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <div class="col-span-1 opacity-70">类型</div>
-                    <div class="col-span-2 font-medium">
+                <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                    <span class="text-base-content/70">类型</span>
+                    <span class="font-medium text-primary">
                         {{ getTypeName(draft.t) }}
-                    </div>
+                    </span>
                 </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <div class="col-span-1 opacity-70">铸造时间</div>
-                    <div class="col-span-2 font-medium">
+                <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                    <span class="text-base-content/70">铸造时间</span>
+                    <span class="font-medium text-primary">
                         {{ formatDuration(draft.d) }}
-                    </div>
+                    </span>
                 </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <div class="col-span-1 opacity-70">产物数量</div>
-                    <div class="col-span-2 font-medium">
-                        {{ draft.c }}
-                    </div>
-                </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <div class="col-span-1 opacity-70">批量制造</div>
-                    <div class="col-span-2 font-medium">
+                <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                    <span class="text-base-content/70">批量制造</span>
+                    <span class="font-medium text-primary">
                         {{ draft.b ? "支持" : "不支持" }}
-                    </div>
+                    </span>
                 </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <div class="col-span-1 opacity-70">无限制造</div>
-                    <div class="col-span-2 font-medium">
+                <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                    <span class="text-base-content/70">无限制造</span>
+                    <span class="font-medium text-primary">
                         {{ draft.i ? "支持" : "不支持" }}
-                    </div>
+                    </span>
                 </div>
             </div>
         </div>
 
         <!-- 产物信息 -->
-        <div v-if="product" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">产物信息</div>
-            <div class="space-y-2 text-sm">
-                <div class="grid grid-cols-3 gap-2">
-                    <div class="col-span-1 opacity-70">名称</div>
-                    <div class="col-span-2 font-medium">
-                        {{ product.名称 }}
-                    </div>
-                </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <div class="col-span-1 opacity-70">ID</div>
-                    <div class="col-span-2 font-medium">
-                        {{ draft.p }}
-                    </div>
-                </div>
-                <div v-if="'品质' in product" class="grid grid-cols-3 gap-2">
-                    <div class="col-span-1 opacity-70">品质</div>
-                    <div class="col-span-2 font-medium">
-                        {{ product.品质 }}
-                    </div>
-                </div>
-                <div v-if="'类型' in product" class="grid grid-cols-3 gap-2">
-                    <div class="col-span-1 opacity-70">类型</div>
-                    <div class="col-span-2 font-medium">
-                        {{ Array.isArray(product.类型) ? product.类型.join("/") : product.类型 }}
-                    </div>
-                </div>
-            </div>
+        <div class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">产物</div>
+            <ResourceCostItem :name="productDisplay.name" :value="productDisplay.value" />
         </div>
 
         <!-- 消耗资源 -->
@@ -154,7 +135,7 @@ const draftShopSource = computed(() => {
             <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                 <ResourceCostItem name="铜币" :value="draft.m" />
                 <template v-for="item in draft.x" :key="item.id">
-                    <ResourceCostItem :name="item.n" :value="item.t === 'Mod' ? [item.c, item.id, item.t] : item.c" />
+                    <ResourceCostItem :name="item.n" :value="item.t === 'Resource' ? item.c : [item.c, item.id, item.t]" />
                 </template>
             </div>
         </div>

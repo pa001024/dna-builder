@@ -5,6 +5,7 @@ export function createScriptHeader(options: {
     author?: string
     version?: string
     category?: string
+    date?: string
 }) {
     return `// ==UserScript==
 // @id ${options.id || "-"}
@@ -13,7 +14,7 @@ export function createScriptHeader(options: {
 // @author ${options.author || "anonymous"}
 // @version ${options.version || "1.0.0"}
 // @category ${options.category || "其他"}
-// @date ${new Date().toLocaleString("zh-CN")}
+// @date ${options.date || new Date().toLocaleString("zh-CN")}
 // ==/UserScript==
 
 `
@@ -25,12 +26,13 @@ export function parseScriptHeader(header: string) {
     const author = header.match(/^\/\/ *@author\s+(.*)/m)?.[1] || undefined
     const version = header.match(/^\/\/ *@version\s+(.*)/m)?.[1] || undefined
     const category = header.match(/^\/\/ *@category\s+(.*)/m)?.[1] || undefined
-    return { id, name, desc, author, version, category }
+    const date = header.match(/^\/\/ *@date\s+(.*)/m)?.[1] || undefined
+    return { id, name, desc, author, version, category, date }
 }
 
 export function replaceScriptHeader(
     script: string,
-    options: { id?: string; name: string; desc?: string; author?: string; version?: string; category?: string }
+    options: { id?: string; name: string; desc?: string; author?: string; version?: string; category?: string; date?: string }
 ) {
     // 匹配 UserScript header 的正则表达式，从 // ==UserScript== 到 // ==/UserScript==
     const headerRegex = /\/\/ ==UserScript==[\s\S]*?\/\/ ==\/UserScript==/
@@ -54,6 +56,7 @@ export function replaceScriptHeader(
         author: options.author ?? existingHeader.author,
         version: options.version ?? existingHeader.version,
         category: options.category ?? existingHeader.category,
+        date: options.date,
     }
 
     // 创建新的 header

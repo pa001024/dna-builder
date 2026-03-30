@@ -1159,10 +1159,12 @@ function normalizeHardbossRecord(record: Record<string, unknown>): Record<string
             }
         })
 
-        const mid = Number(record.mid)
+        const midList = Array.isArray(record.mid)
+            ? record.mid.map(id => Number(id)).filter(Number.isFinite)
+            : [Number(record.mid)].filter(Number.isFinite)
         return {
             ...record,
-            monsterName: Number.isFinite(mid) ? monsterMap.get(mid) || `ID:${mid}` : null,
+            monsterName: midList.length > 0 ? midList.map(mid => monsterMap.get(mid) || `ID:${mid}`).join("、") : null,
             diffResolved,
         }
     }

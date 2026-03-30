@@ -2,7 +2,12 @@
 import { ref } from "vue"
 import type { AbyssDungeon, Char } from "@/data"
 import { charMap, LeveledChar, LeveledMonster } from "@/data"
-import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
+import {
+    ABYSS_DUNGEON_ELEMENT_KEYS,
+    formatAbyssDungeonMbValue,
+    getAbyssDungeonGroup,
+    getAbyssDungeonLevel,
+} from "../utils/dungeon-utils"
 import { getDropModeText, getRewardDetails } from "../utils/reward-utils"
 
 const props = defineProps<{
@@ -123,9 +128,9 @@ function getChar(charId: number): Char | undefined {
         <div v-if="dungeon.mb" class="card bg-base-100 border border-base-200 rounded-lg p-3">
             <h3 class="font-bold mb-2">怪物属性加成</h3>
             <div class="grid grid-cols-3 gap-2 text-sm">
-                <div v-for="key in ['暗', '水', '火', '雷', '风', '光']" :key="key" class="flex justify-between">
+                <div v-for="key in ABYSS_DUNGEON_ELEMENT_KEYS" :key="key" class="flex justify-between">
                     <span class="text-base-content/70">{{ $t(`${key}属性`) }}</span>
-                    <span>{{ (dungeon.mb[key] * 100).toFixed(0) }}%</span>
+                    <span>{{ formatAbyssDungeonMbValue(dungeon, key) }}</span>
                 </div>
             </div>
         </div>

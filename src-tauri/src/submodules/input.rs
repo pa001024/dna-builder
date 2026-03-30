@@ -26,6 +26,14 @@ fn xbutton_flag(button: MouseButtonKind) -> u16 {
         _ => 0,
     }
 }
+
+/// 清空后台激活窗口缓存，避免脚本启动时沿用上一次的前台状态。
+pub fn clear_last_background_activated_hwnd() {
+    if let Ok(mut guard) = LAST_BACKGROUND_ACTIVATED_HWND.lock() {
+        *guard = 0;
+    }
+}
+
 #[allow(unused)]
 pub fn key_to_vkey(key: &str) -> u16 {
     match key.to_lowercase().as_str() {

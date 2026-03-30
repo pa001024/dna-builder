@@ -25,7 +25,7 @@ setCurrentVersionLimit(localStorage.getItem("setting_safe_mode") === "false" ? N
 import { createPinia } from "pinia"
 import App from "./App.vue"
 import { env } from "./env"
-import { initI18n } from "./i18n"
+import { applyLanguageFontClass, initI18n } from "./i18n"
 import { router } from "./router"
 import "@globalhive/vuejs-tour/dist/style.css"
 const app = createApp(App)
@@ -35,6 +35,7 @@ if (env.isApp) {
     // 桌面端启用 HarmonyOS 字体类名，避免影响 Web 端加载策略。
     document.documentElement.classList.add("is-app-font")
 }
+applyLanguageFontClass(localStorage.getItem("setting_lang") || navigator.language)
 
 // Sentry 初始化 - 必须在 app.use 之后
 import * as Sentry from "@sentry/vue"

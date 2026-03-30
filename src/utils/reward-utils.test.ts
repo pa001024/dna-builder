@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest"
-import { getDropModeText, getRewardDetails, type RewardItem } from "./reward-utils"
+import { getDropModeText, getRewardDetails, getRewardTypeText, type RewardItem } from "./reward-utils"
+
+describe("getRewardTypeText", () => {
+    it("应该正确翻译 Hair 类型", () => {
+        expect(getRewardTypeText("Hair")).toBe("发型")
+    })
+})
 
 describe("getDropModeText", () => {
     it("应该正确翻译掉落模式", () => {

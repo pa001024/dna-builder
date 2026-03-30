@@ -49,6 +49,7 @@ const searchKeyword = ref("")
 const selectedCategory = ref<string>("all")
 const loading = ref(false)
 const onlineScripts = ref<Script[]>([])
+const onlineScriptUpdateMap = ref<Record<string, boolean>>({})
 const scriptCategories = ref<ScriptCategory[]>([])
 const extraOnlineCategoryNames = ref<string[]>([])
 const localScripts = ref<string[]>([])
@@ -111,6 +112,26 @@ async function fetchScriptCategories() {
 function getScriptFileNameByTitle(title: string): string {
     const normalized = String(title ?? "").replace(/[^a-zA-Z0-9\u4e00-\u9fa5 \-_\(\)]/g, "_")
     return `${normalized}.js`
+}
+
+/**
+ * 将脚本头中的日期解析为时间戳。
+ * @param dateHeader 脚本头中的 @date 值
+ * @returns 毫秒时间戳，解析失败返回 null
+ */
+function parseScriptHeaderDate(dateHeader?: string): number | null {
+    if (!dateHeader) return null
+    const parsed = Date.parse(dateHeader)
+    return Number.isFinite(parsed) ? parsed : null
+}
+
+/**
+ * 从本地脚本内容解析头部更新时间。
+ * @param content 脚本内容
+ * @returns 毫秒时间戳，解析失败返回 null
+ */
+function getLocalScriptUpdateAt(content: string): number | null {
+    return parseScriptHeaderDate(parseScriptHeader(content).date)
 }
 
 interface OpenedTab {
@@ -454,6 +475,10 @@ async function fetchOnlineScripts(offset = 0) {
             } else {
                 onlineScripts.value.push(...result)
             }
+            const updateEntries = await Promise.all(
+                onlineScripts.value.map(async script => [script.id, await isOnlineScriptExpiredLocal(script)] as const)
+            )
+            onlineScriptUpdateMap.value = Object.fromEntries(updateEntries)
             extraOnlineCategoryNames.value = [...new Set(onlineScripts.value.map(script => script.category).filter(Boolean))].filter(
                 name => !scriptCategories.value.some(category => category.name === name)
             )
@@ -476,6 +501,9 @@ async function fetchLocalScripts() {
     try {
         const files = await listScriptFiles(scriptsDir.value)
         localScripts.value = files
+        if (onlineScripts.value.length > 0) {
+            await refreshOnlineScriptUpdateMap()
+        }
         try {
             await syncScriptHotkeysWithBackend()
         } catch (error) {
@@ -499,6 +527,16 @@ async function loadLocalScriptContent(fileName: string) {
         console.error("读取脚本内容失败", error)
         return ""
     }
+}
+
+/**
+ * 刷新在线脚本的本地过期状态。
+ */
+async function refreshOnlineScriptUpdateMap() {
+    const updateEntries = await Promise.all(
+        onlineScripts.value.map(async script => [script.id, await isOnlineScriptExpiredLocal(script)] as const)
+    )
+    onlineScriptUpdateMap.value = Object.fromEntries(updateEntries)
 }
 
 const handleSearch = debounce(() => {
@@ -2250,13 +2288,40 @@ function preparseScriptConfigFromSource(scope: string, source: string): ScriptCo
 }
 
 /**
- * 判断云端脚本是否已存在于本地。
+ * 判断云端脚本是否已过期。
  * @param script 云端脚本
- * @returns 是否存在同名本地脚本
+ * @returns 本地脚本是否比云端脚本旧
  */
-function isOnlineScriptExistsLocal(script: Script): boolean {
+async function isOnlineScriptExpiredLocal(script: Script): Promise<boolean> {
     const fileName = getScriptFileNameByTitle(script.title)
-    return localScripts.value.includes(fileName)
+    if (!localScripts.value.includes(fileName)) {
+        return false
+    }
+
+    const content = await loadLocalScriptContent(fileName)
+    const localUpdateAt = getLocalScriptUpdateAt(content)
+    const cloudUpdateAt = Date.parse(script.updateAt)
+    if (!Number.isFinite(cloudUpdateAt)) {
+        return false
+    }
+    if (localUpdateAt === null) {
+        return true
+    }
+    return localUpdateAt < cloudUpdateAt
+}
+
+/**
+ * 获取云端脚本在本地的操作状态。
+ * @param script 脚本信息
+ * @returns 下载、更新或已最新
+ */
+function getOnlineScriptActionType(script: Script): "download" | "update" | "latest" {
+    const fileName = getScriptFileNameByTitle(script.title)
+    const isLocal = localScripts.value.includes(fileName)
+    if (!isLocal) {
+        return "download"
+    }
+    return onlineScriptUpdateMap.value[script.id] ? "update" : "latest"
 }
 
 /**
@@ -2276,6 +2341,7 @@ async function syncOpenedLocalTabAfterCloudUpdate(fileName: string, content: str
             codeEditor.value?.safeUpdate(content)
         })
     }
+    await refreshOnlineScriptUpdateMap()
 }
 
 /**
@@ -2520,17 +2586,12 @@ function addConsoleLog(level: string, message: string) {
  * 清空控制台
  */
 async function clearConsole() {
-    const targetPath = activeLocalScriptPath.value || (runningScriptPaths.value.length === 1 ? runningScriptPaths.value[0] : undefined)
     try {
-        await clearScriptMcpConsole(targetPath, true)
+        await clearScriptMcpConsole(undefined, true)
     } catch (error) {
         console.error("清空脚本控制台缓存失败", error)
     }
-    if (targetPath) {
-        scriptRuntime.clearConsoleLogsForScope(targetPath, true)
-    } else {
-        scriptRuntime.clearConsoleLogs()
-    }
+    scriptRuntime.clearConsoleLogs()
 }
 
 /**
@@ -2562,7 +2623,8 @@ function toggleStatusPanel() {
  * 清除指定标题的脚本状态（仅前端显示层）。
  */
 async function clearStatus(title: string, scope?: string) {
-    const targetPath = scope || activeLocalScriptPath.value || (runningScriptPaths.value.length === 1 ? runningScriptPaths.value[0] : undefined)
+    const targetPath =
+        scope || activeLocalScriptPath.value || (runningScriptPaths.value.length === 1 ? runningScriptPaths.value[0] : undefined)
     try {
         await clearScriptMcpStatus(targetPath, title)
     } catch (error) {
@@ -2580,9 +2642,7 @@ async function clearAllStatus() {
         return
     }
     try {
-        await Promise.all(
-            visibleStatuses.map(item => clearScriptMcpStatus(item.scope, item.title))
-        )
+        await Promise.all(visibleStatuses.map(item => clearScriptMcpStatus(item.scope, item.title)))
     } catch (error) {
         console.error("批量清空脚本状态缓存失败", error)
     }
@@ -2605,7 +2665,9 @@ const isScriptHelpRegionMode = computed(() => activeScriptHelpRequest.value?.sel
  * 判断当前协助请求是否已完成有效选择。
  */
 const hasScriptHelpSelection = computed(() =>
-    isScriptHelpPointMode.value ? Boolean(scriptHelpPoint.value) : Boolean(scriptHelpRegion.value && scriptHelpRegion.value.width > 0 && scriptHelpRegion.value.height > 0)
+    isScriptHelpPointMode.value
+        ? Boolean(scriptHelpPoint.value)
+        : Boolean(scriptHelpRegion.value && scriptHelpRegion.value.width > 0 && scriptHelpRegion.value.height > 0)
 )
 
 /**
@@ -3141,7 +3203,7 @@ async function openOnlineScript(script: Script) {
     const existingTab = openedTabs.value.find(tab => tab.type === "online" && tab.name === fileName)
     if (existingTab) {
         try {
-            const latest = await scriptQuery({ id: script.id }, { requestPolicy: "network-only" })
+            const latest = await scriptQuery({ id: script.id, preview: true }, { requestPolicy: "network-only" })
             if (latest) {
                 existingTab.content = latest.content
                 existingTab.modified = false
@@ -3152,7 +3214,7 @@ async function openOnlineScript(script: Script) {
         setActiveTab(existingTab.id)
         return
     }
-    const result = await scriptQuery({ id: script.id }, { requestPolicy: "network-only" })
+    const result = await scriptQuery({ id: script.id, preview: true }, { requestPolicy: "network-only" })
     if (!result) {
         ui.showErrorMessage(t("script-list.fetch_script_content_failed"))
         return
@@ -3327,10 +3389,12 @@ async function publishScript(fileName: string) {
                     name: header.name || fileName.replace(/\.js$/, ""),
                     desc: header.desc || "",
                     author: result.user?.name || "",
+                    date: result.updateAt || undefined,
                 })
 
                 const filePath = `${scriptsDir.value}\\${fileName}`
                 await writeTextFile(filePath, newHeader)
+                await refreshOnlineScriptUpdateMap()
 
                 const tab = openedTabs.value.find(t => t.type === "local" && t.name === fileName)
                 if (tab) {
@@ -3750,9 +3814,11 @@ onUnmounted(async () => {
                                                 </span>
                                                 <button class="ml-auto btn btn-xs" @click.stop="downloadScript(script)">
                                                     {{
-                                                        isOnlineScriptExistsLocal(script)
+                                                        getOnlineScriptActionType(script) === "update"
                                                             ? $t("script-list.update")
-                                                            : $t("script-list.download")
+                                                            : getOnlineScriptActionType(script) === "latest"
+                                                              ? $t("script-list.latest")
+                                                              : $t("script-list.download")
                                                     }}
                                                 </button>
                                             </div>
@@ -4197,7 +4263,10 @@ onUnmounted(async () => {
                     <div>
                         <h3 class="font-bold text-lg">{{ activeScriptHelpRequest?.title || "协助标注" }}</h3>
                         <div class="text-sm text-base-content/70 mt-1">
-                            {{ activeScriptHelpRequest?.message || (isScriptHelpPointMode ? "请直接点击目标点。" : "请在图片上拖拽框选目标区域。") }}
+                            {{
+                                activeScriptHelpRequest?.message ||
+                                (isScriptHelpPointMode ? "请直接点击目标点。" : "请在图片上拖拽框选目标区域。")
+                            }}
                         </div>
                     </div>
                     <div class="badge badge-outline">
@@ -4265,7 +4334,11 @@ onUnmounted(async () => {
 
                 <div class="mt-4 flex justify-end gap-2">
                     <button class="btn btn-ghost" :disabled="scriptHelpSubmitting" @click="submitScriptHelpResponse(false)">取消</button>
-                    <button class="btn btn-primary" :disabled="!hasScriptHelpSelection || scriptHelpSubmitting" @click="submitScriptHelpResponse(true)">
+                    <button
+                        class="btn btn-primary"
+                        :disabled="!hasScriptHelpSelection || scriptHelpSubmitting"
+                        @click="submitScriptHelpResponse(true)"
+                    >
                         确认返回
                     </button>
                 </div>

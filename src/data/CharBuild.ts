@@ -58,6 +58,8 @@ export interface WeaponAttr {
     装填: number
     /** 弹匣容量 基于武器基础值 */
     弹匣: number
+    /** 最大弹药 基于武器基础值 */
+    弹药: number
     /** 独立增伤 0开始 */
     独立增伤: number
     /** 追加伤害 0开始 */
@@ -683,6 +685,7 @@ export class CharBuild {
             let damageIncrease = this.getTotalBonus(`${prefix}增伤`, prefix) + this.getTotalBonus(`增伤`, prefix)
             let reloadTimeBonus = this.getTotalBonus(`${prefix}装填`, prefix) + this.getTotalBonus(`装填`, prefix)
             let magazineBonus = this.getTotalBonus(`${prefix}弹匣`, prefix) + this.getTotalBonus(`弹匣`, prefix)
+            let ammoBonus = this.getTotalBonus(`${prefix}弹药`, prefix) + this.getTotalBonus(`弹药`, prefix)
             const additionalDamage = this.getTotalBonus("追加伤害")
             let weaponDamageMul = this.getTotalBonus(`${prefix}武器倍率`, prefix) + this.getTotalBonus(`武器倍率`, prefix)
             let independentDamageIncrease =
@@ -699,6 +702,7 @@ export class CharBuild {
                 multiShotBonus += this.getTotalBonus(`${lowerPrefix}多重`, lowerPrefix)
                 reloadTimeBonus += this.getTotalBonus(`${lowerPrefix}装填`, lowerPrefix)
                 magazineBonus += this.getTotalBonus(`${lowerPrefix}弹匣`, lowerPrefix)
+                ammoBonus += this.getTotalBonus(`${lowerPrefix}弹药`, lowerPrefix)
                 weaponDamageMul += this.getTotalBonus(`${lowerPrefix}武器倍率`, lowerPrefix)
                 independentDamageIncrease =
                     (1 + independentDamageIncrease) * (1 + this.getTotalBonusMul(`${lowerPrefix}独立增伤`, lowerPrefix)) - 1
@@ -720,6 +724,7 @@ export class CharBuild {
             let attackSpeed = (weapon.射速 || 1) * (1 + attackSpeedBonus)
             const reloadTime = (weapon.基础装填 || 0) / (1 + reloadTimeBonus)
             const magazine = (weapon.基础弹匣 || 0) * (1 + magazineBonus)
+            const ammo = ((weapon as LeveledWeapon).基础弹药 || 0) * (1 + ammoBonus)
 
             let multiShot = 1 + multiShotBonus
 
@@ -750,6 +755,7 @@ export class CharBuild {
                 追加伤害: additionalDamage,
                 装填: reloadTime,
                 弹匣: magazine,
+                弹药: ammo,
                 武器倍率: weaponDamageMul,
             }
             attrs.weapon = weaponAttrs
@@ -1855,6 +1861,51 @@ export class CharBuild {
         }
     }
 
+    /**
+     * 精确计算已装备魔之楔的边际收益。
+     * 通过克隆当前构筑并真实移除指定槽位后重算，避免 `minusAttr`
+     * 在条件联动、乘区耦合或属性上限场景下出现负值误判。
+     * @param type 魔之楔槽位类型
+     * @param index 槽位索引
+     * @returns 移除该槽位后的边际收益
+     */
+    public calcEquippedModIncome(type: string, index: number): number {
+        let resolvedType = type
+        if (resolvedType === "同律" && this.skillWeapon?.inherit) {
+            resolvedType = this.skillWeapon.inherit === "melee" ? "近战" : "远程"
+        }
+
+        const baseValue = this.calculate()
+        const copyBuild = this.clone()
+
+        /**
+         * 按槽位类型移除克隆构筑中的对应魔之楔。
+         */
+        switch (resolvedType) {
+            case "角色":
+                copyBuild.charMods.splice(index, 1)
+                break
+            case "近战":
+                copyBuild.meleeMods.splice(index, 1)
+                break
+            case "远程":
+                copyBuild.rangedMods.splice(index, 1)
+                break
+            case "同律":
+                copyBuild.skillMods.splice(index, 1)
+                break
+            default:
+                return 0
+        }
+
+        const removedValue = copyBuild.calculate()
+        if (!removedValue) {
+            return 0
+        }
+
+        return baseValue / removedValue - 1
+    }
+
     clone() {
         return new CharBuild({
             char: new LeveledChar(this.char.名称, this.char.等级),
@@ -2130,6 +2181,7 @@ export class CharBuild {
                         (!polarity || v.极性 === polarity) &&
                         (!v.属性 || v.属性 === localBuild.char.属性) &&
                         (!v.限定 ||
+                            (key === "charMods" && [localBuild.char.名称, localBuild.char.属性].includes(v.限定)) ||
                             (key === "meleeMods" && [localBuild.meleeWeapon.伤害类型, localBuild.meleeWeapon.类别].includes(v.限定)) ||
                             (key === "rangedMods" && [localBuild.rangedWeapon.伤害类型, localBuild.rangedWeapon.类别].includes(v.限定)) ||
                             (key === "skillMods" &&

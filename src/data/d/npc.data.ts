@@ -1300,6 +1300,288 @@ export const npcData: NPC[] = [
         ],
     },
     {
+        id: 81504,
+        name: "苏乙",
+        camp: "NPC",
+        charId: 1504,
+        type: "Show",
+        icon: "Suyi",
+        talks: [
+            {
+                id: 90260001,
+                content: "你来啦！是不是听说我又重新改装了青鸾贰型，给你看——咦，你只是来找我闲聊的？",
+                voice: "char/Suyi/vo_welcome",
+                npc: 81504,
+                options: [
+                    {
+                        id: 90260100,
+                        content: "闲暇时喜欢做什么？",
+                        next: 90260101,
+                    },
+                    {
+                        id: 90260200,
+                        content: "你之前说过自己辈分高，是什么意思？",
+                        next: 90260201,
+                    },
+                    {
+                        id: 90260300,
+                        content: "说起来，最近经常在你身边见到一只小鸟。",
+                        next: 90260301,
+                    },
+                    {
+                        id: 90260400,
+                        content: "山外山是个怎样的地方？",
+                        next: 90260401,
+                    },
+                ],
+            },
+            {
+                id: 90260101,
+                content: "拼机枢，打磨齿轮，寻找新材料，研发更好用的东西。",
+                voice: "char/Suyi/vo_topic_01_1",
+                npc: 81504,
+                next: 90260102,
+            },
+            {
+                id: 90260201,
+                content:
+                    "机枢派和飘零人都讲究世代传承。比方说，一个九十岁的老师父，收了一个十岁的孩子当关门弟子，那么门派里很多四十多岁的中年人都要管这个孩子叫师叔。",
+                voice: "char/Suyi/vo_topic_02_1",
+                npc: 81504,
+                next: 90260202,
+            },
+            {
+                id: 90260301,
+                content: "哦，那是青鸾叁型，我最新的宠物！",
+                voice: "char/Suyi/vo_topic_03_1",
+                npc: 81504,
+                next: 90260302,
+            },
+            {
+                id: 90260401,
+                content: "山外山啊……嗯，好问题。",
+                voice: "char/Suyi/vo_topic_04_1",
+                npc: 81504,
+                next: 90260402,
+            },
+            {
+                id: 90260102,
+                content:
+                    "上次唐叔不是腿摔了吗？刚好最近有空，我就一直在研究能够更平稳升空的载具。机枢派弟子总是要成果不要命，可不能放任这样的风气延续下去！",
+                voice: "char/Suyi/vo_topic_01_2",
+                npc: 81504,
+                next: 90260103,
+            },
+            {
+                id: 90260202,
+                content: "我比较幸运，我的老师——也就是我的姑姑，她辈分很高，所以我的辈分自然也很高啦。",
+                voice: "char/Suyi/vo_topic_02_2",
+                npc: 81504,
+                next: 90260203,
+            },
+            {
+                id: 90260302,
+                content: "你看，是不是很像是真的云翎鸥？我简化了发动流程，长按头顶，它就能开启拟态飞行模式了。说到飞行——",
+                voice: "char/Suyi/vo_topic_03_2",
+                npc: 81504,
+                next: 90260303,
+            },
+            {
+                id: 90260402,
+                content:
+                    "我们因为相似的处境而集结起来，为了相同的目标而努力着，能够互相理解、彼此信任，战斗时交托后背，疲惫时携手同行……是个很好很好的地方。",
+                voice: "char/Suyi/vo_topic_04_2",
+                npc: 81504,
+                next: 90260403,
+            },
+            {
+                id: 90260103,
+                content: "一直工作不累吗？",
+                npc: 100001,
+                next: 90260104,
+            },
+            {
+                id: 90260203,
+                content: "刻舟就比较不幸，他师父宴山亭辈分低，所以论起排辈啊，他得管我叫姑奶奶~",
+                voice: "char/Suyi/vo_topic_02_3",
+                npc: 81504,
+                next: 90260204,
+            },
+            {
+                id: 90260303,
+                content: "这羽毛也是有学问的！我回收了云翎鸥自然掉落的羽毛，用了改良版的离水技艺给羽毛封层，几乎不会增加重量。",
+                voice: "char/Suyi/vo_topic_03_3",
+                npc: 81504,
+                next: 90260304,
+            },
+            {
+                id: 90260403,
+                content: "对于山外山的很多人来说，这里就像是家一样。",
+                voice: "char/Suyi/vo_topic_04_3",
+                npc: 81504,
+                next: 90260404,
+            },
+            {
+                id: 90260104,
+                content:
+                    "怎么会累？世上还有比工作最有趣的事吗？你只需要在脑海中把机枢拆解成一个个组件，再在现实中拼起来就好。这简直是最享受的时刻啦。",
+                voice: "char/Suyi/vo_topic_01_3",
+                npc: 81504,
+                next: 90260105,
+            },
+            {
+                id: 90260204,
+                content: "那我呢那我呢？",
+                npc: 100001,
+                next: 90260205,
+            },
+            {
+                id: 90260304,
+                content: "不会掉色，永远毛茸茸，也不是飞天老虎钳，情绪价值拉满，完美的宠物。",
+                voice: "char/Suyi/vo_topic_03_4",
+                npc: 81504,
+                next: 90260305,
+            },
+            {
+                id: 90260404,
+                content: "这也是你的家吗？",
+                npc: 100001,
+                next: 90260405,
+            },
+            {
+                id: 90260105,
+                content: "你要不要也试试？全山外山最厉害的机枢大师现在有空，可以手把手教你哦。",
+                voice: "char/Suyi/vo_topic_01_4",
+                npc: 81504,
+                options: [
+                    {
+                        id: 90260002,
+                        content: "聊点别的",
+                        next: 90260001,
+                    },
+                    {
+                        id: 90260003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90260205,
+                content: "公尚先生的辈分也是很高的哦。让我换算一下……巧了，你和我算是同辈呢！",
+                voice: "char/Suyi/vo_topic_02_4",
+                npc: 81504,
+                next: 90260206,
+            },
+            {
+                id: 90260305,
+                content: "为什么不养只真的？",
+                npc: 100001,
+                next: 90260306,
+            },
+            {
+                id: 90260405,
+                content: "这……当然也是我家了！",
+                voice: "char/Suyi/vo_topic_04_4",
+                npc: 81504,
+                next: 90260406,
+            },
+            {
+                id: 90260206,
+                content: "嘻嘻，如果以后刻舟那家伙对你耍贫嘴，你就可以尽情让他管你喊{性别：爷爷|奶奶}了。",
+                voice: "char/Suyi/vo_topic_02_5",
+                npc: 81504,
+                next: 90260207,
+            },
+            {
+                id: 90260306,
+                content:
+                    "云翎鸥是喜欢天空的鸟儿，如果要养，就只能关在笼子里。可是如果我只是为了一饱眼福就把它捉来，那我和昔日的悬衡派有什么区别？",
+                voice: "char/Suyi/vo_topic_03_5",
+                npc: 81504,
+                next: 90260307,
+            },
+            {
+                id: 90260406,
+                content: "你好像不太对劲，怎么了？",
+                npc: 100001,
+                next: 90260407,
+            },
+            {
+                id: 90260207,
+                content: "等等，我记得你是白的小仆从来着……意思是她是你师父？……天啊，难道我们中辈分最高的其实是一个小不点吗？！",
+                voice: "char/Suyi/vo_topic_02_6",
+                npc: 81504,
+                options: [
+                    {
+                        id: 90260002,
+                        content: "聊点别的",
+                        next: 90260001,
+                    },
+                    {
+                        id: 90260003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90260307,
+                content:
+                    "有些动物适合伴人左右，但云翎鸥显然不在此列。它尖尖的喙，长长的尾，适应风阻的双翼，足以证明——它属于天空，而并非某人的掌心。",
+                voice: "char/Suyi/vo_topic_03_6",
+                npc: 81504,
+                options: [
+                    {
+                        id: 90260002,
+                        content: "聊点别的",
+                        next: 90260001,
+                    },
+                    {
+                        id: 90260003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90260407,
+                content:
+                    "好敏锐啊，这就是雇佣兵……不对不对，狩月人的直觉？不只是战斗，接人待物也有用？要是我的机傀探测导航装置，也能和你一样灵活就好了。",
+                voice: "char/Suyi/vo_topic_04_5",
+                npc: 81504,
+                next: 90260408,
+            },
+            {
+                id: 90260408,
+                content: "我只是有点迷茫……家应该是一个什么样的地方？",
+                voice: "char/Suyi/vo_topic_04_6",
+                npc: 81504,
+                next: 90260409,
+            },
+            {
+                id: 90260409,
+                content: "那是，不管多远都要回去的地方。",
+                npc: 100001,
+                next: 90260410,
+            },
+            {
+                id: 90260410,
+                content: "那……回不去的地方，还算是家吗？……抱歉，让你听了奇怪的话，还是当我没说过吧！",
+                voice: "char/Suyi/vo_topic_04_7",
+                npc: 81504,
+                options: [
+                    {
+                        id: 90260002,
+                        content: "聊点别的",
+                        next: 90260001,
+                    },
+                    {
+                        id: 90260003,
+                        content: "再见",
+                    },
+                ],
+            },
+        ],
+    },
+    {
         id: 81801,
         name: "菲娜",
         camp: "NPC",
@@ -2746,6 +3028,225 @@ export const npcData: NPC[] = [
                     },
                     {
                         id: 90060003,
+                        content: "再见",
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 83202,
+        name: "卡米拉",
+        camp: "NPC",
+        charId: 3202,
+        type: "Show",
+        icon: "Kami",
+        talks: [
+            {
+                id: 90270001,
+                content: "叫醒我的是生意，叫醒你的是什么？",
+                voice: "char/Kami/vo_welcome",
+                npc: 83202,
+                options: [
+                    {
+                        id: 90270100,
+                        content: "水仙平原那几个大酒桶是干什么用的？",
+                        next: 90270101,
+                    },
+                    {
+                        id: 90270200,
+                        content: "“水仙平原”撑起了冰湖城狩月人这样一个职业，真了不起。",
+                        next: 90270201,
+                    },
+                    {
+                        id: 90270300,
+                        content: "金钱对人们究竟意味着什么呢？",
+                        next: 90270301,
+                    },
+                    {
+                        id: 90270400,
+                        content: "关于带我来冰湖城的神秘人，你还知道些什么？",
+                        next: 90270401,
+                    },
+                ],
+            },
+            {
+                id: 90270101,
+                content:
+                    "酒桶？那自然是用来装美酒的。“冰湖往事”爽口，“军团狼血”浓烈，华胥运来的“苍龙醉”清冽悠长，卢卡的“假面舞会”由十种口味混合而成，每个人品出来的味道都不一样。",
+                voice: "char/Kami/vo_topic_01_1",
+                npc: 83202,
+                next: 90270102,
+            },
+            {
+                id: 90270201,
+                content:
+                    "承蒙缪赞。狩月人的历史比我这间酒馆古老得多，他们需要一个地方谈谈天，吹吹牛，交换一下彼此手里的“生意”，就算没有“水仙平原”，也会有“铃兰平原”，“郁金香平原”。",
+                voice: "char/Kami/vo_topic_02_1",
+                npc: 83202,
+                next: 90270202,
+            },
+            {
+                id: 90270301,
+                content: "比起问我，问你自己不是更加合适吗？我还记得你初来冰湖城时无处可去的窘境，你应该很明白，钱是在世间立足的根本。",
+                voice: "char/Kami/vo_topic_03_1",
+                npc: 83202,
+                next: 90270302,
+            },
+            {
+                id: 90270401,
+                content:
+                    "很遗憾，我在冰湖城待了这么多年，但那人我也是第一次瞧见。他把自己裹在一身斗篷里，说话也是用的变声器。从哪儿来的，是男是女，多大年纪……一概不知。",
+                voice: "char/Kami/vo_topic_04_1",
+                npc: 83202,
+                next: 90270402,
+            },
+            {
+                id: 90270102,
+                content: "怎么，你也打算来一杯？",
+                voice: "char/Kami/vo_topic_01_2",
+                npc: 83202,
+                next: 90270103,
+            },
+            {
+                id: 90270202,
+                content: "至于最终他们为什么汇集到我这儿来……无非是好喝的酒，作为中间人的公道无欺，以及人们困窘时给出的一点小恩小惠罢了。",
+                voice: "char/Kami/vo_topic_02_2",
+                npc: 83202,
+                options: [
+                    {
+                        id: 90270002,
+                        content: "聊点别的",
+                        next: 90270001,
+                    },
+                    {
+                        id: 90270003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90270302,
+                content: "我没有忘记，缺钱的时候确实很困难。",
+                voice: "char/Kami/vo_topic_03_2",
+                npc: 100001,
+                next: 90270303,
+            },
+            {
+                id: 90270402,
+                content: "我唯一可以确认的便是他的力量深不可测。只是短暂的交手，我便知绝无胜算。",
+                voice: "char/Kami/vo_topic_04_2",
+                npc: 83202,
+                next: 90270403,
+            },
+            {
+                id: 90270103,
+                content: "别装傻了，我敲过，那些酒桶一直是空的。",
+                npc: 100001,
+                next: 90270104,
+            },
+            {
+                id: 90270303,
+                content:
+                    "只要积累财富，即使无法改变出身，也会获得勇气对抗命运，即使周遭都是风雨，也能给自己买上一瓶酒暖暖身子，甚至能给别人分上一口，赚个人情。",
+                voice: "char/Kami/vo_topic_03_3",
+                npc: 83202,
+                next: 90270304,
+            },
+            {
+                id: 90270403,
+                content: "想不到你会这么谦虚。",
+                npc: 100001,
+                next: 90270404,
+            },
+            {
+                id: 90270104,
+                content: "……呵呵，你聪明了许多，早就不像初来冰湖城那样懵懂无知。",
+                voice: "char/Kami/vo_topic_01_3",
+                npc: 83202,
+                next: 90270105,
+            },
+            {
+                id: 90270304,
+                content: "你说，钱是不是很重要？",
+                npc: 83202,
+                options: [
+                    {
+                        id: 90270002,
+                        content: "聊点别的",
+                        next: 90270001,
+                    },
+                    {
+                        id: 90270003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90270404,
+                content:
+                    "呵呵，对生意人来说，最重要的就是盘清自己和对方手里分别捏着多少价码，只有你们手里的价码差不多时，虚张声势才有意义。这种利弊，我还是看得清。",
+                voice: "char/Kami/vo_topic_04_3",
+                npc: 83202,
+                next: 90270405,
+            },
+            {
+                id: 90270105,
+                content: "冰湖城往北走一百多公里，翻越维德弗尼尔山脉，便是峡湾地埃斯加特——传说中卡戎之民真正的故乡。",
+                voice: "char/Kami/vo_topic_01_4",
+                npc: 83202,
+                next: 90270106,
+            },
+            {
+                id: 90270405,
+                content: "对了，我想起来了，那人离开前说了一句话——",
+                voice: "char/Kami/vo_topic_04_4",
+                npc: 83202,
+                next: 90270406,
+            },
+            {
+                id: 90270106,
+                content: "对于很多冰湖城的卡戎之民来说，隔着一百多公里，一座高山……应许之地也并非远不可及，不是吗？",
+                voice: "char/Kami/vo_topic_01_5",
+                npc: 83202,
+                next: 90270107,
+            },
+            {
+                id: 90270406,
+                content: "他说，他希望从你那里得到的，是一个“答案”。",
+                voice: "char/Kami/vo_topic_04_5",
+                npc: 83202,
+                options: [
+                    {
+                        id: 90270002,
+                        content: "聊点别的",
+                        next: 90270001,
+                    },
+                    {
+                        id: 90270003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90270107,
+                content: "难道你在帮他们偷渡……",
+                npc: 100001,
+                next: 90270108,
+            },
+            {
+                id: 90270108,
+                content: "嘘——我可什么都没有说哦。",
+                voice: "char/Kami/vo_topic_01_6",
+                npc: 83202,
+                options: [
+                    {
+                        id: 90270002,
+                        content: "聊点别的",
+                        next: 90270001,
+                    },
+                    {
+                        id: 90270003,
                         content: "再见",
                     },
                 ],
@@ -5112,6 +5613,288 @@ export const npcData: NPC[] = [
         type: "Normal",
     },
     {
+        id: 91504,
+        name: "苏乙",
+        camp: "NPC",
+        charId: 1504,
+        type: "Normal",
+        icon: "Suyi",
+        talks: [
+            {
+                id: 90260001,
+                content: "你来啦！是不是听说我又重新改装了青鸾贰型，给你看——咦，你只是来找我闲聊的？",
+                voice: "char/Suyi/vo_welcome",
+                npc: 81504,
+                options: [
+                    {
+                        id: 90260100,
+                        content: "闲暇时喜欢做什么？",
+                        next: 90260101,
+                    },
+                    {
+                        id: 90260200,
+                        content: "你之前说过自己辈分高，是什么意思？",
+                        next: 90260201,
+                    },
+                    {
+                        id: 90260300,
+                        content: "说起来，最近经常在你身边见到一只小鸟。",
+                        next: 90260301,
+                    },
+                    {
+                        id: 90260400,
+                        content: "山外山是个怎样的地方？",
+                        next: 90260401,
+                    },
+                ],
+            },
+            {
+                id: 90260101,
+                content: "拼机枢，打磨齿轮，寻找新材料，研发更好用的东西。",
+                voice: "char/Suyi/vo_topic_01_1",
+                npc: 81504,
+                next: 90260102,
+            },
+            {
+                id: 90260201,
+                content:
+                    "机枢派和飘零人都讲究世代传承。比方说，一个九十岁的老师父，收了一个十岁的孩子当关门弟子，那么门派里很多四十多岁的中年人都要管这个孩子叫师叔。",
+                voice: "char/Suyi/vo_topic_02_1",
+                npc: 81504,
+                next: 90260202,
+            },
+            {
+                id: 90260301,
+                content: "哦，那是青鸾叁型，我最新的宠物！",
+                voice: "char/Suyi/vo_topic_03_1",
+                npc: 81504,
+                next: 90260302,
+            },
+            {
+                id: 90260401,
+                content: "山外山啊……嗯，好问题。",
+                voice: "char/Suyi/vo_topic_04_1",
+                npc: 81504,
+                next: 90260402,
+            },
+            {
+                id: 90260102,
+                content:
+                    "上次唐叔不是腿摔了吗？刚好最近有空，我就一直在研究能够更平稳升空的载具。机枢派弟子总是要成果不要命，可不能放任这样的风气延续下去！",
+                voice: "char/Suyi/vo_topic_01_2",
+                npc: 81504,
+                next: 90260103,
+            },
+            {
+                id: 90260202,
+                content: "我比较幸运，我的老师——也就是我的姑姑，她辈分很高，所以我的辈分自然也很高啦。",
+                voice: "char/Suyi/vo_topic_02_2",
+                npc: 81504,
+                next: 90260203,
+            },
+            {
+                id: 90260302,
+                content: "你看，是不是很像是真的云翎鸥？我简化了发动流程，长按头顶，它就能开启拟态飞行模式了。说到飞行——",
+                voice: "char/Suyi/vo_topic_03_2",
+                npc: 81504,
+                next: 90260303,
+            },
+            {
+                id: 90260402,
+                content:
+                    "我们因为相似的处境而集结起来，为了相同的目标而努力着，能够互相理解、彼此信任，战斗时交托后背，疲惫时携手同行……是个很好很好的地方。",
+                voice: "char/Suyi/vo_topic_04_2",
+                npc: 81504,
+                next: 90260403,
+            },
+            {
+                id: 90260103,
+                content: "一直工作不累吗？",
+                npc: 100001,
+                next: 90260104,
+            },
+            {
+                id: 90260203,
+                content: "刻舟就比较不幸，他师父宴山亭辈分低，所以论起排辈啊，他得管我叫姑奶奶~",
+                voice: "char/Suyi/vo_topic_02_3",
+                npc: 81504,
+                next: 90260204,
+            },
+            {
+                id: 90260303,
+                content: "这羽毛也是有学问的！我回收了云翎鸥自然掉落的羽毛，用了改良版的离水技艺给羽毛封层，几乎不会增加重量。",
+                voice: "char/Suyi/vo_topic_03_3",
+                npc: 81504,
+                next: 90260304,
+            },
+            {
+                id: 90260403,
+                content: "对于山外山的很多人来说，这里就像是家一样。",
+                voice: "char/Suyi/vo_topic_04_3",
+                npc: 81504,
+                next: 90260404,
+            },
+            {
+                id: 90260104,
+                content:
+                    "怎么会累？世上还有比工作最有趣的事吗？你只需要在脑海中把机枢拆解成一个个组件，再在现实中拼起来就好。这简直是最享受的时刻啦。",
+                voice: "char/Suyi/vo_topic_01_3",
+                npc: 81504,
+                next: 90260105,
+            },
+            {
+                id: 90260204,
+                content: "那我呢那我呢？",
+                npc: 100001,
+                next: 90260205,
+            },
+            {
+                id: 90260304,
+                content: "不会掉色，永远毛茸茸，也不是飞天老虎钳，情绪价值拉满，完美的宠物。",
+                voice: "char/Suyi/vo_topic_03_4",
+                npc: 81504,
+                next: 90260305,
+            },
+            {
+                id: 90260404,
+                content: "这也是你的家吗？",
+                npc: 100001,
+                next: 90260405,
+            },
+            {
+                id: 90260105,
+                content: "你要不要也试试？全山外山最厉害的机枢大师现在有空，可以手把手教你哦。",
+                voice: "char/Suyi/vo_topic_01_4",
+                npc: 81504,
+                options: [
+                    {
+                        id: 90260002,
+                        content: "聊点别的",
+                        next: 90260001,
+                    },
+                    {
+                        id: 90260003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90260205,
+                content: "公尚先生的辈分也是很高的哦。让我换算一下……巧了，你和我算是同辈呢！",
+                voice: "char/Suyi/vo_topic_02_4",
+                npc: 81504,
+                next: 90260206,
+            },
+            {
+                id: 90260305,
+                content: "为什么不养只真的？",
+                npc: 100001,
+                next: 90260306,
+            },
+            {
+                id: 90260405,
+                content: "这……当然也是我家了！",
+                voice: "char/Suyi/vo_topic_04_4",
+                npc: 81504,
+                next: 90260406,
+            },
+            {
+                id: 90260206,
+                content: "嘻嘻，如果以后刻舟那家伙对你耍贫嘴，你就可以尽情让他管你喊{性别：爷爷|奶奶}了。",
+                voice: "char/Suyi/vo_topic_02_5",
+                npc: 81504,
+                next: 90260207,
+            },
+            {
+                id: 90260306,
+                content:
+                    "云翎鸥是喜欢天空的鸟儿，如果要养，就只能关在笼子里。可是如果我只是为了一饱眼福就把它捉来，那我和昔日的悬衡派有什么区别？",
+                voice: "char/Suyi/vo_topic_03_5",
+                npc: 81504,
+                next: 90260307,
+            },
+            {
+                id: 90260406,
+                content: "你好像不太对劲，怎么了？",
+                npc: 100001,
+                next: 90260407,
+            },
+            {
+                id: 90260207,
+                content: "等等，我记得你是白的小仆从来着……意思是她是你师父？……天啊，难道我们中辈分最高的其实是一个小不点吗？！",
+                voice: "char/Suyi/vo_topic_02_6",
+                npc: 81504,
+                options: [
+                    {
+                        id: 90260002,
+                        content: "聊点别的",
+                        next: 90260001,
+                    },
+                    {
+                        id: 90260003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90260307,
+                content:
+                    "有些动物适合伴人左右，但云翎鸥显然不在此列。它尖尖的喙，长长的尾，适应风阻的双翼，足以证明——它属于天空，而并非某人的掌心。",
+                voice: "char/Suyi/vo_topic_03_6",
+                npc: 81504,
+                options: [
+                    {
+                        id: 90260002,
+                        content: "聊点别的",
+                        next: 90260001,
+                    },
+                    {
+                        id: 90260003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90260407,
+                content:
+                    "好敏锐啊，这就是雇佣兵……不对不对，狩月人的直觉？不只是战斗，接人待物也有用？要是我的机傀探测导航装置，也能和你一样灵活就好了。",
+                voice: "char/Suyi/vo_topic_04_5",
+                npc: 81504,
+                next: 90260408,
+            },
+            {
+                id: 90260408,
+                content: "我只是有点迷茫……家应该是一个什么样的地方？",
+                voice: "char/Suyi/vo_topic_04_6",
+                npc: 81504,
+                next: 90260409,
+            },
+            {
+                id: 90260409,
+                content: "那是，不管多远都要回去的地方。",
+                npc: 100001,
+                next: 90260410,
+            },
+            {
+                id: 90260410,
+                content: "那……回不去的地方，还算是家吗？……抱歉，让你听了奇怪的话，还是当我没说过吧！",
+                voice: "char/Suyi/vo_topic_04_7",
+                npc: 81504,
+                options: [
+                    {
+                        id: 90260002,
+                        content: "聊点别的",
+                        next: 90260001,
+                    },
+                    {
+                        id: 90260003,
+                        content: "再见",
+                    },
+                ],
+            },
+        ],
+    },
+    {
         id: 91801,
         name: "菲娜",
         camp: "NPC",
@@ -5166,6 +5949,225 @@ export const npcData: NPC[] = [
         camp: "NPC",
         charId: 3201,
         type: "Normal",
+    },
+    {
+        id: 93202,
+        name: "卡米拉",
+        camp: "NPC",
+        charId: 3202,
+        type: "Normal",
+        icon: "Kami",
+        talks: [
+            {
+                id: 90270001,
+                content: "叫醒我的是生意，叫醒你的是什么？",
+                voice: "char/Kami/vo_welcome",
+                npc: 83202,
+                options: [
+                    {
+                        id: 90270100,
+                        content: "水仙平原那几个大酒桶是干什么用的？",
+                        next: 90270101,
+                    },
+                    {
+                        id: 90270200,
+                        content: "“水仙平原”撑起了冰湖城狩月人这样一个职业，真了不起。",
+                        next: 90270201,
+                    },
+                    {
+                        id: 90270300,
+                        content: "金钱对人们究竟意味着什么呢？",
+                        next: 90270301,
+                    },
+                    {
+                        id: 90270400,
+                        content: "关于带我来冰湖城的神秘人，你还知道些什么？",
+                        next: 90270401,
+                    },
+                ],
+            },
+            {
+                id: 90270101,
+                content:
+                    "酒桶？那自然是用来装美酒的。“冰湖往事”爽口，“军团狼血”浓烈，华胥运来的“苍龙醉”清冽悠长，卢卡的“假面舞会”由十种口味混合而成，每个人品出来的味道都不一样。",
+                voice: "char/Kami/vo_topic_01_1",
+                npc: 83202,
+                next: 90270102,
+            },
+            {
+                id: 90270201,
+                content:
+                    "承蒙缪赞。狩月人的历史比我这间酒馆古老得多，他们需要一个地方谈谈天，吹吹牛，交换一下彼此手里的“生意”，就算没有“水仙平原”，也会有“铃兰平原”，“郁金香平原”。",
+                voice: "char/Kami/vo_topic_02_1",
+                npc: 83202,
+                next: 90270202,
+            },
+            {
+                id: 90270301,
+                content: "比起问我，问你自己不是更加合适吗？我还记得你初来冰湖城时无处可去的窘境，你应该很明白，钱是在世间立足的根本。",
+                voice: "char/Kami/vo_topic_03_1",
+                npc: 83202,
+                next: 90270302,
+            },
+            {
+                id: 90270401,
+                content:
+                    "很遗憾，我在冰湖城待了这么多年，但那人我也是第一次瞧见。他把自己裹在一身斗篷里，说话也是用的变声器。从哪儿来的，是男是女，多大年纪……一概不知。",
+                voice: "char/Kami/vo_topic_04_1",
+                npc: 83202,
+                next: 90270402,
+            },
+            {
+                id: 90270102,
+                content: "怎么，你也打算来一杯？",
+                voice: "char/Kami/vo_topic_01_2",
+                npc: 83202,
+                next: 90270103,
+            },
+            {
+                id: 90270202,
+                content: "至于最终他们为什么汇集到我这儿来……无非是好喝的酒，作为中间人的公道无欺，以及人们困窘时给出的一点小恩小惠罢了。",
+                voice: "char/Kami/vo_topic_02_2",
+                npc: 83202,
+                options: [
+                    {
+                        id: 90270002,
+                        content: "聊点别的",
+                        next: 90270001,
+                    },
+                    {
+                        id: 90270003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90270302,
+                content: "我没有忘记，缺钱的时候确实很困难。",
+                voice: "char/Kami/vo_topic_03_2",
+                npc: 100001,
+                next: 90270303,
+            },
+            {
+                id: 90270402,
+                content: "我唯一可以确认的便是他的力量深不可测。只是短暂的交手，我便知绝无胜算。",
+                voice: "char/Kami/vo_topic_04_2",
+                npc: 83202,
+                next: 90270403,
+            },
+            {
+                id: 90270103,
+                content: "别装傻了，我敲过，那些酒桶一直是空的。",
+                npc: 100001,
+                next: 90270104,
+            },
+            {
+                id: 90270303,
+                content:
+                    "只要积累财富，即使无法改变出身，也会获得勇气对抗命运，即使周遭都是风雨，也能给自己买上一瓶酒暖暖身子，甚至能给别人分上一口，赚个人情。",
+                voice: "char/Kami/vo_topic_03_3",
+                npc: 83202,
+                next: 90270304,
+            },
+            {
+                id: 90270403,
+                content: "想不到你会这么谦虚。",
+                npc: 100001,
+                next: 90270404,
+            },
+            {
+                id: 90270104,
+                content: "……呵呵，你聪明了许多，早就不像初来冰湖城那样懵懂无知。",
+                voice: "char/Kami/vo_topic_01_3",
+                npc: 83202,
+                next: 90270105,
+            },
+            {
+                id: 90270304,
+                content: "你说，钱是不是很重要？",
+                npc: 83202,
+                options: [
+                    {
+                        id: 90270002,
+                        content: "聊点别的",
+                        next: 90270001,
+                    },
+                    {
+                        id: 90270003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90270404,
+                content:
+                    "呵呵，对生意人来说，最重要的就是盘清自己和对方手里分别捏着多少价码，只有你们手里的价码差不多时，虚张声势才有意义。这种利弊，我还是看得清。",
+                voice: "char/Kami/vo_topic_04_3",
+                npc: 83202,
+                next: 90270405,
+            },
+            {
+                id: 90270105,
+                content: "冰湖城往北走一百多公里，翻越维德弗尼尔山脉，便是峡湾地埃斯加特——传说中卡戎之民真正的故乡。",
+                voice: "char/Kami/vo_topic_01_4",
+                npc: 83202,
+                next: 90270106,
+            },
+            {
+                id: 90270405,
+                content: "对了，我想起来了，那人离开前说了一句话——",
+                voice: "char/Kami/vo_topic_04_4",
+                npc: 83202,
+                next: 90270406,
+            },
+            {
+                id: 90270106,
+                content: "对于很多冰湖城的卡戎之民来说，隔着一百多公里，一座高山……应许之地也并非远不可及，不是吗？",
+                voice: "char/Kami/vo_topic_01_5",
+                npc: 83202,
+                next: 90270107,
+            },
+            {
+                id: 90270406,
+                content: "他说，他希望从你那里得到的，是一个“答案”。",
+                voice: "char/Kami/vo_topic_04_5",
+                npc: 83202,
+                options: [
+                    {
+                        id: 90270002,
+                        content: "聊点别的",
+                        next: 90270001,
+                    },
+                    {
+                        id: 90270003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90270107,
+                content: "难道你在帮他们偷渡……",
+                npc: 100001,
+                next: 90270108,
+            },
+            {
+                id: 90270108,
+                content: "嘘——我可什么都没有说哦。",
+                voice: "char/Kami/vo_topic_01_6",
+                npc: 83202,
+                options: [
+                    {
+                        id: 90270002,
+                        content: "聊点别的",
+                        next: 90270001,
+                    },
+                    {
+                        id: 90270003,
+                        content: "再见",
+                    },
+                ],
+            },
+        ],
     },
     {
         id: 93301,
@@ -5241,7 +6243,6 @@ export const npcData: NPC[] = [
         id: 99998,
         name: "运营团队",
         camp: "NPC",
-        type: "Normal",
         icon: "Gift",
     },
     {
@@ -5255,12 +6256,14 @@ export const npcData: NPC[] = [
         id: 100001,
         name: "{nickname}",
         camp: "NPC",
+        charId: 1601,
         type: "Normal",
     },
     {
         id: 100002,
         name: "{nickname}",
         camp: "NPC",
+        charId: 160101,
         type: "Normal",
     },
     {
@@ -8428,6 +9431,7 @@ export const npcData: NPC[] = [
         id: 200061,
         name: "{nickname}",
         camp: "NPC",
+        charId: 1601,
         type: "Normal",
     },
     {
@@ -10513,6 +11517,7 @@ export const npcData: NPC[] = [
         id: 220042,
         name: "{nickname}",
         camp: "NPC",
+        charId: 1601,
         type: "Normal",
     },
     {
@@ -10525,6 +11530,7 @@ export const npcData: NPC[] = [
         id: 220044,
         name: "{nickname}",
         camp: "NPC",
+        charId: 160101,
         type: "Normal",
     },
     {
@@ -10581,61 +11587,61 @@ export const npcData: NPC[] = [
     },
     {
         id: 240003,
-        name: "药师【远期待包装】",
+        name: "药师",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240004,
-        name: "香阁路人A【远期待包装】",
+        name: "路人",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240005,
-        name: "香阁路人B【远期待包装】",
+        name: "路人",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240006,
-        name: "香阁路人C【远期待包装】",
+        name: "路人",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240007,
-        name: "排队的女子【远期待包装】",
+        name: "排队的女子",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240008,
-        name: "香官【远期待包装】",
+        name: "香官",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240009,
-        name: "工匠【远期待包装】",
+        name: "工匠",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240010,
-        name: "兴奋的路人【远期待包装】",
+        name: "兴奋的路人",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240011,
-        name: "炫耀的路人【远期待包装】",
+        name: "炫耀的路人",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240012,
-        name: "文绉绉的路人【远期待包装】",
+        name: "文绉绉的路人",
         camp: "NPC",
         type: "Normal",
     },
@@ -10653,55 +11659,55 @@ export const npcData: NPC[] = [
     },
     {
         id: 240015,
-        name: "电梯员【远期待包装】",
+        name: "门卫",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240016,
-        name: "接待员【远期待包装】",
+        name: "接待员",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240017,
-        name: "守卫1【远期待包装】",
+        name: "守卫",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240018,
-        name: "守卫2【远期待包装】",
+        name: "守卫",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240019,
-        name: "守卫3【远期待包装】",
+        name: "守卫",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240020,
-        name: "墨家机器人1【远期待包装】",
+        name: "偃雀",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240021,
-        name: "墨家机器人2【远期待包装】",
+        name: "偃雀",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240022,
-        name: "墨家机器人3【远期待包装】",
+        name: "偃雀",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240023,
-        name: "墨家机器人4【远期待包装】",
+        name: "偃雀",
         camp: "NPC",
         type: "Normal",
     },
@@ -10725,7 +11731,7 @@ export const npcData: NPC[] = [
     },
     {
         id: 240027,
-        name: "港口负责人【远期待包装】",
+        name: "参商港管事",
         camp: "NPC",
         type: "Normal",
     },
@@ -10755,7 +11761,7 @@ export const npcData: NPC[] = [
     },
     {
         id: 240032,
-        name: "海鸟【远期待包装】",
+        name: "云翎鸥",
         camp: "NPC",
         type: "Normal",
     },
@@ -10773,91 +11779,91 @@ export const npcData: NPC[] = [
     },
     {
         id: 240035,
-        name: "飘零人A【远期待包装】",
+        name: "飘零人",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240036,
-        name: "飘零人B【远期待包装】",
+        name: "飘零人",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240037,
-        name: "玩耍的孩童【远期待包装】",
+        name: "玩耍的孩童",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240038,
-        name: "农妇【远期待包装】",
+        name: "农妇",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240039,
-        name: "村长【远期待包装】",
+        name: "村长",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240040,
-        name: "静渊【远期待包装】",
+        name: "静渊",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240041,
-        name: "被攻击的民众【远期待包装】",
+        name: "被攻击的民众",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240042,
-        name: "祈祷的老年男子【远期待包装】",
+        name: "祈祷的老翁",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240043,
-        name: "害怕的小女孩【远期待包装】",
+        name: "害怕的小女孩",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240044,
-        name: "中年妇女【远期待包装】",
+        name: "中年妇女",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240045,
-        name: "混乱的狴犴【远期待包装】",
+        name: "混乱的狴犴",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240046,
-        name: "胆怯的书生【远期待包装】",
+        name: "胆怯的书生",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240047,
-        name: "声音洪亮的男子【远期待包装】",
+        name: "声音洪亮的男子",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240048,
-        name: "泽生阁学徒A【远期待包装】",
+        name: "泽生阁学徒",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240049,
-        name: "泽生阁学徒B【远期待包装】",
+        name: "泽生阁学徒",
         camp: "NPC",
         type: "Normal",
     },
@@ -10881,13 +11887,13 @@ export const npcData: NPC[] = [
     },
     {
         id: 240053,
-        name: "混乱的狴犴【远期待包装】",
+        name: "混乱的狴犴",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240054,
-        name: "混乱的狴犴【远期待包装】",
+        name: "混乱的狴犴",
         camp: "NPC",
         type: "Normal",
     },
@@ -10918,12 +11924,16 @@ export const npcData: NPC[] = [
     },
     {
         id: 240060,
+        name: "{nickname}",
         camp: "NPC",
+        charId: 1601,
         type: "Normal",
     },
     {
         id: 240061,
+        name: "{nickname}",
         camp: "NPC",
+        charId: 160101,
         type: "Normal",
     },
     {
@@ -10948,61 +11958,61 @@ export const npcData: NPC[] = [
     },
     {
         id: 240066,
-        name: "固执的中年男子【远期待包装】",
+        name: "固执的中年男子",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240067,
-        name: "害怕的男子【远期待包装】",
+        name: "害怕的男子",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240068,
-        name: "瑟瑟发抖的女子【远期待包装】",
+        name: "瑟瑟发抖的女子",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240069,
-        name: "失落的声音【远期待包装】",
+        name: "失落的声音",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240070,
-        name: "无由生【远期待包装】",
+        name: "无由生",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240071,
-        name: "先人（女）【远期待包装】",
+        name: "先人",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240072,
-        name: "先人A【远期待包装】",
+        name: "倨傲的先人",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240073,
-        name: "先人B【远期待包装】",
+        name: "骄横的先人",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240074,
-        name: "先人C【远期待包装】",
+        name: "先人",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 240075,
-        name: "先人D【远期待包装】",
+        name: "先人",
         camp: "NPC",
         type: "Normal",
     },
@@ -11128,6 +12138,126 @@ export const npcData: NPC[] = [
         type: "Normal",
     },
     {
+        id: 240100,
+        name: "煜明",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 240101,
+        name: "白",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 240102,
+        name: "白",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 240103,
+        name: "应天尉",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 240104,
+        name: "路人少女",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 240105,
+        name: "止流",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 240106,
+        name: "止流",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 240107,
+        name: "路人少女",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 12048809,
+                content: "没问题，包在我身上！本姑娘刚刚看你尝试，早就手痒了~",
+                npc: 200026,
+                next: 12048810,
+            },
+            {
+                id: 12048810,
+                content: "不过话说回来，{nickname}，你回去后可得好好从头补起机枢知识呢。让我想想，从哪里开始呢，不如就从……",
+                npc: 200026,
+                next: 12048811,
+            },
+            {
+                id: 12048811,
+                content: "哇啊啊，小仆从，苏乙身上又散发出那种不近人情的老师气场了！好吓人！",
+                npc: 200002,
+                next: 12048812,
+            },
+        ],
+    },
+    {
+        id: 240108,
+        name: "路人少女",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 12048809,
+                content: "没问题，包在我身上！本姑娘刚刚看你尝试，早就手痒了~",
+                npc: 200026,
+                next: 12048810,
+            },
+            {
+                id: 12048810,
+                content: "不过话说回来，{nickname}，你回去后可得好好从头补起机枢知识呢。让我想想，从哪里开始呢，不如就从……",
+                npc: 200026,
+                next: 12048811,
+            },
+            {
+                id: 12048811,
+                content: "哇啊啊，小仆从，苏乙身上又散发出那种不近人情的老师气场了！好吓人！",
+                npc: 200002,
+                next: 12048812,
+            },
+        ],
+    },
+    {
+        id: 240109,
+        name: "路人少女",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 12048809,
+                content: "没问题，包在我身上！本姑娘刚刚看你尝试，早就手痒了~",
+                npc: 200026,
+                next: 12048810,
+            },
+            {
+                id: 12048810,
+                content: "不过话说回来，{nickname}，你回去后可得好好从头补起机枢知识呢。让我想想，从哪里开始呢，不如就从……",
+                npc: 200026,
+                next: 12048811,
+            },
+            {
+                id: 12048811,
+                content: "哇啊啊，小仆从，苏乙身上又散发出那种不近人情的老师气场了！好吓人！",
+                npc: 200002,
+                next: 12048812,
+            },
+        ],
+    },
+    {
         id: 250001,
         name: "扶疏",
         camp: "NPC",
@@ -11138,12 +12268,85 @@ export const npcData: NPC[] = [
         name: "刻舟",
         camp: "NPC",
         type: "Normal",
+        talks: [
+            {
+                id: 12062340,
+                content: "师兄，你终于愿意回来看看了！",
+                voice: "story/1206/120623/1E3261A8",
+                npc: 250002,
+                next: 12062341,
+            },
+            {
+                id: 12062341,
+                content: "……只是此次群英试受人所托，不好半途而废。赛场上遭此变故，于情于理我都该陪着{nickname}与苏乙走完全程。",
+                voice: "story/1206/120623/1E3261D2",
+                npc: 250005,
+                next: 12062342,
+            },
+            {
+                id: 12062342,
+                content: "有些话不好意思直接说出口是吧，我懂，我懂～是我不该这样问，我自罚一杯！",
+                voice: "story/1206/120623/1E3261FC",
+                npc: 250002,
+                next: 12062343,
+            },
+            {
+                id: 12062343,
+                content:
+                    "师兄，我和你说啊，昨天我在山外山附近看到一只大红狐狸窜过去，嗬，那一身毛啊，油光水滑的！你说，它会不会就是咱们一起养过的小橙子？",
+                voice: "story/1206/120623/1E326226",
+                npc: 250002,
+                next: 12062344,
+            },
+            {
+                id: 12062344,
+                content: "还有啊，我和你说。上个月我睡得正熟呢，突然闪过一阵惊雷，恰好劈到我们一起练剑过的那片竹林上，你说邪不邪门？",
+                voice: "story/1206/120623/1E326250",
+                npc: 250002,
+                next: 12062345,
+            },
+            {
+                id: 12062345,
+                content: "竹子被劈倒后，反而周围的花啊草啊都更茂盛了。那雷劈到竹子上的焦痕还在呢。来来来，我现在就带你去看看！",
+                voice: "story/1206/120623/1E32627A",
+                npc: 250002,
+                next: 12062346,
+            },
+            {
+                id: 12062346,
+                content: "………………",
+                voice: "story/1206/120623/1E3262A4",
+                npc: 250005,
+            },
+        ],
     },
     {
         id: 250003,
         name: "苏乙",
         camp: "NPC",
         type: "Normal",
+        talks: [
+            {
+                id: 12060534,
+                content: "机关鸟就藏在那边的箱子里。怎么？需不需要恶魔大盗给你带路？",
+                voice: "story/1206/120605/1E313933",
+                npc: 250006,
+                next: 12060535,
+            },
+            {
+                id: 12060535,
+                content: "这次我盯住你了，不要有什么小心思，也别想着轻举妄动！",
+                voice: "story/1206/120605/1E313934",
+                npc: 250003,
+                next: 12060536,
+            },
+            {
+                id: 12060536,
+                content: "嘻嘻，需要恶魔大盗表演一下从你眼皮底子下消失的魔术吗~这可是我的拿手绝活~",
+                voice: "story/1206/120605/1E313935",
+                npc: 250006,
+            },
+        ],
     },
     {
         id: 250004,
@@ -11162,6 +12365,35 @@ export const npcData: NPC[] = [
         name: "塔比瑟",
         camp: "NPC",
         type: "Normal",
+        talks: [
+            {
+                id: 12061135,
+                content: "地狱辣挑战火热进行中——能吃完这碗担担面的挑战者，不仅能够免单，还将获得本店专门准备的豪华大礼！",
+                voice: "story/1206/120611/1E319BF6",
+                npc: 250031,
+                next: 12061136,
+            },
+            {
+                id: 12061136,
+                content: "豪华大礼？",
+                voice: "story/1206/120611/1E319C20",
+                npc: 250006,
+                next: 12061137,
+            },
+            {
+                id: 12061137,
+                content: "嘻嘻，说出口的事情可不能再反悔，算上我一个！",
+                voice: "story/1206/120611/1E319C4A",
+                npc: 250006,
+                next: 12061138,
+            },
+            {
+                id: 12061138,
+                content: "好嘞！这就给您端上来！",
+                voice: "story/1206/120611/1E319C74",
+                npc: 250031,
+            },
+        ],
     },
     {
         id: 250007,
@@ -11267,7 +12499,6 @@ export const npcData: NPC[] = [
     },
     {
         id: 250024,
-        name: "唐叔",
         camp: "NPC",
         type: "Normal",
     },
@@ -11279,13 +12510,65 @@ export const npcData: NPC[] = [
     },
     {
         id: 250026,
-        name: "UI_Npc_Name_250026",
+        name: "望春",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250027,
-        name: "UI_Npc_Name_250027",
+        name: "看守",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250028,
+        name: "塔比瑟",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250029,
+        name: "苏乙？",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250030,
+        name: "工作人员",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250031,
+        name: "路人A",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250032,
+        name: "塔比瑟",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250033,
+        name: "苏乙",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250034,
+        name: "白",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250035,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250036,
         camp: "NPC",
         type: "Normal",
     },
@@ -16075,6 +17358,7 @@ export const npcData: NPC[] = [
         id: 700210,
         name: "{nickname}",
         camp: "NPC",
+        charId: 1601,
         type: "Normal",
     },
     {
@@ -19015,6 +20299,118 @@ export const npcData: NPC[] = [
     {
         id: 700382,
         name: "群众演员",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700383,
+        name: "帕蒂",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700384,
+        name: "渡影集",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700385,
+        name: "逍遥生",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700386,
+        name: "宫先生",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700387,
+        name: "清商",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700388,
+        name: "卖包子的女孩",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700389,
+        name: "路过的大叔",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700390,
+        name: "扶疏",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700391,
+        name: "扶风",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700392,
+        name: "阁主",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700393,
+        name: "衰弱的伤者",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700394,
+        name: "不会说话的无由生",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700395,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700396,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700397,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700398,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700399,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700400,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700401,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700402,
         camp: "NPC",
         type: "Normal",
     },
@@ -26744,6 +28140,14059 @@ export const npcData: NPC[] = [
         type: "Normal",
     },
     {
+        id: 701113,
+        name: "汀兰",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51156024,
+                content: "我的钱袋子呢？我的钱袋子怎么不见了？",
+                npc: 701113,
+                next: 51156001,
+            },
+            {
+                id: 51156001,
+                content: "就是盯着那吹糖人的店家多看了会，结果准备掏钱买的时候，口袋里居然空空如也。",
+                npc: 701113,
+                next: 51156002,
+            },
+            {
+                id: 51156002,
+                content: "难不成是被人偷了去？还是丢在了什么地方？",
+                npc: 701113,
+                options: [
+                    {
+                        id: 51156003,
+                        content: "需要帮忙吗？",
+                        next: 51156004,
+                        impr: [1041, "Morality", 3],
+                    },
+                    {
+                        id: 51156005,
+                        content: "华胥也有小偷小盗的事情？",
+                        next: 51156006,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                ],
+            },
+            {
+                id: 51156004,
+                content: "谢谢你，我的钱袋子好像不见了，不过我也记不起来丢在什么地方，也许……也许被人顺走了也说不定……",
+                npc: 701113,
+                next: 51156007,
+            },
+            {
+                id: 51156006,
+                content: "说……说的也是，如果真是被偷了应该也会有狴犴相助才对……",
+                npc: 701113,
+                next: 51156007,
+            },
+            {
+                id: 51156007,
+                content: "我还是再找找吧，多谢你。",
+                npc: 701113,
+            },
+            {
+                id: 51156008,
+                content: "我的钱袋子呢？我的钱袋子怎么不见了？",
+                npc: 701113,
+                next: 51156009,
+            },
+            {
+                id: 51156009,
+                content: "找了好半天也没找着，这可怎么办，我回家的船票还没买呢……",
+                npc: 701113,
+                next: 51156010,
+            },
+            {
+                id: 51156010,
+                content: "咦，又是你？你找到我的钱袋子了吗？还是说……",
+                npc: 701113,
+                options: [
+                    {
+                        id: 51156011,
+                        content: "没找到。",
+                        next: 51156012,
+                    },
+                    {
+                        id: 51156014,
+                        content: "你不是皓京本地的？",
+                        next: 51156015,
+                    },
+                ],
+            },
+            {
+                id: 51156012,
+                content: "啊……那也没办法了……虽然也不是什么大钱，但是好歹也是我出来玩带的所有资金了。",
+                npc: 701113,
+                next: 51156013,
+            },
+            {
+                id: 51156015,
+                content:
+                    "是啊，我从烟津渡来，坐了好久的船，听说皓京是个大城市，今日一见果然名不虚传，瞧瞧这建筑多气派！商业街也比咱们那繁华多了。",
+                npc: 701113,
+                next: 51156016,
+            },
+            {
+                id: 51156013,
+                content: "既然找不到，只能去求助天禄司，看看他们有没有办法临时安置一段时间，等家人寄钱来再解燃眉之急。",
+                npc: 701113,
+                options: [
+                    {
+                        id: 51156014,
+                        content: "你不是皓京本地的？",
+                        next: 51156015,
+                    },
+                    {
+                        id: 51156017,
+                        content: "求助……天禄司？",
+                        next: 51156018,
+                    },
+                ],
+            },
+            {
+                id: 51156016,
+                content: "就是这么多的新鲜玩意，看得我眼花缭乱，这不是，钱袋子也没注意守住，丢了！",
+                npc: 701113,
+                options: [
+                    {
+                        id: 51156022,
+                        content: "先不聊了。",
+                        next: 51156023,
+                    },
+                ],
+            },
+            {
+                id: 51156018,
+                content: "第一次听说的时候，我也觉得很奇怪，明明是三司之一，怎么平民百姓的蝇头小事也管。",
+                npc: 701113,
+                next: 51156019,
+            },
+            {
+                id: 51156023,
+                content: "我看这有好些朋友要帮我找钱包，皓京还是好心人多啊。",
+                npc: 701113,
+            },
+            {
+                id: 51156019,
+                content:
+                    "所以我刚刚便顺便抓了个皓京本地人问询。他给的解释是说，毕竟狴犴大人管的只是那些作奸犯科之事，还有许多是狴犴无暇顾及或是无法顾及的。",
+                npc: 701113,
+                next: 51156020,
+            },
+            {
+                id: 51156020,
+                content: "要是让应天尉插手吧，那也有些大材小用。所以天禄司只能承担了这皓京的一些民生问题，专门选了一些人来处理。",
+                npc: 701113,
+                options: [
+                    {
+                        id: 51156022,
+                        content: "先不聊了。",
+                        next: 51156023,
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 701114,
+        name: "诸葛陶",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51156114,
+                content: "定是那油嘴滑舌的小贩子偷的！",
+                npc: 701114,
+                next: 51156101,
+            },
+            {
+                id: 51156101,
+                content:
+                    "要我说，那位姑娘何必再找那钱袋子，她自从进了这条街开始，我便一直盯着她的一举一动，她接触过的人里面，最有嫌疑的，就是刚才那吹糖人的小贩！",
+                npc: 701114,
+                options: [
+                    {
+                        id: 51156102,
+                        content: "怎么推断出的结果？",
+                        next: 51156103,
+                    },
+                    {
+                        id: 51156109,
+                        content: "你为何一直盯着她看？",
+                        next: 51156110,
+                    },
+                ],
+            },
+            {
+                id: 51156103,
+                content: "她与那么多人都擦肩而过，只在那糖人摊前停了片刻，排除所有嫌疑，那必然是这一种可能了！",
+                npc: 701114,
+                options: [
+                    {
+                        id: 51156104,
+                        content: "她在摊子前停下来，难道不是为了看人吹糖人吗？",
+                        next: 51156105,
+                    },
+                    {
+                        id: 51156107,
+                        content: "你的推断没有任何依据。",
+                        next: 51156108,
+                    },
+                ],
+            },
+            {
+                id: 51156110,
+                content:
+                    "我可没看她！我一直看的是那心怀叵测的糖人摊主！自从他把摊子开在我隔壁之后，我这客人便都被他那诡异的戏码博去了眼球！",
+                npc: 701114,
+                next: 51156111,
+            },
+            {
+                id: 51156105,
+                content:
+                    "的确如此，但你可曾听说过一种秘术，利用博人眼球的戏码转移他人的注意力，再用高超到人眼看不清的手上功夫，将人随身携带之物偷走！",
+                npc: 701114,
+                next: 51156106,
+            },
+            {
+                id: 51156108,
+                content:
+                    "如何没有依据，你根本不了解这个卖糖人的小贩，他就是靠这些花招来搏人开心。哼……你大可不信我，等到我拆穿他，你们就知道了！",
+                npc: 701114,
+                options: [
+                    {
+                        id: 51156112,
+                        content: "要是他真偷了，狴犴为什么不来抓他？",
+                        next: 51156113,
+                    },
+                ],
+            },
+            {
+                id: 51156111,
+                content: "所以我便整日盯着他，我定要盯出他做了什么坏事！好早日去检举这家伙！",
+                npc: 701114,
+                options: [
+                    {
+                        id: 51156112,
+                        content: "要是他真偷了，狴犴为什么不来抓他？",
+                        next: 51156113,
+                    },
+                ],
+            },
+            {
+                id: 51156106,
+                content: "这便是那卖糖人的摊主所施之法！",
+                npc: 701114,
+                options: [
+                    {
+                        id: 51156112,
+                        content: "要是他真偷了，狴犴为什么不来抓他？",
+                        next: 51156113,
+                    },
+                ],
+            },
+            {
+                id: 51156113,
+                content: "狴犴大人……在路上了，迟早会来的！你这人不懂事，我懒得和你废话！",
+                npc: 701114,
+            },
+        ],
+    },
+    {
+        id: 701115,
+        name: "西门鹤",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51156201,
+                content: "丢钱袋的姑娘别急，我在家中别称寻物仙人，我老婆乱丢的耳坠和挂饰，我回回都找得到！",
+                npc: 701115,
+                next: 51156202,
+            },
+            {
+                id: 51156202,
+                content: "寻物，我有一简单之法，出自无穷藏派真人传授，十分有效！",
+                npc: 701115,
+                options: [
+                    {
+                        id: 51156203,
+                        content: "我挺好奇，你能给我说说吗？",
+                        next: 51156204,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                ],
+            },
+            {
+                id: 51156204,
+                content: "勤奋好学定是好事，但现在最紧要之事还是帮这位可怜的外乡客找到丢失的钱包，等我找到了再详细和你说说吧！",
+                npc: 701115,
+            },
+            {
+                id: 51156205,
+                content: "诶？怎么就是找不到呢？",
+                npc: 701115,
+                next: 51156206,
+            },
+            {
+                id: 51156206,
+                content: "明明在家中寻物之时都十分好用，怎么到了这大街上就一点作用都没了？还是我学习之时不够认真，才让这寻物之法大打折扣！",
+                npc: 701115,
+                next: 51156207,
+            },
+            {
+                id: 51156207,
+                content: "是你？我还是没找着那位外乡客的钱包，不过看起来她倒是也接受了这事……刚才还来问我要是真丢了要去何处求助。",
+                npc: 701115,
+                next: 51156208,
+            },
+            {
+                id: 51156208,
+                content: "不过我还是觉得很奇怪，我这寻物之法为何就是不灵验了呢？",
+                npc: 701115,
+                options: [
+                    {
+                        id: 51156209,
+                        content: "寻物之法究竟是什么？",
+                        next: 51156210,
+                    },
+                ],
+            },
+            {
+                id: 51156210,
+                content: "诶呀，这方法，说起来是又复杂又简单，你要是愿意听，我就和你说道说道，就是可能有些长。",
+                npc: 701115,
+                options: [
+                    {
+                        id: 51156211,
+                        content: "你说吧。",
+                        next: 51156212,
+                    },
+                ],
+            },
+            {
+                id: 51156212,
+                content: "诶呀，你果然是个勤奋好学的家伙。是这样的，首先呢，你得确认丢东西的日子，上到月份，下到具体时间，越详细越好。",
+                npc: 701115,
+                next: 51156213,
+            },
+            {
+                id: 51156213,
+                content: "以月份来算，一月有31天的为大，一月有30天的为小，如月即为平。",
+                npc: 701115,
+                next: 51156214,
+            },
+            {
+                id: 51156214,
+                content: "大的话，要按天、地、春、星、人、时、风、利、明循环算，小，或平，则按天、明、利、风、时、人、星、春、地来算。",
+                npc: 701115,
+                options: [
+                    {
+                        id: 51156215,
+                        content: "等等等等……你给我绕糊涂了，你说的这些字是什么意思？",
+                        next: 51156216,
+                    },
+                ],
+            },
+            {
+                id: 51156216,
+                content: "这天、春、星、人，分别代表的就是往西、西南、北、南方去找。至于地，是说此物过两天会自己出现。",
+                npc: 701115,
+                next: 51156217,
+            },
+            {
+                id: 51156217,
+                content:
+                    "时呢，是说被偷咯，难找嘞！风是他一时疏忽，或者压根没仔细去寻，利是此物被他熟悉之人拿走了，至于明……我给我那婆娘算时多半都是明，因为那物就在家中。",
+                npc: 701115,
+                options: [
+                    {
+                        id: 51156218,
+                        content: "那你给他算的是什么？",
+                        next: 51156219,
+                    },
+                ],
+            },
+            {
+                id: 51156219,
+                content: "诶呀，实不相瞒，要是结果是时，我便不继续琢磨了，但偏偏就是春……我在她丢物的西南位置搜寻了好久，就是没找着呀。",
+                npc: 701115,
+                next: 51156220,
+            },
+            {
+                id: 51156220,
+                content: "难不成……她早就丢了钱袋，只是现在才发现？诶……我是爱莫能助了！",
+                npc: 701115,
+                options: [
+                    {
+                        id: 51156221,
+                        content: "太复杂了，再见！",
+                        next: 51156222,
+                    },
+                ],
+            },
+            {
+                id: 51156222,
+                content: "分明是春卦，为何会如此呢……",
+                npc: 701115,
+            },
+        ],
+    },
+    {
+        id: 701116,
+        name: "澹台烟",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51156307,
+                content: "我早跟你说了这街上有贼，之前有人看到了，一个小女孩，皮肤黑黢黢的！",
+                npc: 701116,
+                next: 51156301,
+            },
+            {
+                id: 51156301,
+                content: "什么贼不贼的，咱们华胥哪有贼？你来说说看，大风九章难道是摆设吗？狴犴大人不会顺着风来抓贼吗？",
+                npc: 701117,
+                next: 51156302,
+            },
+            {
+                id: 51156302,
+                content:
+                    "我们只是在讨论此事，你别一副我已经错了的语气，我只是说我看见过，真有个小贼，那贼不一定是自己亲自偷的，可能有别的办法……",
+                npc: 701116,
+                next: 51156303,
+            },
+            {
+                id: 51156303,
+                content: "切……还能有什么办法？让那丢了钱袋的人钱袋自己飞起来？",
+                npc: 701117,
+                next: 51156304,
+            },
+            {
+                id: 51156304,
+                content: "我亲眼所见……那小贼有一手奇妙魔法，唰的召唤出一个蠕动的触手，勾出他人包里的东西，掉在地上……",
+                npc: 701116,
+                next: 51156305,
+            },
+            {
+                id: 51156305,
+                content: "还有这种事……未免太玄乎了吧？",
+                npc: 701117,
+                next: 51156306,
+            },
+            {
+                id: 51156306,
+                content: "嗯哼，世界之大，无奇不有~",
+                npc: 701116,
+            },
+        ],
+    },
+    {
+        id: 701117,
+        name: "许星垂",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701118,
+        name: "月痕",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 50107205,
+                content: "博山香行周年店庆！",
+                voice: "env/Ver0102/7D702952",
+                npc: 701118,
+            },
+            {
+                id: 51156529,
+                content: "博山香行周年店庆，来店订购香料满十赠五~",
+                npc: 701118,
+                next: 51156528,
+            },
+            {
+                id: 51156528,
+                content: "博山香行，百年老店，千年基业，香料品质有保证，定让顾客买个安心，买个开心！",
+                npc: 701118,
+                next: 51156501,
+            },
+            {
+                id: 51156501,
+                content: "这位客人，见你在此驻足许久，是不是对我们店的香料感兴趣？不妨进店看看，让店里的伙计好好为您挑选适合的香料和香囊。",
+                npc: 701118,
+                next: 51156502,
+            },
+            {
+                id: 51156502,
+                content: "我们香行历史悠久，也是织星客自营，在口碑和品质上，您完全可以放心。",
+                npc: 701118,
+                options: [
+                    {
+                        id: 51156503,
+                        content: "香料对我没什么用处，有一个香囊就行。",
+                        next: 51156504,
+                    },
+                    {
+                        id: 51156507,
+                        content: "除了香料，你们还卖别的吗？",
+                        next: 51156508,
+                    },
+                ],
+            },
+            {
+                id: 51156504,
+                content: "哦？看来客人并非华胥之人，若是生在华胥，生活中方方面面都是离不开香料的。",
+                npc: 701118,
+                next: 51156505,
+            },
+            {
+                id: 51156508,
+                content:
+                    "自然，除了香料，客人也可以看看我们特质的黍锦香囊，配饰也可分开购买，客人如果喜欢装饰品，还能在本店买到白木雕摆件。",
+                npc: 701118,
+                next: 51156509,
+            },
+            {
+                id: 51156505,
+                content: "不过没关系，咱们香行里还有香囊坠饰，香木雕刻摆件以及最为有名的博山香炉在售。",
+                npc: 701118,
+                next: 51156506,
+            },
+            {
+                id: 51156509,
+                content: "当然最有名的，还是店里热销产品——博山香炉。",
+                npc: 701118,
+                next: 51156510,
+            },
+            {
+                id: 51156506,
+                content: "客人也可以看看，带回去给朋友当做旅游纪念礼也是好的。",
+                npc: 701118,
+                next: 51156510,
+            },
+            {
+                id: 51156510,
+                content: "如何，今日还有周年酬宾活动，客人要进店挑挑看吗？",
+                npc: 701118,
+            },
+            {
+                id: 51156511,
+                content: "博山香行周年店庆，来店订购香料满十送五~",
+                npc: 701118,
+                next: 51156512,
+            },
+            {
+                id: 51156512,
+                content:
+                    "客人又来集市闲逛？这是已经在咱们华胥待了有些时日了吗？可有去街上的茶楼里品上一盏香茗？亦或是抽空体会过附近的山水美景？",
+                npc: 701118,
+                next: 51156513,
+            },
+            {
+                id: 51156513,
+                content: "今日来我们博山香行，有什么需要吗？",
+                npc: 701118,
+                options: [
+                    {
+                        id: 51156514,
+                        content: "介绍一下你们香行。",
+                        next: 51156515,
+                    },
+                ],
+            },
+            {
+                id: 51156515,
+                content: "哦？客人对香行的历史感兴趣？您可知道华胥有着织星客这样的商人联盟，我们博山香行就是织星客自营的店铺。",
+                npc: 701118,
+                next: 51156516,
+            },
+            {
+                id: 51156516,
+                content:
+                    "不止皓京，我们在华胥各地都设有分店，主营的业务就是香料贩售，当然，也卖别的。因为信誉好，香料质量也高，受到各方欢迎。",
+                npc: 701118,
+                options: [
+                    {
+                        id: 51156517,
+                        content: "我从烟津渡来，为什么那边没有博山香行？",
+                        next: 51156518,
+                    },
+                    {
+                        id: 51156521,
+                        content: "你提到的博山香炉是什么东西？",
+                        next: 51156522,
+                    },
+                ],
+            },
+            {
+                id: 51156518,
+                content: "没想到客人还去过华胥不少地方呢！是了，虽然咱们是织星客们开的店，但烟津渡那边的确并无分店。",
+                npc: 701118,
+                next: 51156519,
+            },
+            {
+                id: 51156522,
+                content:
+                    "其实也就是个熏香用的炉子，只是最开始的那个锻自博山，后续便以此命名。此炉小巧精致，既具实用性又有观赏性，也是咱们店里最为畅销的商品之一。",
+                npc: 701118,
+                next: 51156523,
+            },
+            {
+                id: 51156519,
+                content:
+                    "其实之前也不是没有开过，但是他们大多早已养成了去百年春买香料的习惯，只有开店初期一段时间吸引了一批顾客，后续便来的少了。",
+                npc: 701118,
+                next: 51156520,
+            },
+            {
+                id: 51156523,
+                content: "不过客人可去过博山？那里可是个好地方，风景秀丽，还是咱们华胥最为知名的香料产地。",
+                npc: 701118,
+                options: [
+                    {
+                        id: 51156524,
+                        content: "没去过，有机会一定。",
+                        next: 51156525,
+                    },
+                ],
+            },
+            {
+                id: 51156520,
+                content: "如此这般，烟津渡的分铺便就歇业息市。",
+                npc: 701118,
+                options: [
+                    {
+                        id: 51156526,
+                        content: "不聊了，再见。",
+                        next: 51156527,
+                    },
+                ],
+            },
+            {
+                id: 51156525,
+                content:
+                    "好啊，客人来华胥一趟，必定要游个尽兴再归家呢。华胥不像外面，日日提心吊胆，担心秽兽袭击，咱们得白龙神君庇佑，幸享万年和平。",
+                npc: 701118,
+                options: [
+                    {
+                        id: 51156526,
+                        content: "不聊了，再见。",
+                        next: 51156527,
+                    },
+                ],
+            },
+            {
+                id: 51156527,
+                content: "走好。欢迎您下次再来~",
+                npc: 701118,
+            },
+        ],
+    },
+    {
+        id: 701119,
+        name: "离砚",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51156606,
+                content: "你要知道一点——我对香料品质的要求很高，晒得太干我不要，香味散得太过我也不要。",
+                npc: 701119,
+                next: 51156601,
+            },
+            {
+                id: 51156601,
+                content: "那是自然，客人的要求我们定当全力以赴，但有些香料可能现在香行里没有存货，我去帮您问问下次到货的时间是什么时候？",
+                npc: 701120,
+                next: 51156602,
+            },
+            {
+                id: 51156602,
+                content: "问，都可以问，但是你要知道一点——我希望你们能尽快把东西送来，我可以等，但我不能等太久。",
+                npc: 701119,
+                next: 51156603,
+            },
+            {
+                id: 51156603,
+                content: "是，客人的时间也是时间，我们可以先从其他分铺问问，是否有您需要的香料，如果有，那就尽快为您调货。",
+                npc: 701120,
+                next: 51156604,
+            },
+            {
+                id: 51156604,
+                content: "可以，怎么说呢……不愧是你们博山香行，在服务质量上的确没话说，但你要知道——",
+                npc: 701119,
+                next: 51156605,
+            },
+            {
+                id: 51156605,
+                content: "知道知道，质量也一定按您的要求嘛！",
+                npc: 701120,
+            },
+        ],
+    },
+    {
+        id: 701120,
+        name: "雨霖",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701121,
+        name: "沈禾",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51156718,
+                content: "之前定的那批香料，品质相当不错，这次就按原先的订单再来一批，还是送到我家中。",
+                npc: 701121,
+                next: 51156701,
+            },
+            {
+                id: 51156701,
+                content: "要我说，精挑细选对比了好些家香行，最终还是博山香行最值得信赖。陆陆续续已经在这里买了上千斤，品质依旧十分有保障。",
+                npc: 701121,
+                options: [
+                    {
+                        id: 51156702,
+                        content: "为什么要买这么多香料？",
+                        next: 51156703,
+                    },
+                ],
+            },
+            {
+                id: 51156703,
+                content: "我吗？我是合香师呀！自然会购入大批量的香料，回家自己琢磨香方。",
+                npc: 701121,
+                next: 51156704,
+            },
+            {
+                id: 51156704,
+                content: "早在很久之前，我就开始从民间的香行订货，价格倒是便宜，但是质量参差不齐。",
+                npc: 701121,
+                next: 51156705,
+            },
+            {
+                id: 51156705,
+                content: "后来周围的朋友都说我，别省那点钱了，比起价格，稳定的品控对于我们这种民间合香师来说才最为重要。",
+                npc: 701121,
+                next: 51156706,
+            },
+            {
+                id: 51156706,
+                content: "要是研发阶段用的一种品质的香料，卖给客人时用的另一种，两者香气却天差地别，对咱们后续的信誉也不是特别好。",
+                npc: 701121,
+                options: [
+                    {
+                        id: 51156707,
+                        content: "说的是，如果我是客人，我也不喜欢货不对版。",
+                        next: 51156708,
+                    },
+                    {
+                        id: 51156711,
+                        content: "民间合香师……是什么意思？",
+                        next: 51156712,
+                    },
+                ],
+            },
+            {
+                id: 51156708,
+                content: "不过嘛……虽然博山香行的品控做的好，但有些稍许冷门的香料，或是产地特殊些的，我们还是会从别的散户那边采购。",
+                npc: 701121,
+                next: 51156709,
+            },
+            {
+                id: 51156712,
+                content:
+                    "顾名思义啊，民间，合香，分开来都很好理解吧？毕竟咱们华胥对香一事颇有讲究，如果只依靠祀烟阁的香方产出，用多了多少是有些乏味的。",
+                npc: 701121,
+                next: 51156713,
+            },
+            {
+                id: 51156709,
+                content: "比如像龙戚戚这种可遇不可得的香料，存世量本就稀少，要想拿到最高品质的，还得去那海边的产地探寻。",
+                npc: 701121,
+                next: 51156710,
+            },
+            {
+                id: 51156713,
+                content: "所以我们私下就喜欢自己琢磨琢磨香方成分，自制一些有独特风味的香品，供给那些讲究的客人。",
+                npc: 701121,
+                next: 51156714,
+            },
+            {
+                id: 51156710,
+                content: "诶呀……说来说去还是因为咱们华胥讲究香道的人太多……才让我们一天到晚绞尽脑汁去研究如何让这香的制备精益求精。",
+                npc: 701121,
+                options: [
+                    {
+                        id: 51156716,
+                        content: "我先走了。",
+                        next: 51156717,
+                    },
+                ],
+            },
+            {
+                id: 51156714,
+                content:
+                    "我们为了研究新香方，自然会消耗许多香料，自己种是太难了，哦！也确实有人这么干！但我这种，还是会选择靠谱的香行购买。",
+                npc: 701121,
+                next: 51156715,
+            },
+            {
+                id: 51156717,
+                content: "行啊，慢走，有缘再聊！",
+                npc: 701121,
+            },
+            {
+                id: 51156715,
+                content: "这不，博山香行，老靠谱啦！",
+                npc: 701121,
+                options: [
+                    {
+                        id: 51156716,
+                        content: "我先走了。",
+                        next: 51156717,
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 701122,
+        name: "韩菱",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51156801,
+                content: "哪有这么做吃食的……这要是换个牙口不好的来，岂不是早上吃，晚上就得捧着酸掉了的牙去泽生阁？",
+                npc: 701122,
+                next: 51156802,
+            },
+            {
+                id: 51156802,
+                content: "怪我馋嘴，这试吃活动从街头吃到街尾，就没想过会有如此诡异之食物，不吃了，再也不吃了！",
+                npc: 701122,
+                options: [
+                    {
+                        id: 51156803,
+                        content: "你吃的是什么？",
+                        next: 51156804,
+                    },
+                ],
+            },
+            {
+                id: 51156804,
+                content:
+                    "果干啊……你要尝尝吗？这家不知道在外面裹了一层什么东西，比别家还要酸，喏，你看这打的广告，华胥第一酸，真不知道谁会买……",
+                npc: 701122,
+                options: [
+                    {
+                        id: 51156805,
+                        content: "给我尝尝",
+                        next: 51156806,
+                    },
+                    {
+                        id: 51156811,
+                        content: "还是算了。",
+                        next: 51156812,
+                    },
+                ],
+            },
+            {
+                id: 51156806,
+                content: "（你从她手中接过果干，试探性尝了一口……）",
+                npc: 701122,
+                next: 51156807,
+            },
+            {
+                id: 51156812,
+                content: "我看也是……还是别尝试这么恐怖的东西了。",
+                npc: 701122,
+            },
+            {
+                id: 51156807,
+                content: "……",
+                npc: 100001,
+                next: 51156808,
+            },
+            {
+                id: 51156808,
+                content: "……",
+                npc: 701122,
+                next: 51156809,
+            },
+            {
+                id: 51156809,
+                content: "怎么不说话？你还好吧？喂！喂！",
+                npc: 701122,
+                next: 51156810,
+            },
+            {
+                id: 51156810,
+                content: "（一口下去，酸到你的五脏六腑四肢五官全部扭曲到混乱，连带着你的思绪也跟着飘了三里路。）",
+            },
+        ],
+    },
+    {
+        id: 701123,
+        name: "璎珞",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51156928,
+                content: "为什么没人来试试我做的糕点呢……难道是卖相不太好？可是味道很香呀……",
+                npc: 701123,
+                next: 51156901,
+            },
+            {
+                id: 51156901,
+                content: "你……你要来试试我做的糕点吗？免费试吃的，当然……如果你喜欢吃，买一点带回家给你的家人……也是可以的……",
+                npc: 701123,
+                next: 51156902,
+            },
+            {
+                id: 51156902,
+                content: "（你看向她面前摆着的几盒甜品，其中一盒吸引了你的注意力。）",
+                npc: 701123,
+                next: 51156903,
+            },
+            {
+                id: 51156903,
+                content:
+                    "你……你喜欢这个吗？这个是我特制的鱼鳞糕，是用皓京本地的鱼切片，用醋腌制后盖在荷花味道的糕上，可是……他们却都不愿意尝尝。",
+                npc: 701123,
+                options: [
+                    {
+                        id: 51156904,
+                        content: "听起来味道很恐怖啊……",
+                        next: 51156905,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                    {
+                        id: 51156907,
+                        content: "他们不吃是对的……",
+                        next: 51156908,
+                        impr: [1041, "Empathy", 3],
+                    },
+                ],
+            },
+            {
+                id: 51156905,
+                content: "什……什么？这可是我精心研究了好久才做出来的呢……我给它起名，叫荷花醋鱼。",
+                npc: 701123,
+                next: 51156906,
+            },
+            {
+                id: 51156908,
+                content: "怎么会？我研究了很久才做出来的新糕点，如果你不喜欢……那……那这个！",
+                npc: 701123,
+                next: 51156909,
+            },
+            {
+                id: 51156906,
+                content: "你要不要尝尝？一定很好吃的，我加了很多醋呢……鱼也很鲜美。",
+                npc: 701123,
+                options: [
+                    {
+                        id: 51156910,
+                        content: "（快跑！）",
+                        next: 51156911,
+                    },
+                ],
+            },
+            {
+                id: 51156909,
+                content: "油条泡了臭豆腐水后再裹一层面粉放锅里复炸，工序可复杂了呢，我出一锅要等好久，我给它起名为……臭香香~",
+                npc: 701123,
+                options: [
+                    {
+                        id: 51156910,
+                        content: "（快跑！）",
+                        next: 51156911,
+                    },
+                ],
+            },
+            {
+                id: 51156911,
+                content: "我还有事，先走一步！",
+                npc: 100001,
+            },
+            {
+                id: 51156912,
+                content: "为什么没人来试试我做的糕点呢……难道是卖相不太好看？可是味道很好的呀……",
+                npc: 701123,
+                next: 51156913,
+            },
+            {
+                id: 51156913,
+                content:
+                    "咦？又是你！你果然回来了，你还是喜欢我做的糕点的对吧？想吃荷花醋鱼还是臭香香？额……臭香香还是算了，因为太久没有卖出去，我下架了。",
+                npc: 701123,
+                options: [
+                    {
+                        id: 51156916,
+                        content: "有没有一种可能，我是说可能，你不适合做菜……",
+                        next: 51156917,
+                    },
+                    {
+                        id: 51156920,
+                        content: "你有什么全新的研究吗？",
+                        next: 51156921,
+                    },
+                ],
+            },
+            {
+                id: 51156917,
+                content: "不适合……怎么可能呢？我从小做菜就很有天赋，小时候，我总给父亲做我自己研究的糕点，我有做过……",
+                npc: 701123,
+                next: 51156918,
+            },
+            {
+                id: 51156921,
+                content: "有啊！我从未放弃追寻美食的道路！",
+                npc: 701123,
+                next: 51156922,
+            },
+            {
+                id: 51156918,
+                content: "毛虫菜叶！就是用菜园子里最新鲜的毛毛虫，去头后用菜叶裹成一圈放在火上烤，吃到嘴里，嘎嘣脆！",
+                npc: 701123,
+                next: 51156919,
+            },
+            {
+                id: 51156922,
+                content: "锵锵~新研究的一款绝妙糕点，结合了华胥香料特色，口感也十分特殊，你要试试吗？",
+                npc: 701123,
+                options: [
+                    {
+                        id: 51156923,
+                        content: "你先说一下是什么做的……",
+                        next: 51156924,
+                    },
+                ],
+            },
+            {
+                id: 51156919,
+                content: "对了，毛虫菜叶我现在还在做，你要试试吗？",
+                npc: 701123,
+                options: [
+                    {
+                        id: 51156926,
+                        content: "祝你成功！但我先走了！",
+                        next: 51156927,
+                    },
+                ],
+            },
+            {
+                id: 51156924,
+                content: "白木切成块，和豆腐拌在一起，吃在嘴中，既有白木的硬度，又有豆腐的软糯，这两种食材组合在一起，更是妙中之妙！",
+                npc: 701123,
+                next: 51156925,
+            },
+            {
+                id: 51156927,
+                content: "诶？怎么又要跑？！难道我做的食物真的很难吃吗……",
+                npc: 701123,
+            },
+            {
+                id: 51156925,
+                content: "等一下……白木好像不是食材，但是也差不多……总之就是……口感……非常好！你要试试吗？",
+                npc: 701123,
+                options: [
+                    {
+                        id: 51156926,
+                        content: "祝你成功！但我先走了！",
+                        next: 51156927,
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 701124,
+        name: "琳琅",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51157014,
+                content: "华胥特色小吃，吃一口念一年！",
+                npc: 701124,
+                next: 51157001,
+            },
+            {
+                id: 51157001,
+                content: "瞧瞧这油汪汪的辣子，别管谁吃上一口，那都堪比那大冬天钻暖炉，大夏天进冰窖，吃的就是一口心飞扬！",
+                npc: 701124,
+                next: 51157002,
+            },
+            {
+                id: 51157002,
+                content: "这东西可有特色了，你知道锦云谷吗？这道小吃就是我当年因差前往锦云谷，在那待了一段时间后，当地居民拿来招呼我的。",
+                npc: 701124,
+                next: 51157003,
+            },
+            {
+                id: 51157003,
+                content:
+                    "我一吃，连连哈气了好几下，那入口之味，先是辣，辣的心肝脾胃一齐起飞，再是咸，最直接的味觉刺激舌尖，最后才是食材原本之味。",
+                npc: 701124,
+                options: [
+                    {
+                        id: 51157004,
+                        content: "所以这是什么？",
+                        next: 51157005,
+                    },
+                    {
+                        id: 51157006,
+                        content: "所以好吃吗？",
+                        next: 51157007,
+                    },
+                    {
+                        id: 51157009,
+                        content: "（试探性伸手。）",
+                        next: 51157010,
+                    },
+                ],
+            },
+            {
+                id: 51157005,
+                content: "据锦云谷人说，此物名为——串串签！怎么样，要不要尝尝？",
+                npc: 701124,
+            },
+            {
+                id: 51157007,
+                content: "好吃啊！要是不好吃，我为何要在锦云谷滞留直到学会这道菜再回来？",
+                npc: 701124,
+                next: 51157008,
+            },
+            {
+                id: 51157010,
+                content: "来来来，别客气！多吃两个！",
+                npc: 701124,
+                next: 51157011,
+            },
+            {
+                id: 51157008,
+                content: "怎么说，要尝尝吗？免费试吃！",
+                npc: 701124,
+            },
+            {
+                id: 51157011,
+                content: "（好辣好辣好辣好辣！！！这种食物对于你这种没有吃过重口味的舌头来说有些勉强了……）",
+                npc: 701124,
+                next: 51157012,
+            },
+            {
+                id: 51157012,
+                content: "怎么脸都吃红了？你还好吧？要不要来点水？",
+                npc: 701124,
+                next: 51157013,
+            },
+            {
+                id: 51157013,
+                content: "水……救命……",
+                npc: 100001,
+            },
+        ],
+    },
+    {
+        id: 701125,
+        name: "桂棹",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51157625,
+                content: "那里曾是家布鞋店，现在却已经改成了木雕摊……东市啊，大变样咯！",
+                npc: 701125,
+                next: 51157601,
+            },
+            {
+                id: 51157601,
+                content: "好些日子不曾来东市逛过，身子骨老了，不怎么爱在城中走动了。",
+                npc: 701125,
+                next: 51157602,
+            },
+            {
+                id: 51157602,
+                content: "娃儿看着面生，不像是咱们皓京本地的，是来这东市买些啥？纪念之物，还是别的？",
+                npc: 701125,
+                options: [
+                    {
+                        id: 51157603,
+                        content: "只是随便逛逛。",
+                        next: 51157604,
+                    },
+                    {
+                        id: 51157606,
+                        content: "有什么推荐吗？",
+                        next: 51157607,
+                    },
+                ],
+            },
+            {
+                id: 51157604,
+                content: "是啊……外地人来皓京，总是免不了来东市逛逛，但要我们这些老皓京人来说，这边卖的也没什么新鲜稀奇的东西。",
+                npc: 701125,
+                next: 51157605,
+            },
+            {
+                id: 51157607,
+                content: "推荐嘛……真要是说，其实还真没有，这东市近些年改换得面目一新，以往熟悉的老店要不关了门要不搬了地址。",
+                npc: 701125,
+                next: 51157608,
+            },
+            {
+                id: 51157605,
+                content: "真要是有空闲，去华胥各地多走走，多看些山水才是要紧事。",
+                npc: 701125,
+            },
+            {
+                id: 51157608,
+                content: "索性不推荐了，比起买这些特色玩意，还不如多出去走走，看看山山水水才是美事。",
+                npc: 701125,
+            },
+            {
+                id: 51157609,
+                content: "前几年那里还是家布鞋店，现在却已经改成了木雕铺……东市啊，大变样咯！",
+                npc: 701125,
+                next: 51157610,
+            },
+            {
+                id: 51157610,
+                content: "你这娃儿又来东市了？真是好巧，我本来腿脚不好便不怎么来这边逛，今日却又巧合见着你了。",
+                npc: 701125,
+                options: [
+                    {
+                        id: 51157611,
+                        content: "的确好巧。",
+                        next: 51157612,
+                    },
+                    {
+                        id: 51157617,
+                        content: "你不是每天都在这里吗？",
+                        next: 51157618,
+                    },
+                ],
+            },
+            {
+                id: 51157612,
+                content: "是啊……想起了我当年和老头子定情之时……他也是如此这般，频频装作与我偶遇，最终俘获我的芳心，只可惜……",
+                npc: 701125,
+                options: [
+                    {
+                        id: 51157613,
+                        content: "可惜什么？",
+                        next: 51157614,
+                    },
+                    {
+                        id: 51157615,
+                        content: "我……我没这个意思……",
+                        next: 51157616,
+                    },
+                ],
+            },
+            {
+                id: 51157618,
+                content: "娃儿在说什么胡话呢？我不常来这里了，我家那老头子才是经常来，他喜欢热闹，回回肉菜都不从西市买，非要绕一圈过来。",
+                npc: 701125,
+                options: [
+                    {
+                        id: 51157619,
+                        content: "他现在不在这里买了吗？",
+                        next: 51157620,
+                    },
+                ],
+            },
+            {
+                id: 51157614,
+                content: "可惜他去年就走啦……这条路，倒是没他陪我再走一遍……",
+                npc: 701125,
+            },
+            {
+                id: 51157616,
+                content: "哈哈哈！娃儿说话有趣，老太婆我不是那个意思，只是见到你便想起了我那命短的丈夫……诶，还是不提那些伤心事好啦……",
+                npc: 701125,
+                options: [
+                    {
+                        id: 51157623,
+                        content: "再见！",
+                        next: 51157624,
+                    },
+                ],
+            },
+            {
+                id: 51157620,
+                content: "东市现在已经改成了供外来游客闲逛的街区，以往那些适合咱们购入生活用品的店铺基本都关了。",
+                npc: 701125,
+                next: 51157621,
+            },
+            {
+                id: 51157624,
+                content: "下次见，娃儿，买东西时记得和他们谈谈价，别直接就掏钱了。",
+                npc: 701125,
+            },
+            {
+                id: 51157621,
+                content: "你且从这看过去，哪里有卖瓜果蔬菜之类的店？只有年轻一辈们爱来凑热闹了。",
+                npc: 701125,
+                next: 51157622,
+            },
+            {
+                id: 51157622,
+                content: "改了也好，现在老头子也走了。若是他还能再来逛逛，想必现在……多少会有些失望了。",
+                npc: 701125,
+                options: [
+                    {
+                        id: 51157623,
+                        content: "再见！",
+                        next: 51157624,
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 701126,
+        name: "方朔",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51157901,
+                content: "（男人双眸似鹰隼，冷冷地盯着路过的人群，见你在他面前驻留，冰冷的目光便转到你身上。）",
+                next: 51157902,
+            },
+            {
+                id: 51157902,
+                content: "做什么？",
+                npc: 701126,
+                options: [
+                    {
+                        id: 51157903,
+                        content: "这话好像该我问你？",
+                        next: 51157904,
+                    },
+                    {
+                        id: 51157905,
+                        content: "不是你开的店吗？！",
+                        next: 51157906,
+                    },
+                ],
+            },
+            {
+                id: 51157904,
+                content: "唔……我开店，卖木头，买不买？",
+                npc: 701126,
+                options: [
+                    {
+                        id: 51157907,
+                        content: "算了。",
+                        next: 51157908,
+                    },
+                ],
+            },
+            {
+                id: 51157906,
+                content: "唔……是……刚开门，我卖木头的，你买不买？",
+                npc: 701126,
+                options: [
+                    {
+                        id: 51157907,
+                        content: "算了。",
+                        next: 51157908,
+                    },
+                ],
+            },
+            {
+                id: 51157908,
+                content: "行……",
+                npc: 701126,
+            },
+            {
+                id: 51157910,
+                content: "又是……你。",
+                npc: 701126,
+                options: [
+                    {
+                        id: 51157911,
+                        content: "看到我很惊讶？",
+                        next: 51157912,
+                    },
+                ],
+            },
+            {
+                id: 51157912,
+                content: "你之前……不是说不买吗？为什么今天……又回来？",
+                npc: 701126,
+                next: 51157913,
+            },
+            {
+                id: 51157913,
+                content: "只是路过这里，顺便来看看你做生意。",
+                npc: 100001,
+                next: 51157914,
+            },
+            {
+                id: 51157914,
+                content: "他们……跟我说，皓京，喜欢木头的多……让我来开店。",
+                npc: 701126,
+                next: 51157915,
+            },
+            {
+                id: 51157915,
+                content: "结果，没有人买木头，生意……不好。",
+                npc: 701126,
+                options: [
+                    {
+                        id: 51157916,
+                        content: "为什么每次说话都不说完整？",
+                        next: 51157917,
+                    },
+                    {
+                        id: 51157919,
+                        content: "木头买来做什么？",
+                        next: 51157920,
+                    },
+                ],
+            },
+            {
+                id: 51157917,
+                content: "嘴巴，笨……",
+                npc: 701126,
+                next: 51157918,
+            },
+            {
+                id: 51157920,
+                content: "很……很多。屏风，桌子，板凳，都可以。",
+                npc: 701126,
+                next: 51157921,
+            },
+            {
+                id: 51157918,
+                content: "说的慢，才能清楚。",
+                npc: 701126,
+                options: [
+                    {
+                        id: 51157919,
+                        content: "木头买来做什么？",
+                        next: 51157920,
+                    },
+                ],
+            },
+            {
+                id: 51157921,
+                content: "主要是……要雕，我……我会雕，但要时间。",
+                npc: 701126,
+                next: 51157922,
+            },
+            {
+                id: 51157922,
+                content: "所以是家具？",
+                npc: 100001,
+                next: 51157923,
+            },
+            {
+                id: 51157923,
+                content: "嗯……没人买，大家，不喜欢木头。租了半年，到时间，就走了。",
+                npc: 701126,
+                next: 51157924,
+            },
+            {
+                id: 51157924,
+                content: "我听路过的人说，你看起来不是什么好惹的家伙，所以不敢进来，要不你……多笑笑？",
+                npc: 100001,
+                next: 51157925,
+            },
+            {
+                id: 51157925,
+                content: "不好惹？笑……笑吗……",
+                npc: 701126,
+                next: 51157926,
+            },
+            {
+                id: 51157926,
+                content: "（他踌躇了片刻，似乎在思考该如何摆出笑的表情，直到逐渐驯服五官，做出一副古怪的表情。）",
+                next: 51157927,
+            },
+            {
+                id: 51157927,
+                content: "这样……可以吗？",
+                npc: 701126,
+                options: [
+                    {
+                        id: 51157928,
+                        content: "（拍拍他的肩膀。）还是不要勉强自己了。",
+                        next: 51157929,
+                    },
+                    {
+                        id: 51157930,
+                        content: "（朝他笑一个。）做得很好，以后就按这么来。",
+                        next: 51157931,
+                    },
+                ],
+            },
+            {
+                id: 51157929,
+                content: "唔……好吧，或许，在木头上……画个笑脸，比我自己笑，更简单。",
+                npc: 701126,
+            },
+            {
+                id: 51157931,
+                content: "谢谢，你，我以后，就这么，对着大家笑。",
+                npc: 701126,
+            },
+        ],
+    },
+    {
+        id: 701127,
+        name: "云裳",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51158010,
+                content: "这位客人，看你身材匀称，要不要来试试我们千绣阁里的成衣？",
+                npc: 701127,
+                next: 51158001,
+            },
+            {
+                id: 51158001,
+                content:
+                    "客人，来看看阁里的衣服吗？千绣阁是皓京最有名的成衣店，我们店的成衣都是绣娘们一针一线缝出来的，客人喜欢的话，我给您拿一件试试？",
+                npc: 701127,
+                options: [
+                    {
+                        id: 51158002,
+                        content: "试衣服好麻烦，耽误时间。",
+                        next: 51158004,
+                        impr: [1041, "Benefit", 3],
+                    },
+                    {
+                        id: 51158003,
+                        content: "我这身不够好看吗？",
+                        next: 51158004,
+                        impr: [1041, "Chaos", 3],
+                    },
+                ],
+            },
+            {
+                id: 51158004,
+                content: "客人身在华胥，可曾听说过一句：人靠衣装马靠鞍？",
+                npc: 701127,
+                next: 51158005,
+            },
+            {
+                id: 51158005,
+                content: "客人一看就是德才兼备之士，若是再搭配上我们店里精挑细选的好衣服，定是能进一步彰显出客人的卓尔不凡呢。",
+                npc: 701127,
+                next: 51158006,
+            },
+            {
+                id: 51158006,
+                content: "怎么样，要不要来看看呢？",
+                npc: 701127,
+                options: [
+                    {
+                        id: 51158007,
+                        content: "那行吧。",
+                    },
+                    {
+                        id: 51158008,
+                        content: "不看！",
+                        next: 51158009,
+                    },
+                ],
+            },
+            {
+                id: 51158009,
+                content: "好嘞，客人慢走，若是什么时候想来，我们随时欢迎。",
+                npc: 701127,
+            },
+        ],
+    },
+    {
+        id: 701128,
+        name: "同福饭馆店小二",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51158322,
+                content: "同福饭馆菜品上新，外域高人指点，香料入菜，佳肴更添新风味。",
+                npc: 701128,
+                next: 51158301,
+            },
+            {
+                id: 51158301,
+                content: "客人您如意，今日来店，是打尖还是吃饭，咱们店里新上了几道菜品，道道都获得各方好评，您要不要点上一份试试？",
+                npc: 701128,
+                options: [
+                    {
+                        id: 51158302,
+                        content: "有什么推荐吗？",
+                        next: 51158303,
+                    },
+                ],
+            },
+            {
+                id: 51158303,
+                content: "有！统共有甜咸酸三种，您是爱吃什么口的？",
+                npc: 701128,
+                next: 51158323,
+            },
+        ],
+    },
+    {
+        id: 701129,
+        name: "禾穗",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51158112,
+                content: "同福饭馆的厨子发了疯，居然把莞婆娘碾碎包进丸子里！",
+                npc: 701129,
+                next: 51158101,
+            },
+            {
+                id: 51158101,
+                content: "你是不知道，我一向就厌恶莞婆娘那刺破天的香味，每次闻到，那气味浓郁到像是要把我的鼻腔冲洗一遍！",
+                npc: 701129,
+                next: 51158102,
+            },
+            {
+                id: 51158102,
+                content:
+                    "结果呢，这家厨子，起了个什么……翡翠丸子的称号，我过去一看还以为是什么新奇玩意，结果居然是把莞婆娘捏进肉丸子里，再用糯米皮包上。",
+                npc: 701129,
+                next: 51158103,
+            },
+            {
+                id: 51158103,
+                content: "端上来闻不出味，吃到嘴里却是太迟了！有没有人考虑过我们讨厌莞婆娘的人的心理感受呢？",
+                npc: 701129,
+                options: [
+                    {
+                        id: 51158104,
+                        content: "听起来挺好吃。",
+                        next: 51158105,
+                    },
+                    {
+                        id: 51158107,
+                        content: "听起来好难吃。",
+                        next: 51158108,
+                    },
+                ],
+            },
+            {
+                id: 51158105,
+                content: "什么？！你喜欢莞婆娘这种香料？！我和你已经无法正常交流了，我单方面认为喜欢莞婆娘这种香料的人嗅觉有问题！",
+                npc: 701129,
+                next: 51158106,
+            },
+            {
+                id: 51158108,
+                content:
+                    "对嘛对嘛！这就对了嘛！这种独特的香料，用进菜里就应该在菜单上，客人开点之前，就明确告知会放进去，看看客人能不能接受。",
+                npc: 701129,
+                next: 51158109,
+            },
+            {
+                id: 51158106,
+                content: "同福饭馆就该给我赔点钱，好不容易下顿馆子，却吃了一肚子不开心！",
+                npc: 701129,
+                next: 51158110,
+            },
+            {
+                id: 51158109,
+                content: "现在倒好了，我出来下个馆子，却吃了一肚子不开心。",
+                npc: 701129,
+                next: 51158110,
+            },
+            {
+                id: 51158110,
+                content: "消消气，不然下次不来吃了。",
+                npc: 100001,
+                next: 51158111,
+            },
+            {
+                id: 51158111,
+                content: "说得对，再也不来了！我以后只会去隔壁的八珍楼。",
+                npc: 701129,
+            },
+        ],
+    },
+    {
+        id: 701130,
+        name: "魏蒲",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51158201,
+                content: "你居然没去凑那同福饭馆的热闹？哼，我就知道顾客的眼睛终究是雪亮的！那些凑热闹的人，说白了都是不会吃，不懂吃的。",
+                npc: 701130,
+                next: 51158202,
+            },
+            {
+                id: 51158202,
+                content: "你看那同福饭馆，噱头满天飞！什么香料入菜，简直是欺师灭祖，一派胡言！",
+                npc: 701130,
+                options: [
+                    {
+                        id: 51158203,
+                        content: "没你说的这么夸张吧？",
+                        next: 51158204,
+                        impr: [1041, "Morality", 3],
+                    },
+                    {
+                        id: 51158206,
+                        content: "说的很有道理！",
+                        next: 51158207,
+                        impr: [1041, "Empathy", 3],
+                    },
+                ],
+            },
+            {
+                id: 51158204,
+                content:
+                    "怎么夸张了？咱们华胥老祖宗传下来的规矩，做菜就要老老实实本本分分，菜里的香，是用油用盐，一把猛火炒出来的，那是菜品本来的香气！",
+                npc: 701130,
+                next: 51158205,
+            },
+            {
+                id: 51158207,
+                content: "你看，你也觉得我说的对吧？你可知道我们八珍楼的那些老顾客，各个都是老吃家。",
+                npc: 701130,
+                next: 51158208,
+            },
+            {
+                id: 51158205,
+                content: "才不是这些歪门邪道的方法……让老饕们知晓了，都是要笑话他们的！",
+                npc: 701130,
+            },
+            {
+                id: 51158208,
+                content:
+                    "他们品一道菜，更注重的是菜肴原本的味道，是调料和食物碰撞后在舌尖迸发的风味。而不是这些……花里胡哨却没有实际意义的东西……哼！",
+                npc: 701130,
+            },
+            {
+                id: 50107017,
+                content: "一天到晚就知道折腾看似新颖实则无用的花招，可别忘了华胥美食的精髓是什么！",
+                voice: "env/Ver0102/7D702B4A",
+                npc: 701266,
+            },
+            {
+                id: 51158209,
+                content: "一天到晚就知道折腾些看似新颖实则无用的花架子，可别忘了华胥美食的精髓是什么！",
+                npc: 701266,
+                next: 51158210,
+            },
+            {
+                id: 51158210,
+                content: "好啦，这下好啦，把我们家的客人全都骗走了，殊不知大家只是图一时新鲜，难道还能真觉得那些东西好吃吗？",
+                npc: 701266,
+                next: 51158211,
+            },
+            {
+                id: 51158211,
+                content: "我不信……还能真的好吃吗？那个……你，对！就是你！你过来一下！",
+                npc: 701266,
+                options: [
+                    {
+                        id: 51158212,
+                        content: "叫我吗？",
+                        next: 51158213,
+                    },
+                    {
+                        id: 51158221,
+                        content: "（不理他。）",
+                        next: 51158222,
+                    },
+                ],
+            },
+            {
+                id: 51158213,
+                content: "对对对，就是你，你快来，我托你办个事。",
+                npc: 701266,
+                options: [
+                    {
+                        id: 51158214,
+                        content: "什么事？",
+                        next: 51158215,
+                    },
+                    {
+                        id: 51158221,
+                        content: "（不理他。）",
+                        next: 51158222,
+                    },
+                ],
+            },
+            {
+                id: 51158222,
+                content: "不帮就不帮，摆什么脸色呢！我还差你一个吗？",
+                npc: 701266,
+            },
+            {
+                id: 51158215,
+                content: "你有没有吃过同福饭馆的新品菜肴？",
+                npc: 701266,
+                options: [
+                    {
+                        id: 51158216,
+                        content: "没吃过。",
+                        next: 51158217,
+                    },
+                    {
+                        id: 51158221,
+                        content: "（不理他。）",
+                        next: 51158222,
+                    },
+                ],
+            },
+            {
+                id: 51158217,
+                content: "你这样，我给你些钱，你就像寻常顾客那样，去找同福饭馆的店小二买些他们新上的菜品回来，如何？",
+                npc: 701266,
+                options: [
+                    {
+                        id: 51158218,
+                        content: "可以。",
+                        next: 51158219,
+                    },
+                    {
+                        id: 51158221,
+                        content: "（不理他。）",
+                        next: 51158222,
+                    },
+                ],
+            },
+            {
+                id: 51158219,
+                content: "诶，这就对了嘛，给，这是给你的钱。",
+                npc: 701266,
+            },
+            {
+                id: 51158224,
+                content: "一天到晚就知道折腾些看似新颖实则无用的花架子，可别忘了华胥美食的精髓是什么！",
+                npc: 701266,
+                next: 51158225,
+            },
+            {
+                id: 51158225,
+                content: "怎……怎么样？东西带回来了？",
+                npc: 701266,
+                next: 51158226,
+            },
+            {
+                id: 51158226,
+                content: "给你。",
+                npc: 100001,
+                next: 51158227,
+            },
+            {
+                id: 51158227,
+                content: "（他迫不及待地打开食盒，先是俯身仔细闻了一圈，不知从哪掏出一双筷子，夹起菜肴送入嘴中。）",
+                next: 51158228,
+            },
+            {
+                id: 51158228,
+                content:
+                    "的确是……香！在同时保留菜品原先的风味之上，使用香料平增了更刺激的味道，口腔和鼻腔任由香气钩织出协奏的共鸣……美妙！太美妙了！",
+                npc: 701266,
+                next: 51158229,
+            },
+            {
+                id: 51158229,
+                content: "此食只由天上有，人间哪得几回吃！妙哉！妙哉！",
+                npc: 701266,
+                options: [
+                    {
+                        id: 51158230,
+                        content: "有这么夸张吗？",
+                        next: 51158231,
+                    },
+                ],
+            },
+            {
+                id: 51158231,
+                content: "（他并没有理你，显然已经沉浸在食物里不知天地为何物了……）",
+            },
+        ],
+    },
+    {
+        id: 701131,
+        name: "孙枕石",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51158411,
+                content: "秀芳……不要离开我……秀芳……",
+                npc: 701131,
+                next: 51158401,
+            },
+            {
+                id: 51158401,
+                content: "（眼前的男人醉气熏天，你犹豫着是否要绕开他时，他却一把拉住了你。）",
+                next: 51158402,
+            },
+            {
+                id: 51158402,
+                content: "秀芳！你终于来见我了！不要改嫁好不好，我才是唯一对你好的人啊！",
+                npc: 701131,
+                options: [
+                    {
+                        id: 51158403,
+                        content: "大哥，你看清楚，我不是秀芳！",
+                        next: 51158404,
+                    },
+                    {
+                        id: 51158406,
+                        content: "（不解释自己的身份，任他认错。）",
+                        next: 51158407,
+                    },
+                ],
+            },
+            {
+                id: 51158404,
+                content: "不是……我……呜呜呜……她果然还是不肯来见我……",
+                npc: 701131,
+                next: 51158405,
+            },
+            {
+                id: 51158407,
+                content: "秀芳……你不知道我这段时日有多想你，你为何……为何不愿见我！",
+                npc: 701131,
+                next: 51158408,
+            },
+            {
+                id: 51158405,
+                content: "小二！再来三坛酒，今日我就要一醉方休！",
+                npc: 701131,
+            },
+            {
+                id: 51158408,
+                content: "难道那人真就有那么好，值得你为此托付终身吗？还是说……还是说你……你之前与我许诺的那些海誓山盟，都是骗我的？",
+                npc: 701131,
+                next: 51158409,
+            },
+            {
+                id: 51158409,
+                content: "秀芳……我答应你，再不喝了，我们……",
+                npc: 701131,
+                next: 51158410,
+            },
+            {
+                id: 51158410,
+                content: "（男人呜咽一声，醉倒在地，显然是晕过去了。）",
+            },
+        ],
+    },
+    {
+        id: 701132,
+        name: "涧泉",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51158507,
+                content: "把翠屏雀搬来了皓京城？！还有此等奇事！",
+                npc: 701132,
+                next: 51158501,
+            },
+            {
+                id: 51158501,
+                content: "要不说还是东市的这些商户精明呢，为了一时的噱头，无所不用极。",
+                npc: 701133,
+                next: 51158502,
+            },
+            {
+                id: 51158502,
+                content: "那店铺是卖什么呢？总不能把雀儿的羽翎摘下来做饰品吧？",
+                npc: 701132,
+                next: 51158503,
+            },
+            {
+                id: 51158503,
+                content: "哦哟！说得也太残忍了……雀儿可是用来观赏的，赏雀品茗，是不是别有一番风味？",
+                npc: 701133,
+                next: 51158504,
+            },
+            {
+                id: 51158504,
+                content: "有趣是有趣，但……他如何保证客人能看到开了屏的翠屏雀呢？",
+                npc: 701132,
+                next: 51158505,
+            },
+            {
+                id: 51158505,
+                content: "嘿！他们请了全华胥画技最为精妙的画师，在店内绘制了一副又一副栩栩如生的雌雀在那屏风之上。",
+                npc: 701133,
+                next: 51158506,
+            },
+            {
+                id: 51158506,
+                content:
+                    "再将那屏风放置在每位客人的雅间之内，最后将雄雀放出去。那雄雀是左看右看，晕头转向，争相开屏，怕晚一步就吸引不到假雌雀的注意力咯！",
+                npc: 701133,
+            },
+        ],
+    },
+    {
+        id: 701133,
+        name: "秋浦",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701134,
+        name: "方晴川",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51158616,
+                content: "雀翎茗轩……是在这里吗？",
+                npc: 701134,
+                next: 51158601,
+            },
+            {
+                id: 51158601,
+                content: "收到的传单上分明写的是东市，怎么找过来走了几条街也没见着地方在哪呢？",
+                npc: 701134,
+                next: 51158602,
+            },
+            {
+                id: 51158602,
+                content:
+                    "诶！这位朋友，你可曾见到一家茶舍，名为雀翎茗轩，店内据说有多只漂亮张扬的翠屏雀，实不相瞒，我从小到大就对那些鸟儿特别感兴趣。",
+                npc: 701134,
+                next: 51158603,
+            },
+            {
+                id: 51158603,
+                content:
+                    "这次一听说皓京有这样新鲜的店铺，我就高兴得一蹦三尺高，第一时间就赶了过来，可不知为何……我遍寻许久，就是没有瞧见招牌呢……",
+                npc: 701134,
+                options: [
+                    {
+                        id: 51158604,
+                        content: "我也不知道在哪。",
+                        next: 51158605,
+                    },
+                ],
+            },
+            {
+                id: 51158605,
+                content: "是吗……那确实是可惜了……",
+                npc: 701134,
+            },
+            {
+                id: 51158606,
+                content: "雀翎茗轩……是在这里吗？",
+                npc: 701134,
+                next: 51158607,
+            },
+            {
+                id: 51158607,
+                content: "好不容易能有机会看着翠屏雀，怎么就是整日不见开门呢？",
+                npc: 701134,
+                next: 51158608,
+            },
+            {
+                id: 51158608,
+                content: "诶？是你！你也是来找雀翎茗轩的吗？",
+                npc: 701134,
+                options: [
+                    {
+                        id: 51158609,
+                        content: "你还没找到吗？",
+                        next: 51158610,
+                    },
+                ],
+            },
+            {
+                id: 51158610,
+                content: "什么？不不不，其实我倒是找到了，但我过去一看，那店铺空空如也，问了店老板，说是……雀儿在参商港全丢了……",
+                npc: 701134,
+                next: 51158611,
+            },
+            {
+                id: 51158611,
+                content: "你说这事荒谬不荒谬？哪有这种道理呢？好好的雀儿竟是丢了……那我该如何是好呢？",
+                npc: 701134,
+                options: [
+                    {
+                        id: 51158612,
+                        content: "别担心，总会找回来的。",
+                        next: 51158613,
+                    },
+                    {
+                        id: 51158614,
+                        content: "那就不看了呗！",
+                        next: 51158615,
+                    },
+                ],
+            },
+            {
+                id: 51158613,
+                content: "话虽如此……诶！算啦！再想也无济于事，多谢你的宽慰，我这心里好受多了。",
+                npc: 701134,
+            },
+            {
+                id: 51158615,
+                content: "只是感到有些可惜……诶！算啦！那便等段时间，再来看看是何情况吧。",
+                npc: 701134,
+            },
+        ],
+    },
+    {
+        id: 701135,
+        name: "陆瑶光",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51158812,
+                content: "呜呜……龙君不公啊！这茶舍还未开张，怎料运来的雀儿都不见踪影，我该如何是好……",
+                npc: 701135,
+                next: 51158801,
+            },
+            {
+                id: 51158801,
+                content: "如今选购好的茶叶一直压在家中，喂雀的饲料也只能放在店内受潮，连给请的伙计开日钱都要开不起了！",
+                npc: 701135,
+                next: 51158802,
+            },
+            {
+                id: 51158802,
+                content: "我怎么这么倒霉哟……",
+                npc: 701135,
+                options: [
+                    {
+                        id: 51158803,
+                        content: "这是怎么了？",
+                        next: 51158804,
+                    },
+                ],
+            },
+            {
+                id: 51158804,
+                content: "怪我，我自讨苦吃，好好画我的画也就罢了，怎么就想起来要在这东市开个店。",
+                npc: 701135,
+                next: 51158805,
+            },
+            {
+                id: 51158805,
+                content: "怪我，我被那卖绣品的家伙蒙了心，那天我照旧帮他画绣样，本来只说着画些杏花也就罢了，他却让我画翠屏雀。",
+                npc: 701135,
+                next: 51158806,
+            },
+            {
+                id: 51158806,
+                content: "为了画出更好的翠屏雀，我只能亲自到野外，去观察那些雀儿的一举一动，直到我真的画出了一只完美的雀儿。",
+                npc: 701135,
+                next: 51158807,
+            },
+            {
+                id: 51158807,
+                content: "谁知道……那野生的雄雀，看到我画成后，居然走了过来，端倪片刻，自己开了屏！",
+                npc: 701135,
+                next: 51158808,
+            },
+            {
+                id: 51158808,
+                content: "我心想，奇了！还有这种事，隔天就把这事告诉了那商人。他便说，是我那画太精巧，以假乱真，骗过了翠屏雀。",
+                npc: 701135,
+                next: 51158809,
+            },
+            {
+                id: 51158809,
+                content:
+                    "他便说，你有这样好的技艺，应该去让更多人看到，不如就画上许多副雌雀，将他们摆在一起，吸引雄孔雀不断开屏，再展览这般奇景，定能发家致富！",
+                npc: 701135,
+                next: 51158810,
+            },
+            {
+                id: 51158810,
+                content: "如是这般，才有了这雀翎茗轩。但……谁知道……谁知道现在是这样的情况……",
+                npc: 701135,
+                next: 51158811,
+            },
+            {
+                id: 51158811,
+                content: "现在是叫天天不灵，叫地地不应，只能祈祷那些送翠屏雀的伙计们负责些，找回来几只便是几只……",
+                npc: 701135,
+            },
+        ],
+    },
+    {
+        id: 701136,
+        name: "刘福",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51158918,
+                content: "游船游船，十文一趟，排队购票，客满即发。",
+                npc: 701136,
+                next: 51158901,
+            },
+            {
+                id: 51158901,
+                content: "客人您早！是要来坐船去西市吗？",
+                npc: 701136,
+                options: [
+                    {
+                        id: 51158902,
+                        content: "我去。",
+                        next: 51158903,
+                    },
+                    {
+                        id: 51158906,
+                        content: "为什么要坐船，我自己可以过去。",
+                        next: 51158907,
+                    },
+                ],
+            },
+            {
+                id: 51158903,
+                content: "买票得先去后头排队，大伙都在等着呢，客人看面相是有识之士，不会做出插队这种事吧？",
+                npc: 701136,
+                next: 51158904,
+            },
+            {
+                id: 51158907,
+                content: "客人说笑了，您定是脚力过人，皓京城如此之大，光靠走的话，从东市到西市怎么也要个把时辰。",
+                npc: 701136,
+                next: 51158908,
+            },
+            {
+                id: 51158904,
+                content: "（乖乖去排队买票后上了船。）",
+                next: 51158905,
+            },
+            {
+                id: 51158908,
+                content: "为了让大家快些赶路，咱们便在这湖上开了供大家乘坐的游船。",
+                npc: 701136,
+                next: 51158909,
+            },
+            {
+                id: 51158905,
+                content: "（游船把你送到了西市。）",
+            },
+            {
+                id: 51158909,
+                content:
+                    "本地人可以用游船快速赶路，免得有什么急事继续要去城另一头。外地的客人呢——也图个新鲜，毕竟这湖光山色，泛舟湖上可是一桩美事。",
+                npc: 701136,
+                next: 51158910,
+            },
+            {
+                id: 51158910,
+                content: "客人您说是不是？",
+                npc: 701136,
+            },
+            {
+                id: 51158911,
+                content: "游船游船，十文一趟，排队购票，客满即发。",
+                npc: 701136,
+                next: 51158912,
+            },
+            {
+                id: 51158912,
+                content: "客人您早！是要来坐船去西市吗？",
+                npc: 701136,
+                options: [
+                    {
+                        id: 51158913,
+                        content: "去。",
+                        next: 51158914,
+                    },
+                    {
+                        id: 51158916,
+                        content: "不去。",
+                        next: 51158917,
+                    },
+                ],
+            },
+            {
+                id: 51158914,
+                content: "今日没什么人，就不让客人您多等了，直接发船！",
+                npc: 701136,
+                next: 51158915,
+            },
+            {
+                id: 51158917,
+                content: "客人回见，坐船记得找我！",
+                npc: 701136,
+            },
+            {
+                id: 51158915,
+                content: "（游船把你送到了西市。）",
+            },
+        ],
+    },
+    {
+        id: 701137,
+        name: "何道微",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51159013,
+                content: "这皓京城的地形，怎么看怎么觉得邪乎呢……",
+                npc: 701137,
+                next: 51159001,
+            },
+            {
+                id: 51159001,
+                content: "形制着实蹊跷！左凸为东市，右凸为西市，依街巷布局来看，本是借地势聚商便民，倒也算因地制宜。",
+                npc: 701137,
+                next: 51159002,
+            },
+            {
+                id: 51159002,
+                content: "可城中那片湖水，竟比两市地面高出数尺，且横断面平整如削，绝非天然形成。",
+                npc: 701137,
+                next: 51159003,
+            },
+            {
+                id: 51159003,
+                content: "你说，这突出的地形究竟是怎么形成的呢？",
+                npc: 701137,
+                options: [
+                    {
+                        id: 51159004,
+                        content: "只是地形稍微高了一点，没什么奇怪的吧。",
+                        next: 51159005,
+                    },
+                    {
+                        id: 51159007,
+                        content: "龙君神力！",
+                        next: 51159008,
+                    },
+                    {
+                        id: 51159010,
+                        content: "你管他呢……",
+                        next: 51159011,
+                    },
+                ],
+            },
+            {
+                id: 51159005,
+                content:
+                    "不不不，那你可就不懂了，你看这西市是住宅之地，东市乃商贸重地，可地势却十分之低，如若遇上汛期，湖水上涨，岂不是要倒灌双市？",
+                npc: 701137,
+                next: 51159006,
+            },
+            {
+                id: 51159008,
+                content:
+                    "说的很有道理，你知晓我刚才盯着这湖面时在想什么吗？这简直像是在建城之时，有什么怪东西从地底探了探头，却一巴掌被人削了下去。",
+                npc: 701137,
+                next: 51159009,
+            },
+            {
+                id: 51159011,
+                content: "此言差矣！好奇是一种天性，观察到了有趣或是不理解的地方，就要谦逊发问，仔细探查真相，只是今日我这问题是的确难懂。",
+                npc: 701137,
+                next: 51159012,
+            },
+            {
+                id: 51159006,
+                content: "不过……皓京毕竟是有龙君庇佑之地，若真有汛期……呸呸呸！瞧我这嘴！定然不可能！",
+                npc: 701137,
+            },
+            {
+                id: 51159009,
+                content: "这是何等伟力才能做到之事？想必全天下，除了太皓龙君，绝无可能了！",
+                npc: 701137,
+            },
+            {
+                id: 51159012,
+                content: "我在这已经站了数十日，还是没有想明白。想必我明悟的那一日，就会自己离去了。",
+                npc: 701137,
+            },
+        ],
+    },
+    {
+        id: 701138,
+        name: "褚家",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51159111,
+                content: "想当初咱这湖边多清净？钓竿一放，不消半个时辰就能钓上好几尾大鱼。",
+                npc: 701138,
+                next: 51159101,
+            },
+            {
+                id: 51159101,
+                content: "但你瞧这今日呢？画舫游船，走马灯似的来来回回，桨声、浪声，有龙氏和抟土氏在船头船尾笑得嘻嘻哈哈！",
+                npc: 701138,
+                next: 51159102,
+            },
+            {
+                id: 51159102,
+                content: "可鱼儿呢！鱼儿早被吓得躲进水底，我守了大半天，钩都没动一下，这趟，白来！",
+                npc: 701138,
+                options: [
+                    {
+                        id: 51159103,
+                        content: "你可以去别的地方钓吧？",
+                        next: 51159104,
+                    },
+                    {
+                        id: 51159107,
+                        content: "你技术不行，我就能随便钓。",
+                        next: 51159108,
+                    },
+                ],
+            },
+            {
+                id: 51159104,
+                content: "咱都在这地方钓了三十多年鱼了……哪片区域有大货，哪块岸边水流稳，本都是门清。对这有感情啊，就不想随便换地方了。",
+                npc: 701138,
+                next: 51159105,
+            },
+            {
+                id: 51159108,
+                content: "嘿！后生仔年纪轻轻，口气倒不小！当年咱钓鱼的时候，你不知道还在哪穿开裆裤呢！",
+                npc: 701138,
+                next: 51159109,
+            },
+            {
+                id: 51159105,
+                content:
+                    "不过你说的也对，现在的皓京变了，热闹了，人多了，什么都变了，怎么可能就只有我们老头子还守着以前的地盘，一点不变呢。",
+                npc: 701138,
+                next: 51159106,
+            },
+            {
+                id: 51159109,
+                content: "早年间，我一上午就能钓上七八尾大鱼，连当时那酒楼的掌柜都专门等我的鱼下锅！这下你还能说是我技术不行？",
+                npc: 701138,
+                next: 51159110,
+            },
+            {
+                id: 51159106,
+                content: "诶……算啦，赶明儿，我去城外的塘子探探路吧！就算腿脚再不利索，也得舍得挪窝啊！",
+                npc: 701138,
+            },
+            {
+                id: 51159110,
+                content: "你要真不服气，这样，咱们选那些游船没运行的早晨，在这同一位置比比看，看谁钓的多！如何？",
+                npc: 701138,
+            },
+        ],
+    },
+    {
+        id: 701139,
+        name: "周伯远",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51159225,
+                content: "若是能把这五禽戏练好，你平日的那些小病小灾，都可一并消弭！",
+                npc: 701139,
+                next: 51159204,
+            },
+            {
+                id: 51159204,
+                content: "若是能把这五禽戏练好，你平日里叫着的那些小病小灾，都可一并消弭了！",
+                npc: 701139,
+                next: 51159205,
+            },
+            {
+                id: 51159205,
+                content: "咱们的身体啊，若是筋脉通畅呢，就健康无虞，若是不通呢，就会导致你体内的各个地方出问题。",
+                npc: 701139,
+                next: 51159206,
+            },
+            {
+                id: 51159206,
+                content: "所以只有动起来，动起来，筋脉就会畅通，畅通了呢，你体内的郁结就会消失，身体也会变好，你们说，是不是？",
+                npc: 701139,
+                next: 51159207,
+            },
+            {
+                id: 51159207,
+                content: "这位朋友，我看你也不是第一次来我们这里了，是也对五禽戏感兴趣吗？",
+                npc: 701139,
+                options: [
+                    {
+                        id: 51159208,
+                        content: "有一些兴趣。",
+                        next: 51159209,
+                    },
+                ],
+            },
+            {
+                id: 51159209,
+                content: "哦？难得你们这个年纪的孩子居然会对这种养生的东西感兴趣，不像我那儿子，我让他早睡早起，他都要跟我哼哼唧唧半天。",
+                npc: 701139,
+                next: 51159210,
+            },
+            {
+                id: 51159210,
+                content: "孩子，你感兴趣，要不要和我们一起练，还是说，你想问我些什么？",
+                npc: 701139,
+                options: [
+                    {
+                        id: 51159211,
+                        content: "五禽戏是哪五禽？",
+                        next: 51159212,
+                    },
+                ],
+            },
+            {
+                id: 51159212,
+                content: "五禽戏分为五种姿势，动作都是从华胥本土的动物身上学来的。",
+                npc: 701139,
+                next: 51159213,
+            },
+            {
+                id: 51159213,
+                content: "分别是石龙戏、雨蛙戏、蓑翁戏、珍猪戏以及赤狐戏。每个戏的功效都不相同，比如石龙，练的就是双手灵活的抓力和握力。",
+                npc: 701139,
+                options: [
+                    {
+                        id: 51159214,
+                        content: "别的戏是练什么的呢？",
+                        next: 51159215,
+                    },
+                ],
+            },
+            {
+                id: 51159215,
+                content:
+                    "雨蛙戏是练习腿部，毕竟观雨蛙弹跳力惊人嘛，咱们老了虽然不用像年轻人一样爬高下低，但是还是难免要出门走走，活动活动。",
+                npc: 701139,
+                next: 51159216,
+            },
+            {
+                id: 51159216,
+                content: "蓑翁戏呢是锻炼脖颈灵活度的，年轻时曾伏案读书做工，老了这脖子总是酸痛难耐。",
+                npc: 701139,
+                next: 51159217,
+            },
+            {
+                id: 51159217,
+                content: "珍猪戏是用来锻炼全身的力量，动起来就像小珍猪发怒一样，对于活动筋骨很有效的。",
+                npc: 701139,
+                next: 51159218,
+            },
+            {
+                id: 51159218,
+                content: "至于赤狐戏，其实是锻炼反应能力和速度，赤狐灵巧机敏，在田间上蹿下跳时，谁也抓不住呢。",
+                npc: 701139,
+                options: [
+                    {
+                        id: 51159219,
+                        content: "这些听起来怎么都不像是可以模仿的动物吧？",
+                        next: 51159220,
+                    },
+                ],
+            },
+            {
+                id: 51159220,
+                content: "诶~这说的就狭隘了，五禽戏并非要还原动物们的动作，而是要通过模仿动物的神韵，编排适合咱们自己的动作。",
+                npc: 701139,
+                next: 51159221,
+            },
+            {
+                id: 51159221,
+                content:
+                    "其实我拿到这套戏的时候，觉得里面的一些动作不好，还特意找我儿改进了一部分，现在研究出来的啊，绝对是最适合我们老头老太用的了。",
+                npc: 701139,
+                next: 51159222,
+            },
+            {
+                id: 51159222,
+                content: "一套练下来，怡然汗出，浑身舒畅，不至于太累，也不至于没什么感觉，要我说，你们年轻人也该练练。",
+                npc: 701139,
+                options: [
+                    {
+                        id: 51159223,
+                        content: "我先走了。",
+                        next: 51159224,
+                    },
+                ],
+            },
+            {
+                id: 51159224,
+                content: "要是你以后想和咱们一起练，记得每日清晨来此处！",
+                npc: 701139,
+            },
+        ],
+    },
+    {
+        id: 701140,
+        name: "梁达博",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701141,
+        name: "长庚",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51159301,
+                content: "不应当吧，我只是随手画的一套连环画，竟然真能有健身益体的效果？还是说他们只是在瞎练？",
+                npc: 701141,
+                options: [
+                    {
+                        id: 51159302,
+                        content: "鬼鬼祟祟，在做什么呢！",
+                        next: 51159303,
+                    },
+                ],
+            },
+            {
+                id: 51159303,
+                content:
+                    "呜啊！我不知道！我不知道啊！我只是个画连环画的！我可什么都没做啊！虽然那五禽戏是我画的，但是我也没想到他们当真了！",
+                npc: 701141,
+                next: 51159304,
+            },
+            {
+                id: 51159304,
+                content: "我还没说什么呢，你就全招了。",
+                npc: 100001,
+                next: 51159305,
+            },
+            {
+                id: 51159305,
+                content: "我……我……诶呀，我还以为是那些老头老太的子孙来找我麻烦了呢，原来只是个路过的异国人吗……你可要给我吓个半死！",
+                npc: 701141,
+                next: 51159306,
+            },
+            {
+                id: 51159306,
+                content: "麻烦你，别把我和五禽戏的关系说出去，就当没见过我，可以吧！",
+                npc: 701141,
+            },
+            {
+                id: 51159307,
+                content: "他们还真把那五禽戏当真了不成？",
+                npc: 701141,
+                next: 51159308,
+            },
+            {
+                id: 51159308,
+                content: "在这蹲守了也有些日子了，我看他们练习的时候似乎也没完全按照我画的来。",
+                npc: 701141,
+                next: 51159309,
+            },
+            {
+                id: 51159309,
+                content: "也是，我画的那套雨蛙戏，一蹦要蹦个三尺高，这些老头老太们想必也做不到……如此便好，如此便好……",
+                npc: 701141,
+                options: [
+                    {
+                        id: 51159310,
+                        content: "你是那个……",
+                        next: 51159311,
+                    },
+                ],
+            },
+            {
+                id: 51159311,
+                content: "呜啊！又是你！得知我和五禽戏的关系的家伙！你怎么又来了！我什么都没做，我只是在这里看看他们有没有出岔子而已！",
+                npc: 701141,
+                next: 51159312,
+            },
+            {
+                id: 51159312,
+                content: "（依旧是不打自招……）",
+                options: [
+                    {
+                        id: 51159313,
+                        content: "为什么你觉得会出岔子？",
+                        next: 51159314,
+                    },
+                    {
+                        id: 51159317,
+                        content: "他们为什么会觉得你的连环画可以养生？",
+                        next: 51159318,
+                    },
+                ],
+            },
+            {
+                id: 51159314,
+                content:
+                    "还能有什么……我是个画连环画的，之前画的内容还多半是修仙问道一类的。他们找我要的那五禽戏，是我一时心血来潮，随手绘制的。",
+                npc: 701141,
+                next: 51159315,
+            },
+            {
+                id: 51159318,
+                content:
+                    "这就……说来话长了吧……我之前的连环画，多半都是以修仙问道为主，内容也是神乎玄乎的，有时为了卖画方便，我会乔装打扮一番。",
+                npc: 701141,
+                next: 51159319,
+            },
+            {
+                id: 51159315,
+                content: "有些动作那叫一个天马行空，在咱们华胥，要不是应天尉那般神仙人物，想必是还原不出来。",
+                npc: 701141,
+                next: 51159316,
+            },
+            {
+                id: 51159319,
+                content: "就是穿成那种……仙风道骨的样子，然后有人来问我就说，这是我修仙之时的所见所闻，他们当然不会当真了，只当是卖货手段。",
+                npc: 701141,
+                next: 51159320,
+            },
+            {
+                id: 51159316,
+                content: "他们又都是些老头子老太太，要是一意孤行，非要练我那动作，到时候伤到哪里磕了碰了，可都是要找我的麻烦！",
+                npc: 701141,
+                next: 51159323,
+            },
+            {
+                id: 51159320,
+                content: "但我也不知道为何，这事传出去就逐渐变了味，好像总有人说我是什么得道高人，亦或者是什么长生不老者……",
+                npc: 701141,
+                next: 51159321,
+            },
+            {
+                id: 51159323,
+                content: "不过啊，经过我这几日的观察，我发现好像没我想的那么危险，那些家伙还挺聪明的，把我那些夸张的动作做了一些改版。",
+                npc: 701141,
+                next: 51159324,
+            },
+            {
+                id: 51159321,
+                content: "再后来，就有些人总来问我是如何练的功，如何修的仙。我就想着……不如将错就错，画个所谓的修仙之术，卖给别人。",
+                npc: 701141,
+                next: 51159322,
+            },
+            {
+                id: 51159324,
+                content: "嘿！现在看起来像模像样的，倒是真有几分修仙方术的意思了！",
+                npc: 701141,
+            },
+            {
+                id: 51159322,
+                content: "后来的事你也知道了，其实没几个人信，但不知为何，那找我要五禽戏的老头偏偏就深信不疑。",
+                npc: 701141,
+                next: 51159323,
+            },
+        ],
+    },
+    {
+        id: 701142,
+        name: "周砚秋",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51159428,
+                content: "自己要早起练功也便罢了，为何还要拖着我早起……呵欠……",
+                npc: 701142,
+                next: 51159401,
+            },
+            {
+                id: 51159401,
+                content: "不知是从哪找了本歪门邪道的册子，还要我跟着操心，连日都要早起。那一堆老头老太家的后辈都没早起，怎就我要跟着来？",
+                npc: 701142,
+                next: 51159402,
+            },
+            {
+                id: 51159402,
+                content: "这要不是在大街上，我恨不得倒头就睡，诶哟，我想我那被窝，我那柔软的床垫……",
+                npc: 701142,
+                next: 51159403,
+            },
+            {
+                id: 51159403,
+                content: "你……你没事做吗？那正好，你来我这面前，给我挡挡光，我眯一会。",
+                npc: 701142,
+                options: [
+                    {
+                        id: 51159404,
+                        content: "我给你把太阳摘了得了。",
+                        next: 51159405,
+                        impr: [1041, "Chaos", 3],
+                    },
+                    {
+                        id: 51159406,
+                        content: "（摘下一片树叶放在他头上。）",
+                        next: 51159407,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                ],
+            },
+            {
+                id: 51159405,
+                content: "……是个好主意！既然你知道怎么做了，那就速速去办吧！",
+                npc: 701142,
+            },
+            {
+                id: 51159407,
+                content: "妙！妙！妙！我怎么没想到呢，这一叶便可蔽目，就是效果差了些……算了，勉强睡着吧！",
+                npc: 701142,
+            },
+            {
+                id: 51159408,
+                content: "自己要早起练功也便罢了，为何还要拖着我早起……呵欠……",
+                npc: 701142,
+                next: 51159409,
+            },
+            {
+                id: 51159409,
+                content: "妙音……妙儿！妙——吭！",
+                npc: 701142,
+                next: 51159410,
+            },
+            {
+                id: 51159410,
+                content: "（一声响亮的猪叫，眼前的男子从睡梦中惊醒过来。）",
+                next: 51159411,
+            },
+            {
+                id: 51159411,
+                content: "唔……吸溜……怎么睡着了，现在几时几刻了？老头子还在练五禽戏吗？",
+                npc: 701142,
+                options: [
+                    {
+                        id: 51159412,
+                        content: "告知时间。",
+                        next: 51159413,
+                    },
+                ],
+            },
+            {
+                id: 51159413,
+                content: "哦……这个点了，那过会儿我娘就该来送吃食了。诶？你看起来有些眼熟啊，我们之前是不是在哪见过？",
+                npc: 701142,
+                next: 51159414,
+            },
+            {
+                id: 51159414,
+                content: "我想起来了，你是那个……那个……诶呀忘了，总之应该是见过！",
+                npc: 701142,
+                options: [
+                    {
+                        id: 51159415,
+                        content: "你在这里做什么？",
+                        next: 51159416,
+                    },
+                ],
+            },
+            {
+                id: 51159416,
+                content: "我啊，我在等我爹练完五禽戏。不，不对！也不是我要等他，是他非要让我在这等他！",
+                npc: 701142,
+                next: 51159417,
+            },
+            {
+                id: 51159417,
+                content:
+                    "我那老爹最近不知道从哪搞来一本连环画，将其奉为什么养生秘籍，拉上一圈街坊邻居非要每日早起来练习，喏，你看，就是那边一群。",
+                npc: 701142,
+                options: [
+                    {
+                        id: 51159418,
+                        content: "那和你好像没什么关系？",
+                        next: 51159419,
+                    },
+                    {
+                        id: 51159423,
+                        content: "那你娘呢？",
+                        next: 51159424,
+                    },
+                ],
+            },
+            {
+                id: 51159419,
+                content: "本来是没有……诶呀！就算我手欠吧！他把五禽戏带回来后，我随意翻看了几眼，那上面有些动作，实在是荒谬。",
+                npc: 701142,
+                next: 51159420,
+            },
+            {
+                id: 51159424,
+                content: "我娘？哼！我娘和我可不一样，我说不来，我爹会用笤帚劈头盖脸请我吃一顿，我娘说不来，我爹屁都不敢放一个！",
+                npc: 701142,
+                next: 51159425,
+            },
+            {
+                id: 51159420,
+                content: "要是没有习武多年的人去贸然模仿，肯定是要在一些地方吃些苦头的。",
+                npc: 701142,
+                next: 51159421,
+            },
+            {
+                id: 51159425,
+                content: "诶，这就是……怎么说的来着，对！家庭地位，而我，就是家里地位最低的那个！",
+                npc: 701142,
+                options: [
+                    {
+                        id: 51159426,
+                        content: "再见。",
+                        next: 51159427,
+                    },
+                ],
+            },
+            {
+                id: 51159421,
+                content:
+                    "我便抽了空，把其中一些动作做了改版，让他们练起来更轻松讨巧些。谁知道，我爹居然以我改了册子就是陪练为由，抓着我也一并过来！",
+                npc: 701142,
+                next: 51159422,
+            },
+            {
+                id: 51159427,
+                content: "后会有期！下次来可以给我带个枕头吗？",
+                npc: 701142,
+            },
+            {
+                id: 51159422,
+                content: "你都不知道他们起的有多早！我每日觉都不够睡，苦死我了……",
+                npc: 701142,
+                options: [
+                    {
+                        id: 51159426,
+                        content: "再见。",
+                        next: 51159427,
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 701143,
+        name: "张老丈",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51159501,
+                content: "咱皓京城的人啊，除了吃就是喝，没别的~",
+                npc: 701143,
+                next: 51159502,
+            },
+            {
+                id: 51159502,
+                content:
+                    "上次那家伙就是这么跟我说话的，瞧我模仿得像不像？其实他说的也是，过日子除了吃喝也的确没什么别的，就是那语气，怎么听怎么气人。",
+                npc: 701143,
+                next: 51159503,
+            },
+            {
+                id: 51159503,
+                content: "诶呀——提到就来气！不说他！他来找我下棋我都不去了。诶？你是？",
+                npc: 701143,
+                options: [
+                    {
+                        id: 51159504,
+                        content: "只是路过的外乡客。",
+                        next: 51159505,
+                    },
+                ],
+            },
+            {
+                id: 51159505,
+                content: "外乡客？哟，那我可要来给你说道说道了。",
+                npc: 701143,
+                next: 51159506,
+            },
+            {
+                id: 51159506,
+                content: "诶，张兄，差不多得了。你难不成也要和那位一样，把小朋友们都吓到了吗？",
+                npc: 701144,
+                next: 51159507,
+            },
+            {
+                id: 51159507,
+                content: "开个玩笑嘛！娃儿，第一次来皓京？有什么不了解的地方，尽管来问我们这些整日在西市待着的老头就好。",
+                npc: 701143,
+                next: 51159508,
+            },
+            {
+                id: 51159508,
+                content: "是啊，咱们都是老皓京人了，你想找吃的喝的，我们都能给你提些建议。",
+                npc: 701144,
+                options: [
+                    {
+                        id: 51159509,
+                        content: "皓京有什么好吃的？",
+                        next: 51159510,
+                    },
+                    {
+                        id: 51159512,
+                        content: "皓京有什么好玩的？",
+                        next: 51159513,
+                    },
+                    {
+                        id: 51159515,
+                        content: "皓京有什么特产？",
+                        next: 51159516,
+                    },
+                    {
+                        id: 51159518,
+                        content: "没什么想问的。",
+                        next: 51159519,
+                    },
+                ],
+            },
+            {
+                id: 51159510,
+                content: "多着呢！想吃点好的，就去东市随便找家酒楼，点上一桌子招牌菜，不会让你失望。",
+                npc: 701143,
+                next: 51159511,
+            },
+            {
+                id: 51159513,
+                content: "殿前广场那边时不时总有活动，庙会啊什么的，逢年过节人多的很，不过我们喜欢清净，不爱去逛。",
+                npc: 701143,
+                next: 51159514,
+            },
+            {
+                id: 51159516,
+                content: "特产？没有！我就跟你直说了，那东市卖的所谓特产全都是骗你们这帮游客的。",
+                npc: 701143,
+                next: 51159517,
+            },
+            {
+                id: 51159519,
+                content: "嗐！行啊，整日城里的人来来去去，各个都是生面孔，从没说过几句话。而以前那些熟悉的面孔，也是一天比一天见的少了。",
+                npc: 701143,
+                next: 51159520,
+            },
+            {
+                id: 51159511,
+                content: "毕竟那不好吃的，早在多少年前就因为无人光顾关门了！这剩下的店，基本都是咱们皓京人严选。",
+                npc: 701144,
+            },
+            {
+                id: 51159514,
+                content: "不是喜欢清净谁爱住西边呢？西边是老城区，你看着房子，都是经过好几次修缮后的样子了，以前可没这么鲜亮！",
+                npc: 701144,
+            },
+            {
+                id: 51159517,
+                content: "你要真想买点什么带给亲朋好友，这样，我家中婆娘做了些糕点，不嫌弃的话，可以给你拿些。",
+                npc: 701144,
+            },
+            {
+                id: 51159520,
+                content:
+                    "我们老啦，这城却是一天比一天新了，有时也会想着，其实这辈子也没去过几个地方，趁着还没入土的时间，应该多去一些地方走走看看。",
+                npc: 701144,
+                next: 51159521,
+            },
+            {
+                id: 51159521,
+                content: "你还多去几个地方呢？我们这几个里面，难道不就是你最舍不得离开皓京？",
+                npc: 701143,
+                next: 51159522,
+            },
+            {
+                id: 51159522,
+                content:
+                    "住了一辈子，有感情，怎么舍得走呢……还是让娃儿走吧，别把时间耽误在我们这两个糟老头子上了，有这空不如多去逛逛皓京城。",
+                npc: 701144,
+            },
+        ],
+    },
+    {
+        id: 701144,
+        name: "严公",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701145,
+        name: "刘婆婆",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51159621,
+                content: "瞧你这孩子，走起路来慌慌张张，留心点别踩到路上的石子了！",
+                npc: 701145,
+                next: 51159601,
+            },
+            {
+                id: 51159601,
+                content: "着急忙慌的样子，跟我家那位一模一样。他也好些日子没回家了，也不知道寄封信给我。",
+                npc: 701145,
+                next: 51159602,
+            },
+            {
+                id: 51159602,
+                content: "咦？你怎么停下来了？刚才慌慌张张是要做什么去？",
+                npc: 701145,
+                options: [
+                    {
+                        id: 51159603,
+                        content: "我只是走路比较快。",
+                        next: 51159604,
+                        impr: [1041, "Morality", 3],
+                    },
+                    {
+                        id: 51159606,
+                        content: "我来找你说说话。",
+                        next: 51159607,
+                        impr: [1041, "Empathy", 3],
+                    },
+                ],
+            },
+            {
+                id: 51159604,
+                content: "说的是，你们年轻人体力好，血气方刚的年纪，跑起来更是一蹦三尺高！",
+                npc: 701145,
+                next: 51159605,
+            },
+            {
+                id: 51159607,
+                content: "哎哟，好孩子，你有心了~年纪大了就是这样，子女多半都在外成家立业，一年半载可能只回来看我几趟，说不上几句话。",
+                npc: 701145,
+                next: 51159608,
+            },
+            {
+                id: 51159605,
+                content:
+                    "我前几日还看见个高高的男孩，跳起来能在空中旋转一圈，还能向前猛地冲刺一段距离，和咱们华胥古籍里描写的轻功一样，可厉害呢。",
+                npc: 701145,
+            },
+            {
+                id: 51159608,
+                content: "有时候会觉得时间过得慢的很，从天亮到天黑要过这么久，从他们回来到离开居然也只是一瞬间的事情……",
+                npc: 701145,
+                next: 51159609,
+            },
+            {
+                id: 51159609,
+                content: "诶呀，不能说这么多让人难过的话，谢谢你肯陪我这个老太太聊上几句。",
+                npc: 701145,
+            },
+            {
+                id: 51159610,
+                content: "瞧你这孩子，走起路来慌慌张张，留心点别踩到路上的石子了！",
+                npc: 701145,
+                next: 51159611,
+            },
+            {
+                id: 51159611,
+                content: "你看着好生眼熟，是之前从我家屋檐上飞过去的那个？你们这些不省心的孩子，皓京城的路修得好好的，偏偏要从天上飞。",
+                npc: 701145,
+                options: [
+                    {
+                        id: 51159612,
+                        content: "不是我，你认错了。",
+                        next: 51159613,
+                    },
+                    {
+                        id: 51159614,
+                        content: "可能是我……",
+                        next: 51159615,
+                    },
+                ],
+            },
+            {
+                id: 51159613,
+                content: "不是你吗？我仔细看看……好像还真是，上次那个娃娃一身黑，你倒是白白净净的。是我老了，认错啦！",
+                npc: 701145,
+            },
+            {
+                id: 51159615,
+                content: "你也别怪我们老年人啰嗦，在房梁上飞来飞去很危险的，你也要为你的父母想想，要是你摔了碰了，他们该有多担心呢！",
+                npc: 701145,
+            },
+        ],
+    },
+    {
+        id: 701146,
+        name: "渡风",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51159713,
+                content: "什么？涨了这么多？我没看错吧？",
+                npc: 701146,
+                next: 51159701,
+            },
+            {
+                id: 51159701,
+                content: "小时候，我娘每日清晨给我三铜，我就去巷口买一碟两铜的煎饺再去学堂，放学后还能剩一铜买根糖葫芦。",
+                npc: 701146,
+                next: 51159702,
+            },
+            {
+                id: 51159702,
+                content: "现在倒好……随便吃点东西就要三十铜，小时巷口的煎饺现在也不干关门了，东市的东西更是贵到让人咂舌！",
+                npc: 701146,
+                options: [
+                    {
+                        id: 51159703,
+                        content: "看来皓京物价涨的挺厉害。",
+                        next: 51159704,
+                    },
+                ],
+            },
+            {
+                id: 51159704,
+                content: "可不是！对于我这种从小到大都在皓京长大的人，最是深有体会。你看现在从城东到城西，哪里还能吃上两铜的饺子？",
+                npc: 701146,
+                next: 51159705,
+            },
+            {
+                id: 51159705,
+                content: "我可听说，东市新开的一家打着什么海伯利亚流行甜点的店铺，价格简直要上了天，却还是有一堆人整日排队。",
+                npc: 701146,
+                options: [
+                    {
+                        id: 51159706,
+                        content: "也许是商家请人假装排队。",
+                        next: 51159707,
+                    },
+                    {
+                        id: 51159708,
+                        content: "也许是真的很好吃。",
+                        next: 51159709,
+                    },
+                    {
+                        id: 51159711,
+                        content: "再见。",
+                        next: 51159712,
+                    },
+                ],
+            },
+            {
+                id: 51159707,
+                content:
+                    "很有道理，看你年纪轻轻，没想到很懂这些销售套路嘛！的确，他们整日都在那边排队，我本来一点兴趣也没有，看到这么多人都有些好奇了。",
+                npc: 701146,
+                next: 51159710,
+            },
+            {
+                id: 51159709,
+                content: "天知道呢？世上好吃的东西海了去，我总不至于盯着他那金子一样的价格买来吃吧。虽然偶尔尝鲜也不是不行……",
+                npc: 701146,
+                next: 51159710,
+            },
+            {
+                id: 51159712,
+                content: "好想念以前学堂门口的砂锅粉啊，每日他一出摊，香气顺着窗户就进来勾引我……现在不知在哪才能吃上。",
+                npc: 701146,
+            },
+            {
+                id: 51159710,
+                content: "唔……这么一想，要不还是抽空去一趟？",
+                npc: 701146,
+                options: [
+                    {
+                        id: 51159711,
+                        content: "再见。",
+                        next: 51159712,
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 701147,
+        name: "林德昌",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51159801,
+                content: "得抓紧时间把这间老屋记入翻修名单，不然倘若承重柱蚀空，岂不是要砸伤路过行人？",
+                npc: 701147,
+                options: [
+                    {
+                        id: 51159802,
+                        content: "这屋子没人住吗？",
+                        next: 51159803,
+                    },
+                ],
+            },
+            {
+                id: 51159803,
+                content: "确是如此，城西这些老房子，很多原先的住民都搬走了，空置下来便丢给我们天禄司管理，时不时便要来处理一些问题。",
+                npc: 701147,
+                next: 51159804,
+            },
+            {
+                id: 51159804,
+                content: "一些杂七杂八的事情，比如屋顶漏水之类的，都需要格外注意。因为这些房子都有许多年的历史，基本等同于不能移动的古董。",
+                npc: 701147,
+                options: [
+                    {
+                        id: 51159805,
+                        content: "这看着很新啊？",
+                        next: 51159806,
+                    },
+                    {
+                        id: 51159807,
+                        content: "房子原先的主人呢？",
+                        next: 51159808,
+                    },
+                ],
+            },
+            {
+                id: 51159806,
+                content: "许多屋子托匠矩阁的师傅们来翻新过，所以看起来确实相差不大。但毕竟年份和材质摆在那儿，多少都会出些问题。",
+                npc: 701147,
+                options: [
+                    {
+                        id: 51159807,
+                        content: "房子原先的主人呢？",
+                        next: 51159808,
+                    },
+                ],
+            },
+            {
+                id: 51159808,
+                content:
+                    "搬走了罢……算起来，已经不晓得过去几代人了呢。即使是现在，还愿意住在这边的原住民也多半都是念旧的老人，年轻人会更倾向于搬到其他地方。",
+                npc: 701147,
+                options: [
+                    {
+                        id: 51159809,
+                        content: "比如什么地方？",
+                        next: 51159810,
+                    },
+                ],
+            },
+            {
+                id: 51159810,
+                content: "那可就多了，大多都是搬去了别的城市，华胥境内叫得上名字的地方也不少，皓京外围也有一些新的街区。",
+                npc: 701147,
+                next: 51159811,
+            },
+            {
+                id: 51159811,
+                content: "不过即使搬去天涯海角，只要尚未离开华胥，大风九章就会庇佑祂的子民。",
+                npc: 701147,
+            },
+        ],
+    },
+    {
+        id: 701148,
+        name: "阿菀",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51159923,
+                content: "父亲向来放不下娘亲，想必在天上也是不愿看见娘亲落泪的。",
+                npc: 701148,
+                next: 51159901,
+            },
+            {
+                id: 51159901,
+                content: "娘，你说句话吧……你一直哭，阿囡心疼……",
+                npc: 701148,
+                next: 51159902,
+            },
+            {
+                id: 51159902,
+                content: "阿囡，你爹走了……你爹走了……",
+                next: 51159903,
+            },
+            {
+                id: 51159903,
+                content: "娘不是一直告诉我，人死后会化作天上的星星吗？或许爹就像娘说的那样，变成星星，一眨一眨地看着娘呢。",
+                npc: 701148,
+                next: 51159904,
+            },
+            {
+                id: 51159904,
+                content: "别哭，别哭，哭肿了眼睛，就不好看啦。",
+                npc: 701148,
+                next: 51159905,
+            },
+            {
+                id: 51159905,
+                content: "他走了……他怎么就抛下我走了……",
+            },
+            {
+                id: 51159906,
+                content: "父亲向来放不下娘亲，想必在天上也是不愿看见娘亲落泪的。",
+                npc: 701148,
+                next: 51159907,
+            },
+            {
+                id: 51159907,
+                content: "娘，你吃点东西吧……你看你都瘦了……",
+                npc: 701148,
+                options: [
+                    {
+                        id: 51159908,
+                        content: "发生什么了？",
+                        next: 51159909,
+                    },
+                ],
+            },
+            {
+                id: 51159909,
+                content: "你好，你是来吊唁的吗？赙赠放在灵堂前的木箱里就好，我娘现在……可能暂时不能和你说话。",
+                npc: 701148,
+                options: [
+                    {
+                        id: 51159910,
+                        content: "我只是路过。",
+                        next: 51159911,
+                    },
+                ],
+            },
+            {
+                id: 51159911,
+                content: "唔……你这一身白衣看着像是素服，是我看错了，不好意思，{性别:大哥哥|大姐姐}。",
+                npc: 701148,
+                options: [
+                    {
+                        id: 51159912,
+                        content: "你看起来并不怎么伤心？",
+                        next: 51159913,
+                    },
+                ],
+            },
+            {
+                id: 51159913,
+                content: "我现在这样，只是因为我没办法自己沉浸在悲伤里。你也看到了，我娘因为爹走了，现在谁的话也听不进去。",
+                npc: 701148,
+                next: 51159914,
+            },
+            {
+                id: 51159914,
+                content: "如果我不现在站出来，就没有人可以撑起来这个家了。",
+                npc: 701148,
+                options: [
+                    {
+                        id: 51159915,
+                        content: "你成熟得不像孩子。",
+                        next: 51159916,
+                    },
+                ],
+            },
+            {
+                id: 51159916,
+                content: "这算是……夸我吗？爹病重之时曾经告诉我，要我在他走了之后，承担起照顾这个家的责任。",
+                npc: 701148,
+                next: 51159917,
+            },
+            {
+                id: 51159917,
+                content: "没有人比他更了解我娘。现在看起来，事情果然如他所预想的那样。",
+                npc: 701148,
+                next: 51159918,
+            },
+            {
+                id: 51159918,
+                content: "所以我更不能在这个时候发泄自己的情绪，我只能坚强一点，再坚强一点……",
+                npc: 701148,
+                options: [
+                    {
+                        id: 51159919,
+                        content: "加油。",
+                        next: 51159920,
+                    },
+                ],
+            },
+            {
+                id: 51159920,
+                content: "谢谢你，我会的。",
+                npc: 701148,
+                options: [
+                    {
+                        id: 51159921,
+                        content: "（轻轻摸摸她的头。）",
+                        next: 51159922,
+                    },
+                ],
+            },
+            {
+                id: 51159922,
+                content: "（你转身的瞬间，似乎看到这孩子的眼角有些湿润。）",
+                npc: 701148,
+            },
+        ],
+    },
+    {
+        id: 701149,
+        name: "寻鹤",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51160116,
+                content: "现在都什么年代了，哪有在丧礼上请乐队的人家！",
+                npc: 701149,
+                next: 51160109,
+            },
+            {
+                id: 51160109,
+                content: "这话什么意思，葬礼吹唢呐不是传统吗？大舅一辈子操劳，走了还不得是风风光光，热热闹闹的？",
+                next: 51160110,
+            },
+            {
+                id: 51160110,
+                content: "那都多少年前的老古董做法，现在城里早不兴这套了。唢呐一吹扰民得很，到时候还有人去泉通阁投诉。",
+                npc: 701149,
+                next: 51160111,
+            },
+            {
+                id: 51160111,
+                content: "可我早八百年就联系过了，定金也付过了，街坊邻居也知晓此事。我不信旁人会忘本到这种地步，家里出了事还要来怪罪。",
+                next: 51160112,
+            },
+            {
+                id: 51160112,
+                content: "这和别人没关系，是皓京的规矩。那我问你，现在是不是奉香大典期间也不让在皓京城内放烟花了？",
+                npc: 701149,
+                next: 51160113,
+            },
+            {
+                id: 51160113,
+                content: "匠矩阁的师傅说了，只要他们研发出硝烟净化器就给放！",
+                next: 51160114,
+            },
+            {
+                id: 51160114,
+                content: "那是不是还没研究出来？",
+                npc: 701149,
+                next: 51160115,
+            },
+            {
+                id: 51160115,
+                content: "少胡说八道，今年就研究出来了，今年就能在皓京城里放烟花！这事听我的！",
+            },
+        ],
+    },
+    {
+        id: 701150,
+        name: "建业",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51160108,
+                content: "林兄，昔日你我诗会相逢，一见如故。高山流水，难遇知音，这杯，我敬你！",
+                npc: 701150,
+                next: 51160101,
+            },
+            {
+                id: 51160101,
+                content: "去年修书一封，邀你去家乡做客，我给你打树上的核桃来吃，你只说你生了病，后续我忙起别事，竟是忘了这茬。",
+                npc: 701150,
+                next: 51160102,
+            },
+            {
+                id: 51160102,
+                content: "哪里传来的声音……好熟悉……",
+                npc: 701150,
+                options: [
+                    {
+                        id: 51160103,
+                        content: "我没听到啊。",
+                        next: 51160104,
+                    },
+                ],
+            },
+            {
+                id: 51160104,
+                content: "这是喜乐啊……是哪家在办喜事吗？",
+                npc: 701150,
+                next: 51160105,
+            },
+            {
+                id: 51160105,
+                content:
+                    "哈哈……林兄，你可听见了？当年你我同游之时，你折柳击水而歌，唱的便是这首《贺新郎》，你说待我五十寿辰，定要与我共饮这杯酒。",
+                npc: 701150,
+                next: 51160106,
+            },
+            {
+                id: 51160106,
+                content: "此杯酒，我给你带来了，以往你总舍不得喝，每次只说小酌便好，而今日……",
+                npc: 701150,
+                next: 51160107,
+            },
+            {
+                id: 51160107,
+                content: "哈哈哈！随意喝吧！畅快喝吧！本来悲喜总同筵，虞泉人间共举杯！",
+                npc: 701150,
+            },
+        ],
+    },
+    {
+        id: 701151,
+        name: "小棠",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51160201,
+                content: "草木深胡同……是在这里？还是……",
+                npc: 701151,
+                next: 51160202,
+            },
+            {
+                id: 51160202,
+                content: "再找不到地方，这做好的菜肴送到手就凉了，这个月已吃了三次投诉，再来一次怕是要被骂惨啦。",
+                npc: 701151,
+                next: 51160203,
+            },
+            {
+                id: 51160203,
+                content: "不过……这事怎么想都和我没关系，要怪也是怪别人，",
+                npc: 701151,
+                options: [
+                    {
+                        id: 51160204,
+                        content: "怪谁？",
+                        next: 51160205,
+                    },
+                ],
+            },
+            {
+                id: 51160205,
+                content: "那可就多了！首先啊，这厨子做菜时候就开始磨磨唧唧，说今天锅气不好，非要先炒两个菜试试手再做客人定的餐。",
+                npc: 701151,
+                next: 51160206,
+            },
+            {
+                id: 51160206,
+                content: "然后呢，我刚将菜肴装进食盒，准备撒腿就跑，老板的小女儿又缠住我，非要我给她讲个故事才放我走。",
+                npc: 701151,
+                next: 51160207,
+            },
+            {
+                id: 51160207,
+                content: "最后就是，这客人给的地址也表述不清晰，只说是草木深胡同，但却没说具体在哪里，是更靠近参商港还是更靠近泉通阁。",
+                npc: 701151,
+                options: [
+                    {
+                        id: 51160208,
+                        content: "老板的小女儿为什么在店里？",
+                        next: 51160209,
+                    },
+                    {
+                        id: 51160212,
+                        content: "锅气是怎么个说法？",
+                        next: 51160213,
+                    },
+                    {
+                        id: 51160216,
+                        content: "你既然是专门送餐的，为什么会不认路呢？",
+                        next: 51160217,
+                    },
+                ],
+            },
+            {
+                id: 51160209,
+                content:
+                    "可说呢！你不晓得咱这私房菜馆有多讲究，当年只是老板做菜好吃，逐渐在西市这一片传出了名声，于是大家都爱到他家里蹭饭。",
+                npc: 701151,
+                next: 51160210,
+            },
+            {
+                id: 51160213,
+                content: "我其实也不怎么清楚，毕竟我这种连酱油和醋都分不清的烹饪菜鸟，让我去解释如此专业的词还是太难为我了。",
+                npc: 701151,
+                next: 51160214,
+            },
+            {
+                id: 51160217,
+                content: "我又不是皓京城土生土长的本地人，怎么能要求我认清皓京所有的路呢？",
+                npc: 701151,
+                next: 51160218,
+            },
+            {
+                id: 51160210,
+                content: "后面有人蹭饭蹭到不好意思了，就怂恿让他开家私房菜馆，这样大家就能名正言顺吃他做的菜。",
+                npc: 701151,
+                next: 51160211,
+            },
+            {
+                id: 51160214,
+                content:
+                    "但是我可跟你说，要是老板本人来炒这个菜，绝不会说什么锅气不锅气的，但他最近出远门，把整个生意都交给了自己的学徒来打理。",
+                npc: 701151,
+                next: 51160215,
+            },
+            {
+                id: 51160218,
+                content: "再说了，我可是最近才来的皓京，算来也就……三个月？一个月前，我连皓京本地话都不怎么听得懂，现在也还在学习中。",
+                npc: 701151,
+                next: 51160219,
+            },
+            {
+                id: 51160211,
+                content: "所以，其实饭馆就是老板的家，家中有孩子这不是常见之事嘛。",
+                npc: 701151,
+                options: [
+                    {
+                        id: 51160220,
+                        content: "你还是快些去送餐吧。",
+                        next: 51160221,
+                    },
+                ],
+            },
+            {
+                id: 51160215,
+                content: "那家伙事情可多了，总说不能丢师傅的脸，所以一道菜要做上三四遍，耽误我送餐的时间……",
+                npc: 701151,
+                options: [
+                    {
+                        id: 51160220,
+                        content: "你还是快些去送餐吧。",
+                        next: 51160221,
+                    },
+                ],
+            },
+            {
+                id: 51160219,
+                content: "你是不是对一个外来者的要求太高了！",
+                npc: 701151,
+                options: [
+                    {
+                        id: 51160220,
+                        content: "你还是快些去送餐吧。",
+                        next: 51160221,
+                    },
+                ],
+            },
+            {
+                id: 51160221,
+                content: "哎呀！这下要怪你了！要不是跟你聊了这么久，我一定早就送到了！",
+                npc: 701151,
+            },
+        ],
+    },
+    {
+        id: 701152,
+        name: "时风",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51160301,
+                content: "你说那家私房菜？我是听说过，但那家地方小，难订座，现下去问恐怕是吃不上了。",
+                npc: 701152,
+                next: 51160302,
+            },
+            {
+                id: 51160302,
+                content: "我说一个你便拒绝一个，那我还能说什么，别吃了！",
+                npc: 701259,
+                next: 51160303,
+            },
+            {
+                id: 51160303,
+                content: "诶呀，兄台莫生气，气出病来谁如意。这再怎么说也是家里来了远客，我是想着照顾妥帖些，所以才左右为难，瞻前顾后。",
+                npc: 701152,
+                next: 51160304,
+            },
+            {
+                id: 51160304,
+                content: "花言巧语，我是没法给你答案了，你还是问别人吧，诶，就那边那位穿着白衣服的……",
+                npc: 701259,
+                next: 51160305,
+            },
+            {
+                id: 51160305,
+                content: "（两人齐齐看向你。）",
+                next: 51160306,
+            },
+            {
+                id: 51160306,
+                content: "白衣服的朋友，不知方不方便替我做个决断。这事情的来龙去脉，适才你也听过了吧？",
+                npc: 701259,
+                options: [
+                    {
+                        id: 51160307,
+                        content: "没仔细听。",
+                        next: 51160308,
+                    },
+                    {
+                        id: 51160310,
+                        content: "听过了。",
+                        next: 51160311,
+                    },
+                ],
+            },
+            {
+                id: 51160308,
+                content:
+                    "无妨，那我再说一遍，是这样的，我家中来了远客，我想在皓京城里挑家餐馆，款待客人，可却怎么也拿不定主意，所以想请人来帮我参谋参谋。",
+                npc: 701152,
+                next: 51160309,
+            },
+            {
+                id: 51160311,
+                content: "太好了！那便省得我多解释一番。目前已选定了三家，我来细细说给你听。",
+                npc: 701152,
+                next: 51160312,
+            },
+            {
+                id: 51160309,
+                content: "得了吧，哪里是来找人参谋，是来给我找气受。",
+                npc: 701259,
+                options: [
+                    {
+                        id: 51160320,
+                        content: "同福饭馆吧。",
+                        next: 51160321,
+                    },
+                    {
+                        id: 51160322,
+                        content: "八珍楼吧。",
+                        next: 51160323,
+                    },
+                    {
+                        id: 51160324,
+                        content: "私房菜吧。",
+                        next: 51160325,
+                    },
+                ],
+            },
+            {
+                id: 51160312,
+                content: "第一家是同福饭馆，开在东市，算是皓京城新开的店铺，菜品多为融合菜，十分有新意，只是……",
+                npc: 701152,
+                next: 51160313,
+            },
+            {
+                id: 51160321,
+                content: "同福饭馆菜品新颖，想必你朋友也很愿意尝鲜。",
+                npc: 100001,
+                next: 51160326,
+            },
+            {
+                id: 51160323,
+                content: "八珍楼十分传统，一些不那么容易被外人接受的你避开点就是。",
+                npc: 100001,
+                next: 51160326,
+            },
+            {
+                id: 51160325,
+                content: "你还没去排队就说放弃，怎么知道究竟有没有空座预定呢？",
+                npc: 100001,
+                next: 51160326,
+            },
+            {
+                id: 51160313,
+                content: "只是你觉得融合菜有些失了皓京特色。",
+                npc: 701259,
+                next: 51160314,
+            },
+            {
+                id: 51160326,
+                content: "你看，这位朋友说的就十分中肯，和我的推荐也并无多大的差别。我看你啊，就别纠结了，就听我们的吧！",
+                npc: 701259,
+                next: 51160327,
+            },
+            {
+                id: 51160314,
+                content: "是也不是……总之，这第二家则是八珍楼，倒是皓京有些历史的店铺了，以前开在西市，后来店面扩大便搬到东市。",
+                npc: 701152,
+                next: 51160315,
+            },
+            {
+                id: 51160327,
+                content: "倒是确实有道理，那要不……",
+                npc: 701152,
+                next: 51160328,
+            },
+            {
+                id: 51160315,
+                content: "要我说就这家最好，菜品都是老皓京人的口味，档次也足够，是最好的。",
+                npc: 701259,
+                next: 51160316,
+            },
+            {
+                id: 51160328,
+                content: "还要不什么呀，再磨磨唧唧可就一家都选不出来了！",
+                npc: 701259,
+            },
+            {
+                id: 51160316,
+                content: "你怎么不说他家多少年没有上过新，一直在吃老本。",
+                npc: 701152,
+                next: 51160317,
+            },
+            {
+                id: 51160317,
+                content: "行啊，那第三家，西市私房菜馆，多少人来这排队就为了吃上那一口，这也不行。",
+                npc: 701259,
+                next: 51160318,
+            },
+            {
+                id: 51160318,
+                content: "你都说了排队……我那朋友没几天就要来了，要是没排上号那该如何是好？",
+                npc: 701152,
+                next: 51160319,
+            },
+            {
+                id: 51160319,
+                content: "你看看你看看，他就是这般给我找气受，我不说了！你来给他支支招吧！",
+                npc: 701259,
+                options: [
+                    {
+                        id: 51160320,
+                        content: "同福饭馆吧。",
+                        next: 51160321,
+                    },
+                    {
+                        id: 51160322,
+                        content: "八珍楼吧。",
+                        next: 51160323,
+                    },
+                    {
+                        id: 51160324,
+                        content: "私房菜吧。",
+                        next: 51160325,
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 701153,
+        name: "秦执",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51160401,
+                content: "若非有仙人指路，怎知这小巷深处竟藏着这庖厨圣地！",
+                npc: 701153,
+                next: 51160402,
+            },
+            {
+                id: 51160402,
+                content:
+                    "适才品过几道菜肴，最为印象深刻的便是那道青玉鲙，纹理如云，入口即溶，用的是那上好的冬瓜瓤，用笋汁慢煨数时，竟比珍猪蹄还要丰腴肥润……",
+                npc: 701153,
+                next: 51160403,
+            },
+            {
+                id: 51160403,
+                content:
+                    "还有那甜品，桂花香气混进了乳奶，出了蒸锅，再用腌渍过的酸梅放在上方，轻轻碾压，不破坏原先糕体的基础上，让酸液渗入其中。",
+                npc: 701153,
+                next: 51160404,
+            },
+            {
+                id: 51160404,
+                content:
+                    "这般滋味，甚好……甚好……想我也算半个老饕，纵横华胥多年，本以为再吃到什么口味都不会惊叹了，竟被一家名不见经传的小店厨艺折服。",
+                npc: 701153,
+                next: 51160405,
+            },
+            {
+                id: 51160405,
+                content: "皓京还是……卧虎藏龙之地啊……",
+                npc: 701153,
+            },
+        ],
+    },
+    {
+        id: 701154,
+        name: "王伯公",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51160501,
+                content: "老张啊，你那只八哥，今日居然念了几句诗，是不是你孙子整日在家背书被它听着学了去？",
+                npc: 701154,
+                next: 51160502,
+            },
+            {
+                id: 51160502,
+                content: "胡说八道！你怎么不说是鸟儿聪明，听了一遍就学会了，和我那小孙儿一样，学什么都是一点通。",
+                next: 51160503,
+            },
+            {
+                id: 51160503,
+                content: "我都不好说你，老张，你那孙子……你那，嗐……你就说这话说出来你脸不脸红……",
+                npc: 701154,
+                next: 51160504,
+            },
+            {
+                id: 51160504,
+                content: "我老张一辈子行得正坐得直，说话从无虚言！",
+                next: 51160505,
+            },
+            {
+                id: 51160505,
+                content: "行啦，都多大岁数了还整天吵个不停，还是聊聊别的吧，我那窝啾啾莺，今晨搬了家，竟在门口那棵老槐树上坐了窝。",
+                next: 51160506,
+            },
+            {
+                id: 51160506,
+                content: "怪不得你今天没给提出来溜溜呢，原来是换了个场子。",
+                npc: 701154,
+                next: 51160507,
+            },
+            {
+                id: 51160507,
+                content: "不过……你们谁知道那老李头今天又犯什么毛病了，从哪抓了只……",
+                next: 51160508,
+            },
+            {
+                id: 51160508,
+                content: "蓑翁鹭是吧？他那脾气，太古怪了！怎么说我俩的孙儿都在一起念书，我便和他攀谈孙儿学业之事，他却连正眼也不瞧我！",
+                next: 51160509,
+            },
+            {
+                id: 51160509,
+                content: "气得我跟他吵了一架，今日居然又来当这显眼咖。",
+                next: 51160510,
+            },
+            {
+                id: 51160510,
+                content: "嘿，你脾气又好到哪里去呢？",
+                npc: 701154,
+                next: 51160511,
+            },
+            {
+                id: 51160511,
+                content: "你什么意思？",
+                next: 51160512,
+            },
+            {
+                id: 51160512,
+                content: "差不多得啦……",
+            },
+        ],
+    },
+    {
+        id: 701155,
+        name: "李某某",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51160626,
+                content: "凡夫俗子溜凡羽俗鸟，他们那些鸟，能有我这只厉害吗？",
+                npc: 701155,
+                next: 51160601,
+            },
+            {
+                id: 51160601,
+                content: "来，二楞，叫两嗓子给他们听听看，什么叫皓京城里最神气的鸟！",
+                npc: 701155,
+                next: 51160602,
+            },
+            {
+                id: 51160602,
+                content: "叫！叫啊！你怎么不叫？",
+                npc: 701155,
+                options: [
+                    {
+                        id: 51160603,
+                        content: "你喂点吃的？",
+                        next: 51160604,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                    {
+                        id: 51160606,
+                        content: "你这么凶它会害怕的。",
+                        next: 51160607,
+                        impr: [1041, "Empathy", 3],
+                    },
+                ],
+            },
+            {
+                id: 51160604,
+                content: "早上出门前才喂过一盆鱼，那时候吃的肚子鼓鼓囊囊，怎可能现在就饿了呢？",
+                npc: 701155,
+                next: 51160605,
+            },
+            {
+                id: 51160607,
+                content: "什么意思？这鸟……难道还能听懂人的话？我这也不算凶它吧，只是让它嚎一嗓子，好让那边的几个老东西看看，到底谁更厉害！",
+                npc: 701155,
+            },
+            {
+                id: 51160605,
+                content: "看着肚子也不算大，难不成真是无底洞？",
+                npc: 701155,
+            },
+            {
+                id: 51160608,
+                content: "凡夫俗子溜凡夫俗鸟，他们那些，能有我这只厉害吗？",
+                npc: 701155,
+                next: 51160609,
+            },
+            {
+                id: 51160609,
+                content: "水也喝上了，鱼也吃过了，你不是会发出咕咕嘎嘎的叫声吗？叫给他们听听啊？",
+                npc: 701155,
+                next: 51160610,
+            },
+            {
+                id: 51160610,
+                content: "咕咕！嘎嘎！咕嘎！咕咕嘎嘎！",
+                npc: 701155,
+                options: [
+                    {
+                        id: 51160611,
+                        content: "咕咕嘎嘎！",
+                        next: 51160612,
+                    },
+                    {
+                        id: 51160613,
+                        content: "你为什么一定要它叫呢？",
+                        next: 51160614,
+                    },
+                ],
+            },
+            {
+                id: 51160612,
+                content: "是你啊，你之前给我说的招数不好用，这蓑翁鹭还是没叫，我又是给它吃的又是哄它开心，但怎么也不见它叫。",
+                npc: 701155,
+                options: [
+                    {
+                        id: 51160615,
+                        content: "你和他们有仇吗？",
+                        next: 51160616,
+                    },
+                ],
+            },
+            {
+                id: 51160614,
+                content: "当然是要给那些白痴老头听啊！叫的越大声越好！要是能把他们的耳朵震聋，那才最好！",
+                npc: 701155,
+                options: [
+                    {
+                        id: 51160615,
+                        content: "你和他们有仇吗？",
+                        next: 51160616,
+                    },
+                ],
+            },
+            {
+                id: 51160616,
+                content: "仇？哼！我才没那个闲工夫和人结仇！",
+                npc: 701155,
+                next: 51160617,
+            },
+            {
+                id: 51160617,
+                content: "不过是他们平日行径令人不齿，我看不过去，才特意从外买来一只蓑翁鹭，准备狠狠报复他们一顿！",
+                npc: 701155,
+                options: [
+                    {
+                        id: 51160618,
+                        content: "他们做了什么伤天害理的事情？",
+                        next: 51160619,
+                    },
+                ],
+            },
+            {
+                id: 51160619,
+                content: "看那个，满头白发的那个，他那混账孙子，在家惯的无法无天，在外念书更是一窍不通。",
+                npc: 701155,
+                next: 51160620,
+            },
+            {
+                id: 51160620,
+                content: "明明没有我家乖乖孙儿考得好，却回回在外吹说他那混账孙子有多聪明伶俐，简直胡扯！",
+                npc: 701155,
+                next: 51160621,
+            },
+            {
+                id: 51160621,
+                content: "再说那个，牙齿豁口的那个，一天到晚不知道想的什么，非要在皓京城养鸟，还一次养一窝！",
+                npc: 701155,
+                next: 51160622,
+            },
+            {
+                id: 51160622,
+                content: "那啾啾莺是直肠子，飞来飞去管不住自己的肚子，我那日在院子里躺着纳凉，那莺儿居然径自飞到我头上，朝我——！",
+                npc: 701155,
+                next: 51160623,
+            },
+            {
+                id: 51160623,
+                content: "（老头子的声音戛然而止，你再看过去之时，他涨红了脸，却是憋不出一句话来。）",
+                next: 51160624,
+            },
+            {
+                id: 51160624,
+                content: "不说了不说了！说起来就来气！总之这些老家伙都是混账！我这回一定要狠狠报复他们！",
+                npc: 701155,
+                next: 51160625,
+            },
+            {
+                id: 51160625,
+                content: "来！蓑翁鹭，给我叫！",
+                npc: 701155,
+            },
+        ],
+    },
+    {
+        id: 701156,
+        name: "马老丈",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51160801,
+                content: "（这似乎是华胥的一种娱乐用品，你曾在百年春看到过相关介绍，但并不怎么了解规则）。",
+                next: 51160802,
+            },
+            {
+                id: 51160802,
+                content: "小友也对象棋感兴趣？",
+                npc: 701156,
+                options: [
+                    {
+                        id: 51160803,
+                        content: "懂一点，但不多。",
+                        next: 51160805,
+                    },
+                    {
+                        id: 51160804,
+                        content: "完全不懂。",
+                        next: 51160805,
+                    },
+                ],
+            },
+            {
+                id: 51160805,
+                content: "你看这当下局面，黑方多一卒却缺一象，红方双车联动却难破担子炮，以你之见，你觉得这局棋局会是谁胜谁负？",
+                npc: 701156,
+                options: [
+                    {
+                        id: 51160806,
+                        content: "黑方胜红方输。",
+                        next: 51160807,
+                    },
+                    {
+                        id: 51160808,
+                        content: "红方胜黑方输。",
+                        next: 51160809,
+                    },
+                    {
+                        id: 51160810,
+                        content: "我不知道。",
+                        next: 51160811,
+                    },
+                ],
+            },
+            {
+                id: 51160807,
+                content: "的确，若是他走一招马四进六，再接一手炮八平六打双车，那红方若是逃车便会丢马，若是保马则可惜失了先手。",
+                npc: 701156,
+            },
+            {
+                id: 51160809,
+                content: "车四平六，若是黑方吃车则车八平六，若是避让却会丢炮弃势。",
+                npc: 701156,
+            },
+            {
+                id: 51160811,
+                content: "此局棋看似注定，实则双方都有回旋余地，的确难辨。",
+                npc: 701156,
+                options: [
+                    {
+                        id: 51160812,
+                        content: "你既然都知道，为什么不告诉他们呢？",
+                        next: 51160813,
+                    },
+                ],
+            },
+            {
+                id: 51160813,
+                content: "小友，华胥有句古言，叫——观棋不语真君子，你懂了吧？",
+                npc: 701156,
+            },
+        ],
+    },
+    {
+        id: 701157,
+        name: "孙兰芝",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51160909,
+                content: "叫上陈老太太，咱们也在家里聚上一聚，打打骨牌？",
+                npc: 701157,
+                next: 51160901,
+            },
+            {
+                id: 51160901,
+                content:
+                    "最近没得空，儿子和媳妇成日吵架，我天一黑就歇下了，睡到半夜却被吵醒，想着毕竟是夫妻俩之间的事，我们做长辈的也不好插手。",
+                next: 51160902,
+            },
+            {
+                id: 51160902,
+                content: "于是就只能等他们吵到天蒙蒙亮，唉……老啦，体力跟不上了，稍微熬个大夜，第二天哪哪都难受……",
+                next: 51160903,
+            },
+            {
+                id: 51160903,
+                content: "也不能总是这么由着他们，你也要照顾好自己的身体，实在不行，你让他俩搬出去住上几天，不闹了再回家。",
+                npc: 701157,
+                next: 51160904,
+            },
+            {
+                id: 51160904,
+                content: "得闲我去说道说道，要是他俩搬出去，到时你们都来我家里打骨牌。",
+                next: 51160905,
+            },
+            {
+                id: 51160905,
+                content: "前些日子我还从外面淘了一套羊脂玉做的骨牌，手感温润，到时候你们可得陪我好好打个三天三夜。",
+                next: 51160906,
+            },
+            {
+                id: 51160906,
+                content: "你不是才说自己熬夜难受的吗？怎么提到打骨牌就又精神起来了？",
+                npc: 701157,
+                next: 51160907,
+            },
+            {
+                id: 51160907,
+                content: "不是一回事，你就说打不打吧？陈老太太上次还输我一根簪子，这次不知道又要输些什么。",
+                next: 51160908,
+            },
+            {
+                id: 51160908,
+                content: "打！我这就去叫人！",
+                npc: 701157,
+            },
+        ],
+    },
+    {
+        id: 701158,
+        name: "孟巧娘",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51161035,
+                content: "我看你是蹬鼻子上脸，三天不打上房揭瓦！给我回去复习功课！",
+                npc: 701158,
+                next: 51161001,
+            },
+            {
+                id: 51161001,
+                content: "我不要回家！我要在外面跟棠豆玩！我不要看书，我不要练字！不要！",
+                npc: 701159,
+                next: 51161002,
+            },
+            {
+                id: 51161002,
+                content: "棠豆回回拿前三，你呢？回回倒数第一。先生几次找我过去谈话，说我在家对你放任自流，不管不顾。",
+                npc: 701158,
+                next: 51161003,
+            },
+            {
+                id: 51161003,
+                content: "我真——我真恨不得抽你一顿！",
+                npc: 701158,
+                options: [
+                    {
+                        id: 51161004,
+                        content: "不可以！",
+                        next: 51161006,
+                        impr: [1041, "Morality", 3],
+                    },
+                    {
+                        id: 51161005,
+                        content: "嘿嘿，打小孩咯。",
+                        next: 51161006,
+                        impr: [1041, "Chaos", 3],
+                    },
+                ],
+            },
+            {
+                id: 51161006,
+                content: "（母亲因为愤怒而高高扬起的手，却始终悬于半空没有落下来，犹豫再三，她还是将手放了下去。）",
+                next: 51161007,
+            },
+            {
+                id: 51161007,
+                content: "你这混账孩子！诶！",
+                npc: 701158,
+                next: 51161008,
+            },
+            {
+                id: 51161008,
+                content: "娘……",
+                npc: 701159,
+                next: 51161009,
+            },
+            {
+                id: 51161009,
+                content: "算了算了，去找你那帮狐朋狗友玩吧，记得早点回家。",
+                npc: 701158,
+                next: 51161010,
+            },
+            {
+                id: 51161010,
+                content: "谢谢娘！娘是全天下最好的娘亲！",
+                npc: 701159,
+                next: 51161011,
+            },
+            {
+                id: 51161011,
+                content: "（他一溜烟跑了个没影。）",
+            },
+            {
+                id: 51161012,
+                content: "一天到晚就只知道出去玩，功课写得像鬼画符，一张纸上愣是看不懂一个字。",
+                npc: 701158,
+                next: 51161013,
+            },
+            {
+                id: 51161013,
+                content: "这是什么啊？春眠不觉晓的下一句……夏天睡不着？这都什么乱七八糟的！真得好好修理他一顿了！",
+                npc: 701158,
+                options: [
+                    {
+                        id: 51161014,
+                        content: "你说的修理是指？",
+                        next: 51161015,
+                    },
+                ],
+            },
+            {
+                id: 51161015,
+                content: "干嘛这么看我？你以为我要揍他吗？我告诉你，大风九章可不允许随意伤人。",
+                npc: 701158,
+                options: [
+                    {
+                        id: 51161016,
+                        content: "我没这么想。",
+                        next: 51161018,
+                    },
+                    {
+                        id: 51161017,
+                        content: "要是没有大风九章是不是真要揍他了？",
+                        next: 51161018,
+                    },
+                ],
+            },
+            {
+                id: 51161018,
+                content: "只要你来辅导他一次功课，你也会气到牙根发痒。",
+                npc: 701158,
+                next: 51161019,
+            },
+            {
+                id: 51161019,
+                content:
+                    "之前算学先生留了一道题，他在那掰了半天手指也没算出来，题目是说：六个有龙氏去集市，每人买了八条鱼，问一共带回来几条鱼？",
+                npc: 701158,
+                options: [
+                    {
+                        id: 51161020,
+                        content: "48条！",
+                        next: 51161021,
+                    },
+                    {
+                        id: 51161022,
+                        content: "999条！",
+                        next: 51161023,
+                    },
+                ],
+            },
+            {
+                id: 51161021,
+                content: "对了！我家那个要是有你一半聪明就好了！",
+                npc: 701158,
+                next: 51161024,
+            },
+            {
+                id: 51161023,
+                content: "你是在跟我开玩笑吧？难不成你的算术也是一塌糊涂？",
+                npc: 701158,
+                next: 51161024,
+            },
+            {
+                id: 51161024,
+                content: "我家那混账小子，先是盯着书本发了半个时辰的呆，我催了他半天，他才回过神，偷瞄了我一眼。",
+                npc: 701158,
+                next: 51161025,
+            },
+            {
+                id: 51161025,
+                content: "我问他，怎么不说话？他便随意掰扯了一个十八，我说不对，他又在那沉思半天，说二十八。",
+                npc: 701158,
+                next: 51161026,
+            },
+            {
+                id: 51161026,
+                content: "真是要把我气笑了，我说你干脆从零开始把每个数字都猜上一遍得了呗？他点点头，说娘说得对。",
+                npc: 701158,
+                next: 51161027,
+            },
+            {
+                id: 51161027,
+                content:
+                    "气得我哟……但又有什么办法呢？我只能给他支邪招，我说不行你就把有龙和鱼都画出来，画六个有龙，每个有龙带八条鱼，全画出来之后你再一个个数。",
+                npc: 701158,
+                next: 51161028,
+            },
+            {
+                id: 51161028,
+                content: "你以为这就好了？呵！想起来我现在还来气！他按我说的画了一个有龙，手提两条鱼，肩上挑着两条鱼，脚下踩着两条鱼。",
+                npc: 701158,
+                options: [
+                    {
+                        id: 51161029,
+                        content: "还差两条呢？",
+                        next: 51161030,
+                    },
+                ],
+            },
+            {
+                id: 51161030,
+                content: "对！我也这么问他，你知道他怎么说的吗？他思来想去半天，说：娘，他没地方拿鱼了！",
+                npc: 701158,
+                options: [
+                    {
+                        id: 51161031,
+                        content: "你儿子……难不成是天才？",
+                        next: 51161033,
+                    },
+                    {
+                        id: 51161032,
+                        content: "哈哈哈哈哈哈！",
+                        next: 51161033,
+                    },
+                ],
+            },
+            {
+                id: 51161033,
+                content: "这一点也不好笑！现在真是想起来气都不打一处来……要我说，大风九章就该给咱们这些家长出些教育免责。",
+                npc: 701158,
+                next: 51161034,
+            },
+            {
+                id: 51161034,
+                content: "好让我在气到要晕过去之前，还能脱下鞋狠狠打他两下屁股解气！",
+                npc: 701158,
+            },
+        ],
+    },
+    {
+        id: 701159,
+        name: "景小年",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701160,
+        name: "景小年",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51161101,
+                content: "我来了！不好意思，今天翻墙出来被阿娘逮到了……",
+                npc: 701160,
+                next: 51161102,
+            },
+            {
+                id: 51161102,
+                content: "你没挨骂吧？其实如果你娘会骂你的话，你不出来也是可以的。",
+                npc: 701161,
+                next: 51161103,
+            },
+            {
+                id: 51161103,
+                content: "那怎么行呢？我们不是说好了每天都要来照顾小猫的吗？我今天给它带了火腿，我娘晒在院子里的。",
+                npc: 701160,
+                next: 51161104,
+            },
+            {
+                id: 51161104,
+                content: "诶呀！那是过节吃的！你娘知道了肯定又要骂你了！",
+                npc: 701161,
+                next: 51161105,
+            },
+            {
+                id: 51161105,
+                content: "反正我做什么事她都要骂我的，也不差这一件两件。之前写算学题，明明是她让我算不出就画出来，结果我真画了她又要骂我……",
+                npc: 701160,
+                next: 51161106,
+            },
+            {
+                id: 51161106,
+                content: "为何要骂你？",
+                npc: 701161,
+                next: 51161107,
+            },
+            {
+                id: 51161107,
+                content:
+                    "对啊！明明是题的问题，那题说一个有龙氏去集市买八条鱼带回家，哪有这种事？谁家一次要买八条鱼回去吃？一次也拿不下呀。",
+                npc: 701160,
+                next: 51161108,
+            },
+            {
+                id: 51161108,
+                content: "嘻嘻~题目只是先生出的比喻，本质上只是一个题目呀，笨蛋~",
+                npc: 701161,
+                next: 51161109,
+            },
+            {
+                id: 51161109,
+                content: "管他呢……反正就是不合常理，算不出来！不过……",
+                npc: 701160,
+                next: 51161110,
+            },
+            {
+                id: 51161110,
+                content: "不过什么？",
+                npc: 701161,
+                next: 51161111,
+            },
+            {
+                id: 51161111,
+                content: "小猫可不可以吃八条鱼？要不我们去给小猫带八条鱼吧？",
+                npc: 701160,
+            },
+        ],
+    },
+    {
+        id: 701161,
+        name: "棠豆",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701162,
+        name: "文博",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51161322,
+                content: "今年的税账至今还在统计之中，明年的汇算眼见着也要来了……真是忙到头晕眼花。",
+                npc: 701162,
+                next: 51161301,
+            },
+            {
+                id: 51161301,
+                content: "不过比起那些繁杂的数据统计，眼下最急迫的事是——啊！港口消防！我完全忘记了这回事！",
+                npc: 701162,
+                options: [
+                    {
+                        id: 51161302,
+                        content: "港口消防是什么工作？",
+                        next: 51161303,
+                    },
+                ],
+            },
+            {
+                id: 51161303,
+                content: "港口消防……港口消防就是消防呀，还能是什么工作？就像普通的消防工作一样，哪里有火就扑灭哪里。",
+                npc: 701162,
+                next: 51161304,
+            },
+            {
+                id: 51161304,
+                content:
+                    "看你的样子，也不像是会问出这么浅显的问题呀？哦！我知道了！你一定是想知道，港口明明最靠近水域，为什么需要消防工作，是不是？",
+                npc: 701162,
+                options: [
+                    {
+                        id: 51161305,
+                        content: "是我想问的。",
+                        next: 51161306,
+                    },
+                    {
+                        id: 51161310,
+                        content: "我是想问消防工作的具体内容。",
+                        next: 51161311,
+                    },
+                    {
+                        id: 51161317,
+                        content: "我的意思是这种工作为什么现在才做？",
+                        next: 51161318,
+                    },
+                ],
+            },
+            {
+                id: 51161306,
+                content:
+                    "果然还是我神机妙算！这个问题呢……怎么说呢，一部分原因是历史遗留。皓京的参商港建立时间较早，当年没怎么考虑过规划的问题。",
+                npc: 701162,
+                next: 51161307,
+            },
+            {
+                id: 51161311,
+                content: "原来是这样啊？等等——你怎么会问这种专业的问题？难不成……你是上面派下来日常考察我的家伙？看起来也不像呀……",
+                npc: 701162,
+                next: 51161312,
+            },
+            {
+                id: 51161318,
+                content: "额……这个……这个嘛……你也知道，皓京城可是有着千年历史的古城，早年在修建参商港的时候，大家确实没有那方面的意识……",
+                npc: 701162,
+                next: 51161319,
+            },
+            {
+                id: 51161307,
+                content: "所以岸边仓库建筑间隔十分密集，一旦火势传播极难快速控制。即使请上一堆擅长仙术的有龙氏来，一时半会也控制不住。",
+                npc: 701162,
+                next: 51161308,
+            },
+            {
+                id: 51161312,
+                content: "算了，不纠结这些，反正像我这样的天才是不会被轻易问倒的！",
+                npc: 701162,
+                next: 51161313,
+            },
+            {
+                id: 51161319,
+                content: "不过也不是完全没有，只是原先的许多消防站因为经年不用失效或者报废或者水力太小之类的……毕竟是偶发性的事件嘛……",
+                npc: 701162,
+                next: 51161320,
+            },
+            {
+                id: 51161308,
+                content:
+                    "再加上咱们华胥人最离不开的就是香料，而港口仓库多半也是放香料的，还有一些丝绸木材油纸之类，都是一个火星子就能快速引燃的物件。",
+                npc: 701162,
+                next: 51161309,
+            },
+            {
+                id: 51161313,
+                content: "消防工作还能是什么，预防、扑救加善后，不就是这些。参商港的工作麻烦在以前大家并没有预防的意识。",
+                npc: 701162,
+                next: 51161314,
+            },
+            {
+                id: 51161320,
+                content: "前几年，不知道为什么，起了一场大火，好像是一些外来商船来皓京参观奉香大典，批发了一大批香料，结果却……",
+                npc: 701162,
+                next: 51161321,
+            },
+            {
+                id: 51161309,
+                content: "这要是哪个不长眼的笨蛋一不小心忘了吹熄日常奉香……诶呀……想想就很可怕了！",
+                npc: 701162,
+            },
+            {
+                id: 51161314,
+                content:
+                    "不过新上任那位奏书使大人很重视，毕竟之前是起过一场大火嘛……现在我们筹备了一批巡夜人，每天晚上在港口区域巡逻，预防灾情。",
+                npc: 701162,
+                next: 51161315,
+            },
+            {
+                id: 51161321,
+                content: "总之，现在每到奉香大典，我们就要重新检查翻修一遍港口的消防设施，预防再出现那样的事故。",
+                npc: 701162,
+            },
+            {
+                id: 51161315,
+                content:
+                    "后面又重建了一大批仓库，拆了好些棚屋，还给易燃的灯油专门建了特殊墙体仓库，最近又在请匠矩阁的师傅们帮忙掘池掘井，改良水龙车。",
+                npc: 701162,
+                next: 51161316,
+            },
+            {
+                id: 51161316,
+                content:
+                    "总之，差不多就是这样了，不过后续的工作我们还在更进呢，你要是有什么好点子，也可以给泉通阁信箱投建议信，我们是有专人处理的~",
+                npc: 701162,
+            },
+        ],
+    },
+    {
+        id: 701163,
+        name: "吴章知",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51161401,
+                content: "昨夜通宵整理典籍，今日双眼昏花，恐一蹬腿就要去往虞泉了！",
+                npc: 701163,
+                next: 51161402,
+            },
+            {
+                id: 51161402,
+                content: "想来之前刚入泉通阁之时，看到李兄每日煮药，那时还觉得他老气横秋……现在想来，还是他有先见之明啊！",
+                npc: 701163,
+                next: 51161403,
+            },
+            {
+                id: 51161403,
+                content: "看来我也得抽空去趟泽生阁，开一剂养生良药，好保我这条小命能多过些日子。",
+                npc: 701163,
+                options: [
+                    {
+                        id: 51161404,
+                        content: "泉通阁的工作很累吗？",
+                        next: 51161405,
+                    },
+                    {
+                        id: 51161408,
+                        content: "泽生阁不是看病的吗？",
+                        next: 51161409,
+                    },
+                    {
+                        id: 51161413,
+                        content: "再见。",
+                        next: 51161414,
+                    },
+                ],
+            },
+            {
+                id: 51161405,
+                content:
+                    "诶呀……您这话问得……我都不知道该怎么回答好了。累是自然累的，但倒也不是像体力活那般伤筋动骨，动不动这里擦伤那里扭伤之类的。",
+                npc: 701163,
+                next: 51161406,
+            },
+            {
+                id: 51161409,
+                content:
+                    "这话说得，头疼脑热是病，操劳忙碌不也是病嘛，泽生阁的医师们可有创新精神了，针对不同年龄段的不同需求都出了特需药方，方便大家选购。",
+                npc: 701163,
+                next: 51161410,
+            },
+            {
+                id: 51161414,
+                content: "你要不要也去开点药？我看你面色有些苍白，不知道是衣服衬的还是贫血，以防万一，也该补补了。",
+                npc: 701163,
+            },
+            {
+                id: 51161406,
+                content: "而是大多数时间要与各式各样的人交流沟通，一日内还要连续审阅核算诸多繁杂数据，要是一个不小心算差了……",
+                npc: 701163,
+                next: 51161407,
+            },
+            {
+                id: 51161410,
+                content:
+                    "比如对于刻苦求学的学子，就出了一些明目利脑的丸子，方便服用；像我们这种苦于案牍劳苦的成年人，就把消乏的药饮做成小袋装，每日只需加热便可服用。",
+                npc: 701163,
+                next: 51161411,
+            },
+            {
+                id: 51161407,
+                content: "噫……不愿想起！不愿提及！",
+                npc: 701163,
+            },
+            {
+                id: 51161411,
+                content: "当然，还有老人往往会喜欢买些大补之物，但空口吃又不好，泽生阁便出了代加工，比如把阿胶什么的做成糕点……",
+                npc: 701163,
+                next: 51161412,
+            },
+            {
+                id: 51161412,
+                content: "家妻买过几次，我尝了，味道还挺好吃，要不是她拦着，我都当零嘴吃了。",
+                npc: 701163,
+            },
+        ],
+    },
+    {
+        id: 701164,
+        name: "晚月",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51161507,
+                content: "奉香大典意味着什么？意味着休假呀！我一直想去海伯利亚看雪……",
+                npc: 701164,
+                next: 51161501,
+            },
+            {
+                id: 51161501,
+                content: "停停停！畅想你的美好假期之前，能不能先把奉香大典的一堆活儿干完？",
+                next: 51161502,
+            },
+            {
+                id: 51161502,
+                content: "不行了不行了……我的思绪已经飞出泉通阁了，我的魂灵已经乘着啾啾莺的翅膀，飞过湖泊，飞过高山，飞到太皓神君身边了！",
+                npc: 701164,
+                next: 51161503,
+            },
+            {
+                id: 51161503,
+                content: "好……你飞到太皓神君身边的时候，记得问问今年才采购的节货他是否满意，再问问你落下的这些活能不能让神君帮忙做完。",
+                next: 51161504,
+            },
+            {
+                id: 51161504,
+                content: "好你个临夏，居然敢让神君帮我们干活！",
+                npc: 701164,
+                next: 51161505,
+            },
+            {
+                id: 51161505,
+                content: "诶？你搞错了，不是我让神君帮我们干活，是你明明还有一堆事情等着去做，却非要在这里畅想未来。",
+                next: 51161506,
+            },
+            {
+                id: 51161506,
+                content: "嘁——你明明年纪轻轻，却死板得跟个老古董一样，玩笑也开不得，现在不是出来透透气的时候嘛！",
+                npc: 701164,
+            },
+        ],
+    },
+    {
+        id: 701165,
+        name: "安永",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51161601,
+                content: "这般数据出现在这栏不太应当，莫非是填错了？",
+                npc: 701165,
+                next: 51161602,
+            },
+            {
+                id: 51161602,
+                content: "不应当吧，那措施出了之后，按理说是应该没有不来登记的居民和商贩了。",
+                npc: 701165,
+                options: [
+                    {
+                        id: 51161603,
+                        content: "为什么会不来登记？",
+                        next: 51161604,
+                    },
+                    {
+                        id: 51161607,
+                        content: "什么措施？",
+                        next: 51161608,
+                    },
+                ],
+            },
+            {
+                id: 51161604,
+                content: "大多是因为麻烦，只是来皓京短暂工作一段时间，如果不是涉及到落户安家之类的大事，很少会主动来泉通阁登记。",
+                npc: 701165,
+                next: 51161605,
+            },
+            {
+                id: 51161608,
+                content:
+                    "唔……其实说起来很简单，就是我们和祀烟阁的香官说了一声，凡是登记了身份的居民，每日去祀烟阁奉香时，可额外领取一柱奉君香。",
+                npc: 701165,
+                next: 51161609,
+            },
+            {
+                id: 51161605,
+                content: "哪怕是我们挨家挨户上门询问，也会出现一些——出门工作旅游一类的状况，出现误差。",
+                npc: 701165,
+                next: 51161606,
+            },
+            {
+                id: 51161609,
+                content:
+                    "虽说也不是什么十分名贵的香，但是大家本着有便宜不占白不占的心态——我好像不该……算了！我什么也没说！你刚才什么都没有听到！",
+                npc: 701165,
+                options: [
+                    {
+                        id: 51161610,
+                        content: "你们怎么区分登记过和没有登记的人？",
+                        next: 51161611,
+                    },
+                ],
+            },
+            {
+                id: 51161606,
+                content: "至于商户……那就更简单了，毕竟皓京的商人们需要按期缴纳市籍税，如果不登记，自然就少交了这一笔。",
+                npc: 701165,
+                options: [
+                    {
+                        id: 51161614,
+                        content: "我先走了。",
+                        next: 51161615,
+                    },
+                ],
+            },
+            {
+                id: 51161611,
+                content: "这……这就要归功于一种神奇的术法了。我们拜托了悬衡派的分香官，为登记的居民身上印上与其他香料不同的独特的气味。",
+                npc: 701165,
+                next: 51161612,
+            },
+            {
+                id: 51161615,
+                content: "你要是准备在皓京久居，提前来泉通阁办理户籍。现在可以加赠太皓神君定制款棉花娃娃，怎么样？心动不如行动吧！",
+                npc: 701165,
+            },
+            {
+                id: 51161612,
+                content: "这种气味寻常人分辨不出来，但擅长分香术的则可以一眼看出，毕竟修习分香术的第一课就是识香嘛~",
+                npc: 701165,
+                next: 51161613,
+            },
+            {
+                id: 51161613,
+                content:
+                    "但这种术法的持续时间并不会太久，约莫两三个月就会淡去。但好在皓京的居民对于每日奉香一事十分推崇，在期限之内可以再次去祀烟阁那处补上。",
+                npc: 701165,
+                options: [
+                    {
+                        id: 51161614,
+                        content: "我先走了。",
+                        next: 51161615,
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 701166,
+        name: "卢静薇",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51161706,
+                content: "下次遇到这种事情记得早些来泉通阁，硬拖只会让事态恶化。",
+                npc: 701166,
+                next: 51161701,
+            },
+            {
+                id: 51161701,
+                content: "这不是想着你们日理万机，这些小忙小乱的我们自己解决了也便罢了……不给你们添麻烦……",
+                next: 51161702,
+            },
+            {
+                id: 51161702,
+                content: "如果真的是你们自己能解决了倒也还好，问题是……",
+                npc: 701166,
+                next: 51161703,
+            },
+            {
+                id: 51161703,
+                content:
+                    "你就说这口井，你们要是发现没水了就来找我们，现在早就通了，结果呢？偏要自己挖，现在好了，把邻居墙跟挖通了，塌下来还砸到了人！",
+                npc: 701166,
+                next: 51161704,
+            },
+            {
+                id: 51161704,
+                content: "这……这实在是无心之举……我也没想到我的方向感能这么差，我分明是想往下挖的……",
+                next: 51161705,
+            },
+            {
+                id: 51161705,
+                content: "无论怎么说，以后遇事第一时间就来找泉通阁，我们一定第一时间帮你们解决，不要自己瞎折腾了！",
+                npc: 701166,
+            },
+        ],
+    },
+    {
+        id: 701167,
+        name: "文彬",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51161829,
+                content: "祀烟阁今年为何额外申请了一笔经费，是作何用处的？",
+                npc: 701260,
+                next: 51161801,
+            },
+            {
+                id: 51161801,
+                content: "你不知道？哦对，前段时间你休沐不在，他们来申请时你没见到。",
+                npc: 701167,
+                next: 51161802,
+            },
+            {
+                id: 51161802,
+                content: "他们说，烛阴之灾未平，为了安定民心，今年的奉香大典要办的更加隆重。",
+                npc: 701167,
+                next: 51161803,
+            },
+            {
+                id: 51161803,
+                content: "比如说……皓京城内的沉月香，往年只是从普通香农那边收吿苍，今年要专门从园子里收。",
+                npc: 701167,
+                next: 51161804,
+            },
+            {
+                id: 51161804,
+                content: "那些园子里种的吿苍都是优质货，成本要翻好几倍吧……",
+                npc: 701260,
+                next: 51161805,
+            },
+            {
+                id: 51161805,
+                content: "所以原本的预算不够了，不过好在今年的年收确实不错。",
+                npc: 701167,
+                next: 51161806,
+            },
+            {
+                id: 51161806,
+                content:
+                    "因为海外贸易生意做的大，所以商税收入繁荣，也吸引来了更多游客。但吸引来更多游客，所以奉香大典便要办得优质些，好给来宾留下更好的印象。",
+                npc: 701167,
+                next: 51161807,
+            },
+            {
+                id: 51161807,
+                content: "行啦行啦，简直要给我绕晕了。既然他们祀烟阁铆足了劲要办个隆重的大典，那我们泉通阁也不能落于人后。",
+                npc: 701260,
+                next: 51161808,
+            },
+            {
+                id: 51161808,
+                content: "所以说——趁此机会，出个更详细的大典计划吧？",
+                npc: 701260,
+            },
+            {
+                id: 51161809,
+                content: "前脚刚和我一起写了申请奉香大典流程优化的报告，后脚居然卧病不起了……",
+                npc: 701260,
+                next: 51161810,
+            },
+            {
+                id: 51161810,
+                content: "现在这事直接落到了我头上，哎呀……真是难办……",
+                npc: 701260,
+                options: [
+                    {
+                        id: 51161811,
+                        content: "太不靠谱了吧！",
+                        next: 51161812,
+                    },
+                    {
+                        id: 51161814,
+                        content: "什么事情这么难办？",
+                        next: 51161815,
+                    },
+                ],
+            },
+            {
+                id: 51161812,
+                content: "诶……怎么说呢……这也没办法。这家伙的身体本就不好，这么一说我又想起来，前段时间他休沐也是因为旧疾发作。",
+                npc: 701260,
+                next: 51161813,
+            },
+            {
+                id: 51161815,
+                content: "你知道奉香大典吗？就是对咱们华胥人来说四年一度最重要的节日。",
+                npc: 701260,
+                next: 51161816,
+            },
+            {
+                id: 51161813,
+                content: "这么一想，过段时间还是买些补品去看看他好了……",
+                npc: 701260,
+            },
+            {
+                id: 51161816,
+                content: "今年祀烟阁提议，想将奉香大典办的隆重些，我们报了上去后，上面也同意了这个想法，但到具体的步骤……",
+                npc: 701260,
+                next: 51161817,
+            },
+            {
+                id: 51161817,
+                content:
+                    "毕竟不是我提出的意见，现在的确是摸不着头脑。诶？你应该是异国来客？从你的角度，你觉得节日大典上出现什么会让你感到有趣？",
+                npc: 701260,
+            },
+        ],
+    },
+    {
+        id: 701168,
+        name: "景和",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51162005,
+                content: "是，就是往西郊那个方向，鬼鬼祟祟的，看起来不像什么好人。",
+                npc: 701168,
+                next: 51162001,
+            },
+            {
+                id: 51162001,
+                content: "你当时去问了？他们有说运这些东西是要做什么用吗？",
+                next: 51162002,
+            },
+            {
+                id: 51162002,
+                content: "没去，要是去了我现在还来这儿做什么？我那时正在山上捡菌子，弯着身子找着呢，就看到几个人抬着一个大箱子往里面走。",
+                npc: 701168,
+                next: 51162003,
+            },
+            {
+                id: 51162003,
+                content: "我就寻思啊——这平白无故搬东西去山里做什么？总不能是要在里面建寨子吧？",
+                npc: 701168,
+                next: 51162004,
+            },
+            {
+                id: 51162004,
+                content: "是稀奇，但也有可能是今年奉香大典在山里办呢，说不准的，还是去问问司里的官员，看看他们怎么说吧。",
+            },
+        ],
+    },
+    {
+        id: 701169,
+        name: "裴德厚",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51162101,
+                content: "西郊西郊西郊，为何几封投诉信，来来回回都在提西郊？",
+                npc: 701169,
+                next: 51162102,
+            },
+            {
+                id: 51162102,
+                content: "虽说的确有些要在西郊筹备的事情，也通知了一部分居民，但这投诉信还是纷迭而来……",
+                npc: 701169,
+                next: 51162103,
+            },
+            {
+                id: 51162103,
+                content: "你看，这封，说西郊深夜有人敲敲打打，像是在钉什么铁皮，附近巡林的听到了赶过去，现场却什么动静也没有。",
+                npc: 701169,
+                next: 51162104,
+            },
+            {
+                id: 51162104,
+                content: "这封，是个酒楼的伙计，说怀疑有人恶意捉弄他们，让往西郊入口处放几十份伙食，不知道是要孝敬哪路野神仙。",
+                npc: 701169,
+                next: 51162105,
+            },
+            {
+                id: 51162105,
+                content: "条条桩桩，竟全和西郊有关，难不成西郊真出了什么事？",
+                npc: 701169,
+                options: [
+                    {
+                        id: 51162106,
+                        content: "可能闹无由生了。",
+                        next: 51162107,
+                    },
+                    {
+                        id: 51162108,
+                        content: "可能有不法分子！",
+                        next: 51162109,
+                    },
+                ],
+            },
+            {
+                id: 51162107,
+                content: "无由生……？这种没有科学证据的无稽之谈，怎么可以采信呢。不妥不妥。",
+                npc: 701169,
+                options: [
+                    {
+                        id: 51162111,
+                        content: "你去看看不就知道了。",
+                        next: 51162112,
+                    },
+                ],
+            },
+            {
+                id: 51162109,
+                content: "虽然你肯定是想多了，但是排除一万种错误答案，最离谱的那个说不定就是正确答案。",
+                npc: 701169,
+                next: 51162110,
+            },
+            {
+                id: 51162112,
+                content: "这不是奉香大典前事务繁杂，能去的话我早就去了，还是拜托别人帮忙跑一趟吧。",
+                npc: 701169,
+            },
+            {
+                id: 51162110,
+                content: "但要我说，最多也就是哪个富商兴头来了没有登记就在山中大兴土木这种事。",
+                npc: 701169,
+                options: [
+                    {
+                        id: 51162111,
+                        content: "你去看看不就知道了。",
+                        next: 51162112,
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 701170,
+        name: "温玉笙",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51162201,
+                content: "快给我来碗茶水，刚从西郊回来，渴死我了！",
+                npc: 701170,
+                next: 51162202,
+            },
+            {
+                id: 51162202,
+                content: "给你——怎么回事？平白无故去西郊做什么？",
+                next: 51162203,
+            },
+            {
+                id: 51162203,
+                content: "喘口气再说……哈！累死我了！还不是最近总有百姓来投诉，说西郊有人鬼鬼祟祟，不知道在做什么，上面就派我过去看看。",
+                npc: 701170,
+                next: 51162204,
+            },
+            {
+                id: 51162204,
+                content: "这么一说我想起来是有这事，我怀疑是不是……飘零……",
+                next: 51162205,
+            },
+            {
+                id: 51162205,
+                content: "什么呀！什么都不是！飘零人要想作奸犯科肯定要选在皓京城内，就像之前的那谁谁……放把火烧了个干净。",
+                npc: 701170,
+                next: 51162206,
+            },
+            {
+                id: 51162206,
+                content: "说的也是，但华胥的危险分子，除了飘零人还能有谁……所以到底是怎么了？",
+                next: 51162207,
+            },
+            {
+                id: 51162207,
+                content: "真相就是——什么都没有！我绕着山来来回回爬了几圈，什么也没看到，之前我还猜测是有人在山上盖违章建筑。",
+                npc: 701170,
+                next: 51162208,
+            },
+            {
+                id: 51162208,
+                content: "结果呢，瓦都不见一个！去时我背了壶水，衣衫也算体面，你看现在！你看我！",
+                npc: 701170,
+                next: 51162209,
+            },
+            {
+                id: 51162209,
+                content: "劳驾你了，那我去帮你跑一趟，和上面说一声。",
+                next: 51162210,
+            },
+            {
+                id: 51162210,
+                content: "行，我得去按按腿，诶哟……抬不起来了，你背我过去先！",
+                npc: 701170,
+            },
+        ],
+    },
+    {
+        id: 701171,
+        name: "清鸢",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51162219,
+                content: "嗯，是说您负责运输的一船货物在码头丢失了……不是货物？那是……翠屏雀？！",
+                npc: 701171,
+                next: 51162211,
+            },
+            {
+                id: 51162211,
+                content: "是啊，我从烟津渡运过来的，是你们皓京的一位……画师？画师定的。",
+                next: 51162212,
+            },
+            {
+                id: 51162212,
+                content: "不……等等……你让我理一下思绪，首先，买卖翠屏雀是可以的吗？天禄司的交易规定中有说翠屏雀属于可买卖的物种吗？",
+                npc: 701171,
+                next: 51162213,
+            },
+            {
+                id: 51162213,
+                content: "那你这说得——我就是个船夫，你都不知道我怎么知道呢？",
+                next: 51162214,
+            },
+            {
+                id: 51162214,
+                content: "但是这事稍微有些棘手了……如果是货物失窃，大风九章自然早已调来狴犴介入。",
+                npc: 701171,
+                next: 51162215,
+            },
+            {
+                id: 51162215,
+                content: "可此时参商港一切如常，这只能说明——那些翠屏雀是自己跑的！",
+                npc: 701171,
+                next: 51162216,
+            },
+            {
+                id: 51162216,
+                content: "这、这可怎么办？那些翠屏雀金贵着呢！难道就放任这些它们在皓京城里乱跑？",
+                next: 51162217,
+            },
+            {
+                id: 51162217,
+                content:
+                    "您先别急，我想想……这样！我先通知参商港的办事员，让他们帮你留意翠屏雀，然后你那边最好也配合一下，比如提供运输过程中它们的饲料作为诱饵。",
+                npc: 701171,
+                next: 51162218,
+            },
+            {
+                id: 51162218,
+                content: "好好好，就这么办，就这么办！",
+            },
+        ],
+    },
+    {
+        id: 701172,
+        name: "灵月",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51162323,
+                content: "它到底是怎么跑出去的呢？",
+                npc: 701172,
+                next: 51162301,
+            },
+            {
+                id: 51162301,
+                content: "船上不可能会有人把它们放出去，压根不会获得什么好处，只是平白添乱罢了。",
+                npc: 701172,
+                next: 51162302,
+            },
+            {
+                id: 51162302,
+                content:
+                    "可要是说它们是自己跑出去的，未免也有些太过离谱。说来说去不过是鸟类，就算是再有灵气，也不至于一夜成精，学会自己开门？",
+                npc: 701172,
+                options: [
+                    {
+                        id: 51162303,
+                        content: "鸟类是指？",
+                        next: 51162305,
+                    },
+                    {
+                        id: 51162304,
+                        content: "什么跑出去了？",
+                        next: 51162305,
+                    },
+                ],
+            },
+            {
+                id: 51162305,
+                content:
+                    "现在参商港不是应该早就传得沸沸扬扬了？你居然不晓得？我们是从烟津渡来的货运船，几天前，头儿接到一份生意，说要运一批翠屏雀到皓京。",
+                npc: 701172,
+                next: 51162306,
+            },
+            {
+                id: 51162306,
+                content: "那价钱出得极高，接到活第二天，我们一船的伙计都去抓了，好不容易凑齐数量，连赶带围地送上船，又一路颠簸，运到皓京。",
+                npc: 701172,
+                next: 51162307,
+            },
+            {
+                id: 51162307,
+                content:
+                    "结果就在昨天，我们船只到港后，头儿要去登记货运物品信息，结果船舶司的人似乎是第一次听说有人运翠屏雀，说什么也不让咱们进皓京。",
+                npc: 701172,
+                next: 51162308,
+            },
+            {
+                id: 51162308,
+                content: "我们没办法，只能在船上歇了一晚上，结果呢，今早一看，那笼子不知道怎么就打开了，里面关着的翠屏雀全跑了！",
+                npc: 701172,
+                options: [
+                    {
+                        id: 51162309,
+                        content: "为什么不让进皓京？",
+                        next: 51162310,
+                    },
+                    {
+                        id: 51162313,
+                        content: "怎么会有人订购翠屏雀？",
+                        next: 51162314,
+                    },
+                    {
+                        id: 51162318,
+                        content: "它们是怎么逃出去的？",
+                        next: 51162319,
+                    },
+                ],
+            },
+            {
+                id: 51162310,
+                content:
+                    "原因太多了，随便挑一条就够抓我们去天禄司那喝上两壶。第一，翠屏雀本来就不算在买卖运输的商品之类，当然，在我们之前，也没人做过这生意。",
+                npc: 701172,
+                next: 51162311,
+            },
+            {
+                id: 51162314,
+                content: "有的，华胥之大，无奇不有，我们之前还做过一些运输生意，比如珍猪，你知道吧？",
+                npc: 701172,
+                next: 51162315,
+            },
+            {
+                id: 51162319,
+                content: "呵！我正琢磨呢！你看，我们用来运输翠屏雀的，都是这种竖条的铁笼，这边开了门，但会用门闩给关住。",
+                npc: 701172,
+                next: 51162320,
+            },
+            {
+                id: 51162311,
+                content: "第二，鸟都是直肠子，管不住肚子的，它们吃得饱饱的，进了城随地……诶你懂得，总之这不是和人一样，你教它就能会的事情。",
+                npc: 701172,
+                next: 51162312,
+            },
+            {
+                id: 51162315,
+                content: "那是一种肉质很肥美的动物，城里的贵人爱吃。但是翠屏雀……诶，说实话，确实是第一次做这种生意。",
+                npc: 701172,
+                next: 51162316,
+            },
+            {
+                id: 51162320,
+                content: "要想开门，只有把那门闩逆时针绕上大半圈，再从内向外推开铁门，这样里面的东西才能走出来。",
+                npc: 701172,
+                next: 51162321,
+            },
+            {
+                id: 51162312,
+                content:
+                    "第三……下这份订单的买家，以及我们，压根就没有想到皓京城居然这么大，咱们之前谁都没有想过翠屏雀到皓京之后要如何运送去目的地。",
+                npc: 701172,
+            },
+            {
+                id: 51162316,
+                content: "以前会有专门饲养它们收集掉落尾羽的产业，但是那都是在野外养，没有在城里养的说法。",
+                npc: 701172,
+                next: 51162317,
+            },
+            {
+                id: 51162321,
+                content: "你说这能是翠屏雀那小脑袋瓜能琢磨明白的流程吗？绝无可能！",
+                npc: 701172,
+                next: 51162322,
+            },
+            {
+                id: 51162317,
+                content:
+                    "你要说收购来吃吧……我虽然没吃过，但是听说肉是酸的，不好吃……不过要是好吃，想必烟津渡也不会漫山遍野都是游荡的野生翠屏雀。",
+                npc: 701172,
+            },
+            {
+                id: 51162322,
+                content:
+                    "不管怎么说，我都想不到它们自己开门出去的原因，听说赫墨那有可以和动物沟通的能人异士，要是翠屏雀能找回来，拜托他们问问原因就好了……",
+                npc: 701172,
+            },
+        ],
+    },
+    {
+        id: 701173,
+        name: "元祯",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51162412,
+                content: "找不回来了……一切努力都付之东流了……",
+                npc: 701173,
+                next: 51162401,
+            },
+            {
+                id: 51162401,
+                content: "有什么比明知道做了没用还不得不做的事情更没意义呢？",
+                npc: 701173,
+                options: [
+                    {
+                        id: 51162402,
+                        content: "你在苦恼什么？",
+                        next: 51162403,
+                    },
+                ],
+            },
+            {
+                id: 51162403,
+                content: "苦恼？我可没苦恼，我只是觉得我现在做的事情太没有意义了，大家都应该把宝贵的时间用在更有价值的事情上不是吗？",
+                npc: 701173,
+                next: 51162404,
+            },
+            {
+                id: 51162404,
+                content: "而不是在这偌大的皓京城里，寻找六只丢失的翠屏雀，简直荒谬至极！",
+                npc: 701173,
+                options: [
+                    {
+                        id: 51162405,
+                        content: "你觉得更有价值的事情是什么？",
+                        next: 51162406,
+                    },
+                    {
+                        id: 51162407,
+                        content: "找不到没法交差吧？",
+                        next: 51162408,
+                    },
+                    {
+                        id: 51162410,
+                        content: "加油找吧！",
+                        next: 51162411,
+                    },
+                ],
+            },
+            {
+                id: 51162406,
+                content: "好不容易到了皓京，不是应该去逛逛东市，吃吃美食，去祀烟阁奉香，去执律阁参拜神君吗？",
+                npc: 701173,
+            },
+            {
+                id: 51162408,
+                content: "说的也是……只是这样找下去未免也效率太低了，咱们华胥民族上千年的智慧积累，只能想出如此简单粗暴的应对方法吗？",
+                npc: 701173,
+                next: 51162409,
+            },
+            {
+                id: 51162411,
+                content:
+                    "是……你的好意我心领了……所以我很快就会鼓起干劲然后去城中乱跑一通直到抱回六只翠屏雀……那个场面一定很酷，到时候你可千万别错过，好了吧？",
+                npc: 701173,
+            },
+            {
+                id: 51162409,
+                content:
+                    "我想象之中，皓京城的香官们可以以香诱人，用分香术把那些丢失的翠屏雀全都牵引回来，就像是他们在战斗的时候控制狴犴一样！",
+                npc: 701173,
+            },
+        ],
+    },
+    {
+        id: 701174,
+        name: "白灵汐",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51162501,
+                content: "已经找到一只了？在民居的屋顶上？到底是怎么飞上去的？！",
+                npc: 701174,
+                next: 51162502,
+            },
+            {
+                id: 51162502,
+                content: "现在该怎么办啊，那翠屏雀占屋为王，疯狂在人家的屋顶上……",
+                next: 51162503,
+            },
+            {
+                id: 51162503,
+                content: "不要再继续说下去了！你说的场面我已经完全清楚了。不管怎么说，先把它赶下来才是正事。",
+                npc: 701174,
+                next: 51162504,
+            },
+            {
+                id: 51162504,
+                content:
+                    "倒是想抓，但是怎么抓呢？人上去了，刚一靠近它就叫个不停，然后往反方向逃窜，我们也不敢进一步靠近，怕它又跑了个没影。",
+                next: 51162505,
+            },
+            {
+                id: 51162505,
+                content: "真笨！用食物勾引它呀！你在地上放些瓜果蔬菜，然后人走远些，它不就乖乖下来了吗？",
+                npc: 701174,
+                next: 51162506,
+            },
+            {
+                id: 51162506,
+                content: "这种简单的伎俩当然是早就试过了，可就算它下来了，我们飞扑过去要抓的时候，它又扑腾飞上去了！",
+                next: 51162507,
+            },
+            {
+                id: 51162507,
+                content: "那肥身细脖的模样，到底是怎么飞上去的啊！！！",
+                npc: 701174,
+                options: [
+                    {
+                        id: 51162508,
+                        content: "（你开始回忆你之前遇到翠屏雀时的样子。）",
+                        next: 51162509,
+                    },
+                    {
+                        id: 51162517,
+                        content: "（你开始思索起一些抓鸟的好方法。）",
+                        next: 51162518,
+                    },
+                ],
+            },
+            {
+                id: 51162509,
+                content: "我在烟津渡也待过一段时间，那里的翠屏雀满山遍野都是，见到我时却从不害怕。",
+                npc: 100001,
+                next: 51162510,
+            },
+            {
+                id: 51162518,
+                content: "我长大的地方，每到丰收的季节，村民们会把谷子铺在地上晾晒，那时总会有鸟雀来偷吃。",
+                npc: 100001,
+                next: 51162519,
+            },
+            {
+                id: 51162510,
+                content: "……不害怕？你的意思就是，它们看到你不会躲开，也不会惊吓地乱叫？",
+                next: 51162511,
+            },
+            {
+                id: 51162519,
+                content:
+                    "为了不让它们偷吃，大家会提前制作一个用于抓鸟的框子，用一根细细的树枝支撑，就这样倒扣在地上，留出可以让小鸟进去的缝隙，放上它们爱吃的食物。",
+                npc: 100001,
+                next: 51162520,
+            },
+            {
+                id: 51162511,
+                content: "额……开屏不算是惊吓吧？",
+                npc: 100001,
+                next: 51162512,
+            },
+            {
+                id: 51162520,
+                content:
+                    "然后啊，大家就在旁边等着，等小鸟落下来，一蹦一跳地进入框子里，用以支撑的树枝会被它们撞倒，框子自然倒下来，盖住小鸟。",
+                npc: 100001,
+                next: 51162521,
+            },
+            {
+                id: 51162512,
+                content: "什么情况，早听说有龙氏里能人异士居多，难道你就是天生拥有亲鸟体质的高人？",
+                npc: 701174,
+                next: 51162513,
+            },
+            {
+                id: 51162521,
+                content: "好聪明的法子！你这么一说我想起来，我小时候在村子里倒是真这么干过，但我们那时候是年纪小，抓鸟来玩的……",
+                next: 51162522,
+            },
+            {
+                id: 51162513,
+                content: "不对不对，翠屏雀见到这家伙会开屏的话，说不定{性别:他|她}其实是……雌孔雀成精！",
+                next: 51162514,
+            },
+            {
+                id: 51162522,
+                content:
+                    "我在皓京长大，怎么从来没听说过这种事？算了算了，你试试按照{性别:他|她}说的办法试试？做一个……那么胖的翠屏雀要用多大的框呀……",
+                npc: 701174,
+                next: 51162523,
+            },
+            {
+                id: 51162514,
+                content: "胡说！龙君辖下动物不许成精！",
+                npc: 701174,
+                next: 51162515,
+            },
+            {
+                id: 51162523,
+                content: "我家里有个装米用的，我现在去讨来！",
+            },
+            {
+                id: 51162515,
+                content: "总之，我的意思是你们可能对待翠屏雀一事过于紧张了，如果像我一样装作若无其事的样子走过去，或许反而不会惊吓到它们。",
+                npc: 100001,
+                next: 51162516,
+            },
+            {
+                id: 51162516,
+                content: "好像很有道理……那个谁，你你你，快去！就按{性别:他|她}说的做！",
+                npc: 701174,
+            },
+        ],
+    },
+    {
+        id: 701175,
+        name: "朱鹤龄",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51162632,
+                content: "千绣阁今年的订货量又涨了许多，咱们的绣品在皓京城里很受欢迎呢~",
+                npc: 701175,
+                next: 51162601,
+            },
+            {
+                id: 51162601,
+                content: "但可惜的是，此趟来皓京是为了婉拒这批订单，天不遂人愿啊，刚想将锦云谷刺绣的名头传享华胥，居然就出了这样的事情……",
+                npc: 701175,
+                next: 51162602,
+            },
+            {
+                id: 51162602,
+                content: "锦云谷发生了什么？",
+                next: 51162603,
+            },
+            {
+                id: 51162603,
+                content:
+                    "实不相瞒，最近锦云谷的气候着实怪异，往年本是水土丰茂之地，最是适宜栽桑养蚕，但今年却不知为何，连日炎热，溪流干涸，桑树大面积枯死。",
+                npc: 701175,
+                next: 51162604,
+            },
+            {
+                id: 51162604,
+                content: "出了这样的事情，养蚕量自然也大批量下降，许多蚕农没办法，被迫换了生计。",
+                npc: 701175,
+                next: 51162605,
+            },
+            {
+                id: 51162605,
+                content: "因为供丝不足，所以绣娘们也没法给外地供货，此趟入京，即是为了与城中成衣店商议取消订单。",
+                npc: 701175,
+            },
+            {
+                id: 51162606,
+                content: "千绣阁今年的订货量又涨了许多，咱们的绣品在皓京城里很受欢迎呢~",
+                npc: 701175,
+                next: 51162607,
+            },
+            {
+                id: 51162607,
+                content:
+                    "就算现在涨价收购了，原材料跟不上，我们这些收购商人还是束手无策啊……罢了，锦云谷来回皓京一趟也不容易，还是要和他们再掰扯两天。",
+                npc: 701175,
+                next: 51162608,
+            },
+            {
+                id: 51162608,
+                content:
+                    "是你啊，之前你也来和我说过话吧？本来想问问你是否知道皓京城里有没有可供外客留宿之地，但看你面相也不是本地人，遂罢了。",
+                npc: 701175,
+                options: [
+                    {
+                        id: 51162609,
+                        content: "（回忆你对皓京的了解。）",
+                        next: 51162610,
+                    },
+                ],
+            },
+            {
+                id: 51162610,
+                content: "我确实不是皓京人，但我知道东市是热闹的商业街，你去那边转转或许会有收获。",
+                npc: 100001,
+                next: 51162611,
+            },
+            {
+                id: 51162611,
+                content:
+                    "哦？原来如此，谢谢你了，我请助手帮我去跑一趟。实不相瞒，我有些晕船，本不想坐船来皓京，但锦云谷到皓京，最快的方式便是坐船。",
+                npc: 701175,
+                next: 51162612,
+            },
+            {
+                id: 51162612,
+                content: "不过说起来，也多亏了曾经匠矩阁帮助开拓了运河，不然现在大家还在走那难走的山路，十天半个月也走不出锦云谷呢。",
+                npc: 701175,
+                options: [
+                    {
+                        id: 51162613,
+                        content: "锦云谷是个怎么样的地方？",
+                        next: 51162614,
+                    },
+                    {
+                        id: 51162619,
+                        content: "锦云谷为什么会以养蚕为业？",
+                        next: 51162620,
+                    },
+                    {
+                        id: 51162662,
+                        content: "运河是什么？",
+                        next: 51162627,
+                    },
+                ],
+            },
+            {
+                id: 51162614,
+                content: "唔……你倒是问了个好问题，让我想想该从哪里给你说起呢？那里可是个和皓京大相径庭之地。",
+                npc: 701175,
+                next: 51162615,
+            },
+            {
+                id: 51162620,
+                content:
+                    "这个问题嘛……其实我倒是完全可以用一句锦云谷水土丰沛之类的直接糊弄你过去，毕竟要是好好解释，就不得不和你提及锦云谷曾经的历史。",
+                npc: 701175,
+                next: 51162621,
+            },
+            {
+                id: 51162627,
+                content:
+                    "运河……就是运河！不对，好像说了一句废话啊！哈哈！不过我想你问的应该也不只是运河是用来做什么的这种一听名字就能猜到的问题？",
+                npc: 701175,
+                next: 51162628,
+            },
+            {
+                id: 51162615,
+                content: "皓京及周围地势多半平坦，锦云谷却是在群山之间，昔日为躲避秽兽的追袭，小批先人迁徙至此，逐渐发展出了一脉文明。",
+                npc: 701175,
+                next: 51162616,
+            },
+            {
+                id: 51162621,
+                content: "在很早以前，大概千年前？华胥尚未完全统一之时，锦云谷一带同样有一个强大的有龙氏族，氏族的领导者名为桑。",
+                npc: 701175,
+                next: 51162622,
+            },
+            {
+                id: 51162628,
+                content: "锦云谷由于地势和天气的特殊原因，极其容易发生水旱无常等问题，昔年桑还在世之时，想了许多法子也没能完全治理水灾。",
+                npc: 701175,
+                next: 51162629,
+            },
+            {
+                id: 51162616,
+                content:
+                    "锦云谷全年温和，降水频繁，空气湿润，也有冬暖夏凉的美称，不似皓京这般温差明显，我冬日里来过一趟，冰刀子一样的风冷冷往脸上划。",
+                npc: 701175,
+                next: 51162617,
+            },
+            {
+                id: 51162622,
+                content:
+                    "桑拥有与草木共鸣的魔法，在觉醒后，她很快带领氏族将锦云谷一代危害一方的秽兽诛杀，并利用自己的天赋教习部族内的普通人养蚕。",
+                npc: 701175,
+                next: 51162623,
+            },
+            {
+                id: 51162629,
+                content: "但后来，机枢派的高人们为我们支了一招，他们提议直接建造运河，将洪灾水分流，引水灌田，遂设计了这项工程。",
+                npc: 701175,
+                next: 51162630,
+            },
+            {
+                id: 51162617,
+                content:
+                    "在饮食上，锦云谷和皓京也完全不同，我们那里口味可重了，皓京这边一比较就显得十分寡淡，我来只开始吃习惯一两顿，后面便开始怀念家乡菜。",
+                npc: 701175,
+                next: 51162618,
+            },
+            {
+                id: 51162623,
+                content: "桑的部族产出的蚕丝质量优异，很快远近闻名，之后便有织星客不远千里来到锦云谷收购，并带来了大风九章的消息。",
+                npc: 701175,
+                next: 51162624,
+            },
+            {
+                id: 51162630,
+                content: "结果想必你也知道了，这条运河虽耗资巨大，但有机枢派高人的巨型机傀帮忙，克服了诸多困难，在当年也是一则佳话。",
+                npc: 701175,
+                next: 51162631,
+            },
+            {
+                id: 51162618,
+                content: "虽是说了半天，但具体的区别太多，还是得你亲眼看看才好，若是有空，多多去华胥各地看看吧。",
+                npc: 701175,
+            },
+            {
+                id: 51162624,
+                content: "再后来，桑成为了当年进入大风九章内部的第一批有龙氏之一，锦云谷在匠矩阁的帮助下开拓运河，与皓京的关联也更为紧密。",
+                npc: 701175,
+                next: 51162625,
+            },
+            {
+                id: 51162631,
+                content:
+                    "即使现在的机枢派早已不同往日辉煌，但在锦云谷，他们仍旧受到大家的尊重和爱戴，此趟来皓京，我甚至还感叹了一下这京城还没我们锦云谷看着先进呢！",
+                npc: 701175,
+            },
+            {
+                id: 51162625,
+                content:
+                    "所以养蚕这一生意，自然也被保留了下来。时至今日，虽然华胥各地早已不止有锦云谷有丝绸，但由于我们的进展较早，所以织工能力也更为先进。",
+                npc: 701175,
+            },
+        ],
+    },
+    {
+        id: 701176,
+        name: "魏青娥",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51162726,
+                content: "此趟运输甜果只有百分之三损毁？甚好甚好~",
+                npc: 701176,
+                next: 51162701,
+            },
+            {
+                id: 51162701,
+                content: "必须重金将那位擅长冷冻魔法的有龙氏留下来，哦！只是那位有龙并非华胥中人，想让她留下来，似乎要先帮她申请长居证？",
+                npc: 701176,
+                next: 51162702,
+            },
+            {
+                id: 51162702,
+                content:
+                    "唔……少年人，见你在此盯着我看了半天，有何贵干？在下南山商贾，并非皓京中人，如果是问路打听之类的，我可能也不便回答。",
+                npc: 701176,
+                options: [
+                    {
+                        id: 51162703,
+                        content: "南山是哪里？",
+                        next: 51162704,
+                    },
+                ],
+            },
+            {
+                id: 51162704,
+                content: "南山啊……南山可就远了去了，南山是华胥南方的一处岛屿，岛上最瞩目的便是高耸入云的南山，故而得名南山岛。",
+                npc: 701176,
+                next: 51162705,
+            },
+            {
+                id: 51162705,
+                content:
+                    "南山岛虽同样归属华胥，但位置较为偏僻，故而与内地联系并不密切，我们那天气炎热，难以种植香料，为维护大风九章，往往需要从皓京进货。",
+                npc: 701176,
+                next: 51162706,
+            },
+            {
+                id: 51162706,
+                content: "但同样，我们也会向皓京出售一些南山岛特产，只是运输流程较为复杂，往往需要擅长魔法的有龙一族相助。",
+                npc: 701176,
+                options: [
+                    {
+                        id: 51162707,
+                        content: "都有什么特产？",
+                        next: 51162708,
+                    },
+                ],
+            },
+            {
+                id: 51162708,
+                content: "多半都是一些吃吃喝喝，还有特制的工艺品之类的，不足挂齿，能抵消部分来时路费便好了。",
+                npc: 701176,
+                next: 51162709,
+            },
+            {
+                id: 51162709,
+                content: "要说最贵的货物……大概是我们此趟运送的甜果。因为运输损耗太大，导致不得不定价高些。",
+                npc: 701176,
+                options: [
+                    {
+                        id: 51162710,
+                        content: "甜果是什么？",
+                        next: 51162711,
+                    },
+                    {
+                        id: 51162713,
+                        content: "那要怎么运输？",
+                        next: 51162714,
+                    },
+                ],
+            },
+            {
+                id: 51162711,
+                content: "甜果就是南山岛最有名的特产之一，在我们那，漫山遍野种的都是甜果，甜果汁水丰盈，香甜可口，受到各方欢迎。",
+                npc: 701176,
+                next: 51162712,
+            },
+            {
+                id: 51162714,
+                content:
+                    "匠矩阁的师傅们曾为甜果专门定制过一种冷罐，用的是特制的冰瓷，甜果一摘下来便放进双层瓷罐里，再在外面一层里填上许多冰。",
+                npc: 701176,
+                next: 51162715,
+            },
+            {
+                id: 51162712,
+                content: "但由于这种果子极其特殊，从成熟到落地只需短短十天，摘下来更是头疼，一天之内便失了味，所以很少能在其他地区见到。",
+                npc: 701176,
+                options: [
+                    {
+                        id: 51162716,
+                        content: "为什么不在皓京种这种果树？",
+                        next: 51162717,
+                    },
+                    {
+                        id: 51162718,
+                        content: "这和匠矩阁有什么关系？",
+                        next: 51162719,
+                    },
+                    {
+                        id: 51162721,
+                        content: "运输损耗这么大，为什么还要一直运？",
+                        next: 51162722,
+                    },
+                ],
+            },
+            {
+                id: 51162715,
+                content:
+                    "大伙将瓷瓶搬到织星客最先进的船上，船只再以疾速奔驰，到皓京时堪堪只能十中留五，所以我们每每都会多准备许多用以填充损耗。",
+                npc: 701176,
+                options: [
+                    {
+                        id: 51162716,
+                        content: "为什么不在皓京种这种果树？",
+                        next: 51162717,
+                    },
+                    {
+                        id: 51162718,
+                        content: "这和匠矩阁有什么关系？",
+                        next: 51162719,
+                    },
+                    {
+                        id: 51162721,
+                        content: "运输损耗这么大，为什么还要一直运？",
+                        next: 51162722,
+                    },
+                ],
+            },
+            {
+                id: 51162717,
+                content: "这个嘛……之前是想过，但这甜果怪就怪在只能用南山岛上的土壤培育，在其他地方，哪怕是气温相似，一样结不出果。",
+                npc: 701176,
+            },
+            {
+                id: 51162719,
+                content: "几十年前还没有甜果运送链，第一次提出运输甜果这个想法的人是曾经在南山岛帮助基建的匠矩阁师傅。",
+                npc: 701176,
+                next: 51162720,
+            },
+            {
+                id: 51162722,
+                content: "自然是因为有需求，我们也不想让此等美物只能留在南山岛，而是更想与全华胥的百姓共同分享。",
+                npc: 701176,
+                next: 51162723,
+            },
+            {
+                id: 51162720,
+                content:
+                    "他们在南山居住的时间里，不可自拔地爱上了甜果，回到皓京后也时常念着这一口，故而再度回到南山，考虑如何运输甜果至华胥各地。",
+                npc: 701176,
+            },
+            {
+                id: 51162723,
+                content: "何况甜果在南山岛遍地都是，大家整日都吃腻了，送来皓京换些香料，对我们来说也是两全其美之事。",
+                npc: 701176,
+                next: 51162724,
+            },
+            {
+                id: 51162724,
+                content:
+                    "不过此趟运输倒是多了高人相助，我们商队来了一位卢卡的有龙氏，她掌握着冰冻相关的魔法，在她的帮助下，我们的损耗大大降低！",
+                npc: 701176,
+                next: 51162725,
+            },
+            {
+                id: 51162725,
+                content: "不过她似乎只是暂留华胥，要是能一直留下她来帮忙就好了，你说如果我们给她开出更高昂的薪资她会同意吗？",
+                npc: 701176,
+            },
+        ],
+    },
+    {
+        id: 701177,
+        name: "任清欢",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51162801,
+                content: "太皓神君的纹样大家早就看腻啦~一点新意也没有。",
+                npc: 701177,
+                next: 51162802,
+            },
+            {
+                id: 51162802,
+                content: "每年来来回回都是那老几样，花鸟鱼虫，一点品味也没有~没有意思的啦~",
+                npc: 701177,
+                options: [
+                    {
+                        id: 51162803,
+                        content: "你在说什么的啦？",
+                        next: 51162804,
+                    },
+                ],
+            },
+            {
+                id: 51162804,
+                content: "还能是什么，当然是瓷瓶的花纹选图的啦~诶呀你为什么模仿我说话的啦？",
+                npc: 701177,
+                options: [
+                    {
+                        id: 51162805,
+                        content: "没有的啦~",
+                        next: 51162806,
+                    },
+                    {
+                        id: 51162807,
+                        content: "不好意思。",
+                        next: 51162808,
+                    },
+                ],
+            },
+            {
+                id: 51162806,
+                content:
+                    "分明就是有的啦~每次来皓京都要碰到些讨厌的家伙的啦！要不就是祀烟阁里面笨笨的香官，要不就是故意模仿我说话的白衣服笨蛋的啦！",
+                npc: 701177,
+                options: [
+                    {
+                        id: 51162809,
+                        content: "你和祀烟阁之间有什么过节？",
+                        next: 51162810,
+                    },
+                ],
+            },
+            {
+                id: 51162808,
+                content: "这还差不多~不过我也没有生气的啦，比起那个笨笨的祀烟阁香官，你倒是好多了的啦~",
+                npc: 701177,
+                options: [
+                    {
+                        id: 51162809,
+                        content: "你和祀烟阁之间有什么过节？",
+                        next: 51162810,
+                    },
+                ],
+            },
+            {
+                id: 51162810,
+                content: "那当然没有的啦~只是感叹一下他们每年都这么笨笨的啦。",
+                npc: 701177,
+                next: 51162811,
+            },
+            {
+                id: 51162811,
+                content: "我是芙蓉浦来的瓷器商人，祀烟阁每年都会找我们定制一批瓷器用来保存香料，一般找我们定货的客人都是可以自选花纹的啦。",
+                npc: 701177,
+                next: 51162812,
+            },
+            {
+                id: 51162812,
+                content:
+                    "那些长期定制的客人，每年多少会有些新花样，但祀烟阁每回要的都是一样的花纹，要不是太皓神君，要不是花鸟鱼虫，超没意思的啦~",
+                npc: 701177,
+                next: 51162813,
+            },
+            {
+                id: 51162813,
+                content: "所以我就说，那些香官笨笨的啦，虽然大家都说拿钱办事绝不多管闲事，但是……但是每年都做一样的，超级无聊的啦~",
+                npc: 701177,
+                options: [
+                    {
+                        id: 51162814,
+                        content: "或许每个花纹都有特殊含义。",
+                        next: 51162815,
+                    },
+                    {
+                        id: 51162819,
+                        content: "确实没有新意。",
+                        next: 51162820,
+                    },
+                ],
+            },
+            {
+                id: 51162815,
+                content: "如果他们定制瓷罐是用来装香料，有没有可能是因为不同花纹所代表的是不同品种的香料呢？",
+                npc: 100001,
+                next: 51162816,
+            },
+            {
+                id: 51162820,
+                content: "我建议在瓷瓶上推陈出新，比如印一个皎皎之民怎么样？",
+                npc: 100001,
+                next: 51162821,
+            },
+            {
+                id: 51162816,
+                content: "咦？你这么一说好像是有些道理的啦……所以这就是他们十几年来纹样不变的道理吗？",
+                npc: 701177,
+                next: 51162817,
+            },
+            {
+                id: 51162821,
+                content: "诶？好主意！皎皎之民看起来小小一只，可可爱爱的，最适合印在瓷瓶上的啦！",
+                npc: 701177,
+                next: 51162822,
+            },
+            {
+                id: 51162817,
+                content: "随意改变的话，之后新进的香官也不是很方便记忆……按照相同花纹存放香料想必也更好管理。",
+                npc: 100001,
+                next: 51162818,
+            },
+            {
+                id: 51162822,
+                content: "不过这些想法还是我自己私下制瓷之时再尝试好了啦……反正他们每次要的都是一样的。",
+                npc: 701177,
+            },
+            {
+                id: 51162818,
+                content: "好吧好吧，我明白了的啦，勉强接受这个说法，以后我就不说香官们是笨蛋好了啦~",
+                npc: 701177,
+            },
+        ],
+    },
+    {
+        id: 701178,
+        name: "明玥",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51162908,
+                content: "各位好姐姐好哥哥们，现在呢就已经到了咱们皓京，也是咱们华胥呢，最繁华的地方~",
+                npc: 701178,
+                next: 51162901,
+            },
+            {
+                id: 51162901,
+                content: "请大家带好随身行李，提不动的呢就放在我们指定的寄存点，等下会有师傅帮咱们搬到入住的客栈内。",
+                npc: 701178,
+                next: 51162902,
+            },
+            {
+                id: 51162902,
+                content:
+                    "咱们现在已经身处皓京最热闹的地点之一，就是参商港，每天都有几百艘船只从这里进出啊，很多也是像咱们一样，从锦云谷来。",
+                npc: 701178,
+                next: 51162903,
+            },
+            {
+                id: 51162903,
+                content: "大家请跟紧我，我们现在一路走到西市，先去吃个饭，毕竟一路奔波，就算哥哥姐姐们不饿，我的肚子却是早就咕咕作响了。",
+                npc: 701178,
+                options: [
+                    {
+                        id: 51162904,
+                        content: "（目送他们离开。)",
+                        next: 51162905,
+                    },
+                    {
+                        id: 51162906,
+                        content: "（跟随他们离开。）",
+                        next: 51162907,
+                        impr: [1041, "Benefit", 3],
+                    },
+                ],
+            },
+            {
+                id: 51162905,
+                content: "好，就从这条路一直走，大家注意跟着我的小红旗哦~",
+                npc: 701178,
+            },
+            {
+                id: 51162907,
+                content: "咦？你是哪个团的团友？似乎不是咱们团的吧？你最好还是回到自己的队伍里去哦，不然走丢了到时候你们团长会着急的。",
+                npc: 701178,
+            },
+        ],
+    },
+    {
+        id: 701179,
+        name: "彭春桃",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51167008,
+                content: "三百九十九？！皓京三天两晚包吃包住包来回船票只需要三百九十九？",
+                npc: 701179,
+                next: 51167001,
+            },
+            {
+                id: 51167001,
+                content:
+                    "嘘嘘嘘！小声点！团长不是不让互相说参团费用嘛！当时去报名的时候我也不信，那个自称团长的小姑娘却拍着胸脯跟我们保证，说肯定不会骗咱们的。",
+                next: 51167002,
+            },
+            {
+                id: 51167002,
+                content: "我就想啊，那她都这么说了，怎么可能骗我呢？大风九章也不是开玩笑的，要是在咱们华胥骗人，是要被狴犴大人处罚的。",
+                next: 51167003,
+            },
+            {
+                id: 51167003,
+                content: "这么说倒也是，这里是皓京，就算他们心有歹念，也不至于在龙君眼皮子底下做这般大胆之事。",
+                npc: 701179,
+                next: 51167004,
+            },
+            {
+                id: 51167004,
+                content:
+                    "所以我当时就报名啦，反正三百九十九也不是什么大钱，要我说，其实那个团长对咱们蛮好的，在船上有好几个人晕船，她端茶倒水鞍前马后，很是辛苦呢。",
+                next: 51167005,
+            },
+            {
+                id: 51167005,
+                content:
+                    "其实我有时候想着，这样的孩子，辛苦地照顾咱们，也就收了这么点钱，就算她把我们带去什么卖纪念品的小店，干脆支持她一些也没什么。",
+                next: 51167006,
+            },
+            {
+                id: 51167006,
+                content: "那可不行！要是诓骗你们买什么保健品，到时候又花钱又伤身，可就得不偿失了。",
+                npc: 701179,
+                next: 51167007,
+            },
+            {
+                id: 51167007,
+                content: "知道啦，我是人老又不是傻，我也知道你是担心我，没事的，我自会斟酌。",
+            },
+        ],
+    },
+    {
+        id: 701180,
+        name: "时茂",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51167101,
+                content: "恁大一个皓京城，比我屋头看着气派多了哟！",
+                npc: 701180,
+                next: 51167102,
+            },
+            {
+                id: 51167102,
+                content: "不枉我坐了恁个久的船，有个啥子说法来着，先生教过的，叫…… 不虚此行！哎哟，背书这种事硬是恼火得很哦！",
+                npc: 701180,
+                next: 51167103,
+            },
+            {
+                id: 51167103,
+                content: "你干啥子一直盯到我看？没见过我们锦云谷来的英雄豪杰迈？我晓得了，你肯定是遭我的伟岸气度震慑到了，是不是噻？",
+                npc: 701180,
+                next: 51167104,
+            },
+            {
+                id: 51167104,
+                content: "（这家伙说话的风格似乎有些眼熟……但口音却是你第一次听到过的。）",
+                next: 51167105,
+            },
+            {
+                id: 51167105,
+                content: "干啥子又不开腔了？哑巴了嗦？哦豁！哦豁！一点反应都没得，莫非是听不见迈？",
+                npc: 701180,
+                options: [
+                    {
+                        id: 51167106,
+                        content: "只是觉得你和我的朋友很像。",
+                        next: 51167107,
+                    },
+                    {
+                        id: 51167108,
+                        content: "只是觉得你说话口音很独特。",
+                        next: 51167109,
+                    },
+                ],
+            },
+            {
+                id: 51167107,
+                content:
+                    "嚯哟！还会说话的嘛！我跟你勒个朋友长得像？是啥子样子的朋友哦？不过本人帅得惊天地泣鬼神，你勒朋友怕是跟我比都比不上一丢丢噻！",
+                npc: 701180,
+                next: 51167110,
+            },
+            {
+                id: 51167109,
+                content: "独特？跟皓京人比起来嘛，怕是要恁个独特点噻！不过我是从锦云谷来的哦，我们那边的人都恁个说话的嘛～",
+                npc: 701180,
+                next: 51167110,
+            },
+            {
+                id: 51167110,
+                content: "你看起也不像是皓京的噻！你是哪个咔咔角角来的哦？",
+                npc: 701180,
+                options: [
+                    {
+                        id: 51167111,
+                        content: "我来自净界岛，一个南方的小岛。",
+                        next: 51167112,
+                    },
+                    {
+                        id: 51167113,
+                        content: "我只是个过客。",
+                        next: 51167114,
+                    },
+                ],
+            },
+            {
+                id: 51167112,
+                content: "净界岛？听都没听说过！根本不是华胥勒取名方式噻，你怕不是外国来的哦！搞了半天，原来跟我一样，都是来皓京耍的嗦！",
+                npc: 701180,
+            },
+            {
+                id: 51167114,
+                content: "嚯哟！扯把子倒是凶得很，反正看你勒打扮，肯定不是皓京人噻！",
+                npc: 701180,
+                next: 51167115,
+            },
+            {
+                id: 51167115,
+                content:
+                    "本来还想找你问一哈，皓京有啥子好耍的、好吃的，现在看起倒是不消问了！我再歇会儿，就进城头去溜达溜达，有缘的话下回见噻！",
+                npc: 701180,
+                next: 51167116,
+            },
+            {
+                id: 51167116,
+                content: "有缘再见。",
+                npc: 100001,
+            },
+        ],
+    },
+    {
+        id: 701181,
+        name: "何子瑜",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51167201,
+                content: "水龙车我先带走了。不知道哪个龟孙以为是普通木桶，居然往里面放香油，被老鼠啃得面目全非。",
+                npc: 701181,
+                next: 51167202,
+            },
+            {
+                id: 51167202,
+                content: "好嘞师傅，那这大概要什么时候才能送回来？我担心……",
+                next: 51167203,
+            },
+            {
+                id: 51167203,
+                content: "很快的，我给你们打副铁龙车，板实得很！用上多年也不会出问题。",
+                npc: 701181,
+                options: [
+                    {
+                        id: 51167204,
+                        content: "你们说的“龙”是什么？",
+                        next: 51167205,
+                    },
+                ],
+            },
+            {
+                id: 51167205,
+                content: "你说水龙车？就是房子着火时候，大家推出来救火的工具啊。",
+                next: 51167206,
+            },
+            {
+                id: 51167206,
+                content: "你没听过吗？华胥民间有句打油诗：一个木桶长又宽，两边横杆细又弯，三个小人前后抬，四处灭火跑得快。",
+                npc: 701181,
+                next: 51167207,
+            },
+            {
+                id: 51167207,
+                content: "这说得就是咱们灭火用的水龙车啊。",
+                npc: 701181,
+                options: [
+                    {
+                        id: 51167208,
+                        content: "你说得我听不懂……",
+                        next: 51167210,
+                    },
+                    {
+                        id: 51167209,
+                        content: "具体是怎么用的？",
+                        next: 51167210,
+                    },
+                ],
+            },
+            {
+                id: 51167210,
+                content: "诶呀，很简单的，就是先在木桶里装满水，两个人按着上面的横梁，像打年糕一样上下按压，让里面的紫铜活塞受力。",
+                npc: 701181,
+                next: 51167211,
+            },
+            {
+                id: 51167211,
+                content: "此时一人再手持接在水龙车上的输水带，对准着火的地方，就像从龙口中喷水一样，噗地一下，火焰就被浇灭了。",
+                npc: 701181,
+                next: 51167212,
+            },
+            {
+                id: 51167212,
+                content: "说起来还是太复杂了，主要是水龙车不在我身边，你真有兴趣，不然得空来匠矩阁，我给你手把手演示一下好了！",
+                npc: 701181,
+                options: [
+                    {
+                        id: 51167213,
+                        content: "华胥一直用这种东西灭火？",
+                        next: 51167214,
+                    },
+                    {
+                        id: 51167216,
+                        content: "不能用一些……魔法什么的吗？",
+                        next: 51167217,
+                    },
+                ],
+            },
+            {
+                id: 51167214,
+                content: "那也不是，火势小的话，大家一人一瓢水也就浇灭了。要是火势一大，呛得人喘不过气，就把水装在囊袋里，用机关炮打出去。",
+                npc: 701181,
+                next: 51167215,
+            },
+            {
+                id: 51167217,
+                content: "你看你这就是有龙说话不腰疼，哪能随时随地找到拥有如此强大能力的有龙氏呢？火情一现，顷刻之间就会要人性命的。",
+                npc: 701181,
+                next: 51167218,
+            },
+            {
+                id: 51167215,
+                content: "嘿，那力气可带劲了，只是囊袋打出去炸开多少有些浪费，所以后面咱们就研究了这水龙车，效果相当不错呢。",
+                npc: 701181,
+            },
+            {
+                id: 51167218,
+                content: "还是咱们众志成城，齐心协力，能用机枢术解决的事情为何一定要动用魔法呢？",
+                npc: 701181,
+                next: 51167219,
+            },
+            {
+                id: 51167219,
+                content: "你这想法，简直和祀烟阁里那些香官如出一辙，干脆起火就开坛做法，祈祷龙君天降大雨灭火得了。",
+                npc: 701181,
+                options: [
+                    {
+                        id: 51167220,
+                        content: "你好像对祀烟阁有意见？",
+                        next: 51167221,
+                    },
+                ],
+            },
+            {
+                id: 51167221,
+                content: "嘿！你来挑事了是吗？我对他们没一点意见，只是里面有些家伙的脑子简直像一块木头，转不来一点弯。",
+                npc: 701181,
+                next: 51167222,
+            },
+            {
+                id: 51167222,
+                content:
+                    "我不喜欢死板的家伙，但不代表我讨厌他们，你可别跑去跟香官们告我的状哦！诶，还有你，听了半天不说话的家伙，你也不许告状！",
+                npc: 701181,
+                next: 51167223,
+            },
+            {
+                id: 51167223,
+                content: "额……哈哈……我什么也没听到！",
+            },
+        ],
+    },
+    {
+        id: 701182,
+        name: "邵临起",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51167301,
+                content: "匠矩阁的师傅已经来将水龙车全部取走了吗？太麻烦他们了。",
+                npc: 701182,
+                next: 51167302,
+            },
+            {
+                id: 51167302,
+                content: "是的，今年也按历年一样的配额给他们修缮资金吗？",
+                next: 51167303,
+            },
+            {
+                id: 51167303,
+                content: "不了，今年有些特殊，先前一位贩油的商人进港时木桶不知为何出了破损，为着临时找容器帮忙装油，就借用了一下水车。",
+                npc: 701182,
+                next: 51167304,
+            },
+            {
+                id: 51167304,
+                content: "结果因为没人跟这事，大伙都忘了……那水车……",
+                npc: 701182,
+                next: 51167305,
+            },
+            {
+                id: 51167305,
+                content: "唔……我懂了，仓库里经常有偷食的老鼠……",
+                next: 51167306,
+            },
+            {
+                id: 51167306,
+                content: "总之，你回天禄司的时候，多申请一批经费，让匠矩阁的师傅们帮忙定制一批铁质或者铜质的水龙车吧。",
+                npc: 701182,
+            },
+        ],
+    },
+    {
+        id: 701183,
+        name: "陈川",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51167401,
+                content: "为何匠矩阁的人回回要来参商港跑个好几趟，来回拉扯不嫌麻烦吗？",
+                npc: 701183,
+                next: 51167402,
+            },
+            {
+                id: 51167402,
+                content: "可不能说这种话，要是他们不来，消防器具不维护，真出了事可是要出人命的！",
+                npc: 701261,
+                next: 51167403,
+            },
+            {
+                id: 51167403,
+                content: "回回这么说，可也不见得真有什么事吧……",
+                npc: 701183,
+                next: 51167404,
+            },
+            {
+                id: 51167404,
+                content: "这种事就是这样，不出事的时候大家都觉得不可能会有什么问题，但凡出一次，那可就大事不妙了，你可别忘了，几年前那场……",
+                npc: 701261,
+                options: [
+                    {
+                        id: 51167405,
+                        content: "你们在说什么？",
+                        next: 51167407,
+                    },
+                    {
+                        id: 51167406,
+                        content: "几年前的那场什么？",
+                        next: 51167407,
+                    },
+                ],
+            },
+            {
+                id: 51167407,
+                content: "诶呀，小鬼，你莫不是在偷听我们说话？",
+                npc: 701183,
+                options: [
+                    {
+                        id: 51167408,
+                        content: "明明是光明正大地听。",
+                        next: 51167410,
+                    },
+                    {
+                        id: 51167409,
+                        content: "我是来加入这场聊天的。",
+                        next: 51167410,
+                    },
+                ],
+            },
+            {
+                id: 51167410,
+                content: "哈哈哈，你这家伙，说话有趣的很，好吧，董兄，你说说看吧，其实我对那事也不是很了解，只是偶尔听人茶余饭后聊起。",
+                npc: 701183,
+                next: 51167411,
+            },
+            {
+                id: 51167411,
+                content: "倒也不是什么不能听的事情，不过我的消息其实也不保真，你们也知道，这口口相传啊，总会芝麻变个西瓜，大走样！",
+                npc: 701261,
+                next: 51167412,
+            },
+            {
+                id: 51167412,
+                content: "唠叨半天，你还说不说了！",
+                npc: 701183,
+                options: [
+                    {
+                        id: 51167413,
+                        content: "说吧说吧。",
+                        next: 51167414,
+                    },
+                ],
+            },
+            {
+                id: 51167414,
+                content: "那是多年以前，约莫有个……四五年？在一个月黑风高的晚上……一位巡夜人手持一盏油灯，走在参商港寂静无人的路上。",
+                npc: 701261,
+                next: 51167415,
+            },
+            {
+                id: 51167415,
+                content: "他一边扯着嗓子喊“天干物燥，小心火烛”，一边像黑夜中的游魂，穿梭在街头巷口。",
+                npc: 701261,
+                options: [
+                    {
+                        id: 51167416,
+                        content: "哪里有会叫喊的游魂？",
+                        next: 51167417,
+                    },
+                    {
+                        id: 51167418,
+                        content: "（不打断。）",
+                        next: 51167419,
+                    },
+                ],
+            },
+            {
+                id: 51167417,
+                content: "也有吧，有的无由生会一直哭嚎：我死的好惨呐~我死的好惨呐~",
+                npc: 701183,
+                next: 51167421,
+            },
+            {
+                id: 51167419,
+                content: "喂！参商港本就没有几间仓库，怎么就街头巷口了？",
+                npc: 701183,
+                next: 51167420,
+            },
+            {
+                id: 51167421,
+                content: "不对不对，话说一半被你们打断，你们还想不想听完了。",
+                npc: 701261,
+                next: 51167422,
+            },
+            {
+                id: 51167420,
+                content: "啧……那是以前，以前的港口很多间仓库的，还都挤在一起，密密麻麻的。",
+                npc: 701261,
+                next: 51167421,
+            },
+            {
+                id: 51167422,
+                content: "你就说嘛，我们不打断你了好了吧？",
+                npc: 701183,
+                next: 51167423,
+            },
+            {
+                id: 51167423,
+                content: "咳咳，巡夜人就这样走在黑漆漆的巷子间，正当他觉得无事发生，准备转身掉头之时，忽而！",
+                npc: 701261,
+                next: 51167424,
+            },
+            {
+                id: 51167424,
+                content:
+                    "不知什么东西，溅到了他的脚踝之处，他被烫的嗷叫了一声，于是将油灯放下照亮地面，他一看——竟不知是何物，在他的脚踝处烫出了一点灼伤。",
+                npc: 701261,
+                next: 51167425,
+            },
+            {
+                id: 51167425,
+                content: "不看不知道，一看就开始疼了，他当即抱着脚，坐在地上嗷嗷直叫唤。",
+                npc: 701261,
+                next: 51167426,
+            },
+            {
+                id: 51167426,
+                content:
+                    "却在此时，不知哪里传来一阵笑声，他顺着生意望过去，见到月下房上，有一身穿绛珠衣衫的白面小娃娃，头扎马髻，咯咯咯地朝他笑。",
+                npc: 701261,
+                next: 51167427,
+            },
+            {
+                id: 51167427,
+                content: "他心里犯怵，就开口问道：小娃小娃，为何深夜不归家，为何坐于屋檐上，为何嬉笑乐哈哈？",
+                npc: 701261,
+                next: 51167428,
+            },
+            {
+                id: 51167428,
+                content: "娃娃不说话，只是继续笑，那笑声在空旷的夜里越听越瘆人，他也越来越想跑，直到最后，娃娃才说道：",
+                npc: 701261,
+                next: 51167429,
+            },
+            {
+                id: 51167429,
+                content: "巡夜者非人，是灯也，纵火者非灯，是油也。",
+                npc: 701261,
+                next: 51167430,
+            },
+            {
+                id: 51167430,
+                content: "说完，那娃娃居然从房顶上站了起来，拍拍屁股，居然直接从上一跃而下，眨眼就跑了个无影无踪。",
+                npc: 701261,
+                next: 51167431,
+            },
+            {
+                id: 51167431,
+                content: "那巡夜人这才惊觉，那月色把万物照得分明，阴影林立在平整的地面，可偏偏！",
+                npc: 701261,
+                next: 51167432,
+            },
+            {
+                id: 51167432,
+                content: "偏什么呀！你不要总是这样说话，吊人胃口！",
+                npc: 701183,
+                next: 51167433,
+            },
+            {
+                id: 51167433,
+                content: "没有娃娃的影子！",
+                npc: 701261,
+                next: 51167434,
+            },
+            {
+                id: 51167434,
+                content: "哇！！！",
+                npc: 701183,
+                options: [
+                    {
+                        id: 51167435,
+                        content: "哇！！！",
+                        next: 51167437,
+                    },
+                    {
+                        id: 51167436,
+                        content: "好可怕！！！",
+                        next: 51167437,
+                    },
+                ],
+            },
+            {
+                id: 51167437,
+                content: "哼哼，吓到你们了吧？不过这也是我道听途说来的消息，只知道这次事件后，没几天就起了一场大火，后来的，你们也知道了~",
+                npc: 701261,
+                next: 51167438,
+            },
+            {
+                id: 51167438,
+                content: "什么牛鬼蛇神的，必定是那巡夜人自己玩忽职守，编出这档子故事来掩人耳目！",
+                npc: 701183,
+                next: 51167439,
+            },
+            {
+                id: 51167439,
+                content:
+                    "权当听个乐便得了，你还当真了。总之，那场火灾虽然没死人，但却损失了价值高昂的大量货物，于是天禄司才专门设立船舶所，严格管控港口消防。",
+                npc: 701261,
+                next: 51167440,
+            },
+            {
+                id: 51167440,
+                content: "所以啊，你也别唠叨人家匠矩阁的师傅了，人家天天来都不嫌累，你倒叫上了。",
+                npc: 701261,
+                next: 51167441,
+            },
+            {
+                id: 51167441,
+                content: "好了好了，我不过随口一提罢了，是非利害，我当真分不清？",
+                npc: 701183,
+                next: 51167442,
+            },
+            {
+                id: 51167442,
+                content: "哼，你知道就好，不聊了不聊了，再歇会，要去干活了。",
+                npc: 701261,
+            },
+        ],
+    },
+    {
+        id: 701184,
+        name: "阿舟",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51167538,
+                content: "凌波疾步，且看我腾空起，驾云去，身似飞雁过南关，蜻蜓点水不留痕！嘿！哈！",
+                npc: 701184,
+                next: 51167501,
+            },
+            {
+                id: 51167501,
+                content: "（这个孩子面向水面，大幅甩动双臂，一副跃跃欲试要向水里跳的样子……）",
+                options: [
+                    {
+                        id: 51167502,
+                        content: "（出手阻止。）",
+                        next: 51167503,
+                    },
+                    {
+                        id: 51167504,
+                        content: "（只是看着。）",
+                        next: 51167505,
+                    },
+                ],
+            },
+            {
+                id: 51167503,
+                content: "不要跳下去！很危险的！",
+                npc: 100001,
+                next: 51167507,
+            },
+            {
+                id: 51167505,
+                content: "（你等了半天，他始终摆着动作喊着口号，却没有一跃而下。）",
+                next: 51167506,
+            },
+            {
+                id: 51167507,
+                content: "唔？什么？你说我吗？",
+                npc: 701184,
+                next: 51167508,
+            },
+            {
+                id: 51167506,
+                content: "你还跳不跳了？",
+                npc: 100001,
+                next: 51167507,
+            },
+            {
+                id: 51167508,
+                content: "如果这里还有别人的话……",
+                npc: 100001,
+                next: 51167509,
+            },
+            {
+                id: 51167509,
+                content: "我没准备跳下去。",
+                npc: 701184,
+                next: 51167510,
+            },
+            {
+                id: 51167510,
+                content: "那你一直在这……摆来摆去的，是做什么？",
+                npc: 100001,
+                next: 51167511,
+            },
+            {
+                id: 51167511,
+                content: "我在练习——凌波疾步！就是我刚念叨的，是一位应天尉高人教我的，说是只要我潜心背下这串口诀，然后勤加练习，就能学会！",
+                npc: 701184,
+                options: [
+                    {
+                        id: 51167512,
+                        content: "凌波疾步是什么？",
+                        next: 51167513,
+                    },
+                    {
+                        id: 51167524,
+                        content: "你说的是什么样的应天尉……",
+                        next: 51167525,
+                    },
+                    {
+                        id: 51167536,
+                        content: "没空和你聊天了。",
+                        next: 51167537,
+                    },
+                ],
+            },
+            {
+                id: 51167513,
+                content: "就是一种，让人体态轻盈，可以以极快的速度在水面上穿行数百米，不会掉进水里，连鞋底都不会湿的技巧，怎么样，很帅吧？",
+                npc: 701184,
+                options: [
+                    {
+                        id: 51167514,
+                        content: "你为什么要学凌波疾步。",
+                        next: 51167515,
+                    },
+                    {
+                        id: 51167517,
+                        content: "其实我也会类似的。",
+                        next: 51167518,
+                    },
+                ],
+            },
+            {
+                id: 51167525,
+                content: "就是……个子高高的，头发上有一簇白毛，哦哦我想起来，他的眼睛下面有道星星一样的疤痕，看起来超帅的！",
+                npc: 701184,
+                next: 51167526,
+            },
+            {
+                id: 51167537,
+                content: "被你打扰了我的练习，我的技艺一定又倒退了！",
+                npc: 701184,
+            },
+            {
+                id: 51167515,
+                content:
+                    "因为帅啊！我要是学会了凌波疾步，就再也不用坐船去东市玩，那卖票的老头回回都不卖给我，说是我娘打了招呼，卖票给我就找他算账！",
+                npc: 701184,
+                next: 51167516,
+            },
+            {
+                id: 51167518,
+                content: "我会一种独特的穿行技巧。只要在空中滑翔的时候开枪，枪支的后坐力会减缓我的滑翔速度，这样就能一下飞很远的距离了。",
+                npc: 100001,
+                next: 51167519,
+            },
+            {
+                id: 51167526,
+                content: "（怎么觉得这样的描述似曾相识……）",
+                npc: 100001,
+                options: [
+                    {
+                        id: 51167527,
+                        content: "他是怎么跟你说的。",
+                        next: 51167528,
+                    },
+                ],
+            },
+            {
+                id: 51167516,
+                content:
+                    "但凡我学会了，就不需要那劳什子船，我直接就从水面上过去，到时候对面的小绵和大力看到我英俊勇武的身姿，还不都被我迷晕了！",
+                npc: 701184,
+            },
+            {
+                id: 51167519,
+                content: "什么？！还有这招？但是不行啊，华胥不给用枪的！",
+                npc: 701184,
+                next: 51167520,
+            },
+            {
+                id: 51167528,
+                content: "我说那港口的老头不卖去东市的票给我，我没法去和东市的小绵和大力一起玩了。",
+                npc: 701184,
+                next: 51167529,
+            },
+            {
+                id: 51167520,
+                content: "只有危险的，罪大恶极的人才会随身携带刀枪，你不会是那种很恐怖的家伙吧？",
+                npc: 701184,
+                next: 51167521,
+            },
+            {
+                id: 51167529,
+                content: "他就说，他有一门独门武功，可以直接从水面飞到东市去，我就说我想学，他就跟我说，背下口诀，然后每日在这里勤加练习。",
+                npc: 701184,
+                next: 51167530,
+            },
+            {
+                id: 51167521,
+                content: "不过看着也不像……很恐怖的坏人才没功夫和我们这些小孩聊这么久，他们都成了飘零人，准备干点大坏事呢！",
+                npc: 701184,
+                options: [
+                    {
+                        id: 51167522,
+                        content: "飘零人也不是坏人。",
+                        next: 51167523,
+                    },
+                ],
+            },
+            {
+                id: 51167530,
+                content: "直到有一天，能感觉到一股气自丹田涌上喉头，再跳下去，我就学会了！",
+                npc: 701184,
+                next: 51167531,
+            },
+            {
+                id: 51167523,
+                content: "你骗小孩，我娘都说了，飘零人是恶贯满盈的大坏人，如果我不听话，她就会让飘零人来把我抓走！",
+                npc: 701184,
+            },
+            {
+                id: 51167531,
+                content: "只是我好像一直没能领悟到这个技巧，诶呀，难道真的跟我娘说的一样，我学不明白是因为念的书太少了？",
+                npc: 701184,
+                options: [
+                    {
+                        id: 51167532,
+                        content: "也许是那个“应天尉”骗了你。",
+                        next: 51167533,
+                    },
+                    {
+                        id: 51167534,
+                        content: "你娘说得对，快回家读书吧。",
+                        next: 51167535,
+                    },
+                ],
+            },
+            {
+                id: 51167533,
+                content: "不不不，我亲眼看到的，他真的很厉害，他可以左脚踩右脚在空中跳两下，还能在飞起来的时候转圈圈！",
+                npc: 701184,
+                options: [
+                    {
+                        id: 51167536,
+                        content: "没空和你聊天了。",
+                        next: 51167537,
+                    },
+                ],
+            },
+            {
+                id: 51167535,
+                content: "诶呀，我就是不想念书才来学凌波疾步，怎么绕来绕去还是要回去念书……",
+                npc: 701184,
+                options: [
+                    {
+                        id: 51167536,
+                        content: "没空和你聊天了。",
+                        next: 51167537,
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 701185,
+        name: "郭老叟",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51167601,
+                content: "天一热，潮一涨，这浸在水中的部分就开始疯狂长苔，转动都费劲……",
+                npc: 701185,
+                next: 51167602,
+            },
+            {
+                id: 51167602,
+                content: "年年有这茬，回回找人刮苔，我这老腰，诶哟……真是一天都不得休息。",
+                npc: 701185,
+                options: [
+                    {
+                        id: 51167603,
+                        content: "这是在做什么？",
+                        next: 51167604,
+                    },
+                    {
+                        id: 51167606,
+                        content: "这大家伙是做什么的？",
+                        next: 51167607,
+                    },
+                ],
+            },
+            {
+                id: 51167604,
+                content: "给这大家伙刮苔呗。瞧瞧，哦，你在这上面瞧不出来，这轴头下面，青苔都钻进缝里了，那水冲压根冲不干净。",
+                npc: 701185,
+                next: 51167605,
+            },
+            {
+                id: 51167607,
+                content: "这大家伙……倒是没什么学名，主要是用来帮助祀烟阁的磨骨官用作水动力的装置，我们也多半都叫它大水车。",
+                npc: 701185,
+                next: 51167608,
+            },
+            {
+                id: 51167605,
+                content: "只能下来用铁刷一个劲蹭，后面还要拿碱水抹一遍，不然还得长。",
+                npc: 701185,
+                options: [
+                    {
+                        id: 51167611,
+                        content: "常年泡在水里没问题吗？",
+                        next: 51167612,
+                    },
+                ],
+            },
+            {
+                id: 51167608,
+                content: "有了这大水车啊，那香料的研磨环节就是事半功倍，省了不知道多少人力。",
+                npc: 701185,
+                next: 51167609,
+            },
+            {
+                id: 51167612,
+                content: "老松木，结实着呢，就是怕苔巴裹住，潮气散不出去，木头才容易朽。",
+                npc: 701185,
+                next: 51167613,
+            },
+            {
+                id: 51167609,
+                content:
+                    "参商港这片水力充沛，于是匠矩阁就将水车修在这里，但不知道是水不干净了还是怎么回事，这两年频繁长苔，影响传香带运输。",
+                npc: 701185,
+                next: 51167610,
+            },
+            {
+                id: 51167613,
+                content: "所以除苔不仅是为了让它正常转，也是给它“透透气”，多用上些年头！",
+                npc: 701185,
+                options: [
+                    {
+                        id: 51167614,
+                        content: "再见。",
+                        next: 51167615,
+                    },
+                ],
+            },
+            {
+                id: 51167610,
+                content: "于是只能让咱们来给它刮刮痧，祛祛青！",
+                npc: 701185,
+                options: [
+                    {
+                        id: 51167611,
+                        content: "常年泡在水里没问题吗？",
+                        next: 51167612,
+                    },
+                ],
+            },
+            {
+                id: 51167615,
+                content: "把这截收拾完，再去船舶司讨碗凉茶，诶呀，真是累坏我了！",
+                npc: 701185,
+            },
+        ],
+    },
+    {
+        id: 701186,
+        name: "梁思远",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51167710,
+                content: "要不是他们把水车停了下来，怎会有这多事端？",
+                npc: 701186,
+                next: 51167701,
+            },
+            {
+                id: 51167701,
+                content: "瞧你说的，难不成这生苔是因为他们把水车停了才生？",
+                next: 51167702,
+            },
+            {
+                id: 51167702,
+                content: "当然！你想想，这玩意一直在转，就算泡水的地方长了苔，叶片转动之时也就靠着水流冲刷给卷下去了。",
+                npc: 701186,
+                next: 51167703,
+            },
+            {
+                id: 51167703,
+                content: "哪里需要整日动不动就停下来，找个人下去刮擦半天，忙活半天。",
+                npc: 701186,
+                next: 51167704,
+            },
+            {
+                id: 51167704,
+                content: "你说的有几分道理，那我问你，这水车的支脚，浸水的下端若是长苔该怎么办呢？",
+                next: 51167705,
+            },
+            {
+                id: 51167705,
+                content: "这……这水车……转起来……就说明是活水，活水如何……",
+                npc: 701186,
+                next: 51167706,
+            },
+            {
+                id: 51167706,
+                content: "诶呀，参商港的水多半从椒兰村那条河流衍来，里头多少总是有些藻类，只要附着在木头上了，迟早都会长苔。",
+                next: 51167707,
+            },
+            {
+                id: 51167707,
+                content: "一直运转虽说是可以缓解些许，但多少还是有的。",
+                next: 51167708,
+            },
+            {
+                id: 51167708,
+                content: "啧……好了好了，我不听你卖弄你那知识了，去了一趟匠矩阁求学后就一直这样！",
+                npc: 701186,
+                next: 51167709,
+            },
+            {
+                id: 51167709,
+                content: "诶……我只是好心告知于你，全无卖弄之意啊……诶！诶！你别捂耳朵啊？诶？",
+            },
+        ],
+    },
+    {
+        id: 701187,
+        name: "同叔",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51167810,
+                content: "你需谨记六字——明法、公心、勤谨。",
+                npc: 701187,
+                next: 51167801,
+            },
+            {
+                id: 51167801,
+                content: "这位小友不似华胥之人，可是远道而来的贵客？",
+                npc: 701187,
+                options: [
+                    {
+                        id: 51167802,
+                        content: "你是港口的工作人员？",
+                        next: 51167803,
+                    },
+                ],
+            },
+            {
+                id: 51167803,
+                content: "正是，鄙人任职船舶司已有三载，日常工作即为核算参商港内船只进出量，货物量，以及税收统计等。",
+                npc: 701187,
+                next: 51167804,
+            },
+            {
+                id: 51167804,
+                content: "当然，这些事绝非我一人可做到，还有万千同僚助我，才让这港口看起来井井有条，你说是不是？",
+                npc: 701187,
+                options: [
+                    {
+                        id: 51167805,
+                        content: "参商港一年大概有多少船只进出？",
+                        next: 51167806,
+                    },
+                ],
+            },
+            {
+                id: 51167806,
+                content: "这个嘛……详细的数据恐怕只有咱们的顶头上司——天禄司才有留档，以我在此任职三年的记忆里来看，约莫……",
+                npc: 701187,
+                next: 51167807,
+            },
+            {
+                id: 51167807,
+                content: "一年三百六十日，三百余艘是肯定有了。来皓京的船，多半是内地通商。外境商船大多停泊在烟津渡。",
+                npc: 701187,
+                options: [
+                    {
+                        id: 51167808,
+                        content: "没什么好聊的。",
+                        next: 51167809,
+                    },
+                ],
+            },
+            {
+                id: 51167809,
+                content: "小友不再多留一会儿？",
+                npc: 701187,
+            },
+        ],
+    },
+    {
+        id: 701188,
+        name: "余下",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51167910,
+                content: "每至夜半三更，船舶抵港，那船工吆喝声、铁链撞击声、货箱搬运声，直吵得人不得安睡！",
+                npc: 701188,
+                next: 51167901,
+            },
+            {
+                id: 51167901,
+                content: "我本就睡眠惨淡，之前在烟津渡住着之时，邻居深夜归家，扰的我不得好眠，白日也受到影响，昏昏沉沉。",
+                npc: 701188,
+                next: 51167902,
+            },
+            {
+                id: 51167902,
+                content:
+                    "我就想着，现下我搬来皓京，这地方大了，自然不会有扰人清梦一事困扰。结果呢？大船入港的声音竟然直直穿到了我住的房间。",
+                npc: 701188,
+                next: 51167903,
+            },
+            {
+                id: 51167903,
+                content: "我躺在榻上，愣是被那动静震得整个人飞了起来！",
+                npc: 701188,
+                next: 51167904,
+            },
+            {
+                id: 51167904,
+                content:
+                    "额……这位公子，您先冷静，夜航船只多为赶潮而来，潮期不等人，故有深夜到港之事，却未想到竟扰了您作息。不知这喧闹声，通常持续多久？",
+                next: 51167905,
+            },
+            {
+                id: 51167905,
+                content: "短则一个时辰，长则两三个时辰！",
+                npc: 701188,
+                next: 51167906,
+            },
+            {
+                id: 51167906,
+                content: "是我们思虑不周，只重通商效率，未顾念居民安宁。",
+                next: 51167907,
+            },
+            {
+                id: 51167907,
+                content: "您请放心，今日便传相关人等前来商议，必定在一周之内给出一个合理方案出来。",
+                next: 51167908,
+            },
+            {
+                id: 51167908,
+                content: "不！现在，现在我们就下发通文，告知所有深夜入港的船只，严禁高声吆喝，后续方案商榷后再度改进，您看如何？",
+                next: 51167909,
+            },
+            {
+                id: 51167909,
+                content:
+                    "好！好啊！不愧是皓京的管理，就是比那小地方讲人情通道理。我是个写话本的，我定将你的办事效率写在故事里，让你名扬四海，人人称道！",
+                npc: 701188,
+            },
+        ],
+    },
+    {
+        id: 701189,
+        name: "刘禄",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51168016,
+                content: "游船游船，十文一趟，排队购票，客满即发。",
+                npc: 701189,
+                next: 51168001,
+            },
+            {
+                id: 51168001,
+                content: "客人您早！是要来坐船去东市吗？",
+                npc: 701189,
+                options: [
+                    {
+                        id: 51168002,
+                        content: "我去。",
+                        next: 51168003,
+                    },
+                    {
+                        id: 51168004,
+                        content: "你……有些面熟？",
+                        next: 51168005,
+                    },
+                ],
+            },
+            {
+                id: 51168003,
+                content: "（游船把你送到了东市。）",
+            },
+            {
+                id: 51168005,
+                content: "客人好眼力，莫不是刚从东市过来？东市那片的卖票人是我哥哥刘福，你们二位已经见过了？",
+                npc: 701189,
+                next: 51168006,
+            },
+            {
+                id: 51168006,
+                content: "原来如此……难道还有一个兄弟叫……",
+                npc: 100001,
+                next: 51168007,
+            },
+            {
+                id: 51168007,
+                content: "是了，还有一位刘寿兄弟，正是为客人您撑船的船夫呢！",
+                npc: 701189,
+                next: 51168008,
+            },
+            {
+                id: 51168008,
+                content: "福禄寿吗……哈哈……",
+                npc: 100001,
+            },
+            {
+                id: 51168009,
+                content: "游船游船，十文一趟，排队购票，客满即发。",
+                npc: 701189,
+                next: 51168010,
+            },
+            {
+                id: 51168010,
+                content: "客人您早！是要来坐船去东市吗？",
+                npc: 701189,
+                options: [
+                    {
+                        id: 51168011,
+                        content: "去。",
+                        next: 51168012,
+                    },
+                    {
+                        id: 51168014,
+                        content: "不去。",
+                        next: 51168015,
+                    },
+                ],
+            },
+            {
+                id: 51168012,
+                content: "您是熟客，就不让您多等了，直接发船！去东市记得给哥哥带声好！",
+                npc: 701189,
+                next: 51168013,
+            },
+            {
+                id: 51168015,
+                content: "客人回见！",
+                npc: 701189,
+            },
+            {
+                id: 51168013,
+                content: "（游船把你送到了东市。）",
+            },
+        ],
+    },
+    {
+        id: 701190,
+        name: "维尔",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51168130,
+                content: "稍……稍等一下……我查一下刚买的《华胥问候语录大全》。",
+                npc: 701190,
+                next: 51168101,
+            },
+            {
+                id: 51168101,
+                content: "额，这位素喂贫生的盆友，笔人初来炸弹，人生地鼠，敢问厕所……啊不对，玉溪室路在何处？",
+                npc: 701190,
+                options: [
+                    {
+                        id: 51168102,
+                        content: "？？？",
+                        next: 51168104,
+                    },
+                    {
+                        id: 51168103,
+                        content: "你在说什么呢？",
+                        next: 51168104,
+                    },
+                ],
+            },
+            {
+                id: 51168104,
+                content: "听不懂？这什么破字典……不是说这么说话华胥人一定听得懂吗？",
+                npc: 701190,
+                next: 51168105,
+            },
+            {
+                id: 51168105,
+                content: "难道是我说错了？等下，我再翻一下……这位情头一盒的死生只有，笔人出入华胥，人地两生，敢问玉溪识在何方？",
+                npc: 701190,
+                options: [
+                    {
+                        id: 51168106,
+                        content: "能不能正常说话？",
+                        next: 51168107,
+                    },
+                    {
+                        id: 51168108,
+                        content: "你要问的不会是厕所在哪吧？",
+                        next: 51168109,
+                    },
+                ],
+            },
+            {
+                id: 51168107,
+                content: "能不能在大全里对应的是……能否，正常对应的是……诶？不对？你……你不是华胥人？你听得懂我说话？",
+                npc: 701190,
+                next: 51168110,
+            },
+            {
+                id: 51168109,
+                content: "对对对，就是厕所！诶？不是……你……你能听得懂我说话？你不是华胥人？",
+                npc: 701190,
+                next: 51168110,
+            },
+            {
+                id: 51168110,
+                content: "我的打扮也不像华胥人吧？",
+                npc: 100001,
+                next: 51168111,
+            },
+            {
+                id: 51168111,
+                content: "诶呀！可算给我找着同乡了！我请的那个，华胥翻译，刚刚跟我说肚子疼，让我在这里等他一会，就把我丢在这里。",
+                npc: 701190,
+                next: 51168112,
+            },
+            {
+                id: 51168112,
+                content: "现在已经过去了半小时，他还没回来，我一个人在这也不敢乱走，可总在这站着也不是办法呀！",
+                npc: 701190,
+                next: 51168113,
+            },
+            {
+                id: 51168113,
+                content: "我就想着，要不要直接去找他回来得了。但我也不知道华胥人平常都怎么说话，就去买了一本这个……喏，你看！",
+                npc: 701190,
+                next: 51168114,
+            },
+            {
+                id: 51168114,
+                content: "（泛黄的扉页上工工整整地写着——华胥问候语录大全。）",
+                options: [
+                    {
+                        id: 51168115,
+                        content: "谁卖给你的？",
+                        next: 51168116,
+                    },
+                ],
+            },
+            {
+                id: 51168116,
+                content: "就在广场附近，有个卖报的小孩，说是看在我是外乡客的面子上便宜卖我，只收五十铜！",
+                npc: 701190,
+                next: 51168117,
+            },
+            {
+                id: 51168117,
+                content: "还说有了这本书，所有不了解华胥语言的家伙都能变成华胥通！只需要简单的对照就好了。",
+                npc: 701190,
+                options: [
+                    {
+                        id: 51168118,
+                        content: "这本书过时了。",
+                        next: 51168119,
+                    },
+                    {
+                        id: 51168121,
+                        content: "问题是你也没读对啊。",
+                        next: 51168122,
+                    },
+                ],
+            },
+            {
+                id: 51168119,
+                content: "过时了？你的意思是，华胥现在早就不这么说话了？",
+                npc: 701190,
+                next: 51168120,
+            },
+            {
+                id: 51168122,
+                content: "没读对？什么意思？是说我读的语录不对？",
+                npc: 701190,
+                next: 51168123,
+            },
+            {
+                id: 51168120,
+                content: "你手上的那些可能是一些古华胥人说话的教学，现在大家说话都比较随意，你随便找一些华胥人聊聊天就知道了。",
+                npc: 100001,
+                options: [
+                    {
+                        id: 51168128,
+                        content: "祝你玩的开心。",
+                        next: 51168129,
+                    },
+                ],
+            },
+            {
+                id: 51168123,
+                content: "虽然我也对华胥语不是特别了解，但是你刚刚念的只交，应该是知交吧？初来炸弹听起来也很奇怪，应该是初来乍到？",
+                npc: 100001,
+                next: 51168124,
+            },
+            {
+                id: 51168129,
+                content: "好啊，也祝你玩的开心，虽然不知道你是不是跟我一样来旅行的……",
+                npc: 701190,
+            },
+            {
+                id: 51168124,
+                content: "啊！原来是这样啊！哎呀，你看我这……所以其实这翻译也没必要请，现在大家说话也都差不多？",
+                npc: 701190,
+                next: 51168125,
+            },
+            {
+                id: 51168125,
+                content: "差不多……吧。",
+                npc: 100001,
+                next: 51168126,
+            },
+            {
+                id: 51168126,
+                content: "谢谢你啊{性别:先生|女士}。这趟旅程结束回去后，我得和家里人都说说这华胥，是又安全又漂亮。",
+                npc: 701190,
+                next: 51168127,
+            },
+            {
+                id: 51168127,
+                content: "按我这语录里来说，叫什么……不虚此行！我念的对不对？",
+                npc: 701190,
+                options: [
+                    {
+                        id: 51168128,
+                        content: "祝你玩的开心。",
+                        next: 51168129,
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 701191,
+        name: "玉芬",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51168201,
+                content: "他大舅母，晚上做了什么好吃的？可是来这儿散散步，消消食？",
+                npc: 701191,
+                next: 51168202,
+            },
+            {
+                id: 51168202,
+                content: "丫头回来了，她爹勤快，非要露一手，哎哟那做的，惨不忍睹，我只好又额外做了一桌子。",
+                next: 51168203,
+            },
+            {
+                id: 51168203,
+                content: "哦！原来是麦丫头最近回来了，怎得没见到陪你一起来散步呢？",
+                npc: 701191,
+                next: 51168204,
+            },
+            {
+                id: 51168204,
+                content: "给她堂哥拉着不知道去哪里野啦，他俩自小便一起长大，这多年没见，也不知道多开心呢。",
+                next: 51168205,
+            },
+            {
+                id: 51168205,
+                content: "不是我说，大舅母你还是狠心，怎么就把那么小的娃娃送去国外求学呢？一个人在外面，吃不饱穿不暖的，如何放心得下。",
+                npc: 701191,
+                next: 51168206,
+            },
+            {
+                id: 51168206,
+                content: "还不是孩子自己想去，说什么……想学戏剧表演就得去卢卡，学术氛围好之类的……女大不中留，家里既然能支持，便随她去吧。",
+                next: 51168207,
+            },
+            {
+                id: 51168207,
+                content: "哟~那在外面念书可贵了吧？一年得花不少？",
+                npc: 701191,
+                next: 51168208,
+            },
+            {
+                id: 51168208,
+                content: "麦丫头懂事，成绩好，说人家学院免了她学费，她还勤工俭学，我和老头子平时也没啥开销，倒也不紧着用着。",
+                next: 51168209,
+            },
+            {
+                id: 51168209,
+                content: "好，娃娃们都大了，天南地北的，今年奉香大典，我家那个过两天也该回来了……到时候咱们去八珍楼摆上一桌聚聚？",
+                npc: 701191,
+                next: 51168210,
+            },
+            {
+                id: 51168210,
+                content: "好事，自当奉陪！",
+            },
+        ],
+    },
+    {
+        id: 701192,
+        name: "大将军",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51168301,
+                content: "一，二，三，铁柱呢？铁柱为何不在？你们来的时候看到他了吗？",
+                npc: 701192,
+                next: 51168302,
+            },
+            {
+                id: 51168302,
+                content: "（擤鼻涕的声音）没……没有，我从家里来的时候没见着他。",
+                next: 51168303,
+            },
+            {
+                id: 51168303,
+                content: "邋遢鬼，我早就跟你说过了，你来的时候得把铁柱从家里拽出来，不然他铁定不出门！",
+                next: 51168304,
+            },
+            {
+                id: 51168304,
+                content: "淘气包，你……你说着倒是轻松，你看看铁柱的体格，再看看我……（擤鼻涕的声音）你去拽吧！",
+                next: 51168305,
+            },
+            {
+                id: 51168305,
+                content: "好啦好啦，都不吵啦，我看今天咱们四个又不是不能玩，少他一个怎么啦？",
+                next: 51168306,
+            },
+            {
+                id: 51168306,
+                content: "不行！说好的五个人玩，就得五个人一起！都给我听令！邋遢鬼总兵！",
+                npc: 701192,
+                next: 51168307,
+            },
+            {
+                id: 51168307,
+                content: "到！（擤鼻涕的声音）",
+                next: 51168308,
+            },
+            {
+                id: 51168308,
+                content: "你现在立刻回家，找根又长又细的竹竿子来！",
+                npc: 701192,
+                next: 51168309,
+            },
+            {
+                id: 51168309,
+                content: "找那个做什么……",
+                next: 51168310,
+            },
+            {
+                id: 51168310,
+                content: "淘气包参将！",
+                npc: 701192,
+                next: 51168311,
+            },
+            {
+                id: 51168311,
+                content: "到！",
+                next: 51168312,
+            },
+            {
+                id: 51168312,
+                content: "你去东市，去挑春来借来他们运花用的手推车！推到这里来！",
+                npc: 701192,
+                next: 51168313,
+            },
+            {
+                id: 51168313,
+                content: "大将军，你不会想……",
+                next: 51168314,
+            },
+            {
+                id: 51168314,
+                content:
+                    "没错！玉娘娘，你就不用做什么了，等会咱们在这里汇合，然后我们一起去铁柱家，把他的窗户捅开，让太阳好好晒晒他的屁股！",
+                npc: 701192,
+            },
+        ],
+    },
+    {
+        id: 701193,
+        name: "马景岐",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51168417,
+                content: "尘香袅袅龙君现，典前争辉竞纷纭。奉香大典特别活动——灯谜会，待君赏玩！",
+                npc: 701193,
+                next: 51168401,
+            },
+            {
+                id: 51168401,
+                content: "您看着不像华胥之人，是来皓京游玩的客人吗？要不要也来参加我们的奉香灯谜会？",
+                npc: 701193,
+                options: [
+                    {
+                        id: 51168402,
+                        content: "有什么特殊的地方？",
+                        next: 51168403,
+                    },
+                    {
+                        id: 51168405,
+                        content: "有什么奖品吗？",
+                        next: 51168406,
+                    },
+                    {
+                        id: 51168407,
+                        content: "外来者也能参加？",
+                        next: 51168408,
+                    },
+                ],
+            },
+            {
+                id: 51168403,
+                content: "其实与普通的灯谜会并无太多区别。只是因着大典期间，许多外乡客或是奔波在外的游子归来，皓京城内也热闹起来了。",
+                npc: 701193,
+                next: 51168404,
+            },
+            {
+                id: 51168406,
+                content: "自然是准备了些许薄礼，虽然不太丰厚，但也是一分心意。",
+                npc: 701193,
+                options: [
+                    {
+                        id: 51168407,
+                        content: "外来者也能参加？",
+                        next: 51168408,
+                    },
+                ],
+            },
+            {
+                id: 51168408,
+                content: "放心放心，就是考虑到了这一点，所以这次活动设置的谜题都不怎么困难，只需稍稍了解一些华胥文化，就能答上来。",
+                npc: 701193,
+                options: [
+                    {
+                        id: 51168409,
+                        content: "没什么要问的了。",
+                        next: 51168410,
+                    },
+                ],
+            },
+            {
+                id: 51168404,
+                content: "所以在西市和执律阁前广场这里准备了一些活动，灯谜会也是其中之一，大家一同欢庆佳节，岂不美哉？",
+                npc: 701193,
+                options: [
+                    {
+                        id: 51168405,
+                        content: "有什么奖品吗？",
+                        next: 51168406,
+                    },
+                ],
+            },
+            {
+                id: 51168410,
+                content: "那我在此恭祝客人——游玩愉快。",
+                npc: 701193,
+            },
+        ],
+    },
+    {
+        id: 701194,
+        name: "禹臣",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51169202,
+                content: "此情此景，难以言表，唯有无言而泪流……",
+                npc: 701194,
+                next: 51169203,
+            },
+            {
+                id: 51169203,
+                content: "你也是来此瞻仰龙君威严的吗？看看这恢弘的殿前，高耸入云的执律阁，一切的一切都是那么伟大而壮阔，恰如……",
+                npc: 701194,
+                options: [
+                    {
+                        id: 51169204,
+                        content: "等等……",
+                        next: 51169206,
+                    },
+                    {
+                        id: 51169205,
+                        content: "有这么夸张吗？",
+                        next: 51169206,
+                    },
+                ],
+            },
+            {
+                id: 51169206,
+                content: "跨越千山万水，只为来到皓京，来到这执律阁广场见太皓神君一面——这样澎湃的心情，如何才能传达给你呢？",
+                npc: 701194,
+                next: 51169207,
+            },
+            {
+                id: 51169207,
+                content: "执律阁对我来说有着非同寻常的意义！我勤工俭学了一年，只为攒够来皓京的开销。",
+                npc: 701194,
+                next: 51169208,
+            },
+            {
+                id: 51169208,
+                content: "而今天，就在此时此地，我的梦想终于实现了！看这气派的广场，这康庄大道，是否预示着我的前程也在此刻分明了？",
+                npc: 701194,
+                options: [
+                    {
+                        id: 51169209,
+                        content: "执律阁广场对你来说有什么意义？",
+                        next: 51169210,
+                    },
+                ],
+            },
+            {
+                id: 51169210,
+                content: "我从小就听着皓京执律阁的故事长大，奶奶总告诉我，若是我勤勉向学，就会被龙君亲自接引至这里。",
+                npc: 701194,
+                next: 51169211,
+            },
+            {
+                id: 51169211,
+                content: "成为龙渊上卿，成为龙中之龙，成为万千华胥人向往艳羡的存在，效力国家，效力百姓！",
+                npc: 701194,
+                next: 51169212,
+            },
+            {
+                id: 51169212,
+                content: "可偏偏小时的我无法理解奶奶劝我向学的用心，只顾贪玩，奶奶说想见到我独当一面的那一天，可她……",
+                npc: 701194,
+                next: 51169213,
+            },
+            {
+                id: 51169213,
+                content: "她再也见不到了，在我十岁那年，奶奶离开了我。",
+                npc: 701194,
+                next: 51169214,
+            },
+            {
+                id: 51169214,
+                content: "后来我就暗暗发誓，即使成不了龙渊上卿，我也要来执律阁看看，告诉黄泉之下的奶奶，孙儿不孝，辜负了您的期待。",
+                npc: 701194,
+                options: [
+                    {
+                        id: 51169215,
+                        content: "你是个孝顺的人，不要这么说自己。",
+                        next: 51169216,
+                    },
+                    {
+                        id: 51169217,
+                        content: "奶奶不是希望你出人头地，只是希望你过得好。",
+                        next: 51169218,
+                    },
+                ],
+            },
+            {
+                id: 51169216,
+                content: "谢谢你，可现在说这些早就没什么用了，不过至少来到这里，也算是了却我自己一桩心愿。",
+                npc: 701194,
+            },
+            {
+                id: 51169218,
+                content: "我又如何不知道，我只是气我自己，没有在奶奶还在的时候就让她过上好日子。",
+                npc: 701194,
+                next: 51169219,
+            },
+            {
+                id: 51169219,
+                content: "哪怕是现在，也只是攒了好久的银钱才能来这一趟，而不是在皓京定居。",
+                npc: 701194,
+            },
+        ],
+    },
+    {
+        id: 701195,
+        name: "守拙",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51169312,
+                content: "这里面不能进去吗？我买票也不行？那有什么办法能进去看看？我想见白龙神君。",
+                npc: 701195,
+                next: 51169301,
+            },
+            {
+                id: 51169301,
+                content: "不好意思，执律阁内部禁止外人随意进入。",
+                next: 51169302,
+            },
+            {
+                id: 51169302,
+                content: "不对，你们搞错了，我不是外人啊，我是华胥之人，身处于龙君的庇护之下，那就是内人！",
+                npc: 701195,
+                next: 51169303,
+            },
+            {
+                id: 51169303,
+                content: "这位朋友，实在不好意思……可是这里真的不让进。",
+                next: 51169304,
+            },
+            {
+                id: 51169304,
+                content: "我千里迢迢来皓京，就是想见白龙神君一面呀，你就让我进去看看吧，我保证什么也不乱动。",
+                npc: 701195,
+                next: 51169305,
+            },
+            {
+                id: 51169305,
+                content: "真的不行……你看这怎么办呀？他一直不走……",
+                next: 51169306,
+            },
+            {
+                id: 51169306,
+                content: "这位公子，我们自当理解你对神君的虔诚之心，但执律阁历来有规定，除非有重大案件，才会在阁内审理。",
+                next: 51169307,
+            },
+            {
+                id: 51169307,
+                content: "且龙君日理万机，并非成日驻守于执律阁，即使你贸然闯入，也难得一见。",
+                next: 51169308,
+            },
+            {
+                id: 51169308,
+                content: "若阁下真有龙章凤资，何不努力成为龙渊上卿候选，被神君请来阁中，闻香入试？届时自可一睹真容。",
+                next: 51169309,
+            },
+            {
+                id: 51169309,
+                content: "我要有那本事还跟你们在这扯什么，我就想进去看看，这回还特地带了海伯利亚产的照相机，拍张照片我就走！",
+                npc: 701195,
+                next: 51169310,
+            },
+            {
+                id: 51169310,
+                content: "你看，说不通……",
+                next: 51169311,
+            },
+            {
+                id: 51169311,
+                content: "唉……每年都有几个这样的狂热分子啊……",
+            },
+        ],
+    },
+    {
+        id: 701196,
+        name: "雨桐",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51169401,
+                content: "你看！只要内心足够虔诚，望向执律阁顶之时，就会看到白龙神君在云间遨游。",
+                npc: 701196,
+                next: 51169402,
+            },
+            {
+                id: 51169402,
+                content: "阿娘，我的眼睛都要睁到落泪了……怎么还没看见神君呢？",
+                npc: 701197,
+                next: 51169403,
+            },
+            {
+                id: 51169403,
+                content: "等你足够虔诚的时候，自然会看见。",
+                npc: 701196,
+                next: 51169404,
+            },
+            {
+                id: 51169404,
+                content: "唔……那边的{性别:哥哥|姐姐}，你能看到白龙神君吗？",
+                npc: 701197,
+                options: [
+                    {
+                        id: 51169405,
+                        content: "能。",
+                        next: 51169406,
+                    },
+                    {
+                        id: 51169416,
+                        content: "不能。",
+                        next: 51169417,
+                    },
+                ],
+            },
+            {
+                id: 51169406,
+                content: "哇！真的吗！那你能不能告诉我，白龙神君究竟长什么样子呀？",
+                npc: 701197,
+                options: [
+                    {
+                        id: 51169407,
+                        content: "描述龙的长相。",
+                        next: 51169408,
+                    },
+                    {
+                        id: 51169410,
+                        content: "描述人的长相。",
+                        next: 51169411,
+                    },
+                ],
+            },
+            {
+                id: 51169417,
+                content: "难道{性别:哥哥|姐姐}也不够虔诚吗？",
+                npc: 701197,
+                next: 51169418,
+            },
+            {
+                id: 51169408,
+                content: "长长的，弯弯曲曲的身体上面满是鳞片，头上有两只角，跟有龙氏差不多的那种。",
+                npc: 100001,
+                next: 51169409,
+            },
+            {
+                id: 51169411,
+                content: "白龙神君有着和咱们一样的长相，两只眼睛一个鼻子，头顶尖尖的龙角。",
+                npc: 100001,
+                next: 51169412,
+            },
+            {
+                id: 51169418,
+                content: "我不是华胥人，不虔诚也很正常。",
+                npc: 100001,
+                next: 51169419,
+            },
+            {
+                id: 51169409,
+                content: "唔……那不是和画里见到的一模一样吗？娘，我就说画画的人一定见过神君吧，他们一定是当着神君的面给他画像呢！",
+                npc: 701197,
+                next: 51169413,
+            },
+            {
+                id: 51169412,
+                content: "哇！白龙神君果然和画像上的那些不一样，那他是怎么在云上飞的呢？是踩着一片云朵吗？还是直接就——呜~地飞走了。",
+                npc: 701197,
+                next: 51169413,
+            },
+            {
+                id: 51169419,
+                content: "哦~原来是这样呀，{性别:哥哥|姐姐}，欢迎你来华胥玩。",
+                npc: 701197,
+                next: 51169420,
+            },
+            {
+                id: 51169413,
+                content: "小孩子不懂事，说着玩的，你别介意。",
+                npc: 701196,
+                next: 51169414,
+            },
+            {
+                id: 51169420,
+                content: "谢谢。",
+                npc: 100001,
+                next: 51169421,
+            },
+            {
+                id: 51169414,
+                content: "没关系。",
+                npc: 100001,
+                next: 51169415,
+            },
+            {
+                id: 51169421,
+                content: "（你摸了摸她的头。）",
+            },
+            {
+                id: 51169415,
+                content: "好啦，我们去东市吧，娘给你买糖葫芦。",
+                npc: 701196,
+            },
+        ],
+    },
+    {
+        id: 701197,
+        name: "可儿",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701198,
+        name: "小川",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51169501,
+                content: "朝报朝报，茶不思饭不想只想看朝报，皓京独家新闻，绝对真实绝对劲爆！",
+                npc: 701198,
+                next: 51169502,
+            },
+            {
+                id: 51169502,
+                content: "这位客人，要不要来份朝报？匠矩阁出品的印刷机，字体清晰图片高清，内容也由学院才子再次加工，保准有趣！",
+                npc: 701198,
+                options: [
+                    {
+                        id: 51169503,
+                        content: "你是做什么的？",
+                        next: 51169504,
+                    },
+                    {
+                        id: 51169506,
+                        content: "朝报内容有什么？",
+                        next: 51169507,
+                    },
+                    {
+                        id: 51169510,
+                        content: "你这么小就工作吗？",
+                        next: 51169511,
+                    },
+                ],
+            },
+            {
+                id: 51169504,
+                content: "我呀？当然是卖报的啦！上至龙君动向，下至家长里短，我们报童无一不知无一不晓！",
+                npc: 701198,
+                next: 51169505,
+            },
+            {
+                id: 51169507,
+                content: "客人让我好为难呀，我当然知晓客人迫不及待想要知道报里的消息，可我却是个卖报的，要是都告诉你了，你不就不买报了吗？",
+                npc: 701198,
+                next: 51169508,
+            },
+            {
+                id: 51169511,
+                content: "什么工作不工作的，我在给我爹帮忙呢，他就在店里面搞印刷，他答应了，我卖十本朝报，就可以换一串糖葫芦。",
+                npc: 701198,
+                next: 51169512,
+            },
+            {
+                id: 51169505,
+                content: "只是呢，我们打听来的消息，全都在这份朝报之中，客人想知道，那就……",
+                npc: 701198,
+                next: 51169514,
+            },
+            {
+                id: 51169508,
+                content: "怎么办呢……不如这样！我不说内容，只告诉你标题，如何？",
+                npc: 701198,
+                next: 51169509,
+            },
+            {
+                id: 51169512,
+                content:
+                    "喏，你看，这是他给我的凭证，今天已经卖了六本了，我还把一本滞销已久的《华胥问候语录大全》卖给了个什么都不懂的异乡客！这得算我三本报呢！",
+                npc: 701198,
+                next: 51169513,
+            },
+            {
+                id: 51169514,
+                content: "（要买他的朝报吗？）",
+                options: [
+                    {
+                        id: 51169515,
+                        content: "买。",
+                        next: 51169516,
+                    },
+                    {
+                        id: 51169518,
+                        content: "不买。",
+                        next: 51169519,
+                    },
+                ],
+            },
+            {
+                id: 51169509,
+                content: "让我看看……今天的消息是……啊！水冲龙王庙，东市龙君雕像因湖水上涨而被淹；奇事！六旬老妪得子；怪哉，西市一狗拿耗子！",
+                npc: 701198,
+                next: 51169514,
+            },
+            {
+                id: 51169513,
+                content: "嘿嘿，所以怎么样，客人要不要也来赞助一下我的糖葫芦生意？",
+                npc: 701198,
+                next: 51169514,
+            },
+            {
+                id: 51169516,
+                content: "（获得一份报纸。）",
+                next: 51169517,
+            },
+            {
+                id: 51169519,
+                content: "白费我半天口舌，诶呀，算啦算啦！",
+                npc: 701198,
+            },
+            {
+                id: 51169517,
+                content: "好嘞，客人您收好，这是今日的朝报！",
+                npc: 701198,
+            },
+        ],
+    },
+    {
+        id: 701199,
+        name: "洛奇",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51169619,
+                content: "这字乍一看好似和海伯利亚那边没什么区别，可凑在一起为什么完全看不懂……",
+                npc: 701199,
+                next: 51169601,
+            },
+            {
+                id: 51169601,
+                content: "您好，这位{性别:先生|女士}，不知道您现在方不方便，我想问你些事情。",
+                npc: 701199,
+                next: 51169602,
+            },
+            {
+                id: 51169602,
+                content: "是这样的，我是一名来自海伯利亚帝国的商人，来皓京谈生意，因为回程的船只延期，只能在皓京游玩几天。",
+                npc: 701199,
+                next: 51169603,
+            },
+            {
+                id: 51169603,
+                content:
+                    "刚才有个卖报的小童，将这本报刊出售给了我，说是皓京最热门的活动都写在上面了，但我这翻来覆去看了半天，一个华胥字都不认识。",
+                npc: 701199,
+                options: [
+                    {
+                        id: 51169604,
+                        content: "我也是海伯利亚来的。",
+                        next: 51169605,
+                    },
+                ],
+            },
+            {
+                id: 51169605,
+                content: "居然也是帝国之民！荣耀尽归吾皇！不过你这打扮确实不太像……我还以为是华胥哪个地方的小众穿搭呢……",
+                npc: 701199,
+                next: 51169606,
+            },
+            {
+                id: 51169606,
+                content: "既然你也是帝国之民，那想必也不会特别了解华胥字，诶……算啦，我还是自己随便逛逛得了。",
+                npc: 701199,
+                options: [
+                    {
+                        id: 51169607,
+                        content: "我看看，但我也不一定都认识。",
+                        next: 51169608,
+                    },
+                ],
+            },
+            {
+                id: 51169608,
+                content: "（你从他手中拿过报刊，仔细研读。）",
+                next: 51169609,
+            },
+            {
+                id: 51169609,
+                content: "（居然是一份只有字没有任何配图的报刊，密密麻麻的文字让你完全摸不着头脑！）",
+                next: 51169610,
+            },
+            {
+                id: 51169610,
+                content: "（只能……）",
+                options: [
+                    {
+                        id: 51169611,
+                        content: "我也看不懂。",
+                        next: 51169612,
+                    },
+                    {
+                        id: 51169613,
+                        content: "（开始胡编乱造。）",
+                        next: 51169614,
+                    },
+                ],
+            },
+            {
+                id: 51169612,
+                content: "啊这……那好吧……算啦，我还是自己随便逛逛得了。",
+                npc: 701199,
+            },
+            {
+                id: 51169614,
+                content: "这上面是说，西市在办庙庆活动，摊位上有许多特色美食。",
+                npc: 100001,
+                next: 51169615,
+            },
+            {
+                id: 51169615,
+                content: "东市许多店家喜迎奉香大典，推出了折扣活动。",
+                npc: 100001,
+                next: 51169616,
+            },
+            {
+                id: 51169616,
+                content: "中心广场上也有猜灯谜活动，很有意思，当然，最重要的还是奉香大典这个全华胥最知名的活动，非常有趣，绝对不能错过！",
+                npc: 100001,
+                next: 51169617,
+            },
+            {
+                id: 51169617,
+                content: "哦哦！原来写得如此详细！谢谢你！我这就去上面所说的地方看看，究竟是怎样有趣的事情！",
+                npc: 701199,
+                next: 51169618,
+            },
+            {
+                id: 51169618,
+                content: "不客气！",
+                npc: 100001,
+            },
+        ],
+    },
+    {
+        id: 701200,
+        name: "韩老爹",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51169701,
+                content: "您听我说，您去一个地方，吃什么玩什么，都是次要，主要的是要来感受当地的氛围，您说对不对？",
+                npc: 701200,
+                next: 51169702,
+            },
+            {
+                id: 51169702,
+                content:
+                    "咱们呢就是一群老头老太，年轻时候忙习惯了，老了呢也闲不下来，我们就自愿来这执律阁前，来给你们这些小年轻讲讲华胥的历史。",
+                npc: 701200,
+                next: 51169703,
+            },
+            {
+                id: 51169703,
+                content: "不收钱的呀！您放心好啦！绝不是什么强买强卖，咱就是在家闲得长草，就想出门来晒晒。",
+                npc: 701200,
+                options: [
+                    {
+                        id: 51169704,
+                        content: "（打听皓京城的历史。）",
+                        next: 51169705,
+                    },
+                    {
+                        id: 51169716,
+                        content: "（打听皓京的文化。）",
+                        next: 51169717,
+                    },
+                    {
+                        id: 51169729,
+                        content: "（打听这些老人。）",
+                        next: 51169730,
+                    },
+                ],
+            },
+            {
+                id: 51169705,
+                content: "诶呀！又是来问皓京历史的，罗老头，你来你来！",
+                npc: 701200,
+                next: 51169706,
+            },
+            {
+                id: 51169717,
+                content: "这个是乾老太的强项，乾老太！乾老太！快来，这里有人问文化呢！",
+                npc: 701200,
+                next: 51169718,
+            },
+            {
+                id: 51169730,
+                content: "您问我们是做什么的？我们就是闲得没事做才来给大家回答问题的呀。",
+                npc: 701200,
+                next: 51169731,
+            },
+            {
+                id: 51169706,
+                content: "诶哟，皓京城的故事，您问我就对咯！早在千年以前，这里还没有一个叫皓京的地方，只有飏先祖带领的小小聚落。",
+                next: 51169707,
+            },
+            {
+                id: 51169718,
+                content: "来了来了！催什么催！这位小朋友呀，你问我可就问对人了。",
+                next: 51169719,
+            },
+            {
+                id: 51169731,
+                content: "之前总听人家来了皓京的人说：诶呀皓京也就那样，一点意思都没有，跟别的地方差不多，不好玩。",
+                npc: 701200,
+                next: 51169732,
+            },
+            {
+                id: 51169707,
+                content: "那时的华胥啊，苦于秽兽之灾，人们流离失所，为了岌岌可危的生存资源你抢我夺，终日不得安宁。",
+                next: 51169708,
+            },
+            {
+                id: 51169719,
+                content: "虽说我不晓得文化究竟是什么意思，但是我在外求学的丫头说文化呢，就是最独特的，别的地方没有的东西。",
+                next: 51169720,
+            },
+            {
+                id: 51169732,
+                content:
+                    "我们这帮人听了就不乐意啊，那他没去深入了解咋就说不好玩呢，或者说，皓京本身就不是什么“玩”的地方，皓京是华胥最大的一本书啊！",
+                npc: 701200,
+                next: 51169733,
+            },
+            {
+                id: 51169708,
+                content:
+                    "好在我们伟大的飏先祖觉醒了自己的魔法——分香术！分香术辅一落成，便已经可以控制咱这附近的一带的秽兽，只一个人的力量，实在过于渺小。",
+                next: 51169709,
+            },
+            {
+                id: 51169720,
+                content: "所以我就整理出来了三样，皓京最独特的东西，我这就说与你听！",
+                next: 51169721,
+            },
+            {
+                id: 51169733,
+                content:
+                    "所以我就组织了一批和我志同道合的老朋友们，每天来这执律阁门口给人无偿科普！毕竟来皓京玩的孩子们总不会错过执律阁的对吧！",
+                npc: 701200,
+                next: 51169734,
+            },
+            {
+                id: 51169709,
+                content: "于是大风九章落成了，将这分香术发扬光大！围绕着这大风九章奠基的地方，在高悬的执律阁下，皓京应运而生！",
+                next: 51169710,
+            },
+            {
+                id: 51169721,
+                content: "这第一样呢，是这龙君所在的执律阁。这高悬于皓京之巅，有龙神盘旋的执律阁，可是绝无仅有只此一家的！",
+                next: 51169722,
+            },
+            {
+                id: 51169734,
+                content: "不过呢……这样的成效似乎不是特别好，你看我这跟你聊上了，那边那些个就没法理会，我们也在考虑改进一下方法了。",
+                npc: 701200,
+                next: 51169735,
+            },
+            {
+                id: 51169710,
+                content:
+                    "最开始的皓京只有现在的一半大小。随着悬衡派的壮大，附近的居民也逐渐向皓京靠拢，有龙氏学习分香术，抟土氏则种植培养更多香料。",
+                next: 51169711,
+            },
+            {
+                id: 51169722,
+                content:
+                    "这第二样呢，是皓京的府宅文化，您一路来的时候也看见了，咱们这里一家人，不止是一个小家庭，而是一整个大家族，都喜欢住在一栋房子里。",
+                next: 51169723,
+            },
+            {
+                id: 51169735,
+                content: "你说编一出戏在这巡演怎么样？那唢呐一吹小鼓一敲，震个隆咚戕，还有谁人不知不晓？",
+                npc: 701200,
+                options: [
+                    {
+                        id: 51169736,
+                        content: "支持！",
+                        next: 51169737,
+                    },
+                    {
+                        id: 51169738,
+                        content: "不好吧……",
+                        next: 51169739,
+                    },
+                ],
+            },
+            {
+                id: 51169711,
+                content:
+                    "于是椒兰村便因此逐渐落成，时至今日，椒兰村依旧是香料种植的一大宝地，那里的人世代种香供香用香，可能要比皓京城里的还要专业些！",
+                next: 51169712,
+            },
+            {
+                id: 51169723,
+                content: "图的是一个团团美美，大家整日抬头不见低头见，有什么事情家人便一道帮忙，这在外地可是很难看着的。",
+                next: 51169724,
+            },
+            {
+                id: 51169737,
+                content: "好啊！你可比我那不孝子有眼光，他只会觉得我这老头给他丢脸，回回动不动就来劝我回家！",
+                npc: 701200,
+            },
+            {
+                id: 51169739,
+                content: "你和我那不孝子说的一样！他非说在这唱大戏会扰民，扰什么呢？这大广场难道有人睡觉？难不成能吵到天上的龙君？",
+                npc: 701200,
+            },
+            {
+                id: 51169712,
+                content: "大风九章为华胥带来了和平，也带来了人口逐年上涨，直至今天，皓京已经进行了两次大建设以及数不清的无数次小型修缮。",
+                next: 51169713,
+            },
+            {
+                id: 51169724,
+                content: "第三样……其实我也没特别想好，本想说香料，又觉得华胥处处是香，无甚稀奇。又想说商贸，想必也比不得烟津渡那边昌盛。",
+                next: 51169725,
+            },
+            {
+                id: 51169713,
+                content: "皓京老了，岁数大了，所以许多年轻人也不在皓京住了，但皓京依旧见证了华胥的千年和平，是当之无愧的华胥第一城！",
+                next: 51169714,
+            },
+            {
+                id: 51169725,
+                content:
+                    "我是觉得啊，皓京好在一个杂字，就是华胥天南地北的吃喝玩乐，你都能在皓京找到，只因为这座城市留人，离开的孩子们总想把外面的好东西带回家。",
+                next: 51169726,
+            },
+            {
+                id: 51169714,
+                content: "老罗，说得好啊，你是回家又重新写了稿子吗？",
+                npc: 701200,
+                next: 51169715,
+            },
+            {
+                id: 51169726,
+                content: "于是拼拼凑凑，就成了现在最为独特的皓京。",
+                next: 51169727,
+            },
+            {
+                id: 51169715,
+                content: "诶呀过奖过奖，我和夫人一起在家演练过好些遍。",
+            },
+            {
+                id: 51169727,
+                content: "说的好啊，依我看，今年皓京导游非你莫属！",
+                npc: 701200,
+                next: 51169728,
+            },
+            {
+                id: 51169728,
+                content: "韩哥谬赞了，我还差得远呢！",
+            },
+        ],
+    },
+    {
+        id: 701201,
+        name: "韩安世",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51169901,
+                content: "退一万步说，在人家办事处门口宣传这些也不合适吧……",
+                npc: 701201,
+                next: 51169902,
+            },
+            {
+                id: 51169902,
+                content: "不晓得哪听来的闲言碎语，非说什么皓京不好玩，大伙都知道现在的言论二极分化，不是神了就是鬼了。",
+                npc: 701201,
+                next: 51169903,
+            },
+            {
+                id: 51169903,
+                content: "偏是老年人不清楚其中门道，只觉得是自己的故土被诋毁了，才想出了这一出。",
+                npc: 701201,
+                next: 51169904,
+            },
+            {
+                id: 51169904,
+                content: "这有些消息啊，还是不能让他们听着了。",
+                npc: 701201,
+                options: [
+                    {
+                        id: 51169905,
+                        content: "你说的是什么消息？",
+                        next: 51169906,
+                    },
+                ],
+            },
+            {
+                id: 51169906,
+                content: "还能是什么呢，不就是之前有些来皓京的游客，满城乱窜最后说不好玩，避雷！给我家老头子听着了，急得三天没合眼。",
+                npc: 701201,
+                next: 51169907,
+            },
+            {
+                id: 51169907,
+                content: "后面就撺掇着许多老头老太一起，来这执律阁做什么百科讲座，抓着过路人一顿训导。",
+                npc: 701201,
+                next: 51169908,
+            },
+            {
+                id: 51169908,
+                content: "你也是被抓的？还是只是路过，我可建议你，要是不想生命中宝贵的十分钟被浪费，还是离他们远些，绕开走。",
+                npc: 701201,
+                options: [
+                    {
+                        id: 51169909,
+                        content: "你觉得他们的行为没有意义？",
+                        next: 51169910,
+                    },
+                    {
+                        id: 51169912,
+                        content: "你不支持他们宣扬皓京文化？",
+                        next: 51169913,
+                    },
+                ],
+            },
+            {
+                id: 51169910,
+                content: "倒也没那么绝对……只是你也看出来了，这种行为十分冒犯，尤其是选址还是在这执律阁前，皓京最庄严的地方！",
+                npc: 701201,
+                next: 51169911,
+            },
+            {
+                id: 51169913,
+                content: "别扣帽子，我支持宣扬皓京文化，但不是这个宣传法！",
+                npc: 701201,
+                next: 51169914,
+            },
+            {
+                id: 51169911,
+                content: "有这时间不如去和西城的那些老头子们一起打打拳锻炼身体，来这缠着游客……那不是扰民吗？",
+                npc: 701201,
+                options: [
+                    {
+                        id: 51169918,
+                        content: "所以你想劝他们回去？",
+                        next: 51169919,
+                    },
+                ],
+            },
+            {
+                id: 51169914,
+                content: "问题是皓京好不好玩这个事儿，他就不是你这样粗浅地宣传就能改变的。",
+                npc: 701201,
+                next: 51169915,
+            },
+            {
+                id: 51169919,
+                content: "难哦！他们觉得这两天很有成效，要变本加厉了呢，还在那琢磨着要在执律阁唱大戏，锣鼓喧天地宣传。",
+                npc: 701201,
+                next: 51169920,
+            },
+            {
+                id: 51169915,
+                content:
+                    "每个人来皓京的目的不同，有人是为了瞻仰旧都遗迹，他们看到这鲜亮重修过的街面，就要说了：啊皓京真无聊全是仿古建筑，避雷！",
+                npc: 701201,
+                next: 51169916,
+            },
+            {
+                id: 51169920,
+                content: "你说会不会过两天又多了什么说法，说皓京执律阁门口怎么有一堆吵死人的老头老太，实在不尊重龙君，避雷！",
+                npc: 701201,
+                options: [
+                    {
+                        id: 51169921,
+                        content: "你说的很有道理。",
+                        next: 51169922,
+                    },
+                    {
+                        id: 51169924,
+                        content: "他们做的也不一定不对。",
+                        next: 51169925,
+                    },
+                ],
+            },
+            {
+                id: 51169916,
+                content: "有人是为了龙君，为了来执律阁去见龙君，那没见着也要说了：啊皓京真没意思说了龙君在这我啥也没见着，避雷！",
+                npc: 701201,
+                next: 51169917,
+            },
+            {
+                id: 51169922,
+                content: "是吧，你也这么觉得，我反正是希望他能早点醒悟，咱们回家过好自己的日子就得了，皓京如何都是外人眼中的事情。",
+                npc: 701201,
+                next: 51169923,
+            },
+            {
+                id: 51169925,
+                content: "啊是，你要说，一定意义上确实是让部分游客对皓京有了更多的了解，可我真问你，那些游客真的在乎吗？",
+                npc: 701201,
+                next: 51169926,
+            },
+            {
+                id: 51169917,
+                content:
+                    "皓京本就不是个可以让所有人都满意的地方，准确来说，没有一个地方能够做到。只有自己的心意才能决定的事情，旁人无论说什么也没用。",
+                npc: 701201,
+                options: [
+                    {
+                        id: 51169918,
+                        content: "所以你想劝他们回去？",
+                        next: 51169919,
+                    },
+                ],
+            },
+            {
+                id: 51169923,
+                content:
+                    "他们喜欢不喜欢又与我们何干？皓京究竟如何，是我们在这朝夕住着的人来决定的，我们才是最深有感触的人，谁会不喜欢自己的家乡呢？",
+                npc: 701201,
+                next: 51169928,
+            },
+            {
+                id: 51169926,
+                content: "他们在这待着从来到走最多不过小一月，听了一些几千年积累的事情，别说是否真能深有感触，多半只是似懂非懂。",
+                npc: 701201,
+                next: 51169927,
+            },
+            {
+                id: 51169928,
+                content: "反正我是要跟这老头杠到底，他不是说唱大戏不会扰民吗？那我就偏在这睡觉，让他知晓这会打扰到我。",
+                npc: 701201,
+                next: 51169929,
+            },
+            {
+                id: 51169927,
+                content: "没有满足自身需求的地方终究是要批判的，是龙君来了也拦不住的，毕竟嘴长自己身上，想说什么都是自己的事情。",
+                npc: 701201,
+                next: 51169928,
+            },
+            {
+                id: 51169929,
+                content: "看看谁能耗得过谁呢……",
+                npc: 701201,
+            },
+        ],
+    },
+    {
+        id: 701202,
+        name: "郭文昭",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51170001,
+                content: "我家老婆子好好地走在街上，他路也不看，直接推着车撞了过来。",
+                npc: 701202,
+                next: 51170002,
+            },
+            {
+                id: 51170002,
+                content: "谁没看路呢？！分明是我老远就叫着让她让开些，她却充耳不闻，我那车上放着多少重物，我骤然之间停不下来呀！",
+                next: 51170003,
+            },
+            {
+                id: 51170003,
+                content: "老婆子年纪大了，有些耳背也是常事吧，你为何不让旁人提醒一下，现在说这些又有何用？",
+                npc: 701202,
+                next: 51170004,
+            },
+            {
+                id: 51170004,
+                content: "当时情况紧急，我根本想不出这些，只知道一味叫喊了，我喉咙都喊破她还没听到，那这撞上去还能赖我吗？",
+                next: 51170005,
+            },
+            {
+                id: 51170005,
+                content: "尽管诡辩！我不与你分说，来寻调解员，让他们给我们个公道！",
+                npc: 701202,
+                next: 51170006,
+            },
+            {
+                id: 51170006,
+                content: "二位先别急，我先在此问一句，您家婆婆被撞后现下伤势如何了？可曾医治？",
+                next: 51170007,
+            },
+            {
+                id: 51170007,
+                content: "腿上磕到了，乌青一大截，老年人本就骨头脆，现在已经在床上躺着了。",
+                npc: 701202,
+                next: 51170008,
+            },
+            {
+                id: 51170008,
+                content: "需要我们先帮你问问泽生阁的医师们看看吗？",
+                next: 51170009,
+            },
+            {
+                id: 51170009,
+                content: "皮也没破血也没出！还看什么！但凡出点血狴犴大人都来找我麻烦了！",
+                next: 51170010,
+            },
+            {
+                id: 51170010,
+                content: "你还好意思说！虽是表面看着没事，你怎么知道里面的骨头没什么问题呢？",
+                npc: 701202,
+                next: 51170011,
+            },
+            {
+                id: 51170011,
+                content: "我要求立刻介入调解，让调教员还我们家里一个公道！",
+                npc: 701202,
+                next: 51170012,
+            },
+            {
+                id: 51170012,
+                content: "你分明就是想借机生事，讹我一笔！",
+                next: 51170013,
+            },
+            {
+                id: 51170013,
+                content:
+                    "二位别吵了……我这就帮你们记录在册，你们先各自回去，过两日会有专人介入。期间我们会去二位家中问询查证，届时也好各自还二位一个公道！",
+            },
+        ],
+    },
+    {
+        id: 701203,
+        name: "砚北",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51170101,
+                content: "为人在世，奉天命当如沙洲，勤而学当如竹溪先生。",
+                npc: 701203,
+                next: 51170102,
+            },
+            {
+                id: 51170102,
+                content: "有沙洲先生，入悬衡派后修订分香术，将所学所得整理并录入成册，造福后续有志于分香术的华胥人。",
+                npc: 701203,
+                next: 51170103,
+            },
+            {
+                id: 51170103,
+                content: "又有竹溪先生，不求仕进，反求教习著述，办分殊学院，方得我等万千学子之归。",
+                npc: 701203,
+                next: 51170104,
+            },
+            {
+                id: 51170104,
+                content: "而今学院欣欣向荣，学子各自峥嵘，桃李遍天下，想必竹溪先生泉下有知，也当欣慰万分。",
+                npc: 701203,
+                options: [
+                    {
+                        id: 51170105,
+                        content: "你说的沙洲先生是？",
+                        next: 51170106,
+                    },
+                    {
+                        id: 51170112,
+                        content: "你说的竹溪先生是？",
+                        next: 51170113,
+                    },
+                ],
+            },
+            {
+                id: 51170106,
+                content: "沙洲先生是华胥历史上赫赫有名的香官，在其之前，悬衡派的分香术仅仅只有天才才能修行，更别说勤加练习。",
+                npc: 701203,
+                next: 51170107,
+            },
+            {
+                id: 51170113,
+                content:
+                    "刚才我所说的你也听到了吧？竹溪先生曾任一官半职，后来却成了我们分殊学院的创办人，是我们所有学子尊敬并爱戴的先驱者。",
+                npc: 701203,
+                next: 51170114,
+            },
+            {
+                id: 51170107,
+                content:
+                    "但沙洲先生却整理了自己修习分香术的心得体会，写成《香籍》，分成上下两篇，上篇专门为闻香不敏者所书，让其也得窥分香术一二。",
+                npc: 701203,
+                next: 51170108,
+            },
+            {
+                id: 51170114,
+                content: "而今先生已然魂归九泉，但其分殊辩理的观念依旧被学子之间口耳相传，学院也在这样的理念下发展得越来越好。",
+                npc: 701203,
+                options: [
+                    {
+                        id: 51170115,
+                        content: "他以前是香官？",
+                        next: 51170116,
+                    },
+                    {
+                        id: 51170119,
+                        content: "你听起来相当尊敬他。",
+                        next: 51170120,
+                    },
+                ],
+            },
+            {
+                id: 51170108,
+                content: "不过我本人对于沙洲先生的了解并不算多，想知道更多的信息，你可能得去祀烟阁查查资料。",
+                npc: 701203,
+                options: [
+                    {
+                        id: 51170109,
+                        content: "闻香不敏者指的是？",
+                        next: 51170110,
+                    },
+                ],
+            },
+            {
+                id: 51170116,
+                content: "竹溪先生以前是在天禄司任职。在其任职期间多逢区域旱灾，天禄天梁二司携手兴修水利，抗灾救荒，也不失为一段佳话。",
+                npc: 701203,
+                next: 51170117,
+            },
+            {
+                id: 51170120,
+                content: "实不相瞒，我并非皓京本地之人，而是从外地赶来，只为在分殊学院求学，就是慕先生之名而来。",
+                npc: 701203,
+                next: 51170121,
+            },
+            {
+                id: 51170110,
+                content: "简单来说，其实就是那些对于香术上没有什么天赋的人，也就是华胥绝大多数普通人。",
+                npc: 701203,
+                next: 51170111,
+            },
+            {
+                id: 51170117,
+                content:
+                    "但竹溪先生年岁渐长后，便不再继续留任，而是将全部心思都投在学院的建设上。年迈之时，还不忘将学子所阅书籍逐章进行批注。",
+                npc: 701203,
+                next: 51170118,
+            },
+            {
+                id: 51170121,
+                content: "又或者说，在这里的每个学生，心里都是尊敬他的，我不过是万千之一。",
+                npc: 701203,
+            },
+            {
+                id: 51170111,
+                content: "其实我本人就是……",
+                npc: 701203,
+            },
+            {
+                id: 51170118,
+                content: "曾经皓京最大的藏书阁，便是竹溪先生与其他同僚共同主持倡导，才修建落地，只可惜后来被歹人烧毁大半……实属憾事。",
+                npc: 701203,
+            },
+        ],
+    },
+    {
+        id: 701204,
+        name: "韩忠",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51170201,
+                content: "我何时曾说我亲眼见过竹溪先生？我说的是父亲年幼之时，曾在学院听竹溪先生传授最后一课。",
+                npc: 701204,
+                next: 51170202,
+            },
+            {
+                id: 51170202,
+                content: "据我父所述，那时的竹溪先生已经满头华发，双眼几近失明，虽是身形佝偻，但讲课的精气神却是让人浑然忘却他的年龄。",
+                npc: 701204,
+                next: 51170203,
+            },
+            {
+                id: 51170203,
+                content:
+                    "你们这些小家伙，成日贪玩不好好念书。那一字一句可都是当年的竹溪先生用心血批注所得。现下听完了故事，是不是该去发奋向学了？",
+                npc: 701204,
+                next: 51170204,
+            },
+            {
+                id: 51170204,
+                content: "先生敷衍！我们分明是要听好玩的故事，你回回都要扯到念书上来。",
+                next: 51170205,
+            },
+            {
+                id: 51170205,
+                content: "来学院不和你们说念书我还说什么？你们这些坏娃娃，快去快去！",
+                npc: 701204,
+                next: 51170206,
+            },
+            {
+                id: 51170206,
+                content: "（学生们嘟囔抱怨着散开了。）",
+            },
+            {
+                id: 51170207,
+                content: "咦？你是哪个学堂的孩子？我在这里怎么从未见过你？",
+                npc: 701204,
+                options: [
+                    {
+                        id: 51170208,
+                        content: "我是闲逛的。",
+                        next: 51170209,
+                    },
+                    {
+                        id: 51170210,
+                        content: "我是隔壁班的孩子。",
+                        next: 51170211,
+                    },
+                ],
+            },
+            {
+                id: 51170209,
+                content: "哦，你看我说，学堂选址在街旁，隔三差五有路人不小心闯进来，下次要让他们建些院墙才好。",
+                npc: 701204,
+            },
+            {
+                id: 51170211,
+                content: "隔壁班的孩子……是什么意思？",
+                npc: 701204,
+                next: 51170212,
+            },
+            {
+                id: 51170212,
+                content: "意思就是我成绩很好，但不在你们这里念书。",
+                npc: 100001,
+                next: 51170213,
+            },
+            {
+                id: 51170213,
+                content: "那么小同学，你有何贵干呀？",
+                npc: 701204,
+                options: [
+                    {
+                        id: 51170214,
+                        content: "你刚才提到的竹溪先生因为什么原因仙逝？",
+                        next: 51170215,
+                    },
+                    {
+                        id: 51170218,
+                        content: "他们听不到的好玩的故事，你可以给我说吗？",
+                        next: 51170219,
+                    },
+                ],
+            },
+            {
+                id: 51170215,
+                content: "其实我也不是特别清楚，对于竹溪先生的死因，传言有许多，大多都说他日渐年迈，又劳于学院琐事，心力交瘁而死。",
+                npc: 701204,
+                next: 51170216,
+            },
+            {
+                id: 51170219,
+                content: "竟是在这等着我呢！罢了罢了，那便与你说上一说！",
+                npc: 701204,
+                next: 51170220,
+            },
+            {
+                id: 51170216,
+                content: "也有说是因为疾病困扰，后逐渐恶化，最终还是没熬过去。",
+                npc: 701204,
+                next: 51170217,
+            },
+            {
+                id: 51170220,
+                content:
+                    "我曾听闻，竹溪先生极其爱酒，这与他平日里正襟危坐的样子天差地别。说竹溪先生经常邀约一群好友相聚，焚香煮酒，探讨理之一道。",
+                npc: 701204,
+                next: 51170221,
+            },
+            {
+                id: 51170217,
+                content: "不过无论是何原因，竹溪先生发葬那日，光是为其送行的学子，就浩浩荡荡聚集了近千人，人人披麻戴孝，哀先生之逝也。",
+                npc: 701204,
+            },
+            {
+                id: 51170221,
+                content:
+                    "但有人说，竹溪先生酒品极差，每每讨论到后半程，酒意上涌，就粗着嗓子开始大辩特辩，平日里那满腹经纶全忘干净了，只顾着要争出高低来。",
+                npc: 701204,
+                next: 51170222,
+            },
+            {
+                id: 51170222,
+                content: "毕竟，分殊辩理本就是一门容易起争执的学问，就算据理力争，也会被误解为吵架或是起了争执。",
+                npc: 701204,
+                next: 51170223,
+            },
+            {
+                id: 51170223,
+                content: "可若是完全不顾辩，只向对方宣扬理，那就是彻彻底底的吵架了。",
+                npc: 701204,
+                next: 51170224,
+            },
+            {
+                id: 51170224,
+                content: "竹溪先生就是这样，每回都要把满堂宾客辩到再无一人吭声，后来久而久之，大家也不愿再与他一道喝酒辩理。",
+                npc: 701204,
+                next: 51170225,
+            },
+            {
+                id: 51170225,
+                content: "后来先生嘴馋，又亲自去旧友家提礼敲门拜访，只求他人谅解。",
+                npc: 701204,
+                options: [
+                    {
+                        id: 51170226,
+                        content: "这位德高望重的竹溪先生酒品这么差。",
+                        next: 51170227,
+                    },
+                    {
+                        id: 51170228,
+                        content: "不是特别有趣，还有别的吗？",
+                        next: 51170229,
+                    },
+                ],
+            },
+            {
+                id: 51170227,
+                content: "人无完人，一件事物都有千面百面之分，何况人呢？",
+                npc: 701204,
+            },
+            {
+                id: 51170229,
+                content: "没啦，小同学，要是以后还想听，记得来学院报个名，来年咱们再好好絮叨絮叨。",
+                npc: 701204,
+                next: 51170230,
+            },
+            {
+                id: 51170230,
+                content: "现在，我可是要赶着去看看那些孩子们是不是真的在好好背书啦。",
+                npc: 701204,
+            },
+        ],
+    },
+    {
+        id: 701205,
+        name: "周远",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51170301,
+                content: "吵死了……这怎么让人背书！",
+                npc: 701205,
+                next: 51170302,
+            },
+            {
+                id: 51170302,
+                content: "以天下相传，天下之大事也。以天下之大圣，行天下之大事……",
+                npc: 701205,
+                next: 51170303,
+            },
+            {
+                id: 51170303,
+                content: "天下……天下为公，选贤与能……啊不是！这是背到哪里去了！",
+                npc: 701205,
+                next: 51170304,
+            },
+            {
+                id: 51170304,
+                content:
+                    "诶呀，夫子叫我三日之内背完，今日都已是第三日了，明天就要被抽查，这可如何是好……都怪这学院太吵，建哪里不好，偏要在街道旁！",
+                npc: 701205,
+                options: [
+                    {
+                        id: 51170305,
+                        content: "街道旁怎么了？",
+                        next: 51170306,
+                    },
+                ],
+            },
+            {
+                id: 51170306,
+                content:
+                    "你听听！这小贩叫卖声，孩童嬉戏声！你闻闻！这美食的味道，这脂粉的香气！没有一个不在勾得人心痒痒，没一会就想着要去买点好吃好喝的……",
+                npc: 701205,
+                options: [
+                    {
+                        id: 51170307,
+                        content: "你心不静。",
+                        next: 51170308,
+                    },
+                    {
+                        id: 51170310,
+                        content: "说的是，为什么学院会在商店街旁？",
+                        next: 51170311,
+                    },
+                ],
+            },
+            {
+                id: 51170308,
+                content: "你瞧瞧你，分明和我差不多岁数，怎得说话和夫子一样！说什么闹市在外，静心其中，我要真有如此造诣，我早就……",
+                npc: 701205,
+                next: 51170309,
+            },
+            {
+                id: 51170311,
+                content: "诶……还不是皓京这地形，早年建学院之时哪有什么东市，那一片都是黄树林，清净得很。",
+                npc: 701205,
+                next: 51170312,
+            },
+            {
+                id: 51170309,
+                content: "我早就当夫子了！我还需要背书吗？",
+                npc: 701205,
+            },
+            {
+                id: 51170312,
+                content: "后来皓京扩建，便这样扩出了一条偌大的商业街出来，为何不能让咱们也迁走呢？",
+                npc: 701205,
+                next: 51170313,
+            },
+            {
+                id: 51170313,
+                content: "不和你说了，我得背书了，呜呼哀哉！身在闹市，唯吾静心……夫子啊！我悟不出来！你来渡我吧！啊！！！",
+                npc: 701205,
+            },
+        ],
+    },
+    {
+        id: 701206,
+        name: "孟守诚",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51170401,
+                content: "所谓理一，即天地万物都只有一个理，所谓分殊，即千差万殊的事物都是一个理的体现。",
+                npc: 701206,
+                next: 51170402,
+            },
+            {
+                id: 51170402,
+                content: "先生，我没听懂，如何当得一个理，难不成先生和我是一个理吗？",
+                next: 51170403,
+            },
+            {
+                id: 51170403,
+                content: "我便举例于你分说，你说你与我是师徒之理，你有师，我也有师，我师亦有师，你若苦学，以后也定有徒。",
+                npc: 701206,
+                next: 51170404,
+            },
+            {
+                id: 51170404,
+                content: "即你我在师徒之理间，又有不同，其分而殊，即为分殊。",
+                npc: 701206,
+                next: 51170405,
+            },
+            {
+                id: 51170405,
+                content: "可是先生，理……究竟是什么东西呢？",
+                next: 51170406,
+            },
+            {
+                id: 51170406,
+                content:
+                    "理，是天地万物之理，是自然恒转之理，是道法伦常之理，是治家安邦之理，是一切正确的，合乎常理的理，是为人处事的准则，是规矩，是道理。",
+                npc: 701206,
+                next: 51170407,
+            },
+            {
+                id: 51170407,
+                content: "听……听不懂……",
+                next: 51170408,
+            },
+            {
+                id: 51170408,
+                content:
+                    "那我便拿大风九章举例，你知晓大风九章的规则，但你也清楚，人如果蓄意要存险恶之心，大风九章无法将所有违纪之事一一写上。",
+                npc: 701206,
+                next: 51170409,
+            },
+            {
+                id: 51170409,
+                content: "毕竟大风九章只有九章，不是千章，万章，亿万章。但即使如此，那些作奸犯科之人所行之事，岂非不齿之事邪？",
+                npc: 701206,
+                next: 51170410,
+            },
+            {
+                id: 51170410,
+                content: "是以大风九章就是一种理，你顺理而行事，区分看待每一样不同的事物，即是理一分殊。",
+                npc: 701206,
+                next: 51170411,
+            },
+            {
+                id: 51170411,
+                content: "我好像应该也许大概可能似乎依稀明白了……",
+                next: 51170412,
+            },
+            {
+                id: 51170412,
+                content: "甚好，那便继续温书去吧！",
+                npc: 701206,
+            },
+        ],
+    },
+    {
+        id: 701207,
+        name: "李礼一",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51170501,
+                content: "五味万殊，而大同于美；曲变虽众，亦大同于和；子性各异，但大同于敏；教术众多，然大同于情。",
+                npc: 701207,
+                next: 51170502,
+            },
+            {
+                id: 51170502,
+                content: "在对不同学子的教导方面，不违背竹溪先生的创院宗旨的基础上，因材施教才是正道。",
+                npc: 701207,
+                next: 51170503,
+            },
+            {
+                id: 51170503,
+                content: "贪玩爱闹的孩子和一心读书的孩子，你能说他们谁更聪明，谁更愚笨吗？",
+                npc: 701207,
+                options: [
+                    {
+                        id: 51170504,
+                        content: "看谁的成绩好？",
+                        next: 51170505,
+                    },
+                ],
+            },
+            {
+                id: 51170505,
+                content: "不然，你说的前提是你认为学业优异才是聪明，学业不佳则是愚笨。实则世上众多事都不能以成绩来论高低。",
+                npc: 701207,
+                next: 51170506,
+            },
+            {
+                id: 51170506,
+                content: "一孩子虽贪玩，却玩着玩着自己琢磨造出了个会动的小木马；一孩子虽潜心读书，却苦学许久未能背出一段诗文。",
+                npc: 701207,
+                next: 51170507,
+            },
+            {
+                id: 51170507,
+                content: "现在你觉得是谁更聪明呢？",
+                npc: 701207,
+                options: [
+                    {
+                        id: 51170508,
+                        content: "那可能是造木马的孩子聪明。",
+                        next: 51170509,
+                    },
+                    {
+                        id: 51170510,
+                        content: "那可能还是潜心读书的孩子聪明。",
+                        next: 51170511,
+                    },
+                ],
+            },
+            {
+                id: 51170509,
+                content: "你又错了，倘若我再告诉你，那造木马的孩子压根大字不识一个，一看到诗文就头疼，哭嚎着要逃跑。",
+                npc: 701207,
+                options: [
+                    {
+                        id: 51170512,
+                        content: "无论我说是谁，你都会反驳我。",
+                        next: 51170513,
+                    },
+                ],
+            },
+            {
+                id: 51170511,
+                content: "是，也不是，那潜心读书的孩子后来发现，他竟有着超乎常人的分香辨香之术，无论是多么相似的香料，他都能很快识别。",
+                npc: 701207,
+                options: [
+                    {
+                        id: 51170512,
+                        content: "无论我说是谁，你都会反驳我。",
+                        next: 51170513,
+                    },
+                ],
+            },
+            {
+                id: 51170513,
+                content: "哈哈，莫要生气。我只是想说，其实以上我们讨论的内容，即是因材施教的必要性。",
+                npc: 701207,
+                next: 51170514,
+            },
+            {
+                id: 51170514,
+                content: "我们所教授的理，无关某一个专业方向的长处，有的孩子天生就不擅背书，有的孩子费劲力气也不擅算学，这都不稀奇。",
+                npc: 701207,
+                next: 51170515,
+            },
+            {
+                id: 51170515,
+                content:
+                    "但将孩子们框死在一个框架里，那才是限制了理的方向，理应该是教孩子们判断什么是对的，什么是错的，什么是好的，什么是坏的。",
+                npc: 701207,
+                next: 51170516,
+            },
+            {
+                id: 51170516,
+                content: "为人子则孝亲敬长，事龙君则鞠躬尽瘁，为偶则忠贞不渝，为友则肝胆相照。",
+                npc: 701207,
+                next: 51170517,
+            },
+            {
+                id: 51170517,
+                content: "待人接物，当秉仁爱向善之信，博学笃行，当有明辨慎思之能，处事为人，当循自省修身之道。",
+                npc: 701207,
+                next: 51170518,
+            },
+            {
+                id: 51170518,
+                content: "若是在此求学的所有孩子都能深刻领悟到其中真谛，未来无论成大事还是遵小节，都不会做出什么损人利己的坏事来。",
+                npc: 701207,
+                next: 51170519,
+            },
+            {
+                id: 51170519,
+                content: "如此，才是分殊学院创办时，竹溪先生所求之愿啊。",
+                npc: 701207,
+            },
+        ],
+    },
+    {
+        id: 701208,
+        name: "慕远",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51170601,
+                content: "这万事万物，道理总是只有一个，但一个道理却可涵盖了世间万物，所以理一定是在前面的！",
+                npc: 701208,
+                next: 51170602,
+            },
+            {
+                id: 51170602,
+                content: "此话不然，这万事万物的理是最为看不见也摸不着的，只有去结合具体事件，即分殊而论，才得以见理。",
+                next: 51170603,
+            },
+            {
+                id: 51170603,
+                content: "若是没有那个需要遵循的理，没有找到本源，如何得以发散出具体的事物？不过是空口说白话！",
+                npc: 701208,
+                next: 51170604,
+            },
+            {
+                id: 51170604,
+                content: "倘如没有具体的事物践行，你所谓的那些理不过是空中楼阁罢了，只有先“分殊”才能推出“理一”！",
+                next: 51170605,
+            },
+            {
+                id: 51170605,
+                content: "那我问你，你没有理的支撑的时候，如何去分辨事物是对还是错？凭直觉？还是妄下结论，直接断言？",
+                npc: 701208,
+                next: 51170606,
+            },
+            {
+                id: 51170606,
+                content: "那我反倒要问你，你没有具体的行为实践与反思，如何领悟这个理？说到底是先认知到了某些事之间存在联系，再去归纳总结。",
+                next: 51170607,
+            },
+            {
+                id: 51170607,
+                content: "胡搅蛮缠！竹溪先生曾说过，天上只有一个太阳，但太阳出来的时候每个角落都有光，岂不是说明先有的太阳才有的光？",
+                npc: 701208,
+                next: 51170608,
+            },
+            {
+                id: 51170608,
+                content: "歪理一堆，举证也不清晰，我不与你辩了。",
+                next: 51170609,
+            },
+            {
+                id: 51170609,
+                content: "回来！你不继续说，那就说明我赢了！",
+                npc: 701208,
+                next: 51170610,
+            },
+            {
+                id: 51170610,
+                content: "你看，你这不是因为我不再与你争执，你才得出你赢了的理？我再问你，是理一在前还是分殊在前？",
+                next: 51170611,
+            },
+            {
+                id: 51170611,
+                content: "你！你这家伙，竟是诈我的！",
+                npc: 701208,
+            },
+        ],
+    },
+    {
+        id: 701209,
+        name: "思晴",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51170701,
+                content: "今天该轮到你执勤了吧，之前你说你娘风寒，我可帮你顶了三天，夫子都起疑了！",
+                npc: 701209,
+                next: 51170702,
+            },
+            {
+                id: 51170702,
+                content: "好姐姐，再帮我顶两天吧，我娘最近咳嗽得又严重了些，我想今日放学带她去泽生阁看看呢！",
+                next: 51170703,
+            },
+            {
+                id: 51170703,
+                content: "你少胡说八道，我爹说上次在城西果干摊子上见着你了，还问你怎的没回家，你却理都不理，分明就是心虚。",
+                next: 51170704,
+            },
+            {
+                id: 51170704,
+                content: "你才胡说八道，那是我娘嗓子不舒服，我去摊子给她买蜜饯就药吃。",
+                next: 51170705,
+            },
+            {
+                id: 51170705,
+                content: "好了好了……我可以给你替，但你得去跟夫子说清楚，不然回回他都用那种起疑的眼神看我，好像我做错了什么一样……",
+                npc: 701209,
+                next: 51170706,
+            },
+            {
+                id: 51170706,
+                content: "还是姐姐你善解人意，我这就去跟夫子说明白！",
+                next: 51170707,
+            },
+            {
+                id: 51170707,
+                content: "你分明被他骗了……他就是看你好欺负，是个冤大头！",
+            },
+        ],
+    },
+    {
+        id: 701210,
+        name: "沐阳",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51174601,
+                content: "奉香大典期间放假，你们都去哪玩？我哥从外地回来了，说要给我带异国的玩具呢。",
+                npc: 701210,
+                next: 51174602,
+            },
+            {
+                id: 51174602,
+                content: "你哥？是那个几年都没回家的那个织星客哥哥吗？",
+                next: 51174603,
+            },
+            {
+                id: 51174603,
+                content: "什么叫几年没回家，那都是小事，我哥哥在外面生意做的可大着呢！你听说过那个天天打仗的国家吗？",
+                npc: 701210,
+                next: 51174604,
+            },
+            {
+                id: 51174604,
+                content: "唔……我爹说过，叫什么，海博力国！",
+                next: 51174605,
+            },
+            {
+                id: 51174605,
+                content: "是海伯利亚帝国啦，我哥就是在那边做生意，那里的皇帝都要敬他三分！",
+                npc: 701210,
+                next: 51174606,
+            },
+            {
+                id: 51174606,
+                content: "吹牛……我爹说，那个什么皇帝就和咱们的龙君一样厉害，龙君也不见得敬你哥三分，皇帝怎么会敬呢？",
+                next: 51174607,
+            },
+            {
+                id: 51174607,
+                content: "你不信就算了，我哥这次回来会给我带会唱歌的盒子，到时候我带来学院，你们就羡慕我吧！",
+                npc: 701210,
+            },
+        ],
+    },
+    {
+        id: 701211,
+        name: "承泽",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51170801,
+                content: "下午的蹴球赛，咱们队还差一人，你问过樾山哥没有？他要是肯来，咱们定能踢得对面满地找牙！",
+                npc: 701211,
+                next: 51170802,
+            },
+            {
+                id: 51170802,
+                content: "问过了，樾山哥说有事，今日就不来了。",
+                next: 51170803,
+            },
+            {
+                id: 51170803,
+                content: "嘿！那可不行！他不来咱们人不齐，到时候就踢不上蹴球了！",
+                npc: 701211,
+                next: 51170804,
+            },
+            {
+                id: 51170804,
+                content: "不来的又不止是他，小珍今日身体不适，也不来了。",
+                next: 51170805,
+            },
+            {
+                id: 51170805,
+                content: "什么意思？那这球还踢不踢了？我今日课都没仔细听，一门心思想着就是下午的蹴球。",
+                npc: 701211,
+                next: 51170806,
+            },
+            {
+                id: 51170806,
+                content: "踢不了，不然你们组些人白打，也算解了你的球瘾。",
+                next: 51170807,
+            },
+            {
+                id: 51170807,
+                content: "不成！白打没意思！我不干！",
+                npc: 701211,
+                next: 51170808,
+            },
+            {
+                id: 51170808,
+                content: "那这样，小珍说，过两天她想去西郊踏青，看看风景，你要不要去？",
+                next: 51170809,
+            },
+            {
+                id: 51170809,
+                content: "我们现在说的是今日的事，你为何要和我提过两天的事？再说了，那踏青，回回走得人脚酸力竭的，谁去啊？",
+                npc: 701211,
+                next: 51170810,
+            },
+            {
+                id: 51170810,
+                content: "芊芊也去，你还去不去？",
+                next: 51170811,
+            },
+            {
+                id: 51170811,
+                content: "啧……去！",
+                npc: 701211,
+                next: 51170812,
+            },
+            {
+                id: 51170812,
+                content: "那你今天下午有事做了，小珍点名要吃东市的糕点，那家总要排队，还三天两头关店休息，趁着今天开，你去排队买糕点吧。",
+                next: 51170813,
+            },
+            {
+                id: 51170813,
+                content: "凭什么？她要吃她自己去买，关我何事？",
+                npc: 701211,
+                next: 51170814,
+            },
+            {
+                id: 51170814,
+                content: "随你。只是你可别忘了，当时可是你亲口答应她的，要是她陪你玩蹴球，你就请她吃一个月的糕点。",
+                next: 51170815,
+            },
+            {
+                id: 51170815,
+                content: "……知道了，我去就是，你跟她说，下次蹴球绝不能放我鸽子了！不然约定取消！",
+                npc: 701211,
+            },
+        ],
+    },
+    {
+        id: 701212,
+        name: "章景行",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51170919,
+                content: "按这个势头算下去，岂不是又要扩张？可这又还能往哪里扩呢？",
+                npc: 701212,
+                next: 51170901,
+            },
+            {
+                id: 51170901,
+                content: "以往其实已经为学院扩建过一次，但现在招了年纪更小的孩子，学堂数量又不够用了。",
+                npc: 701212,
+                next: 51170902,
+            },
+            {
+                id: 51170902,
+                content: "可眼见着隔壁起了商街，这再扩建又能往哪里扩呢？",
+                npc: 701212,
+                options: [
+                    {
+                        id: 51170903,
+                        content: "看起来学院很受欢迎。",
+                        next: 51170904,
+                    },
+                ],
+            },
+            {
+                id: 51170904,
+                content: "那是自然，自昔日学院创办后，求学之人便络绎不绝，早些年还未收取学金的时候，有学子家长提着两只大鹅就要来念书了。",
+                npc: 701212,
+                next: 51170905,
+            },
+            {
+                id: 51170905,
+                content: "后来收的学金虽也不高，但至少不会闹出什么大鹅在学院叫嚷妨碍孩子们念书的事来。",
+                npc: 701212,
+                options: [
+                    {
+                        id: 51170906,
+                        content: "为什么这么受欢迎？",
+                        next: 51170907,
+                    },
+                    {
+                        id: 51170910,
+                        content: "大鹅后面去哪里了？",
+                        next: 51170911,
+                    },
+                ],
+            },
+            {
+                id: 51170907,
+                content: "那这说法可就太多了，最开始多是慕竹溪先生之名，后来则是学院教出的孩子们一传十十传百。",
+                npc: 701212,
+                next: 51170908,
+            },
+            {
+                id: 51170911,
+                content: "这个嘛……能吃的都在年宴上宰了吃了，吃不完的也都送去给了城外的养殖户，不能吃的……",
+                npc: 701212,
+                next: 51170912,
+            },
+            {
+                id: 51170908,
+                content: "不过最终还是天禄司给学院出资扩建，于是便在皓京成名了。早先华胥的许多学院都未曾有过如此规模。",
+                npc: 701212,
+                next: 51170909,
+            },
+            {
+                id: 51170912,
+                content: "春来一并放生了，因这事还遭到了批评，说咱们把外地的生物放归野外，导致那些家养的大鹅一时间觅不到食……",
+                npc: 701212,
+                next: 51170913,
+            },
+            {
+                id: 51170909,
+                content: "多半只是小型学堂，一间里有个一两位先生就差不多了，只咱们分殊学院特殊些。许是这样也更受欢迎吧。",
+                npc: 701212,
+                options: [
+                    {
+                        id: 51170914,
+                        content: "所以再扩建的话要去哪里？",
+                        next: 51170915,
+                    },
+                ],
+            },
+            {
+                id: 51170913,
+                content: "哈哈，不过这都是后话了~大体上并未造成什么困扰。",
+                npc: 701212,
+                options: [
+                    {
+                        id: 51170914,
+                        content: "所以再扩建的话要去哪里？",
+                        next: 51170915,
+                    },
+                ],
+            },
+            {
+                id: 51170915,
+                content: "唔……确实没有想好，不过之前有位先生提过，说不然就搬去城外吧，正好学生也几度埋怨，说学院附近太躁扰。",
+                npc: 701212,
+                next: 51170916,
+            },
+            {
+                id: 51170916,
+                content: "有时候我也想着，搬去个远些的，偏僻些，但山清水秀的地方，又安静又有野趣，岂不美哉？",
+                npc: 701212,
+                next: 51170917,
+            },
+            {
+                id: 51170917,
+                content: "但后来……你看，这学院里小娃娃也多了起来，若是有那些走读的孩子早上还得花好些时间去山郊野外上学，太难为他们了。",
+                npc: 701212,
+                next: 51170918,
+            },
+            {
+                id: 51170918,
+                content: "不管啦，等真容纳不了的时候再说吧，或许也等不到那天呢。",
+                npc: 701212,
+            },
+        ],
+    },
+    {
+        id: 701213,
+        name: "柳明正",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51171001,
+                content: "是了，来年开春便要递上辞函，到时候自然是会念着大家的，放心！",
+                npc: 701213,
+                next: 51171002,
+            },
+            {
+                id: 51171002,
+                content: "不再考虑考虑了？若是你想，我帮你问问，再涨些薪资也不是问题。",
+                next: 51171003,
+            },
+            {
+                id: 51171003,
+                content: "不啦，并非与之相关，只是在皓京待得太久，总觉得……有些想念家乡故友。",
+                npc: 701213,
+                next: 51171004,
+            },
+            {
+                id: 51171004,
+                content: "若是想念，便准你个假期，回家多待些日子。奉香大典过后再回来便是？",
+                next: 51171005,
+            },
+            {
+                id: 51171005,
+                content: "好归好……只是……嗯……家中长辈也……",
+                npc: 701213,
+                next: 51171006,
+            },
+            {
+                id: 51171006,
+                content: "我一向劝不动你，罢了，随你去了！",
+                next: 51171007,
+            },
+            {
+                id: 51171007,
+                content: "是，多谢您海涵。",
+                npc: 701213,
+                next: 51171008,
+            },
+            {
+                id: 51171008,
+                content: "（老人背过手去，离开了。）",
+            },
+            {
+                id: 51171009,
+                content: "…………",
+                npc: 701213,
+                next: 51171010,
+            },
+            {
+                id: 51171010,
+                content: "……如何舍得，自当是舍不得啊……",
+                npc: 701213,
+                options: [
+                    {
+                        id: 51171011,
+                        content: "舍不得，又为什么要走呢？",
+                        next: 51171013,
+                    },
+                    {
+                        id: 51171012,
+                        content: "你刚刚没和他说实话吧？",
+                        next: 51171013,
+                    },
+                ],
+            },
+            {
+                id: 51171013,
+                content: "嚯！哪里来的孩子，吓我一跳呢。",
+                npc: 701213,
+                next: 51171014,
+            },
+            {
+                id: 51171014,
+                content: "听你这话，应是刚才我与老先生的话都被你听了个七七八八。实不相瞒，的确没说实话，只是有些话如实说了并非好事，何况……",
+                npc: 701213,
+                next: 51171015,
+            },
+            {
+                id: 51171015,
+                content: "这本身也是我自己的问题，在我尚未想出解决办法之前，盲目告诉别人，也只是会让他们徒增烦忧罢了。",
+                npc: 701213,
+                options: [
+                    {
+                        id: 51171016,
+                        content: "什么事情这么严重？",
+                        next: 51171017,
+                    },
+                ],
+            },
+            {
+                id: 51171017,
+                content: "这事说来也是话长……其实我早年来学院之时，便是想着能与诸多学术大能交流沟通，碰撞思想。",
+                npc: 701213,
+                next: 51171018,
+            },
+            {
+                id: 51171018,
+                content: "而后来到这里，虽说是在一些明辨理论上有了更深的造诣，也接触到了许多未曾思考过的想法，深感新奇有趣。",
+                npc: 701213,
+                next: 51171019,
+            },
+            {
+                id: 51171019,
+                content: "但久而久之……却总觉得哪里有些不对味。",
+                npc: 701213,
+                next: 51171020,
+            },
+            {
+                id: 51171020,
+                content: "似乎所有人都在对着书本，对着一些先哲之言引经据典，用复杂的词汇和一些之乎者也之类的话术，恨不得把对方绕到胡同里。",
+                npc: 701213,
+                next: 51171021,
+            },
+            {
+                id: 51171021,
+                content: "辩论最终的结果，往往不是一方的成功，而是一方不愿再进行下去的失败。",
+                npc: 701213,
+                next: 51171022,
+            },
+            {
+                id: 51171022,
+                content: "我只觉得这样的碰撞，无法再产生思想的火花，无法让我再度找到那种脑中的想法被对方捋顺所找寻到的快乐。",
+                npc: 701213,
+                next: 51171023,
+            },
+            {
+                id: 51171023,
+                content: "我也不知道该如何解决这样的问题，回家或许不是解法，但我所能想到的改变方式只有这个了。",
+                npc: 701213,
+                next: 51171024,
+            },
+            {
+                id: 51171024,
+                content: "或许放下书本，走进生活之中，才是我应该做的，而不是高悬在楼台之上，当那莫须有的明月。",
+                npc: 701213,
+                next: 51171025,
+            },
+            {
+                id: 51171025,
+                content: "你瞧我，又开始说些奇怪的话了！",
+                npc: 701213,
+                options: [
+                    {
+                        id: 51171026,
+                        content: "说的有道理，你应该更务实一些。",
+                        next: 51171027,
+                    },
+                    {
+                        id: 51171028,
+                        content: "也不是吧，或许你只是累了。",
+                        next: 51171029,
+                    },
+                ],
+            },
+            {
+                id: 51171027,
+                content: "其实我还不确定这样的方式对还是不对，但总之，改变才是我的第一步。",
+                npc: 701213,
+                next: 51171030,
+            },
+            {
+                id: 51171029,
+                content: "或许吧，或许我只是累了，或许我回家之后，被柴米油盐环绕，没几天又想回来闻闻笔墨纸砚的味道了。",
+                npc: 701213,
+                next: 51171030,
+            },
+            {
+                id: 51171030,
+                content: "不管如何，谢谢你愿意听我说这么多，你倒是一位善良的倾听者。",
+                npc: 701213,
+                next: 51171031,
+            },
+            {
+                id: 51171031,
+                content: "时候不早了，我等家人接我，便不再与你多聊了，我们有缘再会！",
+                npc: 701213,
+            },
+        ],
+    },
+    {
+        id: 701214,
+        name: "郑景",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51171102,
+                content: "以飘零四杰中的文竹女侠来说，若不是她们行侠仗义，昔日的那些滥用大风九章疏漏之人为何会因恐吓而销声匿迹，隐于黑暗？",
+                npc: 701214,
+                next: 51171103,
+            },
+            {
+                id: 51171103,
+                content: "那些不幸的受害者，因文竹女侠的义举而讨回了公道，找回了属于自己的正义。",
+                npc: 701214,
+                next: 51171104,
+            },
+            {
+                id: 51171104,
+                content: "我不同意你的观点！以你所述，文竹女侠，不，是飘零恶贼，不过是以暴止暴威吓他人，并不能为华胥的和平提供助力。",
+                next: 51171105,
+            },
+            {
+                id: 51171105,
+                content:
+                    "以暴制暴，本身只是一种暴力的传递，是不安定信号在人们害怕的情绪之中扩散，即使带来短期的压制，也依旧会埋下长期的隐患。",
+                next: 51171106,
+            },
+            {
+                id: 51171106,
+                content: "何以见得？以暴制暴本身是遏制一些恶性事件的有效手段。在明知有人滥用规章制度的情况下，难道所谓和平，真的还存在吗？",
+                npc: 701214,
+                next: 51171107,
+            },
+            {
+                id: 51171107,
+                content: "你方才提到秩序，如你所言，华胥的和平本身就建立在大风九章的秩序之上，且这样的秩序早就被先人验证，并非空口虚谈。",
+                next: 51171108,
+            },
+            {
+                id: 51171108,
+                content: "在和平的秩序已经建立的基础上，你所谓的复仇行为，不仅无法真正解决问题，反而会制造新的受害者。",
+                next: 51171109,
+            },
+            {
+                id: 51171109,
+                content: "法理所评判不了的善恶，如若交给私心来判断，则只是会让这种暴力的行为一再扩散，最终害人害己，又何来和平一说？",
+                next: 51171110,
+            },
+            {
+                id: 51171110,
+                content: "好！一辩暂时休息，请二位学子暂且休息，待会会在锣鼓声响后开启二辩。",
+            },
+        ],
+    },
+    {
+        id: 701215,
+        name: "裴云",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51171201,
+                content: "好啊，今天的辩题有趣，我在学院许久没见过这么有意思的辩题了。",
+                npc: 701215,
+                next: 51171202,
+            },
+            {
+                id: 51171202,
+                content: "诶！小友留步，你也是学院里的学子？还是专程来听这一出辩论的外人？",
+                npc: 701215,
+                options: [
+                    {
+                        id: 51171203,
+                        content: "我不是学生，偶然路过而已。",
+                        next: 51171204,
+                    },
+                    {
+                        id: 51171205,
+                        content: "与你无关。",
+                        next: 51171206,
+                    },
+                ],
+            },
+            {
+                id: 51171204,
+                content: "哦！原是如此，我看你路过之时，似乎也听到了辩论内容一二，我有些好奇，你如何看待这场辩论？",
+                npc: 701215,
+                options: [
+                    {
+                        id: 51171207,
+                        content: "我对这种事情不怎么了解。",
+                        next: 51171208,
+                    },
+                    {
+                        id: 51171209,
+                        content: "在这里讨论飘零人不好吧？",
+                        next: 51171210,
+                    },
+                ],
+            },
+            {
+                id: 51171206,
+                content: "啊……抱歉抱歉，我看你刚才似乎也听到了他们二位的对话，还以为你也感兴趣，既然你有事，那咱们有缘再会！",
+                npc: 701215,
+            },
+            {
+                id: 51171208,
+                content: "嗯……你的意思是，在你不了解事情的全貌前，无法妄下结论？还是说，你觉得这事不是一般能讨论的话题，所以不愿开口？",
+                npc: 701215,
+                next: 51171211,
+            },
+            {
+                id: 51171210,
+                content: "啊~我懂你的意思，飘零人在华胥的确是一个不怎么被提起的话题，毕竟他们“作恶多端”，罪行罄竹难书，是吧？",
+                npc: 701215,
+                next: 51171211,
+            },
+            {
+                id: 51171211,
+                content:
+                    "但小友莫要担心，在分殊学院，无论谈论什么都是可以的，这里是思想的碰撞之地。任何观点无论善恶好坏，都可以拿出来辩驳。",
+                npc: 701215,
+                next: 51171212,
+            },
+            {
+                id: 51171212,
+                content:
+                    "只要你能为你的观点找出论据，便可以为之辩经，比如我们都以为太阳是圆的，可你就是说太阳是方的，只要给出你的道理，说服了我们即可。",
+                npc: 701215,
+                next: 51171213,
+            },
+            {
+                id: 51171213,
+                content: "这就是分殊学院的特殊之处，法理为一，即无论如何不可与对方发生实质冲突，以雄辩高于一切，让论据为你说话。",
+                npc: 701215,
+                options: [
+                    {
+                        id: 51171214,
+                        content: "听起来挺有趣。",
+                        next: 51171215,
+                    },
+                    {
+                        id: 51171217,
+                        content: "我懂，你们都是嘴炮高手。",
+                        next: 51171218,
+                    },
+                ],
+            },
+            {
+                id: 51171215,
+                content: "那是自然，也是我不远万里前来学院求学的原因，说简单点，就是咱们无论说什么混账话，只需要说明白了，都有志同道合者。",
+                npc: 701215,
+                next: 51171216,
+            },
+            {
+                id: 51171218,
+                content: "嘴……炮？这词汇新鲜，是匠矩阁新出的小玩具吗？听起来是用嘴发出炮仗声？还是什么？",
+                npc: 701215,
+                next: 51171219,
+            },
+            {
+                id: 51171216,
+                content: "要我说，一些所谓真理，在最开始被人提出之前，多半也只是被当作信口胡诌，你说是不是？",
+                npc: 701215,
+                next: 51171220,
+            },
+            {
+                id: 51171219,
+                content: "要我说，这辩论与创造发明的道理是一样的，在你提出一个观点和想法的初期，或许所有人都觉得不可思议，无法理解。",
+                npc: 701215,
+                next: 51171220,
+            },
+            {
+                id: 51171220,
+                content: "但偏偏就是敢于迈出第一步的人，在后续又进一步举证推理，最终才促使观点的诞生和发明的落地，你说是不是？",
+                npc: 701215,
+                next: 51171221,
+            },
+            {
+                id: 51171221,
+                content:
+                    "所以啊，小友，你现在对他俩的辩驳有何见解？是支持甲方所言的飘零人行为也是在维护华胥的和平，还是支持乙方所言飘零人的行为不利于维护和平？",
+                npc: 701215,
+                options: [
+                    {
+                        id: 51171222,
+                        content: "我支持甲方。",
+                        next: 51171223,
+                    },
+                    {
+                        id: 51171224,
+                        content: "我支持乙方。",
+                        next: 51171225,
+                    },
+                    {
+                        id: 51171226,
+                        content: "我不想评判。",
+                        next: 51171227,
+                    },
+                ],
+            },
+            {
+                id: 51171223,
+                content: "害人者本就应该偿命，如果法理让他们有机可乘，就让正义去惩处他们！",
+                npc: 100001,
+            },
+            {
+                id: 51171225,
+                content: "一时的逞凶行事自然是快意，但却和维护和平搭不上任何关系，想要解决这种事，应该尝试其他办法。",
+                npc: 100001,
+            },
+            {
+                id: 51171227,
+                content: "如果法理足够公道的情况下，就不会有这样的事情发生。",
+                npc: 100001,
+                next: 51171228,
+            },
+            {
+                id: 51171228,
+                content: "嗯……你的话倒是让我受益十足啊，我明白了，小友，多谢你的提点，后面的二辩就轮到一辩的旁观者加入赛席了。",
+                npc: 701215,
+                next: 51171229,
+            },
+            {
+                id: 51171229,
+                content: "你这么一说，我对于加入哪一方其实心里也有数了。不如说，其实我早就心中有数，只是还想从旁人口中确认一些什么。",
+                npc: 701215,
+                next: 51171230,
+            },
+            {
+                id: 51171230,
+                content: "好啦，谢谢你，我要去报名了，咱们下次见！",
+                npc: 701215,
+            },
+        ],
+    },
+    {
+        id: 701216,
+        name: "卫德舆",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51171301,
+                content: "空口说白话，不亚于纸上谈兵。有这闲工夫，不如多读些书！",
+                npc: 701216,
+                next: 51171302,
+            },
+            {
+                id: 51171302,
+                content: "我最厌恶这群借着辩论自由的借口在这胡扯大逆不道之事的人。这些年轻人，都是华胥的幼苗，却整日把时间浪费在这些事上。",
+                npc: 701216,
+                options: [
+                    {
+                        id: 51171303,
+                        content: "你是指他们的辩论？",
+                        next: 51171304,
+                    },
+                ],
+            },
+            {
+                id: 51171304,
+                content: "不然？一群愚钝之人，去辩什么，飘零人？",
+                npc: 701216,
+                next: 51171305,
+            },
+            {
+                id: 51171305,
+                content: "这场辩论有什么意义吗？若是飘零人的行为真的正确，又为何现在都像过街老鼠一样人人喊打？",
+                npc: 701216,
+                next: 51171306,
+            },
+            {
+                id: 51171306,
+                content: "那什么四杰，哈哈！一群草莽之辈，真把自己当英雄？到时候全部让应天尉把他们抓起来，以儆效尤！",
+                npc: 701216,
+                options: [
+                    {
+                        id: 51171307,
+                        content: "（不认可他的想法。）",
+                        next: 51171308,
+                    },
+                    {
+                        id: 51171310,
+                        content: "（认可他的想法。）",
+                        next: 51171311,
+                    },
+                ],
+            },
+            {
+                id: 51171308,
+                content: "你有些过激了。",
+                npc: 100001,
+                next: 51171309,
+            },
+            {
+                id: 51171311,
+                content: "你说的有些道理。",
+                npc: 100001,
+                next: 51171312,
+            },
+            {
+                id: 51171309,
+                content: "我过激？你可知那飘零人做的什么灭蒙，让我家乡多少……算了！道不同不相为谋，多说无益！",
+                npc: 701216,
+            },
+            {
+                id: 51171312,
+                content: "那所谓飘零四杰，其中一名女子造的什么……什么灭蒙？降下来砸毁了多少农田，我的家乡本是水丰草茂之地，却因那场意外……",
+                npc: 701216,
+                next: 51171313,
+            },
+            {
+                id: 51171313,
+                content: "三年涝灾，曾经好好的堤坝坍塌，庄稼被淹，你可知，你可知！可知多少家庭毁于一旦？！",
+                npc: 701216,
+                next: 51171314,
+            },
+            {
+                id: 51171314,
+                content: "所有的飘零人，都该受到惩处，而不是这样逍遥法外，还有一群维护他们的人，他们……他们都该……都该……",
+                npc: 701216,
+            },
+        ],
+    },
+    {
+        id: 701217,
+        name: "沈惠兰",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51171402,
+                content: "何以见得？好啊惠兰姐，你不过是跑了几趟园子，出去采购了几批香料，现在是胳膊肘子往外拐了！",
+                next: 51171403,
+            },
+            {
+                id: 51171403,
+                content: "你少胡说八道！我说的都是事实……就在咱们的甄料官们还在辛辛苦苦挑肥浇水的时候，人家那些大的香园早就用上新玩意了。",
+                npc: 701217,
+                next: 51171404,
+            },
+            {
+                id: 51171404,
+                content: "什么新玩意？你说说看？",
+                next: 51171405,
+            },
+            {
+                id: 51171405,
+                content: "听说……有的园子和机枢派的人合作，研制出了一种……叫什么……农事鸢？那鸟儿看似小巧，却能装载极重的物品飞在空中。",
+                npc: 701217,
+                next: 51171406,
+            },
+            {
+                id: 51171406,
+                content: "他们就是借用鸟儿飞在空中洒水，可以均匀覆盖到每一片香料田，比咱们挑水快多啦！",
+                npc: 701217,
+                next: 51171407,
+            },
+            {
+                id: 51171407,
+                content: "更别说开垦什么的，总之，那些流程看着可新鲜呢。",
+                npc: 701217,
+                next: 51171408,
+            },
+            {
+                id: 51171408,
+                content: "惠兰姐，你即便这么说，这种植方法和香料的品质也不能一概而论啊……",
+                next: 51171409,
+            },
+            {
+                id: 51171409,
+                content: "不不不，我觉得这东西可能真有什么说法……不然为何近年来我们在外面园子采购的香料数量愈发多了？都是有原因的。",
+                npc: 701217,
+            },
+        ],
+    },
+    {
+        id: 701218,
+        name: "书瑶",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51171501,
+                content: "这也是没办法的事情，毕竟咱们虽然在椒兰村又购入了几块香田，但终归供给抵不过消耗，总之，在外采购必不可少。",
+                npc: 701218,
+                next: 51171502,
+            },
+            {
+                id: 51171502,
+                content: "知道啦~不过……书瑶姐，今年的采购，能不能让我去呀？",
+                next: 51171503,
+            },
+            {
+                id: 51171503,
+                content: "你方入阁一年，论资历来说，似乎并轮不到你，不过你如果真的想去，我也可以帮你问问。",
+                npc: 701218,
+                next: 51171504,
+            },
+            {
+                id: 51171504,
+                content: "真的？！太好啦，书瑶姐，你就是我最好的姐姐!",
+                next: 51171505,
+            },
+            {
+                id: 51171505,
+                content: "停停停，我话可还没说完，你平日干活也不积极，为何今日突然如此主动要求？",
+                npc: 701218,
+                next: 51171506,
+            },
+            {
+                id: 51171506,
+                content: "诶呀……这不是……书瑶姐~你知道咱们甄料官的日子多无聊嘛，每天就是对着那一堆香料，不停地搬运晾晒处理……",
+                next: 51171507,
+            },
+            {
+                id: 51171507,
+                content: "我这都，入阁一年，不！一年多了！每天做的还是一样的事情，好无聊啊~",
+                next: 51171508,
+            },
+            {
+                id: 51171508,
+                content: "既然要采购，那一定是外出的活计吧？是不是可以见识到新鲜的事情？有意思的，新鲜的，好玩的！",
+                next: 51171509,
+            },
+            {
+                id: 51171509,
+                content: "停！采购香料可不是让你公款出游！即使你去了，也是要在他们那边甄别品质高的香料，筛检之后带回阁内，都是一样的活。",
+                npc: 701218,
+                next: 51171510,
+            },
+            {
+                id: 51171510,
+                content: "啊？那多没意思啊！我不想去了！",
+                next: 51171511,
+            },
+            {
+                id: 51171511,
+                content:
+                    "没有你想来就来想不去就不去的道理，你可知你入阁一年，分香术一点长进都没有，整日凭着之前的那些基础知识工作，那可不行。",
+                npc: 701218,
+                next: 51171512,
+            },
+            {
+                id: 51171512,
+                content:
+                    "我这次带你一起，你便能多学着些，毕竟园子里的香料要是不用分香术，是很难在质量差不多的情况下选出香调和香性的区别的。",
+                npc: 701218,
+                next: 51171513,
+            },
+            {
+                id: 51171513,
+                content: "诶呀~不要啊~书瑶姐，你把我害惨啦~",
+            },
+        ],
+    },
+    {
+        id: 701219,
+        name: "时川",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51171601,
+                content: "敢问祀烟阁的管事香官现在何处？鄙人自氤园而来，与他有约。",
+                npc: 701219,
+                next: 51171602,
+            },
+            {
+                id: 51171602,
+                content: "您好，我们之前便约在此处见面，我应是没有来迟吧？",
+                npc: 701219,
+                options: [
+                    {
+                        id: 51171603,
+                        content: "……我？",
+                        next: 51171605,
+                    },
+                    {
+                        id: 51171604,
+                        content: "什么？",
+                        next: 51171605,
+                    },
+                ],
+            },
+            {
+                id: 51171605,
+                content: "身着白衣的有龙一族……不是你吗？那天你不是说三日后咱们在祀烟阁门口见面吗？",
+                npc: 701219,
+                options: [
+                    {
+                        id: 51171606,
+                        content: "你认错人了。",
+                        next: 51171607,
+                    },
+                    {
+                        id: 51171609,
+                        content: "对！我就是和你相约的人。",
+                        next: 51171610,
+                    },
+                ],
+            },
+            {
+                id: 51171607,
+                content: "认错了？我……不好意思！我自幼便有些脸盲……今天闹了笑话，打扰到了您。",
+                npc: 701219,
+                next: 51171608,
+            },
+            {
+                id: 51171610,
+                content: "您之前说，氤园的吿苍品质是好，但价格稍许有些高，我回去后便又与我家少主商量了一下。",
+                npc: 701219,
+                next: 51171611,
+            },
+            {
+                id: 51171608,
+                content: "我这就让开，实在抱歉！",
+                npc: 701219,
+            },
+            {
+                id: 51171611,
+                content: "我们愿意让利两分，但前提是祀烟阁要加大订购量，因您也知道，氤园吿苍本就名扬华胥。",
+                npc: 701219,
+                next: 51171612,
+            },
+            {
+                id: 51171612,
+                content: "即使没有祀烟阁来收购，我们也可以卖给散商。所以，这已经是我们能做出的最大的让步了。",
+                npc: 701219,
+                options: [
+                    {
+                        id: 51171613,
+                        content: "这价格高了吧。",
+                        next: 51171614,
+                    },
+                    {
+                        id: 51171618,
+                        content: "不能让你们亏！",
+                        next: 51171619,
+                    },
+                ],
+            },
+            {
+                id: 51171614,
+                content: "你这话说的就很不够意思，我们祀烟阁是诚心诚意和你们做生意的，这份合作谈下来，也是长期的事情。",
+                npc: 100001,
+                next: 51171615,
+            },
+            {
+                id: 51171619,
+                content: "不行不行，绝对不行，哪有让你们让利的道理，这么好的吿苍，我们也是诚心收购……",
+                npc: 100001,
+                next: 51171620,
+            },
+            {
+                id: 51171615,
+                content: "你拿散客的生意和一个长期稳定的官方生意相比较，大家都是聪明人，你也知道哪边更划算。",
+                npc: 100001,
+                next: 51171616,
+            },
+            {
+                id: 51171620,
+                content: "这样吧！我们在原先的订购价格上再加三分！不！五分，我们要收购最好的吿苍！",
+                npc: 100001,
+                next: 51171621,
+            },
+            {
+                id: 51171616,
+                content:
+                    "这……可是……可是香官，我们氤园的吿苍之所以出名，便是在水源土壤和日常施肥上的质量极高，费用高昂，若是价格再继续压下去……",
+                npc: 701219,
+                next: 51171617,
+            },
+            {
+                id: 51171621,
+                content: "…………啊？这……",
+                npc: 701219,
+                next: 51171622,
+            },
+            {
+                id: 51171617,
+                content: "哎呀，你这么说实在是让人犯难……那看起来，这生意是谈不下去了。",
+                npc: 100001,
+                next: 51171623,
+            },
+            {
+                id: 51171622,
+                content: "至于数量部分，你们园子产出多少吿苍，我们就收多少，无论品质品相，一律照单全收！",
+                npc: 100001,
+                next: 51171623,
+            },
+            {
+                id: 51171623,
+                content: "（你正侃侃而谈之时，听见一道急促的脚步冲着你这闯了过来。）",
+                next: 51171624,
+            },
+            {
+                id: 51171624,
+                content: "咳咳，特使稍等，我有些别的事情需要处理，先走一步！",
+                npc: 100001,
+                next: 51171625,
+            },
+            {
+                id: 51171625,
+                content: "什？什么？",
+                npc: 701219,
+                next: 51171626,
+            },
+            {
+                id: 51171626,
+                content: "敢问阁下可是氤园来使？",
+                next: 51171627,
+            },
+            {
+                id: 51171627,
+                content: "咦？我？你？{性别:他|她}？",
+                npc: 701219,
+                next: 51171628,
+            },
+            {
+                id: 51171628,
+                content: "（快跑吧！被抓个现行可就完蛋了！）",
+            },
+        ],
+    },
+    {
+        id: 701220,
+        name: "时川",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51171701,
+                content: "今日怎得是你来奉香，你哥又回烟津渡了？",
+                npc: 701220,
+                next: 51171702,
+            },
+            {
+                id: 51171702,
+                content: "别和我提他，说了就来气，他满脑子都钻到钱眼子里去了！",
+                npc: 701262,
+                next: 51171703,
+            },
+            {
+                id: 51171703,
+                content: "前两天才回的家，阿娘劝他多留些日子，他敷衍着没说何时走，我们都以为他多少要过完奉香大典，谁想到？！",
+                npc: 701262,
+                next: 51171704,
+            },
+            {
+                id: 51171704,
+                content: "呵呵~他毕竟是做生意的，有些风吹草动，回家了也很正常，好啦~",
+                npc: 701220,
+                next: 51171705,
+            },
+            {
+                id: 51171705,
+                content: "喏，这是今日的香，奉完早些回家吧~",
+                npc: 701220,
+            },
+            {
+                id: 51171707,
+                content: "咦？你是来奉香的居民吗？唔……不对，你，不是皓京之人吧？",
+                npc: 701220,
+                options: [
+                    {
+                        id: 51171708,
+                        content: "你怎么看出来的？",
+                        next: 51171709,
+                    },
+                    {
+                        id: 51171710,
+                        content: "不是就不能奉香吗？",
+                        next: 51171711,
+                    },
+                ],
+            },
+            {
+                id: 51171709,
+                content: "不是看出来的，是闻出来的，你身上，没有香味。",
+                npc: 701220,
+                next: 51171712,
+            },
+            {
+                id: 51171711,
+                content: "绝无此意，龙君会欢迎每个心存善根之人前来奉香。",
+                npc: 701220,
+                next: 51171712,
+            },
+            {
+                id: 51171712,
+                content: "一般来祀烟阁进行日奉的多半都是皓京本地居民，他们都会在泉通阁登记名籍之时，由香官施术，从而沾染上特殊的香气。",
+                npc: 701220,
+                next: 51171713,
+            },
+            {
+                id: 51171713,
+                content: "故而你来时，我并未分辨出这种香，所以就认出来了。",
+                npc: 701220,
+                options: [
+                    {
+                        id: 51171714,
+                        content: "你说的施术是什么术？",
+                        next: 51171715,
+                    },
+                ],
+            },
+            {
+                id: 51171715,
+                content: "自然是每位香官入门之时都会修习的分香之术。",
+                npc: 701220,
+                next: 51171716,
+            },
+            {
+                id: 51171716,
+                content:
+                    "较为基础的分香术只是一些简单的区分香料之间的区别，再进阶一些的便能通过香料为对方印下“印记”，但凡修习分香术的有龙氏，都能辨认出来这种印记。",
+                npc: 701220,
+                next: 51171717,
+            },
+            {
+                id: 51171717,
+                content: "唔……也有例外，有些有龙氏天赋异禀，即使未学习分香术，对这种味道也有所感知，只是会觉得说不清道不明的感觉。",
+                npc: 701220,
+                options: [
+                    {
+                        id: 51171718,
+                        content: "有点意思，分香术再往后修炼呢？",
+                        next: 51171719,
+                    },
+                ],
+            },
+            {
+                id: 51171719,
+                content: "那就多啦，什么引香入体，强化身躯，或者以香炼魂，这些东西在我们悬衡派内部的分支有许多。",
+                npc: 701220,
+                next: 51171720,
+            },
+            {
+                id: 51171720,
+                content:
+                    "但说白了，这也并非是人人都有机会能接触的，大多数天赋异禀者都被龙君选为了应天尉，至于我们，通过勤加练习，也能成为服务百姓的好香官。",
+                npc: 701220,
+                options: [
+                    {
+                        id: 51171721,
+                        content: "那我还能奉香吗？",
+                        next: 51171722,
+                    },
+                ],
+            },
+            {
+                id: 51171722,
+                content: "自然，只是游客的奉香品相和居民不一样，如果你想长期居住在皓京，最好还是去泉通阁登记一下。",
+                npc: 701220,
+                next: 51171723,
+            },
+            {
+                id: 51171723,
+                content: "毕竟，奉香的品相直接决定了你在华胥能受到的龙君庇佑程度，还是相当重要的。",
+                npc: 701220,
+                next: 51171724,
+            },
+            {
+                id: 51171724,
+                content: "喏，你的香给你，愿你善根常驻。",
+                npc: 701220,
+            },
+        ],
+    },
+    {
+        id: 701221,
+        name: "方寻",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51171801,
+                content: "伏惟上苍垂佑，神君护持，愿家父身体健康，百病不侵。",
+                npc: 701221,
+                next: 51171802,
+            },
+            {
+                id: 51171802,
+                content: "咳……唔……惟愿神君庇佑，助家父早日康复，脱离苦海，我愿以命抵命……以……咳咳！",
+                npc: 701221,
+                options: [
+                    {
+                        id: 51171803,
+                        content: "你还好吧？",
+                        next: 51171804,
+                    },
+                ],
+            },
+            {
+                id: 51171804,
+                content: "你……咳咳！你是什么人？",
+                npc: 701221,
+                options: [
+                    {
+                        id: 51171805,
+                        content: "以命抵命这种话还是不要随便说吧。",
+                        next: 51171806,
+                    },
+                ],
+            },
+            {
+                id: 51171806,
+                content: "你……我明白你的意思，是我对家父的病情过于焦急，遂而口出妄言……咳咳！",
+                npc: 701221,
+                next: 51171807,
+            },
+            {
+                id: 51171807,
+                content: "父亲已经在家下不了床了，我只能来此奉香，以求龙君怜悯。",
+                npc: 701221,
+                options: [
+                    {
+                        id: 51171808,
+                        content: "你不是更应该在家照顾他吗？",
+                        next: 51171809,
+                    },
+                ],
+            },
+            {
+                id: 51171809,
+                content: "咳咳……你也听到了，我这两天染上风寒，邪气入体，我怕长期待在家中又染上父亲，他本就羸弱……",
+                npc: 701221,
+                next: 51171810,
+            },
+            {
+                id: 51171810,
+                content: "等会，我便要去泽生阁取药，先治好我这咳疾，我再回家好好照料我父。",
+                npc: 701221,
+                next: 51171811,
+            },
+            {
+                id: 51171811,
+                content: "多谢你的关心，陌生人，神君也一定会庇佑于你的。",
+                npc: 701221,
+            },
+        ],
+    },
+    {
+        id: 701222,
+        name: "噌噌皎皎",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51171901,
+                content: "唔……我的愿望是，长高一点，也不用太高，像一个正常的抟土氏就好。",
+                npc: 701222,
+                next: 51171902,
+            },
+            {
+                id: 51171902,
+                content: "（当你靠近这只皎皎的时候，敏锐地察觉到了她身上有些与其他皎皎不同之处。）",
+                next: 51171903,
+            },
+            {
+                id: 51171903,
+                content: "你你你，看什么看？是不是垂涎于本皎皎的美貌？当然，我的确与其他皎皎不一样，你被我所吸引也是理所应当的事情~",
+                npc: 701222,
+                options: [
+                    {
+                        id: 51171904,
+                        content: "（继续观察她的不同之处。）",
+                        next: 51171905,
+                    },
+                    {
+                        id: 51171910,
+                        content: "没感觉你有什么不一样的地方。",
+                        next: 51171911,
+                    },
+                ],
+            },
+            {
+                id: 51171905,
+                content: "（你盯着她上下打量，试图通过自己的分辨能力找出她的独特之处。）",
+                next: 51171906,
+            },
+            {
+                id: 51171911,
+                content: "什么？！你，你没感觉到吗？我比其他皎皎都高啊！你看，她们各个都只长到你的腰间，我，我可以超过你的肚脐呢！",
+                npc: 701222,
+                next: 51171912,
+            },
+            {
+                id: 51171906,
+                content: "你……你别看了……你的眼神像小刀子一样，看得我都有些害怕了……",
+                npc: 701222,
+                next: 51171907,
+            },
+            {
+                id: 51171912,
+                content: "这么一说……好像是这样哦。",
+                npc: 100001,
+                next: 51171913,
+            },
+            {
+                id: 51171907,
+                content: "（找出来了！这只皎皎，比别的皎皎显得高些呢！）",
+                next: 51171908,
+            },
+            {
+                id: 51171913,
+                content: "嘿嘿~不枉我垫了三层厚厚的鞋垫子，果然一眼就能让人看出我的独特之处！",
+                npc: 701222,
+                options: [
+                    {
+                        id: 51171914,
+                        content: "所以你刚才许的愿望就是关于身高？",
+                        next: 51171915,
+                    },
+                ],
+            },
+            {
+                id: 51171908,
+                content: "你好像……更高一些？",
+                npc: 100001,
+                next: 51171909,
+            },
+            {
+                id: 51171915,
+                content: "是啦……我每天都会来这里奉香，希望龙君能够看在我足够虔诚的份上，破例让我稍微长高一丢丢~",
+                npc: 701222,
+                options: [
+                    {
+                        id: 51171916,
+                        content: "可是这种事情靠祈祷有用吗？",
+                        next: 51171917,
+                    },
+                    {
+                        id: 51171918,
+                        content: "你为什么想长高呢？",
+                        next: 51171919,
+                    },
+                ],
+            },
+            {
+                id: 51171909,
+                content: "这，这都被你发现了！我偷偷垫了三层鞋垫子的事情……我我我，你……你从哪里看出来的？",
+                npc: 701222,
+                options: [
+                    {
+                        id: 51171914,
+                        content: "所以你刚才许的愿望就是关于身高？",
+                        next: 51171915,
+                    },
+                ],
+            },
+            {
+                id: 51171917,
+                content: "哼。你这家伙好没意思，有没有用总也得试过了再说吧……",
+                npc: 701222,
+                next: 51171921,
+            },
+            {
+                id: 51171919,
+                content: "唔……我只是觉得我们皎皎一族都太没有意思了，就是说，大家好像全都长得一模一样，一样的头，一样的身子。",
+                npc: 701222,
+                next: 51171920,
+            },
+            {
+                id: 51171921,
+                content: "不过现在看起来，还是很有用的嘛~你看你这不就是在人群之中一眼发现了我，然后和我搭话了嘛？",
+                npc: 701222,
+                next: 51171922,
+            },
+            {
+                id: 51171920,
+                content: "我想让自己更独特一些，至少可以和其他皎皎拉开一些差距，但也不要是穿着打扮的那种，而是更更更独特一些的。",
+                npc: 701222,
+                next: 51171921,
+            },
+            {
+                id: 51171922,
+                content: "是被我的魅力折服了吧！",
+                npc: 701222,
+                next: 51171923,
+            },
+            {
+                id: 51171923,
+                content: "（怎么和白那家伙一样自恋……）",
+                options: [
+                    {
+                        id: 51171924,
+                        content: "你说得对。",
+                        next: 51171925,
+                    },
+                ],
+            },
+            {
+                id: 51171925,
+                content: "嘿嘿~增高计划卓有成效嘛，我这就回家多找些垫子垫上~",
+                npc: 701222,
+            },
+        ],
+    },
+    {
+        id: 701223,
+        name: "章景曜",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51172001,
+                content: "往年到了奉香大典期间，总是需要许多帮工入阁，今年怎得没动静了？",
+                npc: 701223,
+                next: 51172002,
+            },
+            {
+                id: 51172002,
+                content: "您不知道？前些日子听说阁内出了事故，引来了几只玄色狴犴。",
+                next: 51172003,
+            },
+            {
+                id: 51172003,
+                content: "哦？那动静可确实不小了，我怎么没听说过？后来如何解决的？",
+                npc: 701223,
+                next: 51172004,
+            },
+            {
+                id: 51172004,
+                content: "似乎是两名当时招进去的帮工相助，打跑了狴犴，才没让事态扩张。",
+                next: 51172005,
+            },
+            {
+                id: 51172005,
+                content: "诶呀，每年奉香大典之前便是这样慌慌张张的，早说了要出些事，这回他们可该长记性啦……",
+                npc: 701223,
+                next: 51172006,
+            },
+            {
+                id: 51172006,
+                content: "就是不知道是哪里找来的能人异士，居然能打跑那凶神恶煞的玄色狴犴？如果有机会，真想见识一下呀。",
+                npc: 701223,
+            },
+        ],
+    },
+    {
+        id: 701224,
+        name: "清岚",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51172101,
+                content: "全城的香炉都要仔细查验香料储备，尤其是中心广场水上的那个炉子，务必不能有疏漏。",
+                npc: 701224,
+                next: 51172102,
+            },
+            {
+                id: 51172102,
+                content: "准备好了，芬氲测量仪也从匠矩阁借来，分发给今日值勤的香官们。",
+                next: 51172103,
+            },
+            {
+                id: 51172103,
+                content: "你做事一向妥当，那便去吧。",
+                npc: 701224,
+            },
+            {
+                id: 51172105,
+                content: "……定要仔细筹划，绝不可再复曾经的灾难了。",
+                npc: 701224,
+                options: [
+                    {
+                        id: 51172106,
+                        content: "曾经的……灾难？",
+                        next: 51172107,
+                    },
+                ],
+            },
+            {
+                id: 51172107,
+                content: "哦？你……你不是皓京之人吧，如果是的话，不会不知道这件事的。",
+                npc: 701224,
+                next: 51172108,
+            },
+            {
+                id: 51172108,
+                content: "不过，由于一些原因，我不能和你详细说明，不过简单提一嘴还是可以的。",
+                npc: 701224,
+                next: 51172109,
+            },
+            {
+                id: 51172109,
+                content: "简单来说就是，一名不法之徒趁着所有人事务繁忙之际，将皓京最重要、长明百年之久的香炉，浇灭了。",
+                npc: 701224,
+                next: 51172110,
+            },
+            {
+                id: 51172110,
+                content: "这让皓京大片区域芬氲度大乱，造成了许多祸事。",
+                npc: 701224,
+                next: 51172111,
+            },
+            {
+                id: 51172111,
+                content: "虽说后面有应天尉出手解决了，但……还是不要继续说下去了吧。",
+                npc: 701224,
+                options: [
+                    {
+                        id: 51172112,
+                        content: "芬氲度是什么？",
+                        next: 51172113,
+                    },
+                ],
+            },
+            {
+                id: 51172113,
+                content: "啊呀，你这话一问，我看你甚至也不是华胥之人咯？好吧好吧，我仔细和你解释解释。",
+                npc: 701224,
+                next: 51172114,
+            },
+            {
+                id: 51172114,
+                content: "你知道华胥是以空气中无处不在的香来维系大风九章的运作的吧？芬氲度就可以理解为，华胥空气之中的的香气含量。",
+                npc: 701224,
+                next: 51172115,
+            },
+            {
+                id: 51172115,
+                content: "只有在芬氲度到达一定数值的情况下，大风九章的运作才能不受外界因素影响，更好地庇佑华胥的子民。",
+                npc: 701224,
+                options: [
+                    {
+                        id: 51172116,
+                        content: "怎么才能知道芬氲度的数值？",
+                        next: 51172117,
+                    },
+                    {
+                        id: 51172120,
+                        content: "外界因素指的是什么？",
+                        next: 51172121,
+                    },
+                ],
+            },
+            {
+                id: 51172117,
+                content: "需要用一种专门的器材，我们叫它芬氲测量仪，那种东西小巧的很，大概只有两枚铜钱大？",
+                npc: 701224,
+                next: 51172118,
+            },
+            {
+                id: 51172121,
+                content: "很多种，最常见的是下雨或天晴，下雨天芬氲度会降低，天晴则会有一定程度的上涨。",
+                npc: 701224,
+                next: 51172122,
+            },
+            {
+                id: 51172118,
+                content: "因为制作工序十分复杂，所需材料也极其昂贵，所以一般只有当日值勤的香官才可去申领使用资格。",
+                npc: 701224,
+                next: 51172119,
+            },
+            {
+                id: 51172122,
+                content:
+                    "其次应该是地区香炉有无正常维护，续燃沉月香。以前还会有疏漏，自从匠矩阁研制出了区域性芬氲检测仪后，这样的情况就不再出现了。",
+                npc: 701224,
+                options: [
+                    {
+                        id: 51172123,
+                        content: "谢谢，我了解了。",
+                        next: 51172124,
+                    },
+                ],
+            },
+            {
+                id: 51172119,
+                content: "刚刚你听到了吧，因为最近是奉香大典，阁内更加注意芬氲度问题，所以那新人就领了我的令去申领测量仪了。",
+                npc: 701224,
+                options: [
+                    {
+                        id: 51172123,
+                        content: "谢谢，我了解了。",
+                        next: 51172124,
+                    },
+                ],
+            },
+            {
+                id: 51172124,
+                content: "不客气，我也要去忙自己的事情了，在华胥玩得开心~",
+                npc: 701224,
+            },
+        ],
+    },
+    {
+        id: 701225,
+        name: "林甫",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51172201,
+                content: "难不成真是我思维迟缓，想不出新颖独特的香方了？",
+                npc: 701225,
+                next: 51172202,
+            },
+            {
+                id: 51172202,
+                content: "不服气不行啊，老了，这脑子是不比那小辈灵光了。",
+                npc: 701225,
+                next: 51172203,
+            },
+            {
+                id: 51172203,
+                content:
+                    "你闻闻，这人家制成的香品，初闻是灯伞花那冲击感十足的清冽香气，再品又有一丝蜜般的甜感泛上鼻头，尾调则是厚重的白木之香。",
+                npc: 701225,
+                options: [
+                    {
+                        id: 51172204,
+                        content: "（凑上去闻闻。）",
+                        next: 51172205,
+                    },
+                ],
+            },
+            {
+                id: 51172205,
+                content: "（好刺鼻的味道，你立刻远离了他，试图通过呼吸新鲜空气来恢复神智，然而却在一呼一吸间，感受到了一种甜蜜的味道。）",
+                next: 51172206,
+            },
+            {
+                id: 51172206,
+                content: "（正在你试图回味之时，那香味却消失了，逐渐转化为一种烧柴的气味，说不上好闻，但也没有开始那么刺鼻。)",
+                next: 51172207,
+            },
+            {
+                id: 51172207,
+                content: "怎么样？这位朋友，你也觉得此香很独特吧？当真是无愧于它的香名啊。",
+                npc: 701225,
+                options: [
+                    {
+                        id: 51172208,
+                        content: "它叫什么？",
+                        next: 51172209,
+                    },
+                ],
+            },
+            {
+                id: 51172209,
+                content: "此香名为……虞泉路。",
+                npc: 701225,
+                next: 51172210,
+            },
+            {
+                id: 51172210,
+                content: "……",
+                npc: 100001,
+                next: 51172211,
+            },
+            {
+                id: 51172211,
+                content:
+                    "你不觉得很适合它吗？虞泉，华胥传说中的亡魂归处，听到这名字的瞬间便会陷入惊诧与恐惧，一如初闻灯伞花时的那种刺激感。",
+                npc: 701225,
+                next: 51172212,
+            },
+            {
+                id: 51172212,
+                content: "但转而，你开始回忆起你生的点滴，想念起曾经的故人，于是心头又泛上一丝甜蜜的哀伤。",
+                npc: 701225,
+                next: 51172213,
+            },
+            {
+                id: 51172213,
+                content:
+                    "最终，你意识到了，无论生时如何，现在的你已经无法再与一切产生纠葛，那种内心的平静，就如同白木的寂寥感一样，回味无穷……",
+                npc: 701225,
+                options: [
+                    {
+                        id: 51172214,
+                        content: "我没这么多感触。",
+                        next: 51172215,
+                    },
+                    {
+                        id: 51172216,
+                        content: "说的很不错。",
+                        next: 51172217,
+                    },
+                ],
+            },
+            {
+                id: 51172215,
+                content: "啊……这也是正常的，我一开始也并不理解，但在我仔细研究这香品长达一月后，我逐渐摸清楚了合香者的心路历程。",
+                npc: 701225,
+                next: 51172218,
+            },
+            {
+                id: 51172217,
+                content:
+                    "啊……我一开始其实并不理解为什么要起一个这么可怖的名字，但在我仔细研究这香方长达一月后，我逐渐摸清楚了合香者的心路历程。",
+                npc: 701225,
+                next: 51172218,
+            },
+            {
+                id: 51172218,
+                content: "那位合香者，一定对死亡有着极深的见解和思考吧。",
+                npc: 701225,
+                next: 51172219,
+            },
+            {
+                id: 51172219,
+                content: "我有时在想，合香其实就是把人生的经历和感悟汇聚在香方之内，用香气去传达自己的想法。",
+                npc: 701225,
+                next: 51172220,
+            },
+            {
+                id: 51172220,
+                content:
+                    "所以我们这些身居高阁不沾尘土的香官们，无论如何也无法合出情感充沛的，独具想象力的香方，只能看着那些天才的作品连连叹息。",
+                npc: 701225,
+                next: 51172221,
+            },
+            {
+                id: 51172221,
+                content: "或许，我们还是做好自己的事情吧，比如将每一根沉月香做到最极致，不负太皓神君之望。",
+                npc: 701225,
+            },
+        ],
+    },
+    {
+        id: 701226,
+        name: "明哲",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51172301,
+                content: "不同的香方自然作用也不相同，你初来乍到，不了解也很正常。",
+                npc: 701226,
+                next: 51172302,
+            },
+            {
+                id: 51172302,
+                content: "合香官大人，我只是不明白，分香术在制香过程中起到的作用是什么？",
+                next: 51172303,
+            },
+            {
+                id: 51172303,
+                content: "我把《香籍》翻了好几遍，怎么看都和民间制香流程并无区别。",
+                next: 51172304,
+            },
+            {
+                id: 51172304,
+                content: "那是因为你对于分香术的使用尚未熟练，祀烟阁不会给新人展示其他香方。",
+                npc: 701226,
+                next: 51172305,
+            },
+            {
+                id: 51172305,
+                content: "分香术的妙用可不是一句话就可以说完的。我给你举个例子吧，你知道月蘅香这种香料吗？月蘅香的香性，你还记得吗？",
+                npc: 701226,
+                next: 51172306,
+            },
+            {
+                id: 51172306,
+                content:
+                    "月蘅……喜温耐旱，花萼入药，外覆绒毛，入香需摘冠洗净，用镊子细细摘除绒毛。可美容养颜，闻之精神清明，亦有加强脑识之效。",
+                next: 51172307,
+            },
+            {
+                id: 51172307,
+                content: "哈哈，不错，那我再问你，你用月蘅香制成香过吗？",
+                npc: 701226,
+                next: 51172308,
+            },
+            {
+                id: 51172308,
+                content: "有啊，之前有段时间，我整日都在合以此香为基香的香方，整日闻那个味道，搞得我头晕脑胀的，哪里有什么加强脑识的效果！",
+                next: 51172309,
+            },
+            {
+                id: 51172309,
+                content: "所谓的香性并非普通合香能做到，而是只有用分香术才能激发出香料中的独特效果，你还觉得分香术没用吗？",
+                npc: 701226,
+                next: 51172310,
+            },
+            {
+                id: 51172310,
+                content: "什么？大人，你的意思是，分香术不是用以区分香料，而是将香料中的香性更大程度挥发出来的术法？",
+                next: 51172311,
+            },
+            {
+                id: 51172311,
+                content: "分香术，辩香以入门，只有在你熟习每种香料的习性后，才能更好地将它们的特殊成效合为一体，即为合香。",
+                npc: 701226,
+                next: 51172312,
+            },
+            {
+                id: 51172312,
+                content: "听起来很神奇……可是合香官大人，为什么我现在不能学习呢？我觉得我已经很了解香料了。",
+                next: 51172313,
+            },
+            {
+                id: 51172313,
+                content: "时候未到。继续学个几年，等你在繁杂的香料之中，突然窥见了属于它们的那一缕香气，你就入门啦~",
+                npc: 701226,
+                next: 51172314,
+            },
+            {
+                id: 51172314,
+                content: "什么？！那才刚刚入门？",
+                next: 51172315,
+            },
+            {
+                id: 51172315,
+                content:
+                    "那不然呢？让你们这些摸不清头脑的小脑袋瓜去胡乱合香，闹出那种，把天南星的香性堆叠到极致，一点起来整个祀烟阁的人全都睡着了的笑话？",
+                npc: 701226,
+                next: 51172316,
+            },
+            {
+                id: 51172316,
+                content: "你呀，老老实实地，好好看，好好学！",
+                npc: 701226,
+            },
+        ],
+    },
+    {
+        id: 701227,
+        name: "周晓棠",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51172401,
+                content: "听说了吗？祀香阁今年招了一位特殊香官，据说是……一位皎皎之民！",
+                npc: 701227,
+                next: 51172402,
+            },
+            {
+                id: 51172402,
+                content: "你莫要跟我开玩笑了，皎皎当香官？她们那矮个子，够得到香炉的边缘吗？",
+                next: 51172403,
+            },
+            {
+                id: 51172403,
+                content:
+                    "我没那个闲情逸致和你开玩笑。只是打听来的消息便是如此，说是有位皎皎热爱香料，苦心钻研，考了三年，终于得了阁内香官的青睐，招了进去。",
+                npc: 701227,
+                next: 51172404,
+            },
+            {
+                id: 51172404,
+                content: "噗~皎皎进阁能做什么？想来也只是香官们想搞个大新闻罢了。",
+                options: [
+                    {
+                        id: 51172405,
+                        content: "你也不能这么说人家吧。",
+                        next: 51172406,
+                    },
+                ],
+            },
+            {
+                id: 51172406,
+                content: "谁？我说谁了？",
+                options: [
+                    {
+                        id: 51172407,
+                        content: "那位当了香官的皎皎。",
+                        next: 51172408,
+                    },
+                    {
+                        id: 51172409,
+                        content: "那些招皎皎进去的香官。",
+                        next: 51172410,
+                    },
+                    {
+                        id: 51172411,
+                        content: "两者都有。",
+                        next: 51172412,
+                    },
+                ],
+            },
+            {
+                id: 51172408,
+                content: "你也不了解事情的全貌，就随便将一位可能是努力考上香官的皎皎打成了无能之辈，这样造谣对她不好吧？",
+                npc: 100001,
+                next: 51172414,
+            },
+            {
+                id: 51172410,
+                content: "你也不了解事情的全貌，就随意评判那些阁内的香官是为了博取名声做面子工作，也有些太过于看不起你们皓京的官员了吧？",
+                npc: 100001,
+                next: 51172414,
+            },
+            {
+                id: 51172412,
+                content: "你并不了解事情的全貌，只听只言片语就断定那位皎皎是无能之辈，还肆意评判你们华胥的官员都是心存私心办事。",
+                npc: 100001,
+                next: 51172413,
+            },
+            {
+                id: 51172414,
+                content: "我觉得这位{性别:公子|姑娘}说得对，你的话稍微有些言过了。",
+                npc: 701227,
+                next: 51172415,
+            },
+            {
+                id: 51172413,
+                content: "这样的想法未免有些失了偏颇吧？",
+                npc: 100001,
+                next: 51172414,
+            },
+            {
+                id: 51172415,
+                content: "我……我也只是……",
+                next: 51172416,
+            },
+            {
+                id: 51172416,
+                content: "好吧……是我错了，是我一时对皎皎一族有些过于刻板的印象，导致连带着对祀烟阁的香官们都口出妄言。",
+                next: 51172417,
+            },
+            {
+                id: 51172417,
+                content: "我会去打听清楚的，在得知全貌之前，我不会再妄自评判了。",
+                options: [
+                    {
+                        id: 51172418,
+                        content: "知错就改的下一句是什么来着？",
+                        next: 51172419,
+                    },
+                    {
+                        id: 51172420,
+                        content: "你知道就好。",
+                        next: 51172421,
+                    },
+                ],
+            },
+            {
+                id: 51172419,
+                content: "善莫大焉，善莫大焉~",
+                npc: 701227,
+            },
+            {
+                id: 51172421,
+                content: "好啦，只是在分享一个听来的趣事而已，倒也不必如此揪着不放。",
+                npc: 701227,
+            },
+        ],
+    },
+    {
+        id: 701228,
+        name: "陈岐",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51172501,
+                content: "皎皎之民？！那大头鱼一样的家伙，如何能担任香官一职？",
+                npc: 701228,
+                next: 51172502,
+            },
+            {
+                id: 51172502,
+                content: "你这见识短浅的庸夫，皎皎怎么啦？皎皎如何不能当香官？",
+                next: 51172503,
+            },
+            {
+                id: 51172503,
+                content: "她们分得清那上千种香料吗？那短小的手指，怕是在阁内打杂都勉强。",
+                npc: 701228,
+                next: 51172504,
+            },
+            {
+                id: 51172504,
+                content: "那名皎皎啊，很早以前就在博山香行帮工，去过的客人无一不赞其对香料极为了解，甚至比起祀烟阁的香官也不为过。",
+                next: 51172505,
+            },
+            {
+                id: 51172505,
+                content: "客人们看她可爱，当孩子一样顺口夸了几句罢了，难不成还能当真？",
+                npc: 701228,
+                next: 51172506,
+            },
+            {
+                id: 51172506,
+                content: "香官是大人做的事，自然要以大人的标准去要求，皎皎之民难当大任，我觉得这事，不成。",
+                npc: 701228,
+                next: 51172507,
+            },
+            {
+                id: 51172507,
+                content: "成不成也不是你说了算，你这顽固，我不与你分说了！",
+            },
+        ],
+    },
+    {
+        id: 701229,
+        name: "伯渊",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51172601,
+                content: "去泉通阁问过了吗？奉香大典前事务繁杂，那批拨款要早点讨过来才好做事。",
+                npc: 701229,
+                next: 51172602,
+            },
+            {
+                id: 51172602,
+                content: "自皓京壮大之后，便再难见一些需要天梁司上下出动的大型基建项目，也就是临了过节，才显得人气浓厚些。",
+                npc: 701229,
+                next: 51172603,
+            },
+            {
+                id: 51172603,
+                content: "伯渊叔，这次群英试要比往届规模更大，天禄司之前来商榷时，便说咱们今年可以额外多要些预算。",
+                next: 51172604,
+            },
+            {
+                id: 51172604,
+                content: "可是我看了咱们送过去的文件，那分明是一点余量也没有……伯渊叔分明都说了，大家聚在一起的机会难得，为何不……",
+                next: 51172605,
+            },
+            {
+                id: 51172605,
+                content: "你在盘算什么鬼点子呢？我们机枢派的匠人，行得正坐得直，不会因为这点蝇头小利就败坏自己的人品！",
+                npc: 701229,
+                next: 51172606,
+            },
+            {
+                id: 51172606,
+                content: "我也没说是要做什么啊，我只是想着，要不要再额外加上一笔，就当给师傅们买些酒水，或是慰问品之类的。",
+                next: 51172607,
+            },
+            {
+                id: 51172607,
+                content: "你这……尽胡说八道，天禄司的钱是为华胥百姓牟利的，不是用来给咱们享受的！",
+                npc: 701229,
+                next: 51172608,
+            },
+            {
+                id: 51172608,
+                content:
+                    "咱们天梁司虽然不怎么阔绰，但是供大家吃喝的开销还是有的，你去和大家说，奉香大典后，我把八珍楼包下来，咱们好好吃好好喝！",
+                npc: 701229,
+                next: 51172609,
+            },
+            {
+                id: 51172609,
+                content: "真的啊？！太好了，伯渊叔大义！我这就去告诉大家这个好消息！",
+            },
+        ],
+    },
+    {
+        id: 701230,
+        name: "芷柔",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51172701,
+                content: "师傅，我就是想来问问，这炉灶为何总是出问题，我这几番叨扰，自己都有点过意不去了。",
+                npc: 701230,
+                next: 51172702,
+            },
+            {
+                id: 51172702,
+                content: "没什么过意不去的。出了问题就得修，这都是分内之事。",
+                next: 51172703,
+            },
+            {
+                id: 51172703,
+                content: "你这炉子……是不是不间断使用，过热后又沾上了凉水？",
+                next: 51172704,
+            },
+            {
+                id: 51172704,
+                content: "我……没印象了，阁里忙起来的时候总是互相把器皿借来借去的，每种香料的处理过程也不一样，许是谁清理的时候沾上了？",
+                npc: 701230,
+                next: 51172705,
+            },
+            {
+                id: 51172705,
+                content: "看着是这样，我给你再上一层隔温涂层，回去后应该就能继续运转了，不过我和你说的问题你还是要重视。",
+                next: 51172706,
+            },
+            {
+                id: 51172706,
+                content: "是，我都晓得了，还是再和师傅你说句抱歉……",
+                npc: 701230,
+                next: 51172707,
+            },
+            {
+                id: 51172707,
+                content: "还客气呢，如果你真的感觉很抱歉，那……头伸过来……",
+                next: 51172708,
+            },
+            {
+                id: 51172708,
+                content: "头？什么意思……嗷！好痛！师傅，你怎么弹我脑瓜子呢！",
+                npc: 701230,
+                next: 51172709,
+            },
+            {
+                id: 51172709,
+                content: "哈哈，你不是很不好意思嘛，我弹你个脑瓜崩让你长长教训~",
+                next: 51172710,
+            },
+            {
+                id: 51172710,
+                content: "师傅，好痛！",
+                npc: 701230,
+                next: 51172711,
+            },
+            {
+                id: 51172711,
+                content: "痛，就对啦。现在，咱俩扯平了，下次还有问题就直接过来，我再赏你一个脑瓜崩。",
+            },
+        ],
+    },
+    {
+        id: 701231,
+        name: "宋卿卿",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51174801,
+                content: "来奉香也有这么多嘁嘁喳喳嘟嘟囔囔，要么就是嘀嘀咕咕哼哼唧唧，这要我们如何兢兢业业干活？",
+                npc: 701231,
+                next: 51174802,
+            },
+            {
+                id: 51174802,
+                content: "嗨呀嗨呀，我在这里听你整日报报怨怨叽叽嘎嘎，脑子也要嗡嗡鸣鸣崩崩溃溃了呀……",
+                next: 51174803,
+            },
+            {
+                id: 51174803,
+                content: "不许学我说话！",
+                npc: 701231,
+            },
+        ],
+    },
+    {
+        id: 701232,
+        name: "张敬之",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51174901,
+                content: "你这关节做的根本不行！偶人要做抬手、转腰的动作，反复受力下来，榫头迟早开裂！",
+                npc: 701232,
+                next: 51174902,
+            },
+            {
+                id: 51174902,
+                content: "一味求牢固怎么能行？你装的黄铜转轴笨重得像块铁疙瘩，装上去木偶的腰都挺不直，动作僵得像个石人，如何能活动自如？",
+                npc: 701263,
+                next: 51174903,
+            },
+            {
+                id: 51174903,
+                content: "拉倒吧，你这偶人唱上半天戏，恐怕早就散成一地零件了。",
+                npc: 701232,
+                next: 51174904,
+            },
+            {
+                id: 51174904,
+                content: "弓兄，不是我说，咱们入阁第一天，师傅就教了，做咱们这活，实用性才是第一，这才没几年，你就忘了个一干二净。",
+                npc: 701232,
+                next: 51174905,
+            },
+            {
+                id: 51174905,
+                content:
+                    "你还拿师傅压我，师傅也说过，若是一项技艺到了停滞的临界点，就该去思考如何寻找寻找解限之法，哪怕剑走偏锋，也应迎难而上。",
+                npc: 701263,
+                next: 51174906,
+            },
+            {
+                id: 51174906,
+                content: "我和你说不通，我们让旁人来评评理！",
+                npc: 701232,
+                next: 51174907,
+            },
+            {
+                id: 51174907,
+                content: "评就评，这！这正好有个听咱们说了半天的，你来！",
+                npc: 701263,
+                next: 51174908,
+            },
+            {
+                id: 51174908,
+                content: "（争吵到面红耳赤的两人齐齐看向你。）",
+                options: [
+                    {
+                        id: 51174909,
+                        content: "……大家好？",
+                        next: 51174911,
+                    },
+                    {
+                        id: 51174910,
+                        content: "哟！",
+                        next: 51174911,
+                    },
+                ],
+            },
+            {
+                id: 51174911,
+                content: "是这样的，这位{性别:兄台|姑娘}，我们二人最近正在帮西市街区的一个戏台班子定制表演用的偶人。",
+                npc: 701232,
+                next: 51174912,
+            },
+            {
+                id: 51174912,
+                content: "可你也听到了，在偶人关节处该用什么零件上，我们的意见有些分歧。",
+                npc: 701232,
+                next: 51174913,
+            },
+            {
+                id: 51174913,
+                content: "他觉得要用黄铜转轴钉上去，我觉得笨重，毕竟表演的偶人需要摆出许多动作，要是扭不过来该如何是好？",
+                npc: 701263,
+                next: 51174914,
+            },
+            {
+                id: 51174914,
+                content: "他觉得要用木头榫头做，可木头长期受力后必然会出现磨损，届时即使制作时吻合多么精确，用久了结构都会松垮。",
+                npc: 701232,
+                options: [
+                    {
+                        id: 51174915,
+                        content: "我支持弓兄的木头关节。",
+                        next: 51174916,
+                    },
+                    {
+                        id: 51174919,
+                        content: "我支持张兄的黄铜关节。",
+                        next: 51174920,
+                    },
+                    {
+                        id: 51174923,
+                        content: "我不知道。",
+                        next: 51174924,
+                    },
+                ],
+            },
+            {
+                id: 51174916,
+                content: "我觉得木头好些，毕竟是用来表演的，偶人动作太笨拙的话演出效果会受到影响。",
+                npc: 100001,
+                next: 51174917,
+            },
+            {
+                id: 51174920,
+                content: "我觉得黄铜好些，定制的偶人一般会用很久，要是散架了可不好办。",
+                npc: 100001,
+                next: 51174921,
+            },
+            {
+                id: 51174924,
+                content: "这是内行的事情，你问一个阁内的师傅比问我靠谱。",
+                npc: 100001,
+                next: 51174925,
+            },
+            {
+                id: 51174917,
+                content: "你听听？！大家都这么说，这事，就听我的！",
+                npc: 701263,
+                next: 51174918,
+            },
+            {
+                id: 51174921,
+                content: "哼！听到没有？这才是专业的建议！",
+                npc: 701232,
+                next: 51174922,
+            },
+            {
+                id: 51174925,
+                content: "这……这也确实，是我思虑不周，打扰您了。",
+                npc: 701232,
+            },
+            {
+                id: 51174918,
+                content: "来来来，我这就把我的偶人给他们送去，哈哈哈！",
+                npc: 701263,
+            },
+            {
+                id: 51174922,
+                content: "等他们来取货时，你就好好把你那偶人丢到一边，让我拿着去交差就好！",
+                npc: 701232,
+            },
+        ],
+    },
+    {
+        id: 701233,
+        name: "景铄",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51175001,
+                content: "你瞧瞧，这是咱们新研究的木头珍猪，上了发条后一下便能冲出十米，想学的话来机枢派报个名？",
+                npc: 701233,
+                next: 51175002,
+            },
+            {
+                id: 51175002,
+                content: "哼，这有什么用处？我爹早和我说过，你们匠矩阁干啥啥不行，搞破坏第一名。",
+                next: 51175003,
+            },
+            {
+                id: 51175003,
+                content: "这珍猪冲出去，撞到人怎么办？就算没撞到人，要是冲撞到了路边建筑摊位又该当如何？",
+                next: 51175004,
+            },
+            {
+                id: 51175004,
+                content:
+                    "你们这些木头疙瘩脑袋，为什么就不能学学对面的祀烟阁做做正经工作，一天到晚用这些木头块吸引我们这些小孩过来，然后又哄我们入派，真没意思！",
+                next: 51175005,
+            },
+            {
+                id: 51175005,
+                content: "你这孩子……怎么和长辈说话的呢！我一片好意都被当做驴肝肺了！",
+                npc: 701233,
+                next: 51175006,
+            },
+            {
+                id: 51175006,
+                content: "略~没用的大哥哥，我走了，你和木头块说话去吧！",
+                next: 51175007,
+            },
+            {
+                id: 51175007,
+                content: "（小孩一溜烟便跑了个没影，只剩你与匠人面面相觑。）",
+            },
+            {
+                id: 51175008,
+                content: "哈哈……让你……让你看了笑话了。",
+                npc: 701233,
+                options: [
+                    {
+                        id: 51175009,
+                        content: "匠矩阁已经名声至此了？",
+                        next: 51175011,
+                    },
+                    {
+                        id: 51175010,
+                        content: "这是什么独特的招新手段吗？",
+                        next: 51175011,
+                    },
+                ],
+            },
+            {
+                id: 51175011,
+                content: "……外面对咱们有些误解也是正常的，他们不晓得这些机关术的妙用，那也没办法嘛。",
+                npc: 701233,
+                next: 51175012,
+            },
+            {
+                id: 51175012,
+                content: "只能用些手段来吸引更多的孩子们学习，他们懂了其中的门道就不会再听信那些流言蜚语了。",
+                npc: 701233,
+                next: 51175013,
+            },
+            {
+                id: 51175013,
+                content:
+                    "等等……你看着年纪也不大，你对机关术有兴趣吗？要不要来咱们阁内，修学一番？虽然不能就此获得荣华富贵，但学一门手艺傍身也不赖嘛。",
+                npc: 701233,
+                options: [
+                    {
+                        id: 51175014,
+                        content: "我已经是公尚师傅的学徒了、",
+                        next: 51175015,
+                    },
+                ],
+            },
+            {
+                id: 51175015,
+                content:
+                    "哦！竟然是公尚师傅的爱徒！他自从去了烟津渡，信都不往皓京寄上一封。我还以为他找了哪个山沟沟做研究，沉浸在里面不出来了。",
+                npc: 701233,
+                next: 51175016,
+            },
+            {
+                id: 51175016,
+                content: "不过我看到你，也就放心了，看起来他还是没有忘记咱们机枢派的传承大任。你看起来是个聪明的孩子啊！",
+                npc: 701233,
+                options: [
+                    {
+                        id: 51175017,
+                        content: "他们为什么对你们的偏见这么深？",
+                        next: 51175018,
+                    },
+                ],
+            },
+            {
+                id: 51175018,
+                content:
+                    "咳咳，这要说起来，有些历史悠久的上古原因……有些重型机傀带有攻击性，被大风九章禁止研究了，这也进一步加深了人们的偏见。",
+                npc: 701233,
+                next: 51175019,
+            },
+            {
+                id: 51175019,
+                content:
+                    "不过其实咱们也做了很多事呀，比如华胥境内的香炉，都是咱们特制的，还有他们那些香官用的制香器材，包括织星客需要用到的种种用具。",
+                npc: 701233,
+                next: 51175020,
+            },
+            {
+                id: 51175020,
+                content: "所以华胥还是离不开机枢派，离不开匠矩阁和天梁司的，你说是不是？",
+                npc: 701233,
+                options: [
+                    {
+                        id: 51175021,
+                        content: "是。",
+                        next: 51175022,
+                    },
+                    {
+                        id: 51175024,
+                        content: "不见得。",
+                        next: 51175025,
+                    },
+                ],
+            },
+            {
+                id: 51175022,
+                content: "所以啊，我相信，只要我竭尽全力去传扬机枢派的衣钵，终有一天大家会对我们的态度改变的。",
+                npc: 701233,
+                next: 51175023,
+            },
+            {
+                id: 51175025,
+                content: "你看你这孩子……尽说些不吉利的话，我当你没说！咱们机枢派啊，迟早会好起来的。",
+                npc: 701233,
+                next: 51175026,
+            },
+            {
+                id: 51175023,
+                content: "到时候，比起把有天赋的孩子往悬衡派送，百姓们可就是抢破头要来咱们这里了！",
+                npc: 701233,
+            },
+            {
+                id: 51175026,
+                content: "这不是已经好些了吗？公尚师傅这都找到你这样人中龙凤的家伙入派了，我看是未来可期！",
+                npc: 701233,
+            },
+        ],
+    },
+    {
+        id: 701234,
+        name: "小瑜",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51175101,
+                content: "叔叔，这是什么？看着好可爱，可以送给我吗？",
+                npc: 701234,
+                next: 51175102,
+            },
+            {
+                id: 51175102,
+                content: "你对这个感兴趣？这是老夫的拿手之作，来来来。你把它拿起来。",
+                next: 51175103,
+            },
+            {
+                id: 51175103,
+                content: "我不敢……它不会突然飞起来啄我吧？",
+                npc: 701234,
+                next: 51175104,
+            },
+            {
+                id: 51175104,
+                content: "不可能！我做的机关鸟，安全性都是一顶一的。来来来，给你，你摸摸，那小鸟的屁股后面是不是有个旋钮一样的机关？",
+                next: 51175105,
+            },
+            {
+                id: 51175105,
+                content: "唔……好像是……是有诶！",
+                npc: 701234,
+                next: 51175106,
+            },
+            {
+                id: 51175106,
+                content: "你顺着转一圈，来，试试~",
+                next: 51175107,
+            },
+            {
+                id: 51175107,
+                content: "（小孩将信将疑地照做了，那机关鸟竟真的在它手上叽叽喳喳叫了出声。）",
+                next: 51175108,
+            },
+            {
+                id: 51175108,
+                content: "哇！这个好厉害！我也想要！",
+                npc: 701234,
+                next: 51175109,
+            },
+            {
+                id: 51175109,
+                content: "厉害吧？嘿嘿，但是这个不能白送给你。",
+                next: 51175110,
+            },
+            {
+                id: 51175110,
+                content: "什么？叔叔，我要买吗？多少钱，我回家找我娘亲要。",
+                npc: 701234,
+                next: 51175111,
+            },
+            {
+                id: 51175111,
+                content: "嘿嘿~你想要这个机关鸟，就得卖身给咱们机枢派，一辈子研习机关术，最后就可以自己造出来小鸟了！",
+                next: 51175112,
+            },
+            {
+                id: 51175112,
+                content: "什……什么？！卖？卖小孩？！呜啊！这里有坏叔叔要拐卖小孩！！！",
+                npc: 701234,
+                next: 51175113,
+            },
+            {
+                id: 51175113,
+                content: "喂！不是！我不是……不是啊！我的意思只是你来机枢派……不是……诶呀，你别哭啊！",
+            },
+        ],
+    },
+    {
+        id: 701235,
+        name: "章老翁",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 50107124,
+                content: "年年招新，年年没人，与其把心思放在拉人进阁，还不如多花些时间造个惊天动地的大工程出来！",
+                voice: "env/Ver0102/7D703CD8",
+                npc: 701235,
+            },
+        ],
+    },
+    {
+        id: 701236,
+        name: "浮生",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51172802,
+                content: "高高的台上我远远地望，见笨笨的家伙建高高的台~",
+                npc: 701236,
+                next: 51172803,
+            },
+            {
+                id: 51172803,
+                content: "低低的脚步声慢慢地来，有白白的身影走到我身旁~",
+                npc: 701236,
+                next: 51172804,
+            },
+            {
+                id: 51172804,
+                content: "你好呀，白白的身影，你也和那些笨笨的家伙是一起的吗？",
+                npc: 701236,
+                options: [
+                    {
+                        id: 51172805,
+                        content: "什么是笨笨的家伙？",
+                        next: 51172806,
+                    },
+                    {
+                        id: 51172815,
+                        content: "那你呢，你就不是笨笨的家伙了？",
+                        next: 51172816,
+                    },
+                ],
+            },
+            {
+                id: 51172806,
+                content: "喏，你看，从这里往下面看。那些地上走的水里游的天上飞的，是不是都是小小的一个黑点点？",
+                npc: 701236,
+                next: 51172807,
+            },
+            {
+                id: 51172816,
+                content: "我当然不是啦，因为那些笨笨的家伙多半都是黑黑的，顶多穿着一些鲜亮的衣服给自己染了染颜色。",
+                npc: 701236,
+                next: 51172817,
+            },
+            {
+                id: 51172807,
+                content:
+                    "黑点点们挪动起来速度慢慢的，有时候汇聚在一起，有时候又各自散开，白天的时候黑点点很多，晚上的时候黑点点就变成了黄色的点点。",
+                npc: 701236,
+                next: 51172808,
+            },
+            {
+                id: 51172817,
+                content:
+                    "但归根到底，他们都是实心的，我可不一样，我是蓝蓝的，空心的，我不用在地上走，也不用在水里游，更不用在天上飞，我只需要在这里飘。",
+                npc: 701236,
+                next: 51172818,
+            },
+            {
+                id: 51172808,
+                content:
+                    "点点们不知道自己要去哪里，也不知道自己要变成什么样的点点，也可能最后会变成线，谁知道呢？所以我觉得点点们都是笨笨的家伙。",
+                npc: 701236,
+                options: [
+                    {
+                        id: 51172809,
+                        content: "那我想我不是笨笨的家伙。",
+                        next: 51172810,
+                    },
+                ],
+            },
+            {
+                id: 51172818,
+                content: "所以我肯定不是笨笨的家伙，但你可不一定。",
+                npc: 701236,
+                next: 51172819,
+            },
+            {
+                id: 51172810,
+                content:
+                    "你可能是，也可能不是，你既然来到这里，和我聊天，我们一起谈论这些东西，说明你可能没有那么笨，你也可以在很高的地方看到笨笨的家伙们。",
+                npc: 701236,
+                next: 51172811,
+            },
+            {
+                id: 51172819,
+                content: "（跟一只无由生较劲可没有意义，走吧。）",
+                next: 51172820,
+            },
+            {
+                id: 51172811,
+                content: "但你好像也很笨，你出现在一个你不该出现的地方，被看不见的东西牵着鼻子走，你以为自己的每一步都是出于你自己的想法。",
+                npc: 701236,
+                next: 51172812,
+            },
+            {
+                id: 51172820,
+                content: "再见，白白的身影，以后还要回来看我哟~",
+                npc: 701236,
+            },
+            {
+                id: 51172812,
+                content: "可是呢……嗯……可是呢……",
+                npc: 701236,
+                options: [
+                    {
+                        id: 51172813,
+                        content: "可是什么？",
+                        next: 51172814,
+                    },
+                ],
+            },
+            {
+                id: 51172814,
+                content: "嘻嘻，我不告诉你，你不是说自己不笨嘛，那你就自己猜猜吧。",
+                npc: 701236,
+            },
+        ],
+    },
+    {
+        id: 701237,
+        name: "离生",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51172902,
+                content: "又来了一个长鼻子家伙，诶呀诶呀，这家伙怎么看着我？",
+                npc: 701237,
+                options: [
+                    {
+                        id: 51172903,
+                        content: "长鼻子？我的鼻子很长吗？",
+                        next: 51172904,
+                    },
+                ],
+            },
+            {
+                id: 51172904,
+                content: "不长呀，但是只是现在还不长，但是总有一天你的鼻子会长起来的！因为你一看就不是华胥本地人。",
+                npc: 701237,
+                options: [
+                    {
+                        id: 51172905,
+                        content: "什么意思？",
+                        next: 51172906,
+                    },
+                    {
+                        id: 51172910,
+                        content: "华胥本地人就不是长鼻子了吗？",
+                        next: 51172911,
+                    },
+                ],
+            },
+            {
+                id: 51172906,
+                content: "曾经有一个异邦人，她长得漂漂亮亮的，带着一个方方正正的小盒子，我问她盒子里装着什么，她却不愿意告诉我。",
+                npc: 701237,
+                next: 51172907,
+            },
+            {
+                id: 51172911,
+                content: "华胥的人们都被龙君庇佑，这种恶毒的诅咒是不能应验在我们身上的。",
+                npc: 701237,
+                next: 51172912,
+            },
+            {
+                id: 51172907,
+                content:
+                    "她说，这是一个秘密，她需要保守那个秘密，如果告诉了我，她就没有遵守和别人的约定，没有遵守约定的家伙，是会长出长鼻子的。",
+                npc: 701237,
+                next: 51172908,
+            },
+            {
+                id: 51172912,
+                content: "以前曾经有个奇怪的异邦人，她和我说他们那边的人如果不遵守与他人的约定，就会长出长鼻子。",
+                npc: 701237,
+                next: 51172913,
+            },
+            {
+                id: 51172908,
+                content:
+                    "我就说啊，那怎么可能呢？大家总会有不遵守约定的时候的，就像我小时候和朋友们约好了出去玩，但是妈妈不让我出门的话，我也会爽约的。",
+                npc: 701237,
+                next: 51172909,
+            },
+            {
+                id: 51172913,
+                content:
+                    "我不信，她就说：你看，我这里有个小盒子，我答应别人不能告诉任何人里面装着什么，如果我现在告诉你，我就会立刻长出长鼻子。",
+                npc: 701237,
+                options: [
+                    {
+                        id: 51172914,
+                        content: "那你让她告诉你了吗？",
+                        next: 51172915,
+                    },
+                ],
+            },
+            {
+                id: 51172909,
+                content: "她就说，对呀，所以这个规矩只会对他们那边的人有效，华胥的人们都被龙君庇佑，这种恶毒的诅咒是应验不了的。",
+                npc: 701237,
+                next: 51172917,
+            },
+            {
+                id: 51172915,
+                content: "没有，她长得白白嫩嫩，漂漂亮亮的，要是那张脸上长了个跟胡萝卜一样的长鼻子，那该有多丑呀。",
+                npc: 701237,
+                next: 51172916,
+            },
+            {
+                id: 51172917,
+                content: "不过现在看起来，你倒是还没有长出长鼻子的预兆，不过既然是异邦人，那早晚都是会长的。",
+                npc: 701237,
+                next: 51172918,
+            },
+            {
+                id: 51172916,
+                content: "所以最终还是没问下去，毕竟……那盒子看起来也平平无奇，没什么好东西的样子。",
+                npc: 701237,
+                next: 51172917,
+            },
+            {
+                id: 51172918,
+                content: "答应别人的事情固然要做到，但是人活一世，总有太多身不由己，所以啊，要是有天你真的长出了长鼻子，那也不怪你。",
+                npc: 701237,
+                next: 51172919,
+            },
+            {
+                id: 51172919,
+                content: "只希望你，不要违背自己的本心才好。",
+                npc: 701237,
+                next: 51172920,
+            },
+            {
+                id: 51172920,
+                content: "（无由生似乎话中有话，但作为一个不了解它生平的人，理解这些话还是有些太困难了。）",
+            },
+        ],
+    },
+    {
+        id: 701238,
+        name: "小婉",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701239,
+        name: "张大婶",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51173102,
+                content: "谁家的孩子穿一身白，太素净，看着一点也不喜庆！",
+                npc: 701239,
+                next: 51173103,
+            },
+            {
+                id: 51173103,
+                content: "可不是！看着就不像咱们华胥土生土长的娃娃，这都奉香大典了，千绣阁卖的都是那大红大紫的，这还穿着一身白。",
+                npc: 701264,
+                options: [
+                    {
+                        id: 51173104,
+                        content: "你们在说我吗？",
+                        next: 51173105,
+                    },
+                ],
+            },
+            {
+                id: 51173105,
+                content: "对啦，就是你，快过来，让我看看你。",
+                npc: 701239,
+                next: 51173106,
+            },
+            {
+                id: 51173106,
+                content: "（大婶的话语中似乎有某种魔力，让你不由自主地就向前走了两步，没等你完全靠近，就被一把拽了过去。）",
+                next: 51173107,
+            },
+            {
+                id: 51173107,
+                content: "瞧瞧，这胳膊肘子瘦的，看着就让人心疼，你家里人是不是欺负你，不给你饭吃？",
+                npc: 701239,
+                next: 51173108,
+            },
+            {
+                id: 51173108,
+                content: "可不止呢，你瞧着这脸颊子，惨白惨白的，看起来像是刚过了荒年一样，来，你来我家里，我做了一桌子好菜，你来尝尝。",
+                npc: 701264,
+            },
+        ],
+    },
+    {
+        id: 701240,
+        name: "无愈",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51173202,
+                content: "此香烘制程度不够，你闻，香味还没散出来呢。",
+                npc: 701240,
+                next: 51173203,
+            },
+            {
+                id: 51173203,
+                content: "嗅嗅……嗅嗅……嗯……",
+                next: 51173204,
+            },
+            {
+                id: 51173204,
+                content: "只闻出香味，感觉在太阳下晒了很久，有股子阳光的味道，怎可能烘制程度不够呢……",
+                next: 51173205,
+            },
+            {
+                id: 51173205,
+                content: "你仔细闻，有没有在里面闻出一股子潮祛祛的，泛着霉味的味道？",
+                npc: 701240,
+                next: 51173206,
+            },
+            {
+                id: 51173206,
+                content: "没……唔……不，有！我闻出来了！就是下过雨之后房子的那股霉味！",
+                next: 51173207,
+            },
+            {
+                id: 51173207,
+                content: "啧……撒谎！",
+                npc: 701240,
+                next: 51173208,
+            },
+            {
+                id: 51173208,
+                content: "嘶！好痛！不要敲我的头！",
+                next: 51173209,
+            },
+            {
+                id: 51173209,
+                content: "不敲你两下你能记得住？现在连撒谎都学会了，谁教你的？闻得出来就闻得出来，闻不出来就说实话，你啊……",
+                npc: 701240,
+            },
+        ],
+    },
+    {
+        id: 701241,
+        name: "长歌",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51173301,
+                content: "早跟你说了，收回来的新鲜吿苍要立即拿去晾晒，为何回回都能忘了呢？",
+                npc: 701241,
+                next: 51173302,
+            },
+            {
+                id: 51173302,
+                content: "瞧瞧，已经蔫巴了，这样的质量已经没法供给祀烟阁。",
+                npc: 701241,
+                next: 51173303,
+            },
+            {
+                id: 51173303,
+                content: "你这糊涂娃娃，我真不知道拿你如何是好。",
+                npc: 701241,
+                next: 51173304,
+            },
+            {
+                id: 51173304,
+                content: "长歌姐，我错了……你罚我吧……",
+                next: 51173305,
+            },
+            {
+                id: 51173305,
+                content: "罚你又有何用，是我的问题，以为你现在已经可以做香料处理的工作，却没想到。",
+                npc: 701241,
+                next: 51173306,
+            },
+            {
+                id: 51173306,
+                content: "只是那日告苍收回来以后，我看日头不好，怕要及时放出去反而影响质量，就想等太阳好些再放出去，没想到……后来忘了……",
+                next: 51173307,
+            },
+            {
+                id: 51173307,
+                content: "算了算了，这批你拿去当次料处理吧，不行就只能烧了。",
+                npc: 701241,
+            },
+        ],
+    },
+    {
+        id: 701242,
+        name: "张远",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51173402,
+                content: "落生香的原料研磨最讲究精细，一遍下来若是还有这种大颗粒，你得重新研磨一遍。",
+                npc: 701242,
+                next: 51173403,
+            },
+            {
+                id: 51173403,
+                content: "你看，虽说这香料放在手上轻轻一捏就碎了，但总有根茎处还在相连，有时候要把它来回……这么碾一遍。",
+                npc: 701242,
+                next: 51173404,
+            },
+            {
+                id: 51173404,
+                content: "都别看着了，来试试吧！",
+                npc: 701242,
+                next: 51173405,
+            },
+            {
+                id: 51173405,
+                content: "（面前的男子招呼着在他面前停驻的游客，也包括停下来听他说话的你。）",
+                options: [
+                    {
+                        id: 51173406,
+                        content: "（接过研磨罐。）",
+                        next: 51173407,
+                    },
+                ],
+            },
+            {
+                id: 51173407,
+                content: "（你从他手中接过研磨罐，又从身边的香料堆中取出一支明显已经烘干至一碰即碎的香料，折叠后放了进去。",
+                next: 51173408,
+            },
+            {
+                id: 51173408,
+                content: "第一遍可以不用罐子，简单用手将香料上面的叶片捋下来，直接轻轻用力就碎了。",
+                npc: 701242,
+                options: [
+                    {
+                        id: 51173409,
+                        content: "（听他的。）",
+                        next: 51173410,
+                    },
+                    {
+                        id: 51173418,
+                        content: "（不听他的。）",
+                        next: 51173419,
+                    },
+                ],
+            },
+            {
+                id: 51173410,
+                content: "（你按他的说法重新处理了香料。）",
+                next: 51173411,
+            },
+            {
+                id: 51173419,
+                content: "（你按自己的心意处理了香料。）",
+                next: 51173420,
+            },
+            {
+                id: 51173411,
+                content: "不错，是不是稍微用力就碎成了粉末？这时再将根茎和叶片的碎片一同丢进罐子里，像是在揉一个面团一样，来回用力碾压它。",
+                npc: 701242,
+                options: [
+                    {
+                        id: 51173412,
+                        content: "（听他的。）",
+                        next: 51173413,
+                    },
+                ],
+            },
+            {
+                id: 51173420,
+                content: "这样不成的，即使你有蛮力，罐子的容量也不方便将这么大的一支香料都放进去。",
+                npc: 701242,
+                next: 51173421,
+            },
+            {
+                id: 51173413,
+                content: "（你按他的说法重新处理了香料。）",
+                next: 51173414,
+            },
+            {
+                id: 51173421,
+                content: "你掀开盖子看看，是不是根茎和和叶片已经混在了一起，你把里面的根茎挑出来吧，单独碾一遍叶片。",
+                npc: 701242,
+                options: [
+                    {
+                        id: 51173422,
+                        content: "（不听他的。）",
+                        next: 51173423,
+                    },
+                ],
+            },
+            {
+                id: 51173414,
+                content: "很好，极有悟性，打开看看吧，现在应该已经是粉末状了，这样的香料已经可以拿去合香了。",
+                npc: 701242,
+                next: 51173415,
+            },
+            {
+                id: 51173423,
+                content: "（你相信大力出奇迹。）",
+                next: 51173424,
+            },
+            {
+                id: 51173415,
+                content: "你做的很好，甚至不像是初学者，要是你有心学制香，我们可以详细聊聊。",
+                npc: 701242,
+                next: 51173416,
+            },
+            {
+                id: 51173424,
+                content: "这……这……这怎么可以呢，这样处理的话又费力又……",
+                npc: 701242,
+                next: 51173425,
+            },
+            {
+                id: 51173416,
+                content: "我只是凑巧来到这里，但我不会久留华胥，所以谢谢你的好意了。",
+                npc: 100001,
+                next: 51173417,
+            },
+            {
+                id: 51173425,
+                content: "（你将研磨后的香料打开给他看，虽然方式不对，但的确是已经磨好了。）",
+                next: 51173426,
+            },
+            {
+                id: 51173417,
+                content: "竟是如此，那便算啦。",
+                npc: 701242,
+            },
+            {
+                id: 51173426,
+                content: "不成啊，烘制极好的香料这么处理的确没问题，但凡有些受潮的都没法这么做，最好还是按照我之前说的来办。",
+                npc: 701242,
+                next: 51173427,
+            },
+            {
+                id: 51173427,
+                content: "不过，你看着细胳膊细腿，倒是很有力气。",
+                npc: 701242,
+                next: 51173428,
+            },
+            {
+                id: 51173428,
+                content: "打架打的。",
+                npc: 100001,
+                next: 51173429,
+            },
+            {
+                id: 51173429,
+                content: "哟！口气倒不小，既然如此，你应该不是华胥人？可不能在华胥舞刀弄枪的，小心被狴犴大人盯上了。",
+                npc: 701242,
+            },
+        ],
+    },
+    {
+        id: 701243,
+        name: "阿乔",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51174702,
+                content: "亮哥亮哥！快来帮忙，炉子又炸了！",
+                npc: 701243,
+                next: 51174703,
+            },
+            {
+                id: 51174703,
+                content: "我发誓，就去门口数了会蚂蚁，什么都没做，然后就听到里面嗡嗡嗡一通乱响。",
+                npc: 701243,
+                next: 51174704,
+            },
+            {
+                id: 51174704,
+                content: "我不敢开门，转身就出来找你了。",
+                npc: 701243,
+                next: 51174705,
+            },
+            {
+                id: 51174705,
+                content: "是不是火候不对？你一直用大火煎着？",
+                next: 51174706,
+            },
+            {
+                id: 51174706,
+                content: "是红壳果，不是本就一直要大火处理吗，不然外壳的那一层烧不掉。",
+                npc: 701243,
+                next: 51174707,
+            },
+            {
+                id: 51174707,
+                content: "糊涂！那层纤维是要手工剥的！你从哪听说是用火煎？",
+                next: 51174708,
+            },
+            {
+                id: 51174708,
+                content: "我一直这么处理啊……之前也……",
+                npc: 701243,
+                next: 51174709,
+            },
+            {
+                id: 51174709,
+                content: "这就是为什么你的炉子天天炸！闲话少说，快带我过去看看！",
+            },
+        ],
+    },
+    {
+        id: 701244,
+        name: "方慕声",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51173502,
+                content: "合香是一门技术活，没你想得那么简单，配比和时间都要多加注意，制香也要顺应天时呀~",
+                npc: 701244,
+                next: 51173503,
+            },
+            {
+                id: 51173503,
+                content:
+                    "比如就打今日来说，风和日丽，万里无云，正是合明耀香的好时机，等到天微微凉，空气里稍微蕴了些许湿气之时，就是合落生香的日子。",
+                npc: 701244,
+                options: [
+                    {
+                        id: 51173504,
+                        content: "天气和合香有什么关联？",
+                        next: 51173505,
+                    },
+                ],
+            },
+            {
+                id: 51173505,
+                content:
+                    "关联可大着呢，你知道每种香料都有不同的处理方式吧，有的是清洗晾晒，有的是直接阴干，有的要研磨，有的只需要简单处理。",
+                npc: 701244,
+                next: 51173506,
+            },
+            {
+                id: 51173506,
+                content: "把这些各异的香料放在一起，才叫合香方，不同香方需要的香料不一样，那合出来的效用也不一样。",
+                npc: 701244,
+                next: 51173507,
+            },
+            {
+                id: 51173507,
+                content:
+                    "就以明耀香来举例，听起来就热热闹闹的香品，是吧？这道香方里有大量玉桂，玉桂本就生长在炎热的地带，取枝摘下来后研磨成粉。",
+                npc: 701244,
+                next: 51173508,
+            },
+            {
+                id: 51173508,
+                content: "包装好运来皓京后，本就有些受潮，所以一般都放在室内烘着，就等到一个暖洋洋的天气里，才把它们拿出来制成香品。",
+                npc: 701244,
+                next: 51173509,
+            },
+            {
+                id: 51173509,
+                content: "这样才能保证明耀香里的热气不散，达到以火注阳，滋补散寒的功效。",
+                npc: 701244,
+                options: [
+                    {
+                        id: 51173510,
+                        content: "这么讲究，有点麻烦。",
+                        next: 51173512,
+                    },
+                    {
+                        id: 51173511,
+                        content: "这么讲究，值得尊敬。",
+                        next: 51173512,
+                    },
+                ],
+            },
+            {
+                id: 51173512,
+                content: "我们椒兰村是以香起家的村落，自然要比其他讲究香料的地方要更较真些。",
+                npc: 701244,
+                next: 51173513,
+            },
+            {
+                id: 51173513,
+                content: "现在许多民间合香师其实不怎么看中这些了，他们只想合出一些香气更为独特的香品出来，所以在选材用料上都极为大胆。",
+                npc: 701244,
+                next: 51173514,
+            },
+            {
+                id: 51173514,
+                content: "殊不知制香的本源该是取自天地，以敬天地。",
+                npc: 701244,
+            },
+        ],
+    },
+    {
+        id: 701245,
+        name: "冬雪",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51173602,
+                content: "那批香装好了吗？订货的人问过几回了。",
+                npc: 701245,
+                next: 51173603,
+            },
+            {
+                id: 51173603,
+                content: "问的是哪批，祀烟阁要的沉月香还是烟津渡的织星客要的落生香？",
+                next: 51173604,
+            },
+            {
+                id: 51173604,
+                content: "沉月香早晨已经有香官来取走了，当时你不是在村子里吗？",
+                npc: 701245,
+                next: 51173605,
+            },
+            {
+                id: 51173605,
+                content: "我以为是取的别的，不晓得是沉月香。但那批落生香一直没送过来，你要不去问问亮子吧。",
+                next: 51173606,
+            },
+            {
+                id: 51173606,
+                content: "还没送来吗？这都第几日了……等等！",
+                npc: 701245,
+                next: 51173607,
+            },
+            {
+                id: 51173607,
+                content: "你要我去问亮哥，难道是他负责合香？他那小学徒……",
+                npc: 701245,
+                next: 51173608,
+            },
+            {
+                id: 51173608,
+                content: "阿乔只是贪玩了些，你别提到他就紧张，这次绝对不会和上次闹一样的笑话了。",
+                next: 51173609,
+            },
+            {
+                id: 51173609,
+                content: "我……我先问问去吧。",
+                npc: 701245,
+            },
+        ],
+    },
+    {
+        id: 701246,
+        name: "大庄",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51173701,
+                content: "抓紧犁完这片田，就能早些回去歇息了……",
+                npc: 701246,
+                next: 51173702,
+            },
+            {
+                id: 51173702,
+                content: "诶……老唐那家伙，任着那帮娃娃乱搞，把夔牛壹型拆了个干净，不然哪里还需要我这把老骨头下地干活……",
+                npc: 701246,
+                options: [
+                    {
+                        id: 51173703,
+                        content: "夔牛壹型？",
+                        next: 51173704,
+                    },
+                ],
+            },
+            {
+                id: 51173704,
+                content: "你是……？哦！苏丫头带回来的人，我想起来了！怎么不去屋子里坐着，往田埂里跑做什么？",
+                npc: 701246,
+                next: 51173705,
+            },
+            {
+                id: 51173705,
+                content: "我方才说的夔牛壹型，是之前苏丫头为了咱们山外山里的耕种活计，专门制作出来的一种特殊机傀。",
+                npc: 701246,
+                next: 51173706,
+            },
+            {
+                id: 51173706,
+                content: "人坐在上面，只需稍微转动把手，就能控制机傀移动和锄地，比人力快的多。",
+                npc: 701246,
+                next: 51173707,
+            },
+            {
+                id: 51173707,
+                content:
+                    "只可惜，老唐上次要教一群娃娃认识机傀结构，上了一堂不知道什么课，把那台夔牛壹型当成教具拆了！苏丫头最近又在忙别的，压根没空。",
+                npc: 701246,
+                next: 51173708,
+            },
+            {
+                id: 51173708,
+                content: "所以咱只能自己来了！这老胳膊老腿，看着羸弱，实则有劲的很呢！",
+                npc: 701246,
+                options: [
+                    {
+                        id: 51173709,
+                        content: "您辛苦了。",
+                        next: 51173710,
+                    },
+                ],
+            },
+            {
+                id: 51173710,
+                content: "不辛苦不辛苦，只是累这么几天，过段时间苏丫头忙好了，就能把夔牛壹型拼回来了。",
+                npc: 701246,
+                next: 51173711,
+            },
+            {
+                id: 51173711,
+                content: "不过……只希望老唐不要灵机一动，又钻研出什么新型机傀，白天犁好的田，晚上实验失败炸了个翻天。",
+                npc: 701246,
+                options: [
+                    {
+                        id: 51173712,
+                        content: "新型机傀？",
+                        next: 51173714,
+                    },
+                    {
+                        id: 51173713,
+                        content: "炸翻天？",
+                        next: 51173714,
+                    },
+                ],
+            },
+            {
+                id: 51173714,
+                content:
+                    "嘿！那臭老头！说到他我就来气！不知道整日里在钻研什么，动不动就来炸田，美曰其名为实验需要，结果呢，也没看到他造出什么有用的东西。",
+                npc: 701246,
+                next: 51173715,
+            },
+            {
+                id: 51173715,
+                content: "之前说要做出一个地龙叁型，比夔牛壹型还厉害，压根不用人骑，它会自动耕地。",
+                npc: 701246,
+                next: 51173716,
+            },
+            {
+                id: 51173716,
+                content: "结果倒好，人是不用在旁边了，但它也不动啊，噗呲噗呲冒了一堆火星子，我没敢过去看，再一会居然炸了！",
+                npc: 701246,
+                next: 51173717,
+            },
+            {
+                id: 51173717,
+                content: "整片田全被烧焦了，只能把赤鲤壹型搬出来救火，险些酿成大祸。那片田到现在也没清理干净，荒到现在。",
+                npc: 701246,
+                next: 51173718,
+            },
+            {
+                id: 51173718,
+                content: "还是找些靠谱的人来吧。那宴山亭的徒弟也不靠谱，后山本来种了一片竹林，他在那练剑。",
+                npc: 701246,
+                next: 51173719,
+            },
+            {
+                id: 51173719,
+                content: "结果整片竹林都被削秃了，还好竹子长得快！",
+                npc: 701246,
+                next: 51173720,
+            },
+            {
+                id: 51173720,
+                content: "不跟你说了，我还差一块地，犁完我要回去吃饭了，肚子一直咕咕叫，今天我得吃上三碗大米饭。",
+                npc: 701246,
+            },
+        ],
+    },
+    {
+        id: 701247,
+        name: "汪洋",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51173801,
+                content: "不知道是打什么鬼主意。",
+                npc: 701247,
+                next: 51173802,
+            },
+            {
+                id: 51173802,
+                content: "听说最近西郊有人借着飘零人的名头活动，不知道是打什么鬼主意。",
+                npc: 701247,
+                next: 51173803,
+            },
+            {
+                id: 51173803,
+                content: "怕也没用，好事不出门，坏事传千里，咱们的名声早就臭了，还管他们怎么说？",
+                npc: 701248,
+                next: 51173804,
+            },
+            {
+                id: 51173804,
+                content: "话虽如此，但让一些真正心存恶意之人顶着我们的名头招摇撞骗，我们却得躲在这山里，遮遮掩掩，避人耳目……",
+                npc: 701247,
+                next: 51173805,
+            },
+            {
+                id: 51173805,
+                content: "他们要是真的把事情闹大了，咱们再出手也不迟，何况真要是做出什么伤害百姓的事情，狴犴和应天尉嗅着味就上去了。",
+                npc: 701248,
+                next: 51173806,
+            },
+            {
+                id: 51173806,
+                content: "比起操心这些，你还是练好你的剑，待到八月八，我剑舞罢百剑杀！哈！",
+                npc: 701248,
+                next: 51173807,
+            },
+            {
+                id: 51173807,
+                content: "（他空着手，用空气挽了一个漂亮的剑花。）",
+                next: 51173808,
+            },
+            {
+                id: 51173808,
+                content: "哇呀呀呀！大胆飘零人，以武犯禁！屡教不改！",
+                npc: 701247,
+                next: 51173809,
+            },
+            {
+                id: 51173809,
+                content: "那又如何，你来抓我呀！",
+                npc: 701248,
+            },
+        ],
+    },
+    {
+        id: 701248,
+        name: "梁平",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701249,
+        name: "婉婉",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51173902,
+                content: "是小苏带回来的那位？模样俊俏，当真是位妙人~",
+                npc: 701249,
+                options: [
+                    {
+                        id: 51173903,
+                        content: "你说的小苏是……",
+                        next: 51173905,
+                    },
+                    {
+                        id: 51173904,
+                        content: "小苏？苏乙？",
+                        next: 51173905,
+                    },
+                ],
+            },
+            {
+                id: 51173905,
+                content: "还能有谁呀，山外山的天工苏氏不就只有那一位了。",
+                npc: 701249,
+                next: 51173906,
+            },
+            {
+                id: 51173906,
+                content:
+                    "不过其实山外山曾经确实还有一位苏氏，但她已经……罢了，不提这些，想必小苏愿意的话，到时候也会跟你说的，毕竟也不算什么秘密。",
+                npc: 701249,
+                next: 51173907,
+            },
+            {
+                id: 51173907,
+                content: "不过说起来，山外山一般是不会让外来人进来的，你既然能被带进来，想必不是什么普通人吧？",
+                npc: 701249,
+                next: 51173908,
+            },
+            {
+                id: 51173908,
+                content: "我叫{nickname}，是个狩月人。",
+                npc: 100001,
+                next: 51173909,
+            },
+            {
+                id: 51173909,
+                content: "狩……月……人……？好奇怪的说法，华胥没有听过这样的名号，不过听起来倒是有几分像是飘零人呢。",
+                npc: 701249,
+                next: 51173910,
+            },
+            {
+                id: 51173910,
+                content: "你们算是海伯利亚的飘零人吗？",
+                npc: 701249,
+            },
+        ],
+    },
+    {
+        id: 701250,
+        name: "史基",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51174002,
+                content: "大哥，我们什么时候才能出山啊，天天待在这里太无聊了……",
+                npc: 701250,
+                next: 51174003,
+            },
+            {
+                id: 51174003,
+                content:
+                    "再等等，等到苏姐姐他们闯出了名堂，等到大风九章认可我们的存在，到时候我们就能昂首挺胸地走在皓京城里，腰上别着剑，向别人自我介绍。",
+                npc: 701251,
+                next: 51174004,
+            },
+            {
+                id: 51174004,
+                content: "哦哦！我知道，在下飘零人——史基！",
+                npc: 701250,
+                next: 51174005,
+            },
+            {
+                id: 51174005,
+                content:
+                    "不错！很有气势！在正式达成目的之前，咱们就要在这山外山养精蓄锐，你实在无聊的紧，不如咱们就去找唐叔问问，有没有什么新出的机傀。",
+                npc: 701251,
+                next: 51174006,
+            },
+            {
+                id: 51174006,
+                content: "好，之前那个会抬手挥剑的机傀很有意思！唐叔答应我，这次要做一个可以驾驶的机傀，我们快去问问他做好没~",
+                npc: 701250,
+            },
+        ],
+    },
+    {
+        id: 701251,
+        name: "史奉春",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701252,
+        name: "桂北发",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51174102,
+                content: "哼！我早说过不要随便带人回来，不然山外山迟早会暴露出去！",
+                npc: 701252,
+                next: 51174103,
+            },
+            {
+                id: 51174103,
+                content:
+                    "现在顶着咱们的名头做坏事的人多了去了，还有这样的不明身份的外来者随意在山里进出。要是这里的位置暴露给大风九章了，岂不是要被一锅端？！",
+                npc: 701252,
+                options: [
+                    {
+                        id: 51174104,
+                        content: "你多虑了。",
+                        next: 51174105,
+                    },
+                    {
+                        id: 51174107,
+                        content: "我能做什么坏事？",
+                        next: 51174108,
+                    },
+                ],
+            },
+            {
+                id: 51174105,
+                content: "那可不叫多虑，那叫以防万一，小心为上。",
+                npc: 701252,
+                next: 51174106,
+            },
+            {
+                id: 51174108,
+                content: "谁知道呢，杀人放火，打家劫舍，能做的坏事可多了。",
+                npc: 701252,
+                next: 51174109,
+            },
+            {
+                id: 51174106,
+                content: "谁知道你有什么心思，我劝你谨慎行事，别顶着我们的名头惹是生非。",
+                npc: 701252,
+                next: 51174109,
+            },
+            {
+                id: 51174109,
+                content: "总之，你老实些。",
+                npc: 701252,
+                options: [
+                    {
+                        id: 51174110,
+                        content: "你就这么不信任你的伙伴带回来的人？",
+                        next: 51174112,
+                    },
+                    {
+                        id: 51174111,
+                        content: "你就是不信任我，也该信任苏乙。",
+                        next: 51174112,
+                    },
+                ],
+            },
+            {
+                id: 51174112,
+                content: "哼……我就是因为太了解苏乙，那丫头，心软又倔强，旁人但凡说点好话她都会相信，谁知道你是不是骗了她什么？",
+                npc: 701252,
+                next: 51174113,
+            },
+            {
+                id: 51174113,
+                content: "我会一直盯着你的，你但凡做出什么逾矩之事，我会立刻让机傀把你抓起来！",
+                npc: 701252,
+                next: 51174114,
+            },
+            {
+                id: 51174114,
+                content: "（算了……和他争执没有什么意义，他也只是担心山外山而已。）",
+            },
+        ],
+    },
+    {
+        id: 701253,
+        name: "竞天",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51174202,
+                content: "机枢有什么好！听我的，剑拿着，咱俩练两手才是真的。",
+                npc: 701253,
+                next: 51174203,
+            },
+            {
+                id: 51174203,
+                content: "不要，哥哥，我想去找唐叔学机枢，不想练剑……",
+                npc: 701254,
+                next: 51174204,
+            },
+            {
+                id: 51174204,
+                content: "哼！整日就是折腾那些机关块。爹娘临走前，让我把这一身武艺传承下去，孰料你竟然沉迷上了那些机关块！",
+                npc: 701253,
+                next: 51174205,
+            },
+            {
+                id: 51174205,
+                content: "不是有哥哥就够了吗……",
+                npc: 701254,
+                next: 51174206,
+            },
+            {
+                id: 51174206,
+                content: "你那机关块有什么用？保护自己靠的是拳头，是功夫，是手上的剑！",
+                npc: 701253,
+                next: 51174207,
+            },
+            {
+                id: 51174207,
+                content: "不是的！机傀……机傀很厉害的，苏姐姐做的那种，可以挥起臂膀，一拳就把玄色狴犴肘飞三里地呢！",
+                npc: 701254,
+                next: 51174208,
+            },
+            {
+                id: 51174208,
+                content: "笨重不堪！要是我来，一剑刺穿那玄色狴犴的咽喉，更是快准狠，绝不拖沓。",
+                npc: 701253,
+                next: 51174209,
+            },
+            {
+                id: 51174209,
+                content: "哥哥就是对机傀术偏见太深，哥哥，相信我，我可以造出超过苏乙姐姐的机傀，力气又大速度也快。",
+                npc: 701254,
+                next: 51174210,
+            },
+            {
+                id: 51174210,
+                content: "到时候，哥哥可以和我的机傀对练，怎么样？我保准哥哥的剑劈不穿机傀的外甲。",
+                npc: 701254,
+                next: 51174211,
+            },
+            {
+                id: 51174211,
+                content: "胡说八道！没有我的剑斩不断的东西！你去！我倒要看看你能造出什么东西！",
+                npc: 701253,
+            },
+        ],
+    },
+    {
+        id: 701254,
+        name: "小槐",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701255,
+        name: "棠生",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51174302,
+                content: "是……新面孔……好想……好想和新面孔说说话……",
+                npc: 701255,
+                next: 51174303,
+            },
+            {
+                id: 51174303,
+                content: "（这只无由生躲在柱子后面探出头，羞涩地看着你，一副想上前却又不敢的样子。）",
+                next: 51174304,
+            },
+            {
+                id: 51174304,
+                content: "新面孔……看过来了！",
+                npc: 701255,
+                options: [
+                    {
+                        id: 51174305,
+                        content: "你好？",
+                        next: 51174306,
+                    },
+                    {
+                        id: 51174307,
+                        content: "你好！",
+                        next: 51174308,
+                    },
+                ],
+            },
+            {
+                id: 51174306,
+                content: "叫我了？跟我打招呼？新面孔和我打招呼了！",
+                npc: 701255,
+                next: 51174309,
+            },
+            {
+                id: 51174308,
+                content: "好……好热情的新面孔，好久没有人和我这么打招呼了……",
+                npc: 701255,
+                next: 51174309,
+            },
+            {
+                id: 51174309,
+                content: "你，你不怕我吗？我是无由生呢，不可怕吗？",
+                npc: 701255,
+                next: 51174310,
+            },
+            {
+                id: 51174310,
+                content: "我见过很多无由生。",
+                npc: 100001,
+                next: 51174311,
+            },
+            {
+                id: 51174311,
+                content: "真……真的吗？！那太好了，你见过很多，那你一定不会排斥这里吧？我们都很友好的，我们只是太孤独了……",
+                npc: 701255,
+                next: 51174312,
+            },
+            {
+                id: 51174312,
+                content: "之前那些误打误撞闯进来的家伙，有的压根看不着我们，一直咕囔着什么……好冷，这里好阴森，我们怎么和他们说话都不理会。",
+                npc: 701255,
+                next: 51174313,
+            },
+            {
+                id: 51174313,
+                content: "大家觉得没意思了，就给他指路，让他出去了。",
+                npc: 701255,
+                next: 51174314,
+            },
+            {
+                id: 51174314,
+                content: "还有一些能看到我们的，那就更可怕了，他们会一直尖叫，然后在巷子里到处乱窜，看到一个无由生就大叫一句。",
+                npc: 701255,
+                next: 51174315,
+            },
+            {
+                id: 51174315,
+                content: "吵得我们头疼，只能把他们丢出去。",
+                npc: 701255,
+                next: 51174316,
+            },
+            {
+                id: 51174316,
+                content: "只有你……你不一样……你看起来好平静，靠近你让我有一种幸福的感觉……啊……好温暖。",
+                npc: 701255,
+                next: 51174317,
+            },
+            {
+                id: 51174317,
+                content: "可以，留得更久一些吗？我想多和你待一会……",
+                npc: 701255,
+            },
+        ],
+    },
+    {
+        id: 701256,
+        name: "饶生",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51174402,
+                content: "打打打打打劫！要从此巷过，留下姓名来！",
+                npc: 701256,
+                options: [
+                    {
+                        id: 51174403,
+                        content: "？",
+                        next: 51174405,
+                    },
+                    {
+                        id: 51174404,
+                        content: "？？？",
+                        next: 51174405,
+                    },
+                ],
+            },
+            {
+                id: 51174405,
+                content: "干，干什么？！干嘛一脸奇怪的样子看着我？我学的不像吗？是我的语气不够凶狠，还是……还是没有那家伙的体型？",
+                npc: 701256,
+                options: [
+                    {
+                        id: 51174406,
+                        content: "你背上没有一个装着好东西的袋子。",
+                        next: 51174407,
+                    },
+                    {
+                        id: 51174408,
+                        content: "少了点气势，比如叫着要打哭我之类的话。",
+                        next: 51174409,
+                    },
+                ],
+            },
+            {
+                id: 51174407,
+                content: "咦？你也见过那个皎皎？那你是看出来我是在模仿她啦？",
+                npc: 701256,
+                next: 51174410,
+            },
+            {
+                id: 51174409,
+                content: "是吗？可那个皎皎没有说这样的话，她就是叫着打劫就从地里钻了出来，然后发现我们无由生什么都没有，就失落地走了。",
+                npc: 701256,
+                next: 51174410,
+            },
+            {
+                id: 51174410,
+                content: "你为什么要模仿打劫皎皎。",
+                npc: 100001,
+                next: 51174411,
+            },
+            {
+                id: 51174411,
+                content: "因为她很厉害！就是，她可以一下子就从一个地方冒出来，然后所有人都会被她吸引。",
+                npc: 701256,
+                next: 51174412,
+            },
+            {
+                id: 51174412,
+                content: "你不觉得这种能力很厉害吗？拥有瞬间吸引所有人视线的能力，不像我，我只能附身在一块大石头上面，动一动就没力气了。",
+                npc: 701256,
+                next: 51174413,
+            },
+            {
+                id: 51174413,
+                content: "看到的人会吓一跳，但看不到的人……那也就看不到了。",
+                npc: 701256,
+                next: 51174414,
+            },
+            {
+                id: 51174414,
+                content: "要是我有一天也可以叫着打劫然后从天而降该有多么威风啊……",
+                npc: 701256,
+                next: 51174415,
+            },
+            {
+                id: 51174415,
+                content: "她每次来打劫我的时候，连话都说不完就会被我赶跑了。",
+                npc: 100001,
+                next: 51174416,
+            },
+            {
+                id: 51174416,
+                content: "啊……那你对她可太坏了吧，她不是一个坏皎皎。",
+                npc: 701256,
+                next: 51174417,
+            },
+            {
+                id: 51174417,
+                content: "那天她不知道为什么来了由来巷，看起来鬼鬼祟祟的，我们就想上去找她打招呼，结果她却想打劫我们。",
+                npc: 701256,
+                next: 51174418,
+            },
+            {
+                id: 51174418,
+                content: "可我们什么也没有，我们就这样在空中转圈，然后跟她说，如果她想的话，可以从由来巷带走一些石头。",
+                npc: 701256,
+                next: 51174419,
+            },
+            {
+                id: 51174419,
+                content: "毕竟我们最无聊的时候，就会在这里玩丢石头，所以我觉得石头是对我们来说最有价值的东西了。",
+                npc: 701256,
+                next: 51174420,
+            },
+            {
+                id: 51174420,
+                content: "可是她居然没有要呢，她拖着那个很大的袋子就走了，真是个好皎皎。",
+                npc: 701256,
+                next: 51174421,
+            },
+            {
+                id: 51174421,
+                content: "我都不知道，要是她把我们的石头抢走了，我们还能玩什么呢……",
+                npc: 701256,
+                next: 51174422,
+            },
+            {
+                id: 51174422,
+                content: "这……",
+                npc: 100001,
+                next: 51174423,
+            },
+            {
+                id: 51174423,
+                content: "她还丢给我们一些铜板！我们现在用铜板和石头下棋玩！要是没有那个好皎皎，我们都不知道还有这么有趣的玩法。",
+                npc: 701256,
+            },
+        ],
+    },
+    {
+        id: 701257,
+        name: "相生",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51174502,
+                content: "我好像有一个哥哥……还有一个妹妹……但他们现在都在哪……",
+                npc: 701257,
+                next: 51174503,
+            },
+            {
+                id: 51174503,
+                content: "我为什么一直在这里，我想回家，可我回不去了……你好，陌生人，你能带我回家吗？",
+                npc: 701257,
+                options: [
+                    {
+                        id: 51174504,
+                        content: "你的家在哪里？",
+                        next: 51174505,
+                    },
+                ],
+            },
+            {
+                id: 51174505,
+                content: "我记不得了，好像在一个镇子上，我家是镇子里最大的那一户，我有个哥哥，在镇上做小生意。",
+                npc: 701257,
+                next: 51174506,
+            },
+            {
+                id: 51174506,
+                content: "他小时候不好好读书，娘就让他从学堂出来了，后来我长大后，我说我想读书，娘就又把我送了进去。",
+                npc: 701257,
+                next: 51174507,
+            },
+            {
+                id: 51174507,
+                content: "我还有个妹妹，她年纪很小，我每天放课时候，她就在学堂门口等我，因为学堂门口有个伯伯卖糖人。",
+                npc: 701257,
+                next: 51174508,
+            },
+            {
+                id: 51174508,
+                content: "我每天不吃早饭，就为了把钱攒下来给妹妹买糖人。",
+                npc: 701257,
+                options: [
+                    {
+                        id: 51174509,
+                        content: "你说的这些没法推测出你家在哪。",
+                        next: 51174510,
+                    },
+                ],
+            },
+            {
+                id: 51174510,
+                content: "是啊，我也记不得家在哪里，我只记得我哥哥回来的很少，一回来就会给我和妹妹好多零花钱。",
+                npc: 701257,
+                next: 51174511,
+            },
+            {
+                id: 51174511,
+                content: "所以他回来的日子我总是很开心，我每天就盼着他回来，他还答应我下次放假时候要接我去外面玩。",
+                npc: 701257,
+                next: 51174512,
+            },
+            {
+                id: 51174512,
+                content:
+                    "后来他的确接我过去了，只是路上不知道为什么窜出来一只颜色奇怪的狴犴大人，大人可能是搞错了，把我当成了坏人，居然把我咬死了。",
+                npc: 701257,
+                next: 51174513,
+            },
+            {
+                id: 51174513,
+                content: "哥哥应该会很难过吧，好不容易说要接我去玩，居然没有见到就……",
+                npc: 701257,
+                next: 51174514,
+            },
+            {
+                id: 51174514,
+                content: "（看来是一位被玄色狴犴所害的可怜人。）",
+                next: 51174515,
+            },
+            {
+                id: 51174515,
+                content:
+                    "我还是想不起来我的家在哪里，要是你有一天在外面看到了我的家人，能不能问问他们现在过的怎么样，尤其是我哥哥，你让他别太难过了。",
+                npc: 701257,
+                next: 51174516,
+            },
+            {
+                id: 51174516,
+                content:
+                    "不过啊……我想他们也不会很难过的，至少不会到现在还在难过，因为我自己都不知道过去多久了，如果他们现在还在因为我难过，实在是太丢人了。",
+                npc: 701257,
+                next: 51174517,
+            },
+            {
+                id: 51174517,
+                content: "我哥哥好像……好像叫相山……妹妹叫阿胜……",
+                npc: 701257,
+                next: 51174518,
+            },
+            {
+                id: 51174518,
+                content: "好想他们啊，希望他们还没忘了我，又希望他们已经忘了我……",
+                npc: 701257,
+            },
+        ],
+    },
+    {
+        id: 701258,
+        name: "星遥",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51158711,
+                content: "东市雀翎茗轩开张，凡携亲眷者入座，皆送花茶一壶。",
+                npc: 701258,
+                next: 51158701,
+            },
+            {
+                id: 51158701,
+                content: "（她心不在焉地吆喝了两嗓子便不再继续了，满脸写着不耐烦。）",
+                next: 51158702,
+            },
+            {
+                id: 51158702,
+                content: "反正雀儿也没找回来，还要吆喝这些做什么……",
+                npc: 701258,
+                options: [
+                    {
+                        id: 51158703,
+                        content: "你在说什么？",
+                        next: 51158704,
+                    },
+                ],
+            },
+            {
+                id: 51158704,
+                content: "噫！偷懒被抓到了？你难道是老板请来的监工？",
+                npc: 701258,
+                options: [
+                    {
+                        id: 51158705,
+                        content: "我是，你被我抓到啦！",
+                        next: 51158706,
+                        impr: [1041, "Chaos", 3],
+                    },
+                    {
+                        id: 51158708,
+                        content: "不是，我只是路过。",
+                        next: 51158709,
+                        impr: [1041, "Morality", 3],
+                    },
+                ],
+            },
+            {
+                id: 51158706,
+                content: "监工大人大人有大量！我错啦，再也不在工作时间偷懒了……拜托不要回去告诉老板，就算告诉了……",
+                npc: 701258,
+                next: 51158707,
+            },
+            {
+                id: 51158709,
+                content: "嗐！吓我一跳！路过是吗？这是我们老板亲手绘制的传单，来，给你一张！",
+                npc: 701258,
+                next: 51158710,
+            },
+            {
+                id: 51158707,
+                content: "也帮我求求情……不要扣我的日时费，拜托了！",
+                npc: 701258,
+            },
+            {
+                id: 51158710,
+                content: "等咱们店的翠屏雀从码头找回来了，就可以开门了，到时候，记得来玩哦。",
+                npc: 701258,
+                next: 51158712,
+            },
+            {
+                id: 51158712,
+                content: "薄薄一张纸，其上绘的翠屏雀却是栩栩如生，像是要随时跃出纸张一样……看来绘制者是位画技高超之人。",
+            },
+        ],
+    },
+    {
+        id: 701259,
+        name: "温景川",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701260,
+        name: "凉苍",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701261,
+        name: "董烨",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701262,
+        name: "阿胜",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701263,
+        name: "弓连春",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701264,
+        name: "任良",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701265,
+        name: "钱袋子",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701266,
+        name: "魏蒲",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
         id: 790001,
         name: "米娅",
         camp: "NPC",
@@ -26789,6 +42238,7 @@ export const npcData: NPC[] = [
         id: 790008,
         name: "{nickname}",
         camp: "NPC",
+        charId: 1601,
         type: "Normal",
     },
     {
@@ -27177,6 +42627,7 @@ export const npcData: NPC[] = [
         id: 790064,
         name: "{nickname}",
         camp: "NPC",
+        charId: 1601,
         type: "Normal",
     },
     {
@@ -27218,6 +42669,102 @@ export const npcData: NPC[] = [
     {
         id: 790071,
         name: "刻舟",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790072,
+        name: "煜明",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790073,
+        name: "不夏",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790074,
+        name: "宴山亭",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790075,
+        name: "飘零人",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790076,
+        name: "止流",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790077,
+        name: "望春",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790078,
+        name: "顾砚",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790079,
+        name: "虬先生",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790080,
+        name: "备选役A",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790081,
+        name: "备选役B",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790082,
+        name: "苏乙",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790083,
+        name: "唐叔",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790084,
+        name: "云纺水",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790085,
+        name: "工匠",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790086,
+        name: "弟弟",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790087,
+        name: "妹妹",
         camp: "NPC",
         type: "Normal",
     },
@@ -27760,85 +43307,94 @@ export const npcData: NPC[] = [
     },
     {
         id: 818078,
-        name: "UI_Npc_Name_Xiaochitanfan",
+        name: "小吃摊贩",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 818079,
-        name: "UI_Npc_Name_RookieFisher",
+        name: "迷糊的捕鱼人",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 818080,
-        name: "UI_Npc_Name_SearchChestMan",
+        name: "苦恼的少女",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 818081,
-        name: "UI_Npc_Name_Jinglijiaojiao",
+        name: "探险家皎皎",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 818082,
-        name: "UI_Npc_Name_DreamWuyousheng",
+        name: "缥缈的无由生",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 818083,
-        name: "UI_Npc_Name_Tongzhenkid",
+        name: "寻宝的孩童",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 818084,
-        name: "UI_Npc_Name_DianzhangA",
+        name: "多疑的店主",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 818085,
-        name: "UI_Npc_Name_Huoji",
+        name: "懦弱的伙计",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 818086,
-        name: "UI_Npc_Name_DianzhangB",
+        name: "强势的店主",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 818087,
-        name: "UI_Npc_Name_Zhuchi",
+        name: "严格的女孩",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 818088,
-        name: "UI_Npc_Name_Runner1",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 818089,
-        name: "UI_Npc_Name_Runner2",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 818090,
-        name: "UI_Npc_Name_Runner3",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 818091,
         name: "乞讨的老人",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 818092,
+        name: "贝蕾妮卡",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 818093,
+        name: "UI_Npc_Name_Xiaochitanfan_Haiou",
         camp: "NPC",
         type: "Normal",
     },
@@ -27915,6 +43471,42 @@ export const npcData: NPC[] = [
     {
         id: 830001,
         name: "漂泊的无由生",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 840001,
+        name: "严谨的机枢派弟子",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 840002,
+        name: "傲气的机枢派师傅",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 840003,
+        name: "头疼的店员",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 840004,
+        name: "神叨叨的女子",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 840005,
+        name: "馋嘴的孩子",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 840006,
+        name: "热情的妇人",
         camp: "NPC",
         type: "Normal",
     },
@@ -28464,6 +44056,12 @@ export const npcData: NPC[] = [
         type: "Normal",
     },
     {
+        id: 900052,
+        name: "探险家皎皎",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
         id: 910001,
         name: "贝蕾妮卡",
         camp: "NPC",
@@ -28548,6 +44146,66 @@ export const npcData: NPC[] = [
         type: "Normal",
     },
     {
+        id: 930006,
+        name: "？？？",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 930007,
+        name: "？？？",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 930008,
+        name: "移动载具",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 930009,
+        name: "赛事主办方",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 930010,
+        name: "？？？",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 930011,
+        name: "？？？",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 930012,
+        name: "？？？",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 930013,
+        name: "？？？",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 930014,
+        name: "？？？",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 930015,
+        name: "？？？",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
         id: 991101,
         name: "贝蕾妮卡",
         camp: "NPC",
@@ -28581,6 +44239,288 @@ export const npcData: NPC[] = [
         camp: "NPC",
         charId: 1503,
         type: "Normal",
+    },
+    {
+        id: 991504,
+        name: "苏乙",
+        camp: "NPC",
+        charId: 1504,
+        type: "Normal",
+        icon: "Suyi",
+        talks: [
+            {
+                id: 90260001,
+                content: "你来啦！是不是听说我又重新改装了青鸾贰型，给你看——咦，你只是来找我闲聊的？",
+                voice: "char/Suyi/vo_welcome",
+                npc: 81504,
+                options: [
+                    {
+                        id: 90260100,
+                        content: "闲暇时喜欢做什么？",
+                        next: 90260101,
+                    },
+                    {
+                        id: 90260200,
+                        content: "你之前说过自己辈分高，是什么意思？",
+                        next: 90260201,
+                    },
+                    {
+                        id: 90260300,
+                        content: "说起来，最近经常在你身边见到一只小鸟。",
+                        next: 90260301,
+                    },
+                    {
+                        id: 90260400,
+                        content: "山外山是个怎样的地方？",
+                        next: 90260401,
+                    },
+                ],
+            },
+            {
+                id: 90260101,
+                content: "拼机枢，打磨齿轮，寻找新材料，研发更好用的东西。",
+                voice: "char/Suyi/vo_topic_01_1",
+                npc: 81504,
+                next: 90260102,
+            },
+            {
+                id: 90260201,
+                content:
+                    "机枢派和飘零人都讲究世代传承。比方说，一个九十岁的老师父，收了一个十岁的孩子当关门弟子，那么门派里很多四十多岁的中年人都要管这个孩子叫师叔。",
+                voice: "char/Suyi/vo_topic_02_1",
+                npc: 81504,
+                next: 90260202,
+            },
+            {
+                id: 90260301,
+                content: "哦，那是青鸾叁型，我最新的宠物！",
+                voice: "char/Suyi/vo_topic_03_1",
+                npc: 81504,
+                next: 90260302,
+            },
+            {
+                id: 90260401,
+                content: "山外山啊……嗯，好问题。",
+                voice: "char/Suyi/vo_topic_04_1",
+                npc: 81504,
+                next: 90260402,
+            },
+            {
+                id: 90260102,
+                content:
+                    "上次唐叔不是腿摔了吗？刚好最近有空，我就一直在研究能够更平稳升空的载具。机枢派弟子总是要成果不要命，可不能放任这样的风气延续下去！",
+                voice: "char/Suyi/vo_topic_01_2",
+                npc: 81504,
+                next: 90260103,
+            },
+            {
+                id: 90260202,
+                content: "我比较幸运，我的老师——也就是我的姑姑，她辈分很高，所以我的辈分自然也很高啦。",
+                voice: "char/Suyi/vo_topic_02_2",
+                npc: 81504,
+                next: 90260203,
+            },
+            {
+                id: 90260302,
+                content: "你看，是不是很像是真的云翎鸥？我简化了发动流程，长按头顶，它就能开启拟态飞行模式了。说到飞行——",
+                voice: "char/Suyi/vo_topic_03_2",
+                npc: 81504,
+                next: 90260303,
+            },
+            {
+                id: 90260402,
+                content:
+                    "我们因为相似的处境而集结起来，为了相同的目标而努力着，能够互相理解、彼此信任，战斗时交托后背，疲惫时携手同行……是个很好很好的地方。",
+                voice: "char/Suyi/vo_topic_04_2",
+                npc: 81504,
+                next: 90260403,
+            },
+            {
+                id: 90260103,
+                content: "一直工作不累吗？",
+                npc: 100001,
+                next: 90260104,
+            },
+            {
+                id: 90260203,
+                content: "刻舟就比较不幸，他师父宴山亭辈分低，所以论起排辈啊，他得管我叫姑奶奶~",
+                voice: "char/Suyi/vo_topic_02_3",
+                npc: 81504,
+                next: 90260204,
+            },
+            {
+                id: 90260303,
+                content: "这羽毛也是有学问的！我回收了云翎鸥自然掉落的羽毛，用了改良版的离水技艺给羽毛封层，几乎不会增加重量。",
+                voice: "char/Suyi/vo_topic_03_3",
+                npc: 81504,
+                next: 90260304,
+            },
+            {
+                id: 90260403,
+                content: "对于山外山的很多人来说，这里就像是家一样。",
+                voice: "char/Suyi/vo_topic_04_3",
+                npc: 81504,
+                next: 90260404,
+            },
+            {
+                id: 90260104,
+                content:
+                    "怎么会累？世上还有比工作最有趣的事吗？你只需要在脑海中把机枢拆解成一个个组件，再在现实中拼起来就好。这简直是最享受的时刻啦。",
+                voice: "char/Suyi/vo_topic_01_3",
+                npc: 81504,
+                next: 90260105,
+            },
+            {
+                id: 90260204,
+                content: "那我呢那我呢？",
+                npc: 100001,
+                next: 90260205,
+            },
+            {
+                id: 90260304,
+                content: "不会掉色，永远毛茸茸，也不是飞天老虎钳，情绪价值拉满，完美的宠物。",
+                voice: "char/Suyi/vo_topic_03_4",
+                npc: 81504,
+                next: 90260305,
+            },
+            {
+                id: 90260404,
+                content: "这也是你的家吗？",
+                npc: 100001,
+                next: 90260405,
+            },
+            {
+                id: 90260105,
+                content: "你要不要也试试？全山外山最厉害的机枢大师现在有空，可以手把手教你哦。",
+                voice: "char/Suyi/vo_topic_01_4",
+                npc: 81504,
+                options: [
+                    {
+                        id: 90260002,
+                        content: "聊点别的",
+                        next: 90260001,
+                    },
+                    {
+                        id: 90260003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90260205,
+                content: "公尚先生的辈分也是很高的哦。让我换算一下……巧了，你和我算是同辈呢！",
+                voice: "char/Suyi/vo_topic_02_4",
+                npc: 81504,
+                next: 90260206,
+            },
+            {
+                id: 90260305,
+                content: "为什么不养只真的？",
+                npc: 100001,
+                next: 90260306,
+            },
+            {
+                id: 90260405,
+                content: "这……当然也是我家了！",
+                voice: "char/Suyi/vo_topic_04_4",
+                npc: 81504,
+                next: 90260406,
+            },
+            {
+                id: 90260206,
+                content: "嘻嘻，如果以后刻舟那家伙对你耍贫嘴，你就可以尽情让他管你喊{性别：爷爷|奶奶}了。",
+                voice: "char/Suyi/vo_topic_02_5",
+                npc: 81504,
+                next: 90260207,
+            },
+            {
+                id: 90260306,
+                content:
+                    "云翎鸥是喜欢天空的鸟儿，如果要养，就只能关在笼子里。可是如果我只是为了一饱眼福就把它捉来，那我和昔日的悬衡派有什么区别？",
+                voice: "char/Suyi/vo_topic_03_5",
+                npc: 81504,
+                next: 90260307,
+            },
+            {
+                id: 90260406,
+                content: "你好像不太对劲，怎么了？",
+                npc: 100001,
+                next: 90260407,
+            },
+            {
+                id: 90260207,
+                content: "等等，我记得你是白的小仆从来着……意思是她是你师父？……天啊，难道我们中辈分最高的其实是一个小不点吗？！",
+                voice: "char/Suyi/vo_topic_02_6",
+                npc: 81504,
+                options: [
+                    {
+                        id: 90260002,
+                        content: "聊点别的",
+                        next: 90260001,
+                    },
+                    {
+                        id: 90260003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90260307,
+                content:
+                    "有些动物适合伴人左右，但云翎鸥显然不在此列。它尖尖的喙，长长的尾，适应风阻的双翼，足以证明——它属于天空，而并非某人的掌心。",
+                voice: "char/Suyi/vo_topic_03_6",
+                npc: 81504,
+                options: [
+                    {
+                        id: 90260002,
+                        content: "聊点别的",
+                        next: 90260001,
+                    },
+                    {
+                        id: 90260003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90260407,
+                content:
+                    "好敏锐啊，这就是雇佣兵……不对不对，狩月人的直觉？不只是战斗，接人待物也有用？要是我的机傀探测导航装置，也能和你一样灵活就好了。",
+                voice: "char/Suyi/vo_topic_04_5",
+                npc: 81504,
+                next: 90260408,
+            },
+            {
+                id: 90260408,
+                content: "我只是有点迷茫……家应该是一个什么样的地方？",
+                voice: "char/Suyi/vo_topic_04_6",
+                npc: 81504,
+                next: 90260409,
+            },
+            {
+                id: 90260409,
+                content: "那是，不管多远都要回去的地方。",
+                npc: 100001,
+                next: 90260410,
+            },
+            {
+                id: 90260410,
+                content: "那……回不去的地方，还算是家吗？……抱歉，让你听了奇怪的话，还是当我没说过吧！",
+                voice: "char/Suyi/vo_topic_04_7",
+                npc: 81504,
+                options: [
+                    {
+                        id: 90260002,
+                        content: "聊点别的",
+                        next: 90260001,
+                    },
+                    {
+                        id: 90260003,
+                        content: "再见",
+                    },
+                ],
+            },
+        ],
     },
     {
         id: 991801,
@@ -28637,6 +44577,225 @@ export const npcData: NPC[] = [
         camp: "NPC",
         charId: 3201,
         type: "Normal",
+    },
+    {
+        id: 993202,
+        name: "卡米拉",
+        camp: "NPC",
+        charId: 3202,
+        type: "Normal",
+        icon: "Kami",
+        talks: [
+            {
+                id: 90270001,
+                content: "叫醒我的是生意，叫醒你的是什么？",
+                voice: "char/Kami/vo_welcome",
+                npc: 83202,
+                options: [
+                    {
+                        id: 90270100,
+                        content: "水仙平原那几个大酒桶是干什么用的？",
+                        next: 90270101,
+                    },
+                    {
+                        id: 90270200,
+                        content: "“水仙平原”撑起了冰湖城狩月人这样一个职业，真了不起。",
+                        next: 90270201,
+                    },
+                    {
+                        id: 90270300,
+                        content: "金钱对人们究竟意味着什么呢？",
+                        next: 90270301,
+                    },
+                    {
+                        id: 90270400,
+                        content: "关于带我来冰湖城的神秘人，你还知道些什么？",
+                        next: 90270401,
+                    },
+                ],
+            },
+            {
+                id: 90270101,
+                content:
+                    "酒桶？那自然是用来装美酒的。“冰湖往事”爽口，“军团狼血”浓烈，华胥运来的“苍龙醉”清冽悠长，卢卡的“假面舞会”由十种口味混合而成，每个人品出来的味道都不一样。",
+                voice: "char/Kami/vo_topic_01_1",
+                npc: 83202,
+                next: 90270102,
+            },
+            {
+                id: 90270201,
+                content:
+                    "承蒙缪赞。狩月人的历史比我这间酒馆古老得多，他们需要一个地方谈谈天，吹吹牛，交换一下彼此手里的“生意”，就算没有“水仙平原”，也会有“铃兰平原”，“郁金香平原”。",
+                voice: "char/Kami/vo_topic_02_1",
+                npc: 83202,
+                next: 90270202,
+            },
+            {
+                id: 90270301,
+                content: "比起问我，问你自己不是更加合适吗？我还记得你初来冰湖城时无处可去的窘境，你应该很明白，钱是在世间立足的根本。",
+                voice: "char/Kami/vo_topic_03_1",
+                npc: 83202,
+                next: 90270302,
+            },
+            {
+                id: 90270401,
+                content:
+                    "很遗憾，我在冰湖城待了这么多年，但那人我也是第一次瞧见。他把自己裹在一身斗篷里，说话也是用的变声器。从哪儿来的，是男是女，多大年纪……一概不知。",
+                voice: "char/Kami/vo_topic_04_1",
+                npc: 83202,
+                next: 90270402,
+            },
+            {
+                id: 90270102,
+                content: "怎么，你也打算来一杯？",
+                voice: "char/Kami/vo_topic_01_2",
+                npc: 83202,
+                next: 90270103,
+            },
+            {
+                id: 90270202,
+                content: "至于最终他们为什么汇集到我这儿来……无非是好喝的酒，作为中间人的公道无欺，以及人们困窘时给出的一点小恩小惠罢了。",
+                voice: "char/Kami/vo_topic_02_2",
+                npc: 83202,
+                options: [
+                    {
+                        id: 90270002,
+                        content: "聊点别的",
+                        next: 90270001,
+                    },
+                    {
+                        id: 90270003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90270302,
+                content: "我没有忘记，缺钱的时候确实很困难。",
+                voice: "char/Kami/vo_topic_03_2",
+                npc: 100001,
+                next: 90270303,
+            },
+            {
+                id: 90270402,
+                content: "我唯一可以确认的便是他的力量深不可测。只是短暂的交手，我便知绝无胜算。",
+                voice: "char/Kami/vo_topic_04_2",
+                npc: 83202,
+                next: 90270403,
+            },
+            {
+                id: 90270103,
+                content: "别装傻了，我敲过，那些酒桶一直是空的。",
+                npc: 100001,
+                next: 90270104,
+            },
+            {
+                id: 90270303,
+                content:
+                    "只要积累财富，即使无法改变出身，也会获得勇气对抗命运，即使周遭都是风雨，也能给自己买上一瓶酒暖暖身子，甚至能给别人分上一口，赚个人情。",
+                voice: "char/Kami/vo_topic_03_3",
+                npc: 83202,
+                next: 90270304,
+            },
+            {
+                id: 90270403,
+                content: "想不到你会这么谦虚。",
+                npc: 100001,
+                next: 90270404,
+            },
+            {
+                id: 90270104,
+                content: "……呵呵，你聪明了许多，早就不像初来冰湖城那样懵懂无知。",
+                voice: "char/Kami/vo_topic_01_3",
+                npc: 83202,
+                next: 90270105,
+            },
+            {
+                id: 90270304,
+                content: "你说，钱是不是很重要？",
+                npc: 83202,
+                options: [
+                    {
+                        id: 90270002,
+                        content: "聊点别的",
+                        next: 90270001,
+                    },
+                    {
+                        id: 90270003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90270404,
+                content:
+                    "呵呵，对生意人来说，最重要的就是盘清自己和对方手里分别捏着多少价码，只有你们手里的价码差不多时，虚张声势才有意义。这种利弊，我还是看得清。",
+                voice: "char/Kami/vo_topic_04_3",
+                npc: 83202,
+                next: 90270405,
+            },
+            {
+                id: 90270105,
+                content: "冰湖城往北走一百多公里，翻越维德弗尼尔山脉，便是峡湾地埃斯加特——传说中卡戎之民真正的故乡。",
+                voice: "char/Kami/vo_topic_01_4",
+                npc: 83202,
+                next: 90270106,
+            },
+            {
+                id: 90270405,
+                content: "对了，我想起来了，那人离开前说了一句话——",
+                voice: "char/Kami/vo_topic_04_4",
+                npc: 83202,
+                next: 90270406,
+            },
+            {
+                id: 90270106,
+                content: "对于很多冰湖城的卡戎之民来说，隔着一百多公里，一座高山……应许之地也并非远不可及，不是吗？",
+                voice: "char/Kami/vo_topic_01_5",
+                npc: 83202,
+                next: 90270107,
+            },
+            {
+                id: 90270406,
+                content: "他说，他希望从你那里得到的，是一个“答案”。",
+                voice: "char/Kami/vo_topic_04_5",
+                npc: 83202,
+                options: [
+                    {
+                        id: 90270002,
+                        content: "聊点别的",
+                        next: 90270001,
+                    },
+                    {
+                        id: 90270003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90270107,
+                content: "难道你在帮他们偷渡……",
+                npc: 100001,
+                next: 90270108,
+            },
+            {
+                id: 90270108,
+                content: "嘘——我可什么都没有说哦。",
+                voice: "char/Kami/vo_topic_01_6",
+                npc: 83202,
+                options: [
+                    {
+                        id: 90270002,
+                        content: "聊点别的",
+                        next: 90270001,
+                    },
+                    {
+                        id: 90270003,
+                        content: "再见",
+                    },
+                ],
+            },
+        ],
     },
     {
         id: 993301,
@@ -28863,24 +45022,28 @@ export const npcData: NPC[] = [
         id: 2000611,
         name: "{nickname}",
         camp: "NPC",
+        charId: 160101,
         type: "Normal",
     },
     {
         id: 7002101,
         name: "{nickname}",
         camp: "NPC",
+        charId: 160101,
         type: "Normal",
     },
     {
         id: 7900081,
         name: "{nickname}",
         camp: "NPC",
+        charId: 160101,
         type: "Normal",
     },
     {
         id: 7900641,
         name: "{nickname}",
         camp: "NPC",
+        charId: 160101,
         type: "Normal",
     },
     {
@@ -36235,6 +52398,12 @@ export const npcData: NPC[] = [
     {
         id: 77000007,
         name: "测试",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 77000008,
+        name: "interact测试",
         camp: "NPC",
         type: "Normal",
     },

@@ -21,8 +21,7 @@ const filteredBosses = computed(() => {
             return true
         } else {
             const q = searchKeyword.value
-            const monster = monsterMap.get(boss.mid)
-            const monsterName = monster ? monster.n : ""
+            const monsterName = boss.mid.map(id => monsterMap.get(id)?.n ?? "").filter(Boolean).join(" ")
             // 直接匹配（ID、名称、描述）
             if (`${boss.id}`.includes(q) || boss.name.includes(q) || boss.desc?.includes(q) || monsterName.includes(q)) {
                 return true

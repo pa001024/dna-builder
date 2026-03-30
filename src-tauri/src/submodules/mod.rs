@@ -3,6 +3,7 @@ pub mod color;
 pub mod color_match;
 pub mod d3d11;
 pub mod dll_call;
+pub mod font_ocr;
 pub mod fx;
 pub mod hotkey;
 pub mod input;

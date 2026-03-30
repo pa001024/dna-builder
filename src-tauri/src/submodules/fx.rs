@@ -9,9 +9,9 @@ use windows::Win32::Graphics::Gdi::{
     PAINTSTRUCT, PatBlt, ReleaseDC,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
-    CreateWindowExW, HWND_TOPMOST, RegisterClassExW, SW_HIDE, SW_SHOW, SWP_HIDEWINDOW,
-    SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOOWNERZORDER, SWP_NOSIZE, SetWindowPos, ShowWindow,
-    ShowWindowAsync, WNDCLASSEXW, WS_EX_LAYERED, WS_EX_TOOLWINDOW, WS_EX_TRANSPARENT, WS_POPUP,
+    CreateWindowExW, HWND_TOPMOST, RegisterClassExW, SW_HIDE, SWP_HIDEWINDOW, SWP_NOACTIVATE,
+    SWP_NOMOVE, SWP_NOOWNERZORDER, SWP_NOSIZE, SWP_SHOWWINDOW, SetWindowPos, ShowWindowAsync,
+    WNDCLASSEXW, WS_EX_LAYERED, WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_EX_TRANSPARENT, WS_POPUP,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
     DefWindowProcW, HCURSOR, HICON, IsWindow, WM_DESTROY, WM_PAINT, WNDCLASS_STYLES,
@@ -93,7 +93,7 @@ impl RectOverlay {
 
             // 创建窗口
             let hwnd = CreateWindowExW(
-                WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW,
+                WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE,
                 PCWSTR(class_name.as_ptr()),
                 PCWSTR(std::ptr::null()),
                 WS_POPUP,
@@ -169,21 +169,18 @@ impl RectOverlay {
         // 显示窗口并设置位置
         if let Some(hwnd) = self.hwnd {
             unsafe {
-                // 设置窗口位置和大小
+                // 设置窗口位置和大小。
                 let _ = SetWindowPos(
                     hwnd,
-                    Some(HWND_TOPMOST), // 使用正确的 HWND_TOPMOST 常量
+                    Some(HWND_TOPMOST),
                     x,
                     y,
                     width,
                     height,
-                    SWP_NOACTIVATE | SWP_NOOWNERZORDER,
+                    SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_SHOWWINDOW,
                 );
 
-                // 显示窗口
-                let _ = ShowWindow(hwnd, SW_SHOW);
-
-                // 直接绘制边框
+                // 直接绘制边框。
                 self.draw_border();
             }
         } else {

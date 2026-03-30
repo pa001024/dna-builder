@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { RouteLocationRaw } from "vue-router"
+import { type RouteLocationRaw } from "vue-router"
 import { openSChat } from "@/api/swindow"
 import { env } from "@/env"
 
@@ -10,12 +10,16 @@ const props = defineProps<{
     activeClass?: string
     exactActiveClass?: string
     ariaCurrentValue?: string
+    stop?: boolean
 }>()
 
 // 继承RouterLink的所有emits
 defineEmits(["click"])
 
 function handleClick(event: MouseEvent, navigate: Function) {
+    if (props.stop) {
+        event.stopPropagation()
+    }
     if (event.ctrlKey && env.isApp) {
         // 如果按住了Ctrl键，阻止默认导航行为，打开新窗口
         event.preventDefault()

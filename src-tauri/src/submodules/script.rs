@@ -1,5 +1,6 @@
 use crate::submodules::async_tokio::TokioJobExecutor;
 use crate::submodules::fx::hide_border_immediately;
+use crate::submodules::input::clear_last_background_activated_hwnd;
 use crate::submodules::jsdnn::JsDnnNet;
 use crate::submodules::jsmat::JsMat;
 use crate::submodules::jstimer::JsTimer;
@@ -635,6 +636,7 @@ pub async fn run_script_file(
     app_handle: tauri::AppHandle,
 ) -> Result<String, String> {
     let normalized_path = normalize_script_path(script_path)?;
+    clear_last_background_activated_hwnd();
     run_script_with_tauri_console(normalized_path, app_handle).await
 }
 
@@ -646,6 +648,7 @@ pub async fn run_script_file_cli(
     script_config_file_path: Option<String>,
 ) -> Result<String, String> {
     let normalized_path = normalize_script_path(script_path)?;
+    clear_last_background_activated_hwnd();
     run_script_with_stdio_console(normalized_path, script_config, script_config_file_path).await
 }
 

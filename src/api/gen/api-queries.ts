@@ -538,8 +538,8 @@ export const scriptsCountQuery = typedQuery(
 
 export const scriptQuery = typedQuery(
     /* GraphQL */ `
-        query ($id: String!) {
-            script(id: $id) {
+        query ($id: String!, $preview: Boolean) {
+            script(id: $id, preview: $preview) {
                 id
                 title
                 description
@@ -561,7 +561,7 @@ export const scriptQuery = typedQuery(
             }
         }
     ` as const
-)<Types.Script, { id: string }>()
+)<Types.Script, { id: string; preview?: boolean }>()
 
 export const rtcClientsQuery = typedQuery(
     /* GraphQL */ `

@@ -514,6 +514,7 @@ export const titleData: Title[] = [
         id: 10090,
         name: "苏乙的",
         suf: false,
+        src: "成就「停驻光阴·苏乙」",
     },
     {
         id: 10091,
@@ -577,6 +578,7 @@ export const titleData: Title[] = [
         id: 10101,
         name: "卡米拉的",
         suf: false,
+        src: "成就「停驻光阴·卡米拉」",
     },
     {
         id: 10102,
@@ -594,11 +596,13 @@ export const titleData: Title[] = [
         id: 10104,
         name: "止流的",
         suf: false,
+        src: "成就「停驻光阴·止流」",
     },
     {
         id: 10105,
         name: "煜明的",
         suf: false,
+        src: "成就「停驻光阴·煜明」",
     },
     {
         id: 10106,
@@ -646,6 +650,28 @@ export const titleData: Title[] = [
         id: 10113,
         name: "机枢派的",
         suf: false,
+    },
+    {
+        id: 10114,
+        name: "胡气满满的",
+        suf: false,
+    },
+    {
+        id: 10115,
+        name: "有胡同享的",
+        suf: false,
+    },
+    {
+        id: 10116,
+        name: "成龙的",
+        suf: false,
+        src: "成就「成龙之望」",
+    },
+    {
+        id: 10117,
+        name: "直视神明的",
+        suf: false,
+        src: "成就「万法归一」",
     },
     {
         id: 20001,
@@ -1064,6 +1090,7 @@ export const titleData: Title[] = [
         id: 20074,
         name: "苏乙",
         suf: true,
+        src: "成就「休憩一刻·苏乙」",
     },
     {
         id: 20075,
@@ -1127,6 +1154,7 @@ export const titleData: Title[] = [
         id: 20085,
         name: "卡米拉",
         suf: true,
+        src: "成就「休憩一刻·卡米拉」",
     },
     {
         id: 20086,
@@ -1198,6 +1226,12 @@ export const titleData: Title[] = [
         id: 20097,
         name: "神之一手",
         suf: true,
+    },
+    {
+        id: 20098,
+        name: "姑奶奶",
+        suf: true,
+        src: "成就「辈分学问」",
     },
 ]
 

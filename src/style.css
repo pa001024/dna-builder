@@ -291,6 +291,10 @@ body {
         "Helvetica Neue";
 }
 
+:root.is-jiaojiao-font {
+    font-family: var(--font-wt);
+}
+
 #app {
     width: 100%;
     height: 100%;

@@ -51,8 +51,27 @@ const bossDetail = computed<HardBossDetail | undefined>(() => {
     return getHardBossDetail(props.boss.id)
 })
 
-// 获取怪物数据
-const monster = computed(() => monsterMap.get(props.boss.mid))
+/**
+ * 获取高难 Boss 关联的怪物列表。
+ * @returns 关联的怪物数据列表
+ */
+const monsters = computed(() => {
+    return props.boss.mid.map(id => monsterMap.get(id)).filter(monster => Boolean(monster))
+})
+
+/**
+ * 获取高难 Boss 关联的怪物名称列表。
+ * @returns 关联的怪物名称列表
+ */
+const monsterNames = computed(() => {
+    return props.boss.mid.map(id => monsterMap.get(id)?.n ?? `ID:${id}`)
+})
+
+/**
+ * 获取首个关联怪物。
+ * @returns 首个怪物数据；不存在时返回 null
+ */
+const monster = computed(() => monsters.value[0] ?? null)
 
 /**
  * 拉平全部动态奖励。
@@ -321,6 +340,9 @@ function getRewardStatusText(startTime: number, endTime: number): { text: string
         <!-- 怪物信息 -->
         <div v-if="monster" class="card bg-base-100 border border-base-200 rounded-lg p-3">
             <h3 class="font-bold mb-2">怪物信息</h3>
+            <div class="mb-3 flex flex-wrap gap-2 text-xs text-base-content/70">
+                <span v-for="(name, index) in monsterNames" :key="`${name}-${index}`" class="rounded bg-base-200 px-2 py-1">{{ name }}</span>
+            </div>
             <DBMonsterDetailItem :monster="monster" :defaultLevel="80" />
         </div>
 

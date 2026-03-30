@@ -200,7 +200,7 @@ function generateResourceTree(
     // 处理图纸和材料
     const draft = mod.draft
     const costDraft = mod.costDraft
-    if (costDraft && draft) {
+    if (costDraft) {
         const processDraft = (d: Draft, multiplier: number, parent: ResourceTreeNode) => {
             // 添加图纸信息
             if (d.t === "Mod") {
@@ -292,22 +292,43 @@ function generateResourceTree(
                 totalGold += gold[i] * count
             }
 
-            if (costDraft.id !== draft.id) {
-                const draftName = `图纸: ${draft.n}`
-                root.children!.push({
-                    id: `mod-${mod.id}-draft-${draft.id}`,
-                    cid: draft.p,
-                    name: draftName,
-                    type: "Draft",
-                    amount: count,
-                })
+            // 只有存在本体蓝图时，才需要补“本体制造”那 1 份。
+            // 直接赠送的 mod 没有本体制造需求，不能把 count 再加进去。
+            if (draft) {
+                if (costDraft.id !== draft.id) {
+                    const draftName = `图纸: ${draft.n}`
+                    root.children!.push({
+                        id: `mod-${mod.id}-draft-${draft.id}`,
+                        cid: draft.p,
+                        name: draftName,
+                        type: "Draft",
+                        amount: count,
+                    })
+                } else {
+                    totalGold = selfGold = totalGold + count
+                }
             } else {
-                totalGold = selfGold = totalGold + count
+                selfGold = totalGold
+            }
+
+            const resourceParent: ResourceTreeNode = draft
+                ? root
+                : {
+                      id: `mod-${mod.id}-product-${costDraft.id}`,
+                      name: costDraft.n,
+                      cid: costDraft.p,
+                      type: "Mod",
+                      amount: selfGold,
+                      children: [],
+                  }
+
+            if (!draft) {
+                root.children!.push(resourceParent)
             }
 
             // 添加委托密函线索消耗
             if (mod.walnut) {
-                root.children!.push({
+                resourceParent.children!.push({
                     id: `mod-${mod.id}-resource-委托密函线索`,
                     name: "委托密函线索",
                     type: "Resource",
@@ -317,7 +338,7 @@ function generateResourceTree(
 
             // 添加商店材料消耗
             if (mod.shop) {
-                root.children!.push({
+                resourceParent.children!.push({
                     id: `mod-${mod.id}-resource-${mod.shop.price}`,
                     name: mod.shop.price,
                     type: "Resource",
@@ -327,7 +348,14 @@ function generateResourceTree(
         }
 
         // 处理图纸
-        processDraft(costDraft, totalGold, root)
+        if (!draft) {
+            const productNode = root.children!.find(child => child.id === `mod-${mod.id}-product-${costDraft.id}`)
+            if (productNode) {
+                processDraft(costDraft, selfGold, productNode)
+            }
+        } else {
+            processDraft(costDraft, totalGold, root)
+        }
     }
 
     return root
@@ -766,11 +794,17 @@ function calculateModLevelUpCost(
                 totalGold += gold[i] * n
             }
 
-            if (draft && d.id !== draft.id) {
-                const self = `图纸: ${draft.n}-${draft.id}`
-                cost[self] = [n, draft.p, "Draft"]
+            // 只有存在本体蓝图时，才需要额外补本体制造次数。
+            // 直接赠送的 mod 没有本体制造需求，这里不能把 count 再加 1。
+            if (draft) {
+                if (d.id !== draft.id) {
+                    const self = `图纸: ${draft.n}-${draft.id}`
+                    cost[self] = [n, draft.p, "Draft"]
+                } else {
+                    selfGold = totalGold = totalGold + n
+                }
             } else {
-                selfGold = totalGold = totalGold + n
+                selfGold = totalGold
             }
 
             if (mod.walnut) {

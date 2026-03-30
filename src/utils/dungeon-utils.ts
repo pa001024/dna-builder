@@ -2,6 +2,10 @@ import { t } from "i18next"
 import { type AbyssDungeon, abyssDungeonMap, type Dungeon, monsterMap } from "../data"
 import { getRewardDetails } from "./reward-utils"
 
+export const ABYSS_DUNGEON_ELEMENT_KEYS = ["暗", "水", "火", "雷", "风", "光"] as const
+
+export type AbyssDungeonElementKey = (typeof ABYSS_DUNGEON_ELEMENT_KEYS)[number]
+
 // 获取副本类型信息
 export function getDungeonType(type: string): { t: string; label: string; color: string } {
     const typeMap: Record<string, { t: string; label: string; color: string }> = {
@@ -43,6 +47,24 @@ export function getAbyssDungeonLevel(dungeon: AbyssDungeon) {
 
 export function getAbyssDungeonName(dungeon: AbyssDungeon) {
     return `${getAbyssDungeonGroup(dungeon)} ${getAbyssDungeonLevel(dungeon)}`
+}
+
+/**
+ * 判断深渊副本是否存在 400% 的怪物属性加成。
+ */
+export function hasAbyssDungeonMaxMb(dungeon: AbyssDungeon) {
+    return Object.values(dungeon.mb || {}).some(value => value === 4)
+}
+
+/**
+ * 格式化深渊副本怪物属性加成。
+ * 当存在 400% 加成时，未配置的属性按 -50% 展示，避免出现 NaN。
+ */
+export function formatAbyssDungeonMbValue(dungeon: AbyssDungeon, key: AbyssDungeonElementKey) {
+    const value = dungeon.mb?.[key]
+    const displayValue = typeof value === "number" ? value : hasAbyssDungeonMaxMb(dungeon) ? -0.5 : undefined
+
+    return typeof displayValue === "number" ? `${(displayValue * 100).toFixed(0)}%` : "--"
 }
 
 const mhList = [

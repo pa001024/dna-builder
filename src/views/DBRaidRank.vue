@@ -2,7 +2,15 @@
 import { computed, ref, watch } from "vue"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { dungeonMap } from "@/data"
-import { PreRaidRank, RaidBuff, RaidCalculation, RaidDungeon, RaidSeason } from "../data/d/raid.data"
+import {
+    getPreRaidRankReward,
+    PreRaidRank,
+    type PreRaidRankRewardItem,
+    RaidBuff,
+    RaidCalculation,
+    RaidDungeon,
+    RaidSeason,
+} from "../data/d/raid.data"
 import { getDropModeText, getRewardDetails } from "../utils/reward-utils"
 
 // 计算分数函数
@@ -143,16 +151,43 @@ const currentDungeon = computed(() => {
 })
 
 // 原始排名数据（暂时保留）
-const rankData = computed(() => {
-    const data = PreRaidRank[selectedSeason.value]
-    if (!data) return undefined
+interface RankDataItem {
+    percent: number
+    rank: string
+    reward: PreRaidRankRewardItem
+}
 
-    return data.RankName.map((item, index) => ({
-        rank: item,
-        percent: data.RankPercent[index],
-        reward: data.RankReward[index],
-    }))
+const titleFrameByRaidSeason: Record<number, Record<string, number>> = {
+    1003: {
+        SSS: 10021,
+        SS: 10022,
+        S: 10023,
+        A: 10024,
+        B: 10025,
+    },
+}
+
+const rankData = computed<RankDataItem[]>(() => {
+    const data = PreRaidRank[selectedSeason.value]
+    if (!data) return []
+
+    return data.RankName.flatMap((item, index) => {
+        const reward = getPreRaidRankReward(selectedSeason.value, index)
+        if (!reward) return []
+
+        return [
+            {
+                rank: item,
+                percent: data.RankPercent[index],
+                reward,
+            },
+        ]
+    })
 })
+
+function getTitleFrameId(rank: string) {
+    return titleFrameByRaidSeason[selectedSeason.value]?.[rank]
+}
 
 function getDungeonName(dungeonId: number) {
     return dungeonMap.get(dungeonId)?.n || `${dungeonId}`
@@ -292,31 +327,32 @@ function getSeasonName(str: number) {
                     </div>
                 </div>
                 <div class="inline-flex relative">
-                    <img class="h-12" :src="`/imgs/rank/${selectedSeason}_${item.rank}.webp`" :alt="item.rank" />
+                    <TitleFrameRender
+                        v-if="getTitleFrameId(item.rank)"
+                        class="w-48 h-12 max-w-full shrink-0"
+                        :title-frame-id="getTitleFrameId(item.rank)"
+                    />
+                    <img v-else class="h-12" :src="`/imgs/rank/${selectedSeason}_${item.rank}.webp`" :alt="item.rank" />
                     <div class="absolute inset-0 flex items-center justify-center">
-                        <p class="text-sm font-bold text-white">{{ getRewardDetails(item.reward)!.child?.[0].n }}</p>
+                        <p class="text-sm font-bold text-white">{{ item.reward.child?.[0].n }}</p>
                     </div>
                 </div>
-                <div
-                    v-for="reward in [getRewardDetails(item.reward)]"
-                    :key="reward?.id"
-                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors"
-                >
+                <div :key="item.reward.id" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors">
                     <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium">奖励组 {{ reward?.id }}</span>
+                        <span class="text-sm font-medium">奖励组 {{ item.reward.id }}</span>
                         <span
                             class="text-xs px-1.5 py-0.5 rounded"
                             :class="
-                                getDropModeText(reward?.m || '') === '独立'
+                                getDropModeText(item.reward.m || '') === '独立'
                                     ? 'bg-success text-success-content'
                                     : 'bg-warning text-warning-content'
                             "
                         >
-                            {{ getDropModeText(reward?.m || "") }}
+                            {{ getDropModeText(item.reward.m || "") }}
                         </span>
                     </div>
                     <!-- 使用 RewardItem 组件显示奖励 -->
-                    <RewardItem :reward="reward!" />
+                    <RewardItem :reward="item.reward" />
                 </div>
             </div>
         </div>

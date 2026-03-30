@@ -84,6 +84,51 @@ function getSelectedOption(scopeKey: string, dialogue: Dialogue): DialogueOption
 }
 
 /**
+ * 递归收集对话及其嵌套选项，建立可查询映射。
+ * @param dialogue 当前对话节点
+ * @param dialogueMap 对话映射
+ * @param incomingIds 入边节点集合
+ */
+function collectDialogueNode(
+    dialogue: Dialogue,
+    dialogueMap: Map<number, Dialogue>,
+    incomingIds: Set<number>
+): void {
+    dialogueMap.set(dialogue.id, dialogue)
+
+    if (dialogue.next !== undefined) {
+        incomingIds.add(dialogue.next)
+    }
+
+    for (const option of dialogue.options ?? []) {
+        collectDialogueOption(option, dialogueMap, incomingIds)
+    }
+}
+
+/**
+ * 递归收集嵌套选项节点。
+ * @param option 对话选项
+ * @param dialogueMap 对话映射
+ * @param incomingIds 入边节点集合
+ */
+function collectDialogueOption(
+    option: DialogueOption,
+    dialogueMap: Map<number, Dialogue>,
+    incomingIds: Set<number>
+): void {
+    dialogueMap.set(option.id, option)
+    incomingIds.add(option.id)
+
+    if (option.next !== undefined) {
+        incomingIds.add(option.next)
+    }
+
+    for (const childOption of option.options ?? []) {
+        collectDialogueOption(childOption, dialogueMap, incomingIds)
+    }
+}
+
+/**
  * 从指定起点串接对话链，并防止循环引用导致死循环。
  * @param startId 起始对话 ID
  * @param dialogueMap 对话映射
@@ -134,17 +179,7 @@ function buildDialogueChain(dialogues: Dialogue[], scopeKey: string): DialogueCh
     const incomingIds = new Set<number>()
 
     for (const dialogue of dialogues) {
-        dialogueMap.set(dialogue.id, dialogue)
-
-        if (dialogue.next !== undefined) {
-            incomingIds.add(dialogue.next)
-        }
-
-        for (const option of dialogue.options ?? []) {
-            if (option.next !== undefined) {
-                incomingIds.add(option.next)
-            }
-        }
+        collectDialogueNode(dialogue, dialogueMap, incomingIds)
     }
 
     const startDialogues = dialogues.filter(dialogue => !incomingIds.has(dialogue.id))

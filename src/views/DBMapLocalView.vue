@@ -3,7 +3,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
 import { useRoute } from "vue-router"
 import { petMap } from "@/data/d"
 import regionData, { type Region, regionMap } from "@/data/d/region.data"
-import { type SubRegion, subRegionData } from "@/data/d/subregion.data"
+import { type SubRegion, subRegionData, type TeleportPoint } from "@/data/d/subregion.data"
 import { LeveledPet } from "@/data/leveled/LeveledPet"
 
 type LayerSelectMode = "single" | "multi"
@@ -83,6 +83,11 @@ interface ProjectedRcPoint extends MapPoint {
     worldY: number
 }
 
+interface ProjectedTeleportPoint extends TeleportPoint, MapPoint {
+    worldX: number
+    worldY: number
+}
+
 interface ProjectedRcInfo {
     rcId: number
     rcIndex: number
@@ -107,6 +112,8 @@ interface ProjectedSubRegionPoint {
     rangeOutline: MapPoint[]
     rcInfos: ProjectedRcInfo[]
     rcPointCount: number
+    tpPoints: ProjectedTeleportPoint[]
+    tpPointCount: number
 }
 
 interface HoverCoordinateInfo {
@@ -194,6 +201,7 @@ const selectedSubRegionId = ref<number | null>(null)
 const hoveredSubRegionId = ref<number | null>(null)
 const selectedRcState = ref<{ subRegionId: number; rcId: number; rcIndex: number } | null>(null)
 const hoverCoordinateInfo = ref<HoverCoordinateInfo | null>(null)
+const showTeleportPoints = ref(true)
 
 let resizeObserver: ResizeObserver | null = null
 let drawRaf = 0
@@ -344,6 +352,29 @@ function buildProjectedRcInfos(subRegion: SubRegion): ProjectedRcInfo[] {
     })
 
     return result
+}
+
+/**
+ * 构建单个子区域的传送点，并映射到当前地图坐标。
+ */
+function buildProjectedTeleportPoints(subRegion: SubRegion): ProjectedTeleportPoint[] {
+    if (!subRegion.tp?.length) return []
+
+    return subRegion.tp
+        .map(tp => {
+            const normalized = normalizeCoordinatePair(tp.pos)
+            if (!normalized) return null
+
+            const mapped = projectWorldToMap(normalized[0], normalized[1])
+            return {
+                ...tp,
+                worldX: normalized[0],
+                worldY: normalized[1],
+                x: mapped.x,
+                y: mapped.y,
+            } satisfies ProjectedTeleportPoint
+        })
+        .filter((value): value is ProjectedTeleportPoint => value !== null)
 }
 
 /**
@@ -518,6 +549,21 @@ const composedBounds = computed<MapBounds>(() => {
 const sourceSize = computed(() => ({ width: composedBounds.value.width, height: composedBounds.value.height }))
 
 /**
+ * base 图层包围盒。
+ * 说明：像净界岛这类把子区域贴到主底图上的地图，点位投影应以主底图尺寸为准，不能把子区域 overlay 一起并入投影尺寸。
+ */
+const baseProjectionBounds = computed<MapBounds | null>(() => {
+    const baseRects = allLayerDrawRects.value.filter(rect => detectLayerGroupId(rect.layer) === "base" && rect.w > 0 && rect.h > 0)
+    if (baseRects.length === 0) return null
+
+    const minX = Math.min(...baseRects.map(rect => rect.x))
+    const minY = Math.min(...baseRects.map(rect => rect.y))
+    const maxX = Math.max(...baseRects.map(rect => rect.x + rect.w))
+    const maxY = Math.max(...baseRects.map(rect => rect.y + rect.h))
+    return { minX, minY, width: Math.max(1, maxX - minX), height: Math.max(1, maxY - minY) }
+})
+
+/**
  * floor 图层包围盒。仅在 floor 与完整合成边界中心发生偏移时用于投影修正。
  * 说明：龙莎要塞底图(Bg)有明显偏移，若直接用 composedBounds 会导致点位整体错位。
  */
@@ -557,6 +603,9 @@ const shouldUseFloorProjectionBounds = computed(() => {
 const projectionBounds = computed<MapBounds>(() => {
     if (shouldUseFloorProjectionBounds.value && floorProjectionBounds.value) {
         return floorProjectionBounds.value
+    }
+    if (baseProjectionBounds.value) {
+        return baseProjectionBounds.value
     }
     return composedBounds.value
 })
@@ -718,6 +767,7 @@ const projectedSubRegions = computed<ProjectedSubRegionPoint[]>(() => {
         const rangeOutline = rangeCenter ? buildProjectedRangeOutline(rangeCenter, extent) : []
         const rcInfos = buildProjectedRcInfos(subRegion)
         const rcPointCount = rcInfos.reduce((sum, rcInfo) => sum + rcInfo.points.length, 0)
+        const tpPoints = buildProjectedTeleportPoints(subRegion)
 
         result.push({
             id: subRegion.id,
@@ -732,11 +782,14 @@ const projectedSubRegions = computed<ProjectedSubRegionPoint[]>(() => {
             rangeOutline,
             rcInfos,
             rcPointCount,
+            tpPoints,
+            tpPointCount: tpPoints.length,
         })
     }
 
     return result
 })
+const totalTeleportPointCount = computed(() => projectedSubRegions.value.reduce((sum, subRegion) => sum + subRegion.tpPointCount, 0))
 
 const selectedSubRegion = computed(() => {
     if (selectedSubRegionId.value === null) return null
@@ -772,6 +825,8 @@ const consumedRouteTargetToken = ref("")
 const imagePromiseCache = new Map<string, Promise<HTMLImageElement>>()
 const rcIconImageCache = new Map<string, HTMLImageElement>()
 const rcIconPromiseCache = new Map<string, Promise<HTMLImageElement>>()
+const tpIconImageCache = new Map<string, HTMLImageElement>()
+const tpIconPromiseCache = new Map<string, Promise<HTMLImageElement>>()
 function loadLayerImage(fileName: string): Promise<HTMLImageElement> {
     const cacheKey = `/imgs/world/${fileName}`
     const cached = imagePromiseCache.get(cacheKey)
@@ -815,6 +870,42 @@ function ensureRcIconImageLoaded(iconUrl: string): HTMLImageElement | null {
     }
 
     return null
+}
+
+/**
+ * 加载传送点图标，若已就绪则返回图像对象，否则返回 null 并等待下一帧重绘。
+ */
+function ensureTpIconImageLoaded(iconUrl: string): HTMLImageElement | null {
+    if (!iconUrl) return null
+    const cached = tpIconImageCache.get(iconUrl)
+    if (cached) return cached
+
+    if (!tpIconPromiseCache.has(iconUrl)) {
+        const promise = new Promise<HTMLImageElement>((resolve, reject) => {
+            const image = new Image()
+            image.onload = () => resolve(image)
+            image.onerror = () => reject(new Error(`加载 TP 图标失败: ${iconUrl}`))
+            image.src = iconUrl
+        })
+        tpIconPromiseCache.set(iconUrl, promise)
+        promise
+            .then(image => {
+                tpIconImageCache.set(iconUrl, image)
+                requestDraw()
+            })
+            .catch(() => {
+                tpIconPromiseCache.delete(iconUrl)
+            })
+    }
+
+    return null
+}
+
+/**
+ * 将传送点 icon 映射到本地静态资源路径。
+ */
+function resolveTeleportPointIconUrl(icon: string): string {
+    return icon ? `/imgs/tp/${icon}.webp` : ""
 }
 
 /**
@@ -1064,6 +1155,29 @@ function pickRcPointByScreenPosition(screenX: number, screenY: number): { subReg
 }
 
 /**
+ * 按点击位置命中传送点，并返回其所属子区域。
+ */
+function pickTeleportPointByScreenPosition(screenX: number, screenY: number): { subRegionId: number; tpPoint: ProjectedTeleportPoint } | null {
+    const mapPoint = screenToMap(screenX, screenY)
+    const threshold = 18 / zoom.value
+
+    let nearest: { subRegionId: number; tpPoint: ProjectedTeleportPoint } | null = null
+    let nearestDistance = Number.POSITIVE_INFINITY
+
+    for (const subRegion of projectedSubRegions.value) {
+        for (const tpPoint of subRegion.tpPoints) {
+            const distance = Math.hypot(tpPoint.x - mapPoint.x, tpPoint.y - mapPoint.y)
+            if (distance <= threshold && distance < nearestDistance) {
+                nearestDistance = distance
+                nearest = { subRegionId: subRegion.id, tpPoint }
+            }
+        }
+    }
+
+    return nearest
+}
+
+/**
  * 请求下一帧重绘。
  */
 function requestDraw() {
@@ -1209,6 +1323,56 @@ function drawHighlightedRcPoints(ctx: CanvasRenderingContext2D) {
 }
 
 /**
+ * 绘制子区域中的传送点。
+ */
+function drawTeleportPoints(ctx: CanvasRenderingContext2D) {
+    if (projectedSubRegions.value.length === 0) return
+
+    ctx.save()
+    const normalRadius = 5 / zoom.value
+    const iconSize = 28 / zoom.value
+    const labelPaddingX = 2 / zoom.value
+    const labelPaddingY = 1 / zoom.value
+    const labelHeight = 13 / zoom.value
+    const labelOffsetX = 3 / zoom.value
+    const labelOffsetY = 2 / zoom.value
+
+    ctx.textBaseline = "top"
+    ctx.font = `${10 / zoom.value}px sans-serif`
+
+    for (const subRegion of projectedSubRegions.value) {
+        if (subRegion.tpPoints.length === 0) continue
+
+        for (const tpPoint of subRegion.tpPoints) {
+            const iconUrl = resolveTeleportPointIconUrl(tpPoint.icon)
+            const iconImage = ensureTpIconImageLoaded(iconUrl)
+
+            ctx.save()
+            ctx.globalAlpha = 1
+            if (iconImage) {
+                ctx.drawImage(iconImage, tpPoint.x - iconSize / 2, tpPoint.y - iconSize / 2, iconSize, iconSize)
+            } else {
+                ctx.beginPath()
+                ctx.arc(tpPoint.x, tpPoint.y, normalRadius, 0, Math.PI * 2)
+                ctx.fillStyle = "rgba(45, 212, 191, 0.95)"
+                ctx.fill()
+            }
+
+            const tag = formatSubRegionLabel(tpPoint.name)
+            const textWidth = ctx.measureText(tag).width
+            const labelX = tpPoint.x + normalRadius + labelOffsetX
+            const labelY = tpPoint.y - normalRadius - labelOffsetY
+            ctx.fillStyle = "rgba(0, 0, 0, 0.66)"
+            ctx.fillRect(labelX - labelPaddingX, labelY - labelPaddingY, textWidth + labelPaddingX * 2, labelHeight)
+            ctx.fillStyle = "rgba(255, 255, 255, 0.95)"
+            ctx.fillText(tag, labelX, labelY)
+            ctx.restore()
+        }
+    }
+    ctx.restore()
+}
+
+/**
  * 地图标签名称截断，避免长名称遮挡大量区域。
  */
 function formatSubRegionLabel(name: string): string {
@@ -1237,6 +1401,9 @@ function formatRcLabel(name: string): string {
 function drawSubRegionPoints(ctx: CanvasRenderingContext2D) {
     drawHoveredRangeOutline(ctx)
     drawHighlightedRcPoints(ctx)
+    if (showTeleportPoints.value) {
+        drawTeleportPoints(ctx)
+    }
 
     const baseFontPx = 12 / zoom.value
     const labelPaddingX = 3 / zoom.value
@@ -1339,6 +1506,11 @@ function updateHoveredSubRegionByPointerEvent(event: PointerEvent) {
         hoveredSubRegionId.value = rcHit.subRegionId
         return
     }
+    const tpHit = pickTeleportPointByScreenPosition(event.clientX - rect.left, event.clientY - rect.top)
+    if (tpHit) {
+        hoveredSubRegionId.value = tpHit.subRegionId
+        return
+    }
     const hit = pickSubRegionByScreenPosition(event.clientX - rect.left, event.clientY - rect.top)
     hoveredSubRegionId.value = hit ? hit.id : null
 }
@@ -1437,6 +1609,13 @@ function handleCanvasClick(event: MouseEvent) {
         selectRc(rcHit.subRegionId, rcHit.rcInfo.rcId, rcHit.rcInfo.rcIndex)
         return
     }
+    const tpHit = pickTeleportPointByScreenPosition(event.clientX - rect.left, event.clientY - rect.top)
+    if (tpHit) {
+        selectedSubRegionId.value = tpHit.subRegionId
+        selectedRcState.value = null
+        requestDraw()
+        return
+    }
     const hit = pickSubRegionByScreenPosition(event.clientX - rect.left, event.clientY - rect.top)
     selectedSubRegionId.value = hit ? hit.id : null
     selectedRcState.value = null
@@ -1475,6 +1654,7 @@ watch(
 watch(
     () => [
         activeLayers.value.map(layer => layer.id).join("|"),
+        showTeleportPoints.value ? 1 : 0,
         projectedSubRegions.value.length,
         selectedSubRegionId.value ?? -1,
         hoveredSubRegionId.value ?? -1,
@@ -1547,6 +1727,10 @@ onUnmounted(() => {
                         </label>
                     </div>
                 </div>
+                <label class="flex items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 hover:bg-base-200">
+                    <input v-model="showTeleportPoints" type="checkbox" class="checkbox checkbox-xs" />
+                    <span>显示TP点</span>
+                </label>
             </div>
 
             <div class="space-y-2">
@@ -1620,6 +1804,16 @@ onUnmounted(() => {
                         </div>
                     </div>
                 </div>
+
+                <div v-if="selectedSubRegion.tpPoints.length > 0" class="mt-2 rounded border border-base-300 bg-base-100/85 p-2 text-xs space-y-1">
+                    <div class="font-medium">TP 点位</div>
+                    <div class="grid gap-1">
+                        <div v-for="tpPoint in selectedSubRegion.tpPoints" :key="tpPoint.id" class="flex items-center gap-2 opacity-90">
+                            <img :src="resolveTeleportPointIconUrl(tpPoint.icon)" :alt="tpPoint.name" class="size-4 shrink-0" />
+                            <span class="min-w-0 truncate">{{ tpPoint.name }}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </aside>
 
@@ -1644,7 +1838,8 @@ onUnmounted(() => {
 
             <div class="absolute top-3 right-3 z-10 space-y-2 max-w-90">
                 <div class="badge badge-neutral badge-lg">
-                    缩放 {{ (zoom * 100).toFixed(0) }}% | 图层 {{ activeLayers.length }} | 点位 {{ projectedSubRegions.length }}
+                    缩放 {{ (zoom * 100).toFixed(0) }}% | 图层 {{ activeLayers.length }} | 点位 {{ projectedSubRegions.length }} | TP
+                    {{ totalTeleportPointCount }}
                 </div>
                 <div v-if="hoverCoordinateInfo" class="rounded-md border border-base-300 bg-base-100/90 px-3 py-2 text-xs leading-5 shadow">
                     <div>Map: {{ hoverCoordinateInfo.mapX.toFixed(2) }}, {{ hoverCoordinateInfo.mapY.toFixed(2) }}</div>

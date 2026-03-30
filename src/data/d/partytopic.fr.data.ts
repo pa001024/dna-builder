@@ -23,7 +23,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80040102,
-                content: "Hmm... d’accord...",
+                content: "<I>Hmm...</> d’accord...",
                 voice: "inv/Heitao/001/C85F3B3C",
                 npc: 790007,
                 next: 80040103,
@@ -457,7 +457,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80040222,
-                content: "Toi... Non, c'est différent pour toi !",
+                content: "Toi... Non, c’est différent pour toi !",
                 voice: "inv/Heitao/002/C85F4EEC",
                 npc: 790007,
                 next: 80040223,
@@ -529,7 +529,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80040316,
-                content: "J’y pense souvent… Peut-être qu’un jour, on pourra quitter l'Île du Purgatoire. Qu’est-ce que t’en penses ?",
+                content: "J’y pense souvent… Peut-être qu’un jour, on pourra quitter l’Île du Purgatoire. Qu’est-ce que t’en penses ?",
                 voice: "inv/Heitao/003/C85F5E58",
                 npc: 790008,
                 next: 80040317,
@@ -1405,7 +1405,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80140206,
-                content: "Voici une broche commémorative célébrant les 200 ans du théâtre. Nous serions honorés que vous l'acceptiez.",
+                content: "Voici une broche commémorative célébrant les 200 ans du théâtre. Nous serions honorés que vous l’acceptiez.",
                 voice: "inv/Tuosi/002/C89F628C",
                 npc: 790043,
                 next: 80140207,
@@ -2418,6 +2418,15 @@ export const partyTopicData_fr: PartyTopic[] = [
                 npc: 790029,
             },
         ],
+    },
+    {
+        id: 150101,
+        charId: 1501,
+        name: "",
+        reward: 7050,
+        consume: {
+            "19006": 2,
+        },
     },
     {
         id: 150201,
@@ -5682,6 +5691,1178 @@ export const partyTopicData_fr: PartyTopic[] = [
         ],
     },
     {
+        id: 150401,
+        charId: 1504,
+        name: "Ne plus errer au loin",
+        desc: "Les feuilles portées par le vent finissent par retomber sur la terre. Ceux qui ont longtemps erré trouvent, eux aussi, le chemin du retour.",
+        memoryName: "Oiseau à câlins au parfum de soleil",
+        memoryDesc:
+            "Un petit oiseau rondouillard dont nul ne connaît le nom, gros comme un avant-bras. En le serrant contre soi, on peut enfouir son visage dans son ventre moelleux et laisser s’envoler la fatigue de la journée.",
+        reward: 7050,
+        consume: {
+            "19003": 3,
+            "19006": 3,
+        },
+        dialogues: [
+            {
+                id: 80240101,
+                content: "Petite Su ? Qu’est-ce que tu fabriques ici ?",
+                voice: "inv/Suyi/001/C8DF6792",
+                npc: 790083,
+                next: 80240102,
+            },
+            {
+                id: 80240102,
+                content: "Le ciel s’est enfin dégagé, alors j’en profite pour faire sécher quelques affaires.",
+                voice: "inv/Suyi/001/C8DF67BC",
+                npc: 790082,
+                next: 80240103,
+            },
+            {
+                id: 80240103,
+                content:
+                    "Hé, Oncle Tang ! Tu es encore sorti sans ta canne ? Je te l’ai pourtant dit plusieurs fois : ta jambe commence à peine à guérir, tu ne dois pas trop la solliciter. Et tu n’en as pas changé récemment ? Ce modèle ne te plaît pas non plus ?",
+                voice: "inv/Suyi/001/C8DF67E6",
+                npc: 790082,
+                next: 80240104,
+            },
+            {
+                id: 80240104,
+                content: "Cette canne, c’est toi qui me l’as fabriquée. Je n’ai pas le cœur à l’abîmer.",
+                voice: "inv/Suyi/001/C8DF6810",
+                npc: 790083,
+                next: 80240105,
+            },
+            {
+                id: 80240105,
+                content:
+                    "Donc tu préfères la laisser prendre la poussière ? Bon... tant pis, c’est trop tard pour aller la chercher maintenant. Fais avec moi à la place. Allez, appuie-toi sur mon bras.",
+                voice: "inv/Suyi/001/C8DF683A",
+                npc: 790082,
+                next: 80240106,
+            },
+            {
+                id: 80240106,
+                content:
+                    "Oh là... ce n’est pas nécessaire. À mon âge, si je me promène avec une canne, les gens vont croire que j’ai quatre-vingts ans passés. Ce serait la honte.",
+                voice: "inv/Suyi/001/C8DF6864",
+                npc: 790083,
+                next: 80240107,
+            },
+            {
+                id: 80240107,
+                content: "Ah ! Voilà enfin la vérité. Je savais bien que je finirais par te la faire avouer. Mais ça ne change rien !",
+                voice: "inv/Suyi/001/C8DF688E",
+                npc: 790082,
+                next: 80240108,
+            },
+            {
+                id: 80240108,
+                content:
+                    "La guérisseuse l’a dit : on ne doit jamais écouter l’avis des patients. Ce n’est pas la première fois que tu tombes, alors il faut être prudent. Sinon tu risques de garder des séquelles.",
+                voice: "inv/Suyi/001/C8DF68B8",
+                npc: 790082,
+                next: 80240109,
+            },
+            {
+                id: 80240109,
+                content:
+                    "Allez, petite Su... épargne-moi. Ne va pas te plaindre à la guérisseuse. Tu sais bien que les objets qui restent longtemps enfermés doivent prendre l’air. Eh bien moi, ça fait quinze jours que je suis cloué au lit. J’ai aussi besoin de soleil.",
+                voice: "inv/Suyi/001/C8DF68E2",
+                npc: 790083,
+                next: 80240110,
+            },
+            {
+                id: 80240110,
+                content: "Bon, assez parlé de moi. Dis-moi plutôt ce que tu es en train de faire sécher.",
+                voice: "inv/Suyi/001/C8DF690C",
+                npc: 790083,
+                next: 80240111,
+            },
+            {
+                id: 80240111,
+                content: "C’est...",
+                voice: "inv/Suyi/001/C8DF6936",
+                npc: 790082,
+                next: 80240112,
+            },
+            {
+                id: 80240112,
+                content:
+                    "... un oiseau à câlins. Une méchapoupée capable de produire de la chaleur. Quand j’étais petite, je refusais toujours d’aller dormir. Alors mes parents ont fabriqué ça pour m’endormir. Dès que je le serrais dans mes bras... je m’endormais aussitôt.",
+                voice: "inv/Suyi/001/C8DF6960",
+                npc: 790082,
+                next: 80240113,
+            },
+            {
+                id: 80240113,
+                content: "Ah... maintenant que tu le dis, ça me revient. Ce n’est pas ce jouet que tu achètes tous les ans ?",
+                voice: "inv/Suyi/001/C8DF698A",
+                npc: 790083,
+                next: 80240114,
+            },
+            {
+                id: 80240114,
+                content: "Oncle Tang ?! Mais... je les avais pourtant cachés ! Où est-ce que tu les as vus ?",
+                voice: "inv/Suyi/001/C8DF69B4",
+                npc: 790082,
+                next: 80240115,
+            },
+            {
+                id: 80240115,
+                content:
+                    "Tu en achètes un chaque année. Puis tu passes les jours suivants à faire la tête. Je vois bien tout ça, moi. Ça m’inquiète.",
+                voice: "inv/Suyi/001/C8DF69DE",
+                npc: 790083,
+                next: 80240116,
+            },
+            {
+                id: 80240116,
+                content:
+                    "Quand tu es arrivée aux Pics Extérieurs, tu étais muette comme une huître. Tu restais souvent seule dans ton coin, sans dire un mot. Je n’avais pas trouvé l’occasion de te poser la question à l’époque... mais aujourd’hui, on peut peut-être enfin parler à cœur ouvert.",
+                voice: "inv/Suyi/001/C8DF6A08",
+                npc: 790083,
+                next: 80240117,
+            },
+            {
+                id: 80240117,
+                content: "Dis-moi, Su Yi... tu avais peut-être le mal du pays ?",
+                voice: "inv/Suyi/001/C8DF6A32",
+                npc: 790083,
+                next: 80240118,
+            },
+            {
+                id: 80240118,
+                content:
+                    "Pas du tout ! Ma famille est à Haojing, ce n’est pas si loin. Si je veux rentrer, je n’ai qu’à y aller. Qu’est-ce qu’il y aurait à regretter ?",
+                voice: "inv/Suyi/001/C8DF6A5C",
+                npc: 790082,
+                next: 80240119,
+            },
+            {
+                id: 80240119,
+                content: "Héhé... si rentrer chez soi était aussi simple, il n’y aurait pas autant d’âmes errantes dans ce monde.",
+                voice: "inv/Suyi/001/C8DF6A86",
+                npc: 790083,
+                next: 80240120,
+            },
+            {
+                id: 80240120,
+                content:
+                    "Dis-moi plutôt pourquoi tu refuses de rentrer. Tu travailles trop ces derniers temps ? Tu as peur d’inquiéter ta famille ?",
+                voice: "inv/Suyi/001/C8DF6AB0",
+                npc: 790083,
+                next: 80240121,
+            },
+            {
+                id: 80240121,
+                content:
+                    "Ce n’est rien de tout ça ! C’est juste que je n’ai pas le temps d’y aller. Et puis je connais mon corps. Regarde, je peux courir et sauter comme je veux. Je suis en pleine forme.",
+                voice: "inv/Suyi/001/C8DF6ADA",
+                npc: 790082,
+                next: 80240122,
+            },
+            {
+                id: 80240122,
+                content: "Alors si ce n’est pas ton corps... c’est ton cœur qui te tracasse ?",
+                voice: "inv/Suyi/001/C8DF6B04",
+                npc: 790083,
+                next: 80240123,
+            },
+            {
+                id: 80240123,
+                content: "Je t’ai dit que je n’avais...",
+                voice: "inv/Suyi/001/C8DF6B2E",
+                npc: 790082,
+                next: 80240124,
+            },
+            {
+                id: 80240124,
+                content:
+                    "... bon, d’accord ! On ne peut vraiment rien te cacher, Oncle Tang. C’est vrai que... j’ai un peu le mal du pays.",
+                voice: "inv/Suyi/001/C8DF6B58",
+                npc: 790082,
+                next: 80240125,
+            },
+            {
+                id: 80240125,
+                content:
+                    "Tu hésites peut-être sur le cadeau à apporter ? Avec toutes les inventions que tu as réalisées ces dernières années, il suffirait d’en rapporter une pour impressionner tout le monde.",
+                voice: "inv/Suyi/001/C8DF6B82",
+                npc: 790083,
+                next: 80240126,
+            },
+            {
+                id: 80240126,
+                content:
+                    "Ce n’est pas ça. Mes parents détestent les méchapoupées. Rien que de me voir étudier l’art des méchapoupées les met en colère. Ils ne me féliciteraient jamais pour ça. Si j’apportais ce genre de cadeau, ce serait pire encore.",
+                voice: "inv/Suyi/001/C8DF6BAC",
+                npc: 790082,
+                next: 80240127,
+            },
+            {
+                id: 80240127,
+                content:
+                    "Depuis toute petite... j’ai toujours adoré l’art des méchapoupées. Et j’apprenais vite. Les techniques décrites dans les anciens ouvrages du clan Su, je pouvais les comprendre d’un seul coup d’œil. Même quand il manquait des pages, j’arrivais à reconstituer le reste.",
+                voice: "inv/Suyi/001/C8DF6BD6",
+                npc: 790082,
+                next: 80240128,
+            },
+            {
+                id: 80240128,
+                content: "J’aimais vraiment ça... mais mes parents, eux, détestaient. Ils ne voulaient pas que j’étudie ces choses.",
+                voice: "inv/Suyi/001/C8DF6C00",
+                npc: 790082,
+                next: 80240129,
+            },
+            {
+                id: 80240129,
+                content:
+                    "À la maison... leur parole faisait loi. S’ils n’aimaient pas quelque chose, je n’avais pas le droit de l’aimer non plus. Heureusement que ma tante était là. Elle me transmettait en secret ce qu’elle savait, et on démontait les machines ensemble pour les étudier.",
+                voice: "inv/Suyi/001/C8DF6C2A",
+                npc: 790082,
+                next: 80240130,
+            },
+            {
+                id: 80240130,
+                content:
+                    "Héhé... aujourd’hui, les Neuf Chapitres de Dafeng ont bien changé. Même l’histoire de la Secte Jishu a été réhabilitée. Qui sait ? Peut-être que tes parents ont changé d’avis eux aussi. Les gens avancent toujours, tu sais.",
+                voice: "inv/Suyi/001/C8DF6C54",
+                npc: 790083,
+                next: 80240131,
+            },
+            {
+                id: 80240131,
+                content:
+                    "Mais... pour eux, ce ne sera jamais une voie respectable. Et puis... toutes ces années sans la moindre nouvelle... ça veut bien dire qu’ils ne m’ont toujours pas pardonnée.",
+                voice: "inv/Suyi/001/C8DF6C7E",
+                npc: 790082,
+                next: 80240132,
+            },
+            {
+                id: 80240132,
+                content: "Tu t’es disputée avec eux avant de venir aux Pics Extérieurs ?",
+                voice: "inv/Suyi/001/C8DF6CA8",
+                npc: 790083,
+                next: 80240133,
+            },
+            {
+                id: 80240133,
+                content:
+                    "Oui... quand je suis partie, j’ai dit des choses horribles. Et eux... ils m’ont répondu qu’à partir de ce jour-là, ils n’avaient plus de fille.",
+                voice: "inv/Suyi/001/C8DF6CD2",
+                npc: 790082,
+                next: 80240134,
+            },
+            {
+                id: 80240134,
+                content:
+                    "Quand j’étais à la maison, chaque nouvelle année, mes parents m’en offraient un nouveau. Quand je faisais de l’insomnie, il me suffisait de le serrer dans mes bras pour m’endormir.",
+                voice: "inv/Suyi/001/C8DF6CFC",
+                npc: 790082,
+                next: 80240135,
+            },
+            {
+                id: 80240135,
+                content:
+                    "Ce que je regrette le plus, c’est de ne pas en avoir emporté deux avec moi quand je suis partie. Mes premières nuits aux Pics Extérieurs, je n’ai pas fermé l’œil. Heureusement, j’ai fini par en trouver des semblables auprès de marchands de passage.",
+                voice: "inv/Suyi/001/C8DF6D26",
+                npc: 790082,
+                next: 80240136,
+            },
+            {
+                id: 80240136,
+                content:
+                    "Celui-ci... ressemble vraiment à ceux que faisaient mes parents. Mais les coutures sont bien plus fines. L’artisan est meilleur qu’eux.",
+                voice: "inv/Suyi/001/C8DF6D50",
+                npc: 790082,
+                next: 80240137,
+            },
+            {
+                id: 80240137,
+                content:
+                    "Chaque fois que j’en vois un, je ne peux pas m’empêcher de l’acheter. Mais je n’ose jamais le regarder trop longtemps, de peur d’être triste. Alors je le jette dans un coffre, je referme le couvercle et je le pousse sous le lit... comme si de rien n’était.",
+                voice: "inv/Suyi/001/C8DF6D7A",
+                npc: 790082,
+                next: 80240138,
+            },
+            {
+                id: 80240138,
+                content: "... C’est assez ridicule, hein ? Je sais bien que je ne peux pas continuer à fuir comme ça.",
+                voice: "inv/Suyi/001/C8DF6DA4",
+                npc: 790082,
+                next: 80240139,
+            },
+            {
+                id: 80240139,
+                content:
+                    "Ces derniers jours, je les ai ressortis. Ils étaient couverts de poussière. Je les ai dépoussiérés, puis je les ai mis à sécher de peur qu’ils ne moisissent... Et en les regardant, tous ces souvenirs de la maison me sont revenus.",
+                voice: "inv/Suyi/001/C8DF6DCE",
+                npc: 790082,
+                next: 80240140,
+            },
+            {
+                id: 80240140,
+                content:
+                    "Avant, je ne pouvais pas rentrer. Ma situation ne me permettait pas de voyager librement, et j’avais peur de leur attirer des ennuis.",
+                voice: "inv/Suyi/001/C8DF6DF8",
+                npc: 790082,
+                next: 80240141,
+            },
+            {
+                id: 80240141,
+                content: "Mais récemment... les choses ont changé à Huaxu, alors je me suis dit...",
+                voice: "inv/Suyi/001/C8DF6E22",
+                npc: 790082,
+                next: 80240142,
+            },
+            {
+                id: 80240142,
+                content:
+                    "... Oncle Tang, je n’ose pas y penser. J’ai envie de rentrer... mais je n’en ai pas le courage. Qu’est-ce que je dois faire ?",
+                voice: "inv/Suyi/001/C8DF6E4C",
+                npc: 790082,
+                next: 80240143,
+            },
+            {
+                id: 80240143,
+                content:
+                    "Et s’ils ne m’avaient toujours pas pardonnée ? S’ils me chassaient... s’ils refusaient de me reconnaître comme leur fille... alors je... je...",
+                voice: "inv/Suyi/001/C8DF6E76",
+                npc: 790082,
+                next: 80240144,
+            },
+            {
+                id: 80240144,
+                content:
+                    "Ma petite Su Yi... tu réfléchis trop, c’est tout. Tu as l’esprit fin et le cœur sensible, et ce sont de belles qualités. Mais parfois, il n’est pas nécessaire de porter autant de poids dans son cœur. C’est lourd... et douloureux.",
+                voice: "inv/Suyi/001/C8DF6EA0",
+                npc: 790083,
+                next: 80240145,
+            },
+            {
+                id: 80240145,
+                content: "Si ton cœur te ramène vers ta maison... alors va simplement la revoir.",
+                voice: "inv/Suyi/001/C8DF6ECA",
+                npc: 790083,
+            },
+        ],
+    },
+    {
+        id: 150402,
+        charId: 1504,
+        name: "Des chemins qui se séparent",
+        desc: "La route qui s’éloigne de la maison est longue et tortueuse. Et tu n’oses pas te retourner pour regarder derrière toi.",
+        memoryName: "Valise de voyage portable",
+        memoryDesc:
+            "L’œuvre méticuleuse d’une jeune artisane. Ses poulies ont été améliorées et un moteur de propulsion y a été ajouté, réduisant considérablement l’effort nécessaire pour la transporter. Idéale pour partir de chez soi.",
+        reward: 7051,
+        consume: {
+            "19002": 6,
+            "19004": 6,
+            "19006": 6,
+        },
+        dialogues: [
+            {
+                id: 80240201,
+                content: "— Quatre ans plus tôt —",
+                voice: "inv/Suyi/002/C8DF77FA",
+                next: 80240202,
+            },
+            {
+                id: 80240202,
+                content: "Charbon... je pars. Une fois que je serai partie, il faudra que tu t’occupes de papa et maman à ma place.",
+                voice: "inv/Suyi/002/C8DF7824",
+                npc: 790082,
+                next: 80240203,
+            },
+            {
+                id: 80240203,
+                content:
+                    "Passe de temps en temps faire ta ronde, et attrape tous ces sales rats. Il ne faudrait pas qu’ils abîment le riz et les réserves. Et si papa et maman se sentent seuls... va te frotter contre leurs jambes pour moi.",
+                voice: "inv/Suyi/002/C8DF784E",
+                npc: 790082,
+                next: 80240204,
+            },
+            {
+                id: 80240204,
+                content: "<I>Miaou~</>",
+                voice: "inv/Suyi/002/C8DF7878",
+                next: 80240205,
+            },
+            {
+                id: 80240205,
+                content:
+                    "Dernière vérification des bagages... Deux tenues de rechange, un jeu complet d’outils en bronze pour l’assemblage, les plans que m’a laissés ma tante...",
+                voice: "inv/Suyi/002/C8DF78A2",
+                npc: 790082,
+                next: 80240206,
+            },
+            {
+                id: 80240206,
+                content: "Zut... j’ai oublié les oiseaux à câlins. Il faut que je retourne les chercher—",
+                voice: "inv/Suyi/002/C8DF78CC",
+                npc: 790082,
+                next: 80240207,
+            },
+            {
+                id: 80240207,
+                content:
+                    "Puisque tu as décidé de partir, cette maison n’a plus rien à voir avec toi. Alors pourquoi hésiter encore ? Entrer et sortir sans cesse... coupe le lien une bonne fois pour toutes.",
+                voice: "inv/Suyi/002/C8DF78F6",
+                npc: 790084,
+                next: 80240208,
+            },
+            {
+                id: 80240208,
+                content: "... Maman ? Tu es encore réveillée ?",
+                voice: "inv/Suyi/002/C8DF7920",
+                npc: 790082,
+                next: 80240209,
+            },
+            {
+                id: 80240209,
+                content: "Je pensais que tu dormais déjà. Tu as vu la lettre que j’ai laissée sur la table ?",
+                voice: "inv/Suyi/002/C8DF794A",
+                npc: 790082,
+                next: 80240210,
+            },
+            {
+                id: 80240210,
+                content:
+                    "Enfin... c’est comme je l’ai écrit. Ta fille part poursuivre ses rêves. Mais je reviendrai vous voir quand j’en aurai l’occasion, alors ne vous inquiétez pas pour moi—",
+                voice: "inv/Suyi/002/C8DF7974",
+                npc: 790082,
+                next: 80240211,
+            },
+            {
+                id: 80240211,
+                content: "Ça suffit. Je ne veux plus entendre ces paroles enfantines.",
+                voice: "inv/Suyi/002/C8DF799E",
+                npc: 790084,
+                next: 80240212,
+            },
+            {
+                id: 80240212,
+                content:
+                    "Je t’ai portée dix mois dans mon ventre. Tu es mon propre sang. Tu pensais cacher tes intentions ? Je les ai devinées immédiatement. Si tu es devenue aussi rebelle et inconsidérée, c’est parce que je t’ai trop gâtée.",
+                voice: "inv/Suyi/002/C8DF79C8",
+                npc: 790084,
+                next: 80240213,
+            },
+            {
+                id: 80240213,
+                content:
+                    "Écoute-moi. Rentre à la maison. Considérons simplement que rien de tout cela ne s’est produit. Je refuse que tu suives le même chemin que ta tante.",
+                voice: "inv/Suyi/002/C8DF79F2",
+                npc: 790084,
+                next: 80240214,
+            },
+            {
+                id: 80240214,
+                content: "... Me gâter ? Tu oses vraiment parler de me gâter ?",
+                voice: "inv/Suyi/002/C8DF7A1C",
+                npc: 790082,
+                next: 80240215,
+            },
+            {
+                id: 80240215,
+                content:
+                    "Depuis que je suis petite, vous m’avez interdit de tout faire. Interdit d’apprendre l’art des méchapoupées, interdit de toucher aux outils, interdit de faire du bruit à table, interdit d’être irrespectueuse envers Taihao. J’ai vécu comme une marionnette que vous manipuliez. Et tu appelles ça me gâter ?!",
+                voice: "inv/Suyi/002/C8DF7A46",
+                npc: 790082,
+                next: 80240216,
+            },
+            {
+                id: 80240216,
+                content:
+                    "Il a fallu que tante supplie pour que vous fermiez enfin les yeux et me laissiez faire ce que j’aimais ! Et dès qu’elle est partie... son nom même est devenu interdit dans cette maison !",
+                voice: "inv/Suyi/002/C8DF7A70",
+                npc: 790082,
+                next: 80240217,
+            },
+            {
+                id: 80240217,
+                content:
+                    "Toutes les injustices des Neuf Chapitres de Dafeng, vous les avez ignorées. Tante est morte innocente, et vous n’avez même pas versé une larme pour elle. Tout ce qui vous importait, c’était de vous protéger et d’éviter d’être impliqués. Vos cœurs sont-ils faits de pierre ?!",
+                voice: "inv/Suyi/002/C8DF7A9A",
+                npc: 790082,
+                next: 80240218,
+            },
+            {
+                id: 80240218,
+                content: "Toi... comment oses-tu proférer de telles paroles !",
+                voice: "inv/Suyi/002/C8DF7AC4",
+                npc: 790084,
+                next: 80240219,
+            },
+            {
+                id: 80240219,
+                content: "Seigneur Dragon d’Argent, pardonne les paroles irréfléchies de ma fille. Su Yi, excuse-toi immédiatement.",
+                voice: "inv/Suyi/002/C8DF7AEE",
+                npc: 790084,
+                next: 80240220,
+            },
+            {
+                id: 80240220,
+                content: "Non ! Aujourd’hui, je vais dire tout ce que j’ai à dire !",
+                voice: "inv/Suyi/002/C8DF7B18",
+                npc: 790082,
+                next: 80240221,
+            },
+            {
+                id: 80240221,
+                content:
+                    "Tante m’a raconté qu’autrefois tu aimais rire, te parer de beaux vêtements, et que tu étais une grande experte en méchapoupées. Mais regarde ce que tu es devenue ! Toujours tremblante, toujours prudente, comme si tu marchais sur de la glace fine, effrayée à l’idée de faire le moindre faux pas.",
+                voice: "inv/Suyi/002/C8DF7B42",
+                npc: 790082,
+                next: 80240222,
+            },
+            {
+                id: 80240222,
+                content:
+                    "Tout ton talent sert maintenant à fabriquer des jouets inutiles comme ces oiseaux à câlins. Alors que l’art des méchapoupées pourrait permettre d’inventer des choses bien plus extraordinaires... des créations capables d’aider tout le monde !",
+                voice: "inv/Suyi/002/C8DF7B6C",
+                npc: 790082,
+                next: 80240223,
+            },
+            {
+                id: 80240223,
+                content:
+                    "Tu as peut-être choisi d’abandonner tes rêves et de t’incliner devant Taihao. Mais tu n’as pas le droit de décider à ma place et d’enfermer toute ma vie dans cette cage !",
+                voice: "inv/Suyi/002/C8DF7B96",
+                npc: 790082,
+                next: 80240224,
+            },
+            {
+                id: 80240224,
+                content: "Très bien. Puisque tu veux absolument vider ton sac, alors écoute-moi bien.",
+                voice: "inv/Suyi/002/C8DF7BC0",
+                npc: 790084,
+                next: 80240225,
+            },
+            {
+                id: 80240225,
+                content:
+                    "Su Yi, pour qui crois-tu que j’ai fait tous ces sacrifices pendant toutes ces années ? Pour qui ai-je vécu dans la peur ? Pour toi. Pour cette famille.",
+                voice: "inv/Suyi/002/C8DF7BEA",
+                npc: 790084,
+                next: 80240226,
+            },
+            {
+                id: 80240226,
+                content:
+                    "Ignore-tu vraiment la situation dans laquelle se trouve le clan Su ? Si je t’ai empêchée de toucher à ces choses, c’était pour éviter que tu ne brises un tabou et ne ruines ton avenir.",
+                voice: "inv/Suyi/002/C8DF7C14",
+                npc: 790084,
+                next: 80240227,
+            },
+            {
+                id: 80240227,
+                content:
+                    "Les Artisans Célestes du clan Su ont dû sacrifier une part d’eux-mêmes pour survivre. Nous avons eu toutes les peines du monde à arriver jusqu’ici. Nous ne pouvons plus prendre le moindre risque. Tu es jeune, fougueuse. Tu veux simplement mettre ton talent à l’épreuve et te faire un nom. Justement, le Bureau des Travaux manque de personnel. C’est là que tu devrais aller.",
+                voice: "inv/Suyi/002/C8DF7C3E",
+                npc: 790084,
+                next: 80240228,
+            },
+            {
+                id: 80240228,
+                content:
+                    "Pour vivre en paix, il faut parfois renoncer à certains rêves. Tu es trop jeune pour comprendre cela. Mais quand tu souffriras un jour, il sera trop tard pour regretter !",
+                voice: "inv/Suyi/002/C8DF7C68",
+                npc: 790084,
+                next: 80240229,
+            },
+            {
+                id: 80240229,
+                content:
+                    "... Maman. Pourquoi refuses-tu de comprendre ? Tout ce que tu me proposes... ce n’est pas ce que je veux vraiment.",
+                voice: "inv/Suyi/002/C8DF7C92",
+                npc: 790082,
+                next: 80240230,
+            },
+            {
+                id: 80240230,
+                content:
+                    "Je pars. Puisque tu refuses que je retourne les chercher, je laisse les oiseaux à câlins ici. De toute façon, je n’en ai pas besoin.",
+                voice: "inv/Suyi/002/C8DF7CBC",
+                npc: 790082,
+                next: 80240231,
+            },
+            {
+                id: 80240231,
+                content: "Reviens ici. Je ne t’ai pas dit de partir.",
+                voice: "inv/Suyi/002/C8DF7CE6",
+                npc: 790084,
+                next: 80240232,
+            },
+            {
+                id: 80240232,
+                content: "Pourquoi je ne pourrais pas partir ?",
+                voice: "inv/Suyi/002/C8DF7D10",
+                npc: 790082,
+                next: 80240233,
+            },
+            {
+                id: 80240233,
+                content: "Parce que tu es ma fille. Et que je suis ta mère !",
+                voice: "inv/Suyi/002/C8DF7D3A",
+                npc: 790084,
+                next: 80240234,
+            },
+            {
+                id: 80240234,
+                content:
+                    "Si tu franchis cette ruelle aujourd’hui, alors les Artisans Célestes du clan Su n’auront jamais eu de fille nommée Su Yi !",
+                voice: "inv/Suyi/002/C8DF7D64",
+                npc: 790084,
+                next: 80240235,
+            },
+            {
+                id: 80240235,
+                content:
+                    "Tu ne comprends rien ! Alors arrête de me barrer la route ! Je refuse de rester enfermée dans cette cage avec toi !",
+                voice: "inv/Suyi/002/C8DF7D8E",
+                npc: 790082,
+                next: 80240236,
+            },
+            {
+                id: 80240236,
+                content: "Plus de dix ans d’amour et de soins... et voilà le monstre ingrat que j’ai élevé...",
+                voice: "inv/Suyi/002/C8DF7DB8",
+                npc: 790084,
+                next: 80240237,
+            },
+            {
+                id: 80240237,
+                content: "Non— maman ! Tu vas bien ? Je ne l’ai pas fait exprès—",
+                voice: "inv/Suyi/002/C8DF7DE2",
+                npc: 790082,
+                next: 80240238,
+            },
+            {
+                id: 80240238,
+                content:
+                    "Ne m’appelle plus ainsi. Puisque tu refuses de me reconnaître comme ta mère, je ferai comme si je ne t’avais jamais mise au monde. À partir d’aujourd’hui, nous n’avons plus aucun lien.",
+                voice: "inv/Suyi/002/C8DF7E0C",
+                npc: 790084,
+                next: 80240239,
+            },
+            {
+                id: 80240239,
+                content: "Prends tes affaires et disparais ! Ne reviens jamais ! Pars !",
+                voice: "inv/Suyi/002/C8DF7E36",
+                npc: 790084,
+            },
+        ],
+    },
+    {
+        id: 150403,
+        charId: 1504,
+        name: "Impossible de trancher l’eau",
+        desc: "Les liens du sang sont de ces choses qu’on ne peut jamais vraiment couper. Comme lorsqu’on tente de fendre l’eau avec une lame : la coupure ne tient pas, et le courant poursuit sa course.",
+        memoryName: "Lettre de famille froissée",
+        memoryDesc:
+            "Une lettre dissimulée depuis des années dans la doublure d’un oiseau à câlins. Le papier est couvert de plis, chargé de nostalgie et d’affection.",
+        reward: 7052,
+        consume: {
+            "19002": 9,
+            "19005": 9,
+            "19008": 9,
+        },
+        dialogues: [
+            {
+                id: 80240301,
+                content: "...",
+                voice: "inv/Suyi/003/C8DF8862",
+                npc: 790082,
+                next: 80240302,
+            },
+            {
+                id: 80240302,
+                content: "Étrange... pourquoi personne ne répond ?",
+                voice: "inv/Suyi/003/C8DF888C",
+                npc: 790082,
+                next: 80240303,
+            },
+            {
+                id: 80240303,
+                content: "Papa et maman ont déménagé ? Ou bien... ils ne veulent tout simplement pas me voir...",
+                voice: "inv/Suyi/003/C8DF88B6",
+                npc: 790082,
+                next: 80240304,
+            },
+            {
+                id: 80240304,
+                content: "<I>Miaou~</>",
+                voice: "inv/Suyi/003/C8DF88E0",
+                next: 80240305,
+            },
+            {
+                id: 80240305,
+                content: "Charbon ! Toutes ces années ont passé, et tu es encore ici !",
+                voice: "inv/Suyi/003/C8DF890A",
+                npc: 790082,
+                next: 80240306,
+            },
+            {
+                id: 80240306,
+                content:
+                    "... Si seulement tu pouvais parler. Tu pourrais au moins me dire comment papa et maman ont vécu toutes ces années... s’ils vont bien...",
+                voice: "inv/Suyi/003/C8DF8934",
+                npc: 790082,
+                next: 80240307,
+            },
+            {
+                id: 80240307,
+                content:
+                    "Peut-être que je devrais repartir... Non ! J’ai déjà fait tout ce chemin. Et dans le dictionnaire de Su Yi, il n’existe pas d’abandon en cours de route !",
+                voice: "inv/Suyi/003/C8DF895E",
+                npc: 790082,
+                next: 80240308,
+            },
+            {
+                id: 80240308,
+                content: "Tout le monde a l’air terriblement occupé... j’ai l’impression que ce serait malvenu de déranger.",
+                voice: "inv/Suyi/003/C8DF8988",
+                npc: 790082,
+                next: 80240309,
+            },
+            {
+                id: 80240309,
+                content: "... Attends une seconde. Il y a quelqu’un qui ne fait rien, là-bas ?",
+                voice: "inv/Suyi/003/C8DF89B2",
+                npc: 790082,
+                next: 80240310,
+            },
+            {
+                id: 80240310,
+                content: "Excusez-moi, maître artisan... vous profitez du soleil ?",
+                voice: "inv/Suyi/003/C8DF89DC",
+                npc: 790082,
+                next: 80240311,
+            },
+            {
+                id: 80240311,
+                content:
+                    "Avec un temps pareil, ce serait presque une offense de ne pas en profiter. Tu veux t’asseoir un moment ? Par contre, je n’ai pas de coussin à te proposer.",
+                voice: "inv/Suyi/003/C8DF8A06",
+                npc: 790085,
+                next: 80240312,
+            },
+            {
+                id: 80240312,
+                content: "Non merci, je ne vais pas rester. J’ai quelque chose d’urgent.",
+                voice: "inv/Suyi/003/C8DF8A30",
+                npc: 790082,
+                next: 80240313,
+            },
+            {
+                id: 80240313,
+                content:
+                    "Dites, j’aurais une question. Vous... vous connaîtriez quelqu’un nommé Su Zhi ? Il travaille au Bureau des Arts Mécaniques.",
+                voice: "inv/Suyi/003/C8DF8A5A",
+                npc: 790082,
+                next: 80240314,
+            },
+            {
+                id: 80240314,
+                content:
+                    "Vous savez ce qui se passe chez sa famille en ce moment ? Je viens de frapper chez eux, mais personne n’a répondu. Ils ont déménagé ?",
+                voice: "inv/Suyi/003/C8DF8A84",
+                npc: 790082,
+                next: 80240315,
+            },
+            {
+                id: 80240315,
+                content:
+                    "Déménagé ? Haha... je comprends pourquoi tu pourrais le croire. Mais avant de répondre à ta question, laisse-moi te raconter une histoire.",
+                voice: "inv/Suyi/003/C8DF8AAE",
+                npc: 790085,
+                next: 80240316,
+            },
+            {
+                id: 80240316,
+                content: "Je n’ai pas vraiment le temps d’écouter des histoires... désolée, maître artisan.",
+                voice: "inv/Suyi/003/C8DF8AD8",
+                npc: 790082,
+                next: 80240317,
+            },
+            {
+                id: 80240317,
+                content: "Ne pars pas si vite. Peut-être que la réponse que tu cherches se trouve justement dans cette histoire.",
+                voice: "inv/Suyi/003/C8DF8B02",
+                npc: 790085,
+                next: 80240318,
+            },
+            {
+                id: 80240318,
+                content: "... Bon, d’accord ! Mais faites vite. Ce n’était pas simple de revenir jusqu’ici, et je suis vraiment pressée.",
+                voice: "inv/Suyi/003/C8DF8B2C",
+                npc: 790082,
+                next: 80240319,
+            },
+            {
+                id: 80240319,
+                content:
+                    "Très bien, très bien. Quelle impatience chez cette petite. Tu connais le dicton : la précipitation ne fait pas cuire les haricots plus vite.",
+                voice: "inv/Suyi/003/C8DF8B56",
+                npc: 790085,
+                next: 80240320,
+            },
+            {
+                id: 80240320,
+                content:
+                    "Il était une fois un couple qui élevait leur fille avec une discipline très stricte. Mais cela produisit l’effet inverse. Un jour, après une violente dispute, la fille quitta la maison.",
+                voice: "inv/Suyi/003/C8DF8B80",
+                npc: 790085,
+                next: 80240321,
+            },
+            {
+                id: 80240321,
+                content:
+                    "Au début, les parents étaient furieux de son entêtement. Ils pensaient qu’elle finirait tôt ou tard par regretter.",
+                voice: "inv/Suyi/003/C8DF8BAA",
+                npc: 790085,
+                next: 80240322,
+            },
+            {
+                id: 80240322,
+                content:
+                    "Un jour, en rangeant l’ancienne chambre de leur fille, ils trouvèrent une vieille méchapoupée. Quand elle était petite, elle refusait toujours d’aller dormir, alors ses parents avaient tout essayé pour fabriquer cette petite machine.",
+                voice: "inv/Suyi/003/C8DF8BD4",
+                npc: 790085,
+                next: 80240323,
+            },
+            {
+                id: 80240323,
+                content:
+                    "Elle était faite pour être serrée contre soi. Son ventre moelleux ne contenait qu’un cœur thermique à température constante. On l’appelait méchapoupée, mais elle n’avait rien de dangereux.",
+                voice: "inv/Suyi/003/C8DF8BFE",
+                npc: 790085,
+                next: 80240324,
+            },
+            {
+                id: 80240324,
+                content:
+                    "Le temps avait laissé sur elle poussière et cicatrices. Elle était sale, usée... oubliée par les parents comme par leur fille.",
+                voice: "inv/Suyi/003/C8DF8C28",
+                npc: 790085,
+                next: 80240325,
+            },
+            {
+                id: 80240325,
+                content: "En regardant cette petite machine inoffensive, les parents réfléchirent longuement.",
+                voice: "inv/Suyi/003/C8DF8C52",
+                npc: 790085,
+                next: 80240326,
+            },
+            {
+                id: 80240326,
+                content: "Ils commencèrent à regretter.",
+                voice: "inv/Suyi/003/C8DF8C7C",
+                npc: 790085,
+                next: 80240327,
+            },
+            {
+                id: 80240327,
+                content:
+                    "Mais il était déjà trop tard. Ils avaient prononcé trop de paroles cruelles, et ne savaient plus comment réparer leur relation avec leur fille.",
+                voice: "inv/Suyi/003/C8DF8CA6",
+                npc: 790085,
+                next: 80240328,
+            },
+            {
+                id: 80240328,
+                content:
+                    "... Je suppose que l’histoire se termine bien ? La fille qui était partie finit sûrement par rentrer chez elle, non ?",
+                voice: "inv/Suyi/003/C8DF8CD0",
+                npc: 790082,
+                next: 80240329,
+            },
+            {
+                id: 80240329,
+                content: "Je ne suis pas un maître moraliste, mais l’histoire ne s’arrête pas là.",
+                voice: "inv/Suyi/003/C8DF8CFA",
+                npc: 790085,
+                next: 80240330,
+            },
+            {
+                id: 80240330,
+                content:
+                    "Le couple fabriqua encore de nombreuses méchapoupées. Dans la doublure de chacune d’elles, ils glissèrent une lettre écrite mot à mot avec le plus grand soin. Puis ils les confièrent à un marchand qui faisait souvent la route vers les Pics Extérieurs.",
+                voice: "inv/Suyi/003/C8DF8D24",
+                npc: 790085,
+                next: 80240331,
+            },
+            {
+                id: 80240331,
+                content: "... Attendez... vous voulez dire...",
+                voice: "inv/Suyi/003/C8DF8D4E",
+                npc: 790082,
+                next: 80240332,
+            },
+            {
+                id: 80240332,
+                content:
+                    "Je leur ai demandé pourquoi ils ne demandaient pas simplement au marchand de transmettre leur message. Ce serait bien plus simple.",
+                voice: "inv/Suyi/003/C8DF8D78",
+                npc: 790085,
+                next: 80240333,
+            },
+            {
+                id: 80240333,
+                content:
+                    "Ils ont hésité longtemps avant de répondre. Ils avaient peur que tu ne leur aies pas pardonné. Peur que tu refuses de rentrer. Peur aussi que tes paroles ne les blessent une nouvelle fois... alors ils n’osaient pas envoyer un message directement.",
+                voice: "inv/Suyi/003/C8DF8DA2",
+                npc: 790085,
+                next: 80240334,
+            },
+            {
+                id: 80240334,
+                content:
+                    "Ils s’étaient préparés à continuer ainsi toute leur vie. Même si tu ne revenais jamais... même si tu ne découvrais jamais les lettres cachées dans les jouets.",
+                voice: "inv/Suyi/003/C8DF8DCC",
+                npc: 790085,
+                next: 80240335,
+            },
+            {
+                id: 80240335,
+                content: "Heureusement... la quatrième année, tu as fini par en trouver une.",
+                voice: "inv/Suyi/003/C8DF8DF6",
+                npc: 790085,
+                next: 80240336,
+            },
+            {
+                id: 80240336,
+                content:
+                    "Pourquoi tu pleures ? Ah... tu restes une enfant après tout. Essuie un peu tes larmes, sinon tu ne verras plus les mots.",
+                voice: "inv/Suyi/003/C8DF8E20",
+                npc: 790085,
+                next: 80240337,
+            },
+            {
+                id: 80240337,
+                content: "Je n’ai jamais... jamais pensé à regarder à l’intérieur.",
+                voice: "inv/Suyi/003/C8DF8E4A",
+                npc: 790082,
+                next: 80240338,
+            },
+            {
+                id: 80240338,
+                content:
+                    "J’ai toujours cru... que papa et maman ne voulaient plus me voir. J’avais tellement peur de rentrer. Peur qu’ils me chassent encore... peur qu’ils me regardent froidement et disent que je ne suis plus leur fille...",
+                voice: "inv/Suyi/003/C8DF8E74",
+                npc: 790082,
+                next: 80240339,
+            },
+            {
+                id: 80240339,
+                content: "... En fait, eux aussi pensaient la même chose.",
+                voice: "inv/Suyi/003/C8DF8E9E",
+                npc: 790082,
+                next: 80240340,
+            },
+            {
+                id: 80240340,
+                content: "Si seulement je l’avais découvert plus tôt... si seulement j’étais revenue plus tôt...",
+                voice: "inv/Suyi/003/C8DF8EC8",
+                npc: 790082,
+                next: 80240341,
+            },
+            {
+                id: 80240341,
+                content:
+                    "Ces dernières années, la situation était instable. Même si tu l’avais voulu, tu n’aurais peut-être pas pu revenir. Ne t’en veux pas. Vas-y, lis la lettre.",
+                voice: "inv/Suyi/003/C8DF8EF2",
+                npc: 790085,
+                next: 80240342,
+            },
+            {
+                id: 80240342,
+                content: "... D’accord. Je vais regarder.",
+                voice: "inv/Suyi/003/C8DF8F1C",
+                npc: 790082,
+                next: 80240343,
+            },
+            {
+                id: 80240343,
+                content:
+                    "« La fin de l’année approche. Comme tu n’es pas là, nous n’avons pas préparé les festivités. Tout est resté très simple. Je ne sais pas ce qu’il peut bien y avoir dehors pour t’empêcher de rentrer chez toi. Voilà déjà un an que tu es partie... et tu n’es même pas revenue pour le dîner du Nouvel An. »",
+                voice: "inv/Suyi/003/C8DF8F46",
+                npc: 790082,
+                next: 80240344,
+            },
+            {
+                id: 80240344,
+                content: "« ... Tu n’as même pas envoyé un mot pour dire que tu allais bien. Tu laisses tes parents s’inquiéter. »",
+                voice: "inv/Suyi/003/C8DF8F70",
+                npc: 790082,
+                next: 80240345,
+            },
+            {
+                id: 80240345,
+                content: "Continue à lire. Chaque jouet en contient une.",
+                voice: "inv/Suyi/003/C8DF8F9A",
+                npc: 790085,
+                next: 80240346,
+            },
+            {
+                id: 80240346,
+                content: "« Ma fille. Cela fait maintenant trois ans que tu es partie. »",
+                voice: "inv/Suyi/003/C8DF8FC4",
+                npc: 790082,
+                next: 80240347,
+            },
+            {
+                id: 80240347,
+                content:
+                    "« ... Ta mère s’est coupée la main en fabriquant un mécanisme. Quand je lui ai demandé à quoi elle pensait, elle s’est mise à pleurer. Elle disait que depuis que tu étudies l’art des méchapoupées, tu as sûrement dû te blesser souvent. En tant que mère, elle n’avait jamais compris les difficultés que tu traversais. »",
+                voice: "inv/Suyi/003/C8DF8FEE",
+                npc: 790082,
+                next: 80240348,
+            },
+            {
+                id: 80240348,
+                content:
+                    "« Nous n’avons pas su te soutenir quand tu en avais le plus besoin. Aujourd’hui nous voudrions réparer cela, mais tu n’es plus là... Puisses-tu lire cette lettre et rentrer bientôt à la maison. »",
+                voice: "inv/Suyi/003/C8DF9018",
+                npc: 790082,
+                next: 80240349,
+            },
+            {
+                id: 80240349,
+                content:
+                    "« Quatre années ont passé en un clin d’œil. Ma fille a maintenant dix-huit ans... elle doit être devenue une belle jeune femme. Ta mère aimerait tant te revoir... mais elle craint que tu aies tellement changé qu’elle ne te reconnaisse plus. »",
+                voice: "inv/Suyi/003/C8DF9042",
+                npc: 790082,
+                next: 80240350,
+            },
+            {
+                id: 80240350,
+                content:
+                    "« Nous avons entendu dire que des Magistrats de Yingtian ont capturé plusieurs Vagabonds... Les temps sont troublés, ta mère ne dort plus. Elle a peur que toi aussi tu finisses emprisonnée... Et n’oublie pas de manger. Quand tu étais petite, c’était toujours ta mère qui devait... »",
+                voice: "inv/Suyi/003/C8DF906C",
+                npc: 790082,
+                next: 80240351,
+            },
+            {
+                id: 80240351,
+                content: "« Su... papa et maman pensent à toi. Si tu es encore prête à rentrer... nous t’attendrons toujours. »",
+                voice: "inv/Suyi/003/C8DF9096",
+                npc: 790082,
+                next: 80240352,
+            },
+            {
+                id: 80240352,
+                content: "Papa... maman... moi aussi... vous me manquez...",
+                voice: "inv/Suyi/003/C8DF90C0",
+                npc: 790082,
+                next: 80240353,
+            },
+            {
+                id: 80240353,
+                content: "Maître artisan... mes parents— enfin... ce couple... comment vont-ils... maintenant ?",
+                voice: "inv/Suyi/003/C8DF90EA",
+                npc: 790082,
+                next: 80240354,
+            },
+            {
+                id: 80240354,
+                content: "Ce couple est tombé gravement malade au début de l’année... et maintenant...",
+                voice: "inv/Suyi/003/C8DF9114",
+                npc: 790085,
+                next: 80240355,
+            },
+            {
+                id: 80240355,
+                content: "...",
+                voice: "inv/Suyi/003/C8DF913E",
+                npc: 790082,
+                next: 80240356,
+            },
+            {
+                id: 80240356,
+                content: "Les guérisseurs de la Pharmacie Zesheng ont fait des miracles. Ils sont complètement rétablis.",
+                voice: "inv/Suyi/003/C8DF9168",
+                npc: 790085,
+                next: 80240357,
+            },
+            {
+                id: 80240357,
+                content: "... Hein ?",
+                voice: "inv/Suyi/003/C8DF9192",
+                npc: 790082,
+                next: 80240358,
+            },
+            {
+                id: 80240358,
+                content: "Haha ! Regarde ton visage. Tu as eu une sacrée frayeur, hein ? On voit bien que tu tiens encore beaucoup à eux.",
+                voice: "inv/Suyi/003/C8DF91BC",
+                npc: 790085,
+                next: 80240359,
+            },
+            {
+                id: 80240359,
+                content:
+                    "Les traits du visage, la silhouette... tout cela révèle d’où l’on vient. Dès que je t’ai vue, j’ai su que tu étais leur fille.",
+                voice: "inv/Suyi/003/C8DF91E6",
+                npc: 790085,
+                next: 80240360,
+            },
+            {
+                id: 80240360,
+                content:
+                    "Tes parents viennent justement de finir leur journée de travail. Vous vous êtes simplement manqués. À cette heure-ci, ils doivent déjà être à la maison... en train d’écrire la lettre de cette année.",
+                voice: "inv/Suyi/003/C8DF9210",
+                npc: 790085,
+                next: 80240361,
+            },
+            {
+                id: 80240361,
+                content: "Rentre chez toi, Su Yi.",
+                voice: "inv/Suyi/003/C8DF923A",
+                npc: 790085,
+                next: 80240362,
+            },
+            {
+                id: 80240362,
+                content: "Tu vois... les liens du sang sont ainsi. Impossible de les trancher.",
+                voice: "inv/Suyi/003/C8DF9264",
+                npc: 790085,
+                next: 80240363,
+            },
+            {
+                id: 80240363,
+                content:
+                    "Mon frère têtu vit aux Pics Extérieurs depuis plus de dix ans... je me demande comment il va. Il est peut-être temps que j’aille lui rendre visite...",
+                voice: "inv/Suyi/003/C8DF928E",
+                npc: 790085,
+                next: 80240364,
+            },
+            {
+                id: 80240364,
+                content: "... Su ? Est-ce... toi ?",
+                voice: "inv/Suyi/003/C8DF92B8",
+                npc: 790084,
+                next: 80240365,
+            },
+            {
+                id: 80240365,
+                content: "... Oui !",
+                voice: "inv/Suyi/003/C8DF92E2",
+                npc: 790082,
+                next: 80240366,
+            },
+            {
+                id: 80240366,
+                content: "Papa... maman... je suis rentrée !",
+                voice: "inv/Suyi/003/C8DF930C",
+                npc: 790082,
+            },
+        ],
+    },
+    {
         id: 180101,
         charId: 1801,
         name: "Le vœu de magie",
@@ -8115,7 +9296,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80090108,
-                content: "Pff, tu te prends trop au sérieux, je voulais juste te faire peur ! Bouh !",
+                content: "<I>Pff</>, tu te prends trop au sérieux, je voulais juste te faire peur ! Bouh !",
                 voice: "inv/Zhangyu/001/C87F4758",
                 npc: 92301,
                 next: 80090109,
@@ -8344,7 +9525,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80090141,
-                content: "Hmpf ! Exactement !",
+                content: "<I>Hmpf</> ! Exactement !",
                 voice: "inv/Zhangyu/001/C87F4CC2",
                 npc: 92301,
                 next: 80090142,
@@ -8429,7 +9610,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80090207,
                 content:
-                    "Hmpf ! Et alors ? Si j’avais été gentille, je serais plus Tabethe ! Ce trou à rats, je pouvais pas y rester une journée de plus. Alors, quand ces riches sont venus, je me suis transformée en une de leurs valises.",
+                    "<I>Hmpf</> ! Et alors ? Si j’avais été gentille, je serais plus Tabethe ! Ce trou à rats, je pouvais pas y rester une journée de plus. Alors, quand ces riches sont venus, je me suis transformée en une de leurs valises.",
                 voice: "inv/Zhangyu/002/C87F5796",
                 npc: 92301,
                 next: 80090208,
@@ -8443,7 +9624,7 @@ export const partyTopicData_fr: PartyTopic[] = [
                 options: [
                     {
                         id: 80090209,
-                        content: "Aïe, ça devait faire mal ! Je vais faire super gaffe à tes oreilles maintenant !",
+                        content: "<I>Aïe, ça devait faire mal ! Je vais faire super gaffe à tes oreilles maintenant !</>",
                         next: 80090210,
                     },
                     {
@@ -8980,7 +10161,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80090401,
                 content:
-                    "Mmmh, c’est trop bon ! Je peux en boire des litres, je m’en lasse jamais ! Et attention, c’est pas souvent que je dit du bien des gens... alors merci pour tout ce que tu prépares rien que pour moi.",
+                    "<I>Mmmh</>, c’est trop bon ! Je peux en boire des litres, je m’en lasse jamais ! Et attention, c’est pas souvent que je dit du bien des gens... alors merci pour tout ce que tu prépares rien que pour moi.",
                 voice: "inv/Zhangyu/004/C87F776A",
                 npc: 92301,
                 next: 80090402,
@@ -9001,7 +10182,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80090404,
                 content:
-                    "Tadaaa ! Voici ma création exclusive, « Démon Tabethe, la Main Rouge » ! Eh ouais, je l’ai appelée comme moi ! J’ai mis tout mon cœur dedans, si si, je te jure !",
+                    "<I>Tadaaa</> ! Voici ma création exclusive, « Démon Tabethe, la Main Rouge » ! Eh ouais, je l’ai appelée comme moi ! J’ai mis tout mon cœur dedans, si si, je te jure !",
                 voice: "inv/Zhangyu/004/C87F77E8",
                 npc: 92301,
                 options: [
@@ -9630,7 +10811,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80200036,
-                content: "Hmm... ton corps est en excellente santé. Du moins, à ce que je peux constater. Mais...",
+                content: "<I>Hmm...</> ton corps est en excellente santé. Du moins, à ce que je peux constater. Mais...",
                 voice: "inv/Fushu/001/C8C5BA68",
                 npc: 790053,
                 next: 80200037,
@@ -9999,7 +11180,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80200129,
-                content: "Hmm...",
+                content: "<I>Hmm...</>",
                 voice: "inv/Fushu/002/C8C5C9AA",
                 npc: 790053,
                 next: 80200130,
@@ -11324,7 +12505,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80110133,
-                content: "Pff, ce genre de blabla, ça peut peut-être passer avec les bleus, mais pas avec moi...",
+                content: "<I>Pff</>, ce genre de blabla, ça peut peut-être passer avec les bleus, mais pas avec moi...",
                 voice: "inv/Linen/001/C88C1CB2",
                 npc: 93101,
                 next: 80110134,
@@ -11924,7 +13105,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80110133,
-                content: "Pff, ce genre de blabla, ça peut peut-être passer avec les bleus, mais pas avec moi...",
+                content: "<I>Pff</>, ce genre de blabla, ça peut peut-être passer avec les bleus, mais pas avec moi...",
                 voice: "inv/Linen/001/C88C1CB2",
                 npc: 93101,
                 next: 80110134,
@@ -12065,7 +13246,7 @@ export const partyTopicData_fr: PartyTopic[] = [
                     },
                     {
                         id: 801103032,
-                        content: "<I>Je ne veux pas livrer quelque chose d'illégal et finir {性别:grillé|grillée}.</>",
+                        content: "<I>Je ne veux pas livrer quelque chose d’illégal et finir {性别:grillé|grillée}.</>",
                         next: 80110304,
                     },
                 ],
@@ -13472,7 +14653,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80130125,
-                content: "Pff, je te l’ai déjà dit mille fois, les acheteurs veulent du BOUM, pas des dessins mignons.",
+                content: "<I>Pff</>, je te l’ai déjà dit mille fois, les acheteurs veulent du BOUM, pas des dessins mignons.",
                 voice: "inv/Yeer/001/C898ECA2",
                 npc: 93103,
                 next: 80130126,
@@ -14458,7 +15639,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80130427,
                 content:
-                    "Je te comprends. Moi non plus j’aime pas avoir des dettes. Quand t’as demandé à Jones de virer ce foutu tourne-disque, je me suis dit que tu m'avais déjà rendu la moitié de ma vie.",
+                    "Je te comprends. Moi non plus j’aime pas avoir des dettes. Quand t’as demandé à Jones de virer ce foutu tourne-disque, je me suis dit que tu m’avais déjà rendu la moitié de ma vie.",
                 voice: "inv/Yeer/004/C8991E2E",
                 npc: 790024,
                 next: 80130428,
@@ -16086,6 +17267,1185 @@ export const partyTopicData_fr: PartyTopic[] = [
                 content: "C’est là le devoir d’une geôlière de la Prison Militaire Royale. C’est le seul chemin qui me reste.",
                 voice: "inv/Haier/003/C8AC58B6",
                 npc: 93201,
+            },
+        ],
+    },
+    {
+        id: 320201,
+        charId: 3202,
+        name: "Une affaire à prix affiché",
+        desc: "Aujourd’hui aux Asphodèles : promotion spéciale — toutes les boissons à –20 % ! Même les Charon peuvent en profiter !",
+        memoryName: "« Vérité Absolue »",
+        memoryDesc:
+            "La vérité change toujours selon ce que les gens sont prêts à croire. Il n’existe pas de vérité absolue. Il en va de même pour les relations humaines : il n’existe pas d’ennemis éternels — seulement des intérêts éternels.",
+        reward: 7050,
+        consume: {
+            "19003": 3,
+            "19006": 3,
+        },
+        dialogues: [
+            {
+                id: 80250101,
+                content: "Camilla ! Je—",
+                voice: "inv/Kami/001/14170A22",
+                npc: 790014,
+                next: 80250102,
+            },
+            {
+                id: 80250102,
+                content: "J’ai besoin que tu me rendes un service.",
+                voice: "inv/Kami/001/14170A4C",
+                npc: 790014,
+                next: 80250103,
+            },
+            {
+                id: 80250103,
+                content:
+                    "Du calme. À taper comme ça, les clients vont croire que quelqu’un vient régler ses comptes. Les Asphodèles sont une modeste affaire. Nous préférons éviter ce genre de spectacle.",
+                voice: "inv/Kami/001/14170A76",
+                npc: 790052,
+                next: 80250104,
+            },
+            {
+                id: 80250104,
+                content:
+                    "Les boissons sont toutes indiquées sur la carte. Tu veux une recommandation ? Personnellement, je te conseillerais la Vérité Absolue. Son degré d’alcool est...",
+                voice: "inv/Kami/001/14170AA0",
+                npc: 790052,
+                next: 80250105,
+            },
+            {
+                id: 80250105,
+                content: "Je ne suis pas venue boire !",
+                voice: "inv/Kami/001/14170ACA",
+                npc: 790014,
+                next: 80250106,
+            },
+            {
+                id: 80250106,
+                content: "Vraiment ? Alors j’imagine que seules les missions de Chasseur de Phoxène pourraient t’intéresser.",
+                voice: "inv/Kami/001/14170AF4",
+                npc: 790052,
+                next: 80250107,
+            },
+            {
+                id: 80250107,
+                content:
+                    "Malheureusement pour toi, il n’y a aucune mission qui te corresponde en ce moment. Et puis... ces missions ne sont plus vraiment à ton goût depuis longtemps, n’est-ce pas ?",
+                voice: "inv/Kami/001/14170B1E",
+                npc: 790052,
+                next: 80250108,
+            },
+            {
+                id: 80250108,
+                content: "Je vais faire court. J’ai mis les mauvaises personnes en colère. Et j’ai besoin de ton aide.",
+                voice: "inv/Kami/001/14170B48",
+                npc: 790014,
+                next: 80250109,
+            },
+            {
+                id: 80250109,
+                content:
+                    "Je pensais que le jour où tu as commencé à accepter des boulots où l’on joue sa peau, tu avais déjà accepté les conséquences.",
+                voice: "inv/Kami/001/14170B72",
+                npc: 790052,
+                next: 80250110,
+            },
+            {
+                id: 80250110,
+                content:
+                    "... Cette fois, c’est différent. Ils s’en prennent à mon frère et ma sœur. Je ne suis pas sûre de pouvoir les protéger.",
+                voice: "inv/Kami/001/14170B9C",
+                npc: 790014,
+                next: 80250111,
+            },
+            {
+                id: 80250111,
+                content: "Si tu m’aides, je travaillerai pour toi. N’importe quoi. Même prendre une balle à ta place.",
+                voice: "inv/Kami/001/14170BC6",
+                npc: 790014,
+                next: 80250112,
+            },
+            {
+                id: 80250112,
+                content:
+                    "Charmante proposition. Mais ici, c’est une taverne respectable. Nous ne faisons rien de... déplacé. Alors dis-moi : qu’attends-tu exactement de moi ?",
+                voice: "inv/Kami/001/14170BF0",
+                npc: 790052,
+                next: 80250113,
+            },
+            {
+                id: 80250113,
+                content: "... Je sais que tu as des relations, Camilla.",
+                voice: "inv/Kami/001/14170C1A",
+                npc: 790014,
+                next: 80250114,
+            },
+            {
+                id: 80250114,
+                content:
+                    "Tu es déjà noyée dans tes propres ennuis... et tu viens me promettre de résoudre les miens ? Tu te rends compte de ce que tu dis ?",
+                voice: "inv/Kami/001/14170C44",
+                npc: 790052,
+                next: 80250115,
+            },
+            {
+                id: 80250115,
+                content: "Je suis commerçante. Les promesses en l’air ne constituent pas une monnaie valable.",
+                voice: "inv/Kami/001/14170C6E",
+                npc: 790052,
+                next: 80250116,
+            },
+            {
+                id: 80250116,
+                content:
+                    "Et si je me souviens bien... quand les missions de Chasseur de Phoxène ne te suffisaient plus, tu as commencé à accepter des contrats qui dépassaient largement les limites. À partir de ce moment-là, nous étions quittes. N’est-ce pas ?",
+                voice: "inv/Kami/001/14170C98",
+                npc: 790052,
+                next: 80250117,
+            },
+            {
+                id: 80250117,
+                content:
+                    "Les missions des Asphodèles rapportent des miettes... ça ne suffisait pas— ... Laisse tomber. Ça ne sert plus à rien d’en parler.",
+                voice: "inv/Kami/001/14170CC2",
+                npc: 790014,
+                next: 80250118,
+            },
+            {
+                id: 80250118,
+                content: "Aide-moi cette fois. Prends ce que tu veux en échange.",
+                voice: "inv/Kami/001/14170CEC",
+                npc: 790014,
+                next: 80250119,
+            },
+            {
+                id: 80250119,
+                content: "Je t’en prie... juste cette fois. Pour mon frère et ma sœur.",
+                voice: "inv/Kami/001/14170D16",
+                npc: 790014,
+                next: 80250120,
+            },
+            {
+                id: 80250120,
+                content: "... Hé bien. Tu n’es pas très brillante, mais la chance semble te sourire.",
+                voice: "inv/Kami/001/14170D40",
+                npc: 790052,
+                next: 80250121,
+            },
+            {
+                id: 80250121,
+                content:
+                    "Tu es tombée au bon moment. Demain, une caravane marchande quitte la ville. Sur l’un des chariots, il y a un tonneau de vin vide.",
+                voice: "inv/Kami/001/14170D6A",
+                npc: 790052,
+                next: 80250122,
+            },
+            {
+                id: 80250122,
+                content: "Génial ! Alors je— ... Attends. Un seul tonneau ?",
+                voice: "inv/Kami/001/14170D94",
+                npc: 790014,
+                next: 80250123,
+            },
+            {
+                id: 80250123,
+                content: "Il est grand comment ? On peut y mettre trois personnes ? Moi, et mes deux petits.",
+                voice: "inv/Kami/001/14170DBE",
+                npc: 790014,
+                next: 80250124,
+            },
+            {
+                id: 80250124,
+                content: "Non. Un adulte... ou deux enfants. Tu devras choisir.",
+                voice: "inv/Kami/001/14170DE8",
+                npc: 790052,
+                next: 80250125,
+            },
+            {
+                id: 80250125,
+                content:
+                    "Ils sont minuscules ! Ils m’arrivent à peine à la cuisse ! À deux, ils ne prennent presque pas de place. Tu ne pourrais pas faire une exception ? Je pourrais—",
+                voice: "inv/Kami/001/14170E12",
+                npc: 790014,
+                next: 80250126,
+            },
+            {
+                id: 80250126,
+                content: "Le tonneau est assez grand. Il pourrait vous contenir tous les trois sans problème.",
+                voice: "inv/Kami/001/14170E3C",
+                npc: 790052,
+                next: 80250127,
+            },
+            {
+                id: 80250127,
+                content: "Alors... ?",
+                voice: "inv/Kami/001/14170E66",
+                npc: 790014,
+                next: 80250128,
+            },
+            {
+                id: 80250128,
+                content: "Mais le problème n’est pas l’espace. Tu connais mes règles, Lynn.",
+                voice: "inv/Kami/001/14170E90",
+                npc: 790052,
+                next: 80250129,
+            },
+            {
+                id: 80250129,
+                content:
+                    "Il n’existe pas de boisson gratuite en ce monde. Et il n’existe pas non plus d’aide gratuite. Toute entorse aux règles a un prix.",
+                voice: "inv/Kami/001/14170EBA",
+                npc: 790052,
+                next: 80250130,
+            },
+            {
+                id: 80250130,
+                content: "Toi... ou ton frère et ta sœur. À toi de choisir.",
+                voice: "inv/Kami/001/14170EE4",
+                npc: 790052,
+                next: 80250131,
+            },
+            {
+                id: 80250131,
+                content: "...",
+                voice: "inv/Kami/001/14170F0E",
+                npc: 790014,
+                next: 80250132,
+            },
+            {
+                id: 80250132,
+                content: "Demain je les amènerai ici. Tu les feras sortir de la ville.",
+                voice: "inv/Kami/001/14170F38",
+                npc: 790014,
+                next: 80250133,
+            },
+            {
+                id: 80250133,
+                content: "Décision rapide. J’aime cette détermination.",
+                voice: "inv/Kami/001/14170F62",
+                npc: 790052,
+                next: 80250134,
+            },
+            {
+                id: 80250134,
+                content:
+                    "Tch. Ma vie ne vaut pas grand-chose. Si je reste, je me battrai avec ces types... et on verra bien qui restera debout. Toujours mieux que de laisser mes petits mourir ici.",
+                voice: "inv/Kami/001/14170F8C",
+                npc: 790014,
+                next: 80250135,
+            },
+            {
+                id: 80250135,
+                content:
+                    "... Camilla. Je n’oublierai pas que tu m’aides aujourd’hui. Et ce que j’ai dit tient toujours. Si un jour tu as besoin de moi, appelle-moi. Tout ce que je peux faire... je le ferai.",
+                voice: "inv/Kami/001/14170FB6",
+                npc: 790014,
+                next: 80250136,
+            },
+            {
+                id: 80250136,
+                content:
+                    "Pas de marchandage. Pas de plainte. Une décision nette. Je dois admettre que tu as gagné un peu de mon respect aujourd’hui.",
+                voice: "inv/Kami/001/14170FE0",
+                npc: 790052,
+                next: 80250137,
+            },
+            {
+                id: 80250137,
+                content: "Pour récompenser cette lucidité... si tu as un dernier souhait, dis-le maintenant.",
+                voice: "inv/Kami/001/1417100A",
+                npc: 790052,
+                next: 80250138,
+            },
+            {
+                id: 80250138,
+                content:
+                    "Je veux boire un verre avant de mourir. Qu’est-ce que tu as ? Donne-moi le truc le plus cher que tu aies. Le genre que les riches boivent. Dans un grand verre élégant... avec une tranche de citron.",
+                voice: "inv/Kami/001/14171034",
+                npc: 790014,
+                next: 80250139,
+            },
+            {
+                id: 80250139,
+                content:
+                    "Avec plaisir. Nous avons déjà une belle sélection, mais je peux aussi préparer quelque chose sur mesure. Alors... qu’est-ce qui te ferait plaisir ? Un goût riche et sucré ? Ou bien vif et amer ?",
+                voice: "inv/Kami/001/1417105E",
+                npc: 790052,
+                next: 80250140,
+            },
+            {
+                id: 80250140,
+                content:
+                    "Une tranche de citron. Une fleur en décoration. Un glaçon sphérique pour adoucir l’alcool. Du sel ou du sucre sur le bord du verre... Tout est possible.",
+                voice: "inv/Kami/001/14171088",
+                npc: 790052,
+                next: 80250141,
+            },
+            {
+                id: 80250141,
+                content: "— Tant que tu peux payer.",
+                voice: "inv/Kami/001/141710B2",
+                npc: 790052,
+                next: 80250142,
+            },
+            {
+                id: 80250142,
+                content: "Tch... laisse tomber. Sers-moi simplement le tord-boyaux le moins cher que tu aies. Du moment que ça m’assomme.",
+                voice: "inv/Kami/001/141710DC",
+                npc: 790014,
+            },
+        ],
+    },
+    {
+        id: 320202,
+        charId: 3202,
+        name: "Un choix dans l’ombre",
+        desc: "Au moment où elle décida de mourir, Camilla fit elle aussi son choix.",
+        memoryName: "Miel et pain",
+        memoryDesc:
+            "Un pain qui glisse facilement dans la gorge... du miel encore tiède qui n’a pas figé. Dans l’esprit des Charons, c’est l’image même d’une vie digne. Ils avalent cette illusion amère comme si c’était la réalité.",
+        reward: 7051,
+        consume: {
+            "19002": 6,
+            "19004": 6,
+            "19006": 6,
+        },
+        dialogues: [
+            {
+                id: 80250201,
+                content: "Lynn... on est sûrs qu’on n’a pas besoin d’apporter un cadeau ?",
+                voice: "inv/Kami/002/14171A8A",
+                npc: 790087,
+                next: 80250202,
+            },
+            {
+                id: 80250202,
+                content: "Ça va aller ! On donnera juste à Camilla un énorme sourire ! Lynn a dit que c’était un trésor inestimable !",
+                voice: "inv/Kami/002/14171AB4",
+                npc: 790086,
+                next: 80250203,
+            },
+            {
+                id: 80250203,
+                content: "Mais qu’est-ce que vous racontez encore... Allez, arrêtez de traîner et entrez.",
+                voice: "inv/Kami/002/14171ADE",
+                npc: 790014,
+                next: 80250204,
+            },
+            {
+                id: 80250204,
+                content: "Tu as fermé ? Pourquoi il n’y a aucun client ?",
+                voice: "inv/Kami/002/14171B08",
+                npc: 790014,
+                next: 80250205,
+            },
+            {
+                id: 80250205,
+                content:
+                    "Réfléchis un peu. Tu crois vraiment que je fermerais pour ça ? Je perdrais une journée de recettes... et j’attirerais encore plus l’attention.",
+                voice: "inv/Kami/002/14171B32",
+                npc: 790052,
+                next: 80250206,
+            },
+            {
+                id: 80250206,
+                content: "Ah... oui. C’est vrai que le jour vient à peine de se lever. C’est moi qui suis en avance.",
+                voice: "inv/Kami/002/14171B5C",
+                npc: 790014,
+                next: 80250207,
+            },
+            {
+                id: 80250207,
+                content: "Bon. Voilà mon frère et ma sœur. Vous deux... euh... venez dire bonjour à Camilla.",
+                voice: "inv/Kami/002/14171B86",
+                npc: 790014,
+                next: 80250208,
+            },
+            {
+                id: 80250208,
+                content:
+                    "Bonjour, Camilla ! Ravi de te rencontrer ! Je ne savais pas que Lynn avait une amie aussi impressionnante. Elle ne nous en avait jamais parlé !",
+                voice: "inv/Kami/002/14171BB0",
+                npc: 790086,
+                next: 80250209,
+            },
+            {
+                id: 80250209,
+                content: "Ah bon ? Et pourquoi penses-tu que je suis impressionnante ?",
+                voice: "inv/Kami/002/14171BDA",
+                npc: 790052,
+                next: 80250210,
+            },
+            {
+                id: 80250210,
+                content:
+                    "Parce que votre maison est énorme ! Lynn dit qu’un jour elle nous emmènera vivre dans une grande maison nous aussi... Et alors on pourra manger du pain tout doux et du miel sucré tous les jours !",
+                voice: "inv/Kami/002/14171C04",
+                npc: 790086,
+                next: 80250211,
+            },
+            {
+                id: 80250211,
+                content: "Pas bien grand... mais l’œil est vif. Tiens. Le pain sort du four. Et voilà un pot de miel.",
+                voice: "inv/Kami/002/14171C2E",
+                npc: 790052,
+                next: 80250212,
+            },
+            {
+                id: 80250212,
+                content: "Ouah ! Merci Camilla !",
+                voice: "inv/Kami/002/14171C58",
+                npc: 790086,
+                next: 80250213,
+            },
+            {
+                id: 80250213,
+                content: "...",
+                voice: "inv/Kami/002/14171C82",
+                npc: 790014,
+                next: 80250214,
+            },
+            {
+                id: 80250214,
+                content: "Je les ai trop gâtés... ils n’ont aucun savoir-vivre. Désolée.",
+                voice: "inv/Kami/002/14171CAC",
+                npc: 790014,
+                next: 80250215,
+            },
+            {
+                id: 80250215,
+                content: "Je les trouve plutôt adorables. Et ils ne ressemblent pas vraiment à des enfants de Brumelac.",
+                voice: "inv/Kami/002/14171CD6",
+                npc: 790052,
+                next: 80250216,
+            },
+            {
+                id: 80250216,
+                content: "Je comprends mieux où est passé l’argent que tu as gagné au péril de ta vie.",
+                voice: "inv/Kami/002/14171D00",
+                npc: 790052,
+                next: 80250217,
+            },
+            {
+                id: 80250217,
+                content: "Tch. Pas vraiment le choix... Quand on se retrouve collé à deux boulets pareils, on ne peut plus les lâcher.",
+                voice: "inv/Kami/002/14171D2A",
+                npc: 790014,
+                next: 80250218,
+            },
+            {
+                id: 80250218,
+                content: "... Pour la suite, je compte sur toi.",
+                voice: "inv/Kami/002/14171D54",
+                npc: 790014,
+                next: 80250219,
+            },
+            {
+                id: 80250219,
+                content:
+                    "Tu te trompes sur un point. Je ne fais que leur offrir une petite opportunité. La suite dépendra uniquement d’eux.",
+                voice: "inv/Kami/002/14171D7E",
+                npc: 790052,
+                next: 80250220,
+            },
+            {
+                id: 80250220,
+                content: "Ce n’est pas moi que tu dois prévenir... mais eux.",
+                voice: "inv/Kami/002/14171DA8",
+                npc: 790052,
+                next: 80250221,
+            },
+            {
+                id: 80250221,
+                content: "Je...",
+                voice: "inv/Kami/002/14171DD2",
+                npc: 790014,
+                next: 80250222,
+            },
+            {
+                id: 80250222,
+                content: "— Venez par ici, vous deux. Avant votre voyage, votre sœur Lynn a quelques mots à vous dire.",
+                voice: "inv/Kami/002/14171DFC",
+                npc: 790052,
+                next: 80250223,
+            },
+            {
+                id: 80250223,
+                content: "Un voyage ? C’est quoi ? Lynn vient avec nous ?",
+                voice: "inv/Kami/002/14171E26",
+                npc: 790086,
+                next: 80250224,
+            },
+            {
+                id: 80250224,
+                content: "Non. J’ai du travail. Vous croyez que le pain que vous mangez tombe du ciel ?",
+                voice: "inv/Kami/002/14171E50",
+                npc: 790014,
+                next: 80250225,
+            },
+            {
+                id: 80250225,
+                content: "Alors je n’y vais pas non plus... je ne veux pas quitter ma sœur...",
+                voice: "inv/Kami/002/14171E7A",
+                npc: 790087,
+                next: 80250226,
+            },
+            {
+                id: 80250226,
+                content: "On dirait que tu ne leur as pas vraiment expliqué la situation.",
+                voice: "inv/Kami/002/14171EA4",
+                npc: 790052,
+                next: 80250227,
+            },
+            {
+                id: 80250227,
+                content: "... Tch. Je n’ai pas eu le temps.",
+                voice: "inv/Kami/002/14171ECE",
+                npc: 790014,
+                next: 80250228,
+            },
+            {
+                id: 80250228,
+                content: "Vous ne disiez pas que Givrelac vous ennuyait ? Que vous vouliez voir ce qu’il y avait dehors ?",
+                voice: "inv/Kami/002/14171EF8",
+                npc: 790014,
+                next: 80250229,
+            },
+            {
+                id: 80250229,
+                content:
+                    "Eh bien, de gentils bienfaiteurs du quartier de la Paix d’Argent organisent un voyage spécial gratuit ! Si vous êtes choisis, vous pourrez monter dans une belle calèche et découvrir le monde.",
+                voice: "inv/Kami/002/14171F22",
+                npc: 790014,
+                next: 80250230,
+            },
+            {
+                id: 80250230,
+                content:
+                    "Et devinez quoi ? Vous êtes les deux heureux gagnants ! Une chance comme ça, ça ne se représente pas deux fois. Alors profitez-en.",
+                voice: "inv/Kami/002/14171F4C",
+                npc: 790014,
+                next: 80250231,
+            },
+            {
+                id: 80250231,
+                content: "...",
+                voice: "inv/Kami/002/14171F76",
+                npc: 790087,
+                next: 80250232,
+            },
+            {
+                id: 80250232,
+                content: "Le monde extérieur est dangereux. Alors avant de vous laisser partir, je dois voir si vous en êtes capables.",
+                voice: "inv/Kami/002/14171FA0",
+                npc: 790014,
+                next: 80250233,
+            },
+            {
+                id: 80250233,
+                content:
+                    "Dans un instant, vous allez vous cacher. Si je ne vous trouve pas, vous partirez en voyage. Mais si je vous attrape... vous resterez à la maison tout le mois pour étudier !",
+                voice: "inv/Kami/002/14171FCA",
+                npc: 790014,
+                next: 80250234,
+            },
+            {
+                id: 80250234,
+                content: "Vous avez cinq minutes pour vous préparer. Et pas de triche si je vous attrape !",
+                voice: "inv/Kami/002/14171FF4",
+                npc: 790014,
+                next: 80250235,
+            },
+            {
+                id: 80250235,
+                content: "C’est une partie de cache-cache !",
+                voice: "inv/Kami/002/1417201E",
+                npc: 790087,
+                next: 80250236,
+            },
+            {
+                id: 80250236,
+                content: "Oui ! Cache-cache !",
+                voice: "inv/Kami/002/14172048",
+                npc: 790086,
+                next: 80250237,
+            },
+            {
+                id: 80250237,
+                content: "C’est une épreuve, bande de morveux. Tenez-vous droits.",
+                voice: "inv/Kami/002/14172072",
+                npc: 790014,
+                next: 80250238,
+            },
+            {
+                id: 80250238,
+                content: "Vous voulez devenir forts, pas vrai ?",
+                voice: "inv/Kami/002/1417209C",
+                npc: 790014,
+                next: 80250239,
+            },
+            {
+                id: 80250239,
+                content: "Oui !",
+                voice: "inv/Kami/002/141720C6",
+                npc: 790087,
+                next: 80250240,
+            },
+            {
+                id: 80250240,
+                content: "Alors montrez-moi ce dont vous êtes capables. Ne me décevez pas.",
+                voice: "inv/Kami/002/141720F0",
+                npc: 790014,
+                next: 80250241,
+            },
+            {
+                id: 80250241,
+                content: "Si vous voulez quelque chose, allez le chercher vous-mêmes. Allez !",
+                voice: "inv/Kami/002/1417211A",
+                npc: 790014,
+                next: 80250242,
+            },
+            {
+                id: 80250242,
+                content: "Venez avec moi. Je connais une cachette parfaite.",
+                voice: "inv/Kami/002/14172144",
+                npc: 790052,
+                next: 80250243,
+            },
+            {
+                id: 80250243,
+                content:
+                    "Chut... vous ne connaissez pas encore les lieux. Je vais simplement vous montrer le chemin. C’est toujours dans les règles.",
+                voice: "inv/Kami/002/1417216E",
+                npc: 790052,
+                next: 80250244,
+            },
+            {
+                id: 80250244,
+                content: "Pas un bruit. Il ne faut pas que votre sœur vous entende.",
+                voice: "inv/Kami/002/14172198",
+                npc: 790052,
+                next: 80250245,
+            },
+            {
+                id: 80250245,
+                content: "Tu les as emmenés ? Tu es rapide.",
+                voice: "inv/Kami/002/141721C2",
+                npc: 790014,
+                next: 80250246,
+            },
+            {
+                id: 80250246,
+                content: "Ce ne sont que des enfants. Rien de bien compliqué.",
+                voice: "inv/Kami/002/141721EC",
+                npc: 790052,
+                next: 80250247,
+            },
+            {
+                id: 80250247,
+                content: "Pour moi ? Ça sent bon... un truc de luxe ?",
+                voice: "inv/Kami/002/14172216",
+                npc: 790014,
+                next: 80250248,
+            },
+            {
+                id: 80250248,
+                content: "Pas mauvais... Un peu trop sucré. J’aime pas trop.",
+                voice: "inv/Kami/002/14172240",
+                npc: 790014,
+                next: 80250249,
+            },
+            {
+                id: 80250249,
+                content:
+                    "Le spiritueux le plus fort des Asphodèles. Trente-cinq pièces d’argent. La douceur... n’est que la première note.",
+                voice: "inv/Kami/002/1417226A",
+                npc: 790052,
+                next: 80250250,
+            },
+            {
+                id: 80250250,
+                content: "<I>Kof, kof</><I>—</>",
+                voice: "inv/Kami/002/14172294",
+                npc: 790014,
+                next: 80250251,
+            },
+            {
+                id: 80250251,
+                content: "... Quoi ?! Trente-cinq pièces d’argent ?! Je t’ai dit de me servir le truc le moins cher !",
+                voice: "inv/Kami/002/141722BE",
+                npc: 790014,
+                next: 80250252,
+            },
+            {
+                id: 80250252,
+                content: "Le bon marché ne suffira pas à t’assommer. Tu boirais toute la nuit sans parvenir à oublier.",
+                voice: "inv/Kami/002/141722E8",
+                npc: 790052,
+                next: 80250253,
+            },
+            {
+                id: 80250253,
+                content: "Nous nous connaissons depuis longtemps. Je te rends service. Bois... et tu ne sentiras plus rien.",
+                voice: "inv/Kami/002/14172312",
+                npc: 790052,
+                next: 80250254,
+            },
+            {
+                id: 80250254,
+                content: "Je te préviens... je n’ai pas un seul sou sur moi.",
+                voice: "inv/Kami/002/1417233C",
+                npc: 790014,
+                next: 80250255,
+            },
+            {
+                id: 80250255,
+                content: "Hah. Bois. C’est moi qui offre.",
+                voice: "inv/Kami/002/14172366",
+                npc: 790052,
+                next: 80250256,
+            },
+            {
+                id: 80250256,
+                content:
+                    "Toi ? Camilla qui offre un verre ? Qu’est-ce qui t’arrive aujourd’hui ? C’est toi qui l’as dit — alors ne viens pas te plaindre si je bois assez pour mettre les Asphodèles en faillite.",
+                voice: "inv/Kami/002/14172390",
+                npc: 790014,
+                next: 80250257,
+            },
+            {
+                id: 80250257,
+                content: "... Ah ! Ça réveille !",
+                voice: "inv/Kami/002/141723BA",
+                npc: 790014,
+                next: 80250258,
+            },
+            {
+                id: 80250258,
+                content: "Encore un !",
+                voice: "inv/Kami/002/141723E4",
+                npc: 790014,
+                next: 80250259,
+            },
+            {
+                id: 80250259,
+                content: "Encore !",
+                voice: "inv/Kami/002/1417240E",
+                npc: 790014,
+                next: 80250260,
+            },
+            {
+                id: 80250260,
+                content: "Enco...",
+                voice: "inv/Kami/002/14172438",
+                npc: 790014,
+            },
+        ],
+    },
+    {
+        id: 320203,
+        charId: 3202,
+        name: "Un investissement involontaire",
+        desc: "Des années ont passé : les Asphodèles n’ont pas changé, et sa propriétaire non plus. Seule une ancienne habituée est devenue presque méconnaissable.",
+        memoryName: "« Adieu à Hier »",
+        memoryDesc:
+            "Une gorgée tiède descend doucement dans la gorge. L’espace d’un instant, on s’imagine pouvoir laisser derrière soi les regrets d’hier.",
+        reward: 7052,
+        consume: {
+            "19002": 9,
+            "19005": 9,
+            "19008": 9,
+        },
+        dialogues: [
+            {
+                id: 80250301,
+                content: "Ma tête... est toujours là ?",
+                voice: "inv/Kami/003/14172AF2",
+                npc: 790014,
+                next: 80250302,
+            },
+            {
+                id: 80250302,
+                content: "Tu tiens mieux l’alcool que je ne le pensais. Tiens, bois.",
+                voice: "inv/Kami/003/14172B1C",
+                npc: 790052,
+                next: 80250303,
+            },
+            {
+                id: 80250303,
+                content: "C’est... quoi ?",
+                voice: "inv/Kami/003/14172B46",
+                npc: 790014,
+                next: 80250304,
+            },
+            {
+                id: 80250304,
+                content:
+                    "Je l’ai préparé moi-même. Bois. Ne t’inquiète pas : tant que notre affaire n’est pas réglée, je ne te ferai aucun mal.",
+                voice: "inv/Kami/003/14172B70",
+                npc: 790052,
+                next: 80250305,
+            },
+            {
+                id: 80250305,
+                content: "Ah... d’accord...",
+                voice: "inv/Kami/003/14172B9A",
+                npc: 790014,
+                next: 80250306,
+            },
+            {
+                id: 80250306,
+                content: "C’est brûlant ! Et... c’est sucré ?",
+                voice: "inv/Kami/003/14172BC4",
+                npc: 790014,
+                next: 80250307,
+            },
+            {
+                id: 80250307,
+                content:
+                    "C’est une soupe contre la gueule de bois. Baies, épices et lait de chèvre mijotés ensemble. Je ne lui ai jamais donné de nom. Ici, aux Asphodèles, les habitués l’appellent « Adieu à Hier ».",
+                voice: "inv/Kami/003/14172BEE",
+                npc: 790052,
+                next: 80250308,
+            },
+            {
+                id: 80250308,
+                content:
+                    "Mais ce fameux « Adieu à Hier », ce n’est rien d’autre qu’un remords passager quand l’ivresse retombe. Ils passent la longue journée à cuver... puis le soir venu, ils replongent dans l’ivresse. À quoi bon lui donner un si joli nom ?",
+                voice: "inv/Kami/003/14172C18",
+                npc: 790052,
+                next: 80250309,
+            },
+            {
+                id: 80250309,
+                content:
+                    "Cela dit, les vices ont aussi leur charme. Sans ces ivrognes obstinés, mon affaire aurait fermé depuis longtemps.",
+                voice: "inv/Kami/003/14172C42",
+                npc: 790052,
+                next: 80250310,
+            },
+            {
+                id: 80250310,
+                content: "Tss...",
+                voice: "inv/Kami/003/14172C6C",
+                npc: 790014,
+                next: 80250311,
+            },
+            {
+                id: 80250311,
+                content: "Alors ? Quel goût ça a ?",
+                voice: "inv/Kami/003/14172C96",
+                npc: 790052,
+                next: 80250312,
+            },
+            {
+                id: 80250312,
+                content: "J’ai la langue toute engourdie par la chaleur... comment veux-tu que je sente quoi que ce soit ?",
+                voice: "inv/Kami/003/14172CC0",
+                npc: 790014,
+                next: 80250313,
+            },
+            {
+                id: 80250313,
+                content: "Souffle dessus avant de boire. Pourquoi te presser ?",
+                voice: "inv/Kami/003/14172CEA",
+                npc: 790052,
+                next: 80250314,
+            },
+            {
+                id: 80250314,
+                content:
+                    "Laisse tomber. Je ne bois plus. Pourquoi me donner un remède contre l’ivresse ? Tu as changé d’avis ? Tu veux que je sois bien lucide pour mourir ?",
+                voice: "inv/Kami/003/14172D14",
+                npc: 790014,
+                next: 80250315,
+            },
+            {
+                id: 80250315,
+                content: "... Depuis quand est-ce que je ne tiens pas parole ? Et pour ce qui t’inquiète—",
+                voice: "inv/Kami/003/14172D3E",
+                npc: 790052,
+                next: 80250316,
+            },
+            {
+                id: 80250316,
+                content: "...",
+                voice: "inv/Kami/003/14172D68",
+                npc: 790014,
+                next: 80250317,
+            },
+            {
+                id: 80250317,
+                content: "Toi, ton frère, ta sœur... j’ai réussi à vous tirer tous les trois d’affaire.",
+                voice: "inv/Kami/003/14172D92",
+                npc: 790052,
+                next: 80250318,
+            },
+            {
+                id: 80250318,
+                content: "Ce type ne viendra plus te chercher des ennuis. C’est terminé.",
+                voice: "inv/Kami/003/14172DBC",
+                npc: 790052,
+                next: 80250319,
+            },
+            {
+                id: 80250319,
+                content: "... C’est tout ?",
+                voice: "inv/Kami/003/14172DE6",
+                npc: 790014,
+                next: 80250320,
+            },
+            {
+                id: 80250320,
+                content: "... Pour moi c’était un problème impossible à régler... et toi tu l’as simplement effacé ?",
+                voice: "inv/Kami/003/14172E10",
+                npc: 790014,
+                next: 80250321,
+            },
+            {
+                id: 80250321,
+                content:
+                    "Oui. Avec les bons contacts et un peu de méthode, beaucoup de choses deviennent plus simples qu’on ne l’imagine. On contourne un peu, on fait quelques concessions... et tout s’arrange.",
+                voice: "inv/Kami/003/14172E3A",
+                npc: 790052,
+                next: 80250322,
+            },
+            {
+                id: 80250322,
+                content:
+                    "Hah... Pour des gens comme moi qui se débrouillent tout en bas de l’échelle, ce genre de moyens reste hors de portée. Tout ce que j’ai jamais eu à offrir... c’est ma peau.",
+                voice: "inv/Kami/003/14172E64",
+                npc: 790014,
+                next: 80250323,
+            },
+            {
+                id: 80250323,
+                content: "Mais ça suffit. Et puis... tu es la seule à m’avoir tendu la main. Quoi qu’il en soit... merci, Camilla.",
+                voice: "inv/Kami/003/14172E8E",
+                npc: 790014,
+                next: 80250324,
+            },
+            {
+                id: 80250324,
+                content: "Tu devrais plutôt te remercier toi-même. Tu as eu de la chance : tu avais encore le choix.",
+                voice: "inv/Kami/003/14172EB8",
+                npc: 790052,
+                next: 80250325,
+            },
+            {
+                id: 80250325,
+                content: "Mais tu n’auras pas toujours cette chance, Lynn.",
+                voice: "inv/Kami/003/14172EE2",
+                npc: 790052,
+                next: 80250326,
+            },
+            {
+                id: 80250326,
+                content:
+                    "Quand on sait ce que ça fait de souffrir, on évite de se mettre soi-même dans la ligne de mire. Et quand on se brûle, on apprend la leçon.",
+                voice: "inv/Kami/003/14172F0C",
+                npc: 790052,
+                next: 80250327,
+            },
+            {
+                id: 80250327,
+                content: "Va-t’en maintenant. Et ne recommence pas. Je ne pourrai peut-être pas t’aider la prochaine fois.",
+                voice: "inv/Kami/003/14172F36",
+                npc: 790052,
+                next: 80250328,
+            },
+            {
+                id: 80250328,
+                content: "La prochaine fois... je ne sais pas ce qui arrivera.",
+                voice: "inv/Kami/003/14172F60",
+                npc: 790014,
+                next: 80250329,
+            },
+            {
+                id: 80250329,
+                content:
+                    "La seule chose que je peux promettre... c’est que je ne viendrai pas te chercher. Au moins, je ne t’impliquerai plus là-dedans.",
+                voice: "inv/Kami/003/14172F8A",
+                npc: 790014,
+                next: 80250330,
+            },
+            {
+                id: 80250330,
+                content:
+                    "Ton alcool est vraiment puissant. Si j’avais vidé ce verre d’un coup, je serais sûrement tombée raide. Encore plus fort que celui que tu m’avais servi pour mon « dernier verre ». À l’époque, j’étais persuadée que j’allais y passer.",
+                voice: "inv/Kami/003/14172FB4",
+                npc: 790014,
+                next: 80250331,
+            },
+            {
+                id: 80250331,
+                content:
+                    "Héhé. Cela fait longtemps que tu n’es pas venue aux Asphodèles. Ici, nous servons des alcools artisanaux. Plus forts que ce qu’on trouve ailleurs.",
+                voice: "inv/Kami/003/14172FDE",
+                npc: 790052,
+                next: 80250332,
+            },
+            {
+                id: 80250332,
+                content:
+                    "Ah... je vois... Moi je ne sais pas juger ce genre de choses. Pour moi il n’y a que trois catégories : « ça cogne », « c’est amer », ou « c’est tellement sucré que ça colle à la gorge ».",
+                voice: "inv/Kami/003/14173008",
+                npc: 790014,
+                next: 80250333,
+            },
+            {
+                id: 80250333,
+                content:
+                    "La dégustation est une affaire pour les clients qui ont du temps à perdre. Pour une officière aussi occupée que toi, un simple « j’aime » ou « je n’aime pas » suffit.",
+                voice: "inv/Kami/003/14173032",
+                npc: 790052,
+                next: 80250334,
+            },
+            {
+                id: 80250334,
+                content: "Officière... tu n’es sûrement pas venue jusqu’ici uniquement pour te souvenir du bon vieux temps ?",
+                voice: "inv/Kami/003/1417305C",
+                npc: 790052,
+                next: 80250335,
+            },
+            {
+                id: 80250335,
+                content: "Hum... oui... tu m’as distraite, j’avais presque oublié. Je suis venue te rembourser.",
+                voice: "inv/Kami/003/14173086",
+                npc: 790014,
+                next: 80250336,
+            },
+            {
+                id: 80250336,
+                content:
+                    "Je n’ai jamais oublié ce qui s’est passé à l’époque. Tu m’as tirée d’un sacré pétrin, tu m’as offert un bon verre... et tu ne m’as rien fait payer. J’ai tout gagné dans cette histoire. Alors je viens régler ma dette.",
+                voice: "inv/Kami/003/141730B0",
+                npc: 790014,
+                next: 80250337,
+            },
+            {
+                id: 80250337,
+                content:
+                    "Mais je préfère te prévenir : après avoir mis de l’argent de côté pour ma famille, c’est tout ce qu’il me reste. Pas un sou de plus. Alors ajoute aussi le prix de ce verre.",
+                voice: "inv/Kami/003/141730DA",
+                npc: 790014,
+                next: 80250338,
+            },
+            {
+                id: 80250338,
+                content: "Au fait... comment il s’appelle ? Combien il coûte ?",
+                voice: "inv/Kami/003/14173104",
+                npc: 790014,
+                next: 80250339,
+            },
+            {
+                id: 80250339,
+                content: "« Vide Parfait ».",
+                voice: "inv/Kami/003/1417312E",
+                npc: 790052,
+                next: 80250340,
+            },
+            {
+                id: 80250340,
+                content: "Le verre que tu bois aujourd’hui s’appelle « Vide Parfait ».",
+                voice: "inv/Kami/003/14173158",
+                npc: 790052,
+                next: 80250341,
+            },
+            {
+                id: 80250341,
+                content:
+                    "À Huaxu, on l’appelle aussi « Corne de Renaissance », symbole d’une vie retrouvée après avoir frôlé la mort. Mais les nobles d’Hyperborea n’aiment pas l’idée de cornes : trop associé aux Charons. Ils ont donc changé le nom.",
+                voice: "inv/Kami/003/14173182",
+                npc: 790052,
+                next: 80250342,
+            },
+            {
+                id: 80250342,
+                content:
+                    "Les ingrédients sont extrêmement rares, et doivent être conservés dans des conditions parfaitement hermétiques. Le transport exige un environnement proche du vide absolu... d’où le nom.",
+                voice: "inv/Kami/003/141731AC",
+                npc: 790052,
+                next: 80250343,
+            },
+            {
+                id: 80250343,
+                content: "... Avec une description pareille, ça ne peut pas être donné.",
+                voice: "inv/Kami/003/141731D6",
+                npc: 790014,
+                next: 80250344,
+            },
+            {
+                id: 80250344,
+                content: "Cela fera cinquante pièces d’argent. Merci de votre visite.",
+                voice: "inv/Kami/003/14173200",
+                npc: 790052,
+                next: 80250345,
+            },
+            {
+                id: 80250345,
+                content: "Quant au reste... reprends-le. Tu as déjà payé ta dette autrefois.",
+                voice: "inv/Kami/003/1417322A",
+                npc: 790052,
+                next: 80250346,
+            },
+            {
+                id: 80250346,
+                content:
+                    "Quand ça ? À l’époque je n’avais même pas un sou. Tu ne voulais pas de mon travail non plus. Je ne t’ai rien donné du tout. Tu confonds avec quelqu’un d’autre ?",
+                voice: "inv/Kami/003/14173254",
+                npc: 790014,
+                next: 80250347,
+            },
+            {
+                id: 80250347,
+                content:
+                    "Aux Asphodèles, on règle toujours ses comptes. Il existe bien des façons de payer. Ta détermination face à la mort... et l’amour que tu portes à ta famille. C’est cela qui a conclu le marché.",
+                voice: "inv/Kami/003/1417327E",
+                npc: 790052,
+                next: 80250348,
+            },
+            {
+                id: 80250348,
+                content: "C’est aussi simple que ça ?",
+                voice: "inv/Kami/003/141732A8",
+                npc: 790014,
+                next: 80250349,
+            },
+            {
+                id: 80250349,
+                content: "Simple ? Peu de gens en sont capables.",
+                voice: "inv/Kami/003/141732D2",
+                npc: 790052,
+                next: 80250350,
+            },
+            {
+                id: 80250350,
+                content: "Je n’aurais jamais imaginé que ce geste fait presque par hasard sauverait un jour une future officière.",
+                voice: "inv/Kami/003/141732FC",
+                npc: 790052,
+                next: 80250351,
+            },
+            {
+                id: 80250351,
+                content: "Alors, grande officière... comment trouves-tu mon alcool ?",
+                voice: "inv/Kami/003/14173326",
+                npc: 790052,
+                next: 80250352,
+            },
+            {
+                id: 80250352,
+                content: "... Pas mal.",
+                voice: "inv/Kami/003/14173350",
+                npc: 790014,
+                next: 80250353,
+            },
+            {
+                id: 80250353,
+                content: "Dans ce cas, n’hésite pas à revenir nous voir.",
+                voice: "inv/Kami/003/1417337A",
+                npc: 790052,
             },
         ],
     },
@@ -18486,25 +20846,178 @@ export const partyTopicData_fr: PartyTopic[] = [
     {
         id: 410201,
         charId: 4102,
-        name: "",
+        name: "Sur la Voie",
+        desc: "Une Voie que l’on peut nommer n’est jamais la Voie véritable. Ce qui soutient l’ordre de toute chose relève d’un principe qui dépasse les mots.",
+        memoryName: "La Voie Céleste",
+        memoryDesc:
+            "Les Neuf Chapitres de Dafeng suivent leur cours immuable, identiques hier comme aujourd’hui. Telle est la Voie Céleste.",
+        reward: 7050,
+        consume: {
+            "19005": 2,
+            "19006": 2,
+        },
+        dialogues: [
+            {
+                id: 10010101,
+                content: "Berry, je...",
+                voice: "story/1001/100101/190F2A32",
+                npc: 100001,
+            },
+        ],
+    },
+    {
+        id: 410202,
+        charId: 4102,
+        name: "Sur le gouvernement",
+        desc: "Gouverner n’est, au fond, qu’une affaire de décision. Depuis l’aube des temps, ceux qui ont accompli de grandes œuvres se sont-ils jamais laissés entraver par des détails insignifiants ?",
+        memoryName: "Rumeurs et calomnies",
+        memoryDesc:
+            "Les injustices d’hier et les griefs tus ne sont plus que des ombres du passé, ensevelies sous les rumeurs et les calomnies.",
         reward: 7051,
         consume: {
             "19002": 5,
-            "19003": 5,
-            "19008": 5,
+            "19004": 5,
         },
+        dialogues: [
+            {
+                id: 10010101,
+                content: "Berry, je...",
+                voice: "story/1001/100101/190F2A32",
+                npc: 100001,
+            },
+        ],
+    },
+    {
+        id: 410203,
+        charId: 4102,
+        name: "Sur le cœur",
+        desc: "Cultiver la vertu au sein du royaume, et elle s’épanouit. La cultiver en soi-même, et elle révèle sa véritable nature.",
+        memoryName: "Trancher le passé",
+        memoryDesc:
+            "Ce qui m’abandonne appartient à hier et ne saurait être retenu. Ce qui trouble mon cœur nourrit les tourments d’aujourd’hui.",
+        reward: 7052,
+        consume: {
+            "19007": 8,
+            "19008": 8,
+        },
+        dialogues: [
+            {
+                id: 10010101,
+                content: "Berry, je...",
+                voice: "story/1001/100101/190F2A32",
+                npc: 100001,
+            },
+        ],
+    },
+    {
+        id: 410204,
+        charId: 4102,
+        name: "Mon cœur n’est pas de pierre",
+        desc: "Mon cœur n’est point de pierre, il ne saurait être détourné. Mon cœur n’est point de tissu, il ne saurait être plié.",
+        memoryName: "Promesse",
+        memoryDesc: "Les années usent toute chose. Mais certaines volontés demeurent inchangées, sans jamais vaciller.",
+        reward: 7053,
+        consume: {
+            "19001": 10,
+            "19002": 10,
+        },
+        dialogues: [
+            {
+                id: 10010101,
+                content: "Berry, je...",
+                voice: "story/1001/100101/190F2A32",
+                npc: 100001,
+            },
+        ],
     },
     {
         id: 420101,
         charId: 4201,
-        name: "",
+        name: "La flûte de jade aux échos lointains",
+        desc: "Une mélodie de flûte s’élève, portée par le vent. Avec elle se dissipent des souvenirs où l’amertume et la joie s’entrelacent.",
+        memoryName: "Cri du phénix",
+        memoryDesc:
+            "Une flûte de bambou. Sur son corps se devinent encore les traces d’une fracture ancienne, puis d’une réparation maladroite. Nul ne saurait dire ce que ces cicatrices ont altéré dans la pureté de sa voix.",
+        reward: 7050,
+        consume: {
+            "19005": 2,
+            "19006": 2,
+        },
+        conditionId: 120206,
+        dialogues: [
+            {
+                id: 10010101,
+                content: "Berry, je...",
+                voice: "story/1001/100101/190F2A32",
+                npc: 100001,
+            },
+        ],
+    },
+    {
+        id: 420102,
+        charId: 4201,
+        name: "Nulle part où revenir",
+        desc: "Le foyer d’autrefois s’est effondré sous le vent et la pluie. Où donc se trouve encore le véritable havre ?",
+        memoryName: "Écharpe du Ciel",
+        memoryDesc:
+            "Un élément de la tenue officielle des Magistrats de Yingtian. Poètes et chanteurs la décrivent comme un lien noué avec la Voie Céleste... mais n’est-elle pas, en vérité, une chaîne de plus ?",
         reward: 7051,
         consume: {
-            "19001": 5,
             "19002": 5,
-            "19006": 5,
-            "19007": 5,
+            "19004": 5,
         },
+        dialogues: [
+            {
+                id: 10010101,
+                content: "Berry, je...",
+                voice: "story/1001/100101/190F2A32",
+                npc: 100001,
+            },
+        ],
+    },
+    {
+        id: 420103,
+        charId: 4201,
+        name: "La pluie nocturne du Jianghu, dix ans sous la lampe",
+        desc: "Lorsque la lame se teinte de sang, en se retournant, il devient déjà impossible de retrouver le chemin parcouru.",
+        memoryName: "Agrafe de ceinture de jade brisée",
+        memoryDesc:
+            "Une agrafe de ceinture en jade. Quelqu’un a tenté, après sa rupture, d’en rassembler les fragments et de la conserver avec soin. Mais la profonde fissure qui la traverse ne pourra jamais retrouver son état d’origine.",
+        reward: 7052,
+        consume: {
+            "19007": 8,
+            "19008": 8,
+        },
+        dialogues: [
+            {
+                id: 10010101,
+                content: "Berry, je...",
+                voice: "story/1001/100101/190F2A32",
+                npc: 100001,
+            },
+        ],
+    },
+    {
+        id: 420104,
+        charId: 4201,
+        name: "En se retournant vers la désolation passée",
+        desc: "Lorsque la poussière retombe et que les nuages se dissipent, où donc s’avance celui qui s’était égaré ?",
+        memoryName: "Vieux grelot",
+        memoryDesc:
+            "Trois adolescents avaient autrefois attaché ce petit grelot au cou d’un renard sauvage, en lui disant : « Ici, c’est chez toi. » Après une errance trop longue, il est peut-être temps, pour le voyageur, de rentrer jeter un dernier regard.",
+        reward: 7053,
+        consume: {
+            "19001": 10,
+            "19002": 10,
+        },
+        dialogues: [
+            {
+                id: 10010101,
+                content: "Berry, je...",
+                voice: "story/1001/100101/190F2A32",
+                npc: 100001,
+            },
+        ],
     },
     {
         id: 420201,
@@ -19037,7 +21550,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80030407,
-                content: "Pour être honnête, j’ai fait un cauchemar cette nuit, alors je ne me sens pas très bien aujourd'hui.",
+                content: "Pour être honnête, j’ai fait un cauchemar cette nuit, alors je ne me sens pas très bien aujourd’hui.",
                 voice: "inv/Landi/004/C85904A6",
                 npc: 94202,
                 options: [
@@ -19858,7 +22371,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80070134,
-                content: "Alors les autres s'en sont tirés comme ça, sans autre forme de procès ?",
+                content: "Alors les autres s’en sont tirés comme ça, sans autre forme de procès ?",
                 voice: "inv/Xibi/001/C8727A5C",
                 npc: 790014,
                 next: 80070135,
@@ -20070,7 +22583,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80070119,
                 content:
-                    "Hmm... En fait, tu ferais mieux de continuer. Ça m’évitera de t’escorter, je peux te descendre ici et maintenant. Vas-y, parle.",
+                    "<I>Hmm...</> En fait, tu ferais mieux de continuer. Ça m’évitera de t’escorter, je peux te descendre ici et maintenant. Vas-y, parle.",
                 voice: "inv/Xibi/001/C87277E6",
                 npc: 790015,
                 next: 80070120,
@@ -21017,7 +23530,7 @@ export const partyTopicData_fr: PartyTopic[] = [
         dialogues: [
             {
                 id: 80060201,
-                content: "Mmh... mmmh...",
+                content: "<I>Mmh... mmmh...</>",
                 voice: "inv/Songlu/002/C86C1CBA",
                 npc: 95101,
                 next: 80060202,
@@ -21601,7 +24114,7 @@ export const partyTopicData_fr: PartyTopic[] = [
                 options: [
                     {
                         id: 80060402,
-                        content: "<I>Bien sûr. Qu'y a-t-il ?</>",
+                        content: "<I>Bien sûr. Qu’y a-t-il ?</>",
                         next: 80060403,
                     },
                 ],
@@ -22309,7 +24822,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80190319,
                 content:
-                    "C’est justement parce que tu es mon {性别:ami|amie} que je ne peux pas te confier mon passé. Je ne cherche pas à jouer les mystérieux, d'accord ? Considère ça comme un conseil de quelqu'un qui tient à toi :",
+                    "C’est justement parce que tu es mon {性别:ami|amie} que je ne peux pas te confier mon passé. Je ne cherche pas à jouer les mystérieux, d’accord ? Considère ça comme un conseil de quelqu’un qui tient à toi :",
                 npc: 95102,
                 next: 80190320,
             },
@@ -22550,7 +25063,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80190424,
-                content: "Comme d'habitude ? Mon moi habituel ne tiendrait pas cinq minutes face à ces fous sans foi ni loi.",
+                content: "Comme d’habitude ? Mon moi habituel ne tiendrait pas cinq minutes face à ces fous sans foi ni loi.",
                 npc: 95102,
                 next: 80190425,
             },
@@ -22661,7 +25174,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80190438,
                 content:
-                    "Hmm, pas faux. À la tienne, à moi dans le futur. Qu’il soit plus sage que celui d’aujourd’hui. Et à toi, mon {性别:ami|amie}.",
+                    "<I>Hmm</>, pas faux. À la tienne, à moi dans le futur. Qu’il soit plus sage que celui d’aujourd’hui. Et à toi, mon {性别:ami|amie}.",
                 npc: 95102,
                 next: 80190439,
             },

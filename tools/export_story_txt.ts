@@ -1,16 +1,11 @@
 import { mkdirSync, writeFileSync } from "node:fs"
 import { dirname, resolve } from "node:path"
-import charData from "../src/data/d/char.data"
-import modData from "../src/data/d/mod.data"
-import { npcMap } from "../src/data/d/npc.data"
-import { type PartyTopic, partyTopicData } from "../src/data/d/partytopic.data"
-import { type Dialogue, type DialogueOption, type QuestItem, type QuestNode, type QuestStory, questData } from "../src/data/d/quest.data"
-import { questChainData } from "../src/data/d/questchain.data"
-import weaponData from "../src/data/d/weapon.data"
+import type { NPC } from "../src/data/d/npc.data"
+import type { PartyTopic } from "../src/data/d/partytopic.data"
+import type { Dialogue, DialogueOption, QuestItem, QuestNode, QuestStory } from "../src/data/d/quest.data"
 import type { Char, Mod, Weapon } from "../src/data/data-types"
-import { LeveledMod } from "../src/data/leveled/LeveledMod"
-import { LeveledSkill, type LeveledSkillField } from "../src/data/leveled/LeveledSkill"
-import { LeveledWeapon } from "../src/data/leveled/LeveledWeapon"
+import type { LeveledSkillField } from "../src/data/leveled/LeveledSkill"
+import { DNA_CURRENT_VERSION_GLOBAL_KEY } from "../src/data/versionGate"
 import { DEFAULT_STORY_TEXT_CONFIG, parseStoryTextSegments } from "../src/utils/story-text"
 
 interface DialogueChainItem {
@@ -29,9 +24,21 @@ const CHAR_OUTPUT_PATH = resolve(OUTPUT_DIR, "char.txt")
 const WEAPON_OUTPUT_PATH = resolve(OUTPUT_DIR, "weapon.txt")
 const MOD_OUTPUT_PATH = resolve(OUTPUT_DIR, "mod.txt")
 
-const questChainById = new Map(questChainData.map(questChain => [questChain.id, questChain]))
-const ROOT_INDEX_NAME = ["一", "二", "三", "四", "五", "六"] as const
+const ROOT_INDEX_NAME = ["一", "二", "三", "四", "五", "六", "七"] as const
 const MOD_QUALITY_PRIORITY = ["金", "紫", "蓝", "绿", "白"] as const
+
+let LeveledModClass: typeof import("../src/data/leveled/LeveledMod").LeveledMod
+let LeveledSkillClass: typeof import("../src/data/leveled/LeveledSkill").LeveledSkill
+let LeveledWeaponClass: typeof import("../src/data/leveled/LeveledWeapon").LeveledWeapon
+
+let questData: QuestStory[] = []
+let questChainData: { id: number; name?: string; quests?: { id: number }[] }[] = []
+let partyTopicData: PartyTopic[] = []
+let npcMap = new Map<number, NPC>()
+let charData: Char[] = []
+let weaponData: Weapon[] = []
+let modData: Mod[] = []
+let questChainById = new Map<number, { id: number; name?: string; quests?: { id: number }[] }>()
 
 /**
  * 将剧情文本转换为纯文本，复用页面中的占位符替换与标记解析逻辑。
@@ -175,6 +182,43 @@ function getSelectedOption(dialogue: Dialogue): DialogueOption | undefined {
 }
 
 /**
+ * 递归收集对话及其嵌套选项，建立可查询映射。
+ * @param dialogue 当前对话节点
+ * @param dialogueMap 对话映射
+ * @param incomingIds 入边节点集合
+ */
+function collectDialogueNode(dialogue: Dialogue, dialogueMap: Map<number, Dialogue>, incomingIds: Set<number>): void {
+    dialogueMap.set(dialogue.id, dialogue)
+
+    if (dialogue.next !== undefined) {
+        incomingIds.add(dialogue.next)
+    }
+
+    for (const option of dialogue.options ?? []) {
+        collectDialogueOption(option, dialogueMap, incomingIds)
+    }
+}
+
+/**
+ * 递归收集嵌套选项节点。
+ * @param option 对话选项
+ * @param dialogueMap 对话映射
+ * @param incomingIds 入边节点集合
+ */
+function collectDialogueOption(option: DialogueOption, dialogueMap: Map<number, Dialogue>, incomingIds: Set<number>): void {
+    dialogueMap.set(option.id, option)
+    incomingIds.add(option.id)
+
+    if (option.next !== undefined) {
+        incomingIds.add(option.next)
+    }
+
+    for (const childOption of option.options ?? []) {
+        collectDialogueOption(childOption, dialogueMap, incomingIds)
+    }
+}
+
+/**
  * 从指定起点拼接对话链，并避免循环引用。
  * @param startId 起始对话 ID
  * @param dialogueMap 对话映射
@@ -222,17 +266,7 @@ function buildDialogueChain(dialogues: Dialogue[]): DialogueChainItem[] {
     const incomingIds = new Set<number>()
 
     for (const dialogue of dialogues) {
-        dialogueMap.set(dialogue.id, dialogue)
-
-        if (dialogue.next !== undefined) {
-            incomingIds.add(dialogue.next)
-        }
-
-        for (const option of dialogue.options ?? []) {
-            if (option.next !== undefined) {
-                incomingIds.add(option.next)
-            }
-        }
+        collectDialogueNode(dialogue, dialogueMap, incomingIds)
     }
 
     const startDialogues = dialogues.filter(dialogue => !incomingIds.has(dialogue.id))
@@ -490,7 +524,7 @@ function buildCharParagraph(char: Char): string {
     }
 
     for (const [index, skill] of char.技能.entries()) {
-        const leveledSkill = new LeveledSkill(skill, 12)
+        const leveledSkill = new LeveledSkillClass(skill, 12)
         lines.push(`技能${index + 1}: ${toPlainStoryText(skill.名称)}`)
         lines.push(`类型: ${toPlainStoryText(skill.类型)}`)
         lines.push(`技能描述: ${toPlainStoryText(skill.描述)}`)
@@ -525,7 +559,7 @@ function buildCharTxt(): string {
  */
 function buildWeaponParagraph(weapon: Weapon): string {
     const lines: string[] = []
-    const leveledWeapon = new LeveledWeapon(weapon, 5, 80)
+    const leveledWeapon = new LeveledWeaponClass(weapon, 5, 80)
     const refineDesc = weapon.熔炼?.[5] ?? weapon.熔炼?.[weapon.熔炼.length - 1]
 
     lines.push(`武器: ${toPlainStoryText(weapon.名称)}`)
@@ -623,7 +657,7 @@ function groupModsByIdentity(): ModExportGroup[] {
  */
 function buildModParagraph(group: ModExportGroup): string {
     const sortedMods = [...group.mods].sort((left, right) => getModQualityRank(left.品质) - getModQualityRank(right.品质))
-    const leveledMods = sortedMods.map(mod => new LeveledMod(mod))
+    const leveledMods = sortedMods.map(mod => new LeveledModClass(mod))
     const primaryMod = leveledMods[0]
     const qualities = [...new Set(leveledMods.map(mod => mod.品质))]
     const lines: string[] = []
@@ -677,7 +711,45 @@ function writeTextFile(filePath: string, content: string): void {
 /**
  * 执行剧情文本导出。
  */
-function main(): void {
+async function main(): Promise<void> {
+    ;(globalThis as Record<string, number>)[DNA_CURRENT_VERSION_GLOBAL_KEY] = Number.POSITIVE_INFINITY
+
+    const [
+        { questData: loadedQuestData },
+        { questChainData: loadedQuestChainData },
+        { partyTopicData: loadedPartyTopicData },
+        { npcMap: loadedNpcMap },
+        { default: loadedCharData },
+        { default: loadedWeaponData },
+        { default: loadedModData },
+        { LeveledMod: loadedLeveledMod },
+        { LeveledSkill: loadedLeveledSkill },
+        { LeveledWeapon: loadedLeveledWeapon },
+    ] = await Promise.all([
+        import("../src/data/d/quest.data"),
+        import("../src/data/d/questchain.data"),
+        import("../src/data/d/partytopic.data"),
+        import("../src/data/d/npc.data"),
+        import("../src/data/d/char.data"),
+        import("../src/data/d/weapon.data"),
+        import("../src/data/d/mod.data"),
+        import("../src/data/leveled/LeveledMod"),
+        import("../src/data/leveled/LeveledSkill"),
+        import("../src/data/leveled/LeveledWeapon"),
+    ])
+
+    questData = loadedQuestData
+    questChainData = loadedQuestChainData
+    partyTopicData = loadedPartyTopicData
+    npcMap = loadedNpcMap
+    charData = loadedCharData
+    weaponData = loadedWeaponData
+    modData = loadedModData
+    LeveledModClass = loadedLeveledMod
+    LeveledSkillClass = loadedLeveledSkill
+    LeveledWeaponClass = loadedLeveledWeapon
+    questChainById = new Map(questChainData.map(questChain => [questChain.id, questChain]))
+
     writeTextFile(QUEST_OUTPUT_PATH, buildQuestTxt())
     writeTextFile(PARTY_TOPIC_OUTPUT_PATH, buildPartyTopicTxt())
     writeTextFile(CHAR_OUTPUT_PATH, buildCharTxt())
@@ -690,4 +762,7 @@ function main(): void {
     console.log(`已导出: ${MOD_OUTPUT_PATH}`)
 }
 
-main()
+main().catch(error => {
+    console.error(error)
+    process.exitCode = 1
+})

@@ -66,6 +66,7 @@ async function loadLocalizedQuestData(language: string): Promise<void> {
  * @returns 任务语音语言
  */
 function resolveVoiceLocaleBySetting(language: string): VoiceLocale {
+    if (language === "jiaojiao") return "en"
     if (language.startsWith("en")) return "en"
     if (language.startsWith("ja")) return "jp"
     if (language.startsWith("ko")) return "kr"
@@ -333,7 +334,7 @@ function getSubRegionName(subRegionId: number): string {
                 </button>
                 <div
                     v-if="isVoiceSettingsOpen"
-                    class="absolute right-0 top-full z-[1000] mt-2 w-56 rounded-box border border-base-300 bg-base-100 p-3 shadow-lg"
+                    class="absolute right-0 top-full z-1000 mt-2 w-56 rounded-box border border-base-300 bg-base-100 p-3 shadow-lg"
                 >
                     <div class="space-y-2">
                         <div class="text-xs font-medium text-base-content/70">语音语言</div>

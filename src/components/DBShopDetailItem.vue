@@ -290,7 +290,7 @@ function buildItemTree(items: ShopItemWithChildren[]): ShopItemWithChildren[] {
 
     // 按照sequence排序
     const sortItems = (items: ShopItemWithChildren[]) => {
-        items.sort((a, b) => (b.sequence || 0) - (a.sequence || 0))
+        items.sort((a, b) => (b.sequence ?? 0) - (a.sequence ?? 0))
         // 递归排序子项
         items.forEach(item => {
             if (item.children) {

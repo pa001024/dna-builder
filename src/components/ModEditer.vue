@@ -366,7 +366,7 @@ const mod_model_show = ref(false)
                 v-for="(mod, index) in mods"
                 :key="index"
                 :mod="mod"
-                :income="mod ? charBuild.calcIncome(mod, true) : 0"
+                :income="mod ? charBuild.calcEquippedModIncome(type, index) : 0"
                 :index="index"
                 :polset="polset?.includes(index)"
                 control

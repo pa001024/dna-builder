@@ -3,9 +3,12 @@ import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { useSettingStore } from "@/store/setting"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 import { LeveledChar, LeveledSkillWeapon } from "../data"
+import { type SkinItem, skinData } from "../data/d/accessory.data"
 import { type CharExt, charExtData } from "../data/d/charext.data"
 import { type CharVoice, charVoiceData } from "../data/d/charvoice.data"
-import type { Char } from "../data/data-types"
+import weaponData from "../data/d/weapon.data"
+import type { Char, Weapon } from "../data/data-types"
+import { LeveledWeapon } from "../data/leveled/LeveledWeapon"
 import { formatProp } from "../util"
 
 const props = defineProps<{
@@ -13,11 +16,21 @@ const props = defineProps<{
 }>()
 const setting = useSettingStore()
 
+/**
+ * 获取角色溯源的序号文本。
+ * @param index 溯源索引
+ * @returns 适合展示的序号文本
+ */
+function getTraceOrdinal(index: number): string {
+    const ordinals = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
+    return ordinals[index] || String(index + 1)
+}
+
 // 当前角色等级
 const currentLevel = ref(80) // 默认80级
 // 当前技能等级
 const currentSkillLevel = ref(12)
-const activeBottomTab = ref<"profile" | "voice">("profile")
+const activeBottomTab = ref<"profile" | "skin" | "voice">("profile")
 const currentVoiceId = ref<number | null>(null)
 const isVoicePlaying = ref(false)
 const voiceAudioRef = ref<HTMLAudioElement | null>(null)
@@ -78,11 +91,45 @@ const bonusAttributes = computed(() => {
     })
 })
 
+const exclusiveWeapon = computed<Weapon | null>(() => {
+    if (!props.char.专武) {
+        return null
+    }
+    return weaponData.find(weapon => weapon.id === props.char.专武) || null
+})
+
+const leveledExclusiveWeapon = computed(() => {
+    if (!exclusiveWeapon.value) {
+        return null
+    }
+    return new LeveledWeapon(exclusiveWeapon.value, 5, currentLevel.value)
+})
+
 const leveledWeapons = computed(() => {
     return props.char.同律武器
         ? props.char.同律武器.map(weapon => new LeveledSkillWeapon(weapon, currentSkillLevel.value, currentLevel.value))
         : null
 })
+
+/**
+ * 判断同律武器是否存在可直接展示的真实图标。
+ * @param weapon 同律武器
+ * @returns 是否存在真实图标
+ */
+function hasRealSkillWeaponIcon(weapon: LeveledSkillWeapon): boolean {
+    return !!weapon._originalWeaponData.icon && !weapon.url.endsWith("/_.webp")
+}
+
+/**
+ * 获取同律武器回退用的技能遮罩图标。
+ * 与 WeaponTab 保持一致，优先使用同律配置指向的角色技能图标。
+ * @param weapon 同律武器
+ * @returns 技能图标 URL
+ */
+function getSkillWeaponMaskUrl(weapon: LeveledSkillWeapon): string {
+    const sourceSkill = leveledChar.value.技能[weapon._originalWeaponData.skill ?? 1]
+    return sourceSkill?.url || weapon.技能?.[0]?.url || ""
+}
 const localizedCharExtData = ref<CharExt[]>(charExtData)
 const localizedCharVoiceData = ref<CharVoice[]>(charVoiceData)
 
@@ -92,6 +139,7 @@ const localizedCharVoiceData = ref<CharVoice[]>(charVoiceData)
  * @returns 角色档案语言
  */
 function resolveCharExtLocaleBySetting(language: string): CharExtLocale {
+    if (language === "jiaojiao") return "en"
     if (language.startsWith("en")) return "en"
     if (language.startsWith("ja")) return "jp"
     if (language.startsWith("ko")) return "kr"
@@ -101,6 +149,17 @@ function resolveCharExtLocaleBySetting(language: string): CharExtLocale {
 }
 
 const charExtList = computed(() => localizedCharExtData.value.filter(item => item.charId === props.char.id))
+const charSkinList = computed<SkinItem[]>(() =>
+    skinData
+        .filter(item => item.charId === props.char.id)
+        .slice()
+        .sort((left, right) => {
+            if ((left.release || "") !== (right.release || "")) {
+                return (left.release || "").localeCompare(right.release || "", "zh-CN")
+            }
+            return right.rarity - left.rarity
+        })
+)
 const storyTextConfig = computed<StoryTextConfig>(() => {
     return {
         nickname: setting.protagonistName1?.trim() || "维塔",
@@ -129,6 +188,7 @@ function formatStoryText(text: string | undefined): string {
  * @returns 语音语言
  */
 function resolveVoiceLocaleBySetting(language: string): VoiceLocale {
+    if (language === "jiaojiao") return "en"
     if (language.startsWith("en")) return "en"
     if (language.startsWith("ja")) return "jp"
     if (language.startsWith("ko")) return "kr"
@@ -143,6 +203,61 @@ function resolveVoiceLocaleBySetting(language: string): VoiceLocale {
 function resolveVoiceDatasetLanguage(locale: VoiceLocale): string {
     if (locale === "zh") return "ch"
     return locale
+}
+
+/**
+ * 将皮肤默认奖励分组键映射为中文标题。
+ * @param key 默认奖励分组键
+ * @returns 中文标题
+ */
+function getSkinItemGroupLabel(key: string): string {
+    const labelMap: Record<string, string> = {
+        HeadSculpture: "头像",
+        Resource: "资源",
+        Draft: "图纸",
+        Mod: "魔之楔",
+        Weapon: "武器",
+        CharAccessory: "角色饰品",
+        WeaponAccessory: "武器饰品",
+        WeaponSkin: "武器皮肤",
+    }
+
+    return labelMap[key] || key
+}
+
+/**
+ * 获取皮肤稀有度文本。
+ * @param rarity 稀有度
+ * @returns 稀有度文本
+ */
+function getSkinRarityText(rarity: number): string {
+    return ["白", "绿", "蓝", "紫", "金"][rarity - 1] || "白"
+}
+
+/**
+ * 获取皮肤稀有度颜色类名。
+ * @param rarity 稀有度
+ * @returns 颜色类名
+ */
+function getSkinRarityClass(rarity: number): string {
+    const rarityMap: Record<number, string> = {
+        1: "bg-gray-500 text-white",
+        2: "bg-green-600 text-white",
+        3: "bg-blue-600 text-white",
+        4: "bg-purple-600 text-white",
+        5: "bg-yellow-500 text-black",
+    }
+
+    return rarityMap[rarity] || rarityMap[1]
+}
+
+/**
+ * 获取皮肤图标地址。
+ * @param icon 图标名
+ * @returns 图标地址
+ */
+function getSkinIconUrl(icon: string): string {
+    return icon ? `/imgs/webp/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
 }
 
 const voiceLanguage = computed(() => resolveVoiceDatasetLanguage(selectedVoiceLocale.value))
@@ -456,8 +571,52 @@ onBeforeUnmount(() => {
             <div class="text-xs text-base-content/70 mb-2">{{ $t("溯源") }}</div>
             <div class="space-y-3">
                 <div v-for="(trace, index) in char.溯源" :key="index" class="text-sm">
-                    <div class="mb-1">{{ $t("第" + ["一", "二", "三", "四", "五", "六"][index] + "根源") }}</div>
+                    <div class="mb-1">{{ $t("第" + getTraceOrdinal(index) + "根源") }}</div>
                     <div class="text-base-content/90">{{ $t(trace) }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 专武 -->
+        <div v-if="exclusiveWeapon && leveledExclusiveWeapon" class="p-1 bg-base-200 rounded">
+            <div class="p-2 rounded">
+                <div class="flex items-center gap-3 mb-1">
+                    <ImageFallback :src="leveledExclusiveWeapon.url" :alt="exclusiveWeapon.名称" class="size-12 rounded object-cover shrink-0" />
+                    <SRouterLink :to="`/db/weapon/${exclusiveWeapon.id}`" class="font-medium link link-primary">
+                        {{ $t(exclusiveWeapon.名称) }}
+                    </SRouterLink>
+                </div>
+                <div class="text-xs text-base-content/70 mb-4">
+                    {{ exclusiveWeapon.类型.map(type => $t(type)).join("、") }}
+                    ·
+                    {{ $t(exclusiveWeapon.伤害类型) }}
+                </div>
+
+                <div class="text-xs text-base-content/70 mb-2">{{ $t("char-build.base_attr") }}</div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                        <span class="text-base-content/70">{{ $t("攻击") }}</span>
+                        <span class="font-medium text-primary">{{ +leveledExclusiveWeapon.基础攻击.toFixed(2) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                        <span class="text-base-content/70">{{ $t("暴击") }}</span>
+                        <span class="font-medium text-primary">{{ formatProp("基础暴击", exclusiveWeapon.暴击) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                        <span class="text-base-content/70">{{ $t("暴伤") }}</span>
+                        <span class="font-medium text-primary">{{ formatProp("基础暴伤", exclusiveWeapon.暴伤) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                        <span class="text-base-content/70">{{ $t("触发") }}</span>
+                        <span class="font-medium text-primary">{{ formatProp("基础触发", exclusiveWeapon.触发) }}</span>
+                    </div>
+                </div>
+
+                <div v-if="exclusiveWeapon.熔炼 && exclusiveWeapon.熔炼.length > 0" class="mt-3">
+                    <div class="text-xs text-base-content/70 mb-2">{{ $t("属性") }}</div>
+                    <div class="p-2 bg-base-300 rounded text-sm text-base-content/90">
+                        {{ exclusiveWeapon.熔炼[5] }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -466,7 +625,24 @@ onBeforeUnmount(() => {
         <div v-if="char.同律武器 && char.同律武器.length > 0" class="p-1 bg-base-200 rounded">
             <div class="space-y-3">
                 <div v-for="leveledWeapon in leveledWeapons" :key="leveledWeapon.id" class="p-2 rounded">
-                    <div class="font-medium mb-1">{{ $t(leveledWeapon.名称) }}</div>
+                    <div class="flex items-center gap-3 mb-1">
+                        <ImageFallback
+                            v-if="hasRealSkillWeaponIcon(leveledWeapon)"
+                            :src="leveledWeapon.url"
+                            :alt="leveledWeapon.名称"
+                            class="size-12 rounded object-cover shrink-0"
+                        />
+                        <div
+                            v-else
+                            class="size-12 rounded shrink-0"
+                        >
+                            <div
+                                class="flex h-full w-full items-center justify-center bg-base-content"
+                                :style="{ mask: `url(${getSkillWeaponMaskUrl(leveledWeapon)}) no-repeat center/68%` }"
+                            />
+                        </div>
+                        <div class="font-medium">{{ $t(leveledWeapon.名称) }}</div>
+                    </div>
                     <div class="text-xs text-base-content/70 mb-4">
                         {{ leveledWeapon._originalWeaponData.类型.map(type => $t(type === "同律" ? "同律武器" : type)).join("、") }}
                     </div>
@@ -510,6 +686,12 @@ onBeforeUnmount(() => {
                 >
                 <span
                     class="text-sm px-2 py-1 rounded cursor-pointer transition-colors duration-200 hover:bg-base-300"
+                    :class="{ 'bg-primary text-white hover:bg-primary': activeBottomTab === 'skin' }"
+                    @click="activeBottomTab = 'skin'"
+                    >{{ $t("皮肤") }}</span
+                >
+                <span
+                    class="text-sm px-2 py-1 rounded cursor-pointer transition-colors duration-200 hover:bg-base-300"
                     :class="{ 'bg-primary text-white hover:bg-primary': activeBottomTab === 'voice' }"
                     @click="activeBottomTab = 'voice'"
                     >{{ $t("语音") }}</span
@@ -524,6 +706,69 @@ onBeforeUnmount(() => {
                         <div class="text-xs text-base-content/70 shrink-0">{{ formatStoryText(item.unlock) }}</div>
                     </div>
                     <div class="text-sm whitespace-pre-line text-base-content/90">{{ formatStoryText(item.text) }}</div>
+                </div>
+            </div>
+
+            <div v-else-if="activeBottomTab === 'skin'" class="space-y-3">
+                <div v-if="charSkinList.length === 0" class="text-sm text-base-content/70">暂无皮肤数据</div>
+                <div v-else class="space-y-3">
+                    <div v-for="skin in charSkinList" :key="skin.id" class="p-3 rounded bg-base-300/70 space-y-3">
+                        <div class="flex items-start gap-3">
+                            <img :src="getSkinIconUrl(skin.icon)" :alt="skin.name" class="size-16 rounded object-cover" />
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0">
+                                        <div class="font-medium text-sm">{{ $t(skin.name) }}</div>
+                                        <div class="text-xs text-base-content/70 mt-1">
+                                            {{ skin.release ? `v${skin.release}` : "未标注版本" }}
+                                        </div>
+                                    </div>
+                                    <span class="text-xs px-2 py-1 rounded shrink-0" :class="getSkinRarityClass(skin.rarity)">
+                                        {{ getSkinRarityText(skin.rarity) }}
+                                    </span>
+                                </div>
+                                <div class="text-sm whitespace-pre-line text-base-content/90 mt-2">{{ $t(skin.desc) }}</div>
+                            </div>
+                        </div>
+
+                        <div v-if="skin.tag" class="text-xs text-base-content/70">{{ skin.tag }}</div>
+
+                        <div v-if="skin.defaultItem && Object.keys(skin.defaultItem).length > 0" class="space-y-2">
+                            <div class="text-xs text-base-content/70">默认奖励</div>
+                            <div class="space-y-2">
+                                <div
+                                    v-for="[groupName, items] in Object.entries(skin.defaultItem)"
+                                    :key="groupName"
+                                    class="rounded bg-base-200/80 px-2 py-1.5"
+                                >
+                                    <div class="text-xs text-base-content/70 mb-1">{{ getSkinItemGroupLabel(groupName) }}</div>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span
+                                            v-for="item in items"
+                                            :key="`${groupName}-${item.id}`"
+                                            class="inline-flex items-center gap-1 rounded bg-base-100 px-2 py-1 text-xs"
+                                        >
+                                            <span>{{ item.name }}</span>
+                                            <span class="text-base-content/60">x{{ item.num }}</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div v-if="skin.upgrade && skin.upgrade.length > 0" class="space-y-2">
+                            <div class="text-xs text-base-content/70">升级消耗</div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div v-for="step in skin.upgrade" :key="step.step" class="rounded bg-base-200/80 px-2 py-1.5 text-xs">
+                                    <div class="flex justify-between gap-2">
+                                        <span>阶段 {{ step.step }}</span>
+                                        <span>x{{ step.amount }}</span>
+                                    </div>
+                                    <div class="mt-1 text-base-content/70">{{ step.currency }} (#{{ step.currencyId }})</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

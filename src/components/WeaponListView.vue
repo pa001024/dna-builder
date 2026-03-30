@@ -2,6 +2,7 @@
 import { computed, ref } from "vue"
 import { CharBuild, LeveledWeapon, weaponData } from "../data"
 import type { Weapon } from "../data/data-types"
+import { useInvStore } from "../store/inv"
 import { format100, format100r } from "../util"
 import { matchPinyin } from "../utils/pinyin-utils"
 
@@ -12,11 +13,13 @@ const props = defineProps<{
     defaultTab?: string
 }>()
 
+const inv = useInvStore()
 const tabs = ["全部", "近战", "远程", "单手剑", "长柄", "重剑", "双刀", "鞭刃", "太刀", "手枪", "双枪", "榴炮", "霰弹枪", "突击枪", "弓"]
 const activeTab = ref(props.defaultTab || tabs[0])
 const searchQuery = ref("")
 const selectedMelee = ref(props.melee || 0)
 const selectedRanged = ref(props.ranged || 0)
+const sortByIncome = ref(true)
 
 // 元素颜色映射
 const elementColors: Record<string, string> = {
@@ -53,6 +56,22 @@ const filteredWeapons = computed(() => {
     return filtered
 })
 
+const displayedWeapons = computed(() => {
+    const charBuild = props.charBuild
+    if (!charBuild || !sortByIncome.value) {
+        return filteredWeapons.value
+    }
+
+    return [...filteredWeapons.value]
+        .map(weapon => {
+            const effectLv = inv.getWBuffLv(weapon.id, charBuild.char.属性)
+            const income = charBuild.calcIncome(new LeveledWeapon(weapon, undefined, undefined, effectLv)) || 0
+            return { weapon, income }
+        })
+        .sort((a, b) => b.income - a.income)
+        .map(item => item.weapon)
+})
+
 // 卡片进入动画延迟
 const getAnimationDelay = (index: number) => {
     return Math.min(index * 50, 500) // 最多延迟500ms
@@ -76,15 +95,21 @@ function selectWeapon(weapon: Weapon) {
     <div class="flex flex-col h-full overflow-hidden bg-base-300">
         <!-- 顶部搜索和筛选区 -->
         <div class="flex-none bg-base-100 border-b border-base-200 shadow-sm p-4 space-y-3">
-            <!-- 搜索框 -->
-            <div class="relative">
-                <input
-                    v-model="searchQuery"
-                    type="text"
-                    :placeholder="$t('weapon-list.searchPlaceholder')"
-                    class="input input-bordered w-full pl-10 pr-4 focus:input-primary transition-all"
-                />
-                <Icon icon="ri:search-line" class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50 w-5 h-5" />
+            <div class="flex items-center gap-2">
+                <!-- 搜索框 -->
+                <div class="relative flex-1 min-w-0">
+                    <input
+                        v-model="searchQuery"
+                        type="text"
+                        :placeholder="$t('weapon-list.searchPlaceholder')"
+                        class="input input-bordered input-sm w-full pl-10 pr-4 focus:input-primary transition-all"
+                    />
+                    <Icon icon="ri:search-line" class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50 w-4 h-4" />
+                </div>
+
+                <button class="btn btn-sm whitespace-nowrap" :class="sortByIncome ? 'btn-secondary' : 'btn-outline'" @click="sortByIncome = !sortByIncome">
+                    {{ sortByIncome ? "收益排序：高→低" : "默认顺序" }}
+                </button>
             </div>
 
             <!-- 分类标签 -->
@@ -116,7 +141,7 @@ function selectWeapon(weapon: Weapon) {
                 class="grid gap-4 p-4 grid-cols-[repeat(auto-fill,minmax(min(100%,120px),1fr))] sm:grid-cols-[repeat(auto-fill,minmax(min(100%,140px),1fr))] md:grid-cols-[repeat(auto-fill,minmax(min(100%,160px),1fr))]"
             >
                 <div
-                    v-for="(weapon, index) in filteredWeapons"
+                    v-for="(weapon, index) in displayedWeapons"
                     :key="weapon.id"
                     class="group relative bg-base-100 rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer border-2"
                     :class="[
@@ -180,7 +205,13 @@ function selectWeapon(weapon: Weapon) {
                                 {{ $t(weapon.伤害类型) }}
                             </span>
                             <span v-if="charBuild" class="text-primary">
-                                {{ $t("weapon-list.income") }}: {{ format100r(charBuild.calcIncome(new LeveledWeapon(weapon))) }}
+                                {{ $t("weapon-list.income") }}: {{
+                                    format100r(
+                                        charBuild.calcIncome(
+                                            new LeveledWeapon(weapon, undefined, undefined, inv.getWBuffLv(weapon.id, charBuild.char.属性))
+                                        )
+                                    )
+                                }}
                             </span>
                         </p>
 

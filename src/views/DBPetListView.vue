@@ -135,23 +135,32 @@ useInitialScrollToSelectedItem()
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedPet }">
                 <div class="p-3 border-b border-base-200">
-                    <input v-model="searchKeyword" type="text" placeholder="搜索魔灵名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
+                    <input
+                        v-model="searchKeyword"
+                        type="text"
+                        placeholder="搜索魔灵名称（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
+                    />
                 </div>
 
                 <div class="p-2 border-b border-base-200 space-y-2">
                     <div>
                         <div class="text-xs text-base-content/70 mb-1">{{ $t("char-build.enemy_type") }}</div>
                         <div class="flex flex-wrap gap-1 pb-1">
-                            <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                            <button
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
                                 :class="selectedType === 0 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedType = 0">
+                                @click="selectedType = 0"
+                            >
                                 {{ $t("全部") }}
                             </button>
-                            <button v-for="type in types" :key="type"
+                            <button
+                                v-for="type in types"
+                                :key="type"
                                 class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
                                 :class="selectedType === type ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedType = type">
+                                @click="selectedType = type"
+                            >
                                 {{ $t(getTypeName(type)) }}
                             </button>
                         </div>
@@ -160,17 +169,24 @@ useInitialScrollToSelectedItem()
                     <div>
                         <div class="text-xs text-base-content/70 mb-1">{{ $t("char-build.quality") }}</div>
                         <div class="flex flex-wrap gap-1 pb-1">
-                            <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                            <button
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
                                 :class="selectedQuality === 0 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedQuality = 0">
+                                @click="selectedQuality = 0"
+                            >
                                 {{ $t("全部") }}
                             </button>
-                            <button v-for="quality in qualities" :key="quality"
+                            <button
+                                v-for="quality in qualities"
+                                :key="quality"
                                 class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                                :class="selectedQuality === quality
-                                    ? 'bg-primary text-white'
-                                    : 'bg-base-200 text-base-content hover:bg-base-300'
-                                    " @click="selectedQuality = quality">
+                                :class="
+                                    selectedQuality === quality
+                                        ? 'bg-primary text-white'
+                                        : 'bg-base-200 text-base-content hover:bg-base-300'
+                                "
+                                @click="selectedQuality = quality"
+                            >
                                 {{ $t(getQualityName(quality)) }}
                             </button>
                         </div>
@@ -179,16 +195,18 @@ useInitialScrollToSelectedItem()
 
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div v-for="item in filteredPets" :key="item.id"
+                        <div
+                            v-for="item in filteredPets"
+                            :key="item.id"
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedPetId === item.id }"
-                            @click="selectedPetId = selectedType === 999 ? 0 : (item as Pet).id">
+                            @click="selectedPetId = selectedType === 999 ? 0 : (item as Pet).id"
+                        >
                             <div class="flex items-start gap-2">
                                 <div class="w-12 h-12 overflow-hidden rounded-full">
                                     <!-- 显示潜质图标 -->
                                     <template v-if="selectedType === 999 && 'icon' in item">
-                                        <img :src="`/imgs/webp/T_Armory_Pet_Attr_${item.icon}_S.webp`"
-                                            class="w-full h-full object-cover" />
+                                        <img :src="`/imgs/webp/T_Armory_Pet_Attr_${item.icon}.webp`" class="w-full h-full object-cover" />
                                     </template>
                                     <!-- 显示普通魔灵图标 -->
                                     <template v-else-if="'icon' in item && '名称' in item">
@@ -241,9 +259,11 @@ useInitialScrollToSelectedItem()
                     共 {{ filteredPets.length }} {{ selectedType === 999 ? "个潜质" : "个魔灵" }}
                 </div>
             </div>
-            <div v-if="selectedPet"
+            <div
+                v-if="selectedPet"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedPetId = 0">
+                @click="selectedPetId = 0"
+            >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 
@@ -253,5 +273,3 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
-
-

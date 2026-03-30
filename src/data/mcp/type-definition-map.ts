@@ -14,7 +14,7 @@ export const DATA_TYPE_INTERFACE_DEFINITION_MAP = {
     Dungeon:
         "export interface Dungeon {\n    id: number\n    n: string\n    t: string\n    e?: string\n    ts?: string\n    lv: number\n    rd: number\n    desc?: string\n    m: number[]\n    r: number[]\n    win: number\n    sm?: number[]\n    sr?: number[]\n    spawn?: SpawnInfo[][]\n}",
     HardBoss:
-        "export interface HardBoss {\n    id: number\n    name: string\n    icon: string\n    desc: string\n    diff: Diff[]\n    mid: number\n}",
+        "export interface HardBoss {\n    id: number\n    name: string\n    icon: string\n    desc: string\n    diff: Diff[]\n    mid: number[]\n}",
     Jargon: "export interface Jargon {\n    name: string\n    alias?: string[]\n    desc: string\n    type: string[]\n    /** 参考数据表 */\n    ref?: string\n}",
     Mod: 'export interface Mod {\n    id: number\n    icon?: string\n    版本?: string\n    名称: string\n    系列: string\n    品质: string\n    极性?: "D" | "O" | "V" | "A"\n    耐受: number\n    类型: string\n    属性?: string\n    限定?: string\n    效果?: string\n    消耗?: number[]\n    技能替换?: Record<string, WeaponSkill>\n    buff?: Buff\n\n    [key: string]: any\n}',
     NPC: "export interface NPC {\n    id: number\n    name?: string\n    camp?: string\n    type?: string\n    charId?: number\n    icon?: string\n    talks?: Dialogue[]\n}",

@@ -1384,7 +1384,13 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         @toggle="toggleSection('mods')">
                         <div class="mt-2">
                             <ModEditer v-if="charTab === '角色'" :mods="selectedCharMods"
-                                :mod-options="modOptions.filter(m => m.type === '角色' && (!m.limit || m.limit === charBuild.char.属性))"
+                                :mod-options="
+                                    modOptions.filter(
+                                        m =>
+                                            m.type === '角色' &&
+                                            (!m.limit || m.limit === charBuild.char.名称 || m.limit === charBuild.char.属性)
+                                    )
+                                "
                                 :char-build="charBuild" :aura-mod="charSettings.auraMod" type="角色"
                                 :polset="charBuild.getModCostTransfer(charTab)" @remove-mod="removeMod($event, '角色')"
                                 @select-mod="selectMod('角色', $event[0], $event[1], $event[2])"

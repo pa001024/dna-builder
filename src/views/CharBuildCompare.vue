@@ -529,7 +529,13 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     :mods="config.additionalMods[0].map(m => (m ? new LeveledMod(m[0], m[1]) : null))"
                                     :other-mods="config.charSettings.charMods.map(m => (m ? new LeveledMod(m[0], m[1]) : null))"
                                     :mod-options="
-                                        modOptions.filter(m => m.type === '角色' && (!m.limit || m.limit === charBuilds[index]?.char.属性))
+                                        modOptions.filter(
+                                            m =>
+                                                m.type === '角色' &&
+                                                (!m.limit ||
+                                                    m.limit === charBuilds[index]?.char.名称 ||
+                                                    m.limit === charBuilds[index]?.char.属性)
+                                        )
                                     "
                                     :char-build="charBuilds[index]"
                                     type="角色"

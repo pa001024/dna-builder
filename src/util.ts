@@ -49,6 +49,7 @@ const numKeys = new Set([
     "基础弹匣",
     "连击持续时间",
     "子弹爆炸范围",
+    "弹药",
 ])
 export function formatProp(prop: string, val: any): string {
     // 实现属性格式化的逻辑
@@ -65,9 +66,16 @@ export function formatWeaponProp(prop: string, val: any): string {
 const propRegex = /神智消耗|神智回复$/
 export function formatSkillProp(prop: string, val: LeveledSkillField) {
     const fmt = propRegex.test(prop) ? format1 : format100
-    return val.格式
-        ? val.格式.replace(/\{%?\}/g, (v, i) => (v.includes("%") ? format100(i ? val.值2! : val.值) : format1(i ? val.值2! : val.值)))
-        : fmt(val.值)
+    if (!val.格式) {
+        return fmt(val.值)
+    }
+
+    let placeholderIndex = 0
+    return val.格式.replace(/\{%?\}/g, v => {
+        const currentValue = placeholderIndex === 0 ? val.值 : (val.值2 ?? val.值)
+        placeholderIndex += 1
+        return v.includes("%") ? format100(currentValue) : format1(currentValue)
+    })
 }
 
 export async function copyText(text: string) {

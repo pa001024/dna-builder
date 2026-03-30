@@ -191,7 +191,7 @@ const reputationData: Reputation[] = [
         entrusts: [
             {
                 id: 10001,
-                name: "外送皎皎的采集物收集",
+                name: "采集物收集",
                 desc: "“你经常在外面闯荡，一定攒了不少好东西吧，能不能卖给咱一些？咱最近正在琢磨搞点副业……”",
                 icon: "T_Head_WaimaiJJ",
                 exp: 30,
@@ -203,7 +203,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10002,
-                name: "外送皎皎的采集物收集",
+                name: "采集物收集",
                 desc: "“你经常在外面闯荡，一定攒了不少好东西吧，能不能卖给咱一些？咱最近正在琢磨搞点副业……”",
                 icon: "T_Head_WaimaiJJ",
                 exp: 30,
@@ -215,7 +215,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10003,
-                name: "外送皎皎的采集物收集",
+                name: "采集物收集",
                 desc: "“你经常在外面闯荡，一定攒了不少好东西吧，能不能卖给咱一些？咱最近正在琢磨搞点副业……”",
                 icon: "T_Head_WaimaiJJ",
                 exp: 30,
@@ -227,7 +227,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10004,
-                name: "外送皎皎的采集物收集",
+                name: "采集物收集",
                 desc: "“你经常在外面闯荡，一定攒了不少好东西吧，能不能卖给咱一些？咱最近正在琢磨搞点副业……”",
                 icon: "T_Head_WaimaiJJ",
                 exp: 30,
@@ -239,7 +239,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10005,
-                name: "外送皎皎的采集物收集",
+                name: "采集物收集",
                 desc: "“你经常在外面闯荡，一定攒了不少好东西吧，能不能卖给咱一些？咱最近正在琢磨搞点副业……”",
                 icon: "T_Head_WaimaiJJ",
                 exp: 30,
@@ -251,7 +251,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10006,
-                name: "卡米拉的素材收集",
+                name: "素材收集",
                 desc: "“有位狩月人要和你打赌，说你绝对搞不来这些。你要应下这个赌吗？”",
                 icon: "T_Head_Kami",
                 exp: 20,
@@ -263,7 +263,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10007,
-                name: "卡米拉的素材收集",
+                name: "素材收集",
                 desc: "“有位狩月人要和你打赌，说你绝对搞不来这些。你要应下这个赌吗？”",
                 icon: "T_Head_Kami",
                 exp: 20,
@@ -275,7 +275,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10008,
-                name: "卡米拉的素材收集",
+                name: "素材收集",
                 desc: "“有位狩月人要和你打赌，说你绝对搞不来这些。你要应下这个赌吗？”",
                 icon: "T_Head_Kami",
                 exp: 20,
@@ -287,7 +287,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10009,
-                name: "卡米拉的素材收集",
+                name: "素材收集",
                 desc: "“有位狩月人要和你打赌，说你绝对搞不来这些。你要应下这个赌吗？”",
                 icon: "T_Head_Kami",
                 exp: 20,
@@ -299,7 +299,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10010,
-                name: "卡米拉的素材收集",
+                name: "素材收集",
                 desc: "“有位狩月人要和你打赌，说你绝对搞不来这些。你要应下这个赌吗？”",
                 icon: "T_Head_Kami",
                 exp: 20,
@@ -311,7 +311,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10011,
-                name: "卡米拉的素材收集",
+                name: "素材收集",
                 desc: "“有位狩月人要和你打赌，说你绝对搞不来这些。你要应下这个赌吗？”",
                 icon: "T_Head_Kami",
                 exp: 20,
@@ -323,7 +323,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10012,
-                name: "卡米拉的素材收集",
+                name: "素材收集",
                 desc: "“有位狩月人要和你打赌，说你绝对搞不来这些。你要应下这个赌吗？”",
                 icon: "T_Head_Kami",
                 exp: 30,
@@ -335,7 +335,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10013,
-                name: "卡米拉的素材收集",
+                name: "素材收集",
                 desc: "“有位狩月人要和你打赌，说你绝对搞不来这些。你要应下这个赌吗？”",
                 icon: "T_Head_Kami",
                 exp: 30,
@@ -347,7 +347,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10014,
-                name: "卡米拉的素材收集",
+                name: "素材收集",
                 desc: "“有位狩月人要和你打赌，说你绝对搞不来这些。你要应下这个赌吗？”",
                 icon: "T_Head_Kami",
                 exp: 30,
@@ -359,7 +359,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10015,
-                name: "玛尔洁的物资收集",
+                name: "物资收集",
                 desc: "“什么什么？！我听说这里有真诚许愿就会满足我的垃圾桶精灵~开玩笑的，但我的确需要这批物资！”",
                 icon: "T_Head_Maer",
                 exp: 30,
@@ -371,7 +371,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10016,
-                name: "玛尔洁的物资收集",
+                name: "物资收集",
                 desc: "“什么什么？！我听说这里有真诚许愿就会满足我的垃圾桶精灵~开玩笑的，但我的确需要这批物资！”",
                 icon: "T_Head_Maer",
                 exp: 30,
@@ -383,7 +383,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10017,
-                name: "玛尔洁的物资收集",
+                name: "物资收集",
                 desc: "“什么什么？！我听说这里有真诚许愿就会满足我的垃圾桶精灵~开玩笑的，但我的确需要这批物资！”",
                 icon: "T_Head_Maer",
                 exp: 30,
@@ -395,7 +395,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10018,
-                name: "玛尔洁的物资收集",
+                name: "物资收集",
                 desc: "“什么什么？！我听说这里有真诚许愿就会满足我的垃圾桶精灵~开玩笑的，但我的确需要这批物资！”",
                 icon: "T_Head_Maer",
                 exp: 40,
@@ -407,7 +407,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10019,
-                name: "玛尔洁的物资收集",
+                name: "物资收集",
                 desc: "“什么什么？！我听说这里有真诚许愿就会满足我的垃圾桶精灵~开玩笑的，但我的确需要这批物资！”",
                 icon: "T_Head_Maer",
                 exp: 40,
@@ -419,7 +419,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 10020,
-                name: "玛尔洁的物资收集",
+                name: "物资收集",
                 desc: "“什么什么？！我听说这里有真诚许愿就会满足我的垃圾桶精灵~开玩笑的，但我的确需要这批物资！”",
                 icon: "T_Head_Maer",
                 exp: 40,
@@ -594,7 +594,7 @@ const reputationData: Reputation[] = [
         entrusts: [
             {
                 id: 11001,
-                name: "锦鲤皎皎的采集物收集",
+                name: "采集物收集",
                 desc: "“白说你们在冒险的过程中经常会捡到这些东西，很多都没用，可以的话，能分给我一些吗？”",
                 icon: "T_Head_JinliJJ",
                 exp: 30,
@@ -606,7 +606,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11002,
-                name: "锦鲤皎皎的采集物收集",
+                name: "采集物收集",
                 desc: "“白说你们在冒险的过程中经常会捡到这些东西，很多都没用，可以的话，能分给我一些吗？”",
                 icon: "T_Head_JinliJJ",
                 exp: 30,
@@ -618,7 +618,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11003,
-                name: "锦鲤皎皎的采集物收集",
+                name: "采集物收集",
                 desc: "“白说你们在冒险的过程中经常会捡到这些东西，很多都没用，可以的话，能分给我一些吗？”",
                 icon: "T_Head_JinliJJ",
                 exp: 30,
@@ -630,7 +630,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11004,
-                name: "锦鲤皎皎的采集物收集",
+                name: "采集物收集",
                 desc: "“白说你们在冒险的过程中经常会捡到这些东西，很多都没用，可以的话，能分给我一些吗？”",
                 icon: "T_Head_JinliJJ",
                 exp: 30,
@@ -642,7 +642,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11005,
-                name: "锦鲤皎皎的采集物收集",
+                name: "采集物收集",
                 desc: "“白说你们在冒险的过程中经常会捡到这些东西，很多都没用，可以的话，能分给我一些吗？”",
                 icon: "T_Head_JinliJJ",
                 exp: 30,
@@ -654,7 +654,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11006,
-                name: "织星客的素材收集",
+                name: "素材收集",
                 desc: "“这些货物很受欢迎，只是最近玄色狴犴在商路肆虐，进货困难。如果你愿意帮忙，我们非常感激。”",
                 icon: "T_Head_FameCommon",
                 exp: 20,
@@ -666,7 +666,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11007,
-                name: "织星客的素材收集",
+                name: "素材收集",
                 desc: "“这些货物很受欢迎，只是最近玄色狴犴在商路肆虐，进货困难。如果你愿意帮忙，我们非常感激。”",
                 icon: "T_Head_FameCommon",
                 exp: 20,
@@ -678,7 +678,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11008,
-                name: "织星客的素材收集",
+                name: "素材收集",
                 desc: "“这些货物很受欢迎，只是最近玄色狴犴在商路肆虐，进货困难。如果你愿意帮忙，我们非常感激。”",
                 icon: "T_Head_FameCommon",
                 exp: 20,
@@ -690,7 +690,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11009,
-                name: "织星客的素材收集",
+                name: "素材收集",
                 desc: "“这些货物很受欢迎，只是最近玄色狴犴在商路肆虐，进货困难。如果你愿意帮忙，我们非常感激。”",
                 icon: "T_Head_FameCommon",
                 exp: 20,
@@ -702,7 +702,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11010,
-                name: "织星客的素材收集",
+                name: "素材收集",
                 desc: "“这些货物很受欢迎，只是最近玄色狴犴在商路肆虐，进货困难。如果你愿意帮忙，我们非常感激。”",
                 icon: "T_Head_FameCommon",
                 exp: 20,
@@ -714,7 +714,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11011,
-                name: "织星客的素材收集",
+                name: "素材收集",
                 desc: "“这些货物很受欢迎，只是最近玄色狴犴在商路肆虐，进货困难。如果你愿意帮忙，我们非常感激。”",
                 icon: "T_Head_FameCommon",
                 exp: 20,
@@ -726,7 +726,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11012,
-                name: "织星客的素材收集",
+                name: "素材收集",
                 desc: "“这些货物很受欢迎，只是最近玄色狴犴在商路肆虐，进货困难。如果你愿意帮忙，我们非常感激。”",
                 icon: "T_Head_FameCommon",
                 exp: 30,
@@ -738,7 +738,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11013,
-                name: "织星客的素材收集",
+                name: "素材收集",
                 desc: "“这些货物很受欢迎，只是最近玄色狴犴在商路肆虐，进货困难。如果你愿意帮忙，我们非常感激。”",
                 icon: "T_Head_FameCommon",
                 exp: 30,
@@ -750,7 +750,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11014,
-                name: "织星客的素材收集",
+                name: "素材收集",
                 desc: "“这些货物很受欢迎，只是最近玄色狴犴在商路肆虐，进货困难。如果你愿意帮忙，我们非常感激。”",
                 icon: "T_Head_FameCommon",
                 exp: 30,
@@ -762,7 +762,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11015,
-                name: "织星客的素材收集",
+                name: "素材收集",
                 desc: "“这些货物很受欢迎，只是最近玄色狴犴在商路肆虐，进货困难。如果你愿意帮忙，我们非常感激。”",
                 icon: "T_Head_FameCommon",
                 exp: 30,
@@ -774,7 +774,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11016,
-                name: "虬先生的物资收集",
+                name: "物资收集",
                 desc: "“不必紧张，若你此时相助，他日定有我回报你之时。”",
                 icon: "T_Head_Qiu",
                 exp: 30,
@@ -786,7 +786,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11017,
-                name: "虬先生的物资收集",
+                name: "物资收集",
                 desc: "“不必紧张，若你此时相助，他日定有我回报你之时。”",
                 icon: "T_Head_Qiu",
                 exp: 30,
@@ -798,7 +798,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11018,
-                name: "虬先生的物资收集",
+                name: "物资收集",
                 desc: "“不必紧张，若你此时相助，他日定有我回报你之时。”",
                 icon: "T_Head_Qiu",
                 exp: 40,
@@ -810,7 +810,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11019,
-                name: "虬先生的物资收集",
+                name: "物资收集",
                 desc: "“不必紧张，若你此时相助，他日定有我回报你之时。”",
                 icon: "T_Head_Qiu",
                 exp: 40,
@@ -822,7 +822,7 @@ const reputationData: Reputation[] = [
             },
             {
                 id: 11020,
-                name: "虬先生的物资收集",
+                name: "物资收集",
                 desc: "“不必紧张，若你此时相助，他日定有我回报你之时。”",
                 icon: "T_Head_Qiu",
                 exp: 40,

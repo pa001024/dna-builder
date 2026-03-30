@@ -26,6 +26,7 @@ export class LeveledWeapon {
     射速?: number
     基础装填?: number
     基础弹匣?: number
+    基础弹药?: number
     技能?: LeveledSkill[]
     // 武器效果描述
     效果?: string
@@ -128,6 +129,7 @@ export class LeveledWeapon {
         this.射速 = weaponData.射击间隔 ? +(1 / weaponData.射击间隔).toFixed(4) : undefined
         this.基础装填 = weaponData.装填 || 0
         this.基础弹匣 = weaponData.弹匣
+        this.基础弹药 = weaponData.最大弹药
 
         // 设置精炼等级（如果提供），否则设为5
         this._精炼 = Math.max(0, Math.min(LeveledWeapon._maxRefineLevel, 精炼 ?? 5))
@@ -259,6 +261,7 @@ export class LeveledWeapon {
         "基础触发",
         "基础装填",
         "基础弹匣",
+        "基础弹药",
         "技能",
         "倍率",
         "弹片数",
@@ -284,6 +287,7 @@ export class LeveledWeapon {
         "基础暴击",
         "基础暴伤",
         "基础触发",
+        "基础弹药",
         "倍率",
         "弹片数",
         "弹道类型",

@@ -27,6 +27,38 @@ const questions = [
         question: "What is the game server opening time? (8-digit number)",
         answer: "20251028",
     },
+    {
+        question: "What time do daily tasks refresh every day? (1-digit number)",
+        answer: "5",
+    },
+    {
+        question: "What color is the sky on a clear day?",
+        answer: "blue",
+    },
+    {
+        question: "Type the word 'unlock' backwards.",
+        answer: "kcolnu",
+    },
+    {
+        question: "What is the second day of the week in English?",
+        answer: "Tuesday",
+    },
+    {
+        question: "What is the first month of the year?",
+        answer: "January",
+    },
+    {
+        question: "What is the color of a banana?",
+        answer: "yellow",
+    },
+    {
+        question: "What is the opposite of cold?",
+        answer: "hot",
+    },
+    {
+        question: "How many days are in a week?",
+        answer: "7",
+    },
 ]
 const currentSafeModeQuestion = ref<(typeof questions)[number] | null>(null)
 
@@ -557,7 +589,7 @@ function resetAiSettings() {
             <div class="flex flex-col gap-3">
                 <label class="w-full flex flex-col gap-2">
                     <span class="text-sm">{{ currentSafeModeQuestion?.question || "no question" }}</span>
-                    <input v-model="safeModeAnswer" type="text" class="input input-bordered" placeholder="enter your answer" />
+                    <input v-model="safeModeAnswer" type="password" class="input input-bordered" placeholder="enter your answer" />
                 </label>
             </div>
 

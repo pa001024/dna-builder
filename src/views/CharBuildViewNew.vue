@@ -744,7 +744,7 @@ const availableModChoices = computed(() => {
                 if (mod.属性 && mod.属性 !== charBuild.value.char.属性) {
                     return false
                 }
-                if (mod.限定 && mod.限定 !== charBuild.value.char.属性) {
+                if (mod.限定 && mod.限定 !== charBuild.value.char.名称 && mod.限定 !== charBuild.value.char.属性) {
                     return false
                 }
             }

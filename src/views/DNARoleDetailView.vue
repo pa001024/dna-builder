@@ -19,6 +19,16 @@ const charId = computed(() => route.params.charId as string)
 const charEid = computed(() => route.params.charEid as string)
 
 /**
+ * 获取角色溯源的序号文本。
+ * @param index 溯源索引
+ * @returns 适合展示的序号文本
+ */
+function getTraceOrdinal(index: number): string {
+    const ordinals = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
+    return ordinals[index] || String(index + 1)
+}
+
+/**
  * 角色详情魔之楔列表（统一转换后复用到展示和生效计算）
  */
 const roleMods = computed(() => {
@@ -239,7 +249,7 @@ async function loadRoleDetail() {
 
                                     <div class="flex-1 space-y-1">
                                         <div class="flex items-center gap-2">
-                                            <span> 第{{ ["一", "二", "三", "四", "五", "六"][index] }}根源 </span>
+                                            <span> 第{{ getTraceOrdinal(index) }}根源 </span>
                                             <span class="badge badge-sm" :class="{
                                                 'badge-warning': charDetail.gradeLevel > index,
                                                 'badge-neutral': charDetail.gradeLevel <= index,

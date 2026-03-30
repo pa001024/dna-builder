@@ -171,9 +171,11 @@ const dynamicWeaponAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>
                         <ul class="space-y-1">
                             <li v-if="'基础' + key in baseWeapon" class="flex justify-between gap-8 text-sm text-primary">
                                 <div class="text-base-content/80">
-                                    {{ key === "攻击"
-                                        ? $t("char-build.base_weapon_attack_label", { dmg: $t(getWeaponAttackLabelPrefix(key)) })
-                                        : $t("char-build.base_attr_label", { attr: $t(key) }) }}
+                                    {{
+                                        key === "攻击"
+                                            ? $t("char-build.base_weapon_attack_label", { dmg: $t(getWeaponAttackLabelPrefix(key)) })
+                                            : $t("char-build.base_attr_label", { attr: $t(key) })
+                                    }}
                                 </div>
                                 {{
                                     formatWeaponProp(
@@ -261,9 +263,7 @@ const dynamicWeaponAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>
                 >
                     <div class="flex items-center gap-1 text-sm text-base-content/80">
                         <span>{{
-                            key === "攻击"
-                                ? $t("char-build.weapon_attack_label", { dmg: $t(getWeaponAttackLabelPrefix(key)) })
-                                : $t(key)
+                            key === "攻击" ? $t("char-build.weapon_attack_label", { dmg: $t(getWeaponAttackLabelPrefix(key)) }) : $t(key)
                         }}</span>
                         <FullTooltip v-if="isInheritedAttackLabel(key)" side="top">
                             <template #tooltip>
@@ -277,7 +277,7 @@ const dynamicWeaponAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>
                         </FullTooltip>
                     </div>
                     <div class="text-primary font-bold text-sm font-orbitron">
-                        {{ formatWeaponProp(["攻速", "多重", "弹匣", "装填"].includes(key) ? "基础攻击" : key, val) }}
+                        {{ formatWeaponProp(["攻速", "多重", "弹匣", "装填", "最大弹药"].includes(key) ? "基础攻击" : key, val) }}
                     </div>
                 </div>
             </FullTooltip>

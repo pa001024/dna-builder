@@ -844,6 +844,18 @@ describe("CharBuild类测试", () => {
             expect(Number.isFinite(income)).toBe(true)
             expect(income).toBeCloseTo(1.6, 10)
         })
+
+        it("已装备MOD的精确收益应等于真实移除后的重算结果", () => {
+            const charBuild = createCharBuild()
+            const baseValue = charBuild.calculate()
+            const removedBuild = charBuild.clone()
+
+            removedBuild.charMods.splice(0, 1)
+            const removedValue = removedBuild.calculate()
+
+            expect(removedValue).toBeGreaterThan(0)
+            expect(charBuild.calcEquippedModIncome("角色", 0)).toBeCloseTo(baseValue / removedValue - 1, 10)
+        })
     })
 
     // 配置测试

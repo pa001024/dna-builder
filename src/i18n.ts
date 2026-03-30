@@ -6,6 +6,10 @@ export const i18nLanguages = [
         code: "en",
     },
     {
+        name: "jiaojiao",
+        code: "jiaojiao",
+    },
+    {
         name: "中文（简体）",
         code: "zh-CN",
         alias: ["zh", "zh-Hans", "zh-Hans-CN"],
@@ -32,21 +36,41 @@ export const i18nLanguages = [
     },
 ]
 
+/**
+ * 将设置语言代码映射为实际加载的 i18n 语言。
+ * @param language 设置语言代码
+ * @returns 实际加载语言
+ */
+export function resolveI18nLanguage(language: string) {
+    if (language === "jiaojiao") return "en"
+    return language
+}
+
 export function changeLanguage(language: string) {
-    i18next.changeLanguage(language)
+    i18next.changeLanguage(resolveI18nLanguage(language))
+}
+
+/**
+ * 根据当前设置切换页面字体类。
+ * @param language 设置语言代码
+ */
+export function applyLanguageFontClass(language: string) {
+    if (typeof document === "undefined") return
+    document.documentElement.classList.toggle("is-jiaojiao-font", language === "jiaojiao")
 }
 
 export async function initI18n(selectedLanguage: string) {
+    const resolvedLanguage = resolveI18nLanguage(selectedLanguage)
     const lngCodes = i18nLanguages.map(l => l.code)
     return i18next.use(Backend).init<HttpBackendOptions>({
         backend: {
             loadPath: "/i18n/{{lng}}/{{ns}}.json",
         },
-        preload: [selectedLanguage],
+        preload: [resolvedLanguage],
         supportedLngs: [...lngCodes, "dev"],
         fallbackLng: "zh-CN",
         debug: import.meta.env.TAURI_DEBUG,
-        lng: selectedLanguage,
+        lng: resolvedLanguage,
 
         interpolation: {
             escapeValue: false,
@@ -72,9 +96,10 @@ export async function waitForInitialLoad({
     ns?: string | string[]
     timeout?: number
 } = {}): Promise<void> {
+    const resolvedLng = resolveI18nLanguage(lng)
     // 第一步：先检查——若资源已加载，直接resolve，无需等待事件
     const nsList = Array.isArray(ns) ? ns : [ns]
-    const isAllLoaded = i18next.isInitialized && nsList.every(namespace => i18next.hasResourceBundle(lng, namespace))
+    const isAllLoaded = i18next.isInitialized && nsList.every(namespace => i18next.hasResourceBundle(resolvedLng, namespace))
     if (isAllLoaded) {
         return
     }
@@ -84,13 +109,13 @@ export async function waitForInitialLoad({
         // 超时处理
         const timeoutTimer = setTimeout(() => {
             i18next.off("loaded", handleLoaded) // 清理事件监听
-            reject(new Error(`语言包加载超时（${timeout}ms），语言：${lng}，命名空间：${nsList.join(",")}`))
+            reject(new Error(`语言包加载超时（${timeout}ms），语言：${resolvedLng}，命名空间：${nsList.join(",")}`))
         }, timeout)
 
         // loaded事件处理
         const handleLoaded = () => {
             // 二次校验：确保指定语言/命名空间真的加载完成（避免事件误触发）
-            const isLoadedAfterEvent = nsList.every(namespace => i18next.hasResourceBundle(lng, namespace))
+            const isLoadedAfterEvent = nsList.every(namespace => i18next.hasResourceBundle(resolvedLng, namespace))
             if (isLoadedAfterEvent) {
                 clearTimeout(timeoutTimer) // 清除超时器
                 i18next.off("loaded", handleLoaded) // 清理事件监听

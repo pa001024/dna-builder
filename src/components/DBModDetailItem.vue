@@ -1,11 +1,13 @@
 <script lang="ts" setup>
 import { computed, nextTick, ref, watch } from "vue"
-import { LeveledSkill } from "@/data"
+import { LeveledSkill, resourceMap } from "@/data"
 import { modConvertData } from "@/data/d/convert.data"
-import { modShopSourceMap } from "@/data/d/shop.data"
+import shopData from "@/data/d/shop.data"
+import weaponData from "@/data/d/weapon.data"
 import { getDungeonName } from "@/utils/dungeon-utils"
 import { getModDropInfo } from "@/utils/reward-utils"
 import { modDraftMap, modDungeonMap } from "../data/d/index"
+import { walnutMap } from "../data/d/walnut.data"
 import type { Draft, Dungeon, Mod, WeaponSkill } from "../data/data-types"
 import { LeveledMod } from "../data/leveled/LeveledMod"
 import { formatProp } from "../util"
@@ -13,6 +15,29 @@ import { formatProp } from "../util"
 const props = defineProps<{
     mod: Mod
 }>()
+
+interface ModShopSource {
+    key: string
+    type: "shop"
+    shopId: string
+    shopName: string
+    mainTabId: number
+    mainTabName: string
+    subTabId: number
+    subTabName: string
+    price: number
+    priceName: string
+    timeStart?: number
+    timeEnd?: number
+}
+
+interface SkillReplaceCompareGroup {
+    skillId: number
+    sourceSkillId: number
+    replaceSkillId: number
+    sourceSkill: LeveledSkill | null
+    replaceSkill: LeveledSkill
+}
 
 // 当前等级
 const currentLevel = ref(LeveledMod.modQualityMaxLevel[props.mod.品质] || 1)
@@ -76,10 +101,90 @@ const modDungeons = computed<Dungeon[]>(() => {
     return modDungeonMap.get(props.mod.id) || []
 })
 
-// 获取当前mod的商店来源
-const modShopSources = computed(() => {
-    return modShopSourceMap.get(props.mod.id)
-})
+/**
+ * 根据价格名称获取资源图标。
+ * @param priceName 价格资源名称
+ * @returns 资源图标 URL
+ */
+function getPriceIcon(priceName: string) {
+    const priceResource = resourceMap.get(priceName)
+    return priceResource?.icon ? `/imgs/res/${priceResource.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+}
+
+/**
+ * 格式化时间范围文本。
+ * @param start 开始时间戳
+ * @param end 结束时间戳
+ * @returns 时间范围文本
+ */
+function formatTimeRange(start: number, end?: number) {
+    const formatTime = (timestamp: number) =>
+        new Date(timestamp * 1000).toLocaleString("zh-CN", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+        })
+
+    return `${formatTime(start)}~${end ? formatTime(end) : "至今"}`
+}
+
+/**
+ * 收集当前魔之楔的商店来源信息。
+ * @param mod 魔之楔数据
+ * @returns 商店来源列表
+ */
+function collectModShopSources(mod: Mod): ModShopSource[] {
+    const result: ModShopSource[] = []
+    const sourceKeySet = new Set<string>()
+
+    shopData.forEach(shop => {
+        shop.mainTabs.forEach(mainTab => {
+            mainTab.subTabs.forEach(subTab => {
+                subTab.items.forEach(item => {
+                    const matched =
+                        (item.itemType === "Mod" && item.typeId === mod.id) ||
+                        (item.itemType === "Walnut" &&
+                            walnutMap.get(item.typeId)?.奖励?.some(reward => reward.type === "Mod" && reward.id === mod.id))
+
+                    if (!matched) {
+                        return
+                    }
+
+                    const key = `shop-${shop.id}-${mainTab.id}-${subTab.id}-${item.id}-${mod.id}`
+                    if (sourceKeySet.has(key)) {
+                        return
+                    }
+
+                    sourceKeySet.add(key)
+                    result.push({
+                        key,
+                        type: "shop",
+                        shopId: shop.id,
+                        shopName: shop.name,
+                        mainTabId: mainTab.id,
+                        mainTabName: mainTab.name,
+                        subTabId: subTab.id,
+                        subTabName: subTab.name,
+                        price: item.price,
+                        priceName: item.priceName,
+                        timeStart: item.startTime,
+                        timeEnd: item.endTime,
+                    })
+                })
+            })
+        })
+    })
+
+    return result
+}
+
+/**
+ * 收集当前魔之楔的商店来源信息。
+ * @returns 商店来源列表
+ */
+const modShopSources = computed<ModShopSource[]>(() => collectModShopSources(props.mod))
 
 const modConvertPoolLabels = ["紫色魔之楔转换", "蓝色魔之楔转换"] as const
 const modConvertTotalWeights = modConvertData.map(pool => pool.Weight.reduce((total, weight) => total + weight, 0))
@@ -175,9 +280,36 @@ const skillReplaceEntries = computed(() => {
     return skillReplace ? Object.entries(skillReplace) : []
 })
 
-const replaceSkills = computed(() => {
-    if (!leveledMod.value.技能替换) return []
-    return Object.values(leveledMod.value.技能替换).map(skill => new LeveledSkill(skill))
+/**
+ * 按技能 ID 查找被替换的原始武器技能。
+ * @param skillId 技能 ID
+ * @returns 原始技能及其来源武器名
+ */
+function findSourceWeaponSkill(skillId: number) {
+    for (const weapon of weaponData) {
+        const sourceSkill = weapon.技能?.find(skill => skill.id === skillId)
+        if (sourceSkill) {
+            return { sourceSkill }
+        }
+    }
+    return { sourceSkill: undefined }
+}
+
+/**
+ * 将技能替换数据整理成左右对照展示所需的条目。
+ */
+const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
+    return skillReplaceEntries.value.map(([skillIdKey, replaceSkill]) => {
+        const skillId = Number(skillIdKey)
+        const { sourceSkill } = findSourceWeaponSkill(skillId)
+        return {
+            skillId,
+            sourceSkillId: sourceSkill?.id || skillId,
+            replaceSkillId: replaceSkill.id || skillId,
+            sourceSkill: sourceSkill ? new LeveledSkill(sourceSkill) : null,
+            replaceSkill: new LeveledSkill(replaceSkill),
+        }
+    })
 })
 </script>
 
@@ -207,6 +339,7 @@ const replaceSkills = computed(() => {
             <span>{{ $t(leveledMod.类型) }}</span>
             <span v-if="leveledMod.属性">{{ $t(`${leveledMod.属性}属性`) }}</span>
             <span v-if="leveledMod.限定">{{ $t(leveledMod.限定) }}</span>
+            <span v-if="mod.版本">v{{ mod.版本 }}</span>
         </div>
 
         <!-- 等级调整 -->
@@ -291,14 +424,33 @@ const replaceSkills = computed(() => {
             </div>
         </div>
 
-        <div v-if="skillReplaceEntries.length" class="p-3 bg-base-200 rounded">
+        <div v-if="skillReplaceCompareGroups.length" class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-2">技能替换</div>
-            <div class="space-y-3">
-                <div v-for="skill in replaceSkills" :key="skill.名称">
-                    <div class="p-2 font-medium mb-1">
-                        {{ $t(skill.名称) }}
+            <div class="space-y-4">
+                <div v-for="group in skillReplaceCompareGroups" :key="group.skillId" class="p-2 bg-base-300 rounded space-y-3">
+                    <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 items-center">
+                        <div class="p-2 bg-base-200 rounded">
+                            <div class="flex flex-wrap items-center gap-2 mb-2">
+                                <div class="font-medium">
+                                    {{ group.sourceSkill ? $t(group.sourceSkill.名称) : `ID: ${group.sourceSkillId}` }}
+                                </div>
+                                <span class="text-xs opacity-70">ID: {{ group.sourceSkillId }}</span>
+                            </div>
+                            <SkillFields v-if="group.sourceSkill" :skill="group.sourceSkill" />
+                        </div>
+                        <div class="flex justify-center items-center text-base-content/50">
+                            <Icon icon="ri:arrow-right-line" class="w-4 h-4 rotate-90 md:rotate-0" />
+                        </div>
+                        <div class="p-2 bg-base-200 rounded">
+                            <div class="flex flex-wrap items-center gap-2 mb-2">
+                                <div class="font-medium">
+                                    {{ $t(group.replaceSkill.名称) }}
+                                </div>
+                                <span class="text-xs opacity-70">ID: {{ group.replaceSkillId }}</span>
+                            </div>
+                            <SkillFields :skill="group.replaceSkill" />
+                        </div>
                     </div>
-                    <SkillFields :skill="skill" />
                 </div>
             </div>
         </div>
@@ -346,63 +498,76 @@ const replaceSkills = computed(() => {
             <DBDraftDetailItem :draft="modDraft" />
         </div>
 
-        <!-- 掉落来源 -->
-        <div v-if="modDungeons.length > 0" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">掉落来源</div>
-            <div class="space-y-2 text-sm">
-                <div v-for="dungeon in modDungeons" :key="dungeon.id" class="space-y-2">
-                    <div
-                        @click="toggleDungeonExpand(dungeon.id)"
-                        class="flex flex-col gap-1 p-2 bg-base-300 rounded hover:bg-base-content/10 transition-colors cursor-pointer"
-                    >
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center gap-2">
-                                <span class="font-medium">{{ getDungeonName(dungeon) }}</span>
-                                <span v-if="dungeon.e" class="text-xs px-1.5 py-0.5 rounded bg-primary/20 text-primary">{{
-                                    $t(dungeon.e)
-                                }}</span>
-                                <span class="text-xs text-base-content/70">ID: {{ dungeon.id }}</span>
+        <div v-if="modDungeons.length > 0 || modShopSources.length > 0" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">来源</div>
+            <div class="space-y-3 text-sm">
+                <div v-if="modDungeons.length > 0" class="space-y-2">
+                    <div class="text-xs text-base-content/60">{{ $t("database.dungeon") }}</div>
+                    <div v-for="dungeon in modDungeons" :key="dungeon.id" class="space-y-2">
+                        <div
+                            @click="toggleDungeonExpand(dungeon.id)"
+                            class="flex flex-col gap-1 p-2 bg-base-300 rounded hover:bg-base-content/10 transition-colors cursor-pointer"
+                        >
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <span class="font-medium truncate">{{ getDungeonName(dungeon) }}</span>
+                                    <span v-if="dungeon.e" class="text-xs px-1.5 py-0.5 rounded bg-primary/20 text-primary">{{
+                                        $t(dungeon.e)
+                                    }}</span>
+                                    <span class="text-xs text-base-content/70">ID: {{ dungeon.id }}</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-base-content/70">
+                                    <span v-if="dungeon.lv" class="badge badge-sm badge-neutral">Lv.{{ dungeon.lv }}</span>
+                                    <span class="text-xs">{{ dungeon.t }}</span>
+                                    <Icon
+                                        :icon="expandedDungeonId === dungeon.id ? 'radix-icons:chevron-up' : 'radix-icons:chevron-down'"
+                                        class="text-xs"
+                                    />
+                                </div>
                             </div>
-                            <div class="flex items-center gap-2 text-base-content/70">
-                                <span v-if="dungeon.lv" class="text-xs">Lv.{{ dungeon.lv }}</span>
-                                <span class="text-xs">{{ dungeon.t }}</span>
-                                <Icon
-                                    :icon="expandedDungeonId === dungeon.id ? 'radix-icons:chevron-up' : 'radix-icons:chevron-down'"
-                                    class="text-xs"
-                                />
+                            <div class="text-xs text-base-content/50">
+                                <span v-if="getModDropInfo(dungeon, mod.id).pp" class="mr-2">
+                                    概率: {{ +(getModDropInfo(dungeon, mod.id).pp! * 100).toFixed(2) }}%
+                                </span>
+                                <span v-if="getModDropInfo(dungeon, mod.id).times">
+                                    期望: {{ +getModDropInfo(dungeon, mod.id).times!.toFixed(2) }}次
+                                </span>
                             </div>
                         </div>
-                        <!-- 显示掉落概率信息 -->
-                        <div class="text-xs text-base-content/50">
-                            <span v-if="getModDropInfo(dungeon, mod.id).pp" class="mr-2">
-                                概率: {{ +(getModDropInfo(dungeon, mod.id).pp! * 100).toFixed(2) }}%
-                            </span>
-                            <span v-if="getModDropInfo(dungeon, mod.id).times">
-                                期望: {{ +getModDropInfo(dungeon, mod.id).times!.toFixed(2) }}次
-                            </span>
+                        <div v-if="expandedDungeonId === dungeon.id" class="p-3 bg-base-100 rounded border border-base-200">
+                            <DBDungeonDetailItem :dungeon="dungeon" />
                         </div>
-                    </div>
-                    <!-- 展开的地下城详情 -->
-                    <div v-if="expandedDungeonId === dungeon.id" class="p-3 bg-base-100 rounded border border-base-200">
-                        <DBDungeonDetailItem :dungeon="dungeon" />
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- 商店来源 -->
-        <div v-if="modShopSources" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">商店来源</div>
-            <div class="space-y-2 text-sm">
-                <div v-for="source in [modShopSources]" :key="source.shop">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-2">
-                            <span class="font-medium">{{ source.shop }}</span>
-                            <span class="text-xs text-base-content/70">{{ source.cost }}</span>
-                        </div>
-                        <div class="flex items-center gap-2 text-base-content/70">
-                            <span class="text-xs">{{ source.n }}</span>
-                            <span class="text-xs">{{ source.t }}</span>
+                <div v-if="modShopSources.length > 0" class="space-y-2">
+                    <div class="text-xs text-base-content/60">商店购买</div>
+                    <div v-for="source in modShopSources" :key="source.key">
+                        <div class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors flex items-center gap-4">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-center gap-2 mb-2">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <SRouterLink
+                                            :to="`/db/shop/${source.shopId}/${source.subTabId}`"
+                                            class="hover:underline min-w-0 truncate"
+                                        >
+                                            {{ source.shopName }}
+                                        </SRouterLink>
+                                        <span class="text-xs text-base-content/70">({{ source.shopId }})</span>
+                                    </div>
+                                    <div class="flex items-center gap-1 shrink-0">
+                                        <img :src="getPriceIcon(source.priceName)" class="w-4 h-4 object-cover rounded" :alt="source.priceName" />
+                                        <span class="text-xs text-base-content/70">{{ source.priceName }}</span>
+                                        <span class="text-sm font-medium">{{ source.price }}</span>
+                                    </div>
+                                </div>
+                                <div class="text-xs text-base-content/70">
+                                    {{ source.mainTabName }} -> {{ source.subTabName }}
+                                </div>
+                                <div v-if="source.timeStart" class="mt-1 text-xs text-base-content/70">
+                                    {{ formatTimeRange(source.timeStart, source.timeEnd) }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

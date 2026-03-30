@@ -4,6 +4,16 @@ import type { LeveledChar } from "@/data"
 const props = defineProps<{
     char: LeveledChar
 }>()
+
+/**
+ * 获取角色溯源的序号文本。
+ * @param index 溯源索引
+ * @returns 适合展示的序号文本
+ */
+function getTraceOrdinal(index: number): string {
+    const ordinals = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
+    return ordinals[index] || String(index + 1)
+}
 </script>
 <template>
     <h2 v-if="char.溯源" class="text-lg font-bold p-2 mt-2">
@@ -12,7 +22,7 @@ const props = defineProps<{
     <div v-if="char.溯源" class="flex flex-col gap-2 p-2">
         <div v-for="(grade, i) in char.溯源" :key="i" class="font-medium flex text-sm justify-between items-center gap-8">
             <div class="font-medium whitespace-nowrap opacity-70">
-                {{ $t("第" + ["一", "二", "三", "四", "五", "六"][i] + "根源") }}
+                {{ $t("第" + getTraceOrdinal(i) + "根源") }}
             </div>
             <div>{{ $t(grade) }}</div>
         </div>

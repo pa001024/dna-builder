@@ -8,6 +8,7 @@ export function getRewardTypeText(type: string): string {
         Drop: "掉落物",
         HeadFrame: "头像框",
         HeadSculpture: "头像",
+        Hair: "发型",
         Mod: "魔之楔",
         Mount: "载具",
         Draft: "图纸",

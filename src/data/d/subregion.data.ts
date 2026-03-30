@@ -7,6 +7,14 @@ export interface SubRegion {
     pos?: [number, number]
     rc?: RandomCreator[]
     range?: Range
+    tp?: TeleportPoint[]
+}
+
+export interface TeleportPoint {
+    id: number
+    pos: [number, number]
+    name: string
+    icon: string
 }
 
 export interface Range {
@@ -19,7 +27,7 @@ export interface RandomCreator {
     id: number
     info: RandomInfo[]
     count: number
-    pos: [number, number][]
+    pos?: [number, number][]
 }
 
 export interface RandomInfo {
@@ -35,6 +43,10 @@ export const subRegionData: SubRegion[] = [
         desc: "村庄描述",
         map: "Prologue_Village",
         pos: [3500, 500],
+        range: {
+            center: [6080, -1610],
+            extent: [0, 0],
+        },
         rc: [
             {
                 id: 9010101,
@@ -130,10 +142,26 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
-        range: {
-            center: [6080, -1610],
-            extent: [0, 0],
-        },
+        tp: [
+            {
+                id: 1001,
+                pos: [370, -1950],
+                name: "秽兽肆虐的村庄",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 2814,
+                pos: [-4222, 11076],
+                name: "净界岛钓鱼点",
+                icon: "T_Gp_Angling",
+            },
+            {
+                id: 2830,
+                pos: [1970, 3670],
+                name: "秽兽肆虐的村庄",
+                icon: "T_Gp_Camera",
+            },
+        ],
     },
     {
         id: 100102,
@@ -142,6 +170,10 @@ export const subRegionData: SubRegion[] = [
         desc: "阳台描述",
         map: "Prologue_Balcony",
         pos: [23500, 4500],
+        range: {
+            center: [22990, -4460],
+            extent: [0, 0],
+        },
         rc: [
             {
                 id: 9010201,
@@ -218,10 +250,14 @@ export const subRegionData: SubRegion[] = [
                 pos: [[26758.711, -3669.841]],
             },
         ],
-        range: {
-            center: [22990, -4460],
-            extent: [0, 0],
-        },
+        tp: [
+            {
+                id: 1002,
+                pos: [23530, -985],
+                name: "神秘遗迹中层",
+                icon: "T_Gp_Trans03",
+            },
+        ],
     },
     {
         id: 100103,
@@ -291,6 +327,26 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
+        tp: [
+            {
+                id: 9000,
+                pos: [31670, 32317],
+                name: "",
+                icon: "T_Gp_Boss",
+            },
+            {
+                id: 1003,
+                pos: [22051, 19329],
+                name: "神秘遗迹顶层",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 2832,
+                pos: [-9460, 44930],
+                name: "泪湖湖畔",
+                icon: "T_Gp_Camera",
+            },
+        ],
     },
     {
         id: 100104,
@@ -305,6 +361,11 @@ export const subRegionData: SubRegion[] = [
         name: "冰湖城外围",
         desc: "冰湖城外围·东区描述",
         map: "Chapter01_IcelakeCity",
+        pos: [-3700, -2530],
+        range: {
+            center: [-3700, -2530],
+            extent: [0, 0],
+        },
         rc: [
             {
                 id: 9020301,
@@ -424,10 +485,98 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
-        range: {
-            center: [-3700, -2530],
-            extent: [0, 0],
-        },
+        tp: [
+            {
+                id: 1011,
+                pos: [358, -1796],
+                name: "冰湖城外围广场",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 2817,
+                pos: [-3172, -5484],
+                name: "异乡来客",
+                icon: "T_Gp_Zhiliu",
+            },
+            {
+                id: 1012,
+                pos: [-3275, 10937],
+                name: "修普诺斯之家",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 2001,
+                pos: [-5221, 6000],
+                name: "休憩之所",
+                icon: "T_Gp_Homebase",
+            },
+            {
+                id: 2002,
+                pos: [-3172, -5484],
+                name: "“水仙平原”",
+                icon: "T_Gp_Tavern",
+            },
+            {
+                id: 2003,
+                pos: [-2360, 13561],
+                name: "“修普诺斯之家”",
+                icon: "T_Gp_Sanatorium",
+            },
+            {
+                id: 2004,
+                pos: [-1768, -12190],
+                name: "奥特赛德的家",
+                icon: "T_Gp_OutsidersHome",
+            },
+            {
+                id: 2006,
+                pos: [-8372, -675],
+                name: "冰湖城下水道",
+                icon: "T_Gp_Sew",
+            },
+            {
+                id: 2007,
+                pos: [100, -7250],
+                name: "冰湖城下水道",
+                icon: "T_Gp_Sew",
+            },
+            {
+                id: 2009,
+                pos: [699, 5940],
+                name: "盖雷亚剧院",
+                icon: "T_Gp_Thea",
+            },
+            {
+                id: 2011,
+                pos: [-8023, -7696],
+                name: "牵念之花",
+                icon: "T_Gp_Flow",
+            },
+            {
+                id: 2612,
+                pos: [-1185, -4530],
+                name: "蛋皎的印象商店",
+                icon: "T_Gp_Shop",
+            },
+            {
+                id: 2613,
+                pos: [44, -2924],
+                name: "探险家馈赠",
+                icon: "T_Gp_Shop",
+            },
+            {
+                id: 2614,
+                pos: [-5184, -621],
+                name: "冰湖城渔业协会",
+                icon: "T_Gp_Shop",
+            },
+            {
+                id: 2831,
+                pos: [-3300, 11840],
+                name: "修普诺斯之家",
+                icon: "T_Gp_Camera",
+            },
+        ],
     },
     {
         id: 101103,
@@ -435,6 +584,11 @@ export const subRegionData: SubRegion[] = [
         name: "泪湖畔",
         desc: "泪湖畔描述",
         map: "Chapter01_Icelake",
+        pos: [-29898.516, -2645.25],
+        range: {
+            center: [-29898.516, -2645.25],
+            extent: [0, 0],
+        },
         rc: [
             {
                 id: 9020101,
@@ -955,10 +1109,80 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
-        range: {
-            center: [-29898.516, -2645.25],
-            extent: [0, 0],
-        },
+        tp: [
+            {
+                id: 9002,
+                pos: [-8800, 42600],
+                name: "",
+                icon: "T_Gp_Boss",
+            },
+            {
+                id: 1015,
+                pos: [-21962, 24549],
+                name: "风息小径",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 1016,
+                pos: [-49727, 31495],
+                name: "泪湖湖畔",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 1017,
+                pos: [-29756, 12563],
+                name: "风语渡口",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 1018,
+                pos: [-3514, 18575],
+                name: "融雪洞窟",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 1014,
+                pos: [-33228, -8523],
+                name: "格雷姆废矿",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 1010,
+                pos: [-34886, 6415],
+                name: "冰湖城郊外",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 1013,
+                pos: [-16993, -4920],
+                name: "冰湖城外围城门",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 2005,
+                pos: [-32320, -14330],
+                name: "格雷姆废矿",
+                icon: "T_Gp_Kuangkeng",
+            },
+            {
+                id: 2008,
+                pos: [-39499, 2240],
+                name: "费西尔秘密基地",
+                icon: "T_Gp_Secr",
+            },
+            {
+                id: 2815,
+                pos: [-31071, 25822],
+                name: "冰湖钓鱼点",
+                icon: "T_Gp_Angling",
+            },
+            {
+                id: 2012,
+                pos: [-39990, 6541],
+                name: "费西尔秘密基地",
+                icon: "T_Gp_Secr",
+            },
+        ],
     },
     {
         id: 101104,
@@ -973,6 +1197,7 @@ export const subRegionData: SubRegion[] = [
         name: "奥特赛德的家",
         desc: "奥特赛德住处描述",
         map: "Chapter01_OutsidersHome",
+        pos: [-8800, -6180],
         range: {
             center: [-8800, -6180],
             extent: [0, 0],
@@ -1019,6 +1244,11 @@ export const subRegionData: SubRegion[] = [
         name: "矿洞一",
         desc: "矿洞一描述",
         map: "Chapter01_Kuangkeng_Part_01",
+        pos: [9550, 4320],
+        range: {
+            center: [9550, 4320],
+            extent: [0, 0],
+        },
         rc: [
             {
                 id: 9020401,
@@ -1087,10 +1317,14 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
-        range: {
-            center: [9550, 4320],
-            extent: [0, 0],
-        },
+        tp: [
+            {
+                id: 1020,
+                pos: [-2104, -3290],
+                name: "格雷姆废矿底层",
+                icon: "T_Gp_Trans03",
+            },
+        ],
     },
     {
         id: 101303,
@@ -1162,6 +1396,7 @@ export const subRegionData: SubRegion[] = [
         name: "矿洞四",
         desc: "矿洞四描述",
         map: "Chapter01_Kuangkeng_Part_04",
+        pos: [16408.5, 31373.5],
         rc: [
             {
                 id: 9020701,
@@ -1229,6 +1464,20 @@ export const subRegionData: SubRegion[] = [
                     [27791, 35840],
                     [17146, 27206.992],
                 ],
+            },
+        ],
+        tp: [
+            {
+                id: 1021,
+                pos: [13852, 31566],
+                name: "格雷姆废矿深处",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 9001,
+                pos: [18965, 31181],
+                name: "",
+                icon: "T_Gp_Boss",
             },
         ],
     },
@@ -1316,6 +1565,10 @@ export const subRegionData: SubRegion[] = [
         desc: "UI_SUBREGION_DES_101701",
         map: "Chapter01_Sew01",
         pos: [-20500, 1500],
+        range: {
+            center: [-39200, -700],
+            extent: [0, 0],
+        },
         rc: [
             {
                 id: 9020801,
@@ -1408,10 +1661,20 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
-        range: {
-            center: [-39200, -700],
-            extent: [0, 0],
-        },
+        tp: [
+            {
+                id: 1030,
+                pos: [632, 693],
+                name: "冰湖城下水道",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 1033,
+                pos: [-31374, 4286],
+                name: "废水处理区深处",
+                icon: "T_Gp_Trans03",
+            },
+        ],
     },
     {
         id: 101702,
@@ -1420,6 +1683,10 @@ export const subRegionData: SubRegion[] = [
         desc: "UI_SUBREGION_DES_101702",
         map: "Chapter01_Sew02",
         pos: [-28500, -15000],
+        range: {
+            center: [-29310, -10890],
+            extent: [0, 0],
+        },
         rc: [
             {
                 id: 9020901,
@@ -1499,10 +1766,26 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
-        range: {
-            center: [-29310, -10890],
-            extent: [0, 0],
-        },
+        tp: [
+            {
+                id: 1031,
+                pos: [-17261, -8662],
+                name: "冰湖城下水道深处",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 1032,
+                pos: [-33224, -14159],
+                name: "废水处理区",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 2816,
+                pos: [-28245, -18056],
+                name: "下水道钓鱼点",
+                icon: "T_Gp_Angling",
+            },
+        ],
     },
     {
         id: 101703,
@@ -1511,6 +1794,10 @@ export const subRegionData: SubRegion[] = [
         desc: "UI_SUBREGION_DES_101703",
         map: "Chapter01_Sew03",
         pos: [-5500, -11500],
+        range: {
+            center: [-10478, -4960],
+            extent: [0, 0],
+        },
         rc: [
             {
                 id: 9021001,
@@ -1551,10 +1838,14 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
-        range: {
-            center: [-10478, -4960],
-            extent: [0, 0],
-        },
+        tp: [
+            {
+                id: 2833,
+                pos: [-6590, -11350],
+                name: "冰湖城下水道深处",
+                icon: "T_Gp_Camera",
+            },
+        ],
     },
     {
         id: 101901,
@@ -1562,10 +1853,31 @@ export const subRegionData: SubRegion[] = [
         name: "盖雷亚剧院",
         desc: "UI_SUBREGION_DES_101901",
         map: "BH_Thea",
+        pos: [20400, 5340],
         range: {
             center: [20400, 5340],
             extent: [0, 0],
         },
+        tp: [
+            {
+                id: 1050,
+                pos: [21110, 10770],
+                name: "盖雷亚剧院",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 9004,
+                pos: [20490, 4135],
+                name: "",
+                icon: "T_Gp_Boss",
+            },
+            {
+                id: 2834,
+                pos: [20510, 900],
+                name: "盖雷亚剧院",
+                icon: "T_Gp_Camera",
+            },
+        ],
     },
     {
         id: 102101,
@@ -1574,6 +1886,10 @@ export const subRegionData: SubRegion[] = [
         desc: "UI_SUBREGION_DES_102101",
         map: "Haiboliya_Longsha01",
         pos: [14000, -40000],
+        range: {
+            center: [-240, -35655],
+            extent: [0, 0],
+        },
         rc: [
             {
                 id: 9030101,
@@ -1685,10 +2001,26 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
-        range: {
-            center: [-240, -35655],
-            extent: [0, 0],
-        },
+        tp: [
+            {
+                id: 1040,
+                pos: [29184, -30997],
+                name: "龙莎要塞装卸区",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 1042,
+                pos: [-3802, -35377],
+                name: "龙莎要塞动力室",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 1041,
+                pos: [10038, -42605],
+                name: "龙莎要塞外环",
+                icon: "T_Gp_Trans03",
+            },
+        ],
     },
     {
         id: 102102,
@@ -1696,6 +2028,11 @@ export const subRegionData: SubRegion[] = [
         name: "中心区",
         desc: "UI_SUBREGION_DES_102102",
         map: "Haiboliya_Longsha02",
+        pos: [-500, 2500],
+        range: {
+            center: [-10751, 3126],
+            extent: [0, 0],
+        },
         rc: [
             {
                 id: 9030201,
@@ -1808,10 +2145,26 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
-        range: {
-            center: [-10751, 3126],
-            extent: [0, 0],
-        },
+        tp: [
+            {
+                id: 1044,
+                pos: [-19392, -1767],
+                name: "龙莎要塞模拟战场",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 1045,
+                pos: [4223, 4940],
+                name: "龙莎要塞中央控制室",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 1043,
+                pos: [-5977, -11054],
+                name: "龙莎要塞下水道",
+                icon: "T_Gp_Trans03",
+            },
+        ],
     },
     {
         id: 102103,
@@ -1828,6 +2181,14 @@ export const subRegionData: SubRegion[] = [
         desc: "UI_SUBREGION_DES_102104",
         map: "Haiboliya_Longsha04",
         pos: [-500, 2500],
+        tp: [
+            {
+                id: 9003,
+                pos: [3946, -8069],
+                name: "",
+                icon: "T_Gp_Boss",
+            },
+        ],
     },
     {
         id: 102201,
@@ -1842,6 +2203,7 @@ export const subRegionData: SubRegion[] = [
         name: "佩剑炼金院",
         desc: "UI_SUBREGION_DES_103201",
         map: "Chapter01_Alch",
+        pos: [5029, -6025],
         range: {
             center: [5029, -6025],
             extent: [0, 0],
@@ -1853,6 +2215,12 @@ export const subRegionData: SubRegion[] = [
         name: "听鸦原",
         desc: "UI_SUBREGION_DES_104102",
         map: "Huaxu_Yanjindu_Batt",
+        pos: [-48564.49, 12800.879],
+        range: {
+            center: [-92904.82, 10952.637],
+            extent: [60500, 52937.508],
+            anchor: [-48564.49, 12800.879],
+        },
         rc: [
             {
                 id: 9040801,
@@ -1906,11 +2274,14 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
-        range: {
-            center: [-92904.82, 10952.637],
-            extent: [60500, 52937.508],
-            anchor: [-48564.49, 12800.879],
-        },
+        tp: [
+            {
+                id: 1106,
+                pos: [-41158, 6354],
+                name: "听鸦原",
+                icon: "T_Gp_Trans03",
+            },
+        ],
     },
     {
         id: 104103,
@@ -1918,6 +2289,11 @@ export const subRegionData: SubRegion[] = [
         name: "潮声岩穴",
         desc: "UI_SUBREGION_DES_104103",
         map: "Huaxu_Yanjindu_Cav",
+        pos: [-692, 26053],
+        range: {
+            center: [6000, 20000],
+            extent: [11000, 6600],
+        },
         rc: [
             {
                 id: 9040301,
@@ -1971,10 +2347,26 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
-        range: {
-            center: [6000, 20000],
-            extent: [11000, 6600],
-        },
+        tp: [
+            {
+                id: 1104,
+                pos: [9817, 22799],
+                name: "潮声岩穴内部",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 2820,
+                pos: [-5619, 31992],
+                name: "潮声岩穴钓鱼点",
+                icon: "T_Gp_Angling",
+            },
+            {
+                id: 8004,
+                pos: [-6274, 23368],
+                name: "灵鸟回声·扼守（潮声岩穴）",
+                icon: "T_Gp_AreaCoop",
+            },
+        ],
     },
     {
         id: 104104,
@@ -1982,6 +2374,12 @@ export const subRegionData: SubRegion[] = [
         name: "幽明涧",
         desc: "UI_SUBREGION_DES_104104",
         map: "Huaxu_Yanjindu_Cen",
+        pos: [4920, -1399],
+        range: {
+            center: [6000, -6000],
+            extent: [6600, 6600],
+            anchor: [4920, -1399],
+        },
         rc: [
             {
                 id: 9040601,
@@ -2036,11 +2434,20 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
-        range: {
-            center: [6000, -6000],
-            extent: [6600, 6600],
-            anchor: [4920, -1399],
-        },
+        tp: [
+            {
+                id: 1109,
+                pos: [7731, -9705],
+                name: "幽明涧",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 8006,
+                pos: [-1440, -13200],
+                name: "灵鸟回声·驱离（往隙）",
+                icon: "T_Gp_AreaCoop",
+            },
+        ],
     },
     {
         id: 104105,
@@ -2048,6 +2455,12 @@ export const subRegionData: SubRegion[] = [
         name: "尘漠石海",
         desc: "UI_SUBREGION_DES_104105",
         map: "Huaxu_Yanjindu_Fil",
+        pos: [-21776.38, -14957.99],
+        range: {
+            center: [-25000, -4500],
+            extent: [14300, 4950],
+            anchor: [-21776.38, -14957.99],
+        },
         rc: [
             {
                 id: 9040901,
@@ -2102,11 +2515,26 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
-        range: {
-            center: [-25000, -4500],
-            extent: [14300, 4950],
-            anchor: [-21776.38, -14957.99],
-        },
+        tp: [
+            {
+                id: 1107,
+                pos: [-23383, -24272],
+                name: "尘漠石海",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 8001,
+                pos: [-22713, -15610],
+                name: "灵鸟回声·避险（尘漠石海）",
+                icon: "T_Gp_AreaCoop",
+            },
+            {
+                id: 2014,
+                pos: [-9753, -36781],
+                name: "烛阴祭坛",
+                icon: "T_Gp_Leave",
+            },
+        ],
     },
     {
         id: 104106,
@@ -2114,6 +2542,12 @@ export const subRegionData: SubRegion[] = [
         name: "枯荣阁",
         desc: "UI_SUBREGION_DES_104106",
         map: "Huaxu_Yanjindu_Hos",
+        pos: [17274, -28561],
+        range: {
+            center: [18000, -27000],
+            extent: [6600, 23100],
+            anchor: [17274, -28561],
+        },
         rc: [
             {
                 id: 9040501,
@@ -2194,11 +2628,26 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
-        range: {
-            center: [18000, -27000],
-            extent: [6600, 23100],
-            anchor: [17274, -28561],
-        },
+        tp: [
+            {
+                id: 1110,
+                pos: [18608, -25303],
+                name: "枯荣阁",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 2821,
+                pos: [14677, -13509],
+                name: "枯荣阁钓鱼点",
+                icon: "T_Gp_Angling",
+            },
+            {
+                id: 8002,
+                pos: [19351, -18648],
+                name: "灵鸟回声·驱逐（枯荣阁）",
+                icon: "T_Gp_AreaCoop",
+            },
+        ],
     },
     {
         id: 104107,
@@ -2206,6 +2655,12 @@ export const subRegionData: SubRegion[] = [
         name: "蒹葭浦",
         desc: "UI_SUBREGION_DES_104107",
         map: "Huaxu_Yanjindu_Plai",
+        pos: [39773.883, -2157.252],
+        range: {
+            center: [51690.57, -4000],
+            extent: [15125, 8800],
+            anchor: [39773.883, -2157.252],
+        },
         rc: [
             {
                 id: 9040201,
@@ -2259,11 +2714,44 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
-        range: {
-            center: [51690.57, -4000],
-            extent: [15125, 8800],
-            anchor: [39773.883, -2157.252],
-        },
+        tp: [
+            {
+                id: 1103,
+                pos: [35037, 12202],
+                name: "蒹葭浦",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 1108,
+                pos: [24643, 16027],
+                name: "潮声岩穴入口",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 1111,
+                pos: [2376, 23863],
+                name: "蓼风岭西侧",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 1112,
+                pos: [26937, 33106],
+                name: "蓼风岭东侧",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 8005,
+                pos: [6760, 22943],
+                name: "灵鸟回声·避险（蓼风岭）",
+                icon: "T_Gp_AreaCoop",
+            },
+            {
+                id: 8000,
+                pos: [38273, 6442],
+                name: "灵鸟回声·扼守（蒹葭浦）",
+                icon: "T_Gp_AreaCoop",
+            },
+        ],
     },
     {
         id: 104108,
@@ -2271,6 +2759,12 @@ export const subRegionData: SubRegion[] = [
         name: "浮星埠",
         desc: "UI_SUBREGION_DES_104108",
         map: "Huaxu_Yanjindu_Por",
+        pos: [35173, 49665],
+        range: {
+            center: [52800, 40000],
+            extent: [13750, 39600],
+            anchor: [35173, 49665],
+        },
         rc: [
             {
                 id: 9040101,
@@ -2389,11 +2883,38 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
-        range: {
-            center: [52800, 40000],
-            extent: [13750, 39600],
-            anchor: [35173, 49665],
-        },
+        tp: [
+            {
+                id: 1100,
+                pos: [39437, 45854],
+                name: "浮星埠",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 1101,
+                pos: [46155, 22382],
+                name: "诫碑区",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 2818,
+                pos: [30373, 61000],
+                name: "浮星埠钓鱼点",
+                icon: "T_Gp_Angling",
+            },
+            {
+                id: 8003,
+                pos: [45084, 42222],
+                name: "灵鸟回声·驱离（浮星埠）",
+                icon: "T_Gp_AreaCoop",
+            },
+            {
+                id: 2824,
+                pos: [31820, 48650],
+                name: "皓京渔业协会",
+                icon: "T_Gp_Shop",
+            },
+        ],
     },
     {
         id: 104109,
@@ -2401,6 +2922,12 @@ export const subRegionData: SubRegion[] = [
         name: "微茫市",
         desc: "UI_SUBREGION_DES_104109",
         map: "Huaxu_Yanjindu_Shi",
+        pos: [-20576, 9367],
+        range: {
+            center: [-2000, 10500],
+            extent: [11000, 1650],
+            anchor: [-20576, 9367],
+        },
         rc: [
             {
                 id: 9040701,
@@ -2481,11 +3008,32 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
-        range: {
-            center: [-2000, 10500],
-            extent: [11000, 1650],
-            anchor: [-20576, 9367],
-        },
+        tp: [
+            {
+                id: 1105,
+                pos: [-16352, 11053],
+                name: "微茫市",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 2013,
+                pos: [-25203, 6819],
+                name: "潜龙居",
+                icon: "T_Gp_Office",
+            },
+            {
+                id: 2822,
+                pos: [-22464, 11542],
+                name: "微茫市钓鱼点",
+                icon: "T_Gp_Angling",
+            },
+            {
+                id: 2823,
+                pos: [-16004, 8005],
+                name: "探险家馈赠",
+                icon: "T_Gp_Shop",
+            },
+        ],
     },
     {
         id: 104110,
@@ -2493,6 +3041,12 @@ export const subRegionData: SubRegion[] = [
         name: "百年春",
         desc: "UI_SUBREGION_DES_104110",
         map: "Huaxu_Yanjindu_Spr",
+        pos: [32371, -5906],
+        range: {
+            center: [31000, -4000],
+            extent: [7700, 8800],
+            anchor: [32371, -5906],
+        },
         rc: [
             {
                 id: 9040401,
@@ -2535,11 +3089,38 @@ export const subRegionData: SubRegion[] = [
                 ],
             },
         ],
-        range: {
-            center: [31000, -4000],
-            extent: [7700, 8800],
-            anchor: [32371, -5906],
-        },
+        tp: [
+            {
+                id: 1102,
+                pos: [31029, -6177],
+                name: "百年春",
+                icon: "T_Gp_Trans03",
+            },
+            {
+                id: 2819,
+                pos: [29404, 1702],
+                name: "百年春钓鱼点",
+                icon: "T_Gp_Angling",
+            },
+            {
+                id: 2825,
+                pos: [26370, -5100],
+                name: "锦鲤皎皎福运蛋铺",
+                icon: "T_Gp_Shop",
+            },
+            {
+                id: 2826,
+                pos: [32634, -7003],
+                name: "蛋皎的印象商店",
+                icon: "T_Gp_Shop",
+            },
+            {
+                id: 2835,
+                pos: [37080, 6230],
+                name: "百年春",
+                icon: "T_Gp_Camera",
+            },
+        ],
     },
     {
         id: 104201,
@@ -2547,6 +3128,7 @@ export const subRegionData: SubRegion[] = [
         name: "千枢狩阵",
         desc: "UI_SUBREGION_DES_104201",
         map: "Huaxu_Yanjindu_Batt01",
+        pos: [-9724.522, 34083.92],
         range: {
             center: [-9724.522, 34083.92],
             extent: [0, 0],
@@ -2558,6 +3140,7 @@ export const subRegionData: SubRegion[] = [
         name: "往隙",
         desc: "UI_SUBREGION_DES_104301",
         map: "Huaxu_Yanjindu_Nai01",
+        pos: [13280.904, 8445.662],
         range: {
             center: [13280.904, 8445.662],
             extent: [0, 0],
@@ -2569,6 +3152,7 @@ export const subRegionData: SubRegion[] = [
         name: "往隙",
         desc: "UI_SUBREGION_DES_104401",
         map: "Huaxu_Yanjindu_Nai02",
+        pos: [6914.1816, -7342.533],
         range: {
             center: [6914.1816, -7342.533],
             extent: [0, 0],
@@ -2577,58 +3161,451 @@ export const subRegionData: SubRegion[] = [
     {
         id: 104501,
         rid: 1045,
-        name: "UI_SUBREGION_NAME_104501",
+        name: "东城",
         desc: "UI_SUBREGION_DES_104501",
         map: "Huaxu_Haojing_Eas",
+        pos: [48445.666667, -24044.333333],
+        rc: [
+            {
+                id: 9050101,
+                info: [
+                    {
+                        id: 4121,
+                        w: 333,
+                    },
+                    {
+                        id: 4122,
+                        w: 333,
+                    },
+                    {
+                        id: 4123,
+                        w: 167,
+                    },
+                    {
+                        id: 4021,
+                        w: 778,
+                    },
+                    {
+                        id: 4022,
+                        w: 778,
+                    },
+                    {
+                        id: 4023,
+                        w: 389,
+                    },
+                    {
+                        id: 4941,
+                        w: 7222,
+                    },
+                ],
+                count: 2,
+                pos: [[48445.666667, -24044.333333]],
+            },
+        ],
+        tp: [
+            {
+                id: 1200,
+                pos: [43600, -14370],
+                name: "东城",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 2850,
+                pos: [58430, -23280],
+                name: "锦鲤皎皎福运蛋铺",
+                icon: "T_Gp_Shop",
+            },
+            {
+                id: 1202,
+                pos: [43307, -34483],
+                name: "分殊学院",
+                icon: "T_Gp_Trans02",
+            },
+        ],
     },
     {
         id: 104502,
         rid: 1045,
-        name: "UI_SUBREGION_NAME_104502",
+        name: "西城",
         desc: "UI_SUBREGION_DES_104502",
         map: "Huaxu_Haojing_Wes",
+        pos: [12453.6, -14883.8],
+        rc: [
+            {
+                id: 9050201,
+                info: [
+                    {
+                        id: 4161,
+                        w: 333,
+                    },
+                    {
+                        id: 4162,
+                        w: 333,
+                    },
+                    {
+                        id: 4163,
+                        w: 167,
+                    },
+                    {
+                        id: 4061,
+                        w: 778,
+                    },
+                    {
+                        id: 4062,
+                        w: 778,
+                    },
+                    {
+                        id: 4063,
+                        w: 389,
+                    },
+                    {
+                        id: 4941,
+                        w: 7222,
+                    },
+                ],
+                count: 3,
+                pos: [[12453.6, -14883.8]],
+            },
+        ],
+        tp: [
+            {
+                id: 1203,
+                pos: [9679, -7692],
+                name: "参商港",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 1205,
+                pos: [14271, -29017],
+                name: "西城",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 2828,
+                pos: [25010, -8420],
+                name: "城西区钓鱼点",
+                icon: "T_Gp_Angling",
+            },
+            {
+                id: 2837,
+                pos: [-8822, -16420],
+                name: "山外山",
+                icon: "T_Gp_Shanwaishan",
+            },
+            {
+                id: 2853,
+                pos: [22130, -12870],
+                name: "皓京渔业协会",
+                icon: "T_Gp_Shop",
+            },
+        ],
     },
     {
         id: 104503,
         rid: 1045,
-        name: "UI_SUBREGION_NAME_104503",
+        name: "内城",
         desc: "UI_SUBREGION_DES_104503",
         map: "Huaxu_Haojing_Inn",
+        pos: [33123.666667, -51726.166667],
+        rc: [
+            {
+                id: 9050501,
+                info: [
+                    {
+                        id: 4131,
+                        w: 333,
+                    },
+                    {
+                        id: 4132,
+                        w: 333,
+                    },
+                    {
+                        id: 4133,
+                        w: 167,
+                    },
+                    {
+                        id: 4031,
+                        w: 778,
+                    },
+                    {
+                        id: 4032,
+                        w: 778,
+                    },
+                    {
+                        id: 4033,
+                        w: 389,
+                    },
+                    {
+                        id: 4941,
+                        w: 7222,
+                    },
+                ],
+                count: 3,
+                pos: [[33123.666667, -51726.166667]],
+            },
+        ],
+        tp: [
+            {
+                id: 1206,
+                pos: [33302, -45653],
+                name: "皓京中央广场",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 1207,
+                pos: [30649, -75570],
+                name: "九章坪",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 2840,
+                pos: [40233, -50974],
+                name: "由来巷",
+                icon: "T_Gp_Youlaixiang",
+            },
+            {
+                id: 1216,
+                pos: [33050, -55115],
+                name: "内城",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 2851,
+                pos: [29590, -45620],
+                name: "蛋皎的印象商店",
+                icon: "T_Gp_Shop",
+            },
+            {
+                id: 2852,
+                pos: [31918, -37425],
+                name: "探险家馈赠",
+                icon: "T_Gp_Shop",
+            },
+        ],
     },
     {
         id: 104504,
         rid: 1045,
-        name: "UI_SUBREGION_NAME_104504",
+        name: "西郊",
         desc: "UI_SUBREGION_DES_104504",
         map: "Huaxu_Haojing_Jlc",
+        pos: [-4239.5, -61312.333333],
+        rc: [
+            {
+                id: 9050301,
+                info: [
+                    {
+                        id: 4081,
+                        w: 133,
+                    },
+                    {
+                        id: 4082,
+                        w: 133,
+                    },
+                    {
+                        id: 4083,
+                        w: 67,
+                    },
+                    {
+                        id: 4151,
+                        w: 322,
+                    },
+                    {
+                        id: 4152,
+                        w: 322,
+                    },
+                    {
+                        id: 4153,
+                        w: 161,
+                    },
+                    {
+                        id: 4051,
+                        w: 752,
+                    },
+                    {
+                        id: 4052,
+                        w: 752,
+                    },
+                    {
+                        id: 4053,
+                        w: 376,
+                    },
+                    {
+                        id: 4941,
+                        w: 6981,
+                    },
+                ],
+                count: 3,
+                pos: [[-4239.5, -61312.333333]],
+            },
+        ],
+        tp: [
+            {
+                id: 1209,
+                pos: [11121, -54242],
+                name: "祀烟阁外近郊",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 1210,
+                pos: [-10629, -52926],
+                name: "椒兰村",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 1211,
+                pos: [-32016, -50249],
+                name: "椒兰村高处",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 1215,
+                pos: [357, -76977],
+                name: "西郊",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 8007,
+                pos: [-7530, -50410],
+                name: "灵鸟回声·扼守（椒兰村）",
+                icon: "T_Gp_AreaCoop",
+            },
+            {
+                id: 8008,
+                pos: [13260, -83070],
+                name: "灵鸟回声·避险（西郊）",
+                icon: "T_Gp_AreaCoop",
+            },
+        ],
     },
     {
         id: 104505,
         rid: 1045,
-        name: "UI_SUBREGION_NAME_104505",
+        name: "东郊",
         desc: "UI_SUBREGION_DES_104505",
         map: "Huaxu_Haojing_Sub",
+        pos: [54139.833333, -62691.5],
+        rc: [
+            {
+                id: 9050401,
+                info: [
+                    {
+                        id: 4091,
+                        w: 133,
+                    },
+                    {
+                        id: 4092,
+                        w: 133,
+                    },
+                    {
+                        id: 4093,
+                        w: 67,
+                    },
+                    {
+                        id: 4141,
+                        w: 322,
+                    },
+                    {
+                        id: 4142,
+                        w: 322,
+                    },
+                    {
+                        id: 4143,
+                        w: 161,
+                    },
+                    {
+                        id: 4041,
+                        w: 752,
+                    },
+                    {
+                        id: 4042,
+                        w: 752,
+                    },
+                    {
+                        id: 4043,
+                        w: 376,
+                    },
+                    {
+                        id: 4941,
+                        w: 6981,
+                    },
+                ],
+                count: 3,
+                pos: [[54139.833333, -62691.5]],
+            },
+        ],
+        tp: [
+            {
+                id: 1212,
+                pos: [51349, -48304],
+                name: "东郊",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 1213,
+                pos: [68490, -73070],
+                name: "东郊野外",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 1214,
+                pos: [49903, -79459],
+                name: "九章坪东侧",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 2827,
+                pos: [48460, -42660],
+                name: "东郊野外钓鱼点",
+                icon: "T_Gp_Angling",
+            },
+            {
+                id: 2841,
+                pos: [55237, -54316],
+                name: "由来巷",
+                icon: "T_Gp_Youlaixiang",
+            },
+            {
+                id: 8010,
+                pos: [51400, -78340],
+                name: "灵鸟回声·驱离（九章坪东侧）",
+                icon: "T_Gp_AreaCoop",
+            },
+        ],
     },
     {
         id: 104506,
         rid: 1045,
-        name: "UI_SUBREGION_NAME_104506",
+        name: "执律阁",
         desc: "UI_SUBREGION_DES_104506",
         map: "Huaxu_Haojing_Top",
-    },
-    {
-        id: 104507,
-        rid: 1045,
-        name: "UI_SUBREGION_NAME_104507",
-        desc: "UI_SUBREGION_DES_104507",
-        map: "Huaxu_Haojing_IQ12020122",
-    },
-    {
-        id: 104508,
-        rid: 1045,
-        name: "UI_SUBREGION_NAME_104508",
-        desc: "UI_SUBREGION_DES_104508",
-        map: "Huaxu_Haojing_IQ12020212",
+        pos: [31481.25, -105727.5],
+        tp: [
+            {
+                id: 1208,
+                pos: [30099, -102626],
+                name: "执律阁",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 2836,
+                pos: [32830, -103270],
+                name: "九章坪",
+                icon: "T_Gp_Camera",
+            },
+            {
+                id: 2839,
+                pos: [31498, -109794],
+                name: "太虚陵",
+                icon: "T_Gp_Taixuling",
+            },
+            {
+                id: 2844,
+                pos: [31498, -107220],
+                name: "内城",
+                icon: "T_Gp_Zhilvge",
+            },
+        ],
     },
     {
         id: 104601,
@@ -2636,6 +3613,7 @@ export const subRegionData: SubRegion[] = [
         name: "千枢狩阵",
         desc: "UI_SUBREGION_DES_104601",
         map: "Huaxu_Yanjindu_Batt02",
+        pos: [60847.594, 25855.69],
         range: {
             center: [60847.594, 25855.69],
             extent: [0, 0],
@@ -2651,9 +3629,15 @@ export const subRegionData: SubRegion[] = [
     {
         id: 104801,
         rid: 1048,
-        name: "UI_SUBREGION_NAME_104801",
+        name: "偃隐宫",
         desc: "UI_SUBREGION_DES_104801",
         map: "Huaxu_Haojing_YYG",
+        pos: [35136.02, -41187.68],
+        range: {
+            center: [15150.24, 17085.41],
+            extent: [137500, 137500],
+            anchor: [35136.02, -41187.68],
+        },
     },
     {
         id: 104901,
@@ -2661,6 +3645,7 @@ export const subRegionData: SubRegion[] = [
         name: "潜龙居",
         desc: "UI_SUBREGION_DES_104901",
         map: "Huaxu_Yanjindu_Off",
+        pos: [-25360, 6862],
         range: {
             center: [-25360, 6862],
             extent: [0, 0],
@@ -2676,70 +3661,240 @@ export const subRegionData: SubRegion[] = [
     {
         id: 105101,
         rid: 1051,
-        name: "测试区域",
+        name: "执律阁内",
         desc: "测试区域",
         map: "Huaxu_Haojing_Int",
-    },
-    {
-        id: 105102,
-        rid: 1051,
-        name: "测试区域",
-        desc: "测试区域",
-        map: "Huaxu_Haojing_Int_IQ12020208_DesignTask",
-    },
-    {
-        id: 105103,
-        rid: 1051,
-        name: "测试区域",
-        desc: "测试区域",
-        map: "Huaxu_Haojing_Int_IQ12020208_Task",
+        pos: [15, -2450],
+        range: {
+            center: [-35, -2430],
+            extent: [6297.5, 4207.5],
+            anchor: [15, -2450],
+        },
     },
     {
         id: 105201,
         rid: 1052,
-        name: "测试区域",
+        name: "山外山",
         desc: "测试区域",
         map: "Huaxu_Haojing_Reb",
+        pos: [7480, -3300],
+        range: {
+            center: [5820, -7930],
+            extent: [50696.25, 54656.25],
+            anchor: [7480, -3300],
+        },
+        rc: [
+            {
+                id: 9050601,
+                info: [
+                    {
+                        id: 4131,
+                        w: 333,
+                    },
+                    {
+                        id: 4132,
+                        w: 333,
+                    },
+                    {
+                        id: 4133,
+                        w: 167,
+                    },
+                    {
+                        id: 4031,
+                        w: 778,
+                    },
+                    {
+                        id: 4032,
+                        w: 778,
+                    },
+                    {
+                        id: 4033,
+                        w: 389,
+                    },
+                    {
+                        id: 4941,
+                        w: 7222,
+                    },
+                ],
+                count: 3,
+                pos: [
+                    [2836.5054, 2727.082],
+                    [3269.9346, 15595.395],
+                    [9251.2852, 9284.467],
+                    [17209.434, 2541.9893],
+                ],
+            },
+        ],
+        tp: [
+            {
+                id: 1300,
+                pos: [4566, 14347],
+                name: "山外山入口",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 1301,
+                pos: [-4131, -5517],
+                name: "山外山深处",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 2838,
+                pos: [-5003, 14586],
+                name: "西城",
+                icon: "T_Gp_Haojing",
+            },
+            {
+                id: 8011,
+                pos: [12183, 6856],
+                name: "灵鸟回声·扼守（山外山）",
+                icon: "T_Gp_AreaCoop",
+            },
+        ],
     },
     {
         id: 105301,
         rid: 1053,
-        name: "测试区域",
+        name: "太虚陵",
         desc: "测试区域",
         map: "Huaxu_Haojing_TRLM",
-    },
-    {
-        id: 105302,
-        rid: 1053,
-        name: "测试区域",
-        desc: "测试区域",
-        map: "Huaxu_Haojing_TRLM_IQ12020515",
+        pos: [15601.5, 23586],
+        tp: [
+            {
+                id: 1400,
+                pos: [-12512, 23717],
+                name: "太虚陵",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 9005,
+                pos: [43715, 23455],
+                name: "",
+                icon: "T_Gp_Boss",
+            },
+        ],
     },
     {
         id: 105401,
         rid: 1054,
-        name: "测试区域",
+        name: "？？？",
         desc: "测试区域",
         map: "Huaxu_Haojing_TXJ",
+        range: {
+            center: [0, 0],
+            extent: [5500, 2750],
+        },
     },
     {
         id: 105501,
         rid: 1055,
-        name: "测试区域",
+        name: "由来巷",
         desc: "测试区域",
         map: "Huaxu_Haojing_YLX",
+        pos: [16130, 1570],
+        range: {
+            center: [16050, 1925],
+            extent: [13750, 13750],
+            anchor: [16130, 1570],
+        },
+        rc: [
+            {
+                id: 9050701,
+                info: [
+                    {
+                        id: 4071,
+                        w: 133,
+                    },
+                    {
+                        id: 4072,
+                        w: 133,
+                    },
+                    {
+                        id: 4073,
+                        w: 67,
+                    },
+                    {
+                        id: 4111,
+                        w: 322,
+                    },
+                    {
+                        id: 4112,
+                        w: 322,
+                    },
+                    {
+                        id: 4113,
+                        w: 161,
+                    },
+                    {
+                        id: 4011,
+                        w: 752,
+                    },
+                    {
+                        id: 4012,
+                        w: 752,
+                    },
+                    {
+                        id: 4013,
+                        w: 376,
+                    },
+                    {
+                        id: 4941,
+                        w: 6981,
+                    },
+                ],
+                count: 3,
+                pos: [
+                    [17567.82, 5148.4185],
+                    [21108.496, 2070.0771],
+                    [16793.104, -1760.0405],
+                    [13607.673, 1675.6058],
+                ],
+            },
+        ],
+        tp: [
+            {
+                id: 1500,
+                pos: [17560, 3410],
+                name: "由来巷",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 2829,
+                pos: [16680, -3400],
+                name: "由来巷钓鱼点",
+                icon: "T_Gp_Angling",
+            },
+            {
+                id: 2842,
+                pos: [15355, 4565],
+                name: "内城",
+                icon: "T_Gp_Haojing",
+            },
+            {
+                id: 2843,
+                pos: [14316, 3500],
+                name: "东郊",
+                icon: "T_Gp_Haojing",
+            },
+            {
+                id: 8012,
+                pos: [13326, 831],
+                name: "灵鸟回声·避险（由来巷）",
+                icon: "T_Gp_AreaCoop",
+            },
+        ],
     },
     {
         id: 105601,
         rid: 1056,
-        name: "测试区域",
+        name: "？？？",
         desc: "测试区域",
         map: "Huaxu_Haojing_ZhiliuHJ_Door",
     },
     {
         id: 105602,
         rid: 1056,
-        name: "测试区域",
+        name: "？？？",
         desc: "测试区域",
         map: "Huaxu_Haojing_ZhiliuHJ_Talk",
     },
@@ -2749,10 +3904,19 @@ export const subRegionData: SubRegion[] = [
         name: "烛阴祭坛",
         desc: "UI_SUBREGION_DES_105701",
         map: "Huaxu_Yanjindu_Alt",
+        pos: [10608, -61626],
         range: {
             center: [6000, -42000],
             extent: [6600, 6600],
         },
+        tp: [
+            {
+                id: 1113,
+                pos: [10608, -61626],
+                name: "烛阴祭坛",
+                icon: "T_Gp_Trans03",
+            },
+        ],
     },
     {
         id: 105801,
@@ -2818,11 +3982,67 @@ export const subRegionData: SubRegion[] = [
         map: "Haiboliya_Chezhan_ZZZ",
     },
     {
+        id: 106008,
+        rid: 1060,
+        name: "测试区域",
+        desc: "测试区域",
+        map: "Haiboliya_Chezhan_YWS",
+    },
+    {
         id: 106101,
         rid: 1061,
         name: "测试区域",
         desc: "测试区域",
         map: "Haiboliya_Chezhan_YW01",
+    },
+    {
+        id: 107001,
+        rid: 1070,
+        name: "UI_SUBREGION_NAME_107001",
+        desc: "UI_SUBREGION_DES_107001",
+        map: "Haiboliya_FTNew",
+    },
+    {
+        id: 107101,
+        rid: 1071,
+        name: "UI_SUBREGION_NAME_107101",
+        desc: "UI_SUBREGION_DES_107101",
+        map: "Haiboliya_FTOld",
+    },
+    {
+        id: 107201,
+        rid: 1072,
+        name: "UI_SUBREGION_NAME_107201",
+        desc: "UI_SUBREGION_DES_107201",
+        map: "Haiboliya_FTLake",
+    },
+    {
+        id: 107301,
+        rid: 1073,
+        name: "UI_SUBREGION_NAME_107301",
+        desc: "UI_SUBREGION_DES_107301",
+        map: "Haiboliya_FTOld_NPark",
+    },
+    {
+        id: 107401,
+        rid: 1074,
+        name: "UI_SUBREGION_NAME_107401",
+        desc: "UI_SUBREGION_DES_107401",
+        map: "Haiboliya_FTLake_BF_Main",
+    },
+    {
+        id: 107501,
+        rid: 1075,
+        name: "UI_SUBREGION_NAME_107501",
+        desc: "UI_SUBREGION_DES_107501",
+        map: "Haiboliya_FTNew_Home",
+    },
+    {
+        id: 107601,
+        rid: 1076,
+        name: "UI_SUBREGION_NAME_107601",
+        desc: "UI_SUBREGION_DES_107601",
+        map: "Haiboliya_FTNew_Boss",
     },
     {
         id: 200101,
@@ -2844,6 +4064,57 @@ export const subRegionData: SubRegion[] = [
         name: "区域性能测试场景",
         desc: "区域性能测试场景",
         map: "RegionProfTest",
+        pos: [-721.875, -10679.875],
+        tp: [
+            {
+                id: 101,
+                pos: [7173, 3028],
+                name: "核心1",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 102,
+                pos: [7874, 1050],
+                name: "核心2",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 103,
+                pos: [9204, -17364],
+                name: "斜坡",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 104,
+                pos: [-18292, -52533],
+                name: "绿色独立联机区域",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 105,
+                pos: [3584, 510],
+                name: "电梯上",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 106,
+                pos: [-1806, 7080],
+                name: "山上",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 107,
+                pos: [-22066, -21810],
+                name: "彩色独立联机区域",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 108,
+                pos: [8554, -5400],
+                name: "钓鱼点",
+                icon: "T_Gp_Trans02",
+            },
+        ],
     },
     {
         id: 999801,
