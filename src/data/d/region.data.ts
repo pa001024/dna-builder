@@ -573,6 +573,13 @@ const t: Region[] = [
     },
 ]
 
+export const mapOffsets: Record<string, [number, number]> = {
+    WBP_Map_Prologue_Bg: [-60, 30],
+    WBP_Map_Prologue_100101: [-60, 30],
+    WBP_Map_Prologue_100102: [5, 0],
+    WBP_Map_Prologue_100103: [-125, 0],
+}
+
 export const regionMap = t.reduce((acc, cur) => {
     acc.set(cur.id, cur)
     return acc

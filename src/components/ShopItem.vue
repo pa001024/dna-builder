@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { computed } from "vue"
-import { draftMap, LeveledMod, LeveledWeapon, modMap, resourceMap, walnutMap, weaponMap } from "@/data"
-import { charAccessoryData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { cutoffMap, draftMap, LeveledMod, LeveledWeapon, modMap, resourceMap, rewardMap, walnutMap, weaponMap } from "@/data"
+import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import type { Cutoff } from "@/data/d/cutoff.data"
 import { headSculptureMap } from "@/data/d/headsculpture.data"
 import { mountData } from "@/data/d/mount.data"
 import type { ShopItem } from "@/data/d/shop.data"
@@ -16,6 +17,26 @@ interface ShopItemWithChildren extends ShopItem {
 const props = defineProps<{
     item: ShopItemWithChildren
 }>()
+
+/**
+ * 反查当前商品对应的折扣配置。
+ */
+const cutoffInfo = computed<Cutoff | null>(() => cutoffMap.get(props.item.id) ?? null)
+
+/**
+ * 当前商品的实际展示价格。
+ * 有折扣时显示折后价，否则显示商品原价。
+ */
+const currentPrice = computed(() => cutoffInfo.value?.price ?? props.item.price)
+
+/**
+ * 格式化时间戳，便于 tooltip 展示。
+ * @param timestamp 秒级时间戳
+ * @returns 本地化时间文本
+ */
+function formatCutoffTime(timestamp: number) {
+    return new Date(timestamp * 1000).toLocaleString()
+}
 
 const itemDetail = computed(() => {
     switch (props.item.itemType) {
@@ -96,6 +117,18 @@ const itemDetail = computed(() => {
                     icon: `/imgs/webp/T_Head_Empty.webp`,
                 }
             }
+        case "HeadFrame":
+            const headFrame = headFrameData.find(item => item.id === props.item.typeId)
+            if (headFrame) {
+                return {
+                    type: props.item.itemType,
+                    icon: `/imgs/headframe/${headFrame.icon}.webp`,
+                }
+            }
+            return {
+                type: props.item.itemType,
+                icon: `/imgs/webp/T_Head_Empty.webp`,
+            }
         case "Skin":
             const skin = skinData.find(item => item.id === props.item.typeId)
             if (!skin) {
@@ -106,7 +139,7 @@ const itemDetail = computed(() => {
             }
             return {
                 type: props.item.itemType,
-                icon: `/imgs/fashion/${skin.icon}.webp`,
+                icon: `/imgs/webp/${skin.icon}.webp`,
                 link: `/db/accessory/skin/${skin.id}`,
             }
         case "Title":
@@ -146,6 +179,12 @@ const itemDetail = computed(() => {
             return {
                 type: props.item.itemType,
                 icon: `/imgs/webp/T_Icon_Random_TitleFrame.webp`,
+            }
+        case "Reward":
+            const rewardDetail = rewardMap.get(props.item.typeId)
+            return {
+                type: props.item.itemType,
+                icon: rewardDetail?.icon ? `/imgs/res/${rewardDetail.icon}.webp` : `/imgs/webp/T_Head_Empty.webp`,
             }
         default:
             return {
@@ -187,10 +226,41 @@ function getPriceIcon(name: string) {
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <div class="flex items-center gap-1">
+                        <FullTooltip v-if="cutoffInfo" side="top">
+                            <template #tooltip>
+                                <div class="flex flex-col gap-2 max-w-75 min-w-28">
+                                    <div class="text-sm font-bold">折扣信息</div>
+                                    <div class="flex justify-between items-center gap-2 text-sm">
+                                        <div class="text-xs text-neutral-500 whitespace-nowrap">折扣</div>
+                                        <div class="font-medium text-primary">{{ cutoffInfo.discount }}折</div>
+                                    </div>
+                                    <div class="flex justify-between items-center gap-2 text-sm">
+                                        <div class="text-xs text-neutral-500 whitespace-nowrap">原价</div>
+                                        <div class="font-medium text-primary line-through">{{ cutoffInfo.originalPrice }}</div>
+                                    </div>
+                                    <div class="flex justify-between items-center gap-2 text-sm">
+                                        <div class="text-xs text-neutral-500 whitespace-nowrap">现价</div>
+                                        <div class="font-medium text-primary">{{ cutoffInfo.price }}</div>
+                                    </div>
+                                    <div class="text-xs text-neutral-500">
+                                        <div>开始：{{ formatCutoffTime(cutoffInfo.startTime) }}</div>
+                                        <div v-if="typeof cutoffInfo.endTime === 'number'">
+                                            结束：{{ formatCutoffTime(cutoffInfo.endTime) }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                            <div class="flex items-center gap-1">
+                                <img :src="getPriceIcon(item.priceName)" class="w-4 h-4 object-cover rounded" :alt="item.priceName" />
+                                <span class="text-xs text-base-content/70">{{ item.priceName }}</span>
+                                <span class="text-sm font-medium">{{ currentPrice }}</span>
+                                <span class="text-xs text-base-content/40 line-through">{{ cutoffInfo.originalPrice }}</span>
+                            </div>
+                        </FullTooltip>
+                        <div v-else class="flex items-center gap-1">
                             <img :src="getPriceIcon(item.priceName)" class="w-4 h-4 object-cover rounded" :alt="item.priceName" />
                             <span class="text-xs text-base-content/70">{{ item.priceName }}</span>
-                            <span class="text-sm font-medium">{{ item.price }}</span>
+                            <span class="text-sm font-medium">{{ currentPrice }}</span>
                         </div>
                     </div>
                 </div>

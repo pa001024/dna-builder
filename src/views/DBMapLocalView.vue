@@ -2,7 +2,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
 import { useRoute } from "vue-router"
 import { petMap } from "@/data/d"
-import regionData, { type Region, regionMap } from "@/data/d/region.data"
+import regionData, { mapOffsets, type Region, regionMap } from "@/data/d/region.data"
 import { type SubRegion, subRegionData, type TeleportPoint } from "@/data/d/subregion.data"
 import { LeveledPet } from "@/data/leveled/LeveledPet"
 
@@ -22,6 +22,7 @@ interface LocalMapLayerSlot {
     name: string
     fileName: string
     slot: CanvasPanelSlotRect
+    offset: [number, number]
 }
 
 interface LocalMapProfile {
@@ -147,6 +148,17 @@ interface MapLocalRouteTarget {
     rcIndex: number | null
 }
 
+/**
+ * 解析 mapMapping 的槽位偏移。
+ * @param mapping 原始图层映射
+ * @returns 前两个坐标的偏移量
+ */
+function resolveMapMappingOffset(mapping: { name: string; pos: number[] }): [number, number] {
+    const offset = mapOffsets[mapping.name]
+    if (!offset) return [0, 0]
+    return [Number(offset[0] || 0), Number(offset[1] || 0)]
+}
+
 const containerRef = ref<HTMLElement>()
 const canvasRef = ref<HTMLCanvasElement>()
 const route = useRoute()
@@ -160,19 +172,24 @@ const mapLocalProfiles: LocalMapProfile[] = regionData
         regionId: region.id,
         key: region.mapImage || `region-${region.id}`,
         name: region.name,
-        layers: (region.mapMapping || []).map((mapping, index) => ({
-            id: `${mapping.name}-${index}`,
-            name: mapping.name,
-            fileName: `${mapping.name}.webp`,
-            slot: {
-                x: Number(mapping.pos[0] || 0),
-                y: Number(mapping.pos[1] || 0),
-                w: Number(mapping.pos[2] || 0),
-                h: Number(mapping.pos[3] || 0),
-                zOrder: Number(mapping.zOrder || 0),
-                opacity: Number(mapping.opacity ?? 1),
-            },
-        })),
+        layers: (region.mapMapping || []).map((mapping, index) => {
+            const offset = resolveMapMappingOffset(mapping)
+            return {
+                id: `${mapping.name}-${index}`,
+                name: mapping.name,
+                fileName: `${mapping.name}.webp`,
+                // 仅对 mapMapping 的前两个坐标应用偏移，保持宽高和其它坐标不变。
+                slot: {
+                    x: Number(mapping.pos[0] || 0),
+                    y: Number(mapping.pos[1] || 0),
+                    w: Number(mapping.pos[2] || 0),
+                    h: Number(mapping.pos[3] || 0),
+                    zOrder: Number(mapping.zOrder || 0),
+                    opacity: Number(mapping.opacity ?? 1),
+                },
+                offset,
+            }
+        }),
     }))
 
 const firstProfile = mapLocalProfiles[0]
@@ -1198,8 +1215,8 @@ function drawLayer(ctx: CanvasRenderingContext2D, item: DrawLayerItem) {
     const rect = resolveLayerDrawRect(layer)
     if (rect.w <= 0 || rect.h <= 0) return
 
-    const drawX = rect.x - composedBounds.value.minX
-    const drawY = rect.y - composedBounds.value.minY
+    const drawX = rect.x + (layer.offset[0] || 0) - composedBounds.value.minX
+    const drawY = rect.y + (layer.offset[1] || 0) - composedBounds.value.minY
     const opacity = Math.max(0, Math.min(1, item.effectiveOpacity))
 
     if (regionProjectionConfig.value.renderMapRotation && Math.abs(regionProjectionConfig.value.mapRotationDeg) > 1e-6) {

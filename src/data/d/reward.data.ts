@@ -4956,6 +4956,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 3014,
         m: "Fixed",
+        icon: "Resource",
         child: [
             {
                 id: 29005,
@@ -11125,6 +11126,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 10003,
         m: "Weight",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 20021,
@@ -11217,6 +11219,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 11001,
         m: "Fixed",
+        icon: "T_Pack_Mod01",
         child: [
             {
                 id: 102,
@@ -11235,6 +11238,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 11002,
         m: "Fixed",
+        icon: "T_Pack_Resource01",
         child: [
             {
                 id: 2008,
@@ -11259,6 +11263,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 11003,
         m: "Fixed",
+        icon: "T_Pack_Resource02",
         child: [
             {
                 id: 2009,
@@ -11283,6 +11288,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 11004,
         m: "Weight",
+        icon: "T_Dye_12",
         child: [
             {
                 id: 30101,
@@ -11352,6 +11358,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 11005,
         m: "Fixed",
+        icon: "T_Pack_Resource02",
         child: [
             {
                 id: 204,
@@ -11370,6 +11377,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 11006,
         m: "Fixed",
+        icon: "T_Pack_Resource02",
         child: [
             {
                 id: 208,
@@ -11400,6 +11408,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12001,
         m: "Fixed",
+        icon: "T_Pack_Level",
         child: [
             {
                 id: 99,
@@ -11424,6 +11433,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12002,
         m: "Fixed",
+        icon: "T_Pack_Level",
         child: [
             {
                 id: 99,
@@ -11448,6 +11458,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12003,
         m: "Fixed",
+        icon: "T_Pack_Level",
         child: [
             {
                 id: 99,
@@ -11472,6 +11483,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12004,
         m: "Fixed",
+        icon: "T_Pack_Level",
         child: [
             {
                 id: 99,
@@ -11496,6 +11508,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12005,
         m: "Fixed",
+        icon: "T_Pack_Level",
         child: [
             {
                 id: 99,
@@ -11520,6 +11533,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12006,
         m: "Fixed",
+        icon: "T_Pack_Level",
         child: [
             {
                 id: 99,
@@ -11544,6 +11558,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12007,
         m: "Fixed",
+        icon: "T_Pack_Outfits_Saiqi01",
         child: [
             {
                 id: 530101,
@@ -11567,6 +11582,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12008,
         m: "Fixed",
+        icon: "T_Pack_Outfits_Saiqi02",
         child: [
             {
                 id: 530101,
@@ -11620,6 +11636,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12009,
         m: "Fixed",
+        icon: "T_Pack_Outfits_Songlu01",
         child: [
             {
                 id: 510101,
@@ -11643,6 +11660,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12010,
         m: "Fixed",
+        icon: "T_Pack_Outfits_Songlu02",
         child: [
             {
                 id: 510101,
@@ -11696,6 +11714,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12011,
         m: "Fixed",
+        icon: "T_Pack_Outfits_Shuimu01",
         child: [
             {
                 id: 210102,
@@ -11719,6 +11738,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12012,
         m: "Fixed",
+        icon: "T_Pack_Outfits_Shuimu02",
         child: [
             {
                 id: 210102,
@@ -11772,6 +11792,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12013,
         m: "Fixed",
+        icon: "T_Pack_Outfits01",
         child: [
             {
                 id: 41012,
@@ -11808,6 +11829,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12014,
         m: "Fixed",
+        icon: "T_Pack_Outfits02",
         child: [
             {
                 id: 41015,
@@ -11844,6 +11866,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12015,
         m: "Fixed",
+        icon: "T_Pack_Outfits03",
         child: [
             {
                 id: 41016,
@@ -11880,6 +11903,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12016,
         m: "Fixed",
+        icon: "T_Pack_Gacha_Saiqi01",
         child: [
             {
                 id: 1004,
@@ -11898,6 +11922,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12017,
         m: "Fixed",
+        icon: "T_Pack_Gacha_Saiqi02",
         child: [
             {
                 id: 1004,
@@ -11916,6 +11941,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12018,
         m: "Fixed",
+        icon: "T_Pack_Gacha_Saiqi03",
         child: [
             {
                 id: 1004,
@@ -11934,6 +11960,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12019,
         m: "Fixed",
+        icon: "T_Pack_Gacha_Saiqi04",
         child: [
             {
                 id: 1004,
@@ -11952,6 +11979,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12020,
         m: "Fixed",
+        icon: "T_Head_Saiqi01",
         child: [
             {
                 id: 530101,
@@ -11969,6 +11997,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12021,
         m: "Fixed",
+        icon: "T_Head_Songlu01",
         child: [
             {
                 id: 510101,
@@ -11986,6 +12015,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12022,
         m: "Fixed",
+        icon: "T_Head_Shuimu01",
         child: [
             {
                 id: 210102,
@@ -12003,6 +12033,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12023,
         m: "Fixed",
+        icon: "T_Pack_Normal01",
         child: [
             {
                 id: 1003,
@@ -12033,6 +12064,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12024,
         m: "Fixed",
+        icon: "T_Pack_Normal02",
         child: [
             {
                 id: 1003,
@@ -12057,6 +12089,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12025,
         m: "Fixed",
+        icon: "T_Pack_Normal03",
         child: [
             {
                 id: 1003,
@@ -12081,6 +12114,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12026,
         m: "Fixed",
+        icon: "T_Pack_Normal04",
         child: [
             {
                 id: 1003,
@@ -12105,6 +12139,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12027,
         m: "Fixed",
+        icon: "T_Head_Broadsword_Huipo",
         child: [
             {
                 id: 3010102,
@@ -12117,6 +12152,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12028,
         m: "Fixed",
+        icon: "T_Head_Sword_Fubei",
         child: [
             {
                 id: 3010202,
@@ -12129,6 +12165,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12029,
         m: "Fixed",
+        icon: "T_Head_Sword_Kongjun",
         child: [
             {
                 id: 3010201,
@@ -12141,6 +12178,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12030,
         m: "Fixed",
+        icon: "T_Head_Claymore_Kongjun",
         child: [
             {
                 id: 3010101,
@@ -12153,6 +12191,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12031,
         m: "Fixed",
+        icon: "T_Head_Polearm_Xiaye",
         child: [
             {
                 id: 3010401,
@@ -12170,6 +12209,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12032,
         m: "Fixed",
+        icon: "T_Head_Bow_Huanri",
         child: [
             {
                 id: 3010301,
@@ -12187,6 +12227,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12033,
         m: "Fixed",
+        icon: "T_Head_Polearm_Talang",
         child: [
             {
                 id: 3010402,
@@ -12204,6 +12245,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12034,
         m: "Fixed",
+        icon: "T_Pack_Level",
         child: [
             {
                 id: 99,
@@ -12228,6 +12270,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12035,
         m: "Fixed",
+        icon: "T_Pack_Level",
         child: [
             {
                 id: 99,
@@ -12252,6 +12295,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12036,
         m: "Fixed",
+        icon: "T_Shop_Dye_Blue",
         child: [
             {
                 id: 30102,
@@ -12264,6 +12308,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12037,
         m: "Fixed",
+        icon: "T_Shop_Dye_Green",
         child: [
             {
                 id: 30103,
@@ -12276,6 +12321,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12038,
         m: "Fixed",
+        icon: "T_Shop_Dye_Yellow",
         child: [
             {
                 id: 30104,
@@ -12288,6 +12334,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12039,
         m: "Fixed",
+        icon: "T_Shop_Dye_Orange",
         child: [
             {
                 id: 30105,
@@ -12300,6 +12347,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12040,
         m: "Fixed",
+        icon: "T_Shop_Dye_Red",
         child: [
             {
                 id: 30106,
@@ -12312,6 +12360,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12041,
         m: "Fixed",
+        icon: "T_Shop_Dye_Pink",
         child: [
             {
                 id: 30107,
@@ -12324,6 +12373,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12042,
         m: "Fixed",
+        icon: "T_Shop_Dye_Purple",
         child: [
             {
                 id: 30109,
@@ -12336,6 +12386,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12043,
         m: "Fixed",
+        icon: "T_Pack_Money_Normal",
         child: [
             {
                 id: 20013,
@@ -12348,6 +12399,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12044,
         m: "Fixed",
+        icon: "T_Pack_Money_Plenty",
         child: [
             {
                 id: 20013,
@@ -12360,6 +12412,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12045,
         m: "Fixed",
+        icon: "T_Pack_Globule_Normal",
         child: [
             {
                 id: 102,
@@ -12372,6 +12425,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12046,
         m: "Fixed",
+        icon: "T_Pack_Globule_Plenty",
         child: [
             {
                 id: 102,
@@ -12384,6 +12438,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12047,
         m: "Fixed",
+        icon: "T_Pack_Weapon_ForgeA_Normal",
         child: [
             {
                 id: 20008,
@@ -12402,6 +12457,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12048,
         m: "Fixed",
+        icon: "T_Pack_Weapon_ForgeA_Plenty",
         child: [
             {
                 id: 20008,
@@ -12420,6 +12476,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12049,
         m: "Fixed",
+        icon: "T_Pack_Weapon_ForgeB_Normal",
         child: [
             {
                 id: 20027,
@@ -12438,6 +12495,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12050,
         m: "Fixed",
+        icon: "T_Pack_Weapon_ForgeB_Plenty",
         child: [
             {
                 id: 20027,
@@ -12456,6 +12514,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12051,
         m: "Fixed",
+        icon: "T_Pack_Char_Track",
         child: [
             {
                 id: 201,
@@ -12468,6 +12527,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12052,
         m: "Fixed",
+        icon: "T_Pack_Weapon_Track",
         child: [
             {
                 id: 202,
@@ -12480,6 +12540,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12053,
         m: "Fixed",
+        icon: "T_Pack_Char_Progress",
         child: [
             {
                 id: 2014,
@@ -12498,6 +12559,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12054,
         m: "Fixed",
+        icon: "T_Pack_Weapon_Progress",
         child: [
             {
                 id: 2010,
@@ -12516,6 +12578,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12055,
         m: "Fixed",
+        icon: "T_Pack_MonthPurple",
         child: [
             {
                 id: 208,
@@ -12534,6 +12597,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12056,
         m: "Fixed",
+        icon: "T_Pack_MonthGold",
         child: [
             {
                 id: 209,
@@ -12552,6 +12616,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12057,
         m: "Fixed",
+        icon: "T_Pack_WeaponUserChoose",
         child: [
             {
                 id: 110014,
@@ -12564,6 +12629,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12058,
         m: "Fixed",
+        icon: "T_Pack_WeaponUserChoose",
         child: [
             {
                 id: 110014,
@@ -12576,6 +12642,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12059,
         m: "Fixed",
+        icon: "T_Pack_CP_Mid",
         child: [
             {
                 id: 101,
@@ -12588,6 +12655,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12060,
         m: "Fixed",
+        icon: "T_Pack_CP_Big",
         child: [
             {
                 id: 101,
@@ -12600,6 +12668,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12061,
         m: "Fixed",
+        icon: "T_Pack_Increase",
         child: [
             {
                 id: 3016,
@@ -12624,6 +12693,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12062,
         m: "Fixed",
+        icon: "T_Pack_CP_Month",
         child: [
             {
                 id: 101,
@@ -12636,6 +12706,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12063,
         m: "Fixed",
+        icon: "T_Pack_Globule_Month",
         child: [
             {
                 id: 102,
@@ -12648,6 +12719,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12064,
         m: "Fixed",
+        icon: "T_Pack_JJ_Month",
         child: [
             {
                 id: 20013,
@@ -12804,6 +12876,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12101,
         m: "Fixed",
+        icon: "T_Pack_Midsummer_Gacha01",
         child: [
             {
                 id: 1004,
@@ -12816,6 +12889,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12102,
         m: "Fixed",
+        icon: "T_Pack_Midsummer_Gacha03",
         child: [
             {
                 id: 1004,
@@ -12834,6 +12908,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12103,
         m: "Fixed",
+        icon: "T_Pack_Midsummer_Gacha04",
         child: [
             {
                 id: 1004,
@@ -12852,6 +12927,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12104,
         m: "Fixed",
+        icon: "T_Pack_Midsummer_Gacha05",
         child: [
             {
                 id: 1004,
@@ -12864,6 +12940,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12105,
         m: "Fixed",
+        icon: "T_Pack_Midsummer_Gacha06",
         child: [
             {
                 id: 1004,
@@ -12876,6 +12953,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12106,
         m: "Fixed",
+        icon: "T_Pack_Midsummer_Gacha07",
         child: [
             {
                 id: 1004,
@@ -12888,6 +12966,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12107,
         m: "Fixed",
+        icon: "T_Pack_CommonChristmasSkin",
         child: [
             {
                 id: 16010010,
@@ -12942,6 +13021,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12110,
         m: "Fixed",
+        icon: "T_Pack_LimitTimeGacha01",
         child: [
             {
                 id: 1004,
@@ -12954,6 +13034,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12111,
         m: "Fixed",
+        icon: "T_Pack_LimitTimeGacha02",
         child: [
             {
                 id: 1004,
@@ -12972,6 +13053,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12112,
         m: "Fixed",
+        icon: "T_Pack_LimitTimeGacha03",
         child: [
             {
                 id: 1004,
@@ -12990,6 +13072,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12113,
         m: "Fixed",
+        icon: "T_Pack_LimitTimeGacha04",
         child: [
             {
                 id: 1004,
@@ -13002,6 +13085,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12114,
         m: "Fixed",
+        icon: "T_Pack_LimitTimeGacha05",
         child: [
             {
                 id: 1004,
@@ -13014,6 +13098,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12115,
         m: "Fixed",
+        icon: "T_Pack_LimitTimeGacha06",
         child: [
             {
                 id: 1004,
@@ -13026,6 +13111,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12116,
         m: "Fixed",
+        icon: "T_Pack_Common01",
         child: [
             {
                 id: 16010011,
@@ -13080,6 +13166,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12119,
         m: "Fixed",
+        icon: "T_Pack_Char_Baiheng",
         child: [
             {
                 id: 1002401,
@@ -13092,6 +13179,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12120,
         m: "Fixed",
+        icon: "T_Pack_Char_Kezhou",
         child: [
             {
                 id: 1001503,
@@ -13104,6 +13192,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12121,
         m: "Fixed",
+        icon: "T_Pack_Fashion_Christmas4In1",
         child: [
             {
                 id: 110006,
@@ -13158,6 +13247,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12123,
         m: "Fixed",
+        icon: "T_Pack_GachaRes01_01",
         child: [
             {
                 id: 1004,
@@ -13182,6 +13272,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12124,
         m: "Fixed",
+        icon: "T_Pack_GachaRes01_02",
         child: [
             {
                 id: 1004,
@@ -13206,6 +13297,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12125,
         m: "Fixed",
+        icon: "T_Pack_GachaRes01_03",
         child: [
             {
                 id: 1004,
@@ -13230,6 +13322,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12126,
         m: "Fixed",
+        icon: "T_Pack_GachaSkinRes01_02",
         child: [
             {
                 id: 1004,
@@ -13254,6 +13347,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12127,
         m: "Fixed",
+        icon: "T_Pack_GachaSkinRes01_01",
         child: [
             {
                 id: 1004,
@@ -13278,6 +13372,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12128,
         m: "Fixed",
+        icon: "T_Pack_LimitTimeGacha01",
         child: [
             {
                 id: 1004,
@@ -13290,6 +13385,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12129,
         m: "Fixed",
+        icon: "T_Pack_LimitTimeGacha02",
         child: [
             {
                 id: 1004,
@@ -13308,6 +13404,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12130,
         m: "Fixed",
+        icon: "T_Pack_LimitTimeGacha03",
         child: [
             {
                 id: 1004,
@@ -13326,6 +13423,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12131,
         m: "Fixed",
+        icon: "T_Pack_LimitTimeGacha04",
         child: [
             {
                 id: 1004,
@@ -13338,6 +13436,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12132,
         m: "Fixed",
+        icon: "T_Pack_LimitTimeGacha05",
         child: [
             {
                 id: 1004,
@@ -13350,6 +13449,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12133,
         m: "Fixed",
+        icon: "T_Pack_LimitTimeGacha06",
         child: [
             {
                 id: 1004,
@@ -13362,6 +13462,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12134,
         m: "Fixed",
+        icon: "T_Icon_JKSkin",
         child: [
             {
                 id: 16010122,
@@ -13380,6 +13481,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12135,
         m: "Fixed",
+        icon: "T_Icon_SnowmanSkin",
         child: [
             {
                 id: 16010121,
@@ -13398,6 +13500,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12136,
         m: "Fixed",
+        icon: "T_Pack_Char_Zhiliu",
         child: [
             {
                 id: 1004102,
@@ -13410,6 +13513,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12137,
         m: "Fixed",
+        icon: "T_Pack_Char_Yuming",
         child: [
             {
                 id: 1004201,
@@ -13494,6 +13598,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12142,
         m: "Fixed",
+        icon: "T_Pack_GodWealth",
         child: [
             {
                 id: 10067,
@@ -13524,6 +13629,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12143,
         m: "Fixed",
+        icon: "T_Pack_JKSkin01",
         child: [
             {
                 id: 110015,
@@ -13542,6 +13648,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12144,
         m: "Fixed",
+        icon: "T_Pack_SnowmanSkin01",
         child: [
             {
                 id: 110016,
@@ -13662,6 +13769,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12152,
         m: "Fixed",
+        icon: "T_Pack_DailyRes",
         child: [
             {
                 id: 41042,
@@ -13680,6 +13788,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12153,
         m: "Fixed",
+        icon: "T_Pack_Weekly",
         child: [
             {
                 id: 1004,
@@ -13698,6 +13807,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12154,
         m: "Fixed",
+        icon: "T_Pack_GachaSkinRes02_01",
         child: [
             {
                 id: 1004,
@@ -13722,6 +13832,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12155,
         m: "Fixed",
+        icon: "T_Pack_GachaSkinRes02_02",
         child: [
             {
                 id: 1004,
@@ -13746,6 +13857,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12156,
         m: "Fixed",
+        icon: "T_Pack_GachaRes01_01",
         child: [
             {
                 id: 1004,
@@ -13770,6 +13882,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12157,
         m: "Fixed",
+        icon: "T_Pack_GachaRes01_02",
         child: [
             {
                 id: 1004,
@@ -13794,6 +13907,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12158,
         m: "Fixed",
+        icon: "T_Pack_GachaRes01_03",
         child: [
             {
                 id: 1004,
@@ -13818,6 +13932,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12159,
         m: "Fixed",
+        icon: "T_Pack_LimitTimeGacha01",
         child: [
             {
                 id: 1004,
@@ -13830,6 +13945,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12160,
         m: "Fixed",
+        icon: "T_Pack_LimitTimeGacha02",
         child: [
             {
                 id: 1004,
@@ -13848,6 +13964,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12161,
         m: "Fixed",
+        icon: "T_Pack_LimitTimeGacha03",
         child: [
             {
                 id: 1004,
@@ -13866,6 +13983,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12162,
         m: "Fixed",
+        icon: "T_Pack_Common03_02",
         child: [
             {
                 id: 16010131,
@@ -13884,6 +14002,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12163,
         m: "Fixed",
+        icon: "T_Pack_Char_Suyi",
         child: [
             {
                 id: 1001504,
@@ -13896,6 +14015,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12164,
         m: "Fixed",
+        icon: "T_Pack_Char_Kami",
         child: [
             {
                 id: 1003202,
@@ -13962,6 +14082,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12168,
         m: "Fixed",
+        icon: "T_Pack_Common03_03",
         child: [
             {
                 id: 110017,
@@ -58776,6 +58897,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 110506,
         m: "Sequence",
+        icon: "T_Pack_Mod01",
         child: [
             {
                 id: 4030002,
@@ -62353,6 +62475,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130009,
         m: "Weight",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 21005,
@@ -62373,6 +62496,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130010,
         m: "Weight",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 22007,
@@ -62414,6 +62538,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130011,
         m: "Weight",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 23007,
@@ -62455,6 +62580,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130012,
         m: "Weight",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 31201,
@@ -62510,6 +62636,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130013,
         m: "Weight",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 32004,
@@ -62565,6 +62692,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130014,
         m: "Weight",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 33004,
@@ -62641,6 +62769,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130015,
         m: "Fixed",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 11001,
@@ -62677,6 +62806,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130016,
         m: "Fixed",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 12001,
@@ -62725,6 +62855,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130017,
         m: "Fixed",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 13001,
@@ -62773,6 +62904,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130018,
         m: "Weight",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 41001,
@@ -62814,6 +62946,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130019,
         m: "Weight",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 42001,
@@ -62883,6 +63016,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130020,
         m: "Weight",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 43001,
@@ -62945,6 +63079,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130021,
         m: "Weight",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 101,
@@ -62958,6 +63093,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130022,
         m: "Sequence",
+        icon: "T_Draft_Weapon_Part05",
         child: [
             {
                 id: 10102,
@@ -63020,6 +63156,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130023,
         m: "Sequence",
+        icon: "T_Draft_Weapon_Part01",
         child: [
             {
                 id: 10401,
@@ -63082,6 +63219,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130024,
         m: "Weight",
+        icon: "T_Resource_Polarity",
         child: [
             {
                 id: 201,
@@ -63104,6 +63242,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130025,
         m: "Fixed",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 14001,
@@ -63140,6 +63279,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130026,
         m: "Fixed",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 15001,
@@ -63176,6 +63316,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 130027,
         m: "Fixed",
+        icon: "T_ModArchive_Unrevealed",
         child: [
             {
                 id: 130015,
@@ -66700,6 +66841,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 140026,
         m: "Fixed",
+        icon: "T_Draft_Mod01",
         child: [
             {
                 id: 54001,
@@ -66713,6 +66855,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 140027,
         m: "Fixed",
+        icon: "T_Draft_Mod01",
         child: [
             {
                 id: 54002,
@@ -66726,6 +66869,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 140028,
         m: "Fixed",
+        icon: "T_Draft_Mod01",
         child: [
             {
                 id: 54003,
@@ -66739,6 +66883,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 140029,
         m: "Fixed",
+        icon: "T_Draft_Mod01",
         child: [
             {
                 id: 54004,
@@ -66752,6 +66897,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 140030,
         m: "Fixed",
+        icon: "T_Draft_Mod01",
         child: [
             {
                 id: 54005,
@@ -66765,6 +66911,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 140031,
         m: "Fixed",
+        icon: "T_Draft_Mod01",
         child: [
             {
                 id: 54006,
@@ -66778,6 +66925,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 140032,
         m: "Fixed",
+        icon: "T_Draft_Mod01",
         child: [
             {
                 id: 54101,
@@ -66791,6 +66939,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 140033,
         m: "Fixed",
+        icon: "T_Draft_Mod01",
         child: [
             {
                 id: 54102,
@@ -66804,6 +66953,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 140034,
         m: "Fixed",
+        icon: "T_Draft_Mod01",
         child: [
             {
                 id: 54103,
@@ -66817,6 +66967,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 140035,
         m: "Fixed",
+        icon: "T_Draft_Mod01",
         child: [
             {
                 id: 55001,
@@ -66830,6 +66981,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 140036,
         m: "Fixed",
+        icon: "T_Draft_Mod01",
         child: [
             {
                 id: 55002,
@@ -66843,6 +66995,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 140037,
         m: "Fixed",
+        icon: "T_Draft_Mod01",
         child: [
             {
                 id: 55003,
@@ -66856,6 +67009,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 140038,
         m: "Fixed",
+        icon: "T_Draft_Mod01",
         child: [
             {
                 id: 55004,
@@ -66869,6 +67023,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 140039,
         m: "Fixed",
+        icon: "T_Draft_Mod01",
         child: [
             {
                 id: 55005,
@@ -66882,6 +67037,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 140040,
         m: "Fixed",
+        icon: "T_Draft_Mod01",
         child: [
             {
                 id: 55006,
@@ -66895,6 +67051,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 140041,
         m: "Fixed",
+        icon: "T_Draft_Mod01",
         child: [
             {
                 id: 55101,
@@ -66908,6 +67065,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 140042,
         m: "Fixed",
+        icon: "T_Draft_Mod01",
         child: [
             {
                 id: 55102,
@@ -66921,6 +67079,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 140043,
         m: "Fixed",
+        icon: "T_Draft_Mod01",
         child: [
             {
                 id: 55103,
@@ -68266,6 +68425,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 160001,
         m: "Fixed",
+        icon: "T_Resource_PolarityPart01",
         child: [
             {
                 id: 101,
@@ -68279,6 +68439,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 160002,
         m: "Sequence",
+        icon: "T_Resource_PolarityPart01",
         child: [
             {
                 id: 101,
@@ -68334,6 +68495,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 160003,
         m: "Sequence",
+        icon: "T_Resource_PolarityPart01",
         child: [
             {
                 id: 101,
@@ -68359,6 +68521,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 160004,
         m: "Sequence",
+        icon: "T_Resource_PolarityPart01",
         child: [
             {
                 id: 101,
@@ -68630,6 +68793,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200000,
         m: "Independent",
+        icon: "T_Icon_DispatchBattleReward",
         child: [
             {
                 id: 20013,
@@ -68685,6 +68849,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200001,
         m: "Independent",
+        icon: "T_Icon_DispatchBattleReward",
         child: [
             {
                 id: 20013,
@@ -68740,6 +68905,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200002,
         m: "Independent",
+        icon: "T_Icon_DispatchBattleReward",
         child: [
             {
                 id: 20013,
@@ -68795,6 +68961,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200003,
         m: "Independent",
+        icon: "T_Icon_DispatchBattleReward",
         child: [
             {
                 id: 20013,
@@ -68850,6 +69017,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200004,
         m: "Independent",
+        icon: "T_Icon_DispatchBattleReward",
         child: [
             {
                 id: 20013,
@@ -68905,6 +69073,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200005,
         m: "Independent",
+        icon: "T_Icon_DispatchBattleReward",
         child: [
             {
                 id: 20013,
@@ -68960,6 +69129,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200006,
         m: "Independent",
+        icon: "T_Icon_DispatchBattleReward",
         child: [
             {
                 id: 20013,
@@ -69015,6 +69185,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200007,
         m: "Independent",
+        icon: "T_Icon_DispatchBattleReward",
         child: [
             {
                 id: 20013,
@@ -69070,6 +69241,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200008,
         m: "Independent",
+        icon: "T_Icon_DispatchBattleReward",
         child: [
             {
                 id: 20013,
@@ -69125,6 +69297,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200009,
         m: "Independent",
+        icon: "T_Icon_DispatchBattleReward",
         child: [
             {
                 id: 20013,
@@ -69180,6 +69353,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200010,
         m: "Independent",
+        icon: "T_Pickup_Butterfly01",
         child: [
             {
                 id: 4010001,
@@ -69277,6 +69451,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200011,
         m: "Independent",
+        icon: "T_Pickup_Butterfly01",
         child: [
             {
                 id: 4010001,
@@ -69374,6 +69549,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200012,
         m: "Independent",
+        icon: "T_Pickup_Butterfly01",
         child: [
             {
                 id: 4010001,
@@ -69471,6 +69647,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200013,
         m: "Independent",
+        icon: "T_Pickup_Butterfly01",
         child: [
             {
                 id: 4010001,
@@ -69568,6 +69745,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200014,
         m: "Independent",
+        icon: "T_Pickup_Butterfly01",
         child: [
             {
                 id: 4010001,
@@ -69665,6 +69843,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200015,
         m: "Independent",
+        icon: "T_Pickup_Butterfly01",
         child: [
             {
                 id: 4010001,
@@ -69762,6 +69941,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200016,
         m: "Independent",
+        icon: "T_Pickup_Butterfly01",
         child: [
             {
                 id: 4010001,
@@ -69859,6 +70039,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200017,
         m: "Independent",
+        icon: "T_Pickup_Butterfly01",
         child: [
             {
                 id: 4010001,
@@ -69956,6 +70137,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200018,
         m: "Independent",
+        icon: "T_Pickup_Butterfly01",
         child: [
             {
                 id: 4010001,
@@ -70053,6 +70235,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200019,
         m: "Independent",
+        icon: "T_Pickup_Butterfly01",
         child: [
             {
                 id: 4010001,
@@ -70150,6 +70333,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200020,
         m: "Independent",
+        icon: "T_Pickup_Nut01",
         child: [
             {
                 id: 4020001,
@@ -70191,6 +70375,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200021,
         m: "Independent",
+        icon: "T_Pickup_Nut01",
         child: [
             {
                 id: 4020001,
@@ -70232,6 +70417,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200022,
         m: "Independent",
+        icon: "T_Pickup_Nut01",
         child: [
             {
                 id: 4020001,
@@ -70273,6 +70459,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200023,
         m: "Independent",
+        icon: "T_Pickup_Nut01",
         child: [
             {
                 id: 4020001,
@@ -70314,6 +70501,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200024,
         m: "Independent",
+        icon: "T_Pickup_Nut01",
         child: [
             {
                 id: 4020001,
@@ -70355,6 +70543,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200025,
         m: "Independent",
+        icon: "T_Pickup_Nut01",
         child: [
             {
                 id: 4020001,
@@ -70396,6 +70585,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200026,
         m: "Independent",
+        icon: "T_Pickup_Nut01",
         child: [
             {
                 id: 4020001,
@@ -70437,6 +70627,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200027,
         m: "Independent",
+        icon: "T_Pickup_Nut01",
         child: [
             {
                 id: 4020001,
@@ -70478,6 +70669,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200028,
         m: "Independent",
+        icon: "T_Pickup_Nut01",
         child: [
             {
                 id: 4020001,
@@ -70519,6 +70711,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200029,
         m: "Independent",
+        icon: "T_Pickup_Nut01",
         child: [
             {
                 id: 4020001,
@@ -70560,6 +70753,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200030,
         m: "Independent",
+        icon: "T_Icon_DispatchFishingReward",
         child: [
             {
                 id: 5011020,
@@ -70608,6 +70802,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200031,
         m: "Independent",
+        icon: "T_Icon_DispatchFishingReward",
         child: [
             {
                 id: 5011020,
@@ -70656,6 +70851,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200032,
         m: "Independent",
+        icon: "T_Icon_DispatchFishingReward",
         child: [
             {
                 id: 5011020,
@@ -70704,6 +70900,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200033,
         m: "Independent",
+        icon: "T_Icon_DispatchFishingReward",
         child: [
             {
                 id: 5011020,
@@ -70752,6 +70949,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200034,
         m: "Independent",
+        icon: "T_Icon_DispatchFishingReward",
         child: [
             {
                 id: 5011020,
@@ -70800,6 +70998,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200035,
         m: "Independent",
+        icon: "T_Icon_DispatchFishingReward",
         child: [
             {
                 id: 5011020,
@@ -70848,6 +71047,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200036,
         m: "Independent",
+        icon: "T_Icon_DispatchFishingReward",
         child: [
             {
                 id: 5011020,
@@ -70896,6 +71096,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200037,
         m: "Independent",
+        icon: "T_Icon_DispatchFishingReward",
         child: [
             {
                 id: 5011020,
@@ -70944,6 +71145,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200038,
         m: "Independent",
+        icon: "T_Icon_DispatchFishingReward",
         child: [
             {
                 id: 5011020,
@@ -70992,6 +71194,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 200039,
         m: "Independent",
+        icon: "T_Icon_DispatchFishingReward",
         child: [
             {
                 id: 5011020,
@@ -78872,6 +79075,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 500000,
         m: "Sequence",
+        icon: "T_Icon_Random_Box_01",
         child: [
             {
                 id: 1001,
@@ -80531,6 +80735,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 4000001,
         m: "Fixed",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 3000001,
@@ -80555,6 +80760,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 4000002,
         m: "Fixed",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 3000002,
@@ -80573,6 +80779,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 4000003,
         m: "Fixed",
+        icon: "T_Reward_UnknownMod01",
         child: [
             {
                 id: 2000017,

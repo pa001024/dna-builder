@@ -2,6 +2,7 @@ import type { Buff, Char, Draft, Dungeon, Mod, Reward, RewardChild, Weapon } fro
 import { type AbyssBuff, type AbyssDungeon, abyssBuffs, abyssDungeons } from "./abyss.data"
 import buffData from "./buff.data"
 import charData from "./char.data"
+import cutoffData from "./cutoff.data"
 import draftData from "./draft.data"
 import dungeonData from "./dungeon.data"
 import effectData from "./effect.data"
@@ -10,6 +11,8 @@ import monsterData, { monsterMap } from "./monster.data"
 import rewardData from "./reward.data"
 import weaponData from "./weapon.data"
 
+export { headFrameData } from "./accessory.data"
+
 // 将静态表转换为Map，提高查找效率
 export const charMap = new Map<number | string, Char>()
 charData.forEach(char => {
@@ -17,7 +20,12 @@ charData.forEach(char => {
     charMap.set(char.id, char as Char)
 })
 
-export { monsterData, monsterMap }
+export { cutoffData, monsterData, monsterMap }
+
+export const cutoffMap = new Map<number, (typeof cutoffData)[number]>()
+cutoffData.forEach(cutoff => {
+    cutoffMap.set(cutoff.itemId, cutoff)
+})
 
 // 将mod数据转换为Map
 export const modMap = new Map<number, Mod>()

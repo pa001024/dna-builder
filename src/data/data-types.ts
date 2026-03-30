@@ -495,6 +495,7 @@ export interface Achievement {
 export interface Reward {
     id: number
     m: string
+    icon?: string
     child: RewardChild[]
 }
 

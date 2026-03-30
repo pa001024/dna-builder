@@ -228,7 +228,7 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
         description: "聚合区域、副本、刷新点位与采集相关资料，优先服务跑图、采集和副本路线查询。",
         badge: "Explore",
         accentClass: "bg-emerald-500",
-        paths: ["/db/dungeon", "/db/abyss", "/db/map", "/db/map-local", "/db/walnut", "/db/fish", "/db/shop"],
+        paths: ["/db/shop", "/db/fish", "/db/map-local", "/db/dungeon", "/db/abyss", "/db/map", "/db/walnut"],
     },
     {
         id: "world",

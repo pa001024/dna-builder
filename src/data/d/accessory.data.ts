@@ -33,6 +33,14 @@ export interface SkinItem {
     upgrade?: SkinUpgradeCost[]
 }
 
+export interface HeadFrameItem {
+    id: number
+    name: string
+    desc: string
+    icon: string
+    access?: string
+}
+
 export const charAccessoryData: Accessory[] = [
     {
         id: 10001,
@@ -3271,6 +3279,222 @@ export const weaponAccessoryData: Accessory[] = [
     },
 ]
 
+export const headFrameData: HeadFrameItem[] = [
+    {
+        id: 10001,
+        name: "旧日相片",
+        desc: "将闪耀定格。",
+        icon: "T_Head_Frame01",
+    },
+    {
+        id: 10002,
+        name: "黑曜石",
+        desc: "在热烈中铸造永恒。",
+        icon: "T_Head_Frame02",
+    },
+    {
+        id: 10003,
+        name: "信封·墨玉",
+        desc: "跨越星夜与晨雾的回信。",
+        icon: "T_Head_Frame03",
+    },
+    {
+        id: 10004,
+        name: "铁荆棘",
+        desc: "金属荆棘之中，铭刻着古典与肃穆。",
+        icon: "T_Head_Frame04",
+    },
+    {
+        id: 10005,
+        name: "静谧香炉",
+        desc: "自香炉弥散的薄雾中，窥见神的一角。",
+        icon: "T_Head_Frame05",
+    },
+    {
+        id: 10006,
+        name: "信封·绛紫",
+        desc: "跨越星夜与晨雾的回信。",
+        icon: "T_Head_Frame06",
+    },
+    {
+        id: 10007,
+        name: "世人印象·才智",
+        desc: "我的聪慧与洞察。",
+        icon: "T_Head_Frame07",
+    },
+    {
+        id: 10008,
+        name: "世人印象·道德",
+        desc: "我的品格与原则。",
+        icon: "T_Head_Frame08",
+    },
+    {
+        id: 10009,
+        name: "世人印象·功利",
+        desc: "我的思虑与权衡。",
+        icon: "T_Head_Frame09",
+    },
+    {
+        id: 10010,
+        name: "世人印象·共情",
+        desc: "我的同理心与善意。",
+        icon: "T_Head_Frame10",
+    },
+    {
+        id: 10011,
+        name: "息蝶·碧绿",
+        desc: "嘘……不要惊扰了它们。",
+        icon: "T_Head_Frame11",
+        access: "通过月度订单获得",
+    },
+    {
+        id: 10012,
+        name: "息蝶·晴蓝",
+        desc: "嘘……不要惊扰了它们。",
+        icon: "T_Head_Frame12",
+    },
+    {
+        id: 10013,
+        name: "世人印象·混沌",
+        desc: "我的……混乱而自由的一切。",
+        icon: "T_Head_Frame13",
+    },
+    {
+        id: 10014,
+        name: "时光胶片",
+        desc: "胶片将会替我们铭记那些无法倒带的时光。",
+        icon: "T_Head_Frame14",
+    },
+    {
+        id: 10015,
+        name: "黑暗森林",
+        desc: "小心那些悬于荆棘之上的红花。",
+        icon: "T_Head_Frame15",
+    },
+    {
+        id: 10016,
+        name: "白羽毛",
+        desc: "用羽毛写下，梦想与希望。",
+        icon: "T_Head_Frame16",
+        access: "通过月度订单获得",
+    },
+    {
+        id: 10017,
+        name: "螺旋交汇时",
+        desc: "于黄昏与夜幕交错时分启程。",
+        icon: "T_Head_Frame17",
+    },
+    {
+        id: 10018,
+        name: "柔波荡漾",
+        desc: "晚风吹拂，碧波荡漾。",
+        icon: "T_Head_Frame18",
+        access: "通过月度订单获得",
+    },
+    {
+        id: 10019,
+        name: "醉当歌",
+        desc: "一人一剑一江湖。",
+        icon: "T_Head_Frame19",
+        access: "通过月度订单获得",
+    },
+    {
+        id: 10020,
+        name: "迷卦",
+        desc: "卜卦奇算，窥伺未来。",
+        icon: "T_Head_Frame20",
+        access: "通过月度订单获得",
+    },
+    {
+        id: 10021,
+        name: "阴翳",
+        desc: "如何才能驱散笼罩心头的阴雨。",
+        icon: "T_Head_Frame21",
+        access: "通过月度订单获得",
+    },
+    {
+        id: 10022,
+        name: "糖福禄",
+        desc: "冰糖葫芦竹签儿串。",
+        icon: "T_Head_Frame22",
+        access: "通过商店获得",
+    },
+    {
+        id: 10023,
+        name: "神行贺春来",
+        desc: "步步生风，心想事成。",
+        icon: "T_Head_Frame23",
+        access: "通过商店获得",
+    },
+    {
+        id: 10024,
+        name: "以笔尖铭记·墨玉",
+        desc: "写下属于我们的故事。",
+        icon: "T_Head_Frame24",
+    },
+    {
+        id: 10025,
+        name: "以笔尖铭记·铅灰",
+        desc: "写下属于我们的故事。",
+        icon: "T_Head_Frame24_01",
+    },
+    {
+        id: 10026,
+        name: "以笔尖铭记·黛蓝",
+        desc: "写下属于我们的故事。",
+        icon: "T_Head_Frame24_02",
+    },
+    {
+        id: 10027,
+        name: "争锋",
+        desc: "群英争锋，气贯长虹。",
+        icon: "T_Head_Frame31",
+        access: "通过活动获得",
+    },
+    {
+        id: 10028,
+        name: "祥云",
+        desc: "身伴流云，心游太虚。",
+        icon: "T_Head_Frame30",
+        access: "通过商店获得",
+    },
+    {
+        id: 10029,
+        name: "失色烈火",
+        desc: "灰烬是烈火最后的辉煌。",
+        icon: "T_Head_Frame25",
+        access: "通过商店获得",
+    },
+    {
+        id: 10030,
+        name: "烈酒与蔷薇",
+        desc: "微醺的夜晚，盛开着带刺的浪漫。",
+        icon: "T_Head_Frame26",
+        access: "通过月度订单获得",
+    },
+    {
+        id: 10031,
+        name: "乙鸟",
+        desc: "永不停歇的飞鸟。",
+        icon: "T_Head_Frame27",
+        access: "通过月度订单获得",
+    },
+    {
+        id: 10032,
+        name: "子不语·黛蓝",
+        desc: "月影憧憧，一窗幽梦。",
+        icon: "T_Head_Frame29",
+        access: "通过商店获得",
+    },
+    {
+        id: 10033,
+        name: "子不语·晴蓝",
+        desc: "月影憧憧，一窗幽梦。",
+        icon: "T_Head_Frame28",
+        access: "通过商店获得",
+    },
+]
+
 export const skinData: SkinItem[] = [
     {
         id: 1101,
@@ -5633,7 +5857,7 @@ export const weaponSkinData: Accessory[] = [
         id: 3010303,
         name: "惊弓之喵",
         desc: "喵呜呜！",
-        icon: "T_Head_Bow_jinggong",
+        icon: "T_Head_Bow_Jinggong",
         rarity: 5,
         unlock: "通过商店获得",
     },

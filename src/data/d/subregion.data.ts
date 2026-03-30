@@ -3199,7 +3199,10 @@ export const subRegionData: SubRegion[] = [
                     },
                 ],
                 count: 2,
-                pos: [[48445.666667, -24044.333333]],
+                pos: [
+                    [41150, -34600],
+                    [52360, -26850],
+                ],
             },
         ],
         tp: [
@@ -3264,7 +3267,7 @@ export const subRegionData: SubRegion[] = [
                     },
                 ],
                 count: 3,
-                pos: [[12453.6, -14883.8]],
+                pos: [[14833, -12825]],
             },
         ],
         tp: [
@@ -3341,7 +3344,10 @@ export const subRegionData: SubRegion[] = [
                     },
                 ],
                 count: 3,
-                pos: [[33123.666667, -51726.166667]],
+                pos: [
+                    [34460, -58730],
+                    [23480, -43350],
+                ],
             },
         ],
         tp: [
@@ -3436,7 +3442,11 @@ export const subRegionData: SubRegion[] = [
                     },
                 ],
                 count: 3,
-                pos: [[-4239.5, -61312.333333]],
+                pos: [
+                    [14280, -79580],
+                    [5171, -72502],
+                    [-9080, -54160],
+                ],
             },
         ],
         tp: [
@@ -3531,7 +3541,10 @@ export const subRegionData: SubRegion[] = [
                     },
                 ],
                 count: 3,
-                pos: [[54139.833333, -62691.5]],
+                pos: [
+                    [57011, -59938],
+                    [66801, -67805],
+                ],
             },
         ],
         tp: [
