@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref, watch } from "vue"
 import {
     equipShopAssetMutation,
@@ -16,6 +17,7 @@ type ShopTab = "all" | "title" | "name_card"
 
 const ui = useUIStore()
 const user = useUserStore()
+const { t } = useTranslation()
 
 const tab = ref<ShopTab>("all")
 const loadingProducts = ref(false)
@@ -148,9 +150,9 @@ function isProductPurchasable(product: ShopProduct): boolean {
  */
 function formatProductAvailability(product: ShopProduct): string {
     if (!product.startTime && !product.endTime) {
-        return "长期上架"
+        return t("shop-detail.alwaysAvailable")
     }
-    return `${product.startTime || "即时生效"} ~ ${product.endTime || "长期有效"}`
+    return `${product.startTime || t("shop-detail.immediateEffective")} ~ ${product.endTime || t("shop-detail.longTermValid")}`
 }
 
 const pointsBalance = computed(() => summary.value?.points ?? null)

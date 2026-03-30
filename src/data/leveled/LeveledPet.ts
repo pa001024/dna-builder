@@ -2,6 +2,8 @@ import { petMap } from "../d"
 import type { PetSkill } from "../d/pet.data"
 import type { Pet } from "../data-types"
 
+const PET_BREAKTHROUGH_MAX_LEVEL = 4
+
 export class LeveledPet implements Pet {
     id: number
     uid: number
@@ -47,7 +49,7 @@ export class LeveledPet implements Pet {
         this.异化 = petData.异化
         this.描述 = petData.描述
 
-        this._等级 = level !== undefined ? Math.max(0, Math.min(3, level)) : 0
+        this._等级 = level !== undefined ? Math.max(0, Math.min(PET_BREAKTHROUGH_MAX_LEVEL, level)) : 0
 
         this.updateProperties()
     }
@@ -57,7 +59,7 @@ export class LeveledPet implements Pet {
     }
 
     set 等级(value: number) {
-        this._等级 = Math.max(0, Math.min(3, value))
+        this._等级 = Math.max(0, Math.min(PET_BREAKTHROUGH_MAX_LEVEL, value))
         this.updateProperties()
     }
 

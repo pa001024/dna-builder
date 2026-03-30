@@ -5963,6 +5963,15 @@
         "winMaterial": "창 재료"
     },
     "shop-detail": {
+        "alwaysAvailable": "상시 판매",
+        "currentPrice": "현재 가격",
+        "discount": "할인",
+        "discountInfo": "할인 정보",
+        "endTime": "종료",
+        "immediateEffective": "즉시 적용",
+        "longTermValid": "장기 유효",
+        "originalPrice": "원가",
+        "startTime": "시작",
         "title": "상점"
     },
     "shop-list": {

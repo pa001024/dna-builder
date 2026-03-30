@@ -229,23 +229,23 @@ function getPriceIcon(name: string) {
                         <FullTooltip v-if="cutoffInfo" side="top">
                             <template #tooltip>
                                 <div class="flex flex-col gap-2 max-w-75 min-w-28">
-                                    <div class="text-sm font-bold">折扣信息</div>
+                                    <div class="text-sm font-bold">{{ $t("shop-detail.discountInfo") }}</div>
                                     <div class="flex justify-between items-center gap-2 text-sm">
-                                        <div class="text-xs text-neutral-500 whitespace-nowrap">折扣</div>
+                                        <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.discount") }}</div>
                                         <div class="font-medium text-primary">{{ cutoffInfo.discount }}折</div>
                                     </div>
                                     <div class="flex justify-between items-center gap-2 text-sm">
-                                        <div class="text-xs text-neutral-500 whitespace-nowrap">原价</div>
+                                        <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.originalPrice") }}</div>
                                         <div class="font-medium text-primary line-through">{{ cutoffInfo.originalPrice }}</div>
                                     </div>
                                     <div class="flex justify-between items-center gap-2 text-sm">
-                                        <div class="text-xs text-neutral-500 whitespace-nowrap">现价</div>
+                                        <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.currentPrice") }}</div>
                                         <div class="font-medium text-primary">{{ cutoffInfo.price }}</div>
                                     </div>
                                     <div class="text-xs text-neutral-500">
-                                        <div>开始：{{ formatCutoffTime(cutoffInfo.startTime) }}</div>
+                                        <div>{{ $t("shop-detail.startTime") }}：{{ formatCutoffTime(cutoffInfo.startTime) }}</div>
                                         <div v-if="typeof cutoffInfo.endTime === 'number'">
-                                            结束：{{ formatCutoffTime(cutoffInfo.endTime) }}
+                                            {{ $t("shop-detail.endTime") }}：{{ formatCutoffTime(cutoffInfo.endTime) }}
                                         </div>
                                     </div>
                                 </div>

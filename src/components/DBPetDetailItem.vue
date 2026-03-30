@@ -11,6 +11,8 @@ const props = defineProps<{
     pet: Pet
 }>()
 
+const PET_BREAKTHROUGH_SLIDER_MAX_LEVEL = 3
+
 interface PetSpawnLocation {
     subRegionId: number
     subRegionName: string
@@ -33,10 +35,18 @@ interface PetShopSource {
     timeEnd?: number
 }
 
-const currentLevel = ref(props.pet.最大等级 > 1 ? 3 : 0)
+const currentLevel = ref(props.pet.最大等级 > 1 ? PET_BREAKTHROUGH_SLIDER_MAX_LEVEL : 0)
+const enableFourthLevel = ref(false)
+
+const displayedLevel = computed(() => currentLevel.value + (enableFourthLevel.value ? 1 : 0))
+
+/**
+ * 经验仅随滑块等级变化，不受“老道”开关影响。
+ */
+const displayedExperience = computed(() => Math.floor(50 * currentLevel.value))
 
 const leveledPet = computed(() => {
-    return new LeveledPet(props.pet, currentLevel.value)
+    return new LeveledPet(props.pet, currentLevel.value + (enableFourthLevel.value ? 1 : 0))
 })
 
 /**
@@ -122,7 +132,8 @@ function formatTimeRange(start: number, end?: number) {
 watch(
     () => props.pet,
     () => {
-        currentLevel.value = props.pet.最大等级 > 1 ? 3 : 0
+        currentLevel.value = props.pet.最大等级 > 1 ? PET_BREAKTHROUGH_SLIDER_MAX_LEVEL : 0
+        enableFourthLevel.value = false
     }
 )
 
@@ -272,7 +283,7 @@ const petShopSources = computed<PetShopSource[]>(() => collectPetShopSources(pro
         <div class="flex flex-wrap gap-2 text-sm opacity-70">
             <span>最大等级: {{ pet.最大等级 }}</span>
             <span>捕获经验: {{ pet.捕获经验 }}</span>
-            <span>经验: {{ leveledPet.经验 }}</span>
+            <span>经验: {{ displayedExperience }}</span>
         </div>
 
         <div v-if="pet.描述" class="p-3 bg-base-200 rounded">
@@ -294,16 +305,20 @@ const petShopSources = computed<PetShopSource[]>(() => collectPetShopSources(pro
 
         <div v-if="pet.最大等级 > 1">
             <div class="flex items-center gap-4">
-                <span class="text-sm min-w-12">Lv. {{ currentLevel }}</span>
+                <span class="text-sm min-w-12">Lv. {{ displayedLevel }}</span>
                 <input
                     :key="pet.id"
                     v-model.number="currentLevel"
                     type="range"
                     class="range range-primary range-xs grow"
                     :min="0"
-                    :max="pet.最大等级 > 1 ? 3 : 0"
+                    :max="pet.最大等级 > 1 ? PET_BREAKTHROUGH_SLIDER_MAX_LEVEL : 0"
                     step="1"
                 />
+                <label class="label cursor-pointer gap-2 px-2 py-0">
+                    <span class="label-text text-xs text-base-content/70 whitespace-nowrap">老道</span>
+                    <input v-model="enableFourthLevel" type="checkbox" class="toggle toggle-primary toggle-sm" />
+                </label>
             </div>
             <div class="text-xs text-base-content/50 mt-1">突破等级 (0-3)</div>
         </div>

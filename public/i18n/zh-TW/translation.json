@@ -5924,6 +5924,15 @@
         "winMaterial": "視窗材質"
     },
     "shop-detail": {
+        "alwaysAvailable": "長期上架",
+        "currentPrice": "現價",
+        "discount": "折扣",
+        "discountInfo": "折扣資訊",
+        "endTime": "結束",
+        "immediateEffective": "即時生效",
+        "longTermValid": "長期有效",
+        "originalPrice": "原價",
+        "startTime": "開始",
         "title": "商店"
     },
     "shop-list": {

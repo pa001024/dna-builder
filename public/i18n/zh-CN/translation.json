@@ -1061,6 +1061,15 @@
         "winMaterial": "窗口材质"
     },
     "shop-detail": {
+        "alwaysAvailable": "长期上架",
+        "currentPrice": "现价",
+        "discount": "折扣",
+        "discountInfo": "折扣信息",
+        "endTime": "结束",
+        "immediateEffective": "即时生效",
+        "longTermValid": "长期有效",
+        "originalPrice": "原价",
+        "startTime": "开始",
         "title": "商店"
     },
     "shop-list": {

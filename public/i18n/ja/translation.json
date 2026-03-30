@@ -5958,6 +5958,15 @@
         "winMaterial": "ウィンドウ素材"
     },
     "shop-detail": {
+        "alwaysAvailable": "常時販売",
+        "currentPrice": "現在価格",
+        "discount": "割引",
+        "discountInfo": "割引情報",
+        "endTime": "終了",
+        "immediateEffective": "即時有効",
+        "longTermValid": "長期有効",
+        "originalPrice": "元価格",
+        "startTime": "開始",
         "title": "ショップ"
     },
     "shop-list": {

@@ -5963,6 +5963,15 @@
         "winMaterial": "Window Material"
     },
     "shop-detail": {
+        "alwaysAvailable": "Always available",
+        "currentPrice": "Current price",
+        "discount": "Discount",
+        "discountInfo": "Discount info",
+        "endTime": "End",
+        "immediateEffective": "Immediate",
+        "longTermValid": "Long-term valid",
+        "originalPrice": "Original price",
+        "startTime": "Start",
         "title": "Shop"
     },
     "shop-list": {

@@ -5888,6 +5888,15 @@
         "winMaterial": "Matériau de fenêtre"
     },
     "shop-detail": {
+        "alwaysAvailable": "Toujours disponible",
+        "currentPrice": "Prix actuel",
+        "discount": "Remise",
+        "discountInfo": "Informations de remise",
+        "endTime": "Fin",
+        "immediateEffective": "Effet immédiat",
+        "longTermValid": "Valable à long terme",
+        "originalPrice": "Prix d'origine",
+        "startTime": "Début",
         "title": "Boutique"
     },
     "shop-list": {
