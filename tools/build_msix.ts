@@ -19,7 +19,7 @@ const CONFIG = {
     publisher: "CN=C21F0FE3-67AF-43C3-A412-51014CF129FA",
     description: "DNA Builder 应用",
     // 版本
-    version: "1.0.1.0",
+    version: "1.0.2.0",
     // 显示名称
     displayName: "DNA Builder",
     // 发布者显示名称
@@ -48,7 +48,42 @@ const CONFIG = {
     // 打包目录
     packageDir: resolve(__dirname, "../src-tauri/target/release/msix/package-content"),
     // makeappx工具路径
-    makeappxPath: "makeappx",
+    makeappxPath: resolveMakeAppxPath(),
+}
+
+/**
+ * 解析 makeappx.exe 的实际路径，优先使用系统 PATH，其次回退到常见 Windows SDK 安装位置。
+ * @returns makeappx.exe 的可执行路径
+ */
+function resolveMakeAppxPath(): string {
+    const candidates = [
+        "makeappx.exe",
+        "makeappx",
+        "C:/Program Files (x86)/Windows Kits/10/App Certification Kit/makeappx.exe",
+        "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x64/makeappx.exe",
+        "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x86/makeappx.exe",
+        "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/arm64/makeappx.exe",
+        "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64/makeappx.exe",
+        "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x86/makeappx.exe",
+        "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/arm64/makeappx.exe",
+    ]
+
+    for (const candidate of candidates) {
+        if (candidate === "makeappx.exe" || candidate === "makeappx") {
+            const result = spawnSync(candidate, ["help"], { shell: true, stdio: "ignore" })
+            if (result.status === 0) {
+                return candidate
+            }
+            continue
+        }
+
+        if (existsSync(candidate)) {
+            return candidate
+        }
+    }
+
+    console.error("错误: 找不到 makeappx.exe，请确认 Windows SDK 已安装，或把 makeappx.exe 加入 PATH。")
+    process.exit(1)
 }
 
 /**
@@ -96,6 +131,7 @@ async function runCommand(cmd: string) {
  */
 function generateAppxManifest(): void {
     console.log("生成AppxManifest.xml文件...")
+    ensureDirExists(CONFIG.packageDir)
 
     const manifestContent = `<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
@@ -200,6 +236,15 @@ function preparePackageContent(): void {
     copyFileSync(appExePath, appExeDest)
     console.log(`复制文件: ${appExePath} -> ${appExeDest}`)
 
+    const runtimeDlls = [resolve(CONFIG.binFolder, "DirectML.dll"), resolve(CONFIG.binFolder, "opencv_world490.dll")]
+
+    for (const dllPath of runtimeDlls) {
+        checkFileExists(dllPath)
+        const dllDest = resolve(CONFIG.packageDir, dllPath.split(/[\\/]/).pop() ?? "")
+        copyFileSync(dllPath, dllDest)
+        console.log(`复制文件: ${dllPath} -> ${dllDest}`)
+    }
+
     console.log("✓ 打包内容准备完成")
 }
 
@@ -210,7 +255,7 @@ async function buildWithMakeAppx(): Promise<void> {
     console.log("开始使用makeappx.exe打包MSIX...")
 
     // 执行打包命令
-    const cmd = `${CONFIG.makeappxPath}.exe pack /d "${CONFIG.packageDir}" /p "${resolve(CONFIG.outputFolder, CONFIG.fileName)}" /v /o`
+    const cmd = `"${CONFIG.makeappxPath}" pack /d "${CONFIG.packageDir}" /p "${resolve(CONFIG.outputFolder, CONFIG.fileName)}" /v /o`
     await runCommand(cmd)
 
     console.log("✓ MSIX打包完成")
