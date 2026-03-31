@@ -2,20 +2,21 @@
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
-import { type Accessory, charAccessoryData, type HeadFrameItem, type HeadSculptureItem, headFrameData, type SkinItem, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { type Accessory, charAccessoryData, type HairItem, type HeadFrameItem, type HeadSculptureItem, hairData, headFrameData, type SkinItem, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
 import { getAccessoryUnlockLabelKey, normalizeAccessoryUnlock, resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
-type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "headframe" | "head"
+type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "hair" | "headframe" | "head"
 
 type CharAccessoryItem = Accessory & { accessoryType: "char" }
 type WeaponAccessoryItem = Accessory & { accessoryType: "weapon" }
 type WeaponSkinAccessoryItem = Accessory & { accessoryType: "weaponskin" }
 type SkinAccessoryItem = SkinItem & { accessoryType: "skin" }
+type HairAccessoryItem = HairItem & { accessoryType: "hair" }
 type HeadFrameAccessoryItem = HeadFrameItem & { accessoryType: "headframe" }
 type HeadAccessoryItem = HeadSculptureItem & { accessoryType: "head" }
-type AccessoryItem = CharAccessoryItem | WeaponAccessoryItem | SkinAccessoryItem | WeaponSkinAccessoryItem | HeadFrameAccessoryItem | HeadAccessoryItem
+type AccessoryItem = CharAccessoryItem | WeaponAccessoryItem | SkinAccessoryItem | WeaponSkinAccessoryItem | HairAccessoryItem | HeadFrameAccessoryItem | HeadAccessoryItem
 
 /**
  * 判断当前饰品是否包含获取方式字段。
@@ -67,9 +68,10 @@ const allAccessories = computed<AccessoryItem[]>(() => {
     const weaponItems: WeaponAccessoryItem[] = weaponAccessoryData.map(item => ({ ...item, accessoryType: "weapon" }))
     const skinItems: SkinAccessoryItem[] = skinData.map(item => ({ ...item, accessoryType: "skin" }))
     const weaponSkinItems: WeaponSkinAccessoryItem[] = weaponSkinData.map(item => ({ ...item, accessoryType: "weaponskin" }))
+    const hairItems: HairAccessoryItem[] = hairData.map(item => ({ ...item, accessoryType: "hair" }))
     const headFrameItems: HeadFrameAccessoryItem[] = headFrameData.map(item => ({ ...item, accessoryType: "headframe" }))
     const headItems: HeadAccessoryItem[] = headSculptureData.map(item => ({ ...item, accessoryType: "head" }))
-    return [...charItems, ...weaponItems, ...skinItems, ...weaponSkinItems, ...headFrameItems, ...headItems]
+    return [...charItems, ...weaponItems, ...skinItems, ...weaponSkinItems, ...hairItems, ...headFrameItems, ...headItems]
 })
 
 /**
@@ -157,17 +159,18 @@ const filteredAccessories = computed(() => {
         }
 
         const query = searchKeyword.value
+        const descText = item.desc ?? ""
         if (
             `${item.id}`.includes(query) ||
             item.name.includes(query) ||
-            item.desc.includes(query) ||
+            descText.includes(query) ||
             unlockText.includes(query) ||
             `${rarity}`.includes(query)
         ) {
             return true
         }
 
-        return matchPinyin(item.name, query).match || matchPinyin(item.desc, query).match || matchPinyin(unlockText, query).match
+        return matchPinyin(item.name, query).match || matchPinyin(descText, query).match || matchPinyin(unlockText, query).match
     })
 })
 
@@ -261,6 +264,9 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
     if (accessoryType === "weaponskin") {
         return "accessory.typeWeaponSkin"
     }
+    if (accessoryType === "hair") {
+        return "accessory.typeHair"
+    }
     if (accessoryType === "headframe") {
         return "accessory.typeHeadFrame"
     }
@@ -309,6 +315,11 @@ useInitialScrollToSelectedItem()
                             :class="selectedType === 'weaponskin' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
                             @click="selectedType = 'weaponskin'">
                             {{ $t("accessory.typeWeaponSkin") }}
+                        </button>
+                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            :class="selectedType === 'hair' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
+                            @click="selectedType = 'hair'">
+                            {{ $t("accessory.typeHair") }}
                         </button>
                         <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
                             :class="selectedType === 'headframe' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
@@ -365,7 +376,7 @@ useInitialScrollToSelectedItem()
                                     :src="getAccessoryIcon(accessory)"
                                     :alt="accessory.name"
                                         class="size-10 rounded object-cover"
-                                        :class="
+                                :class="
                                             accessory.accessoryType === 'headframe' || accessory.accessoryType === 'head'
                                                 ? 'bg-base-200'
                                                 : `bg-linear-15 ${getRarityGradientClass(getAccessoryRarity(accessory))}`

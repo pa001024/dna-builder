@@ -2,14 +2,14 @@
 import { t } from "i18next"
 import { computed } from "vue"
 import { charData } from "@/data"
-import type { Accessory, HeadFrameItem, HeadSculptureItem, SkinItem } from "@/data/d/accessory.data"
+import type { Accessory, HairItem, HeadFrameItem, HeadSculptureItem, SkinItem } from "@/data/d/accessory.data"
 import draftData, { type Draft } from "@/data/d/draft.data"
 import shopData from "@/data/d/shop.data"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import type { ResourceDraftSourceInfo } from "@/utils/draft-source"
 import type { ShopSourceInfo } from "@/utils/weapon-source"
 
-type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "headframe" | "head"
+type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "hair" | "headframe" | "head"
 
 type CharAccessoryItem = Accessory & {
     accessoryType: "char"
@@ -27,6 +27,10 @@ type SkinAccessoryItem = SkinItem & {
     accessoryType: "skin"
 }
 
+type HairAccessoryItem = HairItem & {
+    accessoryType: "hair"
+}
+
 type HeadFrameAccessoryItem = HeadFrameItem & {
     accessoryType: "headframe"
 }
@@ -35,7 +39,7 @@ type HeadAccessoryItem = HeadSculptureItem & {
     accessoryType: "head"
 }
 
-type DetailAccessoryItem = CharAccessoryItem | WeaponAccessoryItem | SkinAccessoryItem | WeaponSkinAccessoryItem | HeadFrameAccessoryItem | HeadAccessoryItem
+type DetailAccessoryItem = CharAccessoryItem | WeaponAccessoryItem | SkinAccessoryItem | WeaponSkinAccessoryItem | HairAccessoryItem | HeadFrameAccessoryItem | HeadAccessoryItem
 
 const props = defineProps<{
     accessory: DetailAccessoryItem
@@ -57,6 +61,15 @@ function isSkinAccessory(accessory: DetailAccessoryItem): accessory is SkinAcces
  */
 function isWeaponSkinAccessory(accessory: DetailAccessoryItem): accessory is WeaponSkinAccessoryItem {
     return accessory.accessoryType === "weaponskin"
+}
+
+/**
+ * 判断是否为发型。
+ * @param accessory 详情数据
+ * @returns 是否为发型
+ */
+function isHairAccessory(accessory: DetailAccessoryItem): accessory is HairAccessoryItem {
+    return accessory.accessoryType === "hair"
 }
 
 /**
@@ -160,6 +173,9 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
     if (accessoryType === "weaponskin") {
         return "accessory.typeWeaponSkin"
     }
+    if (accessoryType === "hair") {
+        return "accessory.typeHair"
+    }
     return "accessory.typeSkin"
 }
 
@@ -249,6 +265,7 @@ const relatedShopSources = computed<ShopSourceInfo[]>(() => {
         weapon: "WeaponAccessory",
         skin: "Skin",
         weaponskin: "WeaponSkin",
+        hair: "",
         headframe: "HeadFrame",
         head: "",
     } as const
@@ -336,6 +353,9 @@ const accessoryIcon = computed(() => {
     if (isWeaponSkinAccessory(props.accessory)) {
         return getWeaponSkinIcon(props.accessory.icon)
     }
+    if (isHairAccessory(props.accessory)) {
+        return getAccessoryIcon(props.accessory.icon)
+    }
     if (isSkinAccessory(props.accessory)) {
         return getSkinIcon(props.accessory.icon)
     }
@@ -351,7 +371,7 @@ const accessoryVersionText = computed(() => (isSkinAccessory(props.accessory) ? 
 /**
  * 详情页描述文本。
  */
-const accessoryDesc = computed(() => props.accessory.desc)
+const accessoryDesc = computed(() => props.accessory.desc ?? "")
 
 /**
  * 详情页稀有度文本。
@@ -377,6 +397,9 @@ const accessoryUnlock = computed(() => {
         return "-"
     }
     if (isWeaponSkinAccessory(props.accessory)) {
+        return "-"
+    }
+    if (isHairAccessory(props.accessory)) {
         return "-"
     }
     return props.accessory.unlock ? t(props.accessory.unlock) : "-"

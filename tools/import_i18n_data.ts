@@ -56,6 +56,7 @@ const MAPPINGS: Mapping[] = [
     { source: "Fish", targetStem: "fish", targetVar: "fishs", locales: ["cn"] },
     { source: "FishingSpot", targetStem: "fish", targetVar: "fishingSpots", locales: ["cn"] },
     { source: "HardBoss", targetStem: "hardboss", targetVar: "hardBossMap", locales: ["cn"] },
+    { source: "Hair", targetStem: "accessory", targetVar: "hairData", locales: ["cn"] },
     { source: "HeadSculpture", targetStem: "headsculpture", targetVar: "headSculptureData", locales: ["cn"] },
     { source: "HeadFrame", targetStem: "accessory", targetVar: "headFrameData", locales: ["cn"] },
     { source: "ImpressionShop", targetStem: "shop", targetVar: "imprShopData", locales: ["cn"] },

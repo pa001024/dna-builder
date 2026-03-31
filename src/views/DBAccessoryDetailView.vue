@@ -1,14 +1,15 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useRoute } from "vue-router"
-import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { charAccessoryData, hairData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
 
-type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "headframe" | "head"
+type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "hair" | "headframe" | "head"
 type AccessoryDetailItem = (typeof charAccessoryData)[number] & { accessoryType: "char" }
     | (typeof weaponAccessoryData)[number] & { accessoryType: "weapon" }
     | (typeof skinData)[number] & { accessoryType: "skin" }
     | (typeof weaponSkinData)[number] & { accessoryType: "weaponskin" }
+    | (typeof hairData)[number] & { accessoryType: "hair" }
     | (typeof headFrameData)[number] & { accessoryType: "headframe" }
     | (typeof headSculptureData)[number] & { accessoryType: "head" }
 
@@ -31,6 +32,9 @@ const accessoryType = computed(() => {
     if (value === "weaponskin") {
         return "weaponskin"
     }
+    if (value === "hair") {
+        return "hair"
+    }
     return value === "skin" ? "skin" : "char"
 })
 
@@ -48,6 +52,7 @@ const accessory = computed(() => {
         weapon: weaponAccessoryData,
         skin: skinData,
         weaponskin: weaponSkinData,
+        hair: hairData,
         headframe: headFrameData,
         head: headSculptureData,
     }

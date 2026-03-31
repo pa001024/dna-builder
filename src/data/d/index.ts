@@ -14,7 +14,7 @@ import monsterData, { monsterMap } from "./monster.data"
 import rewardData from "./reward.data"
 import weaponData from "./weapon.data"
 
-export { headFrameData } from "./accessory.data"
+export { hairData, headFrameData } from "./accessory.data"
 
 // 将静态表转换为Map，提高查找效率
 export const charMap = new Map<number | string, Char>()

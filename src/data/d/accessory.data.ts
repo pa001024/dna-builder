@@ -7,6 +7,15 @@ export interface Accessory {
     unlock: string
 }
 
+export interface HairItem {
+    id: number
+    name: string
+    desc?: string
+    icon: string
+    rarity: number
+    charId?: number
+}
+
 export interface SkinDefaultItemEntry {
     id: number | string
     name: string
@@ -6139,5 +6148,267 @@ export const weaponSkinData: Accessory[] = [
         icon: "T_Head_Crossbow_Maobing",
         rarity: 5,
         unlock: "通过商店获得",
+    },
+]
+
+export const hairData: HairItem[] = [
+    {
+        id: 10122,
+        name: "乌乌头套",
+        icon: "T_Fashion_Head48",
+        rarity: 4,
+        desc: "现在，谁是真的乌乌？",
+    },
+    {
+        id: 10123,
+        name: "魔王头套",
+        icon: "T_Fashion_Head49",
+        rarity: 4,
+        desc: "现在，谁是真的光之魔王大人？",
+    },
+    {
+        id: 10124,
+        name: "奇妙纸袋·本色",
+        icon: "T_Fashion_Head50",
+        rarity: 4,
+        desc: "套上纸袋以后仿佛有种神奇的魔力，让人不再压抑自己的天性。",
+    },
+    {
+        id: 10125,
+        name: "奇妙纸袋·涅白",
+        icon: "T_Fashion_Head51",
+        rarity: 4,
+        desc: "套上纸袋以后仿佛有种神奇的魔力，让人不再压抑自己的天性。",
+    },
+    {
+        id: 10126,
+        name: "奇妙纸袋·焦糖",
+        icon: "T_Fashion_Head47",
+        rarity: 4,
+        desc: "套上纸袋以后仿佛有种神奇的魔力，让人不再压抑自己的天性。",
+    },
+    {
+        id: 10127,
+        name: "极速头盔·白樱",
+        icon: "T_Fashion_Hat09_03",
+        rarity: 4,
+        desc: "道路千万条，安全第一条。",
+    },
+    {
+        id: 10128,
+        name: "极速头盔·墨玉",
+        icon: "T_Fashion_Hat09_01",
+        rarity: 4,
+        desc: "道路千万条，安全第一条。",
+    },
+    {
+        id: 10129,
+        name: "极速头盔·涅白",
+        icon: "T_Fashion_Hat09_02",
+        rarity: 4,
+        desc: "道路千万条，安全第一条。",
+    },
+    {
+        id: 10130,
+        name: "极速头盔·鎏金",
+        icon: "T_Fashion_Hat09_04",
+        rarity: 4,
+        desc: "道路千万条，安全第一条。",
+    },
+    {
+        id: 150492,
+        name: "青羽天巡",
+        icon: "T_Fashion_Suyi_01",
+        rarity: 5,
+        charId: 1504,
+    },
+    {
+        id: 240192,
+        name: "素浪濯心",
+        icon: "T_Fashion_Baiheng_01",
+        rarity: 5,
+        charId: 2401,
+    },
+    {
+        id: 410292,
+        name: "携金宴夜",
+        icon: "T_Fashion_Zhiliu_01",
+        rarity: 5,
+        charId: 4102,
+    },
+    {
+        id: 530192,
+        name: "梦中的舞会",
+        icon: "T_Fashion_Saiqi_01",
+        rarity: 5,
+        charId: 5301,
+    },
+    {
+        id: 11010121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 1101,
+    },
+    {
+        id: 11030121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 1103,
+    },
+    {
+        id: 15010121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 1501,
+    },
+    {
+        id: 15020121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 1502,
+    },
+    {
+        id: 15030121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 1503,
+    },
+    {
+        id: 16010121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 1601,
+    },
+    {
+        id: 16010221,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 160101,
+    },
+    {
+        id: 18010121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 1801,
+    },
+    {
+        id: 21010121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 2101,
+    },
+    {
+        id: 23010121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 2301,
+    },
+    {
+        id: 24010121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 2401,
+    },
+    {
+        id: 31010121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 3101,
+    },
+    {
+        id: 31030121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 3103,
+    },
+    {
+        id: 32010121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 3201,
+    },
+    {
+        id: 33010121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 3301,
+    },
+    {
+        id: 41010121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 4101,
+    },
+    {
+        id: 41020121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 4102,
+    },
+    {
+        id: 42010121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 4201,
+    },
+    {
+        id: 42020121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 4202,
+    },
+    {
+        id: 43010121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 4301,
+    },
+    {
+        id: 51010121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 5101,
+    },
+    {
+        id: 51020121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 5102,
+    },
+    {
+        id: 53010121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 5301,
+    },
+    {
+        id: 54010121,
+        name: "冬日幻想",
+        icon: "T_Fashion_Head46",
+        rarity: 5,
+        charId: 5401,
     },
 ]

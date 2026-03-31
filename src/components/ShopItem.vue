@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
-import { cutoffMap, draftMap, LeveledMod, LeveledWeapon, modMap, resourceMap, rewardMap, walnutMap, weaponMap } from "@/data"
-import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { cutoffMap, draftMap, LeveledMod, LeveledPet, LeveledWeapon, modMap, petMap, resourceMap, rewardMap, walnutMap, weaponMap } from "@/data"
+import { charAccessoryData, hairData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import type { Cutoff } from "@/data/d/cutoff.data"
 import { headSculptureMap } from "@/data/d/headsculpture.data"
 import { mountData } from "@/data/d/mount.data"
@@ -68,6 +68,22 @@ const itemDetail = computed(() => {
                 weapon,
                 icon: LeveledWeapon.url(weapon?.icon),
                 link: `/db/weapon/${weapon?.id}`,
+            }
+        case "Pet":
+            const pet = petMap.get(props.item.typeId)
+            return {
+                type: "Pet" as const,
+                pet,
+                icon: pet?.icon ? LeveledPet.url(pet.icon) : "/imgs/webp/T_Head_Empty.webp",
+                link: `/db/pet/${pet?.id}`,
+            }
+        case "Hair":
+            const hair = hairData.find(item => item.id === props.item.typeId)
+            return {
+                type: "Hair" as const,
+                hair,
+                icon: hair?.icon ? resolveSkinIconUrl(hair.icon) : "/imgs/webp/T_Head_Empty.webp",
+                link: `/db/accessory/hair/${hair?.id}`,
             }
         case "Resource":
             const res = resourceMap.get(props.item.typeId)
