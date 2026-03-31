@@ -1,49 +1,37 @@
 <script lang="ts" setup>
 import { t } from "i18next"
 import { computed } from "vue"
-import { charData, resourceMap } from "@/data"
+import { charData } from "@/data"
 import type { Accessory, HeadFrameItem, SkinItem } from "@/data/d/accessory.data"
 import draftData, { type Draft } from "@/data/d/draft.data"
 import shopData from "@/data/d/shop.data"
+import { resolveSkinIconUrl } from "@/utils/accessory-utils"
+import type { ResourceDraftSourceInfo } from "@/utils/draft-source"
+import type { ShopSourceInfo } from "@/utils/weapon-source"
 
 type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "headframe"
 
-interface AccessoryItem extends Accessory {
-    accessoryType: AccessoryType
+type CharAccessoryItem = Accessory & {
+    accessoryType: "char"
 }
 
-interface SkinAccessoryItem extends SkinItem {
-    accessoryType: "skin"
+type WeaponAccessoryItem = Accessory & {
+    accessoryType: "weapon"
 }
 
-interface WeaponSkinAccessoryItem extends Accessory {
+type WeaponSkinAccessoryItem = Accessory & {
     accessoryType: "weaponskin"
 }
 
-interface HeadFrameAccessoryItem extends HeadFrameItem {
+type SkinAccessoryItem = SkinItem & {
+    accessoryType: "skin"
+}
+
+type HeadFrameAccessoryItem = HeadFrameItem & {
     accessoryType: "headframe"
 }
 
-type DetailAccessoryItem = AccessoryItem | SkinAccessoryItem | WeaponSkinAccessoryItem | HeadFrameAccessoryItem
-
-interface AccessoryShopSource {
-    key: string
-    shopId: string
-    shopName: string
-    mainTabName: string
-    subTabName: string
-    subTabId: number
-    price: number
-    priceName: string
-    limit?: number
-    draftId?: number
-    draftName?: string
-}
-
-interface AccessoryDraftSource {
-    draft: Draft
-    shopSources: AccessoryShopSource[]
-}
+type DetailAccessoryItem = CharAccessoryItem | WeaponAccessoryItem | SkinAccessoryItem | WeaponSkinAccessoryItem | HeadFrameAccessoryItem
 
 const props = defineProps<{
     accessory: DetailAccessoryItem
@@ -82,7 +70,7 @@ function isHeadFrameAccessory(accessory: DetailAccessoryItem): accessory is Head
  * @returns 图标 URL
  */
 function getAccessoryIcon(icon: string): string {
-    return icon ? `/imgs/fashion/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+    return resolveSkinIconUrl(icon)
 }
 
 /**
@@ -91,7 +79,7 @@ function getAccessoryIcon(icon: string): string {
  * @returns 图标 URL
  */
 function getWeaponSkinIcon(icon: string): string {
-    return icon ? `/imgs/fashion/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+    return resolveSkinIconUrl(icon)
 }
 
 /**
@@ -186,7 +174,7 @@ function getSkinCategoryText(skin: SkinItem): string {
  * @returns 图标 URL
  */
 function getSkinIcon(icon: string): string {
-    return icon ? `/imgs/webp/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+    return resolveSkinIconUrl(icon)
 }
 
 /**
@@ -210,8 +198,8 @@ function getHeadFrameCategoryText(headFrame: HeadFrameItem): string {
 function collectShopSources(
     matcher: (item: { itemType: string; typeId: number }) => boolean,
     draft?: Pick<Draft, "id" | "n">
-): AccessoryShopSource[] {
-    const result: AccessoryShopSource[] = []
+): ShopSourceInfo[] {
+    const result: ShopSourceInfo[] = []
 
     shopData.forEach(shop => {
         shop.mainTabs.forEach(mainTab => {
@@ -223,16 +211,17 @@ function collectShopSources(
 
                     result.push({
                         key: `${shop.id}:${mainTab.id}:${subTab.id}:${item.id}:${draft?.id || 0}`,
+                        itemId: item.id,
                         shopId: shop.id,
                         shopName: shop.name,
-                        mainTabName: mainTab.name,
-                        subTabName: subTab.name,
+                        detail: `${mainTab.name} -> ${subTab.name}`,
                         subTabId: subTab.id,
                         price: item.price,
                         priceName: item.priceName,
+                        num: item.num,
                         limit: item.limit,
-                        draftId: draft?.id,
-                        draftName: draft?.n,
+                        timeStart: item.startTime,
+                        timeEnd: item.endTime,
                     })
                 })
             })
@@ -243,30 +232,14 @@ function collectShopSources(
 }
 
 /**
- * 将分钟数转换为 HH:MM 形式的铸造时长。
- * @param minutes 铸造分钟数
- * @returns 格式化后的时间文本
- */
-function formatDraftDuration(minutes: number): string {
-    const hours = Math.floor(minutes / 60)
-    const mins = minutes % 60
-    return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`
-}
-
-/**
  * 根据价格名称获取资源图标。
  * @param priceName 价格资源名称
  * @returns 资源图标 URL
  */
-function getPriceIcon(priceName: string): string {
-    const priceResource = resourceMap.get(priceName)
-    return priceResource?.icon ? `/imgs/res/${priceResource.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
-}
-
 /**
  * 反查当前饰品对应的商店来源信息。
  */
-const relatedShopSources = computed<AccessoryShopSource[]>(() => {
+const relatedShopSources = computed<ShopSourceInfo[]>(() => {
     const itemTypeMap = {
         char: "CharAccessory",
         weapon: "WeaponAccessory",
@@ -281,7 +254,7 @@ const relatedShopSources = computed<AccessoryShopSource[]>(() => {
 /**
  * 当饰品本体没有商店来源时，通过图纸反查商店来源。
  */
-const relatedDraftSources = computed<AccessoryDraftSource[]>(() => {
+const relatedDraftSources = computed<ResourceDraftSourceInfo[]>(() => {
     if (relatedShopSources.value.length > 0 || props.accessory.accessoryType !== "char") {
         return []
     }
@@ -289,9 +262,23 @@ const relatedDraftSources = computed<AccessoryDraftSource[]>(() => {
     const accessoryDrafts = draftData.filter(draft => draft.t === "CharAccessory" && draft.p === props.accessory.id)
 
     return accessoryDrafts.map(draft => ({
+        key: `draft-${draft.id}-${props.accessory.id}`,
         draft,
-        shopSources: collectShopSources(item => item.itemType === "Draft" && item.typeId === draft.id, { id: draft.id, n: draft.n }),
     }))
+})
+
+/**
+ * 当饰品本体没有商店来源时，通过图纸反查商店来源。
+ */
+const relatedDraftShopSources = computed<ShopSourceInfo[]>(() => {
+    if (relatedShopSources.value.length > 0 || props.accessory.accessoryType !== "char") {
+        return []
+    }
+
+    const accessoryDrafts = draftData.filter(draft => draft.t === "CharAccessory" && draft.p === props.accessory.id)
+    return accessoryDrafts.flatMap(draft =>
+        collectShopSources(item => item.itemType === "Draft" && item.typeId === draft.id, { id: draft.id, n: draft.n })
+    )
 })
 
 /**
@@ -313,11 +300,11 @@ const accessoryCategoryText = computed(() => {
 /**
  * 供页面最终展示的商店来源（优先饰品本体，找不到时使用图纸来源）。
  */
-const displayShopSources = computed<AccessoryShopSource[]>(() => {
+const displayShopSources = computed<ShopSourceInfo[]>(() => {
     if (relatedShopSources.value.length > 0) {
         return relatedShopSources.value
     }
-    return relatedDraftSources.value.flatMap(source => source.shopSources)
+    return relatedDraftShopSources.value
 })
 
 /**
@@ -349,7 +336,7 @@ const accessoryDesc = computed(() => props.accessory.desc)
 /**
  * 详情页稀有度文本。
  */
-const accessoryRarity = computed(() => props.accessory.rarity)
+const accessoryRarityValue = computed(() => props.accessory.accessoryType === "headframe" ? 1 : props.accessory.rarity)
 
 /**
  * 详情页获取方式文本。
@@ -372,11 +359,11 @@ const accessoryUnlock = computed(() => {
     <div class="p-3 space-y-3">
         <div class="flex items-start justify-between gap-3">
             <div class="flex items-start gap-3 min-w-0">
-                <img
+            <img
                     :src="accessoryIcon"
                     :alt="accessoryName"
                     class="size-12 rounded-lg bg-linear-15 object-cover"
-                    :class="isHeadFrameAccessory(accessory) ? 'bg-base-200' : getRarityGradientClass(accessoryRarity)"
+                    :class="isHeadFrameAccessory(accessory) ? 'bg-base-200' : getRarityGradientClass(accessoryRarityValue)"
                 />
                 <div class="min-w-0">
                     <div class="text-lg font-bold">
@@ -385,8 +372,8 @@ const accessoryUnlock = computed(() => {
                     <div class="text-xs text-base-content/70 mt-1">ID: {{ accessory.id }}</div>
                 </div>
             </div>
-            <span class="text-xs px-2 py-1 rounded" :class="getRarityBadgeClass(accessoryRarity)">
-                {{ getRarityText(accessoryRarity) }}
+            <span class="text-xs px-2 py-1 rounded" :class="getRarityBadgeClass(accessoryRarityValue)">
+                {{ getRarityText(accessoryRarityValue) }}
             </span>
         </div>
 
@@ -403,7 +390,7 @@ const accessoryUnlock = computed(() => {
                 </div>
                 <div class="flex justify-between gap-2">
                     <span class="text-base-content/70">{{ $t("accessory.rarity") }}</span>
-                    <span>{{ getRarityText(accessoryRarity) }}</span>
+                    <span>{{ getRarityText(accessoryRarityValue) }}</span>
                 </div>
             </div>
         </div>
@@ -422,60 +409,12 @@ const accessoryUnlock = computed(() => {
             </div>
 
             <div v-if="relatedDraftSources.length" class="pt-1 border-t border-base-200/70">
-                <div class="text-sm text-base-content/70 mb-2">{{ $t("accessory.draftInfo") }}</div>
-                <div class="space-y-2">
-                    <div
-                        v-for="source in relatedDraftSources"
-                        :key="source.draft.id"
-                        class="rounded bg-base-200 p-2 text-xs opacity-80 space-y-2"
-                    >
-                        <div class="flex items-center justify-between gap-2">
-                            <SRouterLink :to="`/db/draft/${source.draft.id}`" class="link link-primary text-sm">
-                                {{ source.draft.n }}
-                            </SRouterLink>
-                            <span class="opacity-70">ID: {{ source.draft.id }}</span>
-                        </div>
-                        <div>{{ $t("accessory.draftDuration") }}: {{ formatDraftDuration(source.draft.d) }}</div>
-                        <div class="grid grid-cols-[repeat(auto-fill,minmax(170px,1fr))] gap-2 text-sm opacity-100">
-                            <ResourceCostItem name="铜币" :value="source.draft.m" />
-                            <template v-for="material in source.draft.x" :key="`${source.draft.id}:${material.t}:${material.id}`">
-                                <ResourceCostItem
-                                    :name="material.n"
-                                    :value="material.t === 'Mod' ? [material.c, material.id, material.t] : material.c"
-                                />
-                            </template>
-                        </div>
-                    </div>
-                </div>
+                <DraftSource :draft-sources="relatedDraftSources" />
             </div>
 
             <div class="pt-1 border-t border-base-200/70">
-                <div class="text-sm text-base-content/70 mb-2">{{ $t("accessory.shopSources") }}</div>
                 <div v-if="displayShopSources.length" class="space-y-2">
-                    <div v-for="source in displayShopSources" :key="source.key" class="rounded bg-base-200 p-2">
-                        <div class="flex items-center justify-between gap-2">
-                            <SRouterLink :to="`/db/shop/${source.shopId}/${source.subTabId}`" class="link link-primary text-sm">
-                                {{ source.shopName }}
-                            </SRouterLink>
-                            <span class="text-xs opacity-70">{{ source.shopId }}</span>
-                        </div>
-                        <div class="text-xs opacity-70 mt-1">{{ source.mainTabName }} / {{ source.subTabName }}</div>
-                        <div v-if="source.draftId" class="text-xs opacity-70 mt-1">
-                            {{ $t("accessory.draftInfo") }}:
-                            <SRouterLink :to="`/db/draft/${source.draftId}`" class="link link-primary">
-                                {{ source.draftName || source.draftId }}
-                            </SRouterLink>
-                        </div>
-                        <div class="text-xs opacity-70 mt-1 flex items-center gap-1">
-                            <span>{{ $t("accessory.shopPrice") }}:</span>
-                            <img :src="getPriceIcon(source.priceName)" :alt="source.priceName" class="size-4 rounded object-cover" />
-                            <span>{{ source.price }}</span>
-                            <span>{{ source.priceName }}</span>
-                        </div>
-                        <div v-if="source.limit !== undefined" class="text-xs opacity-70 mt-1">
-                            {{ $t("accessory.shopLimit") }}: {{ source.limit }}
-                        </div>
-                    </div>
+                    <ShopSource :shop-sources="displayShopSources" />
                 </div>
                 <div v-else class="text-sm text-base-content/60">{{ $t("accessory.shopSourcesEmpty") }}</div>
             </div>

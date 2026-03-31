@@ -2137,7 +2137,7 @@ const monsterData: Monster[] = [
         n: "巨阙",
         t: "Boss",
         atk: 20,
-        def: 0,
+        def: 300,
         hp: 6000,
         tn: 3000,
         icon: "Boss_Juque",

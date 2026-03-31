@@ -271,7 +271,7 @@ const t: Region[] = [
         mapImage: "WBP_Map_Reg_East_Haojing",
         mapCenter: [20670, -49970],
         mapScale: [0.3, 1],
-        isRandom: [104501, 104502, 104503, 104504, 104505, 104506, 104507, 104508],
+        isRandom: [104501, 104502, 104503, 104504, 104505, 104506],
         alertDisable: true,
         mapMapping: [
             {
@@ -331,7 +331,7 @@ const t: Region[] = [
         type: "Main",
         mapId: 500,
         mapScale: [0.3, 1],
-        isRandom: [105101, 105102, 105103],
+        isRandom: [105101],
         alertDisable: true,
     },
     {
@@ -368,7 +368,7 @@ const t: Region[] = [
         mapCenter: [19500, 23500],
         mapScale: [0.3, 1],
         mapRotation: 270,
-        isRandom: [105301, 105302],
+        isRandom: [105301],
         alertDisable: true,
         mapMapping: [
             {

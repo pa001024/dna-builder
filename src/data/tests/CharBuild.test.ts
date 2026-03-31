@@ -889,14 +889,62 @@ describe("CharBuild类测试", () => {
     describe("自动构筑测试", () => {
         it("应该优先补齐趋向条件再继续常规迭代", () => {
             const charBuild = createCharBuild()
-            charBuild.mods = [new LeveledMod(51746)]
+            charBuild.mods = [new LeveledMod(41002), new LeveledMod(41003), new LeveledMod(41746)]
+            charBuild.buffs = []
+
+            const modOptions = [new LeveledModWithCount(51742, undefined, undefined, 1)]
+
+            const result = charBuild.autoBuild({
+                includeTypes: ["charMods"],
+                preserveTypes: ["charMods"],
+                modOptions,
+                enableLog: true,
+            })
+
+            const conditionMod = result.newBuild.charMods.find(mod => mod?.id === 41746)
+            const dCount = result.newBuild.charMods.filter(mod => mod?.极性 === "D").length
+
+            expect(conditionMod).toBeDefined()
+            expect(dCount).toBeGreaterThanOrEqual(4)
+            expect(result.newBuild.checkModEffective(conditionMod!)?.isEffective).toBe(true)
+        })
+
+        it("当条件MOD在auraMod时也应优先补齐趋向条件", () => {
+            const charBuild = createCharBuild()
+            charBuild.mods = [new LeveledMod(41002), new LeveledMod(41003)]
+            charBuild.auraMod = new LeveledMod(41746)
+            charBuild.buffs = []
+
+            const modOptions = [new LeveledModWithCount(51742, undefined, undefined, 1)]
+
+            const result = charBuild.autoBuild({
+                includeTypes: ["charMods"],
+                preserveTypes: ["charMods"],
+                modOptions,
+                enableLog: true,
+            })
+
+            const dCount = result.newBuild.mods.filter(mod => mod?.极性 === "D").length
+
+            expect(result.newBuild.auraMod?.id).toBe(41746)
+            expect(dCount).toBeGreaterThanOrEqual(4)
+            expect(result.newBuild.checkModEffective(result.newBuild.auraMod!)?.isEffective).toBe(true)
+        })
+
+        it("应该先补齐技能范围条件再纳入对应条件MOD", () => {
+            const charBuild = createCharBuild()
+            charBuild.char = new LeveledChar("丽蓓卡")
+            charBuild.baseName = "普通攻击"
+            charBuild.mods = [new LeveledMod(56121)]
             charBuild.buffs = []
 
             const modOptions = [
-                new LeveledModWithCount(41001, undefined, undefined, 1),
-                new LeveledModWithCount(41002, undefined, undefined, 1),
-                new LeveledModWithCount(41003, undefined, undefined, 1),
-                new LeveledModWithCount(41007, undefined, undefined, 1),
+                new LeveledModWithCount(56121, undefined, undefined, 1),
+                new LeveledModWithCount(56122, undefined, undefined, 1),
+                new LeveledModWithCount(56161, undefined, undefined, 1),
+                new LeveledModWithCount(56162, undefined, undefined, 1),
+                new LeveledModWithCount(51713, undefined, undefined, 1),
+                new LeveledModWithCount(51722, undefined, undefined, 1),
             ]
 
             const result = charBuild.autoBuild({
@@ -906,40 +954,11 @@ describe("CharBuild类测试", () => {
                 enableLog: true,
             })
 
-            const conditionMod = result.newBuild.charMods.find(mod => mod?.id === 51746)
-            const dCount = result.newBuild.charMods.filter(mod => mod?.极性 === "D").length
+            const conditionalMod = result.newBuild.charMods.find(mod => mod?.id === 56121)
 
-            expect(conditionMod).toBeDefined()
-            expect(dCount).toBeGreaterThanOrEqual(3)
-            expect(result.newBuild.checkModEffective(conditionMod!)?.isEffective).toBe(true)
-            expect(result.log).toContain("条件优先添加角色")
-        })
-
-        it("当条件MOD在auraMod时也应优先补齐趋向条件", () => {
-            const charBuild = createCharBuild()
-            charBuild.mods = []
-            charBuild.auraMod = new LeveledMod(51746)
-            charBuild.buffs = []
-
-            const modOptions = [
-                new LeveledModWithCount(41001, undefined, undefined, 1),
-                new LeveledModWithCount(41002, undefined, undefined, 1),
-                new LeveledModWithCount(41003, undefined, undefined, 1),
-                new LeveledModWithCount(41007, undefined, undefined, 1),
-            ]
-
-            const result = charBuild.autoBuild({
-                includeTypes: ["charMods"],
-                modOptions,
-                enableLog: true,
-            })
-
-            const dCount = result.newBuild.charMods.filter(mod => mod?.极性 === "D").length
-
-            expect(result.newBuild.auraMod?.id).toBe(51746)
-            expect(dCount).toBeGreaterThanOrEqual(2)
-            expect(result.newBuild.checkModEffective(result.newBuild.auraMod!)?.isEffective).toBe(true)
-            expect(result.log).toContain("条件优先添加角色")
+            expect(conditionalMod).toBeDefined()
+            expect(result.newBuild.checkModEffective(conditionalMod!)?.isEffective).toBe(true)
+            expect(result.newBuild.calculateAttributes().技能范围).toBeGreaterThanOrEqual(1.6)
         })
 
         it("替换不应破坏光环条件导致收益误判", () => {

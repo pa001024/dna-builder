@@ -1,11 +1,12 @@
 <script lang="ts" setup>
 import { computed, nextTick, ref, watch } from "vue"
-import { LeveledSkill, resourceMap } from "@/data"
+import { LeveledSkill } from "@/data"
 import { modConvertData } from "@/data/d/convert.data"
 import shopData from "@/data/d/shop.data"
 import weaponData from "@/data/d/weapon.data"
 import { getDungeonName } from "@/utils/dungeon-utils"
 import { getModDropInfo } from "@/utils/reward-utils"
+import type { ShopSourceInfo } from "@/utils/weapon-source"
 import { modDraftMap, modDungeonMap } from "../data/d/index"
 import { walnutMap } from "../data/d/walnut.data"
 import type { Draft, Dungeon, Mod, WeaponSkill } from "../data/data-types"
@@ -15,21 +16,6 @@ import { formatProp } from "../util"
 const props = defineProps<{
     mod: Mod
 }>()
-
-interface ModShopSource {
-    key: string
-    type: "shop"
-    shopId: string
-    shopName: string
-    mainTabId: number
-    mainTabName: string
-    subTabId: number
-    subTabName: string
-    price: number
-    priceName: string
-    timeStart?: number
-    timeEnd?: number
-}
 
 interface SkillReplaceCompareGroup {
     skillId: number
@@ -102,41 +88,12 @@ const modDungeons = computed<Dungeon[]>(() => {
 })
 
 /**
- * 根据价格名称获取资源图标。
- * @param priceName 价格资源名称
- * @returns 资源图标 URL
- */
-function getPriceIcon(priceName: string) {
-    const priceResource = resourceMap.get(priceName)
-    return priceResource?.icon ? `/imgs/res/${priceResource.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
-}
-
-/**
- * 格式化时间范围文本。
- * @param start 开始时间戳
- * @param end 结束时间戳
- * @returns 时间范围文本
- */
-function formatTimeRange(start: number, end?: number) {
-    const formatTime = (timestamp: number) =>
-        new Date(timestamp * 1000).toLocaleString("zh-CN", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-        })
-
-    return `${formatTime(start)}~${end ? formatTime(end) : "至今"}`
-}
-
-/**
  * 收集当前魔之楔的商店来源信息。
  * @param mod 魔之楔数据
  * @returns 商店来源列表
  */
-function collectModShopSources(mod: Mod): ModShopSource[] {
-    const result: ModShopSource[] = []
+function collectModShopSources(mod: Mod): ShopSourceInfo[] {
+    const result: ShopSourceInfo[] = []
     const sourceKeySet = new Set<string>()
 
     shopData.forEach(shop => {
@@ -160,17 +117,17 @@ function collectModShopSources(mod: Mod): ModShopSource[] {
                     sourceKeySet.add(key)
                     result.push({
                         key,
-                        type: "shop",
-                        shopId: shop.id,
-                        shopName: shop.name,
-                        mainTabId: mainTab.id,
-                        mainTabName: mainTab.name,
-                        subTabId: subTab.id,
-                        subTabName: subTab.name,
-                        price: item.price,
-                        priceName: item.priceName,
                         timeStart: item.startTime,
                         timeEnd: item.endTime,
+                        detail: `${mainTab.name} -> ${subTab.name}`,
+                        itemId: item.id,
+                        shopId: shop.id,
+                        shopName: shop.name,
+                        subTabId: subTab.id,
+                        price: item.price,
+                        priceName: item.priceName,
+                        num: item.num,
+                        limit: item.limit,
                     })
                 })
             })
@@ -184,7 +141,7 @@ function collectModShopSources(mod: Mod): ModShopSource[] {
  * 收集当前魔之楔的商店来源信息。
  * @returns 商店来源列表
  */
-const modShopSources = computed<ModShopSource[]>(() => collectModShopSources(props.mod))
+const modShopSources = computed<ShopSourceInfo[]>(() => collectModShopSources(props.mod))
 
 const modConvertPoolLabels = ["紫色魔之楔转换", "蓝色魔之楔转换"] as const
 const modConvertTotalWeights = modConvertData.map(pool => pool.Weight.reduce((total, weight) => total + weight, 0))
@@ -540,37 +497,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                     </div>
                 </div>
 
-                <div v-if="modShopSources.length > 0" class="space-y-2">
-                    <div class="text-xs text-base-content/60">商店购买</div>
-                    <div v-for="source in modShopSources" :key="source.key">
-                        <div class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors flex items-center gap-4">
-                            <div class="flex-1 min-w-0">
-                                <div class="flex justify-between items-center gap-2 mb-2">
-                                    <div class="flex items-center gap-2 min-w-0">
-                                        <SRouterLink
-                                            :to="`/db/shop/${source.shopId}/${source.subTabId}`"
-                                            class="hover:underline min-w-0 truncate"
-                                        >
-                                            {{ source.shopName }}
-                                        </SRouterLink>
-                                        <span class="text-xs text-base-content/70">({{ source.shopId }})</span>
-                                    </div>
-                                    <div class="flex items-center gap-1 shrink-0">
-                                        <img :src="getPriceIcon(source.priceName)" class="w-4 h-4 object-cover rounded" :alt="source.priceName" />
-                                        <span class="text-xs text-base-content/70">{{ source.priceName }}</span>
-                                        <span class="text-sm font-medium">{{ source.price }}</span>
-                                    </div>
-                                </div>
-                                <div class="text-xs text-base-content/70">
-                                    {{ source.mainTabName }} -> {{ source.subTabName }}
-                                </div>
-                                <div v-if="source.timeStart" class="mt-1 text-xs text-base-content/70">
-                                    {{ formatTimeRange(source.timeStart, source.timeEnd) }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <ShopSource :shop-sources="modShopSources" />
             </div>
         </div>
     </div>

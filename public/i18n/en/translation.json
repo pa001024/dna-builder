@@ -5001,6 +5001,7 @@
         "title": "Abyss list"
     },
     "accessory": {
+        "category": "Category",
         "description": "Description",
         "draftCoinCost": "Coin Cost",
         "draftDuration": "Craft Duration",
@@ -5357,6 +5358,8 @@
         "rank_desc": "View ranking tournament rewards",
         "reputation": "Regional Reputation",
         "reputation_desc": "View regional reputation levels and commission details",
+        "resource": "Resource",
+        "resource_desc": "View resource information and icons",
         "shop": "Shop",
         "shop_desc": "View shop item information",
         "title": "Database",
@@ -5798,9 +5801,26 @@
         "onlyOnce": "Only Once",
         "zhouben": "Weekly Boss"
     },
+    "resource": {
+        "background": "Background",
+        "description": "Description",
+        "icon": "Icon",
+        "id": "ID",
+        "name": "Name",
+        "rarity": "Rarity",
+        "searchPlaceholder": "Search resource IDs or names (supports pinyin)...",
+        "source": "Source",
+        "title": "Resources"
+    },
     "RESOURCE_NAME_41049": "RESOURCE_NAME_41049",
     "RESOURCE_NAME_41050": "RESOURCE_NAME_41050",
     "RESOURCE_NAME_41058": "RESOURCE_NAME_41058",
+    "resource-detail": {
+        "title": "Resource Details"
+    },
+    "resource-list": {
+        "title": "Resource List"
+    },
     "room": {
         "remove": "Remove Room"
     },

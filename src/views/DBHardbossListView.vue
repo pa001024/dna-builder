@@ -47,6 +47,15 @@ function selectBoss(boss: HardBoss | null) {
     selectedBossId.value = boss?.id || 0
 }
 
+/**
+ * 获取高难 Boss 图标。
+ * @param boss 高难 Boss 数据
+ * @returns 图标路径
+ */
+function getHardbossIcon(boss: HardBoss): string {
+    return boss.icon ? `/imgs/webp/${boss.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+}
+
 useInitialScrollToSelectedItem()
 </script>
 
@@ -68,8 +77,11 @@ useInitialScrollToSelectedItem()
                             class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedBossId === boss.id }"
                             @click="selectBoss(boss)">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="size-12 shrink-0">
+                                    <img :src="getHardbossIcon(boss)" :alt="boss.name" class="w-full h-full object-cover rounded" />
+                                </div>
+                                <div class="flex-1 min-w-0">
                                     <div class="font-medium">{{ boss.name }}</div>
                                     <div class="text-xs opacity-70 mt-1 line-clamp-2">
                                         {{ boss.desc }}
@@ -80,10 +92,6 @@ useInitialScrollToSelectedItem()
                                     }} 个难度 </span>
                                     <span class="text-xs opacity-70">ID: {{ boss.id }}</span>
                                 </div>
-                            </div>
-                            <div class="flex items-center gap-2 mt-2 text-xs opacity-70">
-                                <span>等级范围: Lv.{{ boss.diff[0]?.lv }} - Lv.{{ boss.diff[boss.diff.length - 1]?.lv
-                                }}</span>
                             </div>
                         </div>
                     </div>
@@ -107,5 +115,3 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
-
-

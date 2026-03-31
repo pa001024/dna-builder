@@ -30,6 +30,13 @@ const databaseItems = [
         color: "from-violet-500/20 to-purple-600/20 text-violet-500",
     },
     {
+        name: "database.resource",
+        path: "/db/resource",
+        desc: "database.resource_desc",
+        icon: "M12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2ZM12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4ZM7 8H17V10H7V8ZM7 12H17V14H7V12ZM7 16H13V18H7V16Z",
+        color: "from-slate-500/20 to-zinc-600/20 text-slate-500",
+    },
+    {
         name: "database.mod",
         path: "/db/mod",
         desc: "database.mod_desc",
@@ -220,7 +227,7 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
         description: "围绕角色培养、装备搭配与养成素材，适合从 Build 视角快速定位核心资料。",
         badge: "Build",
         accentClass: "bg-violet-500",
-        paths: ["/db/char", "/db/weapon", "/db/mod", "/db/damage", "/db/draft", "/db/pet", "/db/accessory"],
+        paths: ["/db/char", "/db/weapon", "/db/resource", "/db/mod", "/db/damage", "/db/draft", "/db/pet", "/db/accessory"],
     },
     {
         id: "explore",

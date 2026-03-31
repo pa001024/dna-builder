@@ -1,10 +1,8 @@
 <script lang="ts" setup>
 import { t } from "i18next"
 import { computed, ref, watch } from "vue"
-import { resourceMap } from "@/data"
 import charData from "@/data/d/char.data"
-import { hardBossMap } from "@/data/d/hardboss.data"
-import { collectWeaponSources, formatWeaponSourceTimeRange, type WeaponSourceInfo } from "@/utils/weapon-source"
+import { collectWeaponSources, type WeaponSourceInfo } from "@/utils/weapon-source"
 import { weaponDraftMap } from "../data/d/index"
 import modData from "../data/d/mod.data"
 import type { Char, Draft, Mod, Skill, SkillField, Weapon, WeaponSkill } from "../data/data-types"
@@ -112,26 +110,6 @@ function getModPropertiesText(mod: LeveledMod) {
     const entries = Object.entries(mod.getProperties()).filter(([_, value]) => value)
     if (!entries.length) return "-"
     return entries.map(([key, value]) => `${t(key)} ${formatProp(key, value)}`).join(" / ")
-}
-
-/**
- * 获取商店价格图标。
- * @param name 价格名称
- * @returns 图标路径
- */
-function getPriceIcon(name?: string) {
-    const res = resourceMap.get(name ?? "")
-    return res?.icon ? `/imgs/res/${res.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
-}
-
-/**
- * 获取高难 Boss 图标。
- * @param hardbossId Boss ID
- * @returns 图标路径
- */
-function getHardbossIcon(hardbossId?: number) {
-    const boss = hardBossMap.get(hardbossId ?? 0)
-    return boss?.icon ? `/imgs/webp/${boss.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
 }
 
 /**
@@ -364,9 +342,13 @@ watch(
                     <span class="text-base-content/70">{{ $t("最大弹药") }}</span>
                     <span class="font-medium text-primary">{{ weapon.最大弹药 }}</span>
                 </div>
+                <div v-if="weapon.弹药转化率 !== undefined" class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
+                    <span class="text-base-content/70">{{ $t("弹药转化率") }}</span>
+                    <span class="font-medium text-primary">{{ `${+(weapon.弹药转化率 * 100).toFixed(1)}%` }}</span>
+                </div>
                 <div v-if="weapon.最大射程" class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
                     <span class="text-base-content/70">{{ $t("最大射程") }}</span>
-                    <span class="font-medium text-primary">{{ weapon.最大射程 }}</span>
+                    <span class="font-medium text-primary">{{ `${+(weapon.最大射程 / 100).toFixed(1)}m` }}</span>
                 </div>
                 <div v-if="weapon.装填" class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
                     <span class="text-base-content/70">{{ $t("装填") }}</span>
@@ -545,69 +527,8 @@ watch(
         <div v-if="weaponSources.length > 0" class="p-3 bg-base-200 rounded mb-3">
             <div class="text-xs text-base-content/70 mb-2">来源</div>
             <div class="space-y-3 text-sm">
-                <div v-if="hardbossSources.length > 0" class="space-y-2">
-                    <div class="text-xs text-base-content/60">{{ $t("database.hardboss") }}</div>
-                    <div v-for="source in hardbossSources" :key="source.key">
-                        <div class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors flex items-center gap-4">
-                            <div class="size-16 shrink-0">
-                                <img
-                                    :src="getHardbossIcon(source.hardbossId)"
-                                    class="w-full h-full object-cover rounded"
-                                    :alt="source.hardbossName"
-                                />
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-2 min-w-0">
-                                    <SRouterLink
-                                        v-if="source.hardbossId"
-                                        :to="`/db/hardboss/${source.hardbossId}`"
-                                        class="hover:underline min-w-0 truncate"
-                                    >
-                                        {{ source.hardbossName }}
-                                    </SRouterLink>
-                                    <span v-if="source.hardbossLv" class="badge badge-sm badge-neutral">Lv.{{ source.hardbossLv }}</span>
-                                </div>
-                                <div class="mt-1 text-xs text-base-content/70">
-                                    {{ formatWeaponSourceTimeRange(source, $t("database.until_now")) }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div v-if="shopSources.length > 0" class="space-y-2">
-                    <div class="text-xs text-base-content/60">商店购买</div>
-                    <div v-for="source in shopSources" :key="source.key">
-                        <div class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors flex items-center gap-4">
-                            <div class="flex-1">
-                                <div class="flex justify-between items-center gap-2 mb-2">
-                                    <div class="flex items-center gap-2 min-w-0">
-                                        <SRouterLink
-                                            v-if="source.shopId && source.subTabId"
-                                            :to="`/db/shop/${source.shopId}/${source.subTabId}`"
-                                            class="hover:underline min-w-0 truncate"
-                                        >
-                                            {{ source.detail }}
-                                        </SRouterLink>
-                                        <span v-else class="min-w-0 truncate">{{ source.detail }}</span>
-                                        <span v-if="source.shopName" class="text-xs text-base-content/70">({{ source.shopName }})</span>
-                                    </div>
-                                    <div v-if="source.priceName" class="flex items-center gap-1">
-                                        <img
-                                            :src="getPriceIcon(source.priceName)"
-                                            class="w-4 h-4 object-cover rounded"
-                                            :alt="source.priceName"
-                                        />
-                                        <span class="text-xs text-base-content/70">{{ source.priceName }}</span>
-                                        <span class="text-sm font-medium">{{ source.price }}</span>
-                                    </div>
-                                </div>
-                                <div class="text-xs text-base-content/70">
-                                    {{ formatWeaponSourceTimeRange(source, $t("database.until_now")) }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <BossSource :boss-sources="hardbossSources" />
+                <ShopSource :shop-sources="shopSources" />
             </div>
         </div>
     </div>

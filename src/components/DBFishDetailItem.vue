@@ -90,13 +90,23 @@ const fishSpots = computed(() => {
         </div>
 
         <div class="flex justify-center items-center">
-            <img :src="`/imgs/webp/T_Fish_${fish.icon}.webp`" class="w-24 object-cover rounded" />
+            <img :src="`/imgs/res/T_Fish_${fish.icon}.webp`" class="w-24 object-cover rounded" />
         </div>
 
         <div class="flex flex-wrap gap-2 text-sm opacity-70">
             <span>Lv. {{ fish.level }}</span>
             <span>长度: {{ fish.length[0] }}-{{ fish.length[1] }}</span>
             <span>价格: {{ fish.price[0] }}</span>
+        </div>
+
+        <div v-if="fish.desc" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-1">{{ $t("resource.description") }}</div>
+            <div class="text-sm leading-6 whitespace-pre-wrap">{{ fish.desc }}</div>
+        </div>
+
+        <div v-if="fish.desc2" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-1">{{ $t("resource.background") }}</div>
+            <div class="text-sm leading-6 whitespace-pre-wrap">{{ fish.desc2 }}</div>
         </div>
 
         <div class="p-3 bg-base-200 rounded">
@@ -112,7 +122,7 @@ const fishSpots = computed(() => {
         <div v-if="s2bFish" class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-1">授渔以鱼</div>
             <div class="flex items-center gap-2">
-                <img :src="`/imgs/webp/T_Fish_${s2bFish.icon}.webp`" class="w-10 h-10 object-cover rounded" />
+                <img :src="`/imgs/res/T_Fish_${s2bFish.icon}.webp`" class="w-10 h-10 object-cover rounded" />
                 <SRouterLink :to="`/db/fish/${s2bFish.id}`" class="text-sm link link-primary">
                     {{ s2bFish.name }}
                 </SRouterLink>

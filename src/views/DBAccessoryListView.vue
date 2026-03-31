@@ -2,33 +2,70 @@
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
-import { type Accessory, charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
-import { getAccessoryUnlockLabelKey, normalizeAccessoryUnlock } from "@/utils/accessory-utils"
+import { type Accessory, charAccessoryData, type HeadFrameItem, headFrameData, type SkinItem, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { getAccessoryUnlockLabelKey, normalizeAccessoryUnlock, resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
 type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "headframe"
 
-interface AccessoryItem extends Accessory {
-    accessoryType: AccessoryType
-    rarity?: number
-    unlock?: string
+type CharAccessoryItem = Accessory & { accessoryType: "char" }
+type WeaponAccessoryItem = Accessory & { accessoryType: "weapon" }
+type WeaponSkinAccessoryItem = Accessory & { accessoryType: "weaponskin" }
+type SkinAccessoryItem = SkinItem & { accessoryType: "skin" }
+type HeadFrameAccessoryItem = HeadFrameItem & { accessoryType: "headframe" }
+type AccessoryItem = CharAccessoryItem | WeaponAccessoryItem | SkinAccessoryItem | WeaponSkinAccessoryItem | HeadFrameAccessoryItem
+
+/**
+ * 判断当前饰品是否包含获取方式字段。
+ * @param accessory 饰品数据
+ * @returns 是否包含获取方式
+ */
+function hasAccessoryUnlock(accessory: AccessoryItem): accessory is CharAccessoryItem | WeaponAccessoryItem | WeaponSkinAccessoryItem {
+    return "unlock" in accessory && typeof accessory.unlock === "string"
+}
+
+/**
+ * 判断当前饰品是否包含稀有度字段。
+ * @param accessory 饰品数据
+ * @returns 是否包含稀有度
+ */
+function hasAccessoryRarity(accessory: AccessoryItem): accessory is CharAccessoryItem | WeaponAccessoryItem | SkinAccessoryItem | WeaponSkinAccessoryItem {
+    return "rarity" in accessory && typeof accessory.rarity === "number"
+}
+
+/**
+ * 获取饰品的获取方式文本。
+ * @param accessory 饰品数据
+ * @returns 获取方式文本
+ */
+function getAccessoryUnlockText(accessory: AccessoryItem): string {
+    return hasAccessoryUnlock(accessory) ? accessory.unlock : ""
+}
+
+/**
+ * 获取饰品的稀有度数值。
+ * @param accessory 饰品数据
+ * @returns 稀有度，缺失时返回 1
+ */
+function getAccessoryRarity(accessory: AccessoryItem): number {
+    return hasAccessoryRarity(accessory) ? accessory.rarity : 1
 }
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedAccessoryKey = useSearchParam<string>("id", "")
 const selectedType = useSearchParam<"all" | AccessoryType>("tp", "all")
-const selectedRarity = useSearchParam<number | 0>("rar", 0)
+const selectedRarity = useSearchParam<number>("rar", -1)
 const selectedUnlock = useSearchParam<string>("ul", "all")
 
 /**
  * 合并角色饰品与武器饰品数据，并标记来源类型。
  */
 const allAccessories = computed<AccessoryItem[]>(() => {
-    const charItems = charAccessoryData.map(item => ({ ...item, accessoryType: "char" as const }))
-    const weaponItems = weaponAccessoryData.map(item => ({ ...item, accessoryType: "weapon" as const }))
-    const skinItems = skinData.map(item => ({ ...item, accessoryType: "skin" as const }))
-    const weaponSkinItems = weaponSkinData.map(item => ({ ...item, accessoryType: "weaponskin" as const }))
-    const headFrameItems = headFrameData.map(item => ({ ...item, accessoryType: "headframe" as const }))
+    const charItems: CharAccessoryItem[] = charAccessoryData.map(item => ({ ...item, accessoryType: "char" }))
+    const weaponItems: WeaponAccessoryItem[] = weaponAccessoryData.map(item => ({ ...item, accessoryType: "weapon" }))
+    const skinItems: SkinAccessoryItem[] = skinData.map(item => ({ ...item, accessoryType: "skin" }))
+    const weaponSkinItems: WeaponSkinAccessoryItem[] = weaponSkinData.map(item => ({ ...item, accessoryType: "weaponskin" }))
+    const headFrameItems: HeadFrameAccessoryItem[] = headFrameData.map(item => ({ ...item, accessoryType: "headframe" }))
     return [...charItems, ...weaponItems, ...skinItems, ...weaponSkinItems, ...headFrameItems]
 })
 
@@ -48,7 +85,7 @@ const selectedAccessory = computed(() => {
 const allUnlockMethods = computed(() => {
     const unlockMethods = new Set<string>()
     for (const accessory of allAccessories.value) {
-        const normalizedUnlock = normalizeAccessoryUnlock(accessory.unlock)
+        const normalizedUnlock = normalizeAccessoryUnlock(getAccessoryUnlockText(accessory))
         if (normalizedUnlock) {
             unlockMethods.add(normalizedUnlock)
         }
@@ -62,8 +99,9 @@ const allUnlockMethods = computed(() => {
 const allRarities = computed(() => {
     const raritySet = new Set<number>()
     for (const accessory of allAccessories.value) {
-        if (typeof accessory.rarity === "number") {
-            raritySet.add(accessory.rarity)
+        const rarity = getAccessoryRarity(accessory)
+        if (rarity > 0) {
+            raritySet.add(rarity)
         }
     }
     return Array.from(raritySet).sort((a, b) => a - b)
@@ -78,11 +116,15 @@ const filteredAccessories = computed(() => {
             return false
         }
 
-        if (selectedRarity.value !== 0 && item.rarity !== selectedRarity.value) {
+        const rarity = getAccessoryRarity(item)
+
+        if (selectedRarity.value !== -1 && rarity !== selectedRarity.value) {
             return false
         }
 
-        if (selectedUnlock.value !== "all" && normalizeAccessoryUnlock(item.unlock) !== selectedUnlock.value) {
+        const unlockText = getAccessoryUnlockText(item)
+
+        if (selectedUnlock.value !== "all" && normalizeAccessoryUnlock(unlockText) !== selectedUnlock.value) {
             return false
         }
 
@@ -95,13 +137,13 @@ const filteredAccessories = computed(() => {
             `${item.id}`.includes(query) ||
             item.name.includes(query) ||
             item.desc.includes(query) ||
-            item.unlock.includes(query) ||
-            `${item.rarity}`.includes(query)
+            unlockText.includes(query) ||
+            `${rarity}`.includes(query)
         ) {
             return true
         }
 
-        return matchPinyin(item.name, query).match || matchPinyin(item.desc, query).match || matchPinyin(item.unlock, query).match
+        return matchPinyin(item.name, query).match || matchPinyin(item.desc, query).match || matchPinyin(unlockText, query).match
     })
 })
 
@@ -120,10 +162,13 @@ function selectAccessory(accessory: AccessoryItem | null) {
  */
 function getAccessoryIcon(accessory: AccessoryItem): string {
     if (accessory.accessoryType === "weaponskin") {
-        return accessory.icon ? `/imgs/fashion/${accessory.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+        return resolveSkinIconUrl(accessory.icon)
     }
     if (accessory.accessoryType === "headframe") {
         return accessory.icon ? `/imgs/headframe/${accessory.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+    }
+    if (accessory.accessoryType === "skin") {
+        return resolveSkinIconUrl(accessory.icon)
     }
     return accessory.icon ? `/imgs/fashion/${accessory.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
 }
@@ -239,8 +284,8 @@ useInitialScrollToSelectedItem()
 
                     <div class="flex flex-wrap gap-1 pb-1">
                         <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
-                            :class="selectedRarity === 0 ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
-                            @click="selectedRarity = 0">
+                            :class="selectedRarity === -1 ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
+                            @click="selectedRarity = -1">
                             {{ $t("全部") }}
                         </button>
                         <button v-for="rarity in allRarities" :key="rarity"
@@ -278,19 +323,19 @@ useInitialScrollToSelectedItem()
                                 <div class="min-w-0 flex items-start gap-2">
                                     <img :src="getAccessoryIcon(accessory)" :alt="accessory.name"
                                         class="size-10 rounded bg-linear-15 object-cover"
-                                        :class="getRarityGradientClass(accessory.rarity)" />
+                                        :class="getRarityGradientClass(getAccessoryRarity(accessory))" />
                                     <div class="min-w-0">
                                         <div class="font-medium wrap-break-word">{{ $t(accessory.name) }}</div>
                                         <div class="text-xs opacity-70 mt-1 line-clamp-1">
-                                            {{ $t(accessory.unlock || "") || "-" }}
+                                            {{ getAccessoryUnlockText(accessory) ? $t(getAccessoryUnlockText(accessory)) : "-" }}
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="flex flex-col items-end gap-1 shrink-0">
                                     <span class="text-xs px-2 py-0.5 rounded"
-                                        :class="getRarityBadgeClass(accessory.rarity)">
-                                        {{ getRarityText(accessory.rarity) }}
+                                        :class="getRarityBadgeClass(getAccessoryRarity(accessory))">
+                                        {{ getRarityText(getAccessoryRarity(accessory)) }}
                                     </span>
                                     <span class="text-xs opacity-70">ID: {{ accessory.id }}</span>
                                 </div>
@@ -321,5 +366,3 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
-
-

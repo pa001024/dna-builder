@@ -48,16 +48,16 @@ interface CumulativeRewardDisplayItem {
  * @returns 默认页签
  */
 function getDefaultDetailTab(dungeon: Dungeon): DetailTab {
+    if (dungeon.r?.length || dungeon.sr?.length) {
+        return "reward"
+    }
+
     if (dungeon.m?.length || dungeon.sm?.length) {
         return "monster"
     }
 
     if (dungeon.spawn?.length) {
         return "wave"
-    }
-
-    if (dungeon.r?.length || dungeon.sr?.length) {
-        return "reward"
     }
 
     return "monster"
@@ -503,14 +503,14 @@ watch(
         </div>
 
         <div class="tabs tabs-boxed bg-base-200/60 p-1">
+            <button type="button" class="tab flex-1" :class="{ 'tab-active': activeTab === 'reward' }" @click="activeTab = 'reward'">
+                奖励 ({{ (dungeon.r?.length || 0) + (dungeon.sr?.length || 0) }})
+            </button>
             <button type="button" class="tab flex-1" :class="{ 'tab-active': activeTab === 'monster' }" @click="activeTab = 'monster'">
                 怪物 ({{ (dungeon.m?.length || 0) + (dungeon.sm?.length || 0) }})
             </button>
             <button type="button" class="tab flex-1" :class="{ 'tab-active': activeTab === 'wave' }" @click="activeTab = 'wave'">
                 波次 ({{ dungeon.spawn?.length || 0 }})
-            </button>
-            <button type="button" class="tab flex-1" :class="{ 'tab-active': activeTab === 'reward' }" @click="activeTab = 'reward'">
-                奖励 ({{ (dungeon.r?.length || 0) + (dungeon.sr?.length || 0) }})
             </button>
         </div>
 

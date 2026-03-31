@@ -5001,6 +5001,7 @@
         "title": "어비스 목록"
     },
     "accessory": {
+        "category": "분류",
         "description": "설명",
         "draftCoinCost": "코인 소모",
         "draftDuration": "제작 시간",
@@ -5357,6 +5358,8 @@
         "rank_desc": "랭킹 대회 보상 확인",
         "reputation": "지역 명성",
         "reputation_desc": "지역 명성 레벨 및 위탁 정보를 확인",
+        "resource": "자원",
+        "resource_desc": "자원 정보와 아이콘 확인",
         "shop": "상점",
         "shop_desc": "상점 아이템 정보 보기",
         "title": "데이터 베이스",
@@ -5798,9 +5801,26 @@
         "onlyOnce": "한 번만",
         "zhouben": "주간 보스"
     },
+    "resource": {
+        "background": "배경",
+        "description": "설명",
+        "icon": "아이콘",
+        "id": "ID",
+        "name": "이름",
+        "rarity": "희귀도",
+        "searchPlaceholder": "자원 ID/이름 검색(병음 지원)...",
+        "source": "출처",
+        "title": "자원"
+    },
     "RESOURCE_NAME_41049": "RESOURCE_NAME_41049",
     "RESOURCE_NAME_41050": "RESOURCE_NAME_41050",
     "RESOURCE_NAME_41058": "RESOURCE_NAME_41058",
+    "resource-detail": {
+        "title": "자원 상세"
+    },
+    "resource-list": {
+        "title": "자원 목록"
+    },
     "room": {
         "remove": "방 제거"
     },

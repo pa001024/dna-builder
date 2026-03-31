@@ -4996,6 +4996,7 @@
         "title": "アビスリスト"
     },
     "accessory": {
+        "category": "カテゴリ",
         "description": "説明",
         "draftCoinCost": "コイン消費",
         "draftDuration": "製作時間",
@@ -5352,6 +5353,8 @@
         "rank_desc": "ランキング大会の報酬を確認",
         "reputation": "地域名声",
         "reputation_desc": "地域名声のレベルと委託情報を確認",
+        "resource": "資源",
+        "resource_desc": "資源情報とアイコンを確認",
         "shop": "ショップ",
         "shop_desc": "ショップアイテム情報を表示",
         "title": "データベース",
@@ -5793,9 +5796,26 @@
         "onlyOnce": "一回だけ",
         "zhouben": "週替わりボス"
     },
+    "resource": {
+        "background": "背景",
+        "description": "説明",
+        "icon": "アイコン",
+        "id": "ID",
+        "name": "名称",
+        "rarity": "レアリティ",
+        "searchPlaceholder": "資源ID/名称で検索（ピンイン対応）...",
+        "source": "入手元",
+        "title": "資源"
+    },
     "RESOURCE_NAME_41049": "RESOURCE_NAME_41049",
     "RESOURCE_NAME_41050": "RESOURCE_NAME_41050",
     "RESOURCE_NAME_41058": "RESOURCE_NAME_41058",
+    "resource-detail": {
+        "title": "資源詳細"
+    },
+    "resource-list": {
+        "title": "資源一覧"
+    },
     "room": {
         "remove": "ルームを削除"
     },

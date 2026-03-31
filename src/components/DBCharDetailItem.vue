@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { useSettingStore } from "@/store/setting"
+import { resolveSkinIconUrl } from "@/utils/accessory-utils"
+import { getRewardTypeText } from "@/utils/reward-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 import { LeveledChar, LeveledSkillWeapon } from "../data"
 import { type SkinItem, skinData } from "../data/d/accessory.data"
 import { type CharExt, charExtData } from "../data/d/charext.data"
 import { type CharVoice, charVoiceData } from "../data/d/charvoice.data"
+import { resourceMap } from "../data/d/resource.data"
 import weaponData from "../data/d/weapon.data"
 import type { Char, Weapon } from "../data/data-types"
 import { LeveledWeapon } from "../data/leveled/LeveledWeapon"
@@ -206,26 +209,6 @@ function resolveVoiceDatasetLanguage(locale: VoiceLocale): string {
 }
 
 /**
- * 将皮肤默认奖励分组键映射为中文标题。
- * @param key 默认奖励分组键
- * @returns 中文标题
- */
-function getSkinItemGroupLabel(key: string): string {
-    const labelMap: Record<string, string> = {
-        HeadSculpture: "头像",
-        Resource: "资源",
-        Draft: "图纸",
-        Mod: "魔之楔",
-        Weapon: "武器",
-        CharAccessory: "角色饰品",
-        WeaponAccessory: "武器饰品",
-        WeaponSkin: "武器皮肤",
-    }
-
-    return labelMap[key] || key
-}
-
-/**
  * 获取皮肤稀有度文本。
  * @param rarity 稀有度
  * @returns 稀有度文本
@@ -257,7 +240,7 @@ function getSkinRarityClass(rarity: number): string {
  * @returns 图标地址
  */
 function getSkinIconUrl(icon: string): string {
-    return icon ? `/imgs/webp/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+    return resolveSkinIconUrl(icon)
 }
 
 const voiceLanguage = computed(() => resolveVoiceDatasetLanguage(selectedVoiceLocale.value))
@@ -566,6 +549,18 @@ onBeforeUnmount(() => {
 
         <CharSkillShow :char="leveledChar" v-model="currentSkillLevel" />
 
+        <div v-if="char.第七溯源消耗 && char.第七溯源消耗.length > 0" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("第七溯源消耗") }}</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <ResourceCostItem
+                    v-for="cost in char.第七溯源消耗"
+                    :key="cost[0]"
+                    :name="resourceMap.get(cost[0])?.name || String(cost[0])"
+                    :value="cost[1]"
+                />
+            </div>
+        </div>
+
         <!-- 溯源信息 -->
         <div v-if="char.溯源 && char.溯源.length > 0" class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-2">{{ $t("溯源") }}</div>
@@ -741,7 +736,7 @@ onBeforeUnmount(() => {
                                     :key="groupName"
                                     class="rounded bg-base-200/80 px-2 py-1.5"
                                 >
-                                    <div class="text-xs text-base-content/70 mb-1">{{ getSkinItemGroupLabel(groupName) }}</div>
+                                    <div class="text-xs text-base-content/70 mb-1">{{ getRewardTypeText(groupName) }}</div>
                                     <div class="flex flex-wrap gap-2">
                                         <span
                                             v-for="item in items"

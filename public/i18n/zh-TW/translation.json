@@ -4962,6 +4962,7 @@
         "title": "深淵列表"
     },
     "accessory": {
+        "category": "分類",
         "description": "描述",
         "draftCoinCost": "銅幣消耗",
         "draftDuration": "鍛造時間",
@@ -5316,6 +5317,8 @@
         "rank_desc": "查看排名賽獎勵",
         "reputation": "區域聲名",
         "reputation_desc": "查看區域聲名等級與委託資訊",
+        "resource": "資源",
+        "resource_desc": "查看資源資訊和圖標",
         "shop": "商店",
         "shop_desc": "查看商店物品資訊",
         "title": "資料庫",
@@ -5757,9 +5760,26 @@
         "onlyOnce": "僅一次",
         "zhouben": "周本"
     },
+    "resource": {
+        "background": "背景",
+        "description": "描述",
+        "icon": "圖標",
+        "id": "ID",
+        "name": "名稱",
+        "rarity": "稀有度",
+        "searchPlaceholder": "搜尋資源ID/名稱（支援拼音）...",
+        "source": "來源",
+        "title": "資源"
+    },
     "RESOURCE_NAME_41049": "RESOURCE_NAME_41049",
     "RESOURCE_NAME_41050": "RESOURCE_NAME_41050",
     "RESOURCE_NAME_41058": "RESOURCE_NAME_41058",
+    "resource-detail": {
+        "title": "資源詳情"
+    },
+    "resource-list": {
+        "title": "資源列表"
+    },
     "room": {
         "remove": "刪除房間"
     },

@@ -3,6 +3,7 @@ import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { LeveledChar } from "@/data"
+import { getCurrentVersionLimit } from "@/data/versionGate"
 import type { AbyssDungeon } from "../data/d/abyss.data"
 import { abyssDungeonMap, charMap } from "../data/d/index"
 import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
@@ -10,6 +11,7 @@ import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-uti
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedDungeonId = useSearchParam<number>("id", 0)
 const selectedDungeonGroup = useSearchParam<string>("dgg", "")
+const selectedVersion = useSearchParam<string>("ver", "")
 
 // 获取选中的深渊副本对象
 const selectedDungeon = computed(() => {
@@ -23,14 +25,29 @@ const allDungeonGroups = computed(() => {
     return Array.from(groups)
 })
 
+// 获取所有可用版本
+const versions = computed(() => {
+    const versionSet = new Set<string>()
+    allDungeons.value.forEach(dungeon => {
+        const version = dungeon.cid ? getCharVersion(dungeon.cid) : ""
+        if (version && isVersionAllowed(version)) {
+            versionSet.add(version)
+        }
+    })
+    return Array.from(versionSet).sort()
+})
+
 const filteredDungeons = computed(() => {
     return allDungeons.value.filter(d => {
         const matchesGroup = selectedDungeonGroup.value === "" || getAbyssDungeonGroup(d) === selectedDungeonGroup.value
+        const dungeonVersion = d.cid ? getCharVersion(d.cid) : ""
+        const matchesVersion = selectedVersion.value === "" || dungeonVersion === selectedVersion.value
+        const matchesSafeMode = !dungeonVersion || isVersionAllowed(dungeonVersion)
         const matchesKeyword =
             searchKeyword.value === "" ||
             d.id.toString().includes(searchKeyword.value) ||
             (d.cid && getCharName(d.cid).toString().includes(searchKeyword.value))
-        return matchesGroup && matchesKeyword
+        return matchesGroup && matchesVersion && matchesSafeMode && matchesKeyword
     })
 })
 
@@ -41,6 +58,29 @@ function selectDungeon(dungeon: AbyssDungeon | null) {
 function getCharName(charId: number): string {
     const char = charMap.get(charId)
     return char?.名称 || `ID: ${charId}`
+}
+
+/**
+ * 获取关联角色的版本号。
+ * @param charId 角色ID
+ * @returns 角色版本号，未找到时返回空字符串
+ */
+function getCharVersion(charId: number): string {
+    const char = charMap.get(charId)
+    return char?.版本 || ""
+}
+
+/**
+ * 判断版本是否在当前安全模式允许范围内。
+ * @param version 版本号
+ * @returns 是否允许显示
+ */
+function isVersionAllowed(version: string): boolean {
+    const parsedVersion = Number(version)
+    if (!Number.isFinite(parsedVersion)) {
+        return true
+    }
+    return parsedVersion <= getCurrentVersionLimit()
 }
 
 useInitialScrollToSelectedItem()
@@ -64,8 +104,22 @@ useInitialScrollToSelectedItem()
                         <button v-for="group in allDungeonGroups" :key="group"
                             class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all cursor-pointer"
                             :class="selectedDungeonGroup === group ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                " @click="selectedDungeonGroup = group">
+                            " @click="selectedDungeonGroup = group">
                             {{ $t(group) }}
+                        </button>
+                    </div>
+
+                    <div class="flex flex-wrap gap-1">
+                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            :class="selectedVersion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            @click="selectedVersion = ''">
+                            全部
+                        </button>
+                        <button v-for="version in versions" :key="version"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all cursor-pointer"
+                            :class="selectedVersion === version ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                " @click="selectedVersion = version">
+                            {{ version }}
                         </button>
                     </div>
                 </div>
@@ -81,6 +135,9 @@ useInitialScrollToSelectedItem()
                                     <div class="font-medium flex gap-2">
                                         <span v-if="dungeon.sn">{{ dungeon.sn }}</span>
                                         <span v-if="dungeon.cid">{{ $t(getCharName(dungeon.cid)) }}</span>
+                                        <span v-if="dungeon.cid && getCharVersion(dungeon.cid)" class="text-xs opacity-70">
+                                            v{{ getCharVersion(dungeon.cid) }}
+                                        </span>
                                         #{{ getAbyssDungeonLevel(dungeon) }}
                                     </div>
                                     <div v-if="dungeon.st && dungeon.et" class="mt-1 text-xs text-base-content/70">
@@ -93,23 +150,22 @@ useInitialScrollToSelectedItem()
                                     <span class="text-xs px-2 py-0.5 rounded bg-warning text-white whitespace-nowrap">{{
                                         $t(getAbyssDungeonGroup(dungeon))
                                         }}</span>
-                                    <span v-if="dungeon.mb" class="flex items-center gap-2">
-                                        <img v-for="key in ['暗', '水', '火', '雷', '风', '光'].filter(k => dungeon.mb![k] > 0)"
-                                            :key="key" :src="LeveledChar.elementUrl(key)" alt=""
-                                            class="h-8 inline-block" />
-                                    </span>
                                 </div>
                             </div>
 
-                            <div v-if="dungeon.buff?.length" class="mt-2">
-                                <div class="flex flex-wrap gap-1">
+                            <div v-if="dungeon.mb || dungeon.buff?.length" class="mt-2 flex items-center justify-between gap-2">
+                                <span v-if="dungeon.buff?.length" class="flex flex-wrap items-center gap-1">
                                     <span v-for="buff in dungeon.buff.slice(0, 3)" :key="buff.id"
                                         class="text-xs bg-base-300/20 px-1.5 py-0.5 rounded">
                                         {{ buff.n }}
                                     </span>
                                     <span v-if="dungeon.buff.length > 3" class="text-xs opacity-70">+{{
                                         dungeon.buff.length - 3 }}</span>
-                                </div>
+                                </span>
+                                <span v-if="dungeon.mb" class="ml-auto flex items-center gap-2">
+                                    <img v-for="key in ['暗', '水', '火', '雷', '风', '光'].filter(k => dungeon.mb![k] > 0)"
+                                        :key="key" :src="LeveledChar.elementUrl(key)" alt="" class="h-8 inline-block" />
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -131,5 +187,3 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
-
-

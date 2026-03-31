@@ -97,7 +97,7 @@ function getLureName(lure: number): string {
  * 获取鱼图片URL
  */
 function getFishIcon(fish: Fish): string {
-    return `/imgs/webp/T_Fish_${fish.icon}.webp`
+    return `/imgs/res/T_Fish_${fish.icon}.webp`
 }
 
 const APPEAR_TIMES = [1, 2, 3] as const

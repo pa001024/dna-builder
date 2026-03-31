@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { LeveledMod, resourceMap } from "@/data"
-import { draftMap, modMap, weaponMap } from "@/data/d"
+import { LeveledChar, LeveledMod, resourceMap } from "@/data"
+import { charMap, draftMap, modMap, walnutMap, weaponMap } from "@/data/d"
 import { charAccessoryData, weaponAccessoryData } from "@/data/d/accessory.data"
 import type { Draft } from "@/data/d/draft.data"
 import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
@@ -8,7 +8,9 @@ import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
 defineOptions({ inheritAttrs: false })
 defineProps<{
     name: string
-    value: number | [number, number, "Mod" | "Draft" | "Weapon" | "CharAccessory" | "WeaponAccessory"]
+    value:
+        | number
+        | [number | string, number | string, "Mod" | "Draft" | "Weapon" | "Char" | "CharAccessory" | "WeaponAccessory" | "Walnut"]
 }>()
 
 const emit = defineEmits<{
@@ -16,6 +18,10 @@ const emit = defineEmits<{
 }>()
 
 function getIcon(name: string) {
+    const fragmentIcon = getCharacterFragmentIcon(name)
+    if (fragmentIcon) {
+        return fragmentIcon
+    }
     const res = resourceMap.get(name)
     return res?.icon ? `/imgs/res/${res?.icon}.webp` : `/imgs/webp/T_Head_Empty.webp`
 }
@@ -43,7 +49,7 @@ function getQualityColor(quality: string | number): string {
  * @param draftId 图纸ID或产物ID
  * @returns 图标路径
  */
-function getDraftIcon(draftId: number) {
+function getDraftIcon(draftId: number | string) {
     const draft = getDraftByIdOrProductId(draftId)
     if (!draft) return `/imgs/webp/T_Head_Empty.webp`
     if (draft.t === "Mod") {
@@ -60,7 +66,7 @@ function getDraftIcon(draftId: number) {
  * @param draftId 图纸ID或产物ID
  * @returns 背景色类名
  */
-function getDraftBackgroundColor(draftId: number): string {
+function getDraftBackgroundColor(draftId: number | string): string {
     const draft = getDraftByIdOrProductId(draftId)
     if (!draft) return getQualityColor(1)
     if (draft.t === "Mod") {
@@ -70,12 +76,70 @@ function getDraftBackgroundColor(draftId: number): string {
 }
 
 /**
+ * 获取角色碎片资源对应的角色头像。
+ * @param name 资源名
+ * @returns 角色头像路径
+ */
+function getCharacterFragmentIcon(name: string): string {
+    const prefix = "思绪片段·"
+    if (!name.startsWith(prefix)) {
+        return ""
+    }
+
+    const char = charMap.get(name.slice(prefix.length))
+    return char?.icon ? LeveledChar.url(char.icon) : ""
+}
+
+/**
+ * 获取密函对应的产物信息。
+ * @param walnutId 密函ID
+ * @returns 产物信息
+ */
+function getWalnutReward(walnutId: number | string) {
+    const walnut = walnutMap.get(Number(walnutId))
+    return { walnut, reward: walnut?.奖励?.[0] ?? null }
+}
+
+/**
+ * 获取密函产物图标。
+ * @param walnutId 密函ID
+ * @returns 图标路径
+ */
+function getWalnutIcon(walnutId: number | string): string {
+    const { reward } = getWalnutReward(walnutId)
+    if (!reward) return "/imgs/webp/T_Head_Empty.webp"
+    if (reward.type === "Mod") {
+        return LeveledMod.url(modMap.get(reward.id)?.icon)
+    }
+    if (reward.type === "Weapon") {
+        return LeveledWeapon.url(weaponMap.get(reward.id)?.icon)
+    }
+    if (reward.type === "Resource") {
+        return getCharacterFragmentIcon(reward.name) || getIcon(reward.name)
+    }
+    return "/imgs/webp/T_Head_Empty.webp"
+}
+
+/**
+ * 获取密函产物背景色。
+ * @param walnutId 密函ID
+ * @returns 背景色类名
+ */
+function getWalnutBackgroundColor(_walnutId: number | string): string {
+    return getQualityColor(5)
+}
+
+/**
  * 通过图纸ID或产物ID查找图纸。
  * @param draftId 图纸ID或产物ID
  * @returns 图纸数据
  */
-function getDraftByIdOrProductId(draftId: number): Draft | undefined {
-    return draftMap.get(draftId) ?? [...draftMap.values()].find(draft => draft.p === draftId)
+function getDraftByIdOrProductId(draftId: number | string): Draft | undefined {
+    const normalizedId = Number(draftId)
+    if (!Number.isFinite(normalizedId)) {
+        return undefined
+    }
+    return draftMap.get(normalizedId) ?? [...draftMap.values()].find(draft => draft.p === normalizedId)
 }
 
 /**
@@ -93,9 +157,46 @@ function getAccessoryIcon(icon?: string) {
  * @param id 饰品ID
  * @returns 饰品数据
  */
-function getAccessoryByType(type: "CharAccessory" | "WeaponAccessory", id: number) {
+function getAccessoryByType(type: "CharAccessory" | "WeaponAccessory", id: number | string) {
     const list = type === "CharAccessory" ? charAccessoryData : weaponAccessoryData
-    return list.find(item => item.id === id)
+    const normalizedId = Number(id)
+    return Number.isFinite(normalizedId) ? list.find(item => item.id === normalizedId) : undefined
+}
+
+/**
+ * 获取用于模组展示的构造参数。
+ * @param id 资源ID
+ * @returns 规范化后的数值ID
+ */
+function getNormalizedId(id: number | string): number {
+    return Number(id)
+}
+
+/**
+ * 构造带等级的模组展示对象。
+ * @param id 模组ID
+ * @returns 带等级的模组对象
+ */
+function createLeveledMod(id: number | string) {
+    return new LeveledMod(getNormalizedId(id))
+}
+
+/**
+ * 构造带等级的武器展示对象。
+ * @param id 武器ID
+ * @returns 带等级的武器对象
+ */
+function createLeveledWeapon(id: number | string) {
+    return new LeveledWeapon(getNormalizedId(id))
+}
+
+/**
+ * 构造带等级的角色展示对象。
+ * @param id 角色ID或名称
+ * @returns 带等级的角色对象
+ */
+function createLeveledChar(id: number | string) {
+    return new LeveledChar(id)
 }
 
 /**
@@ -108,7 +209,7 @@ function handleCardClick() {
 <template>
     <ShowProps
         v-if="Array.isArray(value) && value[2] === 'Mod'"
-        v-for="mod in [new LeveledMod(value[1])]"
+        v-for="mod in [createLeveledMod(value[1])]"
         :key="mod.id"
         :props="mod.getProperties()"
         :title="`${$t(mod.系列)}${$t(mod.名称)}`"
@@ -136,7 +237,7 @@ function handleCardClick() {
     </ShowProps>
     <ShowProps
         v-else-if="Array.isArray(value) && value[2] === 'Weapon'"
-        v-for="weapon in [new LeveledWeapon(value[1])]"
+        v-for="weapon in [createLeveledWeapon(value[1])]"
         :key="weapon.id"
         :props="weapon.getProperties()"
         :title="$t(weapon.名称)"
@@ -149,6 +250,24 @@ function handleCardClick() {
                 <img :src="weapon.url" :alt="weapon.名称" class="size-8 inline-block mr-2 rounded" />
                 <SRouterLink :to="`/db/weapon/${weapon.id}`" stop class="hover:underline">
                     {{ $t(weapon.名称) }}
+                </SRouterLink>
+            </span>
+            <span class="font-bold text-primary ml-auto">{{ value[0] }}</span>
+        </div>
+    </ShowProps>
+    <ShowProps
+        v-else-if="Array.isArray(value) && value[2] === 'Char'"
+        v-for="char in [createLeveledChar(value[1])]"
+        :key="char.id"
+        :props="char.getProperties()"
+        :title="$t(char.名称)"
+        :link="`/db/char/${char.id}`"
+    >
+        <div class="flex items-center p-3 rounded bg-base-300 transition-colors duration-200" v-bind="$attrs" @click="handleCardClick">
+            <span class="font-medium truncate">
+                <img :src="char.url" :alt="char.名称" class="size-8 inline-block mr-2 rounded" />
+                <SRouterLink :to="`/db/char/${char.id}`" stop class="hover:underline">
+                    {{ $t(char.名称) }}
                 </SRouterLink>
             </span>
             <span class="font-bold text-primary ml-auto">{{ value[0] }}</span>
@@ -173,6 +292,25 @@ function handleCardClick() {
         </span>
         <span class="font-bold text-primary ml-auto">{{ value[0] }}</span>
     </div>
+    <div
+        v-else-if="Array.isArray(value) && value[2] === 'Walnut' && getWalnutReward(value[1]).walnut"
+        class="flex items-center p-3 rounded bg-base-300 transition-colors duration-200"
+        v-bind="$attrs"
+        @click="$emit('click')"
+    >
+        <span class="font-medium truncate">
+            <img
+                :src="getWalnutIcon(value[1])"
+                alt=""
+                class="size-8 inline-block mr-2 bg-linear-45 rounded"
+                :class="getWalnutBackgroundColor(value[1])"
+            />
+            <SRouterLink :to="`/db/walnut/${Number(value[1])}`" stop class="hover:underline">
+                {{ `密函: ${getWalnutReward(value[1]).walnut?.名称 || value[1]}` }}
+            </SRouterLink>
+        </span>
+        <span class="font-bold text-primary ml-auto">{{ value[0] }}</span>
+    </div>
     <SRouterLink
         v-else-if="
             Array.isArray(value) &&
@@ -193,7 +331,10 @@ function handleCardClick() {
     <div v-else class="flex items-center p-3 rounded bg-base-300 transition-colors duration-200" v-bind="$attrs" @click="$emit('click')">
         <span class="font-medium truncate">
             <img :src="getIcon(name)" alt="" class="size-8 inline-block mr-2 bg-linear-15 rounded" :class="getRarityColor(name)" />
-            {{ $t(name) }}</span
+            <SRouterLink :to="`/db/resource/${resourceMap.get(name)?.id}`" stop class="hover:underline">
+                {{ $t(name) }}
+            </SRouterLink>
+        </span
         >
         <span class="font-bold text-primary ml-auto">{{ value }}</span>
     </div>

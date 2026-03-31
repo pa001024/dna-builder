@@ -1,9 +1,11 @@
 <script lang="ts" setup>
-import { computed } from "vue"
+import { computed, watch } from "vue"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { monsterMap } from "@/data"
+import { charMap, weaponNameMap } from "@/data/d"
 import type { HardBoss, HardBossDetail } from "@/data/d/hardboss.data"
 import { getHardBossDetail } from "@/data/d/hardboss.data"
+import { walnutMap } from "@/data/d/walnut.data"
 import { getDropModeText, getRewardDetails } from "@/utils/reward-utils"
 
 interface DynamicRewardEntry {
@@ -37,14 +39,21 @@ interface HardbossTimePoint {
     isCurrent: boolean
 }
 
+interface HardbossRewardCost {
+    key: string
+    name: string
+    value: [string, number, "Char" | "Weapon"]
+}
+
 const props = defineProps<{
     boss: HardBoss
 }>()
 
 const nowTimestamp = Math.floor(Date.now() / 1000)
-const timeFilterEnabled = useSearchParam("tf", false)
+const timeFilterEnabled = useSearchParam("tf", true)
 const selectedTimePointIndex = useSearchParam("ti", 0)
 const diffOnlyEnabled = useSearchParam("td", false)
+const selectedMonsterLevel = useSearchParam("ml", 80)
 
 // 获取Boss详情（包含动态奖励）
 const bossDetail = computed<HardBossDetail | undefined>(() => {
@@ -56,22 +65,34 @@ const bossDetail = computed<HardBossDetail | undefined>(() => {
  * @returns 关联的怪物数据列表
  */
 const monsters = computed(() => {
-    return props.boss.mid.map(id => monsterMap.get(id)).filter(monster => Boolean(monster))
+    return props.boss.mid.map(id => monsterMap.get(id)).filter((monster): monster is NonNullable<typeof monster> => Boolean(monster))
 })
 
 /**
- * 获取高难 Boss 关联的怪物名称列表。
- * @returns 关联的怪物名称列表
+ * 获取等级奖励对应的怪物等级选项。
+ * @returns 怪物等级离散值
  */
-const monsterNames = computed(() => {
-    return props.boss.mid.map(id => monsterMap.get(id)?.n ?? `ID:${id}`)
+const monsterLevels = computed(() => {
+    return [...new Set(bossDetail.value?.diff.map(diff => diff.lv) ?? [])].sort((a, b) => a - b)
 })
 
 /**
- * 获取首个关联怪物。
- * @returns 首个怪物数据；不存在时返回 null
+ * 校验当前怪物等级选择是否有效。
+ * @remarks 默认使用最高等级，和原来的展示一致。
  */
-const monster = computed(() => monsters.value[0] ?? null)
+watch(
+    monsterLevels,
+    levels => {
+        if (levels.length === 0) {
+            return
+        }
+
+        if (!levels.includes(selectedMonsterLevel.value)) {
+            selectedMonsterLevel.value = levels.at(-1) ?? selectedMonsterLevel.value
+        }
+    },
+    { immediate: true }
+)
 
 /**
  * 拉平全部动态奖励。
@@ -82,11 +103,25 @@ const allDynamicRewards = computed<DynamicRewardEntry[]>(() => {
 })
 
 /**
+ * 计算某个时间点下全部动态奖励的状态签名。
+ * @param timestamp 目标时间戳
+ * @returns 全局动态奖励状态签名
+ */
+function getRewardStateSignatureAtTimestamp(timestamp: number): string {
+    return allDynamicRewards.value
+        .filter(reward => isRewardAvailableAtTime(reward, timestamp))
+        .map(reward => `${reward.RewardView}-${reward.DynamicRewardId}-${reward.Index}`)
+        .sort()
+        .join("|")
+}
+
+/**
  * 生成当前 Boss 的离散时间点。
+ * 仅保留会导致全局动态奖励状态变化的时间点。
  * @returns 按时间升序排列的离散时间戳
  */
 const hardbossTimeTimestamps = computed(() => {
-    return Array.from(
+    const timestamps = Array.from(
         new Set(
             allDynamicRewards.value.flatMap(reward => {
                 const points = [] as number[]
@@ -96,6 +131,21 @@ const hardbossTimeTimestamps = computed(() => {
             })
         )
     ).sort((a, b) => a - b)
+
+    const filteredTimestamps: number[] = []
+    let previousSignature = ""
+
+    timestamps.forEach(timestamp => {
+        const signature = getRewardStateSignatureAtTimestamp(timestamp)
+        if (signature === previousSignature) {
+            return
+        }
+
+        filteredTimestamps.push(timestamp)
+        previousSignature = signature
+    })
+
+    return filteredTimestamps
 })
 
 /**
@@ -193,8 +243,59 @@ const filteredDiffs = computed<HardbossDiffView[]>(() => {
                 activeFilterTimestamp.value,
                 previousSelectedTimePoint.value?.timestamp ?? null
             ),
-        })) ?? []
+        }))?.filter(diff => !diffOnlyEnabled.value || diff.changedRewardCount > 0) ?? []
     )
+})
+
+/**
+ * 提取当前 Boss 动态奖励中对应的密函奖励资源。
+ * @returns 密函对应的角色或武器资源项列表
+ */
+const hardbossWalnutRewardCosts = computed<HardbossRewardCost[]>(() => {
+    const costs: HardbossRewardCost[] = []
+    const seen = new Set<string>()
+
+    filteredDiffs.value.forEach(diff => {
+        diff.rewards.forEach(dr => {
+            const rewardTree = getRewardDetails(dr.RewardView)
+            rewardTree?.child?.forEach(item => {
+                if (item.t !== "Walnut") {
+                    return
+                }
+
+                const walnut = walnutMap.get(item.id)
+                if (!walnut) {
+                    return
+                }
+
+                const rewardType = walnut.类型 === 1 ? "Char" : walnut.类型 === 2 ? "Weapon" : null
+                if (!rewardType) {
+                    return
+                }
+
+                const rewardName = walnut.名称.replace(/^密函：/, "")
+                const reward = rewardType === "Char" ? charMap.get(rewardName) : weaponNameMap.get(rewardName)
+                const rewardId = reward?.id
+                if (!rewardId) {
+                    return
+                }
+
+                const key = `${dr.RewardView}-${item.id}-${rewardType}-${rewardId}`
+                if (seen.has(key)) {
+                    return
+                }
+                seen.add(key)
+
+                costs.push({
+                    key,
+                    name: rewardName,
+                    value: [`Lv.${diff.lv}`, rewardId, rewardType],
+                })
+            })
+        })
+    })
+
+    return costs
 })
 
 /**
@@ -318,18 +419,30 @@ function getRewardStatusText(startTime: number, endTime: number): { text: string
         return { text: "进行中", color: "text-success" }
     }
 }
+
+/**
+ * 获取高难 Boss 图标。
+ * @param boss 高难 Boss 数据
+ * @returns 图标路径
+ */
+function getHardbossIcon(boss: HardBoss): string {
+    return boss.icon ? `/imgs/webp/${boss.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+}
 </script>
 
 <template>
     <div v-if="bossDetail" class="p-3 space-y-4">
         <!-- 详情头部 -->
-        <div class="flex items-center justify-between">
-            <div class="flex flex-col gap-2">
-                <div class="flex items-center gap-2">
-                    <SRouterLink :to="`/db/hardboss/${boss.id}`" class="text-lg font-bold link link-primary">
+        <div class="flex items-start gap-3">
+            <div class="size-16 shrink-0">
+                <img :src="getHardbossIcon(boss)" :alt="boss.name" class="w-full h-full object-cover rounded-lg" />
+            </div>
+            <div class="flex flex-col gap-2 min-w-0">
+                <div class="flex items-center gap-2 min-w-0">
+                    <SRouterLink :to="`/db/hardboss/${boss.id}`" class="text-lg font-bold link link-primary min-w-0 truncate">
                         {{ boss.name }}
                     </SRouterLink>
-                    <span class="text-sm text-base-content/70">ID: {{ boss.id }}</span>
+                    <span class="text-sm text-base-content/70 shrink-0">ID: {{ boss.id }}</span>
                 </div>
                 <div class="text-sm text-base-content/70">
                     {{ boss.desc }}
@@ -338,12 +451,16 @@ function getRewardStatusText(startTime: number, endTime: number): { text: string
         </div>
 
         <!-- 怪物信息 -->
-        <div v-if="monster" class="card bg-base-100 border border-base-200 rounded-lg p-3">
-            <h3 class="font-bold mb-2">怪物信息</h3>
-            <div class="mb-3 flex flex-wrap gap-2 text-xs text-base-content/70">
-                <span v-for="(name, index) in monsterNames" :key="`${name}-${index}`" class="rounded bg-base-200 px-2 py-1">{{ name }}</span>
+        <div v-if="monsters.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
+            <div class="mb-2 flex items-center justify-between gap-2">
+                <h3 class="font-bold">怪物信息</h3>
+                <select v-if="monsterLevels.length" v-model.number="selectedMonsterLevel" class="select select-bordered select-sm w-24">
+                    <option v-for="level in monsterLevels" :key="level" :value="level">Lv.{{ level }}</option>
+                </select>
             </div>
-            <DBMonsterDetailItem :monster="monster" :defaultLevel="80" />
+            <div class="space-y-2">
+                <MonsterItem v-for="monster in monsters" :key="monster.id" :monster="monster" :level="selectedMonsterLevel" />
+            </div>
         </div>
 
         <div v-if="hardbossTimePoints.length > 0" class="rounded-lg border border-base-200 bg-base-100 p-3 space-y-3">
@@ -392,6 +509,19 @@ function getRewardStatusText(startTime: number, endTime: number): { text: string
             </div>
         </div>
 
+        <div v-if="hardbossWalnutRewardCosts.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
+            <h3 class="font-bold mb-2">{{ $t("game-launcher.preview") }}</h3>
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+                <ResourceCostItem
+                    v-for="cost in hardbossWalnutRewardCosts"
+                    :key="cost.key"
+                    :name="cost.name"
+                    :value="cost.value"
+                    class="bg-base-200"
+                />
+            </div>
+        </div>
+
         <!-- 动态奖励列表 -->
         <div v-for="diff in filteredDiffs" :key="diff.id" class="card bg-base-100 border border-base-200 rounded-lg p-3">
             <h3 class="font-bold mb-2">
@@ -402,7 +532,7 @@ function getRewardStatusText(startTime: number, endTime: number): { text: string
                     <template v-else>{{ diff.activeRewardCount }} 组当前奖励</template>
                 </span>
             </h3>
-            <div v-if="diffOnlyEnabled ? diff.changedRewardCount > 0 : !timeFilterEnabled || diff.activeRewardCount > 0" class="space-y-3">
+            <div v-if="!timeFilterEnabled || diff.activeRewardCount > 0" class="space-y-3">
                 <div
                     v-for="dr in diff.rewards"
                     :key="`${dr.DynamicRewardId}-${dr.Index}`"

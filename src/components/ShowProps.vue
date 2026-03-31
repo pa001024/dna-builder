@@ -47,7 +47,9 @@ function getQualityColor(quality: string): string {
                 <div v-if="title" class="text-sm font-bold">
                     <SRouterLink v-if="link" :to="link" class="cursor-pointer hover:underline">{{ title }}</SRouterLink>
                     <span v-else>{{ title }}</span>
-                    <span v-if="rarity" class="text-xs p-1 rounded-sm ml-1" :class="getQualityColor(rarity)">{{ rarity }}</span>
+                    <span v-if="rarity" class="text-xs p-1 rounded-sm ml-1" :class="getQualityColor(rarity)">
+                        {{ rarity }}
+                    </span>
                 </div>
                 <div v-if="desc" class="text-xs text-gray-400">
                     {{ desc }}
@@ -57,7 +59,7 @@ function getQualityColor(quality: string): string {
                     <Icon v-if="polarity" :icon="`po-${polarity}`" />
                 </div>
                 <div
-                    v-for="[prop, val] in Object.entries(props).filter(([_, v]) => v)"
+                    v-for="[prop, val] in Object.entries(props).filter(([, val]) => val)"
                     :key="prop"
                     class="flex justify-between items-center gap-2 text-sm"
                 >
@@ -69,10 +71,10 @@ function getQualityColor(quality: string): string {
                     </div>
                 </div>
                 <div
-                    v-for="[prop, val] in Object.entries(eff.props!).filter(([_, v]) => v)"
-                    v-if="eff && !eff.isEffective"
+                    v-for="[prop, val] in Object.entries(eff?.props || {}).filter(([prop, val]) => val && !props[prop])"
                     :key="prop"
-                    class="flex justify-between items-center gap-2 text-sm line-through"
+                    class="flex justify-between items-center gap-2 text-sm"
+                    :class="{ 'line-through': !eff?.isEffective }"
                 >
                     <div class="text-xs text-neutral-500">
                         {{ $t(prop) }}

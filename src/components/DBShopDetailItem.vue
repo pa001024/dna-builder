@@ -204,22 +204,25 @@ const activeFilterTimestamp = computed(() => {
 const filteredMainTabs = computed<FilteredShopMainTab[]>(() => {
     return props.shop.mainTabs.map(mainTab => ({
         ...mainTab,
-        subTabs: mainTab.subTabs.map(subTab => ({
-            ...subTab,
-            visibleItems: filterItemsByMode(
-                subTab.items,
-                activeFilterTimestamp.value,
-                previousSelectedTimePoint.value?.timestamp ?? null,
-                diffOnlyEnabled.value
-            ),
-            activeVisibleItemCount: countActiveItemsByTimestamp(subTab.items, activeFilterTimestamp.value),
-            changedItemCount: countChangedItemsByTimestamp(
-                subTab.items,
-                activeFilterTimestamp.value,
-                previousSelectedTimePoint.value?.timestamp ?? null
-            ),
-        })),
+        subTabs: mainTab.subTabs
+            .map(subTab => ({
+                ...subTab,
+                visibleItems: filterItemsByMode(
+                    subTab.items,
+                    activeFilterTimestamp.value,
+                    previousSelectedTimePoint.value?.timestamp ?? null,
+                    diffOnlyEnabled.value
+                ),
+                activeVisibleItemCount: countActiveItemsByTimestamp(subTab.items, activeFilterTimestamp.value),
+                changedItemCount: countChangedItemsByTimestamp(
+                    subTab.items,
+                    activeFilterTimestamp.value,
+                    previousSelectedTimePoint.value?.timestamp ?? null
+                ),
+            }))
+            .filter(subTab => !diffOnlyEnabled.value || subTab.changedItemCount > 0),
     }))
+    .filter(mainTab => mainTab.subTabs.length > 0)
 })
 
 watch(

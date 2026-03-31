@@ -10,26 +10,42 @@ import { getRewardDetails } from "./reward-utils"
 
 export type WeaponSourceType = "hardboss" | "shop"
 
-export interface WeaponSourceInfo {
+export interface ShopSourceInfo {
     key: string
-    type: WeaponSourceType
+    itemId: number
+    shopId: string
+    subTabId: number
+    detail: string
+    shopName: string
+    price: number
+    priceName: string
+    num: number
+    limit?: number
+    timeStart?: number
+    timeEnd?: number
+}
+
+export interface WeaponHardbossSourceInfo {
+    key: string
+    type: "hardboss"
     timeStart: number
     timeEnd?: number
-    detail?: string
     hardbossName?: string
     hardbossLv?: number
     walnutId?: number
     hardbossId?: number
-    shopId?: string
-    shopName?: string
+}
+
+export interface WeaponShopSourceInfo extends ShopSourceInfo {
+    type: "shop"
+    walnutId?: number
     mainTabId?: number
     mainTabName?: string
-    subTabId?: number
     subTabName?: string
-    price?: number
-    priceName?: string
     shopIcon?: string
 }
+
+export type WeaponSourceInfo = WeaponHardbossSourceInfo | WeaponShopSourceInfo
 
 const walnutWeaponMap = new Map<number, number[]>()
 walnutMap.forEach(walnut => {
@@ -288,6 +304,7 @@ export function collectWeaponSources(weapon: Weapon): WeaponSourceInfo[] {
                         timeEnd: item.endTime,
                         detail: `${mainTab.name} -> ${subTab.name}`,
                         walnutId,
+                        itemId: item.id,
                         shopId: shop.id,
                         shopName: shop.name,
                         mainTabId: mainTab.id,
@@ -296,6 +313,8 @@ export function collectWeaponSources(weapon: Weapon): WeaponSourceInfo[] {
                         subTabName: subTab.name,
                         price: item.price,
                         priceName: item.priceName,
+                        num: item.num,
+                        limit: item.limit,
                         shopIcon: getShopSourceIcon(walnutId),
                     })
                 })
@@ -303,14 +322,18 @@ export function collectWeaponSources(weapon: Weapon): WeaponSourceInfo[] {
         })
     })
 
-    return sources.sort((a, b) => {
-        if (a.timeStart !== b.timeStart) {
-            return a.timeStart - b.timeStart
+    return sources.sort((left, right) => {
+        if (left.timeStart !== right.timeStart) {
+            return (left.timeStart ?? 0) - (right.timeStart ?? 0)
         }
-        if (a.type !== b.type) {
-            return a.type === "hardboss" ? -1 : 1
+
+        if (left.type !== right.type) {
+            return left.type === "hardboss" ? -1 : 1
         }
-        return (a.detail ?? a.hardbossName ?? "").localeCompare(b.detail ?? b.hardbossName ?? "", "zh-CN")
+
+        const leftName = left.type === "shop" ? left.detail : (left.hardbossName ?? "")
+        const rightName = right.type === "shop" ? right.detail : (right.hardbossName ?? "")
+        return leftName.localeCompare(rightName, "zh-CN")
     })
 }
 
@@ -330,5 +353,5 @@ export function formatWeaponSourceTimeRange(source: WeaponSourceInfo, untilNowTe
             minute: "2-digit",
         })
 
-    return `${formatTime(source.timeStart)}~${source.timeEnd ? formatTime(source.timeEnd) : untilNowText}`
+    return `${formatTime(source.timeStart ?? 0)}~${source.timeEnd ? formatTime(source.timeEnd) : untilNowText}`
 }

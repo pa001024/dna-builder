@@ -4,6 +4,11 @@ import { useRoute } from "vue-router"
 import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 
 type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "headframe"
+type AccessoryDetailItem = (typeof charAccessoryData)[number] & { accessoryType: "char" }
+    | (typeof weaponAccessoryData)[number] & { accessoryType: "weapon" }
+    | (typeof skinData)[number] & { accessoryType: "skin" }
+    | (typeof weaponSkinData)[number] & { accessoryType: "weaponskin" }
+    | (typeof headFrameData)[number] & { accessoryType: "headframe" }
 
 const route = useRoute()
 
@@ -42,7 +47,7 @@ const accessory = computed(() => {
     }
     const source = sourceMap[accessoryType.value]
     const item = source.find(v => v.id === accessoryId.value)
-    return item ? { ...item, accessoryType: accessoryType.value as AccessoryType } : null
+    return item ? ({ ...item, accessoryType: accessoryType.value as AccessoryType } as AccessoryDetailItem) : null
 })
 </script>
 

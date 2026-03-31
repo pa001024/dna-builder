@@ -4893,6 +4893,7 @@
         "title": "Liste des Abysses"
     },
     "accessory": {
+        "category": "Catégorie",
         "description": "Description",
         "draftCoinCost": "Coût en pièces",
         "draftDuration": "Durée de fabrication",
@@ -5283,6 +5284,8 @@
         "rank_desc": "Voir les récompenses du tournoi de classement",
         "reputation": "Réputation régionale",
         "reputation_desc": "Voir les niveaux de réputation régionale et les informations de commission",
+        "resource": "Ressource",
+        "resource_desc": "Voir les informations et icônes de ressource",
         "shop": "Boutique",
         "shop_desc": "Voir les informations sur les articles de la boutique",
         "title": "Base de données",
@@ -5724,9 +5727,26 @@
         "onlyOnce": "Une seule fois",
         "zhouben": "Boss hebdomadaire"
     },
+    "resource": {
+        "background": "Contexte",
+        "description": "Description",
+        "icon": "Icône",
+        "id": "ID",
+        "name": "Nom",
+        "rarity": "Rareté",
+        "searchPlaceholder": "Rechercher par ID ou nom de ressource (pinyin pris en charge)...",
+        "source": "Source",
+        "title": "Ressources"
+    },
     "RESOURCE_NAME_41049": "RESOURCE_NAME_41049",
     "RESOURCE_NAME_41050": "RESOURCE_NAME_41050",
     "RESOURCE_NAME_41058": "RESOURCE_NAME_41058",
+    "resource-detail": {
+        "title": "Détails de la ressource"
+    },
+    "resource-list": {
+        "title": "Liste des ressources"
+    },
     "room": {
         "remove": "Supprimer la salle"
     },

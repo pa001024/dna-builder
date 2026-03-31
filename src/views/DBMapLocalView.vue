@@ -117,6 +117,10 @@ interface ProjectedSubRegionPoint {
     tpPointCount: number
 }
 
+interface TeleportIconFilterOption {
+    icon: string
+}
+
 interface HoverCoordinateInfo {
     mapX: number
     mapY: number
@@ -217,8 +221,10 @@ const lastPointerPosition = ref({ x: 0, y: 0 })
 const selectedSubRegionId = ref<number | null>(null)
 const hoveredSubRegionId = ref<number | null>(null)
 const selectedRcState = ref<{ subRegionId: number; rcId: number; rcIndex: number } | null>(null)
+const hoveredTeleportPointKey = ref<string | null>(null)
 const hoverCoordinateInfo = ref<HoverCoordinateInfo | null>(null)
 const showTeleportPoints = ref(true)
+const selectedTeleportIcons = ref<Set<string>>(new Set())
 
 let resizeObserver: ResizeObserver | null = null
 let drawRaf = 0
@@ -807,6 +813,29 @@ const projectedSubRegions = computed<ProjectedSubRegionPoint[]>(() => {
     return result
 })
 const totalTeleportPointCount = computed(() => projectedSubRegions.value.reduce((sum, subRegion) => sum + subRegion.tpPointCount, 0))
+const teleportIconOptions = computed<TeleportIconFilterOption[]>(() => {
+    const icons = new Set<string>()
+    for (const subRegion of projectedSubRegions.value) {
+        for (const tpPoint of subRegion.tpPoints) {
+            if (tpPoint.icon) {
+                icons.add(tpPoint.icon)
+            }
+        }
+    }
+    return [...icons].sort((a, b) => a.localeCompare(b)).map(icon => ({ icon }))
+})
+const isTeleportPointFilterActive = computed(
+    () => selectedTeleportIcons.value.size > 0 && selectedTeleportIcons.value.size === teleportIconOptions.value.length
+)
+const visibleTeleportPointCount = computed(() => {
+    if (!showTeleportPoints.value) return 0
+    if (isTeleportPointFilterActive.value) return totalTeleportPointCount.value
+    let count = 0
+    for (const subRegion of projectedSubRegions.value) {
+        count += subRegion.tpPoints.filter(tpPoint => selectedTeleportIcons.value.has(tpPoint.icon)).length
+    }
+    return count
+})
 
 const selectedSubRegion = computed(() => {
     if (selectedSubRegionId.value === null) return null
@@ -919,6 +948,50 @@ function ensureTpIconImageLoaded(iconUrl: string): HTMLImageElement | null {
 }
 
 /**
+ * 判断传送点是否应该显示。
+ */
+function isTeleportPointVisible(tpPoint: ProjectedTeleportPoint): boolean {
+    if (!showTeleportPoints.value) return false
+    if (isTeleportPointFilterActive.value) return true
+    return selectedTeleportIcons.value.has(tpPoint.icon)
+}
+
+/**
+ * 切换单个传送点图标类型的显示状态。
+ */
+function toggleTeleportIcon(icon: string, checked: boolean) {
+    const next = new Set(selectedTeleportIcons.value)
+    if (checked) {
+        next.add(icon)
+    } else {
+        next.delete(icon)
+    }
+    selectedTeleportIcons.value = next
+}
+
+/**
+ * 设置全部传送点图标类型为显示或隐藏。
+ */
+function setAllTeleportIcons(checked: boolean) {
+    selectedTeleportIcons.value = checked ? new Set(teleportIconOptions.value.map(option => option.icon)) : new Set()
+}
+
+/**
+ * 判断传送点图标类型是否处于全选状态。
+ */
+function isAllTeleportIconsSelected(): boolean {
+    return isTeleportPointFilterActive.value
+}
+
+/**
+ * 处理“全部”开关，统一控制 TP 显示和图标筛选状态。
+ */
+function handleTeleportPointsAllChange(checked: boolean) {
+    showTeleportPoints.value = checked
+    setAllTeleportIcons(checked)
+}
+
+/**
  * 将传送点 icon 映射到本地静态资源路径。
  */
 function resolveTeleportPointIconUrl(icon: string): string {
@@ -985,6 +1058,18 @@ function initializeActiveLayers(profile: LocalMapProfile) {
     activeLayerIds.value = next
     selectedSingleLayerByGroup.value = nextSingleSelected
     focusedLayerId.value = firstFocusedLayerId
+}
+
+/**
+ * 切换地图时重置所有依赖当前区域的选中状态。
+ */
+function resetRegionSelectionState() {
+    selectedSubRegionId.value = null
+    hoveredSubRegionId.value = null
+    selectedRcState.value = null
+    hoveredTeleportPointKey.value = null
+    hoverCoordinateInfo.value = null
+    selectedTeleportIcons.value = new Set(teleportIconOptions.value.map(option => option.icon))
 }
 
 /**
@@ -1072,6 +1157,45 @@ function focusSubRegion(subRegionId: number) {
 function selectRc(subRegionId: number, rcId: number, rcIndex: number) {
     selectedSubRegionId.value = subRegionId
     selectedRcState.value = { subRegionId, rcId, rcIndex }
+    requestDraw()
+}
+
+/**
+ * 生成 TP 点的高亮键，避免不同子区域中同 id 点位互相干扰。
+ */
+function getTeleportPointKey(subRegionId: number, tpPointId: number) {
+    return `${subRegionId}:${tpPointId}`
+}
+
+/**
+ * 聚焦到指定 TP 点，并同步选中其所属子区域。
+ */
+function focusTeleportPoint(subRegionId: number, tpPoint: ProjectedTeleportPoint) {
+    selectedSubRegionId.value = subRegionId
+    selectedRcState.value = null
+    hoveredTeleportPointKey.value = getTeleportPointKey(subRegionId, tpPoint.id)
+    const container = containerRef.value
+    if (!container) {
+        requestDraw()
+        return
+    }
+    panOffset.value = { x: container.clientWidth / 2 - tpPoint.x * zoom.value, y: container.clientHeight / 2 - tpPoint.y * zoom.value }
+    requestDraw()
+}
+
+/**
+ * 悬停指定 TP 点，仅更新高亮态。
+ */
+function hoverTeleportPoint(subRegionId: number, tpPointId: number) {
+    hoveredTeleportPointKey.value = getTeleportPointKey(subRegionId, tpPointId)
+    requestDraw()
+}
+
+/**
+ * 清除 TP 点高亮。
+ */
+function clearHoveredTeleportPoint() {
+    hoveredTeleportPointKey.value = null
     requestDraw()
 }
 
@@ -1344,6 +1468,7 @@ function drawHighlightedRcPoints(ctx: CanvasRenderingContext2D) {
  */
 function drawTeleportPoints(ctx: CanvasRenderingContext2D) {
     if (projectedSubRegions.value.length === 0) return
+    const hoveredKey = hoveredTeleportPointKey.value
 
     ctx.save()
     const normalRadius = 5 / zoom.value
@@ -1358,20 +1483,32 @@ function drawTeleportPoints(ctx: CanvasRenderingContext2D) {
     ctx.font = `${10 / zoom.value}px sans-serif`
 
     for (const subRegion of projectedSubRegions.value) {
-        if (subRegion.tpPoints.length === 0) continue
+        const visibleTpPoints = subRegion.tpPoints.filter(tpPoint => isTeleportPointVisible(tpPoint))
+        if (visibleTpPoints.length === 0) continue
 
-        for (const tpPoint of subRegion.tpPoints) {
+        for (const tpPoint of visibleTpPoints) {
             const iconUrl = resolveTeleportPointIconUrl(tpPoint.icon)
             const iconImage = ensureTpIconImageLoaded(iconUrl)
+            const isHovered = hoveredKey === getTeleportPointKey(subRegion.id, tpPoint.id)
+            const highlightRadius = 12 / zoom.value
 
             ctx.save()
-            ctx.globalAlpha = 1
+            ctx.globalAlpha = isHovered ? 1 : 0.92
+            if (isHovered) {
+                ctx.beginPath()
+                ctx.arc(tpPoint.x, tpPoint.y, highlightRadius, 0, Math.PI * 2)
+                ctx.fillStyle = "rgba(250, 204, 21, 0.18)"
+                ctx.fill()
+                ctx.lineWidth = 2 / zoom.value
+                ctx.strokeStyle = "rgba(250, 204, 21, 0.95)"
+                ctx.stroke()
+            }
             if (iconImage) {
                 ctx.drawImage(iconImage, tpPoint.x - iconSize / 2, tpPoint.y - iconSize / 2, iconSize, iconSize)
             } else {
                 ctx.beginPath()
                 ctx.arc(tpPoint.x, tpPoint.y, normalRadius, 0, Math.PI * 2)
-                ctx.fillStyle = "rgba(45, 212, 191, 0.95)"
+                ctx.fillStyle = isHovered ? "rgba(250, 204, 21, 0.95)" : "rgba(45, 212, 191, 0.95)"
                 ctx.fill()
             }
 
@@ -1379,9 +1516,9 @@ function drawTeleportPoints(ctx: CanvasRenderingContext2D) {
             const textWidth = ctx.measureText(tag).width
             const labelX = tpPoint.x + normalRadius + labelOffsetX
             const labelY = tpPoint.y - normalRadius - labelOffsetY
-            ctx.fillStyle = "rgba(0, 0, 0, 0.66)"
+            ctx.fillStyle = isHovered ? "rgba(0, 0, 0, 0.82)" : "rgba(0, 0, 0, 0.66)"
             ctx.fillRect(labelX - labelPaddingX, labelY - labelPaddingY, textWidth + labelPaddingX * 2, labelHeight)
-            ctx.fillStyle = "rgba(255, 255, 255, 0.95)"
+            ctx.fillStyle = isHovered ? "rgba(255, 248, 196, 1)" : "rgba(255, 255, 255, 0.95)"
             ctx.fillText(tag, labelX, labelY)
             ctx.restore()
         }
@@ -1643,10 +1780,7 @@ watch(
     () => currentProfile.value.regionId,
     async () => {
         initializeActiveLayers(currentProfile.value)
-        selectedSubRegionId.value = null
-        hoveredSubRegionId.value = null
-        selectedRcState.value = null
-        hoverCoordinateInfo.value = null
+        resetRegionSelectionState()
         await loadCurrentProfileImages()
         await nextTick()
         resetView()
@@ -1672,9 +1806,11 @@ watch(
     () => [
         activeLayers.value.map(layer => layer.id).join("|"),
         showTeleportPoints.value ? 1 : 0,
+        [...selectedTeleportIcons.value].sort().join("|"),
         projectedSubRegions.value.length,
         selectedSubRegionId.value ?? -1,
         hoveredSubRegionId.value ?? -1,
+        hoveredTeleportPointKey.value ?? "",
         selectedRcState.value?.subRegionId ?? -1,
         selectedRcState.value?.rcId ?? -1,
         selectedRcState.value?.rcIndex ?? -1,
@@ -1744,10 +1880,32 @@ onUnmounted(() => {
                         </label>
                     </div>
                 </div>
-                <label class="flex items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 hover:bg-base-200">
-                    <input v-model="showTeleportPoints" type="checkbox" class="checkbox checkbox-xs" />
-                    <span>显示TP点</span>
-                </label>
+                <div class="rounded-md border border-base-300 p-2 space-y-2 bg-base-100/70">
+                    <label class="flex items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 hover:bg-base-200">
+                        <input
+                            :checked="showTeleportPoints && isAllTeleportIconsSelected()"
+                            type="checkbox"
+                            class="checkbox checkbox-xs"
+                            @change="handleTeleportPointsAllChange(($event.target as HTMLInputElement).checked)"
+                        />
+                        <span>全部</span>
+                    </label>
+                    <div v-if="showTeleportPoints" class="flex flex-wrap gap-2">
+                        <label
+                            v-for="option in teleportIconOptions"
+                            :key="option.icon"
+                            class="inline-flex items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 hover:bg-base-200"
+                        >
+                        <input
+                            :checked="showTeleportPoints && selectedTeleportIcons.has(option.icon)"
+                            type="checkbox"
+                            class="checkbox checkbox-xs"
+                            @change="toggleTeleportIcon(option.icon, ($event.target as HTMLInputElement).checked)"
+                        />
+                            <img :src="resolveTeleportPointIconUrl(option.icon)" :alt="option.icon" class="inline-block size-6 shrink-0" />
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <div class="space-y-2">
@@ -1822,12 +1980,24 @@ onUnmounted(() => {
                     </div>
                 </div>
 
-                <div v-if="selectedSubRegion.tpPoints.length > 0" class="mt-2 rounded border border-base-300 bg-base-100/85 p-2 text-xs space-y-1">
+                <div v-if="selectedSubRegion.tpPoints.filter(tpPoint => isTeleportPointVisible(tpPoint)).length > 0" class="mt-2 rounded border border-base-300 bg-base-100/85 p-2 text-xs space-y-1">
                     <div class="font-medium">TP 点位</div>
                     <div class="grid gap-1">
-                        <div v-for="tpPoint in selectedSubRegion.tpPoints" :key="tpPoint.id" class="flex items-center gap-2 opacity-90">
-                            <img :src="resolveTeleportPointIconUrl(tpPoint.icon)" :alt="tpPoint.name" class="size-4 shrink-0" />
-                            <span class="min-w-0 truncate">{{ tpPoint.name }}</span>
+                        <div
+                            v-for="tpPoint in selectedSubRegion.tpPoints.filter(tpPoint => isTeleportPointVisible(tpPoint))"
+                            :key="tpPoint.id"
+                            class="flex items-center gap-2 opacity-90"
+                        >
+                            <button
+                                type="button"
+                                class="flex min-w-0 flex-1 items-center gap-2 rounded px-1 py-0.5 text-left hover:bg-base-200"
+                                @mouseenter="hoverTeleportPoint(selectedSubRegion.id, tpPoint.id)"
+                                @mouseleave="clearHoveredTeleportPoint"
+                                @click="focusTeleportPoint(selectedSubRegion.id, tpPoint)"
+                            >
+                                <img :src="resolveTeleportPointIconUrl(tpPoint.icon)" :alt="tpPoint.name" class="inline-block size-6 shrink-0" />
+                                <span class="min-w-0 truncate">{{ tpPoint.name }}</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1856,7 +2026,7 @@ onUnmounted(() => {
             <div class="absolute top-3 right-3 z-10 space-y-2 max-w-90">
                 <div class="badge badge-neutral badge-lg">
                     缩放 {{ (zoom * 100).toFixed(0) }}% | 图层 {{ activeLayers.length }} | 点位 {{ projectedSubRegions.length }} | TP
-                    {{ totalTeleportPointCount }}
+                    {{ visibleTeleportPointCount }}
                 </div>
                 <div v-if="hoverCoordinateInfo" class="rounded-md border border-base-300 bg-base-100/90 px-3 py-2 text-xs leading-5 shadow">
                     <div>Map: {{ hoverCoordinateInfo.mapX.toFixed(2) }}, {{ hoverCoordinateInfo.mapY.toFixed(2) }}</div>

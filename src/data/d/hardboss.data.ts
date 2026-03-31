@@ -1976,7 +1976,7 @@ export const hardBossMap: Map<number, HardBoss> = [
         id: 6,
         name: "太皓与烛阴",
         icon: "T_Permanent_HardBoss_Bailong_S",
-        desc: "待包装",
+        desc: "魂兮归来，遗忘之心。悠悠皓苍，失途之理。",
         diff: [
             {
                 id: 1051,

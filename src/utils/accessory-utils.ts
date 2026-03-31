@@ -41,3 +41,21 @@ const ACCESSORY_UNLOCK_LABEL_KEY_MAP: Record<string, string> = {
 export function getAccessoryUnlockLabelKey(normalizedUnlock: string): string {
     return ACCESSORY_UNLOCK_LABEL_KEY_MAP[normalizedUnlock] || normalizedUnlock
 }
+
+/**
+ * 根据资源前缀解析皮肤图标地址。
+ * 规则：
+ * 1. `T_Fashion_` / `T_Skin_` 开头的图标走 `/imgs/fashion/`
+ * 2. 其他图标默认走 `/imgs/webp/`
+ * 3. 空值回退到默认头像占位图
+ * @param icon 图标资源名
+ * @returns 图标 URL
+ */
+export function resolveSkinIconUrl(icon: string): string {
+    if (!icon) {
+        return "/imgs/webp/T_Head_Empty.webp"
+    }
+
+    const targetDir = icon.startsWith("T_Fashion_") || icon.startsWith("T_Skin_") ? "fashion" : "webp"
+    return `/imgs/${targetDir}/${icon}.webp`
+}

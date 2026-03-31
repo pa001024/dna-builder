@@ -77,6 +77,8 @@ export interface Char {
     加成?: CommonAttr
     技能: Skill[]
     溯源?: string[]
+    碎片?: number
+    第七溯源消耗?: [number, number][]
     专武?: number
     同律武器?: SkillWeapon[]
 }

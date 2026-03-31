@@ -5,7 +5,9 @@ import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weapon
 import type { Cutoff } from "@/data/d/cutoff.data"
 import { headSculptureMap } from "@/data/d/headsculpture.data"
 import { mountData } from "@/data/d/mount.data"
+import { getImprType, getRegionType } from "@/data/d/quest.data"
 import type { ShopItem } from "@/data/d/shop.data"
+import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { getRewardDetails, getRewardTypeText } from "@/utils/reward-utils"
 
 // 定义带有子项的商品类型
@@ -36,6 +38,16 @@ const currentPrice = computed(() => cutoffInfo.value?.price ?? props.item.price)
  */
 function formatCutoffTime(timestamp: number) {
     return new Date(timestamp * 1000).toLocaleString()
+}
+
+/**
+ * 格式化印象检定标签。
+ * @param imprCheck 印象检定原始数据
+ * @returns 印象检定文本
+ */
+function formatImpressionCheck(imprCheck: NonNullable<ShopItem["imprCheck"]>): string {
+    const [regionId, imprType, threshold] = imprCheck
+    return `印象检定 ${getRegionType(regionId)}·${getImprType(imprType as Parameters<typeof getImprType>[0])} ≥ ${threshold}`
 }
 
 const itemDetail = computed(() => {
@@ -75,7 +87,7 @@ const itemDetail = computed(() => {
                     switch (draft.t) {
                         case "CharAccessory":
                             let acc = charAccessoryData.find(item => item.id === props.item.typeId)
-                            if (acc) icon = `/imgs/fashion/${acc.icon}.webp`
+                            if (acc) icon = resolveSkinIconUrl(acc.icon)
                     }
                 }
             }
@@ -132,17 +144,17 @@ const itemDetail = computed(() => {
             }
         case "Skin":
             const skin = skinData.find(item => item.id === props.item.typeId)
-            if (!skin) {
+                if (!skin) {
+                    return {
+                        type: props.item.itemType,
+                        icon: `/imgs/webp/T_Head_Empty.webp`,
+                    }
+                }
                 return {
                     type: props.item.itemType,
-                    icon: `/imgs/webp/T_Head_Empty.webp`,
+                    icon: resolveSkinIconUrl(skin.icon),
+                    link: `/db/accessory/skin/${skin.id}`,
                 }
-            }
-            return {
-                type: props.item.itemType,
-                icon: `/imgs/webp/${skin.icon}.webp`,
-                link: `/db/accessory/skin/${skin.id}`,
-            }
         case "Title":
             return {
                 type: props.item.itemType,
@@ -174,7 +186,7 @@ const itemDetail = computed(() => {
                 }
             return {
                 type: props.item.itemType,
-                icon: `/imgs/fashion/${acc.icon}.webp`,
+                icon: resolveSkinIconUrl(acc.icon),
             }
         case "TitleFrame":
             return {
@@ -271,6 +283,11 @@ function getPriceIcon(name: string) {
                     <div><span class="text-base-content/70">限购:</span> {{ item.limit || "∞" }}</div>
                     <div v-if="item.lv"><span class="text-base-content/70">解锁等级:</span> {{ item.lv }}</div>
                     <div v-if="item.cond"><span class="text-base-content/70">解锁条件:</span> {{ item.cond }}</div>
+                </div>
+                <div v-if="item.imprCheck" class="mt-1">
+                    <span class="rounded border border-info/40 bg-info/10 px-1.5 py-0.5 text-[10px] leading-none text-info">
+                        {{ formatImpressionCheck(item.imprCheck) }}
+                    </span>
                 </div>
                 <div v-if="item.startTime" class="mt-1 text-xs text-base-content/70">
                     <span>开始时间:</span> {{ new Date(item.startTime * 1000).toLocaleString() }}

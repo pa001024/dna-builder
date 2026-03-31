@@ -3750,13 +3750,6 @@ export const questChainData: QuestChain[] = [
                 id: 12020615,
                 sr: 105301,
                 next: {
-                    Success: 12020616,
-                },
-            },
-            {
-                id: 12020616,
-                sr: 105301,
-                next: {
                     Success: 12020617,
                 },
             },
@@ -3818,13 +3811,6 @@ export const questChainData: QuestChain[] = [
             },
             {
                 id: 12020627,
-                sr: 104504,
-                next: {
-                    Success: 12020628,
-                },
-            },
-            {
-                id: 12020628,
                 sr: 104504,
             },
         ],

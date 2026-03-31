@@ -331,7 +331,7 @@ export const subRegionData: SubRegion[] = [
             {
                 id: 9000,
                 pos: [31670, 32317],
-                name: "",
+                name: "西比尔",
                 icon: "T_Gp_Boss",
             },
             {
@@ -1113,7 +1113,7 @@ export const subRegionData: SubRegion[] = [
             {
                 id: 9002,
                 pos: [-8800, 42600],
-                name: "",
+                name: "羽化者",
                 icon: "T_Gp_Boss",
             },
             {
@@ -1476,7 +1476,7 @@ export const subRegionData: SubRegion[] = [
             {
                 id: 9001,
                 pos: [18965, 31181],
-                name: "",
+                name: "嗜晶者",
                 icon: "T_Gp_Boss",
             },
         ],
@@ -1868,7 +1868,7 @@ export const subRegionData: SubRegion[] = [
             {
                 id: 9004,
                 pos: [20490, 4135],
-                name: "",
+                name: "“雪国的野兽”",
                 icon: "T_Gp_Boss",
             },
             {
@@ -2185,7 +2185,7 @@ export const subRegionData: SubRegion[] = [
             {
                 id: 9003,
                 pos: [3946, -8069],
-                name: "",
+                name: "“炼火的典狱长”",
                 icon: "T_Gp_Boss",
             },
         ],
@@ -3782,7 +3782,7 @@ export const subRegionData: SubRegion[] = [
             {
                 id: 9005,
                 pos: [43715, 23455],
-                name: "",
+                name: "太皓与烛阴",
                 icon: "T_Gp_Boss",
             },
         ],
@@ -3880,13 +3880,13 @@ export const subRegionData: SubRegion[] = [
             {
                 id: 2842,
                 pos: [15355, 4565],
-                name: "内城",
+                name: "东郊",
                 icon: "T_Gp_Haojing",
             },
             {
                 id: 2843,
                 pos: [14316, 3500],
-                name: "东郊",
+                name: "内城",
                 icon: "T_Gp_Haojing",
             },
             {
