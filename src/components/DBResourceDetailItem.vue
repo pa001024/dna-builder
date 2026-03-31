@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { collectResourceDraftSources } from "@/utils/draft-source"
+import { getRarityBadgeClass } from "@/utils/rarity-utils"
 import { collectResourceDungeonSources, collectResourceShopSources } from "@/utils/resource-source"
 import type { Resource } from "../data/d/resource.data"
 
@@ -16,38 +17,24 @@ const shopSources = computed(() => collectResourceShopSources(props.resource))
 function getResourceIconUrl(icon: string): string {
     return icon ? `/imgs/res/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
 }
-
-function getRarityColor(rarity: number): string {
-    const rarityMap: Record<number, string> = {
-        1: "from-gray-900/80 to-gray-100/80",
-        2: "from-green-900/80 to-green-100/80",
-        3: "from-blue-900/80 to-blue-100/80",
-        4: "from-purple-900/80 to-purple-100/80",
-        5: "from-yellow-900/80 to-yellow-100/80",
-    }
-
-    return rarityMap[rarity] || rarityMap[1]
-}
 </script>
 
 <template>
     <div class="p-3 space-y-3">
-        <div class="p-3">
+        <div>
             <div class="flex items-center gap-3 mb-3">
                 <SRouterLink :to="`/db/resource/${resource.id}`" class="text-lg font-bold link link-primary">
                     {{ resource.name }}
                 </SRouterLink>
                 <span class="text-xs text-base-content/70">{{ $t("resource.id") }}: {{ resource.id }}</span>
+                <div class="flex-1"></div>
+                <div class="text-xs px-2 py-0.5 rounded" :class="getRarityBadgeClass(resource.rarity)">{{ rarityText }}</div>
             </div>
 
             <div class="flex justify-center items-center mb-3">
-                <ImageFallback :src="getResourceIconUrl(resource.icon)" :alt="resource.name" class="w-24 object-cover rounded" :class="getRarityColor(resource.rarity)">
-                    <img src="/imgs/webp/T_Head_Empty.webp" :alt="resource.name" class="w-24 object-cover rounded" :class="getRarityColor(resource.rarity)" />
+                <ImageFallback :src="getResourceIconUrl(resource.icon)" :alt="resource.name" class="w-24 object-cover rounded">
+                    <img src="/imgs/webp/T_Head_Empty.webp" :alt="resource.name" class="w-24 object-cover rounded" />
                 </ImageFallback>
-            </div>
-
-            <div class="flex flex-wrap gap-2 text-sm opacity-70 mb-3">
-                <span>{{ $t("resource.rarity") }}：{{ rarityText }}</span>
             </div>
 
             <div v-if="resource.desc" class="p-3 bg-base-200 rounded mb-3">
@@ -61,7 +48,7 @@ function getRarityColor(rarity: number): string {
             </div>
         </div>
 
-        <div class="p-3 bg-base-200 rounded">
+        <div class="p-3 bg-base-200 rounded" v-if="draftSources.length || dungeonSources.length || shopSources.length">
             <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.source") }}</div>
             <div class="space-y-3">
                 <DraftSource :draft-sources="draftSources" />

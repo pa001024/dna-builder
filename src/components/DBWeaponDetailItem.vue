@@ -2,6 +2,7 @@
 import { t } from "i18next"
 import { computed, ref, watch } from "vue"
 import charData from "@/data/d/char.data"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { collectWeaponSources, type WeaponSourceInfo } from "@/utils/weapon-source"
 import { weaponDraftMap } from "../data/d/index"
 import modData from "../data/d/mod.data"
@@ -83,22 +84,6 @@ function ensureReplaceModLevels() {
             replaceModLevels.value[mod.id] = new LeveledMod(mod).等级
         }
     })
-}
-
-/**
- * 获取 MOD 品质渐变色样式
- * @param quality MOD品质
- * @returns 渐变色 class
- */
-function getQualityColor(quality: string): string {
-    const colorMap: Record<string, string> = {
-        金: "from-yellow-900/80 to-yellow-100/80",
-        紫: "from-purple-900/80 to-purple-100/80",
-        蓝: "from-blue-900/80 to-blue-100/80",
-        绿: "from-green-900/80 to-green-100/80",
-        白: "from-gray-900/80 to-gray-100/80",
-    }
-    return colorMap[quality] || "from-gray-900/80 to-gray-100/80"
 }
 
 /**
@@ -425,13 +410,10 @@ watch(
                                         :src="item.mod.url"
                                         :alt="item.mod.名称"
                                         class="size-8 inline-block mr-2 bg-linear-45 rounded"
-                                        :class="getQualityColor(item.mod.品质)"
+                                        :class="getRarityGradientClass(item.mod.品质)"
                                     />
                                     <div class="flex flex-col min-w-0">
-                                        <SRouterLink
-                                            :to="`/db/mod/${item.mod.id}`"
-                                            class="text-sm font-medium hover:underline truncate"
-                                        >
+                                        <SRouterLink :to="`/db/mod/${item.mod.id}`" class="text-sm font-medium hover:underline truncate">
                                             {{ $t(item.mod.系列) }}{{ $t(item.mod.名称) }}
                                         </SRouterLink>
                                         <div class="text-xs opacity-70 flex flex-wrap gap-x-3 gap-y-1">

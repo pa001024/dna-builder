@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { t } from "i18next"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { draftMap, LeveledChar, LeveledMod, LeveledWeapon, resourceMap } from "../data"
 import { charMap, walnutMap } from "../data/d"
 import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "../data/d/accessory.data"
@@ -36,25 +37,6 @@ function getResourceIcon(id?: number | string) {
         return fragmentIcon
     }
     return resource.icon ? `/imgs/res/${resource.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
-}
-
-/**
- * 获取品质背景色。
- * @param quality 品质
- * @returns 背景色类名
- */
-function getQualityColor(quality: string | number): string {
-    if (typeof quality === "number") {
-        quality = ["白", "绿", "蓝", "紫", "金"][quality - 1]
-    }
-    const colorMap: Record<string, string> = {
-        金: "from-yellow-900/80 to-yellow-100/80",
-        紫: "from-purple-900/80 to-purple-100/80",
-        蓝: "from-blue-900/80 to-blue-100/80",
-        绿: "from-green-900/80 to-green-100/80",
-        白: "from-gray-900/80 to-gray-100/80",
-    }
-    return colorMap[quality] || "from-gray-900/80 to-gray-100/80"
 }
 
 /**
@@ -94,8 +76,8 @@ function getAccessoryIconById(type: "CharAccessory" | "WeaponAccessory" | "Weapo
         type === "CharAccessory"
             ? charAccessoryData.find(item => item.id === normalizedId)
             : type === "WeaponAccessory"
-                ? weaponAccessoryData.find(item => item.id === normalizedId)
-                : weaponSkinData.find(item => item.id === normalizedId)
+              ? weaponAccessoryData.find(item => item.id === normalizedId)
+              : weaponSkinData.find(item => item.id === normalizedId)
     return accessory?.icon ? resolveSkinIconUrl(accessory.icon) : "/imgs/webp/T_Head_Empty.webp"
 }
 
@@ -257,7 +239,7 @@ function getRewardIcon(item: RewardItemType) {
 function getRewardBackgroundColor(item: RewardItemType) {
     if (item.t === "Resource") {
         const resource = resourceMap.get(item.id)
-        return getQualityColor(resource?.rarity || 1)
+        return getRarityGradientClass(resource?.rarity || 1)
     }
     if (
         item.t === "Skin" ||
@@ -267,18 +249,18 @@ function getRewardBackgroundColor(item: RewardItemType) {
         item.t === "WeaponAccessory" ||
         item.t === "WeaponSkin"
     ) {
-        return getQualityColor(
+        return getRarityGradientClass(
             item.t === "Skin"
                 ? skinData.find(entry => entry.id === item.id)?.rarity || 1
                 : item.t === "WeaponSkin"
-                    ? weaponSkinData.find(entry => entry.id === item.id)?.rarity || 1
-                    : item.t === "CharAccessory"
-                        ? charAccessoryData.find(entry => entry.id === item.id)?.rarity || 1
-                        : item.t === "WeaponAccessory"
-                            ? weaponAccessoryData.find(entry => entry.id === item.id)?.rarity || 1
-                            : item.t === "HeadFrame"
-                                ? 4
-                                : 5
+                  ? weaponSkinData.find(entry => entry.id === item.id)?.rarity || 1
+                  : item.t === "CharAccessory"
+                    ? charAccessoryData.find(entry => entry.id === item.id)?.rarity || 1
+                    : item.t === "WeaponAccessory"
+                      ? weaponAccessoryData.find(entry => entry.id === item.id)?.rarity || 1
+                      : item.t === "HeadFrame"
+                        ? 4
+                        : 5
         )
     }
     if (item.t === "Mod") {
@@ -294,7 +276,7 @@ function getRewardBackgroundColor(item: RewardItemType) {
         return "from-yellow-900/80 to-yellow-100/80"
     }
     if (item.t === "Walnut") {
-        return getQualityColor(5)
+        return getRarityGradientClass(5)
     }
     return "from-gray-900/80 to-gray-100/80"
 }
@@ -386,57 +368,57 @@ function getDropModeText(mode: string): string {
         <!-- 递归奖励显示 -->
         <template v-for="item in reward?.child || []" :key="`${item.id}-${item.t}`">
             <template v-if="shouldShowRewardItem(item)">
-            <div class="flex items-start gap-2 text-xs">
-                <div class="flex-1">
-                    <div class="flex items-center gap-2">
-                        <span class="flex min-w-0 items-center gap-1">
-                            <img
-                                v-if="item.t !== 'Reward'"
-                                :src="getRewardIcon(item)"
-                                :alt="getRewardDisplayName(item)"
-                                class="size-6 shrink-0 rounded bg-linear-45"
-                                :class="getRewardBackgroundColor(item)"
-                            />
-                            <SRouterLink v-if="hasRewardLink(item)" :to="getRewardLink(item)" class="min-w-0 truncate hover:underline">
-                                {{ item.dp ? "掉落物: " : "" }}
-                                {{ item.d ? "图纸: " : "" }}
-                                {{ getRewardDisplayName(item) }}
-                            </SRouterLink>
-                            <span v-else>
-                                {{ item.dp ? "掉落物: " : "" }}
-                                {{ item.d ? "图纸: " : "" }}
-                                {{ getRewardDisplayName(item) }}
+                <div class="flex items-start gap-2 text-xs">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="flex min-w-0 items-center gap-1">
+                                <img
+                                    v-if="item.t !== 'Reward'"
+                                    :src="getRewardIcon(item)"
+                                    :alt="getRewardDisplayName(item)"
+                                    class="size-6 shrink-0 rounded bg-linear-45"
+                                    :class="getRewardBackgroundColor(item)"
+                                />
+                                <SRouterLink v-if="hasRewardLink(item)" :to="getRewardLink(item)" class="min-w-0 truncate hover:underline">
+                                    {{ item.dp ? "掉落物: " : "" }}
+                                    {{ item.d ? "图纸: " : "" }}
+                                    {{ getRewardDisplayName(item) }}
+                                </SRouterLink>
+                                <span v-else>
+                                    {{ item.dp ? "掉落物: " : "" }}
+                                    {{ item.d ? "图纸: " : "" }}
+                                    {{ getRewardDisplayName(item) }}
+                                </span>
+                                <span class="text-xs text-base-content/50">({{ $t(getRewardTypeText(item.t)) }})</span>
                             </span>
-                            <span class="text-xs text-base-content/50">({{ $t(getRewardTypeText(item.t)) }})</span>
-                        </span>
-                        <span v-if="item.c" class="text-base-content/70">x{{ item.c }}</span>
-                        <span v-if="item.p && item.m !== 'Independent'" class="text-base-content/70">
-                            ({{ item.m === "Sequence" ? `容量:${item.p}` : `权重:${item.p}` }}
-                            {{ item.pp ? `比例:${+(item.pp * 100).toFixed(2)}%` : "" }}
-                            {{ item.times ? `每个期望:${+item.times.toFixed(2)}次` : "" }}
-                            )
-                        </span>
-                        <span v-if="item.m === 'Independent'">独立掉落 {{ `概率:${+(item.p / 100).toFixed(2)}%` }}</span>
-                        <!-- 显示掉落模式 -->
-                        <span
-                            v-if="item.t === 'Reward'"
-                            class="text-xs px-1.5 py-0.5 rounded"
-                            :class="
-                                getDropModeText(item.m || '') === '独立'
-                                    ? 'bg-success text-success-content'
-                                    : 'bg-warning text-warning-content'
-                            "
-                        >
-                            {{ getDropModeText(item.m || "") }}
-                            <span v-if="item.totalP"> 总容量 {{ item.totalP }}</span>
-                        </span>
-                    </div>
-                    <!-- 递归显示子奖励 -->
-                    <div v-if="item.child && item.child.length" class="pl-4 mt-1 space-y-1">
-                        <RewardItem :reward="item" :type-filter="typeFilter" />
+                            <span v-if="item.c" class="text-base-content/70">x{{ item.c }}</span>
+                            <span v-if="item.p && item.m !== 'Independent'" class="text-base-content/70">
+                                ({{ item.m === "Sequence" ? `容量:${item.p}` : `权重:${item.p}` }}
+                                {{ item.pp ? `比例:${+(item.pp * 100).toFixed(2)}%` : "" }}
+                                {{ item.times ? `每个期望:${+item.times.toFixed(2)}次` : "" }}
+                                )
+                            </span>
+                            <span v-if="item.m === 'Independent'">独立掉落 {{ `概率:${+(item.p / 100).toFixed(2)}%` }}</span>
+                            <!-- 显示掉落模式 -->
+                            <span
+                                v-if="item.t === 'Reward'"
+                                class="text-xs px-1.5 py-0.5 rounded"
+                                :class="
+                                    getDropModeText(item.m || '') === '独立'
+                                        ? 'bg-success text-success-content'
+                                        : 'bg-warning text-warning-content'
+                                "
+                            >
+                                {{ getDropModeText(item.m || "") }}
+                                <span v-if="item.totalP"> 总容量 {{ item.totalP }}</span>
+                            </span>
+                        </div>
+                        <!-- 递归显示子奖励 -->
+                        <div v-if="item.child && item.child.length" class="pl-4 mt-1 space-y-1">
+                            <RewardItem :reward="item" :type-filter="typeFilter" />
+                        </div>
                     </div>
                 </div>
-            </div>
             </template>
         </template>
     </div>

@@ -7,6 +7,7 @@ import type { Draft } from "@/data/d/draft.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
 import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 
 defineOptions({ inheritAttrs: false })
 const props = defineProps<{
@@ -69,7 +70,7 @@ function getResourceById(id: number | string) {
 
 function getRarityColor(name: string): string {
     const res = resourceMap.get(name)
-    return getQualityColor(res?.rarity || 1)
+    return getRarityGradientClass(res?.rarity || 1)
 }
 
 /**
@@ -89,20 +90,7 @@ function getResourceIconById(resourceId: number | string) {
  */
 function getResourceBackgroundById(resourceId: number | string) {
     const resource = getResourceById(resourceId)
-    return getQualityColor(resource?.rarity || 1)
-}
-function getQualityColor(quality: string | number): string {
-    if (typeof quality === "number") {
-        quality = ["白", "绿", "蓝", "紫", "金"][quality - 1]
-    }
-    const colorMap: Record<string, string> = {
-        金: "from-yellow-900/80 to-yellow-100/80",
-        紫: "from-purple-900/80 to-purple-100/80",
-        蓝: "from-blue-900/80 to-blue-100/80",
-        绿: "from-green-900/80 to-green-100/80",
-        白: "from-gray-900/80 to-gray-100/80",
-    }
-    return colorMap[quality] || "from-gray-900/80 to-gray-100/80"
+    return getRarityGradientClass(resource?.rarity || 1)
 }
 
 /**
@@ -129,11 +117,11 @@ function getDraftIcon(draftId: number | string) {
  */
 function getDraftBackgroundColor(draftId: number | string): string {
     const draft = getDraftByIdOrProductId(draftId)
-    if (!draft) return getQualityColor(1)
+    if (!draft) return getRarityGradientClass(1)
     if (draft.t === "Mod") {
-        return getQualityColor(modMap.get(draft.p)?.品质 || draft.r)
+        return getRarityGradientClass(modMap.get(draft.p)?.品质 || draft.r)
     }
-    return getQualityColor(draft.r)
+    return getRarityGradientClass(draft.r)
 }
 
 /**
@@ -187,7 +175,7 @@ function getWalnutIcon(walnutId: number | string): string {
  * @returns 背景色类名
  */
 function getWalnutBackgroundColor(_walnutId: number | string): string {
-    return getQualityColor(5)
+    return getRarityGradientClass(5)
 }
 
 /**
@@ -283,7 +271,7 @@ function getFashionRarity(type: FashionCostType, id: number | string): number {
  * @returns 背景色类名
  */
 function getFashionBackgroundColor(type: FashionCostType, id: number | string): string {
-    return getQualityColor(getFashionRarity(type, id))
+    return getRarityGradientClass(getFashionRarity(type, id))
 }
 
 /**
@@ -365,7 +353,7 @@ function handleCardClick() {
                     :src="mod.url"
                     :alt="mod.名称"
                     class="size-8 inline-block mr-2 bg-linear-45 rounded"
-                    :class="getQualityColor(mod.品质)"
+                    :class="getRarityGradientClass(mod.品质)"
                 />
                 <SRouterLink :to="`/db/mod/${mod.id}`" stop class="hover:underline">
                     {{ value[2] === "Mod" ? $t(mod.名称) : `图纸: ${mod.名称}` }}

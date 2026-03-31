@@ -4,6 +4,7 @@ import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollTo
 import { useSearchParam } from "@/composables/useSearchParam"
 import { resourceData } from "@/data/d/resource.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedResourceId = useSearchParam<number>("id", 0)
@@ -11,40 +12,6 @@ const selectedResourceId = useSearchParam<number>("id", 0)
 const selectedResource = computed(() => {
     return selectedResourceId.value ? resourceData.find(resource => resource.id === selectedResourceId.value) || null : null
 })
-
-/**
- * 获取资源稀有度名称。
- * @param rarity 稀有度数值。
- * @returns 稀有度文本。
- */
-function getRarityName(rarity: number): string {
-    const rarityMap: Record<number, string> = {
-        1: "白",
-        2: "绿",
-        3: "蓝",
-        4: "紫",
-        5: "金",
-    }
-
-    return rarityMap[rarity] || rarity.toString()
-}
-
-/**
- * 获取资源稀有度标签颜色。
- * @param rarity 稀有度数值。
- * @returns 颜色样式类名。
- */
-function getRarityColor(rarity: number): string {
-    const colorMap: Record<number, string> = {
-        1: "bg-gray-200 text-gray-800",
-        2: "bg-green-200 text-green-800",
-        3: "bg-blue-200 text-blue-800",
-        4: "bg-purple-200 text-purple-800",
-        5: "bg-yellow-200 text-yellow-800",
-    }
-
-    return colorMap[rarity] || "bg-base-200 text-base-content"
-}
 
 const filteredResources = computed(() => {
     return resourceData.filter(resource => {
@@ -78,7 +45,7 @@ useInitialScrollToSelectedItem()
                 </div>
 
                 <ScrollArea class="flex-1">
-                    <div class="p-2 grid grid-cols-[repeat(auto-fill,minmax(168px,1fr))] gap-2">
+                    <div class="p-2 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2">
                         <div
                             v-for="resource in filteredResources"
                             :key="resource.id"
@@ -87,16 +54,18 @@ useInitialScrollToSelectedItem()
                             @click="selectedResourceId = resource.id"
                         >
                             <div class="flex flex-col items-center gap-2 text-center">
-                                <ImageFallback :src="`/imgs/res/${resource.icon}.webp`" :alt="resource.name" class="w-14 h-14 rounded shrink-0">
+                                <ImageFallback
+                                    :src="`/imgs/res/${resource.icon}.webp`"
+                                    :alt="resource.name"
+                                    class="w-14 h-14 rounded shrink-0"
+                                    :class="`bg-linear-15 ${getRarityGradientClass(resource.rarity)}`"
+                                >
                                     <img src="/imgs/webp/T_Head_Empty.webp" :alt="resource.name" class="w-14 h-14 rounded shrink-0" />
                                 </ImageFallback>
                                 <div class="min-w-0 w-full">
                                     <div class="font-medium truncate">{{ resource.name }}</div>
                                     <div class="text-xs opacity-70 mt-1">{{ $t("resource.id") }}: {{ resource.id }}</div>
                                 </div>
-                                <span class="text-xs px-2 py-0.5 rounded" :class="getRarityColor(resource.rarity)">
-                                    {{ getRarityName(resource.rarity) }}
-                                </span>
                             </div>
                         </div>
                     </div>

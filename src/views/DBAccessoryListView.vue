@@ -2,10 +2,23 @@
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
-import { type Accessory, charAccessoryData, type HairItem, type HeadFrameItem, type HeadSculptureItem, hairData, headFrameData, type SkinItem, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import {
+    type Accessory,
+    charAccessoryData,
+    type HairItem,
+    type HeadFrameItem,
+    type HeadSculptureItem,
+    hairData,
+    headFrameData,
+    type SkinItem,
+    skinData,
+    weaponAccessoryData,
+    weaponSkinData,
+} from "@/data/d/accessory.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
 import { getAccessoryUnlockLabelKey, normalizeAccessoryUnlock, resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { matchPinyin } from "@/utils/pinyin-utils"
+import { getRarityBadgeClass, getRarityGradientClass } from "@/utils/rarity-utils"
 
 type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "hair" | "headframe" | "head"
 
@@ -16,7 +29,14 @@ type SkinAccessoryItem = SkinItem & { accessoryType: "skin" }
 type HairAccessoryItem = HairItem & { accessoryType: "hair" }
 type HeadFrameAccessoryItem = HeadFrameItem & { accessoryType: "headframe" }
 type HeadAccessoryItem = HeadSculptureItem & { accessoryType: "head" }
-type AccessoryItem = CharAccessoryItem | WeaponAccessoryItem | SkinAccessoryItem | WeaponSkinAccessoryItem | HairAccessoryItem | HeadFrameAccessoryItem | HeadAccessoryItem
+type AccessoryItem =
+    | CharAccessoryItem
+    | WeaponAccessoryItem
+    | SkinAccessoryItem
+    | WeaponSkinAccessoryItem
+    | HairAccessoryItem
+    | HeadFrameAccessoryItem
+    | HeadAccessoryItem
 
 /**
  * 判断当前饰品是否包含获取方式字段。
@@ -32,7 +52,9 @@ function hasAccessoryUnlock(accessory: AccessoryItem): accessory is CharAccessor
  * @param accessory 饰品数据
  * @returns 是否包含稀有度
  */
-function hasAccessoryRarity(accessory: AccessoryItem): accessory is CharAccessoryItem | WeaponAccessoryItem | SkinAccessoryItem | WeaponSkinAccessoryItem {
+function hasAccessoryRarity(
+    accessory: AccessoryItem
+): accessory is CharAccessoryItem | WeaponAccessoryItem | SkinAccessoryItem | WeaponSkinAccessoryItem {
     return "rarity" in accessory && typeof accessory.rarity === "number"
 }
 
@@ -204,40 +226,6 @@ function getAccessoryIcon(accessory: AccessoryItem): string {
 }
 
 /**
- * 根据稀有度返回背景渐变色。
- * @param rarity 稀有度（1~5）
- * @returns Tailwind 渐变类名
- */
-function getRarityGradientClass(rarity: number): string {
-    const rarityMap: Record<number, string> = {
-        1: "from-gray-900/80 to-gray-100/80",
-        2: "from-green-900/80 to-green-100/80",
-        3: "from-blue-900/80 to-blue-100/80",
-        4: "from-purple-900/80 to-purple-100/80",
-        5: "from-yellow-900/80 to-yellow-100/80",
-    }
-
-    return rarityMap[rarity] || rarityMap[1]
-}
-
-/**
- * 根据稀有度返回徽章颜色。
- * @param rarity 稀有度（1~5）
- * @returns Tailwind 颜色类名
- */
-function getRarityBadgeClass(rarity: number): string {
-    const rarityMap: Record<number, string> = {
-        1: "bg-gray-500 text-white",
-        2: "bg-green-600 text-white",
-        3: "bg-blue-600 text-white",
-        4: "bg-purple-600 text-white",
-        5: "bg-yellow-500 text-black",
-    }
-
-    return rarityMap[rarity] || rarityMap[1]
-}
-
-/**
  * 根据稀有度返回文本标签。
  * @param rarity 稀有度（1~5）
  * @returns 稀有度文本
@@ -282,81 +270,110 @@ useInitialScrollToSelectedItem()
 <template>
     <div class="h-full flex flex-col bg-base-100">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
-            <div class="flex-1 flex flex-col overflow-hidden"
-                :class="{ 'border-r border-base-200': selectedAccessory }">
+            <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedAccessory }">
                 <div class="p-3 border-b border-base-200">
-                    <input v-model="searchKeyword" type="text" :placeholder="$t('accessory.searchPlaceholder')"
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
+                    <input
+                        v-model="searchKeyword"
+                        type="text"
+                        :placeholder="$t('accessory.searchPlaceholder')"
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
+                    />
                 </div>
 
                 <div class="p-2 border-b border-base-200">
                     <div class="flex flex-wrap gap-1 pb-1">
-                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                        <button
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
                             :class="selectedType === 'all' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
-                            @click="selectedType = 'all'">
+                            @click="selectedType = 'all'"
+                        >
                             {{ $t("accessory.typeAll") }}
                         </button>
-                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                        <button
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
                             :class="selectedType === 'char' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
-                            @click="selectedType = 'char'">
+                            @click="selectedType = 'char'"
+                        >
                             {{ $t("accessory.typeChar") }}
                         </button>
-                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                        <button
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
                             :class="selectedType === 'weapon' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
-                            @click="selectedType = 'weapon'">
+                            @click="selectedType = 'weapon'"
+                        >
                             {{ $t("accessory.typeWeapon") }}
                         </button>
-                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                        <button
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
                             :class="selectedType === 'skin' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
-                            @click="selectedType = 'skin'">
+                            @click="selectedType = 'skin'"
+                        >
                             {{ $t("accessory.typeSkin") }}
                         </button>
-                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                        <button
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
                             :class="selectedType === 'weaponskin' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
-                            @click="selectedType = 'weaponskin'">
+                            @click="selectedType = 'weaponskin'"
+                        >
                             {{ $t("accessory.typeWeaponSkin") }}
                         </button>
-                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                        <button
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
                             :class="selectedType === 'hair' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
-                            @click="selectedType = 'hair'">
+                            @click="selectedType = 'hair'"
+                        >
                             {{ $t("accessory.typeHair") }}
                         </button>
-                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                        <button
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
                             :class="selectedType === 'headframe' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
-                            @click="selectedType = 'headframe'">
+                            @click="selectedType = 'headframe'"
+                        >
                             {{ $t("accessory.typeHeadFrame") }}
                         </button>
-                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                        <button
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
                             :class="selectedType === 'head' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
-                            @click="selectedType = 'head'">
+                            @click="selectedType = 'head'"
+                        >
                             {{ $t("accessory.typeAvatar") }}
                         </button>
                     </div>
 
                     <div class="flex flex-wrap gap-1 pb-1">
-                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                        <button
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
                             :class="selectedRarity === -1 ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
-                            @click="selectedRarity = -1">
+                            @click="selectedRarity = -1"
+                        >
                             {{ $t("全部") }}
                         </button>
-                        <button v-for="rarity in allRarities" :key="rarity"
+                        <button
+                            v-for="rarity in allRarities"
+                            :key="rarity"
                             class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
                             :class="selectedRarity === rarity ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
-                            @click="selectedRarity = rarity">
+                            @click="selectedRarity = rarity"
+                        >
                             {{ getRarityText(rarity) }}
                         </button>
                     </div>
 
                     <div class="flex flex-wrap gap-1">
-                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                        <button
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
                             :class="selectedUnlock === 'all' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
-                            @click="selectedUnlock = 'all'">
+                            @click="selectedUnlock = 'all'"
+                        >
                             {{ $t("全部") }}
                         </button>
-                        <button v-for="unlockMethod in allUnlockMethods" :key="unlockMethod"
+                        <button
+                            v-for="unlockMethod in allUnlockMethods"
+                            :key="unlockMethod"
                             class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
                             :class="selectedUnlock === unlockMethod ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
-                            @click="selectedUnlock = unlockMethod">
+                            @click="selectedUnlock = unlockMethod"
+                        >
                             {{ $t(getAccessoryUnlockLabelKey(unlockMethod)) }}
                         </button>
                     </div>
@@ -364,19 +381,23 @@ useInitialScrollToSelectedItem()
 
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div v-for="accessory in filteredAccessories"
+                        <div
+                            v-for="accessory in filteredAccessories"
                             :key="`${accessory.accessoryType}:${accessory.id}`"
-                            class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300" :class="{
+                            class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                            :class="{
                                 'bg-primary/90 text-primary-content hover:bg-primary':
                                     selectedAccessoryKey === `${accessory.accessoryType}:${accessory.id}`,
-                            }" @click="selectAccessory(accessory)">
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="min-w-0 flex items-start gap-2">
-                                <img
-                                    :src="getAccessoryIcon(accessory)"
-                                    :alt="accessory.name"
+                            }"
+                            @click="selectAccessory(accessory)"
+                        >
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0 flex items-start gap-2">
+                                    <img
+                                        :src="getAccessoryIcon(accessory)"
+                                        :alt="accessory.name"
                                         class="size-10 rounded object-cover"
-                                :class="
+                                        :class="
                                             accessory.accessoryType === 'headframe' || accessory.accessoryType === 'head'
                                                 ? 'bg-base-200'
                                                 : `bg-linear-15 ${getRarityGradientClass(getAccessoryRarity(accessory))}`
@@ -390,9 +411,11 @@ useInitialScrollToSelectedItem()
                                     </div>
                                 </div>
 
-                                <div v-if="accessory.accessoryType !== 'headframe' && accessory.accessoryType !== 'head'" class="flex flex-col items-end gap-1 shrink-0">
-                                    <span class="text-xs px-2 py-0.5 rounded"
-                                        :class="getRarityBadgeClass(getAccessoryRarity(accessory))">
+                                <div
+                                    v-if="accessory.accessoryType !== 'headframe' && accessory.accessoryType !== 'head'"
+                                    class="flex flex-col items-end gap-1 shrink-0"
+                                >
+                                    <span class="text-xs px-2 py-0.5 rounded" :class="getRarityBadgeClass(getAccessoryRarity(accessory))">
                                         {{ getRarityText(getAccessoryRarity(accessory)) }}
                                     </span>
                                     <span class="text-xs opacity-70">ID: {{ accessory.id }}</span>
@@ -403,8 +426,7 @@ useInitialScrollToSelectedItem()
                             </div>
 
                             <div class="flex items-center gap-2 mt-2 text-xs opacity-70 flex-wrap">
-                                <span>{{ $t("accessory.type") }}: {{
-                                    $t(getAccessoryTypeLabelKey(accessory.accessoryType)) }}</span>
+                                <span>{{ $t("accessory.type") }}: {{ $t(getAccessoryTypeLabelKey(accessory.accessoryType)) }}</span>
                             </div>
                         </div>
                     </div>
@@ -415,9 +437,11 @@ useInitialScrollToSelectedItem()
                 </div>
             </div>
 
-    <div v-if="selectedAccessory"
+            <div
+                v-if="selectedAccessory"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectAccessory(null)">
+                @click="selectAccessory(null)"
+            >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 
