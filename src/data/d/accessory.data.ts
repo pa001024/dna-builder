@@ -41,6 +41,13 @@ export interface HeadFrameItem {
     access?: string
 }
 
+export interface HeadSculptureItem {
+    id: number
+    name: string
+    desc: string
+    icon: string
+}
+
 export const charAccessoryData: Accessory[] = [
     {
         id: 10001,

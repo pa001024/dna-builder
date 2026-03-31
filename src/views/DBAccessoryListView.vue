@@ -2,18 +2,20 @@
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
-import { type Accessory, charAccessoryData, type HeadFrameItem, headFrameData, type SkinItem, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { type Accessory, charAccessoryData, type HeadFrameItem, type HeadSculptureItem, headFrameData, type SkinItem, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { headSculptureData } from "@/data/d/headsculpture.data"
 import { getAccessoryUnlockLabelKey, normalizeAccessoryUnlock, resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
-type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "headframe"
+type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "headframe" | "head"
 
 type CharAccessoryItem = Accessory & { accessoryType: "char" }
 type WeaponAccessoryItem = Accessory & { accessoryType: "weapon" }
 type WeaponSkinAccessoryItem = Accessory & { accessoryType: "weaponskin" }
 type SkinAccessoryItem = SkinItem & { accessoryType: "skin" }
 type HeadFrameAccessoryItem = HeadFrameItem & { accessoryType: "headframe" }
-type AccessoryItem = CharAccessoryItem | WeaponAccessoryItem | SkinAccessoryItem | WeaponSkinAccessoryItem | HeadFrameAccessoryItem
+type HeadAccessoryItem = HeadSculptureItem & { accessoryType: "head" }
+type AccessoryItem = CharAccessoryItem | WeaponAccessoryItem | SkinAccessoryItem | WeaponSkinAccessoryItem | HeadFrameAccessoryItem | HeadAccessoryItem
 
 /**
  * 判断当前饰品是否包含获取方式字段。
@@ -66,7 +68,8 @@ const allAccessories = computed<AccessoryItem[]>(() => {
     const skinItems: SkinAccessoryItem[] = skinData.map(item => ({ ...item, accessoryType: "skin" }))
     const weaponSkinItems: WeaponSkinAccessoryItem[] = weaponSkinData.map(item => ({ ...item, accessoryType: "weaponskin" }))
     const headFrameItems: HeadFrameAccessoryItem[] = headFrameData.map(item => ({ ...item, accessoryType: "headframe" }))
-    return [...charItems, ...weaponItems, ...skinItems, ...weaponSkinItems, ...headFrameItems]
+    const headItems: HeadAccessoryItem[] = headSculptureData.map(item => ({ ...item, accessoryType: "head" }))
+    return [...charItems, ...weaponItems, ...skinItems, ...weaponSkinItems, ...headFrameItems, ...headItems]
 })
 
 /**
@@ -99,6 +102,12 @@ const allUnlockMethods = computed(() => {
 const allRarities = computed(() => {
     const raritySet = new Set<number>()
     for (const accessory of allAccessories.value) {
+        if (accessory.accessoryType === "headframe" || accessory.accessoryType === "head") {
+            continue
+        }
+        if (!hasAccessoryRarity(accessory)) {
+            continue
+        }
         const rarity = getAccessoryRarity(accessory)
         if (rarity > 0) {
             raritySet.add(rarity)
@@ -116,15 +125,30 @@ const filteredAccessories = computed(() => {
             return false
         }
 
+        if (item.accessoryType === "headframe" || item.accessoryType === "head") {
+            if (selectedRarity.value !== -1) {
+                return false
+            }
+        }
+
+        const hasRarity = hasAccessoryRarity(item)
         const rarity = getAccessoryRarity(item)
 
-        if (selectedRarity.value !== -1 && rarity !== selectedRarity.value) {
+        if (!hasRarity) {
+            if (selectedRarity.value !== -1) {
+                return false
+            }
+        } else if (selectedRarity.value !== -1 && rarity !== selectedRarity.value) {
             return false
         }
 
         const unlockText = getAccessoryUnlockText(item)
 
-        if (selectedUnlock.value !== "all" && normalizeAccessoryUnlock(unlockText) !== selectedUnlock.value) {
+        if (hasAccessoryUnlock(item) && selectedUnlock.value !== "all" && normalizeAccessoryUnlock(unlockText) !== selectedUnlock.value) {
+            return false
+        }
+
+        if (!hasAccessoryUnlock(item) && selectedUnlock.value !== "all") {
             return false
         }
 
@@ -167,6 +191,9 @@ function getAccessoryIcon(accessory: AccessoryItem): string {
     if (accessory.accessoryType === "headframe") {
         return accessory.icon ? `/imgs/headframe/${accessory.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
     }
+    if (accessory.accessoryType === "head") {
+        return accessory.icon ? `/imgs/webp/${accessory.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+    }
     if (accessory.accessoryType === "skin") {
         return resolveSkinIconUrl(accessory.icon)
     }
@@ -174,7 +201,7 @@ function getAccessoryIcon(accessory: AccessoryItem): string {
 }
 
 /**
- * 根据稀有度返回背景渐变色，和资源品质颜色保持一致。
+ * 根据稀有度返回背景渐变色。
  * @param rarity 稀有度（1~5）
  * @returns Tailwind 渐变类名
  */
@@ -237,6 +264,9 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
     if (accessoryType === "headframe") {
         return "accessory.typeHeadFrame"
     }
+    if (accessoryType === "head") {
+        return "accessory.typeAvatar"
+    }
     return "accessory.typeSkin"
 }
 
@@ -280,6 +310,11 @@ useInitialScrollToSelectedItem()
                             @click="selectedType = 'headframe'">
                             {{ $t("accessory.typeHeadFrame") }}
                         </button>
+                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            :class="selectedType === 'head' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
+                            @click="selectedType = 'head'">
+                            {{ $t("accessory.typeAvatar") }}
+                        </button>
                     </div>
 
                     <div class="flex flex-wrap gap-1 pb-1">
@@ -319,11 +354,18 @@ useInitialScrollToSelectedItem()
                                 'bg-primary/90 text-primary-content hover:bg-primary':
                                     selectedAccessoryKey === `${accessory.accessoryType}:${accessory.id}`,
                             }" @click="selectAccessory(accessory)">
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="min-w-0 flex items-start gap-2">
-                                    <img :src="getAccessoryIcon(accessory)" :alt="accessory.name"
-                                        class="size-10 rounded bg-linear-15 object-cover"
-                                        :class="getRarityGradientClass(getAccessoryRarity(accessory))" />
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0 flex items-start gap-2">
+                                <img
+                                    :src="getAccessoryIcon(accessory)"
+                                    :alt="accessory.name"
+                                        class="size-10 rounded object-cover"
+                                        :class="
+                                            accessory.accessoryType === 'headframe' || accessory.accessoryType === 'head'
+                                                ? 'bg-base-200'
+                                                : `bg-linear-15 ${getRarityGradientClass(getAccessoryRarity(accessory))}`
+                                        "
+                                    />
                                     <div class="min-w-0">
                                         <div class="font-medium wrap-break-word">{{ $t(accessory.name) }}</div>
                                         <div class="text-xs opacity-70 mt-1 line-clamp-1">
@@ -332,11 +374,14 @@ useInitialScrollToSelectedItem()
                                     </div>
                                 </div>
 
-                                <div class="flex flex-col items-end gap-1 shrink-0">
+                                <div v-if="accessory.accessoryType !== 'headframe' && accessory.accessoryType !== 'head'" class="flex flex-col items-end gap-1 shrink-0">
                                     <span class="text-xs px-2 py-0.5 rounded"
                                         :class="getRarityBadgeClass(getAccessoryRarity(accessory))">
                                         {{ getRarityText(getAccessoryRarity(accessory)) }}
                                     </span>
+                                    <span class="text-xs opacity-70">ID: {{ accessory.id }}</span>
+                                </div>
+                                <div v-else class="flex flex-col items-end gap-1 shrink-0">
                                     <span class="text-xs opacity-70">ID: {{ accessory.id }}</span>
                                 </div>
                             </div>
@@ -354,7 +399,7 @@ useInitialScrollToSelectedItem()
                 </div>
             </div>
 
-            <div v-if="selectedAccessory"
+    <div v-if="selectedAccessory"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
                 @click="selectAccessory(null)">
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />

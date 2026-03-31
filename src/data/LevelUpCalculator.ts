@@ -67,7 +67,7 @@ export interface ResourceCost {
 export interface ResourceTreeNode {
     id: string
     cid?: number
-    name: string
+    name: string | string[]
     type: "Resource" | "Mod" | "Draft"
     amount: number
     children?: ResourceTreeNode[]

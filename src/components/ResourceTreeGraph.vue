@@ -94,8 +94,8 @@ onMounted(() => {
         layout: {
             type: "antv-dagre",
             rankdir: "LR",
-            nodesep: 10,
-            ranksep: 80,
+            nodesep: 2,
+            ranksep: 40,
         },
         edge: {
             type: "cubic-horizontal",
@@ -113,7 +113,7 @@ onMounted(() => {
                 ],
                 component: (data: { name: string; amount: number; type: "Mod" | "Draft" | "Resource"; cid?: number }) => (
                     <ResourceCostItem
-                        class={"w-64"}
+                        class={"w-70"}
                         name={data.name}
                         value={data.type === "Resource" ? data.amount : [data.amount, data.cid || 0, data.type]}
                     />

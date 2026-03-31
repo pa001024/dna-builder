@@ -1,17 +1,44 @@
 <script setup lang="ts">
+import { computed } from "vue"
 import { LeveledChar, LeveledMod, resourceMap } from "@/data"
 import { charMap, draftMap, modMap, walnutMap, weaponMap } from "@/data/d"
-import { charAccessoryData, weaponAccessoryData } from "@/data/d/accessory.data"
+import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import type { Draft } from "@/data/d/draft.data"
+import { headSculptureData } from "@/data/d/headsculpture.data"
 import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
+import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 
 defineOptions({ inheritAttrs: false })
-defineProps<{
-    name: string
+const props = defineProps<{
+    name: string | string[]
     value:
         | number
-        | [number | string, number | string, "Mod" | "Draft" | "Weapon" | "Char" | "CharAccessory" | "WeaponAccessory" | "Walnut"]
+        | [
+              number | string,
+              number | string,
+              (
+                  | "Mod"
+                  | "Draft"
+                  | "Weapon"
+                  | "Char"
+                  | "CharAccessory"
+                  | "WeaponAccessory"
+                  | "Walnut"
+                  | "Resource"
+                  | "Skin"
+                  | "HeadSculpture"
+                  | "HeadFrame"
+                  | "WeaponSkin"
+              ),
+          ]
 }>()
+
+const nameString = computed(() => {
+    if (Array.isArray(props.name)) {
+        return props.name.join(" / ")
+    }
+    return props.name
+})
 
 const emit = defineEmits<{
     click: []
@@ -26,9 +53,43 @@ function getIcon(name: string) {
     return res?.icon ? `/imgs/res/${res?.icon}.webp` : `/imgs/webp/T_Head_Empty.webp`
 }
 
+/**
+ * 通过资源 ID 查找资源信息。
+ * @param id 资源 ID
+ * @returns 资源数据
+ */
+function getResourceById(id: number | string) {
+    const normalizedId = Number(id)
+    if (!Number.isFinite(normalizedId)) {
+        return undefined
+    }
+
+    return [...resourceMap.values()].find(item => item.id === normalizedId)
+}
+
 function getRarityColor(name: string): string {
     const res = resourceMap.get(name)
     return getQualityColor(res?.rarity || 1)
+}
+
+/**
+ * 获取资源的展示图标。
+ * @param resourceId 资源ID
+ * @returns 图标路径
+ */
+function getResourceIconById(resourceId: number | string) {
+    const resource = getResourceById(resourceId)
+    return resource?.icon ? `/imgs/res/${resource.icon}.webp` : `/imgs/webp/T_Head_Empty.webp`
+}
+
+/**
+ * 获取资源的稀有度背景色。
+ * @param resourceId 资源ID
+ * @returns 背景色类名
+ */
+function getResourceBackgroundById(resourceId: number | string) {
+    const resource = getResourceById(resourceId)
+    return getQualityColor(resource?.rarity || 1)
 }
 function getQualityColor(quality: string | number): string {
     if (typeof quality === "number") {
@@ -142,13 +203,87 @@ function getDraftByIdOrProductId(draftId: number | string): Draft | undefined {
     return draftMap.get(normalizedId) ?? [...draftMap.values()].find(draft => draft.p === normalizedId)
 }
 
+type FashionCostType = "CharAccessory" | "WeaponAccessory" | "WeaponSkin" | "Skin" | "HeadSculpture" | "HeadFrame"
+
+interface FashionCostMeta {
+    icon: string
+    rarity: number
+}
+
 /**
- * 获取饰品图标。
- * @param icon 图标名
+ * 通过类型和ID查找时装条目。
+ * @param type 时装类型
+ * @param id 条目ID
+ * @returns 时装元数据
+ */
+function getFashionMeta(type: FashionCostType, id: number | string): FashionCostMeta | null {
+    const normalizedId = Number(id)
+    if (!Number.isFinite(normalizedId)) {
+        return null
+    }
+
+    if (type === "CharAccessory") {
+        const item = charAccessoryData.find(entry => entry.id === normalizedId)
+        return item ? { icon: item.icon, rarity: item.rarity } : null
+    }
+
+    if (type === "WeaponAccessory") {
+        const item = weaponAccessoryData.find(entry => entry.id === normalizedId)
+        return item ? { icon: item.icon, rarity: item.rarity } : null
+    }
+
+    if (type === "WeaponSkin") {
+        const item = weaponSkinData.find(entry => entry.id === normalizedId)
+        return item ? { icon: item.icon, rarity: item.rarity } : null
+    }
+
+    if (type === "Skin") {
+        const item = skinData.find(entry => entry.id === normalizedId)
+        return item ? { icon: item.icon, rarity: item.rarity } : null
+    }
+
+    if (type === "HeadSculpture") {
+        const item = headSculptureData.find(entry => entry.id === normalizedId)
+        return item ? { icon: item.icon, rarity: 5 } : null
+    }
+
+    if (type === "HeadFrame") {
+        const item = headFrameData.find(entry => entry.id === normalizedId)
+        return item ? { icon: item.icon, rarity: 4 } : null
+    }
+
+    return null
+}
+
+/**
+ * 获取时装类条目的图标。
+ * @param type 时装类型
+ * @param id 条目ID
  * @returns 图标路径
  */
-function getAccessoryIcon(icon?: string) {
-    return icon ? `/imgs/fashion/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+function getFashionIcon(type: FashionCostType, id: number | string) {
+    const meta = getFashionMeta(type, id)
+    return meta?.icon ? resolveSkinIconUrl(meta.icon) : "/imgs/webp/T_Head_Empty.webp"
+}
+
+/**
+ * 获取时装类条目的稀有度。
+ * @param type 时装类型
+ * @param id 条目ID
+ * @returns 稀有度
+ */
+function getFashionRarity(type: FashionCostType, id: number | string): number {
+    return getFashionMeta(type, id)?.rarity || 1
+}
+
+/**
+ * 获取时装类条目的背景色。
+ * @param type 时装类型
+ * @param id 条目ID
+ * @returns 背景色类名
+ */
+function getFashionBackgroundColor(type: FashionCostType, id: number | string): string {
+    return getQualityColor(getFashionRarity(type, id))
 }
 
 /**
@@ -158,9 +293,13 @@ function getAccessoryIcon(icon?: string) {
  * @returns 饰品数据
  */
 function getAccessoryByType(type: "CharAccessory" | "WeaponAccessory", id: number | string) {
-    const list = type === "CharAccessory" ? charAccessoryData : weaponAccessoryData
     const normalizedId = Number(id)
-    return Number.isFinite(normalizedId) ? list.find(item => item.id === normalizedId) : undefined
+    if (!Number.isFinite(normalizedId)) {
+        return undefined
+    }
+
+    const list = type === "CharAccessory" ? charAccessoryData : weaponAccessoryData
+    return list.find(item => item.id === normalizedId)
 }
 
 /**
@@ -287,7 +426,7 @@ function handleCardClick() {
                 :class="getDraftBackgroundColor(value[1])"
             />
             <SRouterLink :to="`/db/draft/${getDraftByIdOrProductId(value[1])!.id}`" stop class="hover:underline">
-                {{ `图纸: ${getDraftByIdOrProductId(value[1])!.n}` }}
+                {{ `图纸: ${Array.isArray(name) ? name.join(" / ") : getDraftByIdOrProductId(value[1])!.n}` }}
             </SRouterLink>
         </span>
         <span class="font-bold text-primary ml-auto">{{ value[0] }}</span>
@@ -311,31 +450,80 @@ function handleCardClick() {
         </span>
         <span class="font-bold text-primary ml-auto">{{ value[0] }}</span>
     </div>
-    <SRouterLink
+    <div
+        v-else-if="Array.isArray(value) && value[2] === 'Resource' && getResourceById(value[1])"
+        class="flex items-center p-3 rounded bg-base-300 transition-colors duration-200"
+        v-bind="$attrs"
+        @click="$emit('click')"
+    >
+        <span class="font-medium truncate">
+            <img
+                :src="getResourceIconById(value[1])"
+                alt=""
+                class="size-8 inline-block mr-2 bg-linear-15 rounded"
+                :class="getResourceBackgroundById(value[1])"
+            />
+            <SRouterLink :to="`/db/resource/${getResourceById(value[1])!.id}`" stop class="hover:underline">
+                {{ getResourceById(value[1])!.name }}
+            </SRouterLink>
+        </span>
+        <span class="font-bold text-primary ml-auto">{{ value[0] }}</span>
+    </div>
+    <div
+        v-else-if="
+            Array.isArray(value) &&
+            (value[2] === 'Skin' || value[2] === 'HeadSculpture' || value[2] === 'HeadFrame' || value[2] === 'WeaponSkin')
+        "
+        class="flex items-center p-3 rounded bg-base-300 transition-colors duration-200"
+        v-bind="$attrs"
+        @click="$emit('click')"
+    >
+        <span class="font-medium truncate">
+            <img
+                :src="getFashionIcon(value[2], value[1])"
+                alt=""
+                class="size-8 inline-block mr-2 bg-linear-15 rounded"
+                :class="getFashionBackgroundColor(value[2], value[1])"
+            />
+            <span>{{ name }}</span>
+        </span>
+        <span class="font-bold text-primary ml-auto">{{ value[0] }}</span>
+    </div>
+    <div
         v-else-if="
             Array.isArray(value) &&
             (value[2] === 'CharAccessory' || value[2] === 'WeaponAccessory') &&
             getAccessoryByType(value[2], value[1])
         "
-        :to="`/db/accessory/${value[2] === 'CharAccessory' ? 'char' : 'weapon'}/${value[1]}`"
-        class="flex items-center p-3 rounded bg-base-300 transition-colors duration-200 hover:bg-base-content/10"
+        class="flex items-center p-3 rounded bg-base-300 transition-colors duration-200"
         v-bind="$attrs"
         @click="$emit('click')"
     >
         <span class="font-medium truncate">
-            <img :src="getAccessoryIcon(getAccessoryByType(value[2], value[1])?.icon)" alt="" class="size-8 inline-block mr-2 rounded" />
-            {{ getAccessoryByType(value[2], value[1])?.name || name }}
+            <img
+                :src="getFashionIcon(value[2], value[1])"
+                alt=""
+                class="size-8 inline-block mr-2 bg-linear-15 rounded"
+                :class="getFashionBackgroundColor(value[2], value[1])"
+            />
+            <SRouterLink :to="`/db/accessory/${value[2] === 'CharAccessory' ? 'char' : 'weapon'}/${value[1]}`" stop class="hover:underline">
+                {{ getAccessoryByType(value[2], value[1])?.name || name }}
+            </SRouterLink>
         </span>
         <span class="font-bold text-primary ml-auto">{{ value[0] }}</span>
-    </SRouterLink>
+    </div>
     <div v-else class="flex items-center p-3 rounded bg-base-300 transition-colors duration-200" v-bind="$attrs" @click="$emit('click')">
         <span class="font-medium truncate">
-            <img :src="getIcon(name)" alt="" class="size-8 inline-block mr-2 bg-linear-15 rounded" :class="getRarityColor(name)" />
-            <SRouterLink :to="`/db/resource/${resourceMap.get(name)?.id}`" stop class="hover:underline">
-                {{ $t(name) }}
+            <img
+                :src="getIcon(nameString)"
+                alt=""
+                class="size-8 inline-block mr-2 bg-linear-15 rounded"
+                :class="getRarityColor(nameString)"
+            />
+            <SRouterLink :to="`/db/resource/${resourceMap.get(nameString)?.id}`" stop class="hover:underline">
+                {{ $t(nameString) }}
             </SRouterLink>
-        </span
-        >
+        </span>
         <span class="font-bold text-primary ml-auto">{{ value }}</span>
     </div>
 </template>

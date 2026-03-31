@@ -2,6 +2,7 @@
 import { t } from "i18next"
 import { computed } from "vue"
 import { cutoffMap, resourceMap } from "@/data"
+import { formatDateTime, formatTimeRange } from "@/utils/time"
 import type { ShopSourceInfo } from "@/utils/weapon-source"
 
 const props = defineProps<{
@@ -35,35 +36,12 @@ function getPriceIcon(name?: string) {
 }
 
 /**
- * 格式化时间范围文本。
- * @param start 开始时间戳
- * @param end 结束时间戳
- * @returns 时间范围文本
- */
-function formatTimeRange(start?: number, end?: number) {
-    if (!start) {
-        return ""
-    }
-
-    const formatTime = (timestamp: number) =>
-        new Date(timestamp * 1000).toLocaleString("zh-CN", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-        })
-
-    return `${formatTime(start)}~${end ? formatTime(end) : t("database.until_now")}`
-}
-
-/**
  * 格式化折扣时间。
  * @param timestamp 秒级时间戳
  * @returns 本地化时间文本
  */
 function formatCutoffTime(timestamp: number) {
-    return new Date(timestamp * 1000).toLocaleString()
+    return formatDateTime(timestamp)
 }
 </script>
 
@@ -121,7 +99,7 @@ function formatCutoffTime(timestamp: number) {
                         </div>
                     </div>
                     <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-base-content/70">
-                        <div>{{ formatTimeRange(source.timeStart, source.timeEnd) }}</div>
+                        <div>{{ formatTimeRange(source.timeStart, source.timeEnd, t("database.until_now")) }}</div>
                         <div class="shrink-0 whitespace-nowrap">
                             限购: {{ source.limit || "∞" }} 数量: x{{ source.num }}
                         </div>

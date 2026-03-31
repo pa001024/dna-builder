@@ -114,6 +114,13 @@ const databaseItems = [
         color: "from-green-500/20 to-emerald-600/20 text-green-500",
     },
     {
+        name: "database.event",
+        path: "/db/event",
+        desc: "database.event_desc",
+        icon: "M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM11 6H13V13H11V6ZM11 15H13V17H11V15Z",
+        color: "from-rose-500/20 to-orange-600/20 text-rose-500",
+    },
+    {
         name: "魔灵地图",
         path: "/db/map-local",
         desc: "详细魔灵刷新点位",
@@ -235,7 +242,7 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
         description: "聚合区域、副本、刷新点位与采集相关资料，优先服务跑图、采集和副本路线查询。",
         badge: "Explore",
         accentClass: "bg-emerald-500",
-        paths: ["/db/shop", "/db/fish", "/db/map-local", "/db/dungeon", "/db/abyss", "/db/map", "/db/walnut"],
+        paths: ["/db/shop", "/db/fish", "/db/map-local", "/db/dungeon", "/db/abyss", "/db/map", "/db/event", "/db/walnut"],
     },
     {
         id: "world",

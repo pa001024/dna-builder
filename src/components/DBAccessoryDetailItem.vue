@@ -2,14 +2,14 @@
 import { t } from "i18next"
 import { computed } from "vue"
 import { charData } from "@/data"
-import type { Accessory, HeadFrameItem, SkinItem } from "@/data/d/accessory.data"
+import type { Accessory, HeadFrameItem, HeadSculptureItem, SkinItem } from "@/data/d/accessory.data"
 import draftData, { type Draft } from "@/data/d/draft.data"
 import shopData from "@/data/d/shop.data"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import type { ResourceDraftSourceInfo } from "@/utils/draft-source"
 import type { ShopSourceInfo } from "@/utils/weapon-source"
 
-type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "headframe"
+type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "headframe" | "head"
 
 type CharAccessoryItem = Accessory & {
     accessoryType: "char"
@@ -31,7 +31,11 @@ type HeadFrameAccessoryItem = HeadFrameItem & {
     accessoryType: "headframe"
 }
 
-type DetailAccessoryItem = CharAccessoryItem | WeaponAccessoryItem | SkinAccessoryItem | WeaponSkinAccessoryItem | HeadFrameAccessoryItem
+type HeadAccessoryItem = HeadSculptureItem & {
+    accessoryType: "head"
+}
+
+type DetailAccessoryItem = CharAccessoryItem | WeaponAccessoryItem | SkinAccessoryItem | WeaponSkinAccessoryItem | HeadFrameAccessoryItem | HeadAccessoryItem
 
 const props = defineProps<{
     accessory: DetailAccessoryItem
@@ -65,6 +69,15 @@ function isHeadFrameAccessory(accessory: DetailAccessoryItem): accessory is Head
 }
 
 /**
+ * 判断是否为头像。
+ * @param accessory 详情数据
+ * @returns 是否为头像
+ */
+function isHeadAccessory(accessory: DetailAccessoryItem): accessory is HeadAccessoryItem {
+    return accessory.accessoryType === "head"
+}
+
+/**
  * 将饰品图标名转换为可访问的图片地址。
  * @param icon 图标资源名
  * @returns 图标 URL
@@ -92,20 +105,12 @@ function getHeadFrameIcon(icon: string): string {
 }
 
 /**
- * 根据稀有度返回背景渐变色，和资源品质颜色保持一致。
- * @param rarity 稀有度（1~5）
- * @returns Tailwind 渐变类名
+ * 获取头像图标地址。
+ * @param icon 图标资源名
+ * @returns 图标 URL
  */
-function getRarityGradientClass(rarity: number): string {
-    const rarityMap: Record<number, string> = {
-        1: "from-gray-900/80 to-gray-100/80",
-        2: "from-green-900/80 to-green-100/80",
-        3: "from-blue-900/80 to-blue-100/80",
-        4: "from-purple-900/80 to-purple-100/80",
-        5: "from-yellow-900/80 to-yellow-100/80",
-    }
-
-    return rarityMap[rarity] || rarityMap[1]
+function getHeadIcon(icon: string): string {
+    return icon ? `/imgs/webp/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
 }
 
 /**
@@ -149,6 +154,9 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
     if (accessoryType === "headframe") {
         return "accessory.typeHeadFrame"
     }
+    if (accessoryType === "head") {
+        return "accessory.typeAvatar"
+    }
     if (accessoryType === "weaponskin") {
         return "accessory.typeWeaponSkin"
     }
@@ -156,16 +164,12 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
 }
 
 /**
- * 获取角色皮肤分类文本。
+ * 获取角色皮肤版本文本。
  * @param skin 角色皮肤数据
- * @returns 分类文本
+ * @returns 版本文本
  */
-function getSkinCategoryText(skin: SkinItem): string {
-    const charInfo = charData.find(char => char.id === skin.charId)
-    if (!charInfo) {
-        return skin.tag || skin.release || "-"
-    }
-    return `${charInfo.名称}${skin.tag ? ` · ${skin.tag}` : ""}`
+function getSkinReleaseText(skin: SkinItem): string {
+    return skin.release ? `v${skin.release}` : "-"
 }
 
 /**
@@ -246,8 +250,12 @@ const relatedShopSources = computed<ShopSourceInfo[]>(() => {
         skin: "Skin",
         weaponskin: "WeaponSkin",
         headframe: "HeadFrame",
+        head: "",
     } as const
     const targetItemType = itemTypeMap[props.accessory.accessoryType]
+    if (!targetItemType) {
+        return []
+    }
     return collectShopSources(item => item.itemType === targetItemType && item.typeId === props.accessory.id)
 })
 
@@ -285,14 +293,22 @@ const relatedDraftShopSources = computed<ShopSourceInfo[]>(() => {
  * 当前详情页展示的分类文本。
  */
 const accessoryCategoryText = computed(() => {
-    if (props.accessory.accessoryType === "skin") {
-        return getSkinCategoryText(props.accessory)
+    if (isSkinAccessory(props.accessory)) {
+        const skin = props.accessory as SkinAccessoryItem
+        const charInfo = charData.find(char => char.id === skin.charId)
+        if (!charInfo) {
+            return skin.tag || skin.release || "-"
+        }
+        return `${charInfo.名称}${skin.tag ? ` · ${skin.tag}` : ""}`
     }
     if (props.accessory.accessoryType === "weaponskin") {
         return "武器"
     }
     if (props.accessory.accessoryType === "headframe") {
         return getHeadFrameCategoryText(props.accessory)
+    }
+    if (props.accessory.accessoryType === "head") {
+        return "-"
     }
     return "-"
 })
@@ -314,6 +330,9 @@ const accessoryIcon = computed(() => {
     if (isHeadFrameAccessory(props.accessory)) {
         return getHeadFrameIcon(props.accessory.icon)
     }
+    if (isHeadAccessory(props.accessory)) {
+        return getHeadIcon(props.accessory.icon)
+    }
     if (isWeaponSkinAccessory(props.accessory)) {
         return getWeaponSkinIcon(props.accessory.icon)
     }
@@ -327,6 +346,7 @@ const accessoryIcon = computed(() => {
  * 详情页标题的展示名称。
  */
 const accessoryName = computed(() => props.accessory.name)
+const accessoryVersionText = computed(() => (isSkinAccessory(props.accessory) ? getSkinReleaseText(props.accessory) : ""))
 
 /**
  * 详情页描述文本。
@@ -336,7 +356,12 @@ const accessoryDesc = computed(() => props.accessory.desc)
 /**
  * 详情页稀有度文本。
  */
-const accessoryRarityValue = computed(() => props.accessory.accessoryType === "headframe" ? 1 : props.accessory.rarity)
+const accessoryRarityValue = computed(() => {
+    if (isHeadFrameAccessory(props.accessory) || isHeadAccessory(props.accessory)) {
+        return 1
+    }
+    return props.accessory.rarity
+})
 
 /**
  * 详情页获取方式文本。
@@ -345,8 +370,11 @@ const accessoryUnlock = computed(() => {
     if (isHeadFrameAccessory(props.accessory)) {
         return props.accessory.access || "-"
     }
+    if (isHeadAccessory(props.accessory)) {
+        return "-"
+    }
     if (isSkinAccessory(props.accessory)) {
-        return props.accessory.release ? `v${props.accessory.release}` : "-"
+        return "-"
     }
     if (isWeaponSkinAccessory(props.accessory)) {
         return "-"
@@ -359,20 +387,28 @@ const accessoryUnlock = computed(() => {
     <div class="p-3 space-y-3">
         <div class="flex items-start justify-between gap-3">
             <div class="flex items-start gap-3 min-w-0">
-            <img
+                <img
                     :src="accessoryIcon"
                     :alt="accessoryName"
-                    class="size-12 rounded-lg bg-linear-15 object-cover"
-                    :class="isHeadFrameAccessory(accessory) ? 'bg-base-200' : getRarityGradientClass(accessoryRarityValue)"
+                    class="size-12 rounded-lg bg-base-200 object-cover"
                 />
                 <div class="min-w-0">
-                    <div class="text-lg font-bold">
-                        {{ $t(accessoryName) }}
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <div class="text-lg font-bold">
+                            {{ $t(accessoryName) }}
+                        </div>
+                        <span v-if="accessoryVersionText" class="text-xs px-2 py-0.5 rounded bg-base-200">
+                            {{ accessoryVersionText }}
+                        </span>
                     </div>
                     <div class="text-xs text-base-content/70 mt-1">ID: {{ accessory.id }}</div>
                 </div>
             </div>
-            <span class="text-xs px-2 py-1 rounded" :class="getRarityBadgeClass(accessoryRarityValue)">
+            <span
+                v-if="!isHeadFrameAccessory(accessory) && !isHeadAccessory(accessory)"
+                class="text-xs px-2 py-1 rounded"
+                :class="getRarityBadgeClass(accessoryRarityValue)"
+            >
                 {{ getRarityText(accessoryRarityValue) }}
             </span>
         </div>
@@ -385,12 +421,8 @@ const accessoryUnlock = computed(() => {
                     <span>{{ $t(getAccessoryTypeLabelKey(accessory.accessoryType)) }}</span>
                 </div>
                 <div class="flex justify-between gap-2">
-                    <span class="text-base-content/70">{{ $t("accessory.category") }}</span>
+                    <span class="text-base-content/70">{{ isSkinAccessory(accessory) ? $t("角色") : $t("accessory.category") }}</span>
                     <span>{{ accessoryCategoryText }}</span>
-                </div>
-                <div class="flex justify-between gap-2">
-                    <span class="text-base-content/70">{{ $t("accessory.rarity") }}</span>
-                    <span>{{ getRarityText(accessoryRarityValue) }}</span>
                 </div>
             </div>
         </div>

@@ -188,8 +188,8 @@ function getChar(charId: number): Char | undefined {
                             </span>
                         </div>
                     </div>
-                    <RewardItem :reward="getRewardDetails(item.r)!" />
-                    <RewardItem v-if="item.a" :reward="getRewardDetails(item.a)!" />
+                    <RewardItem :reward="getRewardDetails(item.r)!" :type-filter="['Drop']" />
+                    <RewardItem v-if="item.a" :reward="getRewardDetails(item.a)!" :type-filter="['Drop']" />
                 </div>
             </div>
         </div>

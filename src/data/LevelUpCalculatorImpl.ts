@@ -204,10 +204,11 @@ function generateResourceTree(
         const processDraft = (d: Draft, multiplier: number, parent: ResourceTreeNode) => {
             // 添加图纸信息
             if (d.t === "Mod") {
-                const draftName = `图纸: ${d.n}`
+                const draftNames = mod.消耗?.length ? mod.消耗.map(id => modDraftMap.get(id)?.n || String(id)) : `图纸: ${d.n}`
+                if (draftNames.length > 1) console.log(draftNames)
                 parent.children!.push({
                     id: `mod-${d.p}-draft-${d.id}`,
-                    name: draftName,
+                    name: draftNames.length > 1 ? draftNames : draftNames[0],
                     type: "Draft",
                     amount: multiplier,
                     cid: d.p,
@@ -311,24 +312,9 @@ function generateResourceTree(
                 selfGold = totalGold
             }
 
-            const resourceParent: ResourceTreeNode = draft
-                ? root
-                : {
-                      id: `mod-${mod.id}-product-${costDraft.id}`,
-                      name: costDraft.n,
-                      cid: costDraft.p,
-                      type: "Mod",
-                      amount: selfGold,
-                      children: [],
-                  }
-
-            if (!draft) {
-                root.children!.push(resourceParent)
-            }
-
             // 添加委托密函线索消耗
             if (mod.walnut) {
-                resourceParent.children!.push({
+                root.children!.push({
                     id: `mod-${mod.id}-resource-委托密函线索`,
                     name: "委托密函线索",
                     type: "Resource",
@@ -338,7 +324,7 @@ function generateResourceTree(
 
             // 添加商店材料消耗
             if (mod.shop) {
-                resourceParent.children!.push({
+                root.children!.push({
                     id: `mod-${mod.id}-resource-${mod.shop.price}`,
                     name: mod.shop.price,
                     type: "Resource",
@@ -348,14 +334,7 @@ function generateResourceTree(
         }
 
         // 处理图纸
-        if (!draft) {
-            const productNode = root.children!.find(child => child.id === `mod-${mod.id}-product-${costDraft.id}`)
-            if (productNode) {
-                processDraft(costDraft, selfGold, productNode)
-            }
-        } else {
-            processDraft(costDraft, totalGold, root)
-        }
+        processDraft(costDraft, totalGold, root)
     }
 
     return root

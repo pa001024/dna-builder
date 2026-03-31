@@ -6,6 +6,7 @@ import { LeveledChar } from "@/data"
 import { getCurrentVersionLimit } from "@/data/versionGate"
 import type { AbyssDungeon } from "../data/d/abyss.data"
 import { abyssDungeonMap, charMap } from "../data/d/index"
+import { getVersionByTime } from "../data/time.data"
 import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
 
 const searchKeyword = useSearchParam<string>("kw", "")
@@ -29,7 +30,7 @@ const allDungeonGroups = computed(() => {
 const versions = computed(() => {
     const versionSet = new Set<string>()
     allDungeons.value.forEach(dungeon => {
-        const version = dungeon.cid ? getCharVersion(dungeon.cid) : ""
+        const version = getVersionByTime(dungeon.st)
         if (version && isVersionAllowed(version)) {
             versionSet.add(version)
         }
@@ -40,7 +41,7 @@ const versions = computed(() => {
 const filteredDungeons = computed(() => {
     return allDungeons.value.filter(d => {
         const matchesGroup = selectedDungeonGroup.value === "" || getAbyssDungeonGroup(d) === selectedDungeonGroup.value
-        const dungeonVersion = d.cid ? getCharVersion(d.cid) : ""
+        const dungeonVersion = getVersionByTime(d.st)
         const matchesVersion = selectedVersion.value === "" || dungeonVersion === selectedVersion.value
         const matchesSafeMode = !dungeonVersion || isVersionAllowed(dungeonVersion)
         const matchesKeyword =
@@ -58,16 +59,6 @@ function selectDungeon(dungeon: AbyssDungeon | null) {
 function getCharName(charId: number): string {
     const char = charMap.get(charId)
     return char?.名称 || `ID: ${charId}`
-}
-
-/**
- * 获取关联角色的版本号。
- * @param charId 角色ID
- * @returns 角色版本号，未找到时返回空字符串
- */
-function getCharVersion(charId: number): string {
-    const char = charMap.get(charId)
-    return char?.版本 || ""
 }
 
 /**
@@ -135,14 +126,12 @@ useInitialScrollToSelectedItem()
                                     <div class="font-medium flex gap-2">
                                         <span v-if="dungeon.sn">{{ dungeon.sn }}</span>
                                         <span v-if="dungeon.cid">{{ $t(getCharName(dungeon.cid)) }}</span>
-                                        <span v-if="dungeon.cid && getCharVersion(dungeon.cid)" class="text-xs opacity-70">
-                                            v{{ getCharVersion(dungeon.cid) }}
-                                        </span>
                                         #{{ getAbyssDungeonLevel(dungeon) }}
                                     </div>
                                     <div v-if="dungeon.st && dungeon.et" class="mt-1 text-xs text-base-content/70">
                                         {{ new Date(dungeon.st * 1000).toLocaleDateString() }} -
                                         {{ new Date(dungeon.et * 1000).toLocaleDateString() }}
+                                        <span v-if="getVersionByTime(dungeon.st)" class="ml-2">v{{ getVersionByTime(dungeon.st) }}</span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">

@@ -9,6 +9,7 @@ import { getImprType, getRegionType } from "@/data/d/quest.data"
 import type { ShopItem } from "@/data/d/shop.data"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { getRewardDetails, getRewardTypeText } from "@/utils/reward-utils"
+import { formatDateTime } from "@/utils/time"
 
 // 定义带有子项的商品类型
 interface ShopItemWithChildren extends ShopItem {
@@ -37,7 +38,7 @@ const currentPrice = computed(() => cutoffInfo.value?.price ?? props.item.price)
  * @returns 本地化时间文本
  */
 function formatCutoffTime(timestamp: number) {
-    return new Date(timestamp * 1000).toLocaleString()
+    return formatDateTime(timestamp)
 }
 
 /**
@@ -121,7 +122,7 @@ const itemDetail = computed(() => {
             if (head) {
                 return {
                     type: props.item.itemType,
-                    icon: `/imgs/head/${head.icon}.webp`,
+                    icon: `/imgs/webp/${head.icon}.webp`,
                 }
             } else {
                 return {
@@ -144,17 +145,17 @@ const itemDetail = computed(() => {
             }
         case "Skin":
             const skin = skinData.find(item => item.id === props.item.typeId)
-                if (!skin) {
-                    return {
-                        type: props.item.itemType,
-                        icon: `/imgs/webp/T_Head_Empty.webp`,
-                    }
-                }
+            if (!skin) {
                 return {
                     type: props.item.itemType,
-                    icon: resolveSkinIconUrl(skin.icon),
-                    link: `/db/accessory/skin/${skin.id}`,
+                    icon: `/imgs/webp/T_Head_Empty.webp`,
                 }
+            }
+            return {
+                type: props.item.itemType,
+                icon: resolveSkinIconUrl(skin.icon),
+                link: `/db/accessory/skin/${skin.id}`,
+            }
         case "Title":
             return {
                 type: props.item.itemType,
@@ -290,9 +291,9 @@ function getPriceIcon(name: string) {
                     </span>
                 </div>
                 <div v-if="item.startTime" class="mt-1 text-xs text-base-content/70">
-                    <span>开始时间:</span> {{ new Date(item.startTime * 1000).toLocaleString() }}
+                    <span>开始时间:</span> {{ formatDateTime(item.startTime) }}
                     <span v-if="item.endTime" class="ml-2">结束时间:</span>
-                    {{ item.endTime ? new Date(item.endTime * 1000).toLocaleString() : "" }}
+                    {{ item.endTime ? formatDateTime(item.endTime) : "" }}
                 </div>
                 <div v-if="item.itemType === 'Reward'" class="mt-1">
                     <RewardItem :reward="getRewardDetails(item.typeId)!" />

@@ -52,6 +52,7 @@ const MAPPINGS: Mapping[] = [
     { source: "Dungeon", targetStem: "dungeon", targetVar: "dungeonsData", locales: ["cn"] },
     { source: "DynQuest", targetStem: "dynquest", targetVar: "t", locales: ["cn"] },
     { source: "Cutoff", targetStem: "cutoff", targetVar: "cutoffData", locales: ["cn"] },
+    { source: "Event", targetStem: "event", targetVar: "eventData", locales: ["cn"] },
     { source: "Fish", targetStem: "fish", targetVar: "fishs", locales: ["cn"] },
     { source: "FishingSpot", targetStem: "fish", targetVar: "fishingSpots", locales: ["cn"] },
     { source: "HardBoss", targetStem: "hardboss", targetVar: "hardBossMap", locales: ["cn"] },

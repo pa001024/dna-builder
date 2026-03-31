@@ -127,6 +127,7 @@
         "totalCount": "共 {{count}} 个饰品",
         "type": "类型",
         "typeAll": "全部",
+        "typeAvatar": "头像",
         "typeChar": "角色饰品",
         "typeHeadFrame": "头像框",
         "typeSkin": "角色皮肤",
@@ -443,6 +444,8 @@
         "dungeon_desc": "查看副本信息和奖励掉落",
         "dynquest": "派遣委托",
         "dynquest_desc": "查看派遣委托信息和奖励",
+        "event": "活动",
+        "event_desc": "查看活动列表与活动详情",
         "fish": "钓鱼",
         "fish_desc": "钓鱼点详细收益计算",
         "hardboss": "梦魇残声",
@@ -541,6 +544,12 @@
     "errorBoundary": {
         "retry": "重试",
         "title": "组件渲染出错"
+    },
+    "event-detail": {
+        "title": "活动详情"
+    },
+    "event-list": {
+        "title": "活动列表"
     },
     "fish-list": {
         "title": "钓鱼"

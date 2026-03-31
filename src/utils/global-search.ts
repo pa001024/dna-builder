@@ -11,6 +11,7 @@ import dungeonData from "@/data/d/dungeon.data"
 import dynQuestData from "@/data/d/dynquest.data"
 import { fishingSpots, fishs } from "@/data/d/fish.data"
 import { hardBossMap } from "@/data/d/hardboss.data"
+import { headSculptureData } from "@/data/d/headsculpture.data"
 import modData from "@/data/d/mod.data"
 import monsterData from "@/data/d/monster.data"
 import { monsterTagData } from "@/data/d/monstertag.data"
@@ -194,6 +195,21 @@ export class GlobalSearchService {
                         path: `/db/accessory/headframe/${accessory.id}`,
                     },
                     [accessory.id, accessory.name, accessory.desc, accessory.access, accessory.icon]
+                )
+            )
+        )
+
+        entries.push(
+            ...headSculptureData.map(accessory =>
+                this.buildSearchEntry(
+                    {
+                        id: `head:${accessory.id}`,
+                        title: accessory.name,
+                        subtitle: `头像 ID: ${accessory.id} | 头像`,
+                        typeLabel: t("database.accessory"),
+                        path: `/db/accessory/head/${accessory.id}`,
+                    },
+                    [accessory.id, accessory.name, accessory.desc, accessory.icon]
                 )
             )
         )

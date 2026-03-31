@@ -56,6 +56,6 @@ export function resolveSkinIconUrl(icon: string): string {
         return "/imgs/webp/T_Head_Empty.webp"
     }
 
-    const targetDir = icon.startsWith("T_Fashion_") || icon.startsWith("T_Skin_") ? "fashion" : "webp"
+    const targetDir = icon.startsWith("T_Head_") ? "webp" : "fashion"
     return `/imgs/${targetDir}/${icon}.webp`
 }

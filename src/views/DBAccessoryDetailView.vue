@@ -2,13 +2,15 @@
 import { computed } from "vue"
 import { useRoute } from "vue-router"
 import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { headSculptureData } from "@/data/d/headsculpture.data"
 
-type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "headframe"
+type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "headframe" | "head"
 type AccessoryDetailItem = (typeof charAccessoryData)[number] & { accessoryType: "char" }
     | (typeof weaponAccessoryData)[number] & { accessoryType: "weapon" }
     | (typeof skinData)[number] & { accessoryType: "skin" }
     | (typeof weaponSkinData)[number] & { accessoryType: "weaponskin" }
     | (typeof headFrameData)[number] & { accessoryType: "headframe" }
+    | (typeof headSculptureData)[number] & { accessoryType: "head" }
 
 const route = useRoute()
 
@@ -22,6 +24,9 @@ const accessoryType = computed(() => {
     }
     if (value === "headframe") {
         return "headframe"
+    }
+    if (value === "head") {
+        return "head"
     }
     if (value === "weaponskin") {
         return "weaponskin"
@@ -44,6 +49,7 @@ const accessory = computed(() => {
         skin: skinData,
         weaponskin: weaponSkinData,
         headframe: headFrameData,
+        head: headSculptureData,
     }
     const source = sourceMap[accessoryType.value]
     const item = source.find(v => v.id === accessoryId.value)

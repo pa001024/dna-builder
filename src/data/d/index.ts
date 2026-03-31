@@ -6,6 +6,9 @@ import cutoffData from "./cutoff.data"
 import draftData from "./draft.data"
 import dungeonData from "./dungeon.data"
 import effectData from "./effect.data"
+
+export { eventData } from "./event.data"
+
 import modData from "./mod.data"
 import monsterData, { monsterMap } from "./monster.data"
 import rewardData from "./reward.data"

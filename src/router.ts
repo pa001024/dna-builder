@@ -287,6 +287,18 @@ const routes: readonly RouteRecordRaw[] = [
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
+                name: "event-list",
+                path: "event",
+                component: () => import("./views/DBEventListView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "event-detail",
+                path: "event/:id",
+                component: () => import("./views/DBEventDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
                 name: "resource-list",
                 path: "resource",
                 component: () => import("./views/DBResourceListView.vue"),
