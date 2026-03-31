@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, watch } from "vue"
+import { computed, nextTick, onMounted, watch } from "vue"
 import { useRoute } from "vue-router"
 import { useSearchParam } from "@/composables/useSearchParam"
 import type { Shop, ShopItem as ShopItemType, ShopMainTab, ShopSubTab } from "@/data/d/shop.data"
@@ -202,27 +202,28 @@ const activeFilterTimestamp = computed(() => {
  * @returns 已附带可见商品列表的主标签
  */
 const filteredMainTabs = computed<FilteredShopMainTab[]>(() => {
-    return props.shop.mainTabs.map(mainTab => ({
-        ...mainTab,
-        subTabs: mainTab.subTabs
-            .map(subTab => ({
-                ...subTab,
-                visibleItems: filterItemsByMode(
-                    subTab.items,
-                    activeFilterTimestamp.value,
-                    previousSelectedTimePoint.value?.timestamp ?? null,
-                    diffOnlyEnabled.value
-                ),
-                activeVisibleItemCount: countActiveItemsByTimestamp(subTab.items, activeFilterTimestamp.value),
-                changedItemCount: countChangedItemsByTimestamp(
-                    subTab.items,
-                    activeFilterTimestamp.value,
-                    previousSelectedTimePoint.value?.timestamp ?? null
-                ),
-            }))
-            .filter(subTab => !diffOnlyEnabled.value || subTab.changedItemCount > 0),
-    }))
-    .filter(mainTab => mainTab.subTabs.length > 0)
+    return props.shop.mainTabs
+        .map(mainTab => ({
+            ...mainTab,
+            subTabs: mainTab.subTabs
+                .map(subTab => ({
+                    ...subTab,
+                    visibleItems: filterItemsByMode(
+                        subTab.items,
+                        activeFilterTimestamp.value,
+                        previousSelectedTimePoint.value?.timestamp ?? null,
+                        diffOnlyEnabled.value
+                    ),
+                    activeVisibleItemCount: countActiveItemsByTimestamp(subTab.items, activeFilterTimestamp.value),
+                    changedItemCount: countChangedItemsByTimestamp(
+                        subTab.items,
+                        activeFilterTimestamp.value,
+                        previousSelectedTimePoint.value?.timestamp ?? null
+                    ),
+                }))
+                .filter(subTab => !diffOnlyEnabled.value || subTab.changedItemCount > 0),
+        }))
+        .filter(mainTab => mainTab.subTabs.length > 0)
 })
 
 watch(
@@ -246,6 +247,14 @@ watch(routeSubTabId, () => {
     applyRouteSubTab()
 })
 
+/**
+ * 切换主标签后等待内容重渲染完成，再同步滑块到当前时间点。
+ */
+watch(selectedShop, async () => {
+    await nextTick()
+    resetToCurrentTimePoint()
+})
+
 watch(
     [shopTimePoints, diffOnlyEnabled, selectedTimePointIndex, timeFilterEnabled],
     ([timePoints, diffEnabled, currentIndex, timeFilter]) => {
@@ -258,6 +267,14 @@ watch(
     },
     { immediate: true }
 )
+
+/**
+ * 挂载后等待滑块完成初次渲染，再把位置重置到当前时间点。
+ */
+onMounted(async () => {
+    await nextTick()
+    resetToCurrentTimePoint()
+})
 
 // 将商品列表转换为树形结构
 function buildItemTree(items: ShopItemWithChildren[]): ShopItemWithChildren[] {
@@ -370,7 +387,10 @@ function filterItemsByMode(
     }
 
     const currentActiveIds = new Set(items.filter(item => isItemAvailableAtTime(item, timestamp)).map(item => item.id))
-    const previousActiveIds = previousTimestamp == null ? new Set<number>() : new Set(items.filter(item => isItemAvailableAtTime(item, previousTimestamp)).map(item => item.id))
+    const previousActiveIds =
+        previousTimestamp == null
+            ? new Set<number>()
+            : new Set(items.filter(item => isItemAvailableAtTime(item, previousTimestamp)).map(item => item.id))
     const itemMap = new Map(items.map(item => [item.id, item]))
     const visibleItemIds = new Set<number>()
     const diffStateMap = new Map<number, ShopItemDiffState>()
@@ -438,6 +458,9 @@ function countChangedItemsByTimestamp(items: ShopItemType[], timestamp: number |
  * 将滑块重置到当前时间点。
  */
 function resetToCurrentTimePoint(): void {
+    if (props.shop.mainTabs.every(v => v.name !== selectedShop.value)) {
+        selectedShop.value = props.shop.mainTabs[0].name
+    }
     selectedTimePointIndex.value = currentTimePointIndex.value
 }
 
@@ -508,7 +531,12 @@ function formatShopTimeShort(timestamp: number): string {
                     </label>
                     <label class="label cursor-pointer gap-2 p-0">
                         <span class="text-sm">仅显示差异</span>
-                        <input v-model="diffOnlyEnabled" type="checkbox" class="toggle toggle-success toggle-sm" :disabled="!timeFilterEnabled" />
+                        <input
+                            v-model="diffOnlyEnabled"
+                            type="checkbox"
+                            class="toggle toggle-success toggle-sm"
+                            :disabled="!timeFilterEnabled"
+                        />
                     </label>
                 </div>
             </div>
@@ -548,10 +576,12 @@ function formatShopTimeShort(timestamp: number): string {
                     <h4 class="font-medium">{{ subTab.name }}</h4>
                     <span v-if="timeFilterEnabled" class="text-xs text-base-content/60">
                         <template v-if="diffOnlyEnabled">
-                            {{ subTab.changedItemCount }} 件发生变化，另保留 {{ subTab.visibleItems.length - subTab.changedItemCount }} 件依赖项
+                            {{ subTab.changedItemCount }} 件发生变化，另保留
+                            {{ subTab.visibleItems.length - subTab.changedItemCount }} 件依赖项
                         </template>
                         <template v-else>
-                            {{ subTab.activeVisibleItemCount }} 件当前可购买，另保留 {{ subTab.visibleItems.length - subTab.activeVisibleItemCount }} 件依赖项
+                            {{ subTab.activeVisibleItemCount }} 件当前可购买，另保留
+                            {{ subTab.visibleItems.length - subTab.activeVisibleItemCount }} 件依赖项
                         </template>
                     </span>
                 </div>

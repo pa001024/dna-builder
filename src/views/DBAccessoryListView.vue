@@ -306,6 +306,11 @@ useInitialScrollToSelectedItem()
                             {{ $t("accessory.typeSkin") }}
                         </button>
                         <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            :class="selectedType === 'weaponskin' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
+                            @click="selectedType = 'weaponskin'">
+                            {{ $t("accessory.typeWeaponSkin") }}
+                        </button>
+                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
                             :class="selectedType === 'headframe' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
                             @click="selectedType = 'headframe'">
                             {{ $t("accessory.typeHeadFrame") }}

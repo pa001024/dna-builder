@@ -549,6 +549,17 @@ onBeforeUnmount(() => {
 
         <CharSkillShow :char="leveledChar" v-model="currentSkillLevel" />
 
+        <!-- 溯源信息 -->
+        <div v-if="char.溯源 && char.溯源.length > 0" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("溯源") }}</div>
+            <div class="space-y-3">
+                <div v-for="(trace, index) in char.溯源" :key="index" class="text-sm">
+                    <div class="mb-1">{{ $t("第" + getTraceOrdinal(index) + "根源") }}</div>
+                    <div class="text-base-content/90">{{ $t(trace) }}</div>
+                </div>
+            </div>
+        </div>
+
         <div v-if="char.第七溯源消耗 && char.第七溯源消耗.length > 0" class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-2">{{ $t("第七溯源消耗") }}</div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -558,17 +569,6 @@ onBeforeUnmount(() => {
                     :name="resourceMap.get(cost[0])?.name || String(cost[0])"
                     :value="cost[1]"
                 />
-            </div>
-        </div>
-
-        <!-- 溯源信息 -->
-        <div v-if="char.溯源 && char.溯源.length > 0" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("溯源") }}</div>
-            <div class="space-y-3">
-                <div v-for="(trace, index) in char.溯源" :key="index" class="text-sm">
-                    <div class="mb-1">{{ $t("第" + getTraceOrdinal(index) + "根源") }}</div>
-                    <div class="text-base-content/90">{{ $t(trace) }}</div>
-                </div>
             </div>
         </div>
 
