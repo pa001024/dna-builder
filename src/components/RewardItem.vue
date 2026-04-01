@@ -149,7 +149,7 @@ function getRewardLink(item: RewardItemType) {
         const resource = resourceMap.get(item.id)
         return resource ? `/db/resource/${resource.id}` : ""
     }
-    if (item.t === "CharAccessory" || item.t === "WeaponAccessory") {
+    if (["CharAccessory", "WeaponAccessory"].includes(item.t)) {
         return `/db/accessory/${item.t === "CharAccessory" ? "char" : "weapon"}/${item.id}`
     }
     if (item.t === "Walnut") {
@@ -157,6 +157,15 @@ function getRewardLink(item: RewardItemType) {
     }
 
     return ""
+}
+
+/**
+ * 判断奖励类型是否为饰品类。
+ * @param type 奖励类型
+ * @returns 是否为饰品类
+ */
+function isAccessoryRewardType(type: string): type is "CharAccessory" | "WeaponAccessory" | "WeaponSkin" {
+    return ["CharAccessory", "WeaponAccessory", "WeaponSkin"].includes(type)
 }
 
 /**
@@ -186,7 +195,7 @@ function getRewardIcon(item: RewardItemType) {
     if (item.t === "TitleFrame") {
         return "/imgs/webp/T_Icon_Random_TitleFrame.webp"
     }
-    if (item.t === "CharAccessory" || item.t === "WeaponAccessory" || item.t === "WeaponSkin") {
+    if (isAccessoryRewardType(item.t)) {
         return getAccessoryIconById(item.t, item.id)
     }
     if (item.t === "Draft") {
@@ -226,7 +235,7 @@ function getRewardIcon(item: RewardItemType) {
         if (reward.type === "HeadFrame") {
             return getHeadFrameIconById(reward.id)
         }
-        if (reward.type === "CharAccessory" || reward.type === "WeaponAccessory" || reward.type === "WeaponSkin") {
+        if (isAccessoryRewardType(reward.type)) {
             return getAccessoryIconById(reward.type, reward.id)
         }
         return "/imgs/webp/T_Head_Empty.webp"
@@ -244,14 +253,7 @@ function getRewardBackgroundColor(item: RewardItemType) {
         const resource = resourceMap.get(item.id)
         return getRarityGradientClass(resource?.rarity || 1)
     }
-    if (
-        item.t === "Skin" ||
-        item.t === "HeadSculpture" ||
-        item.t === "HeadFrame" ||
-        item.t === "CharAccessory" ||
-        item.t === "WeaponAccessory" ||
-        item.t === "WeaponSkin"
-    ) {
+    if (["Skin", "HeadSculpture", "HeadFrame", "CharAccessory", "WeaponAccessory", "WeaponSkin"].includes(item.t)) {
         return getRarityGradientClass(
             item.t === "Skin"
                 ? skinData.find(entry => entry.id === item.id)?.rarity || 1
@@ -302,10 +304,10 @@ function getRewardDisplayName(item: RewardItemType) {
     if (item.t === "Mod") {
         return item.n ? t(item.n) : `ID: ${item.id}`
     }
-    if (item.t === "Weapon" || item.t === "Char" || item.t === "Skin" || item.t === "HeadSculpture" || item.t === "HeadFrame") {
+    if (["Weapon", "Char", "Skin", "HeadSculpture", "HeadFrame"].includes(item.t)) {
         return item.n ? t(item.n) : `ID: ${item.id}`
     }
-    if (item.t === "CharAccessory" || item.t === "WeaponAccessory" || item.t === "WeaponSkin") {
+    if (["CharAccessory", "WeaponAccessory", "WeaponSkin"].includes(item.t)) {
         return item.n ? t(item.n) : `ID: ${item.id}`
     }
     if (item.t === "Draft") {

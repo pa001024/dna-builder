@@ -17,7 +17,7 @@ export interface HairItem {
 }
 
 export interface SkinDefaultItemEntry {
-    id: number | string
+    id: number
     name: string
     num: number
 }

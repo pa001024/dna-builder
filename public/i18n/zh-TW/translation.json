@@ -5659,6 +5659,9 @@
     "map-list": {
         "title": "地圖列表"
     },
+    "map-local": {
+        "title": "地圖"
+    },
     "mod-detail": {
         "title": "魔之楔詳情"
     },

@@ -5625,6 +5625,9 @@
     "map-list": {
         "title": "Liste des cartes"
     },
+    "map-local": {
+        "title": "Carte"
+    },
     "mod-detail": {
         "title": "Détails du Wedge du Diable"
     },

@@ -91,6 +91,17 @@ function isHeadAccessory(accessory: DetailAccessoryItem): accessory is HeadAcces
 }
 
 /**
+ * 判断是否为不显示稀有度的饰品。
+ * @param accessory 详情数据
+ * @returns 是否为不显示稀有度的饰品
+ */
+function isNoRarityAccessory(
+    accessory: DetailAccessoryItem
+): accessory is HeadFrameAccessoryItem | HeadAccessoryItem {
+    return accessory.accessoryType === "headframe" || accessory.accessoryType === "head"
+}
+
+/**
  * 将饰品图标名转换为可访问的图片地址。
  * @param icon 图标资源名
  * @returns 图标 URL
@@ -367,6 +378,30 @@ const accessoryIcon = computed(() => {
  */
 const accessoryName = computed(() => props.accessory.name)
 const accessoryVersionText = computed(() => (isSkinAccessory(props.accessory) ? getSkinReleaseText(props.accessory) : ""))
+const accessoryDetailLink = computed(() => {
+    if (props.accessory.accessoryType === "char") {
+        return `/db/accessory/char/${props.accessory.id}`
+    }
+    if (props.accessory.accessoryType === "weapon") {
+        return `/db/accessory/weapon/${props.accessory.id}`
+    }
+    if (props.accessory.accessoryType === "skin") {
+        return `/db/accessory/skin/${props.accessory.id}`
+    }
+    if (props.accessory.accessoryType === "weaponskin") {
+        return `/db/accessory/weaponskin/${props.accessory.id}`
+    }
+    if (props.accessory.accessoryType === "hair") {
+        return `/db/accessory/hair/${props.accessory.id}`
+    }
+    if (props.accessory.accessoryType === "headframe") {
+        return `/db/accessory/headframe/${props.accessory.id}`
+    }
+    if (props.accessory.accessoryType === "head") {
+        return `/db/accessory/head/${props.accessory.id}`
+    }
+    return ""
+})
 
 /**
  * 详情页描述文本。
@@ -377,7 +412,7 @@ const accessoryDesc = computed(() => props.accessory.desc ?? "")
  * 详情页稀有度文本。
  */
 const accessoryRarityValue = computed(() => {
-    if (isHeadFrameAccessory(props.accessory) || isHeadAccessory(props.accessory)) {
+    if (isNoRarityAccessory(props.accessory)) {
         return 1
     }
     return props.accessory.rarity
@@ -417,7 +452,10 @@ const accessoryUnlock = computed(() => {
                 />
                 <div class="min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
-                        <div class="text-lg font-bold">
+                        <SRouterLink v-if="accessoryDetailLink" :to="accessoryDetailLink" class="text-lg font-bold link link-primary">
+                            {{ $t(accessoryName) }}
+                        </SRouterLink>
+                        <div v-else class="text-lg font-bold">
                             {{ $t(accessoryName) }}
                         </div>
                         <span v-if="accessoryVersionText" class="text-xs px-2 py-0.5 rounded bg-base-200">

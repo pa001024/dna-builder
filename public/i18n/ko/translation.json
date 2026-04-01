@@ -5701,6 +5701,9 @@
     "map-list": {
         "title": "지도 목록"
     },
+    "map-local": {
+        "title": "지도"
+    },
     "mod-detail": {
         "title": "악마의 웨지 세부정보"
     },

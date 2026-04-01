@@ -441,7 +441,7 @@ export class GlobalSearchService {
                 const regionIds = Array.from(
                     new Set(
                         book.res
-                            .map(resource => subRegionMap.get(resource.srId)?.rid)
+                            .map(resource => (resource.srId ? subRegionMap.get(resource.srId)?.rid : undefined))
                             .filter((regionId): regionId is number => regionId !== undefined)
                     )
                 )
@@ -472,7 +472,7 @@ export class GlobalSearchService {
         entries.push(
             ...booksData.flatMap(book =>
                 book.res.map(resource => {
-                    const subRegion = subRegionMap.get(resource.srId)
+                    const subRegion = resource.srId ? subRegionMap.get(resource.srId) : undefined
                     const region = subRegion ? regionMap.get(subRegion.rid) : undefined
                     const displayName = resource.name || book.name
                     const displayDesc = resource.desc || book.desc

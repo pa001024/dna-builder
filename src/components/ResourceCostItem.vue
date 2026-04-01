@@ -2,7 +2,7 @@
 import { computed } from "vue"
 import { LeveledChar, LeveledMod, resourceMap } from "@/data"
 import { charMap, draftMap, modMap, walnutMap, weaponMap } from "@/data/d"
-import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { charAccessoryData, hairData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import type { Draft } from "@/data/d/draft.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
 import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
@@ -29,6 +29,7 @@ const props = defineProps<{
                   | "Skin"
                   | "HeadSculpture"
                   | "HeadFrame"
+                  | "Hair"
                   | "WeaponSkin"
               ),
           ]
@@ -191,7 +192,7 @@ function getDraftByIdOrProductId(draftId: number | string): Draft | undefined {
     return draftMap.get(normalizedId) ?? [...draftMap.values()].find(draft => draft.p === normalizedId)
 }
 
-type FashionCostType = "CharAccessory" | "WeaponAccessory" | "WeaponSkin" | "Skin" | "HeadSculpture" | "HeadFrame"
+type FashionCostType = "CharAccessory" | "WeaponAccessory" | "WeaponSkin" | "Skin" | "HeadSculpture" | "HeadFrame" | "Hair"
 
 interface FashionCostMeta {
     icon: string
@@ -240,7 +241,30 @@ function getFashionMeta(type: FashionCostType, id: number | string): FashionCost
         return item ? { icon: item.icon, rarity: 4 } : null
     }
 
+    if (type === "Hair") {
+        const item = hairData.find(entry => entry.id === normalizedId)
+        return item ? { icon: item.icon, rarity: item.rarity } : null
+    }
+
     return null
+}
+
+/**
+ * 判断奖励项是否属于可直接按时装类型展示的分支。
+ * @param type 奖励类型
+ * @returns 是否为时装分支
+ */
+function isFashionCostType(type: string): type is FashionCostType {
+    return ["Skin", "HeadSculpture", "HeadFrame", "Hair", "WeaponSkin"].includes(type)
+}
+
+/**
+ * 判断奖励类型是否可以直接作为饰品查询类型。
+ * @param type 奖励类型
+ * @returns 是否可作为饰品类型
+ */
+function isAccessoryCostType(type: string): type is "CharAccessory" | "WeaponAccessory" {
+    return ["CharAccessory", "WeaponAccessory"].includes(type)
 }
 
 /**
@@ -272,6 +296,37 @@ function getFashionRarity(type: FashionCostType, id: number | string): number {
  */
 function getFashionBackgroundColor(type: FashionCostType, id: number | string): string {
     return getRarityGradientClass(getFashionRarity(type, id))
+}
+
+/**
+ * 获取时装类条目的详情链接。
+ * @param type 时装类型
+ * @param id 条目ID
+ * @returns 详情页链接
+ */
+function getFashionLink(type: FashionCostType, id: number | string): string {
+    const normalizedId = Number(id)
+    if (!Number.isFinite(normalizedId)) {
+        return ""
+    }
+
+    if (type === "Skin") {
+        return `/db/accessory/skin/${normalizedId}`
+    }
+    if (type === "HeadSculpture") {
+        return `/db/accessory/head/${normalizedId}`
+    }
+    if (type === "HeadFrame") {
+        return `/db/accessory/headframe/${normalizedId}`
+    }
+    if (type === "Hair") {
+        return `/db/accessory/hair/${normalizedId}`
+    }
+    if (type === "WeaponSkin") {
+        return `/db/accessory/weaponskin/${normalizedId}`
+    }
+
+    return ""
 }
 
 /**
@@ -460,7 +515,7 @@ function handleCardClick() {
     <div
         v-else-if="
             Array.isArray(value) &&
-            (value[2] === 'Skin' || value[2] === 'HeadSculpture' || value[2] === 'HeadFrame' || value[2] === 'WeaponSkin')
+            isFashionCostType(value[2])
         "
         class="flex items-center p-3 rounded bg-base-300 transition-colors duration-200"
         v-bind="$attrs"
@@ -473,14 +528,22 @@ function handleCardClick() {
                 class="size-8 inline-block mr-2 bg-linear-15 rounded"
                 :class="getFashionBackgroundColor(value[2], value[1])"
             />
-            <span>{{ name }}</span>
+            <SRouterLink
+                v-if="getFashionLink(value[2], value[1])"
+                :to="getFashionLink(value[2], value[1])"
+                stop
+                class="hover:underline"
+            >
+                {{ nameString }}
+            </SRouterLink>
+            <span v-else>{{ name }}</span>
         </span>
         <span class="font-bold text-primary ml-auto">{{ value[0] }}</span>
     </div>
     <div
         v-else-if="
             Array.isArray(value) &&
-            (value[2] === 'CharAccessory' || value[2] === 'WeaponAccessory') &&
+            isAccessoryCostType(value[2]) &&
             getAccessoryByType(value[2], value[1])
         "
         class="flex items-center p-3 rounded bg-base-300 transition-colors duration-200"

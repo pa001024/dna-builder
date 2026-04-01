@@ -61,6 +61,7 @@ function getBookRegionIds(book: Book): number[] {
     const regionIdSet = new Set<number>()
 
     for (const resource of book.res) {
+        if (!resource.srId) continue
         const subRegion = subRegionMap.get(resource.srId)
         if (subRegion) {
             regionIdSet.add(subRegion.rid)
@@ -238,5 +239,4 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
-
 

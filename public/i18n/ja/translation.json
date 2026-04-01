@@ -5694,6 +5694,9 @@
     "map-list": {
         "title": "マップ一覧"
     },
+    "map-local": {
+        "title": "マップ"
+    },
     "mod-detail": {
         "title": "悪魔の楔の詳細"
     },

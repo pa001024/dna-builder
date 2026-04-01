@@ -243,6 +243,55 @@ function getSkinIconUrl(icon: string): string {
     return resolveSkinIconUrl(icon)
 }
 
+/**
+ * 将皮肤默认奖励项转换为资源成本展示入参。
+ * @param groupName 默认奖励分组名
+ * @param item 皮肤默认奖励项
+ * @returns ResourceCostItem 的 value
+ */
+function getSkinDefaultItemValue(
+    groupName: string,
+    item: { id: number; num: number }
+): [number, number, "Resource" | "HeadSculpture" | "Hair"] {
+    if (groupName === "Hair") {
+        return [item.num, item.id, "Hair"]
+    }
+    if (groupName === "HeadSculpture") {
+        return [item.num, item.id, "HeadSculpture"]
+    }
+    return [item.num, item.id, "Resource"]
+}
+
+/**
+ * 将皮肤升级消耗转换为资源成本展示入参。
+ * @param step 皮肤升级消耗
+ * @returns ResourceCostItem 的 value
+ */
+function getSkinUpgradeValue(step: { amount: number; currencyId: number }): [number, number, "Resource"] {
+    return [step.amount, step.currencyId, "Resource"]
+}
+
+const skinDefaultCostItems = computed(() =>
+    charSkinList.value.flatMap(skin =>
+        Object.entries(skin.defaultItem || {}).flatMap(([groupName, items]) =>
+            items.map(item => ({
+                skinId: skin.id,
+                groupName,
+                item,
+            }))
+        )
+    )
+)
+
+const skinUpgradeCostItems = computed(() =>
+    charSkinList.value.flatMap(skin =>
+        (skin.upgrade || []).map(step => ({
+            skinId: skin.id,
+            step,
+        }))
+    )
+)
+
 const voiceLanguage = computed(() => resolveVoiceDatasetLanguage(selectedVoiceLocale.value))
 
 /**
@@ -732,20 +781,20 @@ onBeforeUnmount(() => {
                             <div class="text-xs text-base-content/70">默认奖励</div>
                             <div class="space-y-2">
                                 <div
-                                    v-for="[groupName, items] in Object.entries(skin.defaultItem)"
-                                    :key="groupName"
-                                    class="rounded bg-base-200/80 px-2 py-1.5"
+                                    v-for="groupName in Object.keys(skin.defaultItem)"
+                                    :key="`${skin.id}-${groupName}`"
+                                    class="space-y-1"
                                 >
-                                    <div class="text-xs text-base-content/70 mb-1">{{ getRewardTypeText(groupName) }}</div>
-                                    <div class="flex flex-wrap gap-2">
-                                        <span
-                                            v-for="item in items"
-                                            :key="`${groupName}-${item.id}`"
-                                            class="inline-flex items-center gap-1 rounded bg-base-100 px-2 py-1 text-xs"
-                                        >
-                                            <span>{{ item.name }}</span>
-                                            <span class="text-base-content/60">x{{ item.num }}</span>
-                                        </span>
+                                    <div class="text-xs text-base-content/70">{{ getRewardTypeText(groupName) }}</div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                        <ResourceCostItem
+                                            v-for="entry in skinDefaultCostItems.filter(
+                                                entry => entry.skinId === skin.id && entry.groupName === groupName
+                                            )"
+                                            :key="`${entry.skinId}-${entry.groupName}-${entry.item.id}`"
+                                            :name="entry.item.name"
+                                            :value="getSkinDefaultItemValue(entry.groupName, entry.item)"
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -754,12 +803,9 @@ onBeforeUnmount(() => {
                         <div v-if="skin.upgrade && skin.upgrade.length > 0" class="space-y-2">
                             <div class="text-xs text-base-content/70">升级消耗</div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                <div v-for="step in skin.upgrade" :key="step.step" class="rounded bg-base-200/80 px-2 py-1.5 text-xs">
-                                    <div class="flex justify-between gap-2">
-                                        <span>阶段 {{ step.step }}</span>
-                                        <span>x{{ step.amount }}</span>
-                                    </div>
-                                    <div class="mt-1 text-base-content/70">{{ step.currency }} (#{{ step.currencyId }})</div>
+                                <div v-for="entry in skinUpgradeCostItems.filter(entry => entry.skinId === skin.id)" :key="`${entry.skinId}-${entry.step.step}`" class="space-y-1">
+                                    <div class="text-xs text-base-content/70">Lv.{{ entry.step.step }}</div>
+                                    <ResourceCostItem :name="entry.step.currency" :value="getSkinUpgradeValue(entry.step)" />
                                 </div>
                             </div>
                         </div>

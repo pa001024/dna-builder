@@ -5701,6 +5701,9 @@
     "map-list": {
         "title": "Map List"
     },
+    "map-local": {
+        "title": "Map"
+    },
     "mod-detail": {
         "title": "Devil's Wedge details"
     },

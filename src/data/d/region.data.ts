@@ -1,7 +1,10 @@
+import { applyVersionGate } from "../versionGate"
+
 export interface Region {
     id: number
     name: string
     type?: string
+    版本?: string
     mapId?: number
     mapImage?: string
     mapCenter?: [number, number]
@@ -17,6 +20,33 @@ interface MapMapping {
     pos: number[]
     opacity: number
     zOrder: number
+}
+
+export const region2Version: Record<number, string> = {
+    1001: "1.0",
+    1002: "1.0",
+    1003: "1.0",
+    1004: "1.0",
+    1005: "1.0",
+    1006: "1.0",
+    1007: "1.0",
+    1008: "1.0",
+    1009: "1.0",
+    1010: "1.0",
+    1011: "1.0",
+    1012: "1.0",
+    1013: "1.0",
+    1017: "1.0",
+    1018: "1.0",
+    1019: "1.0",
+    1020: "1.0",
+    1021: "1.0",
+    1041: "1.1",
+    1057: "1.1",
+    1045: "1.3",
+    1052: "1.3",
+    1053: "1.3",
+    1055: "1.3",
 }
 
 const t: Region[] = [
@@ -580,9 +610,16 @@ export const mapOffsets: Record<string, [number, number]> = {
     WBP_Map_Prologue_100103: [-125, 0],
 }
 
-export const regionMap = t.reduce((acc, cur) => {
+const regionDataWithVersion = t.map(region => ({
+    ...region,
+    版本: region2Version[region.id] || "99.9",
+}))
+
+const filteredRegionData = applyVersionGate(regionDataWithVersion)
+
+export const regionMap = filteredRegionData.reduce((acc, cur) => {
     acc.set(cur.id, cur)
     return acc
 }, new Map<number, Region>())
 
-export default t
+export default filteredRegionData

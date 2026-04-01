@@ -1,13 +1,14 @@
 <script lang="ts" setup>
 import { t } from "i18next"
 import { ref, watch } from "vue"
-import { MATERIALS } from "../api/app"
-import { listModels, validateApiKey } from "../api/openai"
-import { env } from "../env"
-import { i18nLanguages } from "../i18n"
-import { db } from "../store/db"
-import { useSettingStore } from "../store/setting"
-import { useUIStore } from "../store/ui"
+import { MATERIALS } from "@/api/app"
+import { listModels, validateApiKey } from "@/api/openai"
+import { DNA_SAFE_VERSION_LIMIT } from "@/data/versionGate"
+import { env } from "@/env"
+import { i18nLanguages } from "@/i18n"
+import { db } from "@/store/db"
+import { useSettingStore } from "@/store/setting"
+import { useUIStore } from "@/store/ui"
 
 const setting = useSettingStore()
 const ui = useUIStore()
@@ -21,7 +22,7 @@ const questions = [
     },
     {
         question: "What is the current game version?",
-        answer: "1.2",
+        answer: String(DNA_SAFE_VERSION_LIMIT),
     },
     {
         question: "What is the game server opening time? (8-digit number)",
