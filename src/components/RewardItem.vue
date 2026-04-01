@@ -183,6 +183,9 @@ function getRewardIcon(item: RewardItemType) {
     if (item.t === "HeadFrame") {
         return getHeadFrameIconById(item.id)
     }
+    if (item.t === "TitleFrame") {
+        return "/imgs/webp/T_Icon_Random_TitleFrame.webp"
+    }
     if (item.t === "CharAccessory" || item.t === "WeaponAccessory" || item.t === "WeaponSkin") {
         return getAccessoryIconById(item.t, item.id)
     }

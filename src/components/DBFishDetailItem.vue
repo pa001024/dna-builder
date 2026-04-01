@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { calculateFishPrice } from "@/utils/fish-utils"
-import { Fish, fish2SpotMap, fishingSpotMap, fishMap } from "../data"
+import { Fish, fish2SpotMap, fishingSpotMap, fishMap, resourceMap } from "../data"
 
 const props = defineProps<{
     fish: Fish
@@ -60,6 +60,11 @@ function getS2BFish(s2bId?: number): Fish | null {
 const s2bFish = computed(() => getS2BFish(props.fish.s2b))
 
 /**
+ * 获取鱼对应的资源信息
+ */
+const fishResource = computed(() => resourceMap.get(props.fish.rid) || null)
+
+/**
  * 获取当前鱼所在的鱼池和权重信息
  */
 const fishSpots = computed(() => {
@@ -99,14 +104,14 @@ const fishSpots = computed(() => {
             <span>价格: {{ fish.price[0] }}</span>
         </div>
 
-        <div v-if="fish.desc" class="p-3 bg-base-200 rounded">
+        <div v-if="fishResource?.desc" class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-1">{{ $t("resource.description") }}</div>
-            <div class="text-sm leading-6 whitespace-pre-wrap">{{ fish.desc }}</div>
+            <div class="text-sm leading-6 whitespace-pre-wrap">{{ fishResource.desc }}</div>
         </div>
 
-        <div v-if="fish.desc2" class="p-3 bg-base-200 rounded">
+        <div v-if="fishResource?.desc2" class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-1">{{ $t("resource.background") }}</div>
-            <div class="text-sm leading-6 whitespace-pre-wrap">{{ fish.desc2 }}</div>
+            <div class="text-sm leading-6 whitespace-pre-wrap">{{ fishResource.desc2 }}</div>
         </div>
 
         <div class="p-3 bg-base-200 rounded">

@@ -17996,7 +17996,7 @@ export const partyTopicData_kr: PartyTopic[] = [
             },
             {
                 id: 80250339,
-                content: "완벽한 진공'.",
+                content: "'완벽한 진공'.",
                 voice: "inv/Kami/003/1417312E",
                 npc: 790052,
                 next: 80250340,
@@ -20917,7 +20917,7 @@ export const partyTopicData_kr: PartyTopic[] = [
             },
             {
                 id: 80230224,
-                content: "뭐야? 정말인가?",
+                content: "(사람들이 수군대는 소리)",
                 voice: "inv/Zhiliu/002/C8D91320",
                 next: 80230225,
             },
@@ -20968,7 +20968,7 @@ export const partyTopicData_kr: PartyTopic[] = [
             },
             {
                 id: 80230231,
-                content: "이래도 안 되고 저래도 안 된다니. 그럼 어쩌지?",
+                content: "(사람들이 수군대는 소리)",
                 voice: "inv/Zhiliu/002/C8D91446",
                 next: 80230232,
             },
