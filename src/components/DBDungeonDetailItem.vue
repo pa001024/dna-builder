@@ -2,7 +2,7 @@
 import { computed, ref, watch } from "vue"
 import { useSearchParam } from "@/composables/useSearchParam"
 import type { Dungeon, RewardChild } from "@/data"
-import { LeveledMonster, rewardMap } from "@/data"
+import { LeveledMonster, MonsterLevelUpperLimit, rewardMap } from "@/data"
 import { getDungeonType } from "@/utils/dungeon-utils"
 import { getDropModeText, getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
 
@@ -13,7 +13,7 @@ const props = defineProps<{
 const currentLevel = ref(props.dungeon.lv)
 const ENDLESS_MAX_WAVE = 99
 const ENDLESS_LEVEL_STEP = 5
-const MAX_MONSTER_LEVEL = 240
+const MAX_MONSTER_LEVEL = MonsterLevelUpperLimit
 type SpawnWave = NonNullable<Dungeon["spawn"]>[number]
 type SpawnGenerator = SpawnWave[number]
 type SpawnMonsterInfo = NonNullable<SpawnGenerator["m"]>[number]
@@ -544,7 +544,7 @@ watch(
                         type="range"
                         class="range range-primary range-xs grow"
                         min="1"
-                        max="240"
+                        :max="MonsterLevelUpperLimit"
                         step="1"
                     />
                     <span v-else class="text-xs text-base-content/70">无尽副本等级由上方波次滑块控制</span>

@@ -178,5 +178,6 @@ fishingSpots.forEach(v =>
     })
 )
 
+export { AbyssMonsterLevelLimit, MonsterLevelUpperLimit } from "./const.data"
 export { type Resource, resourceData, resourceMap } from "./resource.data"
 export type { Fish, FishingSpot }

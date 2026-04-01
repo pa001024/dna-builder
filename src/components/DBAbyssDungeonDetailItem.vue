@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref } from "vue"
 import type { AbyssDungeon, Char } from "@/data"
-import { charMap, LeveledChar, LeveledMonster } from "@/data"
+import { AbyssMonsterLevelLimit, charMap, LeveledChar, LeveledMonster } from "@/data"
 import {
     ABYSS_DUNGEON_ELEMENT_KEYS,
     formatAbyssDungeonMbValue,
@@ -14,7 +14,7 @@ const props = defineProps<{
     dungeon: AbyssDungeon
 }>()
 
-const currentLevel = ref(180)
+const currentLevel = ref(AbyssMonsterLevelLimit)
 
 function getCharName(charId: number): string {
     const char = charMap.get(charId)
@@ -200,7 +200,14 @@ function getChar(charId: number): Char | undefined {
             <!-- 等级控制 -->
             <div class="flex items-center gap-4 mb-3">
                 <span class="text-sm min-w-12">Lv. {{ currentLevel }}</span>
-                <input v-model.number="currentLevel" type="range" class="range range-primary range-xs grow" min="1" max="240" step="1" />
+                <input
+                    v-model.number="currentLevel"
+                    type="range"
+                    class="range range-primary range-xs grow"
+                    min="1"
+                    :max="AbyssMonsterLevelLimit"
+                    step="1"
+                />
             </div>
             <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
                 <DBMonsterCompactCard

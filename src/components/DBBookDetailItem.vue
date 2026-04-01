@@ -165,7 +165,12 @@ function selectResource(resourceId: number): void {
 <template>
     <div class="p-3 space-y-3">
         <div class="flex items-start gap-3">
-            <img :src="getBookIcon(book.icon)" :alt="book.name" class="size-14 rounded-lg bg-base-200 object-cover shrink-0" loading="lazy" />
+            <img
+                :src="getBookIcon(book.icon)"
+                :alt="book.name"
+                class="size-14 rounded-lg bg-base-200 object-cover shrink-0"
+                loading="lazy"
+            />
             <div class="min-w-0">
                 <SRouterLink :to="`/db/book/${book.id}`" class="text-lg font-bold link link-primary wrap-break-word">
                     {{ book.name }}
@@ -217,7 +222,9 @@ function selectResource(resourceId: number): void {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm mt-3">
                     <div class="flex items-start justify-between gap-2">
                         <span class="text-base-content/70">子区域</span>
-                        <span class="text-right wrap-break-word">{{ selectedResourceLocation.subRegionName }} ({{ selectedResource.srId }})</span>
+                        <span class="text-right wrap-break-word"
+                            >{{ selectedResourceLocation.subRegionName }} ({{ selectedResource.srId }})</span
+                        >
                     </div>
 
                     <div class="flex items-start justify-between gap-2">
@@ -238,12 +245,11 @@ function selectResource(resourceId: number): void {
                     </div>
                 </div>
 
-                <div v-if="selectedResourceDescription" class="mt-3 p-2 rounded bg-base-200/70 text-sm leading-6 whitespace-pre-wrap wrap-break-word">
-                    {{ selectedResourceDescription }}
-                </div>
-
                 <div class="mt-3 rounded-lg bg-base-200 p-3 text-sm leading-7 whitespace-pre-wrap wrap-break-word">
-                    <template v-for="(segment, index) in selectedResourceTextSegments" :key="`${selectedResource.id}-${index}-${segment.tone}`">
+                    <template
+                        v-for="(segment, index) in selectedResourceTextSegments"
+                        :key="`${selectedResource.id}-${index}-${segment.tone}`"
+                    >
                         <span
                             :class="{
                                 'text-primary font-semibold': segment.tone === 'highlight',

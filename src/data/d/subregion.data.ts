@@ -3164,7 +3164,12 @@ export const subRegionData: SubRegion[] = [
         name: "东城",
         desc: "UI_SUBREGION_DES_104501",
         map: "Huaxu_Haojing_Eas",
-        pos: [48445.666667, -24044.333333],
+        pos: [60330, -16030],
+        range: {
+            center: [60330, -16030],
+            extent: [27500, 27500],
+            anchor: [60330, -16030],
+        },
         rc: [
             {
                 id: 9050101,
@@ -3200,8 +3205,9 @@ export const subRegionData: SubRegion[] = [
                 ],
                 count: 2,
                 pos: [
-                    [41150, -34600],
-                    [52360, -26850],
+                    [46990.7852, -6631.37],
+                    [57671.141, -25112.5078],
+                    [38754.3633, -17729.32],
                 ],
             },
         ],
@@ -3232,7 +3238,12 @@ export const subRegionData: SubRegion[] = [
         name: "西城",
         desc: "UI_SUBREGION_DES_104502",
         map: "Huaxu_Haojing_Wes",
-        pos: [12453.6, -14883.8],
+        pos: [8520, -25620],
+        range: {
+            center: [8520, -19250.02],
+            extent: [15400, 34375],
+            anchor: [8520, -25620],
+        },
         rc: [
             {
                 id: 9050201,
@@ -3267,7 +3278,12 @@ export const subRegionData: SubRegion[] = [
                     },
                 ],
                 count: 3,
-                pos: [[14833, -12825]],
+                pos: [
+                    [18215.145, -3707.3647],
+                    [-4513.358, -24052.244],
+                    [17738.195, -47959.98],
+                    [5916.933, -28805.969],
+                ],
             },
         ],
         tp: [
@@ -3309,7 +3325,12 @@ export const subRegionData: SubRegion[] = [
         name: "内城",
         desc: "UI_SUBREGION_DES_104503",
         map: "Huaxu_Haojing_Inn",
-        pos: [33123.666667, -51726.166667],
+        pos: [31391.83, -85458.23],
+        range: {
+            center: [31391.83, -85458.23],
+            extent: [16500, 38500],
+            anchor: [31391.83, -85458.23],
+        },
         rc: [
             {
                 id: 9050501,
@@ -3345,8 +3366,10 @@ export const subRegionData: SubRegion[] = [
                 ],
                 count: 3,
                 pos: [
-                    [34460, -58730],
-                    [23480, -43350],
+                    [21851.062, -63406.668],
+                    [39530.332, -64344.22],
+                    [21716.154, -85451.07],
+                    [41493.99, -77562.18],
                 ],
             },
         ],
@@ -3395,7 +3418,12 @@ export const subRegionData: SubRegion[] = [
         name: "西郊",
         desc: "UI_SUBREGION_DES_104504",
         map: "Huaxu_Haojing_Jlc",
-        pos: [-4239.5, -61312.333333],
+        pos: [-30440, -68000],
+        range: {
+            center: [-30440, -68000],
+            extent: [27500, 38500],
+            anchor: [-30440, -68000],
+        },
         rc: [
             {
                 id: 9050301,
@@ -3443,9 +3471,10 @@ export const subRegionData: SubRegion[] = [
                 ],
                 count: 3,
                 pos: [
-                    [14280, -79580],
-                    [5171, -72502],
-                    [-9080, -54160],
+                    [-11407.7295, -59442.586],
+                    [-30278.2, -52559.887],
+                    [-21572.979, -50167.996],
+                    [-6245.082, -47736.43],
                 ],
             },
         ],
@@ -3494,7 +3523,12 @@ export const subRegionData: SubRegion[] = [
         name: "东郊",
         desc: "UI_SUBREGION_DES_104505",
         map: "Huaxu_Haojing_Sub",
-        pos: [54139.833333, -62691.5],
+        pos: [71380, -67920],
+        range: {
+            center: [74240, -41970],
+            extent: [27500, 1100],
+            anchor: [71380, -67920],
+        },
         rc: [
             {
                 id: 9050401,
@@ -3542,8 +3576,10 @@ export const subRegionData: SubRegion[] = [
                 ],
                 count: 3,
                 pos: [
-                    [57011, -59938],
-                    [66801, -67805],
+                    [48835.336, -47590.734],
+                    [60233.348, -56639.18],
+                    [60963.35, -65044.25],
+                    [69015.31, -79030.516],
                 ],
             },
         ],
@@ -3593,6 +3629,10 @@ export const subRegionData: SubRegion[] = [
         desc: "UI_SUBREGION_DES_104506",
         map: "Huaxu_Haojing_Top",
         pos: [31481.25, -105727.5],
+        range: {
+            center: [20670, -49970],
+            extent: [82500, 82500],
+        },
         tp: [
             {
                 id: 1208,
