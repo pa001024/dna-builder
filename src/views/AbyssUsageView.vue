@@ -584,7 +584,7 @@ onMounted(async () => {
                                 <span>{{ seasonRangeText }}</span>
                             </div>
                             <div class="space-y-1">
-                                <h1 class="text-3xl font-black tracking-tight">角色使用率统计</h1>
+                                <h1 class="text-3xl font-black tracking-tight">沉浸式戏剧</h1>
                             </div>
                         </div>
                         <div class="flex items-center gap-2 self-start md:self-auto">
